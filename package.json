@@ -1,0 +1,32 @@
+{
+    "name": "nextjs-observatory-portal",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "export": "next build && next export",
+        "start": "next start",
+        "lint": "next lint"
+    },
+    "dependencies": {
+        "@reduxjs/toolkit": "^1.9.3",
+        "@types/node": "18.15.3",
+        "@types/react": "18.0.28",
+        "@types/react-dom": "18.0.11",
+        "eslint": "8.36.0",
+        "eslint-config-next": "13.2.4",
+        "moment": "^2.29.4",
+        "next": "13.2.4",
+        "next-redux-wrapper": "^8.1.0",
+        "next-seo": "^5.15.0",
+        "react": "18.2.0",
+        "react-dom": "18.2.0",
+        "react-redux": "^8.0.5",
+        "semantic-ui-react": "^2.1.4",
+        "typescript": "5.0.2"
+    },
+    "devDependencies": {
+        "sass": "^1.60.0"
+    }
+}
