@@ -1,0 +1,105 @@
+@import variables.sass
+
+$fontStack: sans-serif
+$borderRadius: 2px
+$colorBackground: #1b1b1b
+
+body
+  //font-family: $fontStack
+  //font-family: Montserrat
+  font-size: 12px
+  line-height: 1.5
+  background-color: $colorBackground
+  color: $text-main
+  margin: 0
+
+h1
+  font-size: 1.6em
+
+#root
+  height: 100vh
+
+/* General */
+.main
+  margin-top: 70px
+
+.small
+  font-size: .9em
+  color: $text-second
+
+.box
+  position: relative
+  background: $box-background
+  border-radius: $borderRadius
+  padding: 13px
+  box-shadow: 0 0 3px rgba(0,0,0,0.5)
+
+  &.table
+    padding: 5px !important
+
+  &.global-map
+    min-height: 560px
+
+  @media only screen and (max-width: 768px)
+    &.global-map
+      min-height: 260px
+
+  .dimmer
+    border-radius: $borderRadius
+
+  &.loader
+    height: 40vh
+
+  .accordion
+    .title
+      margin-left: 10px
+      font-weight: 600
+      text-transform: uppercase
+
+.second-color
+  color: $text-second
+
+.aright
+  text-align: right
+
+.ui.input > input, .ui.multiple.search.dropdown
+  background-color: #4e4e4e
+//color: $text-main !important
+//border-color: transparent !important
+
+.ui.multiple.search.dropdown > input.search
+  color: $text-main !important
+
+.ui.selection.active.dropdown .menu
+  border-color: transparent !important
+  background-color: #4e4e4e !important
+
+  > .item
+    border-top-color: #464646 !important
+    color: $text-main
+
+.ui.selection.dropdown .menu > .message
+  color: $text-second !important
+
+.ui.input.focus > input, .ui.input > input:focus
+  background-color: #565656
+
+@media only screen and (max-width: 768px)
+  .ui.grid
+    .column
+      padding-top: 5px !important
+      padding-bottom: 5px !important
+
+
+
+
+///////////////
+.container
+  align-items: inherit
+  display: flex
+  flex-direction: inherit
+  margin-left: auto !important
+  margin-right: auto !important
+  width: 1127px
+  max-width: 100% !important
+  list-style: none

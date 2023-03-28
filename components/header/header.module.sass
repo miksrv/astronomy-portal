@@ -1,15 +1,35 @@
 @import '@/styles/variables.sass'
 
 .menu
-  padding: 4px 0
   background-color: $box-background !important
+
+  menu
+    margin: 0
+    padding: 6px 0
 
   @media only screen and (max-width: 768px)
     padding: 4px 8px
 
   .item
-    font-size: .9em !important
+    background: 0 0
     height: 32px
+    align-items: center
+    display: flex
+    border: none
+    border-radius: .28571429rem
+    box-shadow: none
+    margin: 0 .35714286em
+    padding: .08571429em .92857143em
+    transition: color .1s ease
+    color: hsla(0,0%,100%,.7) !important
+    text-decoration: none
+
+    &:hover
+      background: hsla(0,0%,100%,.08)
+      color: #fff !important
+
+  .logo
+    margin-right: 15px
 
     &.logo
       margin-left: 0 !important
