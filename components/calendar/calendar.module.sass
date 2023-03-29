@@ -1,4 +1,4 @@
-@import 'src/styles/variables'
+@import @/styles/variables.sass
 
 .calendar
   display: block
@@ -43,13 +43,13 @@
       .icon
         color: $lightblue
 
-  .calendar-toolbar
+  .calendarToolbar
     margin: 5px 0 10px
 
     button
       padding: 5px !important
 
-    .current-month
+    .currentMonth
       display: inline-block
       margin: 0 10px
       text-transform: capitalize
@@ -92,7 +92,7 @@
             background-color: $red
             border-color: #ffa494
 
-        &.calendar-day
+        &.calendarDay
           border: 1px solid #565656
           vertical-align: top
           padding: 3px

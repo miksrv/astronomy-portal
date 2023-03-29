@@ -1,10 +1,11 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
-import { Dimmer, Image, Loader, Reveal } from 'semantic-ui-react'
-
+import Link from "next/link";
+import { Dimmer, Loader, Reveal } from 'semantic-ui-react'
+import classNames from "classnames";
 import { TCatalog, TPhoto } from '@/api/types'
+import Image from "next/image";
 
-import './styles.sass'
+import styles from './photoGrid.module.sass'
 
 type TPhotoGridProps = {
     loading: boolean
@@ -39,25 +40,28 @@ const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
     }
 
     return (
-        <div className={`box photo-gird ${className ? className : ''}`}>
+        <div className={classNames(styles.photoGird, 'box')}>
             {loading || !photoList
                 ? PhotosLoader(loaderCount ? loaderCount : 12)
                 : photoList.map((photo: TPhoto & TCatalog) => (
                       <Link
                           key={photo.file}
-                          to={`/photo/${photo.object}?date=${photo.date}`}
-                          className='item'
+                          href={`/photo/${photo.object}?date=${photo.date}`}
+                          className={styles.item}
                       >
                           {photo.title ? (
                               <Reveal animated='small fade'>
                                   <Reveal.Content visible>
                                       <Image
-                                          src={`${process.env.REACT_APP_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}
-                                          className='photo'
+                                          src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}
+                                          className={styles.photo}
+                                          alt={''}
+                                          width={200}
+                                          height={200}
                                       />
                                   </Reveal.Content>
                                   <Reveal.Content hidden>
-                                      <div className='info'>
+                                      <div className={styles.info}>
                                           <h4>{photo.title}</h4>
                                           <p>
                                               {photo.text &&
@@ -68,8 +72,11 @@ const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
                               </Reveal>
                           ) : (
                               <Image
-                                  src={`${process.env.REACT_APP_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}
-                                  className='photo'
+                                  src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}
+                                  className={styles.photo}
+                                  alt={''}
+                                  width={200}
+                                  height={200}
                               />
                           )}
                       </Link>

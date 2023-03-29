@@ -1,14 +1,10 @@
-@import 'src/styles/variables'
+@import @/styles/variables.sass
 
-.photo-gird
+.photoGird
   display: flex
   flex-wrap: wrap
   padding: 1em .5em
   padding-bottom: 0 !important
-
-  &.photoRow-4
-    .item
-      flex-basis: calc(20%) !important
 
   .item
     color: $text-main
@@ -18,8 +14,9 @@
     overflow: hidden
     flex-grow: 1
     flex-shrink: 0
-    flex-basis: calc(25% - 10px)
+    //flex-basis: calc(25% - 10px)
     margin: 0 .5em 1em
+    flex-basis: calc(20%)
 
     .content
       width: 100%
@@ -27,9 +24,8 @@
   @media only screen and (max-width: 768px)
     flex-wrap: wrap
 
-    &.photoRow-4
-      .item
-        flex-basis: calc(100%) !important
+    .photoRow-4
+      flex-basis: calc(100%) !important
 
     .item
       flex: 100%
@@ -38,6 +34,7 @@
     object-fit: cover
     height: 200px
     width: 100%
+    margin-bottom: -5px
 
   .info
     position: relative

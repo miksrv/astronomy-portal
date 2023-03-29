@@ -5,7 +5,8 @@ import { Button, Dimmer, Loader } from 'semantic-ui-react'
 import { TFilesMonth, TWeatherMonth } from '@/api/types'
 
 import RenderCalendar from './RenderCalendar'
-import './styles.css'
+import styles from './calendar.module.sass'
+import classNames from "classnames";
 
 type TCalendarProps = {
     loading: boolean
@@ -25,13 +26,13 @@ const Calendar: React.FC<TCalendarProps> = (props) => {
     }
 
     return (
-        <div className='box table calendar'>
+        <div className={classNames(styles.calendar, 'box', 'table')}>
             {loading && (
                 <Dimmer active>
                     <Loader />
                 </Dimmer>
             )}
-            <div className='calendar-toolbar'>
+            <div className={styles.calendarToolbar}>
                 <Button
                     size='mini'
                     color='green'
@@ -42,7 +43,7 @@ const Calendar: React.FC<TCalendarProps> = (props) => {
                         )
                     }
                 />
-                <span className='current-month'>
+                <span className={styles.currentMonth}>
                     {dateObject.format('MMMM Y')}
                 </span>
                 <Button
@@ -54,8 +55,8 @@ const Calendar: React.FC<TCalendarProps> = (props) => {
                     }
                 />
             </div>
-            <div className='grid'>
-                <table className='calendar-day'>
+            <div className={styles.grid}>
+                <table className={styles.calendarDay}>
                     <thead>
                         <tr>
                             {weekDayShort.map((day, key) => (

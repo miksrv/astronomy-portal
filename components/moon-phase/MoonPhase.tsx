@@ -2,7 +2,7 @@ import { Moment } from 'moment'
 import React from 'react'
 import SunCalc from 'suncalc'
 
-import './styles.sass'
+import './MoonPhase.module.sass'
 
 type TMoonPhaseProps = {
     date: Moment

@@ -2,12 +2,16 @@ import moment, { Moment } from 'moment'
 import React from 'react'
 import { Icon, Popup } from 'semantic-ui-react'
 import SunCalc from 'suncalc'
+import Image from "next/image";
 
 import { TFilesMonth, TWeatherMonth } from '@/api/types'
 
 import MoonPhase from '@/components/moon-phase/MoonPhase'
 
 import SunIcon from '../moon-phase/images/sun.png'
+
+import styles from './calendar.module.sass'
+import classNames from "classnames";
 
 type TRenderCalendarProps = {
     dateObject: Moment
@@ -18,7 +22,7 @@ type TRenderCalendarProps = {
 const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
     const { dateObject, eventsWeather, eventsTelescope } = props
 
-    const currentMobile: boolean = window.innerWidth <= 760
+    const currentMobile: boolean = typeof window !== "undefined" ? window.innerWidth <= 760 : false
     const daysInMonth: number = dateObject.daysInMonth()
     const firstDayOfMonth: number = parseInt(
         moment(dateObject).startOf('month').format('d')
@@ -28,10 +32,10 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
     const getWeatherClass = (cond: number | undefined) => {
         if (typeof cond === 'undefined' || cond === null) return ''
 
-        if (cond <= 35) return 'green'
-        else if (cond >= 36 && cond <= 65) return 'orange'
+        if (cond <= 35) return styles.green
+        else if (cond >= 36 && cond <= 65) return styles.orange
 
-        return 'red'
+        return styles.red
     }
 
     let blanks = []
@@ -39,7 +43,7 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
         blanks.push(
             <td
                 key={`empty${i}`}
-                className='calendar-day empty'
+                className={classNames(styles.calendarDay, styles.empty)}
             ></td>
         )
     }
@@ -67,12 +71,10 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
         daysMonth.push(
             <td
                 key={`day${d}`}
-                className={`calendar-day ${currentDay}`}
+                className={classNames(styles.calendarDay, currentDay)}
             >
                 <div
-                    className={`day ${getWeatherClass(
-                        itemWeatherEvent?.clouds
-                    )}`}
+                    className={classNames(styles.day, getWeatherClass(itemWeatherEvent?.clouds))}
                     role='button'
                     tabIndex={0}
                     onKeyUp={() => {}}
@@ -81,29 +83,31 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                     {d < 10 ? `0${d}` : d}
                 </div>
                 {!currentMobile ? (
-                    <div className='event moon'>
+                    <div className={classNames(styles.event, styles.moon)}>
                         <MoonPhase date={currentDate} /> ↑{' '}
                         {moment(moonTimes.rise).format('H:mm')} ↓{' '}
                         {moment(moonTimes.set).format('H:mm')}
                     </div>
                 ) : (
-                    <div className='event moon mobile'>
+                    <div className={classNames(styles.event, styles.moon, styles.mobile)}>
                         <MoonPhase date={currentDate} />
                     </div>
                 )}
                 {!currentMobile && (
-                    <div className='event sun'>
-                        <img
+                    <div className={classNames(styles.event, styles.sun)}>
+                        <Image
                             src={SunIcon}
-                            className='icon'
+                            className={styles.icon}
                             alt=''
+                            width={16}
+                            height={16}
                         />{' '}
                         ↑ {moment(sunTimes.dawn).format('H:mm')} ↓{' '}
                         {moment(sunTimes.dusk).format('H:mm')}
                     </div>
                 )}
                 {itemWeatherEvent && !currentMobile && (
-                    <div className='event weather'>
+                    <div className={classNames(styles.event, styles.weather)}>
                         {itemWeatherEvent.clouds !== null && (
                             <>
                                 <Icon name='cloud' />
@@ -121,7 +125,7 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                             content={itemAstroEvents.objects.join(', ')}
                             size='mini'
                             trigger={
-                                <div className='event telescope'>
+                                <div className={classNames(styles.event, styles.telescope)}>
                                     <Icon name='star outline' />
                                     {itemAstroEvents.objects.length}{' '}
                                     <Icon name='clock outline' />
@@ -134,7 +138,7 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                             }
                         />
                     ) : (
-                        <div className='event telescope mobile'>
+                        <div className={classNames(styles.event, styles.telescope, styles.mobile)}>
                             {Math.round(itemAstroEvents.exposure / 60)}
                         </div>
                     ))}
@@ -168,7 +172,7 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                 d.push(
                     <td
                         key={`last${i}`}
-                        className='calendar-day empty'
+                        className={classNames(styles.calendarDay, styles.empty)}
                     ></td>
                 )
             }

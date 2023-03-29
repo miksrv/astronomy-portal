@@ -4,8 +4,10 @@ import {wrapper} from '@/api/store'
 import { Montserrat } from 'next/font/google'
 import Header from '@/components/header/header'
 import Footer from "@/components/footer/footer";
+import {Container} from "semantic-ui-react";
 
 import '@/styles/globals.sass'
+import 'semantic-ui-css/semantic.min.css'
 
 const montserrat = Montserrat({ subsets: ['latin'] })
 export function App({ Component, pageProps }: AppProps) {
@@ -15,7 +17,9 @@ export function App({ Component, pageProps }: AppProps) {
         <Provider store={store}>
             <main className={montserrat.className}>
                 <Header />
-                <Component {...props.pageProps} />
+                <Container className='main'>
+                    <Component {...props.pageProps} />
+                </Container>
                 <Footer />
             </main>
         </Provider>

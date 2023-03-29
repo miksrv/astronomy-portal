@@ -14,7 +14,7 @@ type TNewsItemProps = {
 const NewsItem: React.FC<TNewsItemProps> = (props) => {
     const { news } = props
 
-    const currentMobile: boolean = window.innerWidth <= 760
+    const currentMobile: boolean = typeof window !== "undefined" ? window.innerWidth <= 760 : false
 
     // #TODO Use this
     // const urlify = (text: string) =>
