@@ -1,6 +1,7 @@
 import React from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
-
+import styles from './SkyMap.module.sass'
+import classNames from "classnames";
 import { TObject } from './types'
 
 type TObjectCloudProps = {
@@ -13,7 +14,7 @@ const ObjectCloudSkyMap: React.FC<TObjectCloudProps> = (props) => {
     const { loader, objects, handleClick } = props
 
     return (
-        <div className='box object-cloud-map'>
+        <div className={classNames(styles.objectCloudMap, 'box')}>
             {loader ? (
                 <>
                     <Dimmer active>
@@ -24,7 +25,7 @@ const ObjectCloudSkyMap: React.FC<TObjectCloudProps> = (props) => {
             ) : (
                 objects.map((item, key) => (
                     <span
-                        className='item'
+                        className={styles.item}
                         role='button'
                         tabIndex={0}
                         onKeyDown={() => {}}

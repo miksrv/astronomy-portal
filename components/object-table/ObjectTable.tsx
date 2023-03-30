@@ -7,7 +7,7 @@ import ObjectEditModal from '@/components/obect-edit-modal/ObjectEditModal'
 
 import RenderTableHeader, { HEADER_FIELDS } from './RenderTableHeader'
 import RenderTableRow from './RenderTableRow'
-import './styles.sass'
+import styles from './ObjectTable.module.sass'
 import { TObjectSortable, TSortOrdering } from './types'
 
 type TObjectTable = {
@@ -47,9 +47,11 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
     const listSortedObjects = useMemo(() => {
         return listObjectsPhotos.sort((first, second) =>
             sortOrder === 'descending'
+                // @ts-ignore
                 ? first[sortField] > second[sortField]
                     ? 1
                     : -1
+                // @ts-ignore
                 : first[sortField] < second[sortField]
                 ? 1
                 : -1
@@ -74,7 +76,7 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                 inverted
                 selectable
                 compact
-                className='object-table'
+                className={styles.objectTable}
             >
                 <RenderTableHeader
                     sort={sortField}

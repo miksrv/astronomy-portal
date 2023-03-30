@@ -6,7 +6,7 @@ import { IObjectListItem, TCatalog, TFiltersTypes, TPhoto } from '@/api/types'
 
 import { getTimeFromSec, isOutdated } from '@/functions/helpers'
 
-import './styles.sass'
+import styles from './ObjectTable.module.sass'
 
 type TTableRowProps = {
     item: IObjectListItem & TCatalog
@@ -43,8 +43,8 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
     }, [item])
 
     return (
-        <Table.Row className='table-row'>
-            <Table.Cell className='cell-name'>
+        <Table.Row className={styles.tableRow}>
+            <Table.Cell className={styles.cellCame}>
                 <Popup
                     disabled={!item.title}
                     size='mini'
@@ -52,13 +52,13 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                     header={item.title}
                     content={doTextTruncate}
                     trigger={
-                        <a href={`/object/${item.name}`}>{item.name}</a>
+                        <a href={`/objects/${item.name}`}>{item.name}</a>
                     }
                 />
                 {userLogin && (
                     <div>
                         <span
-                            className='control-button'
+                            className={styles.controlButton}
                             role='button'
                             tabIndex={0}
                             onKeyUp={() => {}}
@@ -66,7 +66,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                         >
                             <Icon name='edit outline' />
                         </span>
-                        <span className='control-button'>
+                        <span className={styles.controlButton}>
                             <Icon name='remove' />
                         </span>
                     </div>
@@ -76,24 +76,24 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                 {photoItem && (
                     <a
                         href={`/photo/${item.name}`}
-                        className='photo-link'
+                        className={styles.photoLink}
                     >
                         <Image
-                            className='photo'
+                            className={styles.photo}
                             size='tiny'
-                            src={`${process.env.REACT_APP_API_HOST}public/photo/${photoItem.file}_thumb.${photoItem.ext}`}
+                            src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photoItem.file}_thumb.${photoItem.ext}`}
                         />
                         {isOutdated(photoItem.date, item.date) && (
                             <Popup
                                 content={
-                                    'Фотография устарела, так как есть новые данные' +
+                                    'Фотография устарела, так как есть новые данные ' +
                                     'с телескопа, с помощью которых можно собрать новое изображение объекта'
                                 }
                                 size='mini'
                                 trigger={
                                     <Icon
                                         name='clock outline'
-                                        className='outdated-icon'
+                                        className={styles.outdatedIcon}
                                     />
                                 }
                             />

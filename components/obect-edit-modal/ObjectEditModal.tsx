@@ -4,7 +4,7 @@ import { Button, Form, Grid, Modal } from 'semantic-ui-react'
 import { TCatalog } from '@/api/types'
 
 import SkyMap from '../sky-map/SkyMap'
-import './styles.sass'
+import styles from './ObjectEditModal.module.sass'
 
 interface IObjectEditModal {
     visible: boolean
@@ -122,7 +122,7 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
                         {skyMapVisible && (
                             <Grid.Column
                                 width={10}
-                                className='skyMap'
+                                className={styles.skyMap}
                             >
                                 <SkyMap
                                     objects={[

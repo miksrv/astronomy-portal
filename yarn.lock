@@ -554,6 +554,18 @@ csstype@^3.0.2:
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.1.tgz#841b532c45c758ee546a11d5bd7b7b473c8c30b9"
   integrity sha512-DJR/VvkAvSZW9bTouZue2sSxDwdTN92uHjqeKVm+0dAqdfNykRzQ95tay8aXMBAAPpUiq4Qcug2L7neoRh2Egw==
 
+d3-celestial@^0.7.35:
+  version "0.7.35"
+  resolved "https://registry.yarnpkg.com/d3-celestial/-/d3-celestial-0.7.35.tgz#bee03f337ac1ae3d32de2c3bd7d7ae4dd27e1e21"
+  integrity sha512-cURxIl0E+FGWnYj6gTDt80SjuiM9lklcGykj/skVy7glDg5nj/QxTUoPPArU+bpEQ+1fLy5hi920OvJ/TgliRw==
+  dependencies:
+    d3 "^3.5.17"
+
+d3@^3.5.17:
+  version "3.5.17"
+  resolved "https://registry.yarnpkg.com/d3/-/d3-3.5.17.tgz#bc46748004378b21a360c9fc7cf5231790762fb8"
+  integrity sha512-yFk/2idb8OHPKkbAL8QaOaqENNoMhIaSHZerk3oQsECwkObkCpJyjYwCe+OHiq6UEdhe1m8ZGARRRO3ljFjlKg==
+
 damerau-levenshtein@^1.0.8:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/damerau-levenshtein/-/damerau-levenshtein-1.0.8.tgz#b43d286ccbd36bc5b2f7ed41caf2d0aba1f8a6e7"

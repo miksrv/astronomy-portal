@@ -1,8 +1,8 @@
-import celestial from 'd3-celestial'
 import React, { useEffect, useRef } from 'react'
 
 import config from './object'
 import { TObject, geoJSON } from './types'
+import styles from './SkyMap.module.sass'
 
 type TRenderMapProps = {
     config: any
@@ -65,7 +65,6 @@ const createObjectsJSON = (objects: TObject[]) => {
 const RenderMap: React.FC<TRenderMapProps> = (props) => {
     const { objects, width, config: customConfig, goto } = props
     const prevJSON = usePrevious({ objects })
-    const SkyMap = celestial.Celestial()
 
     // const box = document.createElement('div')
 
@@ -82,8 +81,8 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
         ) {
             const geoJSON: geoJSON = createObjectsJSON(objects)
 
-            SkyMap.clear()
-            SkyMap.add(
+            Celestial.clear()
+            Celestial.add(
                 {
                     callback: (error: any) => {
                         if (error) {
@@ -92,18 +91,18 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
                             return null
                         }
 
-                        let skyPoint = SkyMap.getData(geoJSON, config.transform)
+                        let skyPoint = Celestial.getData(geoJSON, config.transform)
 
-                        SkyMap.container
+                        Celestial.container
                             .selectAll('.sky-points')
                             .data(skyPoint.features)
                             .enter()
                             .append('path')
                             .attr('class', 'sky-points')
-                        SkyMap.redraw()
+                        Celestial.redraw()
                     },
                     redraw: () => {
-                        SkyMap.container
+                        Celestial.container
                             .selectAll('.sky-points')
                             .each(
                                 (point: {
@@ -111,27 +110,27 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
                                     properties: { name: any }
                                 }) => {
                                     if (
-                                        SkyMap.clip(point.geometry.coordinates)
+                                        Celestial.clip(point.geometry.coordinates)
                                     ) {
-                                        let pointCoords = SkyMap.mapProjection(
+                                        let pointCoords = Celestial.mapProjection(
                                                 point.geometry.coordinates
                                             ),
                                             pointRadius = 5
 
-                                        SkyMap.setStyle(stylePoint)
-                                        SkyMap.context.beginPath()
-                                        SkyMap.context.arc(
+                                        Celestial.setStyle(stylePoint)
+                                        Celestial.context.beginPath()
+                                        Celestial.context.arc(
                                             pointCoords[0],
                                             pointCoords[1],
                                             pointRadius,
                                             0,
                                             2 * Math.PI
                                         )
-                                        SkyMap.context.closePath()
-                                        SkyMap.context.stroke()
-                                        SkyMap.context.fill()
-                                        SkyMap.setTextStyle(styleText)
-                                        SkyMap.context.fillText(
+                                        Celestial.context.closePath()
+                                        Celestial.context.stroke()
+                                        Celestial.context.fill()
+                                        Celestial.setTextStyle(styleText)
+                                        Celestial.context.fillText(
                                             point.properties.name,
                                             pointCoords[0] + pointRadius - 1,
                                             pointCoords[1] - pointRadius + 1
@@ -164,7 +163,7 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
                 config.projection = 'orthographic'
             }
 
-            SkyMap.display(config)
+            Celestial.display(config)
 
             if (customConfig.interactive) {
                 // const canvas = document.querySelector('canvas')
@@ -201,38 +200,38 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
                 // })
             }
         }
-    }, [SkyMap, objects, prevJSON, width, customConfig.interactive])
+    }, [objects, prevJSON, width, customConfig.interactive])
 
     useEffect(() => {
         if (goto !== undefined && goto[0] !== 0 && goto[1] !== 0) {
-            SkyMap.rotate({ center: [goto[0], goto[1], 1] })
+            Celestial.rotate({ center: [goto[0], goto[1], 1] })
         }
-    }, [SkyMap, goto])
+    }, [goto])
 
-    // const canvas = document.querySelector('canvas')
-    // const ctx = canvas?.getContext("2d")
-    //
-    // const getCursorPosition = (canvas: any, event: any) => {
-    //     const rect = canvas.getBoundingClientRect()
-    //     const x = event.clientX - rect.left
-    //     const y = event.clientY - rect.top
-    //
-    //     const coords = SkyMap.mapProjection([299.908, 22.7231])
-    //
-    //
-    //     // console.log('test', SkyMap.mapProjection([x, y]))
-    //     console.log('coords', event.offsetX, event.offsetX)
-    //
-    // }
-    //
-    // canvas?.addEventListener('mousedown', (e) => {
-    //     getCursorPosition(canvas, e)
-    // })
+    const canvas = document.querySelector('canvas')
+    const ctx = canvas?.getContext("2d")
+
+    const getCursorPosition = (canvas: any, event: any) => {
+        const rect = canvas.getBoundingClientRect()
+        const x = event.clientX - rect.left
+        const y = event.clientY - rect.top
+
+        const coords = Celestial.mapProjection([299.908, 22.7231])
+
+
+        // console.log('test', SkyMap.mapProjection([x, y]))
+        console.log('coords', event.offsetX, event.offsetX)
+
+    }
+
+    canvas?.addEventListener('mousedown', (e) => {
+        getCursorPosition(canvas, e)
+    })
 
     return (
         <div
             id='celestial-map'
-            className='sky-map'
+            className={styles.skyMap}
         ></div>
     )
 }

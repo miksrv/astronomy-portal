@@ -46,7 +46,7 @@ const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
                 : photoList.map((photo: TPhoto & TCatalog) => (
                       <Link
                           key={photo.file}
-                          href={`/photo/${photo.object}?date=${photo.date}`}
+                          href={`/photos/${photo.object}?date=${photo.date}`}
                           className={styles.item}
                       >
                           {photo.title ? (

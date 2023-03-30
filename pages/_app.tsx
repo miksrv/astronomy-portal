@@ -8,6 +8,7 @@ import {Container} from "semantic-ui-react";
 
 import '@/styles/globals.sass'
 import 'semantic-ui-css/semantic.min.css'
+import React from "react";
 
 const montserrat = Montserrat({ subsets: ['latin'] })
 export function App({ Component, pageProps }: AppProps) {

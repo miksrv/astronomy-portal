@@ -37,7 +37,7 @@ const config = {
     },
     controls: false, // Display zoom controls
     // otherwise center
-    datapath: `${process.env.REACT_APP_API_HOST}public/skymap`,
+    datapath: 'data',
     daylight: {
         //Show day sky as a gradient, if location is set and map projection is hemispheric
         show: false

@@ -34,6 +34,22 @@ h1
   &.global-map
     min-height: 560px
 
+  #celestial-zoomin, #celestial-zoomout
+    position: absolute
+    left: 5px
+    top: 5px
+    color: $text-main
+    background: $box-background
+    border: 1px solid rgba(255, 255, 255, 0.04)
+    cursor: pointer
+    font-weight: 900
+
+    &:hover
+      background: #484848
+
+  #celestial-zoomout
+    top: 27px
+
   @media only screen and (max-width: 768px)
     &.global-map
       min-height: 260px
