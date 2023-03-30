@@ -27,7 +27,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
         <Table.Row>
             <Table.Cell width='one'>
                 <a
-                    href={`/photo/${photo.object}?date=${photo.date}`}
+                    href={`/photos/${photo.object}?date=${photo.date}`}
                     className='item'
                 >
                     <Image

@@ -1,9 +1,14 @@
 import {store} from "@/api/store";
-import {getPhotoList, getCatalogItem, useGetCatalogItemQuery, getRunningQueriesThunk} from "@/api/api";
+import {getPhotoList, getCatalogItem, useGetCatalogItemQuery, getRunningQueriesThunk, useGetPhotoListItemQuery, useGetPhotoListQuery} from "@/api/api";
 import {wrapper} from "@/api/store";
 import { useRouter } from "next/dist/client/router";
 import { skipToken } from "@reduxjs/toolkit/query";
-import {NextSeo} from "next-seo";
+import { Message } from 'semantic-ui-react'
+import PhotoItemHeader from "@/components/photo-item-header/photoItemHeader";
+import React, {useMemo, useEffect} from "react";
+import PhotoTable from "@/components/photo-table/PhotoTable";
+import ObjectCloud from "@/components/object-cloud/ObjectCloud";
+import Script from "next/script";
 
 export async function getStaticPaths() {
     const storeObject = store();
@@ -44,23 +49,79 @@ export default function Photo() {
     );
     const { isLoading, error, data } = result;
 
-    return (
+    const date = router.query.date;  //new URLSearchParams(window.location.search).get('date')
+
+    const { data: dataPhotos, isFetching: photosLoading } =
+        useGetPhotoListItemQuery(typeof name === "string" ? name : skipToken)
+    const { data: dataCatalog, isLoading: catalogLoading } =
+        useGetCatalogItemQuery(typeof name === "string" ? name : skipToken)
+    const { data: photosList, isLoading: photosListLoading } =
+        useGetPhotoListQuery()
+
+    const currentPhoto = useMemo(() => {
+        const searchPhoto =
+            dataPhotos?.payload &&
+            date &&
+            dataPhotos?.payload.filter((photo) => photo.date === date)
+        return searchPhoto && searchPhoto.length
+            ? searchPhoto.pop()
+            : dataPhotos?.payload?.[0]
+    }, [dataPhotos, date])
+
+    const listPhotoNames = useMemo(() => {
+        return photosList?.payload.length
+            ? photosList.payload
+                .map((item) => item.object)
+                .filter(
+                    (item, index, self) =>
+                        item !== '' && self.indexOf(item) === index
+                )
+            : []
+    }, [photosList])
+
+    useEffect(() => {
+        document.title = `${
+            dataCatalog?.payload ? dataCatalog.payload.title : ''
+        } Фото - Обсерватория`
+    }, [dataCatalog])
+
+    return !dataPhotos?.status && !photosLoading ? (
+        <Message
+            error
+            content='Что-то пошло не так, такого объекта нет. Возможно не верный адрес ссылки?'
+        />
+    ) : (
         <>
-            <NextSeo
-                title={data?.payload.title}
+            <Script
+                src='/scripts/d3.min.js'
+                strategy='beforeInteractive'
             />
-            <article>
-                {error ? (
-                    <>Oh no, there was an error</>
-                ) : router.isFallback || isLoading ? (
-                    <>Loading...</>
-                ) : data ? (
-                    <>
-                        <h3>{data.payload.title}</h3>
-                        <div>{data.payload.category}</div>
-                    </>
-                ) : null}
-            </article>
+            <Script
+                src='/scripts/d3.geo.projection.min.js'
+                strategy='beforeInteractive'
+            />
+            <Script
+                src='/scripts/celestial.min.js'
+                strategy='beforeInteractive'
+            />
+            <PhotoItemHeader
+                loader={photosLoading || catalogLoading}
+                photo={currentPhoto}
+                catalog={dataCatalog?.payload}
+            />
+            {dataPhotos?.payload && (
+                <>
+                    <br />
+                    <PhotoTable photos={dataPhotos?.payload} />
+                </>
+            )}
+            <br />
+            <ObjectCloud
+                loader={photosListLoading}
+                current={typeof name === "string" ? name : ''}
+                names={listPhotoNames}
+                link='photos'
+            />
         </>
-    );
+    )
 }
