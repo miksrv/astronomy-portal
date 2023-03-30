@@ -66,7 +66,7 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
                 .filter((file) => file.image)
                 .map(
                     (file) =>
-                        `${process.env.REACT_APP_API_HOST}uploads/${object}/${file.name}.jpg`
+                        `${process.env.NEXT_PUBLIC_API_HOST}uploads/${object}/${file.name}.jpg`
                 )
 
             setPhotoList(photoList)

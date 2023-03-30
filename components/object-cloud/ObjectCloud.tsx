@@ -1,8 +1,8 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
 import { Dimmer, Loader } from 'semantic-ui-react'
+import Link from "next/link";
 
-import './styles.sass'
+import styles from './ObjectCloud.module.sass'
 
 type TObjectCloudProps = {
     loader: boolean
@@ -26,9 +26,10 @@ const ObjectCloud: React.FC<TObjectCloudProps> = (props) => {
             ) : (
                 names?.map((item) => (
                     <Link
-                        to={`/${link}/${item}`}
+                        href={`/${link}/${item}`}
                         className={current === item ? 'active' : ''}
                         key={item}
+                        title={''}
                     >
                         {item.replace(/_/g, ' ')}
                     </Link>

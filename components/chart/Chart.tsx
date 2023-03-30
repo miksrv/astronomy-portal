@@ -1,11 +1,9 @@
 import HighchartsReact from 'highcharts-react-official'
 import Highcharts from 'highcharts/highmaps'
-import React from 'react'
+import React, {useEffect} from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
 
-import config from './config'
-
-Highcharts.setOptions(config)
+import chartInitialConfig from './config'
 
 type TChartProps = {
     loader: boolean
@@ -26,6 +24,10 @@ const Chart: React.FC<TChartProps> = (params) => {
             config.series[dIndex].data = item
             dIndex++
         }
+    })
+
+    useEffect(() => {
+        Highcharts.setOptions(chartInitialConfig)
     })
 
     return (

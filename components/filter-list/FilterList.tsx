@@ -3,9 +3,9 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { TObjectFilters } from '@/api/types'
 
 import { declOfNum } from '@/functions/helpers'
-import translate from 'functions/translate'
+import translate from '@/functions/translate'
 
-import './styles.sass'
+import styles from './FilterList.module.sass'
 
 type TFilterListProps = {
     filters: TObjectFilters
@@ -23,13 +23,12 @@ const FilterListItem: React.FC<TFilterListItem> = ({
     frames
 }) => {
     const minutes = Math.round(exposure / 60)
-    const lang = translate().general.declining
 
     return (
         <li>
             <span className={`filter-${name}`}>{name}</span>
-            {minutes} {declOfNum(minutes, lang.minutes)} ({frames}{' '}
-            {declOfNum(frames, lang.frames)})
+            {minutes} {declOfNum(minutes, ["минута", "минуты", "минут"])} ({frames}{' '}
+            {declOfNum(frames, ["кадр", "кадра", "кадров"])})
         </li>
     )
 }

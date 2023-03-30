@@ -2,7 +2,7 @@ import Highcharts from 'highcharts/highmaps'
 
 import colors from './colors'
 
-const config: Highcharts.Options = {
+const chartInitialConfig: Highcharts.Options = {
     chart: {
         // backgroundColor: '#373737',
         backgroundColor: '#333',
@@ -264,4 +264,4 @@ const config: Highcharts.Options = {
     }
 }
 
-export default config
+export default chartInitialConfig

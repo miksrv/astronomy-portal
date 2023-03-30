@@ -3,7 +3,6 @@ import { Dimmer, Loader } from 'semantic-ui-react'
 import RenderMap from './RenderMap'
 import styles from './SkyMap.module.sass'
 import { TObject } from './types'
-import Script from "next/script";
 
 type TSkyMapProps = {
     objects: TObject[] | undefined
@@ -26,18 +25,6 @@ const SkyMap: React.FC<TSkyMapProps> = (props) => {
 
     return (
         <div ref={ref}>
-            <Script
-                src='/scripts/d3.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/d3.geo.projection.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/celestial.min.js'
-                strategy='beforeInteractive'
-            />
             {objects === undefined || !objects.length || width === 0 ? (
                 <div className={styles.mapLoader}>
                     <Dimmer active>

@@ -6,7 +6,7 @@ import { TFIle } from '@/api/types'
 
 import MoonPhase from '@/components/moon-phase/MoonPhase'
 
-import './styles.sass'
+import styles from './FilesTable.module.sass'
 
 type TTableRow = {
     item: TFIle
@@ -25,7 +25,7 @@ const RenderTableRow: React.FC<TTableRow> = (props) => {
                     <Image
                         className='fitsImage'
                         onClick={() => onPhotoClick(itemId)}
-                        src={`${process.env.REACT_APP_API_HOST}uploads/${object}/${item.name}_thumb.jpg`}
+                        src={`${process.env.NEXT_PUBLIC_API_HOST}uploads/${object}/${item.name}_thumb.jpg`}
                     />
                 ) : (
                     ''

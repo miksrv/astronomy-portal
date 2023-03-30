@@ -98,6 +98,18 @@ export default function Objects() {
 
     return (
         <>
+            <Script
+                src='/scripts/d3.min.js'
+                strategy='beforeInteractive'
+            />
+            <Script
+                src='/scripts/d3.geo.projection.min.js'
+                strategy='beforeInteractive'
+            />
+            <Script
+                src='/scripts/celestial.min.js'
+                strategy='beforeInteractive'
+            />
             {isError && (
                 <Message
                     error

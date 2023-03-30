@@ -1,9 +1,5 @@
 import moment from 'moment'
 
-import translate from './translate'
-
-const lang = translate().general
-
 export const declOfNum = (number: number, words: string[]) => {
     return words[
         number % 100 > 4 && number % 100 < 20
@@ -28,26 +24,26 @@ export const getTimeFromSec = (sec: number, full: boolean = false): string => {
     let m = ((sec - h * 3600) / 60) ^ 0
 
     if (full)
-        return `${h} ${declOfNum(h, lang.declining.hours)} ${m} ${declOfNum(
+        return `${h} ${declOfNum(h, ["час", "часа", "часов"])} ${m} ${declOfNum(
             m,
-            lang.declining.minutes
+            ["минута", "минуты", "минут"]
         )}`
 
     return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m)
 }
 
 export const timeAgo = (sec: number) => {
-    if (sec === null || sec <= 0) return lang.timeago.recently
+    if (sec === null || sec <= 0) return "обновлено недавно"
 
     let h = (sec / 3600) ^ 0
     let m = ((sec - h * 3600) / 60) ^ 0
     let s = sec - h * 3600 - m * 60
 
     return (
-        (h > 0 ? (h < 10 ? '0' + h : h) + ` ${lang.timeago.h} ` : '') +
-        (m > 0 ? (m < 10 ? '0' + m : m) + ` ${lang.timeago.m} ` : '') +
-        (s > 0 ? (s < 10 ? '0' + s : s) + ` ${lang.timeago.s}` : '') +
-        ` ${lang.timeago.ago}`
+        (h > 0 ? (h < 10 ? '0' + h : h) + ` ч. ` : '') +
+        (m > 0 ? (m < 10 ? '0' + m : m) + ` м. ` : '') +
+        (s > 0 ? (s < 10 ? '0' + s : s) + ` с.` : '') +
+        ` назад`
     )
 }
 

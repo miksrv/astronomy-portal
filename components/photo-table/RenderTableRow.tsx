@@ -33,7 +33,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                     <Image
                         className='photo'
                         size='tiny'
-                        src={`${process.env.REACT_APP_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}
+                        src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}
                     />
                 </a>
             </Table.Cell>

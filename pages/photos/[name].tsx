@@ -1,5 +1,5 @@
 import {store} from "@/api/store";
-import {getCatalogList, getCatalogItem, useGetCatalogItemQuery, getRunningQueriesThunk} from "@/api/api";
+import {getPhotoList, getCatalogItem, useGetCatalogItemQuery, getRunningQueriesThunk} from "@/api/api";
 import {wrapper} from "@/api/store";
 import { useRouter } from "next/dist/client/router";
 import { skipToken } from "@reduxjs/toolkit/query";
@@ -7,10 +7,10 @@ import {NextSeo} from "next-seo";
 
 export async function getStaticPaths() {
     const storeObject = store();
-    const result = await storeObject.dispatch(getCatalogList.initiate());
+    const result = await storeObject.dispatch(getPhotoList.initiate());
 
     return {
-        paths: result.data?.payload.map((item) => `/objects/${item.name}`),
+        paths: result.data?.payload.map((item) => `/photos/${item.object}`),
         fallback: true,
     };
 }

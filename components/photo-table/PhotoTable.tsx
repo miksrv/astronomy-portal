@@ -4,7 +4,7 @@ import { Table } from 'semantic-ui-react'
 import { TPhoto } from '@/api/types'
 
 import RenderTableRow from './RenderTableRow'
-import './styles.sass'
+import styles from './PhotoTable.module.sass'
 
 type TPhotoTableProps = {
     photos: TPhoto[]
