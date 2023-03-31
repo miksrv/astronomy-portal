@@ -15,9 +15,8 @@ const SkyMap: React.FC<TSkyMapProps> = (props) => {
     const [width, setWidth] = useState<number>(0)
 
     const ref = useRef<HTMLDivElement>(null)
-    const config = {
-        interactive: interactive ?? false
-    }
+    const config = {interactive: interactive ?? false}
+    const loading = objects === undefined || !objects.length || width === 0;
 
     useEffect(() => {
         setWidth(ref.current ? ref.current.offsetWidth : 0)
@@ -25,13 +24,10 @@ const SkyMap: React.FC<TSkyMapProps> = (props) => {
 
     return (
         <div ref={ref}>
-            {objects === undefined || !objects.length || width === 0 ? (
-                <div className={styles.mapLoader}>
-                    <Dimmer active>
-                        <Loader>Загрузка</Loader>
-                    </Dimmer>
-                </div>
-            ) : (
+            <Dimmer active={loading}>
+                <Loader>Загрузка</Loader>
+            </Dimmer>
+            {!loading && (
                 <RenderMap
                     objects={objects}
                     config={config}

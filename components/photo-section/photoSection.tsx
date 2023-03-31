@@ -62,11 +62,11 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({ loader, title, photo, c
                     mobile={16}
                     className={styles.photoContainer}
                 >
-                    {loader && (
-                        <Dimmer active>
+                    <div className={styles.loader}>
+                        <Dimmer active={!!loader || !photo}>
                             <Loader />
                         </Dimmer>
-                    )}
+                    </div>
                     <Image
                         className={styles.photo}
                         alt={title || ''}
@@ -106,8 +106,8 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({ loader, title, photo, c
                     </h1>
                     <Grid className={styles.parameters}>
                         <Grid.Column
-                            computer={7}
-                            tablet={7}
+                            computer={8}
+                            tablet={8}
                             mobile={16}
                         >
                             <div>
@@ -162,8 +162,8 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({ loader, title, photo, c
                             )}
                         </Grid.Column>
                         <Grid.Column
-                            computer={9}
-                            tablet={9}
+                            computer={8}
+                            tablet={8}
                             mobile={16}
                         >
                             {!loader && photo?.parameters?.filters && (
