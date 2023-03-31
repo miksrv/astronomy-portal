@@ -8,7 +8,7 @@ import { TCatalog, TObject } from '@/api/types'
 
 import { getTimeFromSec } from '@/functions/helpers'
 
-import FilterList from '@/components/filter-list/FilterList'
+import FilterList from '@/components/filter-list/filterList'
 import ObjectEditModal from '@/components/obect-edit-modal/ObjectEditModal'
 import SkyMap from '@/components/sky-map/SkyMap'
 

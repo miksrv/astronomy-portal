@@ -98,7 +98,7 @@ export const api = createApi({
 
         // PHOTO
         // Список фотографий без характеристик
-        getPhotoList: builder.query<IRestPhotoList, void>({
+        getPhotoList: builder.query<IRestPhotoList, void | {}>({
             keepUnusedDataFor: 3600,
             query: () => 'get/photo/list'
         }),

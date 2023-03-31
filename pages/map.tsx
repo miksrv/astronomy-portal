@@ -29,7 +29,7 @@ export default function Map() {
     })
 
     return (
-        <>
+        <main>
             <div className='box table global-map'>
                 <SkyMap
                     objects={listObjects}
@@ -43,6 +43,6 @@ export default function Map() {
                 objects={listObjects}
                 handleClick={(ra, dec) => setGoToObject([ra, dec])}
             />
-        </>
+        </main>
     )
 }

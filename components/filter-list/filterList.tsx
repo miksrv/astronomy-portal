@@ -3,9 +3,8 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { TObjectFilters } from '@/api/types'
 
 import { declOfNum } from '@/functions/helpers'
-import translate from '@/functions/translate'
 
-import styles from './FilterList.module.sass'
+import styles from './filterList.module.sass'
 
 type TFilterListProps = {
     filters: TObjectFilters
@@ -33,8 +32,7 @@ const FilterListItem: React.FC<TFilterListItem> = ({
     )
 }
 
-const FilterList: React.FC<TFilterListProps> = (props) => {
-    const { filters } = props
+const FilterList: React.FC<TFilterListProps> = ({ filters }) => {
     const [filtersList, setFiltersList] = useState<TFilterListItem[]>([])
 
     const doListFilter = useCallback(() => {
@@ -58,7 +56,7 @@ const FilterList: React.FC<TFilterListProps> = (props) => {
     }, [filters, doListFilter])
 
     return (
-        <ul className='filter-list'>
+        <ul className={styles.filterList}>
             {filtersList.map((item) => (
                 <FilterListItem
                     key={item.name}

@@ -1,16 +1,17 @@
 import {store} from "@/api/store";
+import { GetStaticProps } from 'next';
 import {getPhotoList, getCatalogItem, useGetCatalogItemQuery, getRunningQueriesThunk, useGetPhotoListItemQuery, useGetPhotoListQuery} from "@/api/api";
 import {wrapper} from "@/api/store";
 import { useRouter } from "next/dist/client/router";
 import { skipToken } from "@reduxjs/toolkit/query";
-import { Message } from 'semantic-ui-react'
-import PhotoItemHeader from "@/components/photo-item-header/photoItemHeader";
-import React, {useMemo, useEffect} from "react";
-import PhotoTable from "@/components/photo-table/PhotoTable";
+import PhotoSection from "@/components/photo-section/photoSection";
+import React from "react";
+import PhotoTable from "@/components/photo-table/photoTable";
 import ObjectCloud from "@/components/object-cloud/ObjectCloud";
 import Script from "next/script";
+import {TPhoto} from "@/api/types";
 
-export async function getStaticPaths() {
+export const getStaticPaths = async () => {
     const storeObject = store();
     const result = await storeObject.dispatch(getPhotoList.initiate());
 
@@ -20,78 +21,60 @@ export async function getStaticPaths() {
     };
 }
 
-export const getStaticProps = wrapper.getStaticProps(
-    (store) => async (context) => {
+export const getStaticProps: GetStaticProps = wrapper.getStaticProps((store) => async (context) => {
         const name = context.params?.name;
-        if (typeof name === "string") {
+
+        if (typeof name === 'string') {
             store.dispatch(getCatalogItem.initiate(name));
+            store.dispatch(getPhotoList.initiate({}));
         }
 
         await Promise.all(store.dispatch(getRunningQueriesThunk()));
 
         return {
-            props: { object: {} },
+            props: { },
         };
     }
 );
 
-export default function Photo() {
+const Photo: React.FC = (): JSX.Element => {
     const router = useRouter();
-    const name = router.query.name;
+    const routerObject = router.query.name;
+    const photoDate = router.query.date;
+    const objectName = typeof routerObject === 'string' ? routerObject : skipToken
 
-    const result = useGetCatalogItemQuery(
-        typeof name === "string" ? name : skipToken,
-        {
-            // If the page is not yet generated, router.isFallback will be true
-            // initially until getStaticProps() finishes running
-            skip: router.isFallback,
-        }
-    );
-    const { isLoading, error, data } = result;
+    const { data: dataCatalog, isLoading: loadingCatalog } = useGetCatalogItemQuery(objectName, {skip: router.isFallback})
+    const { data: dataPhotosItem, isFetching: loadingPhotosItem } = useGetPhotoListItemQuery(objectName, {skip: router.isFallback})
+    const { data: dataPhotosList, isLoading: loadingPhotosList } = useGetPhotoListQuery({}, {skip: router.isFallback})
 
-    const date = router.query.date;  //new URLSearchParams(window.location.search).get('date')
-
-    const { data: dataPhotos, isFetching: photosLoading } =
-        useGetPhotoListItemQuery(typeof name === "string" ? name : skipToken)
-    const { data: dataCatalog, isLoading: catalogLoading } =
-        useGetCatalogItemQuery(typeof name === "string" ? name : skipToken)
-    const { data: photosList, isLoading: photosListLoading } =
-        useGetPhotoListQuery()
-
-    const currentPhoto = useMemo(() => {
+    const currentPhoto: TPhoto | undefined = React.useMemo(() => {
         const searchPhoto =
-            dataPhotos?.payload &&
-            date &&
-            dataPhotos?.payload.filter((photo) => photo.date === date)
+            dataPhotosItem?.payload &&
+            photoDate &&
+            dataPhotosItem?.payload.filter((photo) => photo.date === photoDate)
+
         return searchPhoto && searchPhoto.length
             ? searchPhoto.pop()
-            : dataPhotos?.payload?.[0]
-    }, [dataPhotos, date])
+            : dataPhotosItem?.payload?.[0]
+    }, [dataPhotosItem, photoDate])
 
-    const listPhotoNames = useMemo(() => {
-        return photosList?.payload.length
-            ? photosList.payload
+    const listPhotoNames: string[] = React.useMemo(() => {
+        return dataPhotosList?.payload.length
+            ? dataPhotosList.payload
                 .map((item) => item.object)
                 .filter(
                     (item, index, self) =>
                         item !== '' && self.indexOf(item) === index
                 )
             : []
-    }, [photosList])
+    }, [dataPhotosList])
 
-    useEffect(() => {
-        document.title = `${
-            dataCatalog?.payload ? dataCatalog.payload.title : ''
-        } Фото - Обсерватория`
-    }, [dataCatalog])
+    const photoTitle = React.useMemo(() =>
+        dataCatalog?.payload ? dataCatalog.payload?.title || dataCatalog.payload.name : currentPhoto?.object || objectName.toString()
+    , [dataCatalog])
 
-    return !dataPhotos?.status && !photosLoading ? (
-        <Message
-            error
-            content='Что-то пошло не так, такого объекта нет. Возможно не верный адрес ссылки?'
-        />
-    ) : (
-        <>
+    return (
+        <main>
             <Script
                 src='/scripts/d3.min.js'
                 strategy='beforeInteractive'
@@ -104,24 +87,27 @@ export default function Photo() {
                 src='/scripts/celestial.min.js'
                 strategy='beforeInteractive'
             />
-            <PhotoItemHeader
-                loader={photosLoading || catalogLoading}
+            <PhotoSection
+                loader={loadingPhotosItem || loadingCatalog}
+                title={photoTitle}
                 photo={currentPhoto}
                 catalog={dataCatalog?.payload}
             />
-            {dataPhotos?.payload && (
+            {!!dataPhotosItem?.payload.length && (
                 <>
                     <br />
-                    <PhotoTable photos={dataPhotos?.payload} />
+                    <PhotoTable photos={dataPhotosItem?.payload} />
                 </>
             )}
             <br />
             <ObjectCloud
-                loader={photosListLoading}
-                current={typeof name === "string" ? name : ''}
+                loader={loadingPhotosList}
+                current={typeof objectName === "string" ? objectName : ''}
                 names={listPhotoNames}
                 link='photos'
             />
-        </>
+        </main>
     )
 }
+
+export default Photo

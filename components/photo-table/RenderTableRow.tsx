@@ -1,10 +1,14 @@
 import moment from 'moment'
 import React from 'react'
-import { Image, Table } from 'semantic-ui-react'
+import { Table } from 'semantic-ui-react'
+import Image from "next/image";
+import Link from "next/link";
 
 import { TFiltersTypes, TPhoto } from '@/api/types'
 
 import { getTimeFromSec } from '@/functions/helpers'
+
+import styles from './photoTable.module.sass'
 
 type TTableRowProps = {
     photo: TPhoto
@@ -26,16 +30,18 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
     return (
         <Table.Row>
             <Table.Cell width='one'>
-                <a
+                <Link
                     href={`/photos/${photo.object}?date=${photo.date}`}
-                    className='item'
+                    title={photo.object}
                 >
                     <Image
-                        className='photo'
-                        size='tiny'
                         src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}
+                        className={styles.photo}
+                        alt={photo.object}
+                        width={80}
+                        height={30}
                     />
-                </a>
+                </Link>
             </Table.Cell>
             <Table.Cell content={moment(photo.date).format('DD.MM.Y')} />
             <Table.Cell content={photo.parameters?.frames} />

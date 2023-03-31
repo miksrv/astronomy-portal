@@ -18,7 +18,7 @@ import chart_coordlines from '@/components/chart/chart_coordlines'
 import chart_statistic from '@/components/chart/chart_statistic'
 import FilesTable from '@/components/files-table/FilesTable'
 import ObjectCloud from '@/components/object-cloud/ObjectCloud'
-import PhotoTable from '@/components/photo-table/PhotoTable'
+import PhotoTable from '@/components/photo-table/photoTable'
 
 import ObjectsItemHeader from "@/components/objects-item-header/ObjectsItemHeader";
 import Script from "next/script";

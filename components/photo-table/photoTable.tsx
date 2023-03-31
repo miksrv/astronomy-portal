@@ -4,7 +4,8 @@ import { Table } from 'semantic-ui-react'
 import { TPhoto } from '@/api/types'
 
 import RenderTableRow from './RenderTableRow'
-import styles from './PhotoTable.module.sass'
+import classNames from "classnames";
+import styles from './photoTable.module.sass'
 
 type TPhotoTableProps = {
     photos: TPhoto[]
@@ -33,14 +34,14 @@ const PhotoTable: React.FC<TPhotoTableProps> = (props) => {
     const { photos } = props
 
     return (
-        <div className='box table'>
+        <div className={classNames('table', 'box')}>
             <Table
                 sortable
                 celled
                 inverted
                 selectable
                 compact
-                className='photo-table'
+                className={styles.photoTable}
             >
                 <Table.Header>
                     <Table.Row>
