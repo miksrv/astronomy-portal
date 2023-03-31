@@ -1,4 +1,7 @@
 import config from './config'
+import { montserrat } from "@/pages/_app";
+
+const FONT = montserrat.style.fontFamily
 
 const object = {
     adaptable: false,
@@ -18,7 +21,7 @@ const object = {
             align: 'center',
             baseline: 'middle',
             fill: '#ffa51f',
-            font: '15px GOST'
+            font: `15px ${FONT}`
         },
         names: true,
         namesType: 'iau'
@@ -34,8 +37,8 @@ const object = {
     lang: '',
     lines: {
         graticule: {
-            lat: { fill: '#eee', font: '10px GOST', pos: [0] },
-            lon: { fill: '#eee', font: '10px GOST', pos: [0] }, // hor
+            lat: { fill: '#eee', font: `10px ${FONT}`, pos: [0] },
+            lon: { fill: '#eee', font: `10px ${FONT}`, pos: [0] }, // hor
             opacity: 0.5,
             show: true,
             stroke: '#cccccc',
@@ -55,7 +58,7 @@ const object = {
             align: 'left',
             baseline: 'top',
             fill: '#ffffff',
-            font: '13px GOST'
+            font: `13px ${FONT}`
         },
         designationType: 'desig',
         exponent: -0.28,
@@ -66,7 +69,7 @@ const object = {
             align: 'right',
             baseline: 'bottom',
             fill: '#ffffff',
-            font: '13px GOST'
+            font: `13px ${FONT}`
         },
         propernameType: 'name',
         show: true,

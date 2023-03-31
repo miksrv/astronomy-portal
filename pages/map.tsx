@@ -5,6 +5,7 @@ import { TCatalog } from '@/api/types'
 
 import ObjectCloudSkyMap from '@/components/sky-map/ObjectCloudSkyMap'
 import SkyMap from '@/components/sky-map/SkyMap'
+import Script from "next/script";
 
 export default function Map() {
     const { data, isSuccess } = useGetCatalogListQuery()
@@ -30,6 +31,18 @@ export default function Map() {
 
     return (
         <main>
+            <Script
+                src='/scripts/d3.min.js'
+                strategy='beforeInteractive'
+            />
+            <Script
+                src='/scripts/d3.geo.projection.min.js'
+                strategy='beforeInteractive'
+            />
+            <Script
+                src='/scripts/celestial.min.js'
+                strategy='beforeInteractive'
+            />
             <div className='box table global-map'>
                 <SkyMap
                     objects={listObjects}

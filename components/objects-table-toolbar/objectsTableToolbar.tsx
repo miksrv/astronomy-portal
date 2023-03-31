@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { Dropdown, Input } from 'semantic-ui-react'
 
-import styles from './ObjectsTableToolbar.module.sass'
+import styles from './objectsTableToolbar.module.sass'
 
 type TToolbarProps = {
     search: string
@@ -27,12 +27,12 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
             <Input
                 value={search}
                 onChange={handleChange}
-                icon='search'
+                icon={'search'}
                 className={styles.search}
-                placeholder='Поиск...'
+                placeholder={'Поиск...'}
             />
             <Dropdown
-                placeholder='Категории объектов'
+                placeholder={'Категории объектов'}
                 multiple
                 search
                 selection

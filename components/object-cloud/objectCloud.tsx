@@ -1,8 +1,9 @@
 import React from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
 import Link from "next/link";
+import classNames from "classnames";
 
-import styles from './ObjectCloud.module.sass'
+import styles from './objectCloud.module.sass'
 
 type TObjectCloudProps = {
     loader: boolean
@@ -15,7 +16,7 @@ const ObjectCloud: React.FC<TObjectCloudProps> = (props) => {
     const { loader, current, names, link } = props
 
     return (
-        <div className='box object-cloud'>
+        <div className={classNames(styles.objectCloud, 'box')}>
             {loader ? (
                 <>
                     <Dimmer active>
@@ -26,10 +27,10 @@ const ObjectCloud: React.FC<TObjectCloudProps> = (props) => {
             ) : (
                 names?.map((item) => (
                     <Link
-                        href={`/${link}/${item}`}
-                        className={current === item ? 'active' : ''}
                         key={item}
-                        title={''}
+                        href={`/${link}/${item}`}
+                        className={current === item ? styles.active : undefined}
+                        title={item.replace(/_/g, ' ')}
                     >
                         {item.replace(/_/g, ' ')}
                     </Link>

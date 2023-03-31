@@ -7,14 +7,12 @@ import {
     getPhotoList,
     getRunningQueriesThunk,
 } from "@/api/api";
-import Link from "next/link";
 import {wrapper} from "@/api/store";
-import {NextSeo} from "next-seo";
 import { Dimmer, Loader, Message } from 'semantic-ui-react'
-import React, {useState, useMemo, useEffect} from "react";
+import React, {useState, useMemo} from "react";
 import {IObjectListItem, TCatalog} from "@/api/types";
-import ObjectsTableToolbar from "@/components/objects-table-toolbar/ObjectsTableToolbar";
-import ObjectTable from "@/components/object-table/ObjectTable";
+import ObjectsTableToolbar from "@/components/objects-table-toolbar/objectsTableToolbar";
+import ObjectTable from "@/components/object-table/objectTable";
 import Script from "next/script";
 
 export const getStaticProps = wrapper.getStaticProps(

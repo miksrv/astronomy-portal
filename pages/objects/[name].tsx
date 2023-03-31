@@ -8,7 +8,6 @@ import { Grid, Message } from 'semantic-ui-react'
 import {wrapper} from "@/api/store";
 import { useRouter } from "next/dist/client/router";
 import { skipToken } from "@reduxjs/toolkit/query";
-import {NextSeo} from "next-seo";
 
 import { isOutdated } from '@/functions/helpers'
 
@@ -17,7 +16,7 @@ import chart_coordinates from '@/components/chart/chart_coordinates'
 import chart_coordlines from '@/components/chart/chart_coordlines'
 import chart_statistic from '@/components/chart/chart_statistic'
 import FilesTable from '@/components/files-table/FilesTable'
-import ObjectCloud from '@/components/object-cloud/ObjectCloud'
+import ObjectCloud from '@/components/object-cloud/objectCloud'
 import PhotoTable from '@/components/photo-table/photoTable'
 
 import ObjectsItemHeader from "@/components/objects-item-header/ObjectsItemHeader";

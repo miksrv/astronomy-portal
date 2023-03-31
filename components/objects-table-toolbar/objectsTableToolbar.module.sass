@@ -8,9 +8,20 @@
   .categoryDropdown
     margin-left: 10px
 
-.search
-  input
-    color: $text-main !important
+  .search
+    input
+      color: $text-main !important
+      background-color: $input-BackgroundColor
+
+      &:focus
+        background-color: $input-focus-BackgroundColor
+        border-color: $input-focus-BorderColor
+
+        &::placeholder
+          color: $text-main
+
+  i
+    color: $text-main
 
 @media only screen and (max-width: 768px)
   .objectsToolbar

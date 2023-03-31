@@ -7,7 +7,7 @@ import ObjectEditModal from '@/components/obect-edit-modal/ObjectEditModal'
 
 import RenderTableHeader, { HEADER_FIELDS } from './RenderTableHeader'
 import RenderTableRow from './RenderTableRow'
-import styles from './ObjectTable.module.sass'
+import styles from './objectTable.module.sass'
 import { TObjectSortable, TSortOrdering } from './types'
 
 type TObjectTable = {
@@ -18,9 +18,9 @@ type TObjectTable = {
 const RowNoData: React.FC = () => (
     <Table.Row>
         <Table.Cell
-            textAlign='center'
+            textAlign={'center'}
             colSpan={HEADER_FIELDS.length}
-            content='Ничего не найдено, попробуйте изменить условия поиска'
+            content={'Ничего не найдено, попробуйте изменить условия поиска'}
         />
     </Table.Row>
 )

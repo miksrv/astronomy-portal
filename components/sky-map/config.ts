@@ -1,3 +1,7 @@
+import { montserrat } from "@/pages/_app";
+
+const FONT = montserrat.style.fontFamily
+
 const config = {
     adaptable: true, // Sizes are increased with higher zoom-levels
     advanced: false, // Display fewer form fields if false
@@ -25,9 +29,9 @@ const config = {
             baseline: 'middle',
             fill: '#cccc99',
             font: [
-                '14px GOST', // Style for constellations
-                '12px GOST', // Different fonts for diff.
-                '11px GOST'
+                `14px ${FONT}`, // Style for constellations
+                `12px ${FONT}`, // Different fonts for diff.
+                `11px ${FONT}`
             ]
         }, // ranked constellations
         names: true, // Show constellation names
@@ -53,7 +57,7 @@ const config = {
             align: 'left',
             baseline: 'alphabetic',
             fill: '#cccccc',
-            font: '11px GOST'
+            font: `11px ${FONT}`
         }, // Style for DSO names
         names: true, // Show DSO names
         namesType: 'desig', // Type of DSO ('desig' or language) name shown
@@ -133,9 +137,9 @@ const config = {
         // Display & styles for graticule & some planes
         graticule: {
             // grid values: "outline", "center", or [lon,...] specific position
-            lat: { fill: '#eee', font: '10px GOST', pos: [''] },
+            lat: { fill: '#eee', font: `10px ${FONT}`, pos: [''] },
             // grid values: "outline", "center", or [lat,...] specific position
-            lon: { fill: '#eee', font: '10px GOST', pos: [''] },
+            lon: { fill: '#eee', font: `10px ${FONT}`, pos: [''] },
             opacity: 0.8,
             show: true,
             stroke: '#cccccc',
@@ -162,7 +166,7 @@ const config = {
             align: 'right',
             baseline: 'top',
             fill: '#00ccff',
-            font: '14px GOST'
+            font: `14px ${FONT}`
         },
         // 'letter': 1 or 2 letters S Me V L Ma J S U N
         names: true, // Show name in nameType language next to symbol
@@ -173,7 +177,7 @@ const config = {
             align: 'center',
             baseline: 'middle',
             fill: '#00ccff',
-            font: 'bold 17px GOST'
+            font: `bold 17px ${FONT}`
         },
         // Type of planet symbol: 'symbol' graphic planet sign,
         // 'disk' filled circle scaled by magnitude
@@ -225,7 +229,7 @@ const config = {
             align: 'left',
             baseline: 'top',
             fill: '#ddddbb',
-            font: '11px GOST'
+            font: `11px ${FONT}`
         },
         // i.e. whichever of the previous applies first); may vary with culture setting
         designationType: 'desig', // Which kind of name is displayed as designation (fieldname in starnames.json)
@@ -238,11 +242,11 @@ const config = {
             align: 'right',
             baseline: 'bottom',
             fill: '#ddddbb',
-            font: '13px GOST'
+            font: `13px ${FONT}`
         },
         propernameType: 'name', // Languge for proper name, default IAU name; may vary with culture setting
         show: true, // Show stars
-        size: 7, // Maximum size (radius) of star circle in pixels
+        size: 4, // Maximum size (radius) of star circle in pixels
         style: { fill: '#ffffff', opacity: 1 } // Default style for stars
         // number indicates limit magnitude
     },

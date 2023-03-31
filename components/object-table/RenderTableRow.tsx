@@ -1,12 +1,14 @@
 import React, { useMemo } from 'react'
-import { Icon, Image, Popup, Table } from 'semantic-ui-react'
+import { Icon, Popup, Table } from 'semantic-ui-react'
+import Image from "next/image";
+import Link from "next/link";
 
 import { useAppSelector } from '@/api/hooks'
 import { IObjectListItem, TCatalog, TFiltersTypes, TPhoto } from '@/api/types'
 
 import { getTimeFromSec, isOutdated } from '@/functions/helpers'
 
-import styles from './ObjectTable.module.sass'
+import styles from './objectTable.module.sass'
 
 type TTableRowProps = {
     item: IObjectListItem & TCatalog
@@ -47,41 +49,49 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
             <Table.Cell className={styles.cellCame}>
                 <Popup
                     disabled={!item.title}
-                    size='mini'
+                    size={'mini'}
                     wide
                     header={item.title}
                     content={doTextTruncate}
                     trigger={
-                        <a href={`/objects/${item.name}`}>{item.name}</a>
+                        <Link
+                            href={`/objects/${item.name}`}
+                            title={`${item.category} ${item.title || item.name} - Подробная информация об объекте`}
+                        >
+                            {item.name}
+                        </Link>
                     }
                 />
                 {userLogin && (
-                    <div>
+                    <>
                         <span
                             className={styles.controlButton}
-                            role='button'
+                            role={'button'}
                             tabIndex={0}
                             onKeyUp={() => {}}
                             onClick={() => onShowEdit?.(item.name)}
                         >
-                            <Icon name='edit outline' />
+                            <Icon name={'edit outline'} />
                         </span>
                         <span className={styles.controlButton}>
-                            <Icon name='remove' />
+                            <Icon name={'remove'} />
                         </span>
-                    </div>
+                    </>
                 )}
             </Table.Cell>
             <Table.Cell width='one'>
                 {photoItem && (
-                    <a
-                        href={`/photo/${item.name}`}
+                    <Link
+                        href={`/photos/${item.name}`}
+                        title={`${item.title || item.name} - Фотографии и история съемок`}
                         className={styles.photoLink}
                     >
                         <Image
                             className={styles.photo}
-                            size='tiny'
                             src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photoItem.file}_thumb.${photoItem.ext}`}
+                            width={80}
+                            height={18}
+                            alt={`${item.title || item.name} - Фотография`}
                         />
                         {isOutdated(photoItem.date, item.date) && (
                             <Popup
@@ -92,13 +102,13 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                                 size='mini'
                                 trigger={
                                     <Icon
-                                        name='clock outline'
+                                        name={'clock outline'}
                                         className={styles.outdatedIcon}
                                     />
                                 }
                             />
                         )}
-                    </a>
+                    </Link>
                 )}
             </Table.Cell>
             <Table.Cell content={item.frames} />

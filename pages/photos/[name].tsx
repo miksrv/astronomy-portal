@@ -7,7 +7,7 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import PhotoSection from "@/components/photo-section/photoSection";
 import React from "react";
 import PhotoTable from "@/components/photo-table/photoTable";
-import ObjectCloud from "@/components/object-cloud/ObjectCloud";
+import ObjectCloud from "@/components/object-cloud/objectCloud";
 import Script from "next/script";
 import {TPhoto} from "@/api/types";
 
