@@ -18,17 +18,12 @@
     margin: 0 .5em 1em
     flex-basis: calc(20%)
 
-    .content
-      width: 100%
+    &> div
+      &> div
+        width: 100%
 
-  @media only screen and (max-width: 768px)
-    flex-wrap: wrap
-
-    .photoRow-4
-      flex-basis: calc(100%) !important
-
-    .item
-      flex: 100%
+  h4
+    margin-bottom: 2px
 
   .photo
     object-fit: cover
@@ -42,3 +37,12 @@
     height: 200px
     background: #1d1d1e
     font-size: .8em
+
+  @media only screen and (max-width: 768px)
+    flex-wrap: wrap
+
+    .photoRow-4
+      flex-basis: calc(100%) !important
+
+    .item
+      flex: 100%

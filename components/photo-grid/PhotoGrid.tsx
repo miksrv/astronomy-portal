@@ -47,6 +47,7 @@ const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
                       <Link
                           key={photo.file}
                           href={`/photos/${photo.object}?date=${photo.date}`}
+                          title={`${photo.object} - Фотография объекта`}
                           className={styles.item}
                       >
                           {photo.title ? (
@@ -55,7 +56,7 @@ const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
                                       <Image
                                           src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}
                                           className={styles.photo}
-                                          alt={''}
+                                          alt={photo.object}
                                           width={200}
                                           height={200}
                                       />
