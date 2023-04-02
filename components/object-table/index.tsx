@@ -1,7 +1,6 @@
+import { IObjectListItem, TCatalog, TPhoto } from '@/api/types'
 import React, { useMemo, useState } from 'react'
 import { Table } from 'semantic-ui-react'
-
-import { IObjectListItem, TCatalog, TPhoto } from '@/api/types'
 
 import ObjectEditModal from '@/components/obect-edit-modal'
 
@@ -47,12 +46,12 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
     const listSortedObjects = useMemo(() => {
         return listObjectsPhotos.sort((first, second) =>
             sortOrder === 'descending'
-                // @ts-ignore
-                ? first[sortField] > second[sortField]
+                ? // @ts-ignore
+                  first[sortField] > second[sortField]
                     ? 1
                     : -1
-                // @ts-ignore
-                : first[sortField] < second[sortField]
+                : // @ts-ignore
+                first[sortField] < second[sortField]
                 ? 1
                 : -1
         )

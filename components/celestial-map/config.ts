@@ -1,4 +1,4 @@
-import { montserrat } from "@/pages/_app";
+import { montserrat } from '@/pages/_app'
 
 const FONT = montserrat.style.fontFamily
 

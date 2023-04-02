@@ -1,9 +1,9 @@
+import { TCatalog } from '@/api/types'
 import React, { useEffect, useState } from 'react'
 import { Button, Form, Grid, Modal } from 'semantic-ui-react'
 
-import { TCatalog } from '@/api/types'
-
 import CelestialMap from '@/components/celestial-map'
+
 import styles from './styles.module.sass'
 
 interface IObjectEditModal {

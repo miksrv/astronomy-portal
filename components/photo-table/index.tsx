@@ -1,10 +1,9 @@
+import { TPhoto } from '@/api/types'
+import classNames from 'classnames'
 import React from 'react'
 import { Table } from 'semantic-ui-react'
 
-import { TPhoto } from '@/api/types'
-
 import RenderTableRow from './RenderTableRow'
-import classNames from "classnames";
 import styles from './styles.module.sass'
 
 type TPhotoTableProps = {

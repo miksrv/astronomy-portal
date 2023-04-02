@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react'
 
 import config from './object'
-import { TObject, geoJSON } from './types'
 import styles from './styles.module.sass'
+import { TObject, geoJSON } from './types'
 
 type TRenderMapProps = {
     config: any
@@ -91,7 +91,10 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
                             return null
                         }
 
-                        let skyPoint = Celestial.getData(geoJSON, config.transform)
+                        let skyPoint = Celestial.getData(
+                            geoJSON,
+                            config.transform
+                        )
 
                         Celestial.container
                             .selectAll('.sky-points')
@@ -110,11 +113,14 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
                                     properties: { name: any }
                                 }) => {
                                     if (
-                                        Celestial.clip(point.geometry.coordinates)
+                                        Celestial.clip(
+                                            point.geometry.coordinates
+                                        )
                                     ) {
-                                        let pointCoords = Celestial.mapProjection(
-                                                point.geometry.coordinates
-                                            ),
+                                        let pointCoords =
+                                                Celestial.mapProjection(
+                                                    point.geometry.coordinates
+                                                ),
                                             pointRadius = 5
 
                                         Celestial.setStyle(stylePoint)
@@ -209,7 +215,7 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
     }, [goto])
 
     const canvas = document.querySelector('canvas')
-    const ctx = canvas?.getContext("2d")
+    const ctx = canvas?.getContext('2d')
 
     const getCursorPosition = (canvas: any, event: any) => {
         const rect = canvas.getBoundingClientRect()
@@ -218,10 +224,8 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
 
         const coords = Celestial.mapProjection([299.908, 22.7231])
 
-
         // console.log('test', SkyMap.mapProjection([x, y]))
         console.log('coords', event.offsetX, event.offsetX)
-
     }
 
     canvas?.addEventListener('mousedown', (e) => {

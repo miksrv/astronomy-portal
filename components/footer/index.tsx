@@ -1,6 +1,7 @@
-import React from 'react'
-import { update } from '@/update'
 import { version } from '@/version'
+import React from 'react'
+
+import { update } from '@/update'
 
 import styles from './styles.module.sass'
 

@@ -1,16 +1,14 @@
-import moment from 'moment'
-import React, { useState } from 'react'
-import Link from "next/link";
-import { Button, Dimmer, Grid, Loader } from 'semantic-ui-react'
-
 import { useAppSelector } from '@/api/hooks'
 import { TCatalog, TObject } from '@/api/types'
-
 import { getTimeFromSec } from '@/functions/helpers'
+import moment from 'moment'
+import Link from 'next/link'
+import React, { useState } from 'react'
+import { Button, Dimmer, Grid, Loader } from 'semantic-ui-react'
 
+import CelestialMap from '@/components/celestial-map'
 import FilterList from '@/components/filter-list'
 import ObjectEditModal from '@/components/obect-edit-modal'
-import CelestialMap from '@/components/celestial-map'
 
 import styles from './styles.module.sass'
 
@@ -121,7 +119,10 @@ const ObjectItemHeader: React.FC<TObjectHeaderProps> = (props) => {
                                 {deviationRa} / {deviationDec}{' '}
                             </div>
                             <br />
-                            <Link href='/objects/' title={''}>
+                            <Link
+                                href='/objects/'
+                                title={''}
+                            >
                                 Вернуться к списку всех объектов
                             </Link>
                         </Grid.Column>

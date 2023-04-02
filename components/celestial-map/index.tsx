@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
+
 import RenderMap from './RenderMap'
 import { TObject } from './types'
 
@@ -14,8 +15,8 @@ const CelestialMap: React.FC<TSkyMapProps> = (props) => {
     const [width, setWidth] = useState<number>(0)
 
     const ref = useRef<HTMLDivElement>(null)
-    const config = {interactive: interactive ?? false}
-    const loading = objects === undefined || !objects.length || width === 0;
+    const config = { interactive: interactive ?? false }
+    const loading = objects === undefined || !objects.length || width === 0
 
     useEffect(() => {
         setWidth(ref.current ? ref.current.offsetWidth : 0)

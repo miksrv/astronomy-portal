@@ -1,9 +1,9 @@
+import classNames from 'classnames'
 import { Moment } from 'moment'
 import React from 'react'
 import SunCalc from 'suncalc'
 
 import styles from './styles.module.sass'
-import classNames from "classnames";
 
 type TMoonPhaseProps = {
     date: Moment
@@ -21,8 +21,9 @@ const phases: any = {
     '1': '1' // 🌑 new moon
 }
 
-const MoonPhase: React.FC<TMoonPhaseProps> = ({date}) => {
-    const phase: number = Math.round(SunCalc.getMoonIllumination(date).phase * 8) / 8
+const MoonPhase: React.FC<TMoonPhaseProps> = ({ date }) => {
+    const phase: number =
+        Math.round(SunCalc.getMoonIllumination(date).phase * 8) / 8
     const style: string = phases[phase.toString()]
 
     return <span className={classNames(styles.moon, `phase-${style}`)}></span>

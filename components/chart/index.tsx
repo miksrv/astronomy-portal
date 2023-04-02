@@ -1,6 +1,6 @@
 import HighchartsReact from 'highcharts-react-official'
 import Highcharts from 'highcharts/highmaps'
-import React, {useEffect} from 'react'
+import React, { useEffect } from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
 
 import chartInitialConfig from './config'

@@ -1,10 +1,9 @@
+import { useGetStatisticQuery } from '@/api/api'
+import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import React from 'react'
 import { Label, Menu, Sidebar as SidebarMenu } from 'semantic-ui-react'
 
-import { useAppDispatch, useAppSelector } from '@/api/hooks'
-import { MENU_ITEMS } from "@/components/header";
-import { useGetStatisticQuery } from '@/api/api'
-
+import { MENU_ITEMS } from '@/components/header'
 import { hide } from '@/components/sidebar/sidebarSlice'
 
 import styles from './styles.module.sass'

@@ -1,25 +1,24 @@
-'use client';
+'use client'
 
-import { useCallback, useEffect, useState } from 'react'
-
+import { useLoginCheckMutation } from '@/api/api'
 import { setCredentials } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
-import { useLoginCheckMutation } from '@/api/api'
+import { useCallback, useEffect, useState } from 'react'
 
 const TIMEOUT = 30000
 
 export const UserAuth = () => {
     const dispatch = useAppDispatch()
     const user = useAppSelector((state) => state.auth)
-    const [token, setToken] = useState<string>('');
+    const [token, setToken] = useState<string>('')
     const [kepAlive, setKeepAlive] = useState<any>()
     const [loginCheck] = useLoginCheckMutation()
 
     useEffect(() => {
         if (sessionStorage) {
-            setToken(sessionStorage.getItem('token') || '');
+            setToken(sessionStorage.getItem('token') || '')
         }
-    });
+    })
 
     const doCheckToken = useCallback(async () => {
         try {

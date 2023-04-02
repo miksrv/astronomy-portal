@@ -1,12 +1,10 @@
-import React, { useMemo } from 'react'
-import { Icon, Popup, Table } from 'semantic-ui-react'
-import Image from "next/image";
-import Link from "next/link";
-
 import { useAppSelector } from '@/api/hooks'
 import { IObjectListItem, TCatalog, TFiltersTypes, TPhoto } from '@/api/types'
-
 import { getTimeFromSec, isOutdated } from '@/functions/helpers'
+import Image from 'next/image'
+import Link from 'next/link'
+import React, { useMemo } from 'react'
+import { Icon, Popup, Table } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
@@ -56,7 +54,9 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                     trigger={
                         <Link
                             href={`/objects/${item.name}`}
-                            title={`${item.category} ${item.title || item.name} - Подробная информация об объекте`}
+                            title={`${item.category} ${
+                                item.title || item.name
+                            } - Подробная информация об объекте`}
                         >
                             {item.name}
                         </Link>
@@ -83,7 +83,9 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                 {photoItem && (
                     <Link
                         href={`/photos/${item.name}`}
-                        title={`${item.title || item.name} - Фотографии и история съемок`}
+                        title={`${
+                            item.title || item.name
+                        } - Фотографии и история съемок`}
                         className={styles.photoLink}
                     >
                         <Image

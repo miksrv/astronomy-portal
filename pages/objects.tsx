@@ -1,33 +1,34 @@
 import {
-    useGetCatalogListQuery,
-    useGetObjectListQuery,
-    useGetPhotoListQuery,
     getCatalogList,
     getObjectList,
     getPhotoList,
     getRunningQueriesThunk,
-} from "@/api/api";
-import {wrapper} from "@/api/store";
+    useGetCatalogListQuery,
+    useGetObjectListQuery,
+    useGetPhotoListQuery
+} from '@/api/api'
+import { wrapper } from '@/api/store'
+import { IObjectListItem, TCatalog } from '@/api/types'
+import Script from 'next/script'
+import React, { useMemo, useState } from 'react'
 import { Dimmer, Loader, Message } from 'semantic-ui-react'
-import React, {useState, useMemo} from "react";
-import {IObjectListItem, TCatalog} from "@/api/types";
-import ObjectsTableToolbar from "@/components/objects-table-toolbar";
-import ObjectTable from "@/components/object-table";
-import Script from "next/script";
+
+import ObjectTable from '@/components/object-table'
+import ObjectsTableToolbar from '@/components/objects-table-toolbar'
 
 export const getStaticProps = wrapper.getStaticProps(
-    (store) => async (context) => {
-        store.dispatch(getCatalogList.initiate());
-        store.dispatch(getObjectList.initiate());
-        store.dispatch(getPhotoList.initiate());
+    (store) => async (_context) => {
+        store.dispatch(getCatalogList.initiate())
+        store.dispatch(getObjectList.initiate())
+        store.dispatch(getPhotoList.initiate())
 
-        await Promise.all(store.dispatch(getRunningQueriesThunk()));
+        await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
         return {
-            props: { object: {} },
-        };
+            props: { object: {} }
+        }
     }
-);
+)
 
 const TableLoader: React.FC = () => (
     <div className='box loader'>
@@ -67,30 +68,30 @@ export default function Objects() {
         | any => {
         return listObjects.length
             ? listObjects.filter(
-                (item) =>
-                    (search === '' ||
-                        item.name
-                            .toLowerCase()
-                            .includes(search.toLowerCase()) ||
-                        item.title
-                            ?.toLowerCase()
-                            .includes(search.toLowerCase())) &&
-                    (!categories.length ||
-                        categories.includes(
-                            item?.category ? item?.category : ''
-                        ))
-            )
+                  (item) =>
+                      (search === '' ||
+                          item.name
+                              .toLowerCase()
+                              .includes(search.toLowerCase()) ||
+                          item.title
+                              ?.toLowerCase()
+                              .includes(search.toLowerCase())) &&
+                      (!categories.length ||
+                          categories.includes(
+                              item?.category ? item?.category : ''
+                          ))
+              )
             : []
     }, [search, categories, listObjects])
 
     const listCategories = useMemo(() => {
         return catalogData && catalogData.payload.length
             ? catalogData.payload
-                .map((item) => item.category)
-                .filter(
-                    (item, index, self) =>
-                        item !== '' && self.indexOf(item) === index
-                )
+                  .map((item) => item.category)
+                  .filter(
+                      (item, index, self) =>
+                          item !== '' && self.indexOf(item) === index
+                  )
             : []
     }, [catalogData])
 

@@ -1,17 +1,15 @@
+import { TFilesMonth, TWeatherMonth } from '@/api/types'
+import classNames from 'classnames'
 import moment, { Moment } from 'moment'
+import Image from 'next/image'
 import React from 'react'
 import { Icon, Popup } from 'semantic-ui-react'
 import SunCalc from 'suncalc'
-import Image from "next/image";
-
-import { TFilesMonth, TWeatherMonth } from '@/api/types'
 
 import MoonPhase from '@/components/moon-phase'
 
 import SunIcon from '../moon-phase/images/sun.png'
-
 import styles from './styles.module.sass'
-import classNames from "classnames";
 
 type TRenderCalendarProps = {
     dateObject: Moment
@@ -22,7 +20,8 @@ type TRenderCalendarProps = {
 const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
     const { dateObject, eventsWeather, eventsTelescope } = props
 
-    const currentMobile: boolean = typeof window !== "undefined" ? window.innerWidth <= 760 : false
+    const currentMobile: boolean =
+        typeof window !== 'undefined' ? window.innerWidth <= 760 : false
     const daysInMonth: number = dateObject.daysInMonth()
     const firstDayOfMonth: number = parseInt(
         moment(dateObject).startOf('month').format('d')
@@ -74,7 +73,10 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                 className={classNames(styles.calendarDay, currentDay)}
             >
                 <div
-                    className={classNames(styles.day, getWeatherClass(itemWeatherEvent?.clouds))}
+                    className={classNames(
+                        styles.day,
+                        getWeatherClass(itemWeatherEvent?.clouds)
+                    )}
                     role='button'
                     tabIndex={0}
                     onKeyUp={() => {}}
@@ -89,7 +91,13 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                         {moment(moonTimes.set).format('H:mm')}
                     </div>
                 ) : (
-                    <div className={classNames(styles.event, styles.moon, styles.mobile)}>
+                    <div
+                        className={classNames(
+                            styles.event,
+                            styles.moon,
+                            styles.mobile
+                        )}
+                    >
                         <MoonPhase date={currentDate} />
                     </div>
                 )}
@@ -125,7 +133,12 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                             content={itemAstroEvents.objects.join(', ')}
                             size='mini'
                             trigger={
-                                <div className={classNames(styles.event, styles.telescope)}>
+                                <div
+                                    className={classNames(
+                                        styles.event,
+                                        styles.telescope
+                                    )}
+                                >
                                     <Icon name='star outline' />
                                     {itemAstroEvents.objects.length}{' '}
                                     <Icon name='clock outline' />
@@ -138,7 +151,13 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                             }
                         />
                     ) : (
-                        <div className={classNames(styles.event, styles.telescope, styles.mobile)}>
+                        <div
+                            className={classNames(
+                                styles.event,
+                                styles.telescope,
+                                styles.mobile
+                            )}
+                        >
                             {Math.round(itemAstroEvents.exposure / 60)}
                         </div>
                     ))}

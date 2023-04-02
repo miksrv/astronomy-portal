@@ -1,17 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  images: {
-    domains: ['observatory.miksoft.pro'],
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'observatory.miksoft.pro',
-        port: '',
-        pathname: '/api/**',
-      },
-    ],
-  },
+    images: {
+        domains: ['observatory.miksoft.pro'],
+        remotePatterns: [
+            {
+                hostname: 'observatory.miksoft.pro',
+                pathname: '/api/**',
+                port: '',
+                protocol: 'https'
+            }
+        ]
+    },
+    reactStrictMode: true
 }
 
 module.exports = nextConfig

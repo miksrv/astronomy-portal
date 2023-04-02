@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { HYDRATE } from 'next-redux-wrapper'
 
 import { RootState } from './store'
 import {
@@ -20,7 +21,6 @@ import {
     IRestWeatherCurrent,
     IRestWeatherMonth
 } from './types'
-import {HYDRATE} from "next-redux-wrapper";
 
 type TQueryNewsList = {
     limit?: number
@@ -39,11 +39,6 @@ export const api = createApi({
             return headers
         }
     }),
-    extractRehydrationInfo(action, { reducerPath }) {
-        if (action.type === HYDRATE) {
-            return action.payload[reducerPath]
-        }
-    },
     endpoints: (builder) => ({
         // Список объектов каталога
         getCatalogItem: builder.query<IRestCatalogItem, string>({
@@ -169,6 +164,11 @@ export const api = createApi({
             })
         })
     }),
+    extractRehydrationInfo(action, { reducerPath }) {
+        if (action.type === HYDRATE) {
+            return action.payload[reducerPath]
+        }
+    },
     reducerPath: 'api',
     tagTypes: ['Relay']
 })
@@ -195,8 +195,9 @@ export const {
     useGetRelayStateQuery,
     useSetRelayStatusMutation,
     useGetSensorStatisticQuery,
-    util: { getRunningQueriesThunk },
+    util: { getRunningQueriesThunk }
 } = api
 
 // export endpoints for use in SSR
-export const { getCatalogList, getCatalogItem, getPhotoList, getObjectList } = api.endpoints;
+export const { getCatalogList, getCatalogItem, getPhotoList, getObjectList } =
+    api.endpoints

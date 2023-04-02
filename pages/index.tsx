@@ -1,37 +1,37 @@
-import Head from 'next/head'
 import {
-    useGetCatalogListQuery,
     getCatalogList,
-    useGetStatisticQuery,
-    useGetPhotoListQuery,
-    useGetWeatherMonthMutation,
-    useGetFilesMonthMutation,
     getRunningQueriesThunk,
-} from "@/api/api";
-import {TPhoto, TCatalog} from "@/api/types";
-import {store, wrapper} from "@/api/store";
-import Statistic from "@/components/statistic";
-import PhotoGrid from "@/components/photo-grid";
-import {useState, useEffect} from "react";
-import {shuffle} from "@/functions/helpers";
-import Calendar from "@/components/calendar";
+    useGetCatalogListQuery,
+    useGetFilesMonthMutation,
+    useGetPhotoListQuery,
+    useGetStatisticQuery,
+    useGetWeatherMonthMutation
+} from '@/api/api'
+import { wrapper } from '@/api/store'
+import { TCatalog, TPhoto } from '@/api/types'
+import { shuffle } from '@/functions/helpers'
 import moment, { Moment } from 'moment'
+import { useEffect, useState } from 'react'
+
+import Calendar from '@/components/calendar'
+import PhotoGrid from '@/components/photo-grid'
+import Statistic from '@/components/statistic'
 
 export const getStaticProps = wrapper.getStaticProps(
-    (store) => async (context) => {
-        store.dispatch(getCatalogList.initiate());
+    (store) => async (_context) => {
+        store.dispatch(getCatalogList.initiate())
 
-        await Promise.all(store.dispatch(getRunningQueriesThunk()));
+        await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
         return {
-            props: { object: {} },
-        };
+            props: { object: {} }
+        }
     }
-);
+)
 
 export default function Home() {
     const [date, setDate] = useState<Moment>(moment())
-    const { isLoading, error, data } = useGetCatalogListQuery();
+    const { isLoading, error, data } = useGetCatalogListQuery()
     const { data: statisticData, isLoading: statisticLoading } =
         useGetStatisticQuery()
     const { data: photoData, isLoading: photosLoading } = useGetPhotoListQuery()

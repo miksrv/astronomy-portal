@@ -1,8 +1,7 @@
+import { TFIle } from '@/api/types'
 import moment from 'moment'
 import React from 'react'
 import { Image, Table } from 'semantic-ui-react'
-
-import { TFIle } from '@/api/types'
 
 import MoonPhase from '@/components/moon-phase'
 

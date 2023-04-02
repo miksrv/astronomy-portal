@@ -1,8 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react'
-
 import { TObjectFilters } from '@/api/types'
-
 import { declOfNum } from '@/functions/helpers'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import styles from './styles.module.sass'
 
@@ -26,8 +24,8 @@ const FilterListItem: React.FC<TFilterListItem> = ({
     return (
         <li>
             <span className={`filter-${name}`}>{name}</span>
-            {minutes} {declOfNum(minutes, ["минута", "минуты", "минут"])} ({frames}{' '}
-            {declOfNum(frames, ["кадр", "кадра", "кадров"])})
+            {minutes} {declOfNum(minutes, ['минута', 'минуты', 'минут'])} (
+            {frames} {declOfNum(frames, ['кадр', 'кадра', 'кадров'])})
         </li>
     )
 }

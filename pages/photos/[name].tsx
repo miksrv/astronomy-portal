@@ -1,51 +1,63 @@
-import {store} from "@/api/store";
-import { GetStaticProps } from 'next';
-import {getPhotoList, getCatalogItem, useGetCatalogItemQuery, getRunningQueriesThunk, useGetPhotoListItemQuery, useGetPhotoListQuery} from "@/api/api";
-import {wrapper} from "@/api/store";
-import { useRouter } from "next/dist/client/router";
-import { skipToken } from "@reduxjs/toolkit/query";
-import PhotoSection from "@/components/photo-section";
-import React from "react";
-import PhotoTable from "@/components/photo-table";
-import ObjectCloud from "@/components/object-cloud";
-import Script from "next/script";
-import {TPhoto} from "@/api/types";
+import {
+    getCatalogItem,
+    getPhotoList,
+    getRunningQueriesThunk,
+    useGetCatalogItemQuery,
+    useGetPhotoListItemQuery,
+    useGetPhotoListQuery
+} from '@/api/api'
+import { store, wrapper } from '@/api/store'
+import { TPhoto } from '@/api/types'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { GetStaticProps } from 'next'
+import { useRouter } from 'next/dist/client/router'
+import Script from 'next/script'
+import React from 'react'
+
+import ObjectCloud from '@/components/object-cloud'
+import PhotoSection from '@/components/photo-section'
+import PhotoTable from '@/components/photo-table'
 
 export const getStaticPaths = async () => {
-    const storeObject = store();
-    const result = await storeObject.dispatch(getPhotoList.initiate());
+    const storeObject = store()
+    const result = await storeObject.dispatch(getPhotoList.initiate())
 
     return {
-        paths: result.data?.payload.map((item) => `/photos/${item.object}`),
         fallback: true,
-    };
+        paths: result.data?.payload.map((item) => `/photos/${item.object}`)
+    }
 }
 
-export const getStaticProps: GetStaticProps = wrapper.getStaticProps((store) => async (context) => {
-        const name = context.params?.name;
+export const getStaticProps: GetStaticProps = wrapper.getStaticProps(
+    (store) => async (context) => {
+        const name = context.params?.name
 
         if (typeof name === 'string') {
-            store.dispatch(getCatalogItem.initiate(name));
-            store.dispatch(getPhotoList.initiate({}));
+            store.dispatch(getCatalogItem.initiate(name))
+            store.dispatch(getPhotoList.initiate({}))
         }
 
-        await Promise.all(store.dispatch(getRunningQueriesThunk()));
+        await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
         return {
-            props: { },
-        };
+            props: {}
+        }
     }
-);
+)
 
 const Photo: React.FC = (): JSX.Element => {
-    const router = useRouter();
-    const routerObject = router.query.name;
-    const photoDate = router.query.date;
-    const objectName = typeof routerObject === 'string' ? routerObject : skipToken
+    const router = useRouter()
+    const routerObject = router.query.name
+    const photoDate = router.query.date
+    const objectName =
+        typeof routerObject === 'string' ? routerObject : skipToken
 
-    const { data: dataCatalog, isLoading: loadingCatalog } = useGetCatalogItemQuery(objectName, {skip: router.isFallback})
-    const { data: dataPhotosItem, isFetching: loadingPhotosItem } = useGetPhotoListItemQuery(objectName, {skip: router.isFallback})
-    const { data: dataPhotosList, isLoading: loadingPhotosList } = useGetPhotoListQuery({}, {skip: router.isFallback})
+    const { data: dataCatalog, isLoading: loadingCatalog } =
+        useGetCatalogItemQuery(objectName, { skip: router.isFallback })
+    const { data: dataPhotosItem, isFetching: loadingPhotosItem } =
+        useGetPhotoListItemQuery(objectName, { skip: router.isFallback })
+    const { data: dataPhotosList, isLoading: loadingPhotosList } =
+        useGetPhotoListQuery({}, { skip: router.isFallback })
 
     const currentPhoto: TPhoto | undefined = React.useMemo(() => {
         const searchPhoto =
@@ -61,17 +73,21 @@ const Photo: React.FC = (): JSX.Element => {
     const listPhotoNames: string[] = React.useMemo(() => {
         return dataPhotosList?.payload.length
             ? dataPhotosList.payload
-                .map((item) => item.object)
-                .filter(
-                    (item, index, self) =>
-                        item !== '' && self.indexOf(item) === index
-                )
+                  .map((item) => item.object)
+                  .filter(
+                      (item, index, self) =>
+                          item !== '' && self.indexOf(item) === index
+                  )
             : []
     }, [dataPhotosList])
 
-    const photoTitle = React.useMemo(() =>
-        dataCatalog?.payload ? dataCatalog.payload?.title || dataCatalog.payload.name : currentPhoto?.object || objectName.toString()
-    , [dataCatalog])
+    const photoTitle = React.useMemo(
+        () =>
+            dataCatalog?.payload
+                ? dataCatalog.payload?.title || dataCatalog.payload.name
+                : currentPhoto?.object || objectName.toString(),
+        [dataCatalog, objectName, currentPhoto]
+    )
 
     return (
         <main>
@@ -102,7 +118,7 @@ const Photo: React.FC = (): JSX.Element => {
             <br />
             <ObjectCloud
                 loader={loadingPhotosList}
-                current={typeof objectName === "string" ? objectName : ''}
+                current={typeof objectName === 'string' ? objectName : ''}
                 names={listPhotoNames}
                 link='photos'
             />

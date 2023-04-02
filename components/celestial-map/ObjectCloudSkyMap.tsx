@@ -1,7 +1,8 @@
+import classNames from 'classnames'
 import React from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
+
 import styles from './styles.module.sass'
-import classNames from "classnames";
 import { TObject } from './types'
 
 type TObjectCloudProps = {

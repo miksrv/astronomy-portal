@@ -1,8 +1,7 @@
+import { getTimeFromSec } from '@/functions/helpers'
+import classNames from 'classnames'
 import React from 'react'
 import { Dimmer, Grid, Icon, Loader, SemanticICONS } from 'semantic-ui-react'
-
-import { getTimeFromSec } from '@/functions/helpers'
-import classNames from "classnames";
 
 import styles from './styles.module.sass'
 
@@ -35,7 +34,10 @@ const StatisticItem = (props: TStatisticItemProps) => (
                 </Dimmer>
             )}
             <div className={styles.iconContainer}>
-                <Icon name={props.icon} className={styles.icon} />
+                <Icon
+                    name={props.icon}
+                    className={styles.icon}
+                />
             </div>
             <div>
                 <div className={styles.value}>{props.value}</div>

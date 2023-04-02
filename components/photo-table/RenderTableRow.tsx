@@ -1,12 +1,10 @@
+import { TFiltersTypes, TPhoto } from '@/api/types'
+import { getTimeFromSec } from '@/functions/helpers'
 import moment from 'moment'
+import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
 import { Table } from 'semantic-ui-react'
-import Image from "next/image";
-import Link from "next/link";
-
-import { TFiltersTypes, TPhoto } from '@/api/types'
-
-import { getTimeFromSec } from '@/functions/helpers'
 
 import styles from './styles.module.sass'
 

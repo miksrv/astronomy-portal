@@ -1,20 +1,19 @@
+import { TCatalog, TPhoto, TPhotoAuthor } from '@/api/types'
+import { getTimeFromSec } from '@/functions/helpers'
+import classNames from 'classnames'
 import moment from 'moment'
+import Image from 'next/image'
+import Link from 'next/link'
 import React, { useState } from 'react'
 import Lightbox from 'react-image-lightbox'
 import 'react-image-lightbox/style.css'
-import {Button, Dimmer, Grid, Loader} from 'semantic-ui-react'
-import Link from "next/link";
-import Image from "next/image";
-import classNames from "classnames";
+import { Button, Dimmer, Grid, Loader } from 'semantic-ui-react'
 
-import { TCatalog, TPhoto, TPhotoAuthor } from '@/api/types'
-
-import { getTimeFromSec } from '@/functions/helpers'
-
-import FilterList from '@/components/filter-list'
 import CelestialMap from '@/components/celestial-map'
+import FilterList from '@/components/filter-list'
 
 import noPhotoSrc from '@/public/images/no-photo.png'
+
 import styles from './styles.module.sass'
 
 type TPhotoItemHeaderProps = {
@@ -38,7 +37,12 @@ const Author = (data: TPhotoAuthor) =>
         data.name
     )
 
-const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({ loader, title, photo, catalog }) => {
+const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
+    loader,
+    title,
+    photo,
+    catalog
+}) => {
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoLightbox, setPhotoLightbox] = useState<string>('')
 
@@ -101,9 +105,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({ loader, title, photo, c
                     mobile={16}
                     className={styles.description}
                 >
-                    <h1>
-                        {title}
-                    </h1>
+                    <h1>{title}</h1>
                     <Grid className={styles.parameters}>
                         <Grid.Column
                             computer={8}
@@ -111,52 +113,48 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({ loader, title, photo, c
                             mobile={16}
                         >
                             <div>
-                                    <span className={styles.value}>
-                                        Дата обработки:
-                                    </span>
+                                <span className={styles.value}>
+                                    Дата обработки:
+                                </span>
                                 {photoDate}
                             </div>
                             <div>
-                                    <span className={styles.value}>
-                                        Экспозиция:
-                                    </span>
+                                <span className={styles.value}>
+                                    Экспозиция:
+                                </span>
                                 {exposure}
                             </div>
                             <div>
-                                    <span className={styles.value}>
-                                        Кадров:
-                                    </span>
+                                <span className={styles.value}>Кадров:</span>
                                 {photo?.parameters?.frames || '---'}
                                 {photo?.parameters && (
                                     <span className={styles.marginLeft}>
-                                            (
-                                            <Link
-                                                href={`/objects/${photo?.object}`}
-                                                title={''}
-                                            >
-                                                список
-                                            </Link>
-                                            )
-                                        </span>
+                                        (
+                                        <Link
+                                            href={`/objects/${photo?.object}`}
+                                            title={''}
+                                        >
+                                            список
+                                        </Link>
+                                        )
+                                    </span>
                                 )}
                             </div>
                             <div>
-                                    <span className={styles.value}>
-                                        Накоплено данных:
-                                    </span>
+                                <span className={styles.value}>
+                                    Накоплено данных:
+                                </span>
                                 {filesize} Гб
                             </div>
                             <div>
-                                    <span className={styles.value}>
-                                        Категория:
-                                    </span>
+                                <span className={styles.value}>Категория:</span>
                                 {catalog?.category || '---'}
                             </div>
                             {photo?.author && (
                                 <div>
-                                        <span className={styles.value}>
-                                            Обработка:
-                                        </span>
+                                    <span className={styles.value}>
+                                        Обработка:
+                                    </span>
                                     {Author(photo.author)}
                                 </div>
                             )}

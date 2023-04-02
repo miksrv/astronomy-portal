@@ -1,12 +1,11 @@
+import { TFilesMonth, TWeatherMonth } from '@/api/types'
+import classNames from 'classnames'
 import moment, { Moment } from 'moment'
 import React, { useState } from 'react'
 import { Button, Dimmer, Loader } from 'semantic-ui-react'
 
-import { TFilesMonth, TWeatherMonth } from '@/api/types'
-
 import RenderCalendar from './RenderCalendar'
 import styles from './styles.module.sass'
-import classNames from "classnames";
 
 type TCalendarProps = {
     loading: boolean

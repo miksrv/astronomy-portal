@@ -1,5 +1,6 @@
+import { montserrat } from '@/pages/_app'
+
 import config from './config'
-import { montserrat } from "@/pages/_app";
 
 const FONT = montserrat.style.fontFamily
 

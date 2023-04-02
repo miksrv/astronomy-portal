@@ -1,8 +1,7 @@
+import { TNews } from '@/api/types'
 import moment from 'moment'
 import React from 'react'
 import { Icon, Image } from 'semantic-ui-react'
-
-import { TNews } from '@/api/types'
 
 import NewsPhotos from './NewsPhotos'
 import avatar from './images/avatar.jpg'
@@ -14,7 +13,8 @@ type TNewsItemProps = {
 const NewsItem: React.FC<TNewsItemProps> = (props) => {
     const { news } = props
 
-    const currentMobile: boolean = typeof window !== "undefined" ? window.innerWidth <= 760 : false
+    const currentMobile: boolean =
+        typeof window !== 'undefined' ? window.innerWidth <= 760 : false
 
     // #TODO Use this
     // const urlify = (text: string) =>

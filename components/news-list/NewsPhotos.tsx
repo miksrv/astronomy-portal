@@ -1,8 +1,7 @@
+import { TNewsPhotos } from '@/api/types'
 import React, { useMemo, useState } from 'react'
 import Lightbox from 'react-image-lightbox'
 import Gallery from 'react-photo-gallery'
-
-import { TNewsPhotos } from '@/api/types'
 
 type TNewsPhotosProps = {
     photos: TNewsPhotos[]

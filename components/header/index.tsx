@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from 'react'
-import Link from "next/link";
-import { useRouter } from 'next/router';
-
+import { useGetStatisticQuery, useLogoutMutation } from '@/api/api'
 import { setCredentials } from '@/api/authSlice'
 import { useAppDispatch } from '@/api/hooks'
-import { useGetStatisticQuery, useLogoutMutation } from '@/api/api'
-import {Menu, Container, Label} from "semantic-ui-react";
+import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import React, { useEffect, useState } from 'react'
+import { Container, Label, Menu } from 'semantic-ui-react'
 
 import LoginForm from '@/components/login-form'
 import { show } from '@/components/login-form/loginFormSlice'
 import { toggle } from '@/components/sidebar/sidebarSlice'
 
+import logo from '@/public/logo-w.svg'
+
 import styles from './styles.module.sass'
 import { UserAuth } from './userAuth'
-import logo from '@/public/logo-w.svg'
-import Image from "next/image";
 
 type TMenuItems = {
     link: string
@@ -26,18 +26,19 @@ export const MENU_ITEMS: TMenuItems[] = [
     { link: '/', name: 'Сводка' },
     { link: '/news', name: 'Новости' },
     { link: '/map', name: 'Карта' },
-    { link: '/photos', name: 'Фото', label: 'photos' },
-    { link: '/objects', name: 'Объекты', label: 'objects' },
+    { label: 'photos', link: '/photos', name: 'Фото' },
+    { label: 'objects', link: '/objects', name: 'Объекты' },
     { link: '/dashboard', name: 'Телескоп' }
 ]
 
 const Header: React.FC = () => {
     const dispatch = useAppDispatch()
-    const currentMobile: boolean = typeof window !== "undefined" ? window.innerWidth <= 760 : false
+    const currentMobile: boolean =
+        typeof window !== 'undefined' ? window.innerWidth <= 760 : false
     const { data, isSuccess, isFetching, isError } = useGetStatisticQuery()
     const [logout] = useLogoutMutation()
     const [auth, setAuth] = useState<boolean>(false)
-    const router = useRouter();
+    const router = useRouter()
 
     const user = UserAuth()
 

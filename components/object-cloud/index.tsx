@@ -1,7 +1,7 @@
+import classNames from 'classnames'
+import Link from 'next/link'
 import React from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
-import Link from "next/link";
-import classNames from "classnames";
 
 import styles from './styles.module.sass'
 

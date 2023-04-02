@@ -1,6 +1,6 @@
 declare module '*.sass' {
-    const content: {[className: string]: string};
-    export = content;
+    const content: { [className: string]: string }
+    export = content
 }
 
 declare module '@wojtekmaj/react-daterange-picker'

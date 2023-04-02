@@ -1,9 +1,9 @@
-import React from 'react'
-import Link from "next/link";
-import { Dimmer, Loader, Reveal } from 'semantic-ui-react'
-import classNames from "classnames";
 import { TCatalog, TPhoto } from '@/api/types'
-import Image from "next/image";
+import classNames from 'classnames'
+import Image from 'next/image'
+import Link from 'next/link'
+import React from 'react'
+import { Dimmer, Loader, Reveal } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 

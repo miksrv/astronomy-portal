@@ -1,81 +1,70 @@
-import {store} from "@/api/store";
-import {    useGetCatalogItemQuery,
+import {
+    getCatalogList,
+    getRunningQueriesThunk,
+    useGetCatalogItemQuery,
     useGetObjectFilesQuery,
     useGetObjectItemQuery,
-    useGetObjectNamesQuery, getCatalogList,
-    useGetPhotoListItemQuery, getRunningQueriesThunk} from "@/api/api";
-import { Grid, Message } from 'semantic-ui-react'
-import {wrapper} from "@/api/store";
-import { useRouter } from "next/dist/client/router";
-import { skipToken } from "@reduxjs/toolkit/query";
-
+    useGetObjectNamesQuery,
+    useGetPhotoListItemQuery
+} from '@/api/api'
+import { store, wrapper } from '@/api/store'
 import { isOutdated } from '@/functions/helpers'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { useRouter } from 'next/dist/client/router'
+import Script from 'next/script'
+import React from 'react'
+import { Grid, Message } from 'semantic-ui-react'
 
 import Chart from '@/components/chart'
 import chart_coordinates from '@/components/chart/chart_coordinates'
 import chart_coordlines from '@/components/chart/chart_coordlines'
 import chart_statistic from '@/components/chart/chart_statistic'
-import FilesTable from "@/components/files-table";
+import FilesTable from '@/components/files-table'
 import ObjectCloud from '@/components/object-cloud'
+import ObjectsItemHeader from '@/components/objects-item-header'
 import PhotoTable from '@/components/photo-table'
 
-import ObjectsItemHeader from "@/components/objects-item-header";
-import Script from "next/script";
-import React from "react";
-
 export async function getStaticPaths() {
-    const storeObject = store();
-    const result = await storeObject.dispatch(getCatalogList.initiate());
+    const storeObject = store()
+    const result = await storeObject.dispatch(getCatalogList.initiate())
 
     return {
-        paths: result.data?.payload.map((item) => `/objects/${item.name}`),
         fallback: true,
-    };
+        paths: result.data?.payload.map((item) => `/objects/${item.name}`)
+    }
 }
 
 export const getStaticProps = wrapper.getStaticProps(
     (store) => async (context) => {
-        const name = context.params?.name;
-        if (typeof name === "string") {
-            store.dispatch(getCatalogList.initiate());
+        const name = context.params?.name
+        if (typeof name === 'string') {
+            store.dispatch(getCatalogList.initiate())
         }
 
-        await Promise.all(store.dispatch(getRunningQueriesThunk()));
+        await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
         return {
-            props: { object: {} },
-        };
+            props: { object: {} }
+        }
     }
-);
-
-type TParamsURL = {
-    name: string
-}
+)
 
 export default function Object() {
-    const router = useRouter();
-    const name = router.query.name;
-
-    const result = useGetCatalogItemQuery(
-        typeof name === "string" ? name : skipToken,
-        {
-            // If the page is not yet generated, router.isFallback will be true
-            // initially until getStaticProps() finishes running
-            skip: router.isFallback,
-        }
-    );
-    const { isLoading, error, data } = result;
+    const router = useRouter()
+    const name = router.query.name
 
     const {
         data: dataObject,
         isFetching: objectLoading,
         isError
-    } = useGetObjectItemQuery(typeof name === "string" ? name : skipToken)
+    } = useGetObjectItemQuery(typeof name === 'string' ? name : skipToken)
     const { data: dataCatalog, isFetching: catalogLoading } =
-        useGetCatalogItemQuery(typeof name === "string" ? name : skipToken)
-    const { data: dataPhotos } = useGetPhotoListItemQuery(typeof name === "string" ? name : skipToken)
+        useGetCatalogItemQuery(typeof name === 'string' ? name : skipToken)
+    const { data: dataPhotos } = useGetPhotoListItemQuery(
+        typeof name === 'string' ? name : skipToken
+    )
     const { data: dataFiles, isFetching: fileLoading } = useGetObjectFilesQuery(
-        typeof name === "string" ? name : skipToken
+        typeof name === 'string' ? name : skipToken
     )
     const { data: dataNames, isFetching: namesLoading } =
         useGetObjectNamesQuery()
@@ -142,7 +131,7 @@ export default function Object() {
                 strategy='beforeInteractive'
             />
             <ObjectsItemHeader
-                name={typeof name === "string" ? name : ''}
+                name={typeof name === 'string' ? name : ''}
                 loader={objectLoading || catalogLoading}
                 catalog={dataCatalog?.payload}
                 object={dataObject?.payload}
@@ -204,13 +193,13 @@ export default function Object() {
             <br />
             <FilesTable
                 loader={fileLoading}
-                object={typeof name === "string" ? name : ''}
+                object={typeof name === 'string' ? name : ''}
                 files={dataFiles?.payload}
             />
             <br />
             <ObjectCloud
                 loader={namesLoading}
-                current={typeof name === "string" ? name : ''}
+                current={typeof name === 'string' ? name : ''}
                 names={dataNames?.payload}
                 link='object'
             />

@@ -1,11 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react'
-
 import { useGetCatalogListQuery } from '@/api/api'
 import { TCatalog } from '@/api/types'
+import Script from 'next/script'
+import React, { useEffect, useMemo, useState } from 'react'
 
-import ObjectCloudSkyMap from '@/components/celestial-map/ObjectCloudSkyMap'
 import SkyMap from '@/components/celestial-map'
-import Script from "next/script";
+import ObjectCloudSkyMap from '@/components/celestial-map/ObjectCloudSkyMap'
 
 export default function Map() {
     const { data, isSuccess } = useGetCatalogListQuery()

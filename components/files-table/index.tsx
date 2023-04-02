@@ -1,8 +1,7 @@
+import { TFIle } from '@/api/types'
 import React, { useCallback, useEffect, useState } from 'react'
 import Lightbox from 'react-image-lightbox'
 import { Accordion, Dimmer, Icon, Loader, Table } from 'semantic-ui-react'
-
-import { TFIle } from '@/api/types'
 
 import RenderTableHeader from './RenderTableHeader'
 import RenderTableRow from './RenderTableRow'

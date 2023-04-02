@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react'
-import { Button, Dimmer, Loader, Message } from 'semantic-ui-react'
-
-import { useAppSelector } from '@/api/hooks'
 import {
     useGetRelayListQuery,
     useGetRelayStateQuery,
     useSetRelayStatusMutation
 } from '@/api/api'
+import { useAppSelector } from '@/api/hooks'
 import { IRelaySet } from '@/api/types'
-import classNames from "classnames";
+import classNames from 'classnames'
+import React, { useEffect, useState } from 'react'
+import { Button, Dimmer, Loader, Message } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
@@ -80,7 +79,9 @@ const RelayList: React.FC = () => {
                         error
                         icon={'warning sign'}
                         header={'Ошибка получения состояния реле'}
-                        content={'Контроллер обсерватории не отвечает на запрос'}
+                        content={
+                            'Контроллер обсерватории не отвечает на запрос'
+                        }
                     />
                 </Dimmer>
             )}

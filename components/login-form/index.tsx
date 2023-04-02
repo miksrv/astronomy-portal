@@ -1,10 +1,9 @@
-import React, { useState } from 'react'
-import { Button, Form, Message, Modal } from 'semantic-ui-react'
-
+import { useLoginMutation } from '@/api/api'
 import { setCredentials } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
-import { useLoginMutation } from '@/api/api'
 import { ICredentials } from '@/api/types'
+import React, { useState } from 'react'
+import { Button, Form, Message, Modal } from 'semantic-ui-react'
 
 import { hide } from '@/components/login-form/loginFormSlice'
 
@@ -55,7 +54,9 @@ const LoginForm: React.FC = () => {
                 {loginError && (
                     <Message
                         error
-                        content={'Ошибка авторизации, неверный логин или пароль'}
+                        content={
+                            'Ошибка авторизации, неверный логин или пароль'
+                        }
                     />
                 )}
                 <Form
