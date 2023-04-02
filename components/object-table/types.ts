@@ -1,4 +1,4 @@
-import { TFiltersTypes } from '../../app/types'
+import { TFiltersTypes } from '@/api/types'
 
 export type TObjectSortable =
     | 'name'

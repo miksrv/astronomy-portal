@@ -4,10 +4,10 @@ import {getPhotoList, getCatalogItem, useGetCatalogItemQuery, getRunningQueriesT
 import {wrapper} from "@/api/store";
 import { useRouter } from "next/dist/client/router";
 import { skipToken } from "@reduxjs/toolkit/query";
-import PhotoSection from "@/components/photo-section/photoSection";
+import PhotoSection from "@/components/photo-section";
 import React from "react";
-import PhotoTable from "@/components/photo-table/photoTable";
-import ObjectCloud from "@/components/object-cloud/objectCloud";
+import PhotoTable from "@/components/photo-table";
+import ObjectCloud from "@/components/object-cloud";
 import Script from "next/script";
 import {TPhoto} from "@/api/types";
 

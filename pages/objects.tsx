@@ -11,8 +11,8 @@ import {wrapper} from "@/api/store";
 import { Dimmer, Loader, Message } from 'semantic-ui-react'
 import React, {useState, useMemo} from "react";
 import {IObjectListItem, TCatalog} from "@/api/types";
-import ObjectsTableToolbar from "@/components/objects-table-toolbar/objectsTableToolbar";
-import ObjectTable from "@/components/object-table/objectTable";
+import ObjectsTableToolbar from "@/components/objects-table-toolbar";
+import ObjectTable from "@/components/object-table";
 import Script from "next/script";
 
 export const getStaticProps = wrapper.getStaticProps(

@@ -5,7 +5,7 @@ import { Button, Dimmer, Loader } from 'semantic-ui-react'
 import { TFilesMonth, TWeatherMonth } from '@/api/types'
 
 import RenderCalendar from './RenderCalendar'
-import styles from './calendar.module.sass'
+import styles from './styles.module.sass'
 import classNames from "classnames";
 
 type TCalendarProps = {
@@ -34,9 +34,9 @@ const Calendar: React.FC<TCalendarProps> = (props) => {
             )}
             <div className={styles.calendarToolbar}>
                 <Button
-                    size='mini'
-                    color='green'
-                    icon='angle left'
+                    size={'mini'}
+                    color={'green'}
+                    icon={'angle left'}
                     onClick={() =>
                         handleChangeDate(
                             moment(dateObject.subtract(1, 'month'))
@@ -47,9 +47,9 @@ const Calendar: React.FC<TCalendarProps> = (props) => {
                     {dateObject.format('MMMM Y')}
                 </span>
                 <Button
-                    size='mini'
-                    color='green'
-                    icon='angle right'
+                    size={'mini'}
+                    color={'green'}
+                    icon={'angle right'}
                     onClick={() =>
                         handleChangeDate(moment(dateObject.add(1, 'month')))
                     }

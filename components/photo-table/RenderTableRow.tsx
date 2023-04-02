@@ -8,7 +8,7 @@ import { TFiltersTypes, TPhoto } from '@/api/types'
 
 import { getTimeFromSec } from '@/functions/helpers'
 
-import styles from './photoTable.module.sass'
+import styles from './styles.module.sass'
 
 type TTableRowProps = {
     photo: TPhoto

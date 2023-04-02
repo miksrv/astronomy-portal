@@ -8,7 +8,7 @@ import { IObjectListItem, TCatalog, TFiltersTypes, TPhoto } from '@/api/types'
 
 import { getTimeFromSec, isOutdated } from '@/functions/helpers'
 
-import styles from './objectTable.module.sass'
+import styles from './styles.module.sass'
 
 type TTableRowProps = {
     item: IObjectListItem & TCatalog

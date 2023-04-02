@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { Dropdown, Input } from 'semantic-ui-react'
 
-import styles from './objectsTableToolbar.module.sass'
+import styles from './styles.module.sass'
 
 type TToolbarProps = {
     search: string

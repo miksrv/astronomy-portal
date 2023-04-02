@@ -2,8 +2,8 @@ import type { AppProps } from 'next/app'
 import { Provider } from 'react-redux'
 import {wrapper} from '@/api/store'
 import { Montserrat } from 'next/font/google'
-import Header from '@/components/header/header'
-import Footer from "@/components/footer/footer";
+import Header from '@/components/header'
+import Footer from "@/components/footer";
 import {Container} from "semantic-ui-react";
 
 import '@/styles/globals.sass'

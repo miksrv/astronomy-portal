@@ -3,11 +3,11 @@ import { Table } from 'semantic-ui-react'
 
 import { IObjectListItem, TCatalog, TPhoto } from '@/api/types'
 
-import ObjectEditModal from '@/components/obect-edit-modal/ObjectEditModal'
+import ObjectEditModal from '@/components/obect-edit-modal'
 
 import RenderTableHeader, { HEADER_FIELDS } from './RenderTableHeader'
 import RenderTableRow from './RenderTableRow'
-import styles from './objectTable.module.sass'
+import styles from './styles.module.sass'
 import { TObjectSortable, TSortOrdering } from './types'
 
 type TObjectTable = {

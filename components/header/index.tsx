@@ -7,11 +7,11 @@ import { useAppDispatch } from '@/api/hooks'
 import { useGetStatisticQuery, useLogoutMutation } from '@/api/api'
 import {Menu, Container, Label} from "semantic-ui-react";
 
-import LoginForm from '@/components/login-form/LoginForm'
+import LoginForm from '@/components/login-form'
 import { show } from '@/components/login-form/loginFormSlice'
 import { toggle } from '@/components/sidebar/sidebarSlice'
 
-import styles from './header.module.sass'
+import styles from './styles.module.sass'
 import { UserAuth } from './userAuth'
 import logo from '@/public/logo-w.svg'
 import Image from "next/image";

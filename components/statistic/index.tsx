@@ -4,7 +4,7 @@ import { Dimmer, Grid, Icon, Loader, SemanticICONS } from 'semantic-ui-react'
 import { getTimeFromSec } from '@/functions/helpers'
 import classNames from "classnames";
 
-import styles from './statistic.module.sass'
+import styles from './styles.module.sass'
 
 type TStatisticProps = {
     loader: boolean

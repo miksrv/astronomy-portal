@@ -8,8 +8,9 @@ import {
     useSetRelayStatusMutation
 } from '@/api/api'
 import { IRelaySet } from '@/api/types'
+import classNames from "classnames";
 
-import './styles.sass'
+import styles from './styles.module.sass'
 
 type TRelayListItemProps = {
     index: number
@@ -25,8 +26,8 @@ const RelayListItem: React.FC<TRelayListItemProps> = (props) => {
     const switchClass: string = status ? 'on' : 'off'
 
     return (
-        <div className='item'>
-            <div className='name'>
+        <div className={styles.item}>
+            <div className={styles.name}>
                 <span className={`led-${switchClass}`} />
                 {name}
             </div>
@@ -37,7 +38,7 @@ const RelayListItem: React.FC<TRelayListItemProps> = (props) => {
                 onClick={() =>
                     handleClick?.({ index: index, state: status ? 0 : 1 })
                 }
-                size='mini'
+                size={'mini'}
             >
                 {switchClass}
             </Button>
@@ -61,7 +62,7 @@ const RelayList: React.FC = () => {
     }, [user, isAuth])
 
     return isLoading ? (
-        <div className='box relay-list loader'>
+        <div className={classNames(styles.relayList, 'box', 'loader')}>
             <Dimmer active>
                 <Loader />
             </Dimmer>
@@ -69,17 +70,17 @@ const RelayList: React.FC = () => {
     ) : isError || relayList === undefined || !relayList.status ? (
         <Message
             error
-            content='Возникла ошибка при получении списка управляемых реле'
+            content={'Возникла ошибка при получении списка управляемых реле'}
         />
     ) : (
-        <div className='box relay-list'>
+        <div className={classNames(styles.relayList, 'box')}>
             {isAuth && relayState?.status === false && (
                 <Dimmer active>
                     <Message
                         error
-                        icon='warning sign'
-                        header='Ошибка получения состояния реле'
-                        content='Контроллер обсерватории не отвечает на запрос'
+                        icon={'warning sign'}
+                        header={'Ошибка получения состояния реле'}
+                        content={'Контроллер обсерватории не отвечает на запрос'}
                     />
                 </Dimmer>
             )}

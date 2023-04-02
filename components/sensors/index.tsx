@@ -3,7 +3,7 @@ import React from 'react'
 import { useGetSensorStatisticQuery } from '@/api/api'
 import { TSensorsPayload } from '@/api/types'
 
-import Chart from '@/components/chart/Chart'
+import Chart from '@/components/chart'
 import { TChartLineData } from '@/components/chart/types'
 
 import chart_sensors from './chart_sensors'

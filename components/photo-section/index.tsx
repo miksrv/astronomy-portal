@@ -11,11 +11,11 @@ import { TCatalog, TPhoto, TPhotoAuthor } from '@/api/types'
 
 import { getTimeFromSec } from '@/functions/helpers'
 
-import FilterList from '@/components/filter-list/filterList'
-import SkyMap from '@/components/sky-map/SkyMap'
+import FilterList from '@/components/filter-list'
+import CelestialMap from '@/components/celestial-map'
 
 import noPhotoSrc from '@/public/images/no-photo.png'
-import styles from './photoSection.module.sass'
+import styles from './styles.module.sass'
 
 type TPhotoItemHeaderProps = {
     loader: boolean
@@ -175,7 +175,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({ loader, title, photo, c
                     </Grid>
                     <div className={styles.text}>{catalog?.text}</div>
                     <div className={styles.celestialMap}>
-                        <SkyMap
+                        <CelestialMap
                             objects={
                                 catalog && photo
                                     ? [

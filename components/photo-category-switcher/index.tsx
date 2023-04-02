@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button } from 'semantic-ui-react'
 
-import styles from './PhotoCategorySwitcher.module.sass'
+import styles from './styles.module.sass'
 
 type TToolbarProps = {
     active: string
@@ -15,7 +15,7 @@ const PhotoCategorySwitcher: React.FC<TToolbarProps> = (props) => {
     const CategoryButton = (category: string) => (
         <Button
             color={active === category ? 'olive' : 'green'}
-            size='mini'
+            size={'mini'}
             key={category}
             onClick={() => onSelectCategory(category)}
         >

@@ -5,7 +5,7 @@ import classNames from "classnames";
 import { TCatalog, TPhoto } from '@/api/types'
 import Image from "next/image";
 
-import styles from './photoGrid.module.sass'
+import styles from './styles.module.sass'
 
 type TPhotoGridProps = {
     loading: boolean
@@ -20,9 +20,9 @@ const PhotosLoader = (count: number) =>
         .map((item, key) => (
             <div
                 key={key}
-                className='item'
+                className={styles.item}
             >
-                <div className='info'>
+                <div className={styles.info}>
                     <Dimmer active>
                         <Loader />
                     </Dimmer>
@@ -51,7 +51,7 @@ const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
                           className={styles.item}
                       >
                           {photo.title ? (
-                              <Reveal animated='small fade'>
+                              <Reveal animated={'small fade'}>
                                   <Reveal.Content visible>
                                       <Image
                                           src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}

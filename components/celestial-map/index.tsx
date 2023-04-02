@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
 import RenderMap from './RenderMap'
-import styles from './SkyMap.module.sass'
 import { TObject } from './types'
 
 type TSkyMapProps = {
@@ -10,7 +9,7 @@ type TSkyMapProps = {
     goto?: [number, number]
 }
 
-const SkyMap: React.FC<TSkyMapProps> = (props) => {
+const CelestialMap: React.FC<TSkyMapProps> = (props) => {
     const { objects, interactive, goto } = props
     const [width, setWidth] = useState<number>(0)
 
@@ -39,4 +38,4 @@ const SkyMap: React.FC<TSkyMapProps> = (props) => {
     )
 }
 
-export default SkyMap
+export default CelestialMap

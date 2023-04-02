@@ -4,7 +4,7 @@ import { TObjectFilters } from '@/api/types'
 
 import { declOfNum } from '@/functions/helpers'
 
-import styles from './filterList.module.sass'
+import styles from './styles.module.sass'
 
 type TFilterListProps = {
     filters: TObjectFilters

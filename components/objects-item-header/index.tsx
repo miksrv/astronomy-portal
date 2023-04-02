@@ -8,11 +8,11 @@ import { TCatalog, TObject } from '@/api/types'
 
 import { getTimeFromSec } from '@/functions/helpers'
 
-import FilterList from '@/components/filter-list/filterList'
-import ObjectEditModal from '@/components/obect-edit-modal/ObjectEditModal'
-import SkyMap from '@/components/sky-map/SkyMap'
+import FilterList from '@/components/filter-list'
+import ObjectEditModal from '@/components/obect-edit-modal'
+import CelestialMap from '@/components/celestial-map'
 
-import styles from './ObjectsItmHeader.module.sass'
+import styles from './styles.module.sass'
 
 type TObjectHeaderProps = {
     name: string
@@ -143,7 +143,7 @@ const ObjectItemHeader: React.FC<TObjectHeaderProps> = (props) => {
                     className='skyMap'
                 >
                     {catalog && (
-                        <SkyMap
+                        <CelestialMap
                             objects={[
                                 {
                                     dec: catalog.dec,

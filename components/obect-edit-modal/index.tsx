@@ -3,8 +3,8 @@ import { Button, Form, Grid, Modal } from 'semantic-ui-react'
 
 import { TCatalog } from '@/api/types'
 
-import SkyMap from '../sky-map/SkyMap'
-import styles from './ObjectEditModal.module.sass'
+import CelestialMap from '@/components/celestial-map'
+import styles from './styles.module.sass'
 
 interface IObjectEditModal {
     visible: boolean
@@ -124,7 +124,7 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
                                 width={10}
                                 className={styles.skyMap}
                             >
-                                <SkyMap
+                                <CelestialMap
                                     objects={[
                                         {
                                             dec: Number(formState?.dec) || 0,

@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 
 import config from './object'
 import { TObject, geoJSON } from './types'
-import styles from './SkyMap.module.sass'
+import styles from './styles.module.sass'
 
 type TRenderMapProps = {
     config: any

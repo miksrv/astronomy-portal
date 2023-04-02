@@ -10,8 +10,8 @@ import {TPhoto, TCatalog} from "@/api/types";
 import {wrapper} from "@/api/store";
 import {NextSeo} from "next-seo";
 import {useMemo, useState} from "react";
-import PhotoCategorySwitcher from "@/components/photo-category-switcher/PhotoCategorySwitcher";
-import PhotoGrid from "@/components/photo-grid/PhotoGrid";
+import PhotoCategorySwitcher from "@/components/photo-category-switcher";
+import PhotoGrid from "@/components/photo-grid";
 
 export const getStaticProps = wrapper.getStaticProps(
     (store) => async (context) => {

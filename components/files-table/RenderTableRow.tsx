@@ -4,9 +4,9 @@ import { Image, Table } from 'semantic-ui-react'
 
 import { TFIle } from '@/api/types'
 
-import MoonPhase from '@/components/moon-phase/MoonPhase'
+import MoonPhase from '@/components/moon-phase'
 
-import styles from './FilesTable.module.sass'
+import styles from './styles.module.sass'
 
 type TTableRow = {
     item: TFIle
@@ -23,7 +23,7 @@ const RenderTableRow: React.FC<TTableRow> = (props) => {
             <Table.Cell>
                 {item.image ? (
                     <Image
-                        className='fitsImage'
+                        className={styles.fitsImage}
                         onClick={() => onPhotoClick(itemId)}
                         src={`${process.env.NEXT_PUBLIC_API_HOST}uploads/${object}/${item.name}_thumb.jpg`}
                     />

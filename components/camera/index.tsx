@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Lightbox from 'react-image-lightbox'
 import { Dimmer, Message, Progress } from 'semantic-ui-react'
 
-import './styles.sass'
+import './styles.module.sass'
 
 type TCameraProps = {
     cameraURL: string

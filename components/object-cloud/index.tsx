@@ -3,7 +3,7 @@ import { Dimmer, Loader } from 'semantic-ui-react'
 import Link from "next/link";
 import classNames from "classnames";
 
-import styles from './objectCloud.module.sass'
+import styles from './styles.module.sass'
 
 type TObjectCloudProps = {
     loader: boolean

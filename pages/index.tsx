@@ -2,25 +2,19 @@ import Head from 'next/head'
 import {
     useGetCatalogListQuery,
     getCatalogList,
-    getCatalogItem,
     useGetStatisticQuery,
     useGetPhotoListQuery,
     useGetWeatherMonthMutation,
     useGetFilesMonthMutation,
     getRunningQueriesThunk,
-    useGetCatalogItemQuery
 } from "@/api/api";
 import {TPhoto, TCatalog} from "@/api/types";
-import Link from "next/link";
 import {store, wrapper} from "@/api/store";
-import { InferGetServerSidePropsType } from 'next'
-import { GetStaticProps, GetStaticPaths, GetServerSideProps } from 'next'
-import {skipToken} from "@reduxjs/toolkit/query";
-import Statistic from "@/components/statistic/statistic";
-import PhotoGrid from "@/components/photo-grid/PhotoGrid";
+import Statistic from "@/components/statistic";
+import PhotoGrid from "@/components/photo-grid";
 import {useState, useEffect} from "react";
 import {shuffle} from "@/functions/helpers";
-import Calendar from "@/components/calendar/Calendar";
+import Calendar from "@/components/calendar";
 import moment, { Moment } from 'moment'
 
 export const getStaticProps = wrapper.getStaticProps(

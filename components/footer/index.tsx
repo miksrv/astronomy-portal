@@ -2,7 +2,7 @@ import React from 'react'
 import { update } from '@/update'
 import { version } from '@/version'
 
-import styles from './footer.module.sass'
+import styles from './styles.module.sass'
 
 const Footer: React.FC = () => {
     return (
@@ -13,13 +13,13 @@ const Footer: React.FC = () => {
             <div>
                 Copyright ©
                 <a
-                    href='https://miksoft.pro'
-                    className='copyright-link'
-                    title=''
+                    href={'https://miksoft.pro'}
+                    className={styles.copyrightLink}
+                    title={''}
                 >
                     <img
-                        src='https://miksoft.pro/favicon.ico'
-                        alt=''
+                        src={'https://miksoft.pro/favicon.ico'}
+                        alt={''}
                     />{' '}
                     Mik
                 </a>{' '}

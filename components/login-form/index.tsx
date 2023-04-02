@@ -8,7 +8,7 @@ import { ICredentials } from '@/api/types'
 
 import { hide } from '@/components/login-form/loginFormSlice'
 
-import styles from './loginForm.module.sass'
+import styles from './styles.module.sass'
 
 const LoginForm: React.FC = () => {
     const dispatch = useAppDispatch()
@@ -46,7 +46,7 @@ const LoginForm: React.FC = () => {
 
     return (
         <Modal
-            size='tiny'
+            size={'tiny'}
             open={visible}
             onClose={() => dispatch(hide())}
         >
@@ -55,33 +55,33 @@ const LoginForm: React.FC = () => {
                 {loginError && (
                     <Message
                         error
-                        content='Ошибка авторизации, неверный логин или пароль'
+                        content={'Ошибка авторизации, неверный логин или пароль'}
                     />
                 )}
                 <Form
-                    size='large'
+                    size={'large'}
                     onSubmit={handleSubmit}
-                    className='loginForm'
+                    className={styles.loginForm}
                 >
                     <Form.Input
                         fluid
-                        name='username'
-                        icon='user'
-                        iconPosition='left'
-                        placeholder='Логин'
-                        className='userInput'
+                        name={'username'}
+                        icon={'user'}
+                        iconPosition={'left'}
+                        placeholder={'Логин'}
+                        className={styles.userInput}
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         disabled={isLoading}
                     />
                     <Form.Input
                         fluid
-                        name='password'
-                        icon='lock'
-                        iconPosition='left'
-                        placeholder='Пароль'
-                        type='password'
-                        className='userInput'
+                        name={'password'}
+                        icon={'lock'}
+                        iconPosition={'left'}
+                        placeholder={'Пароль'}
+                        type={'password'}
+                        className={styles.userInput}
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         disabled={isLoading}
@@ -90,9 +90,9 @@ const LoginForm: React.FC = () => {
             </Modal.Content>
             <Modal.Actions>
                 <Button
-                    size='tiny'
+                    size={'tiny'}
                     onClick={handleSubmit}
-                    color='green'
+                    color={'green'}
                     disabled={
                         isLoading || !formState.username || !formState.password
                     }
@@ -101,9 +101,9 @@ const LoginForm: React.FC = () => {
                     Войти
                 </Button>
                 <Button
-                    size='small'
+                    size={'small'}
                     onClick={() => dispatch(hide())}
-                    color='grey'
+                    color={'grey'}
                 >
                     Отмена
                 </Button>

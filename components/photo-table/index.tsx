@@ -5,7 +5,7 @@ import { TPhoto } from '@/api/types'
 
 import RenderTableRow from './RenderTableRow'
 import classNames from "classnames";
-import styles from './photoTable.module.sass'
+import styles from './styles.module.sass'
 
 type TPhotoTableProps = {
     photos: TPhoto[]

@@ -6,11 +6,11 @@ import Image from "next/image";
 
 import { TFilesMonth, TWeatherMonth } from '@/api/types'
 
-import MoonPhase from '@/components/moon-phase/MoonPhase'
+import MoonPhase from '@/components/moon-phase'
 
 import SunIcon from '../moon-phase/images/sun.png'
 
-import styles from './calendar.module.sass'
+import styles from './styles.module.sass'
 import classNames from "classnames";
 
 type TRenderCalendarProps = {

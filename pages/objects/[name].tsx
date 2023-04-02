@@ -11,15 +11,15 @@ import { skipToken } from "@reduxjs/toolkit/query";
 
 import { isOutdated } from '@/functions/helpers'
 
-import Chart from '@/components/chart/Chart'
+import Chart from '@/components/chart'
 import chart_coordinates from '@/components/chart/chart_coordinates'
 import chart_coordlines from '@/components/chart/chart_coordlines'
 import chart_statistic from '@/components/chart/chart_statistic'
-import FilesTable from '@/components/files-table/FilesTable'
-import ObjectCloud from '@/components/object-cloud/objectCloud'
-import PhotoTable from '@/components/photo-table/photoTable'
+import FilesTable from "@/components/files-table";
+import ObjectCloud from '@/components/object-cloud'
+import PhotoTable from '@/components/photo-table'
 
-import ObjectsItemHeader from "@/components/objects-item-header/ObjectsItemHeader";
+import ObjectsItemHeader from "@/components/objects-item-header";
 import Script from "next/script";
 import React from "react";
 

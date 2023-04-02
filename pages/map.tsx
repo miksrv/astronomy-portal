@@ -3,8 +3,8 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useGetCatalogListQuery } from '@/api/api'
 import { TCatalog } from '@/api/types'
 
-import ObjectCloudSkyMap from '@/components/sky-map/ObjectCloudSkyMap'
-import SkyMap from '@/components/sky-map/SkyMap'
+import ObjectCloudSkyMap from '@/components/celestial-map/ObjectCloudSkyMap'
+import SkyMap from '@/components/celestial-map'
 import Script from "next/script";
 
 export default function Map() {
