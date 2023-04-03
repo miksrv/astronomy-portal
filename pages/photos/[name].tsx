@@ -10,8 +10,8 @@ import { store, wrapper } from '@/api/store'
 import { TPhoto } from '@/api/types'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { GetStaticProps } from 'next'
+import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
-import Script from 'next/script'
 import React from 'react'
 
 import ObjectCloud from '@/components/object-cloud'
@@ -45,7 +45,7 @@ export const getStaticProps: GetStaticProps = wrapper.getStaticProps(
     }
 )
 
-const Photo: React.FC = (): JSX.Element => {
+const Photo: React.FC = () => {
     const router = useRouter()
     const routerObject = router.query.name
     const photoDate = router.query.date
@@ -91,17 +91,19 @@ const Photo: React.FC = (): JSX.Element => {
 
     return (
         <main>
-            <Script
-                src='/scripts/d3.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/d3.geo.projection.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/celestial.min.js'
-                strategy='beforeInteractive'
+            <NextSeo
+                title={`${photoTitle} - Фотографии астрономического объекта`}
+                description={dataCatalog?.payload?.text}
+                openGraph={{
+                    images: [
+                        {
+                            height: 743,
+                            url: `${process.env.NEXT_PUBLIC_API_HOST}public/photo/${currentPhoto?.file}_thumb.${currentPhoto?.ext}`,
+                            width: 1280
+                        }
+                    ],
+                    locale: 'ru'
+                }}
             />
             <PhotoSection
                 loader={loadingPhotosItem || loadingCatalog}
@@ -120,7 +122,7 @@ const Photo: React.FC = (): JSX.Element => {
                 loader={loadingPhotosList}
                 current={typeof objectName === 'string' ? objectName : ''}
                 names={listPhotoNames}
-                link='photos'
+                link={'photos'}
             />
         </main>
     )

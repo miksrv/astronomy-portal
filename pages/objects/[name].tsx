@@ -11,7 +11,6 @@ import { store, wrapper } from '@/api/store'
 import { isOutdated } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useRouter } from 'next/dist/client/router'
-import Script from 'next/script'
 import React from 'react'
 import { Grid, Message } from 'semantic-ui-react'
 
@@ -49,7 +48,7 @@ export const getStaticProps = wrapper.getStaticProps(
     }
 )
 
-export default function Object() {
+const Object: React.FC = () => {
     const router = useRouter()
     const name = router.query.name
 
@@ -117,19 +116,7 @@ export default function Object() {
     }
 
     return (
-        <>
-            <Script
-                src='/scripts/d3.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/d3.geo.projection.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/celestial.min.js'
-                strategy='beforeInteractive'
-            />
+        <main>
             <ObjectsItemHeader
                 name={typeof name === 'string' ? name : ''}
                 loader={objectLoading || catalogLoading}
@@ -144,9 +131,11 @@ export default function Object() {
             ) ? (
                 <Message
                     warning
-                    icon='warning sign'
-                    header='Новые данные'
-                    content='Фотографии устарели - есть новые данные с телескопа, с помощью которых можно собрать новое изображение объекта'
+                    icon={'warning sign'}
+                    header={'Новые данные'}
+                    content={
+                        'Фотографии устарели - есть новые данные с телескопа, с помощью которых можно собрать новое изображение объекта'
+                    }
                 />
             ) : (
                 <br />
@@ -203,6 +192,8 @@ export default function Object() {
                 names={dataNames?.payload}
                 link='object'
             />
-        </>
+        </main>
     )
 }
+
+export default Object

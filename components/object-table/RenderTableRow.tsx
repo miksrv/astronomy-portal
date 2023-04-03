@@ -101,7 +101,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                                     'Фотография устарела, так как есть новые данные ' +
                                     'с телескопа, с помощью которых можно собрать новое изображение объекта'
                                 }
-                                size='mini'
+                                size={'mini'}
                                 trigger={
                                     <Icon
                                         name={'clock outline'}

@@ -1,7 +1,6 @@
 import {
     getCatalogList,
     getRunningQueriesThunk,
-    useGetCatalogListQuery,
     useGetFilesMonthMutation,
     useGetPhotoListQuery,
     useGetStatisticQuery,
@@ -11,39 +10,36 @@ import { wrapper } from '@/api/store'
 import { TCatalog, TPhoto } from '@/api/types'
 import { shuffle } from '@/functions/helpers'
 import moment, { Moment } from 'moment'
-import { useEffect, useState } from 'react'
+import React from 'react'
 
 import Calendar from '@/components/calendar'
 import PhotoGrid from '@/components/photo-grid'
 import Statistic from '@/components/statistic'
 
-export const getStaticProps = wrapper.getStaticProps(
-    (store) => async (_context) => {
-        store.dispatch(getCatalogList.initiate())
+export const getStaticProps = wrapper.getStaticProps((store) => async () => {
+    store.dispatch(getCatalogList.initiate())
 
-        await Promise.all(store.dispatch(getRunningQueriesThunk()))
+    await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
-        return {
-            props: { object: {} }
-        }
+    return {
+        props: { object: {} }
     }
-)
+})
 
 export default function Home() {
-    const [date, setDate] = useState<Moment>(moment())
-    const { isLoading, error, data } = useGetCatalogListQuery()
+    const [date, setDate] = React.useState<Moment>(moment())
     const { data: statisticData, isLoading: statisticLoading } =
         useGetStatisticQuery()
     const { data: photoData, isLoading: photosLoading } = useGetPhotoListQuery()
-    const [photos, setPhotos] = useState<(TPhoto[] & TCatalog[]) | undefined>(
-        undefined
-    )
+    const [photos, setPhotos] = React.useState<
+        (TPhoto[] & TCatalog[]) | undefined
+    >(undefined)
     const [getWeatherMonth, { data: weatherData, isLoading: weatherLoading }] =
         useGetWeatherMonthMutation()
     const [getFilesMonth, { data: filesData, isLoading: filesLoading }] =
         useGetFilesMonthMutation()
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (photoData?.payload && photos === undefined) {
             const randomPhotos = shuffle(photoData.payload.slice()).slice(0, 4)
 
@@ -51,7 +47,7 @@ export default function Home() {
         }
     }, [photoData?.payload])
 
-    useEffect(() => {
+    React.useEffect(() => {
         const getWeather = async () => {
             try {
                 const monthYear = moment(date).format('Y-MM')

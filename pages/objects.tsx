@@ -9,26 +9,24 @@ import {
 } from '@/api/api'
 import { wrapper } from '@/api/store'
 import { IObjectListItem, TCatalog } from '@/api/types'
-import Script from 'next/script'
-import React, { useMemo, useState } from 'react'
+import { NextSeo } from 'next-seo'
+import React from 'react'
 import { Dimmer, Loader, Message } from 'semantic-ui-react'
 
 import ObjectTable from '@/components/object-table'
 import ObjectsTableToolbar from '@/components/objects-table-toolbar'
 
-export const getStaticProps = wrapper.getStaticProps(
-    (store) => async (_context) => {
-        store.dispatch(getCatalogList.initiate())
-        store.dispatch(getObjectList.initiate())
-        store.dispatch(getPhotoList.initiate())
+export const getStaticProps = wrapper.getStaticProps((store) => async () => {
+    store.dispatch(getCatalogList.initiate())
+    store.dispatch(getObjectList.initiate())
+    store.dispatch(getPhotoList.initiate())
 
-        await Promise.all(store.dispatch(getRunningQueriesThunk()))
+    await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
-        return {
-            props: { object: {} }
-        }
+    return {
+        props: { object: {} }
     }
-)
+})
 
 const TableLoader: React.FC = () => (
     <div className='box loader'>
@@ -38,9 +36,9 @@ const TableLoader: React.FC = () => (
     </div>
 )
 
-export default function Objects() {
-    const [search, setSearch] = useState<string>('')
-    const [categories, setCategories] = useState<string[]>([])
+const Objects: React.FC = () => {
+    const [search, setSearch] = React.useState<string>('')
+    const [categories, setCategories] = React.useState<string[]>([])
     const {
         data: objectData,
         isSuccess,
@@ -50,7 +48,7 @@ export default function Objects() {
     const { data: photoData } = useGetPhotoListQuery()
     const { data: catalogData } = useGetCatalogListQuery()
 
-    const listObjects = useMemo(() => {
+    const listObjects = React.useMemo(() => {
         if (objectData?.payload.length) {
             return objectData.payload.map((item) => ({
                 ...item,
@@ -63,7 +61,7 @@ export default function Objects() {
         return []
     }, [objectData, catalogData])
 
-    const listFilteredObjects = useMemo(():
+    const listFilteredObjects = React.useMemo(():
         | (IObjectListItem & TCatalog)[]
         | any => {
         return listObjects.length
@@ -84,7 +82,7 @@ export default function Objects() {
             : []
     }, [search, categories, listObjects])
 
-    const listCategories = useMemo(() => {
+    const listCategories = React.useMemo(() => {
         return catalogData && catalogData.payload.length
             ? catalogData.payload
                   .map((item) => item.category)
@@ -96,23 +94,27 @@ export default function Objects() {
     }, [catalogData])
 
     return (
-        <>
-            <Script
-                src='/scripts/d3.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/d3.geo.projection.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/celestial.min.js'
-                strategy='beforeInteractive'
+        <main>
+            <NextSeo
+                title={'Список астрономических объектов'}
+                description={
+                    'Список галактик, туманностей, астероидов, комет, сверхновых и других космических объектов, снятых любительским телескопом'
+                }
+                openGraph={{
+                    images: [
+                        {
+                            height: 814,
+                            url: '/screenshots/objects.jpg',
+                            width: 1280
+                        }
+                    ],
+                    locale: 'ru'
+                }}
             />
             {isError && (
                 <Message
                     error
-                    content='Возникла ошибка при получении списка объектов'
+                    content={'Возникла ошибка при получении списка объектов'}
                 />
             )}
             <ObjectsTableToolbar
@@ -128,6 +130,8 @@ export default function Objects() {
                     photos={photoData?.payload}
                 />
             )}
-        </>
+        </main>
     )
 }
+
+export default Objects

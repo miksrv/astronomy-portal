@@ -8,27 +8,25 @@ import {
 import { wrapper } from '@/api/store'
 import { TCatalog, TPhoto } from '@/api/types'
 import { NextSeo } from 'next-seo'
-import { useMemo, useState } from 'react'
+import React from 'react'
 import { Message } from 'semantic-ui-react'
 
 import PhotoCategorySwitcher from '@/components/photo-category-switcher'
 import PhotoGrid from '@/components/photo-grid'
 
-export const getStaticProps = wrapper.getStaticProps(
-    (store) => async (_context) => {
-        store.dispatch(getCatalogList.initiate())
-        store.dispatch(getPhotoList.initiate())
+export const getStaticProps = wrapper.getStaticProps((store) => async () => {
+    store.dispatch(getCatalogList.initiate())
+    store.dispatch(getPhotoList.initiate())
 
-        await Promise.all(store.dispatch(getRunningQueriesThunk()))
+    await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
-        return {
-            props: { object: {} }
-        }
+    return {
+        props: { object: {} }
     }
-)
+})
 
-export default function Photos() {
-    const [category, setCategory] = useState('')
+const Photos: React.FC = () => {
+    const [category, setCategory] = React.useState('')
     const {
         data: photoData,
         isSuccess,
@@ -37,7 +35,7 @@ export default function Photos() {
     } = useGetPhotoListQuery()
     const { data: catalogData } = useGetCatalogListQuery()
 
-    const listCategories = useMemo(() => {
+    const listCategories = React.useMemo(() => {
         return catalogData && catalogData.payload.length
             ? catalogData.payload
                   .map((item) => item.category)
@@ -48,7 +46,7 @@ export default function Photos() {
             : []
     }, [catalogData])
 
-    const listPhotos: (TPhoto & TCatalog)[] | any = useMemo(() => {
+    const listPhotos: (TPhoto & TCatalog)[] | any = React.useMemo(() => {
         return photoData?.payload.length
             ? photoData?.payload.map((photo) => {
                   const objectData = catalogData?.payload.filter(
@@ -71,7 +69,7 @@ export default function Photos() {
             : []
     }, [photoData, catalogData])
 
-    const listFilteredPhotos = useMemo(
+    const listFilteredPhotos = React.useMemo(
         () =>
             listPhotos.length &&
             listPhotos.filter(
@@ -82,31 +80,44 @@ export default function Photos() {
     )
 
     return (
-        <>
-            <NextSeo title='Список фотографий' />
-            <main>
-                <>
-                    {isError && (
-                        <Message
-                            error
-                            content='Возникла ошибка при получении списка отснятых объектов'
-                        />
-                    )}
-                    {isSuccess && (
-                        <PhotoCategorySwitcher
-                            active={category}
-                            categories={listCategories}
-                            onSelectCategory={(category) =>
-                                setCategory(category)
-                            }
-                        />
-                    )}
-                    <PhotoGrid
-                        loading={isLoading}
-                        photoList={listFilteredPhotos}
-                    />
-                </>
-            </main>
-        </>
+        <main>
+            <NextSeo
+                title={'Список фотографий'}
+                description={
+                    'Фотографии галактик, звезд, планет и других космических объектов, сделанных с помощью любительского телескопа'
+                }
+                openGraph={{
+                    images: [
+                        {
+                            height: 743,
+                            url: '/screenshots/photos.jpg',
+                            width: 1280
+                        }
+                    ],
+                    locale: 'ru'
+                }}
+            />
+            {isError && (
+                <Message
+                    error
+                    content={
+                        'Возникла ошибка при получении списка отснятых объектов'
+                    }
+                />
+            )}
+            {isSuccess && (
+                <PhotoCategorySwitcher
+                    active={category}
+                    categories={listCategories}
+                    onSelectCategory={(category) => setCategory(category)}
+                />
+            )}
+            <PhotoGrid
+                loading={isLoading}
+                photoList={listFilteredPhotos}
+            />
+        </main>
     )
 }
+
+export default Photos

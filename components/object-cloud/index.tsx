@@ -30,7 +30,10 @@ const ObjectCloud: React.FC<TObjectCloudProps> = (props) => {
                         key={item}
                         href={`/${link}/${item}`}
                         className={current === item ? styles.active : undefined}
-                        title={item.replace(/_/g, ' ')}
+                        title={`${item.replace(
+                            /_/g,
+                            ' '
+                        )} - Перейти к астрономическому объекту`}
                     >
                         {item.replace(/_/g, ' ')}
                     </Link>

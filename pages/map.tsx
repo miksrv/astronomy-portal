@@ -1,16 +1,31 @@
-import { useGetCatalogListQuery } from '@/api/api'
+import {
+    getCatalogList,
+    getRunningQueriesThunk,
+    useGetCatalogListQuery
+} from '@/api/api'
+import { wrapper } from '@/api/store'
 import { TCatalog } from '@/api/types'
-import Script from 'next/script'
-import React, { useEffect, useMemo, useState } from 'react'
+import { NextSeo } from 'next-seo'
+import React from 'react'
 
 import SkyMap from '@/components/celestial-map'
 import ObjectCloudSkyMap from '@/components/celestial-map/ObjectCloudSkyMap'
 
-export default function Map() {
-    const { data, isSuccess } = useGetCatalogListQuery()
-    const [goToObject, setGoToObject] = useState<[number, number]>([0, 0])
+export const getStaticProps = wrapper.getStaticProps((store) => async () => {
+    store.dispatch(getCatalogList.initiate())
 
-    const listObjects = useMemo(() => {
+    await Promise.all(store.dispatch(getRunningQueriesThunk()))
+
+    return {
+        props: { object: {} }
+    }
+})
+
+const Map: React.FC = () => {
+    const { data, isSuccess } = useGetCatalogListQuery()
+    const [goToObject, setGoToObject] = React.useState<[number, number]>([0, 0])
+
+    const listObjects = React.useMemo(() => {
         return data?.payload.length
             ? data?.payload
                   .filter((item: TCatalog) => item.ra !== 0 && item.dec !== 0)
@@ -24,25 +39,25 @@ export default function Map() {
             : []
     }, [data])
 
-    useEffect(() => {
-        document.title = 'Астрономическая карта - Обсерватория'
-    })
-
     return (
         <main>
-            <Script
-                src='/scripts/d3.min.js'
-                strategy='beforeInteractive'
+            <NextSeo
+                title={'Карта астрономических объектов'}
+                description={
+                    'Карта звездного неба с галактиками, туманностями, кометами, сверхновыми и другими космическими объектами, снятых любительским телескопом'
+                }
+                openGraph={{
+                    images: [
+                        {
+                            height: 815,
+                            url: '/screenshots/celestial.jpg',
+                            width: 1280
+                        }
+                    ],
+                    locale: 'ru'
+                }}
             />
-            <Script
-                src='/scripts/d3.geo.projection.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/celestial.min.js'
-                strategy='beforeInteractive'
-            />
-            <div className='box table global-map'>
+            <div className={'box table global-map'}>
                 <SkyMap
                     objects={listObjects}
                     interactive={true}
@@ -58,3 +73,5 @@ export default function Map() {
         </main>
     )
 }
+
+export default Map

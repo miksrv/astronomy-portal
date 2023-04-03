@@ -22,52 +22,46 @@ const FILTERS: TFiltersTypes[] = [
     'SII'
 ]
 
-const RenderTableRow: React.FC<TTableRowProps> = (props) => {
-    const { photo } = props
-
-    return (
-        <Table.Row>
-            <Table.Cell width='one'>
-                <Link
-                    href={`/photos/${photo.object}?date=${photo.date}`}
-                    title={photo.object}
-                >
-                    <Image
-                        src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}
-                        className={styles.photo}
-                        alt={photo.object}
-                        width={80}
-                        height={30}
-                    />
-                </Link>
-            </Table.Cell>
-            <Table.Cell content={moment(photo.date).format('DD.MM.Y')} />
-            <Table.Cell content={photo.parameters?.frames} />
+const RenderTableRow: React.FC<TTableRowProps> = ({ photo }) => (
+    <Table.Row>
+        <Table.Cell width={'one'}>
+            <Link
+                href={`/photos/${photo.object}?date=${photo.date}`}
+                title={`Перейти к другой фотографии объекта ${photo.object}`}
+            >
+                <Image
+                    src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}
+                    className={styles.photo}
+                    alt={`Другой вариант фотографии объекта ${photo.object}`}
+                    width={80}
+                    height={30}
+                />
+            </Link>
+        </Table.Cell>
+        <Table.Cell content={moment(photo.date).format('DD.MM.Y')} />
+        <Table.Cell content={photo.parameters?.frames} />
+        <Table.Cell
+            content={
+                photo.parameters
+                    ? getTimeFromSec(photo.parameters?.exposure, true)
+                    : '---'
+            }
+        />
+        {FILTERS.map((filter) => (
             <Table.Cell
-                content={
-                    photo.parameters
-                        ? getTimeFromSec(photo.parameters?.exposure, true)
-                        : '---'
+                className={
+                    photo.parameters?.filters[filter] &&
+                    photo.parameters?.filters[filter].frames > 0
+                        ? `filter-${filter}`
+                        : ''
                 }
-            />
-            {FILTERS.map((filter) => (
-                <Table.Cell
-                    className={
-                        photo.parameters?.filters[filter] &&
-                        photo.parameters?.filters[filter].frames > 0
-                            ? `filter-${filter}`
-                            : ''
-                    }
-                    key={filter}
-                >
-                    {photo.parameters?.filters[filter].exposure &&
-                        getTimeFromSec(
-                            photo.parameters?.filters[filter].exposure
-                        )}
-                </Table.Cell>
-            ))}
-        </Table.Row>
-    )
-}
+                key={filter}
+            >
+                {photo.parameters?.filters[filter].exposure &&
+                    getTimeFromSec(photo.parameters?.filters[filter].exposure)}
+            </Table.Cell>
+        ))}
+    </Table.Row>
+)
 
 export default RenderTableRow

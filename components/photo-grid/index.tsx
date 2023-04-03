@@ -11,7 +11,6 @@ type TPhotoGridProps = {
     loading: boolean
     photoList: any
     loaderCount?: number
-    className?: string
 }
 
 const PhotosLoader = (count: number) =>
@@ -31,12 +30,12 @@ const PhotosLoader = (count: number) =>
         ))
 
 const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
-    const { loading, photoList, loaderCount, className } = props
+    const { loading, photoList, loaderCount } = props
 
     const sliceText = (text: string) => {
         let sliced = text.slice(0, 350)
 
-        return sliced + (sliced.length < text.length && '...')
+        return sliced + (sliced.length < text.length ? '...' : '')
     }
 
     return (
@@ -47,7 +46,9 @@ const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
                       <Link
                           key={photo.file}
                           href={`/photos/${photo.object}?date=${photo.date}`}
-                          title={`${photo.object} - Фотография объекта`}
+                          title={`${
+                              photo.title || photo.object
+                          } - Фотография объекта`}
                           className={styles.item}
                       >
                           {photo.title ? (
@@ -56,7 +57,7 @@ const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
                                       <Image
                                           src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}
                                           className={styles.photo}
-                                          alt={photo.object}
+                                          alt={photo.title || photo.object}
                                           width={200}
                                           height={200}
                                       />
@@ -64,10 +65,7 @@ const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
                                   <Reveal.Content hidden>
                                       <div className={styles.info}>
                                           <h4>{photo.title}</h4>
-                                          <p>
-                                              {photo.text &&
-                                                  sliceText(photo.text)}
-                                          </p>
+                                          <p>{sliceText(photo?.text)}</p>
                                       </div>
                                   </Reveal.Content>
                               </Reveal>

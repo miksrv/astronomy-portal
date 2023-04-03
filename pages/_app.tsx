@@ -2,6 +2,7 @@ import { wrapper } from '@/api/store'
 import '@/styles/globals.sass'
 import type { AppProps } from 'next/app'
 import { Montserrat } from 'next/font/google'
+import Script from 'next/script'
 import React from 'react'
 import { Provider } from 'react-redux'
 import 'semantic-ui-css/semantic.min.css'
@@ -16,6 +17,18 @@ export function App({ Component, pageProps }: AppProps) {
 
     return (
         <Provider store={store}>
+            <Script
+                src='/scripts/d3.min.js'
+                strategy='beforeInteractive'
+            />
+            <Script
+                src='/scripts/d3.geo.projection.min.js'
+                strategy='beforeInteractive'
+            />
+            <Script
+                src='/scripts/celestial.min.js'
+                strategy='beforeInteractive'
+            />
             <main className={montserrat.className}>
                 <Header />
                 <Container className='main'>

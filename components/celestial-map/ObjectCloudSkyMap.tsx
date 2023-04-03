@@ -27,7 +27,7 @@ const ObjectCloudSkyMap: React.FC<TObjectCloudProps> = (props) => {
                 objects.map((item, key) => (
                     <span
                         className={styles.item}
-                        role='button'
+                        role={'button'}
                         tabIndex={0}
                         onKeyDown={() => {}}
                         onClick={() => handleClick?.(item.ra, item.dec)}
