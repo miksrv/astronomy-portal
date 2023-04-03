@@ -11,7 +11,7 @@ import LoginForm from '@/components/login-form'
 import { show } from '@/components/login-form/loginFormSlice'
 import { toggle } from '@/components/sidebar/sidebarSlice'
 
-import logo from '@/public/logo-w.svg'
+import logo from '@/public/images/logo-w.svg'
 
 import styles from './styles.module.sass'
 import { UserAuth } from './userAuth'
@@ -35,7 +35,7 @@ const Header: React.FC = () => {
     const dispatch = useAppDispatch()
     const currentMobile: boolean =
         typeof window !== 'undefined' ? window.innerWidth <= 760 : false
-    const { data, isSuccess, isFetching, isError } = useGetStatisticQuery()
+    const { data, isSuccess } = useGetStatisticQuery()
     const [logout] = useLogoutMutation()
     const [auth, setAuth] = useState<boolean>(false)
     const router = useRouter()
@@ -67,12 +67,17 @@ const Header: React.FC = () => {
             <Container>
                 {!currentMobile && (
                     <Menu.Item className={styles.logo}>
-                        <Image
-                            src={logo}
-                            alt=''
-                            width={30}
-                            height={30}
-                        />
+                        <Link
+                            href={'/'}
+                            title={'Главная страница'}
+                        >
+                            <Image
+                                src={logo}
+                                alt={'Логотип самодельной обсерватории'}
+                                width={30}
+                                height={30}
+                            />
+                        </Link>
                     </Menu.Item>
                 )}
                 {currentMobile ? (

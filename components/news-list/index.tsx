@@ -3,7 +3,7 @@ import React from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
 
 import NewsItem from './NewsItem'
-import './styles.module.sass'
+import styles from './styles.module.sass'
 
 type TNewsListProps = {
     loader: boolean
@@ -11,7 +11,7 @@ type TNewsListProps = {
 }
 
 const NewsLoader = () => (
-    <div className='box loader'>
+    <div className={'box loader'}>
         <Dimmer active>
             <Loader>Загрузка</Loader>
         </Dimmer>
@@ -26,14 +26,13 @@ const NewsList: React.FC<TNewsListProps> = (props) => {
             {loader ? (
                 <NewsLoader />
             ) : (
-                <div className='news-list'>
-                    {news &&
-                        news.map((item, key) => (
-                            <NewsItem
-                                news={item}
-                                key={key}
-                            />
-                        ))}
+                <div className={styles.newsList}>
+                    {news?.map((item, key) => (
+                        <NewsItem
+                            news={item}
+                            key={key}
+                        />
+                    ))}
                 </div>
             )}
         </>

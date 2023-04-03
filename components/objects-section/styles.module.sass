@@ -1,14 +1,26 @@
+@import @/styles/variables.sass
+
 .name
   display: flex
   justify-content: space-between
   margin-bottom: 15px
 
-.control-buttons
+.parameters
+  margin-bottom: 10px
+
+  .value
+    color: $text-second
+    margin-right: 5px
+
+  .marginLeft
+    margin-left: 5px
+
+.controlButtons
   button
     &:last-of-type
       margin-right: 0
       margin-left: 5px
 
-.skyMap
+.celestialMap
     canvas
       width: 100% !important

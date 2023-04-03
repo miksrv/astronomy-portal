@@ -1,10 +1,13 @@
 import { TNews } from '@/api/types'
+import classNames from 'classnames'
 import moment from 'moment'
 import React from 'react'
 import { Icon, Image } from 'semantic-ui-react'
 
+import avatar from '@/public/images/avatar.jpg'
+
 import NewsPhotos from './NewsPhotos'
-import avatar from './images/avatar.jpg'
+import styles from './styles.module.sass'
 
 type TNewsItemProps = {
     news: TNews
@@ -21,11 +24,12 @@ const NewsItem: React.FC<TNewsItemProps> = (props) => {
     //     text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1">$1</a>')
 
     return (
-        <div className='box item'>
-            <div className='header'>
+        <div className={classNames(styles.item, 'box')}>
+            <div className={styles.header}>
                 <Image
-                    src={avatar}
                     avatar
+                    src={avatar.src}
+                    className={styles.avatar}
                 />
                 <div>
                     <a
@@ -36,24 +40,24 @@ const NewsItem: React.FC<TNewsItemProps> = (props) => {
                     >
                         Обсерватория
                     </a>
-                    <div className='info'>
+                    <div className={styles.info}>
                         {moment.unix(news.date).format('DD MMMM Y в H:mm')}
                         {!currentMobile && (
                             <>
-                                <span className='divider'></span>
+                                <span className={styles.divider} />
                                 <Icon name='eye' /> {news.views}
-                                <span className='divider'></span>
+                                <span className={styles.divider} />
                                 <Icon name='like' /> {news.likes}
-                                <span className='divider'></span>
+                                <span className={styles.divider} />
                                 <Icon name='reply' /> {news.reposts}
-                                <span className='divider'></span>
+                                <span className={styles.divider} />
                                 <Icon name='comment' /> {news.comments}
                             </>
                         )}
                     </div>
                 </div>
             </div>
-            <p className='text'>{news.text}</p>
+            <p className={styles.text}>{news.text}</p>
             {news.photos && <NewsPhotos photos={news.photos} />}
         </div>
     )

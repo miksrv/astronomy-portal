@@ -1,5 +1,10 @@
 import {
+    getCatalogItem,
     getCatalogList,
+    getObjectFiles,
+    getObjectItem,
+    getObjectNames,
+    getPhotoList,
     getRunningQueriesThunk,
     useGetCatalogItemQuery,
     useGetObjectFilesQuery,
@@ -10,6 +15,7 @@ import {
 import { store, wrapper } from '@/api/store'
 import { isOutdated } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
+import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
 import React from 'react'
 import { Grid, Message } from 'semantic-ui-react'
@@ -20,7 +26,7 @@ import chart_coordlines from '@/components/chart/chart_coordlines'
 import chart_statistic from '@/components/chart/chart_statistic'
 import FilesTable from '@/components/files-table'
 import ObjectCloud from '@/components/object-cloud'
-import ObjectsItemHeader from '@/components/objects-item-header'
+import ObjectSection from '@/components/objects-section'
 import PhotoTable from '@/components/photo-table'
 
 export async function getStaticPaths() {
@@ -36,8 +42,15 @@ export async function getStaticPaths() {
 export const getStaticProps = wrapper.getStaticProps(
     (store) => async (context) => {
         const name = context.params?.name
+
         if (typeof name === 'string') {
             store.dispatch(getCatalogList.initiate())
+            store.dispatch(getObjectNames.initiate())
+            store.dispatch(getPhotoList.initiate(name))
+            store.dispatch(getObjectItem.initiate(name))
+            store.dispatch(getCatalogItem.initiate(name))
+            store.dispatch(getObjectFiles.initiate(name))
+            store.dispatch(getObjectFiles.initiate(name))
         }
 
         await Promise.all(store.dispatch(getRunningQueriesThunk()))
@@ -50,23 +63,35 @@ export const getStaticProps = wrapper.getStaticProps(
 
 const Object: React.FC = () => {
     const router = useRouter()
-    const name = router.query.name
+    const routerObject = router.query.name
+    const objectName =
+        typeof routerObject === 'string' ? routerObject : skipToken
 
     const {
         data: dataObject,
         isFetching: objectLoading,
         isError
-    } = useGetObjectItemQuery(typeof name === 'string' ? name : skipToken)
+    } = useGetObjectItemQuery(objectName, { skip: router.isFallback })
     const { data: dataCatalog, isFetching: catalogLoading } =
-        useGetCatalogItemQuery(typeof name === 'string' ? name : skipToken)
-    const { data: dataPhotos } = useGetPhotoListItemQuery(
-        typeof name === 'string' ? name : skipToken
-    )
+        useGetCatalogItemQuery(objectName, { skip: router.isFallback })
+    const { data: dataPhotos, isFetching: loadingPhotos } =
+        useGetPhotoListItemQuery(objectName, {
+            skip: router.isFallback
+        })
     const { data: dataFiles, isFetching: fileLoading } = useGetObjectFilesQuery(
-        typeof name === 'string' ? name : skipToken
+        objectName,
+        { skip: router.isFallback }
     )
     const { data: dataNames, isFetching: namesLoading } =
         useGetObjectNamesQuery()
+
+    const objectTitle = React.useMemo(
+        () =>
+            dataCatalog?.payload
+                ? dataCatalog.payload?.title || dataCatalog.payload.name
+                : objectName.toString(),
+        [dataCatalog, objectName]
+    )
 
     const chartData: [number, number][] = []
     const chartRa: number[] = []
@@ -117,8 +142,22 @@ const Object: React.FC = () => {
 
     return (
         <main>
-            <ObjectsItemHeader
-                name={typeof name === 'string' ? name : ''}
+            <NextSeo
+                title={`${objectTitle} - Данные астрономического объекта`}
+                description={dataCatalog?.payload?.text}
+                openGraph={{
+                    images: [
+                        {
+                            height: 743,
+                            url: `${process.env.NEXT_PUBLIC_API_HOST}public/photo/${dataPhotos?.payload?.[0].file}_thumb.${dataPhotos?.payload?.[0]?.ext}`,
+                            width: 1280
+                        }
+                    ],
+                    locale: 'ru'
+                }}
+            />
+            <ObjectSection
+                title={objectTitle}
                 loader={objectLoading || catalogLoading}
                 catalog={dataCatalog?.payload}
                 object={dataObject?.payload}
@@ -140,9 +179,10 @@ const Object: React.FC = () => {
             ) : (
                 <br />
             )}
-            {dataPhotos?.payload && !objectLoading && (
-                <PhotoTable photos={dataPhotos?.payload} />
-            )}
+            <PhotoTable
+                photos={dataPhotos?.payload}
+                loader={loadingPhotos}
+            />
             <br />
             <Grid>
                 <Grid.Column
@@ -167,7 +207,7 @@ const Object: React.FC = () => {
                         data={[chartRa, chartDec]}
                     />
                 </Grid.Column>
-                {chartHFR.length && chartSNR.length ? (
+                {chartHFR.length ? (
                     <Grid.Column width={16}>
                         <Chart
                             loader={fileLoading}
@@ -182,15 +222,15 @@ const Object: React.FC = () => {
             <br />
             <FilesTable
                 loader={fileLoading}
-                object={typeof name === 'string' ? name : ''}
-                files={dataFiles?.payload}
+                object={typeof objectName === 'string' ? objectName : ''}
+                files={dataFiles?.payload!}
             />
             <br />
             <ObjectCloud
                 loader={namesLoading}
-                current={typeof name === 'string' ? name : ''}
+                current={typeof objectName === 'string' ? objectName : ''}
                 names={dataNames?.payload}
-                link='object'
+                link={'objects'}
             />
         </main>
     )

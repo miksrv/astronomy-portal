@@ -3,6 +3,8 @@ import React, { useMemo, useState } from 'react'
 import Lightbox from 'react-image-lightbox'
 import Gallery from 'react-photo-gallery'
 
+import styles from './styles.module.sass'
+
 type TNewsPhotosProps = {
     photos: TNewsPhotos[]
 }
@@ -25,7 +27,7 @@ const NewsPhotos: React.FC<TNewsPhotosProps> = (props) => {
     const getPhotoSrc = (index: number) => galleryPhotos[index].full.src
 
     return (
-        <div className='photos'>
+        <div className={styles.photos}>
             <Gallery
                 photos={listGallery}
                 onClick={(event, photos) => {

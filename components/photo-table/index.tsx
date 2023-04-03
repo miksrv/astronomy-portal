@@ -1,13 +1,14 @@
 import { TPhoto } from '@/api/types'
 import classNames from 'classnames'
 import React from 'react'
-import { Table } from 'semantic-ui-react'
+import { Dimmer, Loader, Table } from 'semantic-ui-react'
 
 import RenderTableRow from './RenderTableRow'
 import styles from './styles.module.sass'
 
 type TPhotoTableProps = {
-    photos: TPhoto[]
+    loader?: boolean
+    photos?: TPhoto[]
 }
 
 type THeaderFields = {
@@ -30,10 +31,13 @@ const HEADER_FIELDS: THeaderFields[] = [
 ]
 
 const PhotoTable: React.FC<TPhotoTableProps> = (props) => {
-    const { photos } = props
+    const { photos, loader } = props
 
     return (
         <div className={classNames('table', 'box')}>
+            <Dimmer active={loader}>
+                <Loader />
+            </Dimmer>
             <Table
                 sortable
                 celled

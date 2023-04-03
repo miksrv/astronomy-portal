@@ -199,5 +199,13 @@ export const {
 } = api
 
 // export endpoints for use in SSR
-export const { getCatalogList, getCatalogItem, getPhotoList, getObjectList } =
-    api.endpoints
+export const {
+    getCatalogList,
+    getCatalogItem,
+    getObjectItem,
+    getPhotoList,
+    getObjectList,
+    getObjectFiles,
+    getObjectNames,
+    getNewsList
+} = api.endpoints

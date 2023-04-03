@@ -10,14 +10,8 @@ import { TObjectSortable, TSortOrdering } from './types'
 type TFilesTableProps = {
     loader: boolean
     object: string
-    files: TFIle[] | undefined
+    files: TFIle[]
 }
-
-const TableLoader: React.FC = () => (
-    <Dimmer active>
-        <Loader />
-    </Dimmer>
-)
 
 const FilesTable: React.FC<TFilesTableProps> = (props) => {
     const { files, object, loader } = props
@@ -28,7 +22,7 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
     const [sortField, setSortField] = useState<TObjectSortable>('date')
     const [sortOrder, setSortOrder] = useState<TSortOrdering>('ascending')
     const [showAccordion, setAccordion] = useState<boolean>(false)
-    const [filesList, setFilesList] = useState<TFIle[]>([])
+    const [filesList, setFilesList] = useState<TFIle[]>(files)
 
     const handlerSortClick = (field: TObjectSortable) => {
         if (sortField !== field) setSortField(field)
@@ -60,16 +54,14 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
     }, [files, sortOrder, sortField])
 
     useEffect(() => {
-        if (filesList?.length) {
-            const photoList = filesList
-                .filter((file) => file.image)
-                .map(
-                    (file) =>
-                        `${process.env.NEXT_PUBLIC_API_HOST}uploads/${object}/${file.name}.jpg`
-                )
+        const photoList = filesList
+            .filter((file) => file.image)
+            .map(
+                ({ name }) =>
+                    `${process.env.NEXT_PUBLIC_API_HOST}uploads/${object}/${name}.jpg`
+            )
 
-            setPhotoList(photoList)
-        }
+        setPhotoList(photoList)
     }, [filesList, object])
 
     useEffect(() => {
@@ -77,24 +69,25 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
     }, [files, sortField, sortOrder, doSortObjects])
 
     return (
-        <div className='box table'>
-            {loader && <TableLoader />}
+        <div className={'box table'}>
+            <Dimmer active={loader}>
+                <Loader />
+            </Dimmer>
             <Accordion inverted>
                 <Accordion.Title
                     active={showAccordion}
                     onClick={() => setAccordion(!showAccordion)}
                 >
-                    <Icon name='dropdown' /> Список снятых кадров
+                    <Icon name={'dropdown'} /> Список снятых кадров
                 </Accordion.Title>
                 <Accordion.Content active={showAccordion}>
-                    {filesList.length && (
+                    {filesList.length ? (
                         <Table
                             sortable
                             celled
                             inverted
                             selectable
                             compact
-                            className='object-table'
                         >
                             <RenderTableHeader
                                 sort={sortField}
@@ -115,6 +108,8 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
                                 ))}
                             </Table.Body>
                         </Table>
+                    ) : (
+                        ''
                     )}
                 </Accordion.Content>
             </Accordion>

@@ -8,7 +8,8 @@ import SunCalc from 'suncalc'
 
 import MoonPhase from '@/components/moon-phase'
 
-import SunIcon from '../moon-phase/images/sun.png'
+import SunIcon from '@/public/images/sun.png'
+
 import styles from './styles.module.sass'
 
 type TRenderCalendarProps = {
