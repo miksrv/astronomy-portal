@@ -1,0 +1,38 @@
+@import @/styles/variables.sass
+
+.objectTable
+  .photo
+    height: 18px !important
+    object-fit: cover
+
+  .photoLink
+    position: relative
+    display: block
+
+    .outdatedIcon
+      position: absolute
+      color: $orange
+      top: 0
+      right: 0
+
+  .tableRow
+    .control-button
+      visibility: hidden
+
+    &:hover
+      .control-button
+        visibility: visible
+
+  .cellCame
+    display: flex
+    justify-content: space-between
+
+  .controlButton
+    cursor: pointer
+
+    i
+      color: $text-second
+
+    &:hover
+      i
+        color: $text-main

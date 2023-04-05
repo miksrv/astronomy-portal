@@ -1,0 +1,67 @@
+@import @/styles/variables.sass
+
+%switch-buttons
+  background: transparent !important
+  color: $text-second
+  border: 1px solid $text-main
+  padding: 5px 10px
+  width: 50px
+  text-transform: uppercase
+
+.relayList
+  padding: 11px !important
+
+  &.loader
+    height: 300px
+
+  .item
+    display: flex
+    justify-content: space-between
+    margin: 0
+    padding: 2.3px 0 3px 4px
+
+    button
+      height: 24.15px !important
+      line-height: 0px
+      text-transform: uppercase
+      padding: 0
+
+    &:hover
+      background-color: #373737
+
+  .name
+    line-height: 9px
+    padding-top: 8px
+    margin-bottom: 0
+
+  span[class^='led']
+    margin-right: 5px
+    display: inline-block
+    background-color: $brown
+    width: 8px
+    height: 8px
+    border-radius: 50%
+
+    &.led-on
+      background-color: $green !important
+
+    &.led-off
+      background-color: $red !important
+
+  .switchOff
+    @extend %switch-buttons
+    color: $orange !important
+    border: 1px solid $orange !important
+
+    &:hover, &:active, &:focus
+      background: rgba(221, 145, 36, 0.18) !important
+      color: $text-main !important
+
+  .switchOn
+    @extend %switch-buttons
+    color: $green !important
+    border: 1px solid $green !important
+
+    &:hover, &:active, &:focus
+      background: rgba(46, 140, 71, 0.18) !important
+      color: $text-main !important
