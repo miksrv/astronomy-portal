@@ -93,7 +93,9 @@ const Photo: React.FC = () => {
         <main>
             <NextSeo
                 title={`${photoTitle} - Фотографии астрономического объекта`}
-                description={dataCatalog?.payload?.text}
+                description={dataCatalog?.payload?.text
+                    .replace(/(\r\n|\n|\r)/gm, '')
+                    .slice(0, 200)}
                 openGraph={{
                     images: [
                         {

@@ -5,6 +5,7 @@ import {
 } from '@/api/api'
 import { wrapper } from '@/api/store'
 import { TNews } from '@/api/types'
+import { NextSeo } from 'next-seo'
 import React, { useEffect, useState } from 'react'
 import { Button } from 'semantic-ui-react'
 
@@ -37,6 +38,15 @@ const News: React.FC = () => {
 
     return (
         <main>
+            <NextSeo
+                title={'Новости самодельной обсерватории'}
+                description={data?.payload.news[0].text
+                    .replace(/(\r\n|\n|\r)/gm, '')
+                    .slice(0, 200)}
+                openGraph={{
+                    locale: 'ru'
+                }}
+            />
             <NewsList
                 loader={isLoading}
                 news={offset > 0 ? news : data?.payload.news}
