@@ -1,11 +1,13 @@
 import { useGetSensorStatisticQuery } from '@/api/api'
 import { TSensorsPayload } from '@/api/types'
 import React from 'react'
+import { Dimmer, Message } from 'semantic-ui-react'
 
 import Chart from '@/components/chart'
 import { TChartLineData } from '@/components/chart/types'
 
 import chart_sensors from './chart_sensors'
+import styles from './styles.module.sass'
 
 const Sensors: React.FC = () => {
     const { data, isLoading, isFetching } = useGetSensorStatisticQuery()
@@ -33,11 +35,26 @@ const Sensors: React.FC = () => {
     }, [data])
 
     return (
-        <Chart
-            loader={isFetching || isLoading || !chartData.length}
-            config={chart_sensors}
-            data={chartData}
-        />
+        <div className={styles.sensorsContainer}>
+            {!data?.status ? (
+                <Dimmer active>
+                    <Message
+                        error
+                        icon={'chart line'}
+                        header={'Данные не доступны'}
+                        content={
+                            'Сенсоры обсерватории временно не передают значения'
+                        }
+                    />
+                </Dimmer>
+            ) : (
+                <Chart
+                    loader={isFetching || isLoading || !chartData.length}
+                    config={chart_sensors}
+                    data={chartData}
+                />
+            )}
+        </div>
     )
 }
 

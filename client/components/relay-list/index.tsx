@@ -27,12 +27,12 @@ const RelayListItem: React.FC<TRelayListItemProps> = (props) => {
     return (
         <div className={styles.item}>
             <div className={styles.name}>
-                <span className={`led-${switchClass}`} />
+                <span className={styles[status ? 'ledOn' : 'ledOff']} />
                 {name}
             </div>
             <Button
                 loading={loading}
-                className={`switch-${switchClass}`}
+                className={styles[status ? 'switchOn' : 'switchOff']}
                 disabled={loading || !auth}
                 onClick={() =>
                     handleClick?.({ index: index, state: status ? 0 : 1 })

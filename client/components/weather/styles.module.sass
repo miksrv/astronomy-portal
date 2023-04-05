@@ -1,0 +1,66 @@
+@import @/styles/variables.sass
+
+@mixin weatherCondition
+  display: inline-block
+  width: 8px
+  height: 8px
+  background-color: $brown
+  margin-right: 5px
+
+@mixin state
+  color: $brown
+  margin-left: 5px
+  text-transform: lowercase
+
+.weather
+  padding: 15px !important
+  min-height: 130px
+
+  .blockTitle
+    margin: 0
+
+  .update
+    margin: 2px 0 5px 0
+
+  .grid
+    margin: 10px 0 0 !important
+
+    .column
+      padding: 1px 0 !important
+
+  .key
+    color: $text-second
+
+  .val
+    color: $text-main
+    margin-left: 5px
+
+  .weatherState0
+    @include weatherCondition
+    background-color: $green
+
+  .weatherState1
+    @include weatherCondition
+    background-color: $orange
+
+  .weatherState2
+    @include weatherCondition
+    background-color: $red
+
+  .weatherState3
+    @include weatherCondition
+
+  .state0
+    @include state
+    color: $green
+
+  .state1
+    @include state
+    color: $orange
+
+  .state2
+    @include state
+    color: $red
+
+  .state3
+    @include state

@@ -1,8 +1,9 @@
+import classNames from 'classnames'
 import React, { useEffect, useState } from 'react'
 import Lightbox from 'react-image-lightbox'
 import { Dimmer, Message, Progress } from 'semantic-ui-react'
 
-import './styles.module.sass'
+import styles from './styles.module.sass'
 
 type TCameraProps = {
     cameraURL: string
@@ -41,7 +42,7 @@ const Camera: React.FC<TCameraProps> = (props) => {
     })
 
     return (
-        <div className='box camera'>
+        <div className={classNames(styles.cameraSection, 'box')}>
             {cameraURL && lightbox && (
                 <Lightbox
                     mainSrc={cameraSrc}
@@ -51,29 +52,32 @@ const Camera: React.FC<TCameraProps> = (props) => {
             {cameraURL ? (
                 <>
                     <span
-                        role='button'
+                        className={styles.lightboxTrigger}
+                        role={'button'}
                         tabIndex={0}
                         onKeyUp={() => {}}
                         onClick={() => setLightbox(true)}
                     >
                         <img
+                            className={styles.photoImage}
                             src={cameraSrc}
-                            alt=''
+                            alt={'Изображение с камеры'}
                         />
                     </span>
                     <Progress
+                        className={styles.progress}
                         percent={Math.round((seconds / timeoutInt) * 100)}
                         success
-                        size='tiny'
+                        size={'tiny'}
                     />
                 </>
             ) : (
                 <Dimmer active>
                     <Message
                         error
-                        icon='photo'
-                        header='Камера не доступна'
-                        content='Изображение камеры не доступно'
+                        icon={'photo'}
+                        header={'Камера не доступна'}
+                        content={'Изображение камеры не доступно'}
                     />
                 </Dimmer>
             )}

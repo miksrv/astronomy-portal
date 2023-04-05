@@ -1,12 +1,20 @@
 @import @/styles/variables.sass
 
-%switch-buttons
+@mixin switchButtons
   background: transparent !important
   color: $text-second
   border: 1px solid $text-main
   padding: 5px 10px
   width: 50px
   text-transform: uppercase
+
+@mixin ledIndicator
+  margin-right: 5px
+  display: inline-block
+  background-color: $brown
+  width: 8px
+  height: 8px
+  border-radius: 50%
 
 .relayList
   padding: 11px !important
@@ -34,22 +42,16 @@
     padding-top: 8px
     margin-bottom: 0
 
-  span[class^='led']
-    margin-right: 5px
-    display: inline-block
-    background-color: $brown
-    width: 8px
-    height: 8px
-    border-radius: 50%
+  .ledOn
+    @include ledIndicator
+    background-color: $green
 
-    &.led-on
-      background-color: $green !important
-
-    &.led-off
-      background-color: $red !important
+  .ledOff
+    @include ledIndicator
+    background-color: $red
 
   .switchOff
-    @extend %switch-buttons
+    @include switchButtons
     color: $orange !important
     border: 1px solid $orange !important
 
@@ -58,7 +60,7 @@
       color: $text-main !important
 
   .switchOn
-    @extend %switch-buttons
+    @include switchButtons
     color: $green !important
     border: 1px solid $green !important
 

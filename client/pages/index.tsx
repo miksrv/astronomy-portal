@@ -10,6 +10,7 @@ import { wrapper } from '@/api/store'
 import { TCatalog, TPhoto } from '@/api/types'
 import { shuffle } from '@/functions/helpers'
 import moment, { Moment } from 'moment'
+import { NextSeo } from 'next-seo'
 import React from 'react'
 
 import Calendar from '@/components/calendar'
@@ -63,6 +64,22 @@ export default function Home() {
 
     return (
         <main>
+            <NextSeo
+                title={'Любительская астрономическая обсерватория'}
+                description={
+                    'Самодельная любительская астрономическая обсерватория с удаленным доступом из любой точки мира через интернет. Статистика работы обсерватории, количество отснятых кадров и накопленных данных. Календарь работы телескопа.'
+                }
+                openGraph={{
+                    images: [
+                        {
+                            height: 819,
+                            url: '/main/dashboard.jpg',
+                            width: 1280
+                        }
+                    ],
+                    locale: 'ru'
+                }}
+            />
             <Statistic
                 loader={statisticLoading}
                 frames={statisticData?.payload.frames}

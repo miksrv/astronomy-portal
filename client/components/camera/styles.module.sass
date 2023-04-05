@@ -1,19 +1,22 @@
-.camera
+.cameraSection
   padding: 6px !important
 
-  img
-    height: 95%
+  .lightboxTrigger
+    display: inline-block
+    width: 100%
+
+  .photoImage
+    height: 427px
     width: 100%
     object-fit: cover
-    min-height: 409px
     cursor: pointer
 
   @media only screen and (max-width: 768px)
-    img
-      min-height: auto
+    .photoImage
+      height: auto
 
   .progress
     margin: -6px 0px 0px 0px !important
 
-    .bar
+    :global(.bar)
       height: 2px !important
