@@ -6,7 +6,8 @@
     "license": "MIT",
     "require": {
         "php": "^7.4 || ^8.0",
-        "codeigniter4/framework": "^4.0"
+        "codeigniter4/framework": "^4.0",
+        "firebase/php-jwt": "^6.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9",
@@ -31,7 +32,9 @@
     "scripts": {
         "test": "phpunit",
         "serve": "php spark serve",
-        "migrations": "php spark migrate:create"
+        "migrations": "php spark migrate:create",
+        "migrate": "php spark migrate",
+        "routes": "php spark routes"
     },
     "support": {
         "forum": "https://forum.codeigniter.com/",

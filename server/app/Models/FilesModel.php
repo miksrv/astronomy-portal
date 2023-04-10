@@ -48,7 +48,7 @@ class FilesModel extends Model
     public function findByObject(string $object): array
     {
         return $this
-            ->select(implode(', ', $this->dataFields))
+            ->select($this->dataFields)
             ->where(['object' => $object])->findAll();
     }
 }

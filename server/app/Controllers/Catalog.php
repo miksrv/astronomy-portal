@@ -1,7 +1,6 @@
 <?php namespace App\Controllers;
 
 use App\Libraries\CatalogLibrary;
-use App\Models\FilesModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
@@ -48,16 +47,21 @@ class Catalog extends ResourceController
 
     /**
      * Create new catalog item
-     * @param string $name
+     * @param null $id
      * @return ResponseInterface
      */
-//    public function create(string $name): ResponseInterface
-//    {
+    public function create($id = null): ResponseInterface
+    {
 //        $item = new \App\Entities\Catalog();
 //        $item->name = '111';
-//
-//        return $this->respond([]);
-//    }
+
+        $json = $this->request->getJSON(true);
+
+        var_dump($json);
+        exit();
+
+        return $this->respondCreated(['test' => $id]);
+    }
 
     /**
      * Update exist catalog item
