@@ -49,7 +49,7 @@ class Auth extends ResourceController
     public function login(): ResponseInterface
     {
         $rules = [
-            'email' => 'required|min_length[6]|max_length[50]|valid_email',
+            'email'    => 'required|min_length[6]|max_length[50]|valid_email',
             'password' => 'required|min_length[8]|max_length[255]|validateUser[email, password]'
         ];
 

@@ -28,10 +28,12 @@ class UserModel extends Model
 
     private function getUpdatedDataWithHashedPassword(array $data): array
     {
-        if (isset($data['data']['password'])) {
+        if (isset($data['data']['password']))
+        {
             $plaintextPassword = $data['data']['password'];
             $data['data']['password'] = $this->hashPassword($plaintextPassword);
         }
+
         return $data;
     }
 
@@ -40,6 +42,9 @@ class UserModel extends Model
         return password_hash($plaintextPassword, PASSWORD_BCRYPT);
     }
 
+    /**
+     * @throws Exception
+     */
     public function findUserByEmailAddress(string $emailAddress)
     {
         $user = $this

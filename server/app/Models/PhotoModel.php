@@ -4,7 +4,21 @@ use CodeIgniter\Model;
 
 class PhotoModel extends Model
 {
-    protected $table = 'photo';
+    protected $table      = 'photos';
     protected $primaryKey = 'id';
-//    protected $allowedFields = ['name', 'email'];
+
+    protected $useAutoIncrement = true;
+
+    protected $returnType     = \App\Entities\Photo::class;
+    protected $useSoftDeletes = true;
+
+    // The updatable fields
+    protected $allowedFields = ['object', 'date', 'author', 'file', 'file_ext'];
+
+    // Dates
+    protected $useTimestamps = true;
+    protected $dateFormat    = 'datetime';
+    protected $createdField  = 'created_at';
+    protected $updatedField  = 'updated_at';
+    protected $deletedField  = 'deleted_at';
 }

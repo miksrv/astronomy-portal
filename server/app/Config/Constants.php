@@ -92,3 +92,6 @@ define('EVENT_PRIORITY_NORMAL', 100);
  * @deprecated Use \CodeIgniter\Events\Events::PRIORITY_HIGH instead.
  */
 define('EVENT_PRIORITY_HIGH', 10);
+
+// FIT file size in byte for 16 bit mask (Mb)
+defined('FITS_FILE_SIZE') || define('FITS_FILE_SIZE', 32.78592);

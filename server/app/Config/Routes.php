@@ -31,9 +31,6 @@ $routes->set404Override();
 // route since we don't have to scan directories.
 //$routes->get('/', 'Home::index');
 
-$routes->post('auth/register', 'Auth::register');
-$routes->post('auth/login', 'Auth::login');
-
 $routes->get('statistic', 'Statistic::list');
 
 $routes->get('catalog', 'Catalog::list');
@@ -43,12 +40,15 @@ $routes->patch('catalog/(:any)', 'Catalog::update/$1');
 $routes->delete('catalog/(:any)', 'Catalog::delete/$1');
 
 $routes->get('photo', 'Photo::list');
-$routes->get('photo/(:any)', 'Photo::item/$1');
-$routes->post('photo/(:any)', 'Photo::create/$1');
-$routes->post('photo/(:any)/upload', 'Photo::upload/$1');
+$routes->get('photo/(:any)', 'Photo::show/$1');
+$routes->get('photo/(:any)/(:any)', 'Photo::show/$1/$2');
+$routes->post('photo', 'Photo::create');
+$routes->post('photo/upload', 'Photo::upload');
 $routes->patch('photo/(:any)', 'Photo::update/$1');
 $routes->delete('photo/(:any)', 'Photo::delete/$1');
 
+$routes->post('auth/register', 'Auth::register');
+$routes->post('auth/login', 'Auth::login');
 
 $routes->get('relay', 'Relay::list');
 $routes->put('relay/(:num)', 'Relay::set');

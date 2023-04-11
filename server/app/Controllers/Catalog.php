@@ -5,6 +5,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 use App\Models\CatalogModel;
+use Config\Services;
 use Exception;
 
 class Catalog extends ResourceController
@@ -52,26 +53,68 @@ class Catalog extends ResourceController
      */
     public function create($id = null): ResponseInterface
     {
-//        $item = new \App\Entities\Catalog();
-//        $item->name = '111';
+        $input = $this->request->getJSON(true);
+        $rules = [
+            'name'      => 'required|alpha_dash|min_length[3]|max_length[40]|is_unique[catalog.name]',
+            'title'     => 'max_length[200]',
+            'text'      => 'string',
+            'coord_ra'  => 'decimal',
+            'coord_dec' => 'decimal',
+        ];
 
-        $json = $this->request->getJSON(true);
+        $this->validator = Services::Validation()->setRules($rules);
 
-        var_dump($json);
-        exit();
+        if (!$this->validator->run($input)) {
+            return $this->failValidationErrors($this->validator->getErrors());
+        }
 
-        return $this->respondCreated(['test' => $id]);
+        try {
+            $catalogModel = new CatalogModel();
+            $catalogModel->insert($input);
+
+            return $this->respondCreated($input);
+        } catch (Exception $e) {
+            return $this->failServerError();
+        }
     }
 
     /**
      * Update exist catalog item
-     * @param string $name
+     * @param null $id
      * @return ResponseInterface
      */
-//    public function update(string $name): ResponseInterface
-//    {
-//        return $this->respond([]);
-//    }
+    public function update($id = null): ResponseInterface
+    {
+        $input = $this->request->getJSON(true);
+        $rules = [
+            'title'     => 'max_length[200]',
+            'text'      => 'string',
+            'coord_ra'  => 'decimal',
+            'coord_dec' => 'decimal',
+        ];
+
+        unset($input['name']);
+
+        $this->validator = Services::Validation()->setRules($rules);
+
+        if (!$this->validator->run($input)) {
+            return $this->failValidationErrors($this->validator->getErrors());
+        }
+
+        try {
+            $catalogModel = new CatalogModel();
+            $catalogData  = $catalogModel->find($id);
+
+            if ($catalogData) {
+                $catalogModel->update($id, $input);
+                return $this->respondUpdated($input);
+            }
+
+            return $this->failNotFound();
+        } catch (Exception $e) {
+            return $this->failServerError();
+        }
+    }
 
     /**
      * Soft delete catalog item

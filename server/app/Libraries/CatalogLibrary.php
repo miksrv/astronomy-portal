@@ -3,9 +3,6 @@
 use App\Models\CatalogModel;
 use App\Models\FilesModel;
 
-// FIT file size in byte for 16 bit mask (Mb)
-defined('FITS_FILE_SIZE') || define('FITS_FILE_SIZE', 32.78592);
-
 class CatalogLibrary
 {
     protected array $filterEnum = [
@@ -45,14 +42,14 @@ class CatalogLibrary
         $modelCatalog = new CatalogModel();
         $modelFiles   = new FilesModel();
 
-        $catalogItem = $modelCatalog->findAll();
-        $filesItems  = $modelFiles->select(['object', 'filter', 'date_obs', 'exptime', 'object'])->findAll();
+        $catalogList = $modelCatalog->findAll();
+        $filesList   = $modelFiles->select(['object', 'filter', 'date_obs', 'exptime'])->findAll();
 
-        if (!$catalogItem) return null;
+        if (!$catalogList) return null;
 
-        foreach ($catalogItem as $item)
+        foreach ($catalogList as $item)
         {
-            $objectStatistic = $this->_getObjectStatistic($filesItems, $item->name);
+            $objectStatistic = $this->_getObjectStatistic($filesList, $item->name);
 
             $item->statistic = $objectStatistic->objectStatistic;
             $item->filters   = $objectStatistic->filterStatistic;
@@ -60,7 +57,7 @@ class CatalogLibrary
             unset($item->created_at, $item->updated_at, $item->deleted_at);
         }
 
-        return $catalogItem;
+        return $catalogList;
     }
 
     protected function _getObjectStatistic(
