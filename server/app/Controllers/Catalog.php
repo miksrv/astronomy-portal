@@ -62,9 +62,7 @@ class Catalog extends ResourceController
             'coord_dec' => 'decimal',
         ];
 
-        $this->validator = Services::Validation()->setRules($rules);
-
-        if (!$this->validator->run($input)) {
+        if (!$this->validate($rules)) {
             return $this->failValidationErrors($this->validator->getErrors());
         }
 

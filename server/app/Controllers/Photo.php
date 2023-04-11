@@ -1,12 +1,14 @@
 <?php namespace App\Controllers;
 
 use App\Libraries\PhotosLibrary;
+use App\Models\CatalogModel;
 use App\Models\PhotoModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 use Config\Services;
 use Exception;
+use function PHPUnit\Framework\fileExists;
 
 class Photo extends ResourceController
 {
@@ -55,8 +57,11 @@ class Photo extends ResourceController
         $input = $this->request->getJSON(true);
         $rules = [
             'object' => 'required|alpha_dash|min_length[3]|max_length[40]',
-            'date'   => 'required|string|valid_date',
+            'date'   => 'required|string|valid_date[m/d/Y]',
             'author' => 'numeric',
+            'image_name' => 'required|alpha_dash',
+            'image_ext'  => 'required|alpha_dash',
+            'image_size' => 'required|numeric'
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -65,9 +70,32 @@ class Photo extends ResourceController
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
+        $catalogModel = new CatalogModel();
+        $catalogData  = $catalogModel->find($input['object']);
+
+        if (!$catalogData)
+        {
+            return $this->failValidationErrors('Object by name "' . $input['object'] . '" not found');
+        }
+
+        $photoOrigPath  = WRITEPATH . 'uploads/' . $input['image_name'] . '.' . $input['image_ext'];
+        $photoThumbPath = WRITEPATH . 'uploads/' . $input['image_name'] . '_thumb.' . $input['image_ext'];
+
+        if (!file_exists($photoOrigPath) || !file_exists($photoThumbPath))
+        {
+            return $this->failValidationErrors('Uploaded photo files for this object not found');
+        }
+
         try {
             $catalogModel = new PhotoModel();
             $catalogModel->insert($input);
+
+            $dateFormat  = date_format(date_create($input['date']), 'Y.m.d');
+            $image_orig  = new \CodeIgniter\Files\File($photoOrigPath);
+            $image_thumb = new \CodeIgniter\Files\File($photoThumbPath);
+
+            $image_orig->move(FCPATH . 'photos/', $input['object'] . '-' . $dateFormat . '.' . $input['image_ext']);
+            $image_thumb->move(FCPATH . 'photos/', $input['object'] . '-' . $dateFormat . '_thumb.' . $input['image_ext']);
 
             return $this->respondCreated($input);
         } catch (Exception $e) {
@@ -75,7 +103,7 @@ class Photo extends ResourceController
         }
     }
 
-    public function upload()
+    public function upload(): ResponseInterface
     {
         $rules = [
             'image' => 'uploaded[image]|is_image[image]|mime_in[image,image/jpg,image/jpeg,image/gif,image/png,image/webp]'
@@ -94,17 +122,17 @@ class Photo extends ResourceController
             $img->move($uploadDir, $newName);
 
             $file = new \CodeIgniter\Files\File($uploadDir . '/' . $newName);
+            $name = pathinfo($file, PATHINFO_FILENAME);
 
-            /* */
-//            $image = \Config\Services::image('imagick');
-//            $image->withFile($file->getRealPath())
-//                ->fit(100, 100, 'center')
-//                ->save($uploadDir . '/thumb_' . $newName);
+            $image = \Config\Services::image('gd'); // imagick
+            $image->withFile($file->getRealPath())
+                ->fit(265, 200, 'center')
+                ->save($uploadDir . '/' . $name . '_thumb.' . $file->getExtension());
 
             return $this->respondCreated([
-                'file_name' => $file->getBasename(),
-                'file_ext'  => $file->getExtension(),
-                'file_size' => $file->getSize(),
+                'image_name' => $name,
+                'image_ext'  => $file->getExtension(),
+                'image_size' => $file->getSize(),
             ]);
         }
 
