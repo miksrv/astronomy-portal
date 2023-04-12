@@ -3,7 +3,7 @@ name: UI Deploy
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - 'client/**/*'
 
