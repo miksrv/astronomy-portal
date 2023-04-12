@@ -27,6 +27,7 @@ jobs:
           path: |
             client/node_modules
             ~/.npm
+            ${{ github.workspace }}/.next/cache
           key: ${{ runner.os }}-modules-${{ hashFiles('client/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-modules-
