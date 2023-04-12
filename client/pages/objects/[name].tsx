@@ -34,7 +34,7 @@ export async function getStaticPaths() {
     const result = await storeObject.dispatch(getCatalogList.initiate())
 
     return {
-        fallback: true,
+        fallback: false,
         paths: result.data?.payload.map((item) => `/objects/${item.name}`)
     }
 }

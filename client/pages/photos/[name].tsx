@@ -23,7 +23,7 @@ export const getStaticPaths = async () => {
     const result = await storeObject.dispatch(getPhotoList.initiate())
 
     return {
-        fallback: true,
+        fallback: false,
         paths: result.data?.payload.map((item) => `/photos/${item.object}`)
     }
 }

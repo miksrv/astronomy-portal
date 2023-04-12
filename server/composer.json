@@ -32,6 +32,7 @@
     "scripts": {
         "test": "phpunit",
         "serve": "php spark serve",
+        "kill": "pkill -9 php",
         "migrations": "php spark migrate:create",
         "migrate": "php spark migrate",
         "routes": "php spark routes"
