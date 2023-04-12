@@ -29,9 +29,7 @@ type TQueryNewsList = {
 
 export const api = createApi({
     baseQuery: fetchBaseQuery({
-        baseUrl:
-            process.env.NEXT_PUBLIC_API_HOST ||
-            'https://observatory.miksoft.pro/api/',
+        baseUrl: process.env.NEXT_PUBLIC_API_HOST,
         prepareHeaders: (headers, { getState }) => {
             // By default, if we have a token in the store, let's use that for authenticated requests
             const token = (getState() as RootState).auth.token
