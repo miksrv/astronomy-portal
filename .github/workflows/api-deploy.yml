@@ -9,7 +9,7 @@ on:
 
 # https://github.com/codeigniter4/CodeIgniter4/blob/develop/.github/workflows/deploy-apidocs.yml
 jobs:
-  ftp-deploy:
+  api-ftp-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -35,6 +35,7 @@ jobs:
 
       - name: Install dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
+        working-directory: client
 
       - name: Install LFTP
         run: sudo apt install lftp

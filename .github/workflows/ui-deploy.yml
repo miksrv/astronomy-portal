@@ -53,7 +53,7 @@ jobs:
         run: |
           echo "NEXT_PUBLIC_API_HOST = '${{ secrets.NEXT_PUBLIC_API_HOST }}'
           NEXT_PUBLIC_METRIKA = ' '" > .env
-        working-directory: ./client
+        working-directory: client
 
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
         name: Build UI
@@ -61,7 +61,7 @@ jobs:
           export dateNow=$(date +"%d.%m.%Y")
           echo "export const update = '$dateNow'" > update.ts
           yarn build
-        working-directory: ./client
+        working-directory: client
 
       - name: Export UI
         working-directory: client

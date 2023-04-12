@@ -8,7 +8,7 @@ on:
       - 'client/**/*'
 
 jobs:
-  checks:
+  ui-checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -40,11 +40,11 @@ jobs:
 
       - name: Linter
         run: yarn eslint:check
-        working-directory: ./client
+        working-directory: client
 
       - name: Prettier
         run: yarn prettier:check
-        working-directory: ./client
+        working-directory: client
 
       - name: Cache UI build
         uses: actions/cache@v3
@@ -61,7 +61,7 @@ jobs:
         run: |
           echo "NEXT_PUBLIC_API_HOST = '${{ secrets.NEXT_PUBLIC_API_HOST }}'
           NEXT_PUBLIC_METRIKA = ' '" > .env
-        working-directory: ./client
+        working-directory: client
 
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
         name: Build UI
@@ -69,11 +69,11 @@ jobs:
           export dateNow=$(date +"%d.%m.%Y")
           echo "export const update = '$dateNow'" > update.ts
           yarn build
-        working-directory: ./client
+        working-directory: client
 
 #      - name: Tests
 #        run: npm run test:coverage
-#        working-directory: ./client
+#        working-directory: client
 #
 #      - name: SonarCloud Scan
 #        uses: SonarSource/sonarcloud-github-action@master
