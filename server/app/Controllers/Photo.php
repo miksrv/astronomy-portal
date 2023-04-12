@@ -27,8 +27,11 @@ class Photo extends ResourceController
     }
 
     /**
-     * Photo item by name
+     * Photo item by name and date (optional).
+     * If there are more than 2 photos with the same object (name) and no date is used,
+     * this function will return the newest photo.
      * @param null $id
+     * @param null $date
      * @return ResponseInterface
      */
     public function show($id = null, $date = null): ResponseInterface
@@ -40,7 +43,6 @@ class Photo extends ResourceController
             if ($photoItem) {
                 return $this->respond($photoItem);
             }
-
             return $this->failNotFound();
         } catch (Exception $e) {
             return $this->failNotFound();
@@ -48,7 +50,8 @@ class Photo extends ResourceController
     }
 
     /**
-     * Create new photo item
+     * Create new photo item.
+     * First, use the photo upload function, which returns the data of the uploaded image.
      * @param null $id
      * @return ResponseInterface
      */
@@ -103,6 +106,10 @@ class Photo extends ResourceController
         }
     }
 
+    /**
+     * Uploads a new photo, create a thumbnail and return the data of the uploaded photo.
+     * @return ResponseInterface
+     */
     public function upload(): ResponseInterface
     {
         $rules = [
@@ -146,7 +153,32 @@ class Photo extends ResourceController
      */
     public function update($id = null): ResponseInterface
     {
-        return $this->respond([]);
+        $input = $this->request->getJSON(true);
+        $rules = [
+            'object' => 'required|alpha_dash|min_length[3]|max_length[40]',
+            'date'   => 'required|string|valid_date[m/d/Y]',
+            'author' => 'numeric'
+        ];
+
+        $this->validator = Services::Validation()->setRules($rules);
+
+        if (!$this->validator->run($input)) {
+            return $this->failValidationErrors($this->validator->getErrors());
+        }
+
+        try {
+            $photoModel = new PhotoModel();
+            $photoData  = $photoModel->find($id);
+
+            if ($photoData) {
+                $photoModel->update($id, $input);
+                return $this->respondUpdated($input);
+            }
+
+            return $this->failNotFound();
+        } catch (Exception $e) {
+            return $this->failServerError();
+        }
     }
 
     /**
@@ -156,6 +188,18 @@ class Photo extends ResourceController
      */
     public function delete($id = null): ResponseInterface
     {
-        return $this->respond([]);
+        try {
+            $photoModel = new PhotoModel();
+            $photoData  = $photoModel->find($id);
+
+            if ($photoData) {
+                $photoModel->delete($id);
+                return $this->respondDeleted($photoData);
+            }
+
+            return $this->failNotFound();
+        } catch (Exception $e) {
+            return $this->failServerError();
+        }
     }
 }

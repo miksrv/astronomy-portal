@@ -122,12 +122,12 @@ class Catalog extends ResourceController
     public function delete($id = null): ResponseInterface
     {
         try {
-            $model = new CatalogModel();
-            $data  = $model->find($id);
+            $catalogModel = new CatalogModel();
+            $catalogData  = $catalogModel->find($id);
 
-            if ($data) {
-                $model->delete($id);
-                return $this->respondDeleted($data);
+            if ($catalogData) {
+                $catalogModel->delete($id);
+                return $this->respondDeleted($catalogData);
             }
 
             return $this->failNotFound();

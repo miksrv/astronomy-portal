@@ -32,6 +32,8 @@ $routes->set404Override();
 //$routes->get('/', 'Home::index');
 
 $routes->get('statistic', 'Statistic::list');
+$routes->get('statistic/catalog', 'Statistic::catalog');
+$routes->get('statistic/photos', 'Statistic::photos');
 
 $routes->get('catalog', 'Catalog::list');
 $routes->get('catalog/(:any)', 'Catalog::show/$1');
