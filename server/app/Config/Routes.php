@@ -41,6 +41,11 @@ $routes->post('catalog', 'Catalog::create');
 $routes->patch('catalog/(:any)', 'Catalog::update/$1');
 $routes->delete('catalog/(:any)', 'Catalog::delete/$1');
 
+$routes->get('category', 'Category::list');
+$routes->post('category', 'Category::create');
+$routes->patch('category/(:any)', 'Category::update/$1');
+$routes->delete('category/(:any)', 'Category::delete/$1');
+
 $routes->get('photo', 'Photo::list');
 $routes->get('photo/(:any)', 'Photo::show/$1');
 $routes->get('photo/(:any)/(:any)', 'Photo::show/$1/$2');
