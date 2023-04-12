@@ -33,6 +33,11 @@ export async function getStaticPaths() {
     const storeObject = store()
     const result = await storeObject.dispatch(getCatalogList.initiate())
 
+    console.log(
+        'process.env.NEXT_PUBLIC_API_HOST',
+        process.env.NEXT_PUBLIC_API_HOST
+    )
+
     return {
         fallback: false,
         paths: result.data?.payload.map((item) => `/objects/${item.name}`)
