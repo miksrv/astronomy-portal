@@ -1,11 +1,11 @@
 {
-    "name": "nextjs-observatory-portal",
+    "name": "nextjs-astronomy-portal",
     "version": "0.1.0",
     "private": true,
     "scripts": {
         "dev": "next dev",
         "build": "next build",
-        "export": "next build && next export",
+        "export": "next export",
         "start": "next start",
         "lint": "next lint",
         "eslint:check": "eslint -c .eslintrc --ext .js,.jsx,.ts,.tsx .",
