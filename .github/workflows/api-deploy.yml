@@ -35,7 +35,7 @@ jobs:
 
       - name: Install dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
-        working-directory: client
+        working-directory: server
 
       - name: Install LFTP
         run: sudo apt install lftp
