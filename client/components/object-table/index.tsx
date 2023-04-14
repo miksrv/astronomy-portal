@@ -1,6 +1,6 @@
-import { IObjectListItem, TCatalog, TPhoto } from '@/api/types'
+import { TCatalog, TPhoto } from '@/api/types'
 import React, { useMemo, useState } from 'react'
-import { Table } from 'semantic-ui-react'
+import { Dimmer, Loader, Table } from 'semantic-ui-react'
 
 import ObjectEditModal from '@/components/obect-edit-modal'
 
@@ -10,29 +10,20 @@ import styles from './styles.module.sass'
 import { TObjectSortable, TSortOrdering } from './types'
 
 type TObjectTable = {
-    objects: (IObjectListItem & TCatalog)[]
-    photos: TPhoto[] | undefined
+    loading?: boolean
+    catalog?: TCatalog[]
+    photos?: TPhoto[]
 }
 
-const RowNoData: React.FC = () => (
-    <Table.Row>
-        <Table.Cell
-            textAlign={'center'}
-            colSpan={HEADER_FIELDS.length}
-            content={'Ничего не найдено, попробуйте изменить условия поиска'}
-        />
-    </Table.Row>
-)
-
 const ObjectTable: React.FC<TObjectTable> = (props) => {
-    const { objects, photos } = props
+    const { loading, catalog, photos } = props
     const [sortField, setSortField] = useState<TObjectSortable>('name')
     const [sortOrder, setSortOrder] = useState<TSortOrdering>('descending')
     const [editModalVisible, setEditModalVisible] = useState<boolean>(false)
     const [editModalValue, setEditModalValue] = useState<TCatalog>()
 
-    const listObjectsPhotos = useMemo(() => {
-        return objects.map((item) => {
+    const catalogPhotos = useMemo(() => {
+        return catalog?.map((item) => {
             const objectPhotos = photos?.filter(
                 (photo) => photo.object === item.name
             )
@@ -41,21 +32,21 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                 photo: objectPhotos ? objectPhotos.length : 0
             }
         })
-    }, [objects, photos])
+    }, [catalog, photos])
 
     const listSortedObjects = useMemo(() => {
-        return listObjectsPhotos.sort((first, second) =>
+        return catalogPhotos?.sort((a, b) =>
             sortOrder === 'descending'
                 ? // @ts-ignore
-                  first[sortField] > second[sortField]
+                  a[sortField] > b[sortField]
                     ? 1
                     : -1
                 : // @ts-ignore
-                first[sortField] < second[sortField]
+                a[sortField] < b[sortField]
                 ? 1
                 : -1
         )
-    }, [listObjectsPhotos, sortOrder, sortField])
+    }, [catalogPhotos, sortOrder, sortField])
 
     const handlerSortClick = (field: TObjectSortable) => {
         if (sortField !== field) setSortField(field)
@@ -69,6 +60,9 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
 
     return (
         <div className='box table'>
+            <Dimmer active={loading}>
+                <Loader />
+            </Dimmer>
             <Table
                 sortable
                 celled
@@ -85,12 +79,14 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                     }
                 />
                 <Table.Body>
-                    {listSortedObjects.length ? (
+                    {listSortedObjects?.length ? (
                         listSortedObjects.map((item) => (
                             <RenderTableRow
-                                item={item}
-                                photos={photos}
                                 key={item.name}
+                                item={item}
+                                photo={photos?.find(
+                                    ({ object }) => object === item.name
+                                )}
                                 onShowEdit={() => {
                                     setEditModalValue(item)
                                     setEditModalVisible(true)
@@ -111,5 +107,15 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
         </div>
     )
 }
+
+const RowNoData: React.FC = () => (
+    <Table.Row>
+        <Table.Cell
+            textAlign={'center'}
+            colSpan={HEADER_FIELDS.length}
+            content={'Ничего не найдено, попробуйте изменить условия поиска'}
+        />
+    </Table.Row>
+)
 
 export default ObjectTable

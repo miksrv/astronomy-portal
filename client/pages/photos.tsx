@@ -3,10 +3,12 @@ import {
     getPhotoList,
     getRunningQueriesThunk,
     useGetCatalogListQuery,
-    useGetPhotoListQuery
+    useGetCategoriesListQuery,
+    useGetPhotoListQuery,
+    useGetStatisticQuery
 } from '@/api/api'
 import { wrapper } from '@/api/store'
-import { TCatalog, TPhoto } from '@/api/types'
+import { TPhoto } from '@/api/types'
 import { NextSeo } from 'next-seo'
 import React from 'react'
 import { Message } from 'semantic-ui-react'
@@ -25,66 +27,45 @@ export const getStaticProps = wrapper.getStaticProps((store) => async () => {
     }
 })
 
+type TPhotoCategory = TPhoto & { category: number }
+
 const Photos: React.FC = () => {
-    const [category, setCategory] = React.useState('')
-    const {
-        data: photoData,
-        isSuccess,
-        isLoading,
-        isError
-    } = useGetPhotoListQuery()
+    const [filterCategory, setFilterCategory] = React.useState<number>(0)
+
+    const { data: statisticData } = useGetStatisticQuery()
+    const { data: categoriesData } = useGetCategoriesListQuery()
+    const { data: photoData, isLoading, isError } = useGetPhotoListQuery()
     const { data: catalogData } = useGetCatalogListQuery()
 
-    const listCategories = React.useMemo(() => {
-        return catalogData && catalogData.payload.length
-            ? catalogData.payload
-                  .map((item) => item.category)
-                  .filter(
-                      (item, index, self) =>
-                          item !== '' && self.indexOf(item) === index
-                  )
-            : []
-    }, [catalogData])
-
-    const listPhotos: (TPhoto & TCatalog)[] | any = React.useMemo(() => {
-        return photoData?.payload.length
-            ? photoData?.payload.map((photo) => {
-                  const objectData = catalogData?.payload.filter(
-                      (item) => item.name === photo.object
-                  )
-                  const objectInfo =
-                      objectData && objectData.length ? objectData.pop() : null
-
-                  if (objectInfo) {
-                      return {
-                          ...photo,
-                          category: objectInfo.category,
-                          text: objectInfo.text,
-                          title: objectInfo.title
-                      }
-                  }
-
-                  return photo
-              })
-            : []
-    }, [photoData, catalogData])
-
-    const listFilteredPhotos = React.useMemo(
+    const listPhotos: TPhotoCategory[] | undefined = React.useMemo(
         () =>
-            listPhotos.length &&
-            listPhotos.filter(
-                (photo: TPhoto & TCatalog) =>
-                    category === '' || photo.category === category
+            photoData?.items.map((photo) => {
+                const catalogItem = catalogData?.items.find(
+                    ({ name }) => name === photo.object
+                )
+
+                return {
+                    ...photo,
+                    category: catalogItem?.category || 0
+                }
+            }),
+        [photoData, catalogData]
+    )
+
+    const listFilteredPhotos: TPhotoCategory[] | undefined = React.useMemo(
+        () =>
+            listPhotos?.filter(
+                ({ category }) => !filterCategory || category === filterCategory
             ),
-        [category, listPhotos]
+        [filterCategory, listPhotos]
     )
 
     return (
         <main>
             <NextSeo
-                title={'Список фотографий'}
+                title={'Астрофотографии'}
                 description={
-                    'Фотографии галактик, звезд, планет и других космических объектов, сделанных с помощью любительского телескопа'
+                    'Астрофотографии галактик, звезд, планет и других космических объектов, сделанных с помощью любительского телескопа'
                 }
                 openGraph={{
                     images: [
@@ -99,22 +80,23 @@ const Photos: React.FC = () => {
             />
             {isError && (
                 <Message
-                    error
+                    error={true}
                     content={
                         'Возникла ошибка при получении списка отснятых объектов'
                     }
                 />
             )}
-            {isSuccess && (
-                <PhotoCategorySwitcher
-                    active={category}
-                    categories={listCategories}
-                    onSelectCategory={(category) => setCategory(category)}
-                />
-            )}
+            <PhotoCategorySwitcher
+                active={filterCategory}
+                categories={categoriesData?.items}
+                onSelectCategory={setFilterCategory}
+            />
             <PhotoGrid
+                threeColumns={true}
                 loading={isLoading}
-                photoList={listFilteredPhotos}
+                loaderCount={statisticData?.photos_count || 12}
+                photos={listFilteredPhotos}
+                catalog={catalogData?.items}
             />
         </main>
     )

@@ -3,12 +3,16 @@ import { HYDRATE } from 'next-redux-wrapper'
 
 import { RootState } from './store'
 import {
+    APIRequestCategories,
+    APIRequestPhotos,
+    APIResponseCatalog,
+    APIResponsePhotos,
+    APIResponseStatistic,
     ICredentials,
     IRelayList,
     IRelaySet,
     IRestAuth,
     IRestCatalogItem,
-    IRestCatalogList,
     IRestFilesMonth,
     IRestNewsList,
     IRestObjectFiles,
@@ -17,10 +21,11 @@ import {
     IRestObjectNames,
     IRestPhotoList,
     IRestSensorStatistic,
-    IRestStatistic,
     IRestWeatherCurrent,
     IRestWeatherMonth
 } from './types'
+
+type Maybe<T> = T | void
 
 type TQueryNewsList = {
     limit?: number
@@ -45,10 +50,13 @@ export const api = createApi({
             query: (name) => `get/catalog/item?object=${name}`
         }),
 
-        // CATALOG
-        // Список объектов каталога
-        getCatalogList: builder.query<IRestCatalogList, void>({
-            query: () => 'get/catalog/list'
+        getCatalogList: builder.query<APIResponseCatalog, void>({
+            query: () => 'catalog'
+        }),
+
+        getCategoriesList: builder.query<APIRequestCategories, void>({
+            keepUnusedDataFor: 3600,
+            query: () => 'category'
         }),
 
         // Коллекция дней за месяц, в которые работала обсерватория (exp, frames, objects)
@@ -81,6 +89,7 @@ export const api = createApi({
 
         // OBJECTS
         // Получить список объектов
+
         getObjectList: builder.query<IRestObjectList, void>({
             keepUnusedDataFor: 3600,
             query: () => 'get/object/list'
@@ -93,10 +102,13 @@ export const api = createApi({
 
         // PHOTO
         // Список фотографий без характеристик
-        getPhotoList: builder.query<IRestPhotoList, void | {}>({
-            keepUnusedDataFor: 3600,
-            query: () => 'get/photo/list'
-        }),
+        getPhotoList: builder.query<APIResponsePhotos, Maybe<APIRequestPhotos>>(
+            {
+                keepUnusedDataFor: 3600,
+                query: (params) =>
+                    `photo${params?.limit ? `?limit=${params.limit}` : ''}`
+            }
+        ),
 
         // Список фотографий объекта с характеристиками
         getPhotoListItem: builder.query<IRestPhotoList, string>({
@@ -119,10 +131,11 @@ export const api = createApi({
             query: () => 'get/sensors/statistic'
         }),
         // STATISTIC
-        // Получить общую статистику по обсерватории (кадры, выдержка, объекты, использовано места)
-        getStatistic: builder.query<IRestStatistic, void>({
+
+        /** Statistic **/
+        getStatistic: builder.query<APIResponseStatistic, void>({
             keepUnusedDataFor: 3600,
-            query: () => 'get/statistic/summary'
+            query: () => 'statistic'
         }),
 
         // Текущая погода
@@ -176,10 +189,12 @@ export const api = createApi({
 // Export hooks for usage in functional components
 export const {
     useGetStatisticQuery,
-    useGetFilesMonthMutation,
     useGetCatalogListQuery,
-    useGetCatalogItemQuery,
     useGetPhotoListQuery,
+    useGetCategoriesListQuery,
+
+    useGetFilesMonthMutation,
+    useGetCatalogItemQuery,
     useGetPhotoListItemQuery,
     useGetObjectListQuery,
     useGetObjectNamesQuery,

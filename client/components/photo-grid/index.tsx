@@ -9,8 +9,10 @@ import styles from './styles.module.sass'
 
 type TPhotoGridProps = {
     loading: boolean
-    photoList: any
     loaderCount?: number
+    threeColumns?: boolean
+    photos?: TPhoto[]
+    catalog?: TCatalog[]
 }
 
 const PhotosLoader = (count: number) =>
@@ -30,7 +32,7 @@ const PhotosLoader = (count: number) =>
         ))
 
 const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
-    const { loading, photoList, loaderCount } = props
+    const { loading, loaderCount, threeColumns, photos, catalog } = props
 
     const sliceText = (text: string) => {
         let sliced = text.slice(0, 350)
@@ -40,46 +42,57 @@ const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
 
     return (
         <div className={classNames(styles.photoGird, 'box')}>
-            {loading || !photoList
+            {loading || !photos || !catalog
                 ? PhotosLoader(loaderCount ? loaderCount : 12)
-                : photoList.map((photo: TPhoto & TCatalog) => (
-                      <Link
-                          key={photo.file}
-                          href={`/photos/${photo.object}?date=${photo.date}`}
-                          title={`${
-                              photo.title || photo.object
-                          } - Фотография объекта`}
-                          className={styles.item}
-                      >
-                          {photo.title ? (
-                              <Reveal animated={'small fade'}>
-                                  <Reveal.Content visible>
-                                      <Image
-                                          src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}
-                                          className={styles.photo}
-                                          alt={photo.title || photo.object}
-                                          width={200}
-                                          height={200}
-                                      />
-                                  </Reveal.Content>
-                                  <Reveal.Content hidden>
-                                      <div className={styles.info}>
-                                          <h4>{photo.title}</h4>
-                                          <p>{sliceText(photo?.text)}</p>
-                                      </div>
-                                  </Reveal.Content>
-                              </Reveal>
-                          ) : (
-                              <Image
-                                  src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}
-                                  className={styles.photo}
-                                  alt={''}
-                                  width={200}
-                                  height={200}
-                              />
-                          )}
-                      </Link>
-                  ))}
+                : photos.map((photo) => {
+                      const catalogItem = catalog.find(
+                          ({ name }) => name === photo.object
+                      )
+
+                      return (
+                          <Link
+                              key={photo.id}
+                              href={`/photos/${photo.object}?date=${photo.date}`}
+                              title={`${
+                                  photo.object || photo.object
+                              } - Фотография объекта`}
+                              className={classNames(
+                                  styles.item,
+                                  threeColumns ? styles.item4 : undefined
+                              )}
+                          >
+                              {catalogItem?.title ? (
+                                  <Reveal animated={'small fade'}>
+                                      <Reveal.Content visible>
+                                          <Image
+                                              src={`${process.env.NEXT_PUBLIC_IMG_HOST}public/photo/${photo.image_name}_thumb.${photo.image_ext}`}
+                                              className={styles.photo}
+                                              alt={catalogItem.title}
+                                              width={200}
+                                              height={200}
+                                          />
+                                      </Reveal.Content>
+                                      <Reveal.Content hidden>
+                                          <div className={styles.info}>
+                                              <h4>{catalogItem.title}</h4>
+                                              <p>
+                                                  {sliceText(catalogItem?.text)}
+                                              </p>
+                                          </div>
+                                      </Reveal.Content>
+                                  </Reveal>
+                              ) : (
+                                  <Image
+                                      src={`${process.env.NEXT_PUBLIC_IMG_HOST}public/photo/${photo.image_name}_thumb.${photo.image_ext}`}
+                                      className={styles.photo}
+                                      alt={''}
+                                      width={200}
+                                      height={200}
+                                  />
+                              )}
+                          </Link>
+                      )
+                  })}
         </div>
     )
 }

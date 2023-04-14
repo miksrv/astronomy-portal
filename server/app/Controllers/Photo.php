@@ -8,7 +8,9 @@ use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 use Config\Services;
 use Exception;
-use function PHPUnit\Framework\fileExists;
+
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, DELETE, PATCH');
 
 class Photo extends ResourceController
 {
@@ -21,9 +23,10 @@ class Photo extends ResourceController
     public function list(): ResponseInterface
     {
         $filterObject = $this->request->getGet('object', FILTER_SANITIZE_STRING);
+        $filterLimit  = $this->request->getGet('limit', FILTER_SANITIZE_NUMBER_INT);
         $photoLibrary = new PhotosLibrary();
 
-        return $this->respond(['items' => $photoLibrary->getPhotoList($filterObject)]);
+        return $this->respond(['items' => $photoLibrary->getPhotoList($filterObject, $filterLimit ?? 0)]);
     }
 
     /**

@@ -1,11 +1,12 @@
 import { useGetStatisticQuery, useLogoutMutation } from '@/api/api'
 import { setCredentials } from '@/api/authSlice'
 import { useAppDispatch } from '@/api/hooks'
+import { APIResponseStatistic } from '@/api/types'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
-import { Container, Label, Menu } from 'semantic-ui-react'
+import { Container, Label, Loader, Menu } from 'semantic-ui-react'
 
 import LoginForm from '@/components/login-form'
 import { show } from '@/components/login-form/loginFormSlice'
@@ -19,15 +20,15 @@ import { UserAuth } from './userAuth'
 type TMenuItems = {
     link: string
     name: string
-    label?: 'photos' | 'objects'
+    label?: keyof APIResponseStatistic
 }
 
 export const MENU_ITEMS: TMenuItems[] = [
     { link: '/', name: 'Сводка' },
     { link: '/news', name: 'Новости' },
     { link: '/map', name: 'Карта' },
-    { label: 'photos', link: '/photos', name: 'Фото' },
-    { label: 'objects', link: '/objects', name: 'Объекты' },
+    { label: 'photos_count', link: '/photos', name: 'Фото' },
+    { label: 'catalog_count', link: '/objects', name: 'Объекты' },
     { link: '/dashboard', name: 'Телескоп' }
 ]
 
@@ -35,7 +36,7 @@ const Header: React.FC = () => {
     const dispatch = useAppDispatch()
     const currentMobile: boolean =
         typeof window !== 'undefined' ? window.innerWidth <= 760 : false
-    const { data, isSuccess } = useGetStatisticQuery()
+    const { data, isLoading } = useGetStatisticQuery()
     const [logout] = useLogoutMutation()
     const [auth, setAuth] = useState<boolean>(false)
     const router = useRouter()
@@ -58,15 +59,15 @@ const Header: React.FC = () => {
 
     return (
         <Menu
-            fixed='top'
-            color='grey'
+            fixed={'top'}
+            color={'grey'}
             className={styles.menu}
             secondary
             inverted
         >
             <Container>
                 {!currentMobile && (
-                    <Menu.Item className={styles.logo}>
+                    <Menu.Item>
                         <Link
                             href={'/'}
                             title={'Главная страница'}
@@ -83,8 +84,7 @@ const Header: React.FC = () => {
                 {currentMobile ? (
                     <Menu.Item
                         as={Link}
-                        icon='bars'
-                        className={styles.hamburger}
+                        icon={'bars'}
                         onClick={() => dispatch(toggle())}
                     />
                 ) : (
@@ -99,25 +99,30 @@ const Header: React.FC = () => {
                             {item.name}
                             {item.label && (
                                 <Label
-                                    color='green'
-                                    size='tiny'
+                                    className={styles.label}
+                                    color={'green'}
+                                    size={'tiny'}
                                 >
-                                    {isSuccess ? data?.payload[item.label] : 0}
+                                    <Loader
+                                        active={isLoading}
+                                        size={'mini'}
+                                    />
+                                    {data?.[item.label]}
                                 </Label>
                             )}
                         </Menu.Item>
                     ))
                 )}
-                <Menu.Menu position='right'>
+                <Menu.Menu position={'right'}>
                     {!auth ? (
                         <Menu.Item
-                            name='Войти'
+                            name={'Войти'}
                             onClick={() => dispatch(show())}
                         />
                     ) : (
                         <Menu.Item
-                            name='Выйти'
-                            color='red'
+                            name={'Выйти'}
+                            color={'red'}
                             onClick={() => doLogout()}
                         />
                     )}

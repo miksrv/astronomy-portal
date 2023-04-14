@@ -1,3 +1,4 @@
+import { TCategory } from '@/api/types'
 import React, { useMemo } from 'react'
 import { Dropdown, Input } from 'semantic-ui-react'
 
@@ -5,9 +6,9 @@ import styles from './styles.module.sass'
 
 type TToolbarProps = {
     search: string
-    categories: string[]
+    categories?: TCategory[]
     onChangeSearch: (search: string) => void
-    onChangeCategories: (categories: any) => void
+    onChangeCategories: (id: number[]) => void
 }
 
 const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
@@ -18,7 +19,9 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
     }: React.ChangeEvent<HTMLInputElement>) => onChangeSearch(value)
 
     const listCategoriesOptions = useMemo(
-        () => categories.map((item) => ({ text: item, value: item })),
+        () =>
+            categories?.map((item) => ({ text: item.name, value: item.id })) ||
+            [],
         [categories]
     )
 
@@ -41,9 +44,7 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
                 className={styles.categoryDropdown}
                 options={listCategoriesOptions}
                 onChange={(target, el) => {
-                    if (el.value) {
-                        onChangeCategories(el.value)
-                    }
+                    onChangeCategories(el.value as number[])
                 }}
             />
         </div>
