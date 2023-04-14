@@ -10,7 +10,7 @@ class CategoryModel extends Model
     protected $useAutoIncrement = true;
 
     protected $returnType     = \App\Entities\Category::class;
-    protected $useSoftDeletes = true;
+    protected $useSoftDeletes = false;
 
     // The updatable fields
     protected $allowedFields = ['name'];

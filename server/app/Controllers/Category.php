@@ -7,6 +7,9 @@ use CodeIgniter\API\ResponseTrait;
 use Config\Services;
 use Exception;
 
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, DELETE, PATCH');
+
 class Category extends ResourceController
 {
     use ResponseTrait;

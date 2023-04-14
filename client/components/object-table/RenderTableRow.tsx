@@ -1,5 +1,5 @@
 import { useAppSelector } from '@/api/hooks'
-import { IObjectListItem, TCatalog, TFiltersTypes, TPhoto } from '@/api/types'
+import { TCatalog, TFilterTypes, TPhoto } from '@/api/types'
 import { getTimeFromSec, isOutdated } from '@/functions/helpers'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -9,33 +9,28 @@ import { Icon, Popup, Table } from 'semantic-ui-react'
 import styles from './styles.module.sass'
 
 type TTableRowProps = {
-    item: IObjectListItem & TCatalog
-    photos: TPhoto[] | undefined
+    item: TCatalog
+    photo?: TPhoto
     onShowEdit?: (item: string) => void
 }
 
-const FILTERS: TFiltersTypes[] = [
-    'Luminance',
-    'Red',
-    'Green',
-    'Blue',
-    'Ha',
-    'OIII',
-    'SII'
+const FILTERS: TFilterTypes[] = [
+    TFilterTypes.luminance,
+    TFilterTypes.red,
+    TFilterTypes.green,
+    TFilterTypes.blue,
+    TFilterTypes.hydrogen,
+    TFilterTypes.oxygen,
+    TFilterTypes.sulfur
 ]
 
 const RenderTableRow: React.FC<TTableRowProps> = (props) => {
-    const { item, photos, onShowEdit } = props
+    const { item, photo, onShowEdit } = props
     const userLogin = useAppSelector((state) => state.auth.status)
-    const photoList =
-        photos && photos.filter((photo) => photo.object === item.name)
-    const photoItem = photoList && photoList.pop()
-    const textMaxLength = 200
-
     const doTextTruncate = useMemo(() => {
         if (item?.text) {
-            return item.text.length > textMaxLength
-                ? item.text.slice(0, textMaxLength) + '...'
+            return item.text.length > 200
+                ? item.text.slice(0, 200) + '...'
                 : item.text
         }
 
@@ -80,7 +75,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                 )}
             </Table.Cell>
             <Table.Cell width='one'>
-                {photoItem && (
+                {photo && (
                     <Link
                         href={`/photos/${item.name}`}
                         title={`${
@@ -90,36 +85,42 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                     >
                         <Image
                             className={styles.photo}
-                            src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photoItem.file}_thumb.${photoItem.ext}`}
+                            src={`${process.env.NEXT_PUBLIC_IMG_HOST}public/photo/${photo.image_name}_thumb.${photo.image_ext}`}
                             width={80}
                             height={18}
                             alt={`${item.title || item.name} - Фотография`}
                         />
-                        {isOutdated(photoItem.date, item.date) && (
-                            <Popup
-                                content={
-                                    'Фотография устарела, так как есть новые данные ' +
-                                    'с телескопа, с помощью которых можно собрать новое изображение объекта'
-                                }
-                                size={'mini'}
-                                trigger={
-                                    <Icon
-                                        name={'clock outline'}
-                                        className={styles.outdatedIcon}
-                                    />
-                                }
-                            />
-                        )}
+                        {/*{isOutdated(photoItem.date, item.date) && (*/}
+                        {/*    <Popup*/}
+                        {/*        content={*/}
+                        {/*            'Фотография устарела, так как есть новые данные ' +*/}
+                        {/*            'с телескопа, с помощью которых можно собрать новое изображение объекта'*/}
+                        {/*        }*/}
+                        {/*        size={'mini'}*/}
+                        {/*        trigger={*/}
+                        {/*            <Icon*/}
+                        {/*                name={'clock outline'}*/}
+                        {/*                className={styles.outdatedIcon}*/}
+                        {/*            />*/}
+                        {/*        }*/}
+                        {/*    />*/}
+                        {/*)}*/}
                     </Link>
                 )}
             </Table.Cell>
-            <Table.Cell content={item.frames} />
-            <Table.Cell content={getTimeFromSec(item.exposure)} />
+            <Table.Cell content={item.statistic.frames} />
+            <Table.Cell content={getTimeFromSec(item.statistic.exposure)} />
             {FILTERS.map((filter) => (
                 <Table.Cell
                     key={filter}
-                    className={item[filter] > 0 ? `filter-${filter}` : ''}
-                    content={getTimeFromSec(item[filter])}
+                    className={
+                        item?.filters?.[filter]?.exposure
+                            ? styles[filter]
+                            : undefined
+                    }
+                    content={getTimeFromSec(
+                        item?.filters?.[filter]?.exposure || 0
+                    )}
                 />
             ))}
         </Table.Row>

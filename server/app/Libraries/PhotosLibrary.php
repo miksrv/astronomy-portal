@@ -10,7 +10,7 @@ class PhotosLibrary
         'Luminance' => 'luminance',
         'Red'       => 'red',
         'Green'     => 'green',
-        'Blue'      => 'green',
+        'Blue'      => 'blue',
         'Ha'        => 'hydrogen',
         'OIII'      => 'oxygen',
         'SII'       => 'sulfur',
@@ -53,7 +53,7 @@ class PhotosLibrary
      * @param string|null $filterObject
      * @return array|null
      */
-    function getPhotoList(string $filterObject = null): ?array
+    function getPhotoList(string $filterObject = null, int $filterLimit = 0): ?array
     {
         $modelPhoto = new PhotoModel();
         $modelFiles = new FilesModel();
@@ -66,7 +66,7 @@ class PhotosLibrary
             $modelFiles->where(['object' => $filterObject]);
         }
 
-        $photoList = $modelPhoto->findAll();
+        $photoList = $modelPhoto->findAll($filterLimit);
         $filesList = $modelFiles->findAll();
 
         if (!$photoList) return null;

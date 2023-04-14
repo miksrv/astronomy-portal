@@ -28,24 +28,24 @@ export const HEADER_FIELDS: THeaderFields[] = [
     { key: 'SII', name: 'SII' }
 ]
 
-const RenderTableHeader: React.FC<TTableHeaderProps> = (props) => {
-    const { sort, order, handlerSortClick } = props
-
-    return (
-        <Table.Header>
-            <Table.Row>
-                {HEADER_FIELDS.map((item) => (
-                    <Table.HeaderCell
-                        key={item.key}
-                        sorted={sort === item.key ? order : undefined}
-                        onClick={() => handlerSortClick(item.key)}
-                    >
-                        {item.name}
-                    </Table.HeaderCell>
-                ))}
-            </Table.Row>
-        </Table.Header>
-    )
-}
+const RenderTableHeader: React.FC<TTableHeaderProps> = ({
+    sort,
+    order,
+    handlerSortClick
+}) => (
+    <Table.Header>
+        <Table.Row>
+            {HEADER_FIELDS.map((item) => (
+                <Table.HeaderCell
+                    key={item.key}
+                    sorted={sort === item.key ? order : undefined}
+                    onClick={() => handlerSortClick(item.key)}
+                >
+                    {item.name}
+                </Table.HeaderCell>
+            ))}
+        </Table.Row>
+    </Table.Header>
+)
 
 export default RenderTableHeader

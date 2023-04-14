@@ -4,11 +4,6 @@ export interface IRestResponse {
     errorText?: string
 }
 
-// STATISTIC
-export interface IRestStatistic extends IRestResponse {
-    payload: IStatistic
-}
-
 export interface IRestFilesMonth extends IRestResponse {
     payload: TFilesMonth[]
 }
@@ -115,12 +110,26 @@ export type TSensors = {
     p3?: number
 }
 
-export interface IStatistic {
-    photos: number
-    objects: number
-    frames: number
-    exposure: number
-    filesize: number
+export interface APIResponseStatistic {
+    photos_count: number
+    catalog_count: number
+    frames_count: number
+    total_exposure: number
+    files_size: number
+}
+
+export interface APIRequestCategories {
+    items: TCategory[]
+}
+export interface APIRequestPhotos {
+    limit?: number
+}
+export interface APIResponsePhotos {
+    items: TPhoto[]
+}
+
+export interface APIResponseCatalog {
+    items: TCatalog[]
 }
 
 export interface IObjectListItem {
@@ -137,28 +146,89 @@ export interface IObjectListItem {
     SII: number
 }
 
-export type TPhoto = {
-    object: string
-    date: string
-    file: string
-    ext: string
-    author: TPhotoAuthor | null
-    parameters?: TObject
-}
-
-export type TPhotoAuthor = {
+export type TCategory = {
+    id: number
     name: string
-    link: string
 }
 
 export type TCatalog = {
     name: string
     title: string
     text: string
-    category: string
-    ra: number
-    dec: number
+    category: number
+    coord_ra: number
+    coord_dec: number
+    statistic: TStatistic
+    filters: TFilters
 }
+
+export type TPhoto = {
+    id: number
+    object: string
+    date: string
+    author: number
+    image_name: string
+    image_ext: string
+    image_size: number
+    statistic: TStatistic
+    filters: TFilters
+}
+
+export type TStatistic = {
+    frames: number
+    data_size: number
+    exposure: number
+}
+
+export type TFilters = {
+    luminance?: TFiltersItem
+    red?: TFiltersItem
+    green?: TFiltersItem
+    blue?: TFiltersItem
+    hydrogen?: TFiltersItem
+    oxygen?: TFiltersItem
+    sulfur?: TFiltersItem
+    clear?: TFiltersItem
+}
+
+export type TFiltersItem = {
+    exposure: number
+    frames: number
+}
+
+export enum TFilterTypes {
+    luminance = 'luminance',
+    red = 'red',
+    green = 'green',
+    blue = 'blue',
+    hydrogen = 'hydrogen',
+    oxygen = 'oxygen',
+    sulfur = 'sulfur',
+    clear = 'clear'
+}
+
+// export type TPhoto = {
+//     object: string
+//     date: string
+//     file: string
+//     ext: string
+//     author: TPhotoAuthor | null
+//     parameters?: TObject
+// }
+
+export type TPhotoAuthor = {
+    name: string
+    link: string
+}
+
+// export type TCatalog = {
+//     name: string
+//     title: string
+//     text: string
+//     category: string
+//     ra: number
+//     dec: number
+// }
 
 export type TObject = {
     date: string

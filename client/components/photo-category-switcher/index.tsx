@@ -1,33 +1,35 @@
+import { TCategory } from '@/api/types'
 import React from 'react'
 import { Button } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
-type TToolbarProps = {
-    active: string
-    categories?: string[]
-    onSelectCategory: (category: string) => void
+type TPhotoCategorySwitcherProps = {
+    active: number
+    categories?: TCategory[]
+    onSelectCategory: (id: number) => void
 }
 
-const PhotoCategorySwitcher: React.FC<TToolbarProps> = (props) => {
-    const { active, categories, onSelectCategory } = props
-
-    const CategoryButton = (category: string) => (
-        <Button
-            color={active === category ? 'olive' : 'green'}
-            size={'mini'}
-            key={category}
-            onClick={() => onSelectCategory(category)}
-        >
-            {category === '' ? 'Все объекты' : category}
-        </Button>
-    )
+const PhotoCategorySwitcher: React.FC<TPhotoCategorySwitcherProps> = ({
+    active,
+    categories,
+    onSelectCategory
+}) => {
+    const defaultCategory: TCategory = { id: 0, name: '' }
 
     return (
         <div className={styles.categoryToolbar}>
-            {CategoryButton('')}
             {categories &&
-                categories.map((item: string) => CategoryButton(item))}
+                [defaultCategory, ...categories].map(({ id, name }) => (
+                    <Button
+                        color={active === id ? 'olive' : 'green'}
+                        size={'mini'}
+                        key={id}
+                        onClick={() => onSelectCategory?.(id)}
+                    >
+                        {name === '' ? 'Все объекты' : name}
+                    </Button>
+                ))}
         </div>
     )
 }
