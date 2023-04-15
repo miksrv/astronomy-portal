@@ -8,10 +8,10 @@ import { isOutdated } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
+import dynamic from 'next/dynamic'
 import React from 'react'
 import { Grid, Message } from 'semantic-ui-react'
 
-import Chart from '@/components/chart'
 import chart_coordinates from '@/components/chart/chart_coordinates'
 import chart_coordlines from '@/components/chart/chart_coordlines'
 import chart_statistic from '@/components/chart/chart_statistic'
@@ -19,6 +19,10 @@ import FilesTable from '@/components/files-table'
 import ObjectCloud from '@/components/object-cloud'
 import ObjectSection from '@/components/objects-section'
 import PhotoTable from '@/components/photo-table'
+
+const Chart = dynamic(() => import('@/components/chart'), {
+    ssr: false
+})
 
 // export const getStaticPaths = async () => {
 //     const storeObject = store()
@@ -74,7 +78,7 @@ const Object: React.FC = () => {
         }
     )
 
-    const { data: catalogData, isLoading: catalogLoading } =
+    const { data: catalogData, isFetching: catalogLoading } =
         useGetCatalogItemQuery(objectName, {
             skip: router.isFallback
         })
@@ -82,34 +86,16 @@ const Object: React.FC = () => {
     const { data: catalogObjects, isLoading: objectsLoading } =
         useGetStatisticCatalogItemsQuery()
 
-    // const {
-    //     data: dataObject,
-    //     isFetching: objectLoading,
-    //     isError
-    // } = useGetObjectItemQuery(objectName, { skip: router.isFallback })
-    // const { data: dataCatalog, isFetching: catalogLoading } =
-    //     useGetCatalogItemQuery(objectName, { skip: router.isFallback })
-    // const { data: dataPhotos, isFetching: loadingPhotos } =
-    //     useGetPhotoListItemQuery(objectName, {
-    //         skip: router.isFallback
-    //     })
-    // const { data: dataFiles, isFetching: fileLoading } = useGetObjectFilesQuery(
-    //     objectName,
-    //     { skip: router.isFallback }
-    // )
-    // const { data: dataNames, isFetching: namesLoading } =
-    //     useGetObjectNamesQuery()
-
     const objectTitle = React.useMemo(
         () => catalogData?.title || catalogData?.name || objectName.toString(),
         [catalogData, objectName]
     )
 
-    const [chartData, setChartData] = React.useState<[number, number][]>([])
-    const [chartRa, setChartRa] = React.useState<number[]>([])
-    const [chartDec, setChartDec] = React.useState<number[]>([])
-    const [chartHFR, setChartHFR] = React.useState<number[]>([])
-    const [chartSNR, setChartSNR] = React.useState<number[]>([])
+    const [chartData, setChartData] = React.useState<[number, number][]>()
+    const [chartRa, setChartRa] = React.useState<number[]>()
+    const [chartDec, setChartDec] = React.useState<number[]>()
+    const [chartHFR, setChartHFR] = React.useState<number[]>()
+    const [chartSNR, setChartSNR] = React.useState<number[]>()
     const [devRa, setDevRa] = React.useState<number>(0)
     const [devDec, setDevDec] = React.useState<number>(0)
 
@@ -204,9 +190,9 @@ const Object: React.FC = () => {
                     mobile={16}
                 >
                     <Chart
-                        loader={catalogLoading}
+                        loading={catalogLoading}
                         config={chart_coordinates}
-                        data={[chartData]}
+                        data={chartData ? [chartData] : undefined}
                     />
                 </Grid.Column>
                 <Grid.Column
@@ -215,17 +201,25 @@ const Object: React.FC = () => {
                     mobile={16}
                 >
                     <Chart
-                        loader={catalogLoading}
+                        loading={catalogLoading}
                         config={chart_coordlines}
-                        data={[chartRa, chartDec]}
+                        data={
+                            chartRa && chartDec
+                                ? [chartRa, chartDec]
+                                : undefined
+                        }
                     />
                 </Grid.Column>
-                {chartHFR.length > 0 ? (
+                {chartHFR?.length ? (
                     <Grid.Column width={16}>
                         <Chart
-                            loader={catalogLoading}
+                            loading={catalogLoading}
                             config={chart_statistic}
-                            data={[chartHFR, chartSNR]}
+                            data={
+                                chartHFR && chartSNR
+                                    ? [chartHFR, chartSNR]
+                                    : undefined
+                            }
                         />
                     </Grid.Column>
                 ) : (
