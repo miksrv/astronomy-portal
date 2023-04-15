@@ -1,38 +1,43 @@
 import HighchartsReact from 'highcharts-react-official'
 import Highcharts from 'highcharts/highmaps'
-import React, { useEffect } from 'react'
+import { mergeDeep } from 'immutable'
+import React from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
 
 import chartInitialConfig from './config'
 
 type TChartProps = {
-    loader: boolean
+    loading: boolean
     config: any
-    data: any
+    data?: any
 }
 
-const Chart: React.FC<TChartProps> = (params) => {
-    const { loader, config, data } = params
-    let dIndex = 0
+const Chart: React.FC<TChartProps> = ({ loading, config, data }) => {
     let height =
         typeof config.chart !== 'undefined' && typeof config.chart.height
             ? config.chart.height
             : 300
 
-    data.forEach((item: any | undefined) => {
-        if (typeof item !== 'undefined') {
-            config.series[dIndex].data = item
-            dIndex++
-        }
-    })
+    const chartRef = React.useRef()
+    const [chartOptions, setChartOptions] = React.useState<any>()
 
-    useEffect(() => {
-        Highcharts.setOptions(chartInitialConfig)
-    })
+    React.useEffect(() => {
+        if (data && !loading) {
+            let dIndex = 0
+            data.forEach((item: any | undefined) => {
+                if (typeof item !== 'undefined' && config.series[dIndex]) {
+                    config.series[dIndex].data = item
+                    dIndex++
+                }
+            })
+
+            setChartOptions(mergeDeep(chartInitialConfig, config))
+        }
+    }, [config, data])
 
     return (
-        <div className='box table'>
-            {loader ? (
+        <div className={'box table'}>
+            {loading || !chartOptions ? (
                 <div style={{ height: height }}>
                     <Dimmer active>
                         <Loader />
@@ -41,8 +46,9 @@ const Chart: React.FC<TChartProps> = (params) => {
             ) : (
                 <HighchartsReact
                     highcharts={Highcharts}
-                    options={config}
-                    immutable={true}
+                    options={chartOptions}
+                    constructorType={'chart'}
+                    ref={chartRef}
                 />
             )}
         </div>
