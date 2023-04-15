@@ -110,6 +110,18 @@ export type TSensors = {
     p3?: number
 }
 
+export interface APIResponseCatalogList {
+    items: TCatalog[]
+}
+
+export interface APIResponseCatalogNames {
+    items: string[]
+}
+
+export interface APIResponsePhotosNames {
+    items: string[]
+}
+
 export interface APIResponseStatistic {
     photos_count: number
     catalog_count: number
@@ -122,14 +134,11 @@ export interface APIRequestCategories {
     items: TCategory[]
 }
 export interface APIRequestPhotos {
+    object?: string
     limit?: number
 }
 export interface APIResponsePhotos {
     items: TPhoto[]
-}
-
-export interface APIResponseCatalog {
-    items: TCatalog[]
 }
 
 export interface IObjectListItem {
@@ -155,11 +164,13 @@ export type TCatalog = {
     name: string
     title: string
     text: string
+    updated: string
     category: number
     coord_ra: number
     coord_dec: number
     statistic: TStatistic
     filters: TFilters
+    files?: TFIle[]
 }
 
 export type TPhoto = {
@@ -250,18 +261,19 @@ export type TObjectFilters = {
 
 export type TFIle = {
     id: string
-    name: string
-    date: string
-    filter: TFiltersTypes
-    exposure: number
-    temp: number
-    gain: number
+    object: string
+    date_obs: string
+    filter: TFilterTypes
+    exptime: number
+    file_name: string
+    ccd_temp: number
     offset: number
+    gain: number
     dec: number
     ra: number
-    stars: number
+    star_count: number
+    sky_background: number
     hfr: number
-    sky: number
     image: boolean
 }
 

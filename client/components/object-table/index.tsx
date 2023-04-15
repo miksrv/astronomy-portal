@@ -1,62 +1,74 @@
-import { TCatalog, TPhoto } from '@/api/types'
+import { TCatalog, TCategory, TPhoto } from '@/api/types'
 import React, { useMemo, useState } from 'react'
 import { Dimmer, Loader, Table } from 'semantic-ui-react'
 
 import ObjectEditModal from '@/components/obect-edit-modal'
 
-import RenderTableHeader, { HEADER_FIELDS } from './RenderTableHeader'
+import RenderTableHeader, { HeaderFields } from './RenderTableHeader'
 import RenderTableRow from './RenderTableRow'
 import styles from './styles.module.sass'
-import { TObjectSortable, TSortOrdering } from './types'
+import { TSortKey, TSortOrdering, TTableItem } from './types'
 
 type TObjectTable = {
     loading?: boolean
+    categories?: TCategory[]
     catalog?: TCatalog[]
     photos?: TPhoto[]
 }
 
 const ObjectTable: React.FC<TObjectTable> = (props) => {
-    const { loading, catalog, photos } = props
-    const [sortField, setSortField] = useState<TObjectSortable>('name')
+    const { loading, categories, catalog, photos } = props
+    const [sortField, setSortField] = useState<TSortKey>('name')
     const [sortOrder, setSortOrder] = useState<TSortOrdering>('descending')
     const [editModalVisible, setEditModalVisible] = useState<boolean>(false)
-    const [editModalValue, setEditModalValue] = useState<TCatalog>()
+    const [editModalValue, setEditModalValue] = useState<TCatalog | any>()
 
-    const catalogPhotos = useMemo(() => {
-        return catalog?.map((item) => {
-            const objectPhotos = photos?.filter(
-                (photo) => photo.object === item.name
-            )
-            return {
-                ...item,
-                photo: objectPhotos ? objectPhotos.length : 0
-            }
-        })
-    }, [catalog, photos])
+    const itemsCatalog: TTableItem[] | undefined = useMemo(
+        () =>
+            catalog?.map((item) => ({
+                blue: item.filters?.blue?.exposure || 0,
+                category:
+                    categories?.find(({ id }) => id === item.category)?.name ||
+                    '',
+                clear: item.filters?.clear?.exposure || 0,
+                exposure: item.statistic.exposure,
+                frames: item.statistic.frames,
+                green: item.filters?.green?.exposure || 0,
+                hydrogen: item.filters?.hydrogen?.exposure || 0,
+                luminance: item.filters?.luminance?.exposure || 0,
+                name: item.name,
+                oxygen: item.filters?.oxygen?.exposure || 0,
+                photo:
+                    photos?.filter(({ object }) => object === item.name)
+                        .length || 0,
+                red: item.filters?.red?.exposure || 0,
+                sulfur: item.filters?.sulfur?.exposure || 0,
+                text: item.text,
+                title: item.title,
+                updated: item.updated
+            })),
+        [catalog, photos]
+    )
 
-    const listSortedObjects = useMemo(() => {
-        return catalogPhotos?.sort((a, b) =>
-            sortOrder === 'descending'
-                ? // @ts-ignore
-                  a[sortField] > b[sortField]
+    const sortedCatalog = useMemo(
+        () =>
+            itemsCatalog?.sort((a, b) => {
+                return sortOrder === 'descending'
+                    ? a[sortField] > b[sortField]
+                        ? 1
+                        : -1
+                    : a[sortField] < b[sortField]
                     ? 1
                     : -1
-                : // @ts-ignore
-                a[sortField] < b[sortField]
-                ? 1
-                : -1
-        )
-    }, [catalogPhotos, sortOrder, sortField])
+            }),
+        [itemsCatalog, sortOrder, sortField]
+    )
 
-    const handlerSortClick = (field: TObjectSortable) => {
+    const handlerSortClick = (field: TSortKey) => {
         if (sortField !== field) setSortField(field)
         else
             setSortOrder(sortOrder === 'ascending' ? 'descending' : 'ascending')
     }
-
-    // const handlerShowEditModal = () => {
-    //
-    // }
 
     return (
         <div className='box table'>
@@ -74,13 +86,11 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                 <RenderTableHeader
                     sort={sortField}
                     order={sortOrder}
-                    handlerSortClick={(field: TObjectSortable) =>
-                        handlerSortClick(field)
-                    }
+                    handlerSortClick={handlerSortClick}
                 />
                 <Table.Body>
-                    {listSortedObjects?.length ? (
-                        listSortedObjects.map((item) => (
+                    {sortedCatalog?.length ? (
+                        sortedCatalog.map((item) => (
                             <RenderTableRow
                                 key={item.name}
                                 item={item}
@@ -94,7 +104,15 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                             />
                         ))
                     ) : (
-                        <RowNoData />
+                        <Table.Row>
+                            <Table.Cell
+                                textAlign={'center'}
+                                colSpan={HeaderFields.length}
+                                content={
+                                    'Ничего не найдено, попробуйте изменить условия поиска'
+                                }
+                            />
+                        </Table.Row>
                     )}
                 </Table.Body>
             </Table>
@@ -107,15 +125,5 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
         </div>
     )
 }
-
-const RowNoData: React.FC = () => (
-    <Table.Row>
-        <Table.Cell
-            textAlign={'center'}
-            colSpan={HEADER_FIELDS.length}
-            content={'Ничего не найдено, попробуйте изменить условия поиска'}
-        />
-    </Table.Row>
-)
 
 export default ObjectTable

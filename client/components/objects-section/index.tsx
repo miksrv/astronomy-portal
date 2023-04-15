@@ -24,12 +24,17 @@ type TObjectHeaderProps = {
 const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
     const { title, loader, catalog, object, deviationRa, deviationDec } = props
     const userLogin = useAppSelector((state) => state.auth.status)
-    const date = object
-        ? moment.utc(object.date).utcOffset('GMT+05:00').format('D.MM.Y, H:mm')
+    const date = catalog?.updated
+        ? moment
+              .utc(catalog.updated)
+              .utcOffset('GMT+05:00')
+              .format('D.MM.Y, H:mm')
         : '---'
-    const exposure = object ? getTimeFromSec(object.exposure, true) : '---'
-    const size = object
-        ? Math.round((object.filesizes / 1024) * 100) / 100
+    const exposure = catalog
+        ? getTimeFromSec(catalog.statistic.exposure, true)
+        : '---'
+    const size = catalog
+        ? Math.round((catalog.statistic.data_size / 1024) * 100) / 100
         : '---'
 
     const [editModalVisible, setEditModalVisible] = useState<boolean>(false)
@@ -73,37 +78,37 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                                 <div>
                                     <span className={styles.value}>
                                         Категория:
-                                    </span>{' '}
+                                    </span>
                                     {catalog?.category || '---'}
                                 </div>
                                 <div>
                                     <span className={styles.value}>
                                         Последний кадр:
-                                    </span>{' '}
+                                    </span>
                                     {date}
                                 </div>
                                 <div>
                                     <span className={styles.value}>
                                         Сделано кадров:
-                                    </span>{' '}
-                                    {object?.frames || '---'}
+                                    </span>
+                                    {catalog?.statistic.frames || '---'}
                                 </div>
                                 <div>
                                     <span className={styles.value}>
                                         Общая выдержка:
-                                    </span>{' '}
+                                    </span>
                                     {exposure}
                                 </div>
                                 <div>
                                     <span className={styles.value}>
                                         Накоплено данных:
-                                    </span>{' '}
+                                    </span>
                                     {size} Гб
                                 </div>
                                 <div>
                                     <span className={styles.value}>
                                         Отклонение (RA / DEC):
-                                    </span>{' '}
+                                    </span>
                                     {deviationRa} / {deviationDec}{' '}
                                 </div>
                             </div>
@@ -119,9 +124,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                             tablet={8}
                             mobile={16}
                         >
-                            {!loader && object && (
-                                <FilterList filters={object.filters} />
-                            )}
+                            <FilterList filters={catalog?.filters} />
                         </Grid.Column>
                     </Grid>
                 </Grid.Column>
@@ -135,9 +138,9 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                         <CelestialMap
                             objects={[
                                 {
-                                    dec: catalog.dec,
+                                    dec: catalog.coord_dec,
                                     name: catalog.name,
-                                    ra: catalog.ra
+                                    ra: catalog.coord_ra
                                 }
                             ]}
                         />

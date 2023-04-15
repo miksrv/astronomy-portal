@@ -30,7 +30,7 @@ const RenderTableRow: React.FC<TTableRowProps> = ({ photo }) => (
                 title={`Перейти к другой фотографии объекта ${photo.object}`}
             >
                 <Image
-                    src={`${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`}
+                    src={`${process.env.NEXT_PUBLIC_IMG_HOST}public/photo/${photo.image_name}_thumb.${photo.image_ext}`}
                     className={styles.photo}
                     alt={`Другой вариант фотографии объекта ${photo.object}`}
                     width={80}
@@ -39,18 +39,18 @@ const RenderTableRow: React.FC<TTableRowProps> = ({ photo }) => (
             </Link>
         </Table.Cell>
         <Table.Cell content={moment(photo.date).format('DD.MM.Y')} />
-        <Table.Cell content={photo.parameters?.frames} />
+        <Table.Cell content={photo.statistic?.frames} />
         <Table.Cell
             content={
-                photo.parameters
-                    ? getTimeFromSec(photo.parameters?.exposure, true)
+                photo.statistic
+                    ? getTimeFromSec(photo.statistic?.exposure, true)
                     : '---'
             }
         />
         {FILTERS.map((filter) => (
             <Table.Cell
                 className={
-                    photo.parameters?.filters[filter] &&
+                    photo?.filters[filter] &&
                     photo.parameters?.filters[filter].frames > 0
                         ? `filter-${filter}`
                         : ''
