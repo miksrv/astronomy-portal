@@ -8,50 +8,49 @@ import MoonPhase from '@/components/moon-phase'
 import styles from './styles.module.sass'
 
 type TTableRow = {
-    item: TFIle
+    file: TFIle
     itemId: number
     object: string
     onPhotoClick: (photoId: number) => void
 }
 
-const RenderTableRow: React.FC<TTableRow> = (props) => {
-    const { item, itemId, object, onPhotoClick } = props
-
-    return (
-        <Table.Row>
-            <Table.Cell>
-                {item.image ? (
-                    <Image
-                        className={styles.fitsImage}
-                        onClick={() => onPhotoClick(itemId)}
-                        src={`${process.env.NEXT_PUBLIC_API_HOST}uploads/${object}/${item.name}_thumb.jpg`}
-                    />
-                ) : (
-                    ''
-                )}
-                {item.name}
-            </Table.Cell>
-            <Table.Cell>{item.exposure}</Table.Cell>
-            <Table.Cell className={`filter-${item.filter}`}>
-                {item.filter}
-            </Table.Cell>
-            <Table.Cell>{item.temp}</Table.Cell>
-            <Table.Cell>{item.gain}</Table.Cell>
-            <Table.Cell>{item.offset}</Table.Cell>
-            <Table.Cell>{item.stars}</Table.Cell>
-            <Table.Cell>{item.sky}</Table.Cell>
-            <Table.Cell>{item.hfr}</Table.Cell>
-            <Table.Cell>
-                <MoonPhase
-                    date={moment.utc(item.date).utcOffset('GMT+05:00')}
+const RenderTableRow: React.FC<TTableRow> = ({
+    file,
+    itemId,
+    object,
+    onPhotoClick
+}) => (
+    <Table.Row>
+        <Table.Cell>
+            {file.image ? (
+                <Image
+                    className={styles.fitsImage}
+                    onClick={() => onPhotoClick(itemId)}
+                    src={`${process.env.NEXT_PUBLIC_IMG_HOST}uploads/${object}/${file.file_name}_thumb.jpg`}
                 />
-                {moment
-                    .utc(item.date)
-                    .utcOffset('GMT+05:00')
-                    .format('D.MM.Y, H:mm')}
-            </Table.Cell>
-        </Table.Row>
-    )
-}
+            ) : (
+                ''
+            )}
+            {file.file_name}
+        </Table.Cell>
+        <Table.Cell>{file.exptime}</Table.Cell>
+        <Table.Cell className={styles[file.filter]}>{file.filter}</Table.Cell>
+        <Table.Cell>{file.ccd_temp}</Table.Cell>
+        <Table.Cell>{file.gain}</Table.Cell>
+        <Table.Cell>{file.offset}</Table.Cell>
+        <Table.Cell>{file.star_count}</Table.Cell>
+        <Table.Cell>{file.sky_background}</Table.Cell>
+        <Table.Cell>{file.hfr}</Table.Cell>
+        <Table.Cell>
+            <MoonPhase
+                date={moment.utc(file.date_obs).utcOffset('GMT+05:00')}
+            />
+            {moment
+                .utc(file.date_obs)
+                .utcOffset('GMT+05:00')
+                .format('D.MM.Y, H:mm')}
+        </Table.Cell>
+    </Table.Row>
+)
 
 export default RenderTableRow

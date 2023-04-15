@@ -1,10 +1,9 @@
 import {
-    getCatalogList, // getObjectList,
+    getCatalogList,
     getPhotoList,
     getRunningQueriesThunk,
     useGetCatalogListQuery,
     useGetCategoriesListQuery,
-    useGetObjectListQuery,
     useGetPhotoListQuery
 } from '@/api/api'
 import { wrapper } from '@/api/store'
@@ -17,7 +16,6 @@ import ObjectsTableToolbar from '@/components/objects-table-toolbar'
 
 export const getStaticProps = wrapper.getStaticProps((store) => async () => {
     store.dispatch(getCatalogList.initiate())
-    // store.dispatch(getObjectList.initiate())
     store.dispatch(getPhotoList.initiate())
 
     await Promise.all(store.dispatch(getRunningQueriesThunk()))
@@ -46,9 +44,9 @@ const Objects: React.FC = () => {
                         item.title
                             ?.toLowerCase()
                             .includes(search.toLowerCase())) &&
-                    (!categories.length || categories.includes(item?.category))
+                    (!categories?.length || categories.includes(item?.category))
             ),
-        [search, categories]
+        [catalogData?.items, search, categories]
     )
 
     return (
@@ -79,6 +77,7 @@ const Objects: React.FC = () => {
                 loading={catalogLoading || photoLoading}
                 catalog={filteredCatalog}
                 photos={photoData?.items}
+                categories={categoriesData?.items}
             />
         </main>
     )

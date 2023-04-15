@@ -9,7 +9,7 @@ class CatalogLibrary
         'Luminance' => 'luminance',
         'Red'       => 'red',
         'Green'     => 'green',
-        'Blue'      => 'green',
+        'Blue'      => 'blue',
         'Ha'        => 'hydrogen',
         'OIII'      => 'oxygen',
         'SII'       => 'sulfur',
@@ -28,9 +28,10 @@ class CatalogLibrary
 
         $objectStatistic = $this->_getObjectStatistic($filesItems);
 
+        $catalogItem->updated   = $objectStatistic->lastUpdatedDate;
         $catalogItem->statistic = $objectStatistic->objectStatistic ?? [];
         $catalogItem->filters   = $objectStatistic->filterStatistic ?? [];
-        $catalogItem->files     = $filesItems;
+        $catalogItem->files     = $this->_mapFilesFilters($filesItems);
 
         unset($catalogItem->created_at, $catalogItem->updated_at, $catalogItem->deleted_at);
 
@@ -51,6 +52,7 @@ class CatalogLibrary
         {
             $objectStatistic = $this->_getObjectStatistic($filesList, $item->name);
 
+            $item->updated   = $objectStatistic->lastUpdatedDate;
             $item->statistic = $objectStatistic->objectStatistic;
             $item->filters   = $objectStatistic->filterStatistic;
 
@@ -58,6 +60,16 @@ class CatalogLibrary
         }
 
         return $catalogList;
+    }
+
+    protected function _mapFilesFilters(array $files): array
+    {
+        foreach ($files as $key => $file)
+        {
+            $file->filter = $this->filterEnum[$file->filter] ?? 'unknown';
+        }
+
+        return $files;
     }
 
     protected function _getObjectStatistic(
@@ -68,6 +80,7 @@ class CatalogLibrary
         if (!$filesItems)
             return null;
 
+        $lastUpdatedDate = '';
         $filterStatistic = (object) [];
         $objectStatistic = (object) [
             'frames'    => 0,
@@ -79,6 +92,12 @@ class CatalogLibrary
         {
             if ($object && $object !== $file->object)
                 continue;
+
+            if (!$lastUpdatedDate) {
+                $lastUpdatedDate = $file->date_obs;
+            } else {
+                $lastUpdatedDate = max($lastUpdatedDate, $file->date_obs);
+            }
 
             $filterName = $this->filterEnum[$file->filter] ?? 'unknown';
 
@@ -103,7 +122,8 @@ class CatalogLibrary
 
         return (object) [
             'filterStatistic' => $filterStatistic,
-            'objectStatistic' => $objectStatistic
+            'objectStatistic' => $objectStatistic,
+            'lastUpdatedDate' => $lastUpdatedDate
         ];
     }
 }

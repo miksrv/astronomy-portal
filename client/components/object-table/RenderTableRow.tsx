@@ -1,15 +1,17 @@
 import { useAppSelector } from '@/api/hooks'
-import { TCatalog, TFilterTypes, TPhoto } from '@/api/types'
+import { TFilterTypes, TPhoto } from '@/api/types'
 import { getTimeFromSec, isOutdated } from '@/functions/helpers'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useMemo } from 'react'
 import { Icon, Popup, Table } from 'semantic-ui-react'
 
+import { TTableItem } from '@/components/object-table/types'
+
 import styles from './styles.module.sass'
 
 type TTableRowProps = {
-    item: TCatalog
+    item: TTableItem
     photo?: TPhoto
     onShowEdit?: (item: string) => void
 }
@@ -49,7 +51,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                     trigger={
                         <Link
                             href={`/objects/${item.name}`}
-                            title={`${item.category} ${
+                            title={`${
                                 item.title || item.name
                             } - Подробная информация об объекте`}
                         >
@@ -90,37 +92,31 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                             height={18}
                             alt={`${item.title || item.name} - Фотография`}
                         />
-                        {/*{isOutdated(photoItem.date, item.date) && (*/}
-                        {/*    <Popup*/}
-                        {/*        content={*/}
-                        {/*            'Фотография устарела, так как есть новые данные ' +*/}
-                        {/*            'с телескопа, с помощью которых можно собрать новое изображение объекта'*/}
-                        {/*        }*/}
-                        {/*        size={'mini'}*/}
-                        {/*        trigger={*/}
-                        {/*            <Icon*/}
-                        {/*                name={'clock outline'}*/}
-                        {/*                className={styles.outdatedIcon}*/}
-                        {/*            />*/}
-                        {/*        }*/}
-                        {/*    />*/}
-                        {/*)}*/}
+                        {isOutdated(photo.date, item.updated) && (
+                            <Popup
+                                content={
+                                    'Фотография устарела, так как есть новые данные ' +
+                                    'с телескопа, с помощью которых можно собрать новое изображение объекта'
+                                }
+                                size={'mini'}
+                                trigger={
+                                    <Icon
+                                        name={'clock outline'}
+                                        className={styles.outdatedIcon}
+                                    />
+                                }
+                            />
+                        )}
                     </Link>
                 )}
             </Table.Cell>
-            <Table.Cell content={item.statistic.frames} />
-            <Table.Cell content={getTimeFromSec(item.statistic.exposure)} />
+            <Table.Cell content={item.frames} />
+            <Table.Cell content={getTimeFromSec(item.exposure)} />
             {FILTERS.map((filter) => (
                 <Table.Cell
                     key={filter}
-                    className={
-                        item?.filters?.[filter]?.exposure
-                            ? styles[filter]
-                            : undefined
-                    }
-                    content={getTimeFromSec(
-                        item?.filters?.[filter]?.exposure || 0
-                    )}
+                    className={item?.[filter] ? styles[filter] : undefined}
+                    content={getTimeFromSec(item?.[filter] || 0)}
                 />
             ))}
         </Table.Row>

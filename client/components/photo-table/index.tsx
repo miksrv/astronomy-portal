@@ -16,7 +16,7 @@ type THeaderFields = {
     name: string
 }
 
-const HEADER_FIELDS: THeaderFields[] = [
+const HeaderFields: THeaderFields[] = [
     { key: 'photo', name: 'Фото' },
     { key: 'date', name: 'Дата' },
     { key: 'frames', name: 'Кадров' },
@@ -48,7 +48,7 @@ const PhotoTable: React.FC<TPhotoTableProps> = (props) => {
             >
                 <Table.Header>
                     <Table.Row>
-                        {HEADER_FIELDS.map((item, key) => (
+                        {HeaderFields.map((item, key) => (
                             <Table.HeaderCell key={key}>
                                 {item.name}
                             </Table.HeaderCell>
@@ -56,12 +56,22 @@ const PhotoTable: React.FC<TPhotoTableProps> = (props) => {
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {photos?.map((photo, key) => (
-                        <RenderTableRow
-                            photo={photo}
-                            key={key}
-                        />
-                    ))}
+                    {photos?.length ? (
+                        photos.map((photo, key) => (
+                            <RenderTableRow
+                                photo={photo}
+                                key={key}
+                            />
+                        ))
+                    ) : (
+                        <Table.Row>
+                            <Table.Cell
+                                textAlign={'center'}
+                                colSpan={HeaderFields.length}
+                                content={'Астрофотографй объекта не найдено'}
+                            />
+                        </Table.Row>
+                    )}
                 </Table.Body>
             </Table>
         </div>

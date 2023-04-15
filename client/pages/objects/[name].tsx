@@ -1,18 +1,9 @@
 import {
-    getCatalogItem,
-    getCatalogList,
-    getObjectFiles,
-    getObjectItem,
-    getObjectNames,
-    getPhotoList,
-    getRunningQueriesThunk,
     useGetCatalogItemQuery,
-    useGetObjectFilesQuery,
-    useGetObjectItemQuery,
-    useGetObjectNamesQuery,
-    useGetPhotoListItemQuery
+    useGetPhotoListQuery,
+    useGetStatisticCatalogItemsQuery
 } from '@/api/api'
-import { store, wrapper } from '@/api/store'
+// import { store, wrapper } from '@/api/store'
 import { isOutdated } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { NextSeo } from 'next-seo'
@@ -29,42 +20,46 @@ import ObjectCloud from '@/components/object-cloud'
 import ObjectSection from '@/components/objects-section'
 import PhotoTable from '@/components/photo-table'
 
-export async function getStaticPaths() {
-    const storeObject = store()
-    const result = await storeObject.dispatch(getCatalogList.initiate())
+// export const getStaticPaths = async () => {
+//     const storeObject = store()
+//     const result = await storeObject.dispatch(
+//         getStatisticCatalogItems.initiate()
+//     )
+//
+//     return {
+//         fallback: false,
+//         // paths: ['/objects/M_1']
+//         paths: result.data?.items.map((item) => ({ params: { name: item } }))
+//
+//         // [
+//         //     { params: { name: 'IC_1396' } }
+//         // ]
+//         // paths: result.data?.items.map((item) => `/objects/${item}`)
+//     }
+// }
 
-    console.log(
-        'process.env.NEXT_PUBLIC_API_HOST',
-        process.env.NEXT_PUBLIC_API_HOST
-    )
-
-    return {
-        fallback: false,
-        paths: result.data?.payload.map((item) => `/objects/${item.name}`)
-    }
-}
-
-export const getStaticProps = wrapper.getStaticProps(
-    (store) => async (context) => {
-        const name = context.params?.name
-
-        if (typeof name === 'string') {
-            store.dispatch(getCatalogList.initiate())
-            store.dispatch(getObjectNames.initiate())
-            store.dispatch(getPhotoList.initiate(name))
-            store.dispatch(getObjectItem.initiate(name))
-            store.dispatch(getCatalogItem.initiate(name))
-            store.dispatch(getObjectFiles.initiate(name))
-            store.dispatch(getObjectFiles.initiate(name))
-        }
-
-        await Promise.all(store.dispatch(getRunningQueriesThunk()))
-
-        return {
-            props: { object: {} }
-        }
-    }
-)
+// export const getStaticProps = wrapper.getStaticProps(
+//     (store) => async (context) => {
+//         const name = context.params?.name
+//
+//         if (typeof name === 'string') {
+//             store.dispatch(getStatisticCatalogItems.initiate())
+//             // store.dispatch(getCatalogList.initiate())
+//             //     store.dispatch(getObjectNames.initiate())
+//             //     store.dispatch(getPhotoList.initiate({ object: name }))
+//             //     store.dispatch(getObjectItem.initiate(name))
+//             //     store.dispatch(getCatalogItem.initiate(name))
+//             //     store.dispatch(getObjectFiles.initiate(name))
+//             //     store.dispatch(getObjectFiles.initiate(name))
+//         }
+//
+//         await Promise.all(store.dispatch(getRunningQueriesThunk()))
+//
+//         return {
+//             props: {}
+//         }
+//     }
+// )
 
 const Object: React.FC = () => {
     const router = useRouter()
@@ -72,109 +67,120 @@ const Object: React.FC = () => {
     const objectName =
         typeof routerObject === 'string' ? routerObject : skipToken
 
-    const {
-        data: dataObject,
-        isFetching: objectLoading,
-        isError
-    } = useGetObjectItemQuery(objectName, { skip: router.isFallback })
-    const { data: dataCatalog, isFetching: catalogLoading } =
-        useGetCatalogItemQuery(objectName, { skip: router.isFallback })
-    const { data: dataPhotos, isFetching: loadingPhotos } =
-        useGetPhotoListItemQuery(objectName, {
+    const { data: photosData, isLoading: photosLoading } = useGetPhotoListQuery(
+        { object: typeof objectName === 'string' ? objectName : '' },
+        {
+            skip: router.isFallback
+        }
+    )
+
+    const { data: catalogData, isLoading: catalogLoading } =
+        useGetCatalogItemQuery(objectName, {
             skip: router.isFallback
         })
-    const { data: dataFiles, isFetching: fileLoading } = useGetObjectFilesQuery(
-        objectName,
-        { skip: router.isFallback }
-    )
-    const { data: dataNames, isFetching: namesLoading } =
-        useGetObjectNamesQuery()
+
+    const { data: catalogObjects, isLoading: objectsLoading } =
+        useGetStatisticCatalogItemsQuery()
+
+    // const {
+    //     data: dataObject,
+    //     isFetching: objectLoading,
+    //     isError
+    // } = useGetObjectItemQuery(objectName, { skip: router.isFallback })
+    // const { data: dataCatalog, isFetching: catalogLoading } =
+    //     useGetCatalogItemQuery(objectName, { skip: router.isFallback })
+    // const { data: dataPhotos, isFetching: loadingPhotos } =
+    //     useGetPhotoListItemQuery(objectName, {
+    //         skip: router.isFallback
+    //     })
+    // const { data: dataFiles, isFetching: fileLoading } = useGetObjectFilesQuery(
+    //     objectName,
+    //     { skip: router.isFallback }
+    // )
+    // const { data: dataNames, isFetching: namesLoading } =
+    //     useGetObjectNamesQuery()
 
     const objectTitle = React.useMemo(
-        () =>
-            dataCatalog?.payload
-                ? dataCatalog.payload?.title || dataCatalog.payload.name
-                : objectName.toString(),
-        [dataCatalog, objectName]
+        () => catalogData?.title || catalogData?.name || objectName.toString(),
+        [catalogData, objectName]
     )
 
-    const chartData: [number, number][] = []
-    const chartRa: number[] = []
-    const chartDec: number[] = []
-    const chartHFR: number[] = []
-    const chartSNR: number[] = []
+    const [chartData, setChartData] = React.useState<[number, number][]>([])
+    const [chartRa, setChartRa] = React.useState<number[]>([])
+    const [chartDec, setChartDec] = React.useState<number[]>([])
+    const [chartHFR, setChartHFR] = React.useState<number[]>([])
+    const [chartSNR, setChartSNR] = React.useState<number[]>([])
+    const [devRa, setDevRa] = React.useState<number>(0)
+    const [devDec, setDevDec] = React.useState<number>(0)
 
-    let deviationRa: number = 0
-    let deviationDec: number = 0
+    React.useEffect(() => {
+        if (catalogData?.files?.length) {
+            let middleRa = 0
+            let middleDec = 0
+            let counter = 0
+            let tmpChartData: [number, number][] = []
+            let tmpChartRa: number[] = []
+            let tmpChartDec: number[] = []
+            let tmpChartHFR: number[] = []
+            let tmpChartSNR: number[] = []
 
-    if (isError) {
-        return <div>Возникла ошибка на сервер</div>
-    }
+            catalogData?.files.forEach((item) => {
+                middleRa += item.ra
+                middleDec += item.dec
+                counter += 1
 
-    if (dataObject?.status === false || dataCatalog?.status === false) {
-        return <div>Что-то пошло не так, такого объекта нет</div>
-    }
+                tmpChartData.push([item.ra, item.dec])
+                tmpChartRa.push(item.ra)
+                tmpChartDec.push(item.dec)
 
-    if (dataFiles?.payload) {
-        let middleRa = 0
-        let middleDec = 0
-        let counter = 0
+                if (item.hfr) {
+                    tmpChartHFR.push(item.hfr)
+                }
 
-        dataFiles.payload.forEach((item) => {
-            middleRa += item.ra
-            middleDec += item.dec
-            counter += 1
+                if (item.sky_background) {
+                    tmpChartSNR.push(item.sky_background)
+                }
+            })
 
-            chartData.push([item.ra, item.dec])
-            chartRa.push(item.ra)
-            chartDec.push(item.dec)
+            setDevRa(Math.max(...tmpChartRa) - Math.min(...tmpChartRa))
+            setDevDec(Math.max(...tmpChartDec) - Math.min(...tmpChartDec))
+            setChartDec(tmpChartDec)
+            setChartRa(tmpChartRa)
+            setChartData(tmpChartData)
+            setChartHFR(tmpChartHFR)
+            setChartSNR(tmpChartSNR)
 
-            if (item.hfr !== 0) {
-                chartHFR.push(item.hfr)
-            }
-
-            if (item.sky !== 0) {
-                chartSNR.push(item.sky)
-            }
-        })
-
-        deviationRa = Math.max(...chartRa) - Math.min(...chartRa)
-        deviationDec = Math.max(...chartDec) - Math.min(...chartDec)
-
-        chart_coordinates.xAxis.plotLines[0].value = middleRa / counter
-        chart_coordinates.yAxis.plotLines[0].value = middleDec / counter
-    }
+            chart_coordinates.xAxis.plotLines[0].value = middleRa / counter
+            chart_coordinates.yAxis.plotLines[0].value = middleDec / counter
+        }
+    }, [catalogData?.files])
 
     return (
         <main>
             <NextSeo
                 title={`${objectTitle} - Данные астрономического объекта`}
-                description={dataCatalog?.payload?.text
+                description={catalogData?.text
                     .replace(/(\r\n|\n|\r)/gm, '')
                     .slice(0, 200)}
                 openGraph={{
-                    images: [
-                        {
-                            height: 743,
-                            url: `${process.env.NEXT_PUBLIC_API_HOST}public/photo/${dataPhotos?.payload?.[0].file}_thumb.${dataPhotos?.payload?.[0]?.ext}`,
-                            width: 1280
-                        }
-                    ],
+                    // images: [
+                    //     {
+                    //         height: 743,
+                    //         url: `${process.env.NEXT_PUBLIC_IMG_HOST}public/photo/${dataPhotos?.payload?.[0].image_name}_thumb.${dataPhotos?.payload?.[0]?.image_ext}`,
+                    //         width: 1280
+                    //     }
+                    // ],
                     locale: 'ru'
                 }}
             />
             <ObjectSection
                 title={objectTitle}
-                loader={objectLoading || catalogLoading}
-                catalog={dataCatalog?.payload}
-                object={dataObject?.payload}
-                deviationRa={Math.round(deviationRa * 100) / 100}
-                deviationDec={Math.round(deviationDec * 100) / 100}
+                loader={catalogLoading}
+                catalog={catalogData}
+                deviationRa={Math.round(devRa * 100) / 100}
+                deviationDec={Math.round(devDec * 100) / 100}
             />
-            {isOutdated(
-                dataPhotos?.payload?.[0].date!,
-                dataObject?.payload.date!
-            ) ? (
+            {isOutdated(photosData?.items?.[0].date!, catalogData?.updated!) ? (
                 <Message
                     warning
                     icon={'warning sign'}
@@ -187,8 +193,8 @@ const Object: React.FC = () => {
                 <br />
             )}
             <PhotoTable
-                photos={dataPhotos?.payload}
-                loader={loadingPhotos}
+                photos={photosData?.items}
+                loader={photosLoading}
             />
             <br />
             <Grid>
@@ -198,7 +204,7 @@ const Object: React.FC = () => {
                     mobile={16}
                 >
                     <Chart
-                        loader={fileLoading}
+                        loader={catalogLoading}
                         config={chart_coordinates}
                         data={[chartData]}
                     />
@@ -209,15 +215,15 @@ const Object: React.FC = () => {
                     mobile={16}
                 >
                     <Chart
-                        loader={fileLoading}
+                        loader={catalogLoading}
                         config={chart_coordlines}
                         data={[chartRa, chartDec]}
                     />
                 </Grid.Column>
-                {chartHFR.length ? (
+                {chartHFR.length > 0 ? (
                     <Grid.Column width={16}>
                         <Chart
-                            loader={fileLoading}
+                            loader={catalogLoading}
                             config={chart_statistic}
                             data={[chartHFR, chartSNR]}
                         />
@@ -228,15 +234,15 @@ const Object: React.FC = () => {
             </Grid>
             <br />
             <FilesTable
-                loader={fileLoading}
-                object={typeof objectName === 'string' ? objectName : ''}
-                files={dataFiles?.payload!}
+                loader={catalogLoading}
+                objectName={typeof objectName === 'string' ? objectName : ''}
+                files={catalogData?.files}
             />
             <br />
             <ObjectCloud
-                loader={namesLoading}
+                loader={objectsLoading}
                 current={typeof objectName === 'string' ? objectName : ''}
-                names={dataNames?.payload}
+                names={catalogObjects?.items}
                 link={'objects'}
             />
         </main>

@@ -5,8 +5,10 @@ import { RootState } from './store'
 import {
     APIRequestCategories,
     APIRequestPhotos,
-    APIResponseCatalog,
+    APIResponseCatalogList,
+    APIResponseCatalogNames,
     APIResponsePhotos,
+    APIResponsePhotosNames,
     APIResponseStatistic,
     ICredentials,
     IRelayList,
@@ -22,7 +24,8 @@ import {
     IRestPhotoList,
     IRestSensorStatistic,
     IRestWeatherCurrent,
-    IRestWeatherMonth
+    IRestWeatherMonth,
+    TCatalog
 } from './types'
 
 type Maybe<T> = T | void
@@ -30,6 +33,17 @@ type Maybe<T> = T | void
 type TQueryNewsList = {
     limit?: number
     offset?: number
+}
+
+const encodeQueryData = (data: any): string => {
+    const ret = []
+    for (let d in data) {
+        if (d && data[d]) {
+            ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(data[d]))
+        }
+    }
+
+    return ret.length ? '?' + ret.join('&') : ''
 }
 
 export const api = createApi({
@@ -45,12 +59,14 @@ export const api = createApi({
         }
     }),
     endpoints: (builder) => ({
-        // Список объектов каталога
-        getCatalogItem: builder.query<IRestCatalogItem, string>({
-            query: (name) => `get/catalog/item?object=${name}`
+        getCatalogItem: builder.query<TCatalog, string>({
+            query: (object) => `catalog/${object}`
         }),
-
-        getCatalogList: builder.query<APIResponseCatalog, void>({
+        // Список объектов каталога
+        // getCatalogItem: builder.query<IRestCatalogItem, string>({
+        //     query: (name) => `get/catalog/item?object=${name}`
+        // }),
+        getCatalogList: builder.query<APIResponseCatalogList, void>({
             query: () => 'catalog'
         }),
 
@@ -100,13 +116,10 @@ export const api = createApi({
             query: () => 'get/object/names'
         }),
 
-        // PHOTO
-        // Список фотографий без характеристик
         getPhotoList: builder.query<APIResponsePhotos, Maybe<APIRequestPhotos>>(
             {
                 keepUnusedDataFor: 3600,
-                query: (params) =>
-                    `photo${params?.limit ? `?limit=${params.limit}` : ''}`
+                query: (params) => `photo${encodeQueryData(params)}`
             }
         ),
 
@@ -130,12 +143,15 @@ export const api = createApi({
         getSensorStatistic: builder.query<IRestSensorStatistic, void>({
             query: () => 'get/sensors/statistic'
         }),
-        // STATISTIC
 
-        /** Statistic **/
         getStatistic: builder.query<APIResponseStatistic, void>({
-            keepUnusedDataFor: 3600,
             query: () => 'statistic'
+        }),
+        getStatisticCatalogItems: builder.query<APIResponseCatalogNames, void>({
+            query: () => 'statistic/catalog'
+        }),
+        getStatisticPhotosItems: builder.query<APIResponsePhotosNames, void>({
+            query: () => 'statistic/photos'
         }),
 
         // Текущая погода
@@ -189,6 +205,8 @@ export const api = createApi({
 // Export hooks for usage in functional components
 export const {
     useGetStatisticQuery,
+    useGetStatisticCatalogItemsQuery,
+    useGetStatisticPhotosItemsQuery,
     useGetCatalogListQuery,
     useGetPhotoListQuery,
     useGetCategoriesListQuery,
@@ -222,5 +240,8 @@ export const {
     getObjectList,
     getObjectFiles,
     getObjectNames,
-    getNewsList
+    getNewsList,
+
+    getStatisticCatalogItems,
+    getStatisticPhotosItems
 } = api.endpoints

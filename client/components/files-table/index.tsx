@@ -9,20 +9,20 @@ import { TObjectSortable, TSortOrdering } from './types'
 
 type TFilesTableProps = {
     loader: boolean
-    object: string
-    files: TFIle[]
+    objectName: string
+    files?: TFIle[]
 }
 
 const FilesTable: React.FC<TFilesTableProps> = (props) => {
-    const { files, object, loader } = props
+    const { files, objectName, loader } = props
 
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setCurrentIndex] = useState<number>(0)
     const [photoList, setPhotoList] = useState<string[]>([])
-    const [sortField, setSortField] = useState<TObjectSortable>('date')
+    const [sortField, setSortField] = useState<TObjectSortable>('date_obs')
     const [sortOrder, setSortOrder] = useState<TSortOrdering>('ascending')
     const [showAccordion, setAccordion] = useState<boolean>(false)
-    const [filesList, setFilesList] = useState<TFIle[]>(files)
+    const [filesList, setFilesList] = useState<TFIle[] | undefined>(files)
 
     const handlerSortClick = (field: TObjectSortable) => {
         if (sortField !== field) setSortField(field)
@@ -36,33 +36,31 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
     }
 
     const doSortObjects = useCallback(() => {
-        const filesListSort = files
-            ?.slice()
-            .sort((first, second) =>
-                sortOrder === 'descending'
-                    ? first[sortField] > second[sortField]
-                        ? 1
-                        : -1
-                    : first[sortField] < second[sortField]
+        const sortingFilesList = [...(files || [])].sort((a, b) =>
+            sortOrder === 'descending'
+                ? a[sortField] > b[sortField]
                     ? 1
                     : -1
-            )
+                : a[sortField] < b[sortField]
+                ? 1
+                : -1
+        )
 
-        if (filesListSort?.length) {
-            setFilesList(filesListSort)
+        if (sortingFilesList?.length) {
+            setFilesList(sortingFilesList)
         }
     }, [files, sortOrder, sortField])
 
     useEffect(() => {
         const photoList = filesList
-            .filter((file) => file.image)
+            ?.filter((file) => file.image)
             .map(
-                ({ name }) =>
-                    `${process.env.NEXT_PUBLIC_API_HOST}uploads/${object}/${name}.jpg`
+                ({ file_name }) =>
+                    `${process.env.NEXT_PUBLIC_IMG_HOST}uploads/${objectName}/${file_name}.jpg`
             )
 
-        setPhotoList(photoList)
-    }, [filesList, object])
+        setPhotoList(photoList || [])
+    }, [filesList, objectName])
 
     useEffect(() => {
         doSortObjects()
@@ -81,7 +79,7 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
                     <Icon name={'dropdown'} /> Список снятых кадров
                 </Accordion.Title>
                 <Accordion.Content active={showAccordion}>
-                    {filesList.length ? (
+                    {filesList?.length ? (
                         <Table
                             sortable
                             celled
@@ -97,13 +95,13 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
                                 }
                             />
                             <Table.Body>
-                                {filesList.map((item, key) => (
+                                {filesList.map((file, key) => (
                                     <RenderTableRow
-                                        item={item}
+                                        file={file}
                                         itemId={key}
-                                        object={object}
+                                        object={objectName}
                                         onPhotoClick={handlePhotoClick}
-                                        key={item.name}
+                                        key={file.file_name}
                                     />
                                 ))}
                             </Table.Body>
