@@ -1,4 +1,4 @@
-import { TCatalog, TPhoto, TPhotoAuthor } from '@/api/types'
+import { TCatalog, TPhoto } from '@/api/types'
 import { getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
 import moment from 'moment'
@@ -18,23 +18,29 @@ import styles from './styles.module.sass'
 
 type TPhotoItemHeaderProps = {
     loader: boolean
+    error?: boolean
     title?: string
     photo?: TPhoto
     catalog?: TCatalog
 }
 
-const Author = (data: TPhotoAuthor) =>
-    data.link ? (
+type TPhotoAuthorProps = {
+    name?: string
+    link?: string
+}
+
+const Author: React.FC<TPhotoAuthorProps> = ({ name, link }) =>
+    link ? (
         <a
-            href={data.link}
-            title={data.name}
+            href={link}
+            title={name}
             target='_blank'
             rel='noreferrer'
         >
-            {data.name}
+            {name}
         </a>
     ) : (
-        data.name
+        <span>{name || ''}</span>
     )
 
 const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
@@ -49,12 +55,12 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
     const photoDate = photo ? moment.utc(photo.date).format('D.MM.Y') : '---'
 
     const exposure =
-        !loader && photo?.parameters
-            ? getTimeFromSec(photo.parameters?.exposure, true)
+        !loader && photo?.statistic?.exposure
+            ? getTimeFromSec(photo.statistic.exposure, true)
             : '---'
     const filesize =
-        !loader && photo?.parameters
-            ? Math.round((photo?.parameters.filesizes / 1024) * 100) / 100
+        !loader && photo?.statistic?.data_size
+            ? Math.round((photo.statistic.data_size / 1024) * 100) / 100
             : '---'
 
     return (
@@ -78,12 +84,14 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                         height={400}
                         src={
                             !loader && photo
-                                ? `${process.env.NEXT_PUBLIC_API_HOST}public/photo/${photo.file}_thumb.${photo.ext}`
+                                ? `${process.env.NEXT_PUBLIC_IMG_HOST}public/photo/${photo.image_name}_thumb.${photo.image_ext}`
                                 : noPhotoSrc
                         }
                         onClick={() => {
                             if (photo) {
-                                setPhotoLightbox(`${photo.file}.${photo.ext}`)
+                                setPhotoLightbox(
+                                    `${photo.image_name}.${photo.image_ext}`
+                                )
                                 setShowLightbox(true)
                             }
                         }}
@@ -126,8 +134,8 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                             </div>
                             <div>
                                 <span className={styles.value}>Кадров:</span>
-                                {photo?.parameters?.frames || '---'}
-                                {photo?.parameters && (
+                                {photo?.statistic?.frames || '---'}
+                                {!!catalog?.files?.length && (
                                     <span className={styles.marginLeft}>
                                         (
                                         <Link
@@ -148,15 +156,20 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                             </div>
                             <div>
                                 <span className={styles.value}>Категория:</span>
-                                {catalog?.category || '---'}
+                                {catalog?.category_name || '---'}
                             </div>
-                            {photo?.author && (
+                            {photo?.author_name ? (
                                 <div>
                                     <span className={styles.value}>
                                         Обработка:
                                     </span>
-                                    {Author(photo.author)}
+                                    <Author
+                                        name={photo.author_name}
+                                        link={photo?.author_link}
+                                    />
                                 </div>
+                            ) : (
+                                ''
                             )}
                         </Grid.Column>
                         <Grid.Column
@@ -164,23 +177,19 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                             tablet={8}
                             mobile={16}
                         >
-                            {!loader && photo?.parameters?.filters && (
-                                <FilterList
-                                    filters={photo.parameters?.filters}
-                                />
-                            )}
+                            <FilterList filters={photo?.filters} />
                         </Grid.Column>
                     </Grid>
                     <div className={styles.text}>{catalog?.text}</div>
                     <div className={styles.celestialMap}>
                         <CelestialMap
                             objects={
-                                catalog && photo
+                                catalog
                                     ? [
                                           {
-                                              dec: catalog.dec,
-                                              name: photo.object,
-                                              ra: catalog.ra
+                                              dec: catalog.coord_dec,
+                                              name: catalog.name,
+                                              ra: catalog.coord_ra
                                           }
                                       ]
                                     : undefined

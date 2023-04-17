@@ -59,6 +59,11 @@ class Statistic extends ResourceController
         $photoResult = [];
 
         foreach ($photoData as $item) {
+            if (in_array($item->object, $photoResult))
+            {
+                continue;
+            }
+            
             $photoResult[] = $item->object;
         }
 
