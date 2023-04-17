@@ -71,7 +71,7 @@ const Object: React.FC = () => {
     const objectName =
         typeof routerObject === 'string' ? routerObject : skipToken
 
-    const { data: photosData, isLoading: photosLoading } = useGetPhotoListQuery(
+    const { data: photoList, isLoading: photoLoading } = useGetPhotoListQuery(
         { object: typeof objectName === 'string' ? objectName : '' },
         {
             skip: router.isFallback
@@ -80,7 +80,7 @@ const Object: React.FC = () => {
 
     const {
         data: catalogData,
-        isFetching: catalogLoading,
+        isLoading: catalogLoading,
         isError: catalogError
     } = useGetCatalogItemQuery(objectName, {
         skip: router.isFallback
@@ -170,7 +170,7 @@ const Object: React.FC = () => {
                 deviationRa={Math.round(devRa * 100) / 100}
                 deviationDec={Math.round(devDec * 100) / 100}
             />
-            {isOutdated(photosData?.items?.[0].date!, catalogData?.updated!) ? (
+            {isOutdated(photoList?.items?.[0].date!, catalogData?.updated!) ? (
                 <Message
                     warning
                     icon={'warning sign'}
@@ -183,8 +183,8 @@ const Object: React.FC = () => {
                 <br />
             )}
             <PhotoTable
-                photos={photosData?.items}
-                loader={photosLoading}
+                photos={photoList?.items}
+                loader={photoLoading}
             />
             <br />
             <Grid>

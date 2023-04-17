@@ -1,6 +1,5 @@
 <?php namespace App\Libraries;
 
-use App\Models\CatalogModel;
 use App\Models\FilesModel;
 use App\Models\PhotoModel;
 
@@ -34,6 +33,8 @@ class PhotosLibrary
         $modelPhoto = new PhotoModel();
         $filesModel = new FilesModel();
         $photoItem  = $modelPhoto
+            ->select('photos.*, authors.name as author_name, authors.link as author_link')
+            ->join('authors', 'authors.id = photos.author', 'left')
             ->where($where)
             ->orderBy('date', 'DESC')
             ->first();
@@ -51,14 +52,18 @@ class PhotosLibrary
 
     /**
      * @param string|null $filterObject
+     * @param int $filterLimit
      * @return array|null
      */
     function getPhotoList(string $filterObject = null, int $filterLimit = 0): ?array
     {
         $modelPhoto = new PhotoModel();
         $modelFiles = new FilesModel();
-        $modelPhoto->orderBy('date', 'DESC');
         $modelFiles->select(['object', 'filter', 'date_obs', 'exptime']);
+        $modelPhoto
+            ->select('photos.*, authors.name as author_name, authors.link as author_link')
+            ->join('authors', 'authors.id = photos.author', 'left')
+            ->orderBy('date', 'DESC');
 
         if ($filterObject)
         {

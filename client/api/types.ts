@@ -8,11 +8,6 @@ export interface IRestFilesMonth extends IRestResponse {
     payload: TFilesMonth[]
 }
 
-// CATALOG
-export interface IRestCatalogList extends IRestResponse {
-    payload: TCatalog[]
-}
-
 export interface IRestCatalogItem extends IRestResponse {
     payload: TCatalog
 }
@@ -179,6 +174,8 @@ export type TPhoto = {
     object: string
     date: string
     author: number
+    author_name?: string
+    author_link?: string
     image_name: string
     image_ext: string
     image_size: number
@@ -218,29 +215,6 @@ export enum TFilterTypes {
     sulfur = 'sulfur',
     clear = 'clear'
 }
-
-// export type TPhoto = {
-//     object: string
-//     date: string
-//     file: string
-//     ext: string
-//     author: TPhotoAuthor | null
-//     parameters?: TObject
-// }
-
-export type TPhotoAuthor = {
-    name: string
-    link: string
-}
-
-// export type TCatalog = {
-//     name: string
-//     title: string
-//     text: string
-//     category: string
-//     ra: number
-//     dec: number
-// }
 
 export type TObject = {
     date: string
@@ -329,16 +303,17 @@ export type TNewsPhotosItem = {
     src: string
 }
 
-export type TFiltersTypes =
-    | 'Luminance'
-    | 'Red'
-    | 'Green'
-    | 'Blue'
-    | 'Ha'
-    | 'OIII'
-    | 'SII'
-
 export type TFilterItem = {
     exposure: number
     frames: number
 }
+
+export const FilterList: TFilterTypes[] = [
+    TFilterTypes.luminance,
+    TFilterTypes.red,
+    TFilterTypes.green,
+    TFilterTypes.blue,
+    TFilterTypes.hydrogen,
+    TFilterTypes.oxygen,
+    TFilterTypes.sulfur
+]

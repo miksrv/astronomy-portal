@@ -1,5 +1,6 @@
 import { useAppSelector } from '@/api/hooks'
-import { TFilterTypes, TPhoto } from '@/api/types'
+import { TPhoto } from '@/api/types'
+import { FilterList } from '@/api/types'
 import { getTimeFromSec, isOutdated } from '@/functions/helpers'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -15,16 +16,6 @@ type TTableRowProps = {
     photo?: TPhoto
     onShowEdit?: (item: string) => void
 }
-
-const FILTERS: TFilterTypes[] = [
-    TFilterTypes.luminance,
-    TFilterTypes.red,
-    TFilterTypes.green,
-    TFilterTypes.blue,
-    TFilterTypes.hydrogen,
-    TFilterTypes.oxygen,
-    TFilterTypes.sulfur
-]
 
 const RenderTableRow: React.FC<TTableRowProps> = (props) => {
     const { item, photo, onShowEdit } = props
@@ -112,7 +103,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
             </Table.Cell>
             <Table.Cell content={item.frames} />
             <Table.Cell content={getTimeFromSec(item.exposure)} />
-            {FILTERS.map((filter) => (
+            {FilterList.map((filter) => (
                 <Table.Cell
                     key={filter}
                     className={item?.[filter] ? styles[filter] : undefined}

@@ -1,4 +1,4 @@
-import { useGetStatisticQuery, useLogoutMutation } from '@/api/api'
+import { useGetStatisticQuery } from '@/api/api'
 import { setCredentials } from '@/api/authSlice'
 import { useAppDispatch } from '@/api/hooks'
 import { APIResponseStatistic } from '@/api/types'
@@ -37,7 +37,6 @@ const Header: React.FC = () => {
     const currentMobile: boolean =
         typeof window !== 'undefined' ? window.innerWidth <= 760 : false
     const { data, isLoading } = useGetStatisticQuery()
-    const [logout] = useLogoutMutation()
     const [auth, setAuth] = useState<boolean>(false)
     const router = useRouter()
 
@@ -45,9 +44,8 @@ const Header: React.FC = () => {
 
     const doLogout = async () => {
         try {
-            const user = await logout().unwrap()
-            dispatch(setCredentials(user))
-            setAuth(user.status)
+            dispatch(setCredentials({ status: false, token: '' }))
+            setAuth(false)
         } catch (error) {
             console.error(error)
         }

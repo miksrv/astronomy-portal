@@ -1,4 +1,5 @@
-import { TFiltersTypes, TPhoto } from '@/api/types'
+import { TPhoto } from '@/api/types'
+import { FilterList } from '@/api/types'
 import { getTimeFromSec } from '@/functions/helpers'
 import moment from 'moment'
 import Image from 'next/image'
@@ -11,16 +12,6 @@ import styles from './styles.module.sass'
 type TTableRowProps = {
     photo: TPhoto
 }
-
-const FILTERS: TFiltersTypes[] = [
-    'Luminance',
-    'Red',
-    'Green',
-    'Blue',
-    'Ha',
-    'OIII',
-    'SII'
-]
 
 const RenderTableRow: React.FC<TTableRowProps> = ({ photo }) => (
     <Table.Row>
@@ -39,26 +30,26 @@ const RenderTableRow: React.FC<TTableRowProps> = ({ photo }) => (
             </Link>
         </Table.Cell>
         <Table.Cell content={moment(photo.date).format('DD.MM.Y')} />
-        <Table.Cell content={photo.statistic?.frames} />
+        <Table.Cell content={photo.statistic?.frames || '---'} />
         <Table.Cell
             content={
-                photo.statistic
-                    ? getTimeFromSec(photo.statistic?.exposure, true)
+                photo.statistic?.exposure
+                    ? getTimeFromSec(photo.statistic.exposure, true)
                     : '---'
             }
         />
-        {FILTERS.map((filter) => (
+        {FilterList.map((filter) => (
             <Table.Cell
                 className={
-                    photo?.filters[filter] &&
-                    photo.parameters?.filters[filter].frames > 0
-                        ? `filter-${filter}`
+                    filter && photo?.filters?.[filter]?.frames
+                        ? styles[filter]
                         : ''
                 }
                 key={filter}
             >
-                {photo.parameters?.filters[filter].exposure &&
-                    getTimeFromSec(photo.parameters?.filters[filter].exposure)}
+                {photo.filters?.[filter]?.exposure
+                    ? getTimeFromSec(photo?.filters?.[filter]?.exposure || 0)
+                    : ''}
             </Table.Cell>
         ))}
     </Table.Row>

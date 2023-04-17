@@ -10,30 +10,29 @@ import {
     APIResponsePhotos,
     APIResponsePhotosNames,
     APIResponseStatistic,
-    ICredentials,
-    IRelayList,
-    IRelaySet,
-    IRestAuth,
-    IRestCatalogItem,
-    IRestFilesMonth,
-    IRestNewsList,
-    IRestObjectFiles,
-    IRestObjectItem,
-    IRestObjectList,
-    IRestObjectNames,
-    IRestPhotoList,
-    IRestSensorStatistic,
-    IRestWeatherCurrent,
-    IRestWeatherMonth,
-    TCatalog
+    ICredentials, // IRelayList,
+    // IRelaySet,
+    IRestAuth, // IRestCatalogItem,
+    // IRestFilesMonth,
+    // IRestNewsList,
+    // IRestObjectFiles,
+    // IRestObjectItem,
+    // IRestObjectList,
+    // IRestObjectNames,
+    // IRestPhotoList,
+    // IRestSensorStatistic,
+    // IRestWeatherCurrent,
+    // IRestWeatherMonth,
+    TCatalog,
+    TPhoto
 } from './types'
 
 type Maybe<T> = T | void
 
-type TQueryNewsList = {
-    limit?: number
-    offset?: number
-}
+// type TQueryNewsList = {
+//     limit?: number
+//     offset?: number
+// }
 
 const encodeQueryData = (data: any): string => {
     const ret = []
@@ -62,10 +61,6 @@ export const api = createApi({
         getCatalogItem: builder.query<TCatalog, string>({
             query: (object) => `catalog/${object}`
         }),
-        // Список объектов каталога
-        // getCatalogItem: builder.query<IRestCatalogItem, string>({
-        //     query: (name) => `get/catalog/item?object=${name}`
-        // }),
         getCatalogList: builder.query<APIResponseCatalogList, void>({
             query: () => 'catalog'
         }),
@@ -76,46 +71,43 @@ export const api = createApi({
         }),
 
         // Коллекция дней за месяц, в которые работала обсерватория (exp, frames, objects)
-        getFilesMonth: builder.mutation<IRestFilesMonth, string>({
-            query: (date) => `get/statistic/month?date=${date}`
-        }),
+        // getFilesMonth: builder.mutation<IRestFilesMonth, string>({
+        //     query: (date) => `get/statistic/month?date=${date}`
+        // }),
 
         // NEWS
         // Список новостей
-        getNewsList: builder.query<IRestNewsList, TQueryNewsList>({
-            query: (props) => {
-                const limit = props.limit ? `?limit=${props.limit}` : ''
-                const offset = props.offset ? `&offset=${props.offset}` : ''
-
-                return `news/list${limit}${offset}`
-            }
-        }),
+        // getNewsList: builder.query<IRestNewsList, TQueryNewsList>({
+        //     query: (props) => {
+        //         const limit = props.limit ? `?limit=${props.limit}` : ''
+        //         const offset = props.offset ? `&offset=${props.offset}` : ''
+        //
+        //         return `news/list${limit}${offset}`
+        //     }
+        // }),
 
         // FILES
         // Список файлов объекта по его имени
-        getObjectFiles: builder.query<IRestObjectFiles, string>({
+        // getObjectFiles: builder.query<IRestObjectFiles, string>({
+        //     keepUnusedDataFor: 3600,
+        //     query: (name) => `get/file/list?object=${name}`
+        // }),
+
+        // getObjectItem: builder.query<IRestObjectItem, string>({
+        //     query: (name) => `get/object/item?object=${name}`
+        // }),
+        // getObjectList: builder.query<IRestObjectList, void>({
+        //     keepUnusedDataFor: 3600,
+        //     query: () => 'get/object/list'
+        // }),
+        // getObjectNames: builder.query<IRestObjectNames, void>({
+        //     query: () => 'get/object/names'
+        // }),
+
+        getPhotoItem: builder.query<TPhoto, string>({
             keepUnusedDataFor: 3600,
-            query: (name) => `get/file/list?object=${name}`
+            query: (object) => `photo/${object}`
         }),
-
-        // Получить объект по имени
-        getObjectItem: builder.query<IRestObjectItem, string>({
-            query: (name) => `get/object/item?object=${name}`
-        }),
-
-        // OBJECTS
-        // Получить список объектов
-
-        getObjectList: builder.query<IRestObjectList, void>({
-            keepUnusedDataFor: 3600,
-            query: () => 'get/object/list'
-        }),
-
-        // Получить список названий объектов
-        getObjectNames: builder.query<IRestObjectNames, void>({
-            query: () => 'get/object/names'
-        }),
-
         getPhotoList: builder.query<APIResponsePhotos, Maybe<APIRequestPhotos>>(
             {
                 keepUnusedDataFor: 3600,
@@ -123,26 +115,17 @@ export const api = createApi({
             }
         ),
 
-        // Список фотографий объекта с характеристиками
-        getPhotoListItem: builder.query<IRestPhotoList, string>({
-            query: (name) => `get/photo/list?object=${name}`
-        }),
-
-        // RELAY
-        // Список реле
-        getRelayList: builder.query<IRelayList, void>({
-            keepUnusedDataFor: 3600,
-            query: () => 'relay/list'
-        }),
-        getRelayState: builder.query<any, null>({
-            providesTags: () => [{ id: 'LIST', type: 'Relay' }],
-            query: () => 'relay/state'
-        }),
-
-        // SENSOR
-        getSensorStatistic: builder.query<IRestSensorStatistic, void>({
-            query: () => 'get/sensors/statistic'
-        }),
+        // getRelayList: builder.query<IRelayList, void>({
+        //     keepUnusedDataFor: 3600,
+        //     query: () => 'relay/list'
+        // }),
+        // getRelayState: builder.query<any, null>({
+        //     providesTags: () => [{ id: 'LIST', type: 'Relay' }],
+        //     query: () => 'relay/state'
+        // }),
+        // getSensorStatistic: builder.query<IRestSensorStatistic, void>({
+        //     query: () => 'get/sensors/statistic'
+        // }),
 
         getStatistic: builder.query<APIResponseStatistic, void>({
             query: () => 'statistic'
@@ -154,17 +137,12 @@ export const api = createApi({
             query: () => 'statistic/photos'
         }),
 
-        // Текущая погода
-
-        getWeatherCurrent: builder.query<IRestWeatherCurrent, null>({
-            query: () => 'weather/current'
-        }),
-
-        // WEATHER
-        // Получить погоду за месяц (архив + прогноз)
-        getWeatherMonth: builder.mutation<IRestWeatherMonth, string>({
-            query: (date) => `weather/month?date=${date}`
-        }),
+        // getWeatherCurrent: builder.query<IRestWeatherCurrent, null>({
+        //     query: () => 'weather/current'
+        // }),
+        // getWeatherMonth: builder.mutation<IRestWeatherMonth, string>({
+        //     query: (date) => `weather/month?date=${date}`
+        // }),
 
         // AUTH
         login: builder.mutation<IRestAuth, ICredentials>({
@@ -174,24 +152,20 @@ export const api = createApi({
                 url: 'auth/login'
             })
         }),
-
-        // Проверка токена авторизации
-
         loginCheck: builder.mutation<IRestAuth, void>({
             query: () => 'auth/check'
-        }),
-
-        logout: builder.mutation<IRestAuth, void>({
-            query: () => 'auth/logout'
-        }),
-        setRelayStatus: builder.mutation<IRelayList, IRelaySet>({
-            invalidatesTags: [{ id: 'LIST', type: 'Relay' }],
-            query: (data) => ({
-                body: data,
-                method: 'POST',
-                url: 'relay/set'
-            })
         })
+        // logout: builder.mutation<IRestAuth, void>({
+        //     query: () => 'auth/logout'
+        // }),
+        // setRelayStatus: builder.mutation<IRelayList, IRelaySet>({
+        //     invalidatesTags: [{ id: 'LIST', type: 'Relay' }],
+        //     query: (data) => ({
+        //         body: data,
+        //         method: 'POST',
+        //         url: 'relay/set'
+        //     })
+        // })
     }),
     extractRehydrationInfo(action, { reducerPath }) {
         if (action.type === HYDRATE) {
@@ -210,24 +184,11 @@ export const {
     useGetCatalogListQuery,
     useGetPhotoListQuery,
     useGetCategoriesListQuery,
-
-    useGetFilesMonthMutation,
     useGetCatalogItemQuery,
-    useGetPhotoListItemQuery,
-    useGetObjectListQuery,
-    useGetObjectNamesQuery,
-    useGetObjectItemQuery,
-    useGetObjectFilesQuery,
-    useGetNewsListQuery,
-    useGetWeatherMonthMutation,
-    useGetWeatherCurrentQuery,
-    useLoginMutation,
-    useLogoutMutation,
+    useGetPhotoItemQuery,
+
     useLoginCheckMutation,
-    useGetRelayListQuery,
-    useGetRelayStateQuery,
-    useSetRelayStatusMutation,
-    useGetSensorStatisticQuery,
+    useLoginMutation,
     util: { getRunningQueriesThunk }
 } = api
 
@@ -235,13 +196,7 @@ export const {
 export const {
     getCatalogList,
     getCatalogItem,
-    getObjectItem,
     getPhotoList,
-    getObjectList,
-    getObjectFiles,
-    getObjectNames,
-    getNewsList,
-
     getStatisticCatalogItems,
     getStatisticPhotosItems
 } = api.endpoints
