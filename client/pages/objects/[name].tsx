@@ -78,10 +78,13 @@ const Object: React.FC = () => {
         }
     )
 
-    const { data: catalogData, isFetching: catalogLoading } =
-        useGetCatalogItemQuery(objectName, {
-            skip: router.isFallback
-        })
+    const {
+        data: catalogData,
+        isFetching: catalogLoading,
+        isError: catalogError
+    } = useGetCatalogItemQuery(objectName, {
+        skip: router.isFallback
+    })
 
     const { data: catalogObjects, isLoading: objectsLoading } =
         useGetStatisticCatalogItemsQuery()
@@ -162,6 +165,7 @@ const Object: React.FC = () => {
             <ObjectSection
                 title={objectTitle}
                 loader={catalogLoading}
+                error={catalogError}
                 catalog={catalogData}
                 deviationRa={Math.round(devRa * 100) / 100}
                 deviationDec={Math.round(devDec * 100) / 100}

@@ -1,10 +1,10 @@
 import { useAppSelector } from '@/api/hooks'
-import { TCatalog, TObject } from '@/api/types'
+import { TCatalog } from '@/api/types'
 import { getTimeFromSec } from '@/functions/helpers'
 import moment from 'moment'
 import Link from 'next/link'
 import React, { useState } from 'react'
-import { Button, Dimmer, Grid, Loader } from 'semantic-ui-react'
+import { Button, Dimmer, Grid, Loader, Message } from 'semantic-ui-react'
 
 import CelestialMap from '@/components/celestial-map'
 import FilterList from '@/components/filter-list'
@@ -15,14 +15,14 @@ import styles from './styles.module.sass'
 type TObjectHeaderProps = {
     title: string
     loader?: boolean
+    error?: boolean
     catalog?: TCatalog
-    object?: TObject
     deviationRa?: number
     deviationDec?: number
 }
 
 const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
-    const { title, loader, catalog, object, deviationRa, deviationDec } = props
+    const { title, loader, error, catalog, deviationRa, deviationDec } = props
     const userLogin = useAppSelector((state) => state.auth.status)
     const date = catalog?.updated
         ? moment
@@ -41,8 +41,18 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
 
     return (
         <div className={'box'}>
-            <Dimmer active={loader}>
-                <Loader />
+            <Dimmer active={loader || error}>
+                {loader && <Loader />}
+                {error && (
+                    <Message
+                        error
+                        icon={'database'}
+                        header={'Данные не доступны'}
+                        content={
+                            'На сервере возникла ошибка, попробуйте обновить страницу или зайти немного позже'
+                        }
+                    />
+                )}
             </Dimmer>
             <Grid>
                 <Grid.Column
@@ -79,7 +89,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                                     <span className={styles.value}>
                                         Категория:
                                     </span>
-                                    {catalog?.category || '---'}
+                                    {catalog?.category_name || '---'}
                                 </div>
                                 <div>
                                     <span className={styles.value}>
