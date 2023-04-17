@@ -79,36 +79,32 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
                     <Icon name={'dropdown'} /> Список снятых кадров
                 </Accordion.Title>
                 <Accordion.Content active={showAccordion}>
-                    {filesList?.length ? (
-                        <Table
-                            sortable
-                            celled
-                            inverted
-                            selectable
-                            compact
-                        >
-                            <RenderTableHeader
-                                sort={sortField}
-                                order={sortOrder}
-                                handlerSortClick={(field: TObjectSortable) =>
-                                    handlerSortClick(field)
-                                }
-                            />
-                            <Table.Body>
-                                {filesList.map((file, key) => (
-                                    <RenderTableRow
-                                        file={file}
-                                        itemId={key}
-                                        object={objectName}
-                                        onPhotoClick={handlePhotoClick}
-                                        key={file.file_name}
-                                    />
-                                ))}
-                            </Table.Body>
-                        </Table>
-                    ) : (
-                        ''
-                    )}
+                    <Table
+                        sortable
+                        celled
+                        inverted
+                        selectable
+                        compact
+                    >
+                        <RenderTableHeader
+                            sort={sortField}
+                            order={sortOrder}
+                            handlerSortClick={(field: TObjectSortable) =>
+                                handlerSortClick(field)
+                            }
+                        />
+                        <Table.Body>
+                            {filesList?.map((file, key) => (
+                                <RenderTableRow
+                                    file={file}
+                                    itemId={key}
+                                    object={objectName}
+                                    onPhotoClick={handlePhotoClick}
+                                    key={file.file_name}
+                                />
+                            ))}
+                        </Table.Body>
+                    </Table>
                 </Accordion.Content>
             </Accordion>
             {showLightbox && photoList.length && (

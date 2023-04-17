@@ -21,8 +21,11 @@ class CatalogLibrary
         $modelCatalog = new CatalogModel();
         $modelFiles   = new FilesModel();
 
-        $catalogItem = $modelCatalog->find($objectName);
         $filesItems  = $modelFiles->findByObject($objectName);
+        $catalogItem = $modelCatalog
+            ->select('catalog.*, category.name as category_name')
+            ->join('category', 'category.id = catalog.category', 'left')
+            ->find($objectName);
 
         if (!$catalogItem) return null;
 

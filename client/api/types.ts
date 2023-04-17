@@ -166,6 +166,7 @@ export type TCatalog = {
     text: string
     updated: string
     category: number
+    category_name?: string
     coord_ra: number
     coord_dec: number
     statistic: TStatistic
