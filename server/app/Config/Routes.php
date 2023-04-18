@@ -56,6 +56,7 @@ $routes->delete('photo/(:any)', 'Photo::delete/$1');
 
 $routes->post('auth/register', 'Auth::register');
 $routes->post('auth/login', 'Auth::login');
+$routes->options('auth/login', 'Auth::login');
 
 $routes->get('relay', 'Relay::list');
 $routes->put('relay/(:num)', 'Relay::set');

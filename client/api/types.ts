@@ -4,6 +4,11 @@ export interface IRestResponse {
     errorText?: string
 }
 
+export interface IResponseError {
+    status?: number
+    code?: number
+    message?: any
+}
 export interface IRestFilesMonth extends IRestResponse {
     payload: TFilesMonth[]
 }
@@ -67,8 +72,8 @@ export interface IRestAuth {
     token: string
 }
 
-export interface ICredentials {
-    username: string
+export interface IRequestLogin {
+    email: string
     password: string
 }
 

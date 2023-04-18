@@ -152,13 +152,13 @@ const Object: React.FC = () => {
                     .replace(/(\r\n|\n|\r)/gm, '')
                     .slice(0, 200)}
                 openGraph={{
-                    // images: [
-                    //     {
-                    //         height: 743,
-                    //         url: `${process.env.NEXT_PUBLIC_IMG_HOST}public/photo/${dataPhotos?.payload?.[0].image_name}_thumb.${dataPhotos?.payload?.[0]?.image_ext}`,
-                    //         width: 1280
-                    //     }
-                    // ],
+                    images: [
+                        {
+                            height: 743,
+                            url: `${process.env.NEXT_PUBLIC_IMG_HOST}public/photo/${photoList?.items?.[0].image_name}_thumb.${photoList?.items?.[0]?.image_ext}`,
+                            width: 1280
+                        }
+                    ],
                     locale: 'ru'
                 }}
             />
@@ -170,7 +170,9 @@ const Object: React.FC = () => {
                 deviationRa={Math.round(devRa * 100) / 100}
                 deviationDec={Math.round(devDec * 100) / 100}
             />
-            {isOutdated(photoList?.items?.[0].date!, catalogData?.updated!) ? (
+            {!catalogLoading &&
+            !photoLoading &&
+            isOutdated(photoList?.items?.[0].date!, catalogData?.updated!) ? (
                 <Message
                     warning
                     icon={'warning sign'}

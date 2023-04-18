@@ -9,7 +9,6 @@ use CodeIgniter\API\ResponseTrait;
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
-//header('Access-Control-Allow-Headers: Accept, AuthToken, Content-Type');
 
 class Statistic extends ResourceController
 {

@@ -1,7 +1,7 @@
-import { useLoginMutation } from '@/api/api'
+import { usePostLoginMutation } from '@/api/api'
 import { setCredentials } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
-import { ICredentials } from '@/api/types'
+import { IRequestLogin } from '@/api/types'
 import React, { useState } from 'react'
 import { Button, Form, Message, Modal } from 'semantic-ui-react'
 
@@ -12,11 +12,13 @@ import styles from './styles.module.sass'
 const LoginForm: React.FC = () => {
     const dispatch = useAppDispatch()
     const { visible } = useAppSelector((state) => state.loginForm)
-    const [login, { isLoading }] = useLoginMutation()
+    const [loginMutation, { isLoading, isError, data, error }] =
+        usePostLoginMutation()
     const [loginError, setLoginError] = useState<boolean>(false)
-    const [formState, setFormState] = useState<ICredentials>({
-        password: '',
-        username: ''
+    const [errors, setErrors] = React.useState<any | undefined>(undefined)
+    const [formState, setFormState] = useState<IRequestLogin>({
+        email: '',
+        password: ''
     })
 
     const handleChange = ({
@@ -28,19 +30,41 @@ const LoginForm: React.FC = () => {
         e.key === 'Enter' && handleSubmit()
 
     const handleSubmit = async () => {
-        try {
-            const user = await login(formState).unwrap()
+        const result: any = await loginMutation(formState)
 
-            if (user.status) {
-                dispatch(setCredentials(user))
-                dispatch(hide())
-            } else {
-                setLoginError(true)
-            }
-        } catch (error) {
-            setLoginError(true)
-            dispatch(hide())
+        if (result.error?.data.messages) {
+            setErrors(result.error?.data.messages)
         }
+
+        if (result.data?.access_token) {
+            setErrors(undefined)
+            dispatch(hide())
+            dispatch(
+                setCredentials({
+                    status: true,
+                    token: result.data?.access_token
+                })
+            )
+        }
+
+        // try {
+        //     setLoginError(false)
+        //
+        //     const loginResult = await login(formState).unwrap()
+        //
+        //     // if (loginResult.status === 400) {
+        //     //     setErrors()
+        //     // }
+        //     if (loginResult.status) {
+        //         dispatch(setCredentials(loginResult))
+        //         dispatch(hide())
+        //     } else {
+        //         setLoginError(true)
+        //     }
+        // } catch (error) {
+        //     setLoginError(true)
+        //     //dispatch(hide())
+        // }
     }
 
     return (
@@ -51,14 +75,11 @@ const LoginForm: React.FC = () => {
         >
             <Modal.Header>Авторизация</Modal.Header>
             <Modal.Content>
-                {loginError && (
-                    <Message
-                        error
-                        content={
-                            'Ошибка авторизации, неверный логин или пароль'
-                        }
-                    />
-                )}
+                <Message
+                    error
+                    hidden={!errors}
+                    content={'Ошибка авторизации, неверный логин или пароль'}
+                />
                 <Form
                     size={'large'}
                     onSubmit={handleSubmit}
@@ -66,10 +87,11 @@ const LoginForm: React.FC = () => {
                 >
                     <Form.Input
                         fluid
-                        name={'username'}
+                        error={!!errors?.['email']}
+                        name={'email'}
                         icon={'user'}
                         iconPosition={'left'}
-                        placeholder={'Логин'}
+                        placeholder={'Email'}
                         className={styles.userInput}
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
@@ -77,6 +99,7 @@ const LoginForm: React.FC = () => {
                     />
                     <Form.Input
                         fluid
+                        error={!!errors?.['password']}
                         name={'password'}
                         icon={'lock'}
                         iconPosition={'left'}
@@ -95,7 +118,7 @@ const LoginForm: React.FC = () => {
                     onClick={handleSubmit}
                     color={'green'}
                     disabled={
-                        isLoading || !formState.username || !formState.password
+                        isLoading || !formState.email || !formState.password
                     }
                     loading={isLoading}
                 >

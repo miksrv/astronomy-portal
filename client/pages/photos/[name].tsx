@@ -111,7 +111,9 @@ const Photo: React.FC = () => {
                 photo={photoItem}
                 catalog={catalogData}
             />
-            {isOutdated(photoList?.items?.[0].date!, catalogData?.updated!) ? (
+            {!catalogLoading &&
+            !photoListLoading &&
+            isOutdated(photoList?.items?.[0].date!, catalogData?.updated!) ? (
                 <Message
                     warning
                     icon={'warning sign'}
