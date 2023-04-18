@@ -10,7 +10,8 @@ import {
     APIResponsePhotos,
     APIResponsePhotosNames,
     APIResponseStatistic,
-    ICredentials, // IRelayList,
+    IRequestLogin,
+    IResponseError, // IRelayList,
     // IRelaySet,
     IRestAuth, // IRestCatalogItem,
     // IRestFilesMonth,
@@ -136,6 +137,9 @@ export const api = createApi({
         getStatisticPhotosItems: builder.query<APIResponsePhotosNames, void>({
             query: () => 'statistic/photos'
         }),
+        loginCheck: builder.mutation<IRestAuth, void>({
+            query: () => 'auth/check'
+        }),
 
         // getWeatherCurrent: builder.query<IRestWeatherCurrent, null>({
         //     query: () => 'weather/current'
@@ -144,16 +148,12 @@ export const api = createApi({
         //     query: (date) => `weather/month?date=${date}`
         // }),
 
-        // AUTH
-        login: builder.mutation<IRestAuth, ICredentials>({
+        postLogin: builder.mutation<IRestAuth | IResponseError, IRequestLogin>({
             query: (credentials) => ({
                 body: credentials,
                 method: 'POST',
                 url: 'auth/login'
             })
-        }),
-        loginCheck: builder.mutation<IRestAuth, void>({
-            query: () => 'auth/check'
         })
         // logout: builder.mutation<IRestAuth, void>({
         //     query: () => 'auth/logout'
@@ -188,7 +188,7 @@ export const {
     useGetPhotoItemQuery,
 
     useLoginCheckMutation,
-    useLoginMutation,
+    usePostLoginMutation,
     util: { getRunningQueriesThunk }
 } = api
 

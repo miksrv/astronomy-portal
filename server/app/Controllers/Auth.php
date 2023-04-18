@@ -4,13 +4,20 @@ namespace App\Controllers;
 
 use App\Models\UserModel;
 use CodeIgniter\HTTP\IncomingRequest;
-use CodeIgniter\HTTP\Response;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\Validation\Exceptions\ValidationException;
 use Config\Services;
 use Exception;
 use ReflectionException;
+
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization');
+
+if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
+    die();
+}
 
 class Auth extends ResourceController
 {
@@ -22,8 +29,8 @@ class Auth extends ResourceController
     public function register(): ResponseInterface
     {
         $rules = [
-            'name' => 'required',
-            'email' => 'required|min_length[6]|max_length[50]|valid_email|is_unique[user.email]',
+            'name'     => 'required',
+            'email'    => 'required|min_length[6]|max_length[50]|valid_email|is_unique[user.email]',
             'password' => 'required|min_length[8]|max_length[255]'
         ];
 

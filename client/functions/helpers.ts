@@ -1,12 +1,11 @@
 import moment from 'moment'
 
-export const declOfNum = (number: number, words: string[]) => {
-    return words[
+export const declOfNum = (number: number, words: string[]) =>
+    words[
         number % 100 > 4 && number % 100 < 20
             ? 2
             : [2, 0, 1, 1, 1, 2][number % 10 < 5 ? number % 10 : 5]
     ]
-}
 
 export const isOutdated = (date1: string, date2: string) =>
     moment(date1).diff(moment(date2)) < 0
@@ -32,7 +31,7 @@ export const getTimeFromSec = (sec: number, full: boolean = false): string => {
     return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m)
 }
 
-export const timeAgo = (sec: number) => {
+export const timeAgo = (sec: number): string => {
     if (sec === null || sec <= 0) return 'обновлено недавно'
 
     let h = (sec / 3600) ^ 0
