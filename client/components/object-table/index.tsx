@@ -52,15 +52,15 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
 
     const sortedCatalog = useMemo(
         () =>
-            itemsCatalog?.sort((a, b) => {
-                return sortOrder === 'descending'
+            itemsCatalog?.sort((a, b) =>
+                sortOrder === 'descending'
                     ? a[sortField] > b[sortField]
                         ? 1
                         : -1
                     : a[sortField] < b[sortField]
                     ? 1
                     : -1
-            }),
+            ),
         [itemsCatalog, sortOrder, sortField]
     )
 
@@ -71,7 +71,7 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
     }
 
     return (
-        <div className='box table'>
+        <div className={'box table'}>
             <Dimmer active={loading}>
                 <Loader />
             </Dimmer>

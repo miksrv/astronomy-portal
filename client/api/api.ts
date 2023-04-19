@@ -51,7 +51,7 @@ export const api = createApi({
         baseUrl: process.env.NEXT_PUBLIC_API_HOST,
         prepareHeaders: (headers, { getState }) => {
             // By default, if we have a token in the store, let's use that for authenticated requests
-            const token = (getState() as RootState).auth.token
+            const token = (getState() as RootState).auth.userToken
             if (token) {
                 headers.set('AuthToken', token)
             }

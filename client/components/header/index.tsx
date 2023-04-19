@@ -23,7 +23,7 @@ type TMenuItems = {
     label?: keyof APIResponseStatistic
 }
 
-export const MENU_ITEMS: TMenuItems[] = [
+export const menuItems: TMenuItems[] = [
     { link: '/', name: 'Сводка' },
     { link: '/news', name: 'Новости' },
     { link: '/map', name: 'Карта' },
@@ -50,6 +50,8 @@ const Header: React.FC = () => {
             console.error(error)
         }
     }
+
+    console.log('111')
 
     useEffect(() => {
         setAuth(user.status)
@@ -86,7 +88,7 @@ const Header: React.FC = () => {
                         onClick={() => dispatch(toggle())}
                     />
                 ) : (
-                    MENU_ITEMS.map((item, key) => (
+                    menuItems.map((item, key) => (
                         <Menu.Item
                             as={Link}
                             href={item.link}
