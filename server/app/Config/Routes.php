@@ -34,17 +34,23 @@ $routes->set404Override();
 $routes->get('statistic', 'Statistic::list');
 $routes->get('statistic/catalog', 'Statistic::catalog');
 $routes->get('statistic/photos', 'Statistic::photos');
+$routes->options('statistic', 'Statistic');
+$routes->options('statistic/(:any)', 'Statistic');
 
 $routes->get('catalog', 'Catalog::list');
 $routes->get('catalog/(:any)', 'Catalog::show/$1');
 $routes->post('catalog', 'Catalog::create');
 $routes->patch('catalog/(:any)', 'Catalog::update/$1');
 $routes->delete('catalog/(:any)', 'Catalog::delete/$1');
+$routes->options('catalog', 'Catalog');
+$routes->options('catalog/(:any)', 'Catalog');
 
 $routes->get('category', 'Category::list');
 $routes->post('category', 'Category::create');
 $routes->patch('category/(:any)', 'Category::update/$1');
 $routes->delete('category/(:any)', 'Category::delete/$1');
+$routes->options('category', 'Category');
+$routes->options('category/(:any)', 'Category');
 
 $routes->get('photo', 'Photo::list');
 $routes->get('photo/(:any)', 'Photo::show/$1');
@@ -53,10 +59,15 @@ $routes->post('photo', 'Photo::create');
 $routes->post('photo/upload', 'Photo::upload');
 $routes->patch('photo/(:any)', 'Photo::update/$1');
 $routes->delete('photo/(:any)', 'Photo::delete/$1');
+$routes->options('photo', 'Photo');
+$routes->options('photo/(:any)', 'Photo');
+$routes->options('photo/(:any)/(:any)', 'Photo');
+$routes->options('photo/upload', 'Photo');
 
+$routes->get('auth/me', 'Auth::me');
 $routes->post('auth/register', 'Auth::register');
 $routes->post('auth/login', 'Auth::login');
-$routes->options('auth/login', 'Auth::login');
+$routes->options('auth/(:any)', 'Auth::me');
 
 $routes->get('relay', 'Relay::list');
 $routes->put('relay/(:num)', 'Relay::set');

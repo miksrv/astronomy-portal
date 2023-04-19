@@ -1,7 +1,7 @@
-import { usePostLoginMutation } from '@/api/api'
-import { setCredentials } from '@/api/authSlice'
+import { usePostAuthLoginMutation } from '@/api/api'
+import { login } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
-import { IRequestLogin } from '@/api/types'
+import { APIRequestLogin } from '@/api/types'
 import React, { useState } from 'react'
 import { Button, Form, Message, Modal } from 'semantic-ui-react'
 
@@ -12,9 +12,9 @@ import styles from './styles.module.sass'
 const LoginForm: React.FC = () => {
     const dispatch = useAppDispatch()
     const { visible } = useAppSelector((state) => state.loginForm)
-    const [loginMutation, { isLoading }] = usePostLoginMutation()
+    const [loginMutation, { isLoading }] = usePostAuthLoginMutation()
     const [errors, setErrors] = React.useState<any | undefined>(undefined)
-    const [formState, setFormState] = useState<IRequestLogin>({
+    const [formState, setFormState] = useState<APIRequestLogin>({
         email: '',
         password: ''
     })
@@ -37,12 +37,7 @@ const LoginForm: React.FC = () => {
         if (result.data?.access_token) {
             setErrors(undefined)
             dispatch(hide())
-            dispatch(
-                setCredentials({
-                    status: true,
-                    token: result.data?.access_token
-                })
-            )
+            dispatch(login(result.data))
         }
     }
 

@@ -75,6 +75,23 @@ class Auth extends ResourceController
         return $this->getJWTForUser($input['email']);
     }
 
+    public function me(): ResponseInterface
+    {
+        $authenticationHeader = $this->request->getServer('HTTP_AUTHORIZATION');
+
+        try {
+            helper('jwt');
+            $encodedToken = getJWTFromRequest($authenticationHeader);
+
+            validateJWTFromRequest($encodedToken);
+
+            return $this->respond(null, ResponseInterface::HTTP_OK);
+
+        } catch (Exception $e) {
+            return $this->failUnauthorized();
+        }
+    }
+
     private function getJWTForUser(
         string $emailAddress,
         int $responseCode = ResponseInterface::HTTP_OK
