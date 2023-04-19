@@ -1,21 +1,23 @@
-import { useGetStatisticQuery } from '@/api/api'
-import { setCredentials } from '@/api/authSlice'
-import { useAppDispatch } from '@/api/hooks'
+import { useGetAuthMeMutation, useGetStatisticQuery } from '@/api/api'
+// import { setToken } from '@/api/authSlice'
+import { getStorageToken, logout, setToken } from '@/api/authSlice'
+import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { APIResponseStatistic } from '@/api/types'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Container, Label, Loader, Menu } from 'semantic-ui-react'
 
 import LoginForm from '@/components/login-form'
-import { show } from '@/components/login-form/loginFormSlice'
+import { hide, show } from '@/components/login-form/loginFormSlice'
 import { toggle } from '@/components/sidebar/sidebarSlice'
 
 import logo from '@/public/images/logo-w.svg'
 
 import styles from './styles.module.sass'
-import { UserAuth } from './userAuth'
+
+// import { UserAuth } from './userAuth'
 
 type TMenuItems = {
     link: string
@@ -37,25 +39,42 @@ const Header: React.FC = () => {
     const currentMobile: boolean =
         typeof window !== 'undefined' ? window.innerWidth <= 760 : false
     const { data, isLoading } = useGetStatisticQuery()
+    const [getAuthMe] = useGetAuthMeMutation()
     const [auth, setAuth] = useState<boolean>(false)
     const router = useRouter()
+    const userToken = useAppSelector((state) => state.auth.userToken)
 
-    const user = UserAuth()
+    // const user = UserAuth()
 
-    const doLogout = async () => {
-        try {
-            dispatch(setCredentials({ status: false, token: '' }))
-            setAuth(false)
-        } catch (error) {
-            console.error(error)
+    // const doLogout = async () => {
+    //     try {
+    //         dispatch(setToken({ userToken: '' }))
+    //         setAuth(false)
+    //     } catch (error) {
+    //         console.error(error)
+    //     }
+    // }
+
+    // useEffect(() => {
+    //     setAuth(user.status)
+    // }, [user])
+
+    const handleAuthMe = async () => {
+        const result: any = await getAuthMe()
+
+        if (result?.error?.data?.status === 401) {
+            dispatch(logout())
         }
     }
 
-    console.log('111')
+    React.useEffect(() => {
+        const storageToken = getStorageToken()
 
-    useEffect(() => {
-        setAuth(user.status)
-    }, [user])
+        if (storageToken && !userToken) {
+            dispatch(setToken(storageToken))
+            handleAuthMe()
+        }
+    }, [])
 
     return (
         <Menu
@@ -123,7 +142,7 @@ const Header: React.FC = () => {
                         <Menu.Item
                             name={'Выйти'}
                             color={'red'}
-                            onClick={() => doLogout()}
+                            // onClick={() => doLogout()}
                         />
                     )}
                 </Menu.Menu>

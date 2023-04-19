@@ -1,8 +1,7 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-// import { IRestAuth } from './types'
-//
-// // import { RootState } from './store'
+import { APIResponseLogin, TUserInfo } from './types'
+
 //
 // export const authSlice = createSlice({
 //     initialState: { status: false, token: '' } as IRestAuth,
@@ -24,16 +23,15 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 //
 // export default authSlice.reducer
 
-const userToken = localStorage.getItem('userToken')
-    ? localStorage.getItem('userToken')
-    : null
+type AuthType = {
+    error: any
+    userInfo?: TUserInfo
+    userToken?: string
+}
 
-const initialState = {
+const initialState: AuthType = {
     error: null,
-    loading: false,
-    success: false, // for monitoring the registration process.
-    userInfo: {}, // for user object
-    userToken: null // for storing the JWT
+    userToken: ''
 }
 
 const authSlice = createSlice({
@@ -41,13 +39,37 @@ const authSlice = createSlice({
     initialState,
     name: 'auth',
     reducers: {
-        logout: (state) => {
-            state.
+        login: (state, { payload }: PayloadAction<APIResponseLogin>) => {
+            state.userToken = payload?.access_token || undefined
+            state.userInfo = payload?.user || undefined
+
+            localStorage.setItem('userToken', payload?.access_token || '')
         },
-        setCredentials: (state, { payload }) => {
-            state.userInfo = payload
+        logout: (state) => {
+            state.userToken = ''
+            // state.userInfo = undefined
+            localStorage.setItem('userToken', '')
+        },
+        setToken: (state, action: PayloadAction<string>) => {
+            state.userToken = action.payload
         }
+
+        // setToken: (state, { payload: { userToken } }) => {
+        //     // setCredentials: (state, { payload }: PayloadAction<IRestAuth>) => {
+        //     localStorage.setItem('userToken', userToken)
+        //     state.userToken = userToken
+        // },
+        // setUserInfo: (state, { payload: { userInfo } }) => {
+        //     state.userInfo = userInfo
+        // }
     }
 })
+
+export const { login, logout, setToken } = authSlice.actions
+
+export const getStorageToken = (): string =>
+    typeof window !== 'undefined' && localStorage.getItem('userToken')
+        ? localStorage.getItem('userToken') || ''
+        : ''
 
 export default authSlice.reducer

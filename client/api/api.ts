@@ -4,13 +4,14 @@ import { HYDRATE } from 'next-redux-wrapper'
 import { RootState } from './store'
 import {
     APIRequestCategories,
+    APIRequestLogin,
     APIRequestPhotos,
     APIResponseCatalogList,
     APIResponseCatalogNames,
+    APIResponseLogin,
     APIResponsePhotos,
     APIResponsePhotosNames,
     APIResponseStatistic,
-    IRequestLogin,
     IResponseError, // IRelayList,
     // IRelaySet,
     IRestAuth, // IRestCatalogItem,
@@ -52,16 +53,22 @@ export const api = createApi({
         prepareHeaders: (headers, { getState }) => {
             // By default, if we have a token in the store, let's use that for authenticated requests
             const token = (getState() as RootState).auth.userToken
+
             if (token) {
-                headers.set('AuthToken', token)
+                headers.set('Authorization', token)
             }
+
             return headers
         }
     }),
     endpoints: (builder) => ({
+        getAuthMe: builder.mutation<void, void>({
+            query: () => 'auth/me'
+        }),
         getCatalogItem: builder.query<TCatalog, string>({
             query: (object) => `catalog/${object}`
         }),
+
         getCatalogList: builder.query<APIResponseCatalogList, void>({
             query: () => 'catalog'
         }),
@@ -104,11 +111,11 @@ export const api = createApi({
         // getObjectNames: builder.query<IRestObjectNames, void>({
         //     query: () => 'get/object/names'
         // }),
-
         getPhotoItem: builder.query<TPhoto, string>({
             keepUnusedDataFor: 3600,
             query: (object) => `photo/${object}`
         }),
+
         getPhotoList: builder.query<APIResponsePhotos, Maybe<APIRequestPhotos>>(
             {
                 keepUnusedDataFor: 3600,
@@ -127,7 +134,6 @@ export const api = createApi({
         // getSensorStatistic: builder.query<IRestSensorStatistic, void>({
         //     query: () => 'get/sensors/statistic'
         // }),
-
         getStatistic: builder.query<APIResponseStatistic, void>({
             query: () => 'statistic'
         }),
@@ -137,9 +143,6 @@ export const api = createApi({
         getStatisticPhotosItems: builder.query<APIResponsePhotosNames, void>({
             query: () => 'statistic/photos'
         }),
-        loginCheck: builder.mutation<IRestAuth, void>({
-            query: () => 'auth/check'
-        }),
 
         // getWeatherCurrent: builder.query<IRestWeatherCurrent, null>({
         //     query: () => 'weather/current'
@@ -148,7 +151,10 @@ export const api = createApi({
         //     query: (date) => `weather/month?date=${date}`
         // }),
 
-        postLogin: builder.mutation<IRestAuth | IResponseError, IRequestLogin>({
+        postAuthLogin: builder.mutation<
+            APIResponseLogin | IResponseError,
+            APIRequestLogin
+        >({
             query: (credentials) => ({
                 body: credentials,
                 method: 'POST',
@@ -187,8 +193,8 @@ export const {
     useGetCatalogItemQuery,
     useGetPhotoItemQuery,
 
-    useLoginCheckMutation,
-    usePostLoginMutation,
+    usePostAuthLoginMutation,
+    useGetAuthMeMutation,
     util: { getRunningQueriesThunk }
 } = api
 

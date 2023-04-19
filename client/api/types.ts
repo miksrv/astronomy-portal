@@ -9,6 +9,21 @@ export interface IResponseError {
     code?: number
     message?: any
 }
+
+export interface APIResponseLogin {
+    message?: string
+    user?: TUserInfo
+    access_token?: string
+}
+
+export type TUserInfo = {
+    id: number
+    name: string
+    email: string
+    updated_at?: string
+    created_at?: string
+}
+
 export interface IRestFilesMonth extends IRestResponse {
     payload: TFilesMonth[]
 }
@@ -72,7 +87,7 @@ export interface IRestAuth {
     token: string
 }
 
-export interface IRequestLogin {
+export interface APIRequestLogin {
     email: string
     password: string
 }
