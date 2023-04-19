@@ -12,9 +12,7 @@ import styles from './styles.module.sass'
 const LoginForm: React.FC = () => {
     const dispatch = useAppDispatch()
     const { visible } = useAppSelector((state) => state.loginForm)
-    const [loginMutation, { isLoading, isError, data, error }] =
-        usePostLoginMutation()
-    const [loginError, setLoginError] = useState<boolean>(false)
+    const [loginMutation, { isLoading }] = usePostLoginMutation()
     const [errors, setErrors] = React.useState<any | undefined>(undefined)
     const [formState, setFormState] = useState<IRequestLogin>({
         email: '',
@@ -46,26 +44,13 @@ const LoginForm: React.FC = () => {
                 })
             )
         }
-
-        // try {
-        //     setLoginError(false)
-        //
-        //     const loginResult = await login(formState).unwrap()
-        //
-        //     // if (loginResult.status === 400) {
-        //     //     setErrors()
-        //     // }
-        //     if (loginResult.status) {
-        //         dispatch(setCredentials(loginResult))
-        //         dispatch(hide())
-        //     } else {
-        //         setLoginError(true)
-        //     }
-        // } catch (error) {
-        //     setLoginError(true)
-        //     //dispatch(hide())
-        // }
     }
+
+    const listErrors: string[] = React.useMemo(
+        () =>
+            Object.entries(errors || []).map(([key, value]) => value as string),
+        [errors]
+    )
 
     return (
         <Modal
@@ -78,7 +63,12 @@ const LoginForm: React.FC = () => {
                 <Message
                     error
                     hidden={!errors}
-                    content={'Ошибка авторизации, неверный логин или пароль'}
+                    list={listErrors}
+                    content={
+                        !listErrors
+                            ? 'Ошибка авторизации, неверный логин или пароль'
+                            : undefined
+                    }
                 />
                 <Form
                     size={'large'}

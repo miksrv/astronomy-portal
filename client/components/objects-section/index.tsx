@@ -42,17 +42,16 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
     return (
         <div className={'box'}>
             <Dimmer active={loader || error}>
-                {loader && <Loader />}
-                {error && (
-                    <Message
-                        error
-                        icon={'database'}
-                        header={'Данные не доступны'}
-                        content={
-                            'На сервере возникла ошибка, попробуйте обновить страницу или зайти немного позже'
-                        }
-                    />
-                )}
+                <Loader active={loader} />
+                <Message
+                    error={true}
+                    hidden={!error}
+                    icon={'database'}
+                    header={'Данные не доступны'}
+                    content={
+                        'На сервере возникла ошибка, попробуйте обновить страницу или зайти немного позже'
+                    }
+                />
             </Dimmer>
             <Grid>
                 <Grid.Column

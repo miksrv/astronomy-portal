@@ -15,22 +15,6 @@ type TPhotoGridProps = {
     catalog?: TCatalog[]
 }
 
-const PhotosLoader = (count: number) =>
-    Array(count)
-        .fill(1)
-        .map((item, key) => (
-            <div
-                key={key}
-                className={styles.item}
-            >
-                <div className={styles.info}>
-                    <Dimmer active>
-                        <Loader />
-                    </Dimmer>
-                </div>
-            </div>
-        ))
-
 const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
     const { loading, loaderCount, threeColumns, photos, catalog } = props
 
@@ -42,59 +26,96 @@ const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
 
     return (
         <div className={classNames(styles.photoGird, 'box')}>
-            {loading || !photos || !catalog
-                ? PhotosLoader(loaderCount ? loaderCount : 12)
-                : photos.map((photo) => {
-                      const catalogItem = catalog.find(
-                          ({ name }) => name === photo.object
-                      )
+            {loading || !photos || !catalog ? (
+                <PhotosLoader
+                    count={loaderCount || 12}
+                    threeColumns={threeColumns}
+                />
+            ) : (
+                photos.map((photo) => {
+                    const catalogItem = catalog.find(
+                        ({ name }) => name === photo.object
+                    )
 
-                      return (
-                          <Link
-                              key={photo.id}
-                              href={`/photos/${photo.object}?date=${photo.date}`}
-                              title={`${
-                                  photo.object || photo.object
-                              } - Фотография объекта`}
-                              className={classNames(
-                                  styles.item,
-                                  threeColumns ? styles.item4 : undefined
-                              )}
-                          >
-                              {catalogItem?.title ? (
-                                  <Reveal animated={'small fade'}>
-                                      <Reveal.Content visible>
-                                          <Image
-                                              src={`${process.env.NEXT_PUBLIC_IMG_HOST}public/photo/${photo.image_name}_thumb.${photo.image_ext}`}
-                                              className={styles.photo}
-                                              alt={catalogItem.title}
-                                              width={200}
-                                              height={200}
-                                          />
-                                      </Reveal.Content>
-                                      <Reveal.Content hidden>
-                                          <div className={styles.info}>
-                                              <h4>{catalogItem.title}</h4>
-                                              <p>
-                                                  {sliceText(catalogItem?.text)}
-                                              </p>
-                                          </div>
-                                      </Reveal.Content>
-                                  </Reveal>
-                              ) : (
-                                  <Image
-                                      src={`${process.env.NEXT_PUBLIC_IMG_HOST}public/photo/${photo.image_name}_thumb.${photo.image_ext}`}
-                                      className={styles.photo}
-                                      alt={''}
-                                      width={200}
-                                      height={200}
-                                  />
-                              )}
-                          </Link>
-                      )
-                  })}
+                    return (
+                        <Link
+                            key={photo.id}
+                            href={`/photos/${photo.object}?date=${photo.date}`}
+                            title={`${
+                                photo.object || photo.object
+                            } - Фотография объекта`}
+                            className={classNames(
+                                styles.item,
+                                threeColumns ? styles.item4 : undefined
+                            )}
+                        >
+                            {catalogItem?.title ? (
+                                <Reveal animated={'small fade'}>
+                                    <Reveal.Content visible>
+                                        <PhotoImage
+                                            photo={photo}
+                                            title={catalogItem.title}
+                                        />
+                                    </Reveal.Content>
+                                    <Reveal.Content hidden>
+                                        <div className={styles.info}>
+                                            <h4>{catalogItem.title}</h4>
+                                            <p>
+                                                {sliceText(catalogItem?.text)}
+                                            </p>
+                                        </div>
+                                    </Reveal.Content>
+                                </Reveal>
+                            ) : (
+                                <PhotoImage
+                                    photo={photo}
+                                    title={catalogItem?.name || ''}
+                                />
+                            )}
+                        </Link>
+                    )
+                })
+            )}
         </div>
     )
 }
+
+const PhotosLoader: React.FC<{ count: number; threeColumns?: boolean }> = ({
+    count,
+    threeColumns
+}) => (
+    <>
+        {Array(count)
+            .fill(1)
+            .map((item, key) => (
+                <div
+                    key={key}
+                    className={classNames(
+                        styles.item,
+                        threeColumns ? styles.item4 : undefined
+                    )}
+                >
+                    <div className={styles.info}>
+                        <Dimmer active>
+                            <Loader />
+                        </Dimmer>
+                    </div>
+                </div>
+            ))}
+    </>
+)
+
+const PhotoImage: React.FC<{ photo: TPhoto; title: string }> = ({
+    photo,
+    title
+}) => (
+    <Image
+        src={`${process.env.NEXT_PUBLIC_IMG_HOST}public/photo/${photo.image_name}_thumb.${photo.image_ext}`}
+        className={styles.photo}
+        alt={`${title} Фотография объекта`}
+        width={200}
+        height={200}
+    />
+)
 
 export default PhotoGrid

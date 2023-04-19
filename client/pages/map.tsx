@@ -22,22 +22,22 @@ export const getStaticProps = wrapper.getStaticProps((store) => async () => {
 })
 
 const Map: React.FC = () => {
-    const { data, isSuccess } = useGetCatalogListQuery()
+    const { data, isFetching } = useGetCatalogListQuery()
     const [goToObject, setGoToObject] = React.useState<[number, number]>([0, 0])
 
-    const listObjects = React.useMemo(() => {
-        return data?.payload.length
-            ? data?.payload
-                  .filter((item: TCatalog) => item.ra !== 0 && item.dec !== 0)
-                  .map((item: TCatalog) => {
-                      return {
-                          dec: item.dec,
-                          name: item.name,
-                          ra: item.ra
-                      }
-                  })
-            : []
-    }, [data])
+    const listObjects = React.useMemo(
+        () =>
+            data?.items
+                .filter((item) => item.coord_ra !== 0 && item.coord_dec !== 0)
+                .map((item: TCatalog) => {
+                    return {
+                        dec: item.coord_dec,
+                        name: item.name,
+                        ra: item.coord_ra
+                    }
+                }) || [],
+        [data]
+    )
 
     return (
         <main>
@@ -66,7 +66,7 @@ const Map: React.FC = () => {
             </div>
             <br />
             <ObjectCloudSkyMap
-                loader={isSuccess && !listObjects?.length}
+                loading={isFetching || !listObjects?.length}
                 objects={listObjects}
                 handleClick={(ra, dec) => setGoToObject([ra, dec])}
             />

@@ -88,7 +88,7 @@ class Auth extends ResourceController
             helper('jwt');
 
             return $this
-                ->respondCreated(
+                ->respond(
                     [
                         'message' => 'User authenticated successfully',
                         'user' => $user,

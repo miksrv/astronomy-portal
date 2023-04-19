@@ -17,7 +17,7 @@ export const isOutdated = (date1: string, date2: string) =>
  * @returns {string}
  */
 export const getTimeFromSec = (sec: number, full: boolean = false): string => {
-    if (sec <= 0) return ''
+    if (sec <= 0) return '0'
 
     let h = (sec / 3600) ^ 0
     let m = ((sec - h * 3600) / 60) ^ 0

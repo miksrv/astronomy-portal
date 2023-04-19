@@ -1,9 +1,9 @@
 import { useGetStatisticQuery } from '@/api/api'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import React from 'react'
-import { Label, Menu, Sidebar as SidebarMenu } from 'semantic-ui-react'
+import { Label, Loader, Menu, Sidebar as SidebarMenu } from 'semantic-ui-react'
 
-import { MENU_ITEMS } from '@/components/header'
+import { menuItems } from '@/components/header'
 import { hide } from '@/components/sidebar/sidebarSlice'
 
 // import styles from './styles.module.sass'
@@ -11,7 +11,7 @@ import { hide } from '@/components/sidebar/sidebarSlice'
 const Sidebar: React.FC = () => {
     const dispatch = useAppDispatch()
     const visible = useAppSelector((state) => state.sidebar.visible)
-    const { data, isSuccess } = useGetStatisticQuery()
+    const { data, isLoading } = useGetStatisticQuery()
 
     return (
         <SidebarMenu
@@ -24,7 +24,7 @@ const Sidebar: React.FC = () => {
             visible={visible}
             width={'thin'}
         >
-            {MENU_ITEMS.map((item, key) => (
+            {menuItems.map((item, key) => (
                 <Menu.Item
                     onClick={() => dispatch(hide())}
                     exact
@@ -34,10 +34,15 @@ const Sidebar: React.FC = () => {
                     {item.name}
                     {item.label && (
                         <Label
+                            // className={styles.label}
                             color={'green'}
                             size={'tiny'}
                         >
-                            {isSuccess ? data?.payload[item.label] : 0}
+                            <Loader
+                                active={isLoading}
+                                size={'mini'}
+                            />
+                            {data?.[item.label]}
                         </Label>
                     )}
                 </Menu.Item>
