@@ -1,6 +1,5 @@
 import { useGetAuthMeMutation, useGetStatisticQuery } from '@/api/api'
-// import { setToken } from '@/api/authSlice'
-import { getStorageToken, logout, setToken } from '@/api/authSlice'
+import { getStorageToken, logout, setToken, setUserInfo } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { APIResponseStatistic } from '@/api/types'
 import Image from 'next/image'
@@ -40,37 +39,23 @@ const Header: React.FC = () => {
         typeof window !== 'undefined' ? window.innerWidth <= 760 : false
     const { data, isLoading } = useGetStatisticQuery()
     const [getAuthMe] = useGetAuthMeMutation()
-    const [auth, setAuth] = useState<boolean>(false)
     const router = useRouter()
-    const userToken = useAppSelector((state) => state.auth.userToken)
-
-    // const user = UserAuth()
-
-    // const doLogout = async () => {
-    //     try {
-    //         dispatch(setToken({ userToken: '' }))
-    //         setAuth(false)
-    //     } catch (error) {
-    //         console.error(error)
-    //     }
-    // }
-
-    // useEffect(() => {
-    //     setAuth(user.status)
-    // }, [user])
+    const auth = useAppSelector((state) => state.auth)
 
     const handleAuthMe = async () => {
         const result: any = await getAuthMe()
 
-        if (result?.error?.data?.status === 401) {
+        if (!result?.data?.user?.email) {
             dispatch(logout())
+        } else {
+            dispatch(setUserInfo(result.data.user))
         }
     }
 
     React.useEffect(() => {
         const storageToken = getStorageToken()
 
-        if (storageToken && !userToken) {
+        if (storageToken && !auth.userToken) {
             dispatch(setToken(storageToken))
             handleAuthMe()
         }
@@ -133,7 +118,7 @@ const Header: React.FC = () => {
                     ))
                 )}
                 <Menu.Menu position={'right'}>
-                    {!auth ? (
+                    {!auth.userInfo ? (
                         <Menu.Item
                             name={'Войти'}
                             onClick={() => dispatch(show())}
@@ -142,7 +127,7 @@ const Header: React.FC = () => {
                         <Menu.Item
                             name={'Выйти'}
                             color={'red'}
-                            // onClick={() => doLogout()}
+                            onClick={() => dispatch(logout())}
                         />
                     )}
                 </Menu.Menu>
