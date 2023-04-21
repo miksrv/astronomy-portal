@@ -47,11 +47,15 @@ const authSlice = createSlice({
         },
         logout: (state) => {
             state.userToken = ''
-            // state.userInfo = undefined
+            state.userInfo = undefined
+
             localStorage.setItem('userToken', '')
         },
         setToken: (state, action: PayloadAction<string>) => {
             state.userToken = action.payload
+        },
+        setUserInfo: (state, action: PayloadAction<TUserInfo>) => {
+            state.userInfo = action.payload
         }
 
         // setToken: (state, { payload: { userToken } }) => {
@@ -65,7 +69,7 @@ const authSlice = createSlice({
     }
 })
 
-export const { login, logout, setToken } = authSlice.actions
+export const { login, logout, setToken, setUserInfo } = authSlice.actions
 
 export const getStorageToken = (): string =>
     typeof window !== 'undefined' && localStorage.getItem('userToken')
