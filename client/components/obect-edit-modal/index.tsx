@@ -1,4 +1,8 @@
-import { useGetCategoriesListQuery, usePatchCatalogMutation } from '@/api/api'
+import {
+    useGetCategoriesListQuery,
+    usePatchCatalogMutation,
+    usePostCatalogMutation
+} from '@/api/api'
 import { APIRequestCatalog, APIResponseError, TCatalog } from '@/api/types'
 import isEqual from 'lodash-es/isEqual'
 import React, { useState } from 'react'
@@ -19,8 +23,25 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
     const { visible, value, skyMapVisible, onClose } = props
 
     const { data: categoriesData } = useGetCategoriesListQuery()
-    const [updateCatalog, { isLoading, isSuccess, isError, error, reset }] =
-        usePatchCatalogMutation()
+    const [
+        updateItem,
+        {
+            isLoading: updateLoading,
+            isSuccess: updateSuccess,
+            isError: updateError,
+            error: updateErrorList
+        }
+    ] = usePatchCatalogMutation()
+
+    const [
+        createItem,
+        {
+            isLoading: createLoading,
+            isSuccess: createSuccess,
+            isError: createError,
+            error: createErrorList
+        }
+    ] = usePostCatalogMutation()
 
     const [submitted, setSubmitted] = React.useState<boolean>(false)
     const [formState, setFormState] = useState<APIRequestCatalog>(
@@ -36,7 +57,10 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
         e.key === 'Enter' && handleSubmit()
 
     const findError = (field: keyof APIRequestCatalog) =>
-        (error as APIResponseError)?.messages?.[field] || undefined
+        (
+            (createErrorList as APIResponseError) ||
+            (updateErrorList as APIResponseError)
+        )?.messages?.[field] || undefined
 
     const handleClose = () => {
         setSubmitted(false)
@@ -50,13 +74,16 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
 
     const handleSubmit = React.useCallback(() => {
         setSubmitted(true)
-        updateCatalog(formState)
+
+        if (!value?.name) {
+            createItem(formState)
+        } else {
+            updateItem(formState)
+        }
     }, [formState])
 
     React.useEffect(() => {
-        if (value) {
-            setFormState(mapFormProps(value))
-        }
+        setFormState(mapFormProps(value))
     }, [value])
 
     return (
@@ -65,13 +92,15 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
             open={visible}
             onClose={handleClose}
         >
-            <Modal.Header>Редактирование объекта</Modal.Header>
+            <Modal.Header>
+                {value?.name ? 'Редактирование' : ' Создание'} объекта
+            </Modal.Header>
             <Modal.Content>
                 <Form
                     onSubmit={handleSubmit}
-                    loading={isLoading}
-                    success={isSuccess && submitted}
-                    error={isError && submitted}
+                    loading={createLoading || updateLoading}
+                    success={(createSuccess || updateSuccess) && submitted}
+                    error={(createError || updateError) && submitted}
                     size={'small'}
                 >
                     <Message
@@ -100,7 +129,8 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
                         fluid
                         search
                         selection
-                        value={formState.category}
+                        value={formState?.category}
+                        error={findError('category')}
                         onChange={(e, data) =>
                             setFormState({
                                 ...formState,
@@ -144,7 +174,7 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
                                 label={'RA'}
                                 onChange={handleChange}
                                 onKeyDown={handleKeyDown}
-                                defaultValue={value?.coord_ra}
+                                defaultValue={value?.coord_ra || 0}
                                 error={findError('coord_ra')}
                             />
                             <Form.Input
@@ -153,7 +183,7 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
                                 label={'DEC'}
                                 onChange={handleChange}
                                 onKeyDown={handleKeyDown}
-                                defaultValue={value?.coord_dec}
+                                defaultValue={value?.coord_dec || 0}
                                 error={findError('coord_dec')}
                             />
                         </Grid.Column>
@@ -165,11 +195,9 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
                                 <CelestialMap
                                     objects={[
                                         {
-                                            dec:
-                                                Number(formState?.coord_dec) ||
-                                                0,
+                                            dec: formState?.coord_dec,
                                             name: formState?.name || '',
-                                            ra: Number(formState?.coord_ra) || 0
+                                            ra: formState?.coord_ra
                                         }
                                     ]}
                                 />
@@ -183,8 +211,13 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
                     size={'tiny'}
                     onClick={handleSubmit}
                     color={'green'}
-                    disabled={isLoading || !formState.name || isFormDirty}
-                    loading={isLoading}
+                    disabled={
+                        createLoading ||
+                        updateLoading ||
+                        !formState?.name ||
+                        isFormDirty
+                    }
+                    loading={createLoading || updateLoading}
                 >
                     Сохранить
                 </Button>
@@ -200,7 +233,7 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
     )
 }
 
-const mapFormProps = (value?: TCatalog): APIRequestCatalog => ({
+const mapFormProps = (value?: TCatalog | undefined): APIRequestCatalog => ({
     category: value?.category || 0,
     coord_dec: value?.coord_dec || 0,
     coord_ra: value?.coord_ra || 0,

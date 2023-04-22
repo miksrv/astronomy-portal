@@ -2,8 +2,6 @@ import { TCatalog, TCategory, TPhoto } from '@/api/types'
 import React, { useMemo, useState } from 'react'
 import { Dimmer, Loader, Table } from 'semantic-ui-react'
 
-import ObjectEditModal from '@/components/obect-edit-modal'
-
 import RenderTableHeader, { HeaderFields } from './RenderTableHeader'
 import RenderTableRow from './RenderTableRow'
 import styles from './styles.module.sass'
@@ -14,14 +12,13 @@ type TObjectTable = {
     categories?: TCategory[]
     catalog?: TCatalog[]
     photos?: TPhoto[]
+    onClickEdit?: (item: string) => void
 }
 
 const ObjectTable: React.FC<TObjectTable> = (props) => {
-    const { loading, categories, catalog, photos } = props
+    const { loading, categories, catalog, photos, onClickEdit } = props
     const [sortField, setSortField] = useState<TSortKey>('name')
     const [sortOrder, setSortOrder] = useState<TSortOrdering>('descending')
-    const [editModalVisible, setEditModalVisible] = useState<boolean>(false)
-    const [editModalValue, setEditModalValue] = useState<TCatalog | any>()
 
     const itemsCatalog: TTableItem[] | undefined = useMemo(
         () =>
@@ -97,13 +94,8 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                                 photo={photos?.find(
                                     ({ object }) => object === item.name
                                 )}
-                                onShowEdit={() => {
-                                    setEditModalValue(
-                                        catalog?.find(
-                                            ({ name }) => name === item.name
-                                        )
-                                    )
-                                    setEditModalVisible(true)
+                                onClickEdit={() => {
+                                    onClickEdit?.(item.name)
                                 }}
                             />
                         ))
@@ -120,12 +112,6 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                     )}
                 </Table.Body>
             </Table>
-            <ObjectEditModal
-                visible={editModalVisible}
-                skyMapVisible={true}
-                value={editModalValue}
-                onClose={() => setEditModalVisible(false)}
-            />
         </div>
     )
 }
