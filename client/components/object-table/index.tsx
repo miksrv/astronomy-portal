@@ -98,7 +98,11 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                                     ({ object }) => object === item.name
                                 )}
                                 onShowEdit={() => {
-                                    setEditModalValue(item)
+                                    setEditModalValue(
+                                        catalog?.find(
+                                            ({ name }) => name === item.name
+                                        )
+                                    )
                                     setEditModalVisible(true)
                                 }}
                             />

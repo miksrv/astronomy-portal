@@ -4,10 +4,10 @@ export interface IRestResponse {
     errorText?: string
 }
 
-export interface IResponseError {
+export interface APIResponseError {
     status?: number
     code?: number
-    message?: any
+    messages?: any
 }
 
 export interface APIResponseLogin {
@@ -123,6 +123,15 @@ export type TSensors = {
     p1?: number
     p2?: number
     p3?: number
+}
+
+export interface APIRequestCatalog {
+    category: number
+    coord_dec: number
+    coord_ra: number
+    name: string
+    text: string
+    title: string
 }
 
 export interface APIResponseCatalogList {

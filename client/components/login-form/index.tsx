@@ -49,7 +49,7 @@ const LoginForm: React.FC = () => {
 
     return (
         <Modal
-            size={'tiny'}
+            size={'mini'}
             open={visible}
             onClose={() => dispatch(hide())}
         >
@@ -66,7 +66,7 @@ const LoginForm: React.FC = () => {
                     }
                 />
                 <Form
-                    size={'large'}
+                    size={'tiny'}
                     onSubmit={handleSubmit}
                     className={styles.loginForm}
                 >

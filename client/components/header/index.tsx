@@ -1,5 +1,11 @@
 import { useGetAuthMeMutation, useGetStatisticQuery } from '@/api/api'
-import { getStorageToken, logout, setToken, setUserInfo } from '@/api/authSlice'
+import {
+    getStorageToken,
+    logout,
+    setToken,
+    setUserAuth,
+    setUserInfo
+} from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { APIResponseStatistic } from '@/api/types'
 import Image from 'next/image'
@@ -49,6 +55,7 @@ const Header: React.FC = () => {
             dispatch(logout())
         } else {
             dispatch(setUserInfo(result.data.user))
+            dispatch(setUserAuth(true))
         }
     }
 

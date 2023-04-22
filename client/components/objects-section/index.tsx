@@ -23,7 +23,7 @@ type TObjectHeaderProps = {
 
 const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
     const { title, loader, error, catalog, deviationRa, deviationDec } = props
-    const userLogin = useAppSelector((state) => state.auth.status)
+    const userAuth = useAppSelector((state) => state.auth.userAuth)
     const date = catalog?.updated
         ? moment
               .utc(catalog.updated)
@@ -61,7 +61,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                 >
                     <div className={styles.name}>
                         <h1>Объект: {title}</h1>
-                        {userLogin && (
+                        {userAuth && (
                             <div className={styles.controlButtons}>
                                 <Button
                                     size={'mini'}

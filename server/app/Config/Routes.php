@@ -49,8 +49,8 @@ $routes->get('category', 'Category::list');
 $routes->post('category', 'Category::create');
 $routes->patch('category/(:any)', 'Category::update/$1');
 $routes->delete('category/(:any)', 'Category::delete/$1');
-$routes->options('category', 'Category');
-$routes->options('category/(:any)', 'Category');
+$routes->options('category', 'Category::create');
+$routes->options('category/(:any)', 'Category::update/$1');
 
 $routes->get('photo', 'Photo::list');
 $routes->get('photo/(:any)', 'Photo::show/$1');

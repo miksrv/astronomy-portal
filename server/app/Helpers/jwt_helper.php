@@ -8,19 +8,6 @@ use Firebase\JWT\Key;
 /**
  * @throws Exception
  */
-function getJWTFromRequest($authenticationHeader): string
-{
-    if (is_null($authenticationHeader))
-    {
-        throw new Exception('Missing or invalid JWT in request');
-    }
-
-    return explode(' ', $authenticationHeader)[1];
-}
-
-/**
- * @throws Exception
- */
 function validateJWTFromRequest(string $encodedToken)
 {
     $secretKey    = Services::getSecretKey();
