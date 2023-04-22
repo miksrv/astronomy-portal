@@ -77,10 +77,13 @@ h1
 //color: $text-main !important
 //border-color: transparent !important
 
-.ui.multiple.search.dropdown > input.search
+.ui.page.modals.dimmer.active
+  z-index: 2000 !important
+
+main .ui.multiple.search.dropdown > input.search
   color: $text-main !important
 
-.ui.selection.active.dropdown .menu
+main .ui.selection.active.dropdown .menu
   border-color: transparent !important
   background-color: #4e4e4e !important
 
@@ -89,13 +92,16 @@ h1
     color: $text-main
     font-size: 12px
 
-.ui.selection.active.dropdown
+main .ui.selection.active.dropdown
   &:focus, &.active
     background-color: $input-focus-BackgroundColor !important
     border-color: $input-focus-BorderColor !important
 
-.ui.selection.dropdown .menu > .message
+main .ui.selection.dropdown .menu > .message
   color: $text-second !important
+
+.ui.modal>.content
+  padding: 0.5em 1em 1em !important
 
 .ui.input.focus > input, .ui.input > input:focus
   background-color: #565656

@@ -3,16 +3,17 @@ import { HYDRATE } from 'next-redux-wrapper'
 
 import { RootState } from './store'
 import {
+    APIRequestCatalog,
     APIRequestCategories,
     APIRequestLogin,
     APIRequestPhotos,
     APIResponseCatalogList,
     APIResponseCatalogNames,
+    APIResponseError,
     APIResponseLogin,
     APIResponsePhotos,
     APIResponsePhotosNames,
-    APIResponseStatistic,
-    IResponseError, // IRelayList,
+    APIResponseStatistic, // IRelayList,
     // IRelaySet,
     IRestAuth, // IRestCatalogItem,
     // IRestFilesMonth,
@@ -66,13 +67,13 @@ export const api = createApi({
             query: () => 'auth/me'
         }),
         getCatalogItem: builder.query<TCatalog, string>({
+            providesTags: (result, error, id) => [{ id, type: 'Catalog' }],
             query: (object) => `catalog/${object}`
         }),
-
         getCatalogList: builder.query<APIResponseCatalogList, void>({
+            providesTags: () => [{ id: 'LIST', type: 'Catalog' }],
             query: () => 'catalog'
         }),
-
         getCategoriesList: builder.query<APIRequestCategories, void>({
             keepUnusedDataFor: 3600,
             query: () => 'category'
@@ -144,6 +145,21 @@ export const api = createApi({
             query: () => 'statistic/photos'
         }),
 
+        patchCatalog: builder.mutation<
+            TCatalog | APIResponseError,
+            Partial<APIRequestCatalog> & Pick<APIRequestCatalog, 'name'>
+        >({
+            invalidatesTags: (result, error, { name }) => [
+                { name, type: 'Catalog' }
+            ],
+            query: ({ name, ...formState }) => ({
+                body: formState,
+                method: 'PATCH',
+                url: `catalog/${name}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+
         // getWeatherCurrent: builder.query<IRestWeatherCurrent, null>({
         //     query: () => 'weather/current'
         // }),
@@ -152,7 +168,7 @@ export const api = createApi({
         // }),
 
         postAuthLogin: builder.mutation<
-            APIResponseLogin | IResponseError,
+            APIResponseLogin | APIResponseError,
             APIRequestLogin
         >({
             query: (credentials) => ({
@@ -179,7 +195,7 @@ export const api = createApi({
         }
     },
     reducerPath: 'api',
-    tagTypes: ['Relay']
+    tagTypes: ['Catalog']
 })
 
 // Export hooks for usage in functional components
@@ -195,6 +211,8 @@ export const {
 
     usePostAuthLoginMutation,
     useGetAuthMeMutation,
+
+    usePatchCatalogMutation,
     util: { getRunningQueriesThunk }
 } = api
 

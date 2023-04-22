@@ -19,7 +19,7 @@ type TTableRowProps = {
 
 const RenderTableRow: React.FC<TTableRowProps> = (props) => {
     const { item, photo, onShowEdit } = props
-    const userLogin = useAppSelector((state) => state.auth.status)
+    const userAuth = useAppSelector((state) => state.auth.userAuth)
     const doTextTruncate = useMemo(() => {
         if (item?.text) {
             return item.text.length > 200
@@ -50,8 +50,8 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                         </Link>
                     }
                 />
-                {userLogin && (
-                    <>
+                {userAuth && (
+                    <div>
                         <span
                             className={styles.controlButton}
                             role={'button'}
@@ -64,7 +64,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                         <span className={styles.controlButton}>
                             <Icon name={'remove'} />
                         </span>
-                    </>
+                    </div>
                 )}
             </Table.Cell>
             <Table.Cell width='one'>

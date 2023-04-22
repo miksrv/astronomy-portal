@@ -1,6 +1,8 @@
-import { TCatalog } from '@/api/types'
-import React, { useEffect, useState } from 'react'
-import { Button, Form, Grid, Modal } from 'semantic-ui-react'
+import { useGetCategoriesListQuery, usePatchCatalogMutation } from '@/api/api'
+import { APIRequestCatalog, APIResponseError, TCatalog } from '@/api/types'
+import isEqual from 'lodash-es/isEqual'
+import React, { useState } from 'react'
+import { Button, Form, Grid, Message, Modal } from 'semantic-ui-react'
 
 import CelestialMap from '@/components/celestial-map'
 
@@ -16,14 +18,14 @@ interface IObjectEditModal {
 const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
     const { visible, value, skyMapVisible, onClose } = props
 
-    const [formState, setFormState] = useState<TCatalog>({
-        category: value?.category || '',
-        dec: value?.dec || 0,
-        name: value?.name || '',
-        ra: value?.ra || 0,
-        text: value?.text || '',
-        title: value?.title || ''
-    })
+    const { data: categoriesData } = useGetCategoriesListQuery()
+    const [updateCatalog, { isLoading, isSuccess, isError, error, reset }] =
+        usePatchCatalogMutation()
+
+    const [submitted, setSubmitted] = React.useState<boolean>(false)
+    const [formState, setFormState] = useState<APIRequestCatalog>(
+        mapFormProps(value)
+    )
 
     const handleChange = ({
         target: { name, value }
@@ -33,25 +35,27 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
     const handleKeyDown = (e: { key: string }) =>
         e.key === 'Enter' && handleSubmit()
 
-    const handleSubmit = async () => {
-        // try {
-        //     const user = await login(formState).unwrap()
-        //
-        //     if (user.status) {
-        //         dispatch(setCredentials(user))
-        //         dispatch(hide())
-        //     } else {
-        //         setLoginError(true)
-        //     }
-        // } catch (error) {
-        //     setLoginError(true)
-        //     dispatch(hide())
-        // }
+    const findError = (field: keyof APIRequestCatalog) =>
+        (error as APIResponseError)?.messages?.[field] || undefined
+
+    const handleClose = () => {
+        setSubmitted(false)
+        onClose?.()
     }
 
-    useEffect(() => {
+    const isFormDirty = React.useMemo(
+        () => isEqual(mapFormProps(value), formState),
+        [mapFormProps, value, formState]
+    )
+
+    const handleSubmit = React.useCallback(() => {
+        setSubmitted(true)
+        updateCatalog(formState)
+    }, [formState])
+
+    React.useEffect(() => {
         if (value) {
-            setFormState(value)
+            setFormState(mapFormProps(value))
         }
     }, [value])
 
@@ -59,26 +63,55 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
         <Modal
             size='small'
             open={visible}
-            onClose={onClose}
+            onClose={handleClose}
         >
             <Modal.Header>Редактирование объекта</Modal.Header>
             <Modal.Content>
-                <Form onSubmit={handleSubmit}>
-                    <Form.Input
-                        fluid
-                        name='title'
-                        label='Название'
-                        onChange={handleChange}
-                        onKeyDown={handleKeyDown}
-                        defaultValue={value?.title}
+                <Form
+                    onSubmit={handleSubmit}
+                    loading={isLoading}
+                    success={isSuccess && submitted}
+                    error={isError && submitted}
+                    size={'small'}
+                >
+                    <Message
+                        error
+                        header={'Ошибка сохранения'}
+                        content={
+                            'При сохранении объекта были допущены ошибки, проверьте правильность заполнения полей'
+                        }
+                    />
+                    <Message
+                        success
+                        header={'Объект сохранен'}
+                        content={'Все данные объекта успешно сохранены'}
                     />
                     <Form.Input
                         fluid
-                        name='category'
-                        label='Категория'
+                        name={'title'}
+                        label={'Название'}
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
-                        defaultValue={value?.category}
+                        defaultValue={value?.title}
+                        error={findError('title')}
+                    />
+                    <Form.Dropdown
+                        placeholder={'Выберите категорию'}
+                        fluid
+                        search
+                        selection
+                        value={formState.category}
+                        onChange={(e, data) =>
+                            setFormState({
+                                ...formState,
+                                category: data.value as number
+                            })
+                        }
+                        onKeyDown={handleKeyDown}
+                        options={categoriesData?.items?.map(({ id, name }) => ({
+                            text: name,
+                            value: id
+                        }))}
                     />
                     <Form.TextArea
                         onChange={(event, data) =>
@@ -87,36 +120,41 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
                                 text: data.value?.toString()!
                             }))
                         }
-                        label='Описание'
+                        label={'Описание'}
                         onKeyDown={handleKeyDown}
                         defaultValue={value?.text}
+                        error={findError('text')}
                         rows={7}
                     />
                     <Grid>
                         <Grid.Column width={skyMapVisible ? 6 : 16}>
                             <Form.Input
                                 required
-                                name='name'
-                                label='Идентификатор'
+                                name={'name'}
+                                label={'Идентификатор'}
                                 onChange={handleChange}
                                 onKeyDown={handleKeyDown}
                                 defaultValue={value?.name}
+                                disabled={!!value?.name}
+                                error={findError('name')}
                             />
                             <Form.Input
                                 required
-                                name='ra'
-                                label='RA'
+                                name={'coord_ra'}
+                                label={'RA'}
                                 onChange={handleChange}
                                 onKeyDown={handleKeyDown}
-                                defaultValue={value?.ra}
+                                defaultValue={value?.coord_ra}
+                                error={findError('coord_ra')}
                             />
                             <Form.Input
                                 required
-                                name='dec'
-                                label='DEC'
+                                name={'coord_dec'}
+                                label={'DEC'}
                                 onChange={handleChange}
                                 onKeyDown={handleKeyDown}
-                                defaultValue={value?.dec}
+                                defaultValue={value?.coord_dec}
+                                error={findError('coord_dec')}
                             />
                         </Grid.Column>
                         {skyMapVisible && (
@@ -127,9 +165,11 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
                                 <CelestialMap
                                     objects={[
                                         {
-                                            dec: Number(formState?.dec) || 0,
+                                            dec:
+                                                Number(formState?.coord_dec) ||
+                                                0,
                                             name: formState?.name || '',
-                                            ra: Number(formState?.ra) || 0
+                                            ra: Number(formState?.coord_ra) || 0
                                         }
                                     ]}
                                 />
@@ -140,18 +180,18 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
             </Modal.Content>
             <Modal.Actions>
                 <Button
-                    size='tiny'
+                    size={'tiny'}
                     onClick={handleSubmit}
-                    color='green'
-                    // disabled={isLoading || (!formState.username || !formState.password)}
-                    // loading={isLoading}
+                    color={'green'}
+                    disabled={isLoading || !formState.name || isFormDirty}
+                    loading={isLoading}
                 >
                     Сохранить
                 </Button>
                 <Button
-                    size='small'
-                    onClick={onClose}
-                    color='grey'
+                    size={'small'}
+                    onClick={handleClose}
+                    color={'grey'}
                 >
                     Отмена
                 </Button>
@@ -159,5 +199,14 @@ const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
         </Modal>
     )
 }
+
+const mapFormProps = (value?: TCatalog): APIRequestCatalog => ({
+    category: value?.category || 0,
+    coord_dec: value?.coord_dec || 0,
+    coord_ra: value?.coord_ra || 0,
+    name: value?.name || '',
+    text: value?.text || '',
+    title: value?.title || ''
+})
 
 export default ObjectEditModal
