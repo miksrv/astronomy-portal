@@ -13,10 +13,12 @@ type TObjectTable = {
     catalog?: TCatalog[]
     photos?: TPhoto[]
     onClickEdit?: (item: string) => void
+    onClickDelete?: (item: string) => void
 }
 
 const ObjectTable: React.FC<TObjectTable> = (props) => {
-    const { loading, categories, catalog, photos, onClickEdit } = props
+    const { loading, categories, catalog, photos, onClickEdit, onClickDelete } =
+        props
     const [sortField, setSortField] = useState<TSortKey>('name')
     const [sortOrder, setSortOrder] = useState<TSortOrdering>('descending')
 
@@ -96,6 +98,9 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                                 )}
                                 onClickEdit={() => {
                                     onClickEdit?.(item.name)
+                                }}
+                                onClickDelete={() => {
+                                    onClickDelete?.(item.name)
                                 }}
                             />
                         ))

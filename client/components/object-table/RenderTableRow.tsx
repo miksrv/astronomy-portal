@@ -15,10 +15,11 @@ type TTableRowProps = {
     item: TTableItem
     photo?: TPhoto
     onClickEdit?: (item: string) => void
+    onClickDelete?: (item: string) => void
 }
 
 const RenderTableRow: React.FC<TTableRowProps> = (props) => {
-    const { item, photo, onClickEdit } = props
+    const { item, photo, onClickEdit, onClickDelete } = props
     const userAuth = useAppSelector((state) => state.auth.userAuth)
     const doTextTruncate = useMemo(
         () =>
@@ -61,7 +62,13 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                         >
                             <Icon name={'edit outline'} />
                         </span>
-                        <span className={styles.controlButton}>
+                        <span
+                            className={styles.controlButton}
+                            role={'button'}
+                            tabIndex={0}
+                            onKeyUp={() => {}}
+                            onClick={() => onClickDelete?.(item.name)}
+                        >
                             <Icon name={'remove'} />
                         </span>
                     </div>
