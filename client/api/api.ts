@@ -167,15 +167,15 @@ export const api = createApi({
         //     query: (date) => `weather/month?date=${date}`
         // }),
 
-        postAuthLogin: builder.mutation<
-            APIResponseLogin | APIResponseError,
-            APIRequestLogin
-        >({
+        postAuthLogin: builder.mutation<APIResponseLogin, APIRequestLogin>({
             query: (credentials) => ({
                 body: credentials,
                 method: 'POST',
                 url: 'auth/login'
-            })
+            }),
+            transformErrorResponse: (response) => response.data
+            // transformResponse: (response: { data: APIResponseLogin }) =>
+            //     response.data
         })
         // logout: builder.mutation<IRestAuth, void>({
         //     query: () => 'auth/logout'

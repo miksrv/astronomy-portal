@@ -1,7 +1,7 @@
 import { usePostAuthLoginMutation } from '@/api/api'
 import { login } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
-import { APIRequestLogin } from '@/api/types'
+import { APIRequestLogin, APIResponseError } from '@/api/types'
 import React, { useState } from 'react'
 import { Button, Form, Message, Modal } from 'semantic-ui-react'
 
@@ -12,8 +12,8 @@ import styles from './styles.module.sass'
 const LoginForm: React.FC = () => {
     const dispatch = useAppDispatch()
     const { visible } = useAppSelector((state) => state.loginForm)
-    const [loginMutation, { isLoading }] = usePostAuthLoginMutation()
-    const [errors, setErrors] = React.useState<any | undefined>(undefined)
+    const [loginMutation, { isLoading, isError, data, error }] =
+        usePostAuthLoginMutation()
     const [formState, setFormState] = useState<APIRequestLogin>({
         email: '',
         password: ''
@@ -27,25 +27,27 @@ const LoginForm: React.FC = () => {
     const handleKeyDown = (e: { key: string }) =>
         e.key === 'Enter' && handleSubmit()
 
-    const handleSubmit = async () => {
-        const result: any = await loginMutation(formState)
-
-        if (result.error?.data.messages) {
-            setErrors(result.error?.data.messages)
-        }
-
-        if (result.data?.access_token) {
-            setErrors(undefined)
-            dispatch(hide())
-            dispatch(login(result.data))
-        }
+    const handleSubmit = () => {
+        loginMutation(formState)
     }
+
+    const findError = (field: keyof APIRequestLogin) =>
+        (error as APIResponseError)?.messages?.[field] || undefined
 
     const listErrors: string[] = React.useMemo(
         () =>
-            Object.entries(errors || []).map(([key, value]) => value as string),
-        [errors]
+            Object.entries((error as APIResponseError)?.messages || []).map(
+                ([key, value]) => value as string
+            ),
+        [error]
     )
+
+    React.useEffect(() => {
+        if (data?.access_token && data?.user?.email) {
+            dispatch(hide())
+            dispatch(login(data))
+        }
+    }, [data])
 
     return (
         <Modal
@@ -55,24 +57,24 @@ const LoginForm: React.FC = () => {
         >
             <Modal.Header>Авторизация</Modal.Header>
             <Modal.Content>
-                <Message
-                    error
-                    hidden={!errors}
-                    list={listErrors}
-                    content={
-                        !listErrors
-                            ? 'Ошибка авторизации, неверный логин или пароль'
-                            : undefined
-                    }
-                />
                 <Form
-                    size={'tiny'}
+                    size={'small'}
                     onSubmit={handleSubmit}
+                    error={isError}
                     className={styles.loginForm}
                 >
+                    <Message
+                        error
+                        list={listErrors}
+                        content={
+                            !listErrors
+                                ? 'Ошибка авторизации, неверный логин или пароль'
+                                : undefined
+                        }
+                    />
                     <Form.Input
                         fluid
-                        error={!!errors?.['email']}
+                        error={!!findError('email')}
                         name={'email'}
                         icon={'user'}
                         iconPosition={'left'}
@@ -84,7 +86,7 @@ const LoginForm: React.FC = () => {
                     />
                     <Form.Input
                         fluid
-                        error={!!errors?.['password']}
+                        error={!!findError('password')}
                         name={'password'}
                         icon={'lock'}
                         iconPosition={'left'}
