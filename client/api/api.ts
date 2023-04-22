@@ -63,6 +63,18 @@ export const api = createApi({
         }
     }),
     endpoints: (builder) => ({
+        deleteCatalog: builder.mutation<void, string>({
+            invalidatesTags: (result, error, object) => [
+                { object, type: 'Catalog' },
+                { type: 'Statistic' }
+            ],
+            query: (object) => ({
+                method: 'DELETE',
+                url: `catalog/${object}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+
         getAuthMe: builder.mutation<void, void>({
             query: () => 'auth/me'
         }),
@@ -112,11 +124,11 @@ export const api = createApi({
         // getObjectNames: builder.query<IRestObjectNames, void>({
         //     query: () => 'get/object/names'
         // }),
+
         getPhotoItem: builder.query<TPhoto, string>({
             keepUnusedDataFor: 3600,
             query: (object) => `photo/${object}`
         }),
-
         getPhotoList: builder.query<APIResponsePhotos, Maybe<APIRequestPhotos>>(
             {
                 keepUnusedDataFor: 3600,
@@ -136,11 +148,13 @@ export const api = createApi({
         //     query: () => 'get/sensors/statistic'
         // }),
         getStatistic: builder.query<APIResponseStatistic, void>({
+            providesTags: () => [{ type: 'Catalog' }],
             query: () => 'statistic'
         }),
         getStatisticCatalogItems: builder.query<APIResponseCatalogNames, void>({
             query: () => 'statistic/catalog'
         }),
+
         getStatisticPhotosItems: builder.query<APIResponsePhotosNames, void>({
             query: () => 'statistic/photos'
         }),
@@ -183,7 +197,8 @@ export const api = createApi({
             Partial<APIRequestCatalog>
         >({
             invalidatesTags: (result, error, { name }) => [
-                { name, type: 'Catalog' }
+                { name, type: 'Catalog' },
+                { type: 'Statistic' }
             ],
             query: ({ ...formState }) => ({
                 body: formState,
@@ -210,7 +225,7 @@ export const api = createApi({
         }
     },
     reducerPath: 'api',
-    tagTypes: ['Catalog']
+    tagTypes: ['Catalog', 'Statistic']
 })
 
 // Export hooks for usage in functional components
@@ -229,6 +244,8 @@ export const {
 
     usePatchCatalogMutation,
     usePostCatalogMutation,
+
+    useDeleteCatalogMutation,
     util: { getRunningQueriesThunk }
 } = api
 
