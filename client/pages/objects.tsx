@@ -9,8 +9,9 @@ import {
 import { wrapper } from '@/api/store'
 import { TCatalog } from '@/api/types'
 import { NextSeo } from 'next-seo'
-import React from 'react'
+import React, { useState } from 'react'
 
+import ObjectEditModal from '@/components/obect-edit-modal'
 import ObjectTable from '@/components/object-table'
 import ObjectsTableToolbar from '@/components/objects-table-toolbar'
 
@@ -27,6 +28,8 @@ export const getStaticProps = wrapper.getStaticProps((store) => async () => {
 
 const Objects: React.FC = () => {
     const [search, setSearch] = React.useState<string>('')
+    const [editModalVisible, setEditModalVisible] = useState<boolean>(false)
+    const [editModalItem, setEditModalItem] = useState<string>()
     const [categories, setCategories] = React.useState<number[]>([])
     const { data: categoriesData } = useGetCategoriesListQuery()
     const { data: photoData, isLoading: photoLoading } = useGetPhotoListQuery()
@@ -49,6 +52,16 @@ const Objects: React.FC = () => {
         [catalogData?.items, search, categories]
     )
 
+    const handleAddCatalog = () => {
+        setEditModalItem(undefined)
+        setEditModalVisible(true)
+    }
+
+    const handleEditCatalog = (item: string) => {
+        setEditModalItem(item)
+        setEditModalVisible(true)
+    }
+
     return (
         <main>
             <NextSeo
@@ -70,6 +83,7 @@ const Objects: React.FC = () => {
             <ObjectsTableToolbar
                 search={search}
                 categories={categoriesData?.items}
+                onAddCatalog={handleAddCatalog}
                 onChangeSearch={setSearch}
                 onChangeCategories={setCategories}
             />
@@ -78,6 +92,15 @@ const Objects: React.FC = () => {
                 catalog={filteredCatalog}
                 photos={photoData?.items}
                 categories={categoriesData?.items}
+                onClickEdit={handleEditCatalog}
+            />
+            <ObjectEditModal
+                visible={editModalVisible}
+                skyMapVisible={true}
+                value={catalogData?.items?.find(
+                    ({ name }) => name === editModalItem
+                )}
+                onClose={() => setEditModalVisible(false)}
             />
         </main>
     )

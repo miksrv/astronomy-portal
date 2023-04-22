@@ -65,6 +65,7 @@ class Catalog extends ResourceController
         $rules = [
             'name'      => 'required|alpha_dash|min_length[3]|max_length[40]|is_unique[catalog.name]',
             'title'     => 'max_length[200]',
+            'category'  => 'required|integer|greater_than[0]',
             'text'      => 'string',
             'coord_ra'  => 'decimal',
             'coord_dec' => 'decimal',

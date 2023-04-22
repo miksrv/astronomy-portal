@@ -1,18 +1,28 @@
+import { useAppSelector } from '@/api/hooks'
 import { TCategory } from '@/api/types'
 import React, { useMemo } from 'react'
-import { Dropdown, Input } from 'semantic-ui-react'
+import { Button, Dropdown, Input } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
 type TToolbarProps = {
     search: string
     categories?: TCategory[]
+    onAddCatalog?: () => void
     onChangeSearch: (search: string) => void
     onChangeCategories: (id: number[]) => void
 }
 
 const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
-    const { search, categories, onChangeSearch, onChangeCategories } = props
+    const {
+        search,
+        categories,
+        onAddCatalog,
+        onChangeSearch,
+        onChangeCategories
+    } = props
+
+    const userAuth = useAppSelector((state) => state.auth.userAuth)
 
     const handleChange = ({
         target: { value }
@@ -47,6 +57,16 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
                     onChangeCategories(el.value as number[])
                 }}
             />
+            {userAuth && (
+                <Button
+                    className={styles.addButton}
+                    size={'mini'}
+                    color={'green'}
+                    onClick={onAddCatalog}
+                >
+                    Добавить
+                </Button>
+            )}
         </div>
     )
 }

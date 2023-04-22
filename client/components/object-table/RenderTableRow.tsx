@@ -14,21 +14,21 @@ import styles from './styles.module.sass'
 type TTableRowProps = {
     item: TTableItem
     photo?: TPhoto
-    onShowEdit?: (item: string) => void
+    onClickEdit?: (item: string) => void
 }
 
 const RenderTableRow: React.FC<TTableRowProps> = (props) => {
-    const { item, photo, onShowEdit } = props
+    const { item, photo, onClickEdit } = props
     const userAuth = useAppSelector((state) => state.auth.userAuth)
-    const doTextTruncate = useMemo(() => {
-        if (item?.text) {
-            return item.text.length > 200
-                ? item.text.slice(0, 200) + '...'
-                : item.text
-        }
-
-        return ''
-    }, [item])
+    const doTextTruncate = useMemo(
+        () =>
+            item?.text
+                ? item.text.length > 200
+                    ? item.text.slice(0, 200) + '...'
+                    : item.text
+                : '',
+        [item]
+    )
 
     return (
         <Table.Row className={styles.tableRow}>
@@ -57,7 +57,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                             role={'button'}
                             tabIndex={0}
                             onKeyUp={() => {}}
-                            onClick={() => onShowEdit?.(item.name)}
+                            onClick={() => onClickEdit?.(item.name)}
                         >
                             <Icon name={'edit outline'} />
                         </span>
@@ -107,7 +107,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                 <Table.Cell
                     key={filter}
                     className={item?.[filter] ? styles[filter] : undefined}
-                    content={getTimeFromSec(item?.[filter] || 0)}
+                    content={item?.[filter] ? getTimeFromSec(item[filter]) : ''}
                 />
             ))}
         </Table.Row>

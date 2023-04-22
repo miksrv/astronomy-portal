@@ -176,6 +176,21 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
             // transformResponse: (response: { data: APIResponseLogin }) =>
             //     response.data
+        }),
+
+        postCatalog: builder.mutation<
+            TCatalog | APIResponseError,
+            Partial<APIRequestCatalog>
+        >({
+            invalidatesTags: (result, error, { name }) => [
+                { name, type: 'Catalog' }
+            ],
+            query: ({ ...formState }) => ({
+                body: formState,
+                method: 'POST',
+                url: 'catalog'
+            }),
+            transformErrorResponse: (response) => response.data
         })
         // logout: builder.mutation<IRestAuth, void>({
         //     query: () => 'auth/logout'
@@ -213,6 +228,7 @@ export const {
     useGetAuthMeMutation,
 
     usePatchCatalogMutation,
+    usePostCatalogMutation,
     util: { getRunningQueriesThunk }
 } = api
 
