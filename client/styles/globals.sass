@@ -66,6 +66,26 @@ h1
       font-weight: 600
       text-transform: uppercase
 
+.subTitle
+  font-weight: 400
+  position: relative
+  padding-left: 20px
+  margin: 2em 0 0
+  padding-top: 3px
+
+  &:before
+    content: ""
+    display: inline-block
+    width: 5px
+    height: 100%
+    background: #dd9124
+    position: absolute
+    left: 0
+    top: 0
+
+.inline
+  display: inline-block
+
 .second-color
   color: $text-second
 
@@ -108,6 +128,13 @@ main .ui.selection.dropdown .menu > .message
 
 .ui.input.focus > input, .ui.input > input:focus
   background-color: #565656
+
+.ui.multiple.dropdown>.label
+  color: rgb(59 59 59 / 95%) !important
+  font-weight: 500 !important
+
+.ui.label>.close.icon, .ui.label>.delete.icon
+  color: $box-background !important
 
 @media only screen and (max-width: 768px)
   .ui.grid

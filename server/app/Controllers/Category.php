@@ -1,5 +1,6 @@
 <?php namespace App\Controllers;
 
+use App\Models\CatalogModel;
 use App\Models\CategoryModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
@@ -25,9 +26,27 @@ class Category extends ResourceController
      */
     public function list(): ResponseInterface
     {
-        $categoryModel = new CategoryModel();
+        $modelCategory = new CategoryModel();
+        $modelCatalog  = new CatalogModel();
 
-        return $this->respond(['items' => $categoryModel->findAll()]);
+        $dataCatalog  = $modelCatalog->select('category')->findAll();
+        $dataCategory = $modelCategory->findAll();
+
+        if (empty($dataCatalog))
+        {
+            return $this->respond(['items' => $dataCategory]);
+        }
+
+        foreach ($dataCatalog as $item)
+        {
+            $key = array_search($item->category, array_column($dataCategory, 'id'));
+
+            if ($key === false) continue;
+
+            $dataCategory[$key]->count = $dataCategory[$key]->count ? $dataCategory[$key]->count + 1 : 1;
+        }
+
+        return $this->respond(['items' => $dataCategory]);
     }
     
     /**
@@ -39,7 +58,7 @@ class Category extends ResourceController
     {
         $input = $this->request->getJSON(true);
         $rules = [
-            'name' => 'required|alpha_dash|min_length[3]|max_length[40]|is_unique[category.name]'
+            'name' => 'required|min_length[3]|max_length[40]|is_unique[category.name]'
         ];
 
         if (!$this->validate($rules)) {
@@ -47,8 +66,8 @@ class Category extends ResourceController
         }
 
         try {
-            $categoryModel = new CategoryModel();
-            $categoryModel->insert($input);
+            $modelCategory = new CategoryModel();
+            $modelCategory->insert($input);
 
             return $this->respondCreated($input);
         } catch (Exception $e) {
@@ -65,7 +84,7 @@ class Category extends ResourceController
     {
         $input = $this->request->getJSON(true);
         $rules = [
-            'name' => 'required|alpha_dash|min_length[3]|max_length[40]|is_unique[category.name]'
+            'name' => 'required|min_length[3]|max_length[40]|is_unique[category.name]'
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -75,11 +94,11 @@ class Category extends ResourceController
         }
 
         try {
-            $categoryModel = new CategoryModel();
-            $categoryData  = $categoryModel->find($id);
+            $modelCategory = new CategoryModel();
+            $dataCategory  = $modelCategory->find($id);
 
-            if ($categoryData) {
-                $categoryModel->update($id, $input);
+            if ($dataCategory) {
+                $modelCategory->update($id, $input);
                 return $this->respondUpdated($input);
             }
 
@@ -97,12 +116,12 @@ class Category extends ResourceController
     public function delete($id = null): ResponseInterface
     {
         try {
-            $categoryModel = new CategoryModel();
-            $categoryData   = $categoryModel->find($id);
+            $modelCategory = new CategoryModel();
+            $dataCategory   = $modelCategory->find($id);
 
-            if ($categoryData) {
-                $categoryModel->delete($id, true);
-                return $this->respondDeleted($categoryData);
+            if ($dataCategory) {
+                $modelCategory->delete($id, true);
+                return $this->respondDeleted($dataCategory);
             }
 
             return $this->failNotFound();

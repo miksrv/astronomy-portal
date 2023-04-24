@@ -78,13 +78,14 @@ const Photos: React.FC = () => {
                     locale: 'ru'
                 }}
             />
-            <Message
-                error={true}
-                hidden={!isError}
-                content={
-                    'Возникла ошибка при получении списка отснятых объектов'
-                }
-            />
+            {isError && !photoData?.items.length && (
+                <Message
+                    error={true}
+                    content={
+                        'Возникла ошибка при получении списка отснятых объектов'
+                    }
+                />
+            )}
             <PhotoCategorySwitcher
                 active={filterCategory}
                 categories={categoriesData?.items}

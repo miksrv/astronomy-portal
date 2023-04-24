@@ -1,0 +1,32 @@
+@import @/styles/variables.sass
+
+.categoryTable
+  margin-top: 0 !important
+
+  .tableRow
+    .control-button
+      visibility: hidden
+
+    &:hover
+      .control-button
+        visibility: visible
+
+  .cellCame
+    display: flex
+    justify-content: space-between
+
+    .controlButton
+      cursor: pointer
+      justify-content: end
+      opacity: 0
+
+      i
+        color: $text-second
+
+      &:hover
+        i
+          color: $text-main
+
+    &:hover
+      .controlButton
+        opacity: 1

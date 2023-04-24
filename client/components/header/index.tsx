@@ -11,11 +11,18 @@ import { APIResponseStatistic } from '@/api/types'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { useState } from 'react'
-import { Container, Label, Loader, Menu } from 'semantic-ui-react'
+import React from 'react'
+import {
+    Container,
+    Dropdown,
+    Icon,
+    Label,
+    Loader,
+    Menu
+} from 'semantic-ui-react'
 
 import LoginForm from '@/components/login-form'
-import { hide, show } from '@/components/login-form/loginFormSlice'
+import { show } from '@/components/login-form/loginFormSlice'
 import { toggle } from '@/components/sidebar/sidebarSlice'
 
 import logo from '@/public/images/logo-w.svg'
@@ -131,11 +138,35 @@ const Header: React.FC = () => {
                             onClick={() => dispatch(show())}
                         />
                     ) : (
-                        <Menu.Item
-                            name={'Выйти'}
-                            color={'red'}
-                            onClick={() => dispatch(logout())}
-                        />
+                        <Dropdown
+                            trigger={
+                                <div>
+                                    <Icon name='user' /> {auth.userInfo.name}
+                                </div>
+                            }
+                            // text={auth.userInfo.name}
+                            className={styles.dropdown}
+                            item
+                            simple
+                        >
+                            <Dropdown.Menu>
+                                <Dropdown.Item
+                                    text='Справочники'
+                                    as={Link}
+                                    href={'/directory'}
+                                />
+                                <Dropdown.Divider />
+                                <Dropdown.Item
+                                    text={'Выйти'}
+                                    onClick={() => dispatch(logout())}
+                                />
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        // <Menu.Item
+                        //     name={'Выйти'}
+                        //     color={'red'}
+                        //     onClick={() => dispatch(logout())}
+                        // />
                     )}
                 </Menu.Menu>
             </Container>

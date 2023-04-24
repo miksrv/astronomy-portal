@@ -5,8 +5,7 @@ import {
     useDeleteCatalogMutation,
     useGetCatalogListQuery,
     useGetCategoriesListQuery,
-    useGetPhotoListQuery,
-    usePatchCatalogMutation
+    useGetPhotoListQuery
 } from '@/api/api'
 import { wrapper } from '@/api/store'
 import { TCatalog } from '@/api/types'
@@ -14,7 +13,7 @@ import { NextSeo } from 'next-seo'
 import React, { useState } from 'react'
 import { Confirm, Message } from 'semantic-ui-react'
 
-import ObjectEditModal from '@/components/obect-edit-modal'
+import ObjectFormModal from '@/components/obect-form-modal'
 import ObjectTable from '@/components/object-table'
 import ObjectsTableToolbar from '@/components/objects-table-toolbar'
 
@@ -91,10 +90,6 @@ const Objects: React.FC = () => {
         }
     }
 
-    console.log('deleteError', deleteError)
-    console.log('deleteSuccess', deleteSuccess)
-    console.log('showMessage', showMessage)
-
     return (
         <main>
             <NextSeo
@@ -152,7 +147,7 @@ const Objects: React.FC = () => {
                 onClickEdit={handleEditCatalog}
                 onClickDelete={handleDeleteCatalog}
             />
-            <ObjectEditModal
+            <ObjectFormModal
                 visible={editModalVisible}
                 skyMapVisible={true}
                 value={catalogData?.items?.find(

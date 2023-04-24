@@ -12,14 +12,14 @@ import CelestialMap from '@/components/celestial-map'
 
 import styles from './styles.module.sass'
 
-interface IObjectEditModal {
+interface IObjectFormModal {
     visible: boolean
     value?: TCatalog
     skyMapVisible?: boolean
     onClose?: () => void
 }
 
-const ObjectEditModal: React.FC<IObjectEditModal> = (props) => {
+const ObjectFormModal: React.FC<IObjectFormModal> = (props) => {
     const { visible, value, skyMapVisible, onClose } = props
 
     const { data: categoriesData } = useGetCategoriesListQuery()
@@ -242,4 +242,4 @@ const mapFormProps = (value?: TCatalog | undefined): APIRequestCatalog => ({
     title: value?.title || ''
 })
 
-export default ObjectEditModal
+export default ObjectFormModal

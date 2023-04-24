@@ -182,6 +182,7 @@ export interface IObjectListItem {
 export type TCategory = {
     id: number
     name: string
+    count?: number
 }
 
 export type TCatalog = {
