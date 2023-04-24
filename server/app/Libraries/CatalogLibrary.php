@@ -31,7 +31,7 @@ class CatalogLibrary
 
         $objectStatistic = $this->_getObjectStatistic($filesItems);
 
-        $catalogItem->updated   = $objectStatistic->lastUpdatedDate;
+        $catalogItem->updated   = $objectStatistic->lastUpdatedDate ?? null;
         $catalogItem->statistic = $objectStatistic->objectStatistic ?? [];
         $catalogItem->filters   = $objectStatistic->filterStatistic ?? [];
         $catalogItem->files     = $this->_mapFilesFilters($filesItems);

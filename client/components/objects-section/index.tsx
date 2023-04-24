@@ -33,9 +33,9 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
     const exposure = catalog
         ? getTimeFromSec(catalog.statistic.exposure, true)
         : '---'
-    const size = catalog
+    const size = catalog?.statistic?.data_size
         ? Math.round((catalog.statistic.data_size / 1024) * 100) / 100
-        : '---'
+        : '0'
 
     const [editModalVisible, setEditModalVisible] = useState<boolean>(false)
 
@@ -61,21 +61,21 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                 >
                     <div className={styles.name}>
                         <h1>Объект: {title}</h1>
-                        {userAuth && (
-                            <div className={styles.controlButtons}>
-                                <Button
-                                    size={'mini'}
-                                    color={'blue'}
-                                    icon={'edit outline'}
-                                    onClick={() => setEditModalVisible(true)}
-                                />
-                                <Button
-                                    size={'mini'}
-                                    color={'red'}
-                                    icon={'remove'}
-                                />
-                            </div>
-                        )}
+                        {/*{userAuth && (*/}
+                        {/*    <div className={styles.controlButtons}>*/}
+                        {/*        <Button*/}
+                        {/*            size={'mini'}*/}
+                        {/*            color={'blue'}*/}
+                        {/*            icon={'edit outline'}*/}
+                        {/*            onClick={() => setEditModalVisible(true)}*/}
+                        {/*        />*/}
+                        {/*        <Button*/}
+                        {/*            size={'mini'}*/}
+                        {/*            color={'red'}*/}
+                        {/*            icon={'remove'}*/}
+                        {/*        />*/}
+                        {/*    </div>*/}
+                        {/*)}*/}
                     </div>
                     <Grid>
                         <Grid.Column
@@ -100,7 +100,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                                     <span className={styles.value}>
                                         Сделано кадров:
                                     </span>
-                                    {catalog?.statistic.frames || '---'}
+                                    {catalog?.statistic.frames || '0'}
                                 </div>
                                 <div>
                                     <span className={styles.value}>
@@ -118,7 +118,14 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                                     <span className={styles.value}>
                                         Отклонение (RA / DEC):
                                     </span>
-                                    {deviationRa} / {deviationDec}{' '}
+                                    {deviationRa} / {deviationDec}
+                                </div>
+                                <div>
+                                    <span className={styles.value}>
+                                        Координаты:
+                                    </span>
+                                    RA: {catalog?.coord_ra}, DEC:{' '}
+                                    {catalog?.coord_dec}
                                 </div>
                             </div>
                             <Link
