@@ -62,7 +62,7 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
                     icon={true}
                     className={styles.addButton}
                     size={'mini'}
-                    color={'green'}
+                    color={'yellow'}
                     labelPosition={'left'}
                     onClick={onAddCatalog}
                 >

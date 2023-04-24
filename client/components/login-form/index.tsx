@@ -2,7 +2,7 @@ import { usePostAuthLoginMutation } from '@/api/api'
 import { login } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { APIRequestLogin, APIResponseError } from '@/api/types'
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Button, Form, Message, Modal } from 'semantic-ui-react'
 
 import { hide } from '@/components/login-form/loginFormSlice'
@@ -34,7 +34,7 @@ const LoginForm: React.FC = () => {
     const findError = (field: keyof APIRequestLogin) =>
         (error as APIResponseError)?.messages?.[field] || undefined
 
-    const listErrors: string[] = React.useMemo(
+    const listErrors: string[] = useMemo(
         () =>
             Object.entries((error as APIResponseError)?.messages || []).map(
                 ([key, value]) => value as string
@@ -42,7 +42,7 @@ const LoginForm: React.FC = () => {
         [error]
     )
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (data?.access_token && data?.user?.email) {
             dispatch(hide())
             dispatch(login(data))

@@ -5,7 +5,7 @@ import {
 } from '@/api/api'
 import { APIRequestCatalog, APIResponseError, TCatalog } from '@/api/types'
 import isEqual from 'lodash-es/isEqual'
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Form, Grid, Message, Modal } from 'semantic-ui-react'
 
 import CelestialMap from '@/components/celestial-map'
@@ -43,7 +43,7 @@ const ObjectFormModal: React.FC<IObjectFormModal> = (props) => {
         }
     ] = usePostCatalogMutation()
 
-    const [submitted, setSubmitted] = React.useState<boolean>(false)
+    const [submitted, setSubmitted] = useState<boolean>(false)
     const [formState, setFormState] = useState<APIRequestCatalog>(
         mapFormProps(value)
     )
@@ -67,12 +67,12 @@ const ObjectFormModal: React.FC<IObjectFormModal> = (props) => {
         onClose?.()
     }
 
-    const isFormDirty = React.useMemo(
+    const isFormDirty = useMemo(
         () => isEqual(mapFormProps(value), formState),
         [mapFormProps, value, formState]
     )
 
-    const handleSubmit = React.useCallback(() => {
+    const handleSubmit = useCallback(() => {
         setSubmitted(true)
 
         if (!value?.name) {
@@ -82,7 +82,7 @@ const ObjectFormModal: React.FC<IObjectFormModal> = (props) => {
         }
     }, [formState])
 
-    React.useEffect(() => {
+    useEffect(() => {
         setFormState(mapFormProps(value))
     }, [value])
 

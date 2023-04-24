@@ -1,7 +1,7 @@
 import HighchartsReact from 'highcharts-react-official'
 import Highcharts from 'highcharts/highmaps'
 import { mergeDeep } from 'immutable'
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
 
 import chartInitialConfig from './config'
@@ -18,10 +18,10 @@ const Chart: React.FC<TChartProps> = ({ loading, config, data }) => {
             ? config.chart.height
             : 300
 
-    const chartRef = React.useRef()
-    const [chartOptions, setChartOptions] = React.useState<any>()
+    const chartRef = useRef()
+    const [chartOptions, setChartOptions] = useState<any>()
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (data && !loading) {
             let dIndex = 0
             data.forEach((item: any | undefined) => {

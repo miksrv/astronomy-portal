@@ -7,14 +7,14 @@ import {
     useGetPhotoListQuery,
     useGetStatisticPhotosItemsQuery
 } from '@/api/api'
-import { store, wrapper } from '@/api/store'
+// import { store, wrapper } from '@/api/store'
 import { TPhoto } from '@/api/types'
 import { isOutdated } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
-import { GetStaticProps } from 'next'
+// import { GetStaticProps } from 'next'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Message } from 'semantic-ui-react'
 
 import ObjectCloud from '@/components/object-cloud'
@@ -74,14 +74,14 @@ const Photo: React.FC = () => {
     const { data: photoObjects, isLoading: objectsLoading } =
         useGetStatisticPhotosItemsQuery()
 
-    const photoItem: TPhoto | undefined = React.useMemo(
+    const photoItem: TPhoto | undefined = useMemo(
         () =>
             photoList?.items.find(({ date }) => date === photoDate) ||
             photoList?.items?.[0],
         [photoList, photoDate]
     )
 
-    const objectTitle = React.useMemo(
+    const objectTitle = useMemo(
         () => catalogData?.title || catalogData?.name || objectName.toString(),
         [catalogData, objectName]
     )

@@ -10,7 +10,7 @@ import {
 import { wrapper } from '@/api/store'
 import { TCatalog } from '@/api/types'
 import { NextSeo } from 'next-seo'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Confirm, Message } from 'semantic-ui-react'
 
 import ObjectFormModal from '@/components/obect-form-modal'
@@ -29,12 +29,12 @@ export const getStaticProps = wrapper.getStaticProps((store) => async () => {
 })
 
 const Objects: React.FC = () => {
-    const [search, setSearch] = React.useState<string>('')
+    const [search, setSearch] = useState<string>('')
     const [showMessage, setShowMessage] = useState<boolean>(false)
     const [editModalVisible, setEditModalVisible] = useState<boolean>(false)
     const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false)
     const [modifyItemName, setModifyItemName] = useState<string>()
-    const [categories, setCategories] = React.useState<number[]>([])
+    const [categories, setCategories] = useState<number[]>([])
 
     const { data: categoriesData } = useGetCategoriesListQuery()
     const { data: photoData, isLoading: photoLoading } = useGetPhotoListQuery()
@@ -50,7 +50,7 @@ const Objects: React.FC = () => {
         }
     ] = useDeleteCatalogMutation()
 
-    const filteredCatalog: TCatalog[] | undefined = React.useMemo(
+    const filteredCatalog: TCatalog[] | undefined = useMemo(
         () =>
             catalogData?.items?.filter(
                 (item) =>

@@ -11,7 +11,7 @@ import { APIResponseStatistic } from '@/api/types'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     Container,
     Dropdown,
@@ -29,8 +29,6 @@ import logo from '@/public/images/logo-w.svg'
 
 import styles from './styles.module.sass'
 
-// import { UserAuth } from './userAuth'
-
 type TMenuItems = {
     link: string
     name: string
@@ -38,7 +36,6 @@ type TMenuItems = {
 }
 
 export const menuItems: TMenuItems[] = [
-    { link: '/', name: 'Сводка' },
     { link: '/news', name: 'Новости' },
     { link: '/map', name: 'Карта' },
     { label: 'photos_count', link: '/photos', name: 'Фото' },
@@ -66,7 +63,7 @@ const Header: React.FC = () => {
         }
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         const storageToken = getStorageToken()
 
         if (storageToken && !auth.userToken) {
@@ -118,7 +115,7 @@ const Header: React.FC = () => {
                             {item.label && (
                                 <Label
                                     className={styles.label}
-                                    color={'green'}
+                                    color={'yellow'}
                                     size={'tiny'}
                                 >
                                     <Loader
