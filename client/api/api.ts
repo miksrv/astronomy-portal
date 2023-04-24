@@ -27,6 +27,7 @@ import {
     // IRestWeatherCurrent,
     // IRestWeatherMonth,
     TCatalog,
+    TCategory,
     TPhoto
 } from './types'
 
@@ -74,6 +75,14 @@ export const api = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
+        deleteCategory: builder.mutation<void, number>({
+            invalidatesTags: () => [{ type: 'Category' }],
+            query: (id) => ({
+                method: 'DELETE',
+                url: `category/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
 
         getAuthMe: builder.mutation<void, void>({
             query: () => 'auth/me'
@@ -88,6 +97,7 @@ export const api = createApi({
         }),
         getCategoriesList: builder.query<APIRequestCategories, void>({
             keepUnusedDataFor: 3600,
+            providesTags: () => [{ id: 'LIST', type: 'Category' }],
             query: () => 'category'
         }),
 
@@ -173,6 +183,18 @@ export const api = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
+        patchCategory: builder.mutation<
+            TCategory | APIResponseError,
+            Partial<TCategory> & Pick<TCategory, 'id'>
+        >({
+            invalidatesTags: () => [{ type: 'Category' }],
+            query: ({ id, ...formState }) => ({
+                body: formState,
+                method: 'PATCH',
+                url: `category/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
 
         // getWeatherCurrent: builder.query<IRestWeatherCurrent, null>({
         //     query: () => 'weather/current'
@@ -206,6 +228,18 @@ export const api = createApi({
                 url: 'catalog'
             }),
             transformErrorResponse: (response) => response.data
+        }),
+        postCategory: builder.mutation<
+            TCategory | APIResponseError,
+            Partial<TCategory>
+        >({
+            invalidatesTags: () => [{ type: 'Category' }],
+            query: ({ ...formState }) => ({
+                body: formState,
+                method: 'POST',
+                url: 'category'
+            }),
+            transformErrorResponse: (response) => response.data
         })
         // logout: builder.mutation<IRestAuth, void>({
         //     query: () => 'auth/logout'
@@ -225,7 +259,7 @@ export const api = createApi({
         }
     },
     reducerPath: 'api',
-    tagTypes: ['Catalog', 'Statistic']
+    tagTypes: ['Catalog', 'Statistic', 'Category']
 })
 
 // Export hooks for usage in functional components
@@ -243,9 +277,13 @@ export const {
     useGetAuthMeMutation,
 
     usePatchCatalogMutation,
+    usePatchCategoryMutation,
+
     usePostCatalogMutation,
+    usePostCategoryMutation,
 
     useDeleteCatalogMutation,
+    useDeleteCategoryMutation,
     util: { getRunningQueriesThunk }
 } = api
 

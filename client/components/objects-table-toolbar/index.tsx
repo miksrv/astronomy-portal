@@ -1,7 +1,7 @@
 import { useAppSelector } from '@/api/hooks'
 import { TCategory } from '@/api/types'
 import React, { useMemo } from 'react'
-import { Button, Dropdown, Input } from 'semantic-ui-react'
+import { Button, Dropdown, Icon, Input } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
@@ -59,11 +59,14 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
             />
             {userAuth && (
                 <Button
+                    icon={true}
                     className={styles.addButton}
                     size={'mini'}
                     color={'green'}
+                    labelPosition={'left'}
                     onClick={onAddCatalog}
                 >
+                    <Icon name={'plus'} />
                     Добавить
                 </Button>
             )}

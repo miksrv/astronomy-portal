@@ -8,7 +8,7 @@ import { Button, Dimmer, Grid, Loader, Message } from 'semantic-ui-react'
 
 import CelestialMap from '@/components/celestial-map'
 import FilterList from '@/components/filter-list'
-import ObjectEditModal from '@/components/obect-edit-modal'
+import ObjectFormModal from '@/components/obect-form-modal'
 
 import styles from './styles.module.sass'
 
@@ -163,7 +163,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                     )}
                 </Grid.Column>
             </Grid>
-            <ObjectEditModal
+            <ObjectFormModal
                 visible={editModalVisible}
                 value={catalog!}
                 onClose={() => setEditModalVisible(false)}
