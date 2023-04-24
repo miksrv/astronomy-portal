@@ -10,7 +10,7 @@ import {
 import { wrapper } from '@/api/store'
 import { TPhoto } from '@/api/types'
 import { NextSeo } from 'next-seo'
-import React from 'react'
+import React, { useMemo, useState } from 'react'
 import { Message } from 'semantic-ui-react'
 
 import PhotoCategorySwitcher from '@/components/photo-category-switcher'
@@ -30,14 +30,14 @@ export const getStaticProps = wrapper.getStaticProps((store) => async () => {
 type TPhotoCategory = TPhoto & { category: number }
 
 const Photos: React.FC = () => {
-    const [filterCategory, setFilterCategory] = React.useState<number>(0)
+    const [filterCategory, setFilterCategory] = useState<number>(0)
 
     const { data: statisticData } = useGetStatisticQuery()
     const { data: categoriesData } = useGetCategoriesListQuery()
     const { data: photoData, isLoading, isError } = useGetPhotoListQuery()
     const { data: catalogData } = useGetCatalogListQuery()
 
-    const listPhotos: TPhotoCategory[] | undefined = React.useMemo(
+    const listPhotos: TPhotoCategory[] | undefined = useMemo(
         () =>
             photoData?.items.map((photo) => {
                 const catalogItem = catalogData?.items.find(
@@ -52,7 +52,7 @@ const Photos: React.FC = () => {
         [photoData, catalogData]
     )
 
-    const listFilteredPhotos: TPhotoCategory[] | undefined = React.useMemo(
+    const listFilteredPhotos: TPhotoCategory[] | undefined = useMemo(
         () =>
             listPhotos?.filter(
                 ({ category }) => !filterCategory || category === filterCategory

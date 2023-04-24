@@ -6,7 +6,7 @@ import {
 import { wrapper } from '@/api/store'
 import { TCatalog } from '@/api/types'
 import { NextSeo } from 'next-seo'
-import React from 'react'
+import React, { useMemo, useState } from 'react'
 
 import SkyMap from '@/components/celestial-map'
 import ObjectCloudSkyMap from '@/components/celestial-map/ObjectCloudSkyMap'
@@ -23,9 +23,9 @@ export const getStaticProps = wrapper.getStaticProps((store) => async () => {
 
 const Map: React.FC = () => {
     const { data, isFetching } = useGetCatalogListQuery()
-    const [goToObject, setGoToObject] = React.useState<[number, number]>([0, 0])
+    const [goToObject, setGoToObject] = useState<[number, number]>([0, 0])
 
-    const listObjects = React.useMemo(
+    const listObjects = useMemo(
         () =>
             data?.items
                 .filter((item) => item.coord_ra !== 0 && item.coord_dec !== 0)

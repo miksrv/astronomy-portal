@@ -26,82 +26,88 @@ const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
 
     return (
         <div className={classNames(styles.photoGird, 'box')}>
-            {loading || !photos || !catalog ? (
-                <PhotosLoader
-                    count={loaderCount || 12}
-                    threeColumns={threeColumns}
-                />
-            ) : (
-                photos.map((photo) => {
-                    const catalogItem = catalog.find(
-                        ({ name }) => name === photo.object
-                    )
+            <PhotosLoader
+                visible={loading || !photos || !catalog}
+                count={loaderCount || 12}
+                threeColumns={threeColumns}
+            />
+            {photos?.length && !loading
+                ? photos?.map((photo) => {
+                      const catalogItem = catalog?.find(
+                          ({ name }) => name === photo.object
+                      )
 
-                    return (
-                        <Link
-                            key={photo.id}
-                            href={`/photos/${photo.object}?date=${photo.date}`}
-                            title={`${
-                                photo.object || photo.object
-                            } - Фотография объекта`}
-                            className={classNames(
-                                styles.item,
-                                threeColumns ? styles.item4 : undefined
-                            )}
-                        >
-                            {catalogItem?.title ? (
-                                <Reveal animated={'small fade'}>
-                                    <Reveal.Content visible>
-                                        <PhotoImage
-                                            photo={photo}
-                                            title={catalogItem.title}
-                                        />
-                                    </Reveal.Content>
-                                    <Reveal.Content hidden>
-                                        <div className={styles.info}>
-                                            <h4>{catalogItem.title}</h4>
-                                            <p>
-                                                {sliceText(catalogItem?.text)}
-                                            </p>
-                                        </div>
-                                    </Reveal.Content>
-                                </Reveal>
-                            ) : (
-                                <PhotoImage
-                                    photo={photo}
-                                    title={catalogItem?.name || ''}
-                                />
-                            )}
-                        </Link>
-                    )
-                })
-            )}
+                      return (
+                          <Link
+                              key={photo.id}
+                              href={`/photos/${photo.object}?date=${photo.date}`}
+                              title={`${
+                                  photo.object || photo.object
+                              } - Фотография объекта`}
+                              className={classNames(
+                                  styles.item,
+                                  threeColumns ? styles.item4 : undefined
+                              )}
+                          >
+                              {catalogItem?.title ? (
+                                  <Reveal animated={'small fade'}>
+                                      <Reveal.Content visible>
+                                          <PhotoImage
+                                              photo={photo}
+                                              title={catalogItem.title}
+                                          />
+                                      </Reveal.Content>
+                                      <Reveal.Content hidden>
+                                          <div className={styles.info}>
+                                              <h4>{catalogItem.title}</h4>
+                                              <p>
+                                                  {sliceText(catalogItem?.text)}
+                                              </p>
+                                          </div>
+                                      </Reveal.Content>
+                                  </Reveal>
+                              ) : (
+                                  <PhotoImage
+                                      photo={photo}
+                                      title={catalogItem?.name || ''}
+                                  />
+                              )}
+                          </Link>
+                      )
+                  })
+                : !loading && (
+                      <div className={styles.notFound}>
+                          Фотографий объектов по выбранной категории не найдено
+                      </div>
+                  )}
         </div>
     )
 }
 
-const PhotosLoader: React.FC<{ count: number; threeColumns?: boolean }> = ({
-    count,
-    threeColumns
-}) => (
+const PhotosLoader: React.FC<{
+    count: number
+    visible?: boolean
+    threeColumns?: boolean
+}> = ({ count, visible, threeColumns }) => (
     <>
-        {Array(count)
-            .fill(1)
-            .map((item, key) => (
-                <div
-                    key={key}
-                    className={classNames(
-                        styles.item,
-                        threeColumns ? styles.item4 : undefined
-                    )}
-                >
-                    <div className={styles.info}>
-                        <Dimmer active>
-                            <Loader />
-                        </Dimmer>
+        {visible &&
+            Array(count)
+                .fill(1)
+                .map((item, key) => (
+                    <div
+                        key={key}
+                        className={classNames(
+                            styles.item,
+                            threeColumns ? styles.item4 : undefined
+                        )}
+                    >
+                        <div className={styles.info}>
+                            <Dimmer active>
+                                <Loader />
+                            </Dimmer>
+                        </div>
                     </div>
-                </div>
-            ))}
+                ))}
     </>
 )
 

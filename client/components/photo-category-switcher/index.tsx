@@ -20,16 +20,18 @@ const PhotoCategorySwitcher: React.FC<TPhotoCategorySwitcherProps> = ({
     return (
         <div className={styles.categoryToolbar}>
             {categories &&
-                [defaultCategory, ...categories].map(({ id, name }) => (
-                    <Button
-                        color={active === id ? 'olive' : 'green'}
-                        size={'mini'}
-                        key={id}
-                        onClick={() => onSelectCategory?.(id)}
-                    >
-                        {name === '' ? 'Все объекты' : name}
-                    </Button>
-                ))}
+                [defaultCategory, ...categories]
+                    .filter(({ id, count }) => !!count || id === 0)
+                    .map(({ id, name }) => (
+                        <Button
+                            color={active === id ? 'orange' : 'yellow'}
+                            size={'mini'}
+                            key={id}
+                            onClick={() => onSelectCategory?.(id)}
+                        >
+                            {name === '' ? 'Все объекты' : name}
+                        </Button>
+                    ))}
         </div>
     )
 }

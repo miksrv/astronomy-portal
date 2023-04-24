@@ -1,7 +1,7 @@
 import { usePatchCategoryMutation, usePostCategoryMutation } from '@/api/api'
 import { APIResponseError, TCatalog, TCategory } from '@/api/types'
 import isEqual from 'lodash-es/isEqual'
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Form, Message, Modal } from 'semantic-ui-react'
 
 interface ICategoryFormModal {
@@ -33,7 +33,7 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
         }
     ] = usePostCategoryMutation()
 
-    const [submitted, setSubmitted] = React.useState<boolean>(false)
+    const [submitted, setSubmitted] = useState<boolean>(false)
     const [formState, setFormState] = useState<TCategory>(mapFormProps(value))
 
     const handleChange = ({
@@ -55,12 +55,12 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
         onClose?.()
     }
 
-    const isFormDirty = React.useMemo(
+    const isFormDirty = useMemo(
         () => isEqual(mapFormProps(value), formState),
         [mapFormProps, value, formState]
     )
 
-    const handleSubmit = React.useCallback(() => {
+    const handleSubmit = useCallback(() => {
         setSubmitted(true)
 
         if (!value?.id) {
@@ -70,7 +70,7 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
         }
     }, [formState])
 
-    React.useEffect(() => {
+    useEffect(() => {
         setFormState(mapFormProps(value))
     }, [value])
 

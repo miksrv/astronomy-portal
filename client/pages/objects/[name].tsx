@@ -9,7 +9,7 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
 import dynamic from 'next/dynamic'
-import React from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Grid, Message } from 'semantic-ui-react'
 
 import chart_coordinates from '@/components/chart/chart_coordinates'
@@ -89,20 +89,20 @@ const Object: React.FC = () => {
     const { data: catalogObjects, isLoading: objectsLoading } =
         useGetStatisticCatalogItemsQuery()
 
-    const objectTitle = React.useMemo(
+    const objectTitle = useMemo(
         () => catalogData?.title || catalogData?.name || objectName.toString(),
         [catalogData, objectName]
     )
 
-    const [chartData, setChartData] = React.useState<[number, number][]>()
-    const [chartRa, setChartRa] = React.useState<number[]>()
-    const [chartDec, setChartDec] = React.useState<number[]>()
-    const [chartHFR, setChartHFR] = React.useState<number[]>()
-    const [chartSNR, setChartSNR] = React.useState<number[]>()
-    const [devRa, setDevRa] = React.useState<number>(0)
-    const [devDec, setDevDec] = React.useState<number>(0)
+    const [chartData, setChartData] = useState<[number, number][]>()
+    const [chartRa, setChartRa] = useState<number[]>()
+    const [chartDec, setChartDec] = useState<number[]>()
+    const [chartHFR, setChartHFR] = useState<number[]>()
+    const [chartSNR, setChartSNR] = useState<number[]>()
+    const [devRa, setDevRa] = useState<number>(0)
+    const [devDec, setDevDec] = useState<number>(0)
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (catalogData?.files?.length) {
             let middleRa = 0
             let middleDec = 0

@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import moment from 'moment'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Grid } from 'semantic-ui-react'
 import SunCalc from 'suncalc'
 
@@ -34,7 +34,7 @@ const AstronomyCalc: React.FC = () => {
         setMoonAzimuth(((moonPosition.azimuth * 180) / Math.PI).toFixed(3))
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         const timer = setInterval(() => tick(), 1000)
 
         return () => clearInterval(timer)

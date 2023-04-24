@@ -102,7 +102,7 @@ const Directory: React.FC = () => {
                             icon={true}
                             floated={'right'}
                             labelPosition={'left'}
-                            color={'orange'}
+                            color={'yellow'}
                             size={'tiny'}
                             onClick={handleAddCatalog}
                         >
