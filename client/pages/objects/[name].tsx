@@ -189,50 +189,56 @@ const Object: React.FC = () => {
                 loader={photoLoading}
             />
             <br />
-            <Grid>
-                <Grid.Column
-                    computer={6}
-                    tablet={16}
-                    mobile={16}
-                >
-                    <Chart
-                        loading={catalogLoading}
-                        config={chart_coordinates}
-                        data={chartData ? [chartData] : undefined}
-                    />
-                </Grid.Column>
-                <Grid.Column
-                    computer={10}
-                    tablet={16}
-                    mobile={16}
-                >
-                    <Chart
-                        loading={catalogLoading}
-                        config={chart_coordlines}
-                        data={
-                            chartRa && chartDec
-                                ? [chartRa, chartDec]
-                                : undefined
-                        }
-                    />
-                </Grid.Column>
-                {chartHFR?.length ? (
-                    <Grid.Column width={16}>
-                        <Chart
-                            loading={catalogLoading}
-                            config={chart_statistic}
-                            data={
-                                chartHFR && chartSNR
-                                    ? [chartHFR, chartSNR]
-                                    : undefined
-                            }
-                        />
-                    </Grid.Column>
-                ) : (
-                    ''
-                )}
-            </Grid>
-            <br />
+            {catalogData?.files?.length ? (
+                <>
+                    <Grid>
+                        <Grid.Column
+                            computer={6}
+                            tablet={16}
+                            mobile={16}
+                        >
+                            <Chart
+                                loading={catalogLoading}
+                                config={chart_coordinates}
+                                data={chartData ? [chartData] : undefined}
+                            />
+                        </Grid.Column>
+                        <Grid.Column
+                            computer={10}
+                            tablet={16}
+                            mobile={16}
+                        >
+                            <Chart
+                                loading={catalogLoading}
+                                config={chart_coordlines}
+                                data={
+                                    chartRa && chartDec
+                                        ? [chartRa, chartDec]
+                                        : undefined
+                                }
+                            />
+                        </Grid.Column>
+                        {chartHFR?.length ? (
+                            <Grid.Column width={16}>
+                                <Chart
+                                    loading={catalogLoading}
+                                    config={chart_statistic}
+                                    data={
+                                        chartHFR && chartSNR
+                                            ? [chartHFR, chartSNR]
+                                            : undefined
+                                    }
+                                />
+                            </Grid.Column>
+                        ) : (
+                            ''
+                        )}
+                    </Grid>
+                    <br />
+                </>
+            ) : (
+                ''
+            )}
             <FilesTable
                 loader={catalogLoading}
                 objectName={typeof objectName === 'string' ? objectName : ''}

@@ -46,9 +46,7 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
                 : -1
         )
 
-        if (sortingFilesList?.length) {
-            setFilesList(sortingFilesList)
-        }
+        setFilesList(sortingFilesList || [])
     }, [files, sortOrder, sortField])
 
     useEffect(() => {
@@ -94,15 +92,27 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
                             }
                         />
                         <Table.Body>
-                            {filesList?.map((file, key) => (
-                                <RenderTableRow
-                                    file={file}
-                                    itemId={key}
-                                    object={objectName}
-                                    onPhotoClick={handlePhotoClick}
-                                    key={file.file_name}
-                                />
-                            ))}
+                            {filesList?.length ? (
+                                filesList?.map((file, key) => (
+                                    <RenderTableRow
+                                        file={file}
+                                        itemId={key}
+                                        object={objectName}
+                                        onPhotoClick={handlePhotoClick}
+                                        key={file.file_name}
+                                    />
+                                ))
+                            ) : (
+                                <Table.Row>
+                                    <Table.Cell
+                                        textAlign={'center'}
+                                        colSpan={10}
+                                        content={
+                                            'Нет загруженных файлов для этого объекта'
+                                        }
+                                    />
+                                </Table.Row>
+                            )}
                         </Table.Body>
                     </Table>
                 </Accordion.Content>
