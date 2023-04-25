@@ -8,7 +8,7 @@ class Photo extends Entity
 
     protected $casts = [
         'id'         => 'integer',
-        'author'     => 'integer',
+        'author_id'  => 'integer',
         'image_size' => 'integer'
     ];
 }

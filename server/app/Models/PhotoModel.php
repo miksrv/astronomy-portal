@@ -13,7 +13,7 @@ class PhotoModel extends Model
     protected $useSoftDeletes = true;
 
     // The updatable fields
-    protected $allowedFields = ['object', 'date', 'author', 'image_name', 'image_ext', 'image_size'];
+    protected $allowedFields = ['object', 'date', 'author_id', 'image_name', 'image_ext', 'image_size'];
 
     // Dates
     protected $useTimestamps = true;

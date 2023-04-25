@@ -1,7 +1,7 @@
 import {
-    getCatalogList,
+    catalogGetList,
     getRunningQueriesThunk,
-    useGetCatalogListQuery
+    useCatalogGetListQuery
 } from '@/api/api'
 import { wrapper } from '@/api/store'
 import { TCatalog } from '@/api/types'
@@ -12,7 +12,7 @@ import SkyMap from '@/components/celestial-map'
 import ObjectCloudSkyMap from '@/components/celestial-map/ObjectCloudSkyMap'
 
 export const getStaticProps = wrapper.getStaticProps((store) => async () => {
-    store.dispatch(getCatalogList.initiate())
+    store.dispatch(catalogGetList.initiate())
 
     await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
@@ -22,7 +22,7 @@ export const getStaticProps = wrapper.getStaticProps((store) => async () => {
 })
 
 const Map: React.FC = () => {
-    const { data, isFetching } = useGetCatalogListQuery()
+    const { data, isFetching } = useCatalogGetListQuery()
     const [goToObject, setGoToObject] = useState<[number, number]>([0, 0])
 
     const listObjects = useMemo(

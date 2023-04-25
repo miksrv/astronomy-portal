@@ -1,4 +1,4 @@
-import { useGetAuthMeMutation, useGetStatisticQuery } from '@/api/api'
+import { useAuthGetMeMutation, useStatisticGetQuery } from '@/api/api'
 import {
     getStorageToken,
     logout,
@@ -47,8 +47,8 @@ const Header: React.FC = () => {
     const dispatch = useAppDispatch()
     const currentMobile: boolean =
         typeof window !== 'undefined' ? window.innerWidth <= 760 : false
-    const { data, isLoading } = useGetStatisticQuery()
-    const [getAuthMe] = useGetAuthMeMutation()
+    const { data, isLoading } = useStatisticGetQuery()
+    const [getAuthMe] = useAuthGetMeMutation()
     const router = useRouter()
     const auth = useAppSelector((state) => state.auth)
 

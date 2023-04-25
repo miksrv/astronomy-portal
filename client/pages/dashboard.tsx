@@ -1,4 +1,4 @@
-import { getCatalogList, getRunningQueriesThunk } from '@/api/api'
+import { catalogGetList, getRunningQueriesThunk } from '@/api/api'
 import { wrapper } from '@/api/store'
 import { NextSeo } from 'next-seo'
 import React from 'react'
@@ -11,7 +11,7 @@ import Sensors from '@/components/sensors'
 import Weather from '@/components/weather'
 
 export const getStaticProps = wrapper.getStaticProps((store) => async () => {
-    store.dispatch(getCatalogList.initiate())
+    store.dispatch(catalogGetList.initiate())
 
     await Promise.all(store.dispatch(getRunningQueriesThunk()))
 

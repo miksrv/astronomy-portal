@@ -43,7 +43,7 @@ class Category extends ResourceController
 
             if ($key === false) continue;
 
-            $dataCategory[$key]->count = $dataCategory[$key]->count ? $dataCategory[$key]->count + 1 : 1;
+            $dataCategory[$key]->object_count = $dataCategory[$key]->object_count ? $dataCategory[$key]->object_count + 1 : 1;
         }
 
         return $this->respond(['items' => $dataCategory]);

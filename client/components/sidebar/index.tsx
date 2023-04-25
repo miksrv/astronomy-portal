@@ -1,4 +1,4 @@
-import { useGetStatisticQuery } from '@/api/api'
+import { useStatisticGetQuery } from '@/api/api'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import React from 'react'
 import { Label, Loader, Menu, Sidebar as SidebarMenu } from 'semantic-ui-react'
@@ -11,7 +11,7 @@ import { hide } from '@/components/sidebar/sidebarSlice'
 const Sidebar: React.FC = () => {
     const dispatch = useAppDispatch()
     const visible = useAppSelector((state) => state.sidebar.visible)
-    const { data, isLoading } = useGetStatisticQuery()
+    const { data, isLoading } = useStatisticGetQuery()
 
     return (
         <SidebarMenu

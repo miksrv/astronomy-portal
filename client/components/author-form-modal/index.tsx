@@ -1,16 +1,16 @@
-import { useCategoryPatchMutation, useCategoryPostMutation } from '@/api/api'
-import { APIResponseError, TCatalog, TCategory } from '@/api/types'
+import { useAuthorPatchMutation, useAuthorPostMutation } from '@/api/api'
+import { APIResponseError, TAuthor } from '@/api/types'
 import isEqual from 'lodash-es/isEqual'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Form, Message, Modal } from 'semantic-ui-react'
 
-interface ICategoryFormModal {
+interface IAuthorFormModal {
     visible: boolean
-    value?: TCategory
+    value?: TAuthor
     onClose?: () => void
 }
 
-const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
+const AuthorFormModal: React.FC<IAuthorFormModal> = (props) => {
     const { visible, value, onClose } = props
 
     const [
@@ -21,7 +21,7 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
             isError: updateError,
             error: updateErrorList
         }
-    ] = useCategoryPatchMutation()
+    ] = useAuthorPatchMutation()
 
     const [
         createItem,
@@ -31,10 +31,10 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
             isError: createError,
             error: createErrorList
         }
-    ] = useCategoryPostMutation()
+    ] = useAuthorPostMutation()
 
     const [submitted, setSubmitted] = useState<boolean>(false)
-    const [formState, setFormState] = useState<TCategory>(mapFormProps(value))
+    const [formState, setFormState] = useState<TAuthor>(mapFormProps(value))
 
     const handleChange = ({
         target: { name, value }
@@ -44,7 +44,7 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
     const handleKeyDown = (e: { key: string }) =>
         e.key === 'Enter' && handleSubmit()
 
-    const findError = (field: keyof TCatalog) =>
+    const findError = (field: keyof TAuthor) =>
         (
             (createErrorList as APIResponseError) ||
             (updateErrorList as APIResponseError)
@@ -81,7 +81,7 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
             onClose={handleClose}
         >
             <Modal.Header>
-                {value?.name ? 'Редактирование' : ' Добавления'} категории
+                {value?.id ? 'Редактирование' : ' Добавление'} автора
             </Modal.Header>
             <Modal.Content>
                 <Form
@@ -95,13 +95,13 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
                         error
                         header={'Ошибка сохранения'}
                         content={
-                            'При сохранении категории были допущены ошибки, проверьте правильность заполнения полей'
+                            'При сохранении автора были допущены ошибки, проверьте правильность заполнения полей'
                         }
                     />
                     <Message
                         success
-                        header={'Категория сохранена'}
-                        content={'Все данные категории успешно сохранены'}
+                        header={'Автор сохранен'}
+                        content={'Все данные автора успешно сохранены'}
                     />
                     <Form.Input
                         fluid
@@ -110,6 +110,14 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
                         onKeyDown={handleKeyDown}
                         defaultValue={value?.name}
                         error={findError('name')}
+                    />
+                    <Form.Input
+                        fluid
+                        name={'link'}
+                        onChange={handleChange}
+                        onKeyDown={handleKeyDown}
+                        defaultValue={value?.link}
+                        error={findError('link')}
                     />
                 </Form>
             </Modal.Content>
@@ -140,9 +148,10 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
     )
 }
 
-const mapFormProps = (value?: TCategory | undefined): TCategory => ({
+const mapFormProps = (value?: TAuthor | undefined): TAuthor => ({
     id: value?.id || 0,
+    link: value?.link || '',
     name: value?.name || ''
 })
 
-export default CategoryFormModal
+export default AuthorFormModal

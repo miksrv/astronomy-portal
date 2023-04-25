@@ -1,7 +1,7 @@
 import {
-    useGetCategoriesListQuery,
-    usePatchCatalogMutation,
-    usePostCatalogMutation
+    useCatalogPatchMutation,
+    useCatalogPostMutation,
+    useCategoryGetListQuery
 } from '@/api/api'
 import { APIRequestCatalog, APIResponseError, TCatalog } from '@/api/types'
 import isEqual from 'lodash-es/isEqual'
@@ -22,7 +22,7 @@ interface IObjectFormModal {
 const ObjectFormModal: React.FC<IObjectFormModal> = (props) => {
     const { visible, value, skyMapVisible, onClose } = props
 
-    const { data: categoriesData } = useGetCategoriesListQuery()
+    const { data: categoriesData } = useCategoryGetListQuery()
     const [
         updateItem,
         {
@@ -31,7 +31,7 @@ const ObjectFormModal: React.FC<IObjectFormModal> = (props) => {
             isError: updateError,
             error: updateErrorList
         }
-    ] = usePatchCatalogMutation()
+    ] = useCatalogPatchMutation()
 
     const [
         createItem,
@@ -41,7 +41,7 @@ const ObjectFormModal: React.FC<IObjectFormModal> = (props) => {
             isError: createError,
             error: createErrorList
         }
-    ] = usePostCatalogMutation()
+    ] = useCatalogPostMutation()
 
     const [submitted, setSubmitted] = useState<boolean>(false)
     const [formState, setFormState] = useState<APIRequestCatalog>(
