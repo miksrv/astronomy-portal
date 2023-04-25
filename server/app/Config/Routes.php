@@ -31,6 +31,9 @@ $routes->set404Override();
 // route since we don't have to scan directories.
 //$routes->get('/', 'Home::index');
 
+$routes->get('bot', 'bot::item');
+$routes->post('bot', 'bot::item');
+
 $routes->get('statistic', 'Statistic::list');
 $routes->get('statistic/catalog', 'Statistic::catalog');
 $routes->get('statistic/photos', 'Statistic::photos');
@@ -47,10 +50,17 @@ $routes->options('catalog/(:any)', 'Catalog');
 
 $routes->get('category', 'Category::list');
 $routes->post('category', 'Category::create');
-$routes->patch('category/(:any)', 'Category::update/$1');
-$routes->delete('category/(:any)', 'Category::delete/$1');
+$routes->patch('category/(:num)', 'Category::update/$1');
+$routes->delete('category/(:num)', 'Category::delete/$1');
 $routes->options('category', 'Category::create');
-$routes->options('category/(:any)', 'Category::update/$1');
+$routes->options('category/(:num)', 'Category::update/$1');
+
+$routes->get('author', 'Author::list');
+$routes->post('author', 'Author::create');
+$routes->patch('author/(:num)', 'Author::update/$1');
+$routes->delete('author/(:num)', 'Category::delete/$1');
+$routes->options('author', 'Author::create');
+$routes->options('author/(:num)', 'Author::update/$1');
 
 $routes->get('photo', 'Photo::list');
 $routes->get('photo/(:any)', 'Photo::show/$1');
