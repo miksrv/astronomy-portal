@@ -158,14 +158,14 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                                 <span className={styles.value}>Категория:</span>
                                 {catalog?.category_name || '---'}
                             </div>
-                            {photo?.author_name ? (
+                            {photo?.author ? (
                                 <div>
                                     <span className={styles.value}>
                                         Обработка:
                                     </span>
                                     <Author
-                                        name={photo.author_name}
-                                        link={photo?.author_link}
+                                        name={photo.author?.name}
+                                        link={photo.author?.link}
                                     />
                                 </div>
                             ) : (

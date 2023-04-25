@@ -24,45 +24,6 @@ export type TUserInfo = {
     created_at?: string
 }
 
-export interface IRestFilesMonth extends IRestResponse {
-    payload: TFilesMonth[]
-}
-
-export interface IRestCatalogItem extends IRestResponse {
-    payload: TCatalog
-}
-
-// PHOTO
-export interface IRestPhotoList extends IRestResponse {
-    payload: TPhoto[]
-}
-
-// OBJECT
-export interface IRestObjectList extends IRestResponse {
-    payload: IObjectListItem[]
-}
-
-export interface IRestObjectNames extends IRestResponse {
-    payload: string[]
-}
-
-export interface IRestObjectItem extends IRestResponse {
-    payload: TObject
-}
-
-// FILES
-export interface IRestObjectFiles extends IRestResponse {
-    payload: TFIle[]
-}
-
-// NEWS
-export interface IRestNewsList extends IRestResponse {
-    payload: {
-        count: number
-        news: TNews[]
-    }
-}
-
 // WEATHER
 export interface IRestWeatherMonth extends IRestResponse {
     payload: {
@@ -90,12 +51,6 @@ export interface IRestAuth {
 export interface APIRequestLogin {
     email: string
     password: string
-}
-
-// RELAY
-
-export interface IRelayList extends IRestResponse {
-    payload: string[]
 }
 
 export interface IRelaySet {
@@ -142,7 +97,7 @@ export interface APIResponseCatalogNames {
     items: string[]
 }
 
-export interface APIResponsePhotosNames {
+export interface APIResponsePhotoListNames {
     items: string[]
 }
 
@@ -154,14 +109,19 @@ export interface APIResponseStatistic {
     files_size: number
 }
 
-export interface APIRequestCategories {
+export interface APIResponseCategoryList {
     items: TCategory[]
 }
+
+export interface APIResponseAuthorList {
+    items: TAuthor[]
+}
+
 export interface APIRequestPhotos {
     object?: string
     limit?: number
 }
-export interface APIResponsePhotos {
+export interface APIResponsePhotoList {
     items: TPhoto[]
 }
 
@@ -182,7 +142,7 @@ export interface IObjectListItem {
 export type TCategory = {
     id: number
     name: string
-    count?: number
+    object_count?: number
 }
 
 export type TCatalog = {
@@ -199,13 +159,18 @@ export type TCatalog = {
     files?: TFIle[]
 }
 
+export type TAuthor = {
+    id: number
+    name: string
+    link?: string
+    photo_count?: number
+}
+
 export type TPhoto = {
     id: number
     object: string
     date: string
-    author: number
-    author_name?: string
-    author_link?: string
+    author?: TAuthor
     image_name: string
     image_ext: string
     image_size: number

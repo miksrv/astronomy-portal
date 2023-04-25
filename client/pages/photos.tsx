@@ -1,11 +1,11 @@
 import {
-    getCatalogList,
-    getPhotoList,
+    catalogGetList,
     getRunningQueriesThunk,
-    useGetCatalogListQuery,
-    useGetCategoriesListQuery,
-    useGetPhotoListQuery,
-    useGetStatisticQuery
+    photoGetList,
+    useCatalogGetListQuery,
+    useCategoryGetListQuery,
+    usePhotoGetListQuery,
+    useStatisticGetQuery
 } from '@/api/api'
 import { wrapper } from '@/api/store'
 import { TPhoto } from '@/api/types'
@@ -17,8 +17,8 @@ import PhotoCategorySwitcher from '@/components/photo-category-switcher'
 import PhotoGrid from '@/components/photo-grid'
 
 export const getStaticProps = wrapper.getStaticProps((store) => async () => {
-    store.dispatch(getCatalogList.initiate())
-    store.dispatch(getPhotoList.initiate())
+    store.dispatch(catalogGetList.initiate())
+    store.dispatch(photoGetList.initiate())
 
     await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
@@ -32,10 +32,10 @@ type TPhotoCategory = TPhoto & { category: number }
 const Photos: React.FC = () => {
     const [filterCategory, setFilterCategory] = useState<number>(0)
 
-    const { data: statisticData } = useGetStatisticQuery()
-    const { data: categoriesData } = useGetCategoriesListQuery()
-    const { data: photoData, isLoading, isError } = useGetPhotoListQuery()
-    const { data: catalogData } = useGetCatalogListQuery()
+    const { data: statisticData } = useStatisticGetQuery()
+    const { data: categoriesData } = useCategoryGetListQuery()
+    const { data: photoData, isLoading, isError } = usePhotoGetListQuery()
+    const { data: catalogData } = useCatalogGetListQuery()
 
     const listPhotos: TPhotoCategory[] | undefined = useMemo(
         () =>

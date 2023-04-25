@@ -1,11 +1,11 @@
 import {
-    getCatalogList,
-    getPhotoList,
+    catalogGetList,
     getRunningQueriesThunk,
-    useDeleteCatalogMutation,
-    useGetCatalogListQuery,
-    useGetCategoriesListQuery,
-    useGetPhotoListQuery
+    photoGetList,
+    useCatalogDeleteMutation,
+    useCatalogGetListQuery,
+    useCategoryGetListQuery,
+    usePhotoGetListQuery
 } from '@/api/api'
 import { wrapper } from '@/api/store'
 import { TCatalog } from '@/api/types'
@@ -18,8 +18,8 @@ import ObjectTable from '@/components/object-table'
 import ObjectsTableToolbar from '@/components/objects-table-toolbar'
 
 export const getStaticProps = wrapper.getStaticProps((store) => async () => {
-    store.dispatch(getCatalogList.initiate())
-    store.dispatch(getPhotoList.initiate())
+    store.dispatch(catalogGetList.initiate())
+    store.dispatch(photoGetList.initiate())
 
     await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
@@ -36,10 +36,10 @@ const Objects: React.FC = () => {
     const [modifyItemName, setModifyItemName] = useState<string>()
     const [categories, setCategories] = useState<number[]>([])
 
-    const { data: categoriesData } = useGetCategoriesListQuery()
-    const { data: photoData, isLoading: photoLoading } = useGetPhotoListQuery()
+    const { data: categoriesData } = useCategoryGetListQuery()
+    const { data: photoData, isLoading: photoLoading } = usePhotoGetListQuery()
     const { data: catalogData, isLoading: catalogLoading } =
-        useGetCatalogListQuery()
+        useCatalogGetListQuery()
 
     const [
         deleteItem,
@@ -48,7 +48,7 @@ const Objects: React.FC = () => {
             isSuccess: deleteSuccess,
             isError: deleteError
         }
-    ] = useDeleteCatalogMutation()
+    ] = useCatalogDeleteMutation()
 
     const filteredCatalog: TCatalog[] | undefined = useMemo(
         () =>

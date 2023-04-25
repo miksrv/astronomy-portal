@@ -1,4 +1,4 @@
-import { usePostAuthLoginMutation } from '@/api/api'
+import { useAuthPostLoginMutation } from '@/api/api'
 import { login } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { APIRequestLogin, APIResponseError } from '@/api/types'
@@ -13,7 +13,7 @@ const LoginForm: React.FC = () => {
     const dispatch = useAppDispatch()
     const { visible } = useAppSelector((state) => state.loginForm)
     const [loginMutation, { isLoading, isError, data, error }] =
-        usePostAuthLoginMutation()
+        useAuthPostLoginMutation()
     const [formState, setFormState] = useState<APIRequestLogin>({
         email: '',
         password: ''

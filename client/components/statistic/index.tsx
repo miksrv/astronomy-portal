@@ -1,4 +1,4 @@
-import { useGetStatisticQuery } from '@/api/api'
+import { useStatisticGetQuery } from '@/api/api'
 import { getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
 import React from 'react'
@@ -13,7 +13,7 @@ type TCards = {
 }
 
 const Statistic: React.FC = () => {
-    const { data, isLoading } = useGetStatisticQuery()
+    const { data, isLoading } = useStatisticGetQuery()
 
     const CARDS: TCards[] = [
         { icon: 'photo', name: 'Кадров', value: data?.frames_count || 0 },

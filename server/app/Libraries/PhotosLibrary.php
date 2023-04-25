@@ -33,19 +33,26 @@ class PhotosLibrary
         $modelPhoto = new PhotoModel();
         $filesModel = new FilesModel();
         $photoItem  = $modelPhoto
-            ->select('photos.*, authors.name as author_name, authors.link as author_link')
-            ->join('authors', 'authors.id = photos.author', 'left')
+            ->select('photos.*, authors.id as author_id, authors.name as author_name, authors.link as author_link')
+            ->join('authors', 'authors.id = photos.author_id', 'left')
             ->where($where)
             ->orderBy('date', 'DESC')
             ->first();
-
-        unset($photoItem->created_at, $photoItem->updated_at, $photoItem->deleted_at);
 
         $filesItem = $filesModel->where(['object' => $objectName])->findAll();
         $statistic = $this->_getPhotoStatistic($filesItem, $photoItem->date);
 
         $photoItem->statistic = $statistic->objectStatistic;
         $photoItem->filters   = $statistic->filterStatistic;
+        $photoItem->author    = $photoItem->author_id
+            ? [
+                'id'   => $photoItem->author_id,
+                'name' => $photoItem->author_name ?? '',
+                'link' => $photoItem->author_link ?? '',
+            ]
+            : null;
+
+        unset($photoItem->author_id, $photoItem->created_at, $photoItem->updated_at, $photoItem->deleted_at);
 
         return $photoItem;
     }
@@ -61,8 +68,8 @@ class PhotosLibrary
         $modelFiles = new FilesModel();
         $modelFiles->select(['object', 'filter', 'date_obs', 'exptime']);
         $modelPhoto
-            ->select('photos.*, authors.name as author_name, authors.link as author_link')
-            ->join('authors', 'authors.id = photos.author', 'left')
+            ->select('photos.*, authors.id as author_id, authors.name as author_name, authors.link as author_link')
+            ->join('authors', 'authors.id = photos.author_id', 'left')
             ->orderBy('date', 'DESC');
 
         if ($filterObject)
@@ -82,8 +89,18 @@ class PhotosLibrary
 
             $photo->statistic = $objectStatistic->objectStatistic;
             $photo->filters   = $objectStatistic->filterStatistic;
+            $photo->author    = $photo->author_id
+                ? [
+                    'id'   => $photo->author_id,
+                    'name' => $photo->author_name ?? '',
+                    'link' => $photo->author_link ?? '',
+                  ]
+                : null;
 
-            unset($photo->created_at, $photo->updated_at, $photo->deleted_at);
+            unset(
+                $photo->created_at, $photo->updated_at, $photo->deleted_at,
+                $photo->author_id, $photo->author_name, $photo->author_link,
+            );
         }
 
         return $photoList;

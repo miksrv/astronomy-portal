@@ -58,7 +58,7 @@ $routes->options('category/(:num)', 'Category::update/$1');
 $routes->get('author', 'Author::list');
 $routes->post('author', 'Author::create');
 $routes->patch('author/(:num)', 'Author::update/$1');
-$routes->delete('author/(:num)', 'Category::delete/$1');
+$routes->delete('author/(:num)', 'Author::delete/$1');
 $routes->options('author', 'Author::create');
 $routes->options('author/(:num)', 'Author::update/$1');
 

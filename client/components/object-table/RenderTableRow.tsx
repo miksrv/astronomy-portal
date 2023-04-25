@@ -33,7 +33,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
 
     return (
         <Table.Row className={styles.tableRow}>
-            <Table.Cell className={styles.cellCame}>
+            <Table.Cell className={styles.cellName}>
                 <Popup
                     disabled={!item.title}
                     size={'mini'}
@@ -74,6 +74,10 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                     </div>
                 )}
             </Table.Cell>
+            <Table.Cell
+                content={item.category || ''}
+                className={styles.cellCategory}
+            />
             <Table.Cell width='one'>
                 {photo && (
                     <Link

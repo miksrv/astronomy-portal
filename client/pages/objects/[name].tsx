@@ -1,7 +1,7 @@
 import {
-    useGetCatalogItemQuery,
-    useGetPhotoListQuery,
-    useGetStatisticCatalogItemsQuery
+    useCatalogGetItemQuery,
+    usePhotoGetListQuery,
+    useStatisticGetCatalogItemsQuery
 } from '@/api/api'
 // import { store, wrapper } from '@/api/store'
 import { isOutdated } from '@/functions/helpers'
@@ -27,7 +27,7 @@ const Chart = dynamic(() => import('@/components/chart'), {
 // export const getStaticPaths = async () => {
 //     const storeObject = store()
 //     const result = await storeObject.dispatch(
-//         getStatisticCatalogItems.initiate()
+//         statisticGetCatalogItems.initiate()
 //     )
 //
 //     return {
@@ -47,12 +47,12 @@ const Chart = dynamic(() => import('@/components/chart'), {
 //         const name = context.params?.name
 //
 //         if (typeof name === 'string') {
-//             store.dispatch(getStatisticCatalogItems.initiate())
-//             // store.dispatch(getCatalogList.initiate())
+//             store.dispatch(statisticGetCatalogItems.initiate())
+//             // store.dispatch(catalogGetList.initiate())
 //             //     store.dispatch(getObjectNames.initiate())
-//             //     store.dispatch(getPhotoList.initiate({ object: name }))
+//             //     store.dispatch(photoGetList.initiate({ object: name }))
 //             //     store.dispatch(getObjectItem.initiate(name))
-//             //     store.dispatch(getCatalogItem.initiate(name))
+//             //     store.dispatch(catalogGetItem.initiate(name))
 //             //     store.dispatch(getObjectFiles.initiate(name))
 //             //     store.dispatch(getObjectFiles.initiate(name))
 //         }
@@ -71,7 +71,7 @@ const Object: React.FC = () => {
     const objectName =
         typeof routerObject === 'string' ? routerObject : skipToken
 
-    const { data: photoList, isLoading: photoLoading } = useGetPhotoListQuery(
+    const { data: photoList, isLoading: photoLoading } = usePhotoGetListQuery(
         { object: typeof objectName === 'string' ? objectName : '' },
         {
             skip: router.isFallback
@@ -82,12 +82,12 @@ const Object: React.FC = () => {
         data: catalogData,
         isLoading: catalogLoading,
         isError: catalogError
-    } = useGetCatalogItemQuery(objectName, {
+    } = useCatalogGetItemQuery(objectName, {
         skip: router.isFallback
     })
 
     const { data: catalogObjects, isLoading: objectsLoading } =
-        useGetStatisticCatalogItemsQuery()
+        useStatisticGetCatalogItemsQuery()
 
     const objectTitle = useMemo(
         () => catalogData?.title || catalogData?.name || objectName.toString(),

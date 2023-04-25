@@ -1,12 +1,18 @@
-import { useDeleteCategoryMutation, useGetCategoriesListQuery } from '@/api/api'
+import {
+    useAuthorDeleteMutation,
+    useAuthorGetListQuery,
+    useCategoryDeleteMutation,
+    useCategoryGetListQuery
+} from '@/api/api'
 import { useAppSelector } from '@/api/hooks'
 import { NextSeo } from 'next-seo'
 import React, { useState } from 'react'
 import { Button, Confirm, Grid, Icon, Message } from 'semantic-ui-react'
 
+import AuthorFormModal from '@/components/author-form-modal'
+import AuthorTable from '@/components/author-table'
 import CategoryFormModal from '@/components/category-form-modal'
 import CategoryTable from '@/components/category-table'
-import styles from '@/components/category-table/styles.module.sass'
 
 //
 // export const getStaticProps = wrapper.getStaticProps((store) => async () => {
@@ -21,45 +27,84 @@ import styles from '@/components/category-table/styles.module.sass'
 
 const Directory: React.FC = () => {
     const [showMessage, setShowMessage] = useState<boolean>(false)
-    const [editModalVisible, setEditModalVisible] = useState<boolean>(false)
-    const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false)
-    const [modifyItemName, setModifyItemName] = useState<number>()
+    const [showCategoryModal, setShowCategoryModal] = useState<boolean>(false)
+    const [showAuthorModal, setShowAuthorModal] = useState<boolean>(false)
+    const [categoryDelete, showCategoryDelete] = useState<boolean>(false)
+    const [authorDelete, showAuthorDelete] = useState<boolean>(false)
+    const [modifyCatalogName, setModifyCatalogName] = useState<number>()
+    const [modifyAuthorId, setModifyAuthorId] = useState<number>()
 
     const userAuth = useAppSelector((state) => state.auth.userAuth)
 
     const { data: categoriesData, isLoading: categoriesLoading } =
-        useGetCategoriesListQuery()
+        useCategoryGetListQuery()
+
+    const { data: authorsData, isLoading: authorsLoading } =
+        useAuthorGetListQuery()
 
     const [
-        deleteItem,
+        deleteCategoryItem,
         {
-            isLoading: deleteLoading,
-            isSuccess: deleteSuccess,
-            isError: deleteError
+            isLoading: deleteCategoryLoading,
+            isSuccess: deleteCategorySuccess,
+            isError: deleteCategoryError
         }
-    ] = useDeleteCategoryMutation()
+    ] = useCategoryDeleteMutation()
+
+    const [
+        deleteAuthorItem,
+        {
+            isLoading: deleteAuthorLoading,
+            isSuccess: deleteAuthorSuccess,
+            isError: deleteAuthorError
+        }
+    ] = useAuthorDeleteMutation()
 
     const handleAddCatalog = () => {
-        setModifyItemName(undefined)
-        setEditModalVisible(true)
+        setModifyCatalogName(undefined)
+        setShowCategoryModal(true)
+    }
+
+    const handleAddAuthor = () => {
+        setModifyAuthorId(undefined)
+        setShowAuthorModal(true)
     }
 
     const handleEditCatalog = (item: number) => {
-        setModifyItemName(item)
-        setEditModalVisible(true)
+        setModifyCatalogName(item)
+        setShowCategoryModal(true)
+    }
+
+    const handleEditAuthor = (item: number) => {
+        setModifyAuthorId(item)
+        setShowAuthorModal(true)
     }
 
     const handleDeleteCatalog = (item: number) => {
-        setModifyItemName(item)
-        setDeleteModalVisible(true)
+        setModifyCatalogName(item)
+        showCategoryDelete(true)
+    }
+
+    const handleDeleteAuthor = (item: number) => {
+        setModifyAuthorId(item)
+        showAuthorDelete(true)
     }
 
     const confirmDeleteCatalog = () => {
-        if (modifyItemName) {
-            deleteItem(modifyItemName)
+        if (modifyCatalogName) {
+            deleteCategoryItem(modifyCatalogName)
             setShowMessage(true)
-            setDeleteModalVisible(false)
-            setModifyItemName(undefined)
+            showCategoryDelete(false)
+            setModifyCatalogName(undefined)
+        }
+    }
+
+    const confirmDeleteAuthor = () => {
+        if (modifyAuthorId) {
+            deleteAuthorItem(modifyAuthorId)
+            setShowMessage(true)
+            showAuthorDelete(false)
+            setModifyAuthorId(undefined)
         }
     }
 
@@ -72,7 +117,7 @@ const Directory: React.FC = () => {
                     tablet={16}
                     mobile={16}
                 >
-                    {deleteError && (
+                    {deleteCategoryError && (
                         <Message
                             error
                             onDismiss={() => {
@@ -85,7 +130,7 @@ const Directory: React.FC = () => {
                             }
                         />
                     )}
-                    {deleteSuccess && (
+                    {deleteCategorySuccess && (
                         <Message
                             success
                             onDismiss={() => {
@@ -114,7 +159,7 @@ const Directory: React.FC = () => {
                     <br />
                     <CategoryTable
                         categories={categoriesData?.items}
-                        loading={categoriesLoading}
+                        loading={categoriesLoading || deleteCategoryLoading}
                         onClickEdit={handleEditCatalog}
                         onClickDelete={handleDeleteCatalog}
                     />
@@ -123,22 +168,84 @@ const Directory: React.FC = () => {
                     computer={8}
                     tablet={16}
                     mobile={16}
-                ></Grid.Column>
+                >
+                    {deleteAuthorError && (
+                        <Message
+                            error
+                            onDismiss={() => {
+                                setShowMessage(false)
+                            }}
+                            hidden={!showMessage}
+                            header={'Ошибка удаления'}
+                            content={
+                                'При удалении автора возникла ошибка, удаление временно невозможно'
+                            }
+                        />
+                    )}
+                    {deleteAuthorSuccess && (
+                        <Message
+                            success
+                            onDismiss={() => {
+                                setShowMessage(false)
+                            }}
+                            hidden={!showMessage}
+                            header={'Объект удален'}
+                            content={'Все данные автора успешно удалены'}
+                        />
+                    )}
+                    <h3 className={'subTitle inline'}>Авторы фотографий</h3>
+                    {userAuth && (
+                        <Button
+                            icon={true}
+                            floated={'right'}
+                            labelPosition={'left'}
+                            color={'yellow'}
+                            size={'tiny'}
+                            onClick={handleAddAuthor}
+                        >
+                            <Icon name={'plus'} />
+                            Добавить
+                        </Button>
+                    )}
+                    <br />
+                    <br />
+                    <AuthorTable
+                        authors={authorsData?.items}
+                        loading={authorsLoading || deleteAuthorLoading}
+                        onClickEdit={handleEditAuthor}
+                        onClickDelete={handleDeleteAuthor}
+                    />
+                </Grid.Column>
             </Grid>
             <CategoryFormModal
-                visible={editModalVisible}
+                visible={showCategoryModal}
                 value={categoriesData?.items?.find(
-                    ({ id }) => id === modifyItemName
+                    ({ id }) => id === modifyCatalogName
                 )}
-                onClose={() => setEditModalVisible(false)}
+                onClose={() => setShowCategoryModal(false)}
+            />
+            <AuthorFormModal
+                visible={showAuthorModal}
+                value={authorsData?.items?.find(
+                    ({ id }) => id === modifyAuthorId
+                )}
+                onClose={() => setShowAuthorModal(false)}
             />
             <Confirm
-                open={deleteModalVisible}
+                open={categoryDelete}
                 size={'mini'}
                 className={'confirm'}
-                content={'Подтверждате удаление объекта из каталога?'}
-                onCancel={() => setDeleteModalVisible(false)}
+                content={'Подтверждате удаление категории из каталога?'}
+                onCancel={() => showCategoryDelete(false)}
                 onConfirm={confirmDeleteCatalog}
+            />
+            <Confirm
+                open={authorDelete}
+                size={'mini'}
+                className={'confirm'}
+                content={'Подтверждате удаление автора из каталога?'}
+                onCancel={() => showAuthorDelete(false)}
+                onConfirm={confirmDeleteAuthor}
             />
         </main>
     )

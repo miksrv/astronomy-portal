@@ -1,8 +1,8 @@
 import {
-    getCatalogList,
+    catalogGetList,
     getRunningQueriesThunk,
-    useGetCatalogListQuery, // useGetFilesMonthMutation,
-    useGetPhotoListQuery // useGetWeatherMonthMutation
+    useCatalogGetListQuery, // useGetFilesMonthMutation,
+    usePhotoGetListQuery // useGetWeatherMonthMutation
 } from '@/api/api'
 import { wrapper } from '@/api/store'
 // import { TCatalog, TPhoto } from '@/api/types'
@@ -16,7 +16,7 @@ import PhotoGrid from '@/components/photo-grid'
 import Statistic from '@/components/statistic'
 
 export const getStaticProps = wrapper.getStaticProps((store) => async () => {
-    store.dispatch(getCatalogList.initiate())
+    store.dispatch(catalogGetList.initiate())
 
     await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
@@ -28,11 +28,11 @@ export const getStaticProps = wrapper.getStaticProps((store) => async () => {
 export default function Home() {
     // const [date, setDate] = React.useState<Moment>(moment())
 
-    const { data: photoData, isLoading: photoLoading } = useGetPhotoListQuery({
+    const { data: photoData, isLoading: photoLoading } = usePhotoGetListQuery({
         limit: 4
     })
     const { data: catalogData, isLoading: catalogLoading } =
-        useGetCatalogListQuery()
+        useCatalogGetListQuery()
 
     // const [photos, setPhotos] = React.useState<
     //     (TPhoto[] & TCatalog[]) | undefined

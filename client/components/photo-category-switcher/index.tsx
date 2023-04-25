@@ -21,7 +21,9 @@ const PhotoCategorySwitcher: React.FC<TPhotoCategorySwitcherProps> = ({
         <div className={styles.categoryToolbar}>
             {categories &&
                 [defaultCategory, ...categories]
-                    .filter(({ id, count }) => !!count || id === 0)
+                    .filter(
+                        ({ id, object_count }) => !!object_count || id === 0
+                    )
                     .map(({ id, name }) => (
                         <Button
                             color={active === id ? 'orange' : 'yellow'}

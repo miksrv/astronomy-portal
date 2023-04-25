@@ -1,19 +1,19 @@
 import { useAppSelector } from '@/api/hooks'
-import { TCategory } from '@/api/types'
+import { TAuthor } from '@/api/types'
 import React from 'react'
 import { Dimmer, Icon, Loader, Table } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
-type TCategoryTable = {
+type TAuthorTable = {
     loading?: boolean
-    categories?: TCategory[]
+    authors?: TAuthor[]
     onClickEdit?: (item: number) => void
     onClickDelete?: (item: number) => void
 }
 
-const CategoryTable: React.FC<TCategoryTable> = (props) => {
-    const { loading, categories, onClickEdit, onClickDelete } = props
+const AuthorTable: React.FC<TAuthorTable> = (props) => {
+    const { loading, authors, onClickEdit, onClickDelete } = props
 
     const userAuth = useAppSelector((state) => state.auth.userAuth)
 
@@ -27,17 +27,18 @@ const CategoryTable: React.FC<TCategoryTable> = (props) => {
                 inverted
                 selectable
                 compact
-                className={styles.categoryTable}
+                className={styles.authorTable}
             >
                 <Table.Header>
                     <Table.Row>
-                        <Table.HeaderCell content={'Категории объектов'} />
-                        <Table.HeaderCell content={'Объектов'} />
+                        <Table.HeaderCell content={'Имя'} />
+                        <Table.HeaderCell content={'Ссылка'} />
+                        <Table.HeaderCell content={'Фотографий'} />
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {categories?.length ? (
-                        categories.map((item) => (
+                    {authors?.length ? (
+                        authors.map((item) => (
                             <Table.Row key={item.id}>
                                 <Table.Cell
                                     className={styles.cellName}
@@ -71,7 +72,19 @@ const CategoryTable: React.FC<TCategoryTable> = (props) => {
                                         </div>
                                     )}
                                 </Table.Cell>
-                                <Table.Cell content={item?.object_count || 0} />
+                                <Table.Cell>
+                                    {item.link && (
+                                        <a
+                                            href={item.link}
+                                            title={item.name}
+                                            target='_blank'
+                                            rel='noreferrer'
+                                        >
+                                            {item.link}
+                                        </a>
+                                    )}
+                                </Table.Cell>
+                                <Table.Cell content={item?.photo_count || 0} />
                             </Table.Row>
                         ))
                     ) : (
@@ -88,4 +101,4 @@ const CategoryTable: React.FC<TCategoryTable> = (props) => {
     )
 }
 
-export default CategoryTable
+export default AuthorTable

@@ -18,6 +18,7 @@ type THeaderFields = {
 
 export const HeaderFields: THeaderFields[] = [
     { key: 'name', name: 'Объект' },
+    { key: 'category', name: 'Категория' },
     { key: 'photo', name: 'Фото' },
     { key: 'frames', name: 'Кадров' },
     { key: 'exposure', name: 'Выдержка' },

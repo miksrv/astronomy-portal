@@ -1,11 +1,11 @@
 import {
-    getCatalogItem,
-    getPhotoList,
+    catalogGetItem,
     getRunningQueriesThunk,
-    useGetCatalogItemQuery,
-    useGetPhotoItemQuery,
-    useGetPhotoListQuery,
-    useGetStatisticPhotosItemsQuery
+    photoGetList,
+    useCatalogGetItemQuery,
+    usePhotoGetItemQuery,
+    usePhotoGetListQuery,
+    useStatisticGetPhotosItemsQuery
 } from '@/api/api'
 // import { store, wrapper } from '@/api/store'
 import { TPhoto } from '@/api/types'
@@ -23,7 +23,7 @@ import PhotoTable from '@/components/photo-table'
 
 // export const getStaticPaths = async () => {
 //     const storeObject = store()
-//     const result = await storeObject.dispatch(getPhotoList.initiate())
+//     const result = await storeObject.dispatch(photoGetList.initiate())
 //
 //     return {
 //         fallback: false,
@@ -36,8 +36,8 @@ import PhotoTable from '@/components/photo-table'
 //         const name = context.params?.name
 //
 //         if (typeof name === 'string') {
-//             store.dispatch(getCatalogItem.initiate(name))
-//             store.dispatch(getPhotoList.initiate({}))
+//             store.dispatch(catalogGetItem.initiate(name))
+//             store.dispatch(photoGetList.initiate({}))
 //         }
 //
 //         await Promise.all(store.dispatch(getRunningQueriesThunk()))
@@ -59,12 +59,12 @@ const Photo: React.FC = () => {
         data: catalogData,
         isLoading: catalogLoading,
         isError: catalogError
-    } = useGetCatalogItemQuery(objectName, {
+    } = useCatalogGetItemQuery(objectName, {
         skip: router.isFallback
     })
 
     const { data: photoList, isLoading: photoListLoading } =
-        useGetPhotoListQuery(
+        usePhotoGetListQuery(
             { object: typeof objectName === 'string' ? objectName : '' },
             {
                 skip: router.isFallback
@@ -72,7 +72,7 @@ const Photo: React.FC = () => {
         )
 
     const { data: photoObjects, isLoading: objectsLoading } =
-        useGetStatisticPhotosItemsQuery()
+        useStatisticGetPhotosItemsQuery()
 
     const photoItem: TPhoto | undefined = useMemo(
         () =>

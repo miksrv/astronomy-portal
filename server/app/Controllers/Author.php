@@ -1,6 +1,7 @@
 <?php namespace App\Controllers;
 
-use App\Models\AuthorsModel;
+use App\Models\AuthorModel;
+use App\Models\PhotoModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
@@ -25,9 +26,27 @@ class Author extends ResourceController
      */
     public function list(): ResponseInterface
     {
-        $modelAuthors = new AuthorsModel();
+        $modelAuthor = new AuthorModel();
+        $modelPhotos = new PhotoModel();
 
-        return $this->respond(['items' => $modelAuthors->findAll()]);
+        $dataPhotos  = $modelPhotos->select('author_id')->findAll();
+        $dataAuthors = $modelAuthor->findAll();
+
+        if (empty($dataPhotos))
+        {
+            return $this->respond(['items' => $dataAuthors]);
+        }
+
+        foreach ($dataPhotos as $item)
+        {
+            $key = array_search($item->author_id, array_column($dataAuthors, 'id'));
+
+            if ($key === false) continue;
+
+            $dataAuthors[$key]->photo_count = $dataAuthors[$key]->photo_count ? $dataAuthors[$key]->photo_count + 1 : 1;
+        }
+
+        return $this->respond(['items' => $dataAuthors]);
     }
     
     /**
@@ -47,8 +66,8 @@ class Author extends ResourceController
         }
 
         try {
-            $modelAuthors = new AuthorsModel();
-            $modelAuthors->insert($input);
+            $modelAuthor = new AuthorModel();
+            $modelAuthor->insert($input);
 
             return $this->respondCreated($input);
         } catch (Exception $e) {
@@ -75,11 +94,11 @@ class Author extends ResourceController
         }
 
         try {
-            $modelAuthors = new AuthorsModel();
-            $dataAuthors  = $modelAuthors->find($id);
+            $modelAuthor = new AuthorModel();
+            $dataAuthors  = $modelAuthor->find($id);
 
             if ($dataAuthors) {
-                $modelAuthors->update($id, $input);
+                $modelAuthor->update($id, $input);
                 return $this->respondUpdated($input);
             }
 
@@ -97,11 +116,11 @@ class Author extends ResourceController
     public function delete($id = null): ResponseInterface
     {
         try {
-            $modelAuthors = new AuthorsModel();
-            $dataAuthors  = $modelAuthors->find($id);
+            $modelAuthor = new AuthorModel();
+            $dataAuthors  = $modelAuthor->find($id);
 
             if ($dataAuthors) {
-                $modelAuthors->delete($id);
+                $modelAuthor->delete($id);
                 return $this->respondDeleted($dataAuthors);
             }
 

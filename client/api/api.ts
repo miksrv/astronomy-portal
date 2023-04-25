@@ -4,18 +4,20 @@ import { HYDRATE } from 'next-redux-wrapper'
 import { RootState } from './store'
 import {
     APIRequestCatalog,
-    APIRequestCategories,
     APIRequestLogin,
     APIRequestPhotos,
+    APIResponseAuthorList,
     APIResponseCatalogList,
     APIResponseCatalogNames,
+    APIResponseCategoryList,
     APIResponseError,
     APIResponseLogin,
-    APIResponsePhotos,
-    APIResponsePhotosNames,
+    APIResponsePhotoList,
+    APIResponsePhotoListNames,
     APIResponseStatistic, // IRelayList,
     // IRelaySet,
-    IRestAuth, // IRestCatalogItem,
+    IRestAuth,
+    TAuthor, // IRestCatalogItem,
     // IRestFilesMonth,
     // IRestNewsList,
     // IRestObjectFiles,
@@ -64,7 +66,66 @@ export const api = createApi({
         }
     }),
     endpoints: (builder) => ({
-        deleteCatalog: builder.mutation<void, string>({
+        authGetMe: builder.mutation<void, void>({
+            query: () => 'auth/me'
+        }),
+        authPostLogin: builder.mutation<APIResponseLogin, APIRequestLogin>({
+            query: (credentials) => ({
+                body: credentials,
+                method: 'POST',
+                url: 'auth/login'
+            }),
+            transformErrorResponse: (response) => response.data
+            // transformResponse: (response: { data: APIResponseLogin }) =>
+            //     response.data
+        }),
+
+        // getWeatherCurrent: builder.query<IRestWeatherCurrent, null>({
+        //     query: () => 'weather/current'
+        // }),
+        // getWeatherMonth: builder.mutation<IRestWeatherMonth, string>({
+        //     query: (date) => `weather/month?date=${date}`
+        // }),
+
+        authorDelete: builder.mutation<void, number>({
+            invalidatesTags: () => [{ type: 'Author' }],
+            query: (id) => ({
+                method: 'DELETE',
+                url: `author/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        authorGetList: builder.query<APIResponseAuthorList, void>({
+            keepUnusedDataFor: 3600,
+            providesTags: () => [{ id: 'LIST', type: 'Author' }],
+            query: () => 'author'
+        }),
+        authorPatch: builder.mutation<
+            TAuthor | APIResponseError,
+            Partial<TAuthor> & Pick<TAuthor, 'id'>
+        >({
+            invalidatesTags: () => [{ type: 'Author' }],
+            query: ({ id, ...formState }) => ({
+                body: formState,
+                method: 'PATCH',
+                url: `author/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        authorPost: builder.mutation<
+            TAuthor | APIResponseError,
+            Partial<TAuthor>
+        >({
+            invalidatesTags: () => [{ type: 'Author' }],
+            query: ({ ...formState }) => ({
+                body: formState,
+                method: 'POST',
+                url: 'author'
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+
+        catalogDelete: builder.mutation<void, string>({
             invalidatesTags: (result, error, object) => [
                 { object, type: 'Catalog' },
                 { type: 'Statistic' }
@@ -75,7 +136,45 @@ export const api = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-        deleteCategory: builder.mutation<void, number>({
+        catalogGetItem: builder.query<TCatalog, string>({
+            providesTags: (result, error, id) => [{ id, type: 'Catalog' }],
+            query: (object) => `catalog/${object}`
+        }),
+        catalogGetList: builder.query<APIResponseCatalogList, void>({
+            providesTags: () => [{ id: 'LIST', type: 'Catalog' }],
+            query: () => 'catalog'
+        }),
+        catalogPatch: builder.mutation<
+            TCatalog | APIResponseError,
+            Partial<APIRequestCatalog> & Pick<APIRequestCatalog, 'name'>
+        >({
+            invalidatesTags: (result, error, { name }) => [
+                { name, type: 'Catalog' }
+            ],
+            query: ({ name, ...formState }) => ({
+                body: formState,
+                method: 'PATCH',
+                url: `catalog/${name}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        catalogPost: builder.mutation<
+            TCatalog | APIResponseError,
+            Partial<APIRequestCatalog>
+        >({
+            invalidatesTags: (result, error, { name }) => [
+                { name, type: 'Catalog' },
+                { type: 'Statistic' }
+            ],
+            query: ({ ...formState }) => ({
+                body: formState,
+                method: 'POST',
+                url: 'catalog'
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+
+        categoryDelete: builder.mutation<void, number>({
             invalidatesTags: () => [{ type: 'Category' }],
             query: (id) => ({
                 method: 'DELETE',
@@ -83,22 +182,34 @@ export const api = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-
-        getAuthMe: builder.mutation<void, void>({
-            query: () => 'auth/me'
-        }),
-        getCatalogItem: builder.query<TCatalog, string>({
-            providesTags: (result, error, id) => [{ id, type: 'Catalog' }],
-            query: (object) => `catalog/${object}`
-        }),
-        getCatalogList: builder.query<APIResponseCatalogList, void>({
-            providesTags: () => [{ id: 'LIST', type: 'Catalog' }],
-            query: () => 'catalog'
-        }),
-        getCategoriesList: builder.query<APIRequestCategories, void>({
+        categoryGetList: builder.query<APIResponseCategoryList, void>({
             keepUnusedDataFor: 3600,
             providesTags: () => [{ id: 'LIST', type: 'Category' }],
             query: () => 'category'
+        }),
+        categoryPatch: builder.mutation<
+            TCategory | APIResponseError,
+            Partial<TCategory> & Pick<TCategory, 'id'>
+        >({
+            invalidatesTags: () => [{ type: 'Category' }],
+            query: ({ id, ...formState }) => ({
+                body: formState,
+                method: 'PATCH',
+                url: `category/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        categoryPost: builder.mutation<
+            TCategory | APIResponseError,
+            Partial<TCategory>
+        >({
+            invalidatesTags: () => [{ type: 'Category' }],
+            query: ({ ...formState }) => ({
+                body: formState,
+                method: 'POST',
+                url: 'category'
+            }),
+            transformErrorResponse: (response) => response.data
         }),
 
         // Коллекция дней за месяц, в которые работала обсерватория (exp, frames, objects)
@@ -135,16 +246,17 @@ export const api = createApi({
         //     query: () => 'get/object/names'
         // }),
 
-        getPhotoItem: builder.query<TPhoto, string>({
+        photoGetItem: builder.query<TPhoto, string>({
             keepUnusedDataFor: 3600,
             query: (object) => `photo/${object}`
         }),
-        getPhotoList: builder.query<APIResponsePhotos, Maybe<APIRequestPhotos>>(
-            {
-                keepUnusedDataFor: 3600,
-                query: (params) => `photo${encodeQueryData(params)}`
-            }
-        ),
+        photoGetList: builder.query<
+            APIResponsePhotoList,
+            Maybe<APIRequestPhotos>
+        >({
+            keepUnusedDataFor: 3600,
+            query: (params) => `photo${encodeQueryData(params)}`
+        }),
 
         // getRelayList: builder.query<IRelayList, void>({
         //     keepUnusedDataFor: 3600,
@@ -157,93 +269,20 @@ export const api = createApi({
         // getSensorStatistic: builder.query<IRestSensorStatistic, void>({
         //     query: () => 'get/sensors/statistic'
         // }),
-        getStatistic: builder.query<APIResponseStatistic, void>({
+
+        statisticGet: builder.query<APIResponseStatistic, void>({
             providesTags: () => [{ type: 'Catalog' }],
             query: () => 'statistic'
         }),
-        getStatisticCatalogItems: builder.query<APIResponseCatalogNames, void>({
+        statisticGetCatalogItems: builder.query<APIResponseCatalogNames, void>({
             query: () => 'statistic/catalog'
         }),
+        statisticGetPhotosItems: builder.query<APIResponsePhotoListNames, void>(
+            {
+                query: () => 'statistic/photos'
+            }
+        )
 
-        getStatisticPhotosItems: builder.query<APIResponsePhotosNames, void>({
-            query: () => 'statistic/photos'
-        }),
-
-        patchCatalog: builder.mutation<
-            TCatalog | APIResponseError,
-            Partial<APIRequestCatalog> & Pick<APIRequestCatalog, 'name'>
-        >({
-            invalidatesTags: (result, error, { name }) => [
-                { name, type: 'Catalog' }
-            ],
-            query: ({ name, ...formState }) => ({
-                body: formState,
-                method: 'PATCH',
-                url: `catalog/${name}`
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-        patchCategory: builder.mutation<
-            TCategory | APIResponseError,
-            Partial<TCategory> & Pick<TCategory, 'id'>
-        >({
-            invalidatesTags: () => [{ type: 'Category' }],
-            query: ({ id, ...formState }) => ({
-                body: formState,
-                method: 'PATCH',
-                url: `category/${id}`
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-
-        // getWeatherCurrent: builder.query<IRestWeatherCurrent, null>({
-        //     query: () => 'weather/current'
-        // }),
-        // getWeatherMonth: builder.mutation<IRestWeatherMonth, string>({
-        //     query: (date) => `weather/month?date=${date}`
-        // }),
-
-        postAuthLogin: builder.mutation<APIResponseLogin, APIRequestLogin>({
-            query: (credentials) => ({
-                body: credentials,
-                method: 'POST',
-                url: 'auth/login'
-            }),
-            transformErrorResponse: (response) => response.data
-            // transformResponse: (response: { data: APIResponseLogin }) =>
-            //     response.data
-        }),
-
-        postCatalog: builder.mutation<
-            TCatalog | APIResponseError,
-            Partial<APIRequestCatalog>
-        >({
-            invalidatesTags: (result, error, { name }) => [
-                { name, type: 'Catalog' },
-                { type: 'Statistic' }
-            ],
-            query: ({ ...formState }) => ({
-                body: formState,
-                method: 'POST',
-                url: 'catalog'
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-        postCategory: builder.mutation<
-            TCategory | APIResponseError,
-            Partial<TCategory>
-        >({
-            invalidatesTags: () => [{ type: 'Category' }],
-            query: ({ ...formState }) => ({
-                body: formState,
-                method: 'POST',
-                url: 'category'
-            }),
-            transformErrorResponse: (response) => response.data
-        })
-        // logout: builder.mutation<IRestAuth, void>({
-        //     query: () => 'auth/logout'
-        // }),
         // setRelayStatus: builder.mutation<IRelayList, IRelaySet>({
         //     invalidatesTags: [{ id: 'LIST', type: 'Relay' }],
         //     query: (data) => ({
@@ -259,39 +298,45 @@ export const api = createApi({
         }
     },
     reducerPath: 'api',
-    tagTypes: ['Catalog', 'Statistic', 'Category']
+    tagTypes: ['Catalog', 'Statistic', 'Category', 'Author']
 })
 
 // Export hooks for usage in functional components
 export const {
-    useGetStatisticQuery,
-    useGetStatisticCatalogItemsQuery,
-    useGetStatisticPhotosItemsQuery,
-    useGetCatalogListQuery,
-    useGetPhotoListQuery,
-    useGetCategoriesListQuery,
-    useGetCatalogItemQuery,
-    useGetPhotoItemQuery,
+    useAuthGetMeMutation,
+    useAuthPostLoginMutation,
 
-    usePostAuthLoginMutation,
-    useGetAuthMeMutation,
+    useAuthorDeleteMutation,
+    useAuthorGetListQuery,
+    useAuthorPatchMutation,
+    useAuthorPostMutation,
 
-    usePatchCatalogMutation,
-    usePatchCategoryMutation,
+    useCatalogDeleteMutation,
+    useCatalogGetItemQuery,
+    useCatalogGetListQuery,
+    useCatalogPatchMutation,
+    useCatalogPostMutation,
 
-    usePostCatalogMutation,
-    usePostCategoryMutation,
+    useCategoryDeleteMutation,
+    useCategoryGetListQuery,
+    useCategoryPatchMutation,
+    useCategoryPostMutation,
 
-    useDeleteCatalogMutation,
-    useDeleteCategoryMutation,
+    usePhotoGetItemQuery,
+    usePhotoGetListQuery,
+
+    useStatisticGetQuery,
+    useStatisticGetCatalogItemsQuery,
+    useStatisticGetPhotosItemsQuery,
+
     util: { getRunningQueriesThunk }
 } = api
 
 // export endpoints for use in SSR
 export const {
-    getCatalogList,
-    getCatalogItem,
-    getPhotoList,
-    getStatisticCatalogItems,
-    getStatisticPhotosItems
+    catalogGetList,
+    catalogGetItem,
+    photoGetList,
+    statisticGetCatalogItems,
+    statisticGetPhotosItems
 } = api.endpoints
