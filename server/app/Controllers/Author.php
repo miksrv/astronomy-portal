@@ -37,9 +37,9 @@ class Author extends ResourceController
             return $this->respond(['items' => $dataAuthors]);
         }
 
-        foreach ($dataPhotos as $item)
+        foreach ($dataPhotos as $photo)
         {
-            $key = array_search($item->author_id, array_column($dataAuthors, 'id'));
+            $key = array_search($photo->author_id, array_column($dataAuthors, 'id'));
 
             if ($key === false) continue;
 

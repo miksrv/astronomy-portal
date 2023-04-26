@@ -4,47 +4,47 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class AddNews extends Migration
+class AddBlog extends Migration
 {
     public function up()
     {
         $this->forge->addField([
             'id' => [
-                'type' => 'SMALLINT',
-                'constraint' => 5,
-                'unsigned' => true,
-                'unique' => true,
+                'type'           => 'SMALLINT',
+                'constraint'     => 5,
+                'unsigned'       => true,
+                'unique'         => true,
                 'auto_increment' => true,
             ],
             'telegram_id' => [
-                'type' => 'INT',
+                'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned' => true,
+                'unsigned'   => true,
             ],
             'telegram_date' => [
-                'type' => 'INT',
+                'type'       => 'INT',
                 'constraint' => 11,
-                'unsigned' => true,
+                'unsigned'   => true,
             ],
             'group_id' => [
-                'type' => 'BIGINT',
+                'type'       => 'BIGINT',
                 'constraint' => 11,
-                'unsigned' => true,
+                'unsigned'   => true,
             ],
             'views' => [
-                'type' => 'INT',
+                'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned' => true,
+                'unsigned'   => true,
             ],
             'forwards' => [
-                'type' => 'INT',
+                'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned' => true,
+                'unsigned'   => true,
             ],
             'replies' => [
-                'type' => 'INT',
+                'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned' => true,
+                'unsigned'   => true,
             ],
             'text' => [
                 'type' => 'TEXT',
@@ -54,11 +54,14 @@ class AddNews extends Migration
                 'type' => 'TEXT',
                 'null' => true
             ],
+            'created_at' => [
+                'type' => 'datetime',
+                'null' => true,
+            ],
             'updated_at' => [
                 'type' => 'datetime',
                 'null' => true,
             ],
-            'created_at datetime default current_timestamp',
             'deleted_at' => [
                 'type' => 'datetime',
                 'null' => true,
@@ -68,11 +71,11 @@ class AddNews extends Migration
         $this->forge->addKey('telegram_id');
         $this->forge->addKey('telegram_date');
         $this->forge->addKey('group_id');
-        $this->forge->createTable('news');
+        $this->forge->createTable('blog');
     }
 
     public function down()
     {
-        $this->forge->dropTable('news');
+        $this->forge->dropTable('blog');
     }
 }
