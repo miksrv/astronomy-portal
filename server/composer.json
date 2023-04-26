@@ -8,7 +8,8 @@
         "php": "^7.4 || ^8.0",
         "codeigniter4/framework": "^4.0",
         "danog/madelineproto": "^7",
-        "firebase/php-jwt": "^6.4"
+        "firebase/php-jwt": "^6.4",
+        "ext-json": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9",
@@ -34,8 +35,10 @@
         "test": "phpunit",
         "serve": "php spark serve",
         "kill": "pkill -9 php",
-        "migrations": "php spark migrate:create",
-        "migrate": "php spark migrate",
+        "migration:create": "php spark migrate:create",
+        "migration:status": "php spark migrate:status",
+        "migration:rollback": "php spark migrate:rollback",
+        "migration:run": "php spark migrate",
         "routes": "php spark routes"
     },
     "support": {
