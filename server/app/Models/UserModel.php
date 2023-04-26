@@ -6,12 +6,8 @@ use Exception;
 class UserModel extends Model
 {
     protected $table = 'user';
-    protected $allowedFields = [
-        'name',
-        'email',
-        'password',
-    ];
-    protected $updatedField = 'updated_at';
+    protected $allowedFields = ['name', 'email', 'password'];
+    protected $updatedField  = 'updated_at';
 
     protected $beforeInsert = ['beforeInsert'];
     protected $beforeUpdate = ['beforeUpdate'];

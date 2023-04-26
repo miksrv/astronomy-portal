@@ -1,11 +1,10 @@
 <?php namespace App\Libraries;
 
-use App\Models\NewsMediaModel;
-use App\Models\NewsModel;
+use App\Models\BlogMediaModel;
+use App\Models\BlogModel;
 use ReflectionException;
-use function Amp\File\exists;
 
-class NewsLibrary
+class BlogLibrary
 {
     protected \danog\MadelineProto\API $MadelineProto;
 
@@ -34,8 +33,8 @@ class NewsLibrary
 
     function getMaxTelegramNews(): int
     {
-        $modelNews  = new NewsModel();
-        $modelMedia = new NewsMediaModel();
+        $modelNews  = new BlogModel();
+        $modelMedia = new BlogMediaModel();
 
         $max1 = $modelNews->selectMax('telegram_id')->first();
         $max2 = $modelMedia->selectMax('telegram_id')->first();
@@ -61,8 +60,10 @@ class NewsLibrary
 
             $count++;
 
-            $this->saveMessageMedia($message);
-            $this->saveMessage($message);
+            $groupId = $message['grouped_id'] ?? hexdec(uniqid());
+
+            $this->saveMessageMedia($message, $groupId);
+            $this->saveMessage($message, $groupId);
         }
 
         log_message('notice', "Stop parsing Telegram channel messages, count: {$count}");
@@ -71,19 +72,19 @@ class NewsLibrary
     /**
      * @throws ReflectionException
      */
-    protected function saveMessageMedia($message): bool
+    protected function saveMessageMedia($message, $groupId): bool
     {
         if (empty($message['media']) || $message['media']['_'] !== 'messageMediaPhoto')
             return false;
 
-        $directory = FCPATH . 'news/' . ($message['grouped_id'] ?? $message['peer_id']['channel_id']) . '/';
+        $directory = FCPATH . 'news/' . $groupId . '/';
 
         if (!is_dir($directory))
         {
             mkdir($directory, 0777, TRUE);
         }
 
-        $modelNewsMedia = new NewsMediaModel();
+        $modelNewsMedia = new BlogMediaModel();
         $findNewsMedia  = $modelNewsMedia->where(['telegram_id' => $message['id']])->first();
 
         if ($findNewsMedia) {
@@ -109,10 +110,10 @@ class NewsLibrary
         log_message('notice', "Inserted news media with Telegram ID: {$message['id']}");
 
         return $modelNewsMedia->insert([
-            'news_id'       => 0,
+            'blog_id'       => 0,
             'telegram_id'   => $message['id'] ?? 0,
             'telegram_date' => $message['date'] ?? null,
-            'group_id'      => $message['grouped_id'] ?? $message['peer_id']['channel_id'],
+            'group_id'      => $groupId,
             'views'         => $message['views'] ?? null,
             'forwards'      => $message['forwards'] ?? null,
             'media_type'    => $file->getMimeType(),
@@ -123,7 +124,7 @@ class NewsLibrary
     /**
      * @throws ReflectionException
      */
-    protected function saveMessage($message): bool
+    protected function saveMessage($message, $groupId): bool
     {
         if (empty($message['message']))
             return false;
@@ -131,7 +132,7 @@ class NewsLibrary
         $data = [
             'telegram_id'   => $message['id'] ?? 0,
             'telegram_date' => $message['date'] ?? 0,
-            'group_id'      => $message['grouped_id'] ?? $message['peer_id']['channel_id'],
+            'group_id'      => $groupId,
             'views'         => $message['views'] ?? 0,
             'forwards'      => $message['forwards'] ?? 0,
             'replies'       => $message['replies']['replies'] ?? 0,
@@ -139,7 +140,7 @@ class NewsLibrary
             'reactions'     => json_encode($this->getMessageReactions($message))
         ];
 
-        $modelNews = new NewsModel();
+        $modelNews = new BlogModel();
         $findNews  = $modelNews->where(['telegram_id' => $data['telegram_id']])->first();
 
         if ($findNews) {

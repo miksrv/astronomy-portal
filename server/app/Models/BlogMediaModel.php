@@ -2,21 +2,23 @@
 
 use CodeIgniter\Model;
 
-class NewsModel extends Model
+class BlogMediaModel extends MyBaseModel
 {
-    protected $table      = 'news';
+    protected $table      = 'blog_media';
     protected $primaryKey = 'id';
 
     protected $useAutoIncrement = true;
 
-    protected $returnType     = \App\Entities\News::class;
+    protected $returnType     = \App\Entities\BlogMedia::class;
     protected $useSoftDeletes = true;
 
     // The updatable fields
     protected $allowedFields = [
-        'telegram_id', 'telegram_date', 'group_id',
-        'views', 'forwards', 'replies', 'text', 'reactions'
+        'blog_id', 'telegram_id', 'telegram_date', 'group_id',
+        'views', 'forwards', 'media_type', 'media_file'
     ];
+
+    protected array $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     // Dates
     protected $useTimestamps = true;
@@ -38,7 +40,7 @@ class NewsModel extends Model
     protected $beforeUpdate   = [];
     protected $afterUpdate    = [];
     protected $beforeFind     = [];
-    protected $afterFind      = [];
+    protected $afterFind      = ['prepareOutput'];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 }

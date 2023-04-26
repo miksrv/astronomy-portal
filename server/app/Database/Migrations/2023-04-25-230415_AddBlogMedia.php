@@ -10,62 +10,60 @@ class AddNewsMedia extends Migration
     {
         $this->forge->addField([
             'id' => [
-                'type' => 'SMALLINT',
-                'constraint' => 5,
-                'unsigned' => true,
-                'unique' => true,
+                'type'           => 'SMALLINT',
+                'constraint'     => 5,
+                'unsigned'       => true,
+                'unique'         => true,
                 'auto_increment' => true,
             ],
-            'news_id' => [
-                'type' => 'INT',
+            'blog_id' => [
+                'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned' => true,
+                'unsigned'   => true,
             ],
             'telegram_id' => [
-                'type' => 'INT',
+                'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned' => true,
+                'unsigned'   => true,
             ],
             'telegram_date' => [
-                'type' => 'INT',
+                'type'       => 'INT',
                 'constraint' => 11,
-                'unsigned' => true,
+                'unsigned'   => true,
             ],
             'group_id' => [
-                'type' => 'BIGINT',
+                'type'       => 'BIGINT',
                 'constraint' => 11,
-                'unsigned' => true,
+                'unsigned'   => true,
             ],
             'views' => [
-                'type' => 'INT',
+                'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned' => true,
+                'unsigned'   => true,
             ],
             'forwards' => [
-                'type' => 'INT',
+                'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned' => true,
+                'unsigned'   => true,
             ],
             'media_type' => [
-                'type' => 'VARCHAR',
+                'type'       => 'VARCHAR',
                 'constraint' => 100,
-                'null' => true,
+                'null'       => true,
             ],
             'media_file' => [
-                'type' => 'VARCHAR',
+                'type'       => 'VARCHAR',
                 'constraint' => 250,
-                'null' => true,
+                'null'       => true,
             ],
-            'media_ext' => [
-                'type' => 'VARCHAR',
-                'constraint' => 20,
+            'created_at' => [
+                'type' => 'datetime',
                 'null' => true,
             ],
             'updated_at' => [
                 'type' => 'datetime',
                 'null' => true,
             ],
-            'created_at datetime default current_timestamp',
             'deleted_at' => [
                 'type' => 'datetime',
                 'null' => true,
@@ -74,13 +72,13 @@ class AddNewsMedia extends Migration
         $this->forge->addPrimaryKey('id');
         $this->forge->addKey('telegram_id');
         $this->forge->addKey('telegram_date');
-        $this->forge->addKey('news_id');
+        $this->forge->addKey('blog_id');
         $this->forge->addKey('group_id');
-        $this->forge->createTable('news_media');
+        $this->forge->createTable('blog_media');
     }
 
     public function down()
     {
-        $this->forge->dropTable('news_media');
+        $this->forge->dropTable('blog_media');
     }
 }
