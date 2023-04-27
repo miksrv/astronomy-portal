@@ -117,12 +117,48 @@ export interface APIResponseAuthorList {
     items: TAuthor[]
 }
 
-export interface APIRequestPhotos {
+export interface APIRequestPhotoList {
     object?: string
     limit?: number
 }
+
+export interface APIRequestBlogList {
+    limit?: number
+    offset?: number
+    order?: string
+    sort?: 'ASC' | 'DESC'
+}
+
 export interface APIResponsePhotoList {
     items: TPhoto[]
+}
+
+export interface APIResponseBlogList {
+    items: TBlog[]
+}
+
+export type TBlog = {
+    id: number
+    telegram_id: number
+    telegram_date: number
+    group_id: number
+    views?: number
+    forwards?: number
+    replies?: number
+    text: string
+    reactions?: TBlogReaction[]
+    media?: TBlogMedia[]
+}
+
+export type TBlogMedia = {
+    file: string
+    height: number
+    width: number
+}
+
+export type TBlogReaction = {
+    emoticon: string
+    count: number
 }
 
 export interface IObjectListItem {

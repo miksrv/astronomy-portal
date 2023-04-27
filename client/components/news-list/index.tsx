@@ -1,4 +1,4 @@
-import { TNews } from '@/api/types'
+import { TBlog } from '@/api/types'
 import React from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
 
@@ -7,7 +7,7 @@ import styles from './styles.module.sass'
 
 type TNewsListProps = {
     loader: boolean
-    news: TNews[] | undefined
+    news: TBlog[] | undefined
 }
 
 const NewsLoader = () => (

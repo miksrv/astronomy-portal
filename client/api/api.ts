@@ -3,10 +3,12 @@ import { HYDRATE } from 'next-redux-wrapper'
 
 import { RootState } from './store'
 import {
+    APIRequestBlogList,
     APIRequestCatalog,
     APIRequestLogin,
-    APIRequestPhotos,
+    APIRequestPhotoList,
     APIResponseAuthorList,
+    APIResponseBlogList,
     APIResponseCatalogList,
     APIResponseCatalogNames,
     APIResponseCategoryList,
@@ -125,6 +127,14 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
+        blogGetList: builder.query<
+            APIResponseBlogList,
+            Maybe<APIRequestBlogList>
+        >({
+            keepUnusedDataFor: 3600,
+            query: (params) => `blog${encodeQueryData(params)}`
+        }),
+
         catalogDelete: builder.mutation<void, string>({
             invalidatesTags: (result, error, object) => [
                 { object, type: 'Catalog' },
@@ -158,6 +168,7 @@ export const api = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
+
         catalogPost: builder.mutation<
             TCatalog | APIResponseError,
             Partial<APIRequestCatalog>
@@ -173,7 +184,6 @@ export const api = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-
         categoryDelete: builder.mutation<void, number>({
             invalidatesTags: () => [{ type: 'Category' }],
             query: (id) => ({
@@ -199,6 +209,7 @@ export const api = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
+
         categoryPost: builder.mutation<
             TCategory | APIResponseError,
             Partial<TCategory>
@@ -245,14 +256,13 @@ export const api = createApi({
         // getObjectNames: builder.query<IRestObjectNames, void>({
         //     query: () => 'get/object/names'
         // }),
-
         photoGetItem: builder.query<TPhoto, string>({
             keepUnusedDataFor: 3600,
             query: (object) => `photo/${object}`
         }),
         photoGetList: builder.query<
             APIResponsePhotoList,
-            Maybe<APIRequestPhotos>
+            Maybe<APIRequestPhotoList>
         >({
             keepUnusedDataFor: 3600,
             query: (params) => `photo${encodeQueryData(params)}`
@@ -310,6 +320,8 @@ export const {
     useAuthorGetListQuery,
     useAuthorPatchMutation,
     useAuthorPostMutation,
+
+    useBlogGetListQuery,
 
     useCatalogDeleteMutation,
     useCatalogGetItemQuery,

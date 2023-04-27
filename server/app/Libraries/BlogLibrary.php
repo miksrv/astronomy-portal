@@ -109,6 +109,8 @@ class BlogLibrary
         log_message('notice', "Download media file {$file->getFilename()}");
         log_message('notice', "Inserted news media with Telegram ID: {$message['id']}");
 
+        list($width, $height) = getimagesize($file);
+
         return $modelNewsMedia->insert([
             'blog_id'       => 0,
             'telegram_id'   => $message['id'] ?? 0,
@@ -116,8 +118,9 @@ class BlogLibrary
             'group_id'      => $groupId,
             'views'         => $message['views'] ?? null,
             'forwards'      => $message['forwards'] ?? null,
-            'media_type'    => $file->getMimeType(),
-            'media_file'    => $file->getFilename()
+            'file'          => $file->getFilename(),
+            'height'        => $height,
+            'width'         => $width,
         ]);
     }
 

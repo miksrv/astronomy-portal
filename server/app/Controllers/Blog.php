@@ -6,6 +6,14 @@ use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, DELETE, PATCH');
+header('Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization');
+
+if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
+    die();
+}
+
 class Blog extends ResourceController
 {
     use ResponseTrait;
@@ -16,7 +24,7 @@ class Blog extends ResourceController
      */
     public function list(): ResponseInterface
     {
-        $limit  = $this->request->getGet('limit', FILTER_SANITIZE_NUMBER_INT) ?? 1;
+        $limit  = $this->request->getGet('limit', FILTER_SANITIZE_NUMBER_INT) ?? 2;
         $offset = $this->request->getGet('offset', FILTER_SANITIZE_NUMBER_INT) ?? 0;
         $order  = $this->request->getGet('order', FILTER_SANITIZE_SPECIAL_CHARS) ?? 'telegram_date';
         $sort   = $this->request->getGet('sort', FILTER_SANITIZE_SPECIAL_CHARS) ?? 'DESC';
@@ -36,7 +44,7 @@ class Blog extends ResourceController
 
         $modelBlogMedia = new BlogMediaModel();
         $dataBlogMedia  = $modelBlogMedia
-            ->select(['media_type', 'media_file', 'group_id'])
+            ->select(['file', 'height', 'width', 'group_id'])
             ->whereIn('group_id', $collections)
             ->findAll();
 
