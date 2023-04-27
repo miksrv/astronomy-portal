@@ -12,5 +12,7 @@ class BlogMedia extends Entity
         'group_id'      => 'integer',
         'views'         => 'integer',
         'forwards'      => 'integer',
+        'height'        => 'integer',
+        'width'         => 'integer'
     ];
 }

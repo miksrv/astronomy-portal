@@ -46,15 +46,20 @@ class AddNewsMedia extends Migration
                 'constraint' => 5,
                 'unsigned'   => true,
             ],
-            'media_type' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 100,
-                'null'       => true,
-            ],
-            'media_file' => [
+            'file' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 250,
                 'null'       => true,
+            ],
+            'height' => [
+                'type'       => 'INT',
+                'constraint' => 10,
+                'unsigned'   => true,
+            ],
+            'width' => [
+                'type'       => 'INT',
+                'constraint' => 10,
+                'unsigned'   => true,
             ],
             'created_at' => [
                 'type' => 'datetime',

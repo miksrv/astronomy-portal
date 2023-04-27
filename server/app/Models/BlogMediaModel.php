@@ -15,7 +15,7 @@ class BlogMediaModel extends MyBaseModel
     // The updatable fields
     protected $allowedFields = [
         'blog_id', 'telegram_id', 'telegram_date', 'group_id',
-        'views', 'forwards', 'media_type', 'media_file'
+        'views', 'forwards', 'file', 'height', 'width'
     ];
 
     protected array $hidden = ['created_at', 'updated_at', 'deleted_at'];

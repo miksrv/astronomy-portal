@@ -1,4 +1,4 @@
-import { TNewsPhotos } from '@/api/types'
+import { TBlogMedia } from '@/api/types'
 import React, { useMemo, useState } from 'react'
 import Lightbox from 'react-image-lightbox'
 import Gallery from 'react-photo-gallery'
@@ -6,30 +6,42 @@ import Gallery from 'react-photo-gallery'
 import styles from './styles.module.sass'
 
 type TNewsPhotosProps = {
-    photos: TNewsPhotos[]
+    groupId: number
+    photos: TBlogMedia[]
 }
 
 const NewsPhotos: React.FC<TNewsPhotosProps> = (props) => {
-    const { photos: galleryPhotos } = props
+    const { photos: galleryPhotos, groupId } = props
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setCurrentIndex] = useState<number>(0)
 
     const listGallery = useMemo(() => {
         return galleryPhotos.length
             ? galleryPhotos.map((item) => ({
-                  height: item.thumb.height,
-                  src: item.thumb.src,
-                  width: item.thumb.width
+                  height: item.height / 2,
+                  src:
+                      process.env.NEXT_PUBLIC_API_HOST +
+                      '/news/' +
+                      groupId +
+                      '/' +
+                      item.file,
+                  width: item.width / 2
               }))
             : []
     }, [galleryPhotos])
 
-    const getPhotoSrc = (index: number) => galleryPhotos[index].full.src
+    const getPhotoSrc = (index: number) =>
+        process.env.NEXT_PUBLIC_API_HOST +
+        '/news/' +
+        groupId +
+        '/' +
+        galleryPhotos[index].file
 
     return (
         <div className={styles.photos}>
             <Gallery
                 photos={listGallery}
+                direction={'row'}
                 onClick={(event, photos) => {
                     setCurrentIndex(photos.index)
                     setShowLightbox(true)
