@@ -8,6 +8,8 @@ class BlogLibrary
 {
     protected \danog\MadelineProto\API $MadelineProto;
 
+    protected array $supportedMedia = ['messageMediaPhoto', 'messageMediaDocument'];
+
     function __construct()
     {
         $this->MadelineProto = new \danog\MadelineProto\API('session.madeline');
@@ -74,7 +76,7 @@ class BlogLibrary
      */
     protected function saveMessageMedia($message, $groupId): bool
     {
-        if (empty($message['media']) || $message['media']['_'] !== 'messageMediaPhoto')
+        if (empty($message['media']) || !in_array($message['media']['_'], $this->supportedMedia))
             return false;
 
         $directory = FCPATH . 'news/' . $groupId . '/';
@@ -119,6 +121,7 @@ class BlogLibrary
             'views'         => $message['views'] ?? null,
             'forwards'      => $message['forwards'] ?? null,
             'file'          => $file->getFilename(),
+            'file_type'     => $file->getMimeType(),
             'height'        => $height,
             'width'         => $width,
         ]);

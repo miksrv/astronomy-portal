@@ -44,7 +44,7 @@ class Blog extends ResourceController
 
         $modelBlogMedia = new BlogMediaModel();
         $dataBlogMedia  = $modelBlogMedia
-            ->select(['file', 'height', 'width', 'group_id'])
+            ->select(['file', 'file_type', 'height', 'width', 'group_id'])
             ->whereIn('group_id', $collections)
             ->findAll();
 

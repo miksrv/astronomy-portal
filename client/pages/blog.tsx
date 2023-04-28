@@ -22,7 +22,7 @@ import NewsList from '@/components/news-list'
 const Blog: React.FC = () => {
     const [offset, setOffset] = useState<number>(0)
     const [news, addNews] = useState<TBlog[]>([])
-    const limit = 5
+    const limit = 10
 
     const { data, isLoading, isFetching } = useBlogGetListQuery({
         limit,

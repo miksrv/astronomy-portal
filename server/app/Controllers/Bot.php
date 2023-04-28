@@ -29,7 +29,7 @@ class Bot extends ResourceController
         // Последние записи
         $newsLibrary->getTelegramChannelHistory(
             'nearspace',
-            20
+            40
         );
     }
 }
