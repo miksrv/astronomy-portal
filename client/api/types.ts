@@ -152,6 +152,7 @@ export type TBlog = {
 
 export type TBlogMedia = {
     file: string
+    file_type: 'image/jpeg' | 'image/png' | 'image/gif' | 'video/mp4'
     height: number
     width: number
 }

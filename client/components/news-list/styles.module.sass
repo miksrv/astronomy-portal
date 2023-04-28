@@ -3,35 +3,115 @@
 .newsList
   .item
     margin: 10px
-    max-width: 48%
-    display: inline-block
-    vertical-align: top
+    max-width: 600px
 
     &:last-of-type
       margin-bottom: 0
 
-    .header
+    //.header
+    //  .avatar
+    //    float: left
+    //    margin-right: 2vh !important
+    //    height: 3em !important
+    //    width: 3em !important
+    //
+    //  a
+    //    color: $text-main
+    //    font-weight: 600
+    //
+    //  .info
+    //    color: $text-second
+    //    font-size: 1em
+    //
+    //  .divider
+    //    content: '•'
+    //    margin: 0 5px
+    //    display: inline list-item
 
-      .avatar
-        float: left
-        margin-right: 2vh !important
-        height: 3em !important
-        width: 3em !important
+    .footer
+      border-top: 1px solid $input-BackgroundColor
+      margin-top: 13px
+      padding-top: 13px
 
-      a
-        color: $text-main
-        font-weight: 600
+    .parameter
+      color: $text-second
+      background-color: $input-BackgroundColor
+      border-radius: 4px
+      padding: 3px 6px
+      margin-right: 10px
 
-      .info
-        color: $text-second
-        font-size: 1em
-
-      .divider
-        content: '•'
-        margin: 0 5px
-        display: inline list-item
+    .date
+      color: $text-second
+      float: right
 
     .text
       white-space: pre-wrap
-      margin-top: 5vh
-      font-size: 1.1em
+
+
+  .sliderNextButton
+    background-color: hsla(0,0%,59.6%,.8) !important
+    border-radius: 50%
+    padding: 5px 1px 5px 6px !important
+    font-size: 1.6em
+    margin-right: 20px
+    opacity: 0.5 !important
+
+    &:hover
+      opacity: 0.8 !important
+
+  .sliderPrevButton
+    background-color: hsla(0,0%,59.6%,.8) !important
+    border-radius: 50%
+    padding: 5px 4px 5px 5px !important
+    font-size: 1.6em
+    margin-left: 20px
+    opacity: 0.5 !important
+
+  .sliderDotsContainer
+    background-color: hsla(0, 0%, 59.6%, 0.4)
+    border-radius: 3px
+    padding: 6px !important
+
+  .sliderDots
+    width: 17px
+    height: 3px
+    background: #FFF !important
+    fill: transparent !important
+    margin: 0 3px 0 3px
+
+    &:hover
+      opacity: 0.8 !important
+
+  .slider
+    height: 300px
+    border-radius: 6px
+    margin-bottom: 13px
+
+    .sliderItem
+      position: relative
+      display: flex
+      overflow: hidden
+      align-items: center
+      justify-content: center
+      max-height: 300px
+      text-align: center
+
+      .sliderItemBackground
+        position: absolute
+        z-index: 0
+        top: 0
+        right: 0
+        bottom: 0
+        left: 0
+        background-repeat: no-repeat
+        background-size: 100% 100%
+        transform: scale(1.1)
+        filter: blur(4px) brightness(50%) contrast(80%)
+
+      .sliderImage
+        position: relative
+        z-index: 0
+        max-width: 100%
+        height: 300px
+        margin: 0 auto
+        object-fit: contain
