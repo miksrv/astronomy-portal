@@ -32,6 +32,7 @@ $routes->set404Override();
 //$routes->get('/', 'Home::index');
 
 $routes->get('bot', 'bot::item');
+$routes->get('blog/statistic', 'bot::statistic');
 $routes->post('bot', 'bot::item');
 
 $routes->get('statistic', 'Statistic::list');

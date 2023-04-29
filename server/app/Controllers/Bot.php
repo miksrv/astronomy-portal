@@ -17,8 +17,8 @@ class Bot extends ResourceController
     public function item()
     {
         // Опрашиваем канал в новостями с самого начала
-        $newsLibrary = new BlogLibrary();
-//        $newsLibrary->getTelegramChannelHistory(
+        $blogLibrary = new BlogLibrary();
+//        $blogLibrary->getTelegramChannelHistory(
 //            'nearspace',
 //            20,
 //            -20,
@@ -27,9 +27,19 @@ class Bot extends ResourceController
 //        );
 
         // Последние записи
-        $newsLibrary->getTelegramChannelHistory(
+        $blogLibrary->getTelegramChannelHistory(
             'nearspace',
             40
         );
+    }
+
+    public function statistic()
+    {
+        $blogLibrary = new BlogLibrary();
+
+
+        echo '<pre>';
+        var_dump($blogLibrary->getTelegramChannelStatistic('nearspace'));
+        exit();
     }
 }
