@@ -32,6 +32,34 @@ class Blog extends ResourceController
         $modelBlog = new BlogModel();
         $dataBlog  = $modelBlog->orderBy($order, $sort === 'DESC' ? 'DESC' : 'ASC')->findAll($limit, $offset);
 
+
+
+        return $this->respond([
+            'items' => $this->_addMediaToBlogList($dataBlog),
+            'total' => $modelBlog->countAllResults()
+        ]);
+    }
+
+    public function popular()
+    {
+        $date1 = strtotime("-30 days");
+        $date2 = strtotime("now");
+        $limit = $this->request->getGet('limit', FILTER_SANITIZE_NUMBER_INT) ?? 5;
+
+        $modelBlog = new BlogModel();
+        $dataBlog  = $modelBlog
+            ->where("telegram_date BETWEEN {$date1} AND {$date2}")
+            ->orderBy('views', 'DESC')
+            ->findAll($limit);
+
+        return $this->respond([
+            'items' => $this->_addMediaToBlogList($dataBlog),
+            'total' => $limit
+        ]);
+    }
+
+    protected function _addMediaToBlogList($dataBlog)
+    {
         $collections = [];
 
         foreach ($dataBlog as $item)
@@ -64,9 +92,6 @@ class Blog extends ResourceController
             }
         }
 
-        return $this->respond([
-            'items' => $dataBlog,
-            'total' => $modelBlog->countAllResults()
-        ]);
+        return $dataBlog;
     }
 }

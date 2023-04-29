@@ -141,7 +141,7 @@ const Directory: React.FC = () => {
                             content={'Все данные объекта успешно удалены'}
                         />
                     )}
-                    <h3 className={'subTitle inline'}>Категории объектов</h3>
+                    <h4 className={'subTitle inline'}>Категории объектов</h4>
                     {userAuth && (
                         <Button
                             icon={true}
@@ -193,7 +193,7 @@ const Directory: React.FC = () => {
                             content={'Все данные автора успешно удалены'}
                         />
                     )}
-                    <h3 className={'subTitle inline'}>Авторы фотографий</h3>
+                    <h4 className={'subTitle inline'}>Авторы фотографий</h4>
                     {userAuth && (
                         <Button
                             icon={true}

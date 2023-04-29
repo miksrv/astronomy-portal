@@ -1,5 +1,11 @@
 import moment from 'moment'
 
+export const sliceText = (text: string, length: number = 350): string => {
+    let sliced = text.slice(0, length)
+
+    return sliced + (sliced.length < text.length ? '...' : '')
+}
+
 export const declOfNum = (number: number, words: string[]) =>
     words[
         number % 100 > 4 && number % 100 < 20

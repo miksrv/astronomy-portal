@@ -1,4 +1,5 @@
 import { TCatalog, TPhoto } from '@/api/types'
+import { sliceText } from '@/functions/helpers'
 import classNames from 'classnames'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -15,74 +16,68 @@ type TPhotoGridProps = {
     catalog?: TCatalog[]
 }
 
-const PhotoGrid: React.FC<TPhotoGridProps> = (props) => {
-    const { loading, loaderCount, threeColumns, photos, catalog } = props
+const PhotoGrid: React.FC<TPhotoGridProps> = ({
+    loading,
+    loaderCount,
+    threeColumns,
+    photos,
+    catalog
+}) => (
+    <div className={classNames(styles.photoGird, 'box')}>
+        <PhotosLoader
+            visible={loading || !photos || !catalog}
+            count={loaderCount || 12}
+            threeColumns={threeColumns}
+        />
+        {photos?.length && !loading
+            ? photos?.map((photo) => {
+                  const catalogItem = catalog?.find(
+                      ({ name }) => name === photo.object
+                  )
 
-    const sliceText = (text: string) => {
-        let sliced = text.slice(0, 350)
-
-        return sliced + (sliced.length < text.length ? '...' : '')
-    }
-
-    return (
-        <div className={classNames(styles.photoGird, 'box')}>
-            <PhotosLoader
-                visible={loading || !photos || !catalog}
-                count={loaderCount || 12}
-                threeColumns={threeColumns}
-            />
-            {photos?.length && !loading
-                ? photos?.map((photo) => {
-                      const catalogItem = catalog?.find(
-                          ({ name }) => name === photo.object
-                      )
-
-                      return (
-                          <Link
-                              key={photo.id}
-                              href={`/photos/${photo.object}?date=${photo.date}`}
-                              title={`${
-                                  photo.object || photo.object
-                              } - Фотография объекта`}
-                              className={classNames(
-                                  styles.item,
-                                  threeColumns ? styles.item4 : undefined
-                              )}
-                          >
-                              {catalogItem?.title ? (
-                                  <Reveal animated={'small fade'}>
-                                      <Reveal.Content visible>
-                                          <PhotoImage
-                                              photo={photo}
-                                              title={catalogItem.title}
-                                          />
-                                      </Reveal.Content>
-                                      <Reveal.Content hidden>
-                                          <div className={styles.info}>
-                                              <h4>{catalogItem.title}</h4>
-                                              <p>
-                                                  {sliceText(catalogItem?.text)}
-                                              </p>
-                                          </div>
-                                      </Reveal.Content>
-                                  </Reveal>
-                              ) : (
-                                  <PhotoImage
-                                      photo={photo}
-                                      title={catalogItem?.name || ''}
-                                  />
-                              )}
-                          </Link>
-                      )
-                  })
-                : !loading && (
-                      <div className={styles.notFound}>
-                          Фотографий объектов по выбранной категории не найдено
-                      </div>
-                  )}
-        </div>
-    )
-}
+                  return (
+                      <Link
+                          key={photo.id}
+                          href={`/photos/${photo.object}?date=${photo.date}`}
+                          title={`${
+                              photo.object || photo.object
+                          } - Фотография объекта`}
+                          className={classNames(
+                              styles.item,
+                              threeColumns ? styles.item4 : undefined
+                          )}
+                      >
+                          {catalogItem?.title ? (
+                              <Reveal animated={'small fade'}>
+                                  <Reveal.Content visible>
+                                      <PhotoImage
+                                          photo={photo}
+                                          title={catalogItem.title}
+                                      />
+                                  </Reveal.Content>
+                                  <Reveal.Content hidden>
+                                      <div className={styles.info}>
+                                          <h4>{catalogItem.title}</h4>
+                                          <p>{sliceText(catalogItem?.text)}</p>
+                                      </div>
+                                  </Reveal.Content>
+                              </Reveal>
+                          ) : (
+                              <PhotoImage
+                                  photo={photo}
+                                  title={catalogItem?.name || ''}
+                              />
+                          )}
+                      </Link>
+                  )
+              })
+            : !loading && (
+                  <div className={styles.notFound}>
+                      Фотографий объектов по выбранной категории не найдено
+                  </div>
+              )}
+    </div>
+)
 
 const PhotosLoader: React.FC<{
     count: number
