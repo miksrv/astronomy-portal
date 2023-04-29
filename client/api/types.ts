@@ -129,6 +129,10 @@ export interface APIRequestBlogList {
     sort?: 'ASC' | 'DESC'
 }
 
+export interface APIRequestBlogListPopular {
+    limit?: number
+}
+
 export interface APIResponsePhotoList {
     items: TPhoto[]
 }

@@ -4,6 +4,7 @@ import { HYDRATE } from 'next-redux-wrapper'
 import { RootState } from './store'
 import {
     APIRequestBlogList,
+    APIRequestBlogListPopular,
     APIRequestCatalog,
     APIRequestLogin,
     APIRequestPhotoList,
@@ -133,6 +134,13 @@ export const api = createApi({
         >({
             keepUnusedDataFor: 3600,
             query: (params) => `blog${encodeQueryData(params)}`
+        }),
+        blogGetListPopular: builder.query<
+            APIResponseBlogList,
+            Maybe<APIRequestBlogListPopular>
+        >({
+            keepUnusedDataFor: 3600,
+            query: (params) => `blog/popular${encodeQueryData(params)}`
         }),
 
         catalogDelete: builder.mutation<void, string>({
@@ -322,6 +330,7 @@ export const {
     useAuthorPostMutation,
 
     useBlogGetListQuery,
+    useBlogGetListPopularQuery,
 
     useCatalogDeleteMutation,
     useCatalogGetItemQuery,

@@ -20,8 +20,12 @@
       margin-right: 10px
 
     .date
-      color: $text-second
       float: right
+      padding-top: 1px
+
+      a
+        color: $text-second !important
+        display: block
 
     .text
       white-space: pre-wrap
@@ -95,3 +99,23 @@
         width: auto
         margin: 0 auto
         object-fit: contain
+
+.popular
+  margin-bottom: 20px
+
+  .popularHeader
+    margin-bottom: 20px
+    border-bottom: 1px solid $input-BackgroundColor
+    display: flex
+    justify-content: space-between
+
+    .dayCount
+      color: $text-second
+      line-height: 26px
+
+  .popularImageContainer
+    padding-right: 0 !important
+
+    .popularImage
+      object-fit: cover
+      border-radius: 4px

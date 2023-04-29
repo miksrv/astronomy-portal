@@ -81,6 +81,7 @@ $routes->post('auth/login', 'Auth::login');
 $routes->options('auth/(:any)', 'Auth::me');
 
 $routes->get('blog', 'Blog::list');
+$routes->get('blog/popular', 'Blog::popular');
 
 $routes->get('relay', 'Relay::list');
 $routes->put('relay/(:num)', 'Relay::set');
