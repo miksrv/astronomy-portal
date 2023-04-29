@@ -1,7 +1,9 @@
 import {
     useBlogGetListQuery // getRunningQueriesThunk,
 } from '@/api/api'
+import { skipToken } from '@reduxjs/toolkit/query'
 import { NextSeo } from 'next-seo'
+import { useRouter } from 'next/dist/client/router'
 import React from 'react'
 
 import BlogPage, { postPerPage } from '@/components/blog-page'
@@ -17,16 +19,28 @@ import BlogPage, { postPerPage } from '@/components/blog-page'
 // })
 
 const Blog: React.FC = () => {
-    const { data, isLoading } = useBlogGetListQuery({
-        limit: postPerPage,
-        offset: 0
-    })
+    const router = useRouter()
+    const routerObject = router.query.page
+    const pageNumber =
+        typeof routerObject === 'string' ? routerObject : skipToken
+
+    const currentPage = typeof pageNumber === 'string' ? Number(pageNumber) : 1
+
+    const { data, isLoading } = useBlogGetListQuery(
+        {
+            limit: postPerPage,
+            offset: ((currentPage || 1) - 1) * postPerPage
+        },
+        {
+            skip: router.isFallback || typeof routerObject !== 'string'
+        }
+    )
 
     return (
         <main>
             <NextSeo title={'Новости самодельной обсерватории'} />
             <BlogPage
-                page={1}
+                page={currentPage}
                 loading={isLoading}
                 posts={data?.items}
                 total={data?.total}

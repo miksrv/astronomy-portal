@@ -16,6 +16,11 @@ class BlogLibrary
         $this->MadelineProto->start();
     }
 
+    function getTelegramChannelStatistic(string $peer)
+    {
+        return $this->MadelineProto->getFullInfo($peer);
+    }
+
     /**
      * @throws ReflectionException
      */

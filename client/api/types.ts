@@ -135,6 +135,7 @@ export interface APIResponsePhotoList {
 
 export interface APIResponseBlogList {
     items: TBlog[]
+    total: number
 }
 
 export type TBlog = {
