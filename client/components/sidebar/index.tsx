@@ -1,5 +1,6 @@
 import { useStatisticGetQuery } from '@/api/api'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
+import Link from 'next/link'
 import React from 'react'
 import { Label, Loader, Menu, Sidebar as SidebarMenu } from 'semantic-ui-react'
 
@@ -26,15 +27,14 @@ const Sidebar: React.FC = () => {
         >
             {menuItems.map((item, key) => (
                 <Menu.Item
+                    as={Link}
                     onClick={() => dispatch(hide())}
-                    exact
-                    to={item.link}
+                    href={item.link}
                     key={key}
                 >
                     {item.name}
                     {item.label && (
                         <Label
-                            // className={styles.label}
                             color={'green'}
                             size={'tiny'}
                         >
