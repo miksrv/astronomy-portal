@@ -99,6 +99,7 @@ const Header: React.FC = () => {
                 {currentMobile ? (
                     <Menu.Item
                         as={Link}
+                        href={''}
                         icon={'bars'}
                         onClick={() => dispatch(toggle())}
                     />

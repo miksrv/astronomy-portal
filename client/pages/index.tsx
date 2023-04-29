@@ -7,11 +7,11 @@ import {
 import { wrapper } from '@/api/store'
 // import { TCatalog, TPhoto } from '@/api/types'
 // import { shuffle } from '@/functions/helpers'
-// import moment, { Moment } from 'moment'
+import moment, { Moment } from 'moment'
 import { NextSeo } from 'next-seo'
 import React from 'react'
 
-// import Calendar from '@/components/calendar'
+import Calendar from '@/components/calendar'
 import PhotoGrid from '@/components/photo-grid'
 import Statistic from '@/components/statistic'
 
@@ -26,7 +26,7 @@ export const getStaticProps = wrapper.getStaticProps((store) => async () => {
 })
 
 export default function Home() {
-    // const [date, setDate] = React.useState<Moment>(moment())
+    const [calendarDate, setCalendarDate] = React.useState<Moment>(moment())
 
     const { data: photoData, isLoading: photoLoading } = usePhotoGetListQuery({
         limit: 4
@@ -42,14 +42,6 @@ export default function Home() {
     //     useGetWeatherMonthMutation()
     // const [getFilesMonth, { data: filesData, isLoading: filesLoading }] =
     //     useGetFilesMonthMutation()
-
-    // React.useEffect(() => {
-    //     if (photoData?.payload && photos === undefined) {
-    //         const randomPhotos = shuffle(photoData.payload.slice()).slice(0, 4)
-    //
-    //         setPhotos(randomPhotos)
-    //     }
-    // }, [photoData?.payload, photos])
 
     // React.useEffect(() => {
     //     const getWeather = async () => {
@@ -91,15 +83,15 @@ export default function Home() {
                 photos={photoData?.items}
                 catalog={catalogData?.items}
             />
-            {/*<br />*/}
-            {/*<Calendar*/}
-            {/*    loading={weatherLoading || filesLoading}*/}
-            {/*    eventsWeather={*/}
-            {/*        weatherData?.payload ? weatherData?.payload.weather : []*/}
-            {/*    }*/}
-            {/*    eventsTelescope={filesData?.payload ? filesData.payload : []}*/}
-            {/*    changeDate={(date) => setDate(date)}*/}
-            {/*/>*/}
+            <br />
+            <Calendar
+                loading={false}
+                // eventsWeather={
+                //     weatherData?.payload ? weatherData?.payload.weather : []
+                // }
+                // eventsTelescope={filesData?.payload ? filesData.payload : []}
+                onChangeDate={setCalendarDate}
+            />
         </main>
     )
 }

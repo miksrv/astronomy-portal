@@ -14,8 +14,8 @@ import styles from './styles.module.sass'
 
 type TRenderCalendarProps = {
     dateObject: Moment
-    eventsWeather: TWeatherMonth[]
-    eventsTelescope: TFilesMonth[]
+    eventsWeather?: TWeatherMonth[]
+    eventsTelescope?: TFilesMonth[]
 }
 
 const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
@@ -49,29 +49,29 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
     }
 
     let daysMonth = []
-
     for (let d = 1; d <= daysInMonth; d++) {
         const currentDate = moment(dateObject)
             .startOf('month')
             .add(d - 1, 'days')
-        const currentDay =
+        const currentDay: boolean =
             isCurrentMonth && d === parseInt(dateObject.format('DD'))
-                ? 'today'
-                : ''
         const moonTimes = SunCalc.getMoonTimes(currentDate, 51.7, 55.2)
         const sunTimes = SunCalc.getTimes(currentDate, 51.7, 55.2)
 
         const itemWeatherEvent = eventsWeather
-            .filter((item) => currentDate.isSame(item.date, 'day'))
-            .pop()
+            ?.filter((item) => currentDate.isSame(item.date, 'day'))
+            ?.pop()
         const itemAstroEvents = eventsTelescope
-            .filter((item: any) => currentDate.isSame(item.date, 'day'))
-            .pop()
+            ?.filter((item: any) => currentDate.isSame(item.date, 'day'))
+            ?.pop()
 
         daysMonth.push(
             <td
                 key={`day${d}`}
-                className={classNames(styles.calendarDay, currentDay)}
+                className={classNames(
+                    styles.calendarDay,
+                    currentDay ? styles.currentDay : undefined
+                )}
             >
                 <div
                     className={classNames(
@@ -186,7 +186,6 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
     return rows.map((d: any, key: number) => {
         if (!d.length) return null
 
-        // Добавляем пустые строки в конце месяца
         if (d.length < 7) {
             for (let i = d.length; i < 7; i++) {
                 d.push(

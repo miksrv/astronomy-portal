@@ -1,3 +1,4 @@
+import { useAppSelector } from '@/api/hooks'
 import { wrapper } from '@/api/store'
 import '@/styles/globals.sass'
 import type { AppProps } from 'next/app'
@@ -11,6 +12,7 @@ import { Container } from 'semantic-ui-react'
 
 import Footer from '@/components/footer'
 import Header from '@/components/header'
+import Sidebar from '@/components/sidebar'
 
 export const montserrat = Montserrat({ subsets: ['latin'] })
 export function App({ Component, pageProps }: AppProps) {
@@ -31,6 +33,7 @@ export function App({ Component, pageProps }: AppProps) {
                 strategy='beforeInteractive'
             />
             <main className={montserrat.className}>
+                <Sidebar />
                 <Header />
                 <Container className='main'>
                     <Component {...props.pageProps} />

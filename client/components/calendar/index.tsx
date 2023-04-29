@@ -8,29 +8,27 @@ import RenderCalendar from './RenderCalendar'
 import styles from './styles.module.sass'
 
 type TCalendarProps = {
-    loading: boolean
-    eventsWeather: TWeatherMonth[]
-    eventsTelescope: TFilesMonth[]
-    changeDate: (date: Moment) => void
+    loading?: boolean
+    eventsWeather?: TWeatherMonth[]
+    eventsTelescope?: TFilesMonth[]
+    onChangeDate?: (date: Moment) => void
 }
 
 const Calendar: React.FC<TCalendarProps> = (props) => {
-    const { loading, eventsWeather, eventsTelescope, changeDate } = props
+    const { loading, eventsWeather, eventsTelescope, onChangeDate } = props
     const [dateObject, setDateObject] = useState<Moment>(moment())
     const weekDayShort = moment.weekdaysShort(true)
 
     const handleChangeDate = (date: Moment) => {
         setDateObject(date)
-        changeDate(date)
+        onChangeDate?.(date)
     }
 
     return (
         <div className={classNames(styles.calendar, 'box', 'table')}>
-            {loading && (
-                <Dimmer active>
-                    <Loader />
-                </Dimmer>
-            )}
+            <Dimmer active={loading}>
+                <Loader />
+            </Dimmer>
             <div className={styles.calendarToolbar}>
                 <Button
                     size={'mini'}
