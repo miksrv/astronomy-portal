@@ -37,7 +37,7 @@ const LoginForm: React.FC = () => {
     const listErrors: string[] = useMemo(
         () =>
             Object.entries((error as APIResponseError)?.messages || []).map(
-                ([key, value]) => value as string
+                ([, value]) => value as string
             ),
         [error]
     )
@@ -47,7 +47,7 @@ const LoginForm: React.FC = () => {
             dispatch(hide())
             dispatch(login(data))
         }
-    }, [data])
+    }, [dispatch, data])
 
     return (
         <Modal

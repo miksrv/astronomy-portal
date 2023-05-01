@@ -1,6 +1,5 @@
 import { useAppSelector } from '@/api/hooks'
-import { TPhoto } from '@/api/types'
-import { FilterList } from '@/api/types'
+import { FilterList, TPhoto } from '@/api/types'
 import { getTimeFromSec, isOutdated } from '@/functions/helpers'
 import Image from 'next/image'
 import Link from 'next/link'

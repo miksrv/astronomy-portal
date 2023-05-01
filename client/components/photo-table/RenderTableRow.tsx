@@ -1,5 +1,4 @@
-import { TPhoto } from '@/api/types'
-import { FilterList } from '@/api/types'
+import { FilterList, TPhoto } from '@/api/types'
 import { getTimeFromSec } from '@/functions/helpers'
 import moment from 'moment'
 import Image from 'next/image'

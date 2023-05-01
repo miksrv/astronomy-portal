@@ -57,7 +57,7 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
 
     const isFormDirty = useMemo(
         () => isEqual(mapFormProps(value), formState),
-        [mapFormProps, value, formState]
+        [value, formState]
     )
 
     const handleSubmit = useCallback(() => {
@@ -68,7 +68,7 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
         } else {
             updateItem(formState)
         }
-    }, [formState])
+    }, [formState, createItem, updateItem, value?.id])
 
     useEffect(() => {
         setFormState(mapFormProps(value))

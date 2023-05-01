@@ -72,7 +72,7 @@ const Header: React.FC = () => {
         }
 
         dispatch(api.endpoints.cronGetUpdatePosts.initiate())
-    }, [])
+    })
 
     return (
         <Menu

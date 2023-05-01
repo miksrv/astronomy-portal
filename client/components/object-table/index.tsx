@@ -46,7 +46,7 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                 title: item.title,
                 updated: item.updated
             })),
-        [catalog, photos]
+        [catalog, photos, categories]
     )
 
     const sortedCatalog = useMemo(

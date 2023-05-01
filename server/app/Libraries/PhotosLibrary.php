@@ -60,9 +60,10 @@ class PhotosLibrary
     /**
      * @param string|null $filterObject
      * @param int $filterLimit
+     * @param string $order
      * @return array|null
      */
-    function getPhotoList(string $filterObject = null, int $filterLimit = 0): ?array
+    function getPhotoList(string $filterObject = null, int $filterLimit = 0, string $order = 'date'): ?array
     {
         $modelPhoto = new PhotoModel();
         $modelFiles = new FilesModel();
@@ -70,7 +71,7 @@ class PhotosLibrary
         $modelPhoto
             ->select('photos.*, authors.id as author_id, authors.name as author_name, authors.link as author_link')
             ->join('authors', 'authors.id = photos.author_id', 'left')
-            ->orderBy('date', 'DESC');
+            ->orderBy($order === 'random' ? 'RAND()' : $order, 'DESC');
 
         if ($filterObject)
         {

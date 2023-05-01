@@ -1,13 +1,10 @@
 import {
     catalogGetList,
     getRunningQueriesThunk,
-    useCatalogGetListQuery, // useGetFilesMonthMutation,
-    usePhotoGetListQuery // useGetWeatherMonthMutation
+    useCatalogGetListQuery,
+    usePhotoGetListQuery
 } from '@/api/api'
 import { wrapper } from '@/api/store'
-// import { TCatalog, TPhoto } from '@/api/types'
-// import { shuffle } from '@/functions/helpers'
-import moment, { Moment } from 'moment'
 import { NextSeo } from 'next-seo'
 import React from 'react'
 
@@ -26,36 +23,12 @@ export const getStaticProps = wrapper.getStaticProps((store) => async () => {
 })
 
 export default function Home() {
-    const [calendarDate, setCalendarDate] = React.useState<Moment>(moment())
-
     const { data: photoData, isLoading: photoLoading } = usePhotoGetListQuery({
-        limit: 4
+        limit: 4,
+        order: 'random'
     })
     const { data: catalogData, isLoading: catalogLoading } =
         useCatalogGetListQuery()
-
-    // const [photos, setPhotos] = React.useState<
-    //     (TPhoto[] & TCatalog[]) | undefined
-    // >(undefined)
-
-    // const [getWeatherMonth, { data: weatherData, isLoading: weatherLoading }] =
-    //     useGetWeatherMonthMutation()
-    // const [getFilesMonth, { data: filesData, isLoading: filesLoading }] =
-    //     useGetFilesMonthMutation()
-
-    // React.useEffect(() => {
-    //     const getWeather = async () => {
-    //         try {
-    //             const monthYear = moment(date).format('Y-MM')
-    //             await getWeatherMonth(monthYear).unwrap()
-    //             await getFilesMonth(monthYear).unwrap()
-    //         } catch (error) {
-    //             return null
-    //         }
-    //     }
-    //
-    //     getWeather().finally()
-    // }, [getWeatherMonth, getFilesMonth, date])
 
     return (
         <main>
@@ -68,7 +41,7 @@ export default function Home() {
                     images: [
                         {
                             height: 819,
-                            url: '/main/dashboard.jpg',
+                            url: '/screenshots/main.jpg',
                             width: 1280
                         }
                     ],

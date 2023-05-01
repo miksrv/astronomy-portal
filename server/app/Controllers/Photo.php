@@ -29,9 +29,12 @@ class Photo extends ResourceController
     {
         $filterObject = $this->request->getGet('object', FILTER_SANITIZE_STRING);
         $filterLimit  = $this->request->getGet('limit', FILTER_SANITIZE_NUMBER_INT);
+        $orderColumn  = $this->request->getGet('order', FILTER_SANITIZE_SPECIAL_CHARS) ?? 'date';
         $photoLibrary = new PhotosLibrary();
 
-        return $this->respond(['items' => $photoLibrary->getPhotoList($filterObject, $filterLimit ?? 0)]);
+        return $this->respond([
+            'items' => $photoLibrary->getPhotoList($filterObject, $filterLimit ?? 0, $orderColumn)
+        ]);
     }
 
     /**

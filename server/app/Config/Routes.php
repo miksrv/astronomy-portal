@@ -84,10 +84,14 @@ $routes->options('auth/(:any)', 'Auth::me');
 $routes->get('blog', 'Blog::list');
 $routes->get('blog/popular', 'Blog::popular');
 
-$routes->get('relay', 'Relay::list');
+$routes->get('relay/list', 'Relay::list');
+$routes->get('relay/state', 'Relay::state');
 $routes->put('relay/(:num)', 'Relay::set');
+$routes->options('relay/(:num)', 'Relay::set');
 
-$routes->get('camera/(:num)', 'Camera::item/$1');
+$routes->get('sensors', 'Sensors::list');
+
+$routes->get('camera/(:num)', 'Camera::show/$1');
 /*
  * --------------------------------------------------------------------
  * Additional Routing

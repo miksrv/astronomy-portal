@@ -1,4 +1,3 @@
-import { useAppSelector } from '@/api/hooks'
 import { wrapper } from '@/api/store'
 import '@/styles/globals.sass'
 import type { AppProps } from 'next/app'

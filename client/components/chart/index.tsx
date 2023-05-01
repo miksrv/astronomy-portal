@@ -33,7 +33,7 @@ const Chart: React.FC<TChartProps> = ({ loading, config, data }) => {
 
             setChartOptions(mergeDeep(chartInitialConfig, config))
         }
-    }, [config, data])
+    }, [config, data, loading])
 
     return (
         <div className={'box table'}>

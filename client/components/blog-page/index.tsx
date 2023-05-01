@@ -20,7 +20,7 @@ type TBlogPage = {
 }
 
 const BlogPage: React.FC<TBlogPage> = ({ loading, posts, total, page }) => {
-    const { data: popularPosts, isLoading } = useBlogGetListPopularQuery()
+    const { data: popularPosts } = useBlogGetListPopularQuery()
 
     return (
         <Grid columns={2}>

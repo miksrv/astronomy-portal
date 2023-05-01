@@ -69,7 +69,7 @@ const ObjectFormModal: React.FC<IObjectFormModal> = (props) => {
 
     const isFormDirty = useMemo(
         () => isEqual(mapFormProps(value), formState),
-        [mapFormProps, value, formState]
+        [value, formState]
     )
 
     const handleSubmit = useCallback(() => {
@@ -80,7 +80,7 @@ const ObjectFormModal: React.FC<IObjectFormModal> = (props) => {
         } else {
             updateItem(formState)
         }
-    }, [formState])
+    }, [formState, createItem, updateItem, value?.name])
 
     useEffect(() => {
         setFormState(mapFormProps(value))
