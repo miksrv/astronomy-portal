@@ -40,8 +40,8 @@ export default function Home() {
 
     // const [getWeatherMonth, { data: weatherData, isLoading: weatherLoading }] =
     //     useGetWeatherMonthMutation()
-    // const [getFilesMonth, { data: filesData, isLoading: filesLoading }] =
-    //     useGetFilesMonthMutation()
+    const [getFilesMonth, { data: filesData, isLoading: filesLoading }] =
+        useGetFilesMonthMutation()
 
     // React.useEffect(() => {
     //     const getWeather = async () => {

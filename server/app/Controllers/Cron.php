@@ -5,7 +5,7 @@ use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 use ReflectionException;
 
-class Bot extends ResourceController
+class Cron extends ResourceController
 {
     use ResponseTrait;
 
@@ -14,29 +14,31 @@ class Bot extends ResourceController
      * @return void
      * @throws ReflectionException
      */
-    public function item()
+    public function update_telegram_posts()
     {
         // Опрашиваем канал в новостями с самого начала
         $blogLibrary = new BlogLibrary();
-//        $blogLibrary->getTelegramChannelHistory(
-//            'nearspace',
-//            20,
-//            -20,
-//             $newsLibrary->getMaxTelegramNews() // 9 - min telegram post
-////              9
-//        );
 
-        // Последние записи
+        /* Получение новостей с самой первой новости
+        $blogLibrary->getTelegramChannelHistory(
+            'nearspace',
+            20,
+            -20,
+            $blogLibrary->getMaxTelegramNews() // 9 - min telegram post
+            // 9
+        );
+        */
+
+        // Обновление последних записей
         $blogLibrary->getTelegramChannelHistory(
             'nearspace',
             40
         );
     }
 
-    public function statistic()
+    public function get_telegram_statistic()
     {
         $blogLibrary = new BlogLibrary();
-
 
         echo '<pre>';
         var_dump($blogLibrary->getTelegramChannelStatistic('nearspace'));

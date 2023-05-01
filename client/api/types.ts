@@ -97,6 +97,10 @@ export interface APIResponseCatalogNames {
     items: string[]
 }
 
+export interface APIResponseStatisticTelescope {
+    items?: TStatisticTelescope[]
+}
+
 export interface APIResponsePhotoListNames {
     items: string[]
 }
@@ -121,12 +125,22 @@ export interface APIRequestPhotoList {
     object?: string
     limit?: number
 }
+export interface APIRequestTelescope {
+    period?: string
+}
 
 export interface APIRequestBlogList {
     limit?: number
     offset?: number
     order?: string
     sort?: 'ASC' | 'DESC'
+}
+
+export type TStatisticTelescope = {
+    telescope_date: string
+    total_exposure: number
+    frames_count: number
+    catalog_items: string[]
 }
 
 export interface APIRequestBlogListPopular {
