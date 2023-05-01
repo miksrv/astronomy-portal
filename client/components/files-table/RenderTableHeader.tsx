@@ -15,16 +15,16 @@ type THeaderFields = {
 }
 
 const HEADER_FIELDS: THeaderFields[] = [
-    { key: 'name', name: 'Имя файла' },
-    { key: 'exposure', name: 'Выдержка' },
+    { key: 'file_name', name: 'Имя файла' },
+    { key: 'exptime', name: 'Выдержка' },
     { key: 'filter', name: 'Фильтр' },
-    { key: 'temp', name: '℃' },
+    { key: 'ccd_temp', name: '°C' },
     { key: 'gain', name: 'Gain' },
     { key: 'offset', name: 'Offset' },
-    { key: 'stars', name: 'Звезд' },
-    { key: 'sky', name: 'SNR' },
+    { key: 'star_count', name: 'Звезд' },
+    { key: 'sky_background', name: 'SNR' },
     { key: 'hfr', name: 'HFR' },
-    { key: 'date', name: 'Дата съемки' }
+    { key: 'date_obs', name: 'Дата съемки' }
 ]
 
 const RenderTableHeader: React.FC<TTableHeader> = (props) => {

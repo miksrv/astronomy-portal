@@ -7,7 +7,6 @@ import { Grid } from 'semantic-ui-react'
 import AstronomyCalc from '@/components/astronomy-calc'
 import Camera from '@/components/camera'
 import RelayList from '@/components/relay-list'
-import Sensors from '@/components/sensors'
 import Weather from '@/components/weather'
 
 export const getStaticProps = wrapper.getStaticProps((store) => async () => {
@@ -54,7 +53,7 @@ const Dashboard: React.FC = () => (
                 mobile={16}
             >
                 <Camera
-                    cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}camera/get/2`}
+                    cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/2`}
                 />
             </Grid.Column>
             <Grid.Column
@@ -64,7 +63,7 @@ const Dashboard: React.FC = () => (
             >
                 <AstronomyCalc />
                 <br />
-                <Sensors />
+                {/*<Sensors />*/}
             </Grid.Column>
             <Grid.Column
                 computer={8}
@@ -72,7 +71,7 @@ const Dashboard: React.FC = () => (
                 mobile={16}
             >
                 <Camera
-                    cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}camera/get/1`}
+                    cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/1`}
                     interval={30}
                 />
             </Grid.Column>

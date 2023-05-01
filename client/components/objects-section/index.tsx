@@ -1,10 +1,10 @@
-import { useAppSelector } from '@/api/hooks'
+// import { useAppSelector } from '@/api/hooks'
 import { TCatalog } from '@/api/types'
 import { getTimeFromSec } from '@/functions/helpers'
 import moment from 'moment'
 import Link from 'next/link'
 import React, { useState } from 'react'
-import { Button, Dimmer, Grid, Loader, Message } from 'semantic-ui-react'
+import { Dimmer, Grid, Loader, Message } from 'semantic-ui-react'
 
 import CelestialMap from '@/components/celestial-map'
 import FilterList from '@/components/filter-list'
@@ -23,7 +23,7 @@ type TObjectHeaderProps = {
 
 const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
     const { title, loader, error, catalog, deviationRa, deviationDec } = props
-    const userAuth = useAppSelector((state) => state.auth.userAuth)
+    // const userAuth = useAppSelector((state) => state.auth.userAuth)
     const date = catalog?.updated
         ? moment
               .utc(catalog.updated)

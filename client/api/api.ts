@@ -8,6 +8,7 @@ import {
     APIRequestCatalog,
     APIRequestLogin,
     APIRequestPhotoList,
+    APIRequestRelaySet,
     APIRequestTelescope,
     APIRequestWeatherStatistic,
     APIResponseAuthorList,
@@ -19,34 +20,18 @@ import {
     APIResponseLogin,
     APIResponsePhotoList,
     APIResponsePhotoListNames,
+    APIResponseRelayList,
     APIResponseStatistic,
     APIResponseStatisticTelescope,
     APIResponseWeatherCurrent,
-    APIResponseWeatherStatistic, // IRelayList,
-    // IRelaySet,
-    IRestAuth,
-    TAuthor, // IRestCatalogItem,
-    // IRestFilesMonth,
-    // IRestNewsList,
-    // IRestObjectFiles,
-    // IRestObjectItem,
-    // IRestObjectList,
-    // IRestObjectNames,
-    // IRestPhotoList,
-    // IRestSensorStatistic,
-    // IRestWeatherCurrent,
-    // IRestWeatherMonth,
+    APIResponseWeatherStatistic,
+    TAuthor,
     TCatalog,
     TCategory,
     TPhoto
 } from './types'
 
 type Maybe<T> = T | void
-
-// type TQueryNewsList = {
-//     limit?: number
-//     offset?: number
-// }
 
 const encodeQueryData = (data: any): string => {
     const ret = []
@@ -61,7 +46,7 @@ const encodeQueryData = (data: any): string => {
 
 export const api = createApi({
     baseQuery: fetchBaseQuery({
-        baseUrl: process.env.NEXT_PUBLIC_API_HOST,
+        baseUrl: process.env.NEXT_PUBLIC_API_HOST || 'http://localhost/api/',
         prepareHeaders: (headers, { getState }) => {
             // By default, if we have a token in the store, let's use that for authenticated requests
             const token = (getState() as RootState).auth.userToken
@@ -87,13 +72,6 @@ export const api = createApi({
             // transformResponse: (response: { data: APIResponseLogin }) =>
             //     response.data
         }),
-
-        // getWeatherCurrent: builder.query<IRestWeatherCurrent, null>({
-        //     query: () => 'weather/current'
-        // }),
-        // getWeatherMonth: builder.mutation<IRestWeatherMonth, string>({
-        //     query: (date) => `weather/month?date=${date}`
-        // }),
 
         authorDelete: builder.mutation<void, number>({
             invalidatesTags: () => [{ type: 'Author' }],
@@ -240,44 +218,10 @@ export const api = createApi({
             query: () => 'cron/update_telegram_posts'
         }),
 
-        // Коллекция дней за месяц, в которые работала обсерватория (exp, frames, objects)
-        // getFilesMonth: builder.mutation<IRestFilesMonth, string>({
-        //     query: (date) => `get/statistic/month?date=${date}`
-        // }),
-
-        // NEWS
-        // Список новостей
-        // getNewsList: builder.query<IRestNewsList, TQueryNewsList>({
-        //     query: (props) => {
-        //         const limit = props.limit ? `?limit=${props.limit}` : ''
-        //         const offset = props.offset ? `&offset=${props.offset}` : ''
-        //
-        //         return `news/list${limit}${offset}`
-        //     }
-        // }),
-
-        // FILES
-        // Список файлов объекта по его имени
-        // getObjectFiles: builder.query<IRestObjectFiles, string>({
-        //     keepUnusedDataFor: 3600,
-        //     query: (name) => `get/file/list?object=${name}`
-        // }),
-
-        // getObjectItem: builder.query<IRestObjectItem, string>({
-        //     query: (name) => `get/object/item?object=${name}`
-        // }),
-        // getObjectList: builder.query<IRestObjectList, void>({
-        //     keepUnusedDataFor: 3600,
-        //     query: () => 'get/object/list'
-        // }),
-        // getObjectNames: builder.query<IRestObjectNames, void>({
-        //     query: () => 'get/object/names'
-        // }),
         photoGetItem: builder.query<TPhoto, string>({
             keepUnusedDataFor: 3600,
             query: (object) => `photo/${object}`
         }),
-
         photoGetList: builder.query<
             APIResponsePhotoList,
             Maybe<APIRequestPhotoList>
@@ -286,21 +230,31 @@ export const api = createApi({
             query: (params) => `photo${encodeQueryData(params)}`
         }),
 
-        // getRelayList: builder.query<IRelayList, void>({
-        //     keepUnusedDataFor: 3600,
-        //     query: () => 'relay/list'
-        // }),
-        // getRelayState: builder.query<any, null>({
-        //     providesTags: () => [{ id: 'LIST', type: 'Relay' }],
-        //     query: () => 'relay/state'
-        // }),
-        // getSensorStatistic: builder.query<IRestSensorStatistic, void>({
-        //     query: () => 'get/sensors/statistic'
-        // }),
+        relayGetList: builder.query<APIResponseRelayList, void>({
+            keepUnusedDataFor: 3600,
+            query: () => 'relay/list'
+        }),
+        relayGetState: builder.query<any, null>({
+            providesTags: () => [{ id: 'LIST', type: 'Relay' }],
+            query: () => 'relay/state'
+        }),
+        relayPutStatus: builder.mutation<
+            APIResponseRelayList,
+            APIRequestRelaySet
+        >({
+            invalidatesTags: [{ id: 'LIST', type: 'Relay' }],
+            query: (data) => ({
+                body: data,
+                method: 'PUT',
+                url: 'relay/set'
+            })
+        }),
+
         statisticGet: builder.query<APIResponseStatistic, void>({
             providesTags: () => [{ type: 'Catalog' }],
             query: () => 'statistic'
         }),
+
         statisticGetCatalogItems: builder.query<APIResponseCatalogNames, void>({
             query: () => 'statistic/catalog'
         }),
@@ -309,13 +263,13 @@ export const api = createApi({
                 query: () => 'statistic/photos'
             }
         ),
+
         statisticGetTelescope: builder.query<
             APIResponseStatisticTelescope,
             Maybe<APIRequestTelescope>
         >({
             query: (params) => `statistic/telescope${encodeQueryData(params)}`
         }),
-
         weatherGetCurrent: builder.query<APIResponseWeatherCurrent, void>({
             query: () => 'weather/current'
         }),
@@ -325,15 +279,9 @@ export const api = createApi({
         >({
             query: (params) => `weather/statistic${encodeQueryData(params)}`
         })
-
-        // setRelayStatus: builder.mutation<IRelayList, IRelaySet>({
-        //     invalidatesTags: [{ id: 'LIST', type: 'Relay' }],
-        //     query: (data) => ({
-        //         body: data,
-        //         method: 'POST',
-        //         url: 'relay/set'
-        //     })
-        // })
+        // getSensorStatistic: builder.query<IRestSensorStatistic, void>({
+        //     query: () => 'get/sensors/statistic'
+        // }),
     }),
     extractRehydrationInfo(action, { reducerPath }) {
         if (action.type === HYDRATE) {
@@ -341,7 +289,7 @@ export const api = createApi({
         }
     },
     reducerPath: 'api',
-    tagTypes: ['Catalog', 'Statistic', 'Category', 'Author']
+    tagTypes: ['Catalog', 'Statistic', 'Category', 'Author', 'Relay']
 })
 
 // Export hooks for usage in functional components
@@ -373,12 +321,16 @@ export const {
     usePhotoGetItemQuery,
     usePhotoGetListQuery,
 
+    useRelayGetListQuery,
+    useRelayGetStateQuery,
+    useRelayPutStatusMutation,
+
     useStatisticGetQuery,
     useStatisticGetCatalogItemsQuery,
     useStatisticGetPhotosItemsQuery,
     useStatisticGetTelescopeQuery,
 
-    // useWeatherGetCurrentQuery,
+    useWeatherGetCurrentQuery,
     useWeatherGetStatisticQuery,
 
     util: { getRunningQueriesThunk }

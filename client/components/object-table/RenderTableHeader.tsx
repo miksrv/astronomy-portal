@@ -1,9 +1,7 @@
-import { TCatalog, TFilters, TStatistic } from '@/api/types'
 import React from 'react'
 import { Table } from 'semantic-ui-react'
 
-import { TSortKey } from './types'
-import { TSortOrdering } from './types'
+import { TSortKey, TSortOrdering } from './types'
 
 type TTableHeaderProps = {
     sort: TSortKey

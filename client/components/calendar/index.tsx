@@ -32,7 +32,7 @@ const Calendar: React.FC = () => {
             <div className={styles.calendarToolbar}>
                 <Button
                     size={'mini'}
-                    color={'green'}
+                    color={'yellow'}
                     icon={'angle left'}
                     onClick={() =>
                         setCalendarDate(
@@ -45,7 +45,7 @@ const Calendar: React.FC = () => {
                 </span>
                 <Button
                     size={'mini'}
-                    color={'green'}
+                    color={'yellow'}
                     icon={'angle right'}
                     onClick={() =>
                         setCalendarDate(moment(calendarDate.add(1, 'month')))

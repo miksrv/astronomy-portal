@@ -1,9 +1,3 @@
-export interface IRestResponse {
-    status: boolean
-    payload?: any
-    errorText?: string
-}
-
 export interface APIResponseError {
     status?: number
     code?: number
@@ -37,12 +31,6 @@ export interface APIResponseWeatherStatistic {
     weather: TWeatherStatistic[]
 }
 
-// AUTH
-export interface IRestAuth {
-    status: boolean
-    token: string
-}
-
 export interface APIRequestLogin {
     email: string
     password: string
@@ -51,11 +39,6 @@ export interface APIRequestLogin {
 export interface IRelaySet {
     index: number
     state: number
-}
-
-// SENSOR
-export interface IRestSensorStatistic extends IRestResponse {
-    payload: TSensorsPayload[]
 }
 
 export type TSensorsPayload = {
@@ -73,6 +56,15 @@ export type TSensors = {
     p1?: number
     p2?: number
     p3?: number
+}
+
+export interface APIResponseRelayList {
+    items: string[]
+}
+
+export interface APIRequestRelaySet {
+    index: number
+    state: number
 }
 
 export interface APIRequestCatalog {
@@ -119,6 +111,7 @@ export interface APIResponseAuthorList {
 export interface APIRequestPhotoList {
     object?: string
     limit?: number
+    order?: string
 }
 export interface APIRequestTelescope {
     period?: string
@@ -178,20 +171,6 @@ export type TBlogMedia = {
 export type TBlogReaction = {
     emoticon: string
     count: number
-}
-
-export interface IObjectListItem {
-    name: string
-    date: string
-    frames: number
-    exposure: number
-    Luminance: number
-    Red: number
-    Green: number
-    Blue: number
-    Ha: number
-    OIII: number
-    SII: number
 }
 
 export type TCategory = {
@@ -266,24 +245,6 @@ export enum TFilterTypes {
     clear = 'clear'
 }
 
-export type TObject = {
-    date: string
-    exposure: number
-    frames: number
-    filesizes: number
-    filters: TObjectFilters
-}
-
-export type TObjectFilters = {
-    Luminance: TFilterItem
-    Red: TFilterItem
-    Green: TFilterItem
-    Blue: TFilterItem
-    Ha: TFilterItem
-    OIII: TFilterItem
-    SII: TFilterItem
-}
-
 export type TFIle = {
     id: string
     object: string
@@ -300,24 +261,6 @@ export type TFIle = {
     sky_background: number
     hfr: number
     image: boolean
-}
-
-export type TNews = {
-    date: number
-    text: string
-    link: string
-    comments: number
-    likes: number
-    reposts: number
-    views: number
-    photos: TNewsPhotos[] | undefined
-}
-
-export type TFilesMonth = {
-    date: string
-    exposure: number
-    frames: number
-    objects: string[]
 }
 
 export type TWeatherStatistic = {
@@ -340,22 +283,6 @@ export type TWeatherCurrent = {
     precipitation: number
     illumination: number
     uvindex: number
-}
-
-export type TNewsPhotos = {
-    full: TNewsPhotosItem
-    thumb: TNewsPhotosItem
-}
-
-export type TNewsPhotosItem = {
-    height: number
-    width: number
-    src: string
-}
-
-export type TFilterItem = {
-    exposure: number
-    frames: number
 }
 
 export const FilterList: TFilterTypes[] = [

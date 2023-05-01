@@ -1,9 +1,8 @@
 import {
-    catalogGetItem,
-    getRunningQueriesThunk,
-    photoGetList,
-    useCatalogGetItemQuery,
-    usePhotoGetItemQuery,
+    // catalogGetItem,
+    // getRunningQueriesThunk,
+    // photoGetList,
+    useCatalogGetItemQuery, // usePhotoGetItemQuery,
     usePhotoGetListQuery,
     useStatisticGetPhotosItemsQuery
 } from '@/api/api'
