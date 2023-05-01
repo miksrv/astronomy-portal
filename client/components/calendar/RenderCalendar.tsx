@@ -1,4 +1,4 @@
-import { TFilesMonth, TWeatherMonth } from '@/api/types'
+import { TStatisticTelescope, TWeatherStatistic } from '@/api/types'
 import classNames from 'classnames'
 import moment, { Moment } from 'moment'
 import Image from 'next/image'
@@ -13,21 +13,22 @@ import SunIcon from '@/public/images/sun.png'
 import styles from './styles.module.sass'
 
 type TRenderCalendarProps = {
-    dateObject: Moment
-    eventsWeather?: TWeatherMonth[]
-    eventsTelescope?: TFilesMonth[]
+    calendarDate: Moment
+    eventsWeather?: TWeatherStatistic[]
+    eventsTelescope?: TStatisticTelescope[]
 }
 
 const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
-    const { dateObject, eventsWeather, eventsTelescope } = props
+    const { calendarDate, eventsWeather, eventsTelescope } = props
 
     const currentMobile: boolean =
         typeof window !== 'undefined' ? window.innerWidth <= 760 : false
-    const daysInMonth: number = dateObject.daysInMonth()
+
+    const daysInMonth: number = calendarDate.daysInMonth()
     const firstDayOfMonth: number = parseInt(
-        moment(dateObject).startOf('month').format('d')
+        moment(calendarDate).startOf('month').format('d')
     )
-    const isCurrentMonth = moment(dateObject).isSame(new Date(), 'month')
+    const isCurrentMonth = moment(calendarDate).isSame(new Date(), 'month')
 
     const getWeatherClass = (cond: number | undefined) => {
         if (typeof cond === 'undefined' || cond === null) return ''
@@ -50,20 +51,21 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
 
     let daysMonth = []
     for (let d = 1; d <= daysInMonth; d++) {
-        const currentDate = moment(dateObject)
+        const currentDate = moment(calendarDate)
             .startOf('month')
             .add(d - 1, 'days')
         const currentDay: boolean =
-            isCurrentMonth && d === parseInt(dateObject.format('DD'))
+            isCurrentMonth && d === parseInt(calendarDate.format('DD'))
         const moonTimes = SunCalc.getMoonTimes(currentDate, 51.7, 55.2)
         const sunTimes = SunCalc.getTimes(currentDate, 51.7, 55.2)
 
         const itemWeatherEvent = eventsWeather
             ?.filter((item) => currentDate.isSame(item.date, 'day'))
             ?.pop()
-        const itemAstroEvents = eventsTelescope
-            ?.filter((item: any) => currentDate.isSame(item.date, 'day'))
-            ?.pop()
+
+        const itemAstroEvents = eventsTelescope?.find(({ telescope_date }) =>
+            currentDate.isSame(telescope_date, 'day')
+        )
 
         daysMonth.push(
             <td
@@ -75,7 +77,7 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
             >
                 <div
                     className={classNames(
-                        styles.day,
+                        styles.dayNumber,
                         getWeatherClass(itemWeatherEvent?.clouds)
                     )}
                     role='button'
@@ -131,7 +133,7 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                 {itemAstroEvents &&
                     (!currentMobile ? (
                         <Popup
-                            content={itemAstroEvents.objects.join(', ')}
+                            content={itemAstroEvents.catalog_items.join(', ')}
                             size='mini'
                             trigger={
                                 <div
@@ -141,13 +143,13 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                                     )}
                                 >
                                     <Icon name='star outline' />
-                                    {itemAstroEvents.objects.length}{' '}
+                                    {itemAstroEvents.catalog_items.length}{' '}
                                     <Icon name='clock outline' />
                                     {Math.round(
-                                        itemAstroEvents.exposure / 60
+                                        itemAstroEvents.total_exposure / 60
                                     )}{' '}
                                     <Icon name='image outline' />
-                                    {itemAstroEvents.frames}
+                                    {itemAstroEvents.frames_count}
                                 </div>
                             }
                         />
@@ -159,7 +161,7 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                                 styles.mobile
                             )}
                         >
-                            {Math.round(itemAstroEvents.exposure / 60)}
+                            {Math.round(itemAstroEvents.total_exposure / 60)}
                         </div>
                     ))}
             </td>

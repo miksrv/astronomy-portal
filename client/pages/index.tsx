@@ -40,8 +40,8 @@ export default function Home() {
 
     // const [getWeatherMonth, { data: weatherData, isLoading: weatherLoading }] =
     //     useGetWeatherMonthMutation()
-    const [getFilesMonth, { data: filesData, isLoading: filesLoading }] =
-        useGetFilesMonthMutation()
+    // const [getFilesMonth, { data: filesData, isLoading: filesLoading }] =
+    //     useGetFilesMonthMutation()
 
     // React.useEffect(() => {
     //     const getWeather = async () => {
@@ -84,14 +84,7 @@ export default function Home() {
                 catalog={catalogData?.items}
             />
             <br />
-            <Calendar
-                loading={false}
-                // eventsWeather={
-                //     weatherData?.payload ? weatherData?.payload.weather : []
-                // }
-                // eventsTelescope={filesData?.payload ? filesData.payload : []}
-                onChangeDate={setCalendarDate}
-            />
+            <Calendar />
         </main>
     )
 }
