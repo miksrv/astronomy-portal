@@ -9,6 +9,7 @@ import {
     APIRequestLogin,
     APIRequestPhotoList,
     APIRequestTelescope,
+    APIRequestWeatherStatistic,
     APIResponseAuthorList,
     APIResponseBlogList,
     APIResponseCatalogList,
@@ -19,7 +20,9 @@ import {
     APIResponsePhotoList,
     APIResponsePhotoListNames,
     APIResponseStatistic,
-    APIResponseStatisticTelescope, // IRelayList,
+    APIResponseStatisticTelescope,
+    APIResponseWeatherCurrent,
+    APIResponseWeatherStatistic, // IRelayList,
     // IRelaySet,
     IRestAuth,
     TAuthor, // IRestCatalogItem,
@@ -311,6 +314,16 @@ export const api = createApi({
             Maybe<APIRequestTelescope>
         >({
             query: (params) => `statistic/telescope${encodeQueryData(params)}`
+        }),
+
+        weatherGetCurrent: builder.query<APIResponseWeatherCurrent, void>({
+            query: () => 'weather/current'
+        }),
+        weatherGetStatistic: builder.query<
+            APIResponseWeatherStatistic,
+            Maybe<APIRequestWeatherStatistic>
+        >({
+            query: (params) => `weather/statistic${encodeQueryData(params)}`
         })
 
         // setRelayStatus: builder.mutation<IRelayList, IRelaySet>({
@@ -363,6 +376,10 @@ export const {
     useStatisticGetQuery,
     useStatisticGetCatalogItemsQuery,
     useStatisticGetPhotosItemsQuery,
+    useStatisticGetTelescopeQuery,
+
+    // useWeatherGetCurrentQuery,
+    useWeatherGetStatisticQuery,
 
     util: { getRunningQueriesThunk }
 } = api

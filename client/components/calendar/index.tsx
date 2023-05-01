@@ -1,4 +1,7 @@
-import { TFilesMonth, TWeatherMonth } from '@/api/types'
+import {
+    useStatisticGetTelescopeQuery,
+    useWeatherGetStatisticQuery
+} from '@/api/api'
 import classNames from 'classnames'
 import moment, { Moment } from 'moment'
 import React, { useState } from 'react'
@@ -7,26 +10,23 @@ import { Button, Dimmer, Loader } from 'semantic-ui-react'
 import RenderCalendar from './RenderCalendar'
 import styles from './styles.module.sass'
 
-type TCalendarProps = {
-    loading?: boolean
-    eventsWeather?: TWeatherMonth[]
-    eventsTelescope?: TFilesMonth[]
-    onChangeDate?: (date: Moment) => void
-}
-
-const Calendar: React.FC<TCalendarProps> = (props) => {
-    const { loading, eventsWeather, eventsTelescope, onChangeDate } = props
-    const [dateObject, setDateObject] = useState<Moment>(moment())
+const Calendar: React.FC = () => {
+    const [calendarDate, setCalendarDate] = useState<Moment>(moment())
     const weekDayShort = moment.weekdaysShort(true)
 
-    const handleChangeDate = (date: Moment) => {
-        setDateObject(date)
-        onChangeDate?.(date)
-    }
+    const { data: telescopeData, isFetching: telescopeLoading } =
+        useStatisticGetTelescopeQuery({
+            period: moment(calendarDate).format('MM-Y')
+        })
+
+    const { data: weatherData, isFetching: weatherLoading } =
+        useWeatherGetStatisticQuery({
+            period: moment(calendarDate).format('MM-Y')
+        })
 
     return (
         <div className={classNames(styles.calendar, 'box', 'table')}>
-            <Dimmer active={loading}>
+            <Dimmer active={telescopeLoading || weatherLoading}>
                 <Loader />
             </Dimmer>
             <div className={styles.calendarToolbar}>
@@ -35,20 +35,20 @@ const Calendar: React.FC<TCalendarProps> = (props) => {
                     color={'green'}
                     icon={'angle left'}
                     onClick={() =>
-                        handleChangeDate(
-                            moment(dateObject.subtract(1, 'month'))
+                        setCalendarDate(
+                            moment(calendarDate.subtract(1, 'month'))
                         )
                     }
                 />
                 <span className={styles.currentMonth}>
-                    {dateObject.format('MMMM Y')}
+                    {calendarDate.format('MMMM Y')}
                 </span>
                 <Button
                     size={'mini'}
                     color={'green'}
                     icon={'angle right'}
                     onClick={() =>
-                        handleChangeDate(moment(dateObject.add(1, 'month')))
+                        setCalendarDate(moment(calendarDate.add(1, 'month')))
                     }
                 />
             </div>
@@ -63,9 +63,9 @@ const Calendar: React.FC<TCalendarProps> = (props) => {
                     </thead>
                     <tbody>
                         <RenderCalendar
-                            dateObject={dateObject}
-                            eventsWeather={eventsWeather}
-                            eventsTelescope={eventsTelescope}
+                            calendarDate={calendarDate}
+                            eventsWeather={weatherData?.weather}
+                            eventsTelescope={telescopeData?.items}
                         />
                     </tbody>
                 </table>

@@ -24,22 +24,17 @@ export type TUserInfo = {
     created_at?: string
 }
 
-// WEATHER
-export interface IRestWeatherMonth extends IRestResponse {
-    payload: {
-        date: string
-        weather: TWeatherMonth[]
+export interface APIResponseWeatherCurrent {
+    timestamp: {
+        server: number
+        update: number
     }
+    conditions: TWeatherCurrent
 }
 
-export interface IRestWeatherCurrent extends IRestResponse {
-    payload: {
-        timestamp: {
-            server: number
-            update: number
-        }
-        conditions: TWeatherCurrent
-    }
+export interface APIResponseWeatherStatistic {
+    date: string
+    weather: TWeatherStatistic[]
 }
 
 // AUTH
@@ -126,6 +121,10 @@ export interface APIRequestPhotoList {
     limit?: number
 }
 export interface APIRequestTelescope {
+    period?: string
+}
+
+export interface APIRequestWeatherStatistic {
     period?: string
 }
 
@@ -321,7 +320,7 @@ export type TFilesMonth = {
     objects: string[]
 }
 
-export type TWeatherMonth = {
+export type TWeatherStatistic = {
     date: string
     clouds: number
     temperature: number

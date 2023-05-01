@@ -34,6 +34,9 @@ $routes->set404Override();
 $routes->get('cron/update_telegram_posts', 'Cron::update_telegram_posts');
 $routes->get('cron/statistic', 'Cron::get_telegram_statistic');
 
+$routes->get('weather/current', 'Weather::current');
+$routes->get('weather/statistic', 'Weather::statistic');
+
 $routes->get('statistic', 'Statistic::list');
 $routes->get('statistic/catalog', 'Statistic::catalog');
 $routes->get('statistic/photos', 'Statistic::photos');

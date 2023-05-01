@@ -19,7 +19,7 @@
         height: 17px
 
     &.telescope
-      background-color: #4d4343
+      background-color: #7a5f5f
       cursor: pointer
       .icon
         color: $orange
@@ -28,7 +28,7 @@
         text-align: center
 
     &.weather
-      background-color: #495654
+      background-color: #475e85
       .icon
         color: $lightblue
 
@@ -64,10 +64,13 @@
       tbody tr > *
         background-color: #333
 
-        .day
+        .dayNumber
           display: inline-block
           border: 1px solid #6b6b6b
           padding: 1px 3px
+          width: 23px
+          height: 20px
+          text-align: center
 
           &.green
             background-color: $green
@@ -97,6 +100,6 @@
         &.today
           background-color: #414141
 
-          .day
+          .dayNumber
             font-weight: 900
             border-width: 2px
