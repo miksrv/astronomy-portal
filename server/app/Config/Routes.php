@@ -31,15 +31,13 @@ $routes->set404Override();
 // route since we don't have to scan directories.
 //$routes->get('/', 'Home::index');
 
-$routes->get('bot', 'bot::item');
-$routes->get('blog/statistic', 'bot::statistic');
-$routes->post('bot', 'bot::item');
+$routes->get('cron/update_telegram_posts', 'Cron::update_telegram_posts');
+$routes->get('cron/statistic', 'Cron::get_telegram_statistic');
 
 $routes->get('statistic', 'Statistic::list');
 $routes->get('statistic/catalog', 'Statistic::catalog');
 $routes->get('statistic/photos', 'Statistic::photos');
-$routes->options('statistic', 'Statistic');
-$routes->options('statistic/(:any)', 'Statistic');
+$routes->get('statistic/telescope', 'Statistic::telescope');
 
 $routes->get('catalog', 'Catalog::list');
 $routes->get('catalog/(:any)', 'Catalog::show/$1');

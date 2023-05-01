@@ -1,4 +1,4 @@
-import { useAuthGetMeMutation, useStatisticGetQuery } from '@/api/api'
+import { api, useAuthGetMeMutation, useStatisticGetQuery } from '@/api/api'
 import {
     getStorageToken,
     logout,
@@ -70,6 +70,8 @@ const Header: React.FC = () => {
             dispatch(setToken(storageToken))
             handleAuthMe()
         }
+
+        dispatch(api.endpoints.cronGetUpdatePosts.initiate())
     }, [])
 
     return (

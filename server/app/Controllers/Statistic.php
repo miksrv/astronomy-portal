@@ -75,4 +75,63 @@ class Statistic extends ResourceController
             'items' => $photoResult
         ]);
     }
+
+    public function telescope()
+    {
+        $period = $this->request->getGet('period', FILTER_SANITIZE_SPECIAL_CHARS) ?? date('m-Y');
+
+        $month = date('m');
+        $year  = date('Y');
+        $date  = strtotime("01-{$period}");
+
+        if (checkdate(date('m', $date), 1, date('Y', $date))) {
+            $month = date('m', $date);
+            $year  = date('Y', $date);
+        }
+
+        $filesModel = new FilesModel();
+        $filesData  = $filesModel
+            ->select('date_obs, exptime, object')
+            ->where(['MONTH(date_obs)' => $month, 'YEAR(date_obs)' => $year])
+            ->findAll();
+
+        $daysStatistic = [];
+
+        if (empty($filesData))
+            return $this->respond(['items' => null]);
+
+        foreach ($filesData as $file)
+        {
+            $currentDay = date('Y-m-d', strtotime($file->date_obs . ' +5 hours'));
+
+            if (!isset($daysStatistic[$currentDay]))
+            {
+                $daysStatistic[$currentDay] = (object) [
+                    'telescope_date' => $currentDay,
+                    'total_exposure' => 0,
+                    'frames_count'   => 0,
+                    'catalog_items'  => []
+                ];
+            }
+
+            $daysStatistic[$currentDay]->total_exposure += $file->exptime;
+            $daysStatistic[$currentDay]->frames_count   += 1;
+
+            if (!in_array($file->object, $daysStatistic[$currentDay]->catalog_items))
+            {
+                $daysStatistic[$currentDay]->catalog_items[] = $file->object;
+            }
+        }
+
+        $result = [];
+
+        foreach ($daysStatistic as $day)
+        {
+            $result[] = $day;
+        }
+
+        unset($daysStatistic);
+
+        return $this->respond(['items' => $result]);
+    }
 }

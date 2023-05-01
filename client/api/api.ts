@@ -8,6 +8,7 @@ import {
     APIRequestCatalog,
     APIRequestLogin,
     APIRequestPhotoList,
+    APIRequestTelescope,
     APIResponseAuthorList,
     APIResponseBlogList,
     APIResponseCatalogList,
@@ -17,7 +18,8 @@ import {
     APIResponseLogin,
     APIResponsePhotoList,
     APIResponsePhotoListNames,
-    APIResponseStatistic, // IRelayList,
+    APIResponseStatistic,
+    APIResponseStatisticTelescope, // IRelayList,
     // IRelaySet,
     IRestAuth,
     TAuthor, // IRestCatalogItem,
@@ -231,6 +233,10 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
+        cronGetUpdatePosts: builder.query<void, void>({
+            query: () => 'cron/update_telegram_posts'
+        }),
+
         // Коллекция дней за месяц, в которые работала обсерватория (exp, frames, objects)
         // getFilesMonth: builder.mutation<IRestFilesMonth, string>({
         //     query: (date) => `get/statistic/month?date=${date}`
@@ -268,6 +274,7 @@ export const api = createApi({
             keepUnusedDataFor: 3600,
             query: (object) => `photo/${object}`
         }),
+
         photoGetList: builder.query<
             APIResponsePhotoList,
             Maybe<APIRequestPhotoList>
@@ -287,7 +294,6 @@ export const api = createApi({
         // getSensorStatistic: builder.query<IRestSensorStatistic, void>({
         //     query: () => 'get/sensors/statistic'
         // }),
-
         statisticGet: builder.query<APIResponseStatistic, void>({
             providesTags: () => [{ type: 'Catalog' }],
             query: () => 'statistic'
@@ -299,7 +305,13 @@ export const api = createApi({
             {
                 query: () => 'statistic/photos'
             }
-        )
+        ),
+        statisticGetTelescope: builder.query<
+            APIResponseStatisticTelescope,
+            Maybe<APIRequestTelescope>
+        >({
+            query: (params) => `statistic/telescope${encodeQueryData(params)}`
+        })
 
         // setRelayStatus: builder.mutation<IRelayList, IRelaySet>({
         //     invalidatesTags: [{ id: 'LIST', type: 'Relay' }],
@@ -342,6 +354,8 @@ export const {
     useCategoryGetListQuery,
     useCategoryPatchMutation,
     useCategoryPostMutation,
+
+    // useCronGetUpdatePostsQuery,
 
     usePhotoGetItemQuery,
     usePhotoGetListQuery,

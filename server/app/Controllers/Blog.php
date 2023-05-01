@@ -32,8 +32,6 @@ class Blog extends ResourceController
         $modelBlog = new BlogModel();
         $dataBlog  = $modelBlog->orderBy($order, $sort === 'DESC' ? 'DESC' : 'ASC')->findAll($limit, $offset);
 
-
-
         return $this->respond([
             'items' => $this->_addMediaToBlogList($dataBlog),
             'total' => $modelBlog->countAllResults()
