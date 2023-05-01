@@ -21,8 +21,9 @@
 #--------------------------------------------------------------------
 
 # JWT_SECRET_KEY key is the secret key used by the application to sign JWTS. Pick a stronger one for production.
-JWT_SECRET_KEY = ''
 # JWT_TIME_TO_LIVE indicates the validity period of a signed JWT (in milliseconds)
+
+JWT_SECRET_KEY = ''
 JWT_TIME_TO_LIVE = 3600
 
 # app.baseURL = ''
@@ -30,6 +31,15 @@ JWT_TIME_TO_LIVE = 3600
 # app_baseURL = ''
 # app.forceGlobalSecureRequests = false
 # app.CSPEnabled = false
+
+app.appTimezone = Asia/Yekaterinburg
+app.timezone  = 5
+app.latitude  = 51.7727
+app.longitude = 55.0988
+
+app.observatory.controller = http://localhost:8081/
+app.observatory.webcam_1 = http://localhost:8081/
+app.observatory.webcam_2 = http://localhost:8081/
 
 #--------------------------------------------------------------------
 # DATABASE
