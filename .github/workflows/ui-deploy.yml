@@ -1,68 +1,77 @@
-#name: UI Deploy
-#
-#on:
+name: UI Deploy
+
+on:
 #  push:
-#    branches:
-#      - main
-#    paths:
-#      - 'client/**/*'
-#
-#jobs:
-#  ui-ftp-deploy:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#
-#      - name: Install Node.js
-#        uses: actions/setup-node@v2
-#        with:
-#          node-version: 18
-#          cache: 'yarn'
-#          cache-dependency-path: 'client/yarn.lock'
-#
-#      - name: Cache node modules
-#        uses: actions/cache@v3
-#        id: cache-npm
-#        with:
-#          path: |
-#            client/node_modules
-#            ~/.npm
-#            ${{ github.workspace }}/.next/cache
-#          key: ${{ runner.os }}-modules-${{ hashFiles('client/yarn.lock') }}
-#          restore-keys: |
-#            ${{ runner.os }}-modules-
-#            ${{ runner.os }}-
-#
-#      - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-#        name: Install dependencies
-#        working-directory: client
-#        run: yarn install
-#
-#      - name: Cache UI build
-#        uses: actions/cache@v3
-#        id: cache-build
-#        with:
-#          path: client/out
-#          key: ${{ runner.os }}-build-${{ hashFiles('client/**/*.ts', 'client/**/*.tsx') }}
-#          restore-keys: |
-#            ${{ runner.os }}-build-
-#            ${{ runner.os }}-
-#
-#      - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
-#        name: Configure Client
-#        run: |
-#          echo "NEXT_PUBLIC_API_HOST = '${{ secrets.NEXT_PUBLIC_API_HOST }}'
-#          NEXT_PUBLIC_METRIKA = ' '" > .env
-#        working-directory: client
-#
-#      - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
-#        name: Build UI
-#        run: |
-#          export dateNow=$(date +"%d.%m.%Y")
-#          echo "export const update = '$dateNow'" > update.ts
-#          yarn build
-#        working-directory: client
-#
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'client/**/*'
+
+jobs:
+  ui-ftp-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+          cache: 'yarn'
+          cache-dependency-path: 'client/yarn.lock'
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        id: cache-npm
+        with:
+          path: |
+            client/node_modules
+            ~/.npm
+            ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-modules-${{ hashFiles('client/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-
+            ${{ runner.os }}-
+
+      - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+        name: Install dependencies
+        working-directory: client
+        run: yarn install
+
+      - name: Cache UI build
+        uses: actions/cache@v3
+        id: cache-build
+        with:
+          path: client/out
+          key: ${{ runner.os }}-build-${{ hashFiles('client/**/*.ts', 'client/**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
+        name: Configure Client
+        run: |
+          echo "NEXT_PUBLIC_API_HOST = '${{ secrets.NEXT_PUBLIC_API_HOST }}'
+          NEXT_PUBLIC_METRIKA = ' '" > .env
+        working-directory: client
+
+      - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
+        name: Build UI
+        run: |
+          export dateNow=$(date +"%d.%m.%Y")
+          echo "export const update = '$dateNow'" > update.ts
+          yarn build
+        working-directory: client
+
+      - name: SSH Deploy
+        run: |
+          mkdir ~/.ssh
+          echo "$SSH_KEY" >> ~/.ssh/github-action
+          chmod 400 ~/.ssh/github-action
+          echo -e "Host VPS\n\tHostname $SSH_HOST\n\tPort $SSH_PORT\n\tUser $SSH_USER\n\tIdentityFile ~/.ssh/github-action\n\tStrictHostKeyChecking No" >> ~/.ssh/config
+          rsync -re ssh ./.next/ VPS:/home/deploy/out/.next
+
 #      - name: Export UI
 #        working-directory: client
 #        run: yarn export

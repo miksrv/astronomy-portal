@@ -29,7 +29,6 @@ $routes->set404Override();
 
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
-//$routes->get('/', 'Home::index');
 
 $routes->post('cron/update_telegram_posts', 'Cron::update_telegram_posts');
 $routes->get('cron/update_telegram_posts', 'Cron::update_telegram_posts');
