@@ -76,7 +76,7 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/deploy.key
           chmod 600 ~/.ssh/deploy.key
           cat >>~/.ssh/config <<END
-          Host cloudways
+          Host VPS
             HostName $SSH_HOST
             Port $SSH_PORT
             User $SSH_USER
