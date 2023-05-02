@@ -65,8 +65,8 @@ jobs:
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
         name: Build UI
         run: |
-          export dateNow=$(date +"%d.%m.%Y")
-          echo "export const update = '$dateNow'" > update.ts
+#          export dateNow=$(date +"%d.%m.%Y")
+#          echo "export const update = '$dateNow'" > update.ts
           yarn build
         working-directory: client
 
@@ -75,7 +75,7 @@ jobs:
           mkdir ~/.ssh
           echo "$SSH_KEY" >> ~/.ssh/github-action
           chmod 600 ~/.ssh/github-action
-          echo -e "Host VPS\n\tAddKeysToAgent yes\n\tUseKeychain yes\n\tHostName $SSH_HOST\n\tPort $SSH_PORT\n\tUser $SSH_USER\n\tIdentityFile ~/.ssh/github-action\n\tStrictHostKeyChecking No" >> ~/.ssh/config
+          echo -e "Host VPS\n\tHostName $SSH_HOST\n\tPort $SSH_PORT\n\tUser $SSH_USER\n\tIdentityFile ~/.ssh/github-action\n\tStrictHostKeyChecking No" >> ~/.ssh/config
           cat ~/.ssh/config
           rsync -re ssh ./.next/ VPS:/home/deploy/out/.next
 
