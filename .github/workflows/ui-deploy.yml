@@ -11,11 +11,6 @@ on:
 jobs:
   ui-ssh-deploy:
     runs-on: ubuntu-latest
-    env:
-      SSH_HOST: ${{secrets.SSH_HOST}}
-      SSH_PORT: ${{secrets.SSH_PORT}}
-      SSH_USER: ${{secrets.SSH_USER}}
-      SSH_KEY: ${{secrets.SSH_KEY}}
 
     steps:
       - uses: actions/checkout@v3
@@ -71,6 +66,11 @@ jobs:
         working-directory: client
 
       - name: Configure SSH
+        env:
+          SSH_HOST: ${{secrets.SSH_HOST}}
+          SSH_PORT: ${{secrets.SSH_PORT}}
+          SSH_USER: ${{secrets.SSH_USER}}
+          SSH_KEY: ${{secrets.SSH_KEY}}
         run: |
           mkdir -p ~/.ssh/
           echo "$SSH_KEY" > ~/.ssh/authorized_keys
