@@ -9,13 +9,13 @@ on:
       - 'client/**/*'
 
 jobs:
-  ui-ftp-deploy:
+  ui-ssh-deploy:
     runs-on: ubuntu-latest
     env:
-      SSH_KEY: ${{secrets.SSH_KEY}}
       SSH_HOST: ${{secrets.SSH_HOST}}
       SSH_PORT: ${{secrets.SSH_PORT}}
       SSH_USER: ${{secrets.SSH_USER}}
+      SSH_KEY: ${{secrets.SSH_KEY}}
 
     steps:
       - uses: actions/checkout@v3
@@ -70,14 +70,22 @@ jobs:
 #          yarn build
 #        working-directory: client
 
-      - name: SSH Deploy
+      - name: Configure SSH
         run: |
-          mkdir ~/.ssh
-          echo "$SSH_KEY" >> ~/.ssh/github-action
-          chmod 600 ~/.ssh/github-action
-          echo -e "Host VPS\n\tHostName $SSH_HOST\n\tPort $SSH_PORT\n\tUser $SSH_USER\n\tIdentityFile ~/.ssh/github-action\n\tStrictHostKeyChecking No" >> ~/.ssh/config
-          cat ~/.ssh/config
-          rsync -re ssh ./.next/ VPS:/home/deploy/out/.next
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/deploy.key
+          chmod 600 ~/.ssh/deploy.key
+          cat >>~/.ssh/config <<END
+          Host cloudways
+            HostName $SSH_HOST
+            Port $SSH_PORT
+            User $SSH_USER
+            IdentityFile ~/.ssh/deploy.key
+            StrictHostKeyChecking no
+          END
+
+      - name: Send files
+        run: rsync -re ssh ./.next/ VPS:/home/deploy/out/.next
 
 #      - name: Export UI
 #        working-directory: client
