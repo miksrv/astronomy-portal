@@ -1,5 +1,6 @@
 import {
     catalogGetList,
+    categoryGetList,
     getRunningQueriesThunk,
     photoGetList,
     useCatalogGetListQuery,
@@ -18,6 +19,7 @@ import PhotoGrid from '@/components/photo-grid'
 
 export const getStaticProps = wrapper.getStaticProps((store) => async () => {
     store.dispatch(catalogGetList.initiate())
+    store.dispatch(categoryGetList.initiate())
     store.dispatch(photoGetList.initiate())
 
     await Promise.all(store.dispatch(getRunningQueriesThunk()))

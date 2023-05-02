@@ -1,3 +1,4 @@
+import { range } from '@/functions/helpers'
 import classNames from 'classnames'
 import Link from 'next/link'
 import React, { useMemo } from 'react'
@@ -116,18 +117,6 @@ const Pagination: React.FC<TPaginationProps> = ({
             ))}
         </nav>
     )
-}
-
-const range = (from: number, to: number, step = 1) => {
-    let i = from
-    const range: number[] = []
-
-    while (i <= to) {
-        range.push(i)
-        i += step
-    }
-
-    return range
 }
 
 export default Pagination

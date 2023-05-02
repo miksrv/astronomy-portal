@@ -1,5 +1,17 @@
 import moment from 'moment'
 
+export const range = (from: number, to: number, step = 1) => {
+    let i = from
+    const range: number[] = []
+
+    while (i <= to) {
+        range.push(i)
+        i += step
+    }
+
+    return range
+}
+
 export const sliceText = (text: string, length: number = 350): string => {
     let sliced = text.slice(0, length)
 

@@ -1,10 +1,14 @@
 import {
+    authorGetList,
+    categoryGetList,
+    getRunningQueriesThunk,
     useAuthorDeleteMutation,
     useAuthorGetListQuery,
     useCategoryDeleteMutation,
     useCategoryGetListQuery
 } from '@/api/api'
 import { useAppSelector } from '@/api/hooks'
+import { wrapper } from '@/api/store'
 import { NextSeo } from 'next-seo'
 import React, { useState } from 'react'
 import { Button, Confirm, Grid, Icon, Message } from 'semantic-ui-react'
@@ -14,16 +18,16 @@ import AuthorTable from '@/components/author-table'
 import CategoryFormModal from '@/components/category-form-modal'
 import CategoryTable from '@/components/category-table'
 
-//
-// export const getStaticProps = wrapper.getStaticProps((store) => async () => {
-//     store.dispatch(getCatalogList.initiate())
-//
-//     await Promise.all(store.dispatch(getRunningQueriesThunk()))
-//
-//     return {
-//         props: { object: {} }
-//     }
-// })
+export const getStaticProps = wrapper.getStaticProps((store) => async () => {
+    store.dispatch(authorGetList.initiate())
+    store.dispatch(categoryGetList.initiate())
+
+    await Promise.all(store.dispatch(getRunningQueriesThunk()))
+
+    return {
+        props: { object: {} }
+    }
+})
 
 const Directory: React.FC = () => {
     const [showMessage, setShowMessage] = useState<boolean>(false)

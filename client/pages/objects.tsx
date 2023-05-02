@@ -1,5 +1,6 @@
 import {
     catalogGetList,
+    categoryGetList,
     getRunningQueriesThunk,
     photoGetList,
     useCatalogDeleteMutation,
@@ -19,6 +20,7 @@ import ObjectsTableToolbar from '@/components/objects-table-toolbar'
 
 export const getStaticProps = wrapper.getStaticProps((store) => async () => {
     store.dispatch(catalogGetList.initiate())
+    store.dispatch(categoryGetList.initiate())
     store.dispatch(photoGetList.initiate())
 
     await Promise.all(store.dispatch(getRunningQueriesThunk()))
