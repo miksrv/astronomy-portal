@@ -62,13 +62,13 @@ jobs:
           NEXT_PUBLIC_METRIKA = ' '" > .env
         working-directory: client
 
-#      - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
-#        name: Build UI
-#        run: |
-#          export dateNow=$(date +"%d.%m.%Y")
-#          echo "export const update = '$dateNow'" > update.ts
-#          yarn build
-#        working-directory: client
+      - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
+        name: Build UI
+        run: |
+          export dateNow=$(date +"%d.%m.%Y")
+          echo "export const update = '$dateNow'" > update.ts
+          yarn build
+        working-directory: client
 
       - name: Configure SSH
         run: |
@@ -85,7 +85,7 @@ jobs:
           END
 
       - name: Send files
-        run: rsync -avz -e ssh ./.next/ vps:/home/deploy/out/.next
+        run: rsync -avz -e ssh ./client/ vps:/var/www/astro.miksoft.pro
 
 #      - name: Export UI
 #        working-directory: client
