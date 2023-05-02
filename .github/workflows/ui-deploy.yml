@@ -76,7 +76,7 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/deploy.key
           chmod 600 ~/.ssh/deploy.key
           cat >>~/.ssh/config <<END
-          Host VPS
+          Host vps
             HostName $SSH_HOST
             Port $SSH_PORT
             User $SSH_USER
@@ -85,7 +85,7 @@ jobs:
           END
 
       - name: Send files
-        run: rsync -rvz --progress ./.next/ ${{secrets.SSH_USER}}@VPS:/home/deploy/out/.next
+        run: rsync -rvz --progress ./.next/ ${{secrets.SSH_USER}}@vps:/home/deploy/out/.next
 
 #      - name: Export UI
 #        working-directory: client
