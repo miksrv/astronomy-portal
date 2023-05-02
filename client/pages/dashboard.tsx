@@ -1,5 +1,3 @@
-import { catalogGetList, getRunningQueriesThunk } from '@/api/api'
-import { wrapper } from '@/api/store'
 import { NextSeo } from 'next-seo'
 import React from 'react'
 import { Grid } from 'semantic-ui-react'
@@ -8,16 +6,6 @@ import AstronomyCalc from '@/components/astronomy-calc'
 import Camera from '@/components/camera'
 import RelayList from '@/components/relay-list'
 import Weather from '@/components/weather'
-
-export const getStaticProps = wrapper.getStaticProps((store) => async () => {
-    store.dispatch(catalogGetList.initiate())
-
-    await Promise.all(store.dispatch(getRunningQueriesThunk()))
-
-    return {
-        props: { object: {} }
-    }
-})
 
 const Dashboard: React.FC = () => (
     <main>

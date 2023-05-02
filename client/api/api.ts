@@ -338,8 +338,11 @@ export const {
 
 // export endpoints for use in SSR
 export const {
+    authorGetList,
+    blogGetList,
     catalogGetList,
     catalogGetItem,
+    categoryGetList,
     photoGetList,
     statisticGetCatalogItems,
     statisticGetPhotosItems

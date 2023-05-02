@@ -1,9 +1,13 @@
 import {
+    catalogGetItem,
+    getRunningQueriesThunk,
+    photoGetList,
+    statisticGetCatalogItems,
     useCatalogGetItemQuery,
     usePhotoGetListQuery,
     useStatisticGetCatalogItemsQuery
 } from '@/api/api'
-// import { store, wrapper } from '@/api/store'
+import { store, wrapper } from '@/api/store'
 import { isOutdated } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { NextSeo } from 'next-seo'
@@ -24,46 +28,35 @@ const Chart = dynamic(() => import('@/components/chart'), {
     ssr: false
 })
 
-// export const getStaticPaths = async () => {
-//     const storeObject = store()
-//     const result = await storeObject.dispatch(
-//         statisticGetCatalogItems.initiate()
-//     )
-//
-//     return {
-//         fallback: false,
-//         // paths: ['/objects/M_1']
-//         paths: result.data?.items.map((item) => ({ params: { name: item } }))
-//
-//         // [
-//         //     { params: { name: 'IC_1396' } }
-//         // ]
-//         // paths: result.data?.items.map((item) => `/objects/${item}`)
-//     }
-// }
+export const getStaticPaths = async () => {
+    const storeObject = store()
+    const result = await storeObject.dispatch(
+        statisticGetCatalogItems.initiate()
+    )
 
-// export const getStaticProps = wrapper.getStaticProps(
-//     (store) => async (context) => {
-//         const name = context.params?.name
-//
-//         if (typeof name === 'string') {
-//             store.dispatch(statisticGetCatalogItems.initiate())
-//             // store.dispatch(catalogGetList.initiate())
-//             //     store.dispatch(getObjectNames.initiate())
-//             //     store.dispatch(photoGetList.initiate({ object: name }))
-//             //     store.dispatch(getObjectItem.initiate(name))
-//             //     store.dispatch(catalogGetItem.initiate(name))
-//             //     store.dispatch(getObjectFiles.initiate(name))
-//             //     store.dispatch(getObjectFiles.initiate(name))
-//         }
-//
-//         await Promise.all(store.dispatch(getRunningQueriesThunk()))
-//
-//         return {
-//             props: {}
-//         }
-//     }
-// )
+    return {
+        fallback: false,
+        paths: result.data?.items.map((name) => `/objects/${name}`)
+    }
+}
+
+export const getStaticProps = wrapper.getStaticProps(
+    (store) => async (context) => {
+        const name = context.params?.name
+
+        if (typeof name === 'string') {
+            store.dispatch(statisticGetCatalogItems.initiate())
+            store.dispatch(catalogGetItem.initiate(name))
+            store.dispatch(photoGetList.initiate({ object: name }))
+        }
+
+        await Promise.all(store.dispatch(getRunningQueriesThunk()))
+
+        return {
+            props: {}
+        }
+    }
+)
 
 const Object: React.FC = () => {
     const router = useRouter()

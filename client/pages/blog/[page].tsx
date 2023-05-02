@@ -1,22 +1,52 @@
 import {
-    useBlogGetListQuery // getRunningQueriesThunk,
+    blogGetList,
+    getRunningQueriesThunk,
+    useBlogGetListQuery
 } from '@/api/api'
+import { store, wrapper } from '@/api/store'
+import { range } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
+import { GetStaticProps } from 'next'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
 import React from 'react'
 
 import BlogPage, { postPerPage } from '@/components/blog-page'
 
-// export const getStaticProps = wrapper.getStaticProps((store) => async () => {
-//     store.dispatch(getNewsList.initiate({ limit: 4, offset: 0 }))
-//
-//     await Promise.all(store.dispatch(getRunningQueriesThunk()))
-//
-//     return {
-//         props: { object: {} }
-//     }
-// })
+export const getStaticPaths = async () => {
+    const storeObject = store()
+    const result = await storeObject.dispatch(
+        blogGetList.initiate({ limit: postPerPage, offset: 0 })
+    )
+
+    const totalPages = Math.ceil((result?.data?.total || 0) / postPerPage)
+
+    return {
+        fallback: false,
+        paths: range(1, totalPages).map((page) => `/blog/${page}`)
+    }
+}
+
+export const getStaticProps: GetStaticProps = wrapper.getStaticProps(
+    (store) => async (context) => {
+        const page = context.params?.page
+
+        if (typeof page === 'string') {
+            store.dispatch(
+                blogGetList.initiate({
+                    limit: postPerPage,
+                    offset: ((Number(page) || 1) - 1) * postPerPage
+                })
+            )
+        }
+
+        await Promise.all(store.dispatch(getRunningQueriesThunk()))
+
+        return {
+            props: {}
+        }
+    }
+)
 
 const Blog: React.FC = () => {
     const router = useRouter()

@@ -1,6 +1,7 @@
 import {
     catalogGetList,
     getRunningQueriesThunk,
+    photoGetList,
     useCatalogGetListQuery,
     usePhotoGetListQuery
 } from '@/api/api'
@@ -14,6 +15,7 @@ import Statistic from '@/components/statistic'
 
 export const getStaticProps = wrapper.getStaticProps((store) => async () => {
     store.dispatch(catalogGetList.initiate())
+    store.dispatch(photoGetList.initiate({ limit: 4, order: 'random' }))
 
     await Promise.all(store.dispatch(getRunningQueriesThunk()))
 

@@ -111,7 +111,7 @@ export interface APIResponseAuthorList {
 export interface APIRequestPhotoList {
     object?: string
     limit?: number
-    order?: string
+    order?: 'random' | keyof TPhoto
 }
 export interface APIRequestTelescope {
     period?: string
