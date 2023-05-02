@@ -74,7 +74,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh/
           echo "$SSH_KEY" > ~/.ssh/authorized_keys
-          chmod 600 ~/.ssh/deploy.key
+          chmod 400 ~/.ssh/authorized_keys
           cat >>~/.ssh/config <<END
           Host vps
             HostName $SSH_HOST
