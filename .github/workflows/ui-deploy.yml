@@ -85,7 +85,7 @@ jobs:
           END
 
       - name: Send files
-        run: rsync -re ssh ./.next/ VPS:/home/deploy/out/.next
+        run: rsync -rvz --progress ./.next/ $SSH_USER@VPS:/home/deploy/out/.next
 
 #      - name: Export UI
 #        working-directory: client
