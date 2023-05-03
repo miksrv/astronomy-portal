@@ -4,19 +4,23 @@ import Link from 'next/link'
 import React from 'react'
 import { Label, Loader, Menu, Sidebar as SidebarMenu } from 'semantic-ui-react'
 
+import { TMenuItems } from '@/components/header'
 import { menuItems } from '@/components/header'
 import { hide } from '@/components/sidebar/sidebarSlice'
 
-// import styles from './styles.module.sass'
+import styles from './styles.module.sass'
 
 const Sidebar: React.FC = () => {
     const dispatch = useAppDispatch()
     const visible = useAppSelector((state) => state.sidebar.visible)
     const { data, isLoading } = useStatisticGetQuery()
 
+    const mobileMenuItems: TMenuItems[] = [{ link: '/', name: 'Главная' }]
+
     return (
         <SidebarMenu
             as={Menu}
+            className={styles.sidebar}
             animation={'overlay'}
             icon={'labeled'}
             inverted
@@ -25,12 +29,14 @@ const Sidebar: React.FC = () => {
             visible={visible}
             width={'thin'}
         >
-            {menuItems.map((item, key) => (
+            {[...mobileMenuItems, ...menuItems].map((item, key) => (
                 <Menu.Item
                     as={Link}
                     onClick={() => dispatch(hide())}
                     href={item.link}
+                    title={item.name}
                     key={key}
+                    className={styles.item}
                 >
                     {item.name}
                     {item.label && (

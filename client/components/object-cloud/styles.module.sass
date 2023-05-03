@@ -1,24 +1,25 @@
 @import @/styles/variables.sass
 
-.objectCloud
-  text-align: justify
+.section
+  display: flex
+  flex-wrap: wrap
+  justify-content: center
+  margin-bottom: $sectionMarginBottom
+
+  .divider
+    content: '•'
+    color: $text-main
+    margin: 0 5px
+
+    &:last-of-type
+      display: none
 
   a
-    margin: 1px
     color: $text-second
 
     &.active
       font-weight: bold
       color: $text-main
 
-    &:after
-      content: '•'
-      color: $text-main
-      margin: 0 5px 0 7px
-
     &:hover
       color: $text-main
-
-    &:last-of-type
-      &:after
-        display: none

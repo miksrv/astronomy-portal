@@ -29,7 +29,7 @@ const BlogPage: React.FC<TBlogPage> = ({ loading, posts, total, page }) => {
                     computer={9}
                     mobile={16}
                 >
-                    <div className={styles.newsList}>
+                    <div className={styles.postsList}>
                         <Dimmer active={loading}>
                             <Loader />
                         </Dimmer>

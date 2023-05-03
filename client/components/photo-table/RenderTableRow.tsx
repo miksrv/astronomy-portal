@@ -20,7 +20,7 @@ const RenderTableRow: React.FC<TTableRowProps> = ({ photo }) => (
                 title={`Перейти к другой фотографии объекта ${photo.object}`}
             >
                 <Image
-                    src={`${process.env.NEXT_PUBLIC_IMG_HOST}public/photo/${photo.image_name}_thumb.${photo.image_ext}`}
+                    src={`${process.env.NEXT_PUBLIC_IMG_HOST}photos/${photo.image_name}_thumb.${photo.image_ext}`}
                     className={styles.photo}
                     alt={`Другой вариант фотографии объекта ${photo.object}`}
                     width={80}

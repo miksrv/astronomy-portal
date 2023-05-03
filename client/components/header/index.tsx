@@ -29,7 +29,7 @@ import logo from '@/public/images/logo-w.svg'
 
 import styles from './styles.module.sass'
 
-type TMenuItems = {
+export type TMenuItems = {
     link: string
     name: string
     label?: keyof APIResponseStatistic
@@ -100,8 +100,7 @@ const Header: React.FC = () => {
                 )}
                 {currentMobile ? (
                     <Menu.Item
-                        as={Link}
-                        href={''}
+                        className={styles.hamburger}
                         icon={'bars'}
                         onClick={() => dispatch(toggle())}
                     />
