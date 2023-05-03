@@ -92,7 +92,7 @@ const Photo: React.FC = () => {
     return (
         <main>
             <NextSeo
-                title={`${objectTitle} - Фотографии астрономического объекта`}
+                title={objectTitle}
                 description={catalogData?.text
                     .replace(/(\r\n|\n|\r)/gm, '')
                     .slice(0, 200)}
@@ -114,25 +114,25 @@ const Photo: React.FC = () => {
                 photo={photoItem}
                 catalog={catalogData}
             />
-            {!catalogLoading &&
-            !photoListLoading &&
-            isOutdated(photoList?.items?.[0].date!, catalogData?.updated!) ? (
-                <Message
-                    warning
-                    icon={'warning sign'}
-                    header={'Новые данные'}
-                    content={
-                        'Фотографии устарели - есть новые данные с телескопа, с помощью которых можно собрать новое изображение объекта'
-                    }
-                />
-            ) : (
-                <br />
-            )}
+            <Message
+                warning={true}
+                hidden={
+                    !isOutdated(
+                        photoList?.items?.[0].date!,
+                        catalogData?.updated!
+                    )
+                }
+                className={'section'}
+                icon={'warning sign'}
+                header={'Новые данные'}
+                content={
+                    'Фотографии устарели - есть новые данные с телескопа, с помощью которых можно собрать новое изображение объекта'
+                }
+            />
             <PhotoTable
                 photos={photoList?.items}
                 loader={photoListLoading}
             />
-            <br />
             <ObjectCloud
                 loader={objectsLoading}
                 current={typeof objectName === 'string' ? objectName : ''}

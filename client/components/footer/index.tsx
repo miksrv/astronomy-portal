@@ -1,4 +1,4 @@
-import { version } from '@/version'
+import { version } from '@/package.json'
 import React from 'react'
 
 import { update } from '@/update'

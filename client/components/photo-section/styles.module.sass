@@ -1,11 +1,16 @@
 @import @/styles/variables.sass
 
-.photoSection
+.section
+  margin-bottom: $sectionMarginBottom
+
   .description
     display: flex !important
     flex-direction: column
     justify-content: space-between
     padding-left: 0 !important
+
+    @media only screen and (max-width: 768px)
+      padding: 10px !important
 
     .parameters
       .value
@@ -46,13 +51,14 @@
     position: relative
     min-height: 241px
 
+    @media only screen and (max-width: 768px)
+      min-height: auto
+      margin-bottom: 7px
+
     canvas
       width: 100% !important
 
 @media only screen and (max-width: 768px)
-  .description
-    padding: 10px !important
-
   .text
     padding: 20px 0 !important
 

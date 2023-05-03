@@ -64,7 +64,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
             : '---'
 
     return (
-        <div className={classNames(styles.photoSection, 'box')}>
+        <div className={classNames(styles.section, 'box')}>
             <Grid>
                 <Grid.Column
                     computer={9}

@@ -35,34 +35,40 @@ const Statistic: React.FC = () => {
     ]
 
     return (
-        <Grid>
-            {CARDS.map((item, key) => (
-                <Grid.Column
-                    key={key}
-                    computer={4}
-                    tablet={8}
-                    mobile={16}
-                >
-                    <div
-                        className={classNames(styles.statistic, 'box', 'table')}
+        <div className={styles.section}>
+            <Grid>
+                {CARDS.map((item, key) => (
+                    <Grid.Column
+                        key={key}
+                        computer={4}
+                        tablet={8}
+                        mobile={16}
                     >
-                        <Dimmer active={isLoading}>
-                            <Loader />
-                        </Dimmer>
-                        <div className={styles.iconContainer}>
-                            <Icon
-                                name={item.icon}
-                                className={styles.icon}
-                            />
+                        <div
+                            className={classNames(
+                                styles.statistic,
+                                'box',
+                                'table'
+                            )}
+                        >
+                            <Dimmer active={isLoading}>
+                                <Loader />
+                            </Dimmer>
+                            <div className={styles.iconContainer}>
+                                <Icon
+                                    name={item.icon}
+                                    className={styles.icon}
+                                />
+                            </div>
+                            <div>
+                                <div className={styles.value}>{item.value}</div>
+                                <div className={styles.info}>{item.name}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div className={styles.value}>{item.value}</div>
-                            <div className={styles.info}>{item.name}</div>
-                        </div>
-                    </div>
-                </Grid.Column>
-            ))}
-        </Grid>
+                    </Grid.Column>
+                ))}
+            </Grid>
+        </div>
     )
 }
 

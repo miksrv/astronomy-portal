@@ -23,7 +23,7 @@ const PhotoGrid: React.FC<TPhotoGridProps> = ({
     photos,
     catalog
 }) => (
-    <div className={classNames(styles.photoGird, 'box')}>
+    <div className={classNames(styles.section, 'box')}>
         <PhotosLoader
             visible={loading || !photos || !catalog}
             count={loaderCount || 12}

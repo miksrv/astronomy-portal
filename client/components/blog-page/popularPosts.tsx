@@ -3,63 +3,71 @@ import { sliceText } from '@/functions/helpers'
 import classNames from 'classnames'
 import Image from 'next/image'
 import React from 'react'
-import { Grid } from 'semantic-ui-react'
+import { Dimmer, Grid, Loader } from 'semantic-ui-react'
 
 import noPhoto from '@/public/images/no-photo.png'
 
 import styles from './styles.module.sass'
 
 type TPostGalleryProps = {
+    loading?: boolean
     posts?: TBlog[]
 }
 
-const PopularPosts: React.FC<TPostGalleryProps> = ({ posts }) => {
+const PopularPosts: React.FC<TPostGalleryProps> = ({ loading, posts }) => (
+    <div className={classNames(styles.section, 'box')}>
+        <div className={styles.popularHeader}>
+            <h4>Популярное в блоге</h4>
+            <div className={styles.dayCount}>за 30 дней</div>
+        </div>
+        <Dimmer active={loading}>
+            <Loader />
+        </Dimmer>
+        <Grid>
+            {loading
+                ? Array(4)
+                      .fill(1)
+                      .map((item, key) => <PopularPostItem key={key} />)
+                : posts?.map((post) => (
+                      <PopularPostItem
+                          key={post.id}
+                          group_id={post.group_id}
+                          media={post.media}
+                          text={post.text}
+                      />
+                  ))}
+        </Grid>
+    </div>
+)
+
+const PopularPostItem: React.FC<Partial<TBlog> & { loading?: boolean }> = ({
+    group_id,
+    media,
+    text
+}) => {
+    const imageUrl =
+        process.env.NEXT_PUBLIC_API_HOST + '/news/' + group_id + '/'
+
+    const mediaLink = media?.find(
+        (media) => media.file_type !== 'video/mp4'
+    )?.file
+
     return (
-        <>
-            <div className={classNames(styles.popular, 'box')}>
-                <div className={styles.popularHeader}>
-                    <h4>Популярное в блоге</h4>
-                    <div className={styles.dayCount}>за 30 дней</div>
-                </div>
-                <Grid>
-                    {posts?.map((post, key) => {
-                        const imageUrl =
-                            process.env.NEXT_PUBLIC_API_HOST +
-                            '/news/' +
-                            post.group_id +
-                            '/'
-
-                        const mediaLink = post.media?.find(
-                            (media) => media.file_type !== 'video/mp4'
-                        )?.file
-
-                        return (
-                            <Grid.Row key={key}>
-                                <Grid.Column
-                                    width={4}
-                                    className={styles.popularImageContainer}
-                                >
-                                    <Image
-                                        className={styles.popularImage}
-                                        src={
-                                            mediaLink
-                                                ? `${imageUrl}${mediaLink}`
-                                                : noPhoto
-                                        }
-                                        alt={''}
-                                        width={105}
-                                        height={85}
-                                    />
-                                </Grid.Column>
-                                <Grid.Column width={12}>
-                                    {sliceText(post.text, 220)}
-                                </Grid.Column>
-                            </Grid.Row>
-                        )
-                    })}
-                </Grid>
-            </div>
-        </>
+        <Grid.Row className={styles.popularItem}>
+            <Grid.Column
+                width={4}
+                className={styles.popularImageContainer}
+            >
+                <Image
+                    className={styles.popularImage}
+                    src={mediaLink ? `${imageUrl}${mediaLink}` : noPhoto}
+                    alt={''}
+                    width={105}
+                    height={85}
+                />
+            </Grid.Column>
+            <Grid.Column width={12}>{sliceText(text || '', 220)}</Grid.Column>
+        </Grid.Row>
     )
 }
 
