@@ -1,10 +1,12 @@
 import { TFIle } from '@/api/types'
+import classNames from 'classnames'
 import React, { useCallback, useEffect, useState } from 'react'
 import Lightbox from 'react-image-lightbox'
 import { Accordion, Dimmer, Icon, Loader, Table } from 'semantic-ui-react'
 
 import RenderTableHeader from './RenderTableHeader'
 import RenderTableRow from './RenderTableRow'
+import styles from './styles.module.sass'
 import { TObjectSortable, TSortOrdering } from './types'
 
 type TFilesTableProps = {
@@ -65,7 +67,7 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
     }, [files, sortField, sortOrder, doSortObjects])
 
     return (
-        <div className={'box table'}>
+        <div className={classNames(styles.section, 'box', 'table')}>
             <Dimmer active={loader}>
                 <Loader />
             </Dimmer>

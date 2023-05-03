@@ -13,9 +13,17 @@
     top: 27px
 
 .objectCloudMap
-  word-wrap: break-word
-  text-align: justify
-  min-height: 70px
+  display: flex
+  flex-wrap: wrap
+  justify-content: center
+
+  .divider
+    content: '•'
+    color: $text-main
+    margin: 0 5px
+
+    &:last-of-type
+      display: none
 
   .item
     margin: 1px
@@ -26,14 +34,5 @@
       font-weight: bold
       color: $text-main
 
-    &:after
-      content: '•'
-      color: $text-main
-      margin: 0 5px 0 7px
-
     &:hover
       color: $text-main
-
-    &:last-of-type
-      &:after
-        display: none

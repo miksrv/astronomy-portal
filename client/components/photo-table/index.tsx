@@ -30,52 +30,48 @@ const HeaderFields: THeaderFields[] = [
     { key: 'SII', name: 'S' }
 ]
 
-const PhotoTable: React.FC<TPhotoTableProps> = (props) => {
-    const { photos, loader } = props
-
-    return (
-        <div className={classNames('table', 'box')}>
-            <Dimmer active={loader}>
-                <Loader />
-            </Dimmer>
-            <Table
-                sortable
-                celled
-                inverted
-                selectable
-                compact
-                className={styles.photoTable}
-            >
-                <Table.Header>
+const PhotoTable: React.FC<TPhotoTableProps> = ({ photos, loader }) => (
+    <div className={classNames(styles.section, 'table', 'box')}>
+        <Dimmer active={loader}>
+            <Loader />
+        </Dimmer>
+        <Table
+            sortable
+            celled
+            inverted
+            selectable
+            compact
+            className={styles.photoTable}
+        >
+            <Table.Header>
+                <Table.Row>
+                    {HeaderFields.map((item, key) => (
+                        <Table.HeaderCell key={key}>
+                            {item.name}
+                        </Table.HeaderCell>
+                    ))}
+                </Table.Row>
+            </Table.Header>
+            <Table.Body>
+                {photos?.length ? (
+                    photos.map((photo, key) => (
+                        <RenderTableRow
+                            photo={photo}
+                            key={key}
+                        />
+                    ))
+                ) : (
                     <Table.Row>
-                        {HeaderFields.map((item, key) => (
-                            <Table.HeaderCell key={key}>
-                                {item.name}
-                            </Table.HeaderCell>
-                        ))}
+                        <Table.Cell
+                            textAlign={'center'}
+                            colSpan={HeaderFields.length}
+                            content={'Астрофотографй объекта не найдено'}
+                        />
                     </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                    {photos?.length ? (
-                        photos.map((photo, key) => (
-                            <RenderTableRow
-                                photo={photo}
-                                key={key}
-                            />
-                        ))
-                    ) : (
-                        <Table.Row>
-                            <Table.Cell
-                                textAlign={'center'}
-                                colSpan={HeaderFields.length}
-                                content={'Астрофотографй объекта не найдено'}
-                            />
-                        </Table.Row>
-                    )}
-                </Table.Body>
-            </Table>
-        </div>
-    )
-}
+                )}
+            </Table.Body>
+        </Table>
+    </div>
+)
 
 export default PhotoTable

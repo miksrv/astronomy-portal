@@ -148,7 +148,7 @@ const Object: React.FC = () => {
                     images: [
                         {
                             height: 743,
-                            url: `${process.env.NEXT_PUBLIC_IMG_HOST}public/photo/${photoList?.items?.[0].image_name}_thumb.${photoList?.items?.[0]?.image_ext}`,
+                            url: `${process.env.NEXT_PUBLIC_IMG_HOST}photos/${photoList?.items?.[0].image_name}_thumb.${photoList?.items?.[0]?.image_ext}`,
                             width: 1280
                         }
                     ],
@@ -164,26 +164,26 @@ const Object: React.FC = () => {
                 deviationDec={Math.round(devDec * 100) / 100}
             />
             {!catalogLoading &&
-            !photoLoading &&
-            isOutdated(photoList?.items?.[0].date!, catalogData?.updated!) ? (
-                <Message
-                    warning
-                    icon={'warning sign'}
-                    header={'Новые данные'}
-                    content={
-                        'Фотографии устарели - есть новые данные с телескопа, с помощью которых можно собрать новое изображение объекта'
-                    }
-                />
-            ) : (
-                <br />
-            )}
+                !photoLoading &&
+                isOutdated(
+                    photoList?.items?.[0].date!,
+                    catalogData?.updated!
+                ) && (
+                    <Message
+                        warning
+                        icon={'warning sign'}
+                        header={'Новые данные'}
+                        content={
+                            'Фотографии устарели - есть новые данные с телескопа, с помощью которых можно собрать новое изображение объекта'
+                        }
+                    />
+                )}
             <PhotoTable
                 photos={photoList?.items}
                 loader={photoLoading}
             />
-            <br />
-            {catalogData?.files?.length ? (
-                <>
+            {catalogData?.files?.length && (
+                <div className={'section'}>
                     <Grid>
                         <Grid.Column
                             computer={6}
@@ -227,17 +227,13 @@ const Object: React.FC = () => {
                             ''
                         )}
                     </Grid>
-                    <br />
-                </>
-            ) : (
-                ''
+                </div>
             )}
             <FilesTable
                 loader={catalogLoading}
                 objectName={typeof objectName === 'string' ? objectName : ''}
                 files={catalogData?.files}
             />
-            <br />
             <ObjectCloud
                 loader={objectsLoading}
                 current={typeof objectName === 'string' ? objectName : ''}

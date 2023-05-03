@@ -1,26 +1,29 @@
 @import @/styles/variables.sass
 
-.name
-  display: flex
-  justify-content: space-between
-  margin-bottom: 15px
+.section
+  margin-bottom: $sectionMarginBottom
 
-.parameters
-  margin-bottom: 10px
+  .name
+    display: flex
+    justify-content: space-between
+    margin-bottom: 15px
 
-  .value
-    color: $text-second
-    margin-right: 5px
+  .parameters
+    margin-bottom: 10px
 
-  .marginLeft
-    margin-left: 5px
+    .value
+      color: $text-second
+      margin-right: 5px
 
-.controlButtons
-  button
-    &:last-of-type
-      margin-right: 0
+    .marginLeft
       margin-left: 5px
 
-.celestialMap
-    canvas
-      width: 100% !important
+  .controlButtons
+    button
+      &:last-of-type
+        margin-right: 0
+        margin-left: 5px
+
+  .celestialMap
+      canvas
+        width: 100% !important

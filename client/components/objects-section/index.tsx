@@ -1,6 +1,7 @@
 // import { useAppSelector } from '@/api/hooks'
 import { TCatalog } from '@/api/types'
 import { getTimeFromSec } from '@/functions/helpers'
+import classNames from 'classnames'
 import moment from 'moment'
 import Link from 'next/link'
 import React, { useState } from 'react'
@@ -40,7 +41,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
     const [editModalVisible, setEditModalVisible] = useState<boolean>(false)
 
     return (
-        <div className={'box'}>
+        <div className={classNames(styles.section, 'box')}>
             <Dimmer active={loader || error}>
                 <Loader active={loader} />
                 <Message
