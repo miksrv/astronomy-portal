@@ -1,8 +1,7 @@
 name: UI Deploy
 
 on:
-#  push:
-  pull_request:
+  push:
     branches:
       - main
     paths:
@@ -53,8 +52,7 @@ jobs:
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
         name: Configure Client
         run: |
-          echo "NEXT_PUBLIC_API_HOST = '${{ secrets.NEXT_PUBLIC_API_HOST }}'
-          NEXT_PUBLIC_METRIKA = ' '" > .env
+          echo "NEXT_PUBLIC_API_HOST = '${{ secrets.NEXT_PUBLIC_API_HOST }}'" > .env
         working-directory: client
 
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
@@ -63,6 +61,7 @@ jobs:
           export dateNow=$(date +"%d.%m.%Y")
           echo "export const update = '$dateNow'" > update.ts
           yarn build
+          yarn export
         working-directory: client
 
       - name: Configure SSH
@@ -85,11 +84,16 @@ jobs:
           END
 
       - name: Send files
-        run: rsync -avz -e ssh ./client/ vps:/var/www/astro.miksoft.pro
+        run: rsync -avz -e ssh ./client/out/ vps:/var/www/observatory.miksoft.pro
 
-      - name: Restart PM2
-        run: ssh vps "cd /var/www/astro.miksoft.pro && pm2 restart astro.miksoft.pro"
+# If NextJS use non-static and need PM2 server
+#      - name: Send files
+#        run: rsync -avz -e ssh ./client/ vps:/var/www/astro.miksoft.pro
+#
+#      - name: Restart PM2
+#        run: ssh vps "cd /var/www/astro.miksoft.pro && pm2 restart astro.miksoft.pro"
 
+# If FTP is used for deployment to the server
 #      - name: Export UI
 #        working-directory: client
 #        run: yarn export

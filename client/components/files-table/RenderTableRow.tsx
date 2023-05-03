@@ -26,7 +26,7 @@ const RenderTableRow: React.FC<TTableRow> = ({
                 <Image
                     className={styles.fitsImage}
                     onClick={() => onPhotoClick(itemId)}
-                    src={`${process.env.NEXT_PUBLIC_IMG_HOST}uploads/${object}/${file.file_name}_thumb.jpg`}
+                    src={`${process.env.NEXT_PUBLIC_API_HOST}uploads/${object}/${file.file_name}_thumb.jpg`}
                 />
             ) : (
                 ''

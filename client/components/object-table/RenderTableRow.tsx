@@ -88,7 +88,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                     >
                         <Image
                             className={styles.photo}
-                            src={`${process.env.NEXT_PUBLIC_IMG_HOST}photos/${photo.image_name}_thumb.${photo.image_ext}`}
+                            src={`${process.env.NEXT_PUBLIC_API_HOST}photos/${photo.image_name}_thumb.${photo.image_ext}`}
                             width={80}
                             height={18}
                             alt={`${item.title || item.name} - Фотография`}

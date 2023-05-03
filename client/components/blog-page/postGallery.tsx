@@ -24,7 +24,7 @@ const PostGallery: React.FC<TPostGalleryProps> = ({ media, groupId }) => {
     // const [photoIndex, setCurrentIndex] = useState<number>(0)
     const [playVideo, setPlayVideo] = useState<boolean>(false)
 
-    const imageUrl = process.env.NEXT_PUBLIC_IMG_HOST + 'news/' + groupId + '/'
+    const imageUrl = process.env.NEXT_PUBLIC_API_HOST + 'news/' + groupId + '/'
 
     return (
         <Carousel
