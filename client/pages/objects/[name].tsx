@@ -148,7 +148,7 @@ const Object: React.FC = () => {
                     images: [
                         {
                             height: 743,
-                            url: `${process.env.NEXT_PUBLIC_IMG_HOST}photos/${photoList?.items?.[0].image_name}_thumb.${photoList?.items?.[0]?.image_ext}`,
+                            url: `${process.env.NEXT_PUBLIC_API_HOST}photos/${photoList?.items?.[0].image_name}_thumb.${photoList?.items?.[0]?.image_ext}`,
                             width: 1280
                         }
                     ],

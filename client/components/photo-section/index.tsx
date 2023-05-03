@@ -84,7 +84,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                         height={400}
                         src={
                             !loader && photo
-                                ? `${process.env.NEXT_PUBLIC_IMG_HOST}photos/${photo.image_name}_thumb.${photo.image_ext}`
+                                ? `${process.env.NEXT_PUBLIC_API_HOST}photos/${photo.image_name}_thumb.${photo.image_ext}`
                                 : noPhotoSrc
                         }
                         onClick={() => {
