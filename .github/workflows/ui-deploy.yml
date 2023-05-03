@@ -87,6 +87,9 @@ jobs:
       - name: Send files
         run: rsync -avz -e ssh ./client/ vps:/var/www/astro.miksoft.pro
 
+      - name: Restart PM2
+        run: ssh vps "cd /var/www/astro.miksoft.pro && pm2 restart astro.miksoft.pro"
+
 #      - name: Export UI
 #        working-directory: client
 #        run: yarn export
