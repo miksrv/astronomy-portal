@@ -16,7 +16,7 @@ const ObjectCloudSkyMap: React.FC<TObjectCloudProps> = ({
     objects,
     handleClick
 }) => (
-    <div className={classNames(styles.objectCloudMap, 'box')}>
+    <div className={classNames(styles.section, 'box')}>
         <Dimmer active={loading}>
             <Loader />
         </Dimmer>

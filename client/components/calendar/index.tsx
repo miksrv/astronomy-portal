@@ -25,7 +25,7 @@ const Calendar: React.FC = () => {
         })
 
     return (
-        <div className={classNames(styles.calendar, 'box', 'table')}>
+        <div className={classNames(styles.section, 'box', 'table')}>
             <Dimmer active={telescopeLoading || weatherLoading}>
                 <Loader />
             </Dimmer>

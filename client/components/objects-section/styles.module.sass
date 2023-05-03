@@ -8,6 +8,10 @@
     justify-content: space-between
     margin-bottom: 15px
 
+  .filterContainer
+    @media only screen and (max-width: 768px)
+      margin: 10px 0 20px 0
+
   .parameters
     margin-bottom: 10px
 
@@ -25,5 +29,8 @@
         margin-left: 5px
 
   .celestialMap
-      canvas
-        width: 100% !important
+    @media only screen and (max-width: 768px)
+      margin-bottom: 10px
+
+    canvas
+      width: 100% !important

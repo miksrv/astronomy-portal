@@ -2,7 +2,7 @@
 
 .postsList
   .item
-    margin-bottom: 20px
+    margin-bottom: $sectionMarginBottom
 
     &:last-of-type
       margin-bottom: 0
@@ -100,11 +100,34 @@
         margin: 0 auto
         object-fit: contain
 
-.popular
-  margin-bottom: 20px
+.rail
+  position: relative !important
+  left: 0 !important
+  font-size: inherit !important
+  margin: 0 !important
+  padding: 0 !important
+  width: auto !important
+
+  :global(.ui.sticky.fixed.top)
+    padding-top: $bodyMarginTop !important
+
+.section
+  margin-bottom: $sectionMarginBottom !important
+  padding-bottom: $sectionMarginBottom
+
+  .popularItem
+    margin: 0 !important
+    padding-top: 0 !important
+    padding-bottom: 10px !important
+
+    &:first-of-type
+      padding-top: 10px !important
+
+    &:last-of-type
+      padding-bottom: 0 !important
 
   .popularHeader
-    margin-bottom: 20px
+    margin-bottom: $sectionMarginBottom
     border-bottom: 1px solid $input-BackgroundColor
     display: flex
     justify-content: space-between

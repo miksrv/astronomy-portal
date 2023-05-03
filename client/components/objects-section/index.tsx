@@ -1,4 +1,3 @@
-// import { useAppSelector } from '@/api/hooks'
 import { TCatalog } from '@/api/types'
 import { getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
@@ -60,24 +59,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                     tablet={10}
                     mobile={16}
                 >
-                    <div className={styles.name}>
-                        <h1>Объект: {title}</h1>
-                        {/*{userAuth && (*/}
-                        {/*    <div className={styles.controlButtons}>*/}
-                        {/*        <Button*/}
-                        {/*            size={'mini'}*/}
-                        {/*            color={'blue'}*/}
-                        {/*            icon={'edit outline'}*/}
-                        {/*            onClick={() => setEditModalVisible(true)}*/}
-                        {/*        />*/}
-                        {/*        <Button*/}
-                        {/*            size={'mini'}*/}
-                        {/*            color={'red'}*/}
-                        {/*            icon={'remove'}*/}
-                        {/*        />*/}
-                        {/*    </div>*/}
-                        {/*)}*/}
-                    </div>
+                    <h1>{title}</h1>
                     <Grid>
                         <Grid.Column
                             computer={8}
@@ -140,6 +122,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                             computer={8}
                             tablet={8}
                             mobile={16}
+                            className={styles.filterContainer}
                         >
                             <FilterList filters={catalog?.filters} />
                         </Grid.Column>

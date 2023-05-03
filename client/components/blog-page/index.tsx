@@ -2,8 +2,16 @@ import { useBlogGetListPopularQuery } from '@/api/api'
 import { TBlog } from '@/api/types'
 import classNames from 'classnames'
 import moment from 'moment/moment'
-import React from 'react'
-import { Dimmer, Grid, Icon, Loader } from 'semantic-ui-react'
+import React, { createRef } from 'react'
+import {
+    Dimmer,
+    Grid,
+    Icon,
+    Loader,
+    Rail,
+    Ref,
+    Sticky
+} from 'semantic-ui-react'
 
 import PopularPosts from '@/components/blog-page/popularPosts'
 import PostGallery from '@/components/blog-page/postGallery'
@@ -20,10 +28,16 @@ type TBlogPage = {
 }
 
 const BlogPage: React.FC<TBlogPage> = ({ loading, posts, total, page }) => {
-    const { data: popularPosts } = useBlogGetListPopularQuery()
+    const { data: popularPosts, isLoading: popularLoading } =
+        useBlogGetListPopularQuery({ limit: 4 })
+
+    const contextRef = createRef()
 
     return (
-        <Grid columns={2}>
+        <Grid
+            columns={2}
+            className={styles.section}
+        >
             <Grid.Row>
                 <Grid.Column
                     computer={9}
@@ -71,7 +85,7 @@ const BlogPage: React.FC<TBlogPage> = ({ loading, posts, total, page }) => {
                                         >
                                             {moment
                                                 .unix(item.telegram_date)
-                                                .format('DD MMMM Y в H:mm')}
+                                                .format('MM/DD/Y, H:mm')}
                                         </a>
                                     </div>
                                 </div>
@@ -83,15 +97,29 @@ const BlogPage: React.FC<TBlogPage> = ({ loading, posts, total, page }) => {
                     computer={7}
                     mobile={16}
                 >
-                    <PopularPosts posts={popularPosts?.items} />
-                    <div className={'box'}>
-                        <Pagination
-                            currentPage={page}
-                            totalPostCount={total}
-                            perPage={postPerPage}
-                            linkPart={'blog'}
-                        />
-                    </div>
+                    {/*@ts-ignore*/}
+                    <Ref innerRef={contextRef}>
+                        <Rail
+                            position='right'
+                            className={styles.rail}
+                        >
+                            {/*@ts-ignore*/}
+                            <Sticky context={contextRef}>
+                                <PopularPosts
+                                    loading={popularLoading}
+                                    posts={popularPosts?.items}
+                                />
+                                <div className={'box'}>
+                                    <Pagination
+                                        currentPage={page}
+                                        totalPostCount={total}
+                                        perPage={postPerPage}
+                                        linkPart={'blog'}
+                                    />
+                                </div>
+                            </Sticky>
+                        </Rail>
+                    </Ref>
                 </Grid.Column>
             </Grid.Row>
         </Grid>

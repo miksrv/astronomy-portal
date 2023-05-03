@@ -9,20 +9,15 @@ body
 
 h1
   font-size: 21px !important
+  @media only screen and (max-width: 768px)
+    font-size: 18px !important
+    margin-bottom: 20px !important
 
-#root
-  height: 100vh
-
-/* General */
-.main
-  margin-top: 70px
+.rootContainer
+  margin-top: $bodyMarginTop
 
 .section
-  margin-bottom: $sectionMarginBottom
-
-.small
-  font-size: .9em
-  color: $text-second
+  margin-bottom: $sectionMarginBottom !important
 
 .box
   position: relative
@@ -92,13 +87,8 @@ h1
 .second-color
   color: $text-second
 
-.aright
-  text-align: right
-
 .ui.input > input, .ui.multiple.search.dropdown
   background-color: #4e4e4e
-//color: $text-main !important
-//border-color: transparent !important
 
 .ui.page.modals.dimmer.active
   z-index: 2000 !important

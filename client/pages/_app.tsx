@@ -34,7 +34,7 @@ export function App({ Component, pageProps }: AppProps) {
             <main className={montserrat.className}>
                 <Sidebar />
                 <Header />
-                <Container className='main'>
+                <Container className='rootContainer'>
                     <Component {...props.pageProps} />
                 </Container>
                 <Footer />

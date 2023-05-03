@@ -57,14 +57,13 @@ const Map: React.FC = () => {
                     locale: 'ru'
                 }}
             />
-            <div className={'box table global-map'}>
+            <div className={'box table global-map section'}>
                 <SkyMap
                     objects={listObjects}
                     interactive={true}
                     goto={goToObject}
                 />
             </div>
-            <br />
             <ObjectCloudSkyMap
                 loading={isFetching || !listObjects?.length}
                 objects={listObjects}

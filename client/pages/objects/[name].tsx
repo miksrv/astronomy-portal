@@ -163,21 +163,21 @@ const Object: React.FC = () => {
                 deviationRa={Math.round(devRa * 100) / 100}
                 deviationDec={Math.round(devDec * 100) / 100}
             />
-            {!catalogLoading &&
-                !photoLoading &&
-                isOutdated(
-                    photoList?.items?.[0].date!,
-                    catalogData?.updated!
-                ) && (
-                    <Message
-                        warning
-                        icon={'warning sign'}
-                        header={'Новые данные'}
-                        content={
-                            'Фотографии устарели - есть новые данные с телескопа, с помощью которых можно собрать новое изображение объекта'
-                        }
-                    />
-                )}
+            <Message
+                warning={true}
+                hidden={
+                    !isOutdated(
+                        photoList?.items?.[0].date!,
+                        catalogData?.updated!
+                    )
+                }
+                className={'section'}
+                icon={'warning sign'}
+                header={'Новые данные'}
+                content={
+                    'Фотографии устарели - есть новые данные с телескопа, с помощью которых можно собрать новое изображение объекта'
+                }
+            />
             <PhotoTable
                 photos={photoList?.items}
                 loader={photoLoading}

@@ -51,14 +51,12 @@ export default function Home() {
                 }}
             />
             <Statistic />
-            <br />
             <PhotoGrid
                 loading={photoLoading || catalogLoading}
                 loaderCount={4}
                 photos={photoData?.items}
                 catalog={catalogData?.items}
             />
-            <br />
             <Calendar />
         </main>
     )
