@@ -85,7 +85,7 @@ jobs:
           END
 
       - name: Send files
-        run: rsync -avz -e ssh ./client/out vps:/var/www/observatory.miksoft.pro
+        run: rsync -avz -e ssh ./client/out/ vps:/var/www/observatory.miksoft.pro
 
 # If NextJS use non-static and need PM2 server
 #      - name: Send files
