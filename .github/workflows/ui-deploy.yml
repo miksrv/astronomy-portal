@@ -62,6 +62,7 @@ jobs:
           export dateNow=$(date +"%d.%m.%Y")
           echo "export const update = '$dateNow'" > update.ts
           yarn build
+          yarn export
         working-directory: client
 
       - name: Configure SSH
