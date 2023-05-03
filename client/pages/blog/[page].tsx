@@ -68,7 +68,7 @@ const Blog: React.FC = () => {
 
     return (
         <main>
-            <NextSeo title={'Новости самодельной обсерватории'} />
+            <NextSeo title={'Блог обсерватории'} />
             <BlogPage
                 page={currentPage}
                 loading={isLoading}
