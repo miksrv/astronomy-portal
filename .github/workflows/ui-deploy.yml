@@ -84,28 +84,28 @@ jobs:
           END
 
       - name: Send files
-        run: rsync -avz -e ssh ./client/out/ vps:/var/www/observatory.miksoft.pro
+        run: rsync -avz -e ssh ./client/out/ vps:/var/www/astro.miksoft.pro
 
-# If NextJS use non-static and need PM2 server
-#      - name: Send files
-#        run: rsync -avz -e ssh ./client/ vps:/var/www/astro.miksoft.pro
-#
-#      - name: Restart PM2
-#        run: ssh vps "cd /var/www/astro.miksoft.pro && pm2 restart astro.miksoft.pro"
+      # If we run NextJS on a Node server using PM2
+      # - name: Send files
+      #  run: rsync -avz -e ssh ./client/ vps:/var/www/astro.miksoft.pro
+      #
+      # - name: Restart PM2
+      #  run: ssh vps "cd /var/www/astro.miksoft.pro && pm2 restart astro.miksoft.pro"
 
-# If FTP is used for deployment to the server
-#      - name: Export UI
-#        working-directory: client
-#        run: yarn export
-#
-#      - name: Install LFTP
-#        run: sudo apt install lftp
-#
-#      - name: Configure LFTP
-#        run: mkdir ~/.lftp && echo "set ssl:verify-certificate false;" >> ~/.lftp/rc
-#
-#      - name: Load Secrets
-#        run: echo "machine ${{ secrets.FTP_HOSTNAME }} login ${{ secrets.FTP_USERNAME }} password ${{ secrets.FTP_PASSWORD }}" > ~/.netrc
-#
-#      - name: Upload Folder
-#        run: lftp -e "mirror --parallel=100 -R client/out/ /" ${{ secrets.FTP_HOSTNAME }}
+      # If for deployment we use not SSH, but an FTP connection
+      # - name: Export UI
+      #  working-directory: client
+      #  run: yarn export
+      #
+      # - name: Install LFTP
+      #  run: sudo apt install lftp
+      #
+      # - name: Configure LFTP
+      #  run: mkdir ~/.lftp && echo "set ssl:verify-certificate false;" >> ~/.lftp/rc
+      #
+      # - name: Load Secrets
+      #  run: echo "machine ${{ secrets.FTP_HOSTNAME }} login ${{ secrets.FTP_USERNAME }} password ${{ secrets.FTP_PASSWORD }}" > ~/.netrc
+      #
+      # - name: Upload Folder
+      #  run: lftp -e "mirror --parallel=100 -R client/out/ /" ${{ secrets.FTP_HOSTNAME }}

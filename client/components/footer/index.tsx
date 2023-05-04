@@ -1,4 +1,4 @@
-import { version } from '@/package.json'
+import packageInfo from '@/package.json'
 import React from 'react'
 
 import { update } from '@/update'
@@ -21,7 +21,8 @@ const Footer: React.FC = () => (
                 />{' '}
                 Mik
             </a>{' '}
-            2023, Version <span>{version}</span> <span>({update})</span>
+            2023, Version <span>{packageInfo.version}</span>{' '}
+            <span>({update})</span>
         </div>
     </div>
 )
