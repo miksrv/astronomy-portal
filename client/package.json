@@ -1,10 +1,11 @@
 {
     "name": "astronomy-portal",
-    "version": "3.0.1",
+    "version": "3.0.2",
     "private": true,
     "scripts": {
         "dev": "next dev",
         "build": "next build",
+        "postbuild": "next-sitemap",
         "export": "next export",
         "start": "next start",
         "lint": "next lint",
@@ -28,6 +29,7 @@
         "next": "13.2.4",
         "next-redux-wrapper": "^8.1.0",
         "next-seo": "^5.15.0",
+        "next-sitemap": "^4.0.9",
         "nuka-carousel": "^6.0.2",
         "react": "18.2.0",
         "react-dom": "18.2.0",
