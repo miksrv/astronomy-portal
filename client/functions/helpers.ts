@@ -1,5 +1,8 @@
 import moment from 'moment'
 
+export const isMobile: boolean =
+    typeof window !== 'undefined' ? window.innerWidth <= 760 : false
+
 export const range = (from: number, to: number, step = 1) => {
     let i = from
     const range: number[] = []

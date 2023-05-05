@@ -36,6 +36,7 @@ const RenderTableHeader: React.FC<TTableHeader> = (props) => {
                 {HEADER_FIELDS.map((item, key) => (
                     <Table.HeaderCell
                         key={key}
+                        className={'tableHeaderSticky'}
                         sorted={sort === item.key ? order : undefined}
                         onClick={() => handlerSortClick?.(item.key)}
                     >

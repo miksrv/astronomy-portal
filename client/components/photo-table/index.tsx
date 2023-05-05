@@ -36,6 +36,8 @@ const PhotoTable: React.FC<TPhotoTableProps> = ({ photos, loader }) => (
             <Loader />
         </Dimmer>
         <Table
+            unstackable
+            singleLine
             sortable
             celled
             inverted
@@ -46,7 +48,10 @@ const PhotoTable: React.FC<TPhotoTableProps> = ({ photos, loader }) => (
             <Table.Header>
                 <Table.Row>
                     {HeaderFields.map((item, key) => (
-                        <Table.HeaderCell key={key}>
+                        <Table.HeaderCell
+                            key={key}
+                            className={'tableHeaderSticky'}
+                        >
                             {item.name}
                         </Table.HeaderCell>
                     ))}

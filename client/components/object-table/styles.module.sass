@@ -1,6 +1,15 @@
 @import @/styles/variables.sass
 
-.objectTable
+.section
+  margin-bottom: $sectionMarginBottom
+
+  @media only screen and (max-width: 768px)
+    overflow: hidden
+    overflow-x: auto
+
+  table
+    margin-top: 0 !important
+
   .photo
     object-fit: cover
     margin-bottom: -5px

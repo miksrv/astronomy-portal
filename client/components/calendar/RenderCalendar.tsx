@@ -1,4 +1,5 @@
 import { TStatisticTelescope, TWeatherStatistic } from '@/api/types'
+import { isMobile } from '@/functions/helpers'
 import classNames from 'classnames'
 import moment, { Moment } from 'moment'
 import Image from 'next/image'
@@ -20,9 +21,6 @@ type TRenderCalendarProps = {
 
 const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
     const { calendarDate, eventsWeather, eventsTelescope } = props
-
-    const currentMobile: boolean =
-        typeof window !== 'undefined' ? window.innerWidth <= 760 : false
 
     const daysInMonth: number = calendarDate.daysInMonth()
     const firstDayOfMonth: number = parseInt(
@@ -87,24 +85,18 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                 >
                     {d < 10 ? `0${d}` : d}
                 </div>
-                {!currentMobile ? (
-                    <div className={classNames(styles.event, styles.moon)}>
+                {!isMobile ? (
+                    <div className={classNames(styles.event)}>
                         <MoonPhase date={currentDate} /> ↑{' '}
                         {moment(moonTimes.rise).format('H:mm')} ↓{' '}
                         {moment(moonTimes.set).format('H:mm')}
                     </div>
                 ) : (
-                    <div
-                        className={classNames(
-                            styles.event,
-                            styles.moon,
-                            styles.mobile
-                        )}
-                    >
+                    <div className={classNames(styles.moon)}>
                         <MoonPhase date={currentDate} />
                     </div>
                 )}
-                {!currentMobile && (
+                {!isMobile && (
                     <div className={classNames(styles.event, styles.sun)}>
                         <Image
                             src={SunIcon}
@@ -117,7 +109,7 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                         {moment(sunTimes.dusk).format('H:mm')}
                     </div>
                 )}
-                {itemWeatherEvent && !currentMobile && (
+                {itemWeatherEvent && (
                     <div className={classNames(styles.event, styles.weather)}>
                         {itemWeatherEvent.clouds !== null && (
                             <>
@@ -131,7 +123,7 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                     </div>
                 )}
                 {itemAstroEvents &&
-                    (!currentMobile ? (
+                    (!isMobile ? (
                         <Popup
                             content={itemAstroEvents.catalog_items.join(', ')}
                             size='mini'

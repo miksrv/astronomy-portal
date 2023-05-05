@@ -24,7 +24,7 @@ const RenderTableRow: React.FC<TTableRowProps> = ({ photo }) => (
                     className={styles.photo}
                     alt={`Другой вариант фотографии объекта ${photo.object}`}
                     width={80}
-                    height={30}
+                    height={18}
                 />
             </Link>
         </Table.Cell>

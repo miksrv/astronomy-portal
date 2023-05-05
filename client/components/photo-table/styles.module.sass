@@ -3,12 +3,16 @@
 .section
   margin-bottom: $sectionMarginBottom
 
+  @media only screen and (max-width: 768px)
+    overflow: hidden
+    overflow-x: auto
+
   .photoTable
     margin: 0 !important
 
     .photo
-      height: 30px !important
       object-fit: cover
+      margin-bottom: -5px
 
     .luminance
       background-color: #4e4c57

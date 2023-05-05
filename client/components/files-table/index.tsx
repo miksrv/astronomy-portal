@@ -80,6 +80,8 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
                 </Accordion.Title>
                 <Accordion.Content active={showAccordion}>
                     <Table
+                        unstackable
+                        singleLine
                         sortable
                         celled
                         inverted
