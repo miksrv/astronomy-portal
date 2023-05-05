@@ -1,4 +1,5 @@
 import { TCatalog, TCategory, TPhoto } from '@/api/types'
+import classNames from 'classnames'
 import React, { useMemo, useState } from 'react'
 import { Dimmer, Loader, Table } from 'semantic-ui-react'
 
@@ -70,7 +71,7 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
     }
 
     return (
-        <div className={'box table'}>
+        <div className={classNames(styles.section, 'box table')}>
             <Dimmer active={loading}>
                 <Loader />
             </Dimmer>
@@ -81,7 +82,6 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                 inverted
                 selectable
                 compact
-                className={styles.objectTable}
             >
                 <RenderTableHeader
                     sort={sortField}

@@ -3,12 +3,23 @@
 .section
   margin-bottom: $sectionMarginBottom
 
+  @media only screen and (max-width: 768px)
+    overflow: hidden
+    overflow-x: auto
+
   .fitsImage
     width: 16px
     height: 16px
     float: left
     margin-right: 5px
     cursor: pointer
+
+  .moonDate
+    display: flex
+    flex-wrap: nowrap
+
+    span
+      float: none
 
   .luminance
       background-color: #4e4c57

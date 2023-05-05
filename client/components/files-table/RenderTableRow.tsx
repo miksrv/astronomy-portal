@@ -1,4 +1,5 @@
 import { TFIle } from '@/api/types'
+import { isMobile, sliceText } from '@/functions/helpers'
 import moment from 'moment'
 import React from 'react'
 import { Image, Table } from 'semantic-ui-react'
@@ -31,17 +32,20 @@ const RenderTableRow: React.FC<TTableRow> = ({
             ) : (
                 ''
             )}
-            {file.file_name}
+            {sliceText(file.file_name, isMobile ? 20 : 250)}
         </Table.Cell>
-        <Table.Cell>{file.exptime}</Table.Cell>
-        <Table.Cell className={styles[file.filter]}>{file.filter}</Table.Cell>
-        <Table.Cell>{file.ccd_temp}</Table.Cell>
-        <Table.Cell>{file.gain}</Table.Cell>
-        <Table.Cell>{file.offset}</Table.Cell>
-        <Table.Cell>{file.star_count}</Table.Cell>
-        <Table.Cell>{file.sky_background}</Table.Cell>
-        <Table.Cell>{file.hfr}</Table.Cell>
-        <Table.Cell>
+        <Table.Cell content={file.exptime} />
+        <Table.Cell
+            className={styles[file.filter]}
+            content={file.filter}
+        />
+        <Table.Cell content={file.ccd_temp} />
+        <Table.Cell content={file.gain} />
+        <Table.Cell content={file.offset} />
+        <Table.Cell content={file.star_count} />
+        <Table.Cell content={file.sky_background} />
+        <Table.Cell content={file.hfr} />
+        <Table.Cell className={styles.moonDate}>
             <MoonPhase
                 date={moment.utc(file.date_obs).utcOffset('GMT+05:00')}
             />

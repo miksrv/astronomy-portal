@@ -19,6 +19,9 @@ h1
 .section
   margin-bottom: $sectionMarginBottom !important
 
+.second-color
+  color: $text-second
+
 .box
   position: relative
   background: $box-background
@@ -81,17 +84,13 @@ h1
     left: 0
     top: 0
 
-.inline
-  display: inline-block
+.tableHeaderSticky
+  position: sticky
+  top: 50px
+  z-index: 1
 
-.second-color
-  color: $text-second
-
-.ui.input > input, .ui.multiple.search.dropdown
-  background-color: #4e4e4e
-
-.ui.page.modals.dimmer.active
-  z-index: 2000 !important
+  @media only screen and (max-width: 768px)
+    position: initial
 
 main .ui.multiple.search.dropdown > input.search
   color: $text-main !important
@@ -105,36 +104,45 @@ main .ui.selection.active.dropdown .menu
     color: $text-main
     font-size: 12px
 
-main .ui.selection.active.dropdown
-  &:focus, &.active
-    background-color: $input-focus-BackgroundColor !important
-    border-color: $input-focus-BorderColor !important
+main
+  .ui.input > input, .ui.multiple.search.dropdown
+    background-color: #4e4e4e
 
-main .ui.selection.dropdown .menu > .message
-  color: $text-second !important
+  .ui.page.modals.dimmer.active
+    z-index: 2000 !important
 
-.ui.modal > .content
-  color: $colorBackground
+  .ui.inverted.sortable.table thead th.sorted
+    background: #4f4f4f
 
-.ui.modal:not(.confirm)>.content
-  padding: 0.5em 1em 1em !important
+  .ui.inverted.table th
+    background: #2b2b2b
 
-.ui.input.focus > input, .ui.input > input:focus
-  background-color: #565656
+  .ui.inverted.sortable.table thead th:hover
+    background: #404040
 
-.ui.multiple.dropdown>.label
-  color: rgb(59 59 59 / 95%) !important
-  font-weight: 500 !important
+  .ui.selection.active.dropdown
+    &:focus, &.active
+      background-color: $input-focus-BackgroundColor !important
+      border-color: $input-focus-BorderColor !important
 
-.ui.label>.close.icon, .ui.label>.delete.icon
-  color: $box-background !important
+  .ui.selection.dropdown .menu > .message
+    color: $text-second !important
 
-.paging-item
-  height: 4px
+  .ui.modal > .content
+    color: $colorBackground
 
-.blog-pagination
-  display: flex !important
-  justify-content: space-between
+  .ui.modal:not(.confirm)>.content
+    padding: 0.5em 1em 1em !important
+
+  .ui.input.focus > input, .ui.input > input:focus
+    background-color: #565656
+
+  .ui.multiple.dropdown>.label
+    color: rgb(59 59 59 / 95%) !important
+    font-weight: 500 !important
+
+  .ui.label>.close.icon, .ui.label>.delete.icon
+    color: $box-background !important
 
 @media only screen and (max-width: 768px)
   .ui.grid

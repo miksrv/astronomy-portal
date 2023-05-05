@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['observatory.miksoft.pro'],
+        domains: ['astro.miksoft.pro'],
         remotePatterns: [
             {
-                hostname: 'observatory.miksoft.pro',
+                hostname: 'astro.miksoft.pro',
                 pathname: '/api/**',
                 port: '',
                 protocol: 'https'
@@ -12,8 +12,9 @@ const nextConfig = {
         ],
         // unoptimized - When true, the source image will be served as-is instead of changing quality,
         // size, or format. Defaults to false.
-        unoptimized: true
+        unoptimized: false
     },
+    output: 'standalone',
     reactStrictMode: true
 }
 
