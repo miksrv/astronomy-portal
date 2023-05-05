@@ -18,20 +18,17 @@ import ObjectFormModal from '@/components/obect-form-modal'
 import ObjectTable from '@/components/object-table'
 import ObjectsTableToolbar from '@/components/objects-table-toolbar'
 
-// getStaticProps
-export const getServerSideProps = wrapper.getStaticProps(
-    (store) => async () => {
-        store.dispatch(catalogGetList.initiate())
-        store.dispatch(categoryGetList.initiate())
-        store.dispatch(photoGetList.initiate())
+export const getStaticProps = wrapper.getStaticProps((store) => async () => {
+    store.dispatch(catalogGetList.initiate())
+    store.dispatch(categoryGetList.initiate())
+    store.dispatch(photoGetList.initiate())
 
-        await Promise.all(store.dispatch(getRunningQueriesThunk()))
+    await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
-        return {
-            props: { object: {} }
-        }
+    return {
+        props: { object: {} }
     }
-)
+})
 
 const Objects: React.FC = () => {
     const [search, setSearch] = useState<string>('')

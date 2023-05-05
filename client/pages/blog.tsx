@@ -9,18 +9,15 @@ import React from 'react'
 
 import BlogPage, { postPerPage } from '@/components/blog-page'
 
-// getStaticProps
-export const getServerSideProps = wrapper.getStaticProps(
-    (store) => async () => {
-        store.dispatch(blogGetList.initiate({ limit: postPerPage, offset: 0 }))
+export const getStaticProps = wrapper.getStaticProps((store) => async () => {
+    store.dispatch(blogGetList.initiate({ limit: postPerPage, offset: 0 }))
 
-        await Promise.all(store.dispatch(getRunningQueriesThunk()))
+    await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
-        return {
-            props: { object: {} }
-        }
+    return {
+        props: { object: {} }
     }
-)
+})
 
 const Blog: React.FC = () => {
     const { data, isLoading } = useBlogGetListQuery({
