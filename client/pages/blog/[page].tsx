@@ -27,7 +27,8 @@ export const getStaticPaths = async () => {
     }
 }
 
-export const getStaticProps: GetStaticProps = wrapper.getStaticProps(
+// getStaticProps
+export const getServerSideProps: GetStaticProps = wrapper.getStaticProps(
     (store) => async (context) => {
         const page = context.params?.page
 

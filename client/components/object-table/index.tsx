@@ -75,6 +75,7 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                 <Loader />
             </Dimmer>
             <Table
+                unstackable
                 sortable
                 celled
                 inverted

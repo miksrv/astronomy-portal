@@ -17,17 +17,20 @@ import { Message } from 'semantic-ui-react'
 import PhotoCategorySwitcher from '@/components/photo-category-switcher'
 import PhotoGrid from '@/components/photo-grid'
 
-export const getStaticProps = wrapper.getStaticProps((store) => async () => {
-    store.dispatch(catalogGetList.initiate())
-    store.dispatch(categoryGetList.initiate())
-    store.dispatch(photoGetList.initiate())
+// getStaticProps
+export const getServerSideProps = wrapper.getStaticProps(
+    (store) => async () => {
+        store.dispatch(catalogGetList.initiate())
+        store.dispatch(categoryGetList.initiate())
+        store.dispatch(photoGetList.initiate())
 
-    await Promise.all(store.dispatch(getRunningQueriesThunk()))
+        await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
-    return {
-        props: { object: {} }
+        return {
+            props: { object: {} }
+        }
     }
-})
+)
 
 type TPhotoCategory = TPhoto & { category: number }
 

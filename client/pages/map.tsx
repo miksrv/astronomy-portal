@@ -11,15 +11,18 @@ import React, { useMemo, useState } from 'react'
 import SkyMap from '@/components/celestial-map'
 import ObjectCloudSkyMap from '@/components/celestial-map/ObjectCloudSkyMap'
 
-export const getStaticProps = wrapper.getStaticProps((store) => async () => {
-    store.dispatch(catalogGetList.initiate())
+// getStaticProps
+export const getServerSideProps = wrapper.getStaticProps(
+    (store) => async () => {
+        store.dispatch(catalogGetList.initiate())
 
-    await Promise.all(store.dispatch(getRunningQueriesThunk()))
+        await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
-    return {
-        props: { object: {} }
+        return {
+            props: { object: {} }
+        }
     }
-})
+)
 
 const Map: React.FC = () => {
     const { data, isFetching } = useCatalogGetListQuery()
