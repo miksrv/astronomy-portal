@@ -14,7 +14,7 @@ const nextConfig = {
         // size, or format. Defaults to false.
         unoptimized: true
     },
-    // output: 'standalone',
+    output: 'standalone',
     reactStrictMode: true
 }
 

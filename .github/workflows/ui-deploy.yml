@@ -1,7 +1,7 @@
 name: UI Deploy
 
 on:
-  push:
+  pull_request:
     branches:
       - main
     paths:
@@ -61,7 +61,7 @@ jobs:
           export dateNow=$(date +"%d.%m.%Y %H:%M")
           echo "export const update = '$dateNow'" > update.ts
           yarn build
-          yarn export
+#          yarn export <- This is not needed if we use NodeJS server
         working-directory: client
 
       - name: Configure SSH
@@ -83,15 +83,21 @@ jobs:
             StrictHostKeyChecking no
           END
 
-      - name: Send files
-        run: rsync -avz -e ssh ./client/out/ vps:/var/www/astro.miksoft.pro
+      # If we just use nginx and the application is exported to plain HTML
+      #- name: Send files
+      #  run: rsync -avz -e ssh ./client/out/ vps:/var/www/astro.miksoft.pro
 
       # If we run NextJS on a Node server using PM2
-      # - name: Send files
-      #  run: rsync -avz -e ssh ./client/ vps:/var/www/astro.miksoft.pro
-      #
-      # - name: Restart PM2
-      #  run: ssh vps "cd /var/www/astro.miksoft.pro && pm2 restart astro.miksoft.pro"
+      - name: Send files
+        run: |
+          rsync -avz -e ssh ./client/.next/standalone vps:/var/www/astro.miksoft.pro
+          rsync -avz -e ssh ./client/.next/static vps:/var/www/astro.miksoft.pro/.next/static
+          rsync -avz -e ssh ./client/public vps:/var/www/astro.miksoft.pro/public
+
+      # For the first launch of the application on the server:
+      # pm2 start "node server.js" --name astro.miksoft.pro
+      - name: Restart PM2
+        run: ssh vps "cd /var/www/astro.miksoft.pro && pm2 restart astro.miksoft.pro"
 
       # If for deployment we use not SSH, but an FTP connection
       # - name: Export UI

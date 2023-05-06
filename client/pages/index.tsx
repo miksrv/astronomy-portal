@@ -13,16 +13,18 @@ import Calendar from '@/components/calendar'
 import PhotoGrid from '@/components/photo-grid'
 import Statistic from '@/components/statistic'
 
-export const getStaticProps = wrapper.getStaticProps((store) => async () => {
-    store.dispatch(catalogGetList.initiate())
-    store.dispatch(photoGetList.initiate({ limit: 4, order: 'random' }))
+export const getServerSideProps = wrapper.getServerSideProps(
+    (store) => async () => {
+        store.dispatch(catalogGetList.initiate())
+        store.dispatch(photoGetList.initiate({ limit: 4, order: 'random' }))
 
-    await Promise.all(store.dispatch(getRunningQueriesThunk()))
+        await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
-    return {
-        props: { object: {} }
+        return {
+            props: { object: {} }
+        }
     }
-})
+)
 
 export default function Home() {
     const { data: photoData, isLoading: photoLoading } = usePhotoGetListQuery({

@@ -84,7 +84,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                     )}
                     <Image
                         className={styles.photo}
-                        alt={title || ''}
+                        alt={title || `Астрофото ${catalog?.name}`}
                         width={400}
                         height={400}
                         src={

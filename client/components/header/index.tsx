@@ -91,7 +91,7 @@ const Header: React.FC = () => {
                         >
                             <Image
                                 src={logo}
-                                alt={'Логотип самодельной обсерватории'}
+                                alt={'Самодельная обсерватория'}
                                 width={30}
                                 height={30}
                             />
