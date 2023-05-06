@@ -90,7 +90,7 @@ jobs:
       # If we run NextJS on a Node server using PM2
       - name: Send files
         run: |
-          rsync -avz -e ssh ./client/.next/standalone vps:/var/www/astro.miksoft.pro
+          rsync -avz -e ssh ./client/.next/standalone/ vps:/var/www/astro.miksoft.pro
           rsync -avz -e ssh ./client/.next/static vps:/var/www/astro.miksoft.pro/.next/static
           rsync -avz -e ssh ./client/public vps:/var/www/astro.miksoft.pro/public
 
