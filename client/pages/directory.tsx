@@ -115,7 +115,7 @@ const Directory: React.FC = () => {
     return (
         <main>
             <NextSeo title={'Справочники'} />
-            <Grid>
+            <Grid className={'section'}>
                 <Grid.Column
                     computer={8}
                     tablet={16}
@@ -145,22 +145,25 @@ const Directory: React.FC = () => {
                             content={'Все данные объекта успешно удалены'}
                         />
                     )}
-                    <h4 className={'subTitle inline'}>Категории объектов</h4>
-                    {userAuth && (
-                        <Button
-                            icon={true}
-                            floated={'right'}
-                            labelPosition={'left'}
-                            color={'yellow'}
-                            size={'tiny'}
-                            onClick={handleAddCatalog}
-                        >
-                            <Icon name={'plus'} />
-                            Добавить
-                        </Button>
-                    )}
-                    <br />
-                    <br />
+                    <div className={'section'}>
+                        <h4 className={'subTitle inline'}>
+                            Категории объектов
+                        </h4>
+                        {userAuth && (
+                            <Button
+                                style={{ marginTop: -26 }}
+                                icon={true}
+                                floated={'right'}
+                                labelPosition={'left'}
+                                color={'yellow'}
+                                size={'tiny'}
+                                onClick={handleAddCatalog}
+                            >
+                                <Icon name={'plus'} />
+                                Добавить
+                            </Button>
+                        )}
+                    </div>
                     <CategoryTable
                         categories={categoriesData?.items}
                         loading={categoriesLoading || deleteCategoryLoading}
@@ -197,22 +200,23 @@ const Directory: React.FC = () => {
                             content={'Все данные автора успешно удалены'}
                         />
                     )}
-                    <h4 className={'subTitle inline'}>Авторы фотографий</h4>
-                    {userAuth && (
-                        <Button
-                            icon={true}
-                            floated={'right'}
-                            labelPosition={'left'}
-                            color={'yellow'}
-                            size={'tiny'}
-                            onClick={handleAddAuthor}
-                        >
-                            <Icon name={'plus'} />
-                            Добавить
-                        </Button>
-                    )}
-                    <br />
-                    <br />
+                    <div className={'section'}>
+                        <h4 className={'subTitle inline'}>Авторы фотографий</h4>
+                        {userAuth && (
+                            <Button
+                                style={{ marginTop: -26 }}
+                                icon={true}
+                                floated={'right'}
+                                labelPosition={'left'}
+                                color={'yellow'}
+                                size={'tiny'}
+                                onClick={handleAddAuthor}
+                            >
+                                <Icon name={'plus'} />
+                                Добавить
+                            </Button>
+                        )}
+                    </div>
                     <AuthorTable
                         authors={authorsData?.items}
                         loading={authorsLoading || deleteAuthorLoading}

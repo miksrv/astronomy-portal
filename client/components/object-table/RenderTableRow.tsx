@@ -73,11 +73,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                     </div>
                 )}
             </Table.Cell>
-            <Table.Cell
-                content={item.category || ''}
-                className={styles.cellCategory}
-            />
-            <Table.Cell width='one'>
+            <Table.Cell width={'one'}>
                 {photo && (
                     <Link
                         href={`/photos/${item.name}`}

@@ -128,12 +128,6 @@ main
   .ui.selection.dropdown .menu > .message
     color: $text-second !important
 
-  .ui.modal > .content
-    color: $colorBackground
-
-  .ui.modal:not(.confirm)>.content
-    padding: 0.5em 1em 1em !important
-
   .ui.input.focus > input, .ui.input > input:focus
     background-color: #565656
 
@@ -144,6 +138,12 @@ main
   .ui.label>.close.icon, .ui.label>.delete.icon
     color: $box-background !important
 
+.ui.modal > .content
+  color: $colorBackground !important
+
+.ui.modal:not(.confirm)>.content
+  padding: 0.5em 1em 1em !important
+
 @media only screen and (max-width: 768px)
   .ui.grid
     .column
@@ -151,4 +151,4 @@ main
       padding-bottom: 5px !important
 
 .ui.menu.fixed
-  z-index: 2000 !important
+  z-index: 1000 !important

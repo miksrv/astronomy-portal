@@ -12,7 +12,7 @@ import { Button, Dimmer, Grid, Loader } from 'semantic-ui-react'
 import CelestialMap from '@/components/celestial-map'
 import FilterList from '@/components/filter-list'
 
-import noPhotoSrc from '@/public/images/no-photo.png'
+import noimageServerUrl from '@/public/images/no-photo.png'
 
 import styles from './styles.module.sass'
 
@@ -49,8 +49,9 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
     photo,
     catalog
 }) => {
-    const [showLightbox, setShowLightbox] = useState<boolean>(false)
-    const [photoLightbox, setPhotoLightbox] = useState<string>('')
+    const [photoLightbox, setPhotoLightbox] = useState<string | undefined>(
+        undefined
+    )
 
     const photoDate = photo ? moment.utc(photo.date).format('D.MM.Y') : '---'
 
@@ -63,6 +64,8 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
             ? Math.round((photo.statistic.data_size / 1024) * 100) / 100
             : '---'
 
+    const imageServerUrl = `${process.env.NEXT_PUBLIC_API_HOST}photos/`
+
     return (
         <div className={classNames(styles.section, 'box')}>
             <Grid>
@@ -72,11 +75,13 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                     mobile={16}
                     className={styles.photoContainer}
                 >
-                    <div className={styles.loader}>
-                        <Dimmer active={!!loader || !photo}>
-                            <Loader />
-                        </Dimmer>
-                    </div>
+                    {(!!loader || !photo) && (
+                        <div className={styles.loader}>
+                            <Dimmer active={!!loader || !photo}>
+                                <Loader />
+                            </Dimmer>
+                        </div>
+                    )}
                     <Image
                         className={styles.photo}
                         alt={title || ''}
@@ -84,16 +89,13 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                         height={400}
                         src={
                             !loader && photo
-                                ? `${process.env.NEXT_PUBLIC_API_HOST}photos/${photo.image_name}_thumb.${photo.image_ext}`
-                                : noPhotoSrc
+                                ? `${imageServerUrl}${photo?.image_name}_thumb.${photo?.image_ext}`
+                                : noimageServerUrl
                         }
                         onClick={() => {
-                            if (photo) {
-                                setPhotoLightbox(
-                                    `${photo.image_name}.${photo.image_ext}`
-                                )
-                                setShowLightbox(true)
-                            }
+                            setPhotoLightbox(
+                                `${photo?.image_name}.${photo?.image_ext}`
+                            )
                         }}
                     />
                     <Button
@@ -198,10 +200,10 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                     </div>
                 </Grid.Column>
             </Grid>
-            {showLightbox && (
+            {photoLightbox && (
                 <Lightbox
-                    mainSrc={`${process.env.NEXT_PUBLIC_API_HOST}photo/${photoLightbox}`}
-                    onCloseRequest={() => setShowLightbox(false)}
+                    mainSrc={`${imageServerUrl}${photoLightbox}`}
+                    onCloseRequest={() => setPhotoLightbox(undefined)}
                 />
             )}
         </div>
