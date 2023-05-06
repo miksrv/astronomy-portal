@@ -18,16 +18,18 @@ import AuthorTable from '@/components/author-table'
 import CategoryFormModal from '@/components/category-form-modal'
 import CategoryTable from '@/components/category-table'
 
-export const getStaticProps = wrapper.getStaticProps((store) => async () => {
-    store.dispatch(authorGetList.initiate())
-    store.dispatch(categoryGetList.initiate())
+export const getServerSideProps = wrapper.getServerSideProps(
+    (store) => async () => {
+        store.dispatch(authorGetList.initiate())
+        store.dispatch(categoryGetList.initiate())
 
-    await Promise.all(store.dispatch(getRunningQueriesThunk()))
+        await Promise.all(store.dispatch(getRunningQueriesThunk()))
 
-    return {
-        props: { object: {} }
+        return {
+            props: { object: {} }
+        }
     }
-})
+)
 
 const Directory: React.FC = () => {
     const [showMessage, setShowMessage] = useState<boolean>(false)

@@ -7,7 +7,7 @@ import {
     usePhotoGetListQuery,
     useStatisticGetCatalogItemsQuery
 } from '@/api/api'
-import { store, wrapper } from '@/api/store'
+import { wrapper } from '@/api/store'
 import { isOutdated } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { NextSeo } from 'next-seo'
@@ -28,19 +28,20 @@ const Chart = dynamic(() => import('@/components/chart'), {
     ssr: false
 })
 
-export const getStaticPaths = async () => {
-    const storeObject = store()
-    const result = await storeObject.dispatch(
-        statisticGetCatalogItems.initiate()
-    )
+// Only if we build application as static HTML
+// export const getStaticPaths = async () => {
+//     const storeObject = store()
+//     const result = await storeObject.dispatch(
+//         statisticGetCatalogItems.initiate()
+//     )
+//
+//     return {
+//         fallback: false,
+//         paths: result.data?.items.map((name) => `/objects/${name}`)
+//     }
+// }
 
-    return {
-        fallback: false,
-        paths: result.data?.items.map((name) => `/objects/${name}`)
-    }
-}
-
-export const getStaticProps = wrapper.getStaticProps(
+export const getServerSideProps = wrapper.getServerSideProps(
     (store) => async (context) => {
         const name = context.params?.name
 

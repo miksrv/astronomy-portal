@@ -7,11 +7,10 @@ import {
     usePhotoGetListQuery,
     useStatisticGetPhotosItemsQuery
 } from '@/api/api'
-import { store, wrapper } from '@/api/store'
+import { wrapper } from '@/api/store'
 import { TPhoto } from '@/api/types'
 import { isOutdated } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
-import { GetStaticProps } from 'next'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
 import React, { useMemo } from 'react'
@@ -21,19 +20,20 @@ import ObjectCloud from '@/components/object-cloud'
 import PhotoSection from '@/components/photo-section'
 import PhotoTable from '@/components/photo-table'
 
-export const getStaticPaths = async () => {
-    const storeObject = store()
-    const result = await storeObject.dispatch(
-        statisticGetPhotosItems.initiate()
-    )
+// Only if we build application as static HTML
+// export const getStaticPaths = async () => {
+//     const storeObject = store()
+//     const result = await storeObject.dispatch(
+//         statisticGetPhotosItems.initiate()
+//     )
+//
+//     return {
+//         fallback: false,
+//         paths: result.data?.items.map((name) => `/photos/${name}`)
+//     }
+// }
 
-    return {
-        fallback: false,
-        paths: result.data?.items.map((name) => `/photos/${name}`)
-    }
-}
-
-export const getStaticProps: GetStaticProps = wrapper.getStaticProps(
+export const getServerSideProps = wrapper.getServerSideProps(
     (store) => async (context) => {
         const name = context.params?.name
 

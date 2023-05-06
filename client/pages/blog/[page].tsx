@@ -3,31 +3,30 @@ import {
     getRunningQueriesThunk,
     useBlogGetListQuery
 } from '@/api/api'
-import { store, wrapper } from '@/api/store'
-import { range } from '@/functions/helpers'
+import { wrapper } from '@/api/store'
 import { skipToken } from '@reduxjs/toolkit/query'
-import { GetStaticProps } from 'next'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
 import React from 'react'
 
 import BlogPage, { postPerPage } from '@/components/blog-page'
 
-export const getStaticPaths = async () => {
-    const storeObject = store()
-    const result = await storeObject.dispatch(
-        blogGetList.initiate({ limit: postPerPage, offset: 0 })
-    )
+// Only if we build application as static HTML
+// export const getStaticPaths = async () => {
+//     const storeObject = store()
+//     const result = await storeObject.dispatch(
+//         blogGetList.initiate({ limit: postPerPage, offset: 0 })
+//     )
+//
+//     const totalPages = Math.ceil((result?.data?.total || 0) / postPerPage)
+//
+//     return {
+//         fallback: false,
+//         paths: range(1, totalPages).map((page) => `/blog/${page}`)
+//     }
+// }
 
-    const totalPages = Math.ceil((result?.data?.total || 0) / postPerPage)
-
-    return {
-        fallback: false,
-        paths: range(1, totalPages).map((page) => `/blog/${page}`)
-    }
-}
-
-export const getStaticProps: GetStaticProps = wrapper.getStaticProps(
+export const getServerSideProps = wrapper.getServerSideProps(
     (store) => async (context) => {
         const page = context.params?.page
 

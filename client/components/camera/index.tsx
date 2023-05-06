@@ -61,7 +61,7 @@ const Camera: React.FC<TCameraProps> = (props) => {
                         <img
                             className={styles.photoImage}
                             src={cameraSrc}
-                            alt={'Изображение с камеры'}
+                            alt={'Изображение с камеры обсерватории'}
                         />
                     </span>
                     <Progress

@@ -59,8 +59,7 @@ jobs:
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
         name: Configure Client
         run: |
-          echo "NEXT_PUBLIC_API_HOST = '${{ secrets.NEXT_PUBLIC_API_HOST }}'
-          NEXT_PUBLIC_METRIKA = ' '" > .env
+          echo "NEXT_PUBLIC_API_HOST = '${{ secrets.NEXT_PUBLIC_API_HOST }}'" > .env
         working-directory: client
 
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
@@ -69,7 +68,7 @@ jobs:
           export dateNow=$(date +"%d.%m.%Y %H:%M")
           echo "export const update = '$dateNow'" > update.ts
           yarn build
-          yarn export
+#          yarn export <- This is not needed if we use NodeJS server
         working-directory: client
 
 #      - name: Tests

@@ -69,7 +69,7 @@ const PostGallery: React.FC<TPostGalleryProps> = ({ media, groupId }) => {
                         <Image
                             className={styles.sliderImage}
                             src={`${imageUrl}${item.file}`}
-                            alt={''}
+                            alt={'Фотография астрономического блока'}
                             width={item.width}
                             height={item.height}
                         />
