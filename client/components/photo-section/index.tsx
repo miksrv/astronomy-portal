@@ -7,7 +7,7 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 import Lightbox from 'react-image-lightbox'
 import 'react-image-lightbox/style.css'
-import { Button, Dimmer, Grid, Icon, Loader } from 'semantic-ui-react'
+import { Button, Dimmer, Grid, Loader } from 'semantic-ui-react'
 
 import CelestialMap from '@/components/celestial-map'
 import FilterList from '@/components/filter-list'
