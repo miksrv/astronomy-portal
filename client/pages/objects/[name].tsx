@@ -179,6 +179,9 @@ const Object: React.FC = () => {
                     'Фотографии устарели - есть новые данные с телескопа, с помощью которых можно собрать новое изображение объекта'
                 }
             />
+            {catalogData?.text && (
+                <div className={'section box text'}>{catalogData?.text}</div>
+            )}
             <PhotoTable
                 photos={photoList?.items}
                 loader={photoLoading}

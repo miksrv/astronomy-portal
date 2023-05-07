@@ -2,7 +2,6 @@ import { TCatalog } from '@/api/types'
 import { getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
 import moment from 'moment'
-import Link from 'next/link'
 import React, { useState } from 'react'
 import { Dimmer, Grid, Loader, Message } from 'semantic-ui-react'
 
@@ -35,7 +34,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
         : '---'
     const size = catalog?.statistic?.data_size
         ? Math.round((catalog.statistic.data_size / 1024) * 100) / 100
-        : '0'
+        : undefined
 
     const [editModalVisible, setEditModalVisible] = useState<boolean>(false)
 
@@ -95,7 +94,9 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                                     <span className={styles.value}>
                                         Накоплено данных:
                                     </span>
-                                    {size} Гб
+                                    {catalog?.statistic?.data_size
+                                        ? `${size} Гб`
+                                        : '---'}
                                 </div>
                                 <div>
                                     <span className={styles.value}>
@@ -111,12 +112,6 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                                     {catalog?.coord_dec}
                                 </div>
                             </div>
-                            <Link
-                                href={'/objects/'}
-                                title={'Список всех астрономических объектов'}
-                            >
-                                Вернуться к списку всех объектов
-                            </Link>
                         </Grid.Column>
                         <Grid.Column
                             computer={8}

@@ -62,7 +62,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
     const filesize =
         !loader && photo?.statistic?.data_size
             ? Math.round((photo.statistic.data_size / 1024) * 100) / 100
-            : '---'
+            : undefined
 
     const imageServerUrl = `${process.env.NEXT_PUBLIC_API_HOST}photos/`
 
@@ -137,7 +137,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                             <div>
                                 <span className={styles.value}>Кадров:</span>
                                 {photo?.statistic?.frames || '---'}
-                                {!!catalog?.files?.length && (
+                                {photo?.statistic?.frames ? (
                                     <span className={styles.marginLeft}>
                                         (
                                         <Link
@@ -148,13 +148,15 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                                         </Link>
                                         )
                                     </span>
+                                ) : (
+                                    ''
                                 )}
                             </div>
                             <div>
                                 <span className={styles.value}>
                                     Накоплено данных:
                                 </span>
-                                {filesize} Гб
+                                {filesize ? `${filesize} Гб` : '---'}
                             </div>
                             <div>
                                 <span className={styles.value}>Категория:</span>
@@ -182,7 +184,6 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                             <FilterList filters={photo?.filters} />
                         </Grid.Column>
                     </Grid>
-                    <div className={styles.text}>{catalog?.text}</div>
                     <div className={styles.celestialMap}>
                         <CelestialMap
                             objects={

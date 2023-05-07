@@ -2,6 +2,7 @@ import { TBlogMedia } from '@/api/types'
 import Image from 'next/image'
 import Carousel from 'nuka-carousel'
 import React, { useState } from 'react'
+import Lightbox from 'react-image-lightbox'
 import ReactPlayer from 'react-player'
 import { Icon } from 'semantic-ui-react'
 
@@ -20,11 +21,12 @@ const config = {
 }
 
 const PostGallery: React.FC<TPostGalleryProps> = ({ media, groupId }) => {
-    // const [showLightbox, setShowLightbox] = useState<boolean>(false)
-    // const [photoIndex, setCurrentIndex] = useState<number>(0)
+    const [showLightbox, setShowLightbox] = useState<boolean>(false)
+    const [photoIndex, setCurrentIndex] = useState<number>(0)
     const [playVideo, setPlayVideo] = useState<boolean>(false)
 
     const imageUrl = process.env.NEXT_PUBLIC_API_HOST + 'news/' + groupId + '/'
+    const getPhotoByIndex = (index: number) => imageUrl + media?.[index]?.file
 
     return (
         <Carousel
@@ -41,7 +43,7 @@ const PostGallery: React.FC<TPostGalleryProps> = ({ media, groupId }) => {
             }}
             onDragEnd={() => setPlayVideo(false)}
         >
-            {media?.map((item) => (
+            {media?.map((item, key) => (
                 <div
                     className={styles.sliderItem}
                     key={item.file}
@@ -72,32 +74,32 @@ const PostGallery: React.FC<TPostGalleryProps> = ({ media, groupId }) => {
                             alt={'Фотография астрономического блока'}
                             width={item.width}
                             height={item.height}
+                            onClick={() => {
+                                setCurrentIndex(key)
+                                setShowLightbox(true)
+                            }}
                         />
                     )}
                 </div>
             ))}
-            {/*{showLightbox && (*/}
-            {/*    <Lightbox*/}
-            {/*        mainSrc={getPhotoSrc(photoIndex)}*/}
-            {/*        nextSrc={getPhotoSrc(*/}
-            {/*            (photoIndex + 1) % galleryPhotos.length*/}
-            {/*        )}*/}
-            {/*        prevSrc={getPhotoSrc(*/}
-            {/*            (photoIndex + galleryPhotos.length - 1) %*/}
-            {/*            galleryPhotos.length*/}
-            {/*        )}*/}
-            {/*        onCloseRequest={() => setShowLightbox(false)}*/}
-            {/*        onMovePrevRequest={() =>*/}
-            {/*            setCurrentIndex(*/}
-            {/*                (photoIndex + galleryPhotos.length - 1) %*/}
-            {/*                galleryPhotos.length*/}
-            {/*            )*/}
-            {/*        }*/}
-            {/*        onMoveNextRequest={() =>*/}
-            {/*            setCurrentIndex((photoIndex + 1) % galleryPhotos.length)*/}
-            {/*        }*/}
-            {/*    />*/}
-            {/*)}*/}
+            {showLightbox && (
+                <Lightbox
+                    mainSrc={getPhotoByIndex(photoIndex)}
+                    nextSrc={getPhotoByIndex((photoIndex + 1) % media?.length!)}
+                    prevSrc={getPhotoByIndex(
+                        (photoIndex + media?.length! - 1) % media?.length!
+                    )}
+                    onCloseRequest={() => setShowLightbox(false)}
+                    onMovePrevRequest={() =>
+                        setCurrentIndex(
+                            (photoIndex + media?.length! - 1) % media?.length!
+                        )
+                    }
+                    onMoveNextRequest={() =>
+                        setCurrentIndex((photoIndex + 1) % media?.length!)
+                    }
+                />
+            )}
         </Carousel>
     )
 }
