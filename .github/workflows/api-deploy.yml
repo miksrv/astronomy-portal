@@ -58,4 +58,4 @@ jobs:
 
       - name: Send files
         run: |
-          rsync -avz -e ssh server/app vps:/var/www/astro.miksoft.pro/api/app
+          rsync -avz -e ssh server/app/ vps:/var/www/astro.miksoft.pro/api/app
