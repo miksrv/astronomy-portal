@@ -12,7 +12,12 @@ class BlogLibrary
 
     function __construct()
     {
-        $this->MadelineProto = new \danog\MadelineProto\API('session.madeline');
+        $settings = (new \danog\MadelineProto\Settings\Database\Mysql)
+            ->setUri(getenv('database.' . ENVIRONMENT . '.hostname'))
+            ->setDatabase(getenv('database.' . ENVIRONMENT . '.username'))
+            ->setPassword(getenv('database.' . ENVIRONMENT . '.password'));
+
+        $this->MadelineProto = new \danog\MadelineProto\API('session.madeline', $settings);
         $this->MadelineProto->start();
     }
 

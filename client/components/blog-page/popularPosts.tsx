@@ -1,5 +1,5 @@
 import { TBlog } from '@/api/types'
-import { sliceText } from '@/functions/helpers'
+import { isMobile, sliceText } from '@/functions/helpers'
 import classNames from 'classnames'
 import Image from 'next/image'
 import React from 'react'
@@ -55,7 +55,8 @@ const PopularPostItem: React.FC<Partial<TBlog> & { loading?: boolean }> = ({
     return (
         <Grid.Row className={styles.popularItem}>
             <Grid.Column
-                width={4}
+                computer={4}
+                mobile={5}
                 className={styles.popularImageContainer}
             >
                 <Image
@@ -66,7 +67,12 @@ const PopularPostItem: React.FC<Partial<TBlog> & { loading?: boolean }> = ({
                     height={85}
                 />
             </Grid.Column>
-            <Grid.Column width={12}>{sliceText(text || '', 220)}</Grid.Column>
+            <Grid.Column
+                computer={12}
+                mobile={11}
+            >
+                {sliceText(text || '', isMobile ? 150 : 220)}
+            </Grid.Column>
         </Grid.Row>
     )
 }

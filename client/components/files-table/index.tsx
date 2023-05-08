@@ -23,7 +23,7 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
     const [photoList, setPhotoList] = useState<string[]>([])
     const [sortField, setSortField] = useState<TObjectSortable>('date_obs')
     const [sortOrder, setSortOrder] = useState<TSortOrdering>('ascending')
-    const [showAccordion, setAccordion] = useState<boolean>(false)
+    const [showSpoiler, setShowSpoiler] = useState<boolean>(false)
     const [filesList, setFilesList] = useState<TFIle[] | undefined>(files)
 
     const handlerSortClick = (field: TObjectSortable) => {
@@ -51,6 +51,10 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
         setFilesList(sortingFilesList || [])
     }, [files, sortOrder, sortField])
 
+    const showAdditionalInfo: boolean = !!filesList?.filter(
+        ({ star_count }) => star_count
+    )?.length
+
     useEffect(() => {
         const photoList = filesList
             ?.filter((file) => file.image)
@@ -73,12 +77,12 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
             </Dimmer>
             <Accordion inverted>
                 <Accordion.Title
-                    active={showAccordion}
-                    onClick={() => setAccordion(!showAccordion)}
+                    active={showSpoiler}
+                    onClick={() => setShowSpoiler(!showSpoiler)}
                 >
                     <Icon name={'dropdown'} /> Список снятых кадров
                 </Accordion.Title>
-                <Accordion.Content active={showAccordion}>
+                <Accordion.Content active={showSpoiler}>
                     <Table
                         unstackable
                         singleLine
@@ -91,6 +95,7 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
                         <RenderTableHeader
                             sort={sortField}
                             order={sortOrder}
+                            showAdditional={showAdditionalInfo}
                             handlerSortClick={(field: TObjectSortable) =>
                                 handlerSortClick(field)
                             }
@@ -99,11 +104,12 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
                             {filesList?.length ? (
                                 filesList?.map((file, key) => (
                                     <RenderTableRow
+                                        key={file.file_name}
                                         file={file}
                                         itemId={key}
                                         object={objectName}
+                                        showAdditional={showAdditionalInfo}
                                         onPhotoClick={handlePhotoClick}
-                                        key={file.file_name}
                                     />
                                 ))
                             ) : (

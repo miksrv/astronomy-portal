@@ -61,6 +61,33 @@ class Photo extends ResourceController
     }
 
     /**
+     * Download photo as file
+     * @param $id
+     * @param $date
+     * @return ResponseInterface
+     */
+    public function download($id = null, $date = null): ResponseInterface
+    {
+        try {
+            $photoModel = new PhotoModel();
+            $photoData  = $photoModel
+                ->select('image_name, image_ext')
+                ->where(['object' => $id, 'date' => $date])
+                ->first();
+
+            $photoLink  = FCPATH . 'photos/' .  $photoData->image_name . '.' . $photoData->image_ext;
+
+            if ($photoData && file_exists($photoLink)) {
+                return $this->response->download($photoLink, null);
+            }
+
+            return $this->failNotFound();
+        } catch (Exception $e) {
+            return $this->failNotFound();
+        }
+    }
+
+    /**
      * Create new photo item.
      * First, use the photo upload function, which returns the data of the uploaded image.
      * @param null $id

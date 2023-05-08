@@ -14,37 +14,37 @@ class AddBlog extends Migration
                 'constraint'     => 5,
                 'unsigned'       => true,
                 'unique'         => true,
-                'auto_increment' => true,
+                'auto_increment' => true
             ],
             'telegram_id' => [
                 'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned'   => true,
+                'unsigned'   => true
             ],
             'telegram_date' => [
                 'type'       => 'INT',
                 'constraint' => 11,
-                'unsigned'   => true,
+                'unsigned'   => true
             ],
             'group_id' => [
                 'type'       => 'BIGINT',
                 'constraint' => 11,
-                'unsigned'   => true,
+                'unsigned'   => true
             ],
             'views' => [
                 'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned'   => true,
+                'unsigned'   => true
             ],
             'forwards' => [
                 'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned'   => true,
+                'unsigned'   => true
             ],
             'replies' => [
                 'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned'   => true,
+                'unsigned'   => true
             ],
             'text' => [
                 'type' => 'TEXT',
@@ -54,18 +54,12 @@ class AddBlog extends Migration
                 'type' => 'TEXT',
                 'null' => true
             ],
-            'created_at' => [
-                'type' => 'datetime',
-                'null' => true,
-            ],
-            'updated_at' => [
-                'type' => 'datetime',
-                'null' => true,
-            ],
+            'created_at DATETIME default current_timestamp',
+            'updated_at DATETIME default current_timestamp',
             'deleted_at' => [
-                'type' => 'datetime',
-                'null' => true,
-            ],
+                'type' => 'DATETIME',
+                'null' => true
+            ]
         ]);
         $this->forge->addPrimaryKey('id');
         $this->forge->addKey('telegram_id');

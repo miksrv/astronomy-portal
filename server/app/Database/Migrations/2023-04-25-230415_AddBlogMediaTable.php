@@ -14,70 +14,64 @@ class AddNewsMedia extends Migration
                 'constraint'     => 5,
                 'unsigned'       => true,
                 'unique'         => true,
-                'auto_increment' => true,
+                'auto_increment' => true
             ],
             'blog_id' => [
                 'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned'   => true,
+                'unsigned'   => true
             ],
             'telegram_id' => [
                 'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned'   => true,
+                'unsigned'   => true
             ],
             'telegram_date' => [
                 'type'       => 'INT',
                 'constraint' => 11,
-                'unsigned'   => true,
+                'unsigned'   => true
             ],
             'group_id' => [
                 'type'       => 'BIGINT',
                 'constraint' => 11,
-                'unsigned'   => true,
+                'unsigned'   => true
             ],
             'views' => [
                 'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned'   => true,
+                'unsigned'   => true
             ],
             'forwards' => [
                 'type'       => 'INT',
                 'constraint' => 5,
-                'unsigned'   => true,
+                'unsigned'   => true
             ],
             'file' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 250,
-                'null'       => true,
+                'null'       => true
             ],
             'file_type' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 40,
-                'null'       => true,
+                'null'       => true
             ],
             'height' => [
                 'type'       => 'INT',
                 'constraint' => 10,
-                'unsigned'   => true,
+                'unsigned'   => true
             ],
             'width' => [
                 'type'       => 'INT',
                 'constraint' => 10,
-                'unsigned'   => true,
+                'unsigned'   => true
             ],
-            'created_at' => [
-                'type' => 'datetime',
-                'null' => true,
-            ],
-            'updated_at' => [
-                'type' => 'datetime',
-                'null' => true,
-            ],
+            'created_at DATETIME default current_timestamp',
+            'updated_at DATETIME default current_timestamp',
             'deleted_at' => [
-                'type' => 'datetime',
-                'null' => true,
-            ],
+                'type' => 'DATETIME',
+                'null' => true
+            ]
         ]);
         $this->forge->addPrimaryKey('id');
         $this->forge->addKey('telegram_id');

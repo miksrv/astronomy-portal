@@ -99,13 +99,14 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                         }}
                     />
                     <Button
+                        as={'a'}
                         size={'mini'}
                         icon={'download'}
                         color={'green'}
                         className={styles.buttonDownload}
                         href={
-                            `${process.env.NEXT_PUBLIC_API_HOST}get/photo/download` +
-                            `?object=${photo?.object}&date=${photo?.date}`
+                            `${process.env.NEXT_PUBLIC_API_HOST}photo/download/` +
+                            `${photo?.object}/${photo?.date}`
                         }
                     />
                 </Grid.Column>

@@ -8,6 +8,7 @@ import {
 } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { APIResponseStatistic } from '@/api/types'
+import { isMobile } from '@/functions/helpers'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -45,8 +46,6 @@ export const menuItems: TMenuItems[] = [
 
 const Header: React.FC = () => {
     const dispatch = useAppDispatch()
-    const currentMobile: boolean =
-        typeof window !== 'undefined' ? window.innerWidth <= 760 : false
     const { data, isLoading } = useStatisticGetQuery()
     const [getAuthMe] = useAuthGetMeMutation()
     const router = useRouter()
@@ -83,7 +82,7 @@ const Header: React.FC = () => {
             inverted
         >
             <Container>
-                {!currentMobile && (
+                {!isMobile && (
                     <Menu.Item>
                         <Link
                             href={'/'}
@@ -98,7 +97,7 @@ const Header: React.FC = () => {
                         </Link>
                     </Menu.Item>
                 )}
-                {currentMobile ? (
+                {isMobile ? (
                     <Menu.Item
                         className={styles.hamburger}
                         icon={'bars'}
