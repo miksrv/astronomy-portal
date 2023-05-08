@@ -6,6 +6,7 @@ import { TObjectSortable, TSortOrdering } from './types'
 type TTableHeader = {
     sort: TObjectSortable
     order: TSortOrdering
+    showAdditional?: boolean
     handlerSortClick?: (field: TObjectSortable) => void
 }
 
@@ -27,25 +28,32 @@ const HEADER_FIELDS: THeaderFields[] = [
     { key: 'date_obs', name: 'Дата съемки' }
 ]
 
-const RenderTableHeader: React.FC<TTableHeader> = (props) => {
-    const { sort, order, handlerSortClick } = props
-
-    return (
-        <Table.Header>
-            <Table.Row>
-                {HEADER_FIELDS.map((item, key) => (
-                    <Table.HeaderCell
-                        key={key}
-                        className={'tableHeaderSticky'}
-                        sorted={sort === item.key ? order : undefined}
-                        onClick={() => handlerSortClick?.(item.key)}
-                    >
-                        {item.name}
-                    </Table.HeaderCell>
-                ))}
-            </Table.Row>
-        </Table.Header>
-    )
-}
+const RenderTableHeader: React.FC<TTableHeader> = ({
+    sort,
+    order,
+    showAdditional,
+    handlerSortClick
+}) => (
+    <Table.Header>
+        <Table.Row>
+            {HEADER_FIELDS.filter((item) =>
+                !showAdditional
+                    ? !['star_count', 'sky_background', 'hfr'].includes(
+                          item.key
+                      )
+                    : true
+            ).map((item, key) => (
+                <Table.HeaderCell
+                    key={key}
+                    className={'tableHeaderSticky'}
+                    sorted={sort === item.key ? order : undefined}
+                    onClick={() => handlerSortClick?.(item.key)}
+                >
+                    {item.name}
+                </Table.HeaderCell>
+            ))}
+        </Table.Row>
+    </Table.Header>
+)
 
 export default RenderTableHeader

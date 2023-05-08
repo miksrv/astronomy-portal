@@ -112,14 +112,25 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                 {itemWeatherEvent && (
                     <div className={classNames(styles.event, styles.weather)}>
                         {itemWeatherEvent.clouds !== null && (
-                            <>
-                                <Icon name='cloud' />
-                                {itemWeatherEvent.clouds}{' '}
-                            </>
+                            <span>
+                                <Icon
+                                    name='cloud'
+                                    style={{ marginRight: 5 }}
+                                />
+                                {Math.round(itemWeatherEvent.clouds)}
+                            </span>
                         )}
-                        <Icon name='thermometer' />
-                        {itemWeatherEvent.temperature} <Icon name='send' />
-                        {itemWeatherEvent.wind_speed}
+                        <span>
+                            <Icon
+                                name='thermometer'
+                                style={{ marginRight: 0 }}
+                            />
+                            {itemWeatherEvent.temperature}
+                        </span>
+                        <span>
+                            <Icon name='send' />
+                            {itemWeatherEvent.wind_speed}
+                        </span>
                     </div>
                 )}
                 {itemAstroEvents &&
@@ -134,14 +145,20 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                                         styles.telescope
                                     )}
                                 >
-                                    <Icon name='star outline' />
-                                    {itemAstroEvents.catalog_items.length}{' '}
-                                    <Icon name='clock outline' />
-                                    {Math.round(
-                                        itemAstroEvents.total_exposure / 60
-                                    )}{' '}
-                                    <Icon name='image outline' />
-                                    {itemAstroEvents.frames_count}
+                                    <span>
+                                        <Icon name='star outline' />
+                                        {itemAstroEvents.catalog_items.length}
+                                    </span>
+                                    <span>
+                                        <Icon name='clock outline' />
+                                        {Math.round(
+                                            itemAstroEvents.total_exposure / 60
+                                        )}
+                                    </span>
+                                    <span>
+                                        <Icon name='image outline' />
+                                        {itemAstroEvents.frames_count}
+                                    </span>
                                 </div>
                             }
                         />
@@ -149,11 +166,15 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                         <div
                             className={classNames(
                                 styles.event,
-                                styles.telescope,
-                                styles.mobile
+                                styles.telescope
                             )}
                         >
-                            {Math.round(itemAstroEvents.total_exposure / 60)}
+                            <span>
+                                <Icon name='clock outline' />
+                                {Math.round(
+                                    itemAstroEvents.total_exposure / 60
+                                )}
+                            </span>
                         </div>
                     ))}
             </td>

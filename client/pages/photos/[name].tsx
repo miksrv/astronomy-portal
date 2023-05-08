@@ -13,8 +13,8 @@ import { isOutdated } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
-import React, { useMemo } from 'react'
-import { Message } from 'semantic-ui-react'
+import React, { useMemo, useState } from 'react'
+import { Accordion, Icon, Message } from 'semantic-ui-react'
 
 import ObjectCloud from '@/components/object-cloud'
 import PhotoSection from '@/components/photo-section'
@@ -57,6 +57,8 @@ const Photo: React.FC = () => {
     const photoDate = router.query.date
     const objectName =
         typeof routerObject === 'string' ? routerObject : skipToken
+
+    const [showSpoiler, setShowSpoiler] = useState<boolean>(false)
 
     const {
         data: catalogData,
@@ -130,7 +132,19 @@ const Photo: React.FC = () => {
                 }
             />
             {catalogData?.text && (
-                <div className={'section box text'}>{catalogData?.text}</div>
+                <div className={'section box table'}>
+                    <Accordion inverted>
+                        <Accordion.Title
+                            active={showSpoiler}
+                            onClick={() => setShowSpoiler(!showSpoiler)}
+                        >
+                            <Icon name={'dropdown'} /> Описание объекта
+                        </Accordion.Title>
+                        <Accordion.Content active={showSpoiler}>
+                            <div className={'text'}>{catalogData?.text}</div>
+                        </Accordion.Content>
+                    </Accordion>
+                </div>
             )}
             <PhotoTable
                 photos={photoList?.items}

@@ -65,6 +65,7 @@ $routes->options('author', 'Author::create');
 $routes->options('author/(:num)', 'Author::update/$1');
 
 $routes->get('photo', 'Photo::list');
+$routes->get('photo/download/(:any)/(:any)', 'Photo::download/$1/$2');
 $routes->get('photo/(:any)', 'Photo::show/$1');
 $routes->get('photo/(:any)/(:any)', 'Photo::show/$1/$2');
 $routes->post('photo', 'Photo::create');

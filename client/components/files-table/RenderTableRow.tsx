@@ -12,6 +12,7 @@ type TTableRow = {
     file: TFIle
     itemId: number
     object: string
+    showAdditional?: boolean
     onPhotoClick: (photoId: number) => void
 }
 
@@ -19,6 +20,7 @@ const RenderTableRow: React.FC<TTableRow> = ({
     file,
     itemId,
     object,
+    showAdditional,
     onPhotoClick
 }) => (
     <Table.Row>
@@ -42,9 +44,13 @@ const RenderTableRow: React.FC<TTableRow> = ({
         <Table.Cell content={file.ccd_temp} />
         <Table.Cell content={file.gain} />
         <Table.Cell content={file.offset} />
-        <Table.Cell content={file.star_count} />
-        <Table.Cell content={file.sky_background} />
-        <Table.Cell content={file.hfr} />
+        {showAdditional && (
+            <>
+                <Table.Cell content={file.star_count} />
+                <Table.Cell content={file.sky_background} />
+                <Table.Cell content={file.hfr} />
+            </>
+        )}
         <Table.Cell className={styles.moonDate}>
             <MoonPhase
                 date={moment.utc(file.date_obs).utcOffset('GMT+05:00')}

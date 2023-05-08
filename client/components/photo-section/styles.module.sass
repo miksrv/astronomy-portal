@@ -8,12 +8,17 @@
     flex-direction: column
     justify-content: space-between
     padding-left: 0 !important
-    padding-bottom: 18px !important
+    padding-bottom: 14px !important
 
     @media only screen and (max-width: 768px)
       padding: 10px !important
 
     .parameters
+      margin-bottom: 0
+
+      @media only screen and (max-width: 768px)
+        margin-bottom: 10px
+
       .value
         color: $text-second
         margin-right: 5px
@@ -22,6 +27,11 @@
         margin-left: 5px
 
   .photoContainer
+    margin-bottom: -5px
+
+    @media only screen and (max-width: 768px)
+      margin-bottom: 0
+
     .loader
       position: absolute
       height: 96.1%
@@ -48,7 +58,6 @@
 
   .celestialMap
     position: relative
-    min-height: 241px
 
     @media only screen and (max-width: 768px)
       min-height: auto
@@ -56,10 +65,6 @@
 
     canvas
       width: 100% !important
-
-  .parameters
-    @media only screen and (max-width: 768px)
-      margin-bottom: 10px
 
 @media only screen and (max-width: 768px)
   .text

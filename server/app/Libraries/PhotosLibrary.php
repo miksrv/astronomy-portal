@@ -30,9 +30,9 @@ class PhotosLibrary
             $where['date'] = $date;
         }
 
-        $modelPhoto = new PhotoModel();
+        $photoModel = new PhotoModel();
         $filesModel = new FilesModel();
-        $photoItem  = $modelPhoto
+        $photoItem  = $photoModel
             ->select('photos.*, authors.id as author_id, authors.name as author_name, authors.link as author_link')
             ->join('authors', 'authors.id = photos.author_id', 'left')
             ->where($where)
@@ -65,21 +65,21 @@ class PhotosLibrary
      */
     function getPhotoList(string $filterObject = null, int $filterLimit = 0, string $order = 'date'): ?array
     {
-        $modelPhoto = new PhotoModel();
+        $photoModel = new PhotoModel();
         $modelFiles = new FilesModel();
         $modelFiles->select(['object', 'filter', 'date_obs', 'exptime']);
-        $modelPhoto
+        $photoModel
             ->select('photos.*, authors.id as author_id, authors.name as author_name, authors.link as author_link')
             ->join('authors', 'authors.id = photos.author_id', 'left')
             ->orderBy($order === 'random' ? 'RAND()' : $order, 'DESC');
 
         if ($filterObject)
         {
-            $modelPhoto->where(['object' => $filterObject]);
+            $photoModel->where(['object' => $filterObject]);
             $modelFiles->where(['object' => $filterObject]);
         }
 
-        $photoList = $modelPhoto->findAll($filterLimit);
+        $photoList = $photoModel->findAll($filterLimit);
         $filesList = $modelFiles->findAll();
 
         if (!$photoList) return null;
