@@ -260,7 +260,7 @@ export type TFIle = {
     star_count: number
     sky_background: number
     hfr: number
-    image: boolean
+    preview: boolean
 }
 
 export type TWeatherStatistic = {

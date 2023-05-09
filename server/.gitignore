@@ -130,3 +130,4 @@ nb-configuration.xml
 /public/session*
 /public/photo/
 /public/news/
+/public/uploads/
