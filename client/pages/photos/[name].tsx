@@ -1,6 +1,7 @@
 import {
     catalogGetItem,
     getRunningQueriesThunk,
+    imageHost,
     photoGetList,
     statisticGetPhotosItems,
     useCatalogGetItemQuery,
@@ -102,7 +103,7 @@ const Photo: React.FC = () => {
                     images: [
                         {
                             height: 743,
-                            url: `${process.env.NEXT_PUBLIC_API_HOST}photos/${photoItem?.image_name}_thumb.${photoItem?.image_ext}`,
+                            url: `${imageHost}photos/${photoItem?.image_name}_thumb.${photoItem?.image_ext}`,
                             width: 1280
                         }
                     ],
@@ -141,7 +142,9 @@ const Photo: React.FC = () => {
                             <Icon name={'dropdown'} /> Описание объекта
                         </Accordion.Title>
                         <Accordion.Content active={showSpoiler}>
-                            <div className={'text'}>{catalogData?.text}</div>
+                            <div className={'textBlock'}>
+                                {catalogData?.text}
+                            </div>
                         </Accordion.Content>
                     </Accordion>
                 </div>

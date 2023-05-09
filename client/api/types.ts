@@ -74,6 +74,7 @@ export interface APIRequestCatalog {
     name: string
     text: string
     title: string
+    image?: string
 }
 
 export interface APIResponseCatalogList {

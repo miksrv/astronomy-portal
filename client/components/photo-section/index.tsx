@@ -1,3 +1,4 @@
+import { imageHost } from '@/api/api'
 import { TCatalog, TPhoto } from '@/api/types'
 import { getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
@@ -12,7 +13,7 @@ import { Button, Dimmer, Grid, Loader } from 'semantic-ui-react'
 import CelestialMap from '@/components/celestial-map'
 import FilterList from '@/components/filter-list'
 
-import noimageServerUrl from '@/public/images/no-photo.png'
+import noImageServerUrl from '@/public/images/no-photo.png'
 
 import styles from './styles.module.sass'
 
@@ -64,7 +65,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
             ? Math.round((photo.statistic.data_size / 1024) * 100) / 100
             : undefined
 
-    const imageServerUrl = `${process.env.NEXT_PUBLIC_API_HOST}photos/`
+    const imageServerUrl = `${imageHost}photos/`
 
     return (
         <div className={classNames(styles.section, 'box')}>
@@ -77,7 +78,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                 >
                     {(!!loader || !photo) && (
                         <div className={styles.loader}>
-                            <Dimmer active={!!loader || !photo}>
+                            <Dimmer>
                                 <Loader />
                             </Dimmer>
                         </div>
@@ -90,7 +91,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                         src={
                             !loader && photo
                                 ? `${imageServerUrl}${photo?.image_name}_thumb.${photo?.image_ext}`
-                                : noimageServerUrl
+                                : noImageServerUrl
                         }
                         onClick={() => {
                             setPhotoLightbox(

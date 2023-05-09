@@ -1,4 +1,5 @@
-import { useAppSelector } from '@/api/hooks'
+import { openFormCatalog } from '@/api/applicationSlice'
+import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { TCategory } from '@/api/types'
 import React, { useMemo } from 'react'
 import { Button, Dropdown, Icon, Input } from 'semantic-ui-react'
@@ -8,20 +9,14 @@ import styles from './styles.module.sass'
 type TToolbarProps = {
     search: string
     categories?: TCategory[]
-    onAddCatalog?: () => void
     onChangeSearch: (search: string) => void
     onChangeCategories: (id: number[]) => void
 }
 
 const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
-    const {
-        search,
-        categories,
-        onAddCatalog,
-        onChangeSearch,
-        onChangeCategories
-    } = props
+    const { search, categories, onChangeSearch, onChangeCategories } = props
 
+    const dispatch = useAppDispatch()
     const userAuth = useAppSelector((state) => state.auth.userAuth)
 
     const handleChange = ({
@@ -64,7 +59,7 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
                     size={'mini'}
                     color={'yellow'}
                     labelPosition={'left'}
-                    onClick={onAddCatalog}
+                    onClick={() => dispatch(openFormCatalog(true))}
                 >
                     <Icon name={'plus'} />
                     Добавить

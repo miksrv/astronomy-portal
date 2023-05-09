@@ -1,6 +1,7 @@
 import {
     catalogGetItem,
     getRunningQueriesThunk,
+    imageHost,
     photoGetList,
     statisticGetCatalogItems,
     useCatalogGetItemQuery,
@@ -141,7 +142,7 @@ const Object: React.FC = () => {
     return (
         <main>
             <NextSeo
-                title={`${objectTitle} - Данные астрономического объекта`}
+                title={objectTitle}
                 description={catalogData?.text
                     .replace(/(\r\n|\n|\r)/gm, '')
                     .slice(0, 200)}
@@ -149,7 +150,7 @@ const Object: React.FC = () => {
                     images: [
                         {
                             height: 743,
-                            url: `${process.env.NEXT_PUBLIC_API_HOST}photos/${photoList?.items?.[0].image_name}_thumb.${photoList?.items?.[0]?.image_ext}`,
+                            url: `${imageHost}photos/${photoList?.items?.[0].image_name}_thumb.${photoList?.items?.[0]?.image_ext}`,
                             width: 1280
                         }
                     ],
@@ -180,7 +181,9 @@ const Object: React.FC = () => {
                 }
             />
             {catalogData?.text && (
-                <div className={'section box text'}>{catalogData?.text}</div>
+                <div className={'section box textBlock'}>
+                    {catalogData?.text}
+                </div>
             )}
             <PhotoTable
                 photos={photoList?.items}

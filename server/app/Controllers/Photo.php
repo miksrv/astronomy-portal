@@ -27,7 +27,7 @@ class Photo extends ResourceController
      */
     public function list(): ResponseInterface
     {
-        $filterObject = $this->request->getGet('object', FILTER_SANITIZE_STRING);
+        $filterObject = $this->request->getGet('object', FILTER_SANITIZE_SPECIAL_CHARS);
         $filterLimit  = $this->request->getGet('limit', FILTER_SANITIZE_NUMBER_INT);
         $orderColumn  = $this->request->getGet('order', FILTER_SANITIZE_SPECIAL_CHARS) ?? 'date';
         $photoLibrary = new PhotosLibrary();
@@ -56,6 +56,8 @@ class Photo extends ResourceController
             }
             return $this->failNotFound();
         } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this->failNotFound();
         }
     }
@@ -83,6 +85,8 @@ class Photo extends ResourceController
 
             return $this->failNotFound();
         } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this->failNotFound();
         }
     }
@@ -140,6 +144,8 @@ class Photo extends ResourceController
 
             return $this->respondCreated($input);
         } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this->failServerError();
         }
     }
@@ -215,6 +221,8 @@ class Photo extends ResourceController
 
             return $this->failNotFound();
         } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this->failServerError();
         }
     }
@@ -237,6 +245,8 @@ class Photo extends ResourceController
 
             return $this->failNotFound();
         } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this->failServerError();
         }
     }

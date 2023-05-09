@@ -37,6 +37,11 @@ class AddCatalogTable extends Migration
                 'type'       => 'FLOAT',
                 'null'       => false
             ],
+            'image' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+                'null'       => true
+            ],
             'created_at DATETIME default current_timestamp',
             'updated_at DATETIME default current_timestamp',
             'deleted_at' => [

@@ -71,6 +71,8 @@ class Category extends ResourceController
 
             return $this->respondCreated($input);
         } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this->failServerError();
         }
     }
@@ -104,6 +106,8 @@ class Category extends ResourceController
 
             return $this->failNotFound();
         } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this->failServerError();
         }
     }
@@ -126,6 +130,8 @@ class Category extends ResourceController
 
             return $this->failNotFound();
         } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this->failServerError();
         }
     }

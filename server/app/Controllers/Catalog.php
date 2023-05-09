@@ -50,6 +50,8 @@ class Catalog extends ResourceController
             return $this->failNotFound();
 
         } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this->failServerError();
         }
     }
@@ -67,6 +69,7 @@ class Catalog extends ResourceController
             'title'     => 'max_length[200]',
             'category'  => 'required|integer|greater_than[0]',
             'text'      => 'string',
+            'image'     => 'string',
             'coord_ra'  => 'decimal',
             'coord_dec' => 'decimal',
         ];
@@ -76,11 +79,14 @@ class Catalog extends ResourceController
         }
 
         try {
+            $input['image'] = $this->_saveCatalogImage($input['name'], $input['image']);
             $catalogModel = new CatalogModel();
             $catalogModel->insert($input);
 
             return $this->respondCreated($input);
         } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this->failServerError();
         }
     }
@@ -96,6 +102,7 @@ class Catalog extends ResourceController
         $rules = [
             'title'     => 'max_length[200]',
             'text'      => 'string',
+            'image'     => 'string',
             'coord_ra'  => 'decimal',
             'coord_dec' => 'decimal',
         ];
@@ -109,6 +116,7 @@ class Catalog extends ResourceController
         }
 
         try {
+            $input['image'] = $this->_saveCatalogImage($id, $input['image']);
             $catalogModel = new CatalogModel();
             $catalogData  = $catalogModel->find($id);
 
@@ -119,6 +127,8 @@ class Catalog extends ResourceController
 
             return $this->failNotFound();
         } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this->failServerError();
         }
     }
@@ -141,7 +151,37 @@ class Catalog extends ResourceController
 
             return $this->failNotFound();
         } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this->failServerError();
+        }
+    }
+
+    /**
+     * Stores the image passed as a base64 string
+     */
+    protected function _saveCatalogImage(string $name, string $imageString): ?string
+    {
+        $fileName = $name . '.png';
+
+        try {
+            if (!is_dir(FCPATH . 'catalog/'))
+            {
+                mkdir(FCPATH . 'catalog/',0777, TRUE);
+            }
+
+            $imageString = str_replace('data:image/png;base64,', '', $imageString);
+            $imageString = str_replace(' ', '+', $imageString);
+            $imageString = base64_decode($imageString);
+
+            helper('filesystem');
+            write_file(FCPATH . 'catalog/' . $fileName, $imageString);
+
+            return $fileName;
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return null;
         }
     }
 }

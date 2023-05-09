@@ -1,3 +1,4 @@
+import { imageHost } from '@/api/api'
 import { useAppSelector } from '@/api/hooks'
 import { FilterList, TPhoto } from '@/api/types'
 import { getTimeFromSec, isOutdated } from '@/functions/helpers'
@@ -84,7 +85,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                     >
                         <Image
                             className={styles.photo}
-                            src={`${process.env.NEXT_PUBLIC_API_HOST}photos/${photo.image_name}_thumb.${photo.image_ext}`}
+                            src={`${imageHost}photos/${photo.image_name}_thumb.${photo.image_ext}`}
                             width={80}
                             height={18}
                             alt={`${item.title || item.name} - Фотография`}

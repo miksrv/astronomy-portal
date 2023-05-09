@@ -2,35 +2,14 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 import { APIResponseLogin, TUserInfo } from './types'
 
-//
-// export const authSlice = createSlice({
-//     initialState: { status: false, token: '' } as IRestAuth,
-//     name: 'auth',
-//     reducers: {
-//         setCredentials: (
-//             state,
-//             { payload: { status, token } }: PayloadAction<IRestAuth>
-//         ) => {
-//             state.status = status
-//             state.token = token
-//         }
-//     }
-// })
-//
-// export const { setCredentials } = authSlice.actions
-// // Example without useAppSelector hook
-// // export const getCredentials = (state: RootState) => state.auth
-//
-// export default authSlice.reducer
-
-type AuthType = {
+type TAuthType = {
     error: any
     userAuth: boolean
     userInfo?: TUserInfo
     userToken?: string
 }
 
-const initialState: AuthType = {
+const initialState: TAuthType = {
     error: null,
     userAuth: false,
     userToken: ''
@@ -64,15 +43,6 @@ const authSlice = createSlice({
         setUserInfo: (state, action: PayloadAction<TUserInfo>) => {
             state.userInfo = action.payload
         }
-
-        // setToken: (state, { payload: { userToken } }) => {
-        //     // setCredentials: (state, { payload }: PayloadAction<IRestAuth>) => {
-        //     localStorage.setItem('userToken', userToken)
-        //     state.userToken = userToken
-        // },
-        // setUserInfo: (state, { payload: { userInfo } }) => {
-        //     state.userInfo = userInfo
-        // }
     }
 })
 

@@ -1,3 +1,4 @@
+import { imageHost } from '@/api/api'
 import { TFIle } from '@/api/types'
 import { isMobile, sliceText } from '@/functions/helpers'
 import moment from 'moment'
@@ -36,7 +37,7 @@ const RenderTableRow: React.FC<TTableRow> = ({
                     <Image
                         className={styles.fitsImage}
                         onClick={() => onPhotoClick(itemId)}
-                        src={`${process.env.NEXT_PUBLIC_API_HOST}uploads/${object}/${file.file_name}_thumb.jpg`}
+                        src={`${imageHost}uploads/${object}/${file.file_name}_thumb.jpg`}
                         alt={file.file_name}
                         width={26}
                         height={17}

@@ -29,6 +29,8 @@ class Weather extends ResourceController
                 'conditions' => $weather->payload
             ]);
         } catch (\Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this->fail('Weather error');
         }
     }

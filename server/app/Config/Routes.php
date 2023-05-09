@@ -30,9 +30,10 @@ $routes->set404Override();
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
 
-$routes->post('cron/update_telegram_posts', 'Cron::update_telegram_posts');
-$routes->get('cron/update_telegram_posts', 'Cron::update_telegram_posts');
+//$routes->post('cron/update_telegram_posts', 'Cron::update_telegram_posts');
+$routes->get('cron/telegram', 'Cron::update_telegram_posts');
 $routes->get('cron/statistic', 'Cron::get_telegram_statistic');
+$routes->options('cron/telegram', 'Cron');
 
 $routes->get('weather/current', 'Weather::current');
 $routes->get('weather/statistic', 'Weather::statistic');
@@ -41,6 +42,8 @@ $routes->get('statistic', 'Statistic::list');
 $routes->get('statistic/catalog', 'Statistic::catalog');
 $routes->get('statistic/photos', 'Statistic::photos');
 $routes->get('statistic/telescope', 'Statistic::telescope');
+$routes->options('statistic', 'Statistic');
+$routes->options('statistic/(:any)', 'Statistic');
 
 $routes->get('catalog', 'Catalog::list');
 $routes->get('catalog/(:any)', 'Catalog::show/$1');

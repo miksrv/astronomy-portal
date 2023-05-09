@@ -1,13 +1,14 @@
+import { editCatalog, openFormCatalog } from '@/api/applicationSlice'
+import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { TCatalog } from '@/api/types'
 import { getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
 import moment from 'moment'
-import React, { useState } from 'react'
-import { Dimmer, Grid, Loader, Message } from 'semantic-ui-react'
+import React from 'react'
+import { Dimmer, Grid, Icon, Loader, Message } from 'semantic-ui-react'
 
 import CelestialMap from '@/components/celestial-map'
 import FilterList from '@/components/filter-list'
-import ObjectFormModal from '@/components/obect-form-modal'
 
 import styles from './styles.module.sass'
 
@@ -22,7 +23,10 @@ type TObjectHeaderProps = {
 
 const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
     const { title, loader, error, catalog, deviationRa, deviationDec } = props
-    // const userAuth = useAppSelector((state) => state.auth.userAuth)
+
+    const dispatch = useAppDispatch()
+    const userAuth = useAppSelector((state) => state.auth.userAuth)
+
     const date = catalog?.updated
         ? moment
               .utc(catalog.updated)
@@ -36,7 +40,10 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
         ? Math.round((catalog.statistic.data_size / 1024) * 100) / 100
         : undefined
 
-    const [editModalVisible, setEditModalVisible] = useState<boolean>(false)
+    const handleEditCatalog = () => {
+        dispatch(editCatalog(catalog))
+        dispatch(openFormCatalog(true))
+    }
 
     return (
         <div className={classNames(styles.section, 'box')}>
@@ -58,7 +65,20 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                     tablet={10}
                     mobile={16}
                 >
-                    <h1>{title}</h1>
+                    <h1>
+                        {title}
+                        {userAuth && (
+                            <span
+                                className={styles.controlButton}
+                                role={'button'}
+                                tabIndex={0}
+                                onKeyUp={() => {}}
+                                onClick={handleEditCatalog}
+                            >
+                                <Icon name={'edit outline'} />
+                            </span>
+                        )}
+                    </h1>
                     <Grid>
                         <Grid.Column
                             computer={8}
@@ -142,11 +162,6 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                     )}
                 </Grid.Column>
             </Grid>
-            <ObjectFormModal
-                visible={editModalVisible}
-                value={catalog!}
-                onClose={() => setEditModalVisible(false)}
-            />
         </div>
     )
 }
