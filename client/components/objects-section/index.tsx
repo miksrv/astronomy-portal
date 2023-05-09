@@ -1,14 +1,17 @@
+import { imageHost } from '@/api/api'
 import { editCatalog, openFormCatalog } from '@/api/applicationSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { TCatalog } from '@/api/types'
 import { getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
 import moment from 'moment'
+import Image from 'next/image'
 import React from 'react'
 import { Dimmer, Grid, Icon, Loader, Message } from 'semantic-ui-react'
 
-import CelestialMap from '@/components/celestial-map'
 import FilterList from '@/components/filter-list'
+
+import noImageServerUrl from '@/public/images/no-photo.png'
 
 import styles from './styles.module.sass'
 
@@ -147,19 +150,19 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                     computer={6}
                     tablet={6}
                     mobile={16}
-                    className={styles.celestialMap}
                 >
-                    {catalog && (
-                        <CelestialMap
-                            objects={[
-                                {
-                                    dec: catalog.coord_dec,
-                                    name: catalog.name,
-                                    ra: catalog.coord_ra
-                                }
-                            ]}
-                        />
-                    )}
+                    <Image
+                        src={
+                            catalog?.image
+                                ? `${imageHost}objects/${catalog.image}`
+                                : noImageServerUrl
+                        }
+                        className={styles.celestialMapImage}
+                        width={395}
+                        height={200}
+                        alt={`${title} - Расположение на астрономической карте`}
+                        priority={true}
+                    />
                 </Grid.Column>
             </Grid>
         </div>

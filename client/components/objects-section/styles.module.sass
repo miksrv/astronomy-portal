@@ -39,9 +39,11 @@
         margin-right: 0
         margin-left: 5px
 
-  .celestialMap
-    @media only screen and (max-width: 768px)
-      margin-bottom: 10px
+  .celestialMapImage
+    border: 1px solid hsla(0,0%,100%,.1)
+    object-fit: cover
+    margin-bottom: -5px
+    width: 100%
 
-    canvas
-      width: 100% !important
+    @media only screen and (max-width: 768px)
+      margin-bottom: 5px

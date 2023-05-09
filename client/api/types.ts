@@ -184,6 +184,7 @@ export type TCatalog = {
     name: string
     title: string
     text: string
+    image?: string
     updated: string
     category: number
     category_name?: string
