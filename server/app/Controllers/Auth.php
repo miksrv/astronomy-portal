@@ -92,6 +92,8 @@ class Auth extends ResourceController
                 'access_token' => getSignedJWTForUser($authenticationHeader)
             ], ResponseInterface::HTTP_OK);
         } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this->failUnauthorized();
         }
     }
@@ -117,6 +119,8 @@ class Auth extends ResourceController
                     ]
                 );
         } catch (Exception $exception) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
             return $this
                 ->fail(
                     [

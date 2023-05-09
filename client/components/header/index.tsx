@@ -1,4 +1,5 @@
 import { api, useAuthGetMeMutation, useStatisticGetQuery } from '@/api/api'
+import { openFormCatalog } from '@/api/applicationSlice'
 import {
     getStorageToken,
     logout,
@@ -24,6 +25,7 @@ import {
 
 import LoginForm from '@/components/login-form'
 import { show } from '@/components/login-form/loginFormSlice'
+import ModalFormObject from '@/components/modal-form-object'
 import { toggle } from '@/components/sidebar/sidebarSlice'
 
 import logo from '@/public/images/logo-w.svg'
@@ -138,20 +140,31 @@ const Header: React.FC = () => {
                     ) : (
                         <Dropdown
                             trigger={
-                                <div>
+                                <>
                                     <Icon name='user' /> {auth.userInfo.name}
-                                </div>
+                                </>
                             }
-                            // text={auth.userInfo.name}
-                            className={styles.dropdown}
                             item
-                            simple
                         >
                             <Dropdown.Menu>
                                 <Dropdown.Item
+                                    icon={'book'}
                                     text='Справочники'
                                     as={Link}
                                     href={'/directory'}
+                                />
+                                <Dropdown.Divider />
+                                <Dropdown.Item
+                                    icon={'plus'}
+                                    content='Добавить объект'
+                                    onClick={() =>
+                                        dispatch(openFormCatalog(true))
+                                    }
+                                />
+                                <Dropdown.Item
+                                    icon={'upload'}
+                                    content='Загрузить фотографию'
+                                    disabled={true}
                                 />
                                 <Dropdown.Divider />
                                 <Dropdown.Item
@@ -160,15 +173,11 @@ const Header: React.FC = () => {
                                 />
                             </Dropdown.Menu>
                         </Dropdown>
-                        // <Menu.Item
-                        //     name={'Выйти'}
-                        //     color={'red'}
-                        //     onClick={() => dispatch(logout())}
-                        // />
                     )}
                 </Menu.Menu>
             </Container>
-            <LoginForm />
+            {!auth.userAuth && <LoginForm />}
+            {auth.userAuth && <ModalFormObject />}
         </Menu>
     )
 }

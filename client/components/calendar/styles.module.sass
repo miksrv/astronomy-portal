@@ -56,7 +56,9 @@
         color: $lightblue
 
   .calendarToolbar
-    margin: 5px 0 10px
+    margin: 0 0 5px
+    display: flex
+    justify-content: space-between
 
     button
       padding: 5px !important
@@ -65,6 +67,33 @@
       display: inline-block
       margin: 0 10px
       text-transform: capitalize
+
+    .dayStatistic
+      & > div
+        margin: 0 8px
+
+        &:last-of-type
+          margin-right: 0
+
+  .dayNumber
+    display: inline-block
+    border: 1px solid #6b6b6b
+    padding: 1px 3px
+    width: 23px
+    height: 20px
+    text-align: center
+
+    &.green
+      background-color: $green
+      border-color: #a5ff2c
+
+    &.orange
+      background-color: $orange
+      border-color: #FFB804
+
+    &.red
+      background-color: $red
+      border-color: #ffa494
 
   .grid
     margin: 0
@@ -86,26 +115,6 @@
 
       tbody tr > *
         background-color: #333
-
-        .dayNumber
-          display: inline-block
-          border: 1px solid #6b6b6b
-          padding: 1px 3px
-          width: 23px
-          height: 20px
-          text-align: center
-
-          &.green
-            background-color: $green
-            border-color: #a5ff2c
-
-          &.orange
-            background-color: $orange
-            border-color: #FFB804
-
-          &.red
-            background-color: $red
-            border-color: #ffa494
 
         &.calendarDay
           position: relative

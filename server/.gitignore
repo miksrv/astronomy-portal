@@ -128,6 +128,7 @@ nb-configuration.xml
 # Madeline Telegram session
 /public/MadelineProto.log
 /public/session*
-/public/photo/
+/public/photos/
 /public/news/
 /public/uploads/
+/public/catalog/

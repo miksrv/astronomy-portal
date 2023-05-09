@@ -1,3 +1,4 @@
+import { imageHost } from '@/api/api'
 import { TBlog } from '@/api/types'
 import { isMobile, sliceText } from '@/functions/helpers'
 import classNames from 'classnames'
@@ -45,8 +46,7 @@ const PopularPostItem: React.FC<Partial<TBlog> & { loading?: boolean }> = ({
     media,
     text
 }) => {
-    const imageUrl =
-        process.env.NEXT_PUBLIC_API_HOST + '/news/' + group_id + '/'
+    const imageUrl = imageHost + '/news/' + group_id + '/'
 
     const mediaLink = media?.find(
         (media) => media.file_type !== 'video/mp4'

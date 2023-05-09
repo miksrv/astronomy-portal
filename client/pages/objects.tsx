@@ -8,13 +8,14 @@ import {
     useCategoryGetListQuery,
     usePhotoGetListQuery
 } from '@/api/api'
+import { editCatalog, openFormCatalog } from '@/api/applicationSlice'
+import { useAppDispatch } from '@/api/hooks'
 import { wrapper } from '@/api/store'
 import { TCatalog } from '@/api/types'
 import { NextSeo } from 'next-seo'
 import React, { useMemo, useState } from 'react'
 import { Confirm, Message } from 'semantic-ui-react'
 
-import ObjectFormModal from '@/components/obect-form-modal'
 import ObjectTable from '@/components/object-table'
 import ObjectsTableToolbar from '@/components/objects-table-toolbar'
 
@@ -33,9 +34,10 @@ export const getServerSideProps = wrapper.getServerSideProps(
 )
 
 const Objects: React.FC = () => {
+    const dispatch = useAppDispatch()
+
     const [search, setSearch] = useState<string>('')
     const [showMessage, setShowMessage] = useState<boolean>(false)
-    const [editModalVisible, setEditModalVisible] = useState<boolean>(false)
     const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false)
     const [modifyItemName, setModifyItemName] = useState<string>()
     const [categories, setCategories] = useState<number[]>([])
@@ -70,14 +72,13 @@ const Objects: React.FC = () => {
         [catalogData?.items, search, categories]
     )
 
-    const handleAddCatalog = () => {
-        setModifyItemName(undefined)
-        setEditModalVisible(true)
-    }
-
     const handleEditCatalog = (item: string) => {
-        setModifyItemName(item)
-        setEditModalVisible(true)
+        const editableObject = catalogData?.items?.find(
+            ({ name }) => name === item
+        )
+
+        dispatch(editCatalog(editableObject))
+        dispatch(openFormCatalog(true))
     }
 
     const handleDeleteCatalog = (item: string) => {
@@ -139,7 +140,6 @@ const Objects: React.FC = () => {
             <ObjectsTableToolbar
                 search={search}
                 categories={categoriesData?.items}
-                onAddCatalog={handleAddCatalog}
                 onChangeSearch={setSearch}
                 onChangeCategories={setCategories}
             />
@@ -150,14 +150,6 @@ const Objects: React.FC = () => {
                 categories={categoriesData?.items}
                 onClickEdit={handleEditCatalog}
                 onClickDelete={handleDeleteCatalog}
-            />
-            <ObjectFormModal
-                visible={editModalVisible}
-                skyMapVisible={true}
-                value={catalogData?.items?.find(
-                    ({ name }) => name === modifyItemName
-                )}
-                onClose={() => setEditModalVisible(false)}
             />
             <Confirm
                 open={deleteModalVisible}

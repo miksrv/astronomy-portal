@@ -1,3 +1,4 @@
+import { imageHost } from '@/api/api'
 import { FilterList, TPhoto } from '@/api/types'
 import { getTimeFromSec, isMobile } from '@/functions/helpers'
 import moment from 'moment'
@@ -21,7 +22,7 @@ const RenderTableRow: React.FC<TTableRowProps> = ({ photo, hideRows }) => (
                 title={`Перейти к другой фотографии объекта ${photo.object}`}
             >
                 <Image
-                    src={`${process.env.NEXT_PUBLIC_API_HOST}photos/${photo.image_name}_thumb.${photo.image_ext}`}
+                    src={`${imageHost}photos/${photo.image_name}_thumb.${photo.image_ext}`}
                     className={styles.photo}
                     alt={`Другой вариант фотографии объекта ${photo.object}`}
                     width={80}

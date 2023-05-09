@@ -1,3 +1,4 @@
+import { imageHost } from '@/api/api'
 import { TBlogMedia } from '@/api/types'
 import Image from 'next/image'
 import Carousel from 'nuka-carousel'
@@ -25,7 +26,7 @@ const PostGallery: React.FC<TPostGalleryProps> = ({ media, groupId }) => {
     const [photoIndex, setCurrentIndex] = useState<number>(0)
     const [playVideo, setPlayVideo] = useState<boolean>(false)
 
-    const imageUrl = process.env.NEXT_PUBLIC_API_HOST + 'news/' + groupId + '/'
+    const imageUrl = imageHost + 'news/' + groupId + '/'
     const getPhotoByIndex = (index: number) => imageUrl + media?.[index]?.file
 
     return (

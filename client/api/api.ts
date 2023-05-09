@@ -44,6 +44,9 @@ const encodeQueryData = (data: any): string => {
     return ret.length ? '?' + ret.join('&') : ''
 }
 
+export const imageHost =
+    process.env.NEXT_PUBLIC_IMG_HOST || process.env.NEXT_PUBLIC_API_HOST
+
 export const api = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: process.env.NEXT_PUBLIC_API_HOST || 'http://localhost/api/',
@@ -69,8 +72,6 @@ export const api = createApi({
                 url: 'auth/login'
             }),
             transformErrorResponse: (response) => response.data
-            // transformResponse: (response: { data: APIResponseLogin }) =>
-            //     response.data
         }),
 
         authorDelete: builder.mutation<void, number>({
@@ -215,7 +216,7 @@ export const api = createApi({
         }),
 
         cronGetUpdatePosts: builder.query<void, void>({
-            query: () => 'cron/update_telegram_posts'
+            query: () => 'cron/telegram'
         }),
 
         photoGetItem: builder.query<TPhoto, string>({

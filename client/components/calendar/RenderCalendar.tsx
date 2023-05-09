@@ -78,10 +78,10 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                         styles.dayNumber,
                         getWeatherClass(itemWeatherEvent?.clouds)
                     )}
-                    role='button'
-                    tabIndex={0}
-                    onKeyUp={() => {}}
-                    onClick={(e) => console.warn('onDayClick', e, d)}
+                    // role='button'
+                    // tabIndex={0}
+                    // onKeyUp={() => {}}
+                    // onClick={(e) => console.warn('onDayClick', e, d)}
                 >
                     {d < 10 ? `0${d}` : d}
                 </div>
