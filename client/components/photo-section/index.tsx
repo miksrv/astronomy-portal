@@ -10,7 +10,6 @@ import Lightbox from 'react-image-lightbox'
 import 'react-image-lightbox/style.css'
 import { Button, Dimmer, Grid, Loader } from 'semantic-ui-react'
 
-import CelestialMap from '@/components/celestial-map'
 import FilterList from '@/components/filter-list'
 
 import noImageServerUrl from '@/public/images/no-photo.png'
