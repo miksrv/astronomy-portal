@@ -1,5 +1,5 @@
 import { FilterList, TPhoto } from '@/api/types'
-import { getTimeFromSec } from '@/functions/helpers'
+import { getTimeFromSec, isMobile } from '@/functions/helpers'
 import moment from 'moment'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -10,9 +10,10 @@ import styles from './styles.module.sass'
 
 type TTableRowProps = {
     photo: TPhoto
+    hideRows?: string[]
 }
 
-const RenderTableRow: React.FC<TTableRowProps> = ({ photo }) => (
+const RenderTableRow: React.FC<TTableRowProps> = ({ photo, hideRows }) => (
     <Table.Row>
         <Table.Cell width={'one'}>
             <Link
@@ -37,7 +38,9 @@ const RenderTableRow: React.FC<TTableRowProps> = ({ photo }) => (
                     : '---'
             }
         />
-        {FilterList.map((filter) => (
+        {FilterList.filter((filter) =>
+            isMobile ? !hideRows?.includes(filter) : true
+        ).map((filter) => (
             <Table.Cell
                 className={
                     filter && photo?.filters?.[filter]?.frames

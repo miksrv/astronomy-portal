@@ -1,8 +1,9 @@
 import { TFIle } from '@/api/types'
 import { isMobile, sliceText } from '@/functions/helpers'
 import moment from 'moment'
+import Image from 'next/image'
 import React from 'react'
-import { Image, Table } from 'semantic-ui-react'
+import { Table } from 'semantic-ui-react'
 
 import MoonPhase from '@/components/moon-phase'
 
@@ -12,6 +13,7 @@ type TTableRow = {
     file: TFIle
     itemId: number
     object: string
+    showPreview?: boolean
     showAdditional?: boolean
     onPhotoClick: (photoId: number) => void
 }
@@ -20,22 +22,31 @@ const RenderTableRow: React.FC<TTableRow> = ({
     file,
     itemId,
     object,
+    showPreview,
     showAdditional,
     onPhotoClick
 }) => (
     <Table.Row>
-        <Table.Cell>
-            {file.image ? (
-                <Image
-                    className={styles.fitsImage}
-                    onClick={() => onPhotoClick(itemId)}
-                    src={`${process.env.NEXT_PUBLIC_API_HOST}uploads/${object}/${file.file_name}_thumb.jpg`}
-                />
-            ) : (
-                ''
-            )}
-            {sliceText(file.file_name, isMobile ? 20 : 250)}
-        </Table.Cell>
+        {showPreview && (
+            <Table.Cell
+                collapsing={true}
+                textAlign={'center'}
+            >
+                {file.preview ? (
+                    <Image
+                        className={styles.fitsImage}
+                        onClick={() => onPhotoClick(itemId)}
+                        src={`${process.env.NEXT_PUBLIC_API_HOST}uploads/${object}/${file.file_name}_thumb.jpg`}
+                        alt={file.file_name}
+                        width={26}
+                        height={17}
+                    />
+                ) : (
+                    ''
+                )}
+            </Table.Cell>
+        )}
+        <Table.Cell content={sliceText(file.file_name, isMobile ? 20 : 250)} />
         <Table.Cell content={file.exptime} />
         <Table.Cell
             className={styles[file.filter]}

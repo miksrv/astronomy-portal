@@ -55,13 +55,16 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
         ({ star_count }) => star_count
     )?.length
 
+    const showPreview: boolean = !!filesList?.filter(({ preview }) => preview)
+        ?.length
+
+    const imageUrl = (index: number) =>
+        `${process.env.NEXT_PUBLIC_API_HOST}uploads/${objectName}/${photoList[index]}.jpg`
+
     useEffect(() => {
         const photoList = filesList
-            ?.filter((file) => file.image)
-            .map(
-                ({ file_name }) =>
-                    `${process.env.NEXT_PUBLIC_API_HOST}uploads/${objectName}/${file_name}.jpg`
-            )
+            ?.filter((file) => file.preview)
+            .map(({ file_name }) => `${file_name}`)
 
         setPhotoList(photoList || [])
     }, [filesList, objectName])
@@ -95,6 +98,7 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
                         <RenderTableHeader
                             sort={sortField}
                             order={sortOrder}
+                            showPreview={showPreview}
                             showAdditional={showAdditionalInfo}
                             handlerSortClick={(field: TObjectSortable) =>
                                 handlerSortClick(field)
@@ -108,6 +112,7 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
                                         file={file}
                                         itemId={key}
                                         object={objectName}
+                                        showPreview={showPreview}
                                         showAdditional={showAdditionalInfo}
                                         onPhotoClick={handlePhotoClick}
                                     />
@@ -129,14 +134,12 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
             </Accordion>
             {showLightbox && photoList.length && (
                 <Lightbox
-                    mainSrc={photoList[photoIndex]}
-                    nextSrc={photoList[(photoIndex + 1) % photoList.length]}
-                    prevSrc={
-                        photoList[
-                            (photoIndex + photoList.length - 1) %
-                                photoList.length
-                        ]
-                    }
+                    mainSrc={imageUrl(photoIndex)}
+                    nextSrc={imageUrl((photoIndex + 1) % photoList.length)}
+                    imageTitle={photoList[photoIndex]}
+                    prevSrc={imageUrl(
+                        (photoIndex + photoList.length - 1) % photoList.length
+                    )}
                     onCloseRequest={() => setShowLightbox(false)}
                     onMovePrevRequest={() =>
                         setCurrentIndex(

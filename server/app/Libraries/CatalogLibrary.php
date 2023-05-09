@@ -67,9 +67,10 @@ class CatalogLibrary
 
     protected function _mapFilesFilters(array $files): array
     {
-        foreach ($files as $key => $file)
+        foreach ($files as $file)
         {
-            $file->filter = $this->filterEnum[$file->filter] ?? 'unknown';
+            $file->filter  = $this->filterEnum[$file->filter] ?? 'unknown';
+            $file->preview = file_exists(FCPATH . 'uploads/' . $file->object . '/' . $file->file_name . '.jpg');
         }
 
         return $files;
