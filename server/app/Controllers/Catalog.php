@@ -164,10 +164,13 @@ class Catalog extends ResourceController
     {
         $fileName = $name . '.png';
 
+        if (empty($imageString))
+            return null;
+
         try {
-            if (!is_dir(FCPATH . 'catalog/'))
+            if (!is_dir(FCPATH . 'objects/'))
             {
-                mkdir(FCPATH . 'catalog/',0777, TRUE);
+                mkdir(FCPATH . 'objects/',0777, TRUE);
             }
 
             $imageString = str_replace('data:image/png;base64,', '', $imageString);
@@ -175,7 +178,7 @@ class Catalog extends ResourceController
             $imageString = base64_decode($imageString);
 
             helper('filesystem');
-            write_file(FCPATH . 'catalog/' . $fileName, $imageString);
+            write_file(FCPATH . 'objects/' . $fileName, $imageString);
 
             return $fileName;
         } catch (Exception $e) {

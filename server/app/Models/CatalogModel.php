@@ -13,7 +13,7 @@ class CatalogModel extends Model
     protected $useSoftDeletes = true;
 
     // The updatable fields
-    protected $allowedFields = ['name', 'title', 'category', 'text', 'coord_ra', 'coord_dec'];
+    protected $allowedFields = ['name', 'title', 'category', 'text', 'image', 'coord_ra', 'coord_dec'];
 
     // Dates
     protected $useTimestamps = true;
@@ -23,9 +23,10 @@ class CatalogModel extends Model
     protected $deletedField  = 'deleted_at';
 
     // Validation
-    protected $validationRules      = [
+    protected $validationRules = [
         'name'      => 'required|string|min_length[3]|max_length[40]|is_unique[catalog.name]',
         'title'     => 'max_length[200]',
+        'image'     => 'string',
         'coord_ra'  => 'decimal',
         'coord_dec' => 'decimal',
     ];

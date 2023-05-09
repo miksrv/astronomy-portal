@@ -186,21 +186,18 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                             <FilterList filters={photo?.filters} />
                         </Grid.Column>
                     </Grid>
-                    <div className={styles.celestialMap}>
-                        <CelestialMap
-                            objects={
-                                catalog
-                                    ? [
-                                          {
-                                              dec: catalog.coord_dec,
-                                              name: catalog.name,
-                                              ra: catalog.coord_ra
-                                          }
-                                      ]
-                                    : undefined
-                            }
-                        />
-                    </div>
+                    <Image
+                        src={
+                            catalog?.image
+                                ? `${imageHost}objects/${catalog.image}`
+                                : noImageServerUrl
+                        }
+                        className={styles.celestialMapImage}
+                        width={478}
+                        height={240}
+                        alt={`${title} - Расположение на астрономической карте`}
+                        priority={true}
+                    />
                 </Grid.Column>
             </Grid>
             {photoLightbox && (
