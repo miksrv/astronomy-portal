@@ -57,6 +57,9 @@ class Cron extends ResourceController
     }
 
     /**
+     * This method was needed after migrating and changing directories.
+     * The method creates another 80x18px preview for the astrophoto, gets the image sizes and writes them to the database.
+     * Restart is not needed, because after uploading new photos - all previews will be created automatically
      * @throws ReflectionException
      */
     public function optimize_photos()
