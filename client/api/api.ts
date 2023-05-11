@@ -7,6 +7,7 @@ import {
     APIRequestBlogListPopular,
     APIRequestCatalog,
     APIRequestLogin,
+    APIRequestPhoto,
     APIRequestPhotoList,
     APIRequestRelaySet,
     APIRequestTelescope,
@@ -23,6 +24,7 @@ import {
     APIResponseRelayList,
     APIResponseStatistic,
     APIResponseStatisticTelescope,
+    APIResponseUploadPhoto,
     APIResponseWeatherCurrent,
     APIResponseWeatherStatistic,
     TAuthor,
@@ -49,7 +51,7 @@ export const imageHost =
 
 export const api = createApi({
     baseQuery: fetchBaseQuery({
-        baseUrl: process.env.NEXT_PUBLIC_API_HOST || 'http://localhost/api/',
+        baseUrl: process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:8080/',
         prepareHeaders: (headers, { getState }) => {
             // By default, if we have a token in the store, let's use that for authenticated requests
             const token = (getState() as RootState).auth.userToken
@@ -228,7 +230,50 @@ export const api = createApi({
             Maybe<APIRequestPhotoList>
         >({
             keepUnusedDataFor: 3600,
+            providesTags: () => [{ id: 'LIST', type: 'Photo' }],
             query: (params) => `photo${encodeQueryData(params)}`
+        }),
+        photoPatch: builder.mutation<
+            TPhoto | APIResponseError,
+            Partial<APIRequestPhoto> & Pick<APIRequestPhoto, 'id'>
+        >({
+            invalidatesTags: (result, error, { id }) => [
+                { id, type: 'Photo' },
+                { type: 'Photo' }
+            ],
+            query: ({ id, ...formState }) => ({
+                body: formState,
+                method: 'PATCH',
+                url: `photo/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        photoPost: builder.mutation<
+            TPhoto | APIResponseError,
+            Partial<APIRequestPhoto>
+        >({
+            invalidatesTags: (result, error, { object }) => [
+                { object, type: 'Photo' },
+                { type: 'Photo' },
+                { type: 'Statistic' }
+            ],
+            query: ({ ...formState }) => ({
+                body: formState,
+                method: 'POST',
+                url: 'photo'
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        photoPostUpload: builder.mutation<
+            APIResponseUploadPhoto | APIResponseError,
+            FormData
+        >({
+            query: (formData) => ({
+                body: formData,
+                method: 'POST',
+                url: 'photo/upload'
+            }),
+            transformErrorResponse: (response) => response.data
         }),
 
         relayGetList: builder.query<APIResponseRelayList, void>({
@@ -290,7 +335,7 @@ export const api = createApi({
         }
     },
     reducerPath: 'api',
-    tagTypes: ['Catalog', 'Statistic', 'Category', 'Author', 'Relay']
+    tagTypes: ['Catalog', 'Photo', 'Statistic', 'Category', 'Author', 'Relay']
 })
 
 // Export hooks for usage in functional components
@@ -319,8 +364,11 @@ export const {
 
     // useCronGetUpdatePostsQuery,
 
-    usePhotoGetItemQuery,
+    // usePhotoGetItemQuery,
     usePhotoGetListQuery,
+    usePhotoPatchMutation,
+    usePhotoPostMutation,
+    usePhotoPostUploadMutation,
 
     useRelayGetListQuery,
     useRelayGetStateQuery,

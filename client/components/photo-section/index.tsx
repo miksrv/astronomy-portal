@@ -1,4 +1,6 @@
-import { imageHost } from '@/api/api'
+import { editPhoto, openFormPhoto } from '@/api/applicationSlice'
+import { hosts } from '@/api/constants'
+import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { TCatalog, TPhoto } from '@/api/types'
 import { getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
@@ -8,7 +10,7 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 import Lightbox from 'react-image-lightbox'
 import 'react-image-lightbox/style.css'
-import { Button, Dimmer, Grid, Loader } from 'semantic-ui-react'
+import { Button, Dimmer, Grid, Icon, Loader } from 'semantic-ui-react'
 
 import FilterList from '@/components/filter-list'
 
@@ -49,6 +51,9 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
     photo,
     catalog
 }) => {
+    const dispatch = useAppDispatch()
+    const userAuth = useAppSelector((state) => state.auth.userAuth)
+
     const [photoLightbox, setPhotoLightbox] = useState<string | undefined>(
         undefined
     )
@@ -64,7 +69,15 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
             ? Math.round((photo.statistic.data_size / 1024) * 100) / 100
             : undefined
 
-    const imageServerUrl = `${imageHost}photos/`
+    const imageSize =
+        !loader && photo?.image_size
+            ? Math.round((photo.image_size / 1048576) * 100) / 100
+            : undefined
+
+    const handleEditPhoto = () => {
+        dispatch(editPhoto(photo))
+        dispatch(openFormPhoto(true))
+    }
 
     return (
         <div className={classNames(styles.section, 'box')}>
@@ -89,7 +102,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                         height={400}
                         src={
                             !loader && photo
-                                ? `${imageServerUrl}${photo?.image_name}_thumb.${photo?.image_ext}`
+                                ? `${hosts.photo}${photo?.image_name}_thumb.${photo?.image_ext}`
                                 : noImageServerUrl
                         }
                         onClick={() => {
@@ -102,7 +115,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                         as={'a'}
                         size={'mini'}
                         icon={'download'}
-                        color={'green'}
+                        color={'yellow'}
                         className={styles.buttonDownload}
                         href={
                             `${process.env.NEXT_PUBLIC_API_HOST}photo/download/` +
@@ -116,7 +129,20 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                     mobile={16}
                     className={styles.description}
                 >
-                    <h1>{title}</h1>
+                    <h1>
+                        {title}
+                        {userAuth && (
+                            <span
+                                className={styles.controlButton}
+                                role={'button'}
+                                tabIndex={0}
+                                onKeyUp={() => {}}
+                                onClick={handleEditPhoto}
+                            >
+                                <Icon name={'edit outline'} />
+                            </span>
+                        )}
+                    </h1>
                     <Grid className={styles.parameters}>
                         <Grid.Column
                             computer={8}
@@ -138,7 +164,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                             <div>
                                 <span className={styles.value}>Кадров:</span>
                                 {photo?.statistic?.frames || '---'}
-                                {photo?.statistic?.frames ? (
+                                {photo?.statistic?.data_size ? (
                                     <span className={styles.marginLeft}>
                                         (
                                         <Link
@@ -162,6 +188,18 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                             <div>
                                 <span className={styles.value}>Категория:</span>
                                 {catalog?.category_name || '---'}
+                            </div>
+                            <div>
+                                <span className={styles.value}>
+                                    Размер фото:
+                                </span>
+                                {imageSize ? `${imageSize} Мб` : '---'}
+                            </div>
+                            <div>
+                                <span className={styles.value}>
+                                    Разрешение фото:
+                                </span>
+                                {photo?.image_width} x {photo?.image_height}
                             </div>
                             {photo?.author ? (
                                 <div>
@@ -188,7 +226,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                     <Image
                         src={
                             catalog?.image
-                                ? `${imageHost}objects/${catalog.image}`
+                                ? `${hosts.maps}${catalog.image}`
                                 : noImageServerUrl
                         }
                         className={styles.celestialMapImage}
@@ -201,7 +239,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
             </Grid>
             {photoLightbox && (
                 <Lightbox
-                    mainSrc={`${imageServerUrl}${photoLightbox}`}
+                    mainSrc={`${hosts.photo}${photoLightbox}`}
                     onCloseRequest={() => setPhotoLightbox(undefined)}
                 />
             )}

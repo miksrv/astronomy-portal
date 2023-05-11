@@ -18,13 +18,14 @@
   justify-content: center
   margin-bottom: $sectionMarginBottom
 
+  & > span
+    &:last-of-type
+      .divider
+        display: none
+
   .divider
-    content: '•'
     color: $text-main
     margin: 0 5px
-
-    &:last-of-type
-      display: none
 
   .item
     margin: 1px

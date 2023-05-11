@@ -14,10 +14,8 @@ import CelestialMap from '@/components/celestial-map'
 
 import styles from './styles.module.sass'
 
-const ModalFormObject: React.FC = () => {
+const ObjectFormModal: React.FC = () => {
     const dispatch = useAppDispatch()
-
-    const skyMapVisible = true
     const application = useAppSelector((state) => state.application)
     const value = application.editableItemCatalog
 
@@ -161,7 +159,7 @@ const ModalFormObject: React.FC = () => {
                         rows={7}
                     />
                     <Grid>
-                        <Grid.Column width={skyMapVisible ? 6 : 16}>
+                        <Grid.Column width={6}>
                             <Form.Input
                                 required
                                 name={'name'}
@@ -191,22 +189,20 @@ const ModalFormObject: React.FC = () => {
                                 error={findError('coord_dec')}
                             />
                         </Grid.Column>
-                        {skyMapVisible && (
-                            <Grid.Column
-                                width={10}
-                                className={styles.skyMap}
-                            >
-                                <CelestialMap
-                                    objects={[
-                                        {
-                                            dec: formState?.coord_dec,
-                                            name: formState?.name || '',
-                                            ra: formState?.coord_ra
-                                        }
-                                    ]}
-                                />
-                            </Grid.Column>
-                        )}
+                        <Grid.Column
+                            width={10}
+                            className={styles.celestialMap}
+                        >
+                            <CelestialMap
+                                objects={[
+                                    {
+                                        dec: formState?.coord_dec,
+                                        name: formState?.name || '',
+                                        ra: formState?.coord_ra
+                                    }
+                                ]}
+                            />
+                        </Grid.Column>
                     </Grid>
                 </Form>
             </Modal.Content>
@@ -246,4 +242,4 @@ const mapFormProps = (value?: TCatalog | undefined): APIRequestCatalog => ({
     title: value?.title || ''
 })
 
-export default ModalFormObject
+export default ObjectFormModal

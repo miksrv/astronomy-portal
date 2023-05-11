@@ -23,9 +23,8 @@ const ObjectCloud: React.FC<TObjectCloudProps> = ({
             <Loader />
         </Dimmer>
         {names?.map((item) => (
-            <>
+            <span key={item}>
                 <Link
-                    key={item}
                     href={`/${link}/${item}`}
                     className={current === item ? styles.active : undefined}
                     title={`${item.replace(
@@ -36,7 +35,7 @@ const ObjectCloud: React.FC<TObjectCloudProps> = ({
                     {item.replace(/_/g, ' ')}
                 </Link>
                 <span className={styles.divider}>•</span>
-            </>
+            </span>
         ))}
     </div>
 )

@@ -33,10 +33,12 @@ $routes->set404Override();
 //$routes->post('cron/update_telegram_posts', 'Cron::update_telegram_posts');
 $routes->get('cron/telegram', 'Cron::update_telegram_posts');
 $routes->get('cron/statistic', 'Cron::get_telegram_statistic');
+$routes->get('cron/optimize_images', 'Cron::optimize_photos');
 $routes->options('cron/telegram', 'Cron');
 
 $routes->get('weather/current', 'Weather::current');
 $routes->get('weather/statistic', 'Weather::statistic');
+$routes->options('weather', 'Weather');
 
 $routes->get('statistic', 'Statistic::list');
 $routes->get('statistic/catalog', 'Statistic::catalog');
@@ -87,6 +89,8 @@ $routes->options('auth/(:any)', 'Auth::me');
 
 $routes->get('blog', 'Blog::list');
 $routes->get('blog/popular', 'Blog::popular');
+$routes->options('blog', 'Blog');
+$routes->options('blog/(:any)', 'Blog');
 
 $routes->get('relay/list', 'Relay::list');
 $routes->get('relay/state', 'Relay::state');

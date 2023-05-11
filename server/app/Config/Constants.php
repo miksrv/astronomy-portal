@@ -95,3 +95,9 @@ define('EVENT_PRIORITY_HIGH', 10);
 
 // FIT file size in byte for 16 bit mask (Mb)
 defined('FITS_FILE_SIZE') || define('FITS_FILE_SIZE', 32.78592);
+
+defined('UPLOAD_PHOTOS') || define('UPLOAD_PHOTOS', FCPATH . 'photos/');
+defined('UPLOAD_POST') || define('UPLOAD_POST', FCPATH . 'posts/');
+defined('UPLOAD_TEMP') || define('UPLOAD_TEMP', FCPATH . 'temp/');
+defined('UPLOAD_MAPS') || define('UPLOAD_MAPS', FCPATH . 'maps/');
+defined('UPLOAD_FITS') || define('UPLOAD_FITS', FCPATH . 'fits/');

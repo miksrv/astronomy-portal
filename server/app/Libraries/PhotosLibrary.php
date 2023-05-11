@@ -41,9 +41,11 @@ class PhotosLibrary
 
         $filesItem = $filesModel->where(['object' => $objectName])->findAll();
         $statistic = $this->_getPhotoStatistic($filesItem, $photoItem->date);
+        $calculate = $this->_calculateObjectStatistic($photoItem->filters);
 
-        $photoItem->statistic = $statistic->objectStatistic;
-        $photoItem->filters   = $statistic->filterStatistic;
+        $photoItem->custom    = !empty($photoItem->filters);
+        $photoItem->statistic = $calculate ?? $statistic->objectStatistic ?? null;
+        $photoItem->filters   = $photo->filters ?? $statistic->filterStatistic ?? null;
         $photoItem->author    = $photoItem->author_id
             ? [
                 'id'   => $photoItem->author_id,
@@ -87,9 +89,11 @@ class PhotosLibrary
         foreach ($photoList as $photo)
         {
             $objectStatistic = $this->_getPhotoStatistic($filesList, $photo->date, $photo->object);
+            $objectCalculate = $this->_calculateObjectStatistic($photo->filters);
 
-            $photo->statistic = $objectStatistic->objectStatistic;
-            $photo->filters   = $objectStatistic->filterStatistic;
+            $photo->custom    = !empty($photo->filters);
+            $photo->statistic = $objectCalculate ?? $objectStatistic->objectStatistic ?? null;
+            $photo->filters   = $photo->filters ?? $objectStatistic->filterStatistic ?? null;
             $photo->author    = $photo->author_id
                 ? [
                     'id'   => $photo->author_id,
@@ -105,6 +109,23 @@ class PhotosLibrary
         }
 
         return $photoList;
+    }
+
+    protected function _calculateObjectStatistic($filters)
+    {
+        if (empty($filters)) return null;
+
+        $objectStatistic = (object) [
+            'frames'   => 0,
+            'exposure' => 0
+        ];
+
+        foreach ($filters as $filter) {
+            $objectStatistic->frames   += $filter->frames ?? 0;
+            $objectStatistic->exposure += $filter->exposure ?? 0;
+        }
+
+        return $objectStatistic;
     }
 
     protected function _getPhotoStatistic(

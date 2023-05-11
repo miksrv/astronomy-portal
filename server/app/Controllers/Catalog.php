@@ -168,9 +168,9 @@ class Catalog extends ResourceController
             return null;
 
         try {
-            if (!is_dir(FCPATH . 'objects/'))
+            if (!is_dir(UPLOAD_MAPS))
             {
-                mkdir(FCPATH . 'objects/',0777, TRUE);
+                mkdir(UPLOAD_MAPS,0777, TRUE);
             }
 
             $imageString = str_replace('data:image/png;base64,', '', $imageString);
@@ -178,7 +178,7 @@ class Catalog extends ResourceController
             $imageString = base64_decode($imageString);
 
             helper('filesystem');
-            write_file(FCPATH . 'objects/' . $fileName, $imageString);
+            write_file(UPLOAD_MAPS . $fileName, $imageString);
 
             return $fileName;
         } catch (Exception $e) {

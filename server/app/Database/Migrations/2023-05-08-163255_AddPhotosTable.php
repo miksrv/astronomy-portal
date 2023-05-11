@@ -44,8 +44,21 @@ class AddPhotosTable extends Migration
             'image_size' => [
                 'type'       => 'INT',
                 'constraint' => 11,
-                'null'       => false,
-                'default'    => 0
+                'null'       => true
+            ],
+            'image_width' => [
+                'type'       => 'SMALLINT',
+                'constraint' => 5,
+                'null'       => true
+            ],
+            'image_height' => [
+                'type'       => 'SMALLINT',
+                'constraint' => 5,
+                'null'       => true
+            ],
+            'filters'      => [
+                'type'       => 'TEXT',
+                'null'       => true
             ],
             'created_at DATETIME default current_timestamp',
             'updated_at DATETIME default current_timestamp',

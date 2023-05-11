@@ -11,21 +11,25 @@ type TFilterListProps = {
 
 const FilterList: React.FC<TFilterListProps> = ({ filters }) => (
     <ul className={styles.filterList}>
-        {Object.entries(filters || []).map(([name, filter]) => (
-            <li key={name}>
-                <span className={classNames(styles.filterItem, styles[name])}>
-                    {name}
-                </span>
-                {Math.round(filter.exposure / 60)}{' '}
-                {declOfNum(Math.round(filter.exposure / 60), [
-                    'минута',
-                    'минуты',
-                    'минут'
-                ])}{' '}
-                ({filter.frames}{' '}
-                {declOfNum(filter.frames, ['кадр', 'кадра', 'кадров'])})
-            </li>
-        ))}
+        {Object.entries(filters || [])
+            .filter(([, filter]) => filter.frames)
+            .map(([name, filter]) => (
+                <li key={name}>
+                    <span
+                        className={classNames(styles.filterItem, styles[name])}
+                    >
+                        {name}
+                    </span>
+                    {Math.round(filter.exposure / 60)}{' '}
+                    {declOfNum(Math.round(filter.exposure / 60), [
+                        'минута',
+                        'минуты',
+                        'минут'
+                    ])}{' '}
+                    ({filter.frames}{' '}
+                    {declOfNum(filter.frames, ['кадр', 'кадра', 'кадров'])})
+                </li>
+            ))}
     </ul>
 )
 

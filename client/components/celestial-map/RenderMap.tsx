@@ -44,7 +44,10 @@ const createObjectsJSON = (objects: TObject[]) => {
         const objectName = item.name.replace(/_/g, ' ')
         const objectJSON = {
             geometry: {
-                coordinates: [item.ra, item.dec],
+                coordinates: [
+                    parseFloat(String(item.ra)),
+                    parseFloat(String(item.dec))
+                ],
                 type: 'Point'
             },
             id: objectName,
@@ -67,12 +70,12 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
     const prevJSON = usePrevious({ objects })
 
     // const box = document.createElement('div')
-
-    // box.style.width='200px'
-    // box.style.height='100px'
-    // box.style.background='gray'
-
-    // document.body.appendChild(box);
+    //
+    // box.style.width = '200px'
+    // box.style.height = '100px'
+    // box.style.background = 'gray'
+    //
+    // document.body.appendChild(box)
 
     useEffect(() => {
         if (
@@ -185,12 +188,21 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
                 //     // ctx?.arc(x,y,5,0,2*Math.PI);
                 //     // ctx?.fill();
                 //
-                //     const findObjects: any[] = objects.filter((item: { ra: any; dec: any }) => {
-                //         const obj_cord = SkyMap.mapProjection([item.ra, item.dec])
+                //     const findObjects: any[] = objects.filter(
+                //         (item: { ra: any; dec: any }) => {
+                //             const obj_cord = Celestial.mapProjection([
+                //                 item.ra,
+                //                 item.dec
+                //             ])
                 //
-                //         if (Math.abs(x-obj_cord[0]) <= 15 && Math.abs(y-obj_cord[1]) <= 15) return true
-                //         return false
-                //     })
+                //             if (
+                //                 Math.abs(x - obj_cord[0]) <= 15 &&
+                //                 Math.abs(y - obj_cord[1]) <= 15
+                //             )
+                //                 return true
+                //             return false
+                //         }
+                //     )
                 //
                 //     if (findObjects.length) {
                 //         const objectParam = findObjects.pop()

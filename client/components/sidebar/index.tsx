@@ -40,7 +40,7 @@ const Sidebar: React.FC = () => {
                     {item.name}
                     {item.label && (
                         <Label
-                            color={'green'}
+                            color={'yellow'}
                             size={'tiny'}
                         >
                             <Loader

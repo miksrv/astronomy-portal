@@ -1,5 +1,5 @@
 import { api, useAuthGetMeMutation, useStatisticGetQuery } from '@/api/api'
-import { openFormCatalog } from '@/api/applicationSlice'
+import { openFormCatalog, openFormPhoto } from '@/api/applicationSlice'
 import {
     getStorageToken,
     logout,
@@ -25,7 +25,8 @@ import {
 
 import LoginForm from '@/components/login-form'
 import { show } from '@/components/login-form/loginFormSlice'
-import ModalFormObject from '@/components/modal-form-object'
+import ObjectFormModal from '@/components/object-form-modal'
+import PhotoFormModal from '@/components/photo-form-modal'
 import { toggle } from '@/components/sidebar/sidebarSlice'
 
 import logo from '@/public/images/logo-w.svg'
@@ -95,6 +96,7 @@ const Header: React.FC = () => {
                                 alt={'Самодельная обсерватория'}
                                 width={30}
                                 height={30}
+                                priority={true}
                             />
                         </Link>
                     </Menu.Item>
@@ -163,8 +165,10 @@ const Header: React.FC = () => {
                                 />
                                 <Dropdown.Item
                                     icon={'upload'}
-                                    content='Загрузить фотографию'
-                                    disabled={true}
+                                    content='Добавить астрофото'
+                                    onClick={() =>
+                                        dispatch(openFormPhoto(true))
+                                    }
                                 />
                                 <Dropdown.Divider />
                                 <Dropdown.Item
@@ -177,7 +181,8 @@ const Header: React.FC = () => {
                 </Menu.Menu>
             </Container>
             {!auth.userAuth && <LoginForm />}
-            {auth.userAuth && <ModalFormObject />}
+            {auth.userAuth && <ObjectFormModal />}
+            {auth.userAuth && <PhotoFormModal />}
         </Menu>
     )
 }

@@ -1,5 +1,5 @@
-import { imageHost } from '@/api/api'
 import { editCatalog, openFormCatalog } from '@/api/applicationSlice'
+import { hosts } from '@/api/constants'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { TCatalog } from '@/api/types'
 import { getTimeFromSec } from '@/functions/helpers'
@@ -154,7 +154,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                     <Image
                         src={
                             catalog?.image
-                                ? `${imageHost}objects/${catalog.image}`
+                                ? `${hosts.maps}${catalog.image}`
                                 : noImageServerUrl
                         }
                         className={styles.celestialMapImage}

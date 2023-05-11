@@ -21,19 +21,18 @@ const ObjectCloudSkyMap: React.FC<TObjectCloudProps> = ({
             <Loader />
         </Dimmer>
         {objects?.map((item, key) => (
-            <>
+            <span key={key}>
                 <span
                     className={styles.item}
                     role={'button'}
                     tabIndex={0}
                     onKeyDown={() => {}}
                     onClick={() => handleClick?.(item.ra, item.dec)}
-                    key={key}
                 >
                     {item.name.replace(/_/g, ' ')}
                 </span>
                 <span className={styles.divider}>•</span>
-            </>
+            </span>
         ))}
     </div>
 )

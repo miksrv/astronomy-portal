@@ -1,4 +1,4 @@
-import { imageHost } from '@/api/api'
+import { hosts } from '@/api/constants'
 import { TFIle } from '@/api/types'
 import classNames from 'classnames'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -60,7 +60,7 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
         ?.length
 
     const imageUrl = (index: number) =>
-        `${imageHost}uploads/${objectName}/${photoList[index]}.jpg`
+        `${hosts.fits}${objectName}/${photoList[index]}.jpg`
 
     useEffect(() => {
         const photoList = filesList
