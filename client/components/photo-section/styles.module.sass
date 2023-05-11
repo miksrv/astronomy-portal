@@ -3,6 +3,15 @@
 .section
   margin-bottom: $sectionMarginBottom
 
+  .controlButton
+    cursor: pointer
+    margin-left: 10px
+    color: $text-footer
+    outline: none
+
+    &:hover
+      color: $text-main
+
   .description
     display: flex !important
     flex-direction: column
@@ -42,6 +51,7 @@
       right: 22px
       bottom: 25px
       opacity: .5
+      margin-right: 0
 
     &:hover
       > .buttonDownload

@@ -2,6 +2,7 @@
 
 use App\Models\BlogMediaModel;
 use App\Models\BlogModel;
+use CodeIgniter\Files\File;
 use ReflectionException;
 
 class BlogLibrary
@@ -64,7 +65,7 @@ class BlogLibrary
 
         $count = 0;
 
-        log_message('notice', "Start parsing Telegram channel messages");
+        log_message('info', "Start parsing Telegram channel messages");
 
         foreach (array_reverse($messages['messages']) as $message) {
             if (empty($message['id']))
@@ -78,7 +79,7 @@ class BlogLibrary
             $this->saveMessage($message, $groupId);
         }
 
-        log_message('notice', "Stop parsing Telegram channel messages, count: {$count}");
+        log_message('info', "Stop parsing Telegram channel messages, count: {$count}");
     }
 
     /**
@@ -89,7 +90,7 @@ class BlogLibrary
         if (empty($message['media']) || !in_array($message['media']['_'], $this->supportedMedia))
             return false;
 
-        $directory = FCPATH . 'news/' . $groupId . '/';
+        $directory = UPLOAD_POST . $groupId . '/';
 
         if (!is_dir($directory))
         {
@@ -100,7 +101,7 @@ class BlogLibrary
         $findNewsMedia  = $modelNewsMedia->where(['telegram_id' => $message['id']])->first();
 
         if ($findNewsMedia) {
-            log_message('notice', "Updated news media with Telegram ID {$message['id']}");
+            log_message('info', "Updated news media with Telegram ID {$message['id']}");
 
             return $modelNewsMedia->update(
                 $findNewsMedia->id,
@@ -116,10 +117,10 @@ class BlogLibrary
         if (!is_string($media))
             return false;
 
-        $file = new \CodeIgniter\Files\File($media);
+        $file = new File($media);
 
-        log_message('notice', "Download media file {$file->getFilename()}");
-        log_message('notice', "Inserted news media with Telegram ID: {$message['id']}");
+        log_message('info', "Download media file {$file->getFilename()}");
+        log_message('info', "Inserted news media with Telegram ID: {$message['id']}");
 
         list($width, $height) = getimagesize($file);
 
@@ -160,7 +161,7 @@ class BlogLibrary
         $findNews  = $modelNews->where(['telegram_id' => $data['telegram_id']])->first();
 
         if ($findNews) {
-            log_message('notice', "Updated news with Telegram ID {$data['telegram_id']}");
+            log_message('info', "Updated news with Telegram ID {$data['telegram_id']}");
 
             return $modelNews->update(
                 $findNews->id,
@@ -174,7 +175,7 @@ class BlogLibrary
             );
         }
 
-        log_message('notice', "Inserted news with Telegram ID {$data['telegram_id']}");
+        log_message('info', "Inserted news with Telegram ID {$data['telegram_id']}");
 
         return $modelNews->insert($data);
     }

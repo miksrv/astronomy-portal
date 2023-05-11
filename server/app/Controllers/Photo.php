@@ -3,6 +3,7 @@
 use App\Libraries\PhotosLibrary;
 use App\Models\CatalogModel;
 use App\Models\PhotoModel;
+use CodeIgniter\Files\File;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
@@ -77,7 +78,7 @@ class Photo extends ResourceController
                 ->where(['object' => $id, 'date' => $date])
                 ->first();
 
-            $photoLink  = FCPATH . 'photos/' .  $photoData->image_name . '.' . $photoData->image_ext;
+            $photoLink  = UPLOAD_PHOTOS .  $photoData->image_name . '.' . $photoData->image_ext;
 
             if ($photoData && file_exists($photoLink)) {
                 return $this->response->download($photoLink, null);
@@ -102,8 +103,8 @@ class Photo extends ResourceController
         $input = $this->request->getJSON(true);
         $rules = [
             'object' => 'required|alpha_dash|min_length[3]|max_length[40]',
-            'date'   => 'required|string|valid_date[m/d/Y]',
-            'author' => 'numeric',
+            'date'   => 'required|string|valid_date[Y-m-d]',
+            'author_id'  => 'numeric',
             'image_name' => 'required|alpha_dash',
             'image_ext'  => 'required|alpha_dash',
             'image_size' => 'required|numeric'
@@ -123,8 +124,8 @@ class Photo extends ResourceController
             return $this->failValidationErrors('Object by name "' . $input['object'] . '" not found');
         }
 
-        $photoOrigPath  = WRITEPATH . 'uploads/' . $input['image_name'] . '.' . $input['image_ext'];
-        $photoThumbPath = WRITEPATH . 'uploads/' . $input['image_name'] . '_thumb.' . $input['image_ext'];
+        $photoOrigPath  = UPLOAD_TEMP . $input['image_name'] . '.' . $input['image_ext'];
+        $photoThumbPath = UPLOAD_TEMP . $input['image_name'] . '_thumb.' . $input['image_ext'];
 
         if (!file_exists($photoOrigPath) || !file_exists($photoThumbPath))
         {
@@ -132,15 +133,30 @@ class Photo extends ResourceController
         }
 
         try {
+            $dateFormat  = date_format(date_create($input['date']), 'Y.m.d');
+            $photosName  = $input['object'] . '-' . $dateFormat;
+            $imageFull  = new File($photoOrigPath);
+            $imageThumb = new File($photoThumbPath);
+
+            $imageFull->move(UPLOAD_PHOTOS, $photosName . '.' . $input['image_ext']);
+            $imageThumb->move(UPLOAD_PHOTOS, $photosName . '_thumb.' . $input['image_ext']);
+
+            $image = Services::image('gd'); // imagick
+            $image->withFile(UPLOAD_PHOTOS . $photosName . '.' . $input['image_ext'])
+                ->fit(160, 36, 'center')
+                ->save(UPLOAD_PHOTOS . $photosName . '_80x18.' . $input['image_ext']);
+
+            $movedOriginal = new File(UPLOAD_PHOTOS . $photosName . '.' . $input['image_ext']);
+
+            list($width, $height) = getimagesize($movedOriginal);
+
+            $input['image_name']   = $photosName;
+            $input['image_size']   = $movedOriginal->getSize();
+            $input['image_width']  = $width;
+            $input['image_height'] = $height;
+
             $catalogModel = new PhotoModel();
             $catalogModel->insert($input);
-
-            $dateFormat  = date_format(date_create($input['date']), 'Y.m.d');
-            $image_orig  = new \CodeIgniter\Files\File($photoOrigPath);
-            $image_thumb = new \CodeIgniter\Files\File($photoThumbPath);
-
-            $image_orig->move(FCPATH . 'photos/', $input['object'] . '-' . $dateFormat . '.' . $input['image_ext']);
-            $image_thumb->move(FCPATH . 'photos/', $input['object'] . '-' . $dateFormat . '_thumb.' . $input['image_ext']);
 
             return $this->respondCreated($input);
         } catch (Exception $e) {
@@ -166,19 +182,23 @@ class Photo extends ResourceController
 
         $img = $this->request->getFile('image');
 
-        if (! $img->hasMoved()) {
-            $uploadDir = WRITEPATH . 'uploads';
+        if (!$img->hasMoved()) {
+
+            if (!is_dir(UPLOAD_TEMP))
+            {
+                mkdir(UPLOAD_TEMP,0777, TRUE);
+            }
 
             $newName = $img->getRandomName();
-            $img->move($uploadDir, $newName);
+            $img->move(UPLOAD_TEMP, $newName);
 
-            $file = new \CodeIgniter\Files\File($uploadDir . '/' . $newName);
+            $file = new File(UPLOAD_TEMP . $newName);
             $name = pathinfo($file, PATHINFO_FILENAME);
 
-            $image = \Config\Services::image('gd'); // imagick
+            $image = Services::image('gd'); // imagick
             $image->withFile($file->getRealPath())
-                ->fit(265, 200, 'center')
-                ->save($uploadDir . '/' . $name . '_thumb.' . $file->getExtension());
+                ->fit(700, 500, 'center')
+                ->save(UPLOAD_TEMP . $name . '_thumb.' . $file->getExtension());
 
             return $this->respondCreated([
                 'image_name' => $name,
@@ -199,9 +219,9 @@ class Photo extends ResourceController
     {
         $input = $this->request->getJSON(true);
         $rules = [
-            'object' => 'required|alpha_dash|min_length[3]|max_length[40]',
-            'date'   => 'required|string|valid_date[m/d/Y]',
-            'author' => 'numeric'
+            'object'    => 'required|alpha_dash|min_length[3]|max_length[40]',
+            'date'      => 'required|string|valid_date[Y-m-d]',
+            'author_id' => 'numeric'
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -215,6 +235,8 @@ class Photo extends ResourceController
             $photoData  = $photoModel->find($id);
 
             if ($photoData) {
+                $input['filters'] = isset($input['filters']) ? json_encode($input['filters']) : null;
+
                 $photoModel->update($id, $input);
                 return $this->respondUpdated($input);
             }

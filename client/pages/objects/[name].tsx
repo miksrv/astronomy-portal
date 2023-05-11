@@ -1,13 +1,13 @@
 import {
     catalogGetItem,
     getRunningQueriesThunk,
-    imageHost,
     photoGetList,
     statisticGetCatalogItems,
     useCatalogGetItemQuery,
     usePhotoGetListQuery,
     useStatisticGetCatalogItemsQuery
 } from '@/api/api'
+import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
 import { isOutdated } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
@@ -149,9 +149,11 @@ const Object: React.FC = () => {
                 openGraph={{
                     images: [
                         {
-                            height: 743,
-                            url: `${imageHost}photos/${photoList?.items?.[0].image_name}_thumb.${photoList?.items?.[0]?.image_ext}`,
-                            width: 1280
+                            height: 244,
+                            url: catalogData?.image
+                                ? `${hosts.maps}${catalogData?.image}`
+                                : 'images/no-photo.png',
+                            width: 487
                         }
                     ],
                     locale: 'ru'
@@ -189,7 +191,7 @@ const Object: React.FC = () => {
                 photos={photoList?.items}
                 loader={photoLoading}
             />
-            {catalogData?.files?.length && (
+            {catalogData?.files?.length ? (
                 <div className={'section'}>
                     <Grid>
                         <Grid.Column
@@ -235,6 +237,8 @@ const Object: React.FC = () => {
                         )}
                     </Grid>
                 </div>
+            ) : (
+                ''
             )}
             <FilesTable
                 loader={catalogLoading}

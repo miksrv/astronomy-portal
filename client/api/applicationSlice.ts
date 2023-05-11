@@ -21,10 +21,7 @@ const applicationSlice = createSlice({
         editCatalog: (state, action: PayloadAction<TCatalog | undefined>) => {
             state.editableItemCatalog = action.payload
         },
-        editableItemPhoto: (
-            state,
-            action: PayloadAction<TPhoto | undefined>
-        ) => {
+        editPhoto: (state, action: PayloadAction<TPhoto | undefined>) => {
             state.editableItemPhoto = action.payload
         },
         openFormCatalog: (state, action: PayloadAction<boolean>) => {
@@ -36,15 +33,15 @@ const applicationSlice = createSlice({
         },
         openFormPhoto: (state, action: PayloadAction<boolean>) => {
             state.isActiveFormPhoto = action.payload
+
+            if (action.payload === false) {
+                state.editableItemPhoto = undefined
+            }
         }
     }
 })
 
-export const {
-    editCatalog,
-    editableItemPhoto,
-    openFormCatalog,
-    openFormPhoto
-} = applicationSlice.actions
+export const { editCatalog, editPhoto, openFormCatalog, openFormPhoto } =
+    applicationSlice.actions
 
 export default applicationSlice.reducer

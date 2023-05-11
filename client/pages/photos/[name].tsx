@@ -1,13 +1,13 @@
 import {
     catalogGetItem,
     getRunningQueriesThunk,
-    imageHost,
     photoGetList,
     statisticGetPhotosItems,
     useCatalogGetItemQuery,
     usePhotoGetListQuery,
     useStatisticGetPhotosItemsQuery
 } from '@/api/api'
+import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
 import { TPhoto } from '@/api/types'
 import { isOutdated } from '@/functions/helpers'
@@ -103,7 +103,7 @@ const Photo: React.FC = () => {
                     images: [
                         {
                             height: 743,
-                            url: `${imageHost}photos/${photoItem?.image_name}_thumb.${photoItem?.image_ext}`,
+                            url: `${hosts.photo}${photoItem?.image_name}_thumb.${photoItem?.image_ext}`,
                             width: 1280
                         }
                     ],

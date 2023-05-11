@@ -70,7 +70,7 @@ class CatalogLibrary
         foreach ($files as $file)
         {
             $file->filter  = $this->filterEnum[$file->filter] ?? 'unknown';
-            $file->preview = file_exists(FCPATH . 'uploads/' . $file->object . '/' . $file->file_name . '.jpg');
+            $file->preview = file_exists(UPLOAD_FITS . $file->object . '/' . $file->file_name . '.jpg');
         }
 
         return $files;

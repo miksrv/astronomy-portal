@@ -4,6 +4,12 @@ export interface APIResponseError {
     messages?: any
 }
 
+export interface APIResponseUploadPhoto {
+    image_name: string
+    image_ext: string
+    image_size: number
+}
+
 export interface APIResponseLogin {
     message?: string
     user?: TUserInfo
@@ -65,6 +71,16 @@ export interface APIResponseRelayList {
 export interface APIRequestRelaySet {
     index: number
     state: number
+}
+
+export interface APIRequestPhoto {
+    id: number
+    object: string
+    date: string
+    author_id: number
+    image_name: string
+    image_ext: string
+    filters?: TFilters
 }
 
 export interface APIRequestCatalog {
@@ -210,6 +226,9 @@ export type TPhoto = {
     image_name: string
     image_ext: string
     image_size: number
+    image_width: number
+    image_height: number
+    custom?: boolean
     statistic: TStatistic
     filters: TFilters
 }

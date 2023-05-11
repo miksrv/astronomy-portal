@@ -1,4 +1,4 @@
-import { imageHost } from '@/api/api'
+import { hosts } from '@/api/constants'
 import { TCatalog, TPhoto } from '@/api/types'
 import { sliceText } from '@/functions/helpers'
 import classNames from 'classnames'
@@ -112,10 +112,10 @@ const PhotoImage: React.FC<{ photo: TPhoto; title: string }> = ({
     title
 }) => (
     <Image
-        src={`${imageHost}photos/${photo.image_name}_thumb.${photo.image_ext}`}
+        src={`${hosts.photo}${photo.image_name}_thumb.${photo.image_ext}`}
         className={styles.photo}
         alt={`${title} Фотография объекта`}
-        width={200}
+        width={358}
         height={200}
     />
 )
