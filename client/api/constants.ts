@@ -4,6 +4,6 @@ export const hosts = {
     fits: `${imageHost}fits/`,
     maps: `${imageHost}maps/`,
     photo: `${imageHost}photos/`,
-    post: `${imageHost}post/`,
+    post: `${imageHost}posts/`,
     temp: `${imageHost}temp/`
 }
