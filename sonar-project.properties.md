@@ -1,0 +1,8 @@
+sonar.projectKey=miksrv_astronomy-portal
+sonar.organization=miksoft
+
+sonar.sources=frontend/src,backend/app
+sonar.exclusions=**/*.test.tsx,**/*.test.ts
+
+sonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
+sonar.coverage.exclusions=__mocks__/**,backend/app
