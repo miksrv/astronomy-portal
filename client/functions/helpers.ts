@@ -1,8 +1,17 @@
 import moment from 'moment'
 
+/**
+ * Returns TRUE if the device screen is less than or equal to 760px
+ */
 export const isMobile: boolean =
     typeof window !== 'undefined' ? window.innerWidth <= 760 : false
 
+/**
+ * Generates an array of numbers in a certain range and with a given step
+ * @param from
+ * @param to
+ * @param step
+ */
 export const range = (from: number, to: number, step = 1) => {
     let i = from
     const range: number[] = []
@@ -15,12 +24,24 @@ export const range = (from: number, to: number, step = 1) => {
     return range
 }
 
+/**
+ * Returns abbreviated text up to the specified length.
+ * If the text is truncated (more than the specified length) - adds an ellipsis at the end
+ * @param text
+ * @param length
+ */
 export const sliceText = (text: string, length: number = 350): string => {
     let sliced = text.slice(0, length)
 
     return sliced + (sliced.length < text.length ? '...' : '')
 }
 
+/**
+ * Returns the correct word for plural
+ * Example: declOfNum(5, ['кадр', 'кадра', 'кадров']) = '5 кадров'
+ * @param number
+ * @param words
+ */
 export const declOfNum = (number: number, words: string[]) =>
     words[
         number % 100 > 4 && number % 100 < 20
@@ -28,6 +49,11 @@ export const declOfNum = (number: number, words: string[]) =>
             : [2, 0, 1, 1, 1, 2][number % 10 < 5 ? number % 10 : 5]
     ]
 
+/**
+ * Compares two dates and returns TRUE if the first date is less than the second
+ * @param date1
+ * @param date2
+ */
 export const isOutdated = (date1: string, date2: string) =>
     moment(date1).diff(moment(date2)) < 0
 

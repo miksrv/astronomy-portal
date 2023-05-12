@@ -1,3 +1,4 @@
+import { useStatisticGetQuery } from '@/api/api'
 import { TCatalog, TCategory, TPhoto } from '@/api/types'
 import classNames from 'classnames'
 import React, { useMemo, useState } from 'react'
@@ -20,6 +21,9 @@ type TObjectTable = {
 const ObjectTable: React.FC<TObjectTable> = (props) => {
     const { loading, categories, catalog, photos, onClickEdit, onClickDelete } =
         props
+
+    const { data: statisticData } = useStatisticGetQuery()
+
     const [sortField, setSortField] = useState<TSortKey>('name')
     const [sortOrder, setSortOrder] = useState<TSortOrdering>('descending')
 
@@ -89,7 +93,20 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                     handlerSortClick={handlerSortClick}
                 />
                 <Table.Body>
-                    {sortedCatalog?.length ? (
+                    {statisticData?.catalog_count &&
+                        loading &&
+                        Array(statisticData.catalog_count || 20)
+                            .fill(1)
+                            .map((item, key) => (
+                                <Table.Row key={key}>
+                                    <Table.Cell
+                                        content={''}
+                                        colSpan={HeaderFields.length}
+                                    />
+                                </Table.Row>
+                            ))}
+
+                    {sortedCatalog?.length && !loading ? (
                         sortedCatalog.map((item) => (
                             <RenderTableRow
                                 key={item.name}
