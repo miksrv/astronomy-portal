@@ -95,12 +95,17 @@ const PhotoFormModal: React.FC = () => {
     const handleSubmit = useCallback(() => {
         setSubmitted(true)
 
-        if (!value?.id) {
-            createItem({ ...formState, filters })
-        } else {
-            updateItem({ ...formState, filters })
+        const photoData = {
+            ...formState,
+            filters: useCustomParam ? filters : undefined
         }
-    }, [formState, createItem, updateItem, filters, value?.id])
+
+        if (!value?.id) {
+            createItem(photoData)
+        } else {
+            updateItem(photoData)
+        }
+    }, [useCustomParam, formState, createItem, updateItem, filters, value?.id])
 
     useEffect(() => {
         setFormState(mapFormProps(value))
@@ -232,19 +237,6 @@ const PhotoFormModal: React.FC = () => {
                                     setUseCustomParam(!useCustomParam)
                                 }
                             />
-
-                            {useCustomParam ? (
-                                <CustomParameters
-                                    onChange={setFilters}
-                                    initialState={
-                                        value?.custom
-                                            ? value?.filters
-                                            : undefined
-                                    }
-                                />
-                            ) : (
-                                ''
-                            )}
                         </Grid.Column>
                         <Grid.Column width={7}>
                             {value?.image_name && value?.image_ext ? (
@@ -282,6 +274,14 @@ const PhotoFormModal: React.FC = () => {
                             )}
                         </Grid.Column>
                     </Grid>
+                    {useCustomParam && (
+                        <CustomParameters
+                            onChange={setFilters}
+                            initialState={
+                                value?.custom ? value?.filters : undefined
+                            }
+                        />
+                    )}
                 </Form>
             </Modal.Content>
             <Modal.Actions>

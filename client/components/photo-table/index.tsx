@@ -37,7 +37,8 @@ const PhotoTable: React.FC<TPhotoTableProps> = ({ photos, loader }) => {
         headerFieldsFilters.forEach((filterName) => {
             if (
                 !photos?.filter(
-                    ({ filters }) => filters?.[filterName as keyof TFilters]
+                    ({ filters }) =>
+                        filters?.[filterName as keyof TFilters]?.frames
                 )?.length
             ) {
                 result.push(filterName)

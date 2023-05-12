@@ -81,7 +81,7 @@ const CustomParameters: React.FC<TCustomParameters> = ({
                 <Table.Row>
                     <Table.HeaderCell content={'Фильтр'} />
                     <Table.HeaderCell content={'Кадров'} />
-                    <Table.HeaderCell content={'Выдержка (минут)'} />
+                    <Table.HeaderCell content={'Выдержка (сек)'} />
                 </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -99,6 +99,7 @@ const CustomParameters: React.FC<TCustomParameters> = ({
                         </Table.Cell>
                         <Table.Cell>
                             <Form.Input
+                                size={'mini'}
                                 maxLength={5}
                                 className={styles.input}
                                 defaultValue={parametersState?.[filter]?.frames}
@@ -110,7 +111,8 @@ const CustomParameters: React.FC<TCustomParameters> = ({
                         </Table.Cell>
                         <Table.Cell>
                             <Form.Input
-                                maxLength={5}
+                                size={'mini'}
+                                maxLength={10}
                                 className={styles.input}
                                 defaultValue={
                                     parametersState?.[filter]?.exposure
