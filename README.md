@@ -3,12 +3,26 @@ Amateur astronomical observatory portal
 [![UI Checks](https://github.com/miksrv/astronomy-portal/actions/workflows/ui-checks.yml/badge.svg)](https://github.com/miksrv/astronomy-portal/actions/workflows/ui-checks.yml)
 [![UI Deploy](https://github.com/miksrv/astronomy-portal/actions/workflows/ui-deploy.yml/badge.svg)](https://github.com/miksrv/astronomy-portal/actions/workflows/ui-deploy.yml)
 [![API Deploy](https://github.com/miksrv/astronomy-portal/actions/workflows/api-deploy.yml/badge.svg)](https://github.com/miksrv/astronomy-portal/actions/workflows/api-deploy.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=miksrv_astronomy-portal&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=miksrv_astronomy-portal)
+
+![HTML](https://camo.githubusercontent.com/b4c648ad32f8f9f7c328a4dd59b5df0eb2a4e2623095e31d059f026979129491/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f48544d4c2d4533344632362e7376673f6c6f676f3d68746d6c35266c6f676f436f6c6f723d7768697465)
+![CSS](https://camo.githubusercontent.com/53132716f8ed401a79d8c0980b9666b6cd8ce8e7faed1beeb328f821b44850bc/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4353532d3135373242362e7376673f6c6f676f3d63737333266c6f676f436f6c6f723d7768697465)
+![CSS](https://camo.githubusercontent.com/53132716f8ed401a79d8c0980b9666b6cd8ce8e7faed1beeb328f821b44850bc/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4353532d3135373242362e7376673f6c6f676f3d63737333266c6f676f436f6c6f723d7768697465)
+![JS](https://camo.githubusercontent.com/9a794a64d79bb070a8009cf27eb31c989d09d43a65f95362c88ed6c28218319b/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4a6176615363726970742d4637444631452e7376673f6c6f676f3d6a617661736372697074266c6f676f436f6c6f723d626c61636b)
+![TS](https://camo.githubusercontent.com/11c819f21e728e3ba177845a8c9099c63424415008d291a66921165456cf1c49/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f547970655363726970742d3030374143432e7376673f6c6f676f3d74797065736372697074266c6f676f436f6c6f723d7768697465)
+![NodeJS](https://camo.githubusercontent.com/03d91be86cc33b72b22f8e84f2706a0a91ab0fca763566745ea6e3f72562811e/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4e6f64652e6a732d3433383533442e7376673f6c6f676f3d6e6f64652e6a73266c6f676f436f6c6f723d7768697465)
+![React](https://camo.githubusercontent.com/841a3eb02c53b1da682028a5bf3d4032cee4a00b34cdd35f0b1b93e4e24d9316/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f52656163742d3230323332612e7376673f6c6f676f3d7265616374266c6f676f436f6c6f723d253233363144414642)
+![PHP](https://camo.githubusercontent.com/08f504258b33496b9eb2ad3145dec07f07e8ed7066f3227a716dd6c75edf76ab/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f5048502d3737374242342e7376673f6c6f676f3d706870266c6f676f436f6c6f723d7768697465)
+![SQL](https://camo.githubusercontent.com/4ed1fe3ec872f44fe743932bcf4eb6d18ad8568e8d6d19e16d8d96864f6acd33/68747470733a2f2f637573746f6d2d69636f6e2d6261646765732e64656d6f6c61622e636f6d2f62616467652f53514c2d3032354538432e7376673f6c6f676f3d6461746162617365266c6f676f436f6c6f723d7768697465)
+![Arduino](https://camo.githubusercontent.com/0d9127be2d88deb6ca6995597f7df5f6658f3307a0390176fe47aef616dfda60/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f2d41726475696e6f2d3030393739443f6c6f676f3d41726475696e6f266c6f676f436f6c6f723d7768697465)
+![Github Actions](https://camo.githubusercontent.com/ba4516a1d93862d1c12ad7495551804c58b04066194903828fd83606a0fac2a8/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f476974487562253230416374696f6e732d3236373145352e7376673f6c6f676f3d676974687562253230616374696f6e73266c6f676f436f6c6f723d7768697465)
 
 This astronomical portal is a self-made automatic remote astronomical observatory with a convenient interface for managing and monitoring its operation. The portal provides an opportunity to view data received by the telescope and processed photographs. The server part ensures the stable operation of the portal and the receipt of data from the observatory controller, as well as the loading of FITS frames. The Arduino controller has firmware that allows you to manage the power of devices, collect information from temperature and humidity sensors, as well as other telemetry parameters that are transmitted to this portal.
 
+
 [ [DEMO](https://observatory.miksoft.pro/) ]
 
-![General view of the interface](./docs/ui-screen-1.png)
+![General view of the interface](./docs/ui-screen-1.jpeg)
 
 ## Table of contents
 1. [Observatory](#Observatory)
@@ -18,7 +32,7 @@ This astronomical portal is a self-made automatic remote astronomical observator
 5. [How to start](#How-to-start)
 
 ----------------------
-## Observatory 
+### Observatory 
 
 This is an amateur and completely homemade astronomical observatory project. The goal of the project is to teach the skills of building objects offline, writing drivers in C++, scripts in Python to automate the process of equipment operation. In addition, obtaining good astrophotography of deep-sky objects, observing comets, asteroids and searching for supernovae and variable stars. 
 
