@@ -46,6 +46,7 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                     photos?.filter(({ object }) => object === item.name)
                         .length || 0,
                 red: item.filters?.red?.exposure || 0,
+                source_link: item.source_link || '',
                 sulfur: item.filters?.sulfur?.exposure || 0,
                 text: item.text,
                 title: item.title,

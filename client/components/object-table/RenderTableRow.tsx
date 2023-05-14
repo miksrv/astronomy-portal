@@ -47,6 +47,12 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                                 item.title || item.name
                             } - Подробная информация об объекте`}
                         >
+                            {item.source_link && (
+                                <Icon
+                                    name={'download'}
+                                    className={styles.downloadIcon}
+                                />
+                            )}
                             {item.name}
                         </Link>
                     }

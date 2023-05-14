@@ -13,7 +13,7 @@ class CatalogModel extends Model
     protected $useSoftDeletes = true;
 
     // The updatable fields
-    protected $allowedFields = ['name', 'title', 'category', 'text', 'image', 'coord_ra', 'coord_dec'];
+    protected $allowedFields = ['name', 'title', 'category', 'text', 'image', 'source_link', 'coord_ra', 'coord_dec'];
 
     // Dates
     protected $useTimestamps = true;

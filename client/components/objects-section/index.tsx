@@ -134,6 +134,23 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                                     RA: {catalog?.coord_ra}, DEC:{' '}
                                     {catalog?.coord_dec}
                                 </div>
+                                {catalog?.source_link && (
+                                    <div>
+                                        <span className={styles.value}>
+                                            Исходные данные (FITS):
+                                        </span>
+                                        <a
+                                            href={catalog?.source_link}
+                                            rel={'nofollow noreferrer'}
+                                            target={'_blank'}
+                                            title={`Ссылка на скачивание исходных данных телескопа (FITS) для ${catalog.name}`}
+                                            className={styles.downloadLink}
+                                        >
+                                            <Icon name={'download'} />
+                                            СКАЧАТЬ
+                                        </a>
+                                    </div>
+                                )}
                             </div>
                         </Grid.Column>
                         <Grid.Column

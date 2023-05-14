@@ -1,0 +1,4 @@
+NEXT_PUBLIC_API_HOST = 'https://astro.miksoft.pro/api/'
+
+# Optional, default -> NEXT_PUBLIC_API_HOST
+NEXT_PUBLIC_IMG_HOST = 'https://astro.miksoft.pro/api/'

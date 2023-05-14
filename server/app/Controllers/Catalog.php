@@ -65,13 +65,14 @@ class Catalog extends ResourceController
     {
         $input = $this->request->getJSON(true);
         $rules = [
-            'name'      => 'required|alpha_dash|min_length[3]|max_length[40]|is_unique[catalog.name]',
-            'title'     => 'max_length[200]',
-            'category'  => 'required|integer|greater_than[0]',
-            'text'      => 'string',
-            'image'     => 'string',
-            'coord_ra'  => 'decimal',
-            'coord_dec' => 'decimal',
+            'name'        => 'required|alpha_dash|min_length[3]|max_length[40]|is_unique[catalog.name]',
+            'title'       => 'max_length[200]',
+            'category'    => 'required|integer|greater_than[0]',
+            'text'        => 'string',
+            'image'       => 'string',
+            'source_link' => 'string|max_length[50]',
+            'coord_ra'    => 'decimal',
+            'coord_dec'   => 'decimal',
         ];
 
         if (!$this->validate($rules)) {
@@ -100,11 +101,12 @@ class Catalog extends ResourceController
     {
         $input = $this->request->getJSON(true);
         $rules = [
-            'title'     => 'max_length[200]',
-            'text'      => 'string',
-            'image'     => 'string',
-            'coord_ra'  => 'decimal',
-            'coord_dec' => 'decimal',
+            'title'       => 'max_length[200]',
+            'text'        => 'string',
+            'image'       => 'string',
+            'source_link' => 'string|max_length[50]',
+            'coord_ra'    => 'decimal',
+            'coord_dec'   => 'decimal',
         ];
 
         unset($input['name']);

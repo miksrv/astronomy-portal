@@ -158,6 +158,15 @@ const ObjectFormModal: React.FC = () => {
                         error={findError('text')}
                         rows={7}
                     />
+                    <Form.Input
+                        fluid
+                        name={'source_link'}
+                        label={'Ссылка на исходные данные (FITS)'}
+                        onChange={handleChange}
+                        onKeyDown={handleKeyDown}
+                        defaultValue={value?.source_link}
+                        error={findError('source_link')}
+                    />
                     <Grid>
                         <Grid.Column width={6}>
                             <Form.Input
@@ -238,6 +247,7 @@ const mapFormProps = (value?: TCatalog | undefined): APIRequestCatalog => ({
     coord_dec: value?.coord_dec || 0,
     coord_ra: value?.coord_ra || 0,
     name: value?.name || '',
+    source_link: value?.source_link || '',
     text: value?.text || '',
     title: value?.title || ''
 })
