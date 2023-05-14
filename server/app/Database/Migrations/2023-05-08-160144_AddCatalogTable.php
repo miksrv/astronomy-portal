@@ -29,6 +29,11 @@ class AddCatalogTable extends Migration
                 'constraint' => 2,
                 'null'       => false
             ],
+            'source_link' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+                'null'       => true
+            ],
             'coord_ra' => [
                 'type'       => 'FLOAT',
                 'null'       => false

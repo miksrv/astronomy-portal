@@ -91,6 +91,7 @@ export interface APIRequestCatalog {
     text: string
     title: string
     image?: string
+    source_link?: string
 }
 
 export interface APIResponseCatalogList {
@@ -204,6 +205,7 @@ export type TCatalog = {
     updated: string
     category: number
     category_name?: string
+    source_link?: string
     coord_ra: number
     coord_dec: number
     statistic: TStatistic

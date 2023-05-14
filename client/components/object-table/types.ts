@@ -8,6 +8,7 @@ export type TTableItem = {
     text: string
     updated: string
     category: string
+    source_link: string
     photo: number
     exposure: number
     frames: number

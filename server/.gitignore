@@ -129,7 +129,7 @@ nb-configuration.xml
 /public/MadelineProto.log
 /public/session*
 /public/photos/
-/public/post/
+/public/posts/
 /public/fits/
 /public/maps/
 /public/temp/
