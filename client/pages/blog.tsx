@@ -4,10 +4,11 @@ import {
     useBlogGetListQuery
 } from '@/api/api'
 import { wrapper } from '@/api/store'
+import { sliceText } from '@/functions/helpers'
 import { NextSeo } from 'next-seo'
 import React from 'react'
 
-import BlogPage, { postPerPage } from '@/components/blog-page'
+import BlogPage, { getMediaFromPost, postPerPage } from '@/components/blog-page'
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) => async () => {
@@ -29,7 +30,14 @@ const Blog: React.FC = () => {
 
     return (
         <main>
-            <NextSeo title={'Блог обсерватории'} />
+            <NextSeo
+                title={'Блог обсерватории'}
+                description={sliceText(data?.items?.[0]?.text ?? '', 200)}
+                openGraph={{
+                    images: getMediaFromPost(data?.items?.[0]),
+                    locale: 'ru'
+                }}
+            />
             <BlogPage
                 page={1}
                 loading={isLoading}

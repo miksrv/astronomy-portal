@@ -31,7 +31,7 @@ export const range = (from: number, to: number, step = 1) => {
  * @param length
  */
 export const sliceText = (text: string, length: number = 350): string => {
-    let sliced = text.slice(0, length)
+    let sliced = text.replace(/(\r\n|\n|\r)/gm, '').slice(0, length)
 
     return sliced + (sliced.length < text.length ? '...' : '')
 }

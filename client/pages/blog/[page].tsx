@@ -4,12 +4,13 @@ import {
     useBlogGetListQuery
 } from '@/api/api'
 import { wrapper } from '@/api/store'
+import { sliceText } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
 import React from 'react'
 
-import BlogPage, { postPerPage } from '@/components/blog-page'
+import BlogPage, { getMediaFromPost, postPerPage } from '@/components/blog-page'
 
 // Only if we build application as static HTML
 // export const getStaticPaths = async () => {
@@ -67,7 +68,14 @@ const Blog: React.FC = () => {
 
     return (
         <main>
-            <NextSeo title={`Блог обсерватории - Страница ${currentPage}`} />
+            <NextSeo
+                title={`Блог обсерватории - Страница ${currentPage}`}
+                description={sliceText(data?.items?.[0]?.text ?? '', 200)}
+                openGraph={{
+                    images: getMediaFromPost(data?.items?.[0]),
+                    locale: 'ru'
+                }}
+            />
             <BlogPage
                 page={currentPage}
                 loading={isLoading}

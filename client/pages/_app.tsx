@@ -3,6 +3,7 @@ import '@/styles/globals.sass'
 import type { AppProps } from 'next/app'
 import { Montserrat } from 'next/font/google'
 import Script from 'next/script'
+import NextNProgress from 'nextjs-progressbar'
 import React from 'react'
 import 'react-image-lightbox/style.css'
 import { Provider } from 'react-redux'
@@ -32,9 +33,13 @@ export function App({ Component, pageProps }: AppProps) {
                 strategy='beforeInteractive'
             />
             <main className={montserrat.className}>
+                <NextNProgress
+                    color={'#fbbd08'}
+                    options={{ showSpinner: false }}
+                />
                 <Sidebar />
                 <Header />
-                <Container className='rootContainer'>
+                <Container className={'rootContainer'}>
                     <Component {...props.pageProps} />
                 </Container>
                 <Footer />
