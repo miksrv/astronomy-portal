@@ -1,15 +1,18 @@
-import { useBlogGetListPopularQuery } from '@/api/api'
+import { useBlogGetListPopularQuery, useBlogGetStatisticQuery } from '@/api/api'
 import { TBlog } from '@/api/types'
+import { declOfNum, isMobile } from '@/functions/helpers'
 import classNames from 'classnames'
 import moment from 'moment/moment'
 import React, { createRef } from 'react'
 import {
+    Button,
     Dimmer,
     Grid,
     Icon,
     Loader,
     Rail,
     Ref,
+    Statistic,
     Sticky
 } from 'semantic-ui-react'
 
@@ -28,6 +31,7 @@ type TBlogPage = {
 }
 
 const BlogPage: React.FC<TBlogPage> = ({ loading, posts, total, page }) => {
+    const { data: statisticData } = useBlogGetStatisticQuery()
     const { data: popularPosts, isLoading: popularLoading } =
         useBlogGetListPopularQuery({ limit: 4 })
 
@@ -105,6 +109,41 @@ const BlogPage: React.FC<TBlogPage> = ({ loading, posts, total, page }) => {
                         >
                             {/*@ts-ignore*/}
                             <Sticky context={contextRef}>
+                                <div
+                                    className={classNames(
+                                        styles.subscribeContainer,
+                                        'box'
+                                    )}
+                                >
+                                    <Button
+                                        color={'linkedin'}
+                                        as={'a'}
+                                        target={'_blank'}
+                                        href={'https://t.me/+QpMO8yF37DRVPail'}
+                                        rel={'noindex nofollow'}
+                                    >
+                                        <Icon name='telegram' />
+                                        {`Подписаться${
+                                            !isMobile ? ' на обновления' : ''
+                                        }`}
+                                    </Button>
+                                    <Statistic
+                                        className={styles.statistic}
+                                        horizontal={true}
+                                        inverted={true}
+                                        size={'tiny'}
+                                        floated={'right'}
+                                        label={declOfNum(
+                                            statisticData?.users || 0,
+                                            [
+                                                'участник',
+                                                'участника',
+                                                'участников'
+                                            ]
+                                        )}
+                                        value={statisticData?.users || '?'}
+                                    />
+                                </div>
                                 <PopularPosts
                                     loading={popularLoading}
                                     posts={popularPosts?.items}

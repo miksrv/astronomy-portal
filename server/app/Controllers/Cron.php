@@ -47,15 +47,6 @@ class Cron extends ResourceController
         );
     }
 
-    public function get_telegram_statistic()
-    {
-        $blogLibrary = new BlogLibrary();
-
-        echo '<pre>';
-        var_dump($blogLibrary->getTelegramChannelStatistic('nearspace'));
-        exit();
-    }
-
     /**
      * This method was needed after migrating and changing directories.
      * The method creates another 80x18px preview for the astrophoto, gets the image sizes and writes them to the database.

@@ -1,5 +1,6 @@
 <?php namespace App\Controllers;
 
+use App\Libraries\BlogLibrary;
 use App\Models\BlogMediaModel;
 use App\Models\BlogModel;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -35,6 +36,16 @@ class Blog extends ResourceController
         return $this->respond([
             'items' => $this->_addMediaToBlogList($dataBlog),
             'total' => $modelBlog->countAllResults()
+        ]);
+    }
+
+    public function statistic()
+    {
+        $blogLibrary   = new BlogLibrary();
+        $blogStatistic = $blogLibrary->getTelegramChannelStatistic('nearspace');
+
+        return $this->respond([
+            'users' => $blogStatistic['full']['participants_count']
         ]);
     }
 

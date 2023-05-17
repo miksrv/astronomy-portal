@@ -166,6 +166,10 @@ export interface APIResponseBlogList {
     total: number
 }
 
+export interface APIResponseBlogStatistic {
+    users: number
+}
+
 export type TBlog = {
     id: number
     telegram_id: number

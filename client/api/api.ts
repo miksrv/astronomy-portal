@@ -14,6 +14,7 @@ import {
     APIRequestWeatherStatistic,
     APIResponseAuthorList,
     APIResponseBlogList,
+    APIResponseBlogStatistic,
     APIResponseCatalogList,
     APIResponseCatalogNames,
     APIResponseCategoryList,
@@ -127,6 +128,9 @@ export const api = createApi({
         >({
             keepUnusedDataFor: 3600,
             query: (params) => `blog/popular${encodeQueryData(params)}`
+        }),
+        blogGetStatistic: builder.query<APIResponseBlogStatistic, void>({
+            query: () => 'blog/statistic'
         }),
 
         catalogDelete: builder.mutation<void, string>({
@@ -350,6 +354,7 @@ export const {
 
     useBlogGetListQuery,
     useBlogGetListPopularQuery,
+    useBlogGetStatisticQuery,
 
     useCatalogDeleteMutation,
     useCatalogGetItemQuery,
