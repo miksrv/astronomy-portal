@@ -1,4 +1,5 @@
 import { useBlogGetListPopularQuery, useBlogGetStatisticQuery } from '@/api/api'
+import { hosts } from '@/api/constants'
 import { TBlog } from '@/api/types'
 import { declOfNum, isMobile } from '@/functions/helpers'
 import classNames from 'classnames'
@@ -22,6 +23,14 @@ import styles from '@/components/blog-page/styles.module.sass'
 import Pagination from '@/components/pagination'
 
 export const postPerPage: number = 4
+
+export const getMediaFromPost = (posts?: TBlog) => {
+    return posts?.media?.map((item) => ({
+        height: item.height,
+        url: `${hosts.post}${posts.group_id}/${item.file}`,
+        width: item.width
+    }))
+}
 
 type TBlogPage = {
     loading?: boolean

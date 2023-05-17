@@ -9,7 +9,7 @@ import {
 } from '@/api/api'
 import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
-import { isOutdated } from '@/functions/helpers'
+import { isOutdated, sliceText } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
@@ -143,9 +143,7 @@ const Object: React.FC = () => {
         <main>
             <NextSeo
                 title={objectTitle}
-                description={catalogData?.text
-                    .replace(/(\r\n|\n|\r)/gm, '')
-                    .slice(0, 200)}
+                description={sliceText(catalogData?.text ?? '', 200)}
                 openGraph={{
                     images: [
                         {
