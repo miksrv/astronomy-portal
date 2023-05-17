@@ -95,7 +95,9 @@ const Photo: React.FC = () => {
     return (
         <main>
             <NextSeo
-                title={objectTitle}
+                title={`${objectTitle} - Астрофотография${
+                    photoDate ? ` - ${photoDate}` : ''
+                }`}
                 description={sliceText(catalogData?.text ?? '', 200)}
                 openGraph={{
                     images: [

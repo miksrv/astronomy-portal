@@ -40,6 +40,7 @@ const Sidebar: React.FC = () => {
                     {item.name}
                     {item.label && (
                         <Label
+                            className={styles.label}
                             color={'yellow'}
                             size={'tiny'}
                         >

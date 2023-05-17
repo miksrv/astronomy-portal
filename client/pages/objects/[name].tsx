@@ -142,7 +142,7 @@ const Object: React.FC = () => {
     return (
         <main>
             <NextSeo
-                title={objectTitle}
+                title={`${objectTitle} - Объект`}
                 description={sliceText(catalogData?.text ?? '', 200)}
                 openGraph={{
                     images: [

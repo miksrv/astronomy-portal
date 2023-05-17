@@ -23,6 +23,7 @@ const CategoryTable: React.FC<TCategoryTable> = (props) => {
                 <Loader />
             </Dimmer>
             <Table
+                unstackable
                 celled
                 inverted
                 selectable
