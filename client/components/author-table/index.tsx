@@ -23,6 +23,7 @@ const AuthorTable: React.FC<TAuthorTable> = (props) => {
                 <Loader />
             </Dimmer>
             <Table
+                unstackable
                 celled
                 inverted
                 selectable
