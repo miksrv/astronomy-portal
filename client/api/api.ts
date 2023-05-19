@@ -146,7 +146,8 @@ export const api = createApi({
         }),
         catalogGetItem: builder.query<TCatalog, string>({
             providesTags: (result, error, id) => [{ id, type: 'Catalog' }],
-            query: (object) => `catalog/${object}`
+            query: (object) => `catalog/${object}`,
+            transformErrorResponse: (response) => response.data
         }),
         catalogGetList: builder.query<APIResponseCatalogList, void>({
             providesTags: () => [{ id: 'LIST', type: 'Catalog' }],
@@ -235,7 +236,8 @@ export const api = createApi({
         >({
             keepUnusedDataFor: 3600,
             providesTags: () => [{ id: 'LIST', type: 'Photo' }],
-            query: (params) => `photo${encodeQueryData(params)}`
+            query: (params) => `photo${encodeQueryData(params)}`,
+            transformErrorResponse: (response) => response.data
         }),
         photoPatch: builder.mutation<
             TPhoto | APIResponseError,

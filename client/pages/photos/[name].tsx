@@ -12,6 +12,7 @@ import { wrapper } from '@/api/store'
 import { TPhoto } from '@/api/types'
 import { isOutdated, sliceText } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
+import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
 import React, { useMemo, useState } from 'react'
@@ -52,7 +53,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-const Photo: React.FC = () => {
+const Photo: NextPage = () => {
     const router = useRouter()
     const routerObject = router.query.name
     const photoDate = router.query.date
@@ -82,7 +83,7 @@ const Photo: React.FC = () => {
 
     const photoItem: TPhoto | undefined = useMemo(
         () =>
-            photoList?.items.find(({ date }) => date === photoDate) ||
+            photoList?.items?.find(({ date }) => date === photoDate) ||
             photoList?.items?.[0],
         [photoList, photoDate]
     )

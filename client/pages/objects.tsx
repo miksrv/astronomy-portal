@@ -12,6 +12,7 @@ import { editCatalog, openFormCatalog } from '@/api/applicationSlice'
 import { useAppDispatch } from '@/api/hooks'
 import { wrapper } from '@/api/store'
 import { TCatalog } from '@/api/types'
+import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React, { useMemo, useState } from 'react'
 import { Confirm, Message } from 'semantic-ui-react'
@@ -33,7 +34,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-const Objects: React.FC = () => {
+const Objects: NextPage = () => {
     const dispatch = useAppDispatch()
 
     const [search, setSearch] = useState<string>('')

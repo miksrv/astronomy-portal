@@ -101,6 +101,28 @@ h1
   @media only screen and (max-width: 768px)
     position: initial
 
+.error
+  text-align: center
+  padding: 50px 0 100px
+
+  $background404Image: '/images/error404_background.jpg'
+
+  h1
+    font-size: 80px !important
+    line-height: 80px
+    font-weight: 900
+    max-width: 700px
+    margin: 0 auto 70px
+    background: url($background404Image) no-repeat 100% 50%
+    background-size: cover
+    text-transform: uppercase
+    -webkit-background-clip: text
+    -webkit-text-fill-color: transparent
+
+    @media only screen and (max-width: 768px)
+      font-size: 60px !important
+      line-height: 60px
+
 main .ui.multiple.search.dropdown > input.search
   color: $text-main !important
 

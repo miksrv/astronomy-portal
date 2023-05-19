@@ -50,8 +50,11 @@ const ObjectFormModal: React.FC = () => {
     }: React.ChangeEvent<HTMLInputElement>) =>
         setFormState((prev) => ({ ...prev, [name]: value }))
 
-    const handleKeyDown = (e: { key: string }) =>
-        e.key === 'Enter' && handleSubmit()
+    const handleKeyDown = (e: { key: string; target: HTMLInputElement }) => {
+        if (e.target.tagName !== 'TEXTAREA' && e.key === 'Enter') {
+            handleSubmit()
+        }
+    }
 
     const findError = (field: keyof APIRequestCatalog) =>
         (
