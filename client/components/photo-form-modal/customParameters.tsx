@@ -60,7 +60,7 @@ const CustomParameters: React.FC<TCustomParameters> = ({
     }
 
     const handleKeyPress = (event: any) => {
-        if (!/[0-9]/.test(event.key)) {
+        if (!/\d/.test(event.key)) {
             event.preventDefault()
         }
     }
@@ -85,8 +85,8 @@ const CustomParameters: React.FC<TCustomParameters> = ({
                 </Table.Row>
             </Table.Header>
             <Table.Body>
-                {FilterList.map((filter, key) => (
-                    <Table.Row key={key}>
+                {FilterList.map((filter) => (
+                    <Table.Row key={filter}>
                         <Table.Cell>
                             <span
                                 className={classNames(

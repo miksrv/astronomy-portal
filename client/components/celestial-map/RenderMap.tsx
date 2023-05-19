@@ -35,12 +35,12 @@ const usePrevious: any = (value: any) => {
 }
 
 const createObjectsJSON = (objects: TObject[]) => {
-    const JSON: any = {
+    const geoJSON: any = {
         features: [],
         type: 'FeatureCollection'
     }
 
-    objects.map((item) => {
+    objects.forEach((item) => {
         const objectName = item.name.replace(/_/g, ' ')
         const objectJSON = {
             geometry: {
@@ -59,10 +59,10 @@ const createObjectsJSON = (objects: TObject[]) => {
             type: 'Feature'
         }
 
-        return JSON.features.push(objectJSON)
+        geoJSON.features.push(objectJSON)
     })
 
-    return JSON
+    return geoJSON
 }
 
 const RenderMap: React.FC<TRenderMapProps> = (props) => {

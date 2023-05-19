@@ -69,11 +69,14 @@ export const getTimeFromSec = (sec: number, full: boolean = false): string => {
     let h = (sec / 3600) ^ 0
     let m = ((sec - h * 3600) / 60) ^ 0
 
-    if (full)
-        return `${h} ${declOfNum(h, ['час', 'часа', 'часов'])} ${m} ${declOfNum(
-            m,
-            ['минута', 'минуты', 'минут']
-        )}`
+    if (full) {
+        let text = ''
+
+        text += h ? h + ' ' + declOfNum(h, ['час', 'часа', 'часов']) + ' ' : ''
+        text += m ? m + ' ' + declOfNum(m, ['минута', 'минуты', 'минут']) : ''
+
+        return text
+    }
 
     return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m)
 }

@@ -47,9 +47,9 @@ const RenderTableHeader: React.FC<TTableHeader> = ({
                           )
                         : true) &&
                     (!showPreview ? item.key !== 'preview' : true)
-            ).map((item, key) => (
+            ).map((item) => (
                 <Table.HeaderCell
-                    key={key}
+                    key={item.key}
                     className={'tableHeaderSticky'}
                     sorted={sort === item.key ? order : undefined}
                     onClick={() => handlerSortClick?.(item.key)}

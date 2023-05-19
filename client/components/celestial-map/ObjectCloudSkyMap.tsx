@@ -20,8 +20,8 @@ const ObjectCloudSkyMap: React.FC<TObjectCloudProps> = ({
         <Dimmer active={loading}>
             <Loader />
         </Dimmer>
-        {objects?.map((item, key) => (
-            <span key={key}>
+        {objects?.map((item) => (
+            <span key={item.name}>
                 <span
                     className={styles.item}
                     role={'button'}

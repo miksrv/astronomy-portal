@@ -1,10 +1,15 @@
 import { hosts } from '@/api/constants'
 import { useAppSelector } from '@/api/hooks'
 import { FilterList, TPhoto } from '@/api/types'
-import { getTimeFromSec, isOutdated } from '@/functions/helpers'
+import {
+    getTimeFromSec,
+    isMobile,
+    isOutdated,
+    sliceText
+} from '@/functions/helpers'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useMemo } from 'react'
+import React from 'react'
 import { Icon, Popup, Table } from 'semantic-ui-react'
 
 import { TTableItem } from '@/components/object-table/types'
@@ -21,25 +26,19 @@ type TTableRowProps = {
 const RenderTableRow: React.FC<TTableRowProps> = (props) => {
     const { item, photo, onClickEdit, onClickDelete } = props
     const userAuth = useAppSelector((state) => state.auth.userAuth)
-    const doTextTruncate = useMemo(
-        () =>
-            item?.text
-                ? item.text.length > 200
-                    ? item.text.slice(0, 200) + '...'
-                    : item.text
-                : '',
-        [item]
-    )
 
     return (
         <Table.Row className={styles.tableRow}>
-            <Table.Cell className={styles.cellName}>
+            <Table.Cell
+                className={styles.cellName}
+                singleLine={true}
+            >
                 <Popup
-                    disabled={!item.title}
+                    disabled={!item.title || isMobile}
                     size={'mini'}
                     wide
                     header={item.title}
-                    content={doTextTruncate}
+                    content={sliceText(item.text, 200)}
                     trigger={
                         <Link
                             href={`/objects/${item.name}`}
@@ -98,6 +97,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                         />
                         {isOutdated(photo.date, item.updated) && (
                             <Popup
+                                disabled={isMobile}
                                 content={
                                     'Фотография устарела, так как есть новые данные ' +
                                     'с телескопа, с помощью которых можно собрать новое изображение объекта'

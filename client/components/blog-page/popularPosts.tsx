@@ -28,7 +28,7 @@ const PopularPosts: React.FC<TPostGalleryProps> = ({ loading, posts }) => (
             {loading
                 ? Array(4)
                       .fill(1)
-                      .map((item, key) => <PopularPostItem key={key} />)
+                      .map((item) => <PopularPostItem key={item} />)
                 : posts?.map((post) => (
                       <PopularPostItem
                           key={post.id}

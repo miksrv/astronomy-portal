@@ -40,9 +40,7 @@ const PhotoGrid: React.FC<TPhotoGridProps> = ({
                       <Link
                           key={photo.id}
                           href={`/photos/${photo.object}?date=${photo.date}`}
-                          title={`${
-                              photo.object || photo.object
-                          } - Фотография объекта`}
+                          title={`${photo.object} - Фотография объекта`}
                           className={classNames(
                               styles.item,
                               threeColumns ? styles.item4 : undefined
@@ -89,9 +87,9 @@ const PhotosLoader: React.FC<{
         {visible &&
             Array(count)
                 .fill(1)
-                .map((item, key) => (
+                .map((item) => (
                     <div
-                        key={key}
+                        key={item}
                         className={classNames(
                             styles.item,
                             threeColumns ? styles.item4 : undefined

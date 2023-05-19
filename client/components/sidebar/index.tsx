@@ -28,13 +28,13 @@ const Sidebar: React.FC = () => {
             visible={visible}
             width={'thin'}
         >
-            {[...mobileMenuItems, ...menuItems].map((item, key) => (
+            {[...mobileMenuItems, ...menuItems].map((item) => (
                 <Menu.Item
+                    key={item.link}
                     as={Link}
                     onClick={() => dispatch(hide())}
                     href={item.link}
                     title={item.name}
-                    key={key}
                     className={styles.item}
                 >
                     {item.name}

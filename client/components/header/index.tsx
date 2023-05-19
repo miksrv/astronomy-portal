@@ -108,13 +108,13 @@ const Header: React.FC = () => {
                         onClick={() => dispatch(toggle())}
                     />
                 ) : (
-                    menuItems.map((item, key) => (
+                    menuItems.map((item) => (
                         <Menu.Item
+                            key={item.name}
                             as={Link}
                             href={item.link}
                             title={item.name}
                             active={router.pathname === item.link}
-                            key={key}
                         >
                             {item.name}
                             {item.label && (

@@ -69,9 +69,9 @@ const PhotoTable: React.FC<TPhotoTableProps> = ({ photos, loader }) => {
                             .filter((item) =>
                                 isMobile ? !hideTableRows.includes(item) : true
                             )
-                            .map((item, key) => (
+                            .map((item) => (
                                 <Table.HeaderCell
-                                    key={key}
+                                    key={item}
                                     className={'tableHeaderSticky'}
                                 >
                                     {item}
@@ -81,10 +81,10 @@ const PhotoTable: React.FC<TPhotoTableProps> = ({ photos, loader }) => {
                 </Table.Header>
                 <Table.Body>
                     {photos?.length ? (
-                        photos.map((photo, key) => (
+                        photos.map((photo) => (
                             <RenderTableRow
+                                key={photo.id}
                                 photo={photo}
-                                key={key}
                                 hideRows={hideTableRows}
                             />
                         ))

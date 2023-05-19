@@ -246,13 +246,13 @@ const ObjectFormModal: React.FC = () => {
 }
 
 const mapFormProps = (value?: TCatalog | undefined): APIRequestCatalog => ({
-    category: value?.category || 0,
-    coord_dec: value?.coord_dec || 0,
-    coord_ra: value?.coord_ra || 0,
-    name: value?.name || '',
-    source_link: value?.source_link || '',
-    text: value?.text || '',
-    title: value?.title || ''
+    category: value?.category ?? 0,
+    coord_dec: value?.coord_dec ?? 0,
+    coord_ra: value?.coord_ra ?? 0,
+    name: value?.name ?? '',
+    source_link: value?.source_link ?? '',
+    text: value?.text ?? '',
+    title: value?.title ?? ''
 })
 
 export default ObjectFormModal

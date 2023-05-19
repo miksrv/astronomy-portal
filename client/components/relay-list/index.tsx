@@ -83,7 +83,7 @@ const RelayList: React.FC = () => {
             )}
             {relayList.items.map((item, key) => (
                 <RelayListItem
-                    key={key}
+                    key={item}
                     index={key}
                     name={item}
                     status={
