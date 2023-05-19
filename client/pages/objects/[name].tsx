@@ -61,7 +61,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-const Object: NextPage = () => {
+const ObjectItem: NextPage = () => {
     const router = useRouter()
     const routerObject = router.query.name
     const objectName =
@@ -254,4 +254,4 @@ const Object: NextPage = () => {
     )
 }
 
-export default Object
+export default ObjectItem

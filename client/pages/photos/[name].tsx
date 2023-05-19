@@ -53,7 +53,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-const Photo: NextPage = () => {
+const PhotoItem: NextPage = () => {
     const router = useRouter()
     const routerObject = router.query.name
     const photoDate = router.query.date
@@ -164,4 +164,4 @@ const Photo: NextPage = () => {
     )
 }
 
-export default Photo
+export default PhotoItem

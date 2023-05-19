@@ -24,7 +24,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-const Map: NextPage = () => {
+const Celestial: NextPage = () => {
     const { data, isFetching } = useCatalogGetListQuery()
     const [goToObject, setGoToObject] = useState<[number, number]>([0, 0])
 
@@ -76,4 +76,4 @@ const Map: NextPage = () => {
     )
 }
 
-export default Map
+export default Celestial
