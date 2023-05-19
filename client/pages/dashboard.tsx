@@ -1,3 +1,4 @@
+import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React from 'react'
 import { Grid } from 'semantic-ui-react'
@@ -7,7 +8,7 @@ import Camera from '@/components/camera'
 import RelayList from '@/components/relay-list'
 import Weather from '@/components/weather'
 
-const Dashboard: React.FC = () => (
+const Dashboard: NextPage = () => (
     <main>
         <NextSeo
             title={'Панель управления обсерваторией'}

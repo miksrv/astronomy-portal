@@ -6,6 +6,7 @@ import {
     usePhotoGetListQuery
 } from '@/api/api'
 import { wrapper } from '@/api/store'
+import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React from 'react'
 
@@ -26,7 +27,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-export default function Home() {
+const Home: NextPage = () => {
     const { data: photoData, isLoading: photoLoading } = usePhotoGetListQuery({
         limit: 4,
         order: 'random'
@@ -63,3 +64,5 @@ export default function Home() {
         </main>
     )
 }
+
+export default Home

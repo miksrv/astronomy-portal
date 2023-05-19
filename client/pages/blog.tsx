@@ -5,6 +5,7 @@ import {
 } from '@/api/api'
 import { wrapper } from '@/api/store'
 import { sliceText } from '@/functions/helpers'
+import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React from 'react'
 
@@ -22,7 +23,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-const Blog: React.FC = () => {
+const Blog: NextPage = () => {
     const { data, isLoading } = useBlogGetListQuery({
         limit: postPerPage,
         offset: 0

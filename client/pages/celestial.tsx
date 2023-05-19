@@ -5,6 +5,7 @@ import {
 } from '@/api/api'
 import { wrapper } from '@/api/store'
 import { TCatalog } from '@/api/types'
+import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React, { useMemo, useState } from 'react'
 
@@ -23,7 +24,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-const Map: React.FC = () => {
+const Celestial: NextPage = () => {
     const { data, isFetching } = useCatalogGetListQuery()
     const [goToObject, setGoToObject] = useState<[number, number]>([0, 0])
 
@@ -75,4 +76,4 @@ const Map: React.FC = () => {
     )
 }
 
-export default Map
+export default Celestial

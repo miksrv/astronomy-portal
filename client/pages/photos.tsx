@@ -10,6 +10,7 @@ import {
 } from '@/api/api'
 import { wrapper } from '@/api/store'
 import { TPhoto } from '@/api/types'
+import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React, { useMemo, useState } from 'react'
 import { Message } from 'semantic-ui-react'
@@ -33,7 +34,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
 type TPhotoCategory = TPhoto & { category: number }
 
-const Photos: React.FC = () => {
+const Photos: NextPage = () => {
     const [filterCategory, setFilterCategory] = useState<number>(0)
 
     const { data: statisticData } = useStatisticGetQuery()

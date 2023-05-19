@@ -11,6 +11,7 @@ import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
 import { isOutdated, sliceText } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
+import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
 import dynamic from 'next/dynamic'
@@ -47,12 +48,12 @@ export const getServerSideProps = wrapper.getServerSideProps(
         const name = context.params?.name
 
         if (typeof name === 'string') {
-            store.dispatch(statisticGetCatalogItems.initiate())
-            store.dispatch(catalogGetItem.initiate(name))
-            store.dispatch(photoGetList.initiate({ object: name }))
-        }
+            store.dispatch(await statisticGetCatalogItems.initiate())
+            store.dispatch(await catalogGetItem.initiate(name))
+            store.dispatch(await photoGetList.initiate({ object: name }))
 
-        await Promise.all(store.dispatch(getRunningQueriesThunk()))
+            await Promise.all(store.dispatch(getRunningQueriesThunk()))
+        }
 
         return {
             props: {}
@@ -60,7 +61,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-const Object: React.FC = () => {
+const ObjectItem: NextPage = () => {
     const router = useRouter()
     const routerObject = router.query.name
     const objectName =
@@ -253,4 +254,4 @@ const Object: React.FC = () => {
     )
 }
 
-export default Object
+export default ObjectItem

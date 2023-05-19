@@ -6,6 +6,7 @@ import {
 import { wrapper } from '@/api/store'
 import { sliceText } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
+import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
 import React from 'react'
@@ -48,7 +49,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-const Blog: React.FC = () => {
+const Blog: NextPage = () => {
     const router = useRouter()
     const routerObject = router.query.page
     const pageNumber =

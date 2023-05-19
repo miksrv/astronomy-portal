@@ -9,6 +9,7 @@ import {
 } from '@/api/api'
 import { useAppSelector } from '@/api/hooks'
 import { wrapper } from '@/api/store'
+import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React, { useState } from 'react'
 import { Button, Confirm, Grid, Icon, Message } from 'semantic-ui-react'
@@ -31,7 +32,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-const Directory: React.FC = () => {
+const Directory: NextPage = () => {
     const [showMessage, setShowMessage] = useState<boolean>(false)
     const [showCategoryModal, setShowCategoryModal] = useState<boolean>(false)
     const [showAuthorModal, setShowAuthorModal] = useState<boolean>(false)
