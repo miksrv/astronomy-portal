@@ -312,12 +312,12 @@ const PhotoFormModal: React.FC = () => {
 }
 
 const mapFormProps = (value?: TPhoto | undefined): APIRequestPhoto => ({
-    author_id: value?.author?.id || 0,
-    date: value?.date || '',
-    id: value?.id || 0,
-    image_ext: value?.image_ext || '',
-    image_name: value?.image_name || '',
-    object: value?.object || ''
+    author_id: value?.author?.id ?? 0,
+    date: value?.date ?? '',
+    id: value?.id ?? 0,
+    image_ext: value?.image_ext ?? '',
+    image_name: value?.image_name ?? '',
+    object: value?.object ?? ''
 })
 
 export default PhotoFormModal

@@ -149,9 +149,9 @@ const AuthorFormModal: React.FC<IAuthorFormModal> = (props) => {
 }
 
 const mapFormProps = (value?: TAuthor | undefined): TAuthor => ({
-    id: value?.id || 0,
-    link: value?.link || '',
-    name: value?.name || ''
+    id: value?.id ?? 0,
+    link: value?.link ?? '',
+    name: value?.name ?? ''
 })
 
 export default AuthorFormModal

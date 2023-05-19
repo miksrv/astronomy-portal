@@ -37,9 +37,9 @@ const Statistic: React.FC = () => {
     return (
         <div className={styles.section}>
             <Grid>
-                {CARDS.map((item, key) => (
+                {CARDS.map((item) => (
                     <Grid.Column
-                        key={key}
+                        key={item.name}
                         computer={4}
                         tablet={8}
                         mobile={16}

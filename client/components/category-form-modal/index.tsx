@@ -141,8 +141,8 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
 }
 
 const mapFormProps = (value?: TCategory | undefined): TCategory => ({
-    id: value?.id || 0,
-    name: value?.name || ''
+    id: value?.id ?? 0,
+    name: value?.name ?? ''
 })
 
 export default CategoryFormModal

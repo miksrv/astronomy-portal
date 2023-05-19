@@ -51,7 +51,7 @@ export const { login, logout, setToken, setUserInfo, setUserAuth } =
 
 export const getStorageToken = (): string =>
     typeof window !== 'undefined' && localStorage.getItem('userToken')
-        ? localStorage.getItem('userToken') || ''
+        ? localStorage.getItem('userToken') ?? ''
         : ''
 
 export default authSlice.reducer

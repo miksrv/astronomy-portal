@@ -98,8 +98,8 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                         loading &&
                         Array(statisticData.catalog_count || 20)
                             .fill(1)
-                            .map((item, key) => (
-                                <Table.Row key={key}>
+                            .map((item) => (
+                                <Table.Row key={item}>
                                     <Table.Cell
                                         content={''}
                                         colSpan={HeaderFields.length}
