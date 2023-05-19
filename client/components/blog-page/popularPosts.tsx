@@ -1,6 +1,6 @@
 import { hosts } from '@/api/constants'
 import { TBlog } from '@/api/types'
-import { isMobile, sliceText } from '@/functions/helpers'
+import { isMobile, range, sliceText } from '@/functions/helpers'
 import classNames from 'classnames'
 import Image from 'next/image'
 import React from 'react'
@@ -26,9 +26,7 @@ const PopularPosts: React.FC<TPostGalleryProps> = ({ loading, posts }) => (
         </Dimmer>
         <Grid>
             {loading
-                ? Array(4)
-                      .fill(1)
-                      .map((item) => <PopularPostItem key={item} />)
+                ? range(1, 4).map((item) => <PopularPostItem key={item} />)
                 : posts?.map((post) => (
                       <PopularPostItem
                           key={post.id}
