@@ -1,11 +1,15 @@
 import { hosts } from '@/api/constants'
 import { useAppSelector } from '@/api/hooks'
 import { FilterList, TPhoto } from '@/api/types'
-import { getTimeFromSec, isOutdated } from '@/functions/helpers'
-import { isMobile, sliceText } from '@/functions/helpers'
+import {
+    getTimeFromSec,
+    isMobile,
+    isOutdated,
+    sliceText
+} from '@/functions/helpers'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useMemo } from 'react'
+import React from 'react'
 import { Icon, Popup, Table } from 'semantic-ui-react'
 
 import { TTableItem } from '@/components/object-table/types'
