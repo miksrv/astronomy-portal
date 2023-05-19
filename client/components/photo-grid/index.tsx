@@ -1,6 +1,6 @@
 import { hosts } from '@/api/constants'
 import { TCatalog, TPhoto } from '@/api/types'
-import { sliceText } from '@/functions/helpers'
+import { range, sliceText } from '@/functions/helpers'
 import classNames from 'classnames'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -85,23 +85,21 @@ const PhotosLoader: React.FC<{
 }> = ({ count, visible, threeColumns }) => (
     <>
         {visible &&
-            Array(count)
-                .fill(1)
-                .map((item) => (
-                    <div
-                        key={item}
-                        className={classNames(
-                            styles.item,
-                            threeColumns ? styles.item4 : undefined
-                        )}
-                    >
-                        <div className={styles.info}>
-                            <Dimmer active>
-                                <Loader />
-                            </Dimmer>
-                        </div>
+            range(1, count).map((item) => (
+                <div
+                    key={item}
+                    className={classNames(
+                        styles.item,
+                        threeColumns ? styles.item4 : undefined
+                    )}
+                >
+                    <div className={styles.info}>
+                        <Dimmer active>
+                            <Loader />
+                        </Dimmer>
                     </div>
-                ))}
+                </div>
+            ))}
     </>
 )
 

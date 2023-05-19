@@ -1,5 +1,6 @@
 import { useStatisticGetQuery } from '@/api/api'
 import { TCatalog, TCategory, TPhoto } from '@/api/types'
+import { range } from '@/functions/helpers'
 import classNames from 'classnames'
 import React, { useMemo, useState } from 'react'
 import { Dimmer, Loader, Table } from 'semantic-ui-react'
@@ -96,16 +97,16 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                 <Table.Body>
                     {statisticData?.catalog_count &&
                         loading &&
-                        Array(statisticData.catalog_count || 20)
-                            .fill(1)
-                            .map((item) => (
+                        range(1, statisticData.catalog_count || 20).map(
+                            (item) => (
                                 <Table.Row key={item}>
                                     <Table.Cell
                                         content={''}
                                         colSpan={HeaderFields.length}
                                     />
                                 </Table.Row>
-                            ))}
+                            )
+                        )}
 
                     {sortedCatalog?.length && !loading ? (
                         sortedCatalog.map((item) => (
