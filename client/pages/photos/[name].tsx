@@ -99,7 +99,10 @@ const PhotoItem: NextPage = () => {
                 title={`${objectTitle} - Астрофотография${
                     photoDate ? ` - ${photoDate}` : ''
                 }`}
-                description={sliceText(catalogData?.text ?? '', 200)}
+                description={
+                    'Описание астрофотографии: ' +
+                    sliceText(catalogData?.text ?? '', 200)
+                }
                 openGraph={{
                     images: [
                         {

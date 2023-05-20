@@ -144,7 +144,10 @@ const ObjectItem: NextPage = () => {
         <main>
             <NextSeo
                 title={`${objectTitle} - Объект`}
-                description={sliceText(catalogData?.text ?? '', 200)}
+                description={
+                    'Описание объекта наблюдения: ' +
+                    sliceText(catalogData?.text ?? '', 200)
+                }
                 openGraph={{
                     images: [
                         {
