@@ -106,8 +106,7 @@ class Photo extends ResourceController
             'date'   => 'required|string|valid_date[Y-m-d]',
             'author_id'  => 'numeric',
             'image_name' => 'required|alpha_dash',
-            'image_ext'  => 'required|alpha_dash',
-            'image_size' => 'required|numeric'
+            'image_ext'  => 'required|alpha_dash'
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -133,8 +132,8 @@ class Photo extends ResourceController
         }
 
         try {
-            $dateFormat  = date_format(date_create($input['date']), 'Y.m.d');
-            $photosName  = $input['object'] . '-' . $dateFormat;
+            $dateFormat = date_format(date_create($input['date']), 'Y.m.d');
+            $photosName = $input['object'] . '-' . $dateFormat;
             $imageFull  = new File($photoOrigPath);
             $imageThumb = new File($photoThumbPath);
 
@@ -154,6 +153,7 @@ class Photo extends ResourceController
             $input['image_size']   = $movedOriginal->getSize();
             $input['image_width']  = $width;
             $input['image_height'] = $height;
+            $input['filters']      = isset($input['filters']) ? json_encode($input['filters']) : null;
 
             $catalogModel = new PhotoModel();
             $catalogModel->insert($input);

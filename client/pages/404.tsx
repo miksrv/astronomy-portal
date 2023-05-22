@@ -6,7 +6,7 @@ const Error404: NextPage = () => {
     return (
         <main>
             <NextSeo title={'Ошибка 404 - Такой страницы не существует'} />
-            <div className={'error'}>
+            <div className={'errorPage'}>
                 <h1>Houston, we have a problem</h1>
                 <h2>404 - Страница не найдена</h2>
                 <p>

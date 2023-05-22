@@ -167,7 +167,6 @@ export const api = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-
         catalogPost: builder.mutation<
             TCatalog | APIResponseError,
             Partial<APIRequestCatalog>
@@ -183,6 +182,7 @@ export const api = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
+
         categoryDelete: builder.mutation<void, number>({
             invalidatesTags: () => [{ type: 'Category' }],
             query: (id) => ({
@@ -208,7 +208,6 @@ export const api = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-
         categoryPost: builder.mutation<
             TCategory | APIResponseError,
             Partial<TCategory>
@@ -303,25 +302,26 @@ export const api = createApi({
         }),
 
         statisticGet: builder.query<APIResponseStatistic, void>({
-            providesTags: () => [{ type: 'Catalog' }],
+            providesTags: () => [{ type: 'Statistic' }],
             query: () => 'statistic'
         }),
-
         statisticGetCatalogItems: builder.query<APIResponseCatalogNames, void>({
+            providesTags: () => [{ type: 'Statistic' }],
             query: () => 'statistic/catalog'
         }),
         statisticGetPhotosItems: builder.query<APIResponsePhotoListNames, void>(
             {
+                providesTags: () => [{ type: 'Statistic' }],
                 query: () => 'statistic/photos'
             }
         ),
-
         statisticGetTelescope: builder.query<
             APIResponseStatisticTelescope,
             Maybe<APIRequestTelescope>
         >({
             query: (params) => `statistic/telescope${encodeQueryData(params)}`
         }),
+
         weatherGetCurrent: builder.query<APIResponseWeatherCurrent, void>({
             query: () => 'weather/current'
         }),
