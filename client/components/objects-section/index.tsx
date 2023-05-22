@@ -36,7 +36,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
               .utcOffset('GMT+05:00')
               .format('D.MM.Y, H:mm')
         : '---'
-    const exposure = catalog
+    const exposure = catalog?.statistic?.exposure
         ? getTimeFromSec(catalog.statistic.exposure, true)
         : '---'
     const size = catalog?.statistic?.data_size
@@ -105,7 +105,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                                     <span className={styles.value}>
                                         Сделано кадров:
                                     </span>
-                                    {catalog?.statistic.frames || '0'}
+                                    {catalog?.statistic.frames || '---'}
                                 </div>
                                 <div>
                                     <span className={styles.value}>
