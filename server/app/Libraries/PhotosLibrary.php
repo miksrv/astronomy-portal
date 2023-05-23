@@ -60,8 +60,7 @@ class PhotosLibrary
             return null;
         }
 
-        foreach ($photoList as $photo)
-        {
+        foreach ($photoList as $photo) {
             $this->addPhotoStatistic($filesList, $photo, $photo->object);
         }
 

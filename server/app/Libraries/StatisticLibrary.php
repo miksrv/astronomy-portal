@@ -31,8 +31,7 @@ class StatisticLibrary
             'exposure'  => 0
         ];
 
-        foreach ($filesItems as $file)
-        {
+        foreach ($filesItems as $file) {
             if ($object && $object !== $file->object) {
                 continue;
             }

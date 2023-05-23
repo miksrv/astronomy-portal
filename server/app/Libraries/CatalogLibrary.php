@@ -57,8 +57,7 @@ class CatalogLibrary
             return null;
         }
 
-        foreach ($catalogList as $item)
-        {
+        foreach ($catalogList as $item) {
             $objectStatistic = $libraryStatistic->getObjectStatistic($filesList, $item->name);
 
             $item->text      = word_limiter($item->text, 25, '...');
@@ -78,8 +77,7 @@ class CatalogLibrary
      */
     protected function mappingFilesToFilters(array $files): array
     {
-        foreach ($files as $file)
-        {
+        foreach ($files as $file) {
             $file->filter  = $this->filterEnum[$file->filter] ?? 'unknown';
             $file->preview = file_exists(UPLOAD_FITS . $file->object . '/' . $file->file_name . '.jpg');
         }
