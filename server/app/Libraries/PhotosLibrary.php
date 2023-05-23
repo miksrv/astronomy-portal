@@ -5,17 +5,6 @@ use App\Models\PhotoModel;
 
 class PhotosLibrary
 {
-    protected array $filterEnum = [
-        'Luminance' => 'luminance',
-        'Red'       => 'red',
-        'Green'     => 'green',
-        'Blue'      => 'blue',
-        'Ha'        => 'hydrogen',
-        'OIII'      => 'oxygen',
-        'SII'       => 'sulfur',
-        'CLEAR'     => 'clear'
-    ];
-
     /**
      * @param string $objectName
      * @param string|null $date
@@ -40,23 +29,8 @@ class PhotosLibrary
             ->first();
 
         $filesItem = $filesModel->where(['object' => $objectName])->findAll();
-        $statistic = $this->_getPhotoStatistic($filesItem, $photoItem->date);
-        $calculate = $this->_calculateObjectStatistic($photoItem->filters);
 
-        $photoItem->custom    = !empty($photoItem->filters);
-        $photoItem->statistic = $calculate ?? $statistic->objectStatistic ?? null;
-        $photoItem->filters   = $photo->filters ?? $statistic->filterStatistic ?? null;
-        $photoItem->author    = $photoItem->author_id
-            ? [
-                'id'   => $photoItem->author_id,
-                'name' => $photoItem->author_name ?? '',
-                'link' => $photoItem->author_link ?? '',
-            ]
-            : null;
-
-        unset($photoItem->author_id, $photoItem->created_at, $photoItem->updated_at, $photoItem->deleted_at);
-
-        return $photoItem;
+        return $this->_addPhotoStatistic($filesItem, $photoItem);
     }
 
     /**
@@ -88,30 +62,17 @@ class PhotosLibrary
 
         foreach ($photoList as $photo)
         {
-            $objectStatistic = $this->_getPhotoStatistic($filesList, $photo->date, $photo->object);
-            $objectCalculate = $this->_calculateObjectStatistic($photo->filters);
-
-            $photo->custom    = !empty($photo->filters);
-            $photo->statistic = $objectCalculate ?? $objectStatistic->objectStatistic ?? null;
-            $photo->filters   = $photo->filters ?? $objectStatistic->filterStatistic ?? null;
-            $photo->author    = $photo->author_id
-                ? [
-                    'id'   => $photo->author_id,
-                    'name' => $photo->author_name ?? '',
-                    'link' => $photo->author_link ?? '',
-                  ]
-                : null;
-
-            unset(
-                $photo->created_at, $photo->updated_at, $photo->deleted_at,
-                $photo->author_id, $photo->author_name, $photo->author_link,
-            );
+            $this->_addPhotoStatistic($filesList, $photo, $photo->object);
         }
 
         return $photoList;
     }
 
-    protected function _calculateObjectStatistic($filters)
+    /**
+     * @param $filters
+     * @return object|null
+     */
+    protected function _calculateObjectStatistic($filters): ?object
     {
         if (empty($filters)) return null;
 
@@ -128,54 +89,35 @@ class PhotosLibrary
         return $objectStatistic;
     }
 
-    protected function _getPhotoStatistic(
-        array $filesItems,
-        string $photoDate = null,
-        string $object = null
-    ): ?object
+    /**
+     * @param array $filesList
+     * @param $photo
+     * @param string|null $object
+     * @return object
+     */
+    protected function _addPhotoStatistic(array $filesList, $photo, string $object = null): object
     {
-        if (!$filesItems)
-            return null;
+        $libraryStatistic = new StatisticLibrary();
 
-        $filterStatistic = (object) [];
-        $objectStatistic = (object) [
-            'frames'    => 0,
-            'data_size' => 0,
-            'exposure'  => 0
-        ];
+        $objectStatistic = $libraryStatistic->getObjectStatistic($filesList, $object, $photo->date);
+        $objectCalculate = $this->_calculateObjectStatistic($photo->filters);
 
-        foreach ($filesItems as $file)
-        {
-            if ($object && $object !== $file->object)
-                continue;
+        $photo->custom    = !empty($photo->filters);
+        $photo->statistic = $objectCalculate ?? $objectStatistic->objectStatistic ?? null;
+        $photo->filters   = $photo->filters ?? $objectStatistic->filterStatistic ?? null;
+        $photo->author    = $photo->author_id
+            ? [
+                'id'   => $photo->author_id,
+                'name' => $photo->author_name ?? '',
+                'link' => $photo->author_link ?? '',
+            ]
+            : null;
 
-            if ($photoDate && strtotime($file->date_obs . ' +5 hours') > strtotime($photoDate . ' 23:59:59'))
-                continue;
+        unset(
+            $photo->created_at, $photo->updated_at, $photo->deleted_at,
+            $photo->author_id, $photo->author_name, $photo->author_link,
+        );
 
-            $filterName = $this->filterEnum[$file->filter] ?? 'unknown';
-
-            $objectStatistic->frames   += 1;
-            $objectStatistic->exposure += $file->exptime;
-
-            if (isset($filterStatistic->{$filterName}))
-            {
-                $filterStatistic->{$filterName}->exposure += $file->exptime;
-                $filterStatistic->{$filterName}->frames   += 1;
-            }
-            else
-            {
-                $filterStatistic->{$filterName} = (object) [
-                    'exposure' => $file->exptime,
-                    'frames'   => 1
-                ];
-            }
-        }
-
-        $objectStatistic->data_size = round($objectStatistic->frames * FITS_FILE_SIZE);
-
-        return (object) [
-            'filterStatistic' => $filterStatistic,
-            'objectStatistic' => $objectStatistic
-        ];
+        return $photo;
     }
 }

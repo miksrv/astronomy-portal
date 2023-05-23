@@ -153,10 +153,12 @@ const BlogPage: React.FC<TBlogPage> = ({ loading, posts, total, page }) => {
                                         value={statisticData?.users || '?'}
                                     />
                                 </div>
-                                <PopularPosts
-                                    loading={popularLoading}
-                                    posts={popularPosts?.items}
-                                />
+                                {!isMobile && (
+                                    <PopularPosts
+                                        loading={popularLoading}
+                                        posts={popularPosts?.items}
+                                    />
+                                )}
                                 <div className={'box'}>
                                     <Pagination
                                         currentPage={page}
