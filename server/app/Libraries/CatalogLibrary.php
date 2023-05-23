@@ -5,6 +5,10 @@ use App\Models\FilesModel;
 
 class CatalogLibrary
 {
+    /**
+     * @param string $objectName
+     * @return array|object|null
+     */
     function getCatalogItemByName(string $objectName)
     {
         $libraryStatistic = new StatisticLibrary();
@@ -18,20 +22,25 @@ class CatalogLibrary
             ->join('category', 'category.id = catalog.category', 'left')
             ->find($objectName);
 
-        if (!$catalogItem) return null;
+        if (!$catalogItem) {
+            return null;
+        }
 
         $objectStatistic = $libraryStatistic->getObjectStatistic($filesItems);
 
         $catalogItem->updated   = $objectStatistic->lastUpdatedDate ?? null;
         $catalogItem->statistic = $objectStatistic->objectStatistic ?? [];
         $catalogItem->filters   = $objectStatistic->filterStatistic ?? [];
-        $catalogItem->files     = $this->_mapFilesFilters($filesItems);
+        $catalogItem->files     = $this->mappingFilesToFilters($filesItems);
 
         unset($catalogItem->created_at, $catalogItem->updated_at, $catalogItem->deleted_at);
 
         return $catalogItem;
     }
 
+    /**
+     * @return array|null
+     */
     function getCatalogList(): ?array
     {
         helper('text');
@@ -44,7 +53,9 @@ class CatalogLibrary
         $catalogList = $modelCatalog->findAll();
         $filesList   = $modelFiles->select(['object', 'filter', 'date_obs', 'exptime'])->findAll();
 
-        if (!$catalogList) return null;
+        if (!$catalogList) {
+            return null;
+        }
 
         foreach ($catalogList as $item)
         {
@@ -61,7 +72,11 @@ class CatalogLibrary
         return $catalogList;
     }
 
-    protected function _mapFilesFilters(array $files): array
+    /**
+     * @param array $files
+     * @return array
+     */
+    protected function mappingFilesToFilters(array $files): array
     {
         foreach ($files as $file)
         {

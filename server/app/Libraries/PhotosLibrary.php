@@ -14,8 +14,7 @@ class PhotosLibrary
     {
         $where = ['object' => $objectName];
 
-        if ($date)
-        {
+        if ($date) {
             $where['date'] = $date;
         }
 
@@ -30,7 +29,7 @@ class PhotosLibrary
 
         $filesItem = $filesModel->where(['object' => $objectName])->findAll();
 
-        return $this->_addPhotoStatistic($filesItem, $photoItem);
+        return $this->addPhotoStatistic($filesItem, $photoItem);
     }
 
     /**
@@ -49,8 +48,7 @@ class PhotosLibrary
             ->join('authors', 'authors.id = photos.author_id', 'left')
             ->orderBy($order === 'random' ? 'RAND()' : $order, 'DESC');
 
-        if ($filterObject)
-        {
+        if ($filterObject) {
             $photoModel->where(['object' => $filterObject]);
             $modelFiles->where(['object' => $filterObject]);
         }
@@ -58,11 +56,13 @@ class PhotosLibrary
         $photoList = $photoModel->findAll($filterLimit);
         $filesList = $modelFiles->findAll();
 
-        if (!$photoList) return null;
+        if (!$photoList) {
+            return null;
+        }
 
         foreach ($photoList as $photo)
         {
-            $this->_addPhotoStatistic($filesList, $photo, $photo->object);
+            $this->addPhotoStatistic($filesList, $photo, $photo->object);
         }
 
         return $photoList;
@@ -72,9 +72,11 @@ class PhotosLibrary
      * @param $filters
      * @return object|null
      */
-    protected function _calculateObjectStatistic($filters): ?object
+    protected function calculateObjectStatistic($filters): ?object
     {
-        if (empty($filters)) return null;
+        if (empty($filters)) {
+            return null;
+        }
 
         $objectStatistic = (object) [
             'frames'   => 0,
@@ -95,12 +97,12 @@ class PhotosLibrary
      * @param string|null $object
      * @return object
      */
-    protected function _addPhotoStatistic(array $filesList, $photo, string $object = null): object
+    protected function addPhotoStatistic(array $filesList, $photo, string $object = null): object
     {
         $libraryStatistic = new StatisticLibrary();
 
         $objectStatistic = $libraryStatistic->getObjectStatistic($filesList, $object, $photo->date);
-        $objectCalculate = $this->_calculateObjectStatistic($photo->filters);
+        $objectCalculate = $this->calculateObjectStatistic($photo->filters);
 
         $photo->custom    = !empty($photo->filters);
         $photo->statistic = $objectCalculate ?? $objectStatistic->objectStatistic ?? null;

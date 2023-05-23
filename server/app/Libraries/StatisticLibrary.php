@@ -19,8 +19,9 @@ class StatisticLibrary
         string $photoDate = null
     ): ?object
     {
-        if (!$filesItems)
+        if (!$filesItems) {
             return null;
+        }
 
         $lastUpdatedDate = '';
         $filterStatistic = (object) [];
@@ -32,11 +33,13 @@ class StatisticLibrary
 
         foreach ($filesItems as $file)
         {
-            if ($object && $object !== $file->object)
+            if ($object && $object !== $file->object) {
                 continue;
+            }
 
-            if ($photoDate && strtotime($file->date_obs . ' +5 hours') > strtotime($photoDate . ' 23:59:59'))
+            if ($photoDate && strtotime($file->date_obs . ' +5 hours') > strtotime($photoDate . ' 23:59:59')) {
                 continue;
+            }
 
             if (!$lastUpdatedDate) {
                 $lastUpdatedDate = $file->date_obs;
@@ -49,13 +52,10 @@ class StatisticLibrary
             $objectStatistic->frames   += 1;
             $objectStatistic->exposure += $file->exptime;
 
-            if (isset($filterStatistic->{$filterName}))
-            {
+            if (isset($filterStatistic->{$filterName})) {
                 $filterStatistic->{$filterName}->exposure += $file->exptime;
                 $filterStatistic->{$filterName}->frames   += 1;
-            }
-            else
-            {
+            } else {
                 $filterStatistic->{$filterName} = (object) [
                     'exposure' => $file->exptime,
                     'frames'   => 1
