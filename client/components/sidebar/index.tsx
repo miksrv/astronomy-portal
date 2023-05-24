@@ -14,7 +14,10 @@ const Sidebar: React.FC = () => {
     const visible = useAppSelector((state) => state.sidebar.visible)
     const { data, isLoading } = useStatisticGetQuery()
 
-    const mobileMenuItems: TMenuItems[] = [{ link: '/', name: 'Главная' }]
+    const beforeMobileMenu: TMenuItems[] = [{ link: '/', name: 'Главная' }]
+    const afterMobileMenu: TMenuItems[] = [
+        { link: '/directory', name: 'Справочники' }
+    ]
 
     return (
         <SidebarMenu
@@ -28,31 +31,33 @@ const Sidebar: React.FC = () => {
             visible={visible}
             width={'thin'}
         >
-            {[...mobileMenuItems, ...menuItems].map((item) => (
-                <Menu.Item
-                    key={item.link}
-                    as={Link}
-                    onClick={() => dispatch(hide())}
-                    href={item.link}
-                    title={item.name}
-                    className={styles.item}
-                >
-                    {item.name}
-                    {item.label && (
-                        <Label
-                            className={styles.label}
-                            color={'yellow'}
-                            size={'tiny'}
-                        >
-                            <Loader
-                                active={isLoading}
-                                size={'mini'}
-                            />
-                            {data?.[item.label]}
-                        </Label>
-                    )}
-                </Menu.Item>
-            ))}
+            {[...beforeMobileMenu, ...menuItems, ...afterMobileMenu].map(
+                (item) => (
+                    <Menu.Item
+                        key={item.link}
+                        as={Link}
+                        onClick={() => dispatch(hide())}
+                        href={item.link}
+                        title={item.name}
+                        className={styles.item}
+                    >
+                        {item.name}
+                        {item.label && (
+                            <Label
+                                className={styles.label}
+                                color={'yellow'}
+                                size={'tiny'}
+                            >
+                                <Loader
+                                    active={isLoading}
+                                    size={'mini'}
+                                />
+                                {data?.[item.label]}
+                            </Label>
+                        )}
+                    </Menu.Item>
+                )
+            )}
         </SidebarMenu>
     )
 }
