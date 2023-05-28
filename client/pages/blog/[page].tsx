@@ -70,7 +70,7 @@ const Blog: NextPage = () => {
     return (
         <main>
             <NextSeo
-                title={`Блог обсерватории - Страница ${currentPage}`}
+                title={`Астрономический блог - Страница ${currentPage}`}
                 description={sliceText(data?.items?.[0]?.text ?? '', 200)}
                 openGraph={{
                     images: getMediaFromPost(data?.items?.[0]),
