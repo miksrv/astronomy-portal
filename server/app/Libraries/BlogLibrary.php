@@ -31,13 +31,18 @@ class BlogLibrary
     /**
      * @throws ReflectionException
      */
-    public function getTelegramChannelHistory(string $peer, int $limit = 5, int $offset = 0, int $offset_id = null): bool
+    public function getTelegramChannelHistory(
+        string $peer,
+        int $limit = 5,
+        int $offset = 0,
+        int $offsetId = null
+    ): bool
     {
         $messages = $this->MadelineProto->messages->getHistory([
             'peer'       => $peer,
             'limit'      => $limit,
             'add_offset' => $offset,
-            'offset_id'  => $offset_id
+            'offset_id'  => $offsetId
         ]);
 
         $this->processChannelMessages($messages);
