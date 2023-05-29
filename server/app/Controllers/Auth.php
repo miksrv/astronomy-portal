@@ -42,11 +42,7 @@ class Auth extends ResourceController
         $userModel = new UserModel();
         $userModel->save($input);
 
-        return $this
-            ->getJWTForUser(
-                $input['email'],
-                ResponseInterface::HTTP_CREATED
-            );
+        return $this->getJWTForUser($input['email'], ResponseInterface::HTTP_CREATED);
     }
 
     /**
@@ -72,6 +68,7 @@ class Auth extends ResourceController
         if (!$this->validateRequest($input, $rules, $errors)) {
             return $this->failValidationErrors($this->validator->getErrors());
         }
+
         return $this->getJWTForUser($input['email']);
     }
 
@@ -87,8 +84,8 @@ class Auth extends ResourceController
             $user = validateJWTFromRequest($authenticationHeader);
 
             return $this->respond(                    [
-                'message' => 'User authenticated successfully',
-                'user' => $user,
+                'message'      => 'User authenticated successfully',
+                'user'         => $user,
                 'access_token' => getSignedJWTForUser($authenticationHeader)
             ], ResponseInterface::HTTP_OK);
         } catch (Exception $e) {
@@ -113,21 +110,15 @@ class Auth extends ResourceController
             return $this
                 ->respond(
                     [
-                        'message' => 'User authenticated successfully',
-                        'user' => $user,
+                        'message'      => 'User authenticated successfully',
+                        'user'         => $user,
                         'access_token' => getSignedJWTForUser($emailAddress)
                     ]
                 );
-        } catch (Exception $exception) {
+        } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this
-                ->fail(
-                    [
-                        'error' => $exception->getMessage(),
-                    ],
-                    $responseCode
-                );
+            return $this->fail(['error' => $e->getMessage()], $responseCode);
         }
     }
 
@@ -155,7 +146,8 @@ class Auth extends ResourceController
         return $this->validator->setRules($rules, $messages)->run($input);
     }
 
-    public function getRequestInput(IncomingRequest $request){
+    public function getRequestInput(IncomingRequest $request)
+    {
         $input = $request->getPost();
         if (empty($input)) {
             //convert request body to associative array
