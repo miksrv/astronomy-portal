@@ -10,7 +10,7 @@ class PhotosLibrary
      * @param string|null $date
      * @return array|object|null
      */
-    function getPhotoByObject(string $objectName, string $date = null)
+    public function getPhotoByObject(string $objectName, string $date = null)
     {
         $where = ['object' => $objectName];
 
@@ -38,7 +38,7 @@ class PhotosLibrary
      * @param string $order
      * @return array|null
      */
-    function getPhotoList(string $filterObject = null, int $filterLimit = 0, string $order = 'date'): ?array
+    public function getPhotoList(string $filterObject = null, int $filterLimit = 0, string $order = 'date'): ?array
     {
         $photoModel = new PhotoModel();
         $modelFiles = new FilesModel();

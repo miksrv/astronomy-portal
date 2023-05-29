@@ -5,7 +5,7 @@ use CodeIgniter\CodeIgniter;
 $errorId = uniqid('error', true);
 ?>
 <!doctype html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="robots" content="noindex">

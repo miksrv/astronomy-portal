@@ -9,7 +9,7 @@ class CatalogLibrary
      * @param string $objectName
      * @return array|object|null
      */
-    function getCatalogItemByName(string $objectName)
+    public function getCatalogItemByName(string $objectName)
     {
         $libraryStatistic = new StatisticLibrary();
 
@@ -41,7 +41,7 @@ class CatalogLibrary
     /**
      * @return array|null
      */
-    function getCatalogList(): ?array
+    public function getCatalogList(): ?array
     {
         helper('text');
 

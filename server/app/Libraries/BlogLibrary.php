@@ -3,26 +3,27 @@
 use App\Models\BlogMediaModel;
 use App\Models\BlogModel;
 use CodeIgniter\Files\File;
+use danog\MadelineProto\API;
 use ReflectionException;
 
 class BlogLibrary
 {
-    protected \danog\MadelineProto\API $MadelineProto;
+    protected API $MadelineProto;
 
     protected array $supportedMedia = ['messageMediaPhoto', 'messageMediaDocument'];
 
-    function __construct()
+    public function __construct()
     {
         $settings = (new \danog\MadelineProto\Settings\Database\Mysql)
             ->setUri(getenv('database.' . ENVIRONMENT . '.hostname'))
             ->setDatabase(getenv('database.' . ENVIRONMENT . '.username'))
             ->setPassword(getenv('database.' . ENVIRONMENT . '.password'));
 
-        $this->MadelineProto = new \danog\MadelineProto\API('session.madeline', $settings);
+        $this->MadelineProto = new API('session.madeline', $settings);
         $this->MadelineProto->start();
     }
 
-    function getTelegramChannelStatistic(string $peer)
+    public function getTelegramChannelStatistic(string $peer)
     {
         return $this->MadelineProto->getFullInfo($peer);
     }
@@ -30,13 +31,18 @@ class BlogLibrary
     /**
      * @throws ReflectionException
      */
-    function getTelegramChannelHistory(string $peer, int $limit = 5, int $offset = 0, int $offset_id = null): bool
+    public function getTelegramChannelHistory(
+        string $peer,
+        int $limit = 5,
+        int $offset = 0,
+        int $offsetId = null
+    ): bool
     {
         $messages = $this->MadelineProto->messages->getHistory([
             'peer'       => $peer,
             'limit'      => $limit,
             'add_offset' => $offset,
-            'offset_id'  => $offset_id
+            'offset_id'  => $offsetId
         ]);
 
         $this->processChannelMessages($messages);
@@ -58,10 +64,11 @@ class BlogLibrary
     /**
      * @throws ReflectionException
      */
-    function processChannelMessages($messages)
+    public function processChannelMessages($messages)
     {
-        if (!is_array($messages))
-            return ;
+        if (!is_array($messages)) {
+            return;
+        }
 
         $count = 0;
 
@@ -87,8 +94,9 @@ class BlogLibrary
      */
     protected function saveMessageMedia($message, $groupId): bool
     {
-        if (empty($message['media']) || !in_array($message['media']['_'], $this->supportedMedia))
+        if (empty($message['media']) || !in_array($message['media']['_'], $this->supportedMedia)) {
             return false;
+        }
 
         $directory = UPLOAD_POST . $groupId . '/';
 
@@ -114,8 +122,9 @@ class BlogLibrary
 
         $media = $this->MadelineProto->downloadToDir($message, $directory);
 
-        if (!is_string($media))
+        if (!is_string($media)) {
             return false;
+        }
 
         $file = new File($media);
 
@@ -143,8 +152,9 @@ class BlogLibrary
      */
     protected function saveMessage($message, $groupId): bool
     {
-        if (empty($message['message']))
+        if (empty($message['message'])) {
             return false;
+        }
 
         $data = [
             'telegram_id'   => $message['id'] ?? 0,
@@ -182,7 +192,9 @@ class BlogLibrary
 
     protected function getMessageReactions($message): array
     {
-        if (!isset($message['reactions']['results']) || !is_array($message['reactions']['results'])) return [];
+        if (!isset($message['reactions']['results']) || !is_array($message['reactions']['results'])) {
+            return [];
+        }
         
         $result = [];
 

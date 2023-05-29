@@ -116,6 +116,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                         size={'mini'}
                         icon={'download'}
                         color={'yellow'}
+                        rel={'nofollow noreferrer'}
                         className={styles.buttonDownload}
                         href={
                             `${process.env.NEXT_PUBLIC_API_HOST}photo/download/` +
