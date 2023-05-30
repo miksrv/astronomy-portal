@@ -1,4 +1,5 @@
 import {
+    useCatalogGetItemQuery,
     useCatalogPatchMutation,
     useCatalogPostMutation,
     useCategoryGetListQuery
@@ -20,6 +21,13 @@ const ObjectFormModal: React.FC = () => {
     const value = application.editableItemCatalog
 
     const { data: categoriesData } = useCategoryGetListQuery()
+    const { data: catalogData, isFetching } = useCatalogGetItemQuery(
+        value?.name || '',
+        {
+            skip: !value?.name
+        }
+    )
+
     const [
         updateItem,
         {
@@ -63,13 +71,14 @@ const ObjectFormModal: React.FC = () => {
         )?.messages?.[field] || undefined
 
     const handleClose = () => {
+        setFormState(mapFormProps(undefined))
         setSubmitted(false)
         dispatch(openFormCatalog(false))
     }
 
     const isFormDirty = useMemo(
-        () => isEqual(mapFormProps(value), formState),
-        [value, formState]
+        () => isEqual(mapFormProps(catalogData), formState),
+        [catalogData, formState]
     )
 
     const handleSubmit = useCallback(() => {
@@ -88,8 +97,8 @@ const ObjectFormModal: React.FC = () => {
     }, [formState, createItem, updateItem, value?.name])
 
     useEffect(() => {
-        setFormState(mapFormProps(value))
-    }, [value])
+        setFormState(mapFormProps(catalogData))
+    }, [catalogData])
 
     return (
         <Modal
@@ -103,7 +112,7 @@ const ObjectFormModal: React.FC = () => {
             <Modal.Content>
                 <Form
                     onSubmit={handleSubmit}
-                    loading={createLoading || updateLoading}
+                    loading={createLoading || updateLoading || isFetching}
                     success={(createSuccess || updateSuccess) && submitted}
                     error={(createError || updateError) && submitted}
                     size={'small'}
@@ -157,7 +166,7 @@ const ObjectFormModal: React.FC = () => {
                         }
                         label={'Описание'}
                         onKeyDown={handleKeyDown}
-                        defaultValue={value?.text}
+                        defaultValue={formState?.text}
                         error={findError('text')}
                         rows={7}
                     />
@@ -167,7 +176,7 @@ const ObjectFormModal: React.FC = () => {
                         label={'Ссылка на исходные данные (FITS)'}
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
-                        defaultValue={value?.source_link}
+                        defaultValue={formState?.source_link}
                         error={findError('source_link')}
                     />
                     <Grid>
@@ -178,7 +187,7 @@ const ObjectFormModal: React.FC = () => {
                                 label={'Идентификатор'}
                                 onChange={handleChange}
                                 onKeyDown={handleKeyDown}
-                                defaultValue={value?.name}
+                                defaultValue={formState?.name}
                                 disabled={!!value?.name}
                                 error={findError('name')}
                             />
@@ -188,7 +197,7 @@ const ObjectFormModal: React.FC = () => {
                                 label={'RA'}
                                 onChange={handleChange}
                                 onKeyDown={handleKeyDown}
-                                defaultValue={value?.coord_ra || 0}
+                                value={formState?.coord_ra || 0}
                                 error={findError('coord_ra')}
                             />
                             <Form.Input
@@ -197,7 +206,7 @@ const ObjectFormModal: React.FC = () => {
                                 label={'DEC'}
                                 onChange={handleChange}
                                 onKeyDown={handleKeyDown}
-                                defaultValue={value?.coord_dec || 0}
+                                value={formState?.coord_dec || 0}
                                 error={findError('coord_dec')}
                             />
                         </Grid.Column>
