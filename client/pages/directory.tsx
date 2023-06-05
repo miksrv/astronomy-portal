@@ -117,7 +117,22 @@ const Directory: NextPage = () => {
 
     return (
         <main>
-            <NextSeo title={'Справочники'} />
+            <NextSeo
+                title={'Справочники'}
+                description={
+                    'Астрономические справочники самодельной любительской обсерватории - авторы фотографий, категории астрономических объектов, которые снимает удаленная обсерватория'
+                }
+                openGraph={{
+                    images: [
+                        {
+                            height: 503,
+                            url: '/screenshots/directory.jpg',
+                            width: 1280
+                        }
+                    ],
+                    locale: 'ru'
+                }}
+            />
             <Grid className={'section'}>
                 <Grid.Column
                     computer={8}
