@@ -52,7 +52,7 @@ const Team: React.FC = () => (
                 <Image
                     className={styles.photo}
                     src={item.photo?.src!}
-                    alt={item?.name || ''}
+                    alt={item?.name ?? ''}
                     width={item.photo?.width}
                     height={item.photo?.height}
                 />
