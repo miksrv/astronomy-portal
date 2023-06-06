@@ -1,7 +1,12 @@
 import Image, { StaticImageData } from 'next/image'
 import React from 'react'
 
-import photoMisha from '@/public/photos/team-Misha.jpeg'
+import photoIgor from '@/public/photos/team-Igor.jpg'
+import photoMisha from '@/public/photos/team-Misha.jpg'
+import photoSergey from '@/public/photos/team-Sergey.jpg'
+import photoTanya from '@/public/photos/team-Tanya.jpg'
+import photoVladimir from '@/public/photos/team-Vladimir.jpg'
+import photoZhenya from '@/public/photos/team-Zhenya.jpg'
 
 import styles from './styles.module.sass'
 
@@ -13,15 +18,15 @@ type TTeam = {
 const team: TTeam[] = [
     {
         name: 'Татьяна Гавриш',
-        photo: photoMisha
+        photo: photoTanya
     },
     {
         name: 'Игорь Коммисарчик',
-        photo: photoMisha
+        photo: photoIgor
     },
     {
         name: 'Сергей Медведев',
-        photo: photoMisha
+        photo: photoSergey
     },
     {
         name: 'Михаил Топчило',
@@ -29,11 +34,11 @@ const team: TTeam[] = [
     },
     {
         name: 'Евгений Зимин',
-        photo: photoMisha
+        photo: photoZhenya
     },
     {
         name: 'Владимир Иванович',
-        photo: photoMisha
+        photo: photoVladimir
     }
 ]
 
