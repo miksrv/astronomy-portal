@@ -64,7 +64,7 @@ const PhotoGrid: React.FC<TPhotoGridProps> = ({
                           ) : (
                               <PhotoImage
                                   photo={photo}
-                                  title={catalogItem?.name || ''}
+                                  title={catalogItem?.name ?? ''}
                               />
                           )}
                       </Link>
