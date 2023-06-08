@@ -1,5 +1,8 @@
+@import @/styles/variables.sass
+
 .cameraSection
   padding: 6px !important
+  margin-bottom: $sectionMarginBottom
 
   .lightboxTrigger
     display: inline-block
@@ -14,6 +17,7 @@
   @media only screen and (max-width: 768px)
     .photoImage
       height: auto
+      min-height: 300px
 
   .progress
     margin: -6px 0px 0px 0px !important
