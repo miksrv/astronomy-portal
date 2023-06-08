@@ -5,7 +5,7 @@ import {
 import classNames from 'classnames'
 import moment, { Moment } from 'moment'
 import React, { useMemo, useState } from 'react'
-import { Button, Dimmer, Loader } from 'semantic-ui-react'
+import { Button, Dimmer, Loader, Popup } from 'semantic-ui-react'
 
 import RenderCalendar from './RenderCalendar'
 import styles from './styles.module.sass'
@@ -82,17 +82,48 @@ const Calendar: React.FC = () => {
                     />
                 </div>
                 <div className={styles.dayStatistic}>
-                    <div className={classNames(styles.dayNumber, styles.green)}>
-                        {weatherDays.good}
-                    </div>
-                    <div
-                        className={classNames(styles.dayNumber, styles.orange)}
-                    >
-                        {weatherDays.middle}
-                    </div>
-                    <div className={classNames(styles.dayNumber, styles.red)}>
-                        {weatherDays.bad}
-                    </div>
+                    <Popup
+                        size={'tiny'}
+                        content='Количество ночей без облачности'
+                        trigger={
+                            <div
+                                className={classNames(
+                                    styles.dayNumber,
+                                    styles.green
+                                )}
+                            >
+                                {weatherDays.good}
+                            </div>
+                        }
+                    />
+                    <Popup
+                        size={'tiny'}
+                        content='Количество ночей с переменной облачностью '
+                        trigger={
+                            <div
+                                className={classNames(
+                                    styles.dayNumber,
+                                    styles.orange
+                                )}
+                            >
+                                {weatherDays.middle}
+                            </div>
+                        }
+                    />
+                    <Popup
+                        size={'tiny'}
+                        content='Сплошная облачность'
+                        trigger={
+                            <div
+                                className={classNames(
+                                    styles.dayNumber,
+                                    styles.red
+                                )}
+                            >
+                                {weatherDays.bad}
+                            </div>
+                        }
+                    />
                 </div>
             </div>
             <div className={styles.grid}>

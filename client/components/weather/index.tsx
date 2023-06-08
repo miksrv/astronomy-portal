@@ -141,7 +141,7 @@ const Weather: React.FC = () => {
                         <span className={styles['weatherState' + rangeWind]} />
                         Скорость ветра:
                         <span className={styles.val}>
-                            {data?.conditions.wind_speed || '?'} м\с
+                            {data?.conditions.wind_speed || '?'} м/с
                         </span>
                     </div>
                 </Grid.Column>
@@ -169,7 +169,7 @@ const Weather: React.FC = () => {
                         <span className={styles['weatherState' + rangeGust]} />
                         Порывы ветра:
                         <span className={styles.val}>
-                            {data?.conditions.wind_gust || '?'} м\с
+                            {data?.conditions.wind_gust || '?'} м/с
                         </span>
                     </div>
                 </Grid.Column>
