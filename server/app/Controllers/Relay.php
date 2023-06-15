@@ -5,7 +5,7 @@ use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, DELETE, PATCH');
+header('Access-Control-Allow-Methods: GET, POST, DELETE, PATCH, PUT');
 header('Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization');
 
 if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
@@ -67,10 +67,9 @@ class Relay extends ResourceController
 
     /**
      * Set relay state by ID
-     * @param int|null $id
      * @return ResponseInterface
      */
-    public function set(int $id = null): ResponseInterface
+    public function set(): ResponseInterface
     {
         $inputJSON = $this->request->getJSON();
 
