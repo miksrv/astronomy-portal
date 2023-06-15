@@ -37,7 +37,8 @@ $routes->options('cron/telegram', 'Cron');
 
 $routes->get('weather/current', 'Weather::current');
 $routes->get('weather/statistic', 'Weather::statistic');
-$routes->options('weather', 'Weather');
+$routes->options('weather/current', 'Weather::current');
+$routes->options('weather/statistic', 'Weather::statistic');
 
 $routes->get('statistic', 'Statistic::list');
 $routes->get('statistic/catalog', 'Statistic::catalog');
@@ -94,8 +95,10 @@ $routes->options('blog/(:any)', 'Blog');
 
 $routes->get('relay/list', 'Relay::list');
 $routes->get('relay/state', 'Relay::state');
-$routes->put('relay/(:num)', 'Relay::set');
-$routes->options('relay/(:num)', 'Relay::set');
+$routes->put('relay/set', 'Relay::set');
+$routes->options('relay/list', 'Relay::list');
+$routes->options('relay/state', 'Relay::state');
+$routes->options('relay/set', 'Relay::set');
 
 $routes->get('sensors', 'Sensors::list');
 
