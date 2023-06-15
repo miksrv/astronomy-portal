@@ -86,15 +86,11 @@ const RelayList: React.FC = () => {
                     key={item}
                     index={key}
                     name={item}
-                    status={
-                        relayState?.status === true
-                            ? relayState?.payload[key]
-                            : false
-                    }
+                    status={relayState?.[key] || false}
                     // loading={(!isSuccess && isFetching) ||
                     // (relayState?.status === true && typeof relayState?.payload[key] === 'undefined')}
                     loading={loaderState || loaderSet}
-                    auth={userAuth && relayState?.status === true}
+                    auth={userAuth && relayState?.status !== false}
                     handleClick={async (relay) => await setRelayStatus(relay)}
                 />
             ))}
