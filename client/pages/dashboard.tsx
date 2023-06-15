@@ -26,14 +26,13 @@ const Dashboard: NextPage = () => (
                 locale: 'ru'
             }}
         />
-        <Grid>
+        <Grid className={'noPaddingBottom'}>
             <Grid.Column
                 computer={8}
                 tablet={8}
                 mobile={16}
             >
                 <Weather />
-                <br />
                 <RelayList />
             </Grid.Column>
             <Grid.Column
