@@ -44,7 +44,7 @@ export const menuItems: TMenuItems[] = [
     { link: '/celestial', name: 'Карта' },
     { label: 'photos_count', link: '/photos', name: 'Фото' },
     { label: 'catalog_count', link: '/objects', name: 'Объекты' },
-    { link: '/dashboard', name: 'Телескоп' },
+    { link: '/dashboard', name: 'Телеметрия' },
     { link: '/about', name: 'О проекте' }
 ]
 
