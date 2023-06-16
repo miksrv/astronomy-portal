@@ -21,7 +21,7 @@ const team: TTeam[] = [
         photo: photoTanya
     },
     {
-        name: 'Игорь Коммисарчик',
+        name: 'Игорь Коммиссарчик',
         photo: photoIgor
     },
     {
