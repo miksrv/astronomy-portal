@@ -1,6 +1,9 @@
 @import @/styles/variables.sass
 
 .astronomyCalc
+  @media only screen and (max-width: 768px)
+    margin-bottom: $sectionMarginBottom
+
   .icon, .moon
     width: 16px
     vertical-align: middle
@@ -13,11 +16,11 @@
 
   .key
     color: $text-second
-    margin-bottom: 5px
+    margin-bottom: 2.5px
 
   .val
     color: $text-main
     margin-left: 5px
 
   .sectionTitle
-    margin-bottom: 15px
+    margin-bottom: 10px
