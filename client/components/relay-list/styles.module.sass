@@ -18,7 +18,9 @@
 
 .relayList
   padding: 11px !important
-  margin-bottom: $sectionMarginBottom
+
+  @media only screen and (max-width: 768px)
+    margin-bottom: $sectionMarginBottom
 
   &.loader
     height: 280px

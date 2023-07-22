@@ -33,6 +33,13 @@ const Dashboard: NextPage = () => (
                 mobile={16}
             >
                 <Weather />
+                <AstronomyCalc />
+            </Grid.Column>
+            <Grid.Column
+                computer={8}
+                tablet={8}
+                mobile={16}
+            >
                 <RelayList />
             </Grid.Column>
             <Grid.Column
@@ -43,15 +50,6 @@ const Dashboard: NextPage = () => (
                 <Camera
                     cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/2`}
                 />
-            </Grid.Column>
-            <Grid.Column
-                computer={8}
-                tablet={8}
-                mobile={16}
-            >
-                <AstronomyCalc />
-                <br />
-                {/*<Sensors />*/}
             </Grid.Column>
             <Grid.Column
                 computer={8}
