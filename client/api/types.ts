@@ -42,35 +42,36 @@ export interface APIRequestLogin {
     password: string
 }
 
-export interface IRelaySet {
-    index: number
-    state: number
-}
-
-export type TSensorsPayload = {
-    time: number
-    sensors: TSensors
-}
-
-export type TSensors = {
-    t?: number
-    h?: number
-    t1?: number
-    t2?: number
-    t3?: number
-    v1?: number
-    p1?: number
-    p2?: number
-    p3?: number
-}
+// export type TSensorsPayload = {
+//     time: number
+//     sensors: TSensors
+// }
+//
+// export type TSensors = {
+//     t?: number
+//     h?: number
+//     t1?: number
+//     t2?: number
+//     t3?: number
+//     v1?: number
+//     p1?: number
+//     p2?: number
+//     p3?: number
+// }
 
 export interface APIResponseRelayList {
-    items: string[]
+    items: TRelayItem[]
 }
 
 export interface APIRequestRelaySet {
-    index: number
+    id: number
     state: number
+}
+
+export interface APIResponseRelaySet {
+    id: number
+    state: number
+    result: boolean
 }
 
 export interface APIRequestPhoto {
@@ -168,6 +169,12 @@ export interface APIResponseBlogList {
 
 export interface APIResponseBlogStatistic {
     users: number
+}
+
+export type TRelayItem = {
+    id: number
+    name: string
+    state: number
 }
 
 export type TBlog = {
