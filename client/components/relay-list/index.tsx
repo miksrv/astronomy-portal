@@ -1,10 +1,6 @@
-import {
-    useRelayGetListQuery,
-    useRelayGetStateQuery,
-    useRelayPutStatusMutation
-} from '@/api/api'
+import { useRelayGetStateQuery, useRelayPutStatusMutation } from '@/api/api'
 import { useAppSelector } from '@/api/hooks'
-import { IRelaySet } from '@/api/types'
+import { APIRequestRelaySet } from '@/api/types'
 import classNames from 'classnames'
 import React from 'react'
 import { Button, Dimmer, Loader, Message } from 'semantic-ui-react'
@@ -12,64 +8,75 @@ import { Button, Dimmer, Loader, Message } from 'semantic-ui-react'
 import styles from './styles.module.sass'
 
 type TRelayListItemProps = {
-    index: number
+    id: number
     name: string
-    status: boolean
+    state: boolean
     loading: boolean
     auth: boolean
-    handleClick?: (data: IRelaySet) => void
+    handleClick?: (relay: APIRequestRelaySet) => void
 }
 
 const RelayListItem: React.FC<TRelayListItemProps> = (props) => {
-    const { index, name, status, loading, auth, handleClick } = props
-    const switchClass: string = status ? 'on' : 'off'
+    const { id, name, state, loading, auth, handleClick } = props
 
     return (
         <div className={styles.item}>
             <div className={styles.name}>
-                <span className={styles[status ? 'ledOn' : 'ledOff']} />
+                <span className={styles[state ? 'ledOn' : 'ledOff']} />
                 {name}
             </div>
             <Button
                 loading={loading}
-                className={styles[status ? 'switchOn' : 'switchOff']}
+                className={styles[state ? 'switchOn' : 'switchOff']}
                 disabled={loading || !auth}
-                onClick={() =>
-                    handleClick?.({ index: index, state: status ? 0 : 1 })
-                }
+                onClick={() => handleClick?.({ id, state: state ? 0 : 1 })}
                 size={'mini'}
             >
-                {switchClass}
+                {state ? 'on' : 'off'}
             </Button>
         </div>
     )
 }
 
+/**
+ * #TODO useState
+ *
+ * Нужно создать массив состояний реле через useState и каждый раз при изменении состояния реле
+ * изменять это состояние в массиве, чтобы каждый раз не перезапрашивать список реле с состояниями
+ */
 const RelayList: React.FC = () => {
-    const { data: relayList, isError, isLoading } = useRelayGetListQuery()
-    const { data: relayState, isFetching: loaderState } = useRelayGetStateQuery(
-        null,
-        { pollingInterval: 15 * 1000 }
-    )
-    const [setRelayStatus, { isLoading: loaderSet }] =
+    const [relayLoading, setRelayLoading] = React.useState<number>()
+
+    const {
+        data: relayList,
+        isLoading,
+        isError
+    } = useRelayGetStateQuery(null, { pollingInterval: 15 * 1000 })
+
+    const [setRelayStatus, { isLoading: loaderSet, data: relaySet }] =
         useRelayPutStatusMutation()
 
     const userAuth = useAppSelector((state) => state.auth.userAuth)
 
+    const handleSetRelay = async (relay: APIRequestRelaySet) => {
+        setRelayLoading(relay.id)
+        await setRelayStatus(relay)
+    }
+
     return isLoading ? (
-        <div className={classNames(styles.relayList, 'box', 'loader')}>
+        <div className={classNames(styles.relayList, styles.loader, 'box')}>
             <Dimmer active>
                 <Loader />
             </Dimmer>
         </div>
-    ) : isError || relayList === undefined || !relayList.items.length ? (
+    ) : isError || !relayList?.items.length ? (
         <Message
             error
             content={'Возникла ошибка при получении списка управляемых реле'}
         />
     ) : (
         <div className={classNames(styles.relayList, 'box')}>
-            {userAuth && relayState?.status === false && (
+            {userAuth && isError && (
                 <Dimmer active>
                     <Message
                         error
@@ -81,17 +88,18 @@ const RelayList: React.FC = () => {
                     />
                 </Dimmer>
             )}
-            {relayList.items.map((item, key) => (
+            {relayList?.items.map((item) => (
                 <RelayListItem
-                    key={item}
-                    index={key}
-                    name={item}
-                    status={relayState?.[key] || false}
-                    // loading={(!isSuccess && isFetching) ||
-                    // (relayState?.status === true && typeof relayState?.payload[key] === 'undefined')}
-                    loading={loaderState || loaderSet}
-                    auth={userAuth && relayState?.status !== false}
-                    handleClick={async (relay) => await setRelayStatus(relay)}
+                    key={item.id}
+                    id={item.id}
+                    name={item.name}
+                    state={
+                        item.state === 1 ||
+                        (relaySet?.state === 1 && relaySet?.id === item.id)
+                    }
+                    loading={loaderSet && relayLoading === item.id}
+                    auth={userAuth}
+                    handleClick={async (relay) => await handleSetRelay(relay)}
                 />
             ))}
         </div>
