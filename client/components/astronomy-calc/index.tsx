@@ -60,7 +60,10 @@ const AstronomyCalc: React.FC = () => {
                             styles.columnTable
                         )}
                     >
-                        <Grid.Column width={7}>
+                        <Grid.Column
+                            computer={7}
+                            mobile={16}
+                        >
                             <div className={styles.key}>
                                 ↑ Рассвет:
                                 <span className={styles.val}>
@@ -68,7 +71,10 @@ const AstronomyCalc: React.FC = () => {
                                 </span>
                             </div>
                         </Grid.Column>
-                        <Grid.Column width={8}>
+                        <Grid.Column
+                            computer={8}
+                            mobile={16}
+                        >
                             <div className={styles.key}>
                                 ↓ Закат:
                                 <span className={styles.val}>
@@ -76,7 +82,10 @@ const AstronomyCalc: React.FC = () => {
                                 </span>
                             </div>
                         </Grid.Column>
-                        <Grid.Column width={7}>
+                        <Grid.Column
+                            computer={7}
+                            mobile={16}
+                        >
                             <div className={styles.key}>
                                 Высота:
                                 <span className={styles.val}>
@@ -84,7 +93,10 @@ const AstronomyCalc: React.FC = () => {
                                 </span>
                             </div>
                         </Grid.Column>
-                        <Grid.Column width={8}>
+                        <Grid.Column
+                            computer={8}
+                            mobile={16}
+                        >
                             <div className={styles.key}>
                                 Азимут:
                                 <span className={styles.val}>
@@ -104,7 +116,10 @@ const AstronomyCalc: React.FC = () => {
                             styles.columnTable
                         )}
                     >
-                        <Grid.Column width={7}>
+                        <Grid.Column
+                            computer={7}
+                            mobile={16}
+                        >
                             <div className={styles.key}>
                                 ↑ Восход:
                                 <span className={styles.val}>
@@ -112,7 +127,10 @@ const AstronomyCalc: React.FC = () => {
                                 </span>
                             </div>
                         </Grid.Column>
-                        <Grid.Column width={8}>
+                        <Grid.Column
+                            computer={8}
+                            mobile={16}
+                        >
                             <div className={styles.key}>
                                 ↓ Закат:
                                 <span className={styles.val}>
@@ -120,7 +138,10 @@ const AstronomyCalc: React.FC = () => {
                                 </span>
                             </div>
                         </Grid.Column>
-                        <Grid.Column width={7}>
+                        <Grid.Column
+                            computer={7}
+                            mobile={16}
+                        >
                             <div className={styles.key}>
                                 Высота:
                                 <span className={styles.val}>
@@ -128,7 +149,10 @@ const AstronomyCalc: React.FC = () => {
                                 </span>
                             </div>
                         </Grid.Column>
-                        <Grid.Column width={8}>
+                        <Grid.Column
+                            computer={8}
+                            mobile={16}
+                        >
                             <div className={styles.key}>
                                 Азимут:
                                 <span className={styles.val}>
