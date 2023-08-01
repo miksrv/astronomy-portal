@@ -100,6 +100,11 @@ $routes->options('relay/list', 'Relay::list');
 $routes->options('relay/state', 'Relay::state');
 $routes->options('relay/set', 'Relay::set');
 
+$routes->post('fits/data', 'Fits::fits');
+$routes->post('fits/upload', 'Fits::upload');
+$routes->options('fits/data', 'Fits::fits');
+$routes->options('fits/upload', 'Fits::upload');
+
 $routes->get('sensors', 'Sensors::list');
 
 $routes->get('camera/(:num)', 'Camera::show/$1');

@@ -20,6 +20,13 @@ class Fits extends ResourceController
    public function data(): ResponseInterface {
        $input = $this->request->getJSON(true);
 
+       $fileName   = md5($input->FILE_NAME);
+       $filesModel = new FilesModel();
+
+       if ($filesModel->find($fileName)) {
+           return $this->failResourceExists($input->FILE_NAME);
+       }
+
        try {
            $insert = [
                'id'        => md5($input->FILE_NAME),
@@ -70,8 +77,7 @@ class Fits extends ResourceController
                'hfr'   => isset($input->MEAN_FWHM) ? floatval($input->MEAN_FWHM) : NULL,
                'fwhm'  => isset($input->MEAN_SNR) ? floatval($input->MEAN_SNR) : NULL,
            ];
-           
-           $filesModel = new FilesModel();
+
            $filesModel->insert($insert);
 
            return $this->respondCreated($insert);
@@ -81,4 +87,35 @@ class Fits extends ResourceController
            return $this->failServerError();
        }
    }
+
+    public function image(): ResponseInterface {
+        $files = $this->request->getFile();
+
+        if (!$files)  {
+            throw PageNotFoundException::forPageNotFound();
+        }
+
+        foreach ($files as $key => $file)  {
+            $dirName = UPLOAD_FITS . $key . '/';
+
+            if (!is_dir($dirName)) {
+                mkdir($dirName,0777, TRUE);
+            }
+
+            if (! $file->hasMoved()) {
+                $file->move($dirName, $file->getClientName());
+
+                $fileInfo = pathinfo($dirName . $file->getName());
+
+                Services::image('gd')
+                    ->withFile($dirName . $file->getName())
+                    ->resize(24, 24, true, 'height')
+                    ->save($dirName . $fileInfo['filename'] . '_thumb.' . $fileInfo['extension']);
+
+                return $this->respondCreated();
+            }
+        }
+
+        return $this->failServerError();
+    }
 }
