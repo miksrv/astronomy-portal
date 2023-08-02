@@ -4,6 +4,7 @@ use App\Models\FilesModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
+use Config\Services;
 use ReflectionException;
 use Exception;
 
@@ -102,10 +103,10 @@ class Fits extends ResourceController
      * @return ResponseInterface
      */
     public function image(): ResponseInterface {
-        $files = $this->request->getFile();
+        $files = $this->request->getFiles();
 
         if (!$files)  {
-            throw PageNotFoundException::forPageNotFound();
+            return $this->fail('Files not found');
         }
 
         foreach ($files as $key => $file)  {
@@ -125,7 +126,7 @@ class Fits extends ResourceController
                     ->resize(24, 24, true, 'height')
                     ->save($dirName . $fileInfo['filename'] . '_thumb.' . $fileInfo['extension']);
 
-                return $this->respondCreated();
+                return $this->respondCreated($fileInfo);
             }
         }
 
