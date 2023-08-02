@@ -5,14 +5,18 @@ use App\Models\FilesModel;
 
 class CatalogLibrary
 {
+    protected StatisticLibrary $libraryStatistic;
+
+    public function __construct() {
+        $this->libraryStatistic = new StatisticLibrary();
+    }
+
     /**
      * @param string $objectName
      * @return array|object|null
      */
     public function getCatalogItemByName(string $objectName)
     {
-        $libraryStatistic = new StatisticLibrary();
-
         $modelCatalog = new CatalogModel();
         $modelFiles   = new FilesModel();
 
@@ -26,7 +30,7 @@ class CatalogLibrary
             return null;
         }
 
-        $objectStatistic = $libraryStatistic->getObjectStatistic($filesItems);
+        $objectStatistic = $this->libraryStatistic->getObjectStatistic($filesItems);
 
         $catalogItem->updated   = $objectStatistic->lastUpdatedDate ?? null;
         $catalogItem->statistic = $objectStatistic->objectStatistic ?? [];
@@ -45,8 +49,6 @@ class CatalogLibrary
     {
         helper('text');
 
-        $libraryStatistic = new StatisticLibrary();
-
         $modelCatalog = new CatalogModel();
         $modelFiles   = new FilesModel();
 
@@ -58,7 +60,7 @@ class CatalogLibrary
         }
 
         foreach ($catalogList as $item) {
-            $objectStatistic = $libraryStatistic->getObjectStatistic($filesList, $item->name);
+            $objectStatistic = $this->libraryStatistic->getObjectStatistic($filesList, $item->name);
 
             $item->text      = word_limiter($item->text, 25, '...');
             $item->updated   = $objectStatistic->lastUpdatedDate;
@@ -78,7 +80,7 @@ class CatalogLibrary
     protected function mappingFilesToFilters(array $files): array
     {
         foreach ($files as $file) {
-            $file->filter  = $this->filterEnum[$file->filter] ?? 'unknown';
+            $file->filter  = $this->libraryStatistic->mappingFilesFilters($file->filter);
             $file->preview = file_exists(UPLOAD_FITS . $file->object . '/' . $file->file_name . '.jpg');
         }
 

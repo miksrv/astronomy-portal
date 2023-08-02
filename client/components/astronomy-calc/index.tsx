@@ -27,11 +27,11 @@ const AstronomyCalc: React.FC = () => {
         const sunPosition = SunCalc.getPosition(moment(), LAT, LON)
         const moonPosition = SunCalc.getMoonPosition(moment(), LAT, LON)
 
-        setSunAltitude(((sunPosition.altitude * 180) / Math.PI).toFixed(3))
-        setSunAzimuth(((sunPosition.azimuth * 180) / Math.PI).toFixed(3))
+        setSunAltitude(((sunPosition.altitude * 180) / Math.PI).toFixed(2))
+        setSunAzimuth(((sunPosition.azimuth * 180) / Math.PI).toFixed(2))
 
-        setMoonAltitude(((moonPosition.altitude * 180) / Math.PI).toFixed(3))
-        setMoonAzimuth(((moonPosition.azimuth * 180) / Math.PI).toFixed(3))
+        setMoonAltitude(((moonPosition.altitude * 180) / Math.PI).toFixed(2))
+        setMoonAzimuth(((moonPosition.azimuth * 180) / Math.PI).toFixed(2))
     }
 
     useEffect(() => {
@@ -52,53 +52,115 @@ const AstronomyCalc: React.FC = () => {
                             width={16}
                             height={16}
                         />
-                        Положение Солнца
+                        Солнце
                     </h4>
-                    <div className={styles.key}>
-                        ↑ Окончание сумерек:
-                        <span className={styles.val}>
-                            {moment(sunTimes.dawn).format('H:mm')}
-                        </span>
-                    </div>
-                    <div className={styles.key}>
-                        ↓ Начало сумерек:
-                        <span className={styles.val}>
-                            {moment(sunTimes.dusk).format('H:mm')}
-                        </span>
-                    </div>
-                    <div className={styles.key}>
-                        Высота:
-                        <span className={styles.val}>{sunAltitude}°</span>
-                    </div>
-                    <div className={styles.key}>
-                        Азимут:
-                        <span className={styles.val}>{sunAzimuth}°</span>
-                    </div>
+                    <Grid
+                        className={classNames(
+                            'noPaddingBottom',
+                            styles.columnTable
+                        )}
+                    >
+                        <Grid.Column
+                            computer={7}
+                            mobile={16}
+                        >
+                            <div className={styles.key}>
+                                ↑ Рассвет:
+                                <span className={styles.val}>
+                                    {moment(sunTimes.dawn).format('H:mm')}
+                                </span>
+                            </div>
+                        </Grid.Column>
+                        <Grid.Column
+                            computer={8}
+                            mobile={16}
+                        >
+                            <div className={styles.key}>
+                                ↓ Закат:
+                                <span className={styles.val}>
+                                    {moment(sunTimes.dusk).format('H:mm')}
+                                </span>
+                            </div>
+                        </Grid.Column>
+                        <Grid.Column
+                            computer={7}
+                            mobile={16}
+                        >
+                            <div className={styles.key}>
+                                Высота:
+                                <span className={styles.val}>
+                                    {sunAltitude}°
+                                </span>
+                            </div>
+                        </Grid.Column>
+                        <Grid.Column
+                            computer={8}
+                            mobile={16}
+                        >
+                            <div className={styles.key}>
+                                Азимут:
+                                <span className={styles.val}>
+                                    {sunAzimuth}°
+                                </span>
+                            </div>
+                        </Grid.Column>
+                    </Grid>
                 </Grid.Column>
                 <Grid.Column width={8}>
                     <h4 className={styles.sectionTitle}>
-                        <MoonPhase date={moment()} /> Положение Луны
+                        <MoonPhase date={moment()} /> Луна
                     </h4>
-                    <div className={styles.key}>
-                        ↑ Восход:
-                        <span className={styles.val}>
-                            {moment(moonTimes.rise).format('H:mm')}
-                        </span>
-                    </div>
-                    <div className={styles.key}>
-                        ↓ Закат:
-                        <span className={styles.val}>
-                            {moment(moonTimes.set).format('H:mm')}
-                        </span>
-                    </div>
-                    <div className={styles.key}>
-                        Высота:
-                        <span className={styles.val}>{moonAltitude}°</span>
-                    </div>
-                    <div className={styles.key}>
-                        Азимут:
-                        <span className={styles.val}>{moonAzimuth}°</span>
-                    </div>
+                    <Grid
+                        className={classNames(
+                            'noPaddingBottom',
+                            styles.columnTable
+                        )}
+                    >
+                        <Grid.Column
+                            computer={7}
+                            mobile={16}
+                        >
+                            <div className={styles.key}>
+                                ↑ Восход:
+                                <span className={styles.val}>
+                                    {moment(moonTimes.rise).format('H:mm')}
+                                </span>
+                            </div>
+                        </Grid.Column>
+                        <Grid.Column
+                            computer={8}
+                            mobile={16}
+                        >
+                            <div className={styles.key}>
+                                ↓ Закат:
+                                <span className={styles.val}>
+                                    {moment(moonTimes.set).format('H:mm')}
+                                </span>
+                            </div>
+                        </Grid.Column>
+                        <Grid.Column
+                            computer={7}
+                            mobile={16}
+                        >
+                            <div className={styles.key}>
+                                Высота:
+                                <span className={styles.val}>
+                                    {moonAltitude}°
+                                </span>
+                            </div>
+                        </Grid.Column>
+                        <Grid.Column
+                            computer={8}
+                            mobile={16}
+                        >
+                            <div className={styles.key}>
+                                Азимут:
+                                <span className={styles.val}>
+                                    {moonAzimuth}°
+                                </span>
+                            </div>
+                        </Grid.Column>
+                    </Grid>
                 </Grid.Column>
             </Grid>
         </div>

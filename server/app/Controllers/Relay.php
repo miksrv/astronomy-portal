@@ -3,6 +3,7 @@
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
+use function Amp\delay;
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, DELETE, PATCH, PUT');
@@ -12,54 +13,42 @@ if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
     die();
 }
 
-define('LABEL_NOT_USED', '[Не задействовано]');
-
 class Relay extends ResourceController
 {
     use ResponseTrait;
 
-    protected int $_cmd_set = 5;
-    protected int $_cmd_get = 10;
-
     protected array $relayList = [
-        'Блок питания 12В',
-        LABEL_NOT_USED,
-        'Монтировка (EQ6 Pro)',
-        'Контроллер грелок',
-        'Фокусер ZWO EAF',
-        'Камера (ZWO ASI 1600mm)',
-        LABEL_NOT_USED,
-        LABEL_NOT_USED,
-        'LED Flat панель'
+        'Блок питания 12В'      => 6,
+        'LED Flat панель'       => 7,
+        'Монтировка (EQ6 Pro)'  => 0,
+        'Камера (ZWO ASI 6200)' => 1,
+        'Фокусер ZWO EAF'       => 2,
+        'Контроллер грелок'     => 3,
     ];
 
-    /**
-     * List of all relay states
-     * @return ResponseInterface
-     */
     public function list(): ResponseInterface
-    {
-        return $this->respond(['items' => $this->relayList]);
-    }
-
-    public function state()
     {
         try {
             $client   = \Config\Services::curlrequest();
-            $response = $client->get(getenv('app.observatory.controller') . '?command=' . $this->_cmd_get);
+            $response = $client->get(getenv('app.observatory.controller') . 'pstat.xml');
 
-            $json = json_decode($response->getBody());
+            $xmlDocument = simplexml_load_string($response->getBody(), "SimpleXMLElement", LIBXML_NOCDATA);
+            $jsonObject  = json_encode($xmlDocument);
+            $arrayStates = json_decode($jsonObject,TRUE);
+            $arrayKeys   = array_keys($arrayStates);
+
             $result = [];
 
-            foreach ($json->relay as $key => $item)
+            foreach ($this->relayList as $key => $item)
             {
-                foreach ($item as $state)
-                {
-                    $result[$key] = $state;
-                }
+                $result[] = [
+                    'id'    => $item,
+                    'name'  => $key,
+                    'state' => (integer) $arrayStates[$arrayKeys[$item]],
+                ];
             }
 
-            return $this->respond($result);
+            return $this->respond(['items' => $result]);
         } catch (\Exception $e) {
             return $this->fail('Relay state errors');
         }
@@ -78,20 +67,32 @@ class Relay extends ResourceController
             exit();
         }
 
-        $index = $inputJSON->index ?? null;
+        $index = $inputJSON->id ?? null;
         $state = $inputJSON->state ?? null;
 
-        if (is_null($index) || is_null($state))
+        if (is_null($index) || is_null($state) || !array_search($index, $this->relayList))
         {
             log_message('error', '[' .  __METHOD__ . '] Empty device (' . $index . ') or status (' . $state . ')');
-            $this->_response(null);
+            $this->fail('Relay set status errors');
         }
 
         log_message('info', '[' .  __METHOD__ . '] Set device (' . $index . ') status (' . $state . ')');
 
-        $client = \Config\Services::curlrequest();
-        $response = $client->get(getenv('app.observatory.controller') . '?command=' . $this->_cmd_set . '&pin=' . $index . '&set=' . $state);
+        try {
+            $client = \Config\Services::curlrequest();
 
-        return $this->respond($response);
+            // https://silines.ru/documentation/RODOS/RODOS-EthernetRelay.pdf
+            $action   = $state === 0 ? 'f' : 'n';
+            $format   = "rb{$index}{$action}.cgi";
+            $response = $client->get(getenv('app.observatory.controller') . $format);
+
+            return $this->respond([
+                'id'     => $index,
+                'state'  => $response->getStatusCode() === 200 ? $state : !$state,
+                'result' => $response->getStatusCode() === 200
+            ]);
+        } catch (\Exception $e) {
+            return $this->fail('Relay set status errors');
+        }
     }
 }

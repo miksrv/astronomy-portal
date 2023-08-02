@@ -23,6 +23,7 @@ import {
     APIResponsePhotoList,
     APIResponsePhotoListNames,
     APIResponseRelayList,
+    APIResponseRelaySet,
     APIResponseStatistic,
     APIResponseStatisticTelescope,
     APIResponseUploadPhoto,
@@ -281,16 +282,12 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
-        relayGetList: builder.query<APIResponseRelayList, void>({
-            keepUnusedDataFor: 3600,
+        relayGetState: builder.query<APIResponseRelayList, null>({
+            providesTags: () => [{ id: 'LIST', type: 'Relay' }],
             query: () => 'relay/list'
         }),
-        relayGetState: builder.query<any, null>({
-            providesTags: () => [{ id: 'LIST', type: 'Relay' }],
-            query: () => 'relay/state'
-        }),
         relayPutStatus: builder.mutation<
-            APIResponseRelayList,
+            APIResponseRelaySet,
             APIRequestRelaySet
         >({
             invalidatesTags: [{ id: 'LIST', type: 'Relay' }],
@@ -298,7 +295,8 @@ export const api = createApi({
                 body: data,
                 method: 'PUT',
                 url: 'relay/set'
-            })
+            }),
+            transformErrorResponse: (response) => response.data
         }),
 
         statisticGet: builder.query<APIResponseStatistic, void>({
@@ -369,15 +367,12 @@ export const {
     useCategoryPatchMutation,
     useCategoryPostMutation,
 
-    // useCronGetUpdatePostsQuery,
-
     // usePhotoGetItemQuery,
     usePhotoGetListQuery,
     usePhotoPatchMutation,
     usePhotoPostMutation,
     usePhotoPostUploadMutation,
 
-    useRelayGetListQuery,
     useRelayGetStateQuery,
     useRelayPutStatusMutation,
 
