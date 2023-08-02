@@ -184,8 +184,7 @@ class Photo extends ResourceController
 
         if (!$img->hasMoved()) {
 
-            if (!is_dir(UPLOAD_TEMP))
-            {
+            if (!is_dir(UPLOAD_TEMP)) {
                 mkdir(UPLOAD_TEMP,0777, TRUE);
             }
 

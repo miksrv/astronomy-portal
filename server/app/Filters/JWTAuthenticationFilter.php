@@ -15,7 +15,9 @@ class JWTAuthenticationFilter implements FilterInterface
     {
         if (
             $request->getUri()->getPath() === 'auth/register' ||
-            $request->getUri()->getPath() === 'auth/login'
+            $request->getUri()->getPath() === 'auth/login' ||
+            $request->getUri()->getPath() === 'fits/data' ||
+            $request->getUri()->getPath() === 'fits/image'
         )
             return true;
 
