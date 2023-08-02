@@ -70,4 +70,13 @@ class StatisticLibrary
             'lastUpdatedDate' => $lastUpdatedDate
         ];
     }
+
+    /**
+     * @param string $filter
+     * @return string
+     */
+    public function mappingFilesFilters(string $filter): string
+    {
+        return $this->filterEnum[$filter] ?? 'unknown';
+    }
 }
