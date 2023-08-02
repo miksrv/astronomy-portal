@@ -7,7 +7,7 @@ class CatalogLibrary
 {
     protected StatisticLibrary $libraryStatistic;
 
-    function __construct() {
+    public function __construct() {
         $this->libraryStatistic = new StatisticLibrary();
     }
 
