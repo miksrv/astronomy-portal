@@ -100,10 +100,10 @@ $routes->options('relay/list', 'Relay::list');
 $routes->options('relay/state', 'Relay::state');
 $routes->options('relay/set', 'Relay::set');
 
-$routes->post('fits/data', 'Fits::fits');
-$routes->post('fits/upload', 'Fits::upload');
-$routes->options('fits/data', 'Fits::fits');
-$routes->options('fits/upload', 'Fits::upload');
+$routes->post('fits/data', 'Fits::data');
+$routes->post('fits/image', 'Fits::image');
+$routes->options('fits/data', 'Fits::data');
+$routes->options('fits/image', 'Fits::image');
 
 $routes->get('sensors', 'Sensors::list');
 
