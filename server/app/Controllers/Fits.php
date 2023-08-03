@@ -36,6 +36,7 @@ class Fits extends ResourceController
             $modelCatalog = new CatalogModel();
             $modelFiles   = new FilesModel();
             $fileId       = md5($input->FILE_NAME);
+            $fileObject   = str_replace(' ', '_', $input->OBJECT);
 
             $dataFile = [
                 'id'        => $fileId,
@@ -69,7 +70,7 @@ class Fits extends ResourceController
                 'filter'    => $input->FILTER ?? 'Luminance',
                 'dec'       => floatval($input->DEC),
                 'ra'        => floatval($input->RA),
-                'object'    => $input->OBJECT ?? null,
+                'object'    => $fileObject,
                 'objctdec'  => $input->OBJCTDEC ?? null,
                 'objctra'   => $input->OBJCTRA ?? null,
                 'sitelong'  => floatval($input->SITELONG),
@@ -87,25 +88,27 @@ class Fits extends ResourceController
                 'fwhm'  => isset($input->MEAN_SNR) ? floatval($input->MEAN_SNR) : null,
             ];
 
+            if (!$modelCatalog->find($fileObject)) {
+                $dataCatalog = [
+                    'name'        => $fileObject,
+                    'title'       => str_replace('_', ' ', $fileObject),
+                    'category'    => 1,
+                    'text'        => '',
+                    'source_link' => '',
+                    'image'       => '',
+                    'coord_ra'    => $dataFile['ra'],
+                    'coord_dec'   => $dataFile['dec'],
+                ];
+
+                $modelCatalog->insert($dataCatalog);
+            }
+
             if ($modelFiles->find($fileId)) {
                 unset($dataFile['id']);
 
                 $modelFiles->update($fileId, $dataFile);
 
                 return $this->respondUpdated(['file' => $dataFile['file_name']]);
-            }
-
-            if (!$modelCatalog->find($dataFile['object'])) {
-                $dataCatalog = [
-                    'name'        => $dataFile['object'],
-                    'title'       => str_replace('_', ' ', $dataFile['object']),
-                    'category'    => 1,
-                    'text'        => '',
-                    'coord_ra'    => $dataFile['ra'],
-                    'coord_dec'   => $dataFile['dec'],
-                ];
-
-                $modelCatalog->insert($dataCatalog);
             }
 
             $modelFiles->insert($dataFile);
