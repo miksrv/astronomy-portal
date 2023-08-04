@@ -20,20 +20,22 @@ const ObjectCloudSkyMap: React.FC<TObjectCloudProps> = ({
         <Dimmer active={loading}>
             <Loader />
         </Dimmer>
-        {objects?.map((item) => (
-            <span key={item.name}>
-                <span
-                    className={styles.item}
-                    role={'button'}
-                    tabIndex={0}
-                    onKeyDown={() => {}}
-                    onClick={() => handleClick?.(item.ra, item.dec)}
-                >
-                    {item.name.replace(/_/g, ' ')}
+        {objects
+            ?.sort((a, b) => (a.name > b.name ? 1 : -1))
+            .map((item) => (
+                <span key={item.name}>
+                    <span
+                        className={styles.item}
+                        role={'button'}
+                        tabIndex={0}
+                        onKeyDown={() => {}}
+                        onClick={() => handleClick?.(item.ra, item.dec)}
+                    >
+                        {item.name.replace(/_/g, ' ')}
+                    </span>
+                    <span className={styles.divider}>•</span>
                 </span>
-                <span className={styles.divider}>•</span>
-            </span>
-        ))}
+            ))}
     </div>
 )
 

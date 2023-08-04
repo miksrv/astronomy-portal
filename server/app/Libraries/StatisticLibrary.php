@@ -4,9 +4,13 @@ class StatisticLibrary
 {
     protected array $filterEnum = [
         'Luminance' => 'luminance',
+        'L'         => 'luminance',
         'Red'       => 'red',
+        'R'         => 'red',
         'Green'     => 'green',
+        'G'         => 'green',
         'Blue'      => 'blue',
+        'b'         => 'blue',
         'Ha'        => 'hydrogen',
         'OIII'      => 'oxygen',
         'SII'       => 'sulfur',
