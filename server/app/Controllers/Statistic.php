@@ -41,6 +41,9 @@ class Statistic extends ResourceController
         ]);
     }
 
+    /**
+     * @return ResponseInterface
+     */
     public function catalog(): ResponseInterface
     {
         $catalogModel  = new CatalogModel();
@@ -56,6 +59,9 @@ class Statistic extends ResourceController
         ]);
     }
 
+    /**
+     * @return ResponseInterface
+     */
     public function photos(): ResponseInterface
     {
         $photoModel  = new PhotoModel();
@@ -76,29 +82,28 @@ class Statistic extends ResourceController
         ]);
     }
 
-    public function telescope()
+    /**
+     * @return ResponseInterface
+     */
+    public function telescope(): ResponseInterface
     {
-        $period = $this->request->getGet('period', FILTER_SANITIZE_SPECIAL_CHARS) ?? date('m-Y');
+        $period = $this->request->getGet('period', FILTER_SANITIZE_SPECIAL_CHARS);
+        $date   = strtotime("01-{$period}");
+        $where  = [];
 
-        $month = date('m');
-        $year  = date('Y');
-        $date  = strtotime("01-{$period}");
-
-        if (checkdate(date('m', $date), 1, date('Y', $date))) {
+        if ($period && checkdate(date('m', $date), 1, date('Y', $date))) {
             $month = date('m', $date);
             $year  = date('Y', $date);
+            $where = ['MONTH(date_obs)' => $month, 'YEAR(date_obs)' => $year];
         }
 
         $filesModel = new FilesModel();
         $filesData  = $filesModel
             ->select('date_obs, exptime, object')
-            ->where(['MONTH(date_obs)' => $month, 'YEAR(date_obs)' => $year])
+            ->where($where)
             ->findAll();
 
         $daysStatistic = [];
-
-        if (empty($filesData))
-            return $this->respond(['items' => null]);
 
         foreach ($filesData as $file)
         {
@@ -132,6 +137,11 @@ class Statistic extends ResourceController
 
         unset($daysStatistic);
 
-        return $this->respond(['items' => $result]);
+        usort($result, fn($a, $b) => $b->telescope_date <=> $a->telescope_date);
+
+        return $this->respond([
+            'count' => count($result),
+            'items' => $result
+        ]);
     }
 }
