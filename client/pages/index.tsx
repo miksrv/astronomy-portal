@@ -3,7 +3,8 @@ import {
     getRunningQueriesThunk,
     photoGetList,
     useCatalogGetListQuery,
-    usePhotoGetListQuery
+    usePhotoGetListQuery,
+    useStatisticGetTelescopeQuery
 } from '@/api/api'
 import { wrapper } from '@/api/store'
 import { NextPage } from 'next'
@@ -13,6 +14,7 @@ import React from 'react'
 import Calendar from '@/components/calendar'
 import PhotoGrid from '@/components/photo-grid'
 import Statistic from '@/components/statistic'
+import TelescopeWorkdays from '@/components/telescope-workdays'
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) => async () => {
@@ -34,6 +36,9 @@ const Home: NextPage = () => {
     })
     const { data: catalogData, isLoading: catalogLoading } =
         useCatalogGetListQuery()
+
+    const { data: telescopeData, isFetching: telescopeLoading } =
+        useStatisticGetTelescopeQuery()
 
     return (
         <main>
@@ -60,7 +65,11 @@ const Home: NextPage = () => {
                 photos={photoData?.items}
                 catalog={catalogData?.items}
             />
-            <Calendar />
+            <TelescopeWorkdays
+                eventsTelescope={telescopeData?.items}
+                loading={telescopeLoading}
+            />
+            <Calendar eventsTelescope={telescopeData?.items} />
         </main>
     )
 }

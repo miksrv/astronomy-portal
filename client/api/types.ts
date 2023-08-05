@@ -104,7 +104,8 @@ export interface APIResponseCatalogNames {
 }
 
 export interface APIResponseStatisticTelescope {
-    items?: TStatisticTelescope[]
+    count: number
+    items: TStatisticTelescope[]
 }
 
 export interface APIResponsePhotoListNames {

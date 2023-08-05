@@ -1,7 +1,5 @@
-import {
-    useStatisticGetTelescopeQuery,
-    useWeatherGetStatisticQuery
-} from '@/api/api'
+import { useWeatherGetStatisticQuery } from '@/api/api'
+import { TStatisticTelescope } from '@/api/types'
 import classNames from 'classnames'
 import moment, { Moment } from 'moment'
 import React, { useMemo, useState } from 'react'
@@ -16,14 +14,13 @@ type TWeatherDays = {
     bad: number
 }
 
-const Calendar: React.FC = () => {
+type TCalendarProps = {
+    eventsTelescope?: TStatisticTelescope[]
+}
+
+const Calendar: React.FC<TCalendarProps> = ({ eventsTelescope }) => {
     const [calendarDate, setCalendarDate] = useState<Moment>(moment())
     const weekDayShort = moment.weekdaysShort(true)
-
-    const { data: telescopeData, isFetching: telescopeLoading } =
-        useStatisticGetTelescopeQuery({
-            period: moment(calendarDate).format('MM-Y')
-        })
 
     const { data: weatherData, isFetching: weatherLoading } =
         useWeatherGetStatisticQuery({
@@ -52,7 +49,7 @@ const Calendar: React.FC = () => {
 
     return (
         <div className={classNames(styles.section, 'box', 'table')}>
-            <Dimmer active={telescopeLoading || weatherLoading}>
+            <Dimmer active={weatherLoading}>
                 <Loader />
             </Dimmer>
             <div className={styles.calendarToolbar}>
@@ -108,7 +105,7 @@ const Calendar: React.FC = () => {
                         <RenderCalendar
                             calendarDate={calendarDate}
                             eventsWeather={weatherData?.weather}
-                            eventsTelescope={telescopeData?.items}
+                            eventsTelescope={eventsTelescope}
                         />
                     </tbody>
                 </table>
