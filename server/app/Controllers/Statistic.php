@@ -41,6 +41,9 @@ class Statistic extends ResourceController
         ]);
     }
 
+    /**
+     * @return ResponseInterface
+     */
     public function catalog(): ResponseInterface
     {
         $catalogModel  = new CatalogModel();
@@ -56,6 +59,9 @@ class Statistic extends ResourceController
         ]);
     }
 
+    /**
+     * @return ResponseInterface
+     */
     public function photos(): ResponseInterface
     {
         $photoModel  = new PhotoModel();
@@ -76,14 +82,14 @@ class Statistic extends ResourceController
         ]);
     }
 
-    public function telescope()
+    /**
+     * @return ResponseInterface
+     */
+    public function telescope(): ResponseInterface
     {
         $period = $this->request->getGet('period', FILTER_SANITIZE_SPECIAL_CHARS);
-
-        $month = date('m');
-        $year  = date('Y');
-        $date  = strtotime("01-{$period}");
-        $where = [];
+        $date   = strtotime("01-{$period}");
+        $where  = [];
 
         if ($period && checkdate(date('m', $date), 1, date('Y', $date))) {
             $month = date('m', $date);
