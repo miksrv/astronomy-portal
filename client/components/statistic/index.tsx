@@ -1,5 +1,5 @@
 import { useStatisticGetQuery } from '@/api/api'
-import { getTimeFromSec } from '@/functions/helpers'
+import { declOfNum, getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
 import React from 'react'
 import { Dimmer, Grid, Icon, Loader, SemanticICONS } from 'semantic-ui-react'
@@ -15,8 +15,15 @@ type TCards = {
 const Statistic: React.FC = () => {
     const { data, isLoading } = useStatisticGetQuery()
 
+    const countFrames = data?.frames_count || 0
+    const countObjects = data?.catalog_count || 0
+
     const CARDS: TCards[] = [
-        { icon: 'photo', name: 'Кадров', value: data?.frames_count || 0 },
+        {
+            icon: 'photo',
+            name: declOfNum(countFrames, ['Кадр', 'Кадра', 'Кадров']),
+            value: countFrames
+        },
         {
             icon: 'clock outline',
             name: 'Выдержка',
@@ -24,8 +31,8 @@ const Statistic: React.FC = () => {
         },
         {
             icon: 'star outline',
-            name: 'Объектов',
-            value: data?.catalog_count || 0
+            name: declOfNum(countObjects, ['Объект', 'Объекта', 'Объектов']),
+            value: countObjects
         },
         {
             icon: 'disk',
