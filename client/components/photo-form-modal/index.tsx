@@ -304,7 +304,7 @@ const PhotoFormModal: React.FC = () => {
                     onClick={handleClose}
                     color={'grey'}
                 >
-                    Отмена
+                    Закрыть
                 </Button>
             </Modal.Actions>
         </Modal>

@@ -10,7 +10,7 @@ class StatisticLibrary
         'Green'     => 'green',
         'G'         => 'green',
         'Blue'      => 'blue',
-        'b'         => 'blue',
+        'B'         => 'blue',
         'Ha'        => 'hydrogen',
         'OIII'      => 'oxygen',
         'SII'       => 'sulfur',

@@ -116,7 +116,7 @@ const LoginForm: React.FC = () => {
                     onClick={() => dispatch(hide())}
                     color={'grey'}
                 >
-                    Отмена
+                    Закрыть
                 </Button>
             </Modal.Actions>
         </Modal>

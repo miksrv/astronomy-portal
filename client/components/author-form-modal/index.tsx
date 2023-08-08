@@ -141,7 +141,7 @@ const AuthorFormModal: React.FC<IAuthorFormModal> = (props) => {
                     onClick={handleClose}
                     color={'grey'}
                 >
-                    Отмена
+                    Закрыть
                 </Button>
             </Modal.Actions>
         </Modal>
