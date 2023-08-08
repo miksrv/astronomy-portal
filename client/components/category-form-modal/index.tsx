@@ -133,7 +133,7 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
                     onClick={handleClose}
                     color={'grey'}
                 >
-                    Отмена
+                    Закрыть
                 </Button>
             </Modal.Actions>
         </Modal>
