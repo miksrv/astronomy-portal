@@ -26,7 +26,12 @@ class Fits extends ResourceController
      * @throws ReflectionException
      */
     public function data(): ResponseInterface {
-        $input = json_decode($this->request->getJSON(true));
+        $apiKey = $this->request->getGet('key', FILTER_SANITIZE_SPECIAL_CHARS) ?? '';
+        $input  = json_decode($this->request->getJSON(true));
+
+        if (!$apiKey || $apiKey !== getenv('app.fitsApiKey')) {
+            return $this->failUnauthorized('Invalid API key');
+        }
 
         if (!isset($input->DEC) || !isset($input->RA)) {
             return $this->fail('No RA or DEC coordinates');
@@ -125,7 +130,12 @@ class Fits extends ResourceController
      * @return ResponseInterface
      */
     public function image(): ResponseInterface {
-        $files = $this->request->getFiles();
+        $apiKey = $this->request->getGet('key', FILTER_SANITIZE_SPECIAL_CHARS) ?? '';
+        $files  = $this->request->getFiles();
+
+        if (!$apiKey || $apiKey !== getenv('app.fitsApiKey')) {
+            return $this->failUnauthorized('Invalid API key');
+        }
 
         if (!$files)  {
             return $this->fail('Files not found');
