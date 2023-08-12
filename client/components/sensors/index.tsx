@@ -4,10 +4,11 @@
 // import { Dimmer, Message } from 'semantic-ui-react'
 //
 // import Chart from '@/components/chart'
-// import { TChartLineData } from '@/components/chart/types'
 //
 // import chart_sensors from './chart_sensors'
 // import styles from './styles.module.sass'
+//
+// export type TChartLineData = [number, number]
 //
 // const Sensors: React.FC = () => {
 //     const { data, isLoading, isFetching } = useGetSensorStatisticQuery()
