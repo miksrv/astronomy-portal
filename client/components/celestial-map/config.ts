@@ -231,7 +231,7 @@ const config = {
             fill: '#ddddbb',
             font: `11px ${FONT}`
         },
-        // i.e. whichever of the previous applies first); may vary with culture setting
+        // i.e. whichever of the previous applies first; may vary with culture setting
         designationType: 'desig', // Which kind of name is displayed as designation (fieldname in starnames.json)
         exponent: -0.28, // Scale exponent for star size, larger = more linear
         limit: 6, // Show only stars brighter than limit magnitude

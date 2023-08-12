@@ -50,7 +50,7 @@ class BlogLibrary
         return true;
     }
 
-    function getMaxTelegramNews(): int
+    public function getMaxTelegramNews(): int
     {
         $modelNews  = new BlogModel();
         $modelMedia = new BlogMediaModel();
