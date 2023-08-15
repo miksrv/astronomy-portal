@@ -68,14 +68,7 @@ const createObjectsJSON = (objects: TObject[]) => {
 const RenderMap: React.FC<TRenderMapProps> = (props) => {
     const { objects, width, config: customConfig, goto } = props
     const prevJSON = usePrevious({ objects })
-
-    // const box = document.createElement('div')
-    //
-    // box.style.width = '200px'
-    // box.style.height = '100px'
-    // box.style.background = 'gray'
-    //
-    // document.body.appendChild(box)
+    const popupContainer = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         if (
@@ -173,49 +166,63 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
             }
 
             Celestial.display(config)
+            // Celestial.addCallback(() => {
+            //     if (popupContainer.current) {
+            //         popupContainer.current.style.display = 'none'
+            //     }
+            // })
 
             if (customConfig.interactive) {
-                // const canvas = document.querySelector('canvas')
-                // // const ctx = canvas?.getContext("2d")
-                //
-                // canvas?.addEventListener('click', (e) => {
-                //     const rect = canvas.getBoundingClientRect()
-                //     const x = e.clientX - rect.left
-                //     const y = e.clientY - rect.top
-                //
-                //     // Добавить точку в месте клика
-                //     // ctx?.beginPath();
-                //     // ctx?.arc(x,y,5,0,2*Math.PI);
-                //     // ctx?.fill();
-                //
-                //     const findObjects: any[] = objects.filter(
-                //         (item: { ra: any; dec: any }) => {
-                //             const obj_cord = Celestial.mapProjection([
-                //                 item.ra,
-                //                 item.dec
-                //             ])
-                //
-                //             if (
-                //                 Math.abs(x - obj_cord[0]) <= 15 &&
-                //                 Math.abs(y - obj_cord[1]) <= 15
-                //             )
-                //                 return true
-                //             return false
-                //         }
-                //     )
-                //
-                //     if (findObjects.length) {
-                //         const objectParam = findObjects.pop()
-                //
-                //         // box.style.left = e.clientX + 'px'
-                //         // box.style.top = e.clientY + 'px'
-                //         // box.innerHTML = objectParam.name
-                //
-                //         // SkyMap.rotate({ center: [ objectParam.ra, objectParam.dec, 1 ]})
-                //
-                //         console.log('findObjects', objectParam)
-                //     }
-                // })
+                const canvas = document.querySelector('canvas')
+                // const ctx = canvas?.getContext('2d')
+
+                canvas?.addEventListener('click', (e) => {
+                    const rect = canvas.getBoundingClientRect()
+                    const x = e.clientX - rect.left
+                    const y = e.clientY - rect.top
+
+                    // Добавить точку в месте клика
+                    // ctx?.beginPath()
+                    // ctx?.arc(x, y, 5, 0, 2 * Math.PI)
+                    // ctx?.fill()
+
+                    const findObjects: any[] = objects.filter(
+                        (item: { ra: any; dec: any }) => {
+                            const obj_cord = Celestial.mapProjection([
+                                item.ra,
+                                item.dec
+                            ])
+
+                            if (
+                                Math.abs(x - obj_cord[0]) <= 15 &&
+                                Math.abs(y - obj_cord[1]) <= 15
+                            ) {
+                                return true
+                            }
+
+                            return false
+                        }
+                    )
+
+                    if (findObjects.length) {
+                        const objectParam = findObjects.pop()
+
+                        Celestial.rotate({
+                            center: [objectParam.ra, objectParam.dec, 1]
+                        })
+
+                        if (popupContainer.current) {
+                            popupContainer.current.innerHTML = objectParam.name
+                            popupContainer.current.style.display = 'block'
+                        }
+
+                        console.log('findObjects', objectParam)
+                    } else {
+                        if (popupContainer.current) {
+                            popupContainer.current.style.display = 'none'
+                        }
+                    }
+                })
             }
         }
     }, [objects, prevJSON, width, customConfig.interactive])
@@ -226,29 +233,22 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
         }
     }, [goto])
 
-    // const canvas = document.querySelector('canvas')
-    // const ctx = canvas?.getContext('2d')
-
-    // const getCursorPosition = (canvas: any, event: any) => {
-    //     const rect = canvas.getBoundingClientRect()
-    //     const x = event.clientX - rect.left
-    //     const y = event.clientY - rect.top
-    //
-    //     const coords = Celestial.mapProjection([299.908, 22.7231])
-    //
-    //     // console.log('test', SkyMap.mapProjection([x, y]))
-    //     // console.log('coords', event.offsetX, event.offsetX)
-    // }
-
-    // canvas?.addEventListener('mousedown', (e) => {
-    //     getCursorPosition(canvas, e)
-    // })
+    useEffect(() => {
+        if (popupContainer.current) {
+            popupContainer.current.style.display = 'none'
+        }
+    })
 
     return (
         <div
             id='celestial-map'
             className={styles.skyMap}
-        ></div>
+        >
+            <div
+                ref={popupContainer}
+                className={styles.popupContainer}
+            ></div>
+        </div>
     )
 }
 
