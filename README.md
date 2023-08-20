@@ -371,12 +371,11 @@ database.default.DBDriver = MySQLi
 ```
 5. Installation and configuration of the Portal API is now complete. Now you need to configure and install the interface. On your local computer, in the frontend directory of the repository, rename the `env` file to `.env`. Edit it:
 ```
-NEXT_PUBLIC_API_HOST = 'https://observatory.miksoft.pro/api/'
-NEXT_PUBLIC_METRIKA  = ''
+NEXT_PUBLIC_API_HOST = 'https://YOUR_API_HOST/api/'
+NEXT_PUBLIC_LAT = 51.7
+NEXT_PUBLIC_LON = 55.2
 ```
 The `NEXT_PUBLIC_API_HOST` parameter is responsible for determining the URL to the backend server API. If, following the instructions above, you placed the source code in the `api` directory on the server, then the value of this parameter will be: `https://your_domain.com/api/`. For example, you can use my API to test your portal.
-
-The second `NEXT_PUBLIC_METRIKA` parameter is the code of any analytics service Yandex.Metrika, Google Analytics, etc...
 6. Now we need to copy the interface. To do this, you must have **nodeJS** installed. In the `frontend` directory run the following commands (after exiting the previous one)
 ```bash
 yarn install
