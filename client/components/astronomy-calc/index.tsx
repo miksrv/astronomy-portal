@@ -11,8 +11,8 @@ import SunIcon from '@/public/images/sun.png'
 
 import styles from './styles.module.sass'
 
-const LAT = 51.7
-const LON = 55.2
+const LAT = process.env.NEXT_PUBLIC_LAT ?? 51.7
+const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
 
 const AstronomyCalc: React.FC = () => {
     const moonTimes = SunCalc.getMoonTimes(moment(), LAT, LON)

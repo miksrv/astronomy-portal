@@ -1,4 +1,6 @@
 NEXT_PUBLIC_API_HOST = 'https://astro.miksoft.pro/api/'
+NEXT_PUBLIC_LAT = 51.7
+NEXT_PUBLIC_LON = 55.2
 
 # Optional, default -> NEXT_PUBLIC_API_HOST
 NEXT_PUBLIC_IMG_HOST = 'https://astro.miksoft.pro/api/'
