@@ -12,8 +12,11 @@ class StatisticLibrary
         'Blue'      => 'blue',
         'B'         => 'blue',
         'Ha'        => 'hydrogen',
+        'H'         => 'hydrogen',
         'OIII'      => 'oxygen',
+        'O'         => 'oxygen',
         'SII'       => 'sulfur',
+        'S'         => 'sulfur',
         'CLEAR'     => 'clear'
     ];
 
