@@ -19,6 +19,9 @@ type TRenderCalendarProps = {
     eventsTelescope?: TStatisticTelescope[]
 }
 
+const LAT = process.env.NEXT_PUBLIC_LAT ?? 51.7
+const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
+
 const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
     const { calendarDate, eventsWeather, eventsTelescope } = props
 
@@ -38,7 +41,7 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
     }
 
     let blanks = []
-    for (let i = 1; i < firstDayOfMonth; i++) {
+    for (let i = 1; i < (firstDayOfMonth === 0 ? 7 : firstDayOfMonth); i++) {
         blanks.push(
             <td
                 key={`empty${i}`}
@@ -54,8 +57,8 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
             .add(d - 1, 'days')
         const currentDay: boolean =
             isCurrentMonth && d === parseInt(calendarDate.format('DD'))
-        const moonTimes = SunCalc.getMoonTimes(currentDate, 51.7, 55.2)
-        const sunTimes = SunCalc.getTimes(currentDate, 51.7, 55.2)
+        const moonTimes = SunCalc.getMoonTimes(currentDate, LAT, LON)
+        const sunTimes = SunCalc.getTimes(currentDate, LAT, LON)
 
         const itemWeatherEvent = eventsWeather
             ?.filter((item) => currentDate.isSame(item.date, 'day'))
@@ -101,7 +104,7 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                         <Image
                             src={SunIcon}
                             className={styles.icon}
-                            alt=''
+                            alt={''}
                             width={16}
                             height={16}
                         />{' '}
@@ -114,7 +117,7 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                         {itemWeatherEvent.clouds !== null && (
                             <span>
                                 <Icon
-                                    name='cloud'
+                                    name={'cloud'}
                                     style={{ marginRight: 5 }}
                                 />
                                 {Math.round(itemWeatherEvent.clouds)}
@@ -122,13 +125,13 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                         )}
                         <span>
                             <Icon
-                                name='thermometer'
+                                name={'thermometer'}
                                 style={{ marginRight: 0 }}
                             />
                             {itemWeatherEvent.temperature}
                         </span>
                         <span>
-                            <Icon name='send' />
+                            <Icon name={'send'} />
                             {itemWeatherEvent.wind_speed}
                         </span>
                     </div>
