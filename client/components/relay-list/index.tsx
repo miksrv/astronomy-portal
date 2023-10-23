@@ -1,8 +1,13 @@
-import { useRelayGetStateQuery, useRelayPutStatusMutation } from '@/api/api'
+import {
+    useRelayGetLightMutation,
+    useRelayGetStateQuery,
+    useRelayPutStatusMutation
+} from '@/api/api'
 import { useAppSelector } from '@/api/hooks'
 import { APIRequestRelaySet } from '@/api/types'
+import { declOfNum } from '@/functions/helpers'
 import classNames from 'classnames'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Dimmer, Loader, Message } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
@@ -46,6 +51,7 @@ const RelayListItem: React.FC<TRelayListItemProps> = (props) => {
  */
 const RelayList: React.FC = () => {
     const [relayLoading, setRelayLoading] = React.useState<number>()
+    const [countdownTimer, setCountdownTimer] = useState<number>(0)
 
     const {
         data: relayList,
@@ -56,12 +62,32 @@ const RelayList: React.FC = () => {
     const [setRelayStatus, { isLoading: loaderSet, data: relaySet }] =
         useRelayPutStatusMutation()
 
+    const [setLightOn, { isLoading: lightLoading }] = useRelayGetLightMutation()
+
     const userAuth = useAppSelector((state) => state.auth.userAuth)
 
     const handleSetRelay = async (relay: APIRequestRelaySet) => {
         setRelayLoading(relay.id)
         await setRelayStatus(relay)
     }
+
+    const tick = () => {
+        if (countdownTimer > 0) {
+            setCountdownTimer(countdownTimer - 1)
+        }
+    }
+
+    useEffect(() => {
+        if (relayList?.light?.cooldown) {
+            setCountdownTimer(relayList.light.cooldown)
+        }
+    }, [relayList])
+
+    useEffect(() => {
+        const timer = setInterval(() => tick(), 1000)
+
+        return () => clearInterval(timer)
+    })
 
     return isLoading ? (
         <div className={classNames(styles.relayList, styles.loader, 'box')}>
@@ -102,6 +128,63 @@ const RelayList: React.FC = () => {
                     handleClick={async (relay) => await handleSetRelay(relay)}
                 />
             ))}
+
+            <div className={styles.item}>
+                <div className={styles.name}>
+                    <span
+                        className={
+                            styles[
+                                relayList?.items?.[1]?.state
+                                    ? 'ledOn'
+                                    : 'ledOff'
+                            ]
+                        }
+                    />
+                    СВЕТ В ОБСЕРВАТОРИИ
+                </div>
+                <div className={styles.description}>
+                    {countdownTimer > 0 ? (
+                        <>
+                            {'Доступно через'} <b>{countdownTimer}</b> {'сек'}
+                        </>
+                    ) : (
+                        <>
+                            {'Включили'} <b>{relayList?.light.counter}</b>{' '}
+                            {declOfNum(relayList?.light.counter || 0, [
+                                'раз',
+                                'раза',
+                                'раз'
+                            ])}
+                        </>
+                    )}
+                </div>
+                <Button
+                    loading={(isLoading && relayLoading === 1) || lightLoading}
+                    className={
+                        styles[
+                            relayList?.items?.[1]?.state
+                                ? 'switchOn'
+                                : 'switchOff'
+                        ]
+                    }
+                    disabled={
+                        loaderSet ||
+                        lightLoading ||
+                        relayLoading === 1 ||
+                        !relayList.light.enable ||
+                        countdownTimer > 0 ||
+                        relayList?.items?.[1]?.state === 1
+                    }
+                    onClick={() => {
+                        if (countdownTimer === 0) {
+                            setLightOn()
+                        }
+                    }}
+                    size={'mini'}
+                >
+                    {relayList?.items?.[1]?.state ? 'on' : 'off'}
+                </Button>
+            </div>
         </div>
     )
 }

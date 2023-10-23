@@ -5,29 +5,25 @@ use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 
-class Camera extends ResourceController
-{
+class Camera extends ResourceController {
     use ResponseTrait;
 
-    const CACHE_TIME = 15;
+    const CACHE_TIME = 5;
 
     /**
      * Camera image by id
      * @param null $id
      * @return ResponseInterface
      */
-    public function show($id = null): ResponseInterface
-    {
+    public function show($id = null): ResponseInterface {
         $param = getenv('app.observatory.webcam_' . $id);
         $cache = 'webcam_' . $id;
-
 
         if (!$param) {
             throw PageNotFoundException::forPageNotFound();
         }
 
-        if ( ! $photo = cache($cache))
-        {
+        if ( ! $photo = cache($cache)) {
             try {
                 $photo = file_get_contents($param);
             } catch (\Exception $e) {
