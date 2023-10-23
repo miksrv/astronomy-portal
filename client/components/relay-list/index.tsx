@@ -96,10 +96,14 @@ const RelayList: React.FC = () => {
             </Dimmer>
         </div>
     ) : isError || !relayList?.items.length ? (
-        <Message
-            error
-            content={'Возникла ошибка при получении списка управляемых реле'}
-        />
+        <div className={classNames(styles.relayList, styles.loader, 'box')}>
+            <Dimmer active>
+                <Message
+                    error
+                    content={'Ошибка при получении списка реле'}
+                />
+            </Dimmer>
+        </div>
     ) : (
         <div className={classNames(styles.relayList, 'box')}>
             {userAuth && isError && (
@@ -140,7 +144,7 @@ const RelayList: React.FC = () => {
                             ]
                         }
                     />
-                    СВЕТ В ОБСЕРВАТОРИИ
+                    {'ОСВЕЩЕНИЕ'}
                 </div>
                 <div className={styles.description}>
                     {countdownTimer > 0 ? (
