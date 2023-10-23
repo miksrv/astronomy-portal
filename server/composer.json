@@ -39,6 +39,8 @@
         "migration:status": "php spark migrate:status",
         "migration:rollback": "php spark migrate:rollback",
         "migration:run": "php spark migrate",
+        "seed:create": "php spark make:seeder SettingsUserRelay --suffix",
+        "seed:run": "php spark db:seed SettingsUserRelaySeeder",
         "routes": "php spark routes"
     },
     "support": {

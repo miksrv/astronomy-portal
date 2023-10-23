@@ -49,6 +49,7 @@ const Dashboard: NextPage = () => (
             >
                 <Camera
                     cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/2`}
+                    interval={5}
                 />
             </Grid.Column>
             <Grid.Column

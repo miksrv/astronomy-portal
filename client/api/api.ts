@@ -282,6 +282,10 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
+        relayGetLight: builder.mutation<void, void>({
+            invalidatesTags: () => [{ id: 'LIST', type: 'Relay' }],
+            query: () => 'relay/light'
+        }),
         relayGetState: builder.query<APIResponseRelayList, null>({
             providesTags: () => [{ id: 'LIST', type: 'Relay' }],
             query: () => 'relay/list'
@@ -373,6 +377,7 @@ export const {
     usePhotoPostMutation,
     usePhotoPostUploadMutation,
 
+    useRelayGetLightMutation,
     useRelayGetStateQuery,
     useRelayPutStatusMutation,
 

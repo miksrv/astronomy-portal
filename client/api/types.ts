@@ -61,6 +61,11 @@ export interface APIRequestLogin {
 
 export interface APIResponseRelayList {
     items: TRelayItem[]
+    light: {
+        cooldown: number
+        counter: number
+        enable: boolean
+    }
 }
 
 export interface APIRequestRelaySet {

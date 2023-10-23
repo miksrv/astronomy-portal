@@ -10,7 +10,7 @@ type TCameraProps = {
     interval?: number
 }
 
-const DEFAULT_INTERVAL = 15
+const DEFAULT_INTERVAL = 5
 
 const Camera: React.FC<TCameraProps> = (props) => {
     const { cameraURL, interval } = props
