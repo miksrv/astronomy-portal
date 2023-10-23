@@ -1,4 +1,4 @@
-import { useAuthGetMeMutation, useStatisticGetQuery } from '@/api/api'
+import { api, useAuthGetMeMutation, useStatisticGetQuery } from '@/api/api'
 import { openFormCatalog, openFormPhoto } from '@/api/applicationSlice'
 import {
     getStorageToken,
@@ -74,7 +74,7 @@ const Header: React.FC = () => {
             handleAuthMe()
         }
 
-        // dispatch(api.endpoints.cronGetUpdatePosts.initiate())
+        dispatch(api.endpoints.cronGetUpdatePosts.initiate())
     })
 
     return (
