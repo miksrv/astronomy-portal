@@ -17,13 +17,11 @@ if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
     die();
 }
 
-class Fits extends ResourceController
-{
+class Fits extends ResourceController {
     use ResponseTrait;
 
     /**
      * @return ResponseInterface
-     * @throws ReflectionException
      */
     public function data(): ResponseInterface {
         $apiKey = $this->request->getGet('key', FILTER_SANITIZE_SPECIAL_CHARS) ?? '';

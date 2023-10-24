@@ -21,8 +21,7 @@ define('LIGHT_SWITCH_COOLDOWN', 60 * 5);
 define('LIGHT_SWITCH_OFF_INTERVAL', 60);
 define('LIGHT_SWITCH_NAME', 'LED Flat панель');
 
-class Relay extends ResourceController
-{
+class Relay extends ResourceController {
     use ResponseTrait;
 
     private SettingsModel $settingsModel;

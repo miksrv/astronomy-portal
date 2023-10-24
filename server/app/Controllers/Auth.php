@@ -19,15 +19,13 @@ if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
     die();
 }
 
-class Auth extends ResourceController
-{
+class Auth extends ResourceController {
     /**
      * Register a new user
      * @return ResponseInterface
      * @throws ReflectionException
      */
-    public function register(): ResponseInterface
-    {
+    public function register(): ResponseInterface {
         $rules = [
             'name'     => 'required',
             'email'    => 'required|min_length[6]|max_length[50]|valid_email|is_unique[user.email]',
@@ -35,6 +33,7 @@ class Auth extends ResourceController
         ];
 
         $input = $this->getRequestInput($this->request);
+
         if (!$this->validateRequest($input, $rules)) {
             return $this->failValidationErrors($this->validator->getErrors());
         }
@@ -49,8 +48,7 @@ class Auth extends ResourceController
      * Authenticate Existing User
      * @return ResponseInterface
      */
-    public function login(): ResponseInterface
-    {
+    public function login(): ResponseInterface {
         $rules = [
             'email'    => 'required|min_length[6]|max_length[50]|valid_email',
             'password' => 'required|min_length[8]|max_length[255]|validateUser[email, password]'
@@ -75,8 +73,7 @@ class Auth extends ResourceController
     /**
      * @throws Exception
      */
-    public function me(): ResponseInterface
-    {
+    public function me(): ResponseInterface {
         $authenticationHeader = $this->request->getServer('HTTP_AUTHORIZATION');
 
         try {
@@ -95,11 +92,12 @@ class Auth extends ResourceController
         }
     }
 
-    private function getJWTForUser(
-        string $emailAddress,
-        int $responseCode = ResponseInterface::HTTP_OK
-    ): ResponseInterface
-    {
+    /**
+     * @param string $emailAddress
+     * @param int $responseCode
+     * @return ResponseInterface
+     */
+    private function getJWTForUser(string $emailAddress, int $responseCode = ResponseInterface::HTTP_OK): ResponseInterface {
         try {
             $model = new UserModel();
             $user = $model->findUserByEmailAddress($emailAddress);
@@ -122,8 +120,13 @@ class Auth extends ResourceController
         }
     }
 
-    public function validateRequest($input, array $rules, array $messages =[]): bool
-    {
+    /**
+     * @param $input
+     * @param array $rules
+     * @param array $messages
+     * @return bool
+     */
+    public function validateRequest($input, array $rules, array $messages =[]): bool {
         $this->validator = Services::Validation()->setRules($rules);
         // If you replace the $rules array with the name of the group
         if (is_string($rules)) {
@@ -146,13 +149,18 @@ class Auth extends ResourceController
         return $this->validator->setRules($rules, $messages)->run($input);
     }
 
-    public function getRequestInput(IncomingRequest $request)
-    {
+    /**
+     * @param IncomingRequest $request
+     * @return array|bool|float|int|mixed|object|string|null
+     */
+    public function getRequestInput(IncomingRequest $request) {
         $input = $request->getPost();
+
         if (empty($input)) {
             //convert request body to associative array
             $input = json_decode($request->getBody(), true);
         }
+
         return $input;
     }
 }

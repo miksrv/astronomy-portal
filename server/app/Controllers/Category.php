@@ -16,32 +16,30 @@ if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
     die();
 }
 
-class Category extends ResourceController
-{
+class Category extends ResourceController {
     use ResponseTrait;
 
     /**
      * List of all category items
      * @return ResponseInterface
      */
-    public function list(): ResponseInterface
-    {
+    public function list(): ResponseInterface {
         $modelCategory = new CategoryModel();
         $modelCatalog  = new CatalogModel();
 
         $dataCatalog  = $modelCatalog->select('category')->findAll();
         $dataCategory = $modelCategory->findAll();
 
-        if (empty($dataCatalog))
-        {
+        if (empty($dataCatalog))  {
             return $this->respond(['items' => $dataCategory]);
         }
 
-        foreach ($dataCatalog as $item)
-        {
+        foreach ($dataCatalog as $item)  {
             $key = array_search($item->category, array_column($dataCategory, 'id'));
 
-            if ($key === false) continue;
+            if ($key === false) {
+                continue;
+            }
 
             $dataCategory[$key]->object_count = $dataCategory[$key]->object_count ? $dataCategory[$key]->object_count + 1 : 1;
         }
@@ -54,8 +52,7 @@ class Category extends ResourceController
      * @param null $id
      * @return ResponseInterface
      */
-    public function create($id = null): ResponseInterface
-    {
+    public function create($id = null): ResponseInterface {
         $input = $this->request->getJSON(true);
         $rules = [
             'name' => 'required|min_length[3]|max_length[40]|is_unique[category.name]'
@@ -82,8 +79,7 @@ class Category extends ResourceController
      * @param null $id
      * @return ResponseInterface
      */
-    public function update($id = null): ResponseInterface
-    {
+    public function update($id = null): ResponseInterface {
         $input = $this->request->getJSON(true);
         $rules = [
             'name' => 'required|min_length[3]|max_length[40]|is_unique[category.name]'
@@ -117,8 +113,7 @@ class Category extends ResourceController
      * @param string|null $id
      * @return ResponseInterface
      */
-    public function delete($id = null): ResponseInterface
-    {
+    public function delete($id = null): ResponseInterface {
         try {
             $modelCategory = new CategoryModel();
             $dataCategory   = $modelCategory->find($id);

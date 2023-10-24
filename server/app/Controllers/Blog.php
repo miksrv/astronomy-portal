@@ -15,16 +15,14 @@ if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
     die();
 }
 
-class Blog extends ResourceController
-{
+class Blog extends ResourceController {
     use ResponseTrait;
 
     /**
      * Camera image by id
      * @return ResponseInterface
      */
-    public function list(): ResponseInterface
-    {
+    public function list(): ResponseInterface {
         $limit  = $this->request->getGet('limit', FILTER_SANITIZE_NUMBER_INT) ?? 2;
         $offset = $this->request->getGet('offset', FILTER_SANITIZE_NUMBER_INT) ?? 0;
         $order  = $this->request->getGet('order', FILTER_SANITIZE_SPECIAL_CHARS) ?? 'telegram_date';
@@ -39,8 +37,10 @@ class Blog extends ResourceController
         ]);
     }
 
-    public function statistic()
-    {
+    /**
+     * @return ResponseInterface
+     */
+    public function statistic(): ResponseInterface {
         $blogLibrary   = new BlogLibrary();
         $blogStatistic = $blogLibrary->getTelegramChannelStatistic('nearspace');
 
@@ -49,8 +49,10 @@ class Blog extends ResourceController
         ]);
     }
 
-    public function popular()
-    {
+    /**
+     * @return ResponseInterface
+     */
+    public function popular(): ResponseInterface {
         $date1 = strtotime("-30 days");
         $date2 = strtotime("now");
         $limit = $this->request->getGet('limit', FILTER_SANITIZE_NUMBER_INT) ?? 5;
@@ -67,12 +69,14 @@ class Blog extends ResourceController
         ]);
     }
 
-    protected function _addMediaToBlogList($dataBlog)
-    {
+    /**
+     * @param $dataBlog
+     * @return mixed
+     */
+    protected function _addMediaToBlogList($dataBlog) {
         $collections = [];
 
-        foreach ($dataBlog as $item)
-        {
+        foreach ($dataBlog as $item) {
             if (!in_array($item->group_id, $collections))
             {
                 $collections[] = $item->group_id;
@@ -85,13 +89,13 @@ class Blog extends ResourceController
             ->whereIn('group_id', $collections)
             ->findAll();
 
-        if ($dataBlogMedia)
-        {
-            foreach ($dataBlogMedia as $index => $media)
-            {
+        if ($dataBlogMedia) {
+            foreach ($dataBlogMedia as $index => $media) {
                 $key = array_search($media->group_id, array_column($dataBlog, 'group_id'));
 
-                if ($key === false) continue;
+                if ($key === false) {
+                    continue;
+                }
 
                 unset($media->group_id);
 
