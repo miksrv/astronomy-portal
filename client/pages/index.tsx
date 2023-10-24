@@ -29,7 +29,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-const Home: NextPage = () => {
+const HomePage: NextPage = () => {
     const { data: photoData, isLoading: photoLoading } = usePhotoGetListQuery({
         limit: 4,
         order: 'random'
@@ -74,4 +74,4 @@ const Home: NextPage = () => {
     )
 }
 
-export default Home
+export default HomePage

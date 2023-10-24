@@ -8,7 +8,7 @@ import Camera from '@/components/camera'
 import RelayList from '@/components/relay-list'
 import Weather from '@/components/weather'
 
-const Dashboard: NextPage = () => (
+const DashboardPage: NextPage = () => (
     <main>
         <NextSeo
             title={'Панель управления обсерваторией'}
@@ -66,4 +66,4 @@ const Dashboard: NextPage = () => (
     </main>
 )
 
-export default Dashboard
+export default DashboardPage

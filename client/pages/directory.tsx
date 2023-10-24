@@ -32,7 +32,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-const Directory: NextPage = () => {
+const DirectoryPage: NextPage = () => {
     const [showMessage, setShowMessage] = useState<boolean>(false)
     const [showCategoryModal, setShowCategoryModal] = useState<boolean>(false)
     const [showAuthorModal, setShowAuthorModal] = useState<boolean>(false)
@@ -277,4 +277,4 @@ const Directory: NextPage = () => {
     )
 }
 
-export default Directory
+export default DirectoryPage
