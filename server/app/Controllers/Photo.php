@@ -18,16 +18,14 @@ if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
     die();
 }
 
-class Photo extends ResourceController
-{
+class Photo extends ResourceController {
     use ResponseTrait;
 
     /**
      * List of all photos
      * @return ResponseInterface
      */
-    public function list(): ResponseInterface
-    {
+    public function list(): ResponseInterface {
         $filterObject = $this->request->getGet('object', FILTER_SANITIZE_SPECIAL_CHARS);
         $filterLimit  = $this->request->getGet('limit', FILTER_SANITIZE_NUMBER_INT);
         $orderColumn  = $this->request->getGet('order', FILTER_SANITIZE_SPECIAL_CHARS) ?? 'date';
@@ -46,8 +44,7 @@ class Photo extends ResourceController
      * @param null $date
      * @return ResponseInterface
      */
-    public function show($id = null, $date = null): ResponseInterface
-    {
+    public function show($id = null, $date = null): ResponseInterface {
         try {
             $photoLibrary = new PhotosLibrary();
             $photoItem    = $photoLibrary->getPhotoByObject($id, $date);
@@ -55,6 +52,7 @@ class Photo extends ResourceController
             if ($photoItem) {
                 return $this->respond($photoItem);
             }
+
             return $this->failNotFound();
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
@@ -69,8 +67,7 @@ class Photo extends ResourceController
      * @param $date
      * @return ResponseInterface
      */
-    public function download($id = null, $date = null): ResponseInterface
-    {
+    public function download($id = null, $date = null): ResponseInterface {
         try {
             $photoModel = new PhotoModel();
             $photoData  = $photoModel
@@ -98,8 +95,7 @@ class Photo extends ResourceController
      * @param null $id
      * @return ResponseInterface
      */
-    public function create($id = null): ResponseInterface
-    {
+    public function create($id = null): ResponseInterface {
         $input = $this->request->getJSON(true);
         $rules = [
             'object' => 'required|alpha_dash|min_length[3]|max_length[40]',
@@ -118,16 +114,14 @@ class Photo extends ResourceController
         $catalogModel = new CatalogModel();
         $catalogData  = $catalogModel->find($input['object']);
 
-        if (!$catalogData)
-        {
+        if (!$catalogData)  {
             return $this->failValidationErrors('Object by name "' . $input['object'] . '" not found');
         }
 
         $photoOrigPath  = UPLOAD_TEMP . $input['image_name'] . '.' . $input['image_ext'];
         $photoThumbPath = UPLOAD_TEMP . $input['image_name'] . '_thumb.' . $input['image_ext'];
 
-        if (!file_exists($photoOrigPath) || !file_exists($photoThumbPath))
-        {
+        if (!file_exists($photoOrigPath) || !file_exists($photoThumbPath)) {
             return $this->failValidationErrors('Uploaded photo files for this object not found');
         }
 
@@ -170,8 +164,7 @@ class Photo extends ResourceController
      * Uploads a new photo, create a thumbnail and return the data of the uploaded photo.
      * @return ResponseInterface
      */
-    public function upload(): ResponseInterface
-    {
+    public function upload(): ResponseInterface {
         $rules = [
             'image' => 'uploaded[image]|is_image[image]|mime_in[image,image/jpg,image/jpeg,image/gif,image/png,image/webp]'
         ];
@@ -214,8 +207,7 @@ class Photo extends ResourceController
      * @param null $id
      * @return ResponseInterface
      */
-    public function update($id = null): ResponseInterface
-    {
+    public function update($id = null): ResponseInterface {
         $input = $this->request->getJSON(true);
         $rules = [
             'object'    => 'required|alpha_dash|min_length[3]|max_length[40]',
@@ -253,8 +245,7 @@ class Photo extends ResourceController
      * @param null $id
      * @return ResponseInterface
      */
-    public function delete($id = null): ResponseInterface
-    {
+    public function delete($id = null): ResponseInterface {
         try {
             $photoModel = new PhotoModel();
             $photoData  = $photoModel->find($id);

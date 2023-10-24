@@ -16,16 +16,14 @@ if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
     die();
 }
 
-class Catalog extends ResourceController
-{
+class Catalog extends ResourceController {
     use ResponseTrait;
 
     /**
      * List of all catalog items
      * @return ResponseInterface
      */
-    public function list(): ResponseInterface
-    {
+    public function list(): ResponseInterface {
         $catalogLibrary = new CatalogLibrary();
 
         return $this->respond(['items' => $catalogLibrary->getCatalogList()]);
@@ -36,8 +34,7 @@ class Catalog extends ResourceController
      * @param string|null $id
      * @return ResponseInterface
      */
-    public function show($id = null): ResponseInterface
-    {
+    public function show($id = null): ResponseInterface {
         try {
             $catalogLibrary = new CatalogLibrary();
 
@@ -61,8 +58,7 @@ class Catalog extends ResourceController
      * @param null $id
      * @return ResponseInterface
      */
-    public function create($id = null): ResponseInterface
-    {
+    public function create($id = null): ResponseInterface {
         $input = $this->request->getJSON(true);
         $rules = [
             'name'        => 'required|alpha_dash|min_length[3]|max_length[40]|is_unique[catalog.name]',
@@ -97,8 +93,7 @@ class Catalog extends ResourceController
      * @param null $id
      * @return ResponseInterface
      */
-    public function update($id = null): ResponseInterface
-    {
+    public function update($id = null): ResponseInterface {
         $input = $this->request->getJSON(true);
         $rules = [
             'title'       => 'max_length[200]',
@@ -140,8 +135,7 @@ class Catalog extends ResourceController
      * @param string|null $id
      * @return ResponseInterface
      */
-    public function delete($id = null): ResponseInterface
-    {
+    public function delete($id = null): ResponseInterface {
         try {
             $catalogModel = new CatalogModel();
             $catalogData  = $catalogModel->find($id);
@@ -162,8 +156,7 @@ class Catalog extends ResourceController
     /**
      * Stores the image passed as a base64 string
      */
-    protected function _saveCatalogImage(string $name, string $imageString): ?string
-    {
+    protected function _saveCatalogImage(string $name, string $imageString): ?string {
         $fileName = $name . '.png';
 
         if (empty($imageString))

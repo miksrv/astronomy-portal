@@ -16,17 +16,14 @@ if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
     die();
 }
 
-class Cron extends ResourceController
-{
+class Cron extends ResourceController {
     use ResponseTrait;
 
     /**
-     * Camera image by id
      * @return void
      * @throws ReflectionException
      */
-    public function update_telegram_posts()
-    {
+    public function update_telegram_posts() {
         // Опрашиваем канал в новостями с самого начала
         $blogLibrary = new BlogLibrary();
 
@@ -53,21 +50,20 @@ class Cron extends ResourceController
      * Restart is not needed, because after uploading new photos - all previews will be created automatically
      * @throws ReflectionException
      */
-    public function optimize_photos()
-    {
+    public function optimize_photos() {
         $photoModel = new PhotoModel();
         $photoData  = $photoModel->findAll();
 
-        if (empty($photoData)) return;
+        if (empty($photoData)) {
+            return;
+        }
 
-        foreach ($photoData as $photo)
-        {
+        foreach ($photoData as $photo) {
             $photoPath  = UPLOAD_PHOTOS . $photo->image_name . '.' . $photo->image_ext;
             $photo88x18 = $photo->image_name . '_80x18.' . $photo->image_ext;
             $photoFile  = new File($photoPath);
 
-            if (empty($photo->image_size))
-            {
+            if (empty($photo->image_size)) {
                 list($width, $height) = getimagesize($photoFile);
 
                 $update = [
@@ -81,7 +77,9 @@ class Cron extends ResourceController
                 log_message('notice', "Update photo parameters for ID: {$photo->id}");
             }
 
-            if (file_exists(UPLOAD_PHOTOS . $photo88x18)) continue;
+            if (file_exists(UPLOAD_PHOTOS . $photo88x18)) {
+                continue;
+            }
 
             $image = Services::image('gd'); // imagick
             $image->withFile($photoPath)

@@ -16,32 +16,30 @@ if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
     die();
 }
 
-class Author extends ResourceController
-{
+class Author extends ResourceController {
     use ResponseTrait;
 
     /**
      * List of all authors
      * @return ResponseInterface
      */
-    public function list(): ResponseInterface
-    {
+    public function list(): ResponseInterface {
         $modelAuthor = new AuthorModel();
         $modelPhotos = new PhotoModel();
 
         $dataPhotos  = $modelPhotos->select('author_id')->findAll();
         $dataAuthors = $modelAuthor->findAll();
 
-        if (empty($dataPhotos))
-        {
+        if (empty($dataPhotos)) {
             return $this->respond(['items' => $dataAuthors]);
         }
 
-        foreach ($dataPhotos as $photo)
-        {
+        foreach ($dataPhotos as $photo) {
             $key = array_search($photo->author_id, array_column($dataAuthors, 'id'));
 
-            if ($key === false) continue;
+            if ($key === false) {
+                continue;
+            }
 
             $dataAuthors[$key]->photo_count = $dataAuthors[$key]->photo_count ? $dataAuthors[$key]->photo_count + 1 : 1;
         }
@@ -54,8 +52,7 @@ class Author extends ResourceController
      * @param null $id
      * @return ResponseInterface
      */
-    public function create($id = null): ResponseInterface
-    {
+    public function create($id = null): ResponseInterface {
         $input = $this->request->getJSON(true);
         $rules = [
             'name' => 'required|min_length[3]|max_length[100]',
@@ -82,8 +79,7 @@ class Author extends ResourceController
      * @param null $id
      * @return ResponseInterface
      */
-    public function update($id = null): ResponseInterface
-    {
+    public function update($id = null): ResponseInterface {
         $input = $this->request->getJSON(true);
         $rules = [
             'name' => 'required|min_length[3]|max_length[100]'
@@ -117,8 +113,7 @@ class Author extends ResourceController
      * @param string|null $id
      * @return ResponseInterface
      */
-    public function delete($id = null): ResponseInterface
-    {
+    public function delete($id = null): ResponseInterface {
         try {
             $modelAuthor = new AuthorModel();
             $dataAuthors  = $modelAuthor->find($id);

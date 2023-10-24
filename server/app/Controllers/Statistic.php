@@ -15,16 +15,14 @@ if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
     die();
 }
 
-class Statistic extends ResourceController
-{
+class Statistic extends ResourceController {
     use ResponseTrait;
 
     /**
      * List of statistic summary data
      * @return ResponseInterface
      */
-    public function list(): ResponseInterface
-    {
+    public function list(): ResponseInterface {
         $catalogModel = new CatalogModel();
         $photoModel   = new PhotoModel();
         $filesModel   = new FilesModel();
@@ -44,8 +42,7 @@ class Statistic extends ResourceController
     /**
      * @return ResponseInterface
      */
-    public function catalog(): ResponseInterface
-    {
+    public function catalog(): ResponseInterface {
         $catalogModel  = new CatalogModel();
         $catalogData   = $catalogModel->select('name')->findAll();
         $catalogResult = [];
@@ -62,15 +59,13 @@ class Statistic extends ResourceController
     /**
      * @return ResponseInterface
      */
-    public function photos(): ResponseInterface
-    {
+    public function photos(): ResponseInterface {
         $photoModel  = new PhotoModel();
         $photoData   = $photoModel->select('object')->findAll();
         $photoResult = [];
 
         foreach ($photoData as $item) {
-            if (in_array($item->object, $photoResult))
-            {
+            if (in_array($item->object, $photoResult)) {
                 continue;
             }
             
@@ -85,8 +80,7 @@ class Statistic extends ResourceController
     /**
      * @return ResponseInterface
      */
-    public function telescope(): ResponseInterface
-    {
+    public function telescope(): ResponseInterface {
         $period = $this->request->getGet('period', FILTER_SANITIZE_SPECIAL_CHARS);
         $date   = strtotime("01-{$period}");
         $where  = [];
@@ -105,12 +99,10 @@ class Statistic extends ResourceController
 
         $daysStatistic = [];
 
-        foreach ($filesData as $file)
-        {
+        foreach ($filesData as $file) {
             $currentDay = date('Y-m-d', strtotime($file->date_obs . ' +5 hours'));
 
-            if (!isset($daysStatistic[$currentDay]))
-            {
+            if (!isset($daysStatistic[$currentDay])) {
                 $daysStatistic[$currentDay] = (object) [
                     'telescope_date' => $currentDay,
                     'total_exposure' => 0,
@@ -122,16 +114,14 @@ class Statistic extends ResourceController
             $daysStatistic[$currentDay]->total_exposure += $file->exptime;
             $daysStatistic[$currentDay]->frames_count   += 1;
 
-            if (!in_array($file->object, $daysStatistic[$currentDay]->catalog_items))
-            {
+            if (!in_array($file->object, $daysStatistic[$currentDay]->catalog_items)) {
                 $daysStatistic[$currentDay]->catalog_items[] = $file->object;
             }
         }
 
         $result = [];
 
-        foreach ($daysStatistic as $day)
-        {
+        foreach ($daysStatistic as $day) {
             $result[] = $day;
         }
 

@@ -12,12 +12,13 @@ if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
     die();
 }
 
-class Weather extends ResourceController
-{
+class Weather extends ResourceController {
     use ResponseTrait;
 
-    public function current(): ResponseInterface
-    {
+    /**
+     * @return ResponseInterface
+     */
+    public function current(): ResponseInterface {
         $client = \Config\Services::curlrequest();
 
         try {
@@ -35,8 +36,10 @@ class Weather extends ResourceController
         }
     }
 
-    public function statistic(): ResponseInterface
-    {
+    /**
+     * @return ResponseInterface
+     */
+    public function statistic(): ResponseInterface {
         $period = $this->request->getGet('period', FILTER_SANITIZE_SPECIAL_CHARS) ?? date('m-Y');
         $client = \Config\Services::curlrequest();
 
@@ -48,8 +51,7 @@ class Weather extends ResourceController
 
         $days = [];
 
-        foreach ($weather->payload as $item)
-        {
+        foreach ($weather->payload as $item) {
             $sunData = date_sun_info($item->date, getenv('app.latitude'), getenv('app.longitude'));
 
             $sunrise = $sunData['astronomical_twilight_end'];
@@ -59,18 +61,19 @@ class Weather extends ResourceController
 
             $day = date('Y-m-d', $item->date);
 
-            if (!isset($days[$day])) { $days[$day] = (object) ['count' => 0]; }
+            if (!isset($days[$day])) {
+                $days[$day] = (object) ['count' => 0];
+            }
 
-            foreach ($item as $var => $val)
-            {
-                if ($var === 'date') { continue; }
+            foreach ($item as $var => $val) {
+                if ($var === 'date') {
+                    continue;
+                }
 
-                if ($val === null)
-                {
+                if ($val === null) {
                     $days[$day]->$var = null;
                 } else {
-                    if (!isset($days[$day]->$var))
-                    {
+                    if (!isset($days[$day]->$var)) {
                         $days[$day]->$var = (float) $val;
                     } else {
                         $days[$day]->$var += (float) $val;
@@ -85,12 +88,12 @@ class Weather extends ResourceController
 
         foreach ($days as $date => $item) {
 
-            foreach ($item as $var => $value)
-            {
-                if ($var === 'count') { continue; }
+            foreach ($item as $var => $value) {
+                if ($var === 'count') {
+                    continue;
+                }
 
-                if ($value !== null)
-                {
+                if ($value !== null) {
                     $item->$var = round($value / $item->count, 1);
                 }
             }
