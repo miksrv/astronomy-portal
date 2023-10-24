@@ -48,20 +48,28 @@ export const getServerSideProps = wrapper.getServerSideProps(
         const name = context.params?.name
 
         if (typeof name === 'string') {
-            store.dispatch(await statisticGetCatalogItems.initiate())
-            store.dispatch(await catalogGetItem.initiate(name))
-            store.dispatch(await photoGetList.initiate({ object: name }))
+            await store.dispatch(statisticGetCatalogItems.initiate())
+            const catalog: any = await store.dispatch(
+                catalogGetItem.initiate(name)
+            )
+            const photos: any = await store.dispatch(
+                photoGetList.initiate({ object: name })
+            )
 
             await Promise.all(store.dispatch(getRunningQueriesThunk()))
+
+            if (catalog.error?.status === 404 || photos.error?.status === 404) {
+                return { notFound: true }
+            }
+
+            return { props: {} }
         }
 
-        return {
-            props: {}
-        }
+        return { notFound: true }
     }
 )
 
-const ObjectItem: NextPage = () => {
+const ObjectItemPage: NextPage = () => {
     const router = useRouter()
     const routerObject = router.query.name
     const objectName =
@@ -257,4 +265,4 @@ const ObjectItem: NextPage = () => {
     )
 }
 
-export default ObjectItem
+export default ObjectItemPage

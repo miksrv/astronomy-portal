@@ -34,7 +34,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
 type TPhotoCategory = TPhoto & { category: number }
 
-const Photos: NextPage = () => {
+const PhotosPage: NextPage = () => {
     const [filterCategory, setFilterCategory] = useState<number>(0)
 
     const { data: statisticData } = useStatisticGetQuery()
@@ -107,4 +107,4 @@ const Photos: NextPage = () => {
     )
 }
 
-export default Photos
+export default PhotosPage

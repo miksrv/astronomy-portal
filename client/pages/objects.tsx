@@ -34,7 +34,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-const Objects: NextPage = () => {
+const ObjectsPage: NextPage = () => {
     const dispatch = useAppDispatch()
 
     const [search, setSearch] = useState<string>('')
@@ -164,4 +164,4 @@ const Objects: NextPage = () => {
     )
 }
 
-export default Objects
+export default ObjectsPage
