@@ -7,8 +7,13 @@ on:
     paths:
       - 'client/**/*'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ui-checks:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -62,6 +67,10 @@ jobs:
           echo "NEXT_PUBLIC_API_HOST = '${{ secrets.NEXT_PUBLIC_API_HOST }}'
           NEXT_PUBLIC_LAT = 51.7
           NEXT_PUBLIC_LON = 55.2" > .env
+        working-directory: client
+
+      - name: UI Unit Tests
+        run: yarn test
         working-directory: client
 
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
