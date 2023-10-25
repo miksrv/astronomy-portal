@@ -7,8 +7,6 @@ import SunCalc from 'suncalc'
 
 import MoonPhase from '@/components/moon-phase'
 
-import SunIcon from '@/public/images/sun.png'
-
 import styles from './styles.module.sass'
 
 const LAT = process.env.NEXT_PUBLIC_LAT ?? 51.7
@@ -46,7 +44,7 @@ const AstronomyCalc: React.FC = () => {
                 <Grid.Column width={8}>
                     <h4 className={styles.sectionTitle}>
                         <Image
-                            src={SunIcon}
+                            src={'/images/sun.png'}
                             className={styles.icon}
                             alt={''}
                             width={16}
