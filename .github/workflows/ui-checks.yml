@@ -64,6 +64,10 @@ jobs:
           NEXT_PUBLIC_LON = 55.2" > .env
         working-directory: client
 
+      - name: UI Unit Tests
+        run: yarn test
+        working-directory: client
+
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
         name: Build UI
         run: |
