@@ -17,8 +17,8 @@ import {
     Sticky
 } from 'semantic-ui-react'
 
-import PopularPosts from '@/components/blog-page/popularPosts'
-import PostGallery from '@/components/blog-page/postGallery'
+import PopularPosts from '@/components/blog-page/PopularPosts'
+import PostGallery from '@/components/blog-page/PostGallery'
 import styles from '@/components/blog-page/styles.module.sass'
 import Pagination from '@/components/pagination'
 

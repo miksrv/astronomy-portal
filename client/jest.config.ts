@@ -26,10 +26,13 @@ const config: Config.InitialOptions = {
         '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
 
         // Handle module aliases
+        '^@/api/(.*)$': '<rootDir>/api/$1',
         '^@/components/(.*)$': '<rootDir>/components/$1',
+        '^@/constants/(.*)$': '<rootDir>/constants/$1',
+        '^@/functions/(.*)$': '<rootDir>/functions/$1',
         '^@/public/(.*)$': '<rootDir>/public/$1'
     },
-    // setupFilesAfterEnv: ['<rootDir>/setupTests.ts'],
+    silent: true, // hide all warnings
     testEnvironment: 'jsdom',
     testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/'],
     transform: {
