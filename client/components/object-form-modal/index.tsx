@@ -9,9 +9,10 @@ import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { APIRequestCatalog, APIResponseError, TCatalog } from '@/api/types'
 import isEqual from 'lodash-es/isEqual'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Form, Grid, Message, Modal } from 'semantic-ui-react'
+import { Form, Grid, Message, Modal } from 'semantic-ui-react'
 
 import CelestialMap from '@/components/celestial-map'
+import FormModalActions from '@/components/form-modal-actions'
 
 import styles from './styles.module.sass'
 
@@ -227,29 +228,17 @@ const ObjectFormModal: React.FC = () => {
                     </Grid>
                 </Form>
             </Modal.Content>
-            <Modal.Actions>
-                <Button
-                    size={'tiny'}
-                    onClick={handleSubmit}
-                    color={'green'}
-                    disabled={
-                        createLoading ||
-                        updateLoading ||
-                        !formState?.name ||
-                        isFormDirty
-                    }
-                    loading={createLoading || updateLoading}
-                >
-                    Сохранить
-                </Button>
-                <Button
-                    size={'small'}
-                    onClick={handleClose}
-                    color={'grey'}
-                >
-                    Закрыть
-                </Button>
-            </Modal.Actions>
+            <FormModalActions
+                disabled={
+                    createLoading ||
+                    updateLoading ||
+                    !formState?.name ||
+                    isFormDirty
+                }
+                loading={createLoading || updateLoading}
+                onClickSave={handleSubmit}
+                onClickClose={handleClose}
+            />
         </Modal>
     )
 }
