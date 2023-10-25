@@ -63,7 +63,7 @@ const AstronomyCalc: React.FC = () => {
                             mobile={16}
                         >
                             <div className={styles.key}>
-                                ↑ Рассвет:
+                                {'↑ Рассвет:'}
                                 <span className={styles.val}>
                                     {moment(sunTimes.dawn).format('H:mm')}
                                 </span>
@@ -74,7 +74,7 @@ const AstronomyCalc: React.FC = () => {
                             mobile={16}
                         >
                             <div className={styles.key}>
-                                ↓ Закат:
+                                {'↓ Закат:'}
                                 <span className={styles.val}>
                                     {moment(sunTimes.dusk).format('H:mm')}
                                 </span>
@@ -85,7 +85,7 @@ const AstronomyCalc: React.FC = () => {
                             mobile={16}
                         >
                             <div className={styles.key}>
-                                Высота:
+                                {'Высота:'}
                                 <span className={styles.val}>
                                     {sunAltitude}°
                                 </span>
@@ -96,7 +96,7 @@ const AstronomyCalc: React.FC = () => {
                             mobile={16}
                         >
                             <div className={styles.key}>
-                                Азимут:
+                                {'Азимут:'}
                                 <span className={styles.val}>
                                     {sunAzimuth}°
                                 </span>
@@ -119,7 +119,7 @@ const AstronomyCalc: React.FC = () => {
                             mobile={16}
                         >
                             <div className={styles.key}>
-                                ↑ Восход:
+                                {'↑ Восход:'}
                                 <span className={styles.val}>
                                     {moment(moonTimes.rise).format('H:mm')}
                                 </span>
@@ -130,7 +130,7 @@ const AstronomyCalc: React.FC = () => {
                             mobile={16}
                         >
                             <div className={styles.key}>
-                                ↓ Закат:
+                                {'↓ Закат:'}
                                 <span className={styles.val}>
                                     {moment(moonTimes.set).format('H:mm')}
                                 </span>
@@ -141,7 +141,7 @@ const AstronomyCalc: React.FC = () => {
                             mobile={16}
                         >
                             <div className={styles.key}>
-                                Высота:
+                                {'Высота:'}
                                 <span className={styles.val}>
                                     {moonAltitude}°
                                 </span>
@@ -152,7 +152,7 @@ const AstronomyCalc: React.FC = () => {
                             mobile={16}
                         >
                             <div className={styles.key}>
-                                Азимут:
+                                {'Азимут:'}
                                 <span className={styles.val}>
                                     {moonAzimuth}°
                                 </span>
