@@ -32,6 +32,7 @@ const TableCellButtons: React.FC<TableCellButtonsProps> = ({
                         tabIndex={0}
                         onKeyUp={() => {}}
                         onClick={() => onClickEdit?.(itemId!)}
+                        data-testid={'table-cell-edit'}
                     >
                         <Icon name={'edit outline'} />
                     </span>
@@ -43,6 +44,7 @@ const TableCellButtons: React.FC<TableCellButtonsProps> = ({
                         tabIndex={0}
                         onKeyUp={() => {}}
                         onClick={() => onClickDelete?.(itemId!)}
+                        data-testid={'table-cell-remove'}
                     >
                         <Icon name={'remove'} />
                     </span>
