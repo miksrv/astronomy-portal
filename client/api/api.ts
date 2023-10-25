@@ -49,7 +49,9 @@ const encodeQueryData = (data: any): string => {
 }
 
 export const imageHost =
-    process.env.NEXT_PUBLIC_IMG_HOST || process.env.NEXT_PUBLIC_API_HOST
+    process.env.NEXT_PUBLIC_IMG_HOST ||
+    process.env.NEXT_PUBLIC_API_HOST ||
+    'http://localhost/'
 
 export const api = createApi({
     baseQuery: fetchBaseQuery({

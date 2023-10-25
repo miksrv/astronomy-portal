@@ -67,12 +67,13 @@ const PostGallery: React.FC<TPostGalleryProps> = ({ media, groupId }) => {
                             onPlay={() => setPlayVideo(true)}
                             // @ts-ignore
                             config={config}
+                            data-testid={'video-player'}
                         />
                     ) : (
                         <Image
                             className={styles.sliderImage}
                             src={`${imageUrl}${item.file}`}
-                            alt={'Фотография астрономического блока'}
+                            alt={'Фотография астрономического объекта'}
                             width={item.width}
                             height={item.height}
                             onClick={() => {
@@ -85,6 +86,7 @@ const PostGallery: React.FC<TPostGalleryProps> = ({ media, groupId }) => {
             ))}
             {showLightbox && (
                 <Lightbox
+                    data-testid={'lightbox'}
                     mainSrc={getPhotoByIndex(photoIndex)}
                     nextSrc={getPhotoByIndex((photoIndex + 1) % media?.length!)}
                     prevSrc={getPhotoByIndex(

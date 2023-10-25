@@ -1,7 +1,9 @@
 import { useAppSelector } from '@/api/hooks'
 import { TCategory } from '@/api/types'
 import React from 'react'
-import { Dimmer, Icon, Loader, Table } from 'semantic-ui-react'
+import { Dimmer, Loader, Table } from 'semantic-ui-react'
+
+import TableCellButtons from '@/components/table-cell-buttons'
 
 import styles from './styles.module.sass'
 
@@ -40,38 +42,13 @@ const CategoryTable: React.FC<TCategoryTable> = (props) => {
                     {categories?.length ? (
                         categories.map((item) => (
                             <Table.Row key={item.id}>
-                                <Table.Cell
-                                    className={styles.cellName}
-                                    colSpan={2}
-                                >
-                                    {item.name}
-                                    {userAuth && (
-                                        <div>
-                                            <span
-                                                className={styles.controlButton}
-                                                role={'button'}
-                                                tabIndex={0}
-                                                onKeyUp={() => {}}
-                                                onClick={() =>
-                                                    onClickEdit?.(item.id)
-                                                }
-                                            >
-                                                <Icon name={'edit outline'} />
-                                            </span>
-                                            <span
-                                                className={styles.controlButton}
-                                                role={'button'}
-                                                tabIndex={0}
-                                                onKeyUp={() => {}}
-                                                onClick={() =>
-                                                    onClickDelete?.(item.id)
-                                                }
-                                            >
-                                                <Icon name={'remove'} />
-                                            </span>
-                                        </div>
-                                    )}
-                                </Table.Cell>
+                                <TableCellButtons
+                                    itemId={item.id}
+                                    name={item.name}
+                                    isAuth={userAuth}
+                                    onClickEdit={onClickEdit}
+                                    onClickDelete={onClickDelete}
+                                />
                                 <Table.Cell content={item?.object_count || 0} />
                             </Table.Row>
                         ))

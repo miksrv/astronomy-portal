@@ -9,7 +9,8 @@ import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React from 'react'
 
-import BlogPage, { getMediaFromPost, postPerPage } from '@/components/blog-page'
+import BlogPage from '@/components/blog-page'
+import { getMediaFromPost, postPerPage } from '@/components/blog-page/BlogPage'
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) => async () => {

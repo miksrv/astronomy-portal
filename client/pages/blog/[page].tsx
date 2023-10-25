@@ -11,7 +11,8 @@ import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
 import React from 'react'
 
-import BlogPage, { getMediaFromPost, postPerPage } from '@/components/blog-page'
+import BlogPage from '@/components/blog-page'
+import { getMediaFromPost, postPerPage } from '@/components/blog-page/BlogPage'
 
 // Only if we build application as static HTML
 // export const getStaticPaths = async () => {
