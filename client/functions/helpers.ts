@@ -81,7 +81,7 @@ export const getTimeFromSec = (sec: number, full: boolean = false): string => {
     return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m)
 }
 
-export const timeAgo = (sec: number): string => {
+export const timeAgo = (sec: number | null): string => {
     if (sec === null || sec <= 0) return 'обновлено недавно'
 
     let h = (sec / 3600) ^ 0
