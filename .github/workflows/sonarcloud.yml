@@ -6,13 +6,55 @@ on:
       - main
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   sonarcloud:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+          cache: 'yarn'
+          cache-dependency-path: 'client/yarn.lock'
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        id: cache-npm
+        with:
+          path: |
+            client/node_modules
+            ~/.npm
+            ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-modules-${{ hashFiles('client/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-
+            ${{ runner.os }}-
+
+      - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+        name: Install dependencies
+        working-directory: client
+        run: yarn install
+
+      - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
+        name: Configure Client
+        run: |
+          echo "NEXT_PUBLIC_API_HOST = '${{ secrets.NEXT_PUBLIC_API_HOST }}'
+          NEXT_PUBLIC_LAT = 51.7
+          NEXT_PUBLIC_LON = 55.2" > .env
+        working-directory: client
+
+      - name: UI Unit Tests
+        run: yarn test
+        working-directory: client
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
