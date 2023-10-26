@@ -18,8 +18,14 @@ const ObjectCloud: React.FC<TObjectCloudProps> = ({
     names,
     link
 }) => (
-    <div className={classNames(styles.section, 'box')}>
-        <Dimmer active={loader}>
+    <div
+        className={classNames(styles.section, 'box')}
+        data-testid={'object-cloud'}
+    >
+        <Dimmer
+            active={loader}
+            data-testid={'object-cloud-loader'}
+        >
             <Loader />
         </Dimmer>
         {names?.map((item) => (
