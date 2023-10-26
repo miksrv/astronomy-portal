@@ -1,13 +1,15 @@
-import packageInfo from '@/package.json'
 import moment from 'moment/moment'
 import React from 'react'
 
-import { update } from '@/update'
-
+import packageInfo from '../../package.json'
+import { update } from '../../update'
 import styles from './styles.module.sass'
 
 const Footer: React.FC = () => (
-    <div className={styles.footer}>
+    <div
+        className={styles.footer}
+        data-testid={'footer'}
+    >
         <div>Powered by Arduino, PHP + MySQL, NextJS + TS + Redux.</div>
         <div>
             Copyright ©

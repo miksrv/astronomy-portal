@@ -6,18 +6,16 @@ import { Dimmer, Message, Progress } from 'semantic-ui-react'
 import styles from './styles.module.sass'
 
 type TCameraProps = {
-    cameraURL: string
+    cameraURL?: string
     interval?: number
 }
 
 const DEFAULT_INTERVAL = 5
 
-const Camera: React.FC<TCameraProps> = (props) => {
-    const { cameraURL, interval } = props
-
+const Camera: React.FC<TCameraProps> = ({ cameraURL, interval }) => {
     const timeoutInt = interval || DEFAULT_INTERVAL
 
-    const [cameraSrc, setCameraSrc] = useState<string>(cameraURL)
+    const [cameraSrc, setCameraSrc] = useState<string>(cameraURL || '')
     const [seconds, setSeconds] = useState<number>(0)
     const [lightbox, setLightbox] = useState<boolean>(false)
 
@@ -42,9 +40,13 @@ const Camera: React.FC<TCameraProps> = (props) => {
     })
 
     return (
-        <div className={classNames(styles.cameraSection, 'box')}>
+        <div
+            className={classNames(styles.cameraSection, 'box')}
+            data-testid={'camera-section'}
+        >
             {cameraURL && lightbox && (
                 <Lightbox
+                    data-testid={'lightbox'}
                     mainSrc={cameraSrc}
                     onCloseRequest={() => setLightbox(false)}
                 />
@@ -65,10 +67,11 @@ const Camera: React.FC<TCameraProps> = (props) => {
                         />
                     </span>
                     <Progress
+                        size={'tiny'}
                         className={styles.progress}
+                        data-testid={'progress-bar'}
                         percent={Math.round((seconds / timeoutInt) * 100)}
                         success
-                        size={'tiny'}
                     />
                 </>
             ) : (
