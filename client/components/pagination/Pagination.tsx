@@ -97,7 +97,13 @@ const Pagination: React.FC<TPaginationProps> = ({
                             ? link
                             : `${link}/${page}`
                     }
-                    title={`Страница - ${page}`}
+                    title={
+                        page === RIGHT_PAGE
+                            ? 'Следующая страница'
+                            : page === LEFT_PAGE
+                            ? 'Предыдущая страница'
+                            : `Страница - ${page}`
+                    }
                     key={page}
                 >
                     {page === RIGHT_PAGE ? (

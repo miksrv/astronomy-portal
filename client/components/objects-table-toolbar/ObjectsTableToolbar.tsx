@@ -9,8 +9,8 @@ import styles from './styles.module.sass'
 type TToolbarProps = {
     search: string
     categories?: TCategory[]
-    onChangeSearch: (search: string) => void
-    onChangeCategories: (id: number[]) => void
+    onChangeSearch?: (search: string) => void
+    onChangeCategories?: (id: number[]) => void
 }
 
 const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
@@ -21,7 +21,7 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
 
     const handleChange = ({
         target: { value }
-    }: React.ChangeEvent<HTMLInputElement>) => onChangeSearch(value)
+    }: React.ChangeEvent<HTMLInputElement>) => onChangeSearch?.(value)
 
     const listCategoriesOptions = useMemo(
         () =>
@@ -49,7 +49,7 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
                 className={styles.categoryDropdown}
                 options={listCategoriesOptions}
                 onChange={(target, el) => {
-                    onChangeCategories(el.value as number[])
+                    onChangeCategories?.(el.value as number[])
                 }}
             />
             {userAuth && (
