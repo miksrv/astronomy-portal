@@ -78,7 +78,7 @@ const PhotoGrid: React.FC<TPhotoGridProps> = ({
     </div>
 )
 
-const PhotosLoader: React.FC<{
+export const PhotosLoader: React.FC<{
     count: number
     visible?: boolean
     threeColumns?: boolean
@@ -103,7 +103,7 @@ const PhotosLoader: React.FC<{
     </>
 )
 
-const PhotoImage: React.FC<{ photo: TPhoto; title: string }> = ({
+export const PhotoImage: React.FC<{ photo: TPhoto; title: string }> = ({
     photo,
     title
 }) => (

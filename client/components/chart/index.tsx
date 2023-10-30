@@ -18,7 +18,7 @@ const Chart: React.FC<TChartProps> = ({ loading, config, data }) => {
             ? config.chart.height
             : 300
 
-    const chartRef = useRef()
+    const chartRef = useRef<any>()
     const [chartOptions, setChartOptions] = useState<any>()
 
     useEffect(() => {

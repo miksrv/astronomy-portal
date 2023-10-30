@@ -1,6 +1,6 @@
 {
     "name": "astronomy-portal",
-    "version": "3.2.10",
+    "version": "3.2.11",
     "private": true,
     "scripts": {
         "dev": "next dev",
@@ -19,8 +19,8 @@
     "dependencies": {
         "@reduxjs/toolkit": "^1.9.3",
         "@types/node": "18.15.3",
-        "@types/react": "18.0.28",
-        "@types/react-dom": "18.0.11",
+        "@types/react": "18.2.33",
+        "@types/react-dom": "18.2.14",
         "classnames": "^2.3.2",
         "eslint": "^8.37.0",
         "eslint-config-next": "^13.2.4",
@@ -44,7 +44,7 @@
         "semantic-ui-css": "^2.5.0",
         "semantic-ui-react": "^2.1.4",
         "suncalc": "^1.9.0",
-        "typescript": "5.0.2"
+        "typescript": "5.2.2"
     },
     "devDependencies": {
         "@testing-library/jest-dom": "^6.1.4",
