@@ -24,7 +24,10 @@ const TelescopeWorkdays: React.FC<TTelescopeWorkdaysProps> = ({
             <div className={styles.tableContainer}>
                 {loading && (
                     <div className={classNames(styles.loader)}>
-                        <Dimmer active>
+                        <Dimmer
+                            active={loading}
+                            data-testid={'telescope-workdays-loader'}
+                        >
                             <Loader />
                         </Dimmer>
                     </div>
