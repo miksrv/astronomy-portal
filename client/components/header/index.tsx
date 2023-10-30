@@ -10,6 +10,7 @@ import {
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { APIResponseStatistic } from '@/api/types'
 import { isMobile } from '@/functions/helpers'
+import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -23,15 +24,27 @@ import {
     Menu
 } from 'semantic-ui-react'
 
-import LoginForm from '@/components/login-form'
 import { show } from '@/components/login-form/loginFormSlice'
-import ObjectFormModal from '@/components/object-form-modal'
-import PhotoFormModal from '@/components/photo-form-modal'
 import { toggle } from '@/components/sidebar/sidebarSlice'
 
 import logo from '@/public/images/logo-w.svg'
 
 import styles from './styles.module.sass'
+
+const ObjectFormModal = dynamic(
+    () => import('@/components/object-form-modal'),
+    {
+        ssr: false
+    }
+)
+
+const PhotoFormModal = dynamic(() => import('@/components/photo-form-modal'), {
+    ssr: false
+})
+
+const LoginForm = dynamic(() => import('@/components/login-form'), {
+    ssr: false
+})
 
 export type TMenuItems = {
     link: string

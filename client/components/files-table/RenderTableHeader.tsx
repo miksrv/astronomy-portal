@@ -16,7 +16,7 @@ type THeaderFields = {
     name: string
 }
 
-const HEADER_FIELDS: THeaderFields[] = [
+export const HEADER_FIELDS: THeaderFields[] = [
     { key: 'preview', name: '' },
     { key: 'file_name', name: 'Имя файла' },
     { key: 'exptime', name: 'Выдержка' },
@@ -53,6 +53,7 @@ const RenderTableHeader: React.FC<TTableHeader> = ({
                     className={'tableHeaderSticky'}
                     sorted={sort === item.key ? order : undefined}
                     onClick={() => handlerSortClick?.(item.key)}
+                    aria-sort={order}
                 >
                     {item.key === 'preview' ? (
                         <Icon name={'image'} />
