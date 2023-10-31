@@ -2,56 +2,48 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 import { APIResponseLogin, TUserInfo } from './types'
 
-type TAuthType = {
-    error: any
-    userAuth: boolean
-    userInfo?: TUserInfo
-    userToken?: string
+export const ACCESS_TOKEN_KEY = 'AstroAuthToken'
+
+type InitialStateProps = {
+    isAuth?: boolean
+    error?: any
+    token?: string
+    user?: TUserInfo
 }
 
-const initialState: TAuthType = {
-    error: null,
-    userAuth: false,
-    userToken: ''
-}
+export const getStorageToken = (): string | undefined =>
+    typeof window !== 'undefined' && localStorage.getItem(ACCESS_TOKEN_KEY)
+        ? localStorage.getItem(ACCESS_TOKEN_KEY) ?? ''
+        : ''
 
 const authSlice = createSlice({
     extraReducers: {},
-    initialState,
+    initialState: {
+        token: getStorageToken()
+    } as InitialStateProps,
     name: 'auth',
     reducers: {
         login: (state, { payload }: PayloadAction<APIResponseLogin>) => {
-            state.userToken = payload?.access_token || undefined
-            state.userInfo = payload?.user || undefined
-            state.userAuth = true
+            state.user = payload?.user || undefined
+            state.token = payload?.token || ''
+            state.isAuth = true
 
-            localStorage.setItem('userToken', payload?.access_token || '')
+            if (payload?.auth && !!payload?.token) {
+                localStorage.setItem(ACCESS_TOKEN_KEY, payload?.token || '')
+            } else {
+                localStorage.setItem(ACCESS_TOKEN_KEY, '')
+            }
         },
         logout: (state) => {
-            state.userToken = ''
-            state.userInfo = undefined
-            state.userAuth = false
+            state.token = ''
+            state.user = undefined
+            state.isAuth = false
 
-            localStorage.setItem('userToken', '')
-        },
-        setToken: (state, action: PayloadAction<string>) => {
-            state.userToken = action.payload
-        },
-        setUserAuth: (state, action: PayloadAction<boolean>) => {
-            state.userAuth = action.payload
-        },
-        setUserInfo: (state, action: PayloadAction<TUserInfo>) => {
-            state.userInfo = action.payload
+            localStorage.setItem(ACCESS_TOKEN_KEY, '')
         }
     }
 })
 
-export const { login, logout, setToken, setUserInfo, setUserAuth } =
-    authSlice.actions
-
-export const getStorageToken = (): string =>
-    typeof window !== 'undefined' && localStorage.getItem('userToken')
-        ? localStorage.getItem('userToken') ?? ''
-        : ''
+export const { login, logout } = authSlice.actions
 
 export default authSlice.reducer

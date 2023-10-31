@@ -12,7 +12,7 @@ import styles from './styles.module.sass'
 const LoginForm: React.FC = () => {
     const dispatch = useAppDispatch()
     const { visible } = useAppSelector((state) => state.loginForm)
-    const [loginMutation, { isLoading, isError, data, error }] =
+    const [authLoginPost, { isLoading, isError, data, error }] =
         useAuthPostLoginMutation()
     const [formState, setFormState] = useState<APIRequestLogin>({
         email: '',
@@ -28,7 +28,9 @@ const LoginForm: React.FC = () => {
         e.key === 'Enter' && handleSubmit()
 
     const handleSubmit = () => {
-        loginMutation(formState)
+        if (formState) {
+            authLoginPost(formState)
+        }
     }
 
     const findError = (field: keyof APIRequestLogin) =>
@@ -43,11 +45,11 @@ const LoginForm: React.FC = () => {
     )
 
     useEffect(() => {
-        if (data?.access_token && data?.user?.email) {
+        if (data?.token && data?.user?.email) {
             dispatch(hide())
             dispatch(login(data))
         }
-    }, [dispatch, data])
+    }, [data])
 
     return (
         <Modal
@@ -55,7 +57,7 @@ const LoginForm: React.FC = () => {
             open={visible}
             onClose={() => dispatch(hide())}
         >
-            <Modal.Header>Авторизация</Modal.Header>
+            <Modal.Header>{'Авторизация'}</Modal.Header>
             <Modal.Content>
                 <Form
                     size={'small'}
@@ -109,14 +111,14 @@ const LoginForm: React.FC = () => {
                     }
                     loading={isLoading}
                 >
-                    Войти
+                    {'Войти'}
                 </Button>
                 <Button
                     size={'small'}
                     onClick={() => dispatch(hide())}
                     color={'grey'}
                 >
-                    Закрыть
+                    {'Закрыть'}
                 </Button>
             </Modal.Actions>
         </Modal>

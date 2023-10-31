@@ -1,15 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-interface ILoginFormState {
+interface InitialStateProps {
     visible: boolean
 }
 
-const initialState: ILoginFormState = {
-    visible: false
-}
-
 export const loginFormSlice = createSlice({
-    initialState,
+    initialState: { visible: false } as InitialStateProps,
     name: 'loginform',
     reducers: {
         hide: (state) => {

@@ -17,7 +17,7 @@ type TCategoryTable = {
 const CategoryTable: React.FC<TCategoryTable> = (props) => {
     const { loading, categories, onClickEdit, onClickDelete } = props
 
-    const userAuth = useAppSelector((state) => state.auth.userAuth)
+    const isAuth = useAppSelector((state) => state.auth.isAuth)
 
     return (
         <div className={'box table'}>
@@ -45,7 +45,7 @@ const CategoryTable: React.FC<TCategoryTable> = (props) => {
                                 <TableCellButtons
                                     itemId={item.id}
                                     name={item.name}
-                                    isAuth={userAuth}
+                                    isAuth={isAuth}
                                     onClickEdit={onClickEdit}
                                     onClickDelete={onClickDelete}
                                 />

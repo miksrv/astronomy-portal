@@ -28,7 +28,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
     const { title, loader, error, catalog, deviationRa, deviationDec } = props
 
     const dispatch = useAppDispatch()
-    const userAuth = useAppSelector((state) => state.auth.userAuth)
+    const isAuth = useAppSelector((state) => state.auth.isAuth)
 
     const date = catalog?.updated
         ? moment
@@ -70,7 +70,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                 >
                     <h1>
                         {title}
-                        {userAuth && (
+                        {isAuth && (
                             <span
                                 className={styles.controlButton}
                                 role={'button'}

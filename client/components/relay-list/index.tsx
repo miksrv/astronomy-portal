@@ -17,31 +17,34 @@ type TRelayListItemProps = {
     name: string
     state: boolean
     loading: boolean
-    auth: boolean
+    isAuth?: boolean
     handleClick?: (relay: APIRequestRelaySet) => void
 }
 
-const RelayListItem: React.FC<TRelayListItemProps> = (props) => {
-    const { id, name, state, loading, auth, handleClick } = props
-
-    return (
-        <div className={styles.item}>
-            <div className={styles.name}>
-                <span className={styles[state ? 'ledOn' : 'ledOff']} />
-                {name}
-            </div>
-            <Button
-                loading={loading}
-                className={styles[state ? 'switchOn' : 'switchOff']}
-                disabled={loading || !auth}
-                onClick={() => handleClick?.({ id, state: state ? 0 : 1 })}
-                size={'mini'}
-            >
-                {state ? 'on' : 'off'}
-            </Button>
+const RelayListItem: React.FC<TRelayListItemProps> = ({
+    id,
+    name,
+    state,
+    loading,
+    isAuth,
+    handleClick
+}) => (
+    <div className={styles.item}>
+        <div className={styles.name}>
+            <span className={styles[state ? 'ledOn' : 'ledOff']} />
+            {name}
         </div>
-    )
-}
+        <Button
+            loading={loading}
+            className={styles[state ? 'switchOn' : 'switchOff']}
+            disabled={loading || !isAuth}
+            onClick={() => handleClick?.({ id, state: state ? 0 : 1 })}
+            size={'mini'}
+        >
+            {state ? 'on' : 'off'}
+        </Button>
+    </div>
+)
 
 /**
  * #TODO useState
@@ -64,7 +67,7 @@ const RelayList: React.FC = () => {
 
     const [setLightOn, { isLoading: lightLoading }] = useRelayGetLightMutation()
 
-    const userAuth = useAppSelector((state) => state.auth.userAuth)
+    const isAuth = useAppSelector((state) => state.auth.isAuth)
 
     const handleSetRelay = async (relay: APIRequestRelaySet) => {
         setRelayLoading(relay.id)
@@ -106,7 +109,7 @@ const RelayList: React.FC = () => {
         </div>
     ) : (
         <div className={classNames(styles.relayList, 'box')}>
-            {userAuth && isError && (
+            {isAuth && isError && (
                 <Dimmer active>
                     <Message
                         error
@@ -128,7 +131,7 @@ const RelayList: React.FC = () => {
                         (relaySet?.state === 1 && relaySet?.id === item.id)
                     }
                     loading={loaderSet && relayLoading === item.id}
-                    auth={userAuth}
+                    isAuth={isAuth}
                     handleClick={async (relay) => await handleSetRelay(relay)}
                 />
             ))}

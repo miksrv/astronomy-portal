@@ -1,12 +1,6 @@
-import { api, useAuthGetMeMutation, useStatisticGetQuery } from '@/api/api'
+import { useAuthGetMeMutation, useStatisticGetQuery } from '@/api/api'
 import { openFormCatalog, openFormPhoto } from '@/api/applicationSlice'
-import {
-    getStorageToken,
-    logout,
-    setToken,
-    setUserAuth,
-    setUserInfo
-} from '@/api/authSlice'
+import { login, logout } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { APIResponseStatistic } from '@/api/types'
 import { isMobile } from '@/functions/helpers'
@@ -63,32 +57,27 @@ export const menuItems: TMenuItems[] = [
 
 const Header: React.FC = () => {
     const dispatch = useAppDispatch()
-    const { data, isLoading } = useStatisticGetQuery()
-    const [getAuthMe] = useAuthGetMeMutation()
     const router = useRouter()
-    const auth = useAppSelector((state) => state.auth)
 
-    const handleAuthMe = async () => {
-        const result: any = await getAuthMe()
-
-        if (!result?.data?.user?.email) {
-            dispatch(logout())
-        } else {
-            dispatch(setUserInfo(result.data.user))
-            dispatch(setUserAuth(true))
-        }
-    }
+    const { data, isLoading } = useStatisticGetQuery()
+    const [authGetMe, { data: meData, error }] = useAuthGetMeMutation()
+    const authSlice = useAppSelector((state) => state.auth)
 
     useEffect(() => {
-        const storageToken = getStorageToken()
-
-        if (storageToken && !auth.userToken) {
-            dispatch(setToken(storageToken))
-            handleAuthMe()
+        if (meData?.auth) {
+            dispatch(login(meData))
+        } else {
+            if (error) {
+                dispatch(logout())
+            }
         }
+    }, [meData, error])
 
-        dispatch(api.endpoints.cronGetUpdatePosts.initiate())
-    })
+    useEffect(() => {
+        if (authSlice.token) {
+            authGetMe()
+        }
+    }, [])
 
     return (
         <Menu
@@ -148,7 +137,7 @@ const Header: React.FC = () => {
                     ))
                 )}
                 <Menu.Menu position={'right'}>
-                    {!auth.userInfo ? (
+                    {!authSlice.isAuth ? (
                         <Menu.Item
                             name={'Войти'}
                             onClick={() => dispatch(show())}
@@ -157,7 +146,7 @@ const Header: React.FC = () => {
                         <Dropdown
                             trigger={
                                 <>
-                                    <Icon name='user' /> {auth.userInfo.name}
+                                    <Icon name='user' /> {authSlice?.user?.name}
                                 </>
                             }
                             item
@@ -194,9 +183,9 @@ const Header: React.FC = () => {
                     )}
                 </Menu.Menu>
             </Container>
-            {!auth.userAuth && <LoginForm />}
-            {auth.userAuth && <ObjectFormModal />}
-            {auth.userAuth && <PhotoFormModal />}
+            {!authSlice.isAuth && <LoginForm />}
+            {authSlice.isAuth && <ObjectFormModal />}
+            {authSlice.isAuth && <PhotoFormModal />}
         </Menu>
     )
 }
