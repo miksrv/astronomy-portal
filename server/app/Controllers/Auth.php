@@ -85,8 +85,8 @@ class Auth extends ResourceController {
             return $this->respond(                    [
                 'auth'  => true,
                 'user'  => $userData,
-                'token' => getSignedJWTForUser($authenticationHeader)
-            ], ResponseInterface::HTTP_OK);
+                'token' => getSignedJWTForUser($userData['email'])
+            ]);
 
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
