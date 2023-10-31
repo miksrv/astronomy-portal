@@ -11,13 +11,26 @@ import { useAppSelector } from '@/api/hooks'
 import { wrapper } from '@/api/store'
 import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
+import dynamic from 'next/dynamic'
 import React, { useState } from 'react'
 import { Button, Confirm, Grid, Icon, Message } from 'semantic-ui-react'
 
-import AuthorFormModal from '@/components/author-form-modal'
 import AuthorTable from '@/components/author-table'
-import CategoryFormModal from '@/components/category-form-modal'
 import CategoryTable from '@/components/category-table'
+
+const AuthorFormModal = dynamic(
+    () => import('@/components/author-form-modal'),
+    {
+        ssr: false
+    }
+)
+
+const CategoryFormModal = dynamic(
+    () => import('@/components/category-form-modal'),
+    {
+        ssr: false
+    }
+)
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) => async () => {
@@ -41,7 +54,7 @@ const DirectoryPage: NextPage = () => {
     const [modifyCatalogName, setModifyCatalogName] = useState<number>()
     const [modifyAuthorId, setModifyAuthorId] = useState<number>()
 
-    const userAuth = useAppSelector((state) => state.auth.userAuth)
+    const isAuth = useAppSelector((state) => state.auth.isAuth)
 
     const { data: categoriesData, isLoading: categoriesLoading } =
         useCategoryGetListQuery()
@@ -167,7 +180,7 @@ const DirectoryPage: NextPage = () => {
                         <h4 className={'subTitle inline'}>
                             Категории объектов
                         </h4>
-                        {userAuth && (
+                        {isAuth && (
                             <Button
                                 style={{ marginTop: -26 }}
                                 icon={true}
@@ -220,7 +233,7 @@ const DirectoryPage: NextPage = () => {
                     )}
                     <div className={'section'}>
                         <h4 className={'subTitle inline'}>Авторы фотографий</h4>
-                        {userAuth && (
+                        {isAuth && (
                             <Button
                                 style={{ marginTop: -26 }}
                                 icon={true}
@@ -243,36 +256,40 @@ const DirectoryPage: NextPage = () => {
                     />
                 </Grid.Column>
             </Grid>
-            <CategoryFormModal
-                visible={showCategoryModal}
-                value={categoriesData?.items?.find(
-                    ({ id }) => id === modifyCatalogName
-                )}
-                onClose={() => setShowCategoryModal(false)}
-            />
-            <AuthorFormModal
-                visible={showAuthorModal}
-                value={authorsData?.items?.find(
-                    ({ id }) => id === modifyAuthorId
-                )}
-                onClose={() => setShowAuthorModal(false)}
-            />
-            <Confirm
-                open={categoryDelete}
-                size={'mini'}
-                className={'confirm'}
-                content={'Подтверждате удаление категории из каталога?'}
-                onCancel={() => showCategoryDelete(false)}
-                onConfirm={confirmDeleteCatalog}
-            />
-            <Confirm
-                open={authorDelete}
-                size={'mini'}
-                className={'confirm'}
-                content={'Подтверждате удаление автора из каталога?'}
-                onCancel={() => showAuthorDelete(false)}
-                onConfirm={confirmDeleteAuthor}
-            />
+            {isAuth && (
+                <>
+                    <CategoryFormModal
+                        visible={showCategoryModal}
+                        value={categoriesData?.items?.find(
+                            ({ id }) => id === modifyCatalogName
+                        )}
+                        onClose={() => setShowCategoryModal(false)}
+                    />
+                    <AuthorFormModal
+                        visible={showAuthorModal}
+                        value={authorsData?.items?.find(
+                            ({ id }) => id === modifyAuthorId
+                        )}
+                        onClose={() => setShowAuthorModal(false)}
+                    />
+                    <Confirm
+                        open={categoryDelete}
+                        size={'mini'}
+                        className={'confirm'}
+                        content={'Подтверждате удаление категории из каталога?'}
+                        onCancel={() => showCategoryDelete(false)}
+                        onConfirm={confirmDeleteCatalog}
+                    />
+                    <Confirm
+                        open={authorDelete}
+                        size={'mini'}
+                        className={'confirm'}
+                        content={'Подтверждате удаление автора из каталога?'}
+                        onCancel={() => showAuthorDelete(false)}
+                        onConfirm={confirmDeleteAuthor}
+                    />
+                </>
+            )}
         </main>
     )
 }

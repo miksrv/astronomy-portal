@@ -13,7 +13,8 @@ export interface APIResponseUploadPhoto {
 export interface APIResponseLogin {
     message?: string
     user?: TUserInfo
-    access_token?: string
+    token?: string
+    auth?: boolean
 }
 
 export type TUserInfo = {

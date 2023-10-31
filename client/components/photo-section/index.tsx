@@ -52,7 +52,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
     catalog
 }) => {
     const dispatch = useAppDispatch()
-    const userAuth = useAppSelector((state) => state.auth.userAuth)
+    const isAuth = useAppSelector((state) => state.auth.isAuth)
 
     const [photoLightbox, setPhotoLightbox] = useState<string | undefined>(
         undefined
@@ -132,7 +132,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                 >
                     <h1>
                         {title}
-                        {userAuth && (
+                        {isAuth && (
                             <span
                                 className={styles.controlButton}
                                 role={'button'}

@@ -17,7 +17,7 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
     const { search, categories, onChangeSearch, onChangeCategories } = props
 
     const dispatch = useAppDispatch()
-    const userAuth = useAppSelector((state) => state.auth.userAuth)
+    const isAuth = useAppSelector((state) => state.auth.isAuth)
 
     const handleChange = ({
         target: { value }
@@ -48,11 +48,11 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
                 fluid
                 className={styles.categoryDropdown}
                 options={listCategoriesOptions}
-                onChange={(target, el) => {
+                onChange={(_, el) => {
                     onChangeCategories?.(el.value as number[])
                 }}
             />
-            {userAuth && (
+            {isAuth && (
                 <Button
                     icon={true}
                     className={styles.addButton}
@@ -62,7 +62,7 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
                     onClick={() => dispatch(openFormCatalog(true))}
                 >
                     <Icon name={'plus'} />
-                    Добавить
+                    {'Добавить'}
                 </Button>
             )}
         </div>

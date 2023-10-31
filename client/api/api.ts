@@ -58,7 +58,7 @@ export const api = createApi({
         baseUrl: process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:8080/',
         prepareHeaders: (headers, { getState }) => {
             // By default, if we have a token in the store, let's use that for authenticated requests
-            const token = (getState() as RootState).auth.userToken
+            const token = (getState() as RootState).auth.token
 
             if (token) {
                 headers.set('Authorization', token)
@@ -68,7 +68,7 @@ export const api = createApi({
         }
     }),
     endpoints: (builder) => ({
-        authGetMe: builder.mutation<void, void>({
+        authGetMe: builder.mutation<APIResponseLogin, void>({
             query: () => 'auth/me'
         }),
         authPostLogin: builder.mutation<APIResponseLogin, APIRequestLogin>({

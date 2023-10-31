@@ -6,6 +6,8 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
 /**
+ * @param string $encodedToken
+ * @return array|object
  * @throws Exception
  */
 function validateJWTFromRequest(string $encodedToken) {
@@ -17,6 +19,10 @@ function validateJWTFromRequest(string $encodedToken) {
     return $userModel->findUserByEmailAddress($decodedToken->email);
 }
 
+/**
+ * @param string $email
+ * @return string
+ */
 function getSignedJWTForUser(string $email): string {
     $issuedAtTime    = time();
     $tokenTimeToLive = getenv('JWT_TIME_TO_LIVE');

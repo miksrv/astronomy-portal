@@ -25,7 +25,7 @@ type TTableRowProps = {
 
 const RenderTableRow: React.FC<TTableRowProps> = (props) => {
     const { item, photo, onClickEdit, onClickDelete } = props
-    const userAuth = useAppSelector((state) => state.auth.userAuth)
+    const isAuth = useAppSelector((state) => state.auth.isAuth)
 
     return (
         <Table.Row className={styles.tableRow}>
@@ -56,7 +56,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                         </Link>
                     }
                 />
-                {userAuth && (
+                {isAuth && (
                     <div>
                         <span
                             className={styles.controlButton}

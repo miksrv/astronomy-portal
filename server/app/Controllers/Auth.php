@@ -62,7 +62,6 @@ class Auth extends ResourceController {
 
         $input = $this->getRequestInput($this->request);
 
-
         if (!$this->validateRequest($input, $rules, $errors)) {
             return $this->failValidationErrors($this->validator->getErrors());
         }
@@ -78,13 +77,17 @@ class Auth extends ResourceController {
 
         try {
             helper('jwt');
-            $user = validateJWTFromRequest($authenticationHeader);
+
+            $userData = validateJWTFromRequest($authenticationHeader);
+
+            unset($userData['password']);
 
             return $this->respond(                    [
-                'message'      => 'User authenticated successfully',
-                'user'         => $user,
-                'access_token' => getSignedJWTForUser($authenticationHeader)
+                'auth'  => true,
+                'user'  => $userData,
+                'token' => getSignedJWTForUser($authenticationHeader)
             ], ResponseInterface::HTTP_OK);
+
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
@@ -99,20 +102,19 @@ class Auth extends ResourceController {
      */
     private function getJWTForUser(string $emailAddress, int $responseCode = ResponseInterface::HTTP_OK): ResponseInterface {
         try {
-            $model = new UserModel();
-            $user = $model->findUserByEmailAddress($emailAddress);
-            unset($user['password']);
+            $userModel = new UserModel();
+            $userData  = $userModel->findUserByEmailAddress($emailAddress);
+
+            unset($userData['password']);
 
             helper('jwt');
 
-            return $this
-                ->respond(
-                    [
-                        'message'      => 'User authenticated successfully',
-                        'user'         => $user,
-                        'access_token' => getSignedJWTForUser($emailAddress)
-                    ]
-                );
+            return $this->respond([
+                'auth'  => true,
+                'user'  => $userData,
+                'token' => getSignedJWTForUser($emailAddress)
+            ]);
+
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
