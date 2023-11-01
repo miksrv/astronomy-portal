@@ -17,8 +17,8 @@
         "plugin:jest/recommended",
         "plugin:testing-library/react",
         "plugin:import/typescript",
-        "plugin:prettier/recommended"
-        // "plugin:@next/next/recommended"
+        "plugin:prettier/recommended",
+        "plugin:@next/next/recommended"
     ],
     "overrides": [
         {

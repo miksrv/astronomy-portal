@@ -17,7 +17,6 @@ export const getStorageToken = (): string | undefined =>
         : ''
 
 const authSlice = createSlice({
-    extraReducers: {},
     initialState: {
         token: getStorageToken()
     } as InitialStateProps,
