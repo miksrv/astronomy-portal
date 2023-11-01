@@ -3,7 +3,6 @@ import '@/styles/globals.sass'
 import 'moment/locale/ru'
 import type { AppProps } from 'next/app'
 import { Montserrat } from 'next/font/google'
-import Script from 'next/script'
 import NextNProgress from 'nextjs-progressbar'
 import React from 'react'
 import 'react-image-lightbox/style.css'
@@ -21,18 +20,6 @@ export function App({ Component, pageProps }: AppProps) {
 
     return (
         <Provider store={store}>
-            <Script
-                src='/scripts/d3.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/d3.geo.projection.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/celestial.min.js'
-                strategy='beforeInteractive'
-            />
             <main className={montserrat.className}>
                 <NextNProgress
                     color={'#fbbd08'}

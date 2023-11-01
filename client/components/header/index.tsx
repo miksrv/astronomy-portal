@@ -99,7 +99,6 @@ const Header: React.FC = () => {
                                 alt={'Самодельная обсерватория'}
                                 width={30}
                                 height={30}
-                                priority={true}
                             />
                         </Link>
                     </Menu.Item>
