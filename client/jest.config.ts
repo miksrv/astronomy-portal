@@ -28,9 +28,9 @@ const config: Config.InitialOptions = {
         // Handle module aliases
         '^@/api/(.*)$': '<rootDir>/api/$1',
         '^@/components/(.*)$': '<rootDir>/components/$1',
-        '^@/constants/(.*)$': '<rootDir>/constants/$1',
         '^@/functions/(.*)$': '<rootDir>/functions/$1',
-        '^@/public/(.*)$': '<rootDir>/public/$1'
+        '^@/public/(.*)$': '<rootDir>/public/$1',
+        '^@/styles/(.*)$': '<rootDir>/styles/$1'
     },
     silent: true, // hide all warnings
     testEnvironment: 'jsdom',

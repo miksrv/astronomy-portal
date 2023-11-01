@@ -12,7 +12,7 @@ import { Button, Dimmer, Loader, Message } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
-type TRelayListItemProps = {
+type RelayListItemProps = {
     id: number
     name: string
     state: boolean
@@ -21,7 +21,7 @@ type TRelayListItemProps = {
     handleClick?: (relay: APIRequestRelaySet) => void
 }
 
-const RelayListItem: React.FC<TRelayListItemProps> = ({
+export const RelayListItem: React.FC<RelayListItemProps> = ({
     id,
     name,
     state,
@@ -47,12 +47,12 @@ const RelayListItem: React.FC<TRelayListItemProps> = ({
 )
 
 /**
- * #TODO useState
+ * TODO useState
  *
  * Нужно создать массив состояний реле через useState и каждый раз при изменении состояния реле
  * изменять это состояние в массиве, чтобы каждый раз не перезапрашивать список реле с состояниями
  */
-const RelayList: React.FC = () => {
+export const RelayList: React.FC = () => {
     const [relayLoading, setRelayLoading] = React.useState<number>()
     const [countdownTimer, setCountdownTimer] = useState<number>(0)
 
@@ -94,7 +94,10 @@ const RelayList: React.FC = () => {
 
     return isLoading ? (
         <div className={classNames(styles.relayList, styles.loader, 'box')}>
-            <Dimmer active>
+            <Dimmer
+                active
+                data-testid={'relay-list-loader'}
+            >
                 <Loader />
             </Dimmer>
         </div>
