@@ -4,7 +4,7 @@ import Link from 'next/link'
 import React from 'react'
 import { Label, Loader, Menu, Sidebar as SidebarMenu } from 'semantic-ui-react'
 
-import { TMenuItems, menuItems } from '@/components/header'
+import { TMenuItems, menuItems } from '@/components/header/Header'
 import { hide } from '@/components/sidebar/sidebarSlice'
 
 import styles from './styles.module.sass'
