@@ -23,7 +23,7 @@ This astronomical portal is a self-made automatic remote astronomical observator
 🌐 http://astro.miksoft.pro
 
 ## Table of contents
-1. [Online Service](#Online Service)
+1. [Online Service](#Online-Service)
 2. [Observatory](#Observatory)
 3. [Controller components ](#Controller-components)
 4. [API methods](#API-methods)
