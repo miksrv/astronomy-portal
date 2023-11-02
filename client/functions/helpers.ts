@@ -1,12 +1,6 @@
 import moment from 'moment'
 
 /**
- * Returns TRUE if the device screen is less than or equal to 760px
- */
-export const isMobile: boolean =
-    typeof window !== 'undefined' ? window.innerWidth <= 760 : false
-
-/**
  * Generates an array of numbers in a certain range and with a given step
  * @param from
  * @param to

@@ -1,6 +1,5 @@
 import { hosts } from '@/api/constants'
 import { TFIle } from '@/api/types'
-import { isMobile, sliceText } from '@/functions/helpers'
 import moment from 'moment'
 import Image from 'next/image'
 import React from 'react'
@@ -47,7 +46,10 @@ const RenderTableRow: React.FC<TTableRow> = ({
                 )}
             </Table.Cell>
         )}
-        <Table.Cell content={sliceText(file.file_name, isMobile ? 20 : 250)} />
+        <Table.Cell
+            className={styles.cellFileName}
+            content={<span>{file.file_name}</span>}
+        />
         <Table.Cell content={file.exptime} />
         <Table.Cell
             className={styles[file.filter]}

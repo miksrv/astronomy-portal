@@ -1,12 +1,7 @@
 import { hosts } from '@/api/constants'
 import { useAppSelector } from '@/api/hooks'
 import { FilterList, TPhoto } from '@/api/types'
-import {
-    getTimeFromSec,
-    isMobile,
-    isOutdated,
-    sliceText
-} from '@/functions/helpers'
+import { getTimeFromSec, isOutdated, sliceText } from '@/functions/helpers'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -34,7 +29,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                 singleLine={true}
             >
                 <Popup
-                    disabled={!item.title || isMobile}
+                    disabled={!item.title}
                     size={'mini'}
                     wide
                     header={item.title}
@@ -97,7 +92,6 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
                         />
                         {isOutdated(photo.date, item.updated) && (
                             <Popup
-                                disabled={isMobile}
                                 content={
                                     'Фотография устарела, так как есть новые данные ' +
                                     'с телескопа, с помощью которых можно собрать новое изображение объекта'

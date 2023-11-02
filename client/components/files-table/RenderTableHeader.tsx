@@ -54,13 +54,14 @@ const RenderTableHeader: React.FC<TTableHeader> = ({
                     sorted={sort === item.key ? order : undefined}
                     onClick={() => handlerSortClick?.(item.key)}
                     aria-sort={order}
-                >
-                    {item.key === 'preview' ? (
-                        <Icon name={'image'} />
-                    ) : (
-                        item.name
-                    )}
-                </Table.HeaderCell>
+                    content={
+                        item.key === 'preview' ? (
+                            <Icon name={'image'} />
+                        ) : (
+                            item.name
+                        )
+                    }
+                />
             ))}
         </Table.Row>
     </Table.Header>

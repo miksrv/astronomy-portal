@@ -41,9 +41,8 @@ const RenderTableHeader: React.FC<TTableHeaderProps> = ({
                     key={item.key}
                     sorted={sort === item.key ? order : undefined}
                     onClick={() => handlerSortClick(item.key)}
-                >
-                    {item.name}
-                </Table.HeaderCell>
+                    content={item.name}
+                />
             ))}
         </Table.Row>
     </Table.Header>
