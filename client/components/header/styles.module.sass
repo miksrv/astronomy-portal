@@ -7,6 +7,14 @@
   .hamburger
     font-size: 20px
     cursor: pointer
+    display: none !important
+
+    @media only screen and (max-width: 768px)
+      display: block !important
+
+  .desktopMenu, .logoLink
+    @media only screen and (max-width: 768px)
+      display: none !important
 
   .label
     position: relative

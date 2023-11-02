@@ -1,6 +1,6 @@
 import { hosts } from '@/api/constants'
 import { FilterList, TPhoto } from '@/api/types'
-import { getTimeFromSec, isMobile } from '@/functions/helpers'
+import { getTimeFromSec } from '@/functions/helpers'
 import moment from 'moment'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -39,22 +39,24 @@ const RenderTableRow: React.FC<TTableRowProps> = ({ photo, hideRows }) => (
                     : '---'
             }
         />
-        {FilterList.filter((filter) =>
-            isMobile ? !hideRows?.includes(filter) : true
-        ).map((filter) => (
-            <Table.Cell
-                className={
-                    filter && photo?.filters?.[filter]?.frames
-                        ? styles[filter]
-                        : ''
-                }
-                key={filter}
-            >
-                {photo.filters?.[filter]?.exposure
-                    ? getTimeFromSec(photo?.filters?.[filter]?.exposure || 0)
-                    : ''}
-            </Table.Cell>
-        ))}
+        {FilterList.filter((filter) => !hideRows?.includes(filter)).map(
+            (filter) => (
+                <Table.Cell
+                    className={
+                        filter && photo?.filters?.[filter]?.frames
+                            ? styles[filter]
+                            : ''
+                    }
+                    key={filter}
+                >
+                    {photo.filters?.[filter]?.exposure
+                        ? getTimeFromSec(
+                              photo?.filters?.[filter]?.exposure || 0
+                          )
+                        : ''}
+                </Table.Cell>
+            )
+        )}
     </Table.Row>
 )
 

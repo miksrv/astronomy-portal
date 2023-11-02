@@ -1,6 +1,6 @@
 import { hosts } from '@/api/constants'
 import { TBlog } from '@/api/types'
-import { isMobile, sliceText } from '@/functions/helpers'
+import { sliceText } from '@/functions/helpers'
 import Image from 'next/image'
 import React from 'react'
 import { Grid } from 'semantic-ui-react'
@@ -39,7 +39,7 @@ const PopularPostItem: React.FC<Partial<TBlog> & { loading?: boolean }> = ({
                 computer={12}
                 mobile={11}
             >
-                {sliceText(text || '', isMobile ? 150 : 220)}
+                {sliceText(text || '', 220)}
             </Grid.Column>
         </Grid.Row>
     )
