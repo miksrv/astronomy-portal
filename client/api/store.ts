@@ -8,17 +8,19 @@ import sidebarSlice from '@/components/sidebar/sidebarSlice'
 import applicationSlice from './applicationSlice'
 import authSlice from './authSlice'
 
+export const reducers = {
+    application: applicationSlice,
+    auth: authSlice,
+    loginForm: loginFormSlice,
+    sidebar: sidebarSlice,
+
+    [api.reducerPath]: api.reducer
+}
+
 export const store = () =>
     configureStore({
         middleware: (gDM) => gDM().concat(api.middleware),
-        reducer: {
-            application: applicationSlice,
-            auth: authSlice,
-            loginForm: loginFormSlice,
-            sidebar: sidebarSlice,
-
-            [api.reducerPath]: api.reducer
-        }
+        reducer: reducers
     })
 
 export type AppStore = ReturnType<typeof store>

@@ -1,9 +1,10 @@
+import packageInfo from '@/package.json'
 import moment from 'moment/moment'
 import Image from 'next/image'
 import React from 'react'
 
-import packageInfo from '../../package.json'
-import { update } from '../../update'
+import { update } from '@/update'
+
 import styles from './styles.module.sass'
 
 const Footer: React.FC = () => (

@@ -1,9 +1,8 @@
-import '@testing-library/jest-dom'
+import packageInfo from '@/package.json'
 import { render, screen } from '@testing-library/react'
-import React from 'react'
 
-import packageInfo from '../../package.json'
-import { update } from '../../update'
+import { update } from '@/update'
+
 import Footer from './Footer'
 
 describe('Footer', () => {

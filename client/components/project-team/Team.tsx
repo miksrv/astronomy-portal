@@ -15,7 +15,7 @@ type TTeam = {
     photo?: StaticImageData
 }
 
-const team: TTeam[] = [
+export const teamList: TTeam[] = [
     {
         name: 'Михаил Топчило',
         photo: photoMisha
@@ -44,10 +44,11 @@ const team: TTeam[] = [
 
 const Team: React.FC = () => (
     <div className={styles.section}>
-        {team?.map((item) => (
+        {teamList?.map((item) => (
             <div
                 key={item.name}
                 className={styles.item}
+                role={'listitem'}
             >
                 <Image
                     className={styles.photo}
