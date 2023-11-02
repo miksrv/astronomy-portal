@@ -4,6 +4,7 @@ Amateur astronomical observatory portal
 [![UI Deploy](https://github.com/miksrv/astronomy-portal/actions/workflows/ui-deploy.yml/badge.svg)](https://github.com/miksrv/astronomy-portal/actions/workflows/ui-deploy.yml)
 [![API Deploy](https://github.com/miksrv/astronomy-portal/actions/workflows/api-deploy.yml/badge.svg)](https://github.com/miksrv/astronomy-portal/actions/workflows/api-deploy.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=miksrv_astronomy-portal&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=miksrv_astronomy-portal)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=miksrv_astronomy-portal&metric=coverage)](https://sonarcloud.io/summary/new_code?id=miksrv_astronomy-portal)
 
 ![HTML](https://camo.githubusercontent.com/b4c648ad32f8f9f7c328a4dd59b5df0eb2a4e2623095e31d059f026979129491/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f48544d4c2d4533344632362e7376673f6c6f676f3d68746d6c35266c6f676f436f6c6f723d7768697465)
 ![CSS](https://camo.githubusercontent.com/53132716f8ed401a79d8c0980b9666b6cd8ce8e7faed1beeb328f821b44850bc/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4353532d3135373242362e7376673f6c6f676f3d63737333266c6f676f436f6c6f723d7768697465)
@@ -21,25 +22,57 @@ This astronomical portal is a self-made automatic remote astronomical observator
 
 🌐 http://astro.miksoft.pro
 
-![General view of the interface](./docs/ui-screen-1.jpeg)
-
 ## Table of contents
-1. [Observatory](#Observatory)
-2. [Controller components ](#Controller-components)
-3. [API methods](#API-methods)
-4. [Project structure](#Project-structure)
-5. [How to start](#How-to-start)
+1. [Online Service](#Online Service)
+2. [Observatory](#Observatory)
+3. [Controller components ](#Controller-components)
+4. [API methods](#API-methods)
+5. [Project structure](#Project-structure)
+6. [How to start](#How-to-start)
 
-----------------------
+---------------------
+### Online Service Website
+The site is made on a microservice architecture; there is a separate client application (site) and a server that processes data from the observatory, uploads it to the database and allows visualization on the site. Thus, all data that has ever been received by the observatory is stored on the site. You can see what objects were photographed, at what time, what filters were used, what the moon phase was, the weather and much more.
+
+#### Main Page
+General statistics of the observatory, random processed photos and an event calendar displaying the total weather for the night, sunrise and sunset, and footage for the night.
+
+![ain Page](./client/public/screenshots/main.jpg)
+
+#### Blog Page
+Materials from the telegram channel are automatically duplicated here for ease of reading.
+
+![Blog Page](./client/public/screenshots/blog.jpg)
+
+#### Celestial Map Page
+Interactive map of objects photographed by the observatory.
+
+![Celestial Map Page](./client/public/screenshots/celestial.jpg)
+
+#### Astronomy Photos Page
+This section stores all processed photos. Photo processing is done manually and takes time. On the page of each photo there is detailed information about the photo, parameters and, of course, the ability to download it in full resolution.
+
+![Astronomy Photos Page](./client/public/screenshots/photos.jpg)
+
+#### Astronomy Objects Page
+A list of all objects that the observatory records. The table shows the total number of frames captured, shutter speed in general and for each filter. When you go to the page of each object, you will see deviation graphs, a table of frames and a list of processed photographs of the object.
+
+![Astronomy Objects Page](./client/public/screenshots/objects.jpg)
+
+#### Observatory Dashboard Page
+All information in real time from the telescope equipment - online cameras, power status of devices, current weather data and graphs of sensors inside the observatory.
+
+![Observatory Dashboard Page](./client/public/screenshots/dashboard.jpg)
+
 ### Observatory 
 
 This is an amateur and completely homemade astronomical observatory project. The goal of the project is to teach the skills of building objects offline, writing drivers in C++, scripts in Python to automate the process of equipment operation. In addition, obtaining good astrophotography of deep-sky objects, observing comets, asteroids and searching for supernovae and variable stars. 
 
-![General view of the observatory](./docs/photo-1.jpg)
+![Homemade astronomical observatory](./client/public/photos/observatory-3.jpeg)
 
 The observatory controller is based on Ardunio (AVR) and connects to the observatory network. The controller is controlled by means of HTTP requests, which send commands to switch the state of the relay and other elements of the power load. The controller's WEB client sends statistics to a remote server ([API](https://github.com/miksrv/api-backend)) at a specified time interval. The web interface in this repository displays statistics from the backend server and sends commands to the observatory controller through it. 
 
-![General view of the observatory](./docs/photo-2.jpg)
+![The observatory controller](./client/public/photos/observatory-2.jpeg)
 
 ## Controller components 
 - Arduino Mega 2560
