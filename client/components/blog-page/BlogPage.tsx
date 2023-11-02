@@ -1,7 +1,7 @@
 import { useBlogGetListPopularQuery, useBlogGetStatisticQuery } from '@/api/api'
 import { hosts } from '@/api/constants'
 import { TBlog } from '@/api/types'
-import { declOfNum, isMobile } from '@/functions/helpers'
+import { declOfNum } from '@/functions/helpers'
 import classNames from 'classnames'
 import moment from 'moment/moment'
 import React, { createRef } from 'react'
@@ -132,9 +132,7 @@ const BlogPage: React.FC<TBlogPage> = ({ loading, posts, total, page }) => {
                                         rel={'noindex nofollow'}
                                     >
                                         <Icon name='telegram' />
-                                        {`Подписаться${
-                                            !isMobile ? ' на обновления' : ''
-                                        }`}
+                                        {'Подписаться'}
                                     </Button>
                                     <Statistic
                                         className={styles.statistic}
@@ -153,12 +151,10 @@ const BlogPage: React.FC<TBlogPage> = ({ loading, posts, total, page }) => {
                                         value={statisticData?.users || '?'}
                                     />
                                 </div>
-                                {!isMobile && (
-                                    <PopularPosts
-                                        loading={popularLoading}
-                                        posts={popularPosts?.items}
-                                    />
-                                )}
+                                <PopularPosts
+                                    loading={popularLoading}
+                                    posts={popularPosts?.items}
+                                />
                                 <div className={'box'}>
                                     <Pagination
                                         currentPage={page}

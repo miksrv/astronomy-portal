@@ -1,4 +1,5 @@
 import moment from 'moment/moment'
+import Image from 'next/image'
 import React from 'react'
 
 import packageInfo from '../../package.json'
@@ -18,11 +19,14 @@ const Footer: React.FC = () => (
                 className={styles.copyrightLink}
                 title={''}
             >
-                <img
+                <Image
+                    className={styles.copyrightImage}
                     src={'https://miksoft.pro/favicon.ico'}
                     alt={''}
-                />{' '}
-                Mik
+                    width={11}
+                    height={11}
+                />
+                {'Mik'}
             </a>{' '}
             {moment().format('Y')}, Version <span>{packageInfo.version}</span>{' '}
             <span>({update})</span>

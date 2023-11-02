@@ -1,5 +1,4 @@
 import { TStatisticTelescope, TWeatherStatistic } from '@/api/types'
-import { isMobile } from '@/functions/helpers'
 import classNames from 'classnames'
 import moment, { Moment } from 'moment'
 import Image from 'next/image'
@@ -88,32 +87,36 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                 >
                     {d < 10 ? `0${d}` : d}
                 </div>
-                {!isMobile ? (
-                    <div className={classNames(styles.event)}>
-                        <MoonPhase date={currentDate} /> ↑{' '}
-                        {moment(moonTimes.rise).format('H:mm')} ↓{' '}
+                <div className={styles.mobileMoonIcon}>
+                    <MoonPhase date={currentDate} />
+                </div>
+                <div className={styles.moonEvent}>
+                    <MoonPhase date={currentDate} />
+                    <span className={styles.rise}>
+                        {moment(moonTimes.rise).format('H:mm')}
+                    </span>
+                    <span className={styles.set}>
                         {moment(moonTimes.set).format('H:mm')}
-                    </div>
-                ) : (
-                    <div className={classNames(styles.moon)}>
-                        <MoonPhase date={currentDate} />
-                    </div>
-                )}
-                {!isMobile && (
-                    <div className={classNames(styles.event, styles.sun)}>
-                        <Image
-                            src={SunIcon}
-                            className={styles.icon}
-                            alt={''}
-                            width={16}
-                            height={16}
-                        />{' '}
-                        ↑ {moment(sunTimes.dawn).format('H:mm')} ↓{' '}
+                    </span>
+                </div>
+
+                <div className={styles.sunEvent}>
+                    <Image
+                        src={SunIcon}
+                        className={styles.sunIcon}
+                        alt={''}
+                        width={16}
+                        height={16}
+                    />
+                    <span className={styles.rise}>
+                        {moment(sunTimes.dawn).format('H:mm')}
+                    </span>
+                    <span className={styles.set}>
                         {moment(sunTimes.dusk).format('H:mm')}
-                    </div>
-                )}
+                    </span>
+                </div>
                 {itemWeatherEvent && (
-                    <div className={classNames(styles.event, styles.weather)}>
+                    <div className={styles.weatherEvent}>
                         {itemWeatherEvent.clouds !== null && (
                             <span>
                                 <Icon
@@ -136,50 +139,30 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                         </span>
                     </div>
                 )}
-                {itemAstroEvents &&
-                    (!isMobile ? (
-                        <Popup
-                            content={itemAstroEvents.catalog_items.join(', ')}
-                            size='mini'
-                            trigger={
-                                <div
-                                    className={classNames(
-                                        styles.event,
-                                        styles.telescope
+                {itemAstroEvents && (
+                    <Popup
+                        content={itemAstroEvents.catalog_items.join(', ')}
+                        size='mini'
+                        trigger={
+                            <div className={styles.telescopeEvent}>
+                                <span>
+                                    <Icon name='star outline' />
+                                    {itemAstroEvents.catalog_items.length}
+                                </span>
+                                <span>
+                                    <Icon name='clock outline' />
+                                    {Math.round(
+                                        itemAstroEvents.total_exposure / 60
                                     )}
-                                >
-                                    <span>
-                                        <Icon name='star outline' />
-                                        {itemAstroEvents.catalog_items.length}
-                                    </span>
-                                    <span>
-                                        <Icon name='clock outline' />
-                                        {Math.round(
-                                            itemAstroEvents.total_exposure / 60
-                                        )}
-                                    </span>
-                                    <span>
-                                        <Icon name='image outline' />
-                                        {itemAstroEvents.frames_count}
-                                    </span>
-                                </div>
-                            }
-                        />
-                    ) : (
-                        <div
-                            className={classNames(
-                                styles.event,
-                                styles.telescope
-                            )}
-                        >
-                            <span>
-                                <Icon name='clock outline' />
-                                {Math.round(
-                                    itemAstroEvents.total_exposure / 60
-                                )}
-                            </span>
-                        </div>
-                    ))}
+                                </span>
+                                <span>
+                                    <Icon name='image outline' />
+                                    {itemAstroEvents.frames_count}
+                                </span>
+                            </div>
+                        }
+                    />
+                )}
             </td>
         )
     }

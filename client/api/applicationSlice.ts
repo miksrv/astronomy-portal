@@ -14,7 +14,6 @@ const initialState: TApplicationSlice = {
 }
 
 const applicationSlice = createSlice({
-    extraReducers: {},
     initialState,
     name: 'auth',
     reducers: {

@@ -111,7 +111,7 @@ export const PhotoImage: React.FC<{ photo: TPhoto; title: string }> = ({
         src={`${hosts.photo}${photo.image_name}_thumb.${photo.image_ext}`}
         className={styles.photo}
         alt={`${title} Фотография объекта`}
-        width={358}
+        width={300}
         height={200}
     />
 )

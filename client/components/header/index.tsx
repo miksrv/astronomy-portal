@@ -3,7 +3,6 @@ import { openFormCatalog, openFormPhoto } from '@/api/applicationSlice'
 import { login, logout } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { APIResponseStatistic } from '@/api/types'
-import { isMobile } from '@/functions/helpers'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -88,54 +87,49 @@ const Header: React.FC = () => {
             inverted
         >
             <Container>
-                {!isMobile && (
-                    <Menu.Item>
-                        <Link
-                            href={'/'}
-                            title={'Главная страница'}
-                        >
-                            <Image
-                                src={logo}
-                                alt={'Самодельная обсерватория'}
-                                width={30}
-                                height={30}
-                                priority={true}
-                            />
-                        </Link>
-                    </Menu.Item>
-                )}
-                {isMobile ? (
+                <Menu.Item className={styles.logoLink}>
+                    <Link
+                        href={'/'}
+                        title={'Главная страница'}
+                    >
+                        <Image
+                            src={logo}
+                            alt={'Самодельная обсерватория'}
+                            width={30}
+                            height={30}
+                        />
+                    </Link>
+                </Menu.Item>
+                <Menu.Item
+                    className={styles.hamburger}
+                    icon={'bars'}
+                    onClick={() => dispatch(toggle())}
+                />
+                {menuItems.map((item) => (
                     <Menu.Item
-                        className={styles.hamburger}
-                        icon={'bars'}
-                        onClick={() => dispatch(toggle())}
-                    />
-                ) : (
-                    menuItems.map((item) => (
-                        <Menu.Item
-                            key={item.name}
-                            as={Link}
-                            href={item.link}
-                            title={item.name}
-                            active={router.pathname === item.link}
-                        >
-                            {item.name}
-                            {item.label && (
-                                <Label
-                                    className={styles.label}
-                                    color={'yellow'}
-                                    size={'tiny'}
-                                >
-                                    <Loader
-                                        active={isLoading}
-                                        size={'mini'}
-                                    />
-                                    {data?.[item.label]}
-                                </Label>
-                            )}
-                        </Menu.Item>
-                    ))
-                )}
+                        key={item.name}
+                        as={Link}
+                        href={item.link}
+                        title={item.name}
+                        active={router.pathname === item.link}
+                        className={styles.desktopMenu}
+                    >
+                        {item.name}
+                        {item.label && (
+                            <Label
+                                className={styles.label}
+                                color={'yellow'}
+                                size={'tiny'}
+                            >
+                                <Loader
+                                    active={isLoading}
+                                    size={'mini'}
+                                />
+                                {data?.[item.label]}
+                            </Label>
+                        )}
+                    </Menu.Item>
+                ))}
                 <Menu.Menu position={'right'}>
                     {!authSlice.isAuth ? (
                         <Menu.Item

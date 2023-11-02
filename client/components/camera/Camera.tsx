@@ -1,4 +1,5 @@
 import classNames from 'classnames'
+import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
 import Lightbox from 'react-image-lightbox'
 import { Dimmer, Message, Progress } from 'semantic-ui-react'
@@ -60,10 +61,12 @@ const Camera: React.FC<TCameraProps> = ({ cameraURL, interval }) => {
                         onKeyUp={() => {}}
                         onClick={() => setLightbox(true)}
                     >
-                        <img
+                        <Image
                             className={styles.photoImage}
                             src={cameraSrc}
                             alt={'Изображение с камеры обсерватории'}
+                            height={428}
+                            width={400}
                         />
                     </span>
                     <Progress

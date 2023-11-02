@@ -1,59 +1,76 @@
 @import @/styles/variables.sass
 
+.eventCalendarBlock
+  display: flex
+  padding: 1px 1px 1px 4px
+  margin-top: 3px
+  background-color: #43464d
+
+  @media only screen and (max-width: 768px)
+    flex-direction: column
+
+.eventCalendarBlockBox
+  margin-right: 6px
+  white-space: nowrap
+
+  @media only screen and (max-width: 768px)
+    margin-right: 0
+
 .section
   display: block
   overflow: hidden
   border-collapse: separate
   margin-bottom: $sectionMarginBottom
 
-  .moon
+  .mobileMoonIcon
     position: absolute
     right: -1px
     top: 4px
 
-  .event
-    display: flex
-    padding: 1px 1px 1px 4px
-    margin-top: 3px
-    background-color: #43464d
+    @media only screen and (min-width: 768px)
+      display: none
 
+  .moonEvent, .sunEvent
+    @extend .eventCalendarBlock
     @media only screen and (max-width: 768px)
-      flex-direction: column
+      display: none
+
+    .sunIcon
+      margin-left: 1px
+      margin-right: 7px
+
+    .rise
+      &:before
+        content: '↑'
+        margin-right: 5px
+
+    .set
+      &:before
+        content: '↓'
+        margin-left: 10px
+        margin-right: 5px
+
+  .weatherEvent
+    @extend .eventCalendarBlock
+    background-color: #475e85
+    padding-left: 6px
 
     span
-      margin-right: 5px
-      white-space: nowrap
+      @extend .eventCalendarBlockBox
 
-      @media only screen and (max-width: 768px)
-        margin: 0
+    i
+      color: $lightblue
 
-    &.sun
-      .icon
-        width: 17px
-        float: left
-        margin: 0 5px 0 2px
-        height: 17px
+  .telescopeEvent
+    @extend .eventCalendarBlock
+    background-color: #7a5f5f
+    padding-left: 6px
 
-    &.telescope
-      background-color: #7a5f5f
-      cursor: pointer
-      padding-left: 8px
+    span
+      @extend .eventCalendarBlockBox
 
-      @media only screen and (max-width: 768px)
-        padding-left: 2px
-
-      .icon
-        color: $orange
-
-    &.weather
-      background-color: #475e85
-      padding-left: 7px
-
-      @media only screen and (max-width: 768px)
-        padding-left: 2px
-
-      .icon
-        color: $lightblue
+    i
+      color: $orange
 
   .calendarToolbar
     margin: 0 0 5px

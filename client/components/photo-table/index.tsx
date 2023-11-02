@@ -1,5 +1,4 @@
 import { TFilterTypes, TFilters, TPhoto } from '@/api/types'
-import { isMobile } from '@/functions/helpers'
 import classNames from 'classnames'
 import React, { useMemo } from 'react'
 import { Dimmer, Loader, Table } from 'semantic-ui-react'
@@ -66,16 +65,13 @@ const PhotoTable: React.FC<TPhotoTableProps> = ({ photos, loader }) => {
                 <Table.Header>
                     <Table.Row>
                         {headerFields
-                            .filter((item) =>
-                                isMobile ? !hideTableRows.includes(item) : true
-                            )
+                            .filter((item) => !hideTableRows.includes(item))
                             .map((item) => (
                                 <Table.HeaderCell
                                     key={item}
                                     className={'tableHeaderSticky'}
-                                >
-                                    {item}
-                                </Table.HeaderCell>
+                                    content={item}
+                                />
                             ))}
                     </Table.Row>
                 </Table.Header>
