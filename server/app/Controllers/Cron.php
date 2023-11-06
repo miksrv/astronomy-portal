@@ -40,7 +40,7 @@ class Cron extends ResourceController {
         // Обновление последних записей
         $blogLibrary->getTelegramChannelHistory(
             'nearspace',
-            40
+            80
         );
     }
 

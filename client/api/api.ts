@@ -373,6 +373,8 @@ export const {
     useCategoryPatchMutation,
     useCategoryPostMutation,
 
+    useCronGetUpdatePostsQuery,
+
     // usePhotoGetItemQuery,
     usePhotoGetListQuery,
     usePhotoPatchMutation,
