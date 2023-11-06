@@ -1,4 +1,8 @@
-import { useAuthGetMeMutation, useStatisticGetQuery } from '@/api/api'
+import {
+    useAuthGetMeMutation,
+    useCronGetUpdatePostsQuery,
+    useStatisticGetQuery
+} from '@/api/api'
 import { openFormCatalog, openFormPhoto } from '@/api/applicationSlice'
 import { login, logout } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
@@ -59,6 +63,7 @@ const Header: React.FC = () => {
     const router = useRouter()
 
     const { data, isLoading } = useStatisticGetQuery()
+    const { isLoading: isCronLoading } = useCronGetUpdatePostsQuery()
     const [authGetMe, { data: meData, error }] = useAuthGetMeMutation()
     const authSlice = useAppSelector((state) => state.auth)
 
@@ -122,7 +127,7 @@ const Header: React.FC = () => {
                                 size={'tiny'}
                             >
                                 <Loader
-                                    active={isLoading}
+                                    active={isLoading || isCronLoading}
                                     size={'mini'}
                                 />
                                 {data?.[item.label]}
