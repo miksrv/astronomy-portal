@@ -15,7 +15,7 @@ import { NextSeo } from 'next-seo'
 import React, { useMemo, useState } from 'react'
 import { Message } from 'semantic-ui-react'
 
-import PhotoCategorySwitcher from '@/components/photo-category-switcher'
+import ObjectsTableToolbar from '@/components/objects-table-toolbar'
 import PhotoGrid from '@/components/photo-grid'
 
 export const getServerSideProps = wrapper.getServerSideProps(
@@ -32,37 +32,36 @@ export const getServerSideProps = wrapper.getServerSideProps(
     }
 )
 
-type TPhotoCategory = TPhoto & { category: number }
-
 const PhotosPage: NextPage = () => {
-    const [filterCategory, setFilterCategory] = useState<number>(0)
+    const [search, setSearch] = useState<string>('')
+    const [categories, setCategories] = useState<number[]>([])
 
     const { data: statisticData } = useStatisticGetQuery()
     const { data: categoriesData } = useCategoryGetListQuery()
     const { data: photoData, isLoading, isError } = usePhotoGetListQuery()
     const { data: catalogData } = useCatalogGetListQuery()
 
-    const listPhotos: TPhotoCategory[] | undefined = useMemo(
+    const listPhotos: TPhoto[] | undefined = useMemo(
         () =>
-            photoData?.items.map((photo) => {
-                const catalogItem = catalogData?.items.find(
+            photoData?.items?.filter((photo) => {
+                const catalogItem = catalogData?.items?.find(
                     ({ name }) => name === photo.object
                 )
 
-                return {
-                    ...photo,
-                    category: catalogItem?.category || 0
-                }
+                return (
+                    (search === '' ||
+                        catalogItem?.name
+                            .toLowerCase()
+                            .includes(search.toLowerCase()) ||
+                        catalogItem?.title
+                            ?.toLowerCase()
+                            .includes(search.toLowerCase())) &&
+                    (!categories?.length ||
+                        (catalogItem?.category &&
+                            categories.includes(catalogItem.category)))
+                )
             }),
-        [photoData, catalogData]
-    )
-
-    const listFilteredPhotos: TPhotoCategory[] | undefined = useMemo(
-        () =>
-            listPhotos?.filter(
-                ({ category }) => !filterCategory || category === filterCategory
-            ),
-        [filterCategory, listPhotos]
+        [photoData, catalogData, categories, search]
     )
 
     return (
@@ -91,16 +90,17 @@ const PhotosPage: NextPage = () => {
                     }
                 />
             )}
-            <PhotoCategorySwitcher
-                active={filterCategory}
+            <ObjectsTableToolbar
+                search={search}
                 categories={categoriesData?.items}
-                onSelectCategory={setFilterCategory}
+                onChangeSearch={setSearch}
+                onChangeCategories={setCategories}
             />
             <PhotoGrid
                 threeColumns={true}
                 loading={isLoading}
                 loaderCount={statisticData?.photos_count || 12}
-                photos={listFilteredPhotos}
+                photos={listPhotos}
                 catalog={catalogData?.items}
             />
         </main>

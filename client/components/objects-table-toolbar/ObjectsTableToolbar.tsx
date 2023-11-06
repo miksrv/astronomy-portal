@@ -1,6 +1,9 @@
-import { openFormCatalog } from '@/api/applicationSlice'
+'use client'
+
+import { openFormCatalog, openFormPhoto } from '@/api/applicationSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { TCategory } from '@/api/types'
+import { usePathname } from 'next/navigation'
 import React, { useMemo } from 'react'
 import { Button, Dropdown, Icon, Input } from 'semantic-ui-react'
 
@@ -16,6 +19,7 @@ type TToolbarProps = {
 const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
     const { search, categories, onChangeSearch, onChangeCategories } = props
 
+    const pathname = usePathname()
     const dispatch = useAppDispatch()
     const isAuth = useAppSelector((state) => state.auth.isAuth)
 
@@ -30,14 +34,22 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
         [categories]
     )
 
+    const handleAddButton = () => {
+        if (pathname === '/photos') {
+            dispatch(openFormPhoto(true))
+        } else {
+            dispatch(openFormCatalog(true))
+        }
+    }
+
     return (
         <div className={styles.objectsToolbar}>
             <Input
-                value={search}
-                onChange={handleChange}
                 icon={'search'}
-                className={styles.search}
                 placeholder={'Поиск...'}
+                value={search}
+                className={styles.search}
+                onChange={handleChange}
             />
             <Dropdown
                 placeholder={'Категории объектов'}
@@ -59,7 +71,7 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
                     size={'mini'}
                     color={'yellow'}
                     labelPosition={'left'}
-                    onClick={() => dispatch(openFormCatalog(true))}
+                    onClick={handleAddButton}
                 >
                     <Icon name={'plus'} />
                     {'Добавить'}
