@@ -1,3 +1,4 @@
+import { usePhotoGetListQuery } from '@/api/api'
 import React, { useEffect, useRef } from 'react'
 
 import config from './object'
@@ -65,10 +66,19 @@ const createObjectsJSON = (objects: TObject[]) => {
     return geoJSON
 }
 
-const RenderMap: React.FC<TRenderMapProps> = (props) => {
-    const { objects, width, config: customConfig, goto } = props
+const RenderMap: React.FC<TRenderMapProps> = ({
+    objects,
+    width,
+    config: customConfig,
+    goto
+}) => {
     const prevJSON = usePrevious({ objects })
     const popupContainer = useRef<HTMLDivElement>(null)
+
+    const { data: photoData } = usePhotoGetListQuery(
+        {},
+        { skip: !customConfig.interactive }
+    )
 
     useEffect(() => {
         if (
@@ -241,13 +251,13 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
 
     return (
         <div
-            id='celestial-map'
+            id={'celestial-map'}
             className={styles.skyMap}
         >
             <div
                 ref={popupContainer}
                 className={styles.popupContainer}
-            ></div>
+            />
         </div>
     )
 }
