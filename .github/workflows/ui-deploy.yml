@@ -1,7 +1,12 @@
 name: UI Deploy
 
 on:
-  push:
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'client/**/*'
+  pull_request:
     branches:
       - main
     paths:
@@ -92,6 +97,7 @@ jobs:
       # If we run NextJS on a Node server using PM2
       - name: Send files
         run: |
+          ssh vps "cd /var/www/astro.miksoft.pro && rm -r .next"
           rsync -avz -e ssh client/.next/standalone/ vps:/var/www/astro.miksoft.pro
           rsync -avz -e ssh client/.next/static vps:/var/www/astro.miksoft.pro/.next
           rsync -avz -e ssh client/public vps:/var/www/astro.miksoft.pro

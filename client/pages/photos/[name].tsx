@@ -152,7 +152,8 @@ const PhotoItemPage: NextPage = () => {
                             active={showSpoiler}
                             onClick={() => setShowSpoiler(!showSpoiler)}
                         >
-                            <Icon name={'dropdown'} /> Описание объекта
+                            <Icon name={'dropdown'} /> Описание объекта{' '}
+                            {catalogData?.name.replace(/_/g, ' ')}
                         </Accordion.Title>
                         <Accordion.Content active={showSpoiler}>
                             <div className={'textBlock'}>
