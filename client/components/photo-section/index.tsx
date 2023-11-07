@@ -151,6 +151,15 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                             mobile={16}
                         >
                             <div>
+                                <span className={styles.value}>Объект:</span>
+                                <Link
+                                    href={`/objects/${photo?.object}`}
+                                    title={''}
+                                >
+                                    {photo?.object?.replace(/_/g, ' ')}
+                                </Link>
+                            </div>
+                            <div>
                                 <span className={styles.value}>
                                     Дата обработки:
                                 </span>
@@ -163,22 +172,10 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                                 {exposure}
                             </div>
                             <div>
-                                <span className={styles.value}>Кадров:</span>
+                                <span className={styles.value}>
+                                    Сделано кадров:
+                                </span>
                                 {photo?.statistic?.frames || '---'}
-                                {photo?.statistic?.data_size ? (
-                                    <span className={styles.marginLeft}>
-                                        (
-                                        <Link
-                                            href={`/objects/${photo?.object}`}
-                                            title={''}
-                                        >
-                                            список
-                                        </Link>
-                                        )
-                                    </span>
-                                ) : (
-                                    ''
-                                )}
                             </div>
                             <div>
                                 <span className={styles.value}>
@@ -232,7 +229,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
                         }
                         className={styles.celestialMapImage}
                         width={478}
-                        height={240}
+                        height={230}
                         alt={`${title} - Расположение на астрономической карте`}
                         priority={true}
                     />
