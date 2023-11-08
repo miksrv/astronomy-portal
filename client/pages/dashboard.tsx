@@ -26,43 +26,48 @@ const DashboardPage: NextPage = () => (
                 locale: 'ru'
             }}
         />
-        <Grid className={'noPaddingBottom'}>
-            <Grid.Column
-                computer={8}
-                tablet={8}
-                mobile={16}
-            >
-                <Weather />
-                <AstronomyCalc />
-            </Grid.Column>
-            <Grid.Column
-                computer={8}
-                tablet={8}
-                mobile={16}
-            >
-                <RelayList />
-            </Grid.Column>
-            <Grid.Column
-                computer={8}
-                tablet={8}
-                mobile={16}
-            >
-                <Camera
-                    cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/2`}
-                    interval={5}
-                />
-            </Grid.Column>
-            <Grid.Column
-                computer={8}
-                tablet={8}
-                mobile={16}
-            >
-                <Camera
-                    cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/1`}
-                    interval={30}
-                />
-            </Grid.Column>
+        <Grid>
+            <Grid.Row>
+                <Grid.Column
+                    computer={8}
+                    tablet={8}
+                    mobile={16}
+                >
+                    <Weather />
+                    <AstronomyCalc />
+                </Grid.Column>
+                <Grid.Column
+                    computer={8}
+                    tablet={8}
+                    mobile={16}
+                >
+                    <RelayList />
+                </Grid.Column>
+            </Grid.Row>
+            <Grid.Row>
+                <Grid.Column
+                    computer={8}
+                    tablet={8}
+                    mobile={16}
+                >
+                    <Camera
+                        cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/2`}
+                        interval={5}
+                    />
+                </Grid.Column>
+                <Grid.Column
+                    computer={8}
+                    tablet={8}
+                    mobile={16}
+                >
+                    <Camera
+                        cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/1`}
+                        interval={30}
+                    />
+                </Grid.Column>
+            </Grid.Row>
         </Grid>
+        <br />
     </main>
 )
 

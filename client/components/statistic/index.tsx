@@ -42,8 +42,8 @@ const Statistic: React.FC = () => {
     ]
 
     return (
-        <div className={styles.section}>
-            <Grid>
+        <Grid className={styles.section}>
+            <Grid.Row>
                 {CARDS.map((item) => (
                     <Grid.Column
                         key={item.name}
@@ -74,8 +74,8 @@ const Statistic: React.FC = () => {
                         </div>
                     </Grid.Column>
                 ))}
-            </Grid>
-        </div>
+            </Grid.Row>
+        </Grid>
     )
 }
 

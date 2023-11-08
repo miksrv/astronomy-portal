@@ -8,7 +8,7 @@ import { update } from '@/update'
 import styles from './styles.module.sass'
 
 const Footer: React.FC = () => (
-    <div
+    <footer
         className={styles.footer}
         data-testid={'footer'}
     >
@@ -32,7 +32,7 @@ const Footer: React.FC = () => (
             {moment().format('Y')}, Version <span>{packageInfo.version}</span>{' '}
             <span>({update})</span>
         </div>
-    </div>
+    </footer>
 )
 
 export default Footer

@@ -201,9 +201,9 @@ const ObjectItemPage: NextPage = () => {
                 photos={photoList?.items}
                 loader={photoLoading}
             />
-            {catalogData?.files?.length ? (
-                <div className={'section'}>
-                    <Grid>
+            {!!catalogData?.files?.length && (
+                <Grid className={'section'}>
+                    <Grid.Row>
                         <Grid.Column
                             computer={6}
                             tablet={16}
@@ -230,7 +230,9 @@ const ObjectItemPage: NextPage = () => {
                                 }
                             />
                         </Grid.Column>
-                        {chartHFR?.length ? (
+                    </Grid.Row>
+                    {!!chartHFR?.length && (
+                        <Grid.Row>
                             <Grid.Column width={16}>
                                 <Chart
                                     loading={catalogLoading}
@@ -242,13 +244,9 @@ const ObjectItemPage: NextPage = () => {
                                     }
                                 />
                             </Grid.Column>
-                        ) : (
-                            ''
-                        )}
-                    </Grid>
-                </div>
-            ) : (
-                ''
+                        </Grid.Row>
+                    )}
+                </Grid>
             )}
             <FilesTable
                 loader={catalogLoading}
