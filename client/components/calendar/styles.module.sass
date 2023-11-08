@@ -58,8 +58,12 @@
     span
       @extend .eventCalendarBlockBox
 
-    i
-      color: $lightblue
+      @media only screen and (max-width: 768px)
+        &:nth-child(1), &:nth-child(2)
+          display: none
+
+    //i
+    //  color: $lightblue
 
   .telescopeEvent
     @extend .eventCalendarBlock
@@ -69,11 +73,15 @@
     span
       @extend .eventCalendarBlockBox
 
-    i
-      color: $orange
+      @media only screen and (max-width: 768px)
+        &:nth-child(1), &:nth-child(3)
+          display: none
+
+    //i
+    //  color: $orange
 
   .calendarToolbar
-    margin: 0 0 5px
+    margin: 0 0 10px
     display: flex
     justify-content: space-between
 
@@ -119,33 +127,35 @@
 
     table
       width: 100%
-      margin: 0
-      padding: 0
-      border-spacing: 0
       border-collapse: collapse
 
       thead tr > th
-        height: 50px
-        border: 1px solid #3f3f3f
-        background-color: #242424
+        height: 40px
         text-transform: uppercase
 
       tbody tr > *
-        background-color: #333
+        > div
+          background-color: #333
 
         &.calendarDay
           position: relative
-          border: 1px solid #565656
           vertical-align: top
-          padding: 3px
           width: 14.2%
 
+          > div
+            margin: 0
+            padding: 1px
+            background-color: #333
+
           &.currentDay
-            background-color: #414141
+
+            > div
+              background-color: #414141
 
         &.empty, &.disable
-          cursor: not-allowed
-          background-color: #424242
+          //cursor: not-allowed
+          //background-color: #2a2a2a
+          background: #333
 
         &.today
           background-color: #414141

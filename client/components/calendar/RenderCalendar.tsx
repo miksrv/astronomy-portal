@@ -75,94 +75,96 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                     currentDay ? styles.currentDay : undefined
                 )}
             >
-                <div
-                    className={classNames(
-                        styles.dayNumber,
-                        getWeatherClass(itemWeatherEvent?.clouds)
-                    )}
-                    // role='button'
-                    // tabIndex={0}
-                    // onKeyUp={() => {}}
-                    // onClick={(e) => console.warn('onDayClick', e, d)}
-                >
-                    {d < 10 ? `0${d}` : d}
-                </div>
-                <div className={styles.mobileMoonIcon}>
-                    <MoonPhase date={currentDate} />
-                </div>
-                <div className={styles.moonEvent}>
-                    <MoonPhase date={currentDate} />
-                    <span className={styles.rise}>
-                        {moment(moonTimes.rise).format('H:mm')}
-                    </span>
-                    <span className={styles.set}>
-                        {moment(moonTimes.set).format('H:mm')}
-                    </span>
-                </div>
-
-                <div className={styles.sunEvent}>
-                    <Image
-                        src={SunIcon}
-                        className={styles.sunIcon}
-                        alt={''}
-                        width={16}
-                        height={16}
-                    />
-                    <span className={styles.rise}>
-                        {moment(sunTimes.dawn).format('H:mm')}
-                    </span>
-                    <span className={styles.set}>
-                        {moment(sunTimes.dusk).format('H:mm')}
-                    </span>
-                </div>
-                {itemWeatherEvent && (
-                    <div className={styles.weatherEvent}>
-                        {itemWeatherEvent.clouds !== null && (
-                            <span>
-                                <Icon
-                                    name={'cloud'}
-                                    style={{ marginRight: 5 }}
-                                />
-                                {Math.round(itemWeatherEvent.clouds)}
-                            </span>
+                <div>
+                    <div
+                        className={classNames(
+                            styles.dayNumber,
+                            getWeatherClass(itemWeatherEvent?.clouds)
                         )}
-                        <span>
-                            <Icon
-                                name={'thermometer'}
-                                style={{ marginRight: 0 }}
-                            />
-                            {itemWeatherEvent.temperature}
+                        // role='button'
+                        // tabIndex={0}
+                        // onKeyUp={() => {}}
+                        // onClick={(e) => console.warn('onDayClick', e, d)}
+                    >
+                        {d < 10 ? `0${d}` : d}
+                    </div>
+                    <div className={styles.mobileMoonIcon}>
+                        <MoonPhase date={currentDate} />
+                    </div>
+                    <div className={styles.moonEvent}>
+                        <MoonPhase date={currentDate} />
+                        <span className={styles.rise}>
+                            {moment(moonTimes.rise).format('H:mm')}
                         </span>
-                        <span>
-                            <Icon name={'send'} />
-                            {itemWeatherEvent.wind_speed}
+                        <span className={styles.set}>
+                            {moment(moonTimes.set).format('H:mm')}
                         </span>
                     </div>
-                )}
-                {itemAstroEvents && (
-                    <Popup
-                        content={itemAstroEvents.catalog_items.join(', ')}
-                        size='mini'
-                        trigger={
-                            <div className={styles.telescopeEvent}>
+
+                    <div className={styles.sunEvent}>
+                        <Image
+                            src={SunIcon}
+                            className={styles.sunIcon}
+                            alt={''}
+                            width={16}
+                            height={16}
+                        />
+                        <span className={styles.rise}>
+                            {moment(sunTimes.dawn).format('H:mm')}
+                        </span>
+                        <span className={styles.set}>
+                            {moment(sunTimes.dusk).format('H:mm')}
+                        </span>
+                    </div>
+                    {itemWeatherEvent && (
+                        <div className={styles.weatherEvent}>
+                            {itemWeatherEvent.clouds !== null && (
                                 <span>
-                                    <Icon name='star outline' />
-                                    {itemAstroEvents.catalog_items.length}
+                                    <Icon
+                                        name={'cloud'}
+                                        style={{ marginRight: 5 }}
+                                    />
+                                    {Math.round(itemWeatherEvent.clouds)}
                                 </span>
-                                <span>
-                                    <Icon name='clock outline' />
-                                    {Math.round(
-                                        itemAstroEvents.total_exposure / 60
-                                    )}
-                                </span>
-                                <span>
-                                    <Icon name='image outline' />
-                                    {itemAstroEvents.frames_count}
-                                </span>
-                            </div>
-                        }
-                    />
-                )}
+                            )}
+                            <span>
+                                <Icon
+                                    name={'thermometer'}
+                                    style={{ marginRight: 0 }}
+                                />
+                                {itemWeatherEvent.temperature}
+                            </span>
+                            <span>
+                                <Icon name={'send'} />
+                                {itemWeatherEvent.wind_speed}
+                            </span>
+                        </div>
+                    )}
+                    {itemAstroEvents && (
+                        <Popup
+                            content={itemAstroEvents.catalog_items.join(', ')}
+                            size='mini'
+                            trigger={
+                                <div className={styles.telescopeEvent}>
+                                    <span>
+                                        <Icon name='star outline' />
+                                        {itemAstroEvents.catalog_items.length}
+                                    </span>
+                                    <span>
+                                        <Icon name='clock outline' />
+                                        {Math.round(
+                                            itemAstroEvents.total_exposure / 60
+                                        )}
+                                    </span>
+                                    <span>
+                                        <Icon name='image outline' />
+                                        {itemAstroEvents.frames_count}
+                                    </span>
+                                </div>
+                            }
+                        />
+                    )}
+                </div>
             </td>
         )
     }
