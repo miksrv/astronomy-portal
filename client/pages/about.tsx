@@ -120,8 +120,7 @@ const AboutPage: NextPage = () => {
                     locale: 'ru'
                 }}
             />
-            <h1 className={'pageTitle'}>О проекте</h1>
-            <div className={'box'}>
+            <div className={'box section'}>
                 <h2>🔭 Самодельная астрономическая обсерватория</h2>
                 <p>
                     Привет 👋! Этот сайт посвящен нашему любительскому проекту -
@@ -239,7 +238,6 @@ const AboutPage: NextPage = () => {
                     становится ближе!
                 </p>
             </div>
-            <br />
             <PhotoLightbox
                 photos={allPhotos}
                 photoIndex={photoIndex}

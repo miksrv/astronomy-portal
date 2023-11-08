@@ -50,7 +50,7 @@ const AuthorTable: React.FC<TAuthorTable> = (props) => {
                                     onClickEdit={onClickEdit}
                                     onClickDelete={onClickDelete}
                                 />
-                                <Table.Cell>
+                                <Table.Cell className={styles.cellLink}>
                                     {item.link && (
                                         <a
                                             href={item.link}

@@ -45,12 +45,9 @@ const Author: React.FC<TPhotoAuthorProps> = ({ name, link }) =>
         <span>{name || ''}</span>
     )
 
-const PhotoSection: React.FC<TPhotoItemHeaderProps> = ({
-    loader,
-    title,
-    photo,
-    catalog
-}) => {
+const PhotoSection: React.FC<TPhotoItemHeaderProps> = (props) => {
+    const { loader, title, photo, catalog } = props
+
     const dispatch = useAppDispatch()
     const isAuth = useAppSelector((state) => state.auth.isAuth)
 

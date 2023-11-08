@@ -52,12 +52,7 @@ const AstronomyCalc: React.FC = () => {
                         />
                         Солнце
                     </h4>
-                    <Grid
-                        className={classNames(
-                            'noPaddingBottom',
-                            styles.columnTable
-                        )}
-                    >
+                    <Grid className={styles.columnTable}>
                         <Grid.Column
                             computer={7}
                             mobile={16}
@@ -108,12 +103,7 @@ const AstronomyCalc: React.FC = () => {
                     <h4 className={styles.sectionTitle}>
                         <MoonPhase date={moment()} /> Луна
                     </h4>
-                    <Grid
-                        className={classNames(
-                            'noPaddingBottom',
-                            styles.columnTable
-                        )}
-                    >
+                    <Grid className={styles.columnTable}>
                         <Grid.Column
                             computer={7}
                             mobile={16}

@@ -182,11 +182,20 @@ main
   .ui.label>.close.icon, .ui.label>.delete.icon
     color: $box-background !important
 
-  .ui.grid.noPaddingBottom
-    margin-bottom: 0 !important
+  .ui.grid
+    margin-left: -.5rem !important
+    margin-right: -.5rem !important
 
-  .ui.grid.noPaddingBottom > .column
+  .ui.grid>.row
     padding-bottom: 0 !important
+
+    @media only screen and (max-width: 768px)
+      &:last-of-type
+        padding-top: 0 !important
+
+  .ui.grid>.column:not(.row), .ui.grid>.row>.column
+    padding-left: 0.5rem !important
+    padding-right: 0.5rem !important
 
 .ui.modal > .content
   color: $colorBackground !important
