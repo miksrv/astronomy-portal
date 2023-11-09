@@ -68,7 +68,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                     tablet={10}
                     mobile={16}
                 >
-                    <h1>
+                    <h1 className={'pageTitle'}>
                         {title}
                         {isAuth && (
                             <span
@@ -176,7 +176,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                         }
                         className={styles.celestialMapImage}
                         width={395}
-                        height={200}
+                        height={182}
                         alt={`${title} - Расположение на астрономической карте`}
                         priority={true}
                     />

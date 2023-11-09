@@ -127,7 +127,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = (props) => {
                     mobile={16}
                     className={styles.description}
                 >
-                    <h1>
+                    <h1 className={'pageTitle'}>
                         {title}
                         {isAuth && (
                             <span
@@ -226,7 +226,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = (props) => {
                         }
                         className={styles.celestialMapImage}
                         width={478}
-                        height={230}
+                        height={225}
                         alt={`${title} - Расположение на астрономической карте`}
                         priority={true}
                     />

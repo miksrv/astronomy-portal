@@ -14,21 +14,16 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
-import dynamic from 'next/dynamic'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import { Grid, Message } from 'semantic-ui-react'
 
-import chart_coordinates from '@/components/chart/chart_coordinates'
-import chart_coordlines from '@/components/chart/chart_coordlines'
-import chart_statistic from '@/components/chart/chart_statistic'
+import Coordinates from '@/components/charts/Coordinates'
+import Deviation from '@/components/charts/Deviation'
+import FilesQuality from '@/components/charts/FilesQuality'
 import FilesTable from '@/components/files-table'
 import ObjectCloud from '@/components/object-cloud'
 import ObjectSection from '@/components/objects-section'
 import PhotoTable from '@/components/photo-table'
-
-const Chart = dynamic(() => import('@/components/chart'), {
-    ssr: false
-})
 
 // Only if we build application as static HTML
 // export const getStaticPaths = async () => {
@@ -98,54 +93,40 @@ const ObjectItemPage: NextPage = () => {
         [catalogData, objectName]
     )
 
-    const [chartData, setChartData] = useState<[number, number][]>()
-    const [chartRa, setChartRa] = useState<number[]>()
-    const [chartDec, setChartDec] = useState<number[]>()
-    const [chartHFR, setChartHFR] = useState<number[]>()
-    const [chartSNR, setChartSNR] = useState<number[]>()
-    const [devRa, setDevRa] = useState<number>(0)
-    const [devDec, setDevDec] = useState<number>(0)
+    const filesSorted = useMemo(
+        () =>
+            [...(catalogData?.files || [])]?.sort(
+                (a, b) =>
+                    new Date(a.date_obs).getTime() -
+                    new Date(b.date_obs).getTime()
+            ),
+        [catalogData?.files]
+    )
 
-    useEffect(() => {
-        if (catalogData?.files?.length) {
-            let middleRa = 0
-            let middleDec = 0
-            let counter = 0
-            let tmpChartData: [number, number][] = []
-            let tmpChartRa: number[] = []
-            let tmpChartDec: number[] = []
-            let tmpChartHFR: number[] = []
-            let tmpChartSNR: number[] = []
+    const deviationRa: number = useMemo(() => {
+        const max = Math.max.apply(
+            null,
+            catalogData?.files?.map(({ ra }) => ra) || []
+        )
+        const min = Math.min.apply(
+            null,
+            catalogData?.files?.map(({ ra }) => ra) || []
+        )
 
-            catalogData?.files.forEach((item) => {
-                middleRa += item.ra
-                middleDec += item.dec
-                counter += 1
+        return Math.round((max - min) * 100) / 100
+    }, [catalogData?.files])
 
-                tmpChartData.push([item.ra, item.dec])
-                tmpChartRa.push(item.ra)
-                tmpChartDec.push(item.dec)
+    const deviationDec: number = useMemo(() => {
+        const max = Math.max.apply(
+            null,
+            catalogData?.files?.map(({ dec }) => dec) || []
+        )
+        const min = Math.min.apply(
+            null,
+            catalogData?.files?.map(({ dec }) => dec) || []
+        )
 
-                if (item.hfr) {
-                    tmpChartHFR.push(item.hfr)
-                }
-
-                if (item.sky_background) {
-                    tmpChartSNR.push(item.sky_background)
-                }
-            })
-
-            setDevRa(Math.max(...tmpChartRa) - Math.min(...tmpChartRa))
-            setDevDec(Math.max(...tmpChartDec) - Math.min(...tmpChartDec))
-            setChartDec(tmpChartDec)
-            setChartRa(tmpChartRa)
-            setChartData(tmpChartData)
-            setChartHFR(tmpChartHFR)
-            setChartSNR(tmpChartSNR)
-
-            chart_coordinates.xAxis.plotLines[0].value = middleRa / counter
-            chart_coordinates.yAxis.plotLines[0].value = middleDec / counter
-        }
+        return Math.round((max - min) * 100) / 100
     }, [catalogData?.files])
 
     return (
@@ -174,8 +155,8 @@ const ObjectItemPage: NextPage = () => {
                 loader={catalogLoading}
                 error={catalogError}
                 catalog={catalogData}
-                deviationRa={Math.round(devRa * 100) / 100}
-                deviationDec={Math.round(devDec * 100) / 100}
+                deviationRa={deviationRa}
+                deviationDec={deviationDec}
             />
             <Message
                 warning={true}
@@ -201,53 +182,34 @@ const ObjectItemPage: NextPage = () => {
                 photos={photoList?.items}
                 loader={photoLoading}
             />
-            {!!catalogData?.files?.length && (
-                <Grid className={'section'}>
-                    <Grid.Row>
-                        <Grid.Column
-                            computer={6}
-                            tablet={16}
-                            mobile={16}
-                        >
-                            <Chart
-                                loading={catalogLoading}
-                                config={chart_coordinates}
-                                data={chartData ? [chartData] : undefined}
-                            />
-                        </Grid.Column>
-                        <Grid.Column
-                            computer={10}
-                            tablet={16}
-                            mobile={16}
-                        >
-                            <Chart
-                                loading={catalogLoading}
-                                config={chart_coordlines}
-                                data={
-                                    chartRa && chartDec
-                                        ? [chartRa, chartDec]
-                                        : undefined
-                                }
-                            />
-                        </Grid.Column>
-                    </Grid.Row>
-                    {!!chartHFR?.length && (
-                        <Grid.Row>
-                            <Grid.Column width={16}>
-                                <Chart
-                                    loading={catalogLoading}
-                                    config={chart_statistic}
-                                    data={
-                                        chartHFR && chartSNR
-                                            ? [chartHFR, chartSNR]
-                                            : undefined
-                                    }
-                                />
-                            </Grid.Column>
-                        </Grid.Row>
-                    )}
-                </Grid>
-            )}
+            <Grid className={'section'}>
+                <Grid.Column
+                    computer={6}
+                    tablet={16}
+                    mobile={16}
+                    style={{ paddingBottom: '0' }}
+                >
+                    <Deviation files={filesSorted} />
+                </Grid.Column>
+                <Grid.Column
+                    computer={10}
+                    tablet={16}
+                    mobile={16}
+                    style={{ paddingBottom: '0' }}
+                >
+                    <Coordinates files={filesSorted} />
+                </Grid.Column>
+                {!!filesSorted?.filter(
+                    ({ star_count, hfr }) => star_count && hfr
+                ).length && (
+                    <Grid.Column
+                        width={16}
+                        style={{ paddingBottom: '0' }}
+                    >
+                        <FilesQuality files={filesSorted} />
+                    </Grid.Column>
+                )}
+            </Grid>
             <FilesTable
                 loader={catalogLoading}
                 objectName={typeof objectName === 'string' ? objectName : ''}

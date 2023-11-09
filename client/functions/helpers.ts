@@ -75,6 +75,16 @@ export const getTimeFromSec = (sec: number, full: boolean = false): string => {
     return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m)
 }
 
+/**
+ * @param date
+ */
+export const formatDate = (
+    date: string | Date | undefined
+): string | undefined =>
+    date
+        ? moment.utc(date).utcOffset('GMT+05:00').format('D.MM.Y, H:mm')
+        : undefined
+
 export const timeAgo = (sec: number | null): string => {
     if (sec === null || sec <= 0) return 'обновлено недавно'
 
