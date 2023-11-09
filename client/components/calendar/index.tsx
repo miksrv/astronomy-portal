@@ -1,7 +1,7 @@
 import { useWeatherGetStatisticQuery } from '@/api/api'
 import { TStatisticTelescope } from '@/api/types'
+import { dateAddMonth, dateExtractMonth, formatDate } from '@/functions/helpers'
 import classNames from 'classnames'
-import moment, { Moment } from 'moment'
 import React, { useMemo, useState } from 'react'
 import { Button, Dimmer, Loader } from 'semantic-ui-react'
 
@@ -14,17 +14,17 @@ type TWeatherDays = {
     bad: number
 }
 
-type TCalendarProps = {
+interface CalendarProps {
     eventsTelescope?: TStatisticTelescope[]
 }
 
-const Calendar: React.FC<TCalendarProps> = ({ eventsTelescope }) => {
-    const [calendarDate, setCalendarDate] = useState<Moment>(moment())
-    const weekDayShort = moment.weekdaysShort(true)
+const Calendar: React.FC<CalendarProps> = ({ eventsTelescope }) => {
+    const [calendarDate, setCalendarDate] = useState<Date>(new Date())
+    const daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС']
 
     const { data: weatherData, isFetching: weatherLoading } =
         useWeatherGetStatisticQuery({
-            period: moment(calendarDate).format('MM-Y')
+            period: formatDate(calendarDate, 'MM-Y')
         })
 
     const weatherDays = useMemo(() => {
@@ -59,22 +59,18 @@ const Calendar: React.FC<TCalendarProps> = ({ eventsTelescope }) => {
                         color={'yellow'}
                         icon={'angle left'}
                         onClick={() =>
-                            setCalendarDate(
-                                moment(calendarDate.subtract(1, 'month'))
-                            )
+                            setCalendarDate(dateExtractMonth(calendarDate, 1))
                         }
                     />
                     <span className={styles.currentMonth}>
-                        {calendarDate.format('MMMM Y')}
+                        {formatDate(calendarDate, 'MMMM YYYY')}
                     </span>
                     <Button
                         size={'mini'}
                         color={'yellow'}
                         icon={'angle right'}
                         onClick={() =>
-                            setCalendarDate(
-                                moment(calendarDate.add(1, 'month'))
-                            )
+                            setCalendarDate(dateAddMonth(calendarDate, 1))
                         }
                     />
                 </div>
@@ -96,7 +92,7 @@ const Calendar: React.FC<TCalendarProps> = ({ eventsTelescope }) => {
                 <table className={styles.calendarDay}>
                     <thead>
                         <tr>
-                            {weekDayShort.map((day, key) => (
+                            {daysOfWeek.map((day, key) => (
                                 <th key={key}>{day}</th>
                             ))}
                         </tr>

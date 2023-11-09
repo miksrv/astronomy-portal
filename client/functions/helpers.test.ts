@@ -1,4 +1,10 @@
+import dayjs from 'dayjs'
+
 import {
+    dateAddMonth,
+    dateExtractMonth,
+    formatDate,
+    formatTimestamp,
     getTimeFromSec,
     isOutdated,
     range,
@@ -84,6 +90,36 @@ describe('helpers', () => {
             inputArray.forEach((item) => {
                 expect(outputArray).toContain(item)
             })
+        })
+    })
+
+    describe('Date Utils', () => {
+        it('formatDate should format date correctly', () => {
+            const date = '2023-01-15T12:30:00Z'
+            const formattedDate = formatDate(date, 'YYYY-MM-DD HH:mm')
+            expect(formattedDate).toBe('2023-01-15 04:30')
+        })
+
+        it('formatTimestamp should format timestamp correctly', () => {
+            const fixedDate = '2023-01-15T12:30:00Z'
+            const timestamp = dayjs(fixedDate).unix()
+            const formattedTimestamp = formatTimestamp(
+                timestamp,
+                'YYYY-MM-DD HH:mm'
+            )
+            expect(formattedTimestamp).toBe('2023-01-15 04:30')
+        })
+
+        it('dateExtractMonth should extract month correctly', () => {
+            const date = '2023-01-15T12:30:00Z'
+            const extractedDate = dateExtractMonth(date, 2)
+            expect(extractedDate.toISOString()).toBe('2022-11-15T12:30:00.000Z')
+        })
+
+        it('dateAddMonth should add month correctly', () => {
+            const date = '2023-01-15T12:30:00Z'
+            const addedDate = dateAddMonth(date, 2)
+            expect(addedDate.toISOString()).toBe('2023-03-15T11:30:00.000Z')
         })
     })
 })

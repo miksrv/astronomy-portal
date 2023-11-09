@@ -1,12 +1,7 @@
-import { Moment } from 'moment'
 import React from 'react'
 import SunCalc from 'suncalc'
 
 import styles from './styles.module.sass'
-
-type TMoonPhaseProps = {
-    date: Moment
-}
 
 const phases: any = {
     /* 🌒 */ '0': '2',
@@ -20,10 +15,14 @@ const phases: any = {
     /* 🌑 */ '1': '1'
 }
 
-const MoonPhase: React.FC<TMoonPhaseProps> = ({ date }) => {
-    const phase: number =
-        Math.round(SunCalc.getMoonIllumination(date).phase * 8) / 8
-    const moonPhaseClass: string = 'moonPhase' + phases[phase.toString()]
+interface MoonPhaseProps {
+    date: Date | string
+}
+
+const MoonPhase: React.FC<MoonPhaseProps> = ({ date }) => {
+    const illumination = SunCalc.getMoonIllumination(new Date(date))
+    const phase = Math.round(illumination.phase * 8) / 8
+    const moonPhaseClass = 'moonPhase' + phases[phase.toString()]
 
     return <span className={styles[moonPhaseClass]} />
 }

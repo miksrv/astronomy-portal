@@ -2,9 +2,8 @@ import { editCatalog, openFormCatalog } from '@/api/applicationSlice'
 import { hosts } from '@/api/constants'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { TCatalog } from '@/api/types'
-import { getTimeFromSec } from '@/functions/helpers'
+import { formatDate, getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
-import moment from 'moment'
 import Image from 'next/image'
 import React from 'react'
 import { Dimmer, Grid, Icon, Loader, Message } from 'semantic-ui-react'
@@ -30,12 +29,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
     const dispatch = useAppDispatch()
     const isAuth = useAppSelector((state) => state.auth.isAuth)
 
-    const date = catalog?.updated
-        ? moment
-              .utc(catalog.updated)
-              .utcOffset('GMT+05:00')
-              .format('D.MM.Y, H:mm')
-        : '---'
+    const date = catalog?.updated ? formatDate(catalog.updated) : '---'
     const exposure = catalog?.statistic?.exposure
         ? getTimeFromSec(catalog.statistic.exposure, true)
         : '---'

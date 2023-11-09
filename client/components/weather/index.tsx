@@ -1,7 +1,6 @@
 import { useWeatherGetCurrentQuery } from '@/api/api'
-import { timeAgo } from '@/functions/helpers'
+import { formatTimestamp, timeAgo } from '@/functions/helpers'
 import classNames from 'classnames'
-import moment from 'moment'
 import React from 'react'
 import { Dimmer, Grid, Loader } from 'semantic-ui-react'
 
@@ -81,9 +80,7 @@ const Weather: React.FC = () => {
                 Обновлено:{' '}
                 <strong>
                     {data
-                        ? moment
-                              .unix(data.timestamp.update)
-                              .format('DD.MM.Y, H:mm:ss')
+                        ? formatTimestamp(data.timestamp.update)
                         : 'Загрузка...'}
                 </strong>{' '}
                 ({timeAgo(lastUpdate)})

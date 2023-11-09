@@ -1,5 +1,5 @@
+import { formatDate } from '@/functions/helpers'
 import classNames from 'classnames'
-import moment from 'moment'
 import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
 import { Grid } from 'semantic-ui-react'
@@ -13,8 +13,9 @@ const LAT = process.env.NEXT_PUBLIC_LAT ?? 51.7
 const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
 
 const AstronomyCalc: React.FC = () => {
-    const moonTimes = SunCalc.getMoonTimes(moment(), LAT, LON)
-    const sunTimes = SunCalc.getTimes(moment(), LAT, LON)
+    const currentDate = new Date()
+    const moonTimes = SunCalc.getMoonTimes(currentDate, LAT, LON)
+    const sunTimes = SunCalc.getTimes(currentDate, LAT, LON)
 
     const [sunAltitude, setSunAltitude] = useState<string>('00.000')
     const [sunAzimuth, setSunAzimuth] = useState<string>('00.000')
@@ -22,8 +23,8 @@ const AstronomyCalc: React.FC = () => {
     const [moonAzimuth, setMoonAzimuth] = useState<string>('00.000')
 
     const tick = () => {
-        const sunPosition = SunCalc.getPosition(moment(), LAT, LON)
-        const moonPosition = SunCalc.getMoonPosition(moment(), LAT, LON)
+        const sunPosition = SunCalc.getPosition(currentDate, LAT, LON)
+        const moonPosition = SunCalc.getMoonPosition(currentDate, LAT, LON)
 
         setSunAltitude(((sunPosition.altitude * 180) / Math.PI).toFixed(2))
         setSunAzimuth(((sunPosition.azimuth * 180) / Math.PI).toFixed(2))
@@ -60,7 +61,7 @@ const AstronomyCalc: React.FC = () => {
                             <div className={styles.key}>
                                 {'↑ Рассвет:'}
                                 <span className={styles.val}>
-                                    {moment(sunTimes.dawn).format('H:mm')}
+                                    {formatDate(sunTimes.dawn, 'H:mm')}
                                 </span>
                             </div>
                         </Grid.Column>
@@ -71,7 +72,7 @@ const AstronomyCalc: React.FC = () => {
                             <div className={styles.key}>
                                 {'↓ Закат:'}
                                 <span className={styles.val}>
-                                    {moment(sunTimes.dusk).format('H:mm')}
+                                    {formatDate(sunTimes.dusk, 'H:mm')}
                                 </span>
                             </div>
                         </Grid.Column>
@@ -101,7 +102,7 @@ const AstronomyCalc: React.FC = () => {
                 </Grid.Column>
                 <Grid.Column width={8}>
                     <h4 className={styles.sectionTitle}>
-                        <MoonPhase date={moment()} /> Луна
+                        <MoonPhase date={currentDate} /> Луна
                     </h4>
                     <Grid className={styles.columnTable}>
                         <Grid.Column
@@ -111,7 +112,7 @@ const AstronomyCalc: React.FC = () => {
                             <div className={styles.key}>
                                 {'↑ Восход:'}
                                 <span className={styles.val}>
-                                    {moment(moonTimes.rise).format('H:mm')}
+                                    {formatDate(moonTimes.rise, 'H:mm')}
                                 </span>
                             </div>
                         </Grid.Column>
@@ -122,7 +123,7 @@ const AstronomyCalc: React.FC = () => {
                             <div className={styles.key}>
                                 {'↓ Закат:'}
                                 <span className={styles.val}>
-                                    {moment(moonTimes.set).format('H:mm')}
+                                    {formatDate(moonTimes.set, 'H:mm')}
                                 </span>
                             </div>
                         </Grid.Column>

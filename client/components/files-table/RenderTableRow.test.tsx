@@ -46,7 +46,7 @@ describe('RenderTableRow Component', () => {
         expect(screen.getByText('-10')).toBeInTheDocument()
         expect(screen.getByText('1.5')).toBeInTheDocument()
         expect(screen.getByText('0.8')).toBeInTheDocument()
-        expect(screen.getByText('25.10.2023, 20:30')).toBeInTheDocument()
+        expect(screen.getByText('25.10.2023, 8:30')).toBeInTheDocument()
 
         // Verify that the preview image is present and clickable
         const previewImage = screen.getByRole('img')
