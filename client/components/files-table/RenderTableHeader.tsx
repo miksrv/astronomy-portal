@@ -19,7 +19,7 @@ type THeaderFields = {
 export const HEADER_FIELDS: THeaderFields[] = [
     { key: 'preview', name: '' },
     { key: 'file_name', name: 'Имя файла' },
-    { key: 'exptime', name: 'Выдержка' },
+    { key: 'exptime', name: 'sec' },
     { key: 'filter', name: 'Фильтр' },
     { key: 'ccd_temp', name: '°C' },
     { key: 'gain', name: 'Gain' },
