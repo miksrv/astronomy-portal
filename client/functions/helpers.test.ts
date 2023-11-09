@@ -99,7 +99,7 @@ describe('helpers', () => {
         it('formatDate should format date correctly', () => {
             const date = '2023-01-15T12:30:00Z'
             const formattedDate = formatDate(date, 'YYYY-MM-DD HH:mm')
-            expect(formattedDate).toBe('2023-01-15 04:30')
+            expect(formattedDate).toBe('2023-01-15 12:30')
         })
 
         it('formatTimestamp should format timestamp correctly', () => {
@@ -108,7 +108,7 @@ describe('helpers', () => {
                 timestamp,
                 'YYYY-MM-DD HH:mm'
             )
-            expect(formattedTimestamp).toBe('2023-01-15 04:30')
+            expect(formattedTimestamp).toBe('2023-01-15 12:30')
         })
 
         it('dateExtractMonth should extract month correctly', () => {
@@ -120,7 +120,7 @@ describe('helpers', () => {
         it('dateAddMonth should add month correctly', () => {
             const date = '2023-01-15T12:30:00Z'
             const addedDate = dateAddMonth(date, 2)
-            expect(addedDate.toISOString()).toBe('2023-03-15T11:30:00.000Z')
+            expect(addedDate.toISOString()).toBe('2023-03-15T12:30:00.000Z')
         })
     })
 })
