@@ -94,6 +94,8 @@ describe('helpers', () => {
     })
 
     describe('Date Utils', () => {
+        const fixedDate = '2023-01-15T12:30:00Z'
+
         it('formatDate should format date correctly', () => {
             const date = '2023-01-15T12:30:00Z'
             const formattedDate = formatDate(date, 'YYYY-MM-DD HH:mm')
@@ -101,7 +103,6 @@ describe('helpers', () => {
         })
 
         it('formatTimestamp should format timestamp correctly', () => {
-            const fixedDate = '2023-01-15T12:30:00Z'
             const timestamp = dayjs(fixedDate).unix()
             const formattedTimestamp = formatTimestamp(
                 timestamp,
