@@ -10,25 +10,32 @@ import {
 import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
 import { isOutdated, sliceText } from '@/functions/helpers'
+import { formatDate } from '@/functions/helpers'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/dist/client/router'
-import dynamic from 'next/dynamic'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
+import {
+    CartesianGrid,
+    Cell,
+    Line,
+    LineChart,
+    ReferenceLine,
+    ResponsiveContainer,
+    Scatter,
+    ScatterChart,
+    Tooltip,
+    XAxis,
+    YAxis,
+    ZAxis
+} from 'recharts'
 import { Grid, Message } from 'semantic-ui-react'
 
-import chart_coordinates from '@/components/chart/chart_coordinates'
-import chart_coordlines from '@/components/chart/chart_coordlines'
-import chart_statistic from '@/components/chart/chart_statistic'
 import FilesTable from '@/components/files-table'
 import ObjectCloud from '@/components/object-cloud'
 import ObjectSection from '@/components/objects-section'
 import PhotoTable from '@/components/photo-table'
-
-const Chart = dynamic(() => import('@/components/chart'), {
-    ssr: false
-})
 
 // Only if we build application as static HTML
 // export const getStaticPaths = async () => {
@@ -98,54 +105,40 @@ const ObjectItemPage: NextPage = () => {
         [catalogData, objectName]
     )
 
-    const [chartData, setChartData] = useState<[number, number][]>()
-    const [chartRa, setChartRa] = useState<number[]>()
-    const [chartDec, setChartDec] = useState<number[]>()
-    const [chartHFR, setChartHFR] = useState<number[]>()
-    const [chartSNR, setChartSNR] = useState<number[]>()
-    const [devRa, setDevRa] = useState<number>(0)
-    const [devDec, setDevDec] = useState<number>(0)
+    const filesSorted = useMemo(
+        () =>
+            [...(catalogData?.files || [])]?.sort(
+                (a, b) =>
+                    new Date(a.date_obs).getTime() -
+                    new Date(b.date_obs).getTime()
+            ),
+        [catalogData?.files]
+    )
 
-    useEffect(() => {
-        if (catalogData?.files?.length) {
-            let middleRa = 0
-            let middleDec = 0
-            let counter = 0
-            let tmpChartData: [number, number][] = []
-            let tmpChartRa: number[] = []
-            let tmpChartDec: number[] = []
-            let tmpChartHFR: number[] = []
-            let tmpChartSNR: number[] = []
+    const deviationRa: number = useMemo(() => {
+        const max = Math.max.apply(
+            null,
+            catalogData?.files?.map(({ ra }) => ra) || []
+        )
+        const min = Math.min.apply(
+            null,
+            catalogData?.files?.map(({ ra }) => ra) || []
+        )
 
-            catalogData?.files.forEach((item) => {
-                middleRa += item.ra
-                middleDec += item.dec
-                counter += 1
+        return Math.round((max - min) * 100) / 100
+    }, [catalogData?.files])
 
-                tmpChartData.push([item.ra, item.dec])
-                tmpChartRa.push(item.ra)
-                tmpChartDec.push(item.dec)
+    const deviationDec: number = useMemo(() => {
+        const max = Math.max.apply(
+            null,
+            catalogData?.files?.map(({ dec }) => dec) || []
+        )
+        const min = Math.min.apply(
+            null,
+            catalogData?.files?.map(({ dec }) => dec) || []
+        )
 
-                if (item.hfr) {
-                    tmpChartHFR.push(item.hfr)
-                }
-
-                if (item.sky_background) {
-                    tmpChartSNR.push(item.sky_background)
-                }
-            })
-
-            setDevRa(Math.max(...tmpChartRa) - Math.min(...tmpChartRa))
-            setDevDec(Math.max(...tmpChartDec) - Math.min(...tmpChartDec))
-            setChartDec(tmpChartDec)
-            setChartRa(tmpChartRa)
-            setChartData(tmpChartData)
-            setChartHFR(tmpChartHFR)
-            setChartSNR(tmpChartSNR)
-
-            chart_coordinates.xAxis.plotLines[0].value = middleRa / counter
-            chart_coordinates.yAxis.plotLines[0].value = middleDec / counter
-        }
+        return Math.round((max - min) * 100) / 100
     }, [catalogData?.files])
 
     return (
@@ -174,8 +167,8 @@ const ObjectItemPage: NextPage = () => {
                 loader={catalogLoading}
                 error={catalogError}
                 catalog={catalogData}
-                deviationRa={Math.round(devRa * 100) / 100}
-                deviationDec={Math.round(devDec * 100) / 100}
+                deviationRa={deviationRa}
+                deviationDec={deviationDec}
             />
             <Message
                 warning={true}
@@ -201,53 +194,295 @@ const ObjectItemPage: NextPage = () => {
                 photos={photoList?.items}
                 loader={photoLoading}
             />
-            {!!catalogData?.files?.length && (
-                <Grid className={'section'}>
-                    <Grid.Row>
-                        <Grid.Column
-                            computer={6}
-                            tablet={16}
-                            mobile={16}
+            <Grid className={'section'}>
+                <Grid.Column
+                    computer={6}
+                    tablet={16}
+                    mobile={16}
+                    style={{ paddingBottom: '0' }}
+                >
+                    <div
+                        className={'box table'}
+                        style={{ height: '250px' }}
+                    >
+                        <ResponsiveContainer
+                            width='100%'
+                            height='100%'
+                            style={{ background: '#333333' }}
                         >
-                            <Chart
-                                loading={catalogLoading}
-                                config={chart_coordinates}
-                                data={chartData ? [chartData] : undefined}
-                            />
-                        </Grid.Column>
-                        <Grid.Column
-                            computer={10}
-                            tablet={16}
-                            mobile={16}
+                            <ScatterChart
+                                width={800}
+                                height={300}
+                                margin={{
+                                    bottom: 10,
+                                    left: 10,
+                                    right: 10,
+                                    top: 10
+                                }}
+                            >
+                                <CartesianGrid
+                                    stroke={'#676767'}
+                                    strokeDasharray={'3'}
+                                />
+                                <XAxis
+                                    hide={true}
+                                    type='number'
+                                    dataKey='ra'
+                                    name='RA'
+                                    unit='°'
+                                    domain={['auto', 'auto']}
+                                />
+                                <YAxis
+                                    tickCount={10}
+                                    hide={true}
+                                    type='number'
+                                    dataKey='dec'
+                                    name='DEC'
+                                    unit='°'
+                                    domain={['auto', 'auto']}
+                                />
+                                <ZAxis range={[20, 25]} />
+                                <ReferenceLine
+                                    x={
+                                        filesSorted.reduce(
+                                            (total, next) => total + next.ra,
+                                            0
+                                        ) / filesSorted.length
+                                    }
+                                    stroke='red'
+                                    strokeDasharray='3 3'
+                                />
+                                <ReferenceLine
+                                    y={
+                                        filesSorted.reduce(
+                                            (total, next) => total + next.dec,
+                                            0
+                                        ) / filesSorted.length
+                                    }
+                                    stroke='red'
+                                    strokeDasharray='3 3'
+                                />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                                        borderColor: '#808083',
+                                        color: '#F0F0F0',
+                                        fontSize: '11px',
+                                        padding: '5px 10px'
+                                    }}
+                                    cursor={{ strokeDasharray: '3 3' }}
+                                    itemStyle={{
+                                        color: '#F0F0F0',
+                                        padding: 0
+                                    }}
+                                />
+                                <Scatter
+                                    stroke={'#e6a241'}
+                                    data={filesSorted}
+                                >
+                                    {filesSorted?.map((entry, index) => (
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={'#e6a241'}
+                                        />
+                                    ))}
+                                </Scatter>
+                            </ScatterChart>
+                        </ResponsiveContainer>
+                    </div>
+                </Grid.Column>
+                <Grid.Column
+                    computer={10}
+                    tablet={16}
+                    mobile={16}
+                    style={{ paddingBottom: '0' }}
+                >
+                    <div
+                        className={'box table'}
+                        style={{ height: '250px' }}
+                    >
+                        <ResponsiveContainer
+                            width='100%'
+                            height='100%'
+                            style={{ background: '#333333' }}
                         >
-                            <Chart
-                                loading={catalogLoading}
-                                config={chart_coordlines}
-                                data={
-                                    chartRa && chartDec
-                                        ? [chartRa, chartDec]
-                                        : undefined
-                                }
-                            />
-                        </Grid.Column>
-                    </Grid.Row>
-                    {!!chartHFR?.length && (
-                        <Grid.Row>
-                            <Grid.Column width={16}>
-                                <Chart
-                                    loading={catalogLoading}
-                                    config={chart_statistic}
-                                    data={
-                                        chartHFR && chartSNR
-                                            ? [chartHFR, chartSNR]
-                                            : undefined
+                            <LineChart
+                                width={800}
+                                height={300}
+                                data={filesSorted}
+                                margin={{
+                                    bottom: 10,
+                                    left: -15,
+                                    right: -15,
+                                    top: 10
+                                }}
+                            >
+                                <CartesianGrid
+                                    stroke={'#676767'}
+                                    strokeDasharray={'3'}
+                                />
+                                <YAxis
+                                    yAxisId='1'
+                                    domain={['auto', 'auto']}
+                                    type='number'
+                                    stroke={'#38bc57'}
+                                />
+                                <YAxis
+                                    yAxisId='2'
+                                    orientation='right'
+                                    domain={['auto', 'auto']}
+                                    stroke={'#08B8F4'}
+                                />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                                        borderColor: '#808083',
+                                        color: '#F0F0F0',
+                                        fontSize: '11px',
+                                        padding: '5px 10px'
+                                    }}
+                                    itemStyle={{ padding: 0 }}
+                                    labelFormatter={(label) =>
+                                        formatDate(
+                                            filesSorted?.[label]?.date_obs
+                                        )
                                     }
                                 />
-                            </Grid.Column>
-                        </Grid.Row>
-                    )}
-                </Grid>
-            )}
+                                <Line
+                                    type='monotone'
+                                    dataKey='ra'
+                                    name='RA'
+                                    unit='°'
+                                    stroke={'#38bc57'}
+                                    yAxisId='1'
+                                    dot={false}
+                                />
+                                <Line
+                                    type='monotone'
+                                    dataKey='dec'
+                                    name='DEC'
+                                    unit='°'
+                                    stroke={'#08B8F4'}
+                                    fill='#8884d8'
+                                    yAxisId='2'
+                                    dot={false}
+                                />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </Grid.Column>
+                {!!filesSorted?.filter(
+                    ({ star_count, hfr }) => star_count && hfr
+                ).length && (
+                    <Grid.Column
+                        width={16}
+                        style={{ paddingBottom: '0' }}
+                    >
+                        <div
+                            className={'box table'}
+                            style={{ height: '250px' }}
+                        >
+                            <ResponsiveContainer
+                                width='100%'
+                                height='100%'
+                                style={{ background: '#333333' }}
+                            >
+                                <LineChart
+                                    width={800}
+                                    height={300}
+                                    data={filesSorted?.filter(
+                                        ({ star_count, hfr }) =>
+                                            star_count && hfr
+                                    )}
+                                    margin={{
+                                        bottom: 10,
+                                        left: -35,
+                                        right: -25,
+                                        top: 10
+                                    }}
+                                >
+                                    <CartesianGrid
+                                        stroke={'#676767'}
+                                        strokeDasharray={'3'}
+                                    />
+                                    <YAxis
+                                        yAxisId='1'
+                                        domain={['auto', 'auto']}
+                                        type='number'
+                                        stroke={'#b8bc18'}
+                                    />
+                                    <YAxis
+                                        yAxisId='2'
+                                        orientation='right'
+                                        domain={['auto', 'auto']}
+                                        stroke={'#e64b24'}
+                                    />
+                                    <YAxis
+                                        hide={true}
+                                        yAxisId='3'
+                                        orientation='right'
+                                        domain={['auto', 'auto']}
+                                        stroke={'#7face6'}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor:
+                                                'rgba(0, 0, 0, 0.85)',
+                                            borderColor: '#808083',
+                                            color: '#F0F0F0',
+                                            fontSize: '11px',
+                                            padding: '5px 10px'
+                                        }}
+                                        itemStyle={{ padding: 0 }}
+                                        labelFormatter={(label) => (
+                                            <>
+                                                <div>
+                                                    {formatDate(
+                                                        filesSorted?.[label]
+                                                            ?.date_obs
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    {
+                                                        filesSorted?.[label]
+                                                            ?.filter
+                                                    }
+                                                </div>
+                                            </>
+                                        )}
+                                    />
+                                    <Line
+                                        type='monotone'
+                                        dataKey='hfr'
+                                        name='HFR'
+                                        stroke={'#b8bc18'}
+                                        yAxisId='1'
+                                        dot={false}
+                                    />
+                                    <Line
+                                        type='monotone'
+                                        dataKey='star_count'
+                                        name='Stars'
+                                        stroke={'#e64b24'}
+                                        fill='#8884d8'
+                                        yAxisId='2'
+                                        dot={false}
+                                    />
+                                    <Line
+                                        type='monotone'
+                                        dataKey='sky_background'
+                                        name='Background'
+                                        stroke={'#7face6'}
+                                        fill='#8884d8'
+                                        yAxisId='3'
+                                        dot={false}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </Grid.Column>
+                )}
+            </Grid>
             <FilesTable
                 loader={catalogLoading}
                 objectName={typeof objectName === 'string' ? objectName : ''}
