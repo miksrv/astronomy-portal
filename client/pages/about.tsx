@@ -145,7 +145,8 @@ const AboutPage: NextPage = () => {
                         handlePhotoClick(photos.index)
                     }}
                 />
-                <br />ю<h2 className={'pageTitle'}> Наша команда</h2>
+                <br />
+                <h2 className={'pageTitle'}> Наша команда</h2>
                 <p>
                     Мы работаем в самых разных сферах, но всех нас объединяет
                     одно - любовь к космосу. С 2016 года мы вместе смотрим на

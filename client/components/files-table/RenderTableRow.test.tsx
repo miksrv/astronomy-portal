@@ -1,4 +1,5 @@
 import { TFIle, TFilterTypes } from '@/api/types'
+import { formatDate } from '@/functions/helpers'
 import { fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
 
@@ -46,7 +47,9 @@ describe('RenderTableRow Component', () => {
         expect(screen.getByText('-10')).toBeInTheDocument()
         expect(screen.getByText('1.5')).toBeInTheDocument()
         expect(screen.getByText('0.8')).toBeInTheDocument()
-        expect(screen.getByText('25.10.2023, 20:30')).toBeInTheDocument()
+        expect(
+            screen.getByText(formatDate(sampleFile.date_obs)!)
+        ).toBeInTheDocument()
 
         // Verify that the preview image is present and clickable
         const previewImage = screen.getByRole('img')

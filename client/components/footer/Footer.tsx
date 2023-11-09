@@ -1,5 +1,5 @@
+import { formatDate } from '@/functions/helpers'
 import packageInfo from '@/package.json'
-import moment from 'moment/moment'
 import Image from 'next/image'
 import React from 'react'
 
@@ -29,8 +29,8 @@ const Footer: React.FC = () => (
                 />
                 {'Mik'}
             </a>{' '}
-            {moment().format('Y')}, Version <span>{packageInfo.version}</span>{' '}
-            <span>({update})</span>
+            {formatDate(new Date(), 'YYYY')}, Version{' '}
+            <span>{packageInfo.version}</span> <span>({update})</span>
         </div>
     </footer>
 )

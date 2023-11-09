@@ -1,6 +1,7 @@
 import { TStatisticTelescope, TWeatherStatistic } from '@/api/types'
+import { formatDate } from '@/functions/helpers'
 import classNames from 'classnames'
-import moment, { Moment } from 'moment'
+import dayjs, { Dayjs } from 'dayjs'
 import Image from 'next/image'
 import React from 'react'
 import { Icon, Popup } from 'semantic-ui-react'
@@ -12,23 +13,23 @@ import SunIcon from '@/public/images/sun.png'
 
 import styles from './styles.module.sass'
 
-type TRenderCalendarProps = {
-    calendarDate: Moment
+const LAT = process.env.NEXT_PUBLIC_LAT ?? 51.7
+const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
+
+interface RenderCalendarProps {
+    calendarDate: Date | Dayjs
     eventsWeather?: TWeatherStatistic[]
     eventsTelescope?: TStatisticTelescope[]
 }
 
-const LAT = process.env.NEXT_PUBLIC_LAT ?? 51.7
-const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
-
-const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
+const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
     const { calendarDate, eventsWeather, eventsTelescope } = props
 
-    const daysInMonth: number = calendarDate.daysInMonth()
+    const daysInMonth: number = dayjs(calendarDate).daysInMonth()
     const firstDayOfMonth: number = parseInt(
-        moment(calendarDate).startOf('month').format('d')
+        dayjs(calendarDate).startOf('month').format('d')
     )
-    const isCurrentMonth = moment(calendarDate).isSame(new Date(), 'month')
+    const isCurrentMonth = dayjs(calendarDate).isSame(new Date(), 'month')
 
     const getWeatherClass = (cond: number | undefined) => {
         if (typeof cond === 'undefined' || cond === null) return ''
@@ -51,20 +52,21 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
 
     let daysMonth = []
     for (let d = 1; d <= daysInMonth; d++) {
-        const currentDate = moment(calendarDate)
+        const currentDayDate = dayjs(calendarDate)
             .startOf('month')
             .add(d - 1, 'days')
+
         const currentDay: boolean =
-            isCurrentMonth && d === parseInt(calendarDate.format('DD'))
-        const moonTimes = SunCalc.getMoonTimes(currentDate, LAT, LON)
-        const sunTimes = SunCalc.getTimes(currentDate, LAT, LON)
+            isCurrentMonth && d === parseInt(formatDate(calendarDate, 'DD')!)
+        const moonTimes = SunCalc.getMoonTimes(currentDayDate, LAT, LON)
+        const sunTimes = SunCalc.getTimes(currentDayDate, LAT, LON)
 
         const itemWeatherEvent = eventsWeather
-            ?.filter((item) => currentDate.isSame(item.date, 'day'))
+            ?.filter((item) => currentDayDate.isSame(item.date, 'day'))
             ?.pop()
 
         const itemAstroEvents = eventsTelescope?.find(({ telescope_date }) =>
-            currentDate.isSame(telescope_date, 'day')
+            currentDayDate.isSame(telescope_date, 'day')
         )
 
         daysMonth.push(
@@ -88,16 +90,22 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                     {d < 10 ? `0${d}` : d}
                 </div>
                 <div className={styles.mobileMoonIcon}>
-                    <MoonPhase date={currentDate} />
+                    <MoonPhase date={currentDayDate.toDate()} />
                 </div>
                 <div className={styles.moonEvent}>
-                    <MoonPhase date={currentDate} />
-                    <span className={styles.rise}>
-                        {moment(moonTimes.rise).format('H:mm')}
-                    </span>
-                    <span className={styles.set}>
-                        {moment(moonTimes.set).format('H:mm')}
-                    </span>
+                    <MoonPhase date={currentDayDate.toDate()} />
+
+                    {moonTimes.rise && (
+                        <span className={styles.rise}>
+                            {formatDate(moonTimes.rise, 'H:mm')}
+                        </span>
+                    )}
+
+                    {moonTimes.set && (
+                        <span className={styles.set}>
+                            {formatDate(moonTimes.set, 'H:mm')}
+                        </span>
+                    )}
                 </div>
 
                 <div className={styles.sunEvent}>
@@ -108,12 +116,17 @@ const RenderCalendar: React.FC<TRenderCalendarProps> = (props) => {
                         width={16}
                         height={16}
                     />
-                    <span className={styles.rise}>
-                        {moment(sunTimes.dawn).format('H:mm')}
-                    </span>
-                    <span className={styles.set}>
-                        {moment(sunTimes.dusk).format('H:mm')}
-                    </span>
+                    {sunTimes.dawn && (
+                        <span className={styles.rise}>
+                            {formatDate(sunTimes.dawn, 'H:mm')}
+                        </span>
+                    )}
+
+                    {sunTimes.dusk && (
+                        <span className={styles.set}>
+                            {formatDate(sunTimes.dusk, 'H:mm')}
+                        </span>
+                    )}
                 </div>
                 {itemWeatherEvent && (
                     <div className={styles.weatherEvent}>

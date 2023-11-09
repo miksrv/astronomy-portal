@@ -1,9 +1,8 @@
 import { useBlogGetListPopularQuery, useBlogGetStatisticQuery } from '@/api/api'
 import { hosts } from '@/api/constants'
 import { TBlog } from '@/api/types'
-import { declOfNum } from '@/functions/helpers'
+import { declOfNum, formatTimestamp } from '@/functions/helpers'
 import classNames from 'classnames'
-import moment from 'moment/moment'
 import React, { createRef } from 'react'
 import {
     Button,
@@ -96,9 +95,9 @@ const BlogPage: React.FC<TBlogPage> = ({ loading, posts, total, page }) => {
                                             title={'Прочитать новость в канале'}
                                             rel={'nofollow'}
                                         >
-                                            {moment
-                                                .unix(item.telegram_date)
-                                                .format('MM/DD/Y, H:mm')}
+                                            {formatTimestamp(
+                                                item.telegram_date
+                                            )}
                                         </a>
                                     </div>
                                 </div>

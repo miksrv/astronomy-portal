@@ -15,8 +15,8 @@ import {
     TFilters,
     TPhoto
 } from '@/api/types'
+import { formatDate } from '@/functions/helpers'
 import isEqual from 'lodash-es/isEqual'
-import moment from 'moment/moment'
 import Image from 'next/image'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import SemanticDatepicker from 'react-semantic-ui-datepickers'
@@ -224,9 +224,10 @@ const PhotoFormModal: React.FC = () => {
                                 onChange={(event, data) =>
                                     setFormState({
                                         ...formState,
-                                        date: moment(data.value as Date).format(
-                                            'Y-MM-DD'
-                                        )
+                                        date: formatDate(
+                                            data.value as Date,
+                                            'YYYY-MM-DD'
+                                        )!
                                     })
                                 }
                                 error={findError('date')}

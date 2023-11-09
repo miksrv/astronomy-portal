@@ -1,6 +1,6 @@
 import { hosts } from '@/api/constants'
 import { TFIle } from '@/api/types'
-import moment from 'moment'
+import { formatDate } from '@/functions/helpers'
 import Image from 'next/image'
 import React from 'react'
 import { Table } from 'semantic-ui-react'
@@ -66,13 +66,8 @@ const RenderTableRow: React.FC<TTableRow> = ({
             </>
         )}
         <Table.Cell className={styles.moonDate}>
-            <MoonPhase
-                date={moment.utc(file.date_obs).utcOffset('GMT+05:00')}
-            />
-            {moment
-                .utc(file.date_obs)
-                .utcOffset('GMT+05:00')
-                .format('D.MM.Y, H:mm')}
+            <MoonPhase date={file.date_obs} />
+            {formatDate(file.date_obs)}
         </Table.Cell>
     </Table.Row>
 )

@@ -1,7 +1,6 @@
 import { hosts } from '@/api/constants'
 import { FilterList, TPhoto } from '@/api/types'
-import { getTimeFromSec } from '@/functions/helpers'
-import moment from 'moment'
+import { formatDate, getTimeFromSec } from '@/functions/helpers'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -30,7 +29,7 @@ const RenderTableRow: React.FC<TTableRowProps> = ({ photo, hideRows }) => (
                 />
             </Link>
         </Table.Cell>
-        <Table.Cell content={moment(photo.date).format('DD.MM.Y')} />
+        <Table.Cell content={formatDate(photo.date, 'DD.MM.YYYY')} />
         <Table.Cell content={photo.statistic?.frames || '---'} />
         <Table.Cell
             content={

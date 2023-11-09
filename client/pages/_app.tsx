@@ -1,6 +1,7 @@
 import { wrapper } from '@/api/store'
 import '@/styles/globals.sass'
-import 'moment/locale/ru'
+import dayjs from 'dayjs'
+import 'dayjs/locale/ru'
 import type { AppProps } from 'next/app'
 import { Montserrat } from 'next/font/google'
 import NextNProgress from 'nextjs-progressbar'
@@ -13,6 +14,8 @@ import { Container } from 'semantic-ui-react'
 import Footer from '@/components/footer'
 import Header from '@/components/header'
 import Sidebar from '@/components/sidebar'
+
+dayjs.locale('ru')
 
 export const montserrat = Montserrat({ subsets: ['latin'] })
 export function App({ Component, pageProps }: AppProps) {

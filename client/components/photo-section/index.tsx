@@ -2,9 +2,8 @@ import { editPhoto, openFormPhoto } from '@/api/applicationSlice'
 import { hosts } from '@/api/constants'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
 import { TCatalog, TPhoto } from '@/api/types'
-import { getTimeFromSec } from '@/functions/helpers'
+import { formatDate, getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
-import moment from 'moment'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useState } from 'react'
@@ -55,7 +54,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = (props) => {
         undefined
     )
 
-    const photoDate = photo ? moment.utc(photo.date).format('D.MM.Y') : '---'
+    const photoDate = photo ? formatDate(photo.date, 'D.MM.YYYY') : '---'
 
     const exposure =
         !loader && photo?.statistic?.exposure

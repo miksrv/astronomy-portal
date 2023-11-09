@@ -1,4 +1,4 @@
-import moment from 'moment'
+import dayjs, { Dayjs } from 'dayjs'
 
 /**
  * Generates an array of numbers in a certain range and with a given step
@@ -49,7 +49,7 @@ export const declOfNum = (number: number, words: string[]) =>
  * @param date2
  */
 export const isOutdated = (date1: string, date2: string) =>
-    moment(date1).diff(moment(date2)) < 0
+    dayjs(date1).diff(dayjs(date2)) <= 0
 
 /**
  * Returns the formatted time elapsed since the beginning of the event
@@ -79,11 +79,26 @@ export const getTimeFromSec = (sec: number, full: boolean = false): string => {
  * @param date
  */
 export const formatDate = (
-    date: string | Date | undefined
+    date: string | Date | Dayjs | undefined,
+    format?: string
 ): string | undefined =>
-    date
-        ? moment.utc(date).utcOffset('GMT+05:00').format('D.MM.Y, H:mm')
-        : undefined
+    date ? dayjs(date).format(format ?? 'D.MM.YYYY, H:mm') : undefined
+
+export const formatTimestamp = (
+    timestamp: number | undefined,
+    format?: string
+): string | undefined =>
+    timestamp ? formatDate(dayjs.unix(timestamp), format) : undefined
+
+export const dateExtractMonth = (
+    date: string | Date | Dayjs,
+    monthCount: number
+): Date => dayjs(date).subtract(monthCount, 'month').toDate()
+
+export const dateAddMonth = (
+    date: string | Date | Dayjs,
+    monthCount: number
+): Date => dayjs(date).add(monthCount, 'month').toDate()
 
 export const timeAgo = (sec: number | null): string => {
     if (sec === null || sec <= 0) return 'обновлено недавно'
@@ -105,7 +120,7 @@ export const timeAgo = (sec: number | null): string => {
  * @param array
  * @returns {array}
  */
-export const shuffle = (array: any[]) => {
+export const shuffle = (array: any[]): any[] => {
     let currentIndex: number = array.length
     let temporaryValue
     let randomIndex

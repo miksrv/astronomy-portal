@@ -1,7 +1,6 @@
 import { TStatisticTelescope } from '@/api/types'
-import { getTimeFromSec } from '@/functions/helpers'
+import { formatDate, getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
-import moment from 'moment/moment'
 import Link from 'next/link'
 import React from 'react'
 import { Dimmer, Loader, Table } from 'semantic-ui-react'
@@ -55,13 +54,11 @@ const TelescopeWorkdays: React.FC<TTelescopeWorkdaysProps> = ({
                                     singleLine={true}
                                     className={styles.date}
                                 >
-                                    <MoonPhase
-                                        date={moment(day.telescope_date)}
-                                    />
-                                    {moment
-                                        .utc(day.telescope_date)
-                                        .utcOffset('GMT+05:00')
-                                        .format('D MMMM Y')}
+                                    <MoonPhase date={day.telescope_date} />
+                                    {formatDate(
+                                        day.telescope_date,
+                                        'D MMMM YYYY'
+                                    )}
                                 </Table.Cell>
                                 <Table.Cell
                                     singleLine={true}
