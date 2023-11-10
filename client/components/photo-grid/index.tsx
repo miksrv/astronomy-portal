@@ -9,7 +9,7 @@ import { Dimmer, Loader, Reveal } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
-type TPhotoGridProps = {
+interface PhotoGridProps {
     loading: boolean
     loaderCount?: number
     threeColumns?: boolean
@@ -17,7 +17,7 @@ type TPhotoGridProps = {
     catalog?: TCatalog[]
 }
 
-const PhotoGrid: React.FC<TPhotoGridProps> = ({
+const PhotoGrid: React.FC<PhotoGridProps> = ({
     loading,
     loaderCount,
     threeColumns,
@@ -78,11 +78,17 @@ const PhotoGrid: React.FC<TPhotoGridProps> = ({
     </div>
 )
 
-export const PhotosLoader: React.FC<{
+interface PhotosLoaderProps {
     count: number
     visible?: boolean
     threeColumns?: boolean
-}> = ({ count, visible, threeColumns }) => (
+}
+
+export const PhotosLoader: React.FC<PhotosLoaderProps> = ({
+    count,
+    visible,
+    threeColumns
+}) => (
     <>
         {visible &&
             range(1, count).map((item) => (
@@ -103,10 +109,12 @@ export const PhotosLoader: React.FC<{
     </>
 )
 
-export const PhotoImage: React.FC<{ photo: TPhoto; title: string }> = ({
-    photo,
-    title
-}) => (
+interface PhotoImageProps {
+    photo: TPhoto
+    title: string
+}
+
+export const PhotoImage: React.FC<PhotoImageProps> = ({ photo, title }) => (
     <Image
         src={`${hosts.photo}${photo.image_name}_thumb.${photo.image_ext}`}
         className={styles.photo}

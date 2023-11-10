@@ -15,7 +15,7 @@ import { NextSeo } from 'next-seo'
 import React, { useMemo, useState } from 'react'
 import { Message } from 'semantic-ui-react'
 
-import ObjectsTableToolbar from '@/components/objects-table-toolbar'
+import CatalogToolbar from '@/components/catalog-toolbar'
 import PhotoGrid from '@/components/photo-grid'
 
 export const getServerSideProps = wrapper.getServerSideProps(
@@ -90,7 +90,7 @@ const PhotosPage: NextPage = () => {
                     }
                 />
             )}
-            <ObjectsTableToolbar
+            <CatalogToolbar
                 search={search}
                 categories={categoriesData?.items}
                 onChangeSearch={setSearch}

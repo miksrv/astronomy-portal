@@ -17,7 +17,7 @@ import noImageServerUrl from '@/public/images/no-photo.png'
 
 import styles from './styles.module.sass'
 
-type TPhotoItemHeaderProps = {
+interface PhotoSectionProps {
     loader: boolean
     error?: boolean
     title?: string
@@ -25,26 +25,7 @@ type TPhotoItemHeaderProps = {
     catalog?: TCatalog
 }
 
-type TPhotoAuthorProps = {
-    name?: string
-    link?: string
-}
-
-const Author: React.FC<TPhotoAuthorProps> = ({ name, link }) =>
-    link ? (
-        <a
-            href={link}
-            title={name}
-            target='_blank'
-            rel='noreferrer'
-        >
-            {name}
-        </a>
-    ) : (
-        <span>{name || ''}</span>
-    )
-
-const PhotoSection: React.FC<TPhotoItemHeaderProps> = (props) => {
+const PhotoSection: React.FC<PhotoSectionProps> = (props) => {
     const { loader, title, photo, catalog } = props
 
     const dispatch = useAppDispatch()
@@ -240,5 +221,24 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = (props) => {
         </div>
     )
 }
+
+interface AuthorProps {
+    name?: string
+    link?: string
+}
+
+const Author: React.FC<AuthorProps> = ({ name, link }) =>
+    link ? (
+        <a
+            href={link}
+            title={name}
+            target='_blank'
+            rel='noreferrer'
+        >
+            {name}
+        </a>
+    ) : (
+        <span>{name || ''}</span>
+    )
 
 export default PhotoSection

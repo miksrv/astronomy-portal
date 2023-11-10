@@ -6,7 +6,10 @@ import { Icon } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
-type TPaginationProps = {
+const LEFT_PAGE = 'LEFT'
+const RIGHT_PAGE = 'RIGHT'
+
+interface PaginationProps {
     currentPage?: number
     totalPostCount?: number
     linkPart?: string
@@ -14,10 +17,7 @@ type TPaginationProps = {
     neighbours?: number
 }
 
-const LEFT_PAGE = 'LEFT'
-const RIGHT_PAGE = 'RIGHT'
-
-const Pagination: React.FC<TPaginationProps> = ({
+const Pagination: React.FC<PaginationProps> = ({
     currentPage = 1,
     totalPostCount = 0,
     linkPart,
