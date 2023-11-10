@@ -119,11 +119,11 @@ export interface APIResponsePhotoListNames {
 }
 
 export interface APIResponseStatistic {
-    photos_count: number
-    catalog_count: number
-    frames_count: number
-    total_exposure: number
-    files_size: number
+    photos: number
+    objects: number
+    frames: number
+    exposure: number
+    filesize: number
 }
 
 export interface APIResponseCategoryList {

@@ -15,8 +15,8 @@ type TCards = {
 const Statistic: React.FC = () => {
     const { data, isLoading } = useStatisticGetQuery()
 
-    const countFrames = data?.frames_count || 0
-    const countObjects = data?.catalog_count || 0
+    const countFrames = data?.frames || 0
+    const countObjects = data?.objects || 0
 
     const CARDS: TCards[] = [
         {
@@ -27,7 +27,7 @@ const Statistic: React.FC = () => {
         {
             icon: 'clock outline',
             name: 'Выдержка',
-            value: getTimeFromSec(data?.total_exposure || 0)
+            value: getTimeFromSec(data?.exposure || 0)
         },
         {
             icon: 'star outline',
@@ -37,13 +37,13 @@ const Statistic: React.FC = () => {
         {
             icon: 'disk',
             name: 'Данных (Гб)',
-            value: Math.round(((data?.files_size || 0) / 1024) * 100) / 100
+            value: Math.round(((data?.filesize || 0) / 1024) * 100) / 100
         }
     ]
 
     return (
         <Grid className={styles.section}>
-            <Grid.Row>
+            <Grid.Row className={styles.section}>
                 {CARDS.map((item) => (
                     <Grid.Column
                         key={item.name}

@@ -95,18 +95,16 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
                     handlerSortClick={handlerSortClick}
                 />
                 <Table.Body>
-                    {statisticData?.catalog_count &&
+                    {statisticData?.objects &&
                         loading &&
-                        range(1, statisticData.catalog_count || 20).map(
-                            (item) => (
-                                <Table.Row key={item}>
-                                    <Table.Cell
-                                        content={''}
-                                        colSpan={HeaderFields.length}
-                                    />
-                                </Table.Row>
-                            )
-                        )}
+                        range(1, statisticData.objects || 20).map((item) => (
+                            <Table.Row key={item}>
+                                <Table.Cell
+                                    content={''}
+                                    colSpan={HeaderFields.length}
+                                />
+                            </Table.Row>
+                        ))}
 
                     {sortedCatalog?.length && !loading ? (
                         sortedCatalog.map((item) => (
