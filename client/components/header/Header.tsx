@@ -52,8 +52,8 @@ export type TMenuItems = {
 export const menuItems: TMenuItems[] = [
     { link: '/blog', name: 'Блог' },
     { link: '/celestial', name: 'Карта' },
-    { label: 'photos_count', link: '/photos', name: 'Фото' },
-    { label: 'catalog_count', link: '/objects', name: 'Объекты' },
+    { label: 'photos', link: '/photos', name: 'Фото' },
+    { label: 'objects', link: '/objects', name: 'Объекты' },
     { link: '/dashboard', name: 'Телеметрия' },
     { link: '/about', name: 'О проекте' }
 ]

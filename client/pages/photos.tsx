@@ -99,7 +99,7 @@ const PhotosPage: NextPage = () => {
             <PhotoGrid
                 threeColumns={true}
                 loading={isLoading}
-                loaderCount={statisticData?.photos_count || 12}
+                loaderCount={statisticData?.photos || 12}
                 photos={listPhotos}
                 catalog={catalogData?.items}
             />

@@ -31,11 +31,11 @@ class Statistic extends ResourceController {
         $exposureSum = $filesModel->selectSum('exptime')->first();
 
         return $this->respond([
-            'photos_count'   => $photoModel->select('id')->countAllResults() ?? 0,
-            'catalog_count'  => $catalogModel->select('name')->countAllResults() ?? 0,
-            'frames_count'   => $framesCount ?? 0,
-            'total_exposure' => $exposureSum->exptime ?? 0,
-            'files_size'     => round($framesCount * FITS_FILE_SIZE) ?? 0
+            'photos'   => $photoModel->select('id')->countAllResults() ?? 0,
+            'objects'  => $catalogModel->select('name')->countAllResults() ?? 0,
+            'frames'   => $framesCount ?? 0,
+            'exposure' => $exposureSum->exptime ?? 0,
+            'filesize' => round($framesCount * FITS_FILE_SIZE) ?? 0
         ]);
     }
 
