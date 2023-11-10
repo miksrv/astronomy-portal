@@ -126,7 +126,7 @@ const PhotoSection: React.FC<TPhotoItemHeaderProps> = (props) => {
                     mobile={16}
                     className={styles.description}
                 >
-                    <h1 className={'pageTitle'}>
+                    <h1>
                         {title}
                         {isAuth && (
                             <span

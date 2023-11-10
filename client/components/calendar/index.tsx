@@ -24,7 +24,7 @@ const Calendar: React.FC<CalendarProps> = ({ eventsTelescope }) => {
 
     const { data: weatherData, isFetching: weatherLoading } =
         useWeatherGetStatisticQuery({
-            period: formatDate(calendarDate, 'MM-Y')
+            period: formatDate(calendarDate, 'MM-YYYY')
         })
 
     const weatherDays = useMemo(() => {
