@@ -6,7 +6,7 @@ import { Dimmer, Grid, Icon, Loader, SemanticICONS } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
-type TCards = {
+type StatisticCardType = {
     name: string
     icon: SemanticICONS
     value: number | string
@@ -15,14 +15,11 @@ type TCards = {
 const Statistic: React.FC = () => {
     const { data, isLoading } = useStatisticGetQuery()
 
-    const countFrames = data?.frames || 0
-    const countObjects = data?.objects || 0
-
-    const CARDS: TCards[] = [
+    const CARDS: StatisticCardType[] = [
         {
             icon: 'photo',
-            name: declOfNum(countFrames, ['Кадр', 'Кадра', 'Кадров']),
-            value: countFrames
+            name: declOfNum(data?.frames || 0, ['Кадр', 'Кадра', 'Кадров']),
+            value: data?.frames || 0
         },
         {
             icon: 'clock outline',
@@ -31,8 +28,12 @@ const Statistic: React.FC = () => {
         },
         {
             icon: 'star outline',
-            name: declOfNum(countObjects, ['Объект', 'Объекта', 'Объектов']),
-            value: countObjects
+            name: declOfNum(data?.objects || 0, [
+                'Объект',
+                'Объекта',
+                'Объектов'
+            ]),
+            value: data?.objects || 0
         },
         {
             icon: 'disk',

@@ -8,12 +8,12 @@ import { Table } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
-type TTableRowProps = {
+interface RenderTableRowProps {
     photo: TPhoto
     hideRows?: string[]
 }
 
-const RenderTableRow: React.FC<TTableRowProps> = ({ photo, hideRows }) => (
+const RenderTableRow: React.FC<RenderTableRowProps> = ({ photo, hideRows }) => (
     <Table.Row>
         <Table.Cell width={'one'}>
             <Link

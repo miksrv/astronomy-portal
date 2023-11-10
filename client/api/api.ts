@@ -237,7 +237,7 @@ export const api = createApi({
             Maybe<APIRequestPhotoList>
         >({
             keepUnusedDataFor: 3600,
-            providesTags: () => [{ id: 'LIST', type: 'Photo' }],
+            providesTags: () => ['Photo'],
             query: (params) => `photo${encodeQueryData(params)}`,
             transformErrorResponse: (response) => response.data
         }),
@@ -245,10 +245,7 @@ export const api = createApi({
             TPhoto | APIResponseError,
             Partial<APIRequestPhoto> & Pick<APIRequestPhoto, 'id'>
         >({
-            invalidatesTags: (result, error, { id }) => [
-                { id, type: 'Photo' },
-                { type: 'Photo' }
-            ],
+            invalidatesTags: (result, error, { id }) => [{ id, type: 'Photo' }],
             query: ({ id, ...formState }) => ({
                 body: formState,
                 method: 'PATCH',
@@ -262,7 +259,6 @@ export const api = createApi({
         >({
             invalidatesTags: (result, error, { object }) => [
                 { object, type: 'Photo' },
-                { type: 'Photo' },
                 { type: 'Statistic' }
             ],
             query: ({ ...formState }) => ({
@@ -306,16 +302,16 @@ export const api = createApi({
         }),
 
         statisticGet: builder.query<APIResponseStatistic, void>({
-            providesTags: () => [{ type: 'Statistic' }],
+            providesTags: () => ['Statistic'],
             query: () => 'statistic'
         }),
         statisticGetCatalogItems: builder.query<APIResponseCatalogNames, void>({
-            providesTags: () => [{ type: 'Statistic' }],
+            providesTags: () => ['Statistic'],
             query: () => 'statistic/catalog'
         }),
         statisticGetPhotosItems: builder.query<APIResponsePhotoListNames, void>(
             {
-                providesTags: () => [{ type: 'Statistic' }],
+                providesTags: () => ['Statistic'],
                 query: () => 'statistic/photos'
             }
         ),

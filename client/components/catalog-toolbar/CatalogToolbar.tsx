@@ -9,14 +9,14 @@ import { Button, Dropdown, Icon, Input } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
-type TToolbarProps = {
+interface CatalogToolbarProps {
     search: string
     categories?: TCategory[]
     onChangeSearch?: (search: string) => void
     onChangeCategories?: (id: number[]) => void
 }
 
-const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
+const CatalogToolbar: React.FC<CatalogToolbarProps> = (props) => {
     const { search, categories, onChangeSearch, onChangeCategories } = props
 
     const pathname = usePathname()
@@ -81,4 +81,4 @@ const ObjectsTableToolbar: React.FC<TToolbarProps> = (props) => {
     )
 }
 
-export default ObjectsTableToolbar
+export default CatalogToolbar

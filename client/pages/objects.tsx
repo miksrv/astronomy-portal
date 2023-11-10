@@ -17,8 +17,8 @@ import { NextSeo } from 'next-seo'
 import React, { useMemo, useState } from 'react'
 import { Confirm, Message } from 'semantic-ui-react'
 
+import CatalogToolbar from '@/components/catalog-toolbar'
 import ObjectTable from '@/components/object-table'
-import ObjectsTableToolbar from '@/components/objects-table-toolbar'
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) => async () => {
@@ -138,7 +138,7 @@ const ObjectsPage: NextPage = () => {
                     content={'Все данные объекта успешно удалены'}
                 />
             )}
-            <ObjectsTableToolbar
+            <CatalogToolbar
                 search={search}
                 categories={categoriesData?.items}
                 onChangeSearch={setSearch}
