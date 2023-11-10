@@ -133,6 +133,7 @@ const PhotoItemPage: NextPage = () => {
             <Message
                 warning={true}
                 hidden={
+                    !photoListLoading &&
                     !isOutdated(
                         photoList?.items?.[0].date!,
                         catalogData?.updated!

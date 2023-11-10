@@ -62,7 +62,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                     tablet={10}
                     mobile={16}
                 >
-                    <h1 className={'pageTitle'}>
+                    <h1>
                         {title}
                         {isAuth && (
                             <span
