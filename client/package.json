@@ -9,7 +9,7 @@
         "export": "next export",
         "start": "next start",
         "lint": "next lint",
-        "test:watch": "jest --testNamePattern RelayList --watch",
+        "test:watch": "jest --testNamePattern Statistic --watch",
         "test": "jest",
         "eslint:check": "eslint -c .eslintrc --ext .js,.jsx,.ts,.tsx .",
         "eslint:fix": "npm run eslint:check -- --fix",
