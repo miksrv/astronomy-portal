@@ -10,22 +10,19 @@ const customInitialState = {
     }
 }
 
-// Mock the constants
 jest.mock('@/api/constants', () => ({
     hosts: {
         photo: 'https://example.com/photos/'
     }
 }))
 
-// Mock the helpers
 jest.mock('@/functions/helpers', () => ({
     range: jest.fn((start, end) =>
         Array.from({ length: end - start + 1 }, (_, i) => start + i)
     ),
-    sliceText: jest.fn((text) => text.slice(0, 10)) // Adjust sliceText as needed
+    sliceText: jest.fn((text) => text.slice(0, 10))
 }))
 
-// Mock the catalog data
 const mockCatalog: TCatalog[] = [
     {
         category: 1,
@@ -59,7 +56,6 @@ const mockCatalog: TCatalog[] = [
     }
 ]
 
-// Mock the photos data
 const mockPhotos: TPhoto[] = [
     {
         date: '2023-01-01',
@@ -139,7 +135,7 @@ describe('PhotosLoader Component', () => {
                 visible={true}
             />
         )
-        expect(screen.getAllByTestId('photos-loader-item')).toHaveLength(3)
+        expect(screen.getAllByTestId('photos-loader')).toHaveLength(3)
     })
 })
 
@@ -153,6 +149,5 @@ describe('PhotoImage Component', () => {
         )
         const image = screen.getByAltText('Object 1 Фотография объекта')
         expect(image).toBeInTheDocument()
-        // expect(image.src).toBe('https://example.com/photos/image1_thumb.jpg')
     })
 })
