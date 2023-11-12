@@ -60,10 +60,6 @@
         "comma-dangle": ["warn", "never"],
         "eol-last": "error",
         "jsx-quotes": ["warn", "prefer-single"],
-        "testing-library/no-node-access": [
-            "error",
-            { "allowContainerFirstChild": true }
-        ],
         "max-len": [
             "warn",
             {
