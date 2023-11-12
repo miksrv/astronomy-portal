@@ -101,7 +101,7 @@ export const PhotosLoader: React.FC<PhotosLoaderProps> = ({
                 >
                     <div className={styles.info}>
                         <Dimmer active>
-                            <Loader />
+                            <Loader data-testid={'photos-loader'} />
                         </Dimmer>
                     </div>
                 </div>
