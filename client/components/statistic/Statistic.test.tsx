@@ -14,7 +14,7 @@ describe('Statistic', () => {
         ;(useStatisticGetQuery as jest.Mock).mockReturnValue({
             data: {
                 exposure: 300,
-                filesize: 1024, // 1 GB
+                filesize: 1024,
                 frames: 10,
                 objects: 5
             },
@@ -33,7 +33,7 @@ describe('Statistic', () => {
         expect(screen.getByText('10')).toBeInTheDocument()
         expect(screen.getByText('5')).toBeInTheDocument()
         expect(screen.getByText('5')).toBeInTheDocument()
-        expect(screen.getByText('300')).toBeInTheDocument()
+        expect(screen.getByText('00:05')).toBeInTheDocument()
         expect(screen.getByText('1')).toBeInTheDocument()
     })
 
@@ -45,7 +45,7 @@ describe('Statistic', () => {
 
         render(<Statistic />)
 
-        expect(screen.getByTestId('loader')).toBeInTheDocument()
+        expect(screen.getAllByTestId('statistic-loader').length).toBe(4)
     })
 
     it('does not display loader when not loading', () => {

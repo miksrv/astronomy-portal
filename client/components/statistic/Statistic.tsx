@@ -60,7 +60,7 @@ const Statistic: React.FC = () => {
                             )}
                         >
                             <Dimmer active={isLoading}>
-                                <Loader />
+                                <Loader data-testid={'statistic-loader'} />
                             </Dimmer>
                             <div className={styles.iconContainer}>
                                 <Icon
