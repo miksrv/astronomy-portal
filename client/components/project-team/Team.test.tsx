@@ -3,14 +3,6 @@ import React from 'react'
 
 import Team, { teamList } from './Team'
 
-jest.mock('next/image', () => ({
-    __esModule: true,
-    default: (props: any) => {
-        /* eslint-disable-next-line */
-        return <img {...props} />
-    }
-}))
-
 describe('Team Component', () => {
     it('should render team members with names and photos', () => {
         render(<Team />)
