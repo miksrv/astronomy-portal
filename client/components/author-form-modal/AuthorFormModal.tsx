@@ -78,7 +78,7 @@ const AuthorFormModal: React.FC<IAuthorFormModal> = (props) => {
 
     return (
         <Modal
-            size='tiny'
+            size={'tiny'}
             open={visible}
             onClose={handleClose}
         >

@@ -22,7 +22,7 @@ const AuthorTable: React.FC<TAuthorTable> = (props) => {
     return (
         <div className={'box table'}>
             <Dimmer active={loading}>
-                <Loader />
+                <Loader data-testid={'authors-loader'} />
             </Dimmer>
             <Table
                 unstackable
@@ -55,8 +55,8 @@ const AuthorTable: React.FC<TAuthorTable> = (props) => {
                                         <a
                                             href={item.link}
                                             title={item.name}
-                                            target='_blank'
-                                            rel='noreferrer'
+                                            target={'_blank'}
+                                            rel={'noreferrer'}
                                         >
                                             {item.link}
                                         </a>
