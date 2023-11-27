@@ -9,7 +9,7 @@ import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React, { useMemo, useState } from 'react'
 
-import SkyMap from '@/components/celestial-map'
+import CelestialMap from '@/components/celestial-map'
 import ObjectCloudSkyMap from '@/components/celestial-map/ObjectCloudSkyMap'
 
 export const getServerSideProps = wrapper.getServerSideProps(
@@ -61,7 +61,7 @@ const CelestialPage: NextPage = () => {
                 }}
             />
             <div className={'box table global-map section'}>
-                <SkyMap
+                <CelestialMap
                     objects={listObjects}
                     interactive={true}
                     goto={goToObject}
