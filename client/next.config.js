@@ -18,7 +18,14 @@ const nextConfig = {
         unoptimized: true
     },
     output: 'standalone',
-    reactStrictMode: true
+    reactStrictMode: true,
+    transpilePackages: [
+        '/scripts/d3.min.js',
+        '/scripts/d3.geo.projection.min.js',
+        '/scripts/celestial.min.js',
+        '@/components/celestial-map',
+        'recharts'
+    ]
 }
 
 module.exports = nextConfig
