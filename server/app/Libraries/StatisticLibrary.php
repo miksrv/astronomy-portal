@@ -1,7 +1,6 @@
 <?php namespace App\Libraries;
 
-class StatisticLibrary
-{
+class StatisticLibrary {
     protected array $filterEnum = [
         'Luminance' => 'luminance',
         'L'         => 'luminance',
@@ -20,12 +19,17 @@ class StatisticLibrary
         'CLEAR'     => 'clear'
     ];
 
+    /**
+     * @param array $filesItems
+     * @param string|null $object
+     * @param string|null $photoDate
+     * @return object|null
+     */
     public function getObjectStatistic(
         array $filesItems,
         string $object = null,
         string $photoDate = null
-    ): ?object
-    {
+    ): ?object {
         if (!$filesItems) {
             return null;
         }
@@ -82,8 +86,7 @@ class StatisticLibrary
      * @param string $filter
      * @return string
      */
-    public function mappingFilesFilters(string $filter): string
-    {
+    public function mappingFilesFilters(string $filter): string {
         return $this->filterEnum[$filter] ?? 'unknown';
     }
 }

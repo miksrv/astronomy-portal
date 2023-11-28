@@ -3,8 +3,7 @@
 use App\Models\CatalogModel;
 use App\Models\FilesModel;
 
-class CatalogLibrary
-{
+class CatalogLibrary {
     protected StatisticLibrary $libraryStatistic;
 
     public function __construct() {
@@ -15,8 +14,7 @@ class CatalogLibrary
      * @param string $objectName
      * @return array|object|null
      */
-    public function getCatalogItemByName(string $objectName)
-    {
+    public function getCatalogItemByName(string $objectName) {
         $modelCatalog = new CatalogModel();
         $modelFiles   = new FilesModel();
 
@@ -45,8 +43,7 @@ class CatalogLibrary
     /**
      * @return array|null
      */
-    public function getCatalogList(): ?array
-    {
+    public function getCatalogList(): ?array {
         helper('text');
 
         $modelCatalog = new CatalogModel();
@@ -77,8 +74,7 @@ class CatalogLibrary
      * @param array $files
      * @return array
      */
-    protected function mappingFilesToFilters(array $files): array
-    {
+    protected function mappingFilesToFilters(array $files): array {
         foreach ($files as $file) {
             $file->filter  = $this->libraryStatistic->mappingFilesFilters($file->filter);
             $file->preview = file_exists(UPLOAD_FITS . $file->object . '/' . $file->file_name . '.jpg');
