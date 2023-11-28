@@ -3,15 +3,13 @@
 use App\Models\FilesModel;
 use App\Models\PhotoModel;
 
-class PhotosLibrary
-{
+class PhotosLibrary {
     /**
      * @param string $objectName
      * @param string|null $date
      * @return array|object|null
      */
-    public function getPhotoByObject(string $objectName, string $date = null)
-    {
+    public function getPhotoByObject(string $objectName, string $date = null) {
         $where = ['object' => $objectName];
 
         if ($date) {
@@ -38,8 +36,7 @@ class PhotosLibrary
      * @param string $order
      * @return array|null
      */
-    public function getPhotoList(string $filterObject = null, int $filterLimit = 0, string $order = 'date'): ?array
-    {
+    public function getPhotoList(string $filterObject = null, int $filterLimit = 0, string $order = 'date'): ?array {
         $photoModel = new PhotoModel();
         $modelFiles = new FilesModel();
         $modelFiles->select(['object', 'filter', 'date_obs', 'exptime']);
@@ -71,8 +68,7 @@ class PhotosLibrary
      * @param $filters
      * @return object|null
      */
-    protected function calculateObjectStatistic($filters): ?object
-    {
+    protected function calculateObjectStatistic($filters): ?object {
         if (empty($filters)) {
             return null;
         }
@@ -96,8 +92,7 @@ class PhotosLibrary
      * @param string|null $object
      * @return object
      */
-    protected function addPhotoStatistic(array $filesList, $photo, string $object = null): object
-    {
+    protected function addPhotoStatistic(array $filesList, $photo, string $object = null): object {
         $libraryStatistic = new StatisticLibrary();
 
         $objectStatistic = $libraryStatistic->getObjectStatistic($filesList, $object, $photo->date);

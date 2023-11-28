@@ -6,14 +6,12 @@ use CodeIgniter\Files\File;
 use danog\MadelineProto\API;
 use ReflectionException;
 
-class BlogLibrary
-{
+class BlogLibrary {
     protected API $MadelineProto;
 
     protected array $supportedMedia = ['messageMediaPhoto', 'messageMediaDocument'];
 
-    public function __construct()
-    {
+    public function __construct() {
         $settings = (new \danog\MadelineProto\Settings\Database\Mysql)
             ->setUri(getenv('database.' . ENVIRONMENT . '.hostname'))
             ->setDatabase(getenv('database.' . ENVIRONMENT . '.username'))
@@ -23,8 +21,7 @@ class BlogLibrary
         $this->MadelineProto->start();
     }
 
-    public function getTelegramChannelStatistic(string $peer)
-    {
+    public function getTelegramChannelStatistic(string $peer) {
         return $this->MadelineProto->getFullInfo($peer);
     }
 
@@ -36,8 +33,7 @@ class BlogLibrary
         int $limit = 5,
         int $offset = 0,
         int $offsetId = null
-    ): bool
-    {
+    ): bool {
         $messages = $this->MadelineProto->messages->getHistory([
             'peer'       => $peer,
             'limit'      => $limit,
@@ -50,8 +46,10 @@ class BlogLibrary
         return true;
     }
 
-    public function getMaxTelegramNews(): int
-    {
+    /**
+     * @return int
+     */
+    public function getMaxTelegramNews(): int {
         $modelNews  = new BlogModel();
         $modelMedia = new BlogMediaModel();
 
@@ -64,8 +62,7 @@ class BlogLibrary
     /**
      * @throws ReflectionException
      */
-    public function processChannelMessages($messages)
-    {
+    public function processChannelMessages($messages) {
         if (!is_array($messages)) {
             return;
         }
@@ -75,8 +72,9 @@ class BlogLibrary
         log_message('info', "Start parsing Telegram channel messages");
 
         foreach (array_reverse($messages['messages']) as $message) {
-            if (empty($message['id']))
-                continue ;
+            if (empty($message['id'])) {
+                continue;
+            }
 
             $count++;
 
@@ -92,16 +90,14 @@ class BlogLibrary
     /**
      * @throws ReflectionException
      */
-    protected function saveMessageMedia($message, $groupId): bool
-    {
+    protected function saveMessageMedia($message, $groupId): bool {
         if (empty($message['media']) || !in_array($message['media']['_'], $this->supportedMedia)) {
             return false;
         }
 
         $directory = UPLOAD_POST . $groupId . '/';
 
-        if (!is_dir($directory))
-        {
+        if (!is_dir($directory)) {
             mkdir($directory, 0777, TRUE);
         }
 
@@ -150,8 +146,7 @@ class BlogLibrary
     /**
      * @throws ReflectionException
      */
-    protected function saveMessage($message, $groupId): bool
-    {
+    protected function saveMessage($message, $groupId): bool {
         if (empty($message['message'])) {
             return false;
         }
@@ -190,16 +185,18 @@ class BlogLibrary
         return $modelNews->insert($data);
     }
 
-    protected function getMessageReactions($message): array
-    {
+    /**
+     * @param $message
+     * @return array
+     */
+    protected function getMessageReactions($message): array {
         if (!isset($message['reactions']['results']) || !is_array($message['reactions']['results'])) {
             return [];
         }
         
         $result = [];
 
-        foreach ($message['reactions']['results'] as $item)
-        {
+        foreach ($message['reactions']['results'] as $item) {
             $result[] = [
                 'emoticon' => $item['reaction']['emoticon'],
                 'count'    => $item['count']
