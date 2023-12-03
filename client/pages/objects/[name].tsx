@@ -104,6 +104,10 @@ const ObjectItemPage: NextPage = () => {
     )
 
     const deviationRa: number = useMemo(() => {
+        if (!catalogData?.files?.length) {
+            return 0
+        }
+
         const max = Math.max.apply(
             null,
             catalogData?.files?.map(({ ra }) => ra) || []
@@ -117,6 +121,10 @@ const ObjectItemPage: NextPage = () => {
     }, [catalogData?.files])
 
     const deviationDec: number = useMemo(() => {
+        if (!catalogData?.files?.length) {
+            return 0
+        }
+
         const max = Math.max.apply(
             null,
             catalogData?.files?.map(({ dec }) => dec) || []
@@ -182,34 +190,36 @@ const ObjectItemPage: NextPage = () => {
                 photos={photoList?.items}
                 loader={photoLoading}
             />
-            <Grid className={'section'}>
-                <Grid.Column
-                    computer={6}
-                    tablet={16}
-                    mobile={16}
-                    style={{ paddingBottom: '0' }}
-                >
-                    <Deviation files={filesSorted} />
-                </Grid.Column>
-                <Grid.Column
-                    computer={10}
-                    tablet={16}
-                    mobile={16}
-                    style={{ paddingBottom: '0' }}
-                >
-                    <Coordinates files={filesSorted} />
-                </Grid.Column>
-                {!!filesSorted?.filter(
-                    ({ star_count, hfr }) => star_count && hfr
-                ).length && (
+            {!!catalogData?.files?.length && (
+                <Grid className={'section'}>
                     <Grid.Column
-                        width={16}
+                        computer={6}
+                        tablet={16}
+                        mobile={16}
                         style={{ paddingBottom: '0' }}
                     >
-                        <FilesQuality files={filesSorted} />
+                        <Deviation files={filesSorted} />
                     </Grid.Column>
-                )}
-            </Grid>
+                    <Grid.Column
+                        computer={10}
+                        tablet={16}
+                        mobile={16}
+                        style={{ paddingBottom: '0' }}
+                    >
+                        <Coordinates files={filesSorted} />
+                    </Grid.Column>
+                    {!!filesSorted?.filter(
+                        ({ star_count, hfr }) => star_count && hfr
+                    ).length && (
+                        <Grid.Column
+                            width={16}
+                            style={{ paddingBottom: '0' }}
+                        >
+                            <FilesQuality files={filesSorted} />
+                        </Grid.Column>
+                    )}
+                </Grid>
+            )}
             <FilesTable
                 loader={catalogLoading}
                 objectName={typeof objectName === 'string' ? objectName : ''}
