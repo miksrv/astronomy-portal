@@ -8,6 +8,7 @@ import { Grid } from 'semantic-ui-react'
 import styles from './styles.module.sass'
 
 const PopularPostItem: React.FC<Partial<TBlog> & { loading?: boolean }> = ({
+    telegram_id,
     group_id,
     media,
     text
@@ -23,17 +24,22 @@ const PopularPostItem: React.FC<Partial<TBlog> & { loading?: boolean }> = ({
                 mobile={5}
                 className={styles.popularImageContainer}
             >
-                <Image
-                    className={styles.popularImage}
-                    src={
-                        mediaLink
-                            ? `${hosts.post}${group_id}/${mediaLink}`
-                            : '/images/no-photo.png'
-                    }
-                    alt={text || ''}
-                    width={105}
-                    height={85}
-                />
+                <a
+                    href={`https://t.me/nearspace/${telegram_id}`}
+                    title={''}
+                >
+                    <Image
+                        className={styles.popularImage}
+                        src={
+                            mediaLink
+                                ? `${hosts.post}${group_id}/${mediaLink}`
+                                : '/images/no-photo.png'
+                        }
+                        alt={text || ''}
+                        width={105}
+                        height={85}
+                    />
+                </a>
             </Grid.Column>
             <Grid.Column
                 computer={12}

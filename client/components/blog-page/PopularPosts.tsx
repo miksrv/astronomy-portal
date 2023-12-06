@@ -28,6 +28,7 @@ const PopularPosts: React.FC<TPostGalleryProps> = ({ loading, posts }) => (
                 : posts?.map((post) => (
                       <PopularPostItem
                           key={post.id}
+                          telegram_id={post.telegram_id}
                           group_id={post.group_id}
                           media={post.media}
                           text={post.text}
