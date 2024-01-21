@@ -18,9 +18,8 @@ import Sidebar from '@/components/sidebar'
 dayjs.locale('ru')
 
 export const montserrat = Montserrat({ subsets: ['latin'] })
-
-const App = ({ Component, pageProps }: AppProps) => {
-    const { store } = wrapper.useWrappedStore(pageProps)
+export function App({ Component, pageProps }: AppProps) {
+    const { store, props } = wrapper.useWrappedStore(pageProps)
 
     return (
         <Provider store={store}>
@@ -32,7 +31,7 @@ const App = ({ Component, pageProps }: AppProps) => {
                 <Sidebar />
                 <Header />
                 <Container className={'rootContainer'}>
-                    <Component {...pageProps} />
+                    <Component {...props.pageProps} />
                 </Container>
                 <Footer />
             </main>
