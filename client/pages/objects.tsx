@@ -3,16 +3,13 @@ import {
     categoryGetList,
     getRunningQueriesThunk,
     photoGetList,
-    useCatalogDeleteMutation,
-    useCatalogGetListQuery,
-    useCategoryGetListQuery,
-    usePhotoGetListQuery
+    useCatalogDeleteMutation
 } from '@/api/api'
 import { editCatalog, openFormCatalog } from '@/api/applicationSlice'
 import { useAppDispatch } from '@/api/hooks'
 import { wrapper } from '@/api/store'
-import { TCatalog } from '@/api/types'
-import { NextPage } from 'next'
+import { TCatalog, TCategory, TPhoto } from '@/api/types'
+import { GetServerSidePropsResult, NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React, { useMemo, useState } from 'react'
 import { Confirm, Message } from 'semantic-ui-react'
@@ -20,21 +17,17 @@ import { Confirm, Message } from 'semantic-ui-react'
 import CatalogToolbar from '@/components/catalog-toolbar'
 import ObjectTable from '@/components/object-table'
 
-export const getServerSideProps = wrapper.getServerSideProps(
-    (store) => async () => {
-        store.dispatch(catalogGetList.initiate())
-        store.dispatch(categoryGetList.initiate())
-        store.dispatch(photoGetList.initiate())
+interface ObjectsPageProps {
+    categoryList: TCategory[]
+    photoList: TPhoto[]
+    catalogList: TCatalog[]
+}
 
-        await Promise.all(store.dispatch(getRunningQueriesThunk()))
-
-        return {
-            props: { object: {} }
-        }
-    }
-)
-
-const ObjectsPage: NextPage = () => {
+const ObjectsPage: NextPage<ObjectsPageProps> = ({
+    categoryList,
+    photoList,
+    catalogList
+}) => {
     const dispatch = useAppDispatch()
 
     const [search, setSearch] = useState<string>('')
@@ -42,11 +35,6 @@ const ObjectsPage: NextPage = () => {
     const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false)
     const [modifyItemName, setModifyItemName] = useState<string>()
     const [categories, setCategories] = useState<number[]>([])
-
-    const { data: categoriesData } = useCategoryGetListQuery()
-    const { data: photoData, isLoading: photoLoading } = usePhotoGetListQuery()
-    const { data: catalogData, isLoading: catalogLoading } =
-        useCatalogGetListQuery()
 
     const [
         deleteItem,
@@ -59,7 +47,7 @@ const ObjectsPage: NextPage = () => {
 
     const filteredCatalog: TCatalog[] | undefined = useMemo(
         () =>
-            catalogData?.items?.filter(
+            catalogList?.filter(
                 (item) =>
                     (search === '' ||
                         item.name
@@ -70,13 +58,11 @@ const ObjectsPage: NextPage = () => {
                             .includes(search.toLowerCase())) &&
                     (!categories?.length || categories.includes(item?.category))
             ),
-        [catalogData?.items, search, categories]
+        [catalogList, search, categories]
     )
 
     const handleEditCatalog = (item: string) => {
-        const editableObject = catalogData?.items?.find(
-            ({ name }) => name === item
-        )
+        const editableObject = catalogList?.find(({ name }) => name === item)
 
         dispatch(editCatalog(editableObject))
         dispatch(openFormCatalog(true))
@@ -140,15 +126,15 @@ const ObjectsPage: NextPage = () => {
             )}
             <CatalogToolbar
                 search={search}
-                categories={categoriesData?.items}
+                categories={categoryList}
                 onChangeSearch={setSearch}
                 onChangeCategories={setCategories}
             />
             <ObjectTable
-                loading={catalogLoading || photoLoading || deleteLoading}
+                loading={deleteLoading}
                 catalog={filteredCatalog}
-                photos={photoData?.items}
-                categories={categoriesData?.items}
+                photos={photoList}
+                categories={categoryList}
                 onClickEdit={handleEditCatalog}
                 onClickDelete={handleDeleteCatalog}
             />
@@ -163,5 +149,32 @@ const ObjectsPage: NextPage = () => {
         </main>
     )
 }
+
+export const getServerSideProps = wrapper.getServerSideProps(
+    (store) =>
+        async (): Promise<GetServerSidePropsResult<ObjectsPageProps>> => {
+            const { data: catalogData } = await store.dispatch(
+                catalogGetList.initiate()
+            )
+
+            const { data: categoriesData } = await store.dispatch(
+                categoryGetList.initiate()
+            )
+
+            const { data: photosData } = await store.dispatch(
+                photoGetList.initiate()
+            )
+
+            await Promise.all(store.dispatch(getRunningQueriesThunk()))
+
+            return {
+                props: {
+                    catalogList: catalogData?.items || [],
+                    categoryList: categoriesData?.items || [],
+                    photoList: photosData?.items || []
+                }
+            }
+        }
+)
 
 export default ObjectsPage
