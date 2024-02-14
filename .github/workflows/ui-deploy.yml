@@ -9,20 +9,21 @@ on:
 
 jobs:
   ui-ssh-deploy:
+    name: Production
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'yarn'
           cache-dependency-path: 'client/yarn.lock'
 
       - name: Cache node modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-npm
         with:
           path: |
@@ -40,10 +41,10 @@ jobs:
         run: yarn install
 
       - name: Cache UI build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-build
         with:
-          path: client/out
+          path: client/.next
           key: ${{ runner.os }}-build-${{ hashFiles('client/**/*.ts', 'client/**/*.tsx') }}
           restore-keys: |
             ${{ runner.os }}-build-
@@ -60,10 +61,9 @@ jobs:
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
         name: Build UI
         run: |
-          export dateNow=$(date +"%d.%m.%Y %H:%M")
+          export dateNow=$(date +"%Y-%m-%dT%H:%M")
           echo "export const update = '$dateNow'" > update.ts
           yarn build
-#          yarn export <- This is not needed if we use NodeJS server
         working-directory: client
 
       - name: Configure SSH
@@ -74,14 +74,14 @@ jobs:
           SSH_KEY: ${{secrets.SSH_KEY}}
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/authorized_keys
-          chmod 400 ~/.ssh/authorized_keys
+          echo "$SSH_KEY" > ~/.ssh/deploy
+          chmod 400 ~/.ssh/deploy
           cat >>~/.ssh/config <<END
           Host vps
             HostName $SSH_HOST
             Port $SSH_PORT
             User $SSH_USER
-            IdentityFile ~/.ssh/authorized_keys
+            IdentityFile ~/.ssh/deploy
             StrictHostKeyChecking no
           END
 
@@ -96,11 +96,12 @@ jobs:
           rsync -avz -e ssh client/.next/standalone/ vps:/var/www/astro.miksoft.pro
           rsync -avz -e ssh client/.next/static vps:/var/www/astro.miksoft.pro/.next
           rsync -avz -e ssh client/public vps:/var/www/astro.miksoft.pro
+          rsync -avz -e ssh client/ecosystem.config.js vps:/var/www/astro.miksoft.pro
 
       # For the first launch of the application on the server:
       # pm2 start "node server.js" --name astro.miksoft.pro
       - name: Restart PM2
-        run: ssh vps "cd /var/www/astro.miksoft.pro && pm2 restart astro.miksoft.pro"
+        run: ssh vps "pm2 restart geometki.com"
 
       # If for deployment we use not SSH, but an FTP connection
       # - name: Export UI
