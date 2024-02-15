@@ -11,6 +11,7 @@ header('Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Conte
 if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
     die();
 }
+
 class Sensors extends ResourceController {
     use ResponseTrait;
 
