@@ -1,3 +1,4 @@
+import type { Action, PayloadAction } from '@reduxjs/toolkit'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { HYDRATE } from 'next-redux-wrapper'
 
@@ -47,6 +48,9 @@ const encodeQueryData = (data: any): string => {
 
     return ret.length ? '?' + ret.join('&') : ''
 }
+
+const isHydrateAction = (action: Action): action is PayloadAction<RootState> =>
+    action.type === HYDRATE
 
 export const imageHost =
     process.env.NEXT_PUBLIC_IMG_HOST ||
@@ -335,8 +339,8 @@ export const api = createApi({
         //     query: () => 'get/sensors/statistic'
         // }),
     }),
-    extractRehydrationInfo(action, { reducerPath }) {
-        if (action.type === HYDRATE) {
+    extractRehydrationInfo(action, { reducerPath }): any {
+        if (isHydrateAction(action)) {
             return action.payload[reducerPath]
         }
     },
