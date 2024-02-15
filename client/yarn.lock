@@ -4091,10 +4091,10 @@ nprogress@^0.2.0:
   resolved "https://registry.yarnpkg.com/nprogress/-/nprogress-0.2.0.tgz#cb8f34c53213d895723fcbab907e9422adbcafb1"
   integrity sha512-I19aIingLgR1fmhftnbWWO3dXc0hSxqHQHQb3H8m+K3TnEn/iSeTZZOyvKXWqQESMwuUVnatlCnZdLBZZt2VSA==
 
-nuka-carousel@^6.0.2:
-  version "6.0.3"
-  resolved "https://registry.yarnpkg.com/nuka-carousel/-/nuka-carousel-6.0.3.tgz#75ecbf5d3a8f538e84f53d220c3092abc56335ef"
-  integrity sha512-DYxCTp4xIv9/vfrfOr9FAmYizMr7AefL7mbqsBaBTwdrZ77mAsR/SNZtk+/KHJSuH+9gZLrugj/RC6qM8MJr+Q==
+nuka-carousel@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/nuka-carousel/-/nuka-carousel-7.0.0.tgz#bcf1d9d1ebf194a589ffecbfd42df269a6219805"
+  integrity sha512-KE0WV1MuE4Gq6ynL8P3qJH2rGq/DkJ0ej+ezo0IuZp4oklV8WNqu6P6O1utJqihHLGoEuFppq5wlHSHfhdCHXA==
 
 nwsapi@^2.2.2:
   version "2.2.7"
