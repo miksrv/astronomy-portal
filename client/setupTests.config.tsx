@@ -21,7 +21,7 @@ jest.mock('next/image', () => ({
 export const testStore = (state: Partial<RootState>) =>
     configureStore({
         middleware: (gDM) => gDM().concat(api.middleware),
-        preloadedState: state,
+        // preloadedState: state,
         reducer: reducers
     })
 

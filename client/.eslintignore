@@ -1,6 +1,5 @@
 .next
 .vscode
-.yarn
 node_modules
 out
 coverage
