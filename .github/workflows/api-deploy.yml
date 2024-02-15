@@ -12,13 +12,13 @@ jobs:
   api-ssh-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Docs: https://github.com/shivammathur/setup-php
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.1
+          php-version: 8.2
           extensions: mbstring, intl, curl, dom
           coverage: none
 
@@ -27,35 +27,24 @@ jobs:
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache composer dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('server/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --no-progress --prefer-dist --optimize-autoloader
+        run: composer install --no-dev --no-progress --prefer-dist --optimize-autoloader
         working-directory: server
 
-      - name: Configure SSH
-        env:
-          SSH_HOST: ${{secrets.SSH_HOST}}
-          SSH_PORT: ${{secrets.SSH_PORT}}
-          SSH_USER: ${{secrets.SSH_USER}}
-          SSH_KEY: ${{secrets.SSH_KEY}}
-        run: |
-          mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/authorized_keys
-          chmod 400 ~/.ssh/authorized_keys
-          cat >>~/.ssh/config <<END
-          Host vps
-            HostName $SSH_HOST
-            Port $SSH_PORT
-            User $SSH_USER
-            IdentityFile ~/.ssh/authorized_keys
-            StrictHostKeyChecking no
-          END
+      - name: Install LFTP
+        run: sudo apt install lftp
 
-      - name: Send files
-        run: |
-          rsync -avz -e ssh server/app/ vps:/var/www/astro.miksoft.pro/api/app
+      - name: Configure LFTP
+        run: mkdir ~/.lftp && echo "set ssl:verify-certificate false;" >> ~/.lftp/rc
+
+      - name: Load Secrets
+        run: echo "machine ${{ secrets.FTP_HOSTNAME }} login ${{ secrets.FTP_USERNAME }} password ${{ secrets.FTP_PASSWORD }}" > ~/.netrc
+
+      - name: Upload Folder
+        run: lftp -e "mirror --parallel=100 -R server /" ${{ secrets.FTP_HOSTNAME }}
