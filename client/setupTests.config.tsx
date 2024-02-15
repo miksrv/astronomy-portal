@@ -1,5 +1,5 @@
 import { api } from '@/api/api'
-import { RootState, reducers } from '@/api/store'
+import { reducers } from '@/api/store'
 import { configureStore } from '@reduxjs/toolkit'
 import '@testing-library/jest-dom'
 import { render } from '@testing-library/react'
@@ -18,19 +18,16 @@ jest.mock('next/image', () => ({
     }
 }))
 
-export const testStore = (state: Partial<RootState>) =>
+export const testStore = () =>
     configureStore({
         middleware: (gDM) => gDM().concat(api.middleware),
         // preloadedState: state,
         reducer: reducers
     })
 
-export const renderWithStore = (
-    component: React.ReactElement,
-    initialState: any
-) => {
+export const renderWithStore = (component: React.ReactElement) => {
     const Wrapper: React.FC<WrapperProps> = ({ children }) => (
-        <Provider store={testStore(initialState)}>{children}</Provider>
+        <Provider store={testStore()}>{children}</Provider>
     )
 
     return render(component, { wrapper: Wrapper })
