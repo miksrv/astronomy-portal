@@ -49,11 +49,11 @@ jobs:
       - name: Load Secrets
         run: echo "machine ${{ secrets.FTP_HOSTNAME }} login ${{ secrets.FTP_USERNAME }} password ${{ secrets.FTP_PASSWORD }}" > ~/.netrc
 
-       - name: Upload Folder
-         run: |
-            lftp -e "put -O / .htaccess" ${{ secrets.FTP_HOSTNAME }}
-            lftp -e "mirror --parallel=100 -R app" ${{ secrets.FTP_HOSTNAME }}
-            lftp -e "mirror --parallel=100 -R vendor" ${{ secrets.FTP_HOSTNAME }}
-            lftp -e "mirror --parallel=100 -R public" ${{ secrets.FTP_HOSTNAME }}
-            lftp -e "mirror --parallel=100 -R writable" ${{ secrets.FTP_HOSTNAME }}
-         working-directory: server
+      - name: Upload Folder
+        run: |
+          lftp -e "put -O / .htaccess" ${{ secrets.FTP_HOSTNAME }}
+          lftp -e "mirror --parallel=100 -R app" ${{ secrets.FTP_HOSTNAME }}
+          lftp -e "mirror --parallel=100 -R vendor" ${{ secrets.FTP_HOSTNAME }}
+          lftp -e "mirror --parallel=100 -R public" ${{ secrets.FTP_HOSTNAME }}
+          lftp -e "mirror --parallel=100 -R writable" ${{ secrets.FTP_HOSTNAME }}
+        working-directory: server
