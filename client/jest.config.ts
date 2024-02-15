@@ -44,6 +44,7 @@ const config: Config.InitialOptions = {
     },
     transformIgnorePatterns: [
         '/node_modules/',
+        '/node_modules/(?!(string-width)/)',
         '^.+\\.module\\.(css|sass|scss)$'
     ]
 }
