@@ -13,11 +13,9 @@ const config: Config.InitialOptions = {
     ],
     // on node 14.x coverage provider v8 offers good speed and more or less good report
     coverageProvider: 'v8',
-    extensionsToTreatAsEsm: ['.ts'],
     globals: {
         'ts-jest': {
-            tsconfig: 'tsconfig.node.json',
-            useESM: true
+            tsconfig: 'tsconfig.node.json'
         }
     },
     moduleNameMapper: {
@@ -46,7 +44,6 @@ const config: Config.InitialOptions = {
     },
     transformIgnorePatterns: [
         '/node_modules/',
-        '/node_modules/(?!(cliui)/)',
         '^.+\\.module\\.(css|sass|scss)$'
     ]
 }
