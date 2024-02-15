@@ -12,13 +12,11 @@ class UserModel extends Model
     protected $beforeInsert = ['beforeInsert'];
     protected $beforeUpdate = ['beforeUpdate'];
 
-    protected function beforeInsert(array $data): array
-    {
+    protected function beforeInsert(array $data): array {
         return $this->getUpdatedDataWithHashedPassword($data);
     }
 
-    protected function beforeUpdate(array $data): array
-    {
+    protected function beforeUpdate(array $data): array {
         return $this->getUpdatedDataWithHashedPassword($data);
     }
 
