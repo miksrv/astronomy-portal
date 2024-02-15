@@ -99,9 +99,9 @@ jobs:
           rsync -avz -e ssh client/ecosystem.config.js vps:/var/www/astro.miksoft.pro
 
       # For the first launch of the application on the server:
-      # pm2 start "node server.js" --name astro.miksoft.pro
+      # pm2 start ecosystem.config.js
       - name: Restart PM2
-        run: ssh vps "pm2 restart geometki.com"
+        run: ssh vps "pm2 restart astro.miksoft.pro"
 
       # If for deployment we use not SSH, but an FTP connection
       # - name: Export UI
