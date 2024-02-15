@@ -45,8 +45,8 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
                     ? 1
                     : -1
                 : a[sortField] < b[sortField]
-                ? 1
-                : -1
+                  ? 1
+                  : -1
         )
 
         setFilesList(sortingFilesList || [])

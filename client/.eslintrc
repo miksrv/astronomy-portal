@@ -55,11 +55,13 @@
     ],
     "root": true, // For configuration cascading.
     "rules": {
+        "jsx-a11y/no-static-element-interactions": "off",
         "jest/no-mocks-import": "off",
         "react/react-in-jsx-scope": "off",
         "comma-dangle": ["warn", "never"],
         "eol-last": "error",
         "jsx-quotes": ["warn", "prefer-single"],
+        "no-redeclare": 1,
         "max-len": [
             "warn",
             {
@@ -68,6 +70,7 @@
                 "ignoreStrings": true
             }
         ],
+        "react-hooks/exhaustive-deps": "off",
         "no-console": [
             "warn",
             {
@@ -100,8 +103,6 @@
                 "patterns": ["lodash/**", "lodash/fp/**"]
             }
         ],
-        "react-hooks/rules-of-hooks": "error",
-        "react-hooks/exhaustive-deps": "off",
         "@typescript-eslint/no-unused-vars": "warn",
         "object-curly-spacing": ["warn", "always"],
         "quotes": ["warn", "single"],
@@ -111,7 +112,7 @@
                 "extensions": [".js", ".jsx", ".ts", ".tsx"]
             }
         ],
-        "react/prop-types": "warn",
+        "react/prop-types": "off",
         "sort-imports": [
             "warn",
             {
