@@ -10,7 +10,9 @@ on:
 # https://github.com/codeigniter4/CodeIgniter4/blob/develop/.github/workflows/deploy-apidocs.yml
 jobs:
   api-ssh-deploy:
+    name: Production
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
