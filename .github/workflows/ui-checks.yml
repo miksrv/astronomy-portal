@@ -1,15 +1,20 @@
-name: UI Deploy
+name: UI Checks
 
 on:
-  push:
+  pull_request:
     branches:
       - main
     paths:
       - 'client/**/*'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  ui-ssh-deploy:
-    name: Production
+  ui-checks:
+    if: github.event.pull_request.draft == false
+    name: Build & Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -40,6 +45,14 @@ jobs:
         working-directory: client
         run: yarn install
 
+      - name: Linter
+        run: yarn eslint:check
+        working-directory: client
+
+      - name: Prettier
+        run: yarn prettier:check
+        working-directory: client
+
       - name: Cache UI build
         uses: actions/cache@v4
         id: cache-build
@@ -58,6 +71,10 @@ jobs:
           NEXT_PUBLIC_LON = 55.2" > .env
         working-directory: client
 
+      - name: UI Unit Tests
+        run: yarn test
+        working-directory: client
+
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
         name: Build UI
         run: |
@@ -65,57 +82,3 @@ jobs:
           echo "export const update = '$dateNow'" > update.ts
           yarn build
         working-directory: client
-
-      - name: Configure SSH
-        env:
-          SSH_HOST: ${{secrets.SSH_HOST}}
-          SSH_PORT: ${{secrets.SSH_PORT}}
-          SSH_USER: ${{secrets.SSH_USER}}
-          SSH_KEY: ${{secrets.SSH_KEY}}
-        run: |
-          mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/deploy
-          chmod 400 ~/.ssh/deploy
-          cat >>~/.ssh/config <<END
-          Host vps
-            HostName $SSH_HOST
-            Port $SSH_PORT
-            User $SSH_USER
-            IdentityFile ~/.ssh/deploy
-            StrictHostKeyChecking no
-          END
-
-      # If we just use nginx and the application is exported to plain HTML
-      #- name: Send files
-      #  run: rsync -avz -e ssh ./client/out/ vps:/var/www/astro.miksoft.pro
-
-      # If we run NextJS on a Node server using PM2
-      - name: Send files
-        run: |
-          ssh vps "cd /var/www/astro.miksoft.pro && rm -r .next"
-          rsync -avz -e ssh client/.next/standalone/ vps:/var/www/astro.miksoft.pro
-          rsync -avz -e ssh client/.next/static vps:/var/www/astro.miksoft.pro/.next
-          rsync -avz -e ssh client/public vps:/var/www/astro.miksoft.pro
-          rsync -avz -e ssh client/ecosystem.config.js vps:/var/www/astro.miksoft.pro
-
-      # For the first launch of the application on the server:
-      # pm2 start ecosystem.config.js
-      - name: Restart PM2
-        run: ssh vps "pm2 restart astro.miksoft.pro"
-
-      # If for deployment we use not SSH, but an FTP connection
-      # - name: Export UI
-      #  working-directory: client
-      #  run: yarn export
-      #
-      # - name: Install LFTP
-      #  run: sudo apt install lftp
-      #
-      # - name: Configure LFTP
-      #  run: mkdir ~/.lftp && echo "set ssl:verify-certificate false;" >> ~/.lftp/rc
-      #
-      # - name: Load Secrets
-      #  run: echo "machine ${{ secrets.FTP_HOSTNAME }} login ${{ secrets.FTP_USERNAME }} password ${{ secrets.FTP_PASSWORD }}" > ~/.netrc
-      #
-      # - name: Upload Folder
-      #  run: lftp -e "mirror --parallel=100 -R client/out/ /" ${{ secrets.FTP_HOSTNAME }}
