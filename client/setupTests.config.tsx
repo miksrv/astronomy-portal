@@ -12,17 +12,15 @@ type WrapperProps = {
 
 jest.mock('next/image', () => ({
     __esModule: true,
-    default: (props: any) => {
-        /* eslint-disable-next-line */
-        return <img {...props} />
-    }
+    /* eslint-disable-next-line */
+    default: (props: any) => <img {...props} />
 }))
 
 export const testStore = (state: Partial<RootState>) => {
     return configureStore({
-        middleware: (gDM) => gDM().concat(api.middleware),
+        middleware: (gDM) => gDM().concat(api.middleware) as any,
         preloadedState: state,
-        reducer: reducers
+        reducer: reducers as any
     })
 }
 
