@@ -1,5 +1,4 @@
 module.exports = {
-    generateRobotsTxt: true, // (optional)
+    generateRobotsTxt: true,
     siteUrl: process.env.SITE_URL || 'https://astro.miksoft.pro'
-    // ...other options
 }
