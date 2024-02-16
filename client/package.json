@@ -1,6 +1,6 @@
 {
     "name": "astronomy-portal",
-    "version": "3.2.22",
+    "version": "3.3.0",
     "private": true,
     "scripts": {
         "dev": "next dev",
@@ -17,10 +17,6 @@
         "prettier:fix": "prettier --write ."
     },
     "dependencies": {
-        "@reduxjs/toolkit": "^2.2.1",
-        "@types/node": "20.11.17",
-        "@types/react": "18.2.55",
-        "@types/react-dom": "18.2.19",
         "classnames": "^2.3.2",
         "dayjs": "^1.11.10",
         "eslint": "^8.37.0",
@@ -30,12 +26,10 @@
         "next-seo": "^6.4.0",
         "next-sitemap": "^4.0.9",
         "nextjs-progressbar": "^0.0.16",
-        "nuka-carousel": "^7.0.0",
         "react": "18.2.0",
         "react-dom": "18.2.0",
         "react-image-lightbox": "^5.1.4",
         "react-photo-gallery": "^8.0.0",
-        "react-player": "^2.12.0",
         "react-redux": "^9.1.0",
         "react-semantic-ui-datepickers": "^2.17.2",
         "recharts": "^2.9.3",
@@ -45,6 +39,10 @@
         "typescript": "5.3.3"
     },
     "devDependencies": {
+        "@reduxjs/toolkit": "^2.2.1",
+        "@types/node": "20.11.17",
+        "@types/react": "18.2.55",
+        "@types/react-dom": "18.2.19",
         "@testing-library/jest-dom": "^6.1.4",
         "@testing-library/react": "^14.0.0",
         "@trivago/prettier-plugin-sort-imports": "^4.1.1",

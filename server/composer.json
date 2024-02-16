@@ -6,15 +6,14 @@
     "license": "MIT",
     "require": {
         "php": "^7.4 || ^8.0",
-        "codeigniter4/framework": "^4.0",
-        "danog/madelineproto": "^7",
-        "firebase/php-jwt": "^6.4",
+        "codeigniter4/framework": "^4.4",
+        "firebase/php-jwt": "^6.9",
         "ext-json": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9",
         "mikey179/vfsstream": "^1.6",
-        "phpunit/phpunit": "^9.1"
+        "phpunit/phpunit": "^9.6"
     },
     "config": {
         "optimize-autoloader": true,
@@ -33,7 +32,10 @@
     },
     "scripts": {
         "test": "phpunit",
-        "serve": "php spark serve",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "php spark serve"
+        ],
         "kill": "pkill -9 php",
         "migration:create": "php spark migrate:create",
         "migration:status": "php spark migrate:status",

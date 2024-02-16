@@ -4,8 +4,6 @@ import { HYDRATE } from 'next-redux-wrapper'
 
 import { RootState } from './store'
 import {
-    APIRequestBlogList,
-    APIRequestBlogListPopular,
     APIRequestCatalog,
     APIRequestLogin,
     APIRequestPhoto,
@@ -14,8 +12,6 @@ import {
     APIRequestTelescope,
     APIRequestWeatherStatistic,
     APIResponseAuthorList,
-    APIResponseBlogList,
-    APIResponseBlogStatistic,
     APIResponseCatalogList,
     APIResponseCatalogNames,
     APIResponseCategoryList,
@@ -122,24 +118,6 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
-        blogGetList: builder.query<
-            APIResponseBlogList,
-            Maybe<APIRequestBlogList>
-        >({
-            keepUnusedDataFor: 3600,
-            query: (params) => `blog${encodeQueryData(params)}`
-        }),
-        blogGetListPopular: builder.query<
-            APIResponseBlogList,
-            Maybe<APIRequestBlogListPopular>
-        >({
-            keepUnusedDataFor: 3600,
-            query: (params) => `blog/popular${encodeQueryData(params)}`
-        }),
-        blogGetStatistic: builder.query<APIResponseBlogStatistic, void>({
-            query: () => 'blog/statistic'
-        }),
-
         catalogDelete: builder.mutation<void, string>({
             invalidatesTags: (result, error, object) => [
                 { object, type: 'Catalog' },
@@ -226,10 +204,6 @@ export const api = createApi({
                 url: 'category'
             }),
             transformErrorResponse: (response) => response.data
-        }),
-
-        cronGetUpdatePosts: builder.query<void, void>({
-            query: () => 'cron/telegram'
         }),
 
         photoGetItem: builder.query<TPhoto, string>({
@@ -358,10 +332,6 @@ export const {
     useAuthorPatchMutation,
     useAuthorPostMutation,
 
-    useBlogGetListQuery,
-    useBlogGetListPopularQuery,
-    useBlogGetStatisticQuery,
-
     useCatalogDeleteMutation,
     useCatalogGetItemQuery,
     useCatalogGetListQuery,
@@ -373,9 +343,6 @@ export const {
     useCategoryPatchMutation,
     useCategoryPostMutation,
 
-    useCronGetUpdatePostsQuery,
-
-    // usePhotoGetItemQuery,
     usePhotoGetListQuery,
     usePhotoPatchMutation,
     usePhotoPostMutation,
@@ -399,7 +366,6 @@ export const {
 // export endpoints for use in SSR
 export const {
     authorGetList,
-    blogGetList,
     catalogGetList,
     catalogGetItem,
     categoryGetList,

@@ -1,13 +1,7 @@
-import {
-    catalogGetList,
-    getRunningQueriesThunk,
-    photoGetList,
-    useCatalogGetListQuery,
-    usePhotoGetListQuery,
-    useStatisticGetTelescopeQuery
-} from '@/api/api'
+import { api } from '@/api/api'
 import { wrapper } from '@/api/store'
-import { NextPage } from 'next'
+import { TCatalog, TPhoto, TStatisticTelescope } from '@/api/types'
+import { GetServerSidePropsResult, NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React from 'react'
 
@@ -16,62 +10,64 @@ import PhotoGrid from '@/components/photo-grid'
 import Statistic from '@/components/statistic'
 import TelescopeWorkdays from '@/components/telescope-workdays'
 
-export const getServerSideProps = wrapper.getServerSideProps(
-    (store) => async () => {
-        store.dispatch(catalogGetList.initiate())
-        store.dispatch(photoGetList.initiate({ limit: 4, order: 'random' }))
+interface HomePageProps {
+    photos: TPhoto[]
+    catalog: TCatalog[]
+    telescope: TStatisticTelescope[]
+}
 
-        await Promise.all(store.dispatch(getRunningQueriesThunk()))
+const HomePage: NextPage<HomePageProps> = ({ photos, catalog, telescope }) => (
+    <main>
+        <NextSeo
+            title={'Любительская астрономическая обсерватория'}
+            description={
+                'Самодельная любительская астрономическая обсерватория с удаленным доступом из любой точки мира через интернет. Статистика работы обсерватории, количество отснятых кадров и накопленных данных. Календарь работы телескопа.'
+            }
+            openGraph={{
+                images: [
+                    {
+                        height: 819,
+                        url: '/screenshots/main.jpg',
+                        width: 1280
+                    }
+                ],
+                locale: 'ru'
+            }}
+        />
+        <Statistic />
+        <PhotoGrid
+            photos={photos}
+            catalog={catalog}
+        />
+        <TelescopeWorkdays eventsTelescope={telescope} />
+        <Calendar eventsTelescope={telescope} />
+    </main>
+)
+
+export const getServerSideProps = wrapper.getServerSideProps(
+    (store) => async (): Promise<GetServerSidePropsResult<HomePageProps>> => {
+        const { data: catalog } = await store.dispatch(
+            api.endpoints?.catalogGetList.initiate()
+        )
+
+        const { data: telescope } = await store.dispatch(
+            api.endpoints?.statisticGetTelescope.initiate()
+        )
+
+        const { data: photos } = await store.dispatch(
+            api.endpoints?.photoGetList.initiate({ limit: 4, order: 'random' })
+        )
+
+        await Promise.all(store.dispatch(api.util.getRunningQueriesThunk()))
 
         return {
-            props: { object: {} }
+            props: {
+                catalog: catalog?.items || [],
+                photos: photos?.items || [],
+                telescope: telescope?.items || []
+            }
         }
     }
 )
-
-const HomePage: NextPage = () => {
-    const { data: photoData, isLoading: photoLoading } = usePhotoGetListQuery({
-        limit: 4,
-        order: 'random'
-    })
-    const { data: catalogData, isLoading: catalogLoading } =
-        useCatalogGetListQuery()
-
-    const { data: telescopeData, isFetching: telescopeLoading } =
-        useStatisticGetTelescopeQuery()
-
-    return (
-        <main>
-            <NextSeo
-                title={'Любительская астрономическая обсерватория'}
-                description={
-                    'Самодельная любительская астрономическая обсерватория с удаленным доступом из любой точки мира через интернет. Статистика работы обсерватории, количество отснятых кадров и накопленных данных. Календарь работы телескопа.'
-                }
-                openGraph={{
-                    images: [
-                        {
-                            height: 819,
-                            url: '/screenshots/main.jpg',
-                            width: 1280
-                        }
-                    ],
-                    locale: 'ru'
-                }}
-            />
-            <Statistic />
-            <PhotoGrid
-                loading={photoLoading || catalogLoading}
-                loaderCount={4}
-                photos={photoData?.items}
-                catalog={catalogData?.items}
-            />
-            <TelescopeWorkdays
-                eventsTelescope={telescopeData?.items}
-                loading={telescopeLoading}
-            />
-            <Calendar eventsTelescope={telescopeData?.items} />
-        </main>
-    )
-}
 
 export default HomePage

@@ -6,7 +6,7 @@ import { formatDate, getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
 import Image from 'next/image'
 import React from 'react'
-import { Dimmer, Grid, Icon, Loader, Message } from 'semantic-ui-react'
+import { Grid, Icon } from 'semantic-ui-react'
 
 import FilterList from '@/components/filter-list'
 
@@ -16,15 +16,13 @@ import styles from './styles.module.sass'
 
 type TObjectHeaderProps = {
     title: string
-    loader?: boolean
-    error?: boolean
     catalog?: TCatalog
     deviationRa?: number
     deviationDec?: number
 }
 
 const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
-    const { title, loader, error, catalog, deviationRa, deviationDec } = props
+    const { title, catalog, deviationRa, deviationDec } = props
 
     const dispatch = useAppDispatch()
     const isAuth = useAppSelector((state) => state.auth.isAuth)
@@ -44,18 +42,6 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
 
     return (
         <div className={classNames(styles.section, 'box')}>
-            <Dimmer active={loader || error}>
-                <Loader active={loader} />
-                <Message
-                    error={true}
-                    hidden={!error}
-                    icon={'database'}
-                    header={'Данные не доступны'}
-                    content={
-                        'На сервере возникла ошибка, попробуйте обновить страницу или зайти немного позже'
-                    }
-                />
-            </Dimmer>
             <Grid>
                 <Grid.Column
                     computer={10}

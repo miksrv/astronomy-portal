@@ -1,20 +1,10 @@
-import {
-    catalogGetItem,
-    getRunningQueriesThunk,
-    photoGetList,
-    statisticGetPhotosItems,
-    useCatalogGetItemQuery,
-    usePhotoGetListQuery,
-    useStatisticGetPhotosItemsQuery
-} from '@/api/api'
+import { api, useStatisticGetPhotosItemsQuery } from '@/api/api'
 import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
-import { TPhoto } from '@/api/types'
+import { TCatalog, TPhoto } from '@/api/types'
 import { isOutdated, sliceText } from '@/functions/helpers'
-import { skipToken } from '@reduxjs/toolkit/query'
-import { NextPage } from 'next'
+import { GetServerSidePropsResult, NextPage } from 'next'
 import { NextSeo } from 'next-seo'
-import { useRouter } from 'next/dist/client/router'
 import React, { useMemo, useState } from 'react'
 import { Accordion, Icon, Message } from 'semantic-ui-react'
 
@@ -22,95 +12,43 @@ import ObjectCloud from '@/components/object-cloud'
 import PhotoSection from '@/components/photo-section'
 import PhotoTable from '@/components/photo-table'
 
-// Only if we build application as static HTML
-// export const getStaticPaths = async () => {
-//     const storeObject = store()
-//     const result = await storeObject.dispatch(
-//         statisticGetPhotosItems.initiate()
-//     )
-//
-//     return {
-//         fallback: false,
-//         paths: result.data?.items.map((name) => `/photos/${name}`)
-//     }
-// }
+interface PhotoItemPageProps {
+    object: string
+    date: string
+    photos: TPhoto[]
+    catalog: TCatalog | null
+}
 
-export const getServerSideProps = wrapper.getServerSideProps(
-    (store) => async (context) => {
-        const name = context.params?.name
-
-        if (typeof name === 'string') {
-            const catalog: any = await store.dispatch(
-                catalogGetItem.initiate(name)
-            )
-            const photos: any = await store.dispatch(
-                photoGetList.initiate({ object: name })
-            )
-
-            await store.dispatch(statisticGetPhotosItems.initiate())
-
-            await Promise.all(store.dispatch(getRunningQueriesThunk()))
-
-            if (catalog.error?.status === 404 || photos.error?.status === 404) {
-                return { notFound: true }
-            }
-
-            return { props: {} }
-        }
-
-        return { notFound: true }
-    }
-)
-
-const PhotoItemPage: NextPage = () => {
-    const router = useRouter()
-    const routerObject = router.query.name
-    const photoDate = router.query.date
-    const objectName =
-        typeof routerObject === 'string' ? routerObject : skipToken
-
+const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
+    object,
+    date,
+    photos,
+    catalog
+}) => {
     const [showSpoiler, setShowSpoiler] = useState<boolean>(false)
-
-    const {
-        data: catalogData,
-        isLoading: catalogLoading,
-        isError: catalogError
-    } = useCatalogGetItemQuery(objectName, {
-        skip: router.isFallback
-    })
-
-    const { data: photoList, isLoading: photoListLoading } =
-        usePhotoGetListQuery(
-            { object: typeof objectName === 'string' ? objectName : '' },
-            {
-                skip: router.isFallback
-            }
-        )
 
     const { data: photoObjects, isLoading: objectsLoading } =
         useStatisticGetPhotosItemsQuery()
 
     const photoItem: TPhoto | undefined = useMemo(
-        () =>
-            photoList?.items?.find(({ date }) => date === photoDate) ||
-            photoList?.items?.[0],
-        [photoList, photoDate]
+        () => photos?.find((photo) => photo.date === date) || photos?.[0],
+        [photos, date]
     )
 
     const objectTitle = useMemo(
-        () => catalogData?.title || catalogData?.name || objectName.toString(),
-        [catalogData, objectName]
+        () => catalog?.title || catalog?.name || object.toString(),
+        [catalog, object]
     )
 
     return (
         <main>
             <NextSeo
                 title={`${objectTitle} - Астрофотография${
-                    photoDate ? ` - ${photoDate}` : ''
+                    date ? ` - ${date}` : ''
                 }`}
                 description={
                     'Описание астрофотографии: ' +
-                    sliceText(catalogData?.text ?? '', 200)
+                    sliceText(catalog?.text ?? '', 200)
                 }
                 openGraph={{
                     images: [
@@ -124,21 +62,13 @@ const PhotoItemPage: NextPage = () => {
                 }}
             />
             <PhotoSection
-                loader={photoListLoading || catalogLoading}
                 title={objectTitle}
-                error={catalogError}
                 photo={photoItem}
-                catalog={catalogData}
+                catalog={catalog ?? undefined}
             />
             <Message
                 warning={true}
-                hidden={
-                    !photoListLoading &&
-                    !isOutdated(
-                        photoList?.items?.[0].date!,
-                        catalogData?.updated!
-                    )
-                }
+                hidden={!isOutdated(photos?.[0].date!, catalog?.updated!)}
                 className={'section'}
                 icon={'warning sign'}
                 header={'Новые данные'}
@@ -146,7 +76,7 @@ const PhotoItemPage: NextPage = () => {
                     'Фотографии устарели - есть новые данные с телескопа, с помощью которых можно собрать новое изображение объекта'
                 }
             />
-            {catalogData?.text && (
+            {catalog?.text && (
                 <div className={'section box table'}>
                     <Accordion inverted>
                         <Accordion.Title
@@ -154,28 +84,60 @@ const PhotoItemPage: NextPage = () => {
                             onClick={() => setShowSpoiler(!showSpoiler)}
                         >
                             <Icon name={'dropdown'} /> Описание объекта{' '}
-                            {catalogData?.name.replace(/_/g, ' ')}
+                            {catalog?.name.replace(/_/g, ' ')}
                         </Accordion.Title>
                         <Accordion.Content active={showSpoiler}>
-                            <div className={'textBlock'}>
-                                {catalogData?.text}
-                            </div>
+                            <div className={'textBlock'}>{catalog?.text}</div>
                         </Accordion.Content>
                     </Accordion>
                 </div>
             )}
-            <PhotoTable
-                photos={photoList?.items}
-                loader={photoListLoading}
-            />
+            <PhotoTable photos={photos} />
             <ObjectCloud
                 loader={objectsLoading}
-                current={typeof objectName === 'string' ? objectName : ''}
+                current={object}
                 names={photoObjects?.items}
                 link={'photos'}
             />
         </main>
     )
 }
+
+export const getServerSideProps = wrapper.getServerSideProps(
+    (store) =>
+        async (
+            context
+        ): Promise<GetServerSidePropsResult<PhotoItemPageProps>> => {
+            const object = context.params?.name
+            const date = context.query?.date as string
+
+            if (typeof object !== 'string') {
+                return { notFound: true }
+            }
+
+            const { data: catalog } = await store.dispatch(
+                api.endpoints?.catalogGetItem.initiate(object)
+            )
+
+            const { data: photos, isError } = await store.dispatch(
+                api.endpoints?.photoGetList.initiate({ object })
+            )
+
+            if (isError) {
+                return { notFound: true }
+            }
+
+            await Promise.all(store.dispatch(api.util.getRunningQueriesThunk()))
+
+            return {
+                props: {
+                    catalog: catalog || null,
+                    date: date ?? '',
+                    object,
+                    photos: photos?.items || []
+                }
+            }
+        }
+)
 
 export default PhotoItemPage

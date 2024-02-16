@@ -1,19 +1,10 @@
-import {
-    catalogGetItem,
-    getRunningQueriesThunk,
-    photoGetList,
-    statisticGetCatalogItems,
-    useCatalogGetItemQuery,
-    usePhotoGetListQuery,
-    useStatisticGetCatalogItemsQuery
-} from '@/api/api'
+import { api, useStatisticGetCatalogItemsQuery } from '@/api/api'
 import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
+import { TCatalog, TPhoto } from '@/api/types'
 import { isOutdated, sliceText } from '@/functions/helpers'
-import { skipToken } from '@reduxjs/toolkit/query'
-import { NextPage } from 'next'
+import { GetServerSidePropsResult, NextPage } from 'next'
 import { NextSeo } from 'next-seo'
-import { useRouter } from 'next/dist/client/router'
 import React, { useMemo } from 'react'
 import { Grid, Message } from 'semantic-ui-react'
 
@@ -25,117 +16,68 @@ import ObjectCloud from '@/components/object-cloud'
 import ObjectSection from '@/components/objects-section'
 import PhotoTable from '@/components/photo-table'
 
-// Only if we build application as static HTML
-// export const getStaticPaths = async () => {
-//     const storeObject = store()
-//     const result = await storeObject.dispatch(
-//         statisticGetCatalogItems.initiate()
-//     )
-//
-//     return {
-//         fallback: false,
-//         paths: result.data?.items.map((name) => `/objects/${name}`)
-//     }
-// }
+interface ObjectItemPageProps {
+    object: string
+    photos: TPhoto[]
+    catalog: TCatalog
+}
 
-export const getServerSideProps = wrapper.getServerSideProps(
-    (store) => async (context) => {
-        const name = context.params?.name
-
-        if (typeof name === 'string') {
-            await store.dispatch(statisticGetCatalogItems.initiate())
-            const catalog: any = await store.dispatch(
-                catalogGetItem.initiate(name)
-            )
-            const photos: any = await store.dispatch(
-                photoGetList.initiate({ object: name })
-            )
-
-            await Promise.all(store.dispatch(getRunningQueriesThunk()))
-
-            if (catalog.error?.status === 404 || photos.error?.status === 404) {
-                return { notFound: true }
-            }
-
-            return { props: {} }
-        }
-
-        return { notFound: true }
-    }
-)
-
-const ObjectItemPage: NextPage = () => {
-    const router = useRouter()
-    const routerObject = router.query.name
-    const objectName =
-        typeof routerObject === 'string' ? routerObject : skipToken
-
-    const { data: photoList, isLoading: photoLoading } = usePhotoGetListQuery(
-        { object: typeof objectName === 'string' ? objectName : '' },
-        {
-            skip: router.isFallback
-        }
-    )
-
-    const {
-        data: catalogData,
-        isLoading: catalogLoading,
-        isError: catalogError
-    } = useCatalogGetItemQuery(objectName, {
-        skip: router.isFallback
-    })
-
+const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
+    object,
+    photos,
+    catalog
+}) => {
     const { data: catalogObjects, isLoading: objectsLoading } =
         useStatisticGetCatalogItemsQuery()
 
     const objectTitle = useMemo(
-        () => catalogData?.title || catalogData?.name || objectName.toString(),
-        [catalogData, objectName]
+        () => catalog?.title || catalog?.name || object.toString(),
+        [catalog, object]
     )
 
     const filesSorted = useMemo(
         () =>
-            [...(catalogData?.files || [])]?.sort(
+            [...(catalog?.files || [])]?.sort(
                 (a, b) =>
                     new Date(a.date_obs).getTime() -
                     new Date(b.date_obs).getTime()
             ),
-        [catalogData?.files]
+        [catalog?.files]
     )
 
     const deviationRa: number = useMemo(() => {
-        if (!catalogData?.files?.length) {
+        if (!catalog?.files?.length) {
             return 0
         }
 
         const max = Math.max.apply(
             null,
-            catalogData?.files?.map(({ ra }) => ra) || []
+            catalog?.files?.map(({ ra }) => ra) || []
         )
         const min = Math.min.apply(
             null,
-            catalogData?.files?.map(({ ra }) => ra) || []
+            catalog?.files?.map(({ ra }) => ra) || []
         )
 
         return Math.round((max - min) * 100) / 100
-    }, [catalogData?.files])
+    }, [catalog?.files])
 
     const deviationDec: number = useMemo(() => {
-        if (!catalogData?.files?.length) {
+        if (!catalog?.files?.length) {
             return 0
         }
 
         const max = Math.max.apply(
             null,
-            catalogData?.files?.map(({ dec }) => dec) || []
+            catalog?.files?.map(({ dec }) => dec) || []
         )
         const min = Math.min.apply(
             null,
-            catalogData?.files?.map(({ dec }) => dec) || []
+            catalog?.files?.map(({ dec }) => dec) || []
         )
 
         return Math.round((max - min) * 100) / 100
-    }, [catalogData?.files])
+    }, [catalog?.files])
 
     return (
         <main>
@@ -143,14 +85,14 @@ const ObjectItemPage: NextPage = () => {
                 title={`${objectTitle} - Объект`}
                 description={
                     'Описание объекта наблюдения: ' +
-                    sliceText(catalogData?.text ?? '', 200)
+                    sliceText(catalog?.text ?? '', 200)
                 }
                 openGraph={{
                     images: [
                         {
                             height: 244,
-                            url: catalogData?.image
-                                ? `${hosts.maps}${catalogData?.image}`
+                            url: catalog?.image
+                                ? `${hosts.maps}${catalog?.image}`
                                 : 'images/no-photo.png',
                             width: 487
                         }
@@ -160,20 +102,13 @@ const ObjectItemPage: NextPage = () => {
             />
             <ObjectSection
                 title={objectTitle}
-                loader={catalogLoading}
-                error={catalogError}
-                catalog={catalogData}
+                catalog={catalog}
                 deviationRa={deviationRa}
                 deviationDec={deviationDec}
             />
             <Message
                 warning={true}
-                hidden={
-                    !isOutdated(
-                        photoList?.items?.[0].date!,
-                        catalogData?.updated!
-                    )
-                }
+                hidden={!isOutdated(photos?.[0].date!, catalog?.updated!)}
                 className={'section'}
                 icon={'warning sign'}
                 header={'Новые данные'}
@@ -181,16 +116,11 @@ const ObjectItemPage: NextPage = () => {
                     'Фотографии устарели - есть новые данные с телескопа, с помощью которых можно собрать новое изображение объекта'
                 }
             />
-            {catalogData?.text && (
-                <div className={'section box textBlock'}>
-                    {catalogData?.text}
-                </div>
+            {catalog?.text && (
+                <div className={'section box textBlock'}>{catalog?.text}</div>
             )}
-            <PhotoTable
-                photos={photoList?.items}
-                loader={photoLoading}
-            />
-            {!!catalogData?.files?.length && (
+            <PhotoTable photos={photos} />
+            {!!catalog?.files?.length && (
                 <Grid className={'section'}>
                     <Grid.Column
                         computer={6}
@@ -221,18 +151,52 @@ const ObjectItemPage: NextPage = () => {
                 </Grid>
             )}
             <FilesTable
-                loader={catalogLoading}
-                objectName={typeof objectName === 'string' ? objectName : ''}
-                files={catalogData?.files}
+                objectName={object}
+                files={catalog?.files}
             />
             <ObjectCloud
                 loader={objectsLoading}
-                current={typeof objectName === 'string' ? objectName : ''}
+                current={object}
                 names={catalogObjects?.items}
                 link={'objects'}
             />
         </main>
     )
 }
+
+export const getServerSideProps = wrapper.getServerSideProps(
+    (store) =>
+        async (
+            context
+        ): Promise<GetServerSidePropsResult<ObjectItemPageProps>> => {
+            const object = context.params?.name
+
+            if (typeof object !== 'string') {
+                return { notFound: true }
+            }
+
+            const { data: catalog, isError } = await store.dispatch(
+                api.endpoints?.catalogGetItem.initiate(object)
+            )
+
+            const { data: photos } = await store.dispatch(
+                api.endpoints?.photoGetList.initiate({ object })
+            )
+
+            if (isError) {
+                return { notFound: true }
+            }
+
+            await Promise.all(store.dispatch(api.util.getRunningQueriesThunk()))
+
+            return {
+                props: {
+                    catalog: catalog!,
+                    object,
+                    photos: photos?.items || []
+                }
+            }
+        }
+)
 
 export default ObjectItemPage

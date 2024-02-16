@@ -1,3 +1,5 @@
+'use client'
+
 import { useAuthPostLoginMutation } from '@/api/api'
 import { login } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'

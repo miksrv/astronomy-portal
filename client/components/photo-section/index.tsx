@@ -18,7 +18,6 @@ import noImageServerUrl from '@/public/images/no-photo.png'
 import styles from './styles.module.sass'
 
 interface PhotoSectionProps {
-    loader: boolean
     error?: boolean
     title?: string
     photo?: TPhoto
@@ -26,7 +25,7 @@ interface PhotoSectionProps {
 }
 
 const PhotoSection: React.FC<PhotoSectionProps> = (props) => {
-    const { loader, title, photo, catalog } = props
+    const { title, photo, catalog } = props
 
     const dispatch = useAppDispatch()
     const isAuth = useAppSelector((state) => state.auth.isAuth)
@@ -37,19 +36,16 @@ const PhotoSection: React.FC<PhotoSectionProps> = (props) => {
 
     const photoDate = photo ? formatDate(photo.date, 'D.MM.YYYY') : '---'
 
-    const exposure =
-        !loader && photo?.statistic?.exposure
-            ? getTimeFromSec(photo.statistic.exposure, true)
-            : '---'
-    const filesize =
-        !loader && photo?.statistic?.data_size
-            ? Math.round((photo.statistic.data_size / 1024) * 100) / 100
-            : undefined
+    const exposure = photo?.statistic?.exposure
+        ? getTimeFromSec(photo.statistic.exposure, true)
+        : '---'
+    const filesize = photo?.statistic?.data_size
+        ? Math.round((photo.statistic.data_size / 1024) * 100) / 100
+        : undefined
 
-    const imageSize =
-        !loader && photo?.image_size
-            ? Math.round((photo.image_size / 1048576) * 100) / 100
-            : undefined
+    const imageSize = photo?.image_size
+        ? Math.round((photo.image_size / 1048576) * 100) / 100
+        : undefined
 
     const handleEditPhoto = () => {
         dispatch(editPhoto(photo))
@@ -65,7 +61,7 @@ const PhotoSection: React.FC<PhotoSectionProps> = (props) => {
                     mobile={16}
                     className={styles.photoContainer}
                 >
-                    {(!!loader || !photo) && (
+                    {!photo && (
                         <div className={styles.loader}>
                             <Dimmer>
                                 <Loader />
@@ -78,7 +74,7 @@ const PhotoSection: React.FC<PhotoSectionProps> = (props) => {
                         width={400}
                         height={400}
                         src={
-                            !loader && photo
+                            photo
                                 ? `${hosts.photo}${photo?.image_name}_thumb.${photo?.image_ext}`
                                 : noImageServerUrl
                         }

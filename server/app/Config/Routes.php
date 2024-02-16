@@ -1,39 +1,10 @@
 <?php
 
-namespace Config;
+use CodeIgniter\Router\RouteCollection;
 
-// Create a new instance of our RouteCollection class.
-$routes = Services::routes();
-
-/*
- * --------------------------------------------------------------------
- * Router Setup
- * --------------------------------------------------------------------
+/**
+ * @var RouteCollection $routes
  */
-$routes->setDefaultNamespace('App\Controllers');
-$routes->setDefaultController('Home');
-$routes->setDefaultMethod('index');
-$routes->setTranslateURIDashes(false);
-$routes->set404Override();
-// The Auto Routing (Legacy) is very dangerous. It is easy to create vulnerable apps
-// where controller filters or CSRF protection are bypassed.
-// If you don't want to define all routes, please use the Auto Routing (Improved).
-// Set `$autoRoutesImproved` to true in `app/Config/Feature.php` and set the following to true.
-// $routes->setAutoRoute(false);
-
-/*
- * --------------------------------------------------------------------
- * Route Definitions
- * --------------------------------------------------------------------
- */
-
-// We get a performance increase by specifying the default
-// route since we don't have to scan directories.
-
-$routes->get('cron/telegram', 'Cron::update_telegram_posts');
-//$routes->get('cron/optimize_images', 'Cron::optimize_photos');
-$routes->options('cron/telegram', 'Cron');
-
 $routes->get('weather/current', 'Weather::current');
 $routes->get('weather/statistic', 'Weather::statistic');
 $routes->options('weather/current', 'Weather::current');
@@ -86,12 +57,6 @@ $routes->post('auth/register', 'Auth::register');
 $routes->post('auth/login', 'Auth::login');
 $routes->options('auth/(:any)', 'Auth::me');
 
-$routes->get('blog', 'Blog::list');
-$routes->get('blog/statistic', 'Blog::statistic');
-$routes->get('blog/popular', 'Blog::popular');
-$routes->options('blog', 'Blog');
-$routes->options('blog/(:any)', 'Blog');
-
 $routes->get('relay/list', 'Relay::list');
 $routes->get('relay/light', 'Relay::light');
 $routes->put('relay/set', 'Relay::set');
@@ -107,19 +72,3 @@ $routes->options('fits/image', 'Fits::image');
 $routes->get('sensors', 'Sensors::list');
 
 $routes->get('camera/(:num)', 'Camera::show/$1');
-/*
- * --------------------------------------------------------------------
- * Additional Routing
- * --------------------------------------------------------------------
- *
- * There will often be times that you need additional routing and you
- * need it to be able to override any defaults in this file. Environment
- * based routes is one such time. require() additional route files here
- * to make that happen.
- *
- * You will have access to the $routes object within that file without
- * needing to reload it.
- */
-if (is_file(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php')) {
-    require APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php';
-}

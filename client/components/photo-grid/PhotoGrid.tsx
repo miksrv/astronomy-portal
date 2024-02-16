@@ -1,112 +1,72 @@
 import { hosts } from '@/api/constants'
 import { TCatalog, TPhoto } from '@/api/types'
-import { range, sliceText } from '@/functions/helpers'
+import { sliceText } from '@/functions/helpers'
 import classNames from 'classnames'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
-import { Dimmer, Loader, Reveal } from 'semantic-ui-react'
+import { Reveal } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
 interface PhotoGridProps {
-    loading: boolean
-    loaderCount?: number
     threeColumns?: boolean
     photos?: TPhoto[]
     catalog?: TCatalog[]
 }
 
 const PhotoGrid: React.FC<PhotoGridProps> = ({
-    loading,
-    loaderCount,
     threeColumns,
     photos,
     catalog
 }) => (
     <div className={classNames(styles.section, 'box')}>
-        <PhotosLoader
-            visible={loading || !photos || !catalog}
-            count={loaderCount || 12}
-            threeColumns={threeColumns}
-        />
-        {photos?.length && !loading
-            ? photos?.map((photo) => {
-                  const catalogItem = catalog?.find(
-                      ({ name }) => name === photo.object
-                  )
+        {!photos?.length && (
+            <div className={styles.notFound}>
+                {'Ничего не найдено, попробуйте изменить условия поиска.'}
+            </div>
+        )}
 
-                  return (
-                      <Link
-                          key={photo.id}
-                          href={`/photos/${photo.object}?date=${photo.date}`}
-                          title={`${photo.object} - Фотография объекта`}
-                          className={classNames(
-                              styles.item,
-                              threeColumns ? styles.item4 : undefined
-                          )}
-                      >
-                          {catalogItem?.title ? (
-                              <Reveal animated={'small fade'}>
-                                  <Reveal.Content visible>
-                                      <PhotoImage
-                                          photo={photo}
-                                          title={catalogItem.title}
-                                      />
-                                  </Reveal.Content>
-                                  <Reveal.Content hidden>
-                                      <div className={styles.info}>
-                                          <h4>{catalogItem.title}</h4>
-                                          <p>{sliceText(catalogItem?.text)}</p>
-                                      </div>
-                                  </Reveal.Content>
-                              </Reveal>
-                          ) : (
-                              <PhotoImage
-                                  photo={photo}
-                                  title={catalogItem?.name ?? ''}
-                              />
-                          )}
-                      </Link>
-                  )
-              })
-            : !loading && (
-                  <div className={styles.notFound}>
-                      Фотографий объектов по выбранной категории не найдено
-                  </div>
-              )}
-    </div>
-)
+        {photos?.map((photo) => {
+            const catalogItem = catalog?.find(
+                ({ name }) => name === photo.object
+            )
 
-interface PhotosLoaderProps {
-    count: number
-    visible?: boolean
-    threeColumns?: boolean
-}
-
-export const PhotosLoader: React.FC<PhotosLoaderProps> = ({
-    count,
-    visible,
-    threeColumns
-}) => (
-    <>
-        {visible &&
-            range(1, count).map((item) => (
-                <div
-                    key={item}
+            return (
+                <Link
+                    key={photo.id}
+                    href={`/photos/${photo.object}?date=${photo.date}`}
+                    title={`${photo.object} - Фотография объекта`}
                     className={classNames(
                         styles.item,
                         threeColumns ? styles.item4 : undefined
                     )}
                 >
-                    <div className={styles.info}>
-                        <Dimmer active>
-                            <Loader data-testid={'photos-loader'} />
-                        </Dimmer>
-                    </div>
-                </div>
-            ))}
-    </>
+                    {catalogItem?.title ? (
+                        <Reveal animated={'small fade'}>
+                            <Reveal.Content visible>
+                                <PhotoImage
+                                    photo={photo}
+                                    title={catalogItem.title}
+                                />
+                            </Reveal.Content>
+                            <Reveal.Content hidden>
+                                <div className={styles.info}>
+                                    <h4>{catalogItem.title}</h4>
+                                    <p>{sliceText(catalogItem?.text)}</p>
+                                </div>
+                            </Reveal.Content>
+                        </Reveal>
+                    ) : (
+                        <PhotoImage
+                            photo={photo}
+                            title={catalogItem?.name ?? ''}
+                        />
+                    )}
+                </Link>
+            )
+        })}
+    </div>
 )
 
 interface PhotoImageProps {

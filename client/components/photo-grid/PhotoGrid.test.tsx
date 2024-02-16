@@ -2,7 +2,7 @@ import { TCatalog, TPhoto } from '@/api/types'
 import { renderWithStore } from '@/setupTests.config'
 import { render, screen, waitFor } from '@testing-library/react'
 
-import PhotoGrid, { PhotoImage, PhotosLoader } from './PhotoGrid'
+import PhotoGrid, { PhotoImage } from './PhotoGrid'
 
 const customInitialState = {
     auth: {
@@ -92,15 +92,9 @@ const mockPhotos: TPhoto[] = [
 ]
 
 describe('PhotoGrid', () => {
-    it('renders PhotoGrid component with loader', () => {
-        render(<PhotoGrid loading={true} />)
-        expect(screen.getAllByTestId('photos-loader').length).toBeGreaterThan(0)
-    })
-
     it('renders PhotoGrid component with photos and catalog', async () => {
         renderWithStore(
             <PhotoGrid
-                loading={false}
                 photos={mockPhotos}
                 catalog={mockCatalog}
             />,
@@ -116,7 +110,7 @@ describe('PhotoGrid', () => {
     })
 
     it('renders not found message when no photos are present', async () => {
-        renderWithStore(<PhotoGrid loading={false} />, customInitialState)
+        renderWithStore(<PhotoGrid />, customInitialState)
         await waitFor(() => {
             expect(
                 screen.getByText(
@@ -124,18 +118,6 @@ describe('PhotoGrid', () => {
                 )
             ).toBeInTheDocument()
         })
-    })
-})
-
-describe('PhotosLoader Component', () => {
-    it('renders PhotosLoader component with loader items', () => {
-        render(
-            <PhotosLoader
-                count={3}
-                visible={true}
-            />
-        )
-        expect(screen.getAllByTestId('photos-loader')).toHaveLength(3)
     })
 })
 
