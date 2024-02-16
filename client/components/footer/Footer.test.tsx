@@ -1,3 +1,4 @@
+import { formatDate } from '@/functions/helpers'
 import packageInfo from '@/package.json'
 import { render, screen } from '@testing-library/react'
 
@@ -42,6 +43,6 @@ describe('Footer', () => {
     it('displays the update information', () => {
         render(<Footer />)
 
-        expect(screen.getByText(`(${update})`)).toBeInTheDocument()
+        expect(screen.getByText(`(${formatDate(update)})`)).toBeInTheDocument()
     })
 })

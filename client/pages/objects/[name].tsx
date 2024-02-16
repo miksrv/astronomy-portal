@@ -108,7 +108,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
             />
             <Message
                 warning={true}
-                hidden={!isOutdated(photos?.[0].date!, catalog?.updated!)}
+                hidden={!isOutdated(photos?.[0]?.date, catalog?.updated!)}
                 className={'section'}
                 icon={'warning sign'}
                 header={'Новые данные'}

@@ -114,7 +114,7 @@ describe('PhotoGrid', () => {
         await waitFor(() => {
             expect(
                 screen.getByText(
-                    'Фотографий объектов по выбранной категории не найдено'
+                    'Ничего не найдено, попробуйте изменить условия поиска.'
                 )
             ).toBeInTheDocument()
         })
