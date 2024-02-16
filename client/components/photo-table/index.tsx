@@ -1,13 +1,12 @@
 import { TFilterTypes, TFilters, TPhoto } from '@/api/types'
 import classNames from 'classnames'
 import React, { useMemo } from 'react'
-import { Dimmer, Loader, Table } from 'semantic-ui-react'
+import { Table } from 'semantic-ui-react'
 
 import RenderTableRow from './RenderTableRow'
 import styles from './styles.module.sass'
 
 type TPhotoTableProps = {
-    loader?: boolean
     photos?: TPhoto[]
 }
 
@@ -29,7 +28,7 @@ const headerFields: string[] = [
     ...headerFieldsFilters
 ]
 
-const PhotoTable: React.FC<TPhotoTableProps> = ({ photos, loader }) => {
+const PhotoTable: React.FC<TPhotoTableProps> = ({ photos }) => {
     const hideTableRows = useMemo(() => {
         let result: any[] = []
 
@@ -49,9 +48,6 @@ const PhotoTable: React.FC<TPhotoTableProps> = ({ photos, loader }) => {
 
     return (
         <div className={classNames(styles.section, 'table', 'box')}>
-            <Dimmer active={loader}>
-                <Loader />
-            </Dimmer>
             <Table
                 unstackable
                 singleLine

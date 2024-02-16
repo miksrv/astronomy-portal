@@ -3,7 +3,7 @@ import { TFIle } from '@/api/types'
 import classNames from 'classnames'
 import React, { useCallback, useEffect, useState } from 'react'
 import Lightbox from 'react-image-lightbox'
-import { Accordion, Dimmer, Icon, Loader, Table } from 'semantic-ui-react'
+import { Accordion, Icon, Table } from 'semantic-ui-react'
 
 import RenderTableHeader from './RenderTableHeader'
 import RenderTableRow from './RenderTableRow'
@@ -11,13 +11,12 @@ import styles from './styles.module.sass'
 import { TObjectSortable, TSortOrdering } from './types'
 
 type TFilesTableProps = {
-    loader: boolean
     objectName: string
     files?: TFIle[]
 }
 
 const FilesTable: React.FC<TFilesTableProps> = (props) => {
-    const { files, objectName, loader } = props
+    const { files, objectName } = props
 
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setCurrentIndex] = useState<number>(0)
@@ -76,9 +75,6 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
 
     return (
         <div className={classNames(styles.section, 'box', 'table')}>
-            <Dimmer active={loader}>
-                <Loader />
-            </Dimmer>
             <Accordion inverted>
                 <Accordion.Title
                     active={showSpoiler}

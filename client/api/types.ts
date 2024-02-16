@@ -43,23 +43,6 @@ export interface APIRequestLogin {
     password: string
 }
 
-// export type TSensorsPayload = {
-//     time: number
-//     sensors: TSensors
-// }
-//
-// export type TSensors = {
-//     t?: number
-//     h?: number
-//     t1?: number
-//     t2?: number
-//     t3?: number
-//     v1?: number
-//     p1?: number
-//     p2?: number
-//     p3?: number
-// }
-
 export interface APIResponseRelayList {
     items: TRelayItem[]
     light: {
@@ -147,13 +130,6 @@ export interface APIRequestWeatherStatistic {
     period?: string
 }
 
-export interface APIRequestBlogList {
-    limit?: number
-    offset?: number
-    order?: string
-    sort?: 'ASC' | 'DESC'
-}
-
 export type TStatisticTelescope = {
     telescope_date: string
     total_exposure: number
@@ -161,52 +137,14 @@ export type TStatisticTelescope = {
     catalog_items: string[]
 }
 
-export interface APIRequestBlogListPopular {
-    limit?: number
-}
-
 export interface APIResponsePhotoList {
     items: TPhoto[]
-}
-
-export interface APIResponseBlogList {
-    items: TBlog[]
-    total: number
-}
-
-export interface APIResponseBlogStatistic {
-    users: number
 }
 
 export type TRelayItem = {
     id: number
     name: string
     state: number
-}
-
-export type TBlog = {
-    id: number
-    telegram_id: number
-    telegram_date: number
-    group_id: number
-    views?: number
-    forwards?: number
-    replies?: number
-    text: string
-    reactions?: TBlogReaction[]
-    media?: TBlogMedia[]
-}
-
-export type TBlogMedia = {
-    file: string
-    file_type: 'image/jpeg' | 'image/png' | 'image/gif' | 'video/mp4' | string
-    height: number
-    width: number
-}
-
-export type TBlogReaction = {
-    emoticon: string
-    count: number
 }
 
 export type TCategory = {

@@ -1,50 +1,31 @@
-import {
-    catalogGetList,
-    categoryGetList,
-    getRunningQueriesThunk,
-    photoGetList,
-    useCatalogGetListQuery,
-    useCategoryGetListQuery,
-    usePhotoGetListQuery,
-    useStatisticGetQuery
-} from '@/api/api'
+import { api } from '@/api/api'
 import { wrapper } from '@/api/store'
-import { TPhoto } from '@/api/types'
-import { NextPage } from 'next'
+import { TCatalog, TCategory, TPhoto } from '@/api/types'
+import { GetServerSidePropsResult, NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React, { useMemo, useState } from 'react'
-import { Message } from 'semantic-ui-react'
 
 import CatalogToolbar from '@/components/catalog-toolbar'
 import PhotoGrid from '@/components/photo-grid'
 
-export const getServerSideProps = wrapper.getServerSideProps(
-    (store) => async () => {
-        store.dispatch(catalogGetList.initiate())
-        store.dispatch(categoryGetList.initiate())
-        store.dispatch(photoGetList.initiate())
+interface PhotosPageProps {
+    catalog: TCatalog[]
+    categories: TCategory[]
+    photos: TPhoto[]
+}
 
-        await Promise.all(store.dispatch(getRunningQueriesThunk()))
-
-        return {
-            props: { object: {} }
-        }
-    }
-)
-
-const PhotosPage: NextPage = () => {
+const PhotosPage: NextPage<PhotosPageProps> = ({
+    catalog,
+    categories,
+    photos
+}) => {
     const [search, setSearch] = useState<string>('')
-    const [categories, setCategories] = useState<number[]>([])
-
-    const { data: statisticData } = useStatisticGetQuery()
-    const { data: categoriesData } = useCategoryGetListQuery()
-    const { data: photoData, isLoading, isError } = usePhotoGetListQuery()
-    const { data: catalogData } = useCatalogGetListQuery()
+    const [localCategories, setLocalCategories] = useState<number[]>([])
 
     const listPhotos: TPhoto[] | undefined = useMemo(
         () =>
-            photoData?.items?.filter((photo) => {
-                const catalogItem = catalogData?.items?.find(
+            photos?.filter((photo) => {
+                const catalogItem = catalog?.find(
                     ({ name }) => name === photo.object
                 )
 
@@ -56,12 +37,12 @@ const PhotosPage: NextPage = () => {
                         catalogItem?.title
                             ?.toLowerCase()
                             .includes(search.toLowerCase())) &&
-                    (!categories?.length ||
+                    (!localCategories?.length ||
                         (catalogItem?.category &&
-                            categories.includes(catalogItem.category)))
+                            localCategories.includes(catalogItem.category)))
                 )
             }),
-        [photoData, catalogData, categories, search]
+        [photos, catalog, localCategories, search]
     )
 
     return (
@@ -82,29 +63,45 @@ const PhotosPage: NextPage = () => {
                     locale: 'ru'
                 }}
             />
-            {isError && !photoData?.items.length && (
-                <Message
-                    error={true}
-                    content={
-                        'Возникла ошибка при получении списка отснятых объектов'
-                    }
-                />
-            )}
             <CatalogToolbar
                 search={search}
-                categories={categoriesData?.items}
+                categories={categories}
                 onChangeSearch={setSearch}
-                onChangeCategories={setCategories}
+                onChangeCategories={setLocalCategories}
             />
             <PhotoGrid
                 threeColumns={true}
-                loading={isLoading}
-                loaderCount={statisticData?.photos || 12}
                 photos={listPhotos}
-                catalog={catalogData?.items}
+                catalog={catalog}
             />
         </main>
     )
 }
+
+export const getServerSideProps = wrapper.getServerSideProps(
+    (store) => async (): Promise<GetServerSidePropsResult<PhotosPageProps>> => {
+        const { data: catalog } = await store.dispatch(
+            api.endpoints?.catalogGetList.initiate()
+        )
+
+        const { data: categories } = await store.dispatch(
+            api.endpoints?.categoryGetList.initiate()
+        )
+
+        const { data: photos } = await store.dispatch(
+            api.endpoints?.photoGetList.initiate()
+        )
+
+        await Promise.all(store.dispatch(api.util.getRunningQueriesThunk()))
+
+        return {
+            props: {
+                catalog: catalog?.items || [],
+                categories: categories?.items || [],
+                photos: photos?.items || []
+            }
+        }
+    }
+)
 
 export default PhotosPage

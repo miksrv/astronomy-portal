@@ -1,3 +1,5 @@
+'use client'
+
 import { TFIle } from '@/api/types'
 import { formatDate } from '@/functions/helpers'
 import React from 'react'

@@ -1,8 +1,4 @@
-import {
-    useAuthGetMeMutation,
-    useCronGetUpdatePostsQuery,
-    useStatisticGetQuery
-} from '@/api/api'
+import { useAuthGetMeMutation, useStatisticGetQuery } from '@/api/api'
 import { openFormCatalog, openFormPhoto } from '@/api/applicationSlice'
 import { login, logout } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector } from '@/api/hooks'
@@ -47,10 +43,11 @@ export type TMenuItems = {
     link: string
     name: string
     label?: keyof APIResponseStatistic
+    external?: boolean
 }
 
 export const menuItems: TMenuItems[] = [
-    { link: '/blog', name: 'Блог' },
+    { external: true, link: 'https://t.me/nearspace', name: 'Блог' },
     { link: '/celestial', name: 'Карта' },
     { label: 'photos', link: '/photos', name: 'Фото' },
     { label: 'objects', link: '/objects', name: 'Объекты' },
@@ -63,7 +60,6 @@ const Header: React.FC = () => {
     const router = useRouter()
 
     const { data, isLoading } = useStatisticGetQuery()
-    const { isLoading: isCronLoading } = useCronGetUpdatePostsQuery()
     const [authGetMe, { data: meData, error }] = useAuthGetMeMutation()
     const authSlice = useAppSelector((state) => state.auth)
 
@@ -117,6 +113,7 @@ const Header: React.FC = () => {
                         href={item.link}
                         title={item.name}
                         active={router.pathname === item.link}
+                        target={item.external ? '_blank' : undefined}
                         className={styles.desktopMenu}
                     >
                         {item.name}
@@ -127,7 +124,7 @@ const Header: React.FC = () => {
                                 size={'tiny'}
                             >
                                 <Loader
-                                    active={isLoading || isCronLoading}
+                                    active={isLoading}
                                     size={'mini'}
                                 />
                                 {data?.[item.label]}

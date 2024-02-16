@@ -111,7 +111,7 @@
                 "extensions": [".js", ".jsx", ".ts", ".tsx"]
             }
         ],
-        "react/prop-types": "warn",
+        "react/prop-types": "off",
         "sort-imports": [
             "warn",
             {

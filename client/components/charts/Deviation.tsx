@@ -1,3 +1,5 @@
+'use client'
+
 import { TFIle } from '@/api/types'
 import React from 'react'
 import {
