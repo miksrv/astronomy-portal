@@ -4,18 +4,16 @@ const nextConfig = {
         removeConsole: process.env.NODE_ENV === 'production'
     },
     images: {
-        domains: ['astro.miksoft.pro'],
         remotePatterns: [
             {
-                hostname: 'astro.miksoft.pro',
-                pathname: '/api/**',
+                hostname: 'api.astro.miksoft.pro',
                 port: '',
                 protocol: 'https'
             }
         ],
         // unoptimized - When true, the source image will be served as-is instead of changing quality,
         // size, or format. Defaults to false.
-        unoptimized: true
+        unoptimized: false
     },
     output: 'standalone',
     reactStrictMode: true,

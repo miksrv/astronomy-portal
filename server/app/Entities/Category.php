@@ -2,8 +2,7 @@
 
 use CodeIgniter\Entity\Entity;
 
-class Category extends Entity
-{
+class Category extends Entity {
     protected $casts = [
         'id' => 'integer'
     ];

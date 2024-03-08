@@ -4,6 +4,3 @@ Allow: /
 
 # Host
 Host: https://astro.miksoft.pro
-
-# Sitemaps
-Sitemap: https://astro.miksoft.pro/sitemap.xml

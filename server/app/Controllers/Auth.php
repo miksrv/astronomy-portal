@@ -1,8 +1,7 @@
-<?php
+<?php namespace App\Controllers;
 
-namespace App\Controllers;
-
-use App\Models\UserModel;
+use App\Libraries\SessionLibrary;
+use App\Models\UsersModel;
 use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
@@ -11,44 +10,23 @@ use Config\Services;
 use Exception;
 use ReflectionException;
 
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization');
-
-if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
-    die();
-}
-
 class Auth extends ResourceController {
-    /**
-     * Register a new user
-     * @return ResponseInterface
-     * @throws ReflectionException
-     */
-    public function register(): ResponseInterface {
-        $rules = [
-            'name'     => 'required',
-            'email'    => 'required|min_length[6]|max_length[50]|valid_email|is_unique[user.email]',
-            'password' => 'required|min_length[8]|max_length[255]'
-        ];
+    private SessionLibrary $session;
 
-        $input = $this->getRequestInput($this->request);
-
-        if (!$this->validateRequest($input, $rules)) {
-            return $this->failValidationErrors($this->validator->getErrors());
-        }
-
-        $userModel = new UserModel();
-        $userModel->save($input);
-
-        return $this->getJWTForUser($input['email'], ResponseInterface::HTTP_CREATED);
+    public function __construct() {
+        $this->session = new SessionLibrary();
     }
 
     /**
      * Authenticate Existing User
      * @return ResponseInterface
+     * @throws ReflectionException
      */
     public function login(): ResponseInterface {
+        if ($this->session->isAuth) {
+            return $this->failForbidden('Already authorized');
+        }
+
         $rules = [
             'email'    => 'required|min_length[6]|max_length[50]|valid_email',
             'password' => 'required|min_length[8]|max_length[255]|validateUser[email, password]'
@@ -66,60 +44,28 @@ class Auth extends ResourceController {
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
-        return $this->getJWTForUser($input['email']);
+        $userModel = new UsersModel();
+        $userData  = $userModel->findUserByEmailAddress($input['email']);
+
+        $this->session->authorization($userData);
+
+        return $this->responseAuth();
     }
 
     /**
      * @throws Exception
      */
     public function me(): ResponseInterface {
-        $authenticationHeader = $this->request->getServer('HTTP_AUTHORIZATION');
+        $this->session->update();
 
-        try {
-            helper('jwt');
+        $response = (object) ['auth' => $this->session->isAuth];
 
-            $userData = validateJWTFromRequest($authenticationHeader);
-
-            unset($userData['password']);
-
-            return $this->respond(                    [
-                'auth'  => true,
-                'user'  => $userData,
-                'token' => getSignedJWTForUser($userData['email'])
-            ]);
-
-        } catch (Exception $e) {
-            log_message('error', '{exception}', ['exception' => $e]);
-
-            return $this->failUnauthorized();
+        if ($this->session->isAuth && $this->session->user) {
+            $response->user  = $this->session->user;
+            $response->token = generateAuthToken($this->session->user->email);
         }
-    }
 
-    /**
-     * @param string $emailAddress
-     * @param int $responseCode
-     * @return ResponseInterface
-     */
-    private function getJWTForUser(string $emailAddress, int $responseCode = ResponseInterface::HTTP_OK): ResponseInterface {
-        try {
-            $userModel = new UserModel();
-            $userData  = $userModel->findUserByEmailAddress($emailAddress);
-
-            unset($userData['password']);
-
-            helper('jwt');
-
-            return $this->respond([
-                'auth'  => true,
-                'user'  => $userData,
-                'token' => getSignedJWTForUser($emailAddress)
-            ]);
-
-        } catch (Exception $e) {
-            log_message('error', '{exception}', ['exception' => $e]);
-
-            return $this->fail(['error' => $e->getMessage()], $responseCode);
-        }
+        return $this->respond($response);
     }
 
     /**
@@ -148,6 +94,7 @@ class Auth extends ResourceController {
 
             $rules = $validation->$rules;
         }
+
         return $this->validator->setRules($rules, $messages)->run($input);
     }
 
@@ -155,7 +102,7 @@ class Auth extends ResourceController {
      * @param IncomingRequest $request
      * @return array|bool|float|int|mixed|object|string|null
      */
-    public function getRequestInput(IncomingRequest $request) {
+    public function getRequestInput(IncomingRequest $request): mixed {
         $input = $request->getPost();
 
         if (empty($input)) {
@@ -164,5 +111,16 @@ class Auth extends ResourceController {
         }
 
         return $input;
+    }
+
+    /**
+     * @return ResponseInterface
+     */
+    protected function responseAuth(): ResponseInterface {
+        return $this->respond([
+            'auth'  => $this->session->isAuth,
+            'user'  => $this->session->user,
+            'token' => generateAuthToken($this->session->user->email),
+        ]);
     }
 }

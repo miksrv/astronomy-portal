@@ -2,8 +2,7 @@
 
 use CodeIgniter\Model;
 
-class CategoryModel extends Model
-{
+class CategoryModel extends Model {
     protected $table      = 'category';
     protected $primaryKey = 'id';
 

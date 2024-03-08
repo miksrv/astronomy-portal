@@ -6,8 +6,7 @@ class MyBaseModel extends Model {
 
     protected array $hidden = [];
 
-    public function prepareOutput(array $data): array
-    {
+    public function prepareOutput(array $data): array {
 
         // if the hidden array is empty, we just return the original dta
         if (sizeof($this->hidden) == 0) return $data;
@@ -45,5 +44,4 @@ class MyBaseModel extends Model {
         }
 
     }
-
 }
