@@ -7,22 +7,14 @@ import { wrapper } from '@/api/store'
 import { TCatalog } from '@/api/types'
 import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
+import dynamic from 'next/dynamic'
 import React, { useMemo, useState } from 'react'
 
-import CelestialMap from '@/components/celestial-map'
 import ObjectCloudSkyMap from '@/components/celestial-map/ObjectCloudSkyMap'
 
-export const getServerSideProps = wrapper.getServerSideProps(
-    (store) => async () => {
-        store.dispatch(catalogGetList.initiate())
-
-        await Promise.all(store.dispatch(getRunningQueriesThunk()))
-
-        return {
-            props: { object: {} }
-        }
-    }
-)
+const CelestialMap = dynamic(() => import('@/components/celestial-map'), {
+    ssr: false
+})
 
 const CelestialPage: NextPage = () => {
     const { data, isFetching } = useCatalogGetListQuery()
@@ -60,6 +52,7 @@ const CelestialPage: NextPage = () => {
                     locale: 'ru'
                 }}
             />
+
             <div className={'box table global-map section'}>
                 <CelestialMap
                     objects={listObjects}
@@ -67,6 +60,7 @@ const CelestialPage: NextPage = () => {
                     goto={goToObject}
                 />
             </div>
+
             <ObjectCloudSkyMap
                 loading={isFetching || !listObjects?.length}
                 objects={listObjects}
@@ -75,5 +69,17 @@ const CelestialPage: NextPage = () => {
         </main>
     )
 }
+
+export const getServerSideProps = wrapper.getServerSideProps(
+    (store) => async () => {
+        store.dispatch(catalogGetList.initiate())
+
+        await Promise.all(store.dispatch(getRunningQueriesThunk()))
+
+        return {
+            props: { object: {} }
+        }
+    }
+)
 
 export default CelestialPage

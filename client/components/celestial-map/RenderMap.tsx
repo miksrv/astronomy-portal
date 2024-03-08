@@ -246,9 +246,9 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
 
     return (
         <div
-            id='celestial-map'
+            id={'celestial-map'}
             className={styles.skyMap}
-        ></div>
+        />
     )
 }
 
