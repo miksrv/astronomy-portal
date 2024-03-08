@@ -1,16 +1,22 @@
 <?php namespace App\Validation;
 
-use App\Models\UserModel;
+use App\Models\UsersModel;
 use Exception;
 
-class UserRules
-{
-    public function validateUser(string $str, string $fields, array $data): bool
-    {
+class UserRules {
+    /**
+     * @param string $str
+     * @param string $fields
+     * @param array $data
+     * @return bool
+     */
+    public function validateUser(string $str, string $fields, array $data): bool {
         try {
-            $model = new UserModel();
-            $user = $model->findUserByEmailAddress($data['email']);
-            return password_verify($data['password'], $user['password']);
+            $userModel = new UsersModel();
+            $userData  = $userModel->findUserByEmailAddress($data['email']);
+
+            return password_verify($data['password'], $userData->password);
+
         } catch (Exception $e) {
             return false;
         }

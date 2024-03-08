@@ -2,8 +2,7 @@
 
 use CodeIgniter\Model;
 
-class AuthorModel extends Model
-{
+class AuthorModel extends Model {
     protected $table      = 'authors';
     protected $primaryKey = 'id';
 

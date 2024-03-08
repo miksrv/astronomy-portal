@@ -2,8 +2,7 @@
 
 use CodeIgniter\Model;
 
-class SettingsModel extends Model
-{
+class SettingsModel extends Model {
     protected $table = 'settings';
     protected $primaryKey = 'key';
 

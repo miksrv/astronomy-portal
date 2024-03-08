@@ -2,8 +2,7 @@
 
 use CodeIgniter\Model;
 
-class CatalogModel extends Model
-{
+class CatalogModel extends Model {
     protected $table      = 'catalog';
     protected $primaryKey = 'name';
 

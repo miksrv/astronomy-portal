@@ -2,8 +2,7 @@
 
 use CodeIgniter\Entity\Entity;
 
-class File extends Entity
-{
+class File extends Entity {
     protected $attributes = [];
 
     protected $casts = [

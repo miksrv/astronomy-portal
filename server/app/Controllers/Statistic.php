@@ -7,14 +7,6 @@ use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET');
-header('Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization');
-
-if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
-    die();
-}
-
 class Statistic extends ResourceController {
     use ResponseTrait;
 

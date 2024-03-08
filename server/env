@@ -20,17 +20,7 @@
 # APP
 #--------------------------------------------------------------------
 
-# JWT_SECRET_KEY key is the secret key used by the application to sign JWTS. Pick a stronger one for production.
-# JWT_TIME_TO_LIVE indicates the validity period of a signed JWT (in milliseconds)
-
-JWT_SECRET_KEY = ''
-JWT_TIME_TO_LIVE = 3600
-
 # app.baseURL = ''
-# If you have trouble with `.`, you could also use `_`.
-# app_baseURL = ''
-# app.forceGlobalSecureRequests = false
-# app.CSPEnabled = false
 
 # Key for parser of FITS files, which downloads data about FITS files
 # and their image preview (see project https://github.com/miksrv/astronomy-fits-parser)
@@ -44,6 +34,21 @@ app.longitude = 55.0988
 app.observatory.controller = http://localhost:8081/
 app.observatory.webcam_1 = http://localhost:8081/
 app.observatory.webcam_2 = http://localhost:8081/
+
+#--------------------------------------------------------------------
+# AUTHORIZATION
+#--------------------------------------------------------------------
+
+auth.token.secret = '' # key is the secret key used by the application to sign JWTS
+auth.token.live   = 3600 # indicates the validity period of a signed JWT (in milliseconds)
+
+auth.google.clientID = ''
+auth.google.secret   = ''
+auth.google.redirect = ''
+
+auth.yandex.clientID = ''
+auth.yandex.secret   = ''
+auth.yandex.redirect = ''
 
 #--------------------------------------------------------------------
 # DATABASE

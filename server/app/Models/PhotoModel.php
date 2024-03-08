@@ -2,8 +2,7 @@
 
 use CodeIgniter\Model;
 
-class PhotoModel extends Model
-{
+class PhotoModel extends Model {
     protected $table      = 'photos';
     protected $primaryKey = 'id';
 

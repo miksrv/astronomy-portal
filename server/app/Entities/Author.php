@@ -2,8 +2,7 @@
 
 use CodeIgniter\Entity\Entity;
 
-class Author extends Entity
-{
+class Author extends Entity {
     protected $casts = [
         'id'  => 'integer'
     ];

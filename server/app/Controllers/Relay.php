@@ -8,14 +8,6 @@ use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 use Exception;
 
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, DELETE, PATCH, PUT');
-header('Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization');
-
-if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
-    die();
-}
-
 // The time during which the user cannot turn on the light from the moment it was last turned on
 define('LIGHT_SWITCH_COOLDOWN', 60 * 5);
 define('LIGHT_SWITCH_OFF_INTERVAL', 60);

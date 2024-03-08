@@ -2,8 +2,7 @@
 
 use CodeIgniter\Model;
 
-class FilesModel extends Model
-{
+class FilesModel extends Model {
     protected $table      = 'files';
     protected $primaryKey = 'id';
 
