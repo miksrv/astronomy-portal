@@ -174,6 +174,8 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
 
             Celestial.display(config)
 
+            const canvas = document.querySelector('canvas')
+
             if (customConfig.interactive) {
                 // const canvas = document.querySelector('canvas')
                 // // const ctx = canvas?.getContext("2d")
@@ -246,9 +248,9 @@ const RenderMap: React.FC<TRenderMapProps> = (props) => {
 
     return (
         <div
-            id='celestial-map'
+            id={'celestial-map'}
             className={styles.skyMap}
-        ></div>
+        />
     )
 }
 
