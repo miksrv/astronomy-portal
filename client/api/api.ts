@@ -309,9 +309,6 @@ export const api = createApi({
         >({
             query: (params) => `weather/statistic${encodeQueryData(params)}`
         })
-        // getSensorStatistic: builder.query<IRestSensorStatistic, void>({
-        //     query: () => 'get/sensors/statistic'
-        // }),
     }),
     extractRehydrationInfo(action, { reducerPath }): any {
         if (isHydrateAction(action)) {
@@ -332,7 +329,6 @@ export const {
     useAuthorPatchMutation,
     useAuthorPostMutation,
 
-    useCatalogDeleteMutation,
     useCatalogGetItemQuery,
     useCatalogGetListQuery,
     useCatalogPatchMutation,
@@ -343,7 +339,6 @@ export const {
     useCategoryPatchMutation,
     useCategoryPostMutation,
 
-    usePhotoGetListQuery,
     usePhotoPatchMutation,
     usePhotoPostMutation,
     usePhotoPostUploadMutation,
@@ -355,7 +350,6 @@ export const {
     useStatisticGetQuery,
     useStatisticGetCatalogItemsQuery,
     useStatisticGetPhotosItemsQuery,
-    useStatisticGetTelescopeQuery,
 
     useWeatherGetCurrentQuery,
     useWeatherGetStatisticQuery,
@@ -364,12 +358,4 @@ export const {
 } = api
 
 // export endpoints for use in SSR
-export const {
-    authorGetList,
-    catalogGetList,
-    catalogGetItem,
-    categoryGetList,
-    photoGetList,
-    statisticGetCatalogItems,
-    statisticGetPhotosItems
-} = api.endpoints
+export const { authorGetList, catalogGetList, categoryGetList } = api.endpoints
