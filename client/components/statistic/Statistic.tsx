@@ -1,8 +1,8 @@
-import { useStatisticGetQuery } from '@/api/api'
+import { APIResponseStatistic } from '@/api/types'
 import { declOfNum, getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
 import React from 'react'
-import { Dimmer, Grid, Icon, Loader, SemanticICONS } from 'semantic-ui-react'
+import { Grid, Icon, SemanticICONS } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
@@ -12,33 +12,33 @@ type StatisticCardType = {
     value: number | string
 }
 
-const Statistic: React.FC = () => {
-    const { data, isLoading } = useStatisticGetQuery()
+interface StatisticProps extends APIResponseStatistic {}
 
+const Statistic: React.FC<StatisticProps> = ({ ...props }) => {
     const CARDS: StatisticCardType[] = [
         {
             icon: 'photo',
-            name: declOfNum(data?.frames || 0, ['Кадр', 'Кадра', 'Кадров']),
-            value: data?.frames || 0
+            name: declOfNum(props?.frames || 0, ['Кадр', 'Кадра', 'Кадров']),
+            value: props?.frames || 0
         },
         {
             icon: 'clock outline',
             name: 'Выдержка',
-            value: getTimeFromSec(data?.exposure || 0)
+            value: getTimeFromSec(props?.exposure || 0)
         },
         {
             icon: 'star outline',
-            name: declOfNum(data?.objects || 0, [
+            name: declOfNum(props?.objects || 0, [
                 'Объект',
                 'Объекта',
                 'Объектов'
             ]),
-            value: data?.objects || 0
+            value: props?.objects || 0
         },
         {
             icon: 'disk',
             name: 'Данных (Гб)',
-            value: Math.round(((data?.filesize || 0) / 1024) * 100) / 100
+            value: Math.round(((props?.filesize || 0) / 1024) * 100) / 100
         }
     ]
 
@@ -59,9 +59,6 @@ const Statistic: React.FC = () => {
                                 'table'
                             )}
                         >
-                            <Dimmer active={isLoading}>
-                                <Loader data-testid={'statistic-loader'} />
-                            </Dimmer>
                             <div className={styles.iconContainer}>
                                 <Icon
                                     name={item.icon}

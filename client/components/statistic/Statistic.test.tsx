@@ -1,29 +1,20 @@
-import { useStatisticGetQuery } from '@/api/api'
+import { APIResponseStatistic } from '@/api/types'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
 
 import Statistic from './Statistic'
 
-jest.mock('@/api/api', () => ({
-    ...jest.requireActual('@/api/api'),
-    useStatisticGetQuery: jest.fn()
-}))
+const statistic: APIResponseStatistic = {
+    exposure: 300,
+    filesize: 1024,
+    frames: 10,
+    objects: 5,
+    photos: 10
+}
 
 describe('Statistic', () => {
-    beforeEach(() => {
-        ;(useStatisticGetQuery as jest.Mock).mockReturnValue({
-            data: {
-                exposure: 300,
-                filesize: 1024,
-                frames: 10,
-                objects: 5
-            },
-            isLoading: false
-        })
-    })
-
     it('renders statistic cards', () => {
-        render(<Statistic />)
+        render(<Statistic {...statistic} />)
 
         expect(screen.getByText('Кадров')).toBeInTheDocument()
         expect(screen.getByText('Выдержка')).toBeInTheDocument()
@@ -35,22 +26,5 @@ describe('Statistic', () => {
         expect(screen.getByText('5')).toBeInTheDocument()
         expect(screen.getByText('00:05')).toBeInTheDocument()
         expect(screen.getByText('1')).toBeInTheDocument()
-    })
-
-    it('displays loader while loading', () => {
-        ;(useStatisticGetQuery as jest.Mock).mockReturnValue({
-            data: undefined,
-            isLoading: true
-        })
-
-        render(<Statistic />)
-
-        expect(screen.getAllByTestId('statistic-loader').length).toBe(4)
-    })
-
-    it('does not display loader when not loading', () => {
-        render(<Statistic />)
-
-        expect(screen.queryByTestId('loader')).toBeNull()
     })
 })

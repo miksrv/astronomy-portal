@@ -1,6 +1,11 @@
 import { api } from '@/api/api'
 import { wrapper } from '@/api/store'
-import { TCatalog, TPhoto, TStatisticTelescope } from '@/api/types'
+import {
+    APIResponseStatistic,
+    TCatalog,
+    TPhoto,
+    TStatisticTelescope
+} from '@/api/types'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React from 'react'
@@ -14,9 +19,15 @@ interface HomePageProps {
     photos: TPhoto[]
     catalog: TCatalog[]
     telescope: TStatisticTelescope[]
+    statistic: APIResponseStatistic | null
 }
 
-const HomePage: NextPage<HomePageProps> = ({ photos, catalog, telescope }) => (
+const HomePage: NextPage<HomePageProps> = ({
+    photos,
+    catalog,
+    telescope,
+    statistic
+}) => (
     <main>
         <NextSeo
             title={'Любительская астрономическая обсерватория'}
@@ -34,12 +45,16 @@ const HomePage: NextPage<HomePageProps> = ({ photos, catalog, telescope }) => (
                 locale: 'ru'
             }}
         />
-        <Statistic />
+
+        {statistic && <Statistic {...statistic} />}
+
         <PhotoGrid
             photos={photos}
             catalog={catalog}
         />
+
         <TelescopeWorkdays eventsTelescope={telescope} />
+
         <Calendar eventsTelescope={telescope} />
     </main>
 )
@@ -58,12 +73,17 @@ export const getServerSideProps = wrapper.getServerSideProps(
             api.endpoints?.photoGetList.initiate({ limit: 4, order: 'random' })
         )
 
+        const { data: statistic } = await store.dispatch(
+            api.endpoints?.statisticGet.initiate()
+        )
+
         await Promise.all(store.dispatch(api.util.getRunningQueriesThunk()))
 
         return {
             props: {
                 catalog: catalog?.items || [],
                 photos: photos?.items || [],
+                statistic: statistic || null,
                 telescope: telescope?.items || []
             }
         }
