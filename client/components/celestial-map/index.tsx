@@ -6,13 +6,13 @@ import { Dimmer, Loader } from 'semantic-ui-react'
 import RenderMap from './RenderMap'
 import { TObject } from './types'
 
-type TSkyMapProps = {
-    objects: TObject[] | undefined
+interface CelestialMapProps {
+    objects?: TObject[]
     interactive?: boolean
     goto?: [number, number]
 }
 
-const CelestialMap: React.FC<TSkyMapProps> = (props) => {
+const CelestialMap: React.FC<CelestialMapProps> = (props) => {
     const { objects, interactive, goto } = props
     const [width, setWidth] = useState<number>(0)
 

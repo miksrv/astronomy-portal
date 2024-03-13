@@ -1,13 +1,4 @@
-import {
-    authorGetList,
-    categoryGetList,
-    getRunningQueriesThunk,
-    useAuthorDeleteMutation,
-    useAuthorGetListQuery,
-    useCategoryDeleteMutation,
-    useCategoryGetListQuery
-} from '@/api/api'
-import { useAppSelector } from '@/api/hooks'
+import { API, useAppSelector } from '@/api'
 import { wrapper } from '@/api/store'
 import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
@@ -32,19 +23,6 @@ const CategoryFormModal = dynamic(
     }
 )
 
-export const getServerSideProps = wrapper.getServerSideProps(
-    (store) => async () => {
-        store.dispatch(authorGetList.initiate())
-        store.dispatch(categoryGetList.initiate())
-
-        await Promise.all(store.dispatch(getRunningQueriesThunk()))
-
-        return {
-            props: { object: {} }
-        }
-    }
-)
-
 const DirectoryPage: NextPage = () => {
     const [showMessage, setShowMessage] = useState<boolean>(false)
     const [showCategoryModal, setShowCategoryModal] = useState<boolean>(false)
@@ -57,10 +35,10 @@ const DirectoryPage: NextPage = () => {
     const isAuth = useAppSelector((state) => state.auth.isAuth)
 
     const { data: categoriesData, isLoading: categoriesLoading } =
-        useCategoryGetListQuery()
+        API.useCategoryGetListQuery()
 
     const { data: authorsData, isLoading: authorsLoading } =
-        useAuthorGetListQuery()
+        API.useAuthorGetListQuery()
 
     const [
         deleteCategoryItem,
@@ -69,7 +47,7 @@ const DirectoryPage: NextPage = () => {
             isSuccess: deleteCategorySuccess,
             isError: deleteCategoryError
         }
-    ] = useCategoryDeleteMutation()
+    ] = API.useCategoryDeleteMutation()
 
     const [
         deleteAuthorItem,
@@ -78,7 +56,7 @@ const DirectoryPage: NextPage = () => {
             isSuccess: deleteAuthorSuccess,
             isError: deleteAuthorError
         }
-    ] = useAuthorDeleteMutation()
+    ] = API.useAuthorDeleteMutation()
 
     const handleAddCatalog = () => {
         setModifyCatalogName(undefined)
@@ -293,5 +271,18 @@ const DirectoryPage: NextPage = () => {
         </main>
     )
 }
+
+export const getServerSideProps = wrapper.getServerSideProps(
+    (store) => async () => {
+        store.dispatch(API.endpoints?.authorGetList.initiate())
+        store.dispatch(API.endpoints?.categoryGetList.initiate())
+
+        await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+
+        return {
+            props: { object: {} }
+        }
+    }
+)
 
 export default DirectoryPage

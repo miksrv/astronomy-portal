@@ -5,13 +5,13 @@ import { Dimmer, Loader } from 'semantic-ui-react'
 import styles from './styles.module.sass'
 import { TObject } from './types'
 
-type TObjectCloudProps = {
+interface ObjectCloudSkyMapProps {
     loading: boolean
-    objects: TObject[]
+    objects?: TObject[]
     handleClick?: (ra: number, dec: number) => void
 }
 
-const ObjectCloudSkyMap: React.FC<TObjectCloudProps> = ({
+const ObjectCloudSkyMap: React.FC<ObjectCloudSkyMapProps> = ({
     loading,
     objects,
     handleClick
@@ -21,7 +21,7 @@ const ObjectCloudSkyMap: React.FC<TObjectCloudProps> = ({
             <Loader />
         </Dimmer>
         {objects
-            ?.sort((a, b) => (a.name > b.name ? 1 : -1))
+            ?.sort((a, b) => (a.name! > b.name! ? 1 : -1))
             .map((item) => (
                 <span key={item.name}>
                     <span
@@ -29,9 +29,9 @@ const ObjectCloudSkyMap: React.FC<TObjectCloudProps> = ({
                         role={'button'}
                         tabIndex={0}
                         onKeyDown={() => {}}
-                        onClick={() => handleClick?.(item.ra, item.dec)}
+                        onClick={() => handleClick?.(item.ra!, item.dec!)}
                     >
-                        {item.name.replace(/_/g, ' ')}
+                        {item.name?.replace(/_/g, ' ')}
                     </span>
                     <span className={styles.divider}>•</span>
                 </span>

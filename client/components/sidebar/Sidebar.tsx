@@ -1,10 +1,9 @@
-import { useStatisticGetQuery } from '@/api/api'
-import { useAppDispatch, useAppSelector } from '@/api/hooks'
+import { API, useAppDispatch, useAppSelector } from '@/api'
 import Link from 'next/link'
 import React from 'react'
 import { Label, Loader, Menu, Sidebar as SidebarMenu } from 'semantic-ui-react'
 
-import { TMenuItems, menuItems } from '@/components/header/Header'
+import { MenuItemsType, menuItems } from '@/components/header/Header'
 import { hide } from '@/components/sidebar/sidebarSlice'
 
 import styles from './styles.module.sass'
@@ -12,10 +11,10 @@ import styles from './styles.module.sass'
 const Sidebar: React.FC = () => {
     const dispatch = useAppDispatch()
     const visible = useAppSelector((state) => state.sidebar.visible)
-    const { data, isLoading } = useStatisticGetQuery()
+    const { data, isLoading } = API.useStatisticGetQuery()
 
-    const beforeMobileMenu: TMenuItems[] = [{ link: '/', name: 'Главная' }]
-    const afterMobileMenu: TMenuItems[] = [
+    const beforeMobileMenu: MenuItemsType[] = [{ link: '/', name: 'Главная' }]
+    const afterMobileMenu: MenuItemsType[] = [
         { link: '/directory', name: 'Справочники' }
     ]
 

@@ -1,6 +1,5 @@
+import { ApiModel, useAppSelector } from '@/api'
 import { hosts } from '@/api/constants'
-import { useAppSelector } from '@/api/hooks'
-import { FilterList, TPhoto } from '@/api/types'
 import { getTimeFromSec, isOutdated, sliceText } from '@/functions/helpers'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -11,15 +10,19 @@ import { TTableItem } from '@/components/object-table/types'
 
 import styles from './styles.module.sass'
 
-type TTableRowProps = {
+interface RenderTableRowProps {
     item: TTableItem
-    photo?: TPhoto
+    photo?: ApiModel.Photo
     onClickEdit?: (item: string) => void
     onClickDelete?: (item: string) => void
 }
 
-const RenderTableRow: React.FC<TTableRowProps> = (props) => {
-    const { item, photo, onClickEdit, onClickDelete } = props
+const RenderTableRow: React.FC<RenderTableRowProps> = ({
+    item,
+    photo,
+    onClickEdit,
+    onClickDelete
+}) => {
     const isAuth = useAppSelector((state) => state.auth.isAuth)
 
     return (
@@ -110,7 +113,7 @@ const RenderTableRow: React.FC<TTableRowProps> = (props) => {
             </Table.Cell>
             <Table.Cell content={item.frames} />
             <Table.Cell content={getTimeFromSec(item.exposure)} />
-            {FilterList.map((filter) => (
+            {ApiModel.Filter.List.map((filter) => (
                 <Table.Cell
                     key={filter}
                     className={item?.[filter] ? styles[filter] : undefined}

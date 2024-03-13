@@ -1,5 +1,5 @@
+import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
-import { TFIle } from '@/api/types'
 import { formatDate } from '@/functions/helpers'
 import Image from 'next/image'
 import React from 'react'
@@ -9,8 +9,8 @@ import MoonPhase from '@/components/moon-phase'
 
 import styles from './styles.module.sass'
 
-type TTableRow = {
-    file: TFIle
+interface RenderTableRowProps {
+    file: ApiModel.File.Item
     itemId: number
     object: string
     showPreview?: boolean
@@ -18,7 +18,7 @@ type TTableRow = {
     onPhotoClick: (photoId: number) => void
 }
 
-const RenderTableRow: React.FC<TTableRow> = ({
+const RenderTableRow: React.FC<RenderTableRowProps> = ({
     file,
     itemId,
     object,

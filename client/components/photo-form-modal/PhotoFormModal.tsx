@@ -1,20 +1,6 @@
-import {
-    useAuthorGetListQuery,
-    usePhotoPatchMutation,
-    usePhotoPostMutation,
-    usePhotoPostUploadMutation,
-    useStatisticGetCatalogItemsQuery
-} from '@/api/api'
+import { API, ApiModel, ApiType, useAppDispatch, useAppSelector } from '@/api'
 import { openFormPhoto } from '@/api/applicationSlice'
 import { hosts } from '@/api/constants'
-import { useAppDispatch, useAppSelector } from '@/api/hooks'
-import {
-    APIRequestPhoto,
-    APIResponseError,
-    APIResponseUploadPhoto,
-    TFilters,
-    TPhoto
-} from '@/api/types'
 import { formatDate } from '@/functions/helpers'
 import isEqual from 'lodash-es/isEqual'
 import Image from 'next/image'
@@ -25,7 +11,7 @@ import { Button, Checkbox, Form, Grid, Message, Modal } from 'semantic-ui-react'
 
 import FormModalActions from '@/components/form-modal-actions'
 
-import CustomParameters from './customParameters'
+import CustomParameters from './CustomParameters'
 import styles from './styles.module.sass'
 
 const PhotoFormModal: React.FC = () => {
@@ -34,8 +20,8 @@ const PhotoFormModal: React.FC = () => {
     const application = useAppSelector((state) => state.application)
     const value = application.editableItemPhoto
 
-    const { data: catalogData } = useStatisticGetCatalogItemsQuery()
-    const { data: authorsData } = useAuthorGetListQuery()
+    const { data: catalogData } = API.useStatisticGetCatalogItemsQuery()
+    const { data: authorsData } = API.useAuthorGetListQuery()
     const [
         updateItem,
         {
@@ -44,7 +30,7 @@ const PhotoFormModal: React.FC = () => {
             isError: updateError,
             error: updateErrorList
         }
-    ] = usePhotoPatchMutation()
+    ] = API.usePhotoPatchMutation()
 
     const [
         createItem,
@@ -54,7 +40,7 @@ const PhotoFormModal: React.FC = () => {
             isError: createError,
             error: createErrorList
         }
-    ] = usePhotoPostMutation()
+    ] = API.usePhotoPostMutation()
 
     const [
         uploadPhoto,
@@ -65,23 +51,23 @@ const PhotoFormModal: React.FC = () => {
             // isError: uploadError,
             // error: uploadErrorList
         }
-    ] = usePhotoPostUploadMutation()
+    ] = API.usePhotoPostUploadMutation()
 
     const [file, setFile] = useState<File | undefined>()
-    const [filters, setFilters] = useState<TFilters>()
+    const [filters, setFilters] = useState<ApiModel.Filter.ListItems>()
     const [useCustomParam, setUseCustomParam] = useState<boolean>(false)
     const [submitted, setSubmitted] = useState<boolean>(false)
-    const [formState, setFormState] = useState<APIRequestPhoto>(
+    const [formState, setFormState] = useState<ApiType.Photo.ReqSet>(
         mapFormProps(value)
     )
 
     const handleKeyDown = (e: { key: string }) =>
         e.key === 'Enter' && handleSubmit()
 
-    const findError = (field: keyof APIRequestPhoto) =>
+    const findError = (field: keyof ApiType.Photo.ReqSet) =>
         (
-            (createErrorList as APIResponseError) ||
-            (updateErrorList as APIResponseError)
+            (createErrorList as ApiType.ResError) ||
+            (updateErrorList as ApiType.ResError)
         )?.messages?.[field] || undefined
 
     const handleClose = () => {
@@ -120,7 +106,7 @@ const PhotoFormModal: React.FC = () => {
 
     useEffect(() => {
         if (uploadData && uploadSuccess) {
-            const uploadPhotoResult = uploadData as APIResponseUploadPhoto
+            const uploadPhotoResult = uploadData as ApiType.Photo.ResUpload
 
             setFormState({
                 ...formState,
@@ -302,7 +288,7 @@ const PhotoFormModal: React.FC = () => {
     )
 }
 
-const mapFormProps = (value?: TPhoto | undefined): APIRequestPhoto => ({
+const mapFormProps = (value?: ApiModel.Photo): ApiType.Photo.ReqSet => ({
     author_id: value?.author?.id ?? 0,
     date: value?.date ?? '',
     id: value?.id ?? 0,

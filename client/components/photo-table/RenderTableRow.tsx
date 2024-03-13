@@ -1,5 +1,5 @@
+import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
-import { FilterList, TPhoto } from '@/api/types'
 import { formatDate, getTimeFromSec } from '@/functions/helpers'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -9,7 +9,7 @@ import { Table } from 'semantic-ui-react'
 import styles from './styles.module.sass'
 
 interface RenderTableRowProps {
-    photo: TPhoto
+    photo: ApiModel.Photo
     hideRows?: string[]
 }
 
@@ -38,24 +38,22 @@ const RenderTableRow: React.FC<RenderTableRowProps> = ({ photo, hideRows }) => (
                     : '---'
             }
         />
-        {FilterList.filter((filter) => !hideRows?.includes(filter)).map(
-            (filter) => (
-                <Table.Cell
-                    className={
-                        filter && photo?.filters?.[filter]?.frames
-                            ? styles[filter]
-                            : ''
-                    }
-                    key={filter}
-                >
-                    {photo.filters?.[filter]?.exposure
-                        ? getTimeFromSec(
-                              photo?.filters?.[filter]?.exposure || 0
-                          )
-                        : ''}
-                </Table.Cell>
-            )
-        )}
+        {ApiModel.Filter.List.filter(
+            (filter) => !hideRows?.includes(filter)
+        ).map((filter) => (
+            <Table.Cell
+                className={
+                    filter && photo?.filters?.[filter]?.frames
+                        ? styles[filter]
+                        : ''
+                }
+                key={filter}
+            >
+                {photo.filters?.[filter]?.exposure
+                    ? getTimeFromSec(photo?.filters?.[filter]?.exposure || 0)
+                    : ''}
+            </Table.Cell>
+        ))}
     </Table.Row>
 )
 

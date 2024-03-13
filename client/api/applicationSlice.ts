@@ -1,11 +1,11 @@
-import { TCatalog, TPhoto } from '@/api/types'
+import { ApiModel } from '@/api'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 type TApplicationSlice = {
     isActiveFormCatalog: boolean
     isActiveFormPhoto: boolean
-    editableItemCatalog?: TCatalog
-    editableItemPhoto?: TPhoto
+    editableItemCatalog?: ApiModel.Catalog
+    editableItemPhoto?: ApiModel.Photo
 }
 
 const initialState: TApplicationSlice = {
@@ -17,10 +17,16 @@ const applicationSlice = createSlice({
     initialState,
     name: 'auth',
     reducers: {
-        editCatalog: (state, action: PayloadAction<TCatalog | undefined>) => {
+        editCatalog: (
+            state,
+            action: PayloadAction<ApiModel.Catalog | undefined>
+        ) => {
             state.editableItemCatalog = action.payload
         },
-        editPhoto: (state, action: PayloadAction<TPhoto | undefined>) => {
+        editPhoto: (
+            state,
+            action: PayloadAction<ApiModel.Photo | undefined>
+        ) => {
             state.editableItemPhoto = action.payload
         },
         openFormCatalog: (state, action: PayloadAction<boolean>) => {

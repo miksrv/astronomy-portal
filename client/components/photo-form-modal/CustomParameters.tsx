@@ -1,4 +1,4 @@
-import { FilterList, TFilterTypes, TFilters, TFiltersItem } from '@/api/types'
+import { ApiModel } from '@/api'
 import classNames from 'classnames'
 import React, { useEffect, useState } from 'react'
 import 'react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css'
@@ -6,51 +6,52 @@ import { Form, Table } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
-type TCustomParameters = {
-    initialState?: TFilters
-    onChange?: (parameters: TFilters) => void
+interface CustomParametersProps {
+    initialState?: ApiModel.Filter.ListItems
+    onChange?: (parameters: ApiModel.Filter.ListItems) => void
 }
 
-const CustomParameters: React.FC<TCustomParameters> = ({
+const CustomParameters: React.FC<CustomParametersProps> = ({
     initialState,
     onChange
 }) => {
-    const [parametersState, setParametersState] = useState<TFilters>(
-        initialState || {
-            blue: {
-                exposure: 0,
-                frames: 0
-            },
-            green: {
-                exposure: 0,
-                frames: 0
-            },
-            hydrogen: {
-                exposure: 0,
-                frames: 0
-            },
-            luminance: {
-                exposure: 0,
-                frames: 0
-            },
-            oxygen: {
-                exposure: 0,
-                frames: 0
-            },
-            red: {
-                exposure: 0,
-                frames: 0
-            },
-            sulfur: {
-                exposure: 0,
-                frames: 0
+    const [parametersState, setParametersState] =
+        useState<ApiModel.Filter.ListItems>(
+            initialState || {
+                blue: {
+                    exposure: 0,
+                    frames: 0
+                },
+                green: {
+                    exposure: 0,
+                    frames: 0
+                },
+                hydrogen: {
+                    exposure: 0,
+                    frames: 0
+                },
+                luminance: {
+                    exposure: 0,
+                    frames: 0
+                },
+                oxygen: {
+                    exposure: 0,
+                    frames: 0
+                },
+                red: {
+                    exposure: 0,
+                    frames: 0
+                },
+                sulfur: {
+                    exposure: 0,
+                    frames: 0
+                }
             }
-        }
-    )
+        )
 
     const handleChange = (
-        filter: TFilterTypes,
-        param: keyof TFiltersItem,
+        filter: ApiModel.Filter.Type,
+        param: keyof ApiModel.File.Statistic,
         value: string
     ) => {
         setParametersState({
@@ -85,7 +86,7 @@ const CustomParameters: React.FC<TCustomParameters> = ({
                 </Table.Row>
             </Table.Header>
             <Table.Body>
-                {FilterList.map((filter) => (
+                {ApiModel.Filter.List.map((filter) => (
                     <Table.Row key={filter}>
                         <Table.Cell>
                             <span

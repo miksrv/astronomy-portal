@@ -10,12 +10,12 @@ import photoZhenya from '@/public/photos/team-Zhenya.jpg'
 
 import styles from './styles.module.sass'
 
-type TTeam = {
+type TeamMemberType = {
     name?: string
     photo?: StaticImageData
 }
 
-export const teamList: TTeam[] = [
+export const teamList: TeamMemberType[] = [
     {
         name: 'Михаил Топчило',
         photo: photoMisha

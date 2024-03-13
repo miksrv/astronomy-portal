@@ -1,7 +1,6 @@
-import { api, useStatisticGetCatalogItemsQuery } from '@/api/api'
+import { API, ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
-import { TCatalog, TPhoto } from '@/api/types'
 import { isOutdated, sliceText } from '@/functions/helpers'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { NextSeo } from 'next-seo'
@@ -18,8 +17,8 @@ import PhotoTable from '@/components/photo-table'
 
 interface ObjectItemPageProps {
     object: string
-    photos: TPhoto[]
-    catalog: TCatalog
+    photos: ApiModel.Photo[]
+    catalog: ApiModel.Catalog
 }
 
 const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
@@ -28,7 +27,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
     catalog
 }) => {
     const { data: catalogObjects, isLoading: objectsLoading } =
-        useStatisticGetCatalogItemsQuery()
+        API.useStatisticGetCatalogItemsQuery()
 
     const objectTitle = useMemo(
         () => catalog?.title || catalog?.name || object.toString(),
@@ -176,18 +175,18 @@ export const getServerSideProps = wrapper.getServerSideProps(
             }
 
             const { data: catalog, isError } = await store.dispatch(
-                api.endpoints?.catalogGetItem.initiate(object)
+                API.endpoints?.catalogGetItem.initiate(object)
             )
 
             const { data: photos } = await store.dispatch(
-                api.endpoints?.photoGetList.initiate({ object })
+                API.endpoints?.photoGetList.initiate({ object })
             )
 
             if (isError) {
                 return { notFound: true }
             }
 
-            await Promise.all(store.dispatch(api.util.getRunningQueriesThunk()))
+            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
             return {
                 props: {

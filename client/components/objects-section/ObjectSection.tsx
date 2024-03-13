@@ -1,7 +1,6 @@
+import { ApiModel, useAppDispatch, useAppSelector } from '@/api'
 import { editCatalog, openFormCatalog } from '@/api/applicationSlice'
 import { hosts } from '@/api/constants'
-import { useAppDispatch, useAppSelector } from '@/api/hooks'
-import { TCatalog } from '@/api/types'
 import { formatDate, getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
 import Image from 'next/image'
@@ -14,16 +13,19 @@ import noImageServerUrl from '@/public/images/no-photo.png'
 
 import styles from './styles.module.sass'
 
-type TObjectHeaderProps = {
+interface ObjectSectionProps {
     title: string
-    catalog?: TCatalog
+    catalog?: ApiModel.Catalog
     deviationRa?: number
     deviationDec?: number
 }
 
-const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
-    const { title, catalog, deviationRa, deviationDec } = props
-
+const ObjectSection: React.FC<ObjectSectionProps> = ({
+    title,
+    catalog,
+    deviationRa,
+    deviationDec
+}) => {
     const dispatch = useAppDispatch()
     const isAuth = useAppSelector((state) => state.auth.isAuth)
 
@@ -85,7 +87,7 @@ const ObjectSection: React.FC<TObjectHeaderProps> = (props) => {
                                     <span className={styles.value}>
                                         Сделано кадров:
                                     </span>
-                                    {catalog?.statistic.frames || '---'}
+                                    {catalog?.statistic?.frames || '---'}
                                 </div>
                                 <div>
                                     <span className={styles.value}>

@@ -1,6 +1,5 @@
-import { api } from '@/api/api'
+import { API, ApiModel } from '@/api'
 import { wrapper } from '@/api/store'
-import { TCatalog, TCategory, TPhoto } from '@/api/types'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React, { useMemo, useState } from 'react'
@@ -9,9 +8,9 @@ import CatalogToolbar from '@/components/catalog-toolbar'
 import PhotoGrid from '@/components/photo-grid'
 
 interface PhotosPageProps {
-    catalog: TCatalog[]
-    categories: TCategory[]
-    photos: TPhoto[]
+    catalog: ApiModel.Catalog[]
+    categories: ApiModel.Category[]
+    photos: ApiModel.Photo[]
 }
 
 const PhotosPage: NextPage<PhotosPageProps> = ({
@@ -22,7 +21,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
     const [search, setSearch] = useState<string>('')
     const [localCategories, setLocalCategories] = useState<number[]>([])
 
-    const listPhotos: TPhoto[] | undefined = useMemo(
+    const listPhotos: ApiModel.Photo[] | undefined = useMemo(
         () =>
             photos?.filter((photo) => {
                 const catalogItem = catalog?.find(
@@ -81,18 +80,18 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) => async (): Promise<GetServerSidePropsResult<PhotosPageProps>> => {
         const { data: catalog } = await store.dispatch(
-            api.endpoints?.catalogGetList.initiate()
+            API.endpoints?.catalogGetList.initiate()
         )
 
         const { data: categories } = await store.dispatch(
-            api.endpoints?.categoryGetList.initiate()
+            API.endpoints?.categoryGetList.initiate()
         )
 
         const { data: photos } = await store.dispatch(
-            api.endpoints?.photoGetList.initiate()
+            API.endpoints?.photoGetList.initiate()
         )
 
-        await Promise.all(store.dispatch(api.util.getRunningQueriesThunk()))
+        await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
         return {
             props: {

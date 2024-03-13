@@ -1,4 +1,4 @@
-import { APIResponseStatistic } from '@/api/types'
+import { ApiType } from '@/api'
 import { declOfNum, getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
 import React from 'react'
@@ -12,7 +12,7 @@ type StatisticCardType = {
     value: number | string
 }
 
-interface StatisticProps extends APIResponseStatistic {}
+interface StatisticProps extends ApiType.Statistic.ResGeneral {}
 
 const Statistic: React.FC<StatisticProps> = ({ ...props }) => {
     const CARDS: StatisticCardType[] = [

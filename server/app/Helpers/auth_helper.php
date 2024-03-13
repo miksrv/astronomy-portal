@@ -16,10 +16,10 @@ function validateAuthToken(string $encodedToken = null):? User {
     }
 
     try {
-        $userModel    = new UsersModel();
-        $secretKey    = Services::getSecretKey();
-        $decodedToken = JWT::decode($encodedToken, new Key($secretKey, 'HS256'));
-        $userData     = $userModel->findUserByEmailAddress($decodedToken->email);
+        $userModel = new UsersModel();
+        $secretKey = Services::getSecretKey();
+        $decoded   = JWT::decode($encodedToken, new Key($secretKey, 'HS256'));
+        $userData  = $userModel->findUserByEmailAddress($decoded->email);
 
         if (!$userData) {
             return null;

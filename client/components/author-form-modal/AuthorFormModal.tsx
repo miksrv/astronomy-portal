@@ -1,18 +1,18 @@
+import { ApiModel, ApiType } from '@/api'
 import { useAuthorPatchMutation, useAuthorPostMutation } from '@/api/api'
-import { APIResponseError, TAuthor } from '@/api/types'
 import isEqual from 'lodash-es/isEqual'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Form, Message, Modal } from 'semantic-ui-react'
 
 import FormModalActions from '@/components/form-modal-actions'
 
-interface IAuthorFormModal {
+interface AuthorFormModalProps {
     visible: boolean
-    value?: TAuthor
+    value?: ApiModel.Author
     onClose?: () => void
 }
 
-const AuthorFormModal: React.FC<IAuthorFormModal> = (props) => {
+const AuthorFormModal: React.FC<AuthorFormModalProps> = (props) => {
     const { visible, value, onClose } = props
 
     const [
@@ -36,7 +36,9 @@ const AuthorFormModal: React.FC<IAuthorFormModal> = (props) => {
     ] = useAuthorPostMutation()
 
     const [submitted, setSubmitted] = useState<boolean>(false)
-    const [formState, setFormState] = useState<TAuthor>(mapFormProps(value))
+    const [formState, setFormState] = useState<ApiModel.Author>(
+        mapFormProps(value)
+    )
 
     const handleChange = ({
         target: { name, value }
@@ -46,10 +48,10 @@ const AuthorFormModal: React.FC<IAuthorFormModal> = (props) => {
     const handleKeyDown = (e: { key: string }) =>
         e.key === 'Enter' && handleSubmit()
 
-    const findError = (field: keyof TAuthor) =>
+    const findError = (field: keyof ApiModel.Author) =>
         (
-            (createErrorList as APIResponseError) ||
-            (updateErrorList as APIResponseError)
+            (createErrorList as ApiType.ResError) ||
+            (updateErrorList as ApiType.ResError)
         )?.messages?.[field] || undefined
 
     const handleClose = () => {
@@ -138,7 +140,7 @@ const AuthorFormModal: React.FC<IAuthorFormModal> = (props) => {
     )
 }
 
-const mapFormProps = (value?: TAuthor | undefined): TAuthor => ({
+const mapFormProps = (value?: ApiModel.Author): ApiModel.Author => ({
     id: value?.id ?? 0,
     link: value?.link ?? '',
     name: value?.name ?? ''

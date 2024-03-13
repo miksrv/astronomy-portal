@@ -3,7 +3,7 @@ import { Icon, Table } from 'semantic-ui-react'
 
 import { TObjectSortable, TSortOrdering } from './types'
 
-type TTableHeader = {
+interface RenderTableHeaderProps {
     sort: TObjectSortable
     order: TSortOrdering
     showPreview?: boolean
@@ -30,7 +30,7 @@ export const HEADER_FIELDS: THeaderFields[] = [
     { key: 'date_obs', name: 'Дата съемки' }
 ]
 
-const RenderTableHeader: React.FC<TTableHeader> = ({
+const RenderTableHeader: React.FC<RenderTableHeaderProps> = ({
     sort,
     order,
     showPreview,

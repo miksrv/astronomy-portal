@@ -3,7 +3,7 @@ import { Table } from 'semantic-ui-react'
 
 import { TSortKey, TSortOrdering } from './types'
 
-type TTableHeaderProps = {
+interface RenderTableHeaderProps {
     sort: TSortKey
     order: TSortOrdering
     handlerSortClick: (field: TSortKey) => void
@@ -28,7 +28,7 @@ export const HeaderFields: THeaderFields[] = [
     { key: 'sulfur', name: 'SII' }
 ]
 
-const RenderTableHeader: React.FC<TTableHeaderProps> = ({
+const RenderTableHeader: React.FC<RenderTableHeaderProps> = ({
     sort,
     order,
     handlerSortClick

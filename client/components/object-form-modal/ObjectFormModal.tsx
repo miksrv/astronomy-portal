@@ -1,14 +1,7 @@
 'use client'
 
-import {
-    useCatalogGetItemQuery,
-    useCatalogPatchMutation,
-    useCatalogPostMutation,
-    useCategoryGetListQuery
-} from '@/api/api'
+import { API, ApiModel, ApiType, useAppDispatch, useAppSelector } from '@/api'
 import { openFormCatalog } from '@/api/applicationSlice'
-import { useAppDispatch, useAppSelector } from '@/api/hooks'
-import { APIRequestCatalog, APIResponseError, TCatalog } from '@/api/types'
 import isEqual from 'lodash-es/isEqual'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Form, Grid, Message, Modal } from 'semantic-ui-react'
@@ -23,8 +16,8 @@ const ObjectFormModal: React.FC = () => {
     const application = useAppSelector((state) => state.application)
     const value = application.editableItemCatalog
 
-    const { data: categoriesData } = useCategoryGetListQuery()
-    const { data: catalogData, isFetching } = useCatalogGetItemQuery(
+    const { data: categoriesData } = API.useCategoryGetListQuery()
+    const { data: catalogData, isFetching } = API.useCatalogGetItemQuery(
         value?.name || '',
         {
             skip: !value?.name
@@ -39,7 +32,7 @@ const ObjectFormModal: React.FC = () => {
             isError: updateError,
             error: updateErrorList
         }
-    ] = useCatalogPatchMutation()
+    ] = API.useCatalogPatchMutation()
 
     const [
         createItem,
@@ -49,10 +42,10 @@ const ObjectFormModal: React.FC = () => {
             isError: createError,
             error: createErrorList
         }
-    ] = useCatalogPostMutation()
+    ] = API.useCatalogPostMutation()
 
     const [submitted, setSubmitted] = useState<boolean>(false)
-    const [formState, setFormState] = useState<APIRequestCatalog>(
+    const [formState, setFormState] = useState<ApiType.Catalog.ReqSet>(
         mapFormProps(value)
     )
 
@@ -67,10 +60,10 @@ const ObjectFormModal: React.FC = () => {
         }
     }
 
-    const findError = (field: keyof APIRequestCatalog) =>
+    const findError = (field: keyof ApiType.Catalog.ReqSet) =>
         (
-            (createErrorList as APIResponseError) ||
-            (updateErrorList as APIResponseError)
+            (createErrorList as ApiType.ResError) ||
+            (updateErrorList as ApiType.ResError)
         )?.messages?.[field] || undefined
 
     const handleClose = () => {
@@ -220,9 +213,9 @@ const ObjectFormModal: React.FC = () => {
                             <CelestialMap
                                 objects={[
                                     {
-                                        dec: formState?.coord_dec,
+                                        dec: formState?.coord_dec!,
                                         name: formState?.name || '',
-                                        ra: formState?.coord_ra
+                                        ra: formState?.coord_ra!
                                     }
                                 ]}
                             />
@@ -245,7 +238,7 @@ const ObjectFormModal: React.FC = () => {
     )
 }
 
-const mapFormProps = (value?: TCatalog | undefined): APIRequestCatalog => ({
+const mapFormProps = (value?: ApiModel.Catalog): ApiType.Catalog.ReqSet => ({
     category: value?.category ?? 0,
     coord_dec: value?.coord_dec ?? 0,
     coord_ra: value?.coord_ra ?? 0,

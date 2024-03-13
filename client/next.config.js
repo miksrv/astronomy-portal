@@ -9,6 +9,11 @@ const nextConfig = {
                 hostname: 'api.astro.miksoft.pro',
                 port: '',
                 protocol: 'https'
+            },
+            {
+                hostname: 'localhost',
+                port: '8080',
+                protocol: 'http'
             }
         ],
         // unoptimized - When true, the source image will be served as-is instead of changing quality,

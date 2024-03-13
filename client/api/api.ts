@@ -1,36 +1,9 @@
+import { ApiType } from '@/api'
 import type { Action, PayloadAction } from '@reduxjs/toolkit'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { HYDRATE } from 'next-redux-wrapper'
 
 import { RootState } from './store'
-import {
-    APIRequestCatalog,
-    APIRequestLogin,
-    APIRequestPhoto,
-    APIRequestPhotoList,
-    APIRequestRelaySet,
-    APIRequestTelescope,
-    APIRequestWeatherStatistic,
-    APIResponseAuthorList,
-    APIResponseCatalogList,
-    APIResponseCatalogNames,
-    APIResponseCategoryList,
-    APIResponseError,
-    APIResponseLogin,
-    APIResponsePhotoList,
-    APIResponsePhotoListNames,
-    APIResponseRelayList,
-    APIResponseRelaySet,
-    APIResponseStatistic,
-    APIResponseStatisticTelescope,
-    APIResponseUploadPhoto,
-    APIResponseWeatherCurrent,
-    APIResponseWeatherStatistic,
-    TAuthor,
-    TCatalog,
-    TCategory,
-    TPhoto
-} from './types'
 
 type Maybe<T> = T | void
 
@@ -49,11 +22,9 @@ const isHydrateAction = (action: Action): action is PayloadAction<RootState> =>
     action.type === HYDRATE
 
 export const imageHost =
-    process.env.NEXT_PUBLIC_IMG_HOST ||
-    process.env.NEXT_PUBLIC_API_HOST ||
-    'http://localhost/'
+    process.env.NEXT_PUBLIC_IMG_HOST || process.env.NEXT_PUBLIC_API_HOST
 
-export const api = createApi({
+export const API = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:8080/',
         prepareHeaders: (headers, { getState }) => {
@@ -68,10 +39,19 @@ export const api = createApi({
         }
     }),
     endpoints: (builder) => ({
-        authGetMe: builder.mutation<APIResponseLogin, void>({
+        /* Auth Controller */
+        authGetMe: builder.mutation<ApiType.Auth.ResLogin, void>({
             query: () => 'auth/me'
         }),
-        authPostLogin: builder.mutation<APIResponseLogin, APIRequestLogin>({
+        authLoginService: builder.mutation<any, any>({
+            query: ({ service, code }) =>
+                `auth/${service}${code ? `?code=${code}` : ''}`,
+            transformErrorResponse: (response) => response.data
+        }),
+        authPostLogin: builder.mutation<
+            ApiType.Auth.ResLogin,
+            ApiType.Auth.ReqLogin
+        >({
             query: (credentials) => ({
                 body: credentials,
                 method: 'POST',
@@ -80,6 +60,7 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
+        /* Author Controller */
         authorDelete: builder.mutation<void, number>({
             invalidatesTags: () => [{ type: 'Author' }],
             query: (id) => ({
@@ -88,14 +69,14 @@ export const api = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-        authorGetList: builder.query<APIResponseAuthorList, void>({
+        authorGetList: builder.query<ApiType.Author.ResList, void>({
             keepUnusedDataFor: 3600,
             providesTags: () => [{ id: 'LIST', type: 'Author' }],
             query: () => 'author'
         }),
         authorPatch: builder.mutation<
-            TAuthor | APIResponseError,
-            Partial<TAuthor> & Pick<TAuthor, 'id'>
+            ApiType.Author.ResSet | ApiType.ResError,
+            Partial<ApiType.Author.ReqSet> & Pick<ApiType.Author.ReqSet, 'id'>
         >({
             invalidatesTags: () => [{ type: 'Author' }],
             query: ({ id, ...formState }) => ({
@@ -106,8 +87,8 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
         authorPost: builder.mutation<
-            TAuthor | APIResponseError,
-            Partial<TAuthor>
+            ApiType.Author.ResSet | ApiType.ResError,
+            Partial<ApiType.Author.ReqSet>
         >({
             invalidatesTags: () => [{ type: 'Author' }],
             query: ({ ...formState }) => ({
@@ -118,6 +99,7 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
+        /* Catalog Controller */
         catalogDelete: builder.mutation<void, string>({
             invalidatesTags: (result, error, object) => [
                 { object, type: 'Catalog' },
@@ -129,18 +111,19 @@ export const api = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-        catalogGetItem: builder.query<TCatalog, string>({
+        catalogGetItem: builder.query<ApiType.Catalog.ResItem, string>({
             providesTags: (result, error, id) => [{ id, type: 'Catalog' }],
             query: (object) => `catalog/${object}`,
             transformErrorResponse: (response) => response.data
         }),
-        catalogGetList: builder.query<APIResponseCatalogList, void>({
+        catalogGetList: builder.query<ApiType.Catalog.ResList, void>({
             providesTags: () => [{ id: 'LIST', type: 'Catalog' }],
             query: () => 'catalog'
         }),
         catalogPatch: builder.mutation<
-            TCatalog | APIResponseError,
-            Partial<APIRequestCatalog> & Pick<APIRequestCatalog, 'name'>
+            ApiType.Catalog.ResSet | ApiType.ResError,
+            Partial<ApiType.Catalog.ReqSet> &
+                Pick<ApiType.Catalog.ReqSet, 'name'>
         >({
             invalidatesTags: (result, error, { name }) => [
                 { name, type: 'Catalog' }
@@ -153,8 +136,8 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
         catalogPost: builder.mutation<
-            TCatalog | APIResponseError,
-            Partial<APIRequestCatalog>
+            ApiType.Catalog.ResSet | ApiType.ResError,
+            Partial<ApiType.Catalog.ReqSet>
         >({
             invalidatesTags: (result, error, { name }) => [
                 { name, type: 'Catalog' },
@@ -168,6 +151,7 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
+        /* Category Controller */
         categoryDelete: builder.mutation<void, number>({
             invalidatesTags: () => [{ type: 'Category' }],
             query: (id) => ({
@@ -176,14 +160,15 @@ export const api = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-        categoryGetList: builder.query<APIResponseCategoryList, void>({
+        categoryGetList: builder.query<ApiType.Category.ResList, void>({
             keepUnusedDataFor: 3600,
             providesTags: () => [{ id: 'LIST', type: 'Category' }],
             query: () => 'category'
         }),
         categoryPatch: builder.mutation<
-            TCategory | APIResponseError,
-            Partial<TCategory> & Pick<TCategory, 'id'>
+            ApiType.Category.ResSet | ApiType.ResError,
+            Partial<ApiType.Category.ReqSet> &
+                Pick<ApiType.Category.ReqSet, 'id'>
         >({
             invalidatesTags: () => [{ type: 'Category' }],
             query: ({ id, ...formState }) => ({
@@ -194,8 +179,8 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
         categoryPost: builder.mutation<
-            TCategory | APIResponseError,
-            Partial<TCategory>
+            ApiType.Category.ResSet | ApiType.ResError,
+            Partial<ApiType.Category.ReqSet>
         >({
             invalidatesTags: () => [{ type: 'Category' }],
             query: ({ ...formState }) => ({
@@ -206,13 +191,14 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
-        photoGetItem: builder.query<TPhoto, string>({
+        /* Photo Controller */
+        photoGetItem: builder.query<ApiType.Photo.ResItem, string>({
             keepUnusedDataFor: 3600,
             query: (object) => `photo/${object}`
         }),
         photoGetList: builder.query<
-            APIResponsePhotoList,
-            Maybe<APIRequestPhotoList>
+            ApiType.Photo.ResList,
+            Maybe<ApiType.Photo.ReqList>
         >({
             keepUnusedDataFor: 3600,
             providesTags: () => ['Photo'],
@@ -220,8 +206,8 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
         photoPatch: builder.mutation<
-            TPhoto | APIResponseError,
-            Partial<APIRequestPhoto> & Pick<APIRequestPhoto, 'id'>
+            ApiType.Photo.ResSet | ApiType.ResError,
+            Partial<ApiType.Photo.ReqSet> & Pick<ApiType.Photo.ReqSet, 'id'>
         >({
             invalidatesTags: (result, error, { id }) => [{ id, type: 'Photo' }],
             query: ({ id, ...formState }) => ({
@@ -232,8 +218,8 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
         photoPost: builder.mutation<
-            TPhoto | APIResponseError,
-            Partial<APIRequestPhoto>
+            ApiType.Photo.ResSet | ApiType.ResError,
+            Partial<ApiType.Photo.ReqSet>
         >({
             invalidatesTags: (result, error, { object }) => [
                 { object, type: 'Photo' },
@@ -247,7 +233,7 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
         photoPostUpload: builder.mutation<
-            APIResponseUploadPhoto | APIResponseError,
+            ApiType.Photo.ResUpload | ApiType.ResError,
             FormData
         >({
             query: (formData) => ({
@@ -258,17 +244,18 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
+        /* Relay Controller */
         relayGetLight: builder.mutation<void, void>({
             invalidatesTags: () => [{ id: 'LIST', type: 'Relay' }],
             query: () => 'relay/light'
         }),
-        relayGetState: builder.query<APIResponseRelayList, null>({
+        relayGetState: builder.query<ApiType.Relay.ResRelayList, null>({
             providesTags: () => [{ id: 'LIST', type: 'Relay' }],
             query: () => 'relay/list'
         }),
         relayPutStatus: builder.mutation<
-            APIResponseRelaySet,
-            APIRequestRelaySet
+            ApiType.Relay.ResRelaySet,
+            ApiType.Relay.ReqRelaySet
         >({
             invalidatesTags: [{ id: 'LIST', type: 'Relay' }],
             query: (data) => ({
@@ -279,33 +266,39 @@ export const api = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
-        statisticGet: builder.query<APIResponseStatistic, void>({
+        /* Statistic Controller */
+        statisticGet: builder.query<ApiType.Statistic.ResGeneral, void>({
             providesTags: () => ['Statistic'],
             query: () => 'statistic'
         }),
-        statisticGetCatalogItems: builder.query<APIResponseCatalogNames, void>({
+        statisticGetCatalogItems: builder.query<
+            ApiType.Statistic.ResCatalogNames,
+            void
+        >({
             providesTags: () => ['Statistic'],
             query: () => 'statistic/catalog'
         }),
-        statisticGetPhotosItems: builder.query<APIResponsePhotoListNames, void>(
-            {
-                providesTags: () => ['Statistic'],
-                query: () => 'statistic/photos'
-            }
-        ),
+        statisticGetPhotosItems: builder.query<
+            ApiType.Statistic.ResPhotoNames,
+            void
+        >({
+            providesTags: () => ['Statistic'],
+            query: () => 'statistic/photos'
+        }),
         statisticGetTelescope: builder.query<
-            APIResponseStatisticTelescope,
-            Maybe<APIRequestTelescope>
+            ApiType.Statistic.ResTelescope,
+            Maybe<ApiType.Statistic.ReqTelescope>
         >({
             query: (params) => `statistic/telescope${encodeQueryData(params)}`
         }),
 
-        weatherGetCurrent: builder.query<APIResponseWeatherCurrent, void>({
+        /* Weather Controller */
+        weatherGetCurrent: builder.query<ApiType.Weather.ResCurrent, void>({
             query: () => 'weather/current'
         }),
         weatherGetStatistic: builder.query<
-            APIResponseWeatherStatistic,
-            Maybe<APIRequestWeatherStatistic>
+            ApiType.Weather.ResStatistic,
+            Maybe<ApiType.Weather.ReqStatistic>
         >({
             query: (params) => `weather/statistic${encodeQueryData(params)}`
         })
@@ -355,7 +348,7 @@ export const {
     useWeatherGetStatisticQuery,
 
     util: { getRunningQueriesThunk }
-} = api
+} = API
 
 // export endpoints for use in SSR
-export const { authorGetList, catalogGetList, categoryGetList } = api.endpoints
+export const { authorGetList, catalogGetList, categoryGetList } = API.endpoints

@@ -1,4 +1,4 @@
-import { TFilters } from '@/api/types'
+import { ApiModel } from '@/api'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
 
@@ -6,7 +6,7 @@ import FilterList from './FilterList'
 
 describe('FilterList Component', () => {
     it('renders without errors when filters are provided', () => {
-        const filters: TFilters = {
+        const filters: ApiModel.Filter.ListItems = {
             hydrogen: {
                 exposure: 300,
                 frames: 5
@@ -32,7 +32,7 @@ describe('FilterList Component', () => {
     })
 
     it('renders correct text when filters have different values', () => {
-        const filters: TFilters = {
+        const filters: ApiModel.Filter.ListItems = {
             hydrogen: {
                 exposure: 60,
                 frames: 1

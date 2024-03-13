@@ -1,4 +1,4 @@
-import { TStatisticTelescope } from '@/api/types'
+import { ApiModel } from '@/api'
 import { formatDate, getTimeFromSec } from '@/functions/helpers'
 import classNames from 'classnames'
 import Link from 'next/link'
@@ -11,7 +11,7 @@ import styles from './styles.module.sass'
 
 interface TelescopeWorkdaysProps {
     loading?: boolean
-    eventsTelescope?: TStatisticTelescope[]
+    eventsTelescope?: ApiModel.Statistic.Telescope[]
 }
 
 const TelescopeWorkdays: React.FC<TelescopeWorkdaysProps> = ({
