@@ -125,23 +125,22 @@ class Auth extends ResourceController {
 
             // If a Google user has an avatar, copy it
             if ($googleUser->picture) {
-                $avatarDirectory = UPLOAD_USERS . '/' . $newUserId . '/';
-                $avatar = md5($googleUser->name . AUTH_TYPE_GOOGLE . $googleUser->email) . '.jpg';
+                $avatar = $newUserId . '.jpg';
 
-                if (!is_dir($avatarDirectory)) {
-                    mkdir($avatarDirectory,0777, TRUE);
+                if (!is_dir(UPLOAD_USERS)) {
+                    mkdir(UPLOAD_USERS,0777, TRUE);
                 }
 
-                file_put_contents($avatarDirectory . $avatar, file_get_contents($googleUser->picture));
+                file_put_contents(UPLOAD_USERS . $avatar, file_get_contents($googleUser->picture));
 
-                $file = new File($avatarDirectory . $avatar);
+                $file = new File(UPLOAD_USERS . $avatar);
                 $name = pathinfo($file, PATHINFO_FILENAME);
                 $ext  = $file->getExtension();
 
                 $image = Services::image('gd'); // imagick
                 $image->withFile($file->getRealPath())
                     ->fit(AVATAR_WIDTH, AVATAR_HEIGHT)
-                    ->save($avatarDirectory  . $name . '_medium.' . $ext);
+                    ->save(UPLOAD_USERS  . $name . '_medium.' . $ext);
 
                 $userModel->update($newUserId, ['avatar' => $avatar]);
             }
@@ -220,24 +219,23 @@ class Auth extends ResourceController {
 
             // If a Google user has an avatar, copy it
             if (!$yandexUser->is_avatar_empty && $yandexUser->default_avatar_id) {
-                $avatarDirectory = UPLOAD_USERS . '/' . $newUserId . '/';
                 $yandexAvatarUrl = "https://avatars.yandex.net/get-yapic/{$yandexUser->default_avatar_id}/islands-200";
-                $avatar = md5($yandexUser->real_name . AUTH_TYPE_YANDEX . $yandexEmail) . '.jpg';
+                $avatar = $newUserId . '.jpg';
 
-                if (!is_dir($avatarDirectory)) {
-                    mkdir($avatarDirectory,0777, TRUE);
+                if (!is_dir(UPLOAD_USERS)) {
+                    mkdir(UPLOAD_USERS,0777, TRUE);
                 }
 
-                file_put_contents($avatarDirectory . $avatar, file_get_contents($yandexAvatarUrl));
+                file_put_contents(UPLOAD_USERS . $avatar, file_get_contents($yandexAvatarUrl));
 
-                $file = new File($avatarDirectory . $avatar);
+                $file = new File(UPLOAD_USERS . $avatar);
                 $name = pathinfo($file, PATHINFO_FILENAME);
                 $ext  = $file->getExtension();
 
                 $image = Services::image('gd'); // imagick
                 $image->withFile($file->getRealPath())
                     ->fit(AVATAR_WIDTH, AVATAR_HEIGHT)
-                    ->save($avatarDirectory  . $name . '_medium.' . $ext);
+                    ->save(UPLOAD_USERS  . $name . '_medium.' . $ext);
 
                 $userModel->update($newUserId, ['avatar' => $avatar]);
             }
