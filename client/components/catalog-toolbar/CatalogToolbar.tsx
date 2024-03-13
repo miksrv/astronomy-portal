@@ -1,8 +1,7 @@
 'use client'
 
+import { ApiModel, useAppDispatch, useAppSelector } from '@/api'
 import { openFormCatalog, openFormPhoto } from '@/api/applicationSlice'
-import { useAppDispatch, useAppSelector } from '@/api/hooks'
-import { TCategory } from '@/api/types'
 import { usePathname } from 'next/navigation'
 import React, { useMemo } from 'react'
 import { Button, Dropdown, Icon, Input } from 'semantic-ui-react'
@@ -11,7 +10,7 @@ import styles from './styles.module.sass'
 
 interface CatalogToolbarProps {
     search: string
-    categories?: TCategory[]
+    categories?: ApiModel.Category[]
     onChangeSearch?: (search: string) => void
     onChangeCategories?: (id: number[]) => void
 }

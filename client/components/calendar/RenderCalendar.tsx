@@ -1,4 +1,4 @@
-import { TStatisticTelescope, TWeatherStatistic } from '@/api/types'
+import { ApiModel } from '@/api'
 import { formatDate } from '@/functions/helpers'
 import classNames from 'classnames'
 import dayjs, { Dayjs } from 'dayjs'
@@ -18,8 +18,8 @@ const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
 
 interface RenderCalendarProps {
     calendarDate: Date | Dayjs
-    eventsWeather?: TWeatherStatistic[]
-    eventsTelescope?: TStatisticTelescope[]
+    eventsWeather?: ApiModel.Statistic.Weather[]
+    eventsTelescope?: ApiModel.Statistic.Telescope[]
 }
 
 const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {

@@ -1,10 +1,10 @@
-import { APIResponseStatistic } from '@/api/types'
+import { ApiType } from '@/api'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
 
 import Statistic from './Statistic'
 
-const statistic: APIResponseStatistic = {
+const statistic: ApiType.Statistic.ResGeneral = {
     exposure: 300,
     filesize: 1024,
     frames: 10,

@@ -1,5 +1,4 @@
-import { useWeatherGetStatisticQuery } from '@/api/api'
-import { TStatisticTelescope } from '@/api/types'
+import { API, ApiModel } from '@/api'
 import { dateAddMonth, dateExtractMonth, formatDate } from '@/functions/helpers'
 import classNames from 'classnames'
 import React, { useMemo, useState } from 'react'
@@ -8,14 +7,14 @@ import { Button, Dimmer, Loader } from 'semantic-ui-react'
 import RenderCalendar from './RenderCalendar'
 import styles from './styles.module.sass'
 
-type TWeatherDays = {
+type WeatherDaysType = {
     good: number
     middle: number
     bad: number
 }
 
 interface CalendarProps {
-    eventsTelescope?: TStatisticTelescope[]
+    eventsTelescope?: ApiModel.Statistic.Telescope[]
 }
 
 const Calendar: React.FC<CalendarProps> = ({ eventsTelescope }) => {
@@ -23,12 +22,12 @@ const Calendar: React.FC<CalendarProps> = ({ eventsTelescope }) => {
     const daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС']
 
     const { data: weatherData, isFetching: weatherLoading } =
-        useWeatherGetStatisticQuery({
+        API.useWeatherGetStatisticQuery({
             period: formatDate(calendarDate, 'MM-YYYY')
         })
 
     const weatherDays = useMemo(() => {
-        let initialData: TWeatherDays = {
+        let initialData: WeatherDaysType = {
             bad: 0,
             good: 0,
             middle: 0

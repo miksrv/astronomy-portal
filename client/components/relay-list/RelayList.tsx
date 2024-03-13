@@ -1,10 +1,4 @@
-import {
-    useRelayGetLightMutation,
-    useRelayGetStateQuery,
-    useRelayPutStatusMutation
-} from '@/api/api'
-import { useAppSelector } from '@/api/hooks'
-import { APIRequestRelaySet } from '@/api/types'
+import { API, ApiType, useAppSelector } from '@/api'
 import { declOfNum } from '@/functions/helpers'
 import classNames from 'classnames'
 import React, { useEffect, useState } from 'react'
@@ -12,13 +6,13 @@ import { Button, Dimmer, Loader, Message } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
-type RelayListItemProps = {
+interface RelayListItemProps {
     id: number
     name: string
     state: boolean
     loading: boolean
     isAuth?: boolean
-    handleClick?: (relay: APIRequestRelaySet) => void
+    handleClick?: (relay: ApiType.Relay.ReqRelaySet) => void
 }
 
 export const RelayListItem: React.FC<RelayListItemProps> = ({
@@ -60,16 +54,17 @@ export const RelayList: React.FC = () => {
         data: relayList,
         isLoading,
         isError
-    } = useRelayGetStateQuery(null, { pollingInterval: 15 * 1000 })
+    } = API.useRelayGetStateQuery(null, { pollingInterval: 15 * 1000 })
 
     const [setRelayStatus, { isLoading: loaderSet, data: relaySet }] =
-        useRelayPutStatusMutation()
+        API.useRelayPutStatusMutation()
 
-    const [setLightOn, { isLoading: lightLoading }] = useRelayGetLightMutation()
+    const [setLightOn, { isLoading: lightLoading }] =
+        API.useRelayGetLightMutation()
 
     const isAuth = useAppSelector((state) => state.auth.isAuth)
 
-    const handleSetRelay = async (relay: APIRequestRelaySet) => {
+    const handleSetRelay = async (relay: ApiType.Relay.ReqRelaySet) => {
         setRelayLoading(relay.id)
         await setRelayStatus(relay)
     }

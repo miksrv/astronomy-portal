@@ -1,5 +1,5 @@
+import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
-import { TCatalog, TPhoto } from '@/api/types'
 import { sliceText } from '@/functions/helpers'
 import classNames from 'classnames'
 import Image from 'next/image'
@@ -11,8 +11,8 @@ import styles from './styles.module.sass'
 
 interface PhotoGridProps {
     threeColumns?: boolean
-    photos?: TPhoto[]
-    catalog?: TCatalog[]
+    photos?: ApiModel.Photo[]
+    catalog?: ApiModel.Catalog[]
 }
 
 const PhotoGrid: React.FC<PhotoGridProps> = ({
@@ -70,7 +70,7 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({
 )
 
 interface PhotoImageProps {
-    photo: TPhoto
+    photo: ApiModel.Photo
     title: string
 }
 

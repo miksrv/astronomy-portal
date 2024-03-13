@@ -1,10 +1,5 @@
-import {
-    catalogGetList,
-    getRunningQueriesThunk,
-    useCatalogGetListQuery
-} from '@/api/api'
+import { API } from '@/api'
 import { wrapper } from '@/api/store'
-import { TCatalog } from '@/api/types'
 import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import dynamic from 'next/dynamic'
@@ -17,14 +12,14 @@ const CelestialMap = dynamic(() => import('@/components/celestial-map'), {
 })
 
 const CelestialPage: NextPage = () => {
-    const { data, isFetching } = useCatalogGetListQuery()
+    const { data, isFetching } = API.useCatalogGetListQuery()
     const [goToObject, setGoToObject] = useState<[number, number]>([0, 0])
 
     const listObjects = useMemo(
         () =>
             data?.items
-                .filter((item) => item.coord_ra !== 0 && item.coord_dec !== 0)
-                .map((item: TCatalog) => {
+                ?.filter((item) => item.coord_ra !== 0 && item.coord_dec !== 0)
+                ?.map((item) => {
                     return {
                         dec: item.coord_dec,
                         name: item.name,
@@ -72,9 +67,9 @@ const CelestialPage: NextPage = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) => async () => {
-        store.dispatch(catalogGetList.initiate())
+        store.dispatch(API.endpoints.catalogGetList.initiate())
 
-        await Promise.all(store.dispatch(getRunningQueriesThunk()))
+        await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
         return {
             props: { object: {} }

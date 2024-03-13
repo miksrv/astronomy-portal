@@ -1,10 +1,11 @@
-import { api } from '@/api/api'
 import { configureStore } from '@reduxjs/toolkit'
 import { createWrapper } from 'next-redux-wrapper'
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
 import loginFormSlice from '@/components/login-form/loginFormSlice'
 import sidebarSlice from '@/components/sidebar/sidebarSlice'
 
+import { API } from './api'
 import applicationSlice from './applicationSlice'
 import authSlice from './authSlice'
 
@@ -14,17 +15,20 @@ export const reducers = {
     loginForm: loginFormSlice,
     sidebar: sidebarSlice,
 
-    [api.reducerPath]: api.reducer
+    [API.reducerPath]: API.reducer
 }
 
 export const store = () =>
     configureStore({
-        middleware: (gDM) => gDM().concat(api.middleware),
+        middleware: (gDM) => gDM().concat(API.middleware),
         reducer: reducers
     })
 
 export type AppStore = ReturnType<typeof store>
 export type RootState = ReturnType<AppStore['getState']>
 export type AppDispatch = AppStore['dispatch']
+
+export const useAppDispatch = () => useDispatch<AppDispatch>()
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
 
 export const wrapper = createWrapper<AppStore>(store, { debug: false })

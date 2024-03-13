@@ -1,8 +1,6 @@
-import { api } from '@/api/api'
+import { API, ApiModel, useAppDispatch } from '@/api'
 import { editCatalog, openFormCatalog } from '@/api/applicationSlice'
-import { useAppDispatch } from '@/api/hooks'
 import { wrapper } from '@/api/store'
-import { TCatalog, TCategory, TPhoto } from '@/api/types'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React, { useMemo, useState } from 'react'
@@ -12,9 +10,9 @@ import CatalogToolbar from '@/components/catalog-toolbar'
 import ObjectTable from '@/components/object-table'
 
 interface ObjectsPageProps {
-    catalog: TCatalog[]
-    categories: TCategory[]
-    photos: TPhoto[]
+    catalog: ApiModel.Catalog[]
+    categories: ApiModel.Category[]
+    photos: ApiModel.Photo[]
 }
 
 const ObjectsPage: NextPage<ObjectsPageProps> = ({
@@ -37,9 +35,9 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
             isSuccess: deleteSuccess,
             isError: deleteError
         }
-    ] = api.useCatalogDeleteMutation()
+    ] = API.useCatalogDeleteMutation()
 
-    const filteredCatalog: TCatalog[] | undefined = useMemo(
+    const filteredCatalog: ApiModel.Catalog[] | undefined = useMemo(
         () =>
             catalog?.filter(
                 (item) =>
@@ -51,7 +49,8 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
                             ?.toLowerCase()
                             .includes(search.toLowerCase())) &&
                     (!localCategories?.length ||
-                        localCategories.includes(item?.category))
+                        (item?.category &&
+                            localCategories.includes(item.category)))
             ),
         [catalog, search, localCategories]
     )
@@ -149,18 +148,18 @@ export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (): Promise<GetServerSidePropsResult<ObjectsPageProps>> => {
             const { data: catalog } = await store.dispatch(
-                api.endpoints?.catalogGetList.initiate()
+                API.endpoints?.catalogGetList.initiate()
             )
 
             const { data: categories } = await store.dispatch(
-                api.endpoints?.categoryGetList.initiate()
+                API.endpoints?.categoryGetList.initiate()
             )
 
             const { data: photos } = await store.dispatch(
-                api.endpoints?.photoGetList.initiate()
+                API.endpoints?.photoGetList.initiate()
             )
 
-            await Promise.all(store.dispatch(api.util.getRunningQueriesThunk()))
+            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
             return {
                 props: {

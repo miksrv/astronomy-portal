@@ -1,4 +1,4 @@
-import { TCatalog, TPhoto } from '@/api/types'
+import { ApiModel } from '@/api'
 import { renderWithStore } from '@/setupTests.config'
 import { render, screen, waitFor } from '@testing-library/react'
 
@@ -23,7 +23,7 @@ jest.mock('@/functions/helpers', () => ({
     sliceText: jest.fn((text) => text.slice(0, 10))
 }))
 
-const mockCatalog: TCatalog[] = [
+const mockCatalog: ApiModel.Catalog[] = [
     {
         category: 1,
         coord_dec: 3,
@@ -56,7 +56,7 @@ const mockCatalog: TCatalog[] = [
     }
 ]
 
-const mockPhotos: TPhoto[] = [
+const mockPhotos: ApiModel.Photo[] = [
     {
         date: '2023-01-01',
         filters: {},

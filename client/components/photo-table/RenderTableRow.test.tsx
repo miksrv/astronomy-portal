@@ -1,10 +1,10 @@
-import { TPhoto } from '@/api/types'
+import { ApiModel } from '@/api'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
 
 import RenderTableRow from './RenderTableRow'
 
-const mockPhoto: TPhoto = {
+const mockPhoto: ApiModel.Photo = {
     date: '2023-10-26',
     filters: {
         hydrogen: {

@@ -1,8 +1,7 @@
+import { ApiType, useAppDispatch, useAppSelector } from '@/api'
 import { useAuthGetMeMutation, useStatisticGetQuery } from '@/api/api'
 import { openFormCatalog, openFormPhoto } from '@/api/applicationSlice'
 import { login, logout } from '@/api/authSlice'
-import { useAppDispatch, useAppSelector } from '@/api/hooks'
-import { APIResponseStatistic } from '@/api/types'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -39,14 +38,14 @@ const LoginForm = dynamic(() => import('@/components/login-form'), {
     ssr: false
 })
 
-export type TMenuItems = {
+export type MenuItemsType = {
     link: string
     name: string
-    label?: keyof APIResponseStatistic
+    label?: keyof ApiType.Statistic.ResGeneral
     external?: boolean
 }
 
-export const menuItems: TMenuItems[] = [
+export const menuItems: MenuItemsType[] = [
     { external: true, link: 'https://t.me/nearspace', name: 'Блог' },
     { link: '/celestial', name: 'Карта' },
     { label: 'photos', link: '/photos', name: 'Фото' },

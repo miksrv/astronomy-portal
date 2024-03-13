@@ -1,15 +1,15 @@
-import { TFilters } from '@/api/types'
+import { ApiModel } from '@/api'
 import { declOfNum } from '@/functions/helpers'
 import classNames from 'classnames'
 import React from 'react'
 
 import styles from './styles.module.sass'
 
-type TFilterListProps = {
-    filters?: TFilters
+interface FilterListProps {
+    filters?: ApiModel.Filter.ListItems
 }
 
-const FilterList: React.FC<TFilterListProps> = ({ filters }) => (
+const FilterList: React.FC<FilterListProps> = ({ filters }) => (
     <ul className={styles.filterList}>
         {Object.entries(filters || [])
             .filter(([, filter]) => filter.frames)

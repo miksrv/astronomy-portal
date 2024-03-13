@@ -1,5 +1,4 @@
-import { useStatisticGetQuery } from '@/api/api'
-import { TCatalog, TCategory, TPhoto } from '@/api/types'
+import { API, ApiModel } from '@/api'
 import { range } from '@/functions/helpers'
 import classNames from 'classnames'
 import React, { useMemo, useState } from 'react'
@@ -10,20 +9,24 @@ import RenderTableRow from './RenderTableRow'
 import styles from './styles.module.sass'
 import { TSortKey, TSortOrdering, TTableItem } from './types'
 
-type TObjectTable = {
+interface ObjectTableProps {
     loading?: boolean
-    categories?: TCategory[]
-    catalog?: TCatalog[]
-    photos?: TPhoto[]
+    categories?: ApiModel.Category[]
+    catalog?: ApiModel.Catalog[]
+    photos?: ApiModel.Photo[]
     onClickEdit?: (item: string) => void
     onClickDelete?: (item: string) => void
 }
 
-const ObjectTable: React.FC<TObjectTable> = (props) => {
-    const { loading, categories, catalog, photos, onClickEdit, onClickDelete } =
-        props
-
-    const { data: statisticData } = useStatisticGetQuery()
+const ObjectTable: React.FC<ObjectTableProps> = ({
+    loading,
+    categories,
+    catalog,
+    photos,
+    onClickEdit,
+    onClickDelete
+}) => {
+    const { data: statisticData } = API.useStatisticGetQuery()
 
     const [sortField, setSortField] = useState<TSortKey>('name')
     const [sortOrder, setSortOrder] = useState<TSortOrdering>('descending')
@@ -31,27 +34,27 @@ const ObjectTable: React.FC<TObjectTable> = (props) => {
     const itemsCatalog: TTableItem[] | undefined = useMemo(
         () =>
             catalog?.map((item) => ({
-                blue: item.filters?.blue?.exposure || 0,
+                blue: item.filters?.blue?.exposure ?? 0,
                 category:
                     categories?.find(({ id }) => id === item.category)?.name ||
                     '',
-                clear: item.filters?.clear?.exposure || 0,
-                exposure: item.statistic.exposure,
-                frames: item.statistic.frames,
-                green: item.filters?.green?.exposure || 0,
-                hydrogen: item.filters?.hydrogen?.exposure || 0,
-                luminance: item.filters?.luminance?.exposure || 0,
+                clear: item.filters?.clear?.exposure ?? 0,
+                exposure: item.statistic?.exposure ?? 0,
+                frames: item.statistic?.frames ?? 0,
+                green: item.filters?.green?.exposure ?? 0,
+                hydrogen: item.filters?.hydrogen?.exposure ?? 0,
+                luminance: item.filters?.luminance?.exposure ?? 0,
                 name: item.name,
-                oxygen: item.filters?.oxygen?.exposure || 0,
+                oxygen: item.filters?.oxygen?.exposure ?? 0,
                 photo:
                     photos?.filter(({ object }) => object === item.name)
-                        .length || 0,
-                red: item.filters?.red?.exposure || 0,
-                source_link: item.source_link || '',
-                sulfur: item.filters?.sulfur?.exposure || 0,
+                        .length ?? 0,
+                red: item.filters?.red?.exposure ?? 0,
+                source_link: item.source_link ?? '',
+                sulfur: item.filters?.sulfur?.exposure ?? 0,
                 text: item.text,
                 title: item.title,
-                updated: item.updated
+                updated: item.updated ?? ''
             })),
         [catalog, photos, categories]
     )

@@ -101,3 +101,7 @@ defined('UPLOAD_POST') || define('UPLOAD_POST', FCPATH . 'posts/');
 defined('UPLOAD_TEMP') || define('UPLOAD_TEMP', FCPATH . 'temp/');
 defined('UPLOAD_MAPS') || define('UPLOAD_MAPS', FCPATH . 'maps/');
 defined('UPLOAD_FITS') || define('UPLOAD_FITS', FCPATH . 'fits/');
+defined('UPLOAD_USERS') || define('UPLOAD_USERS', FCPATH . 'users/');
+
+defined('AVATAR_WIDTH') || define('AVATAR_WIDTH', 400);
+defined('AVATAR_HEIGHT') || define('AVATAR_HEIGHT', 400);

@@ -1,4 +1,4 @@
-import { TFIle, TFilterTypes } from '@/api/types'
+import { ApiModel } from '@/api'
 import { formatDate } from '@/functions/helpers'
 import { fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
@@ -7,13 +7,13 @@ import RenderTableRow from './RenderTableRow'
 
 describe('RenderTableRow Component', () => {
     const mockOnPhotoClick = jest.fn()
-    const sampleFile: TFIle = {
+    const sampleFile: ApiModel.File.Item = {
         ccd_temp: -10,
         date_obs: '2023-10-25T15:30:00Z',
         dec: 50,
         exptime: 120,
         file_name: 'sample-file.fits',
-        filter: TFilterTypes.red,
+        filter: ApiModel.Filter.Type.red,
         gain: 1.5,
         hfr: 2.5,
         id: '1',

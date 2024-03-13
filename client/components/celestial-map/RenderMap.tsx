@@ -4,7 +4,7 @@ import config from './object'
 import styles from './styles.module.sass'
 import { TObject, geoJSON } from './types'
 
-type TRenderMapProps = {
+interface RenderMapProps {
     config: any
     objects: TObject[]
     width: number
@@ -41,7 +41,7 @@ const createObjectsJSON = (objects: TObject[]) => {
     }
 
     objects.forEach((item) => {
-        const objectName = item.name.replace(/_/g, ' ')
+        const objectName = item.name?.replace(/_/g, ' ')
         const objectJSON = {
             geometry: {
                 coordinates: [
@@ -65,7 +65,7 @@ const createObjectsJSON = (objects: TObject[]) => {
     return geoJSON
 }
 
-const RenderMap: React.FC<TRenderMapProps> = (props) => {
+const RenderMap: React.FC<RenderMapProps> = (props) => {
     const { objects, width, config: customConfig, goto } = props
     const prevJSON = usePrevious({ objects })
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { TFIle } from '@/api/types'
+import { ApiModel } from '@/api'
 import React from 'react'
 import {
     CartesianGrid,
@@ -16,7 +16,7 @@ import {
 } from 'recharts'
 
 interface DeviationProps {
-    files: TFIle[]
+    files: ApiModel.File.Item[]
 }
 
 const Deviation: React.FC<DeviationProps> = ({ files }) => (

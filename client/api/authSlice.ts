@@ -1,6 +1,5 @@
+import { ApiModel, ApiType } from '@/api'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-
-import { APIResponseLogin, TUserInfo } from './types'
 
 export const ACCESS_TOKEN_KEY = 'AstroAuthToken'
 
@@ -8,7 +7,7 @@ type InitialStateProps = {
     isAuth?: boolean
     error?: any
     token?: string
-    user?: TUserInfo
+    user?: ApiModel.User
 }
 
 export const getStorageToken = (): string | undefined =>
@@ -22,7 +21,7 @@ const authSlice = createSlice({
     } as InitialStateProps,
     name: 'auth',
     reducers: {
-        login: (state, { payload }: PayloadAction<APIResponseLogin>) => {
+        login: (state, { payload }: PayloadAction<ApiType.Auth.ResLogin>) => {
             state.user = payload?.user || undefined
             state.token = payload?.token || ''
             state.isAuth = true

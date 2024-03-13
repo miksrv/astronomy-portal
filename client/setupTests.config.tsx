@@ -1,4 +1,4 @@
-import { api } from '@/api/api'
+import { API } from '@/api/api'
 import { RootState, reducers } from '@/api/store'
 import { configureStore } from '@reduxjs/toolkit'
 import '@testing-library/jest-dom'
@@ -18,7 +18,7 @@ jest.mock('next/image', () => ({
 
 export const testStore = (state: Partial<RootState>) => {
     return configureStore({
-        middleware: (gDM) => gDM().concat(api.middleware) as any,
+        middleware: (gDM) => gDM().concat(API.middleware) as any,
         preloadedState: state,
         reducer: reducers as any
     })

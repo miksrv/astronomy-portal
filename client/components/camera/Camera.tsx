@@ -6,14 +6,14 @@ import { Dimmer, Message, Progress } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
-type TCameraProps = {
+interface CameraProps {
     cameraURL?: string
     interval?: number
 }
 
 const DEFAULT_INTERVAL = 5
 
-const Camera: React.FC<TCameraProps> = ({ cameraURL, interval }) => {
+const Camera: React.FC<CameraProps> = ({ cameraURL, interval }) => {
     const timeoutInt = interval || DEFAULT_INTERVAL
 
     const [cameraSrc, setCameraSrc] = useState<string>(cameraURL || '')

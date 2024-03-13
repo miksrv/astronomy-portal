@@ -1,6 +1,6 @@
 'use client'
 
-import { TFIle } from '@/api/types'
+import { ApiModel } from '@/api'
 import { formatDate } from '@/functions/helpers'
 import React from 'react'
 import {
@@ -13,7 +13,7 @@ import {
 } from 'recharts'
 
 interface FilesQualityProps {
-    files: TFIle[]
+    files: ApiModel.File.Item[]
 }
 
 const FilesQuality: React.FC<FilesQualityProps> = ({ files }) => (

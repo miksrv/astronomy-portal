@@ -10,10 +10,10 @@ class AddUser extends Migration
     {
         $this->forge->addField([
             'id' => [
-                'type'           => 'SMALLINT',
-                'constraint'     => 5,
-                'unsigned'       => true,
-                'auto_increment' => true
+                'type'       => 'VARCHAR',
+                'constraint' => 15,
+                'null'       => false,
+                'unique'     => true
             ],
             'name' => [
                 'type'       => 'VARCHAR',
@@ -32,8 +32,21 @@ class AddUser extends Migration
                 'null'       => false,
                 'unique'     => true
             ],
+            'auth_type'      => [
+                'type'       => 'ENUM("native", "google", "yandex")',
+                'null'       => true
+            ],
+            'locale' => [
+                'type'    => 'ENUM("ru", "en")',
+                'default' => 'ru',
+                'null'    => false,
+            ],
             'created_at DATETIME default current_timestamp',
             'updated_at DATETIME default current_timestamp',
+            'activity_at' => [
+                'type' => 'DATETIME',
+                'null' => true
+            ],
             'deleted_at' => [
                 'type' => 'DATETIME',
                 'null' => true

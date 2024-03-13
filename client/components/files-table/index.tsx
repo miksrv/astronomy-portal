@@ -1,5 +1,5 @@
+import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
-import { TFIle } from '@/api/types'
 import classNames from 'classnames'
 import React, { useCallback, useEffect, useState } from 'react'
 import Lightbox from 'react-image-lightbox'
@@ -10,12 +10,12 @@ import RenderTableRow from './RenderTableRow'
 import styles from './styles.module.sass'
 import { TObjectSortable, TSortOrdering } from './types'
 
-type TFilesTableProps = {
+interface FilesTableProps {
     objectName: string
-    files?: TFIle[]
+    files?: ApiModel.File.Item[]
 }
 
-const FilesTable: React.FC<TFilesTableProps> = (props) => {
+const FilesTable: React.FC<FilesTableProps> = (props) => {
     const { files, objectName } = props
 
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
@@ -24,7 +24,9 @@ const FilesTable: React.FC<TFilesTableProps> = (props) => {
     const [sortField, setSortField] = useState<TObjectSortable>('date_obs')
     const [sortOrder, setSortOrder] = useState<TSortOrdering>('ascending')
     const [showSpoiler, setShowSpoiler] = useState<boolean>(false)
-    const [filesList, setFilesList] = useState<TFIle[] | undefined>(files)
+    const [filesList, setFilesList] = useState<
+        ApiModel.File.Item[] | undefined
+    >(files)
 
     const handlerSortClick = (field: TObjectSortable) => {
         if (sortField !== field) setSortField(field)

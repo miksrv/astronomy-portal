@@ -5,14 +5,14 @@ import { Dimmer, Loader } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
-type TObjectCloudProps = {
+interface ObjectCloudProps {
     loader: boolean
     current: string
-    names: string[] | undefined
+    names?: string[]
     link: string
 }
 
-const ObjectCloud: React.FC<TObjectCloudProps> = ({
+const ObjectCloud: React.FC<ObjectCloudProps> = ({
     loader,
     current,
     names,

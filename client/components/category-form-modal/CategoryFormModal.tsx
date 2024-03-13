@@ -1,18 +1,17 @@
-import { useCategoryPatchMutation, useCategoryPostMutation } from '@/api/api'
-import { APIResponseError, TCatalog, TCategory } from '@/api/types'
+import { API, ApiModel, ApiType } from '@/api'
 import isEqual from 'lodash-es/isEqual'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Form, Message, Modal } from 'semantic-ui-react'
 
 import FormModalActions from '@/components/form-modal-actions'
 
-interface ICategoryFormModal {
+interface CategoryFormModalProps {
     visible: boolean
-    value?: TCategory
+    value?: ApiModel.Category
     onClose?: () => void
 }
 
-const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
+const CategoryFormModal: React.FC<CategoryFormModalProps> = (props) => {
     const { visible, value, onClose } = props
 
     const [
@@ -23,7 +22,7 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
             isError: updateError,
             error: updateErrorList
         }
-    ] = useCategoryPatchMutation()
+    ] = API.useCategoryPatchMutation()
 
     const [
         createItem,
@@ -33,10 +32,12 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
             isError: createError,
             error: createErrorList
         }
-    ] = useCategoryPostMutation()
+    ] = API.useCategoryPostMutation()
 
     const [submitted, setSubmitted] = useState<boolean>(false)
-    const [formState, setFormState] = useState<TCategory>(mapFormProps(value))
+    const [formState, setFormState] = useState<ApiModel.Category>(
+        mapFormProps(value)
+    )
 
     const handleChange = ({
         target: { name, value }
@@ -46,10 +47,10 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
     const handleKeyDown = (e: { key: string }) =>
         e.key === 'Enter' && handleSubmit()
 
-    const findError = (field: keyof TCatalog) =>
+    const findError = (field: keyof ApiModel.Catalog) =>
         (
-            (createErrorList as APIResponseError) ||
-            (updateErrorList as APIResponseError)
+            (createErrorList as ApiType.ResError) ||
+            (updateErrorList as ApiType.ResError)
         )?.messages?.[field] || undefined
 
     const handleClose = () => {
@@ -130,7 +131,7 @@ const CategoryFormModal: React.FC<ICategoryFormModal> = (props) => {
     )
 }
 
-const mapFormProps = (value?: TCategory | undefined): TCategory => ({
+const mapFormProps = (value?: ApiModel.Category): ApiModel.Category => ({
     id: value?.id ?? 0,
     name: value?.name ?? ''
 })

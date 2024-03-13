@@ -1,9 +1,7 @@
 'use client'
 
-import { useAuthPostLoginMutation } from '@/api/api'
+import { API, ApiType, useAppDispatch, useAppSelector } from '@/api'
 import { login } from '@/api/authSlice'
-import { useAppDispatch, useAppSelector } from '@/api/hooks'
-import { APIRequestLogin, APIResponseError } from '@/api/types'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Button, Form, Message, Modal } from 'semantic-ui-react'
 
@@ -15,8 +13,9 @@ const LoginForm: React.FC = () => {
     const dispatch = useAppDispatch()
     const { visible } = useAppSelector((state) => state.loginForm)
     const [authLoginPost, { isLoading, isError, data, error }] =
-        useAuthPostLoginMutation()
-    const [formState, setFormState] = useState<APIRequestLogin>({
+        API.useAuthPostLoginMutation()
+
+    const [formState, setFormState] = useState<ApiType.Auth.ReqLogin>({
         email: '',
         password: ''
     })
@@ -35,12 +34,12 @@ const LoginForm: React.FC = () => {
         }
     }
 
-    const findError = (field: keyof APIRequestLogin) =>
-        (error as APIResponseError)?.messages?.[field] || undefined
+    const findError = (field: keyof ApiType.Auth.ReqLogin) =>
+        (error as ApiType.ResError)?.messages?.[field] || undefined
 
     const listErrors: string[] = useMemo(
         () =>
-            Object.entries((error as APIResponseError)?.messages || []).map(
+            Object.entries((error as ApiType.ResError)?.messages || []).map(
                 ([, value]) => value as string
             ),
         [error]

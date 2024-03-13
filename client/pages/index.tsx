@@ -1,11 +1,5 @@
-import { api } from '@/api/api'
+import { API, ApiModel, ApiType } from '@/api'
 import { wrapper } from '@/api/store'
-import {
-    APIResponseStatistic,
-    TCatalog,
-    TPhoto,
-    TStatisticTelescope
-} from '@/api/types'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React from 'react'
@@ -16,10 +10,10 @@ import Statistic from '@/components/statistic'
 import TelescopeWorkdays from '@/components/telescope-workdays'
 
 interface HomePageProps {
-    photos: TPhoto[]
-    catalog: TCatalog[]
-    telescope: TStatisticTelescope[]
-    statistic: APIResponseStatistic | null
+    photos: ApiModel.Photo[]
+    catalog: ApiModel.Catalog[]
+    telescope: ApiModel.Statistic.Telescope[]
+    statistic: ApiType.Statistic.ResGeneral | null
 }
 
 const HomePage: NextPage<HomePageProps> = ({
@@ -62,22 +56,22 @@ const HomePage: NextPage<HomePageProps> = ({
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) => async (): Promise<GetServerSidePropsResult<HomePageProps>> => {
         const { data: catalog } = await store.dispatch(
-            api.endpoints?.catalogGetList.initiate()
+            API.endpoints?.catalogGetList.initiate()
         )
 
         const { data: telescope } = await store.dispatch(
-            api.endpoints?.statisticGetTelescope.initiate()
+            API.endpoints?.statisticGetTelescope.initiate()
         )
 
         const { data: photos } = await store.dispatch(
-            api.endpoints?.photoGetList.initiate({ limit: 4, order: 'random' })
+            API.endpoints?.photoGetList.initiate({ limit: 4, order: 'random' })
         )
 
         const { data: statistic } = await store.dispatch(
-            api.endpoints?.statisticGet.initiate()
+            API.endpoints?.statisticGet.initiate()
         )
 
-        await Promise.all(store.dispatch(api.util.getRunningQueriesThunk()))
+        await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
         return {
             props: {

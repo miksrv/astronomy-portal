@@ -1,4 +1,4 @@
-import { useWeatherGetCurrentQuery } from '@/api/api'
+import { API } from '@/api'
 import { formatTimestamp, timeAgo } from '@/functions/helpers'
 import classNames from 'classnames'
 import React from 'react'
@@ -24,7 +24,7 @@ const getRange = (value: number | null, min: number, max: number): number => {
 }
 
 const Weather: React.FC = () => {
-    const { data, isLoading } = useWeatherGetCurrentQuery()
+    const { data, isLoading } = API.useWeatherGetCurrentQuery()
 
     const lastUpdate = data ? data.timestamp.server - data.timestamp.update : 0
 

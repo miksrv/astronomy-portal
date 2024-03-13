@@ -1,5 +1,4 @@
-import { useAppSelector } from '@/api/hooks'
-import { TCategory } from '@/api/types'
+import { ApiModel, useAppSelector } from '@/api'
 import React from 'react'
 import { Dimmer, Loader, Table } from 'semantic-ui-react'
 
@@ -7,14 +6,14 @@ import TableCellButtons from '@/components/table-cell-buttons'
 
 import styles from './styles.module.sass'
 
-type TCategoryTable = {
+interface CategoryTableProps {
     loading?: boolean
-    categories?: TCategory[]
+    categories?: ApiModel.Category[]
     onClickEdit?: (item: number) => void
     onClickDelete?: (item: number) => void
 }
 
-const CategoryTable: React.FC<TCategoryTable> = (props) => {
+const CategoryTable: React.FC<CategoryTableProps> = (props) => {
     const { loading, categories, onClickEdit, onClickDelete } = props
 
     const isAuth = useAppSelector((state) => state.auth.isAuth)
