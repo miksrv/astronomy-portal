@@ -9,6 +9,7 @@ class User extends Entity {
         'email'       => 'string',
         'password'    => 'string',
         'auth_type'   => 'string',
+        'role'        => 'string',
         'locale'      => 'string',
         'avatar'      => 'string',
         'updated_at'  => 'datetime',

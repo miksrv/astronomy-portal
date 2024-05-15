@@ -36,6 +36,11 @@ class AddUser extends Migration
                 'type'       => 'ENUM("native", "google", "yandex")',
                 'null'       => true
             ],
+            'role' => [
+                'type'    => 'ENUM("user", "moderator", "admin")',
+                'null'    => false,
+                'default' => 'user'
+            ],
             'locale' => [
                 'type'    => 'ENUM("ru", "en")',
                 'default' => 'ru',

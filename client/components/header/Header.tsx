@@ -50,7 +50,7 @@ export const menuItems: MenuItemsType[] = [
     { link: '/celestial', name: 'Карта' },
     { label: 'photos', link: '/photos', name: 'Фото' },
     { label: 'objects', link: '/objects', name: 'Объекты' },
-    { link: '/dashboard', name: 'Телеметрия' },
+    { link: '/dashboard', name: 'Обсерватория' },
     { link: '/about', name: 'О проекте' }
 ]
 

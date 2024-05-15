@@ -210,7 +210,7 @@ class Auth extends ResourceController {
             $user->name      = $yandexUser->real_name;
             $user->email     = $yandexEmail;
             $user->auth_type = AUTH_TYPE_YANDEX;
-            $user->locale    = $this->request->getLocale();
+            $user->locale    = 'ru'; // $this->request->getLocale();
             $user->level     = 1;
 
             $userModel->insert($user);
