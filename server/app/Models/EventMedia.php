@@ -3,11 +3,20 @@
 class EventMedia extends MyBaseModel {
     protected $table            = 'event_media';
     protected $primaryKey       = 'id';
-    protected $useAutoIncrement = true;
+    protected $useAutoIncrement = false;
     protected $returnType       = \App\Entities\EventMedia::class;
-    protected $useSoftDeletes   = false;
+    protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields    = [
+        'event_id',
+        'user_id',
+        'title',
+        'filename',
+        'extension',
+        'filesize',
+        'width',
+        'height',
+    ];
 
     protected bool $allowEmptyInserts = false;
 
@@ -21,7 +30,7 @@ class EventMedia extends MyBaseModel {
     // Validation
     protected $validationRules      = [];
     protected $validationMessages   = [];
-    protected $skipValidation       = false;
+    protected $skipValidation       = true;
     protected $cleanValidationRules = true;
 
     // Callbacks
