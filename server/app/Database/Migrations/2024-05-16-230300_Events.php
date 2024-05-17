@@ -20,6 +20,11 @@ class Events extends Migration {
                 'type' => 'TEXT',
                 'null' => true
             ],
+            'cover' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 150,
+                'null'       => true
+            ],
             'max_tickets' => [
                 'type'       => 'INT',
                 'constraint' => 5,
