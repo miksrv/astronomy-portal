@@ -63,7 +63,7 @@ class UsersModel extends Model {
      */
     public function findUserByEmailAddress(string $emailAddress): User | array | null {
         return $this
-            ->select('id, email, name, avatar, role')
+            ->select('id, email, name, avatar, auth_type, role')
             ->where('email', $emailAddress)
             ->first();
     }

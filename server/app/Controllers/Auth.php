@@ -248,7 +248,7 @@ class Auth extends ResourceController {
         // either recover the password or log in through Google or another system.
         // But if the authorization type is already specified, you should authorize only this way.
         if ($userData->auth_type !== null && $userData->auth_type !== AUTH_TYPE_YANDEX) {
-            log_message('error', 'The user cannot log in because he has a different type of account authorization');
+            log_message('error', 'The user (' . $userData->email . ') cannot log in because he has a different type (' . $userData->auth_type . ') of account authorization');
             return $this->failValidationErrors('You have a different authorization type set to Yandex');
         }
 

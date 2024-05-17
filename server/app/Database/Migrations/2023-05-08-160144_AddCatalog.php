@@ -1,13 +1,9 @@
-<?php
-
-namespace App\Database\Migrations;
+<?php namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class AddCatalogTable extends Migration
-{
-    public function up()
-    {
+class AddCatalog extends Migration {
+    public function up() {
         $this->forge->addField([
             'name' => [
                 'type'       => 'VARCHAR',
@@ -21,8 +17,8 @@ class AddCatalogTable extends Migration
                 'null'       => true
             ],
             'text' => [
-                'type'       => 'TEXT',
-                'null'       => true
+                'type' => 'TEXT',
+                'null' => true
             ],
             'category' => [
                 'type'       => 'TINYINT',
@@ -35,12 +31,12 @@ class AddCatalogTable extends Migration
                 'null'       => true
             ],
             'coord_ra' => [
-                'type'       => 'FLOAT',
-                'null'       => false
+                'type' => 'FLOAT',
+                'null' => false
             ],
             'coord_dec' => [
-                'type'       => 'FLOAT',
-                'null'       => false
+                'type' => 'FLOAT',
+                'null' => false
             ],
             'image' => [
                 'type'       => 'VARCHAR',
@@ -54,13 +50,13 @@ class AddCatalogTable extends Migration
                 'null' => true
             ]
         ]);
+
         $this->forge->addPrimaryKey('name');
         $this->forge->addKey('title');
         $this->forge->createTable('catalog');
     }
 
-    public function down()
-    {
+    public function down() {
         $this->forge->dropTable('catalog');
     }
 }

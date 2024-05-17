@@ -1,13 +1,9 @@
-<?php
-
-namespace App\Database\Migrations;
+<?php namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class AddAuthorsTable extends Migration
-{
-    public function up()
-    {
+class AddAuthors extends Migration {
+    public function up() {
         $this->forge->addField([
             'id' => [
                 'type'           => 'SMALLINT',
@@ -33,13 +29,13 @@ class AddAuthorsTable extends Migration
                 'null' => true
             ]
         ]);
+
         $this->forge->addPrimaryKey('id');
         $this->forge->addKey('name');
         $this->forge->createTable('authors');
     }
 
-    public function down()
-    {
+    public function down() {
         $this->forge->dropTable('authors');
     }
 }
