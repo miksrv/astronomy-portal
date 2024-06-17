@@ -32,7 +32,7 @@ const DirectoryPage: NextPage = () => {
     const [modifyCatalogName, setModifyCatalogName] = useState<number>()
     const [modifyAuthorId, setModifyAuthorId] = useState<number>()
 
-    const isAuth = useAppSelector((state) => state.auth.isAuth)
+    const user = useAppSelector((state) => state.auth.user)
 
     const { data: categoriesData, isLoading: categoriesLoading } =
         API.useCategoryGetListQuery()
@@ -158,7 +158,7 @@ const DirectoryPage: NextPage = () => {
                         <h4 className={'subTitle inline'}>
                             Категории объектов
                         </h4>
-                        {isAuth && (
+                        {user?.role === 'admin' && (
                             <Button
                                 style={{ marginTop: -26 }}
                                 icon={true}
@@ -211,7 +211,7 @@ const DirectoryPage: NextPage = () => {
                     )}
                     <div className={'section'}>
                         <h4 className={'subTitle inline'}>Авторы фотографий</h4>
-                        {isAuth && (
+                        {user?.role === 'admin' && (
                             <Button
                                 style={{ marginTop: -26 }}
                                 icon={true}
@@ -234,7 +234,7 @@ const DirectoryPage: NextPage = () => {
                     />
                 </Grid.Column>
             </Grid>
-            {isAuth && (
+            {user?.role === 'admin' && (
                 <>
                     <CategoryFormModal
                         visible={showCategoryModal}

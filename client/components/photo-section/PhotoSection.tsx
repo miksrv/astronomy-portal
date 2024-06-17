@@ -27,7 +27,7 @@ const PhotoSection: React.FC<PhotoSectionProps> = (props) => {
     const { title, photo, catalog } = props
 
     const dispatch = useAppDispatch()
-    const isAuth = useAppSelector((state) => state.auth.isAuth)
+    const user = useAppSelector((state) => state.auth?.user)
 
     const [photoLightbox, setPhotoLightbox] = useState<string | undefined>(
         undefined
@@ -104,7 +104,7 @@ const PhotoSection: React.FC<PhotoSectionProps> = (props) => {
                 >
                     <h1>
                         {title}
-                        {isAuth && (
+                        {user?.role === 'admin' && (
                             <span
                                 className={styles.controlButton}
                                 role={'button'}

@@ -16,7 +16,7 @@ interface CategoryTableProps {
 const CategoryTable: React.FC<CategoryTableProps> = (props) => {
     const { loading, categories, onClickEdit, onClickDelete } = props
 
-    const isAuth = useAppSelector((state) => state.auth.isAuth)
+    const user = useAppSelector((state) => state.auth.user)
 
     return (
         <div className={'box table'}>
@@ -44,7 +44,7 @@ const CategoryTable: React.FC<CategoryTableProps> = (props) => {
                                 <TableCellButtons
                                     itemId={item.id}
                                     name={item.name}
-                                    isAuth={isAuth}
+                                    isAdmin={user?.role === 'admin'}
                                     onClickEdit={onClickEdit}
                                     onClickDelete={onClickDelete}
                                 />

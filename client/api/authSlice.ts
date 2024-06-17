@@ -27,9 +27,9 @@ const authSlice = createSlice({
             state.isAuth = true
 
             if (payload?.auth && !!payload?.token) {
-                localStorage.setItem(ACCESS_TOKEN_KEY, payload?.token || '')
+                localStorage.setItem(ACCESS_TOKEN_KEY, payload.token)
             } else {
-                localStorage.setItem(ACCESS_TOKEN_KEY, '')
+                localStorage.removeItem(ACCESS_TOKEN_KEY)
             }
         },
         logout: (state) => {
@@ -37,7 +37,7 @@ const authSlice = createSlice({
             state.user = undefined
             state.isAuth = false
 
-            localStorage.setItem(ACCESS_TOKEN_KEY, '')
+            localStorage.removeItem(ACCESS_TOKEN_KEY)
         }
     }
 })
