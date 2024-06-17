@@ -11,6 +11,11 @@ const nextConfig = {
                 protocol: 'https'
             },
             {
+                hostname: 'miksoft.pro',
+                port: '',
+                protocol: 'https'
+            },
+            {
                 hostname: 'localhost',
                 port: '8080',
                 protocol: 'http'

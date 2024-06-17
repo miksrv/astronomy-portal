@@ -64,15 +64,7 @@ class Auth extends ResourceController {
      */
     public function me(): ResponseInterface {
         $this->session->update();
-
-        $response = (object) ['auth' => $this->session->isAuth];
-
-        if ($this->session->isAuth && $this->session->user) {
-            $response->user  = $this->session->user;
-            $response->token = generateAuthToken($this->session->user->email);
-        }
-
-        return $this->respond($response);
+        return $this->responseAuth();
     }
 
     /**
@@ -117,7 +109,10 @@ class Auth extends ResourceController {
             $user->name      = $googleUser->name;
             $user->email     = $googleUser->email;
             $user->auth_type = AUTH_TYPE_GOOGLE;
-            $user->locale    = $googleUser->locale === 'ru' ? 'ru' : 'en';
+            $user->locale    = isset($googleUser->locale)
+                ? $googleUser->locale === 'en'
+                    ? 'en' : 'ru'
+                : 'ru';
 
             $userModel->insert($user);
 
@@ -210,7 +205,7 @@ class Auth extends ResourceController {
             $user->name      = $yandexUser->real_name;
             $user->email     = $yandexEmail;
             $user->auth_type = AUTH_TYPE_YANDEX;
-            $user->locale    = $this->request->getLocale();
+            $user->locale    = 'ru'; // $this->request->getLocale();
             $user->level     = 1;
 
             $userModel->insert($user);
@@ -248,7 +243,7 @@ class Auth extends ResourceController {
         // either recover the password or log in through Google or another system.
         // But if the authorization type is already specified, you should authorize only this way.
         if ($userData->auth_type !== null && $userData->auth_type !== AUTH_TYPE_YANDEX) {
-            log_message('error', 'The user cannot log in because he has a different type of account authorization');
+            log_message('error', 'The user (' . $userData->email . ') cannot log in because he has a different type (' . $userData->auth_type . ') of account authorization');
             return $this->failValidationErrors('You have a different authorization type set to Yandex');
         }
 
@@ -292,10 +287,15 @@ class Auth extends ResourceController {
      * @return ResponseInterface
      */
     protected function responseAuth(): ResponseInterface {
-        return $this->respond([
-            'auth'  => $this->session->isAuth,
-            'user'  => $this->session->user,
-            'token' => generateAuthToken($this->session->user->email),
-        ]);
+        $response = (object) ['auth' => $this->session->isAuth];
+
+        if ($this->session->isAuth && $this->session->user) {
+            $response->user  = $this->session->user;
+            $response->token = generateAuthToken($this->session->user->email);
+
+            unset($response->user->email, $response->user->auth_type, $response->user->role);
+        }
+
+        return $this->respond($response);
     }
 }

@@ -1,13 +1,9 @@
-<?php
-
-namespace App\Database\Migrations;
+<?php namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class AddUser extends Migration
-{
-    public function up()
-    {
+class AddUser extends Migration {
+    public function up() {
         $this->forge->addField([
             'id' => [
                 'type'       => 'VARCHAR',
@@ -17,24 +13,39 @@ class AddUser extends Migration
             ],
             'name' => [
                 'type'       => 'VARCHAR',
-                'constraint' => '100',
+                'constraint' => 100,
                 'null'       => false
             ],
             'email' => [
                 'type'       => 'VARCHAR',
-                'constraint' => '100',
+                'constraint' => 100,
                 'null'       => false,
                 'unique'     => true
             ],
-            'password'       => [
+            'phone' => [
                 'type'       => 'VARCHAR',
-                'constraint' => '255',
+                'constraint' => 100,
+                'null'       => true
+            ],
+            'avatar' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+                'null'       => true,
+            ],
+            'password' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 255,
                 'null'       => false,
                 'unique'     => true
             ],
-            'auth_type'      => [
-                'type'       => 'ENUM("native", "google", "yandex")',
-                'null'       => true
+            'auth_type' => [
+                'type' => 'ENUM("native", "google", "yandex")',
+                'null' => true
+            ],
+            'role' => [
+                'type'    => 'ENUM("user", "moderator", "admin")',
+                'null'    => false,
+                'default' => 'user'
             ],
             'locale' => [
                 'type'    => 'ENUM("ru", "en")',
@@ -52,12 +63,12 @@ class AddUser extends Migration
                 'null' => true
             ]
         ]);
+
         $this->forge->addPrimaryKey('id');
-        $this->forge->createTable('user');
+        $this->forge->createTable('users');
     }
 
-    public function down()
-    {
-        $this->forge->dropTable('user');
+    public function down() {
+        $this->forge->dropTable('users');
     }
 }

@@ -43,7 +43,10 @@ export const API = createApi({
         authGetMe: builder.mutation<ApiType.Auth.ResLogin, void>({
             query: () => 'auth/me'
         }),
-        authLoginService: builder.mutation<any, any>({
+        authLoginService: builder.mutation<
+            ApiType.Auth.ResAuthService,
+            ApiType.Auth.ReqAuthService
+        >({
             query: ({ service, code }) =>
                 `auth/${service}${code ? `?code=${code}` : ''}`,
             transformErrorResponse: (response) => response.data
@@ -315,40 +318,7 @@ export const API = createApi({
 // Export hooks for usage in functional components
 export const {
     useAuthGetMeMutation,
-    useAuthPostLoginMutation,
-
-    useAuthorDeleteMutation,
-    useAuthorGetListQuery,
     useAuthorPatchMutation,
     useAuthorPostMutation,
-
-    useCatalogGetItemQuery,
-    useCatalogGetListQuery,
-    useCatalogPatchMutation,
-    useCatalogPostMutation,
-
-    useCategoryDeleteMutation,
-    useCategoryGetListQuery,
-    useCategoryPatchMutation,
-    useCategoryPostMutation,
-
-    usePhotoPatchMutation,
-    usePhotoPostMutation,
-    usePhotoPostUploadMutation,
-
-    useRelayGetLightMutation,
-    useRelayGetStateQuery,
-    useRelayPutStatusMutation,
-
-    useStatisticGetQuery,
-    useStatisticGetCatalogItemsQuery,
-    useStatisticGetPhotosItemsQuery,
-
-    useWeatherGetCurrentQuery,
-    useWeatherGetStatisticQuery,
-
-    util: { getRunningQueriesThunk }
+    useStatisticGetQuery
 } = API
-
-// export endpoints for use in SSR
-export const { authorGetList, catalogGetList, categoryGetList } = API.endpoints

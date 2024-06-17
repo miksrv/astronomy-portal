@@ -1,6 +1,6 @@
 {
     "name": "astronomy-portal",
-    "version": "3.3.3",
+    "version": "3.4.0",
     "private": true,
     "engines": {
         "node": ">=20.11.0"
@@ -46,9 +46,9 @@
         "@trivago/prettier-plugin-sort-imports": "^4.1.1",
         "@types/jest": "^29.5.6",
         "@types/lodash-es": "^4.17.7",
-        "@types/node": "20.11.25",
-        "@types/react": "18.2.64",
-        "@types/react-dom": "18.2.21",
+        "@types/node": "20.12.12",
+        "@types/react": "18.3.2",
+        "@types/react-dom": "18.3.0",
         "@typescript-eslint/eslint-plugin": "^5.57.0",
         "eslint": "^8.57.0",
         "eslint-config-next": "^13.2.4",

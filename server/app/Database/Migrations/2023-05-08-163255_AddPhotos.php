@@ -1,13 +1,9 @@
-<?php
-
-namespace App\Database\Migrations;
+<?php namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class AddPhotosTable extends Migration
-{
-    public function up()
-    {
+class AddPhotos extends Migration {
+    public function up() {
         $this->forge->addField([
             'id' => [
                 'type'           => 'SMALLINT',
@@ -26,7 +22,7 @@ class AddPhotosTable extends Migration
                 'null'       => true
             ],
             'author_id' => [
-                'type'       => 'TINYINT',
+                'type'       => 'VARCHAR',
                 'constraint' => 5,
                 'null'       => true
             ],
@@ -67,14 +63,14 @@ class AddPhotosTable extends Migration
                 'null' => true
             ]
         ]);
+
         $this->forge->addPrimaryKey('id');
         $this->forge->addKey('object');
         $this->forge->addKey('date');
         $this->forge->createTable('photos');
     }
 
-    public function down()
-    {
+    public function down() {
         $this->forge->dropTable('photos');
     }
 }

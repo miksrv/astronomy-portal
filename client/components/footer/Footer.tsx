@@ -1,5 +1,6 @@
 import { formatDate } from '@/functions/helpers'
 import packageInfo from '@/package.json'
+import Image from 'next/image'
 import React from 'react'
 
 import { update } from '@/update'
@@ -19,7 +20,7 @@ const Footer: React.FC = () => (
                 className={styles.copyrightLink}
                 title={''}
             >
-                <img
+                <Image
                     className={styles.copyrightImage}
                     src={'https://miksoft.pro/favicon.ico'}
                     alt={''}

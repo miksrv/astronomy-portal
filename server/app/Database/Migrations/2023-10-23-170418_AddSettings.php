@@ -1,18 +1,14 @@
-<?php
-
-namespace App\Database\Migrations;
+<?php namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class AddSettingsTable extends Migration
-{
-    public function up()
-    {
+class AddSettings extends Migration {
+    public function up() {
         $this->forge->addField([
             'key' => [
-                'type'           => 'VARCHAR',
-                'constraint'     => 200,
-                'unique'         => true
+                'type'       => 'VARCHAR',
+                'constraint' => 200,
+                'unique'     => true
             ],
             'value' => [
                 'type'       => 'VARCHAR',
@@ -20,12 +16,12 @@ class AddSettingsTable extends Migration
                 'null'       => true
             ]
         ]);
+
         $this->forge->addPrimaryKey('key');
         $this->forge->createTable('settings');
     }
 
-    public function down()
-    {
+    public function down() {
         $this->forge->dropTable('settings');
     }
 }

@@ -42,6 +42,15 @@ class MyBaseModel extends Model {
         } else {
             return ['data' => $resultData];
         }
+    }
 
+    /**
+     * @param array $data
+     * @return array
+     */
+    protected function generateId(array $data): array {
+        $data['data']['id'] = uniqid();
+
+        return $data;
     }
 }

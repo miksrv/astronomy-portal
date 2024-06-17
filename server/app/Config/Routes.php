@@ -53,8 +53,8 @@ $routes->options('photo/(:any)/(:any)', 'Photo');
 $routes->get('auth/me', 'Auth::me');
 $routes->get('auth/google', 'Auth::google');
 $routes->get('auth/yandex', 'Auth::yandex');
-$routes->post('auth/register', 'Auth::register');
-$routes->post('auth/login', 'Auth::login');
+//$routes->post('auth/register', 'Auth::register');
+//$routes->post('auth/login', 'Auth::login');
 $routes->options('auth/(:any)', 'Auth');
 
 $routes->get('relay/list', 'Relay::list');

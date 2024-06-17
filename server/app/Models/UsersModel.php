@@ -19,6 +19,11 @@ class UsersModel extends Model {
         'name',
         'email',
         'password',
+        'auth_type',
+        'role',
+        'locale',
+        'avatar',
+        'updated_at',
         'activity_at'
     ];
 
@@ -59,7 +64,7 @@ class UsersModel extends Model {
      */
     public function findUserByEmailAddress(string $emailAddress): User | array | null {
         return $this
-            ->select('id, email, password')
+            ->select('id, email, name, avatar, auth_type, role')
             ->where('email', $emailAddress)
             ->first();
     }

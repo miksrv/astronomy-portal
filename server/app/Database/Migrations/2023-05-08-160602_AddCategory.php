@@ -1,13 +1,9 @@
-<?php
-
-namespace App\Database\Migrations;
+<?php namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class AddCategoryTable extends Migration
-{
-    public function up()
-    {
+class AddCategory extends Migration {
+    public function up() {
         $this->forge->addField([
             'id' => [
                 'type'           => 'SMALLINT',
@@ -22,13 +18,13 @@ class AddCategoryTable extends Migration
                 'null'       => true
             ]
         ]);
+
         $this->forge->addPrimaryKey('id');
         $this->forge->addKey('name');
         $this->forge->createTable('category');
     }
 
-    public function down()
-    {
+    public function down() {
         $this->forge->dropTable('category');
     }
 }
