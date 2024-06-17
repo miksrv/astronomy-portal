@@ -6,7 +6,10 @@ import AuthorTable from './AuthorTable'
 
 const customInitialState = {
     auth: {
-        isAuth: true
+        isAuth: true,
+        user: {
+            role: 'admin'
+        }
     }
 }
 
