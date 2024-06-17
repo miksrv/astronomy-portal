@@ -4,7 +4,7 @@ import { API, ApiType, useAppDispatch, useAppSelector } from '@/api'
 import { LOCAL_STORAGE } from '@/functions/constants'
 import useLocalStorage from '@/functions/hooks/useLocalStorage'
 import { useRouter } from 'next/router'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { Button, Icon, Modal } from 'semantic-ui-react'
 
 import { hide } from '@/components/login-form/loginFormSlice'
@@ -19,15 +19,15 @@ const LoginForm: React.FC = () => {
 
     const [, setReturnPath] = useLocalStorage<string>(LOCAL_STORAGE.RETURN_PATH)
 
-    const [localeError, setLocaleError] = useState<string>('')
+    // const [localeError, setLocaleError] = useState<string>('')
 
     const [
         authLoginService,
         {
-            data: serviceData,
-            isLoading: serviceLoading,
-            isSuccess: serviceSuccess,
-            isError: serviceError
+            data: serviceData
+            // isLoading: serviceLoading,
+            // isSuccess: serviceSuccess,
+            // isError: serviceError
         }
     ] = API.useAuthLoginServiceMutation()
 
@@ -44,11 +44,11 @@ const LoginForm: React.FC = () => {
         }
     }, [serviceData?.redirect])
 
-    useEffect(() => {
-        if (serviceError) {
-            setLocaleError('Ошибка авторизации через сервис')
-        }
-    }, [serviceError])
+    // useEffect(() => {
+    //     if (serviceError) {
+    //         setLocaleError('Ошибка авторизации через сервис')
+    //     }
+    // }, [serviceError])
 
     return (
         <Modal
@@ -72,13 +72,13 @@ const LoginForm: React.FC = () => {
                 >
                     <Icon name={'yandex'} /> {'Яндекс'}
                 </Button>
-                <Button
-                    color={'vk'}
-                    fluid={true}
-                    disabled={true}
-                >
-                    <Icon name={'vk'} /> {'Вконтакте'}
-                </Button>
+                {/*<Button*/}
+                {/*    color={'vk'}*/}
+                {/*    fluid={true}*/}
+                {/*    disabled={true}*/}
+                {/*>*/}
+                {/*    <Icon name={'vk'} /> {'Вконтакте'}*/}
+                {/*</Button>*/}
             </Modal.Content>
         </Modal>
     )

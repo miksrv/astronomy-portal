@@ -64,15 +64,7 @@ class Auth extends ResourceController {
      */
     public function me(): ResponseInterface {
         $this->session->update();
-
-        $response = (object) ['auth' => $this->session->isAuth];
-
-        if ($this->session->isAuth && $this->session->user) {
-            $response->user  = $this->session->user;
-            $response->token = generateAuthToken($this->session->user->email);
-        }
-
-        return $this->respond($response);
+        return $this->responseAuth();
     }
 
     /**
@@ -117,7 +109,10 @@ class Auth extends ResourceController {
             $user->name      = $googleUser->name;
             $user->email     = $googleUser->email;
             $user->auth_type = AUTH_TYPE_GOOGLE;
-            $user->locale    = $googleUser->locale === 'ru' ? 'ru' : 'en';
+            $user->locale    = isset($googleUser->locale)
+                ? $googleUser->locale === 'en'
+                    ? 'en' : 'ru'
+                : 'ru';
 
             $userModel->insert($user);
 
@@ -292,10 +287,15 @@ class Auth extends ResourceController {
      * @return ResponseInterface
      */
     protected function responseAuth(): ResponseInterface {
-        return $this->respond([
-            'auth'  => $this->session->isAuth,
-            'user'  => $this->session->user,
-            'token' => generateAuthToken($this->session->user->email),
-        ]);
+        $response = (object) ['auth' => $this->session->isAuth];
+
+        if ($this->session->isAuth && $this->session->user) {
+            $response->user  = $this->session->user;
+            $response->token = generateAuthToken($this->session->user->email);
+
+            unset($response->user->email, $response->user->auth_type, $response->user->role);
+        }
+
+        return $this->respond($response);
     }
 }

@@ -23,6 +23,7 @@ class UsersModel extends Model {
         'role',
         'locale',
         'avatar',
+        'updated_at',
         'activity_at'
     ];
 
