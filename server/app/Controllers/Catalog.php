@@ -1,6 +1,7 @@
 <?php namespace App\Controllers;
 
 use App\Libraries\CatalogLibrary;
+use App\Libraries\SessionLibrary;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
@@ -10,6 +11,12 @@ use Exception;
 
 class Catalog extends ResourceController {
     use ResponseTrait;
+
+    private SessionLibrary $session;
+
+    public function __construct() {
+        $this->session = new SessionLibrary();
+    }
 
     /**
      * List of all catalog items
@@ -67,6 +74,10 @@ class Catalog extends ResourceController {
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
+        if ($this->session->user->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
         try {
             $input['image'] = $this->_saveCatalogImage($input['name'], $input['image']);
             $catalogModel = new CatalogModel();
@@ -104,6 +115,10 @@ class Catalog extends ResourceController {
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
+        if ($this->session->user->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
         try {
             $input['image'] = $this->_saveCatalogImage($id, $input['image']);
             $catalogModel = new CatalogModel();
@@ -128,6 +143,10 @@ class Catalog extends ResourceController {
      * @return ResponseInterface
      */
     public function delete($id = null): ResponseInterface {
+        if ($this->session->user->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
         try {
             $catalogModel = new CatalogModel();
             $catalogData  = $catalogModel->find($id);
