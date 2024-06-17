@@ -1,5 +1,6 @@
 <?php namespace App\Controllers;
 
+use App\Libraries\SessionLibrary;
 use App\Models\AuthorModel;
 use App\Models\PhotoModel;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -10,6 +11,12 @@ use Exception;
 
 class Author extends ResourceController {
     use ResponseTrait;
+
+    private SessionLibrary $session;
+
+    public function __construct() {
+        $this->session = new SessionLibrary();
+    }
 
     /**
      * List of all authors
@@ -54,6 +61,10 @@ class Author extends ResourceController {
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
+        if ($this->session->user->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
         try {
             $modelAuthor = new AuthorModel();
             $modelAuthor->insert($input);
@@ -83,6 +94,10 @@ class Author extends ResourceController {
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
+        if ($this->session->user->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
         try {
             $modelAuthor = new AuthorModel();
             $dataAuthors  = $modelAuthor->find($id);
@@ -106,6 +121,10 @@ class Author extends ResourceController {
      * @return ResponseInterface
      */
     public function delete($id = null): ResponseInterface {
+        if ($this->session->user->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
         try {
             $modelAuthor = new AuthorModel();
             $dataAuthors  = $modelAuthor->find($id);

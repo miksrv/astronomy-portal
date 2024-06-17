@@ -1,6 +1,7 @@
 <?php namespace App\Controllers;
 
 use App\Libraries\PhotosLibrary;
+use App\Libraries\SessionLibrary;
 use App\Models\CatalogModel;
 use App\Models\PhotoModel;
 use CodeIgniter\Files\File;
@@ -12,6 +13,12 @@ use Exception;
 
 class Photo extends ResourceController {
     use ResponseTrait;
+
+    private SessionLibrary $session;
+
+    public function __construct() {
+        $this->session = new SessionLibrary();
+    }
 
     /**
      * List of all photos
@@ -103,6 +110,10 @@ class Photo extends ResourceController {
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
+        if ($this->session->user->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
         $catalogModel = new CatalogModel();
         $catalogData  = $catalogModel->find($input['object']);
 
@@ -165,6 +176,10 @@ class Photo extends ResourceController {
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
+        if ($this->session->user->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
         $img = $this->request->getFile('image');
 
         if (!$img->hasMoved()) {
@@ -213,6 +228,10 @@ class Photo extends ResourceController {
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
+        if ($this->session->user->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
         try {
             $photoModel = new PhotoModel();
             $photoData  = $photoModel->find($id);
@@ -238,6 +257,10 @@ class Photo extends ResourceController {
      * @return ResponseInterface
      */
     public function delete($id = null): ResponseInterface {
+        if ($this->session->user->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+        
         try {
             $photoModel = new PhotoModel();
             $photoData  = $photoModel->find($id);

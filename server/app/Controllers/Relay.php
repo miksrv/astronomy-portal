@@ -1,6 +1,7 @@
 <?php namespace App\Controllers;
 
 use App\Libraries\RelayLibrary;
+use App\Libraries\SessionLibrary;
 use App\Models\SettingsModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
@@ -20,9 +21,12 @@ class Relay extends ResourceController {
 
     private RelayLibrary $relayLibrary;
 
+    private SessionLibrary $session;
+
     public function __construct() {
         $this->settingsModel = new SettingsModel();
         $this->relayLibrary  = new RelayLibrary();
+        $this->session       = new SessionLibrary();
     }
 
     /**
@@ -64,6 +68,10 @@ class Relay extends ResourceController {
 
         if (empty($inputJSON)) {
             $this->failValidationErrors('Invalid request format');
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
         }
 
         $index = $inputJSON->id ?? null;
@@ -129,7 +137,7 @@ class Relay extends ResourceController {
      *   2. If any relay in the observatory is currently turned on
      *   3. If the time between the last time the relay was turned on by the user was less than LIGHT_SWITCH_COOLDOWN (5 minutes)
      * @param array $relayStates
-     * @return bool|null
+     * @return bool
      * @throws Exception
      */
     protected function _userCanTurnLight(array $relayStates): bool {
