@@ -5,7 +5,10 @@ import CatalogToolbar from './CatalogToolbar'
 
 const customInitialState = {
     auth: {
-        isAuth: true
+        isAuth: true,
+        user: {
+            role: 'admin'
+        }
     }
 }
 

@@ -6,7 +6,7 @@ import styles from './styles.module.sass'
 interface TableCellButtonsProps {
     itemId?: number
     name?: string
-    isAuth?: boolean
+    isAdmin?: boolean
     onClickEdit?: (itemId: number) => void
     onClickDelete?: (itemId: number) => void
 }
@@ -14,7 +14,7 @@ interface TableCellButtonsProps {
 const TableCellButtons: React.FC<TableCellButtonsProps> = ({
     itemId,
     name,
-    isAuth,
+    isAdmin,
     onClickEdit,
     onClickDelete
 }) => (
@@ -23,7 +23,7 @@ const TableCellButtons: React.FC<TableCellButtonsProps> = ({
         colSpan={2}
     >
         {name}
-        {isAuth && (
+        {isAdmin && (
             <div>
                 {onClickEdit && (
                     <span

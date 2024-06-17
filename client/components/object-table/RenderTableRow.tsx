@@ -23,7 +23,7 @@ const RenderTableRow: React.FC<RenderTableRowProps> = ({
     onClickEdit,
     onClickDelete
 }) => {
-    const isAuth = useAppSelector((state) => state.auth.isAuth)
+    const user = useAppSelector((state) => state.auth.user)
 
     return (
         <Table.Row className={styles.tableRow}>
@@ -54,7 +54,7 @@ const RenderTableRow: React.FC<RenderTableRowProps> = ({
                         </Link>
                     }
                 />
-                {isAuth && (
+                {user?.role === 'admin' && (
                     <div>
                         <span
                             className={styles.controlButton}

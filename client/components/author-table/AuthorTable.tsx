@@ -16,7 +16,7 @@ type AuthorTableProps = {
 const AuthorTable: React.FC<AuthorTableProps> = (props) => {
     const { loading, authors, onClickEdit, onClickDelete } = props
 
-    const isAuth = useAppSelector((state) => state.auth.isAuth)
+    const user = useAppSelector((state) => state.auth.user)
 
     return (
         <div className={'box table'}>
@@ -45,7 +45,7 @@ const AuthorTable: React.FC<AuthorTableProps> = (props) => {
                                 <TableCellButtons
                                     itemId={item.id}
                                     name={item.name}
-                                    isAuth={isAuth}
+                                    isAdmin={user?.role === 'admin'}
                                     onClickEdit={onClickEdit}
                                     onClickDelete={onClickDelete}
                                 />

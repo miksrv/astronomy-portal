@@ -13,7 +13,7 @@ describe('TableCellButtons', () => {
     it('renders edit and delete buttons when isAuth is true', () => {
         render(
             <TableCellButtons
-                isAuth={true}
+                isAdmin={true}
                 onClickEdit={() => {}}
                 onClickDelete={() => {}}
             />
@@ -31,7 +31,7 @@ describe('TableCellButtons', () => {
 
         render(
             <TableCellButtons
-                isAuth={true}
+                isAdmin={true}
                 onClickEdit={onClickEdit}
             />
         )
@@ -47,7 +47,7 @@ describe('TableCellButtons', () => {
 
         render(
             <TableCellButtons
-                isAuth={true}
+                isAdmin={true}
                 onClickDelete={onClickDelete}
             />
         )
@@ -60,7 +60,7 @@ describe('TableCellButtons', () => {
     })
 
     it('does not render edit and delete buttons when isAuth is false', () => {
-        render(<TableCellButtons isAuth={false} />)
+        render(<TableCellButtons isAdmin={false} />)
 
         const editButton = screen.queryByRole('button', {
             name: 'edit outline'

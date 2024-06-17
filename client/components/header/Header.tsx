@@ -153,21 +153,25 @@ const Header: React.FC = () => {
                                     as={Link}
                                     href={'/directory'}
                                 />
-                                <Dropdown.Divider />
-                                <Dropdown.Item
-                                    icon={'plus'}
-                                    content='Добавить объект'
-                                    onClick={() =>
-                                        dispatch(openFormCatalog(true))
-                                    }
-                                />
-                                <Dropdown.Item
-                                    icon={'upload'}
-                                    content='Добавить астрофото'
-                                    onClick={() =>
-                                        dispatch(openFormPhoto(true))
-                                    }
-                                />
+                                {authSlice?.user?.role === 'admin' && (
+                                    <>
+                                        <Dropdown.Divider />
+                                        <Dropdown.Item
+                                            icon={'plus'}
+                                            content='Добавить объект'
+                                            onClick={() =>
+                                                dispatch(openFormCatalog(true))
+                                            }
+                                        />
+                                        <Dropdown.Item
+                                            icon={'upload'}
+                                            content='Добавить астрофото'
+                                            onClick={() =>
+                                                dispatch(openFormPhoto(true))
+                                            }
+                                        />
+                                    </>
+                                )}
                                 <Dropdown.Divider />
                                 <Dropdown.Item
                                     text={'Выйти'}
@@ -179,8 +183,12 @@ const Header: React.FC = () => {
                 </Menu.Menu>
             </Container>
             {!authSlice.isAuth && <LoginForm />}
-            {authSlice.isAuth && <ObjectFormModal />}
-            {authSlice.isAuth && <PhotoFormModal />}
+            {authSlice.isAuth && authSlice?.user?.role === 'admin' && (
+                <ObjectFormModal />
+            )}
+            {authSlice.isAuth && authSlice?.user?.role === 'admin' && (
+                <PhotoFormModal />
+            )}
         </Menu>
     )
 }

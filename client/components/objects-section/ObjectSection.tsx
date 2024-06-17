@@ -27,7 +27,7 @@ const ObjectSection: React.FC<ObjectSectionProps> = ({
     deviationDec
 }) => {
     const dispatch = useAppDispatch()
-    const isAuth = useAppSelector((state) => state.auth.isAuth)
+    const user = useAppSelector((state) => state.auth.user)
 
     const date = catalog?.updated ? formatDate(catalog.updated) : '---'
     const exposure = catalog?.statistic?.exposure
@@ -52,7 +52,7 @@ const ObjectSection: React.FC<ObjectSectionProps> = ({
                 >
                     <h1>
                         {title}
-                        {isAuth && (
+                        {user?.role === 'admin' && (
                             <span
                                 className={styles.controlButton}
                                 role={'button'}

@@ -15,7 +15,7 @@ const initialState: TApplicationSlice = {
 
 const applicationSlice = createSlice({
     initialState,
-    name: 'auth',
+    name: 'application',
     reducers: {
         editCatalog: (
             state,

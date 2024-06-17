@@ -6,7 +6,10 @@ import PhotoGrid, { PhotoImage } from './PhotoGrid'
 
 const customInitialState = {
     auth: {
-        isAuth: true
+        isAuth: true,
+        user: {
+            role: 'admin'
+        }
     }
 }
 

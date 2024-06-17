@@ -20,7 +20,7 @@ const CatalogToolbar: React.FC<CatalogToolbarProps> = (props) => {
 
     const pathname = usePathname()
     const dispatch = useAppDispatch()
-    const isAuth = useAppSelector((state) => state.auth.isAuth)
+    const user = useAppSelector((state) => state.auth.user)
 
     const handleChange = ({
         target: { value }
@@ -63,7 +63,7 @@ const CatalogToolbar: React.FC<CatalogToolbarProps> = (props) => {
                     onChangeCategories?.(el.value as number[])
                 }}
             />
-            {isAuth && (
+            {user?.role === 'admin' && (
                 <Button
                     icon={true}
                     className={styles.addButton}

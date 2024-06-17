@@ -11,7 +11,7 @@ interface RelayListItemProps {
     name: string
     state: boolean
     loading: boolean
-    isAuth?: boolean
+    isAdmin?: boolean
     handleClick?: (relay: ApiType.Relay.ReqRelaySet) => void
 }
 
@@ -20,7 +20,7 @@ export const RelayListItem: React.FC<RelayListItemProps> = ({
     name,
     state,
     loading,
-    isAuth,
+    isAdmin,
     handleClick
 }) => (
     <div className={styles.item}>
@@ -31,7 +31,7 @@ export const RelayListItem: React.FC<RelayListItemProps> = ({
         <Button
             loading={loading}
             className={styles[state ? 'switchOn' : 'switchOff']}
-            disabled={loading || !isAuth}
+            disabled={loading || !isAdmin}
             onClick={() => handleClick?.({ id, state: state ? 0 : 1 })}
             size={'mini'}
         >
@@ -62,7 +62,7 @@ export const RelayList: React.FC = () => {
     const [setLightOn, { isLoading: lightLoading }] =
         API.useRelayGetLightMutation()
 
-    const isAuth = useAppSelector((state) => state.auth.isAuth)
+    const user = useAppSelector((state) => state.auth.user)
 
     const handleSetRelay = async (relay: ApiType.Relay.ReqRelaySet) => {
         setRelayLoading(relay.id)
@@ -107,7 +107,7 @@ export const RelayList: React.FC = () => {
         </div>
     ) : (
         <div className={classNames(styles.relayList, 'box')}>
-            {isAuth && isError && (
+            {user?.role === 'admin' && isError && (
                 <Dimmer active>
                     <Message
                         error
@@ -129,7 +129,7 @@ export const RelayList: React.FC = () => {
                         (relaySet?.state === 1 && relaySet?.id === item.id)
                     }
                     loading={loaderSet && relayLoading === item.id}
-                    isAuth={isAuth}
+                    isAdmin={user?.role === 'admin'}
                     handleClick={async (relay) => await handleSetRelay(relay)}
                 />
             ))}
