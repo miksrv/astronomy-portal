@@ -1,6 +1,7 @@
 export * as Weather from './weather'
 export * as Statistic from './statistic'
 export * as Relay from './relay'
+export * as Events from './events'
 export * as Photo from './photo'
 export * as Category from './category'
 export * as Catalog from './catalog'

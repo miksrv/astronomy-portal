@@ -194,6 +194,24 @@ export const API = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
+        /* Events Controller */
+        eventsGetList: builder.query<ApiType.Events.ResList, void>({
+            providesTags: () => [{ id: 'LIST', type: 'Events' }],
+            query: () => 'events'
+        }),
+        eventsRegistrationPost: builder.mutation<
+            ApiType.Events.ResRegistration | ApiType.ResError,
+            ApiType.Events.ReqRegistration
+        >({
+            invalidatesTags: () => [{ id: 'LIST', type: 'Events' }],
+            query: (formState) => ({
+                body: formState,
+                method: 'PATCH',
+                url: 'event/registration'
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+
         /* Photo Controller */
         photoGetItem: builder.query<ApiType.Photo.ResItem, string>({
             keepUnusedDataFor: 3600,
@@ -312,7 +330,15 @@ export const API = createApi({
         }
     },
     reducerPath: 'api',
-    tagTypes: ['Catalog', 'Photo', 'Statistic', 'Category', 'Author', 'Relay']
+    tagTypes: [
+        'Catalog',
+        'Events',
+        'Photo',
+        'Statistic',
+        'Category',
+        'Author',
+        'Relay'
+    ]
 })
 
 // Export hooks for usage in functional components
