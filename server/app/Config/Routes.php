@@ -9,6 +9,11 @@ $routes->get('weather/current', 'Weather::current');
 $routes->get('weather/statistic', 'Weather::statistic');
 $routes->options('weather/(:any)', 'Weather');
 
+// Events
+$routes->get('events', 'Events::list');
+$routes->options('events', 'Events');
+$routes->options('events/(:any)', 'Events');
+
 $routes->get('statistic', 'Statistic::list');
 $routes->get('statistic/catalog', 'Statistic::catalog');
 $routes->get('statistic/photos', 'Statistic::photos');

@@ -7,12 +7,17 @@ use CodeIgniter\RESTful\ResourceController;
 class Events extends ResourceController {
     private SessionLibrary $session;
 
+    protected $model;
+
     public function __construct() {
         $this->session = new SessionLibrary();
+        $this->model   = new \App\Models\Events();
     }
 
     public function list(): ResponseInterface {
-        return $this->respond();
+        $data = $this->model->findAll();
+
+        return $this->respond(['items' => $data]);
     }
 
     public function show($id = null): ResponseInterface {

@@ -77,6 +77,7 @@ export const getTimeFromSec = (sec: number, full: boolean = false): string => {
 
 /**
  * @param date
+ * @param format
  */
 export const formatDate = (
     date: string | Date | Dayjs | undefined,
