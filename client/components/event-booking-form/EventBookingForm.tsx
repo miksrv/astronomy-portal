@@ -1,32 +1,30 @@
-import { API, ApiModel, ApiType } from '@/api'
-import isEqual from 'lodash-es/isEqual'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Form, Grid, Message, Modal } from 'semantic-ui-react'
+import React from 'react'
+import { Button, Form, Grid } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
 interface EventBookingFormProps {}
 
-const EventBookingForm: React.FC<EventBookingFormProps> = (props) => {
-    const [submitted, setSubmitted] = useState<boolean>(false)
-    const [formState, setFormState] = useState<any>()
+const EventBookingForm: React.FC<EventBookingFormProps> = () => {
+    // const [submitted, setSubmitted] = useState<boolean>(false)
+    // const [formState, setFormState] = useState<any>()
 
     // const handleChange = ({
     //     target: { name, value }
     // }: React.ChangeEvent<HTMLInputElement>) =>
     //     setFormState((prev) => ({ ...prev, [name]: value }))
 
-    const handleKeyDown = (e: { key: string }) =>
-        e.key === 'Enter' && handleSubmit()
+    // const handleKeyDown = (e: { key: string }) =>
+    //     e.key === 'Enter' && handleSubmit()
 
-    const handleSubmit = useCallback(() => {
-        setSubmitted(true)
-    }, [formState])
+    // const handleSubmit = useCallback(() => {
+    //     setSubmitted(true)
+    // }, [formState])
 
     return (
         <Form
             className={styles.form}
-            onSubmit={handleSubmit}
+            // onSubmit={handleSubmit}
             inverted={true}
             // loading={createLoading || updateLoading}
             // success={(createSuccess || updateSuccess) && submitted}
@@ -51,7 +49,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = (props) => {
                 name={'name'}
                 placeholder={'Укажите ваше имя'}
                 // onChange={handleChange}
-                onKeyDown={handleKeyDown}
+                // onKeyDown={handleKeyDown}
                 // defaultValue={value?.name}
                 // error={findError('name')}
             />
@@ -62,7 +60,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = (props) => {
                 name={'phone'}
                 placeholder={'Укажите ваш номер телефона'}
                 // onChange={handleChange}
-                onKeyDown={handleKeyDown}
+                // onKeyDown={handleKeyDown}
                 // defaultValue={value?.name}
                 // error={findError('name')}
             />
@@ -76,7 +74,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = (props) => {
                         value={1}
                         type={'number'}
                         // onChange={handleChange}
-                        onKeyDown={handleKeyDown}
+                        // onKeyDown={handleKeyDown}
                         // defaultValue={value?.name}
                         // error={findError('name')}
                     />
@@ -89,7 +87,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = (props) => {
                         value={0}
                         type={'number'}
                         // onChange={handleChange}
-                        onKeyDown={handleKeyDown}
+                        // onKeyDown={handleKeyDown}
                         // defaultValue={value?.name}
                         // error={findError('name')}
                     />
