@@ -1,1 +1,1 @@
-export { default } from './CategoryFormModal'
+export { default } from './EventBookingForm'
