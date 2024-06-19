@@ -1,16 +1,24 @@
-import { API, ApiModel } from '@/api'
+import { API, ApiModel, useAppDispatch, useAppSelector } from '@/api'
 import { wrapper } from '@/api/store'
 import { formatDate, isOutdated } from '@/functions/helpers'
 import dayjs from 'dayjs'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React from 'react'
+import { Button } from 'semantic-ui-react'
+
+import EventBookingForm from '@/components/event-booking-form/EventBookingForm'
+import { show } from '@/components/login-form/loginFormSlice'
 
 interface StargazingPageProps {
     events: ApiModel.Event[]
 }
 
 const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
+    const dispatch = useAppDispatch()
+
+    const user = useAppSelector((state) => state.auth.user)
+
     const currentDate = dayjs().toISOString()
 
     return (
@@ -59,6 +67,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                         <div>{formatDate(event.date, 'D MMMM YYYY')}</div>
                         <div>{formatDate(event.date, 'H:mm')}</div>
                         <div>{event.content}</div>
+                        <div>Свободные места: {event.availableTickets}</div>
                         {!isOutdated(currentDate, event.registrationStart!) && (
                             <div>Дата регистрации наступила</div>
                         )}
@@ -69,6 +78,32 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
 
                         {isOutdated(currentDate, event.date!) && (
                             <div>Мероприятие еще не наступило</div>
+                        )}
+
+                        {user?.id ? (
+                            <EventBookingForm />
+                        ) : (
+                            <div
+                                style={{
+                                    margin: '20px auto',
+                                    maxWidth: '500px',
+                                    textAlign: 'center'
+                                }}
+                            >
+                                <h3>
+                                    {
+                                        'Для бронирования войдите под своим профилем'
+                                    }
+                                </h3>
+                                <Button
+                                    fluid={true}
+                                    size={'tiny'}
+                                    color={'green'}
+                                    onClick={() => dispatch(show())}
+                                >
+                                    {'Войти'}
+                                </Button>
+                            </div>
                         )}
                     </div>
                 </div>
