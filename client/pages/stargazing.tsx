@@ -78,102 +78,97 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
                     астровыезде.
                 </p>
             </div>
-            {user &&
-                eventsData?.map((event) => (
-                    <div
-                        className={'box'}
-                        key={event.id}
-                        style={{ marginBottom: '15px', marginTop: '15px' }}
-                    >
-                        <div style={{ textAlign: 'center' }}>
-                            <h2
-                                style={{
-                                    fontSize: '2em !important'
-                                }}
-                            >
-                                {event.title}
-                            </h2>
-                            <div>
-                                {formatUTCDate(event.date?.date, 'D MMMM YYYY')}
-                            </div>
-                            <div>{formatUTCDate(event.date?.date, 'H:mm')}</div>
-                            <div>{event.content}</div>
+            {eventsData?.map((event) => (
+                <div
+                    className={'box'}
+                    key={event.id}
+                    style={{ marginBottom: '15px', marginTop: '15px' }}
+                >
+                    <div style={{ textAlign: 'center' }}>
+                        <h2
+                            style={{
+                                fontSize: '2em !important'
+                            }}
+                        >
+                            {event.title}
+                        </h2>
+                        <div>
+                            {formatUTCDate(event.date?.date, 'D MMMM YYYY')}
+                        </div>
+                        <div>{formatUTCDate(event.date?.date, 'H:mm')}</div>
+                        <div>{event.content}</div>
 
-                            <div>
-                                {event.availableTickets === 0
-                                    ? 'Места закончились'
-                                    : `Свободные места: ${event.availableTickets}`}
-                            </div>
+                        <div>
+                            {event.availableTickets === 0
+                                ? 'Места закончились'
+                                : `Свободные места: ${event.availableTickets}`}
+                        </div>
 
-                            {dayjs
-                                .utc(event.registrationStart?.date)
-                                .local()
-                                .diff(dayjs()) >= 0 && (
-                                <div>Дата регистрации еще не наступила</div>
-                            )}
+                        {dayjs
+                            .utc(event.registrationStart?.date)
+                            .local()
+                            .diff(dayjs()) >= 0 && (
+                            <div>Дата регистрации еще не наступила</div>
+                        )}
 
+                        {dayjs
+                            .utc(event.registrationEnd?.date)
+                            .local()
+                            .diff(dayjs()) <= 0 && (
+                            <div>Дата окончания регистрации уже прошла</div>
+                        )}
+
+                        <div>
+                            До конца регистрации дней:{' '}
                             {dayjs
                                 .utc(event.registrationEnd?.date)
                                 .local()
-                                .diff(dayjs()) <= 0 && (
-                                <div>Дата окончания регистрации уже прошла</div>
-                            )}
+                                .diff(dayjs(), 'day')}
+                        </div>
 
+                        {dayjs.utc(event.date?.date).local().diff(dayjs()) <=
+                            0 && <div>Дата мероприятия уже наступило</div>}
+
+                        {checkAvailabilityRegistration(event) && (
                             <div>
-                                До конца регистрации дней:{' '}
-                                {dayjs
-                                    .utc(event.registrationEnd?.date)
-                                    .local()
-                                    .diff(dayjs(), 'day')}
-                            </div>
-
-                            {dayjs
-                                .utc(event.date?.date)
-                                .local()
-                                .diff(dayjs()) <= 0 && (
-                                <div>Дата мероприятия уже наступило</div>
-                            )}
-
-                            {checkAvailabilityRegistration(event) && (
-                                <div>
-                                    {!user?.id && (
-                                        <div
-                                            style={{
-                                                margin: '20px auto',
-                                                maxWidth: '500px',
-                                                textAlign: 'center'
-                                            }}
+                                {!user?.id && (
+                                    <div
+                                        style={{
+                                            margin: '20px auto',
+                                            maxWidth: '500px',
+                                            textAlign: 'center'
+                                        }}
+                                    >
+                                        <h3>
+                                            {
+                                                'Для бронирования войдите под своим профилем'
+                                            }
+                                        </h3>
+                                        <Button
+                                            fluid={true}
+                                            size={'tiny'}
+                                            color={'green'}
+                                            onClick={() => dispatch(show())}
                                         >
-                                            <h3>
-                                                {
-                                                    'Для бронирования войдите под своим профилем'
-                                                }
-                                            </h3>
-                                            <Button
-                                                fluid={true}
-                                                size={'tiny'}
-                                                color={'green'}
-                                                onClick={() => dispatch(show())}
-                                            >
-                                                {'Войти'}
-                                            </Button>
-                                        </div>
-                                    )}
+                                            {'Войти'}
+                                        </Button>
+                                    </div>
+                                )}
 
-                                    {user?.id && !event?.registered && (
-                                        <EventBookingForm eventId={event.id} />
-                                    )}
-                                </div>
-                            )}
-
-                            <div>
-                                {user?.id && event?.registered && (
-                                    <h3>Вы зарегистрированы на мероприятие</h3>
+                                {user?.id && !event?.registered && (
+                                    <EventBookingForm eventId={event.id} />
                                 )}
                             </div>
+                        )}
+
+                        <div>
+                            {user?.id && event?.registered && (
+                                <h3>Вы зарегистрированы на мероприятие</h3>
+                            )}
                         </div>
                     </div>
-                ))}
+                </div>
+            ))}
         </main>
     )
 }
