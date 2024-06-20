@@ -6,6 +6,11 @@ use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\RESTful\ResourceController;
 use Config\Services;
+use Longman\TelegramBot\Entities\Update;
+use Longman\TelegramBot\Exception\TelegramException;
+use Longman\TelegramBot\Request;
+use Longman\TelegramBot\Telegram;
+use ReflectionException;
 
 class Events extends ResourceController {
     private SessionLibrary $session;
@@ -45,6 +50,10 @@ class Events extends ResourceController {
         return $this->respond(['items' => $eventsData]);
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws TelegramException
+     */
     public function booking(): ResponseInterface {
         // Check that user is auth
         if (!$this->session->isAuth) {
@@ -107,6 +116,18 @@ class Events extends ResourceController {
             'user_id'  => $this->session->user->id,
             'adults'   => $input['adults'],
             'children' => $input['children'],
+        ]);
+
+        new Telegram(getenv('app.telegramBotKey'), '');
+
+        Request::sendMessage([
+            'chat_id'    => getenv('app.telegramChatID'),
+            'parse_mode' => 'HTML',
+            'text'       => "<b>Astro:</b> 🙋Регистрация на астровыезд\n" .
+                "<b>{$event->title}</b>\n" .
+                "🔹Имя: <i>{$input['name']}</i>\n" .
+                "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
+                "🔹Осталось мест: <b>" . ($event->max_tickets - $currentTickets) . "</b>"
         ]);
 
         return $this->respond(['message' => 'Вы успешно зарегистрировались на мероприятие']);

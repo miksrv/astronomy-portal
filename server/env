@@ -26,6 +26,9 @@
 # and their image preview (see project https://github.com/miksrv/astronomy-fits-parser)
 app.fitsApiKey = YOUR_API_KEY
 
+app.telegramBotKey = ''
+app.telegramChatID = ''
+
 app.appTimezone = Asia/Yekaterinburg
 app.timezone  = 5
 app.latitude  = 51.7727
