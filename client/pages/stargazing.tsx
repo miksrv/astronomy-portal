@@ -1,6 +1,6 @@
 import { API, useAppDispatch, useAppSelector } from '@/api'
 // import { wrapper } from '@/api/store'
-import { formatDate, isOutdated } from '@/functions/helpers'
+import { formatUTCDate, isOutdated, isUTCOutdated } from '@/functions/helpers'
 import dayjs from 'dayjs'
 import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
@@ -67,21 +67,38 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
                             >
                                 {event.title}
                             </h2>
-                            <div>{formatDate(event.date, 'D MMMM YYYY')}</div>
-                            <div>{formatDate(event.date, 'H:mm')}</div>
+                            <div>
+                                {formatUTCDate(event.date?.date, 'D MMMM YYYY')}
+                            </div>
+                            <div>{formatUTCDate(event.date?.date, 'H:mm')}</div>
                             <div>{event.content}</div>
                             <div>Свободные места: {event.availableTickets}</div>
-                            {!isOutdated(
-                                currentDate,
-                                event.registrationStart!
-                            ) && <div>Дата регистрации наступила</div>}
+                            {dayjs
+                                .utc(event.registrationStart?.date)
+                                .local()
+                                .diff(dayjs()) <= 0 && (
+                                <div>Дата регистрации наступила</div>
+                            )}
 
-                            {isOutdated(
-                                currentDate,
-                                event.registrationEnd!
-                            ) && <div>Дата окончания еще не прошла</div>}
+                            {dayjs
+                                .utc(event.registrationEnd?.date)
+                                .local()
+                                .diff(dayjs()) >= 0 && (
+                                <div>Дата окончания еще не прошла</div>
+                            )}
 
-                            {isOutdated(currentDate, event.date!) && (
+                            <div>
+                                До конца регистрации дней:{' '}
+                                {dayjs
+                                    .utc(event.registrationEnd?.date)
+                                    .local()
+                                    .diff(dayjs(), 'day')}
+                            </div>
+
+                            {dayjs
+                                .utc(event.date?.date)
+                                .local()
+                                .diff(dayjs()) >= 0 && (
                                 <div>Мероприятие еще не наступило</div>
                             )}
 

@@ -30,15 +30,15 @@ class Events extends Migration {
                 'constraint' => 5,
                 'unsigned'   => true
             ],
+            'date' => [
+                'type' => 'DATETIME',
+                'null' => true
+            ],
             'registration_start' => [
                 'type' => 'DATETIME',
                 'null' => true
             ],
             'registration_end' => [
-                'type' => 'DATETIME',
-                'null' => true
-            ],
-            'date' => [
                 'type' => 'DATETIME',
                 'null' => true
             ],

@@ -3,6 +3,7 @@
 use App\Libraries\SessionLibrary;
 use App\Models\EventUsers;
 use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\I18n\Time;
 use CodeIgniter\RESTful\ResourceController;
 use Config\Services;
 
@@ -41,12 +42,6 @@ class Events extends ResourceController {
         }
 
         $input = $this->request->getJSON(true);
-
-        // Check that event with ID is exists
-        if (!$input['eventId'] || !$this->model->find($input['eventId'])) {
-            $this->failValidationErrors(['error' => 'Такого мероприятия не существует']);
-        }
-
         $rules = [
             'eventId'  => 'required|string|max_length[13]',
             'name'     => 'required|string|min_length[3]|max_length[40]',
@@ -62,11 +57,26 @@ class Events extends ResourceController {
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
+        $event = $this->model->find($input['eventId']);
+        // Check that event with ID is exists
+        if (!$event) {
+            $this->failValidationErrors(['error' => 'Такого мероприятия не существует']);
+        }
+
         $eventUsersModel = new EventUsers();
 
         // Check that user not already registered at this event
         if ($eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->first()) {
             return $this->failValidationErrors(['error' => 'Вы уже зарегистрировались на это мероприятие']);
+        }
+
+        // Check registration start and end dates
+        $currentTime   = new Time('now');
+        $timeDiffStart = $currentTime->difference($event->registration_start);
+        $timeDiffEnd   = $currentTime->difference($event->registration_end);
+
+        if ($timeDiffStart->getSeconds() >= 0 || $timeDiffEnd->getSeconds() <= 0) {
+            return $this->failValidationErrors(['error' => 'Регистрация на мероприятие уже знакончилась или еще не начиналась']);
         }
 
         $eventUsersModel->insert([

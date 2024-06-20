@@ -2,6 +2,8 @@ import { wrapper } from '@/api/store'
 import '@/styles/globals.sass'
 import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import utc from 'dayjs/plugin/utc'
 import type { AppProps } from 'next/app'
 import { Montserrat } from 'next/font/google'
 import NextNProgress from 'nextjs-progressbar'
@@ -16,6 +18,8 @@ import Header from '@/components/header'
 import Sidebar from '@/components/sidebar'
 
 dayjs.locale('ru')
+dayjs.extend(utc)
+dayjs.extend(relativeTime)
 
 export const montserrat = Montserrat({ subsets: ['latin'] })
 

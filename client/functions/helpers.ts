@@ -75,6 +75,14 @@ export const getTimeFromSec = (sec: number, full: boolean = false): string => {
     return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m)
 }
 
+export const formatUTCDate = (
+    date?: string | Date,
+    format: string = 'D MMMM YYYY, HH:mm'
+): string => (date ? dayjs.utc(date).local().format(format) : '')
+
+export const isUTCOutdated = (date: string) =>
+    dayjs.utc(date).local().diff(dayjs()) >= 0
+
 /**
  * @param date
  * @param format
