@@ -206,8 +206,8 @@ export const API = createApi({
             invalidatesTags: () => [{ id: 'LIST', type: 'Events' }],
             query: (formState) => ({
                 body: formState,
-                method: 'PATCH',
-                url: 'event/registration'
+                method: 'POST',
+                url: 'events/booking'
             }),
             transformErrorResponse: (response) => response.data
         }),
