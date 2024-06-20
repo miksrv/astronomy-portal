@@ -6,6 +6,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\RESTful\ResourceController;
 use Config\Services;
+use Exception;
 use Longman\TelegramBot\Entities\Update;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
@@ -53,6 +54,7 @@ class Events extends ResourceController {
     /**
      * @throws ReflectionException
      * @throws TelegramException
+     * @throws Exception
      */
     public function booking(): ResponseInterface {
         // Check that user is auth

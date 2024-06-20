@@ -14,6 +14,7 @@ class EventsModel extends MyBaseModel {
         'content',
         'cover',
         'max_tickets',
+        'yandex_map_link',
         'registration_start',
         'registration_end',
         'date',

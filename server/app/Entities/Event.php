@@ -10,6 +10,8 @@ class Event extends Entity {
         'cover'              => null,
         'max_tickets'        => null,
         'date'               => null,
+        'yandex_map_link'    => null,
+        'google_map_link'    => null,
         'registration_start' => null,
         'registration_end'   => null,
         'created_at'         => null,
@@ -20,7 +22,9 @@ class Event extends Entity {
     protected $datamap = [
         'registrationStart' => 'registration_start',
         'registrationEnd'   => 'registration_end',
-        'availableTickets'  => 'max_tickets'
+        'availableTickets'  => 'max_tickets',
+        'yandexMap' => 'yandex_map_link',
+        'googleMap' => 'google_map_link',
     ];
 
     protected $dates   = [
