@@ -17,9 +17,21 @@ class Events extends ResourceController {
     }
 
     public function list(): ResponseInterface {
-        $data = $this->model->findAll();
+        $eventsData = $this->model->findAll();
 
-        return $this->respond(['items' => $data]);
+        if (!$this->session->isAuth || !$this->session->user->id) {
+            return $this->respond(['items' => $eventsData]);
+        }
+
+        $eventUsersModel = new EventUsers();
+        $bookedEvents    = $eventUsersModel->where(['user_id' => $this->session->user->id])->findAll();
+
+        foreach ($eventsData as $event) {
+            $searchIndex = in_array($event->id, array_column($bookedEvents, 'event_id'));
+            $event->registered = $searchIndex !== false;
+        }
+
+        return $this->respond(['items' => $eventsData]);
     }
 
     public function booking(): ResponseInterface {

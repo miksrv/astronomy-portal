@@ -1,8 +1,8 @@
-import { API, ApiModel, useAppDispatch, useAppSelector } from '@/api'
-import { wrapper } from '@/api/store'
+import { API, useAppDispatch, useAppSelector } from '@/api'
+// import { wrapper } from '@/api/store'
 import { formatDate, isOutdated } from '@/functions/helpers'
 import dayjs from 'dayjs'
-import { GetServerSidePropsResult, NextPage } from 'next'
+import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React from 'react'
 import { Button } from 'semantic-ui-react'
@@ -11,14 +11,16 @@ import EventBookingForm from '@/components/event-booking-form/EventBookingForm'
 import { show } from '@/components/login-form/loginFormSlice'
 
 interface StargazingPageProps {
-    events: ApiModel.Event[]
+    // events: ApiModel.Event[]
 }
 
-const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
+const StargazingPage: NextPage<StargazingPageProps> = () => {
     const dispatch = useAppDispatch()
 
     const user = useAppSelector((state) => state.auth.user)
+    const { data } = API.useEventsGetListQuery()
 
+    const eventsData = data?.items
     const currentDate = dayjs().toISOString()
 
     return (
@@ -50,83 +52,92 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                     астровыезде.
                 </p>
             </div>
-            {events?.map((event) => (
-                <div
-                    className={'box'}
-                    key={event.id}
-                    style={{ marginBottom: '15px', marginTop: '15px' }}
-                >
-                    <div style={{ textAlign: 'center' }}>
-                        <h2
-                            style={{
-                                fontSize: '2em !important'
-                            }}
-                        >
-                            {event.title}
-                        </h2>
-                        <div>{formatDate(event.date, 'D MMMM YYYY')}</div>
-                        <div>{formatDate(event.date, 'H:mm')}</div>
-                        <div>{event.content}</div>
-                        <div>Свободные места: {event.availableTickets}</div>
-                        {!isOutdated(currentDate, event.registrationStart!) && (
-                            <div>Дата регистрации наступила</div>
-                        )}
-
-                        {isOutdated(currentDate, event.registrationEnd!) && (
-                            <div>Дата окончания еще не прошла</div>
-                        )}
-
-                        {isOutdated(currentDate, event.date!) && (
-                            <div>Мероприятие еще не наступило</div>
-                        )}
-
-                        {user?.id ? (
-                            <EventBookingForm eventId={event.id} />
-                        ) : (
-                            <div
+            {user &&
+                eventsData?.map((event) => (
+                    <div
+                        className={'box'}
+                        key={event.id}
+                        style={{ marginBottom: '15px', marginTop: '15px' }}
+                    >
+                        <div style={{ textAlign: 'center' }}>
+                            <h2
                                 style={{
-                                    margin: '20px auto',
-                                    maxWidth: '500px',
-                                    textAlign: 'center'
+                                    fontSize: '2em !important'
                                 }}
                             >
-                                <h3>
-                                    {
-                                        'Для бронирования войдите под своим профилем'
-                                    }
-                                </h3>
-                                <Button
-                                    fluid={true}
-                                    size={'tiny'}
-                                    color={'green'}
-                                    onClick={() => dispatch(show())}
+                                {event.title}
+                            </h2>
+                            <div>{formatDate(event.date, 'D MMMM YYYY')}</div>
+                            <div>{formatDate(event.date, 'H:mm')}</div>
+                            <div>{event.content}</div>
+                            <div>Свободные места: {event.availableTickets}</div>
+                            {!isOutdated(
+                                currentDate,
+                                event.registrationStart!
+                            ) && <div>Дата регистрации наступила</div>}
+
+                            {isOutdated(
+                                currentDate,
+                                event.registrationEnd!
+                            ) && <div>Дата окончания еще не прошла</div>}
+
+                            {isOutdated(currentDate, event.date!) && (
+                                <div>Мероприятие еще не наступило</div>
+                            )}
+
+                            {user?.id ? (
+                                event?.registered ? (
+                                    <div>
+                                        Вы уже зарегистрированы на мероприятие
+                                    </div>
+                                ) : (
+                                    <EventBookingForm eventId={event.id} />
+                                )
+                            ) : (
+                                <div
+                                    style={{
+                                        margin: '20px auto',
+                                        maxWidth: '500px',
+                                        textAlign: 'center'
+                                    }}
                                 >
-                                    {'Войти'}
-                                </Button>
-                            </div>
-                        )}
+                                    <h3>
+                                        {
+                                            'Для бронирования войдите под своим профилем'
+                                        }
+                                    </h3>
+                                    <Button
+                                        fluid={true}
+                                        size={'tiny'}
+                                        color={'green'}
+                                        onClick={() => dispatch(show())}
+                                    >
+                                        {'Войти'}
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
-            ))}
+                ))}
         </main>
     )
 }
 
-export const getServerSideProps = wrapper.getServerSideProps(
-    (store) =>
-        async (): Promise<GetServerSidePropsResult<StargazingPageProps>> => {
-            const { data } = await store.dispatch(
-                API.endpoints?.eventsGetList.initiate()
-            )
-
-            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
-
-            return {
-                props: {
-                    events: data?.items || []
-                }
-            }
-        }
-)
+// export const getServerSideProps = wrapper.getServerSideProps(
+//     (store) =>
+//         async (): Promise<GetServerSidePropsResult<StargazingPageProps>> => {
+//             const { data } = await store.dispatch(
+//                 API.endpoints?.eventsGetList.initiate()
+//             )
+//
+//             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+//
+//             return {
+//                 props: {
+//                     events: data?.items || []
+//                 }
+//             }
+//         }
+// )
 
 export default StargazingPage

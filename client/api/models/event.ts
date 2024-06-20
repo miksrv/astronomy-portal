@@ -5,6 +5,7 @@ export type Event = {
     cover?: string
     date?: string
     time?: string
+    registered?: boolean
     yandexMap?: string
     googleMap?: string
     registrationStart?: string

@@ -26,7 +26,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
         phone: user?.phone || ''
     })
 
-    const [bookEvent, { isLoading, isSuccess, isError, error, data }] =
+    const [bookEvent, { isLoading, isSuccess, isError, error }] =
         API.useEventsRegistrationPostMutation()
 
     const findError = (field: keyof ApiType.Events.ReqRegistration) =>
