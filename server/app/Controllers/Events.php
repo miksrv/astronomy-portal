@@ -1,8 +1,10 @@
 <?php namespace App\Controllers;
 
 use App\Libraries\SessionLibrary;
+use App\Models\EventUsers;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
+use Config\Services;
 
 class Events extends ResourceController {
     private SessionLibrary $session;
@@ -18,6 +20,51 @@ class Events extends ResourceController {
         $data = $this->model->findAll();
 
         return $this->respond(['items' => $data]);
+    }
+
+    public function booking(): ResponseInterface {
+        // Check that user is auth
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized();
+        }
+
+        $input = $this->request->getJSON(true);
+
+        // Check that event with ID is exists
+        if (!$input['eventId'] || !$this->model->find($input['eventId'])) {
+            $this->failValidationErrors(['error' => 'Такого мероприятия не существует']);
+        }
+
+        $rules = [
+            'eventId'  => 'required|string|max_length[13]',
+            'name'     => 'required|string|min_length[3]|max_length[40]',
+            'phone'    => 'if_exist|min_length[6]|max_length[13]',
+            'adults'   => 'required|integer|greater_than[0]|less_than[5]',
+            'children' => 'integer|greater_than[-1]|less_than[5]',
+        ];
+
+        $this->validator = Services::Validation()->setRules($rules);
+
+        // Check input data validation rules
+        if (!$this->validator->run($input)) {
+            return $this->failValidationErrors($this->validator->getErrors());
+        }
+
+        $eventUsersModel = new EventUsers();
+
+        // Check that user not already registered at this event
+        if ($eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->first()) {
+            return $this->failValidationErrors(['error' => 'Вы уже зарегистрировались на это мероприятие']);
+        }
+
+        $eventUsersModel->insert([
+            'event_id' => $input['eventId'],
+            'user_id'  => $this->session->user->id,
+            'adults'   => $input['adults'],
+            'children' => $input['children'],
+        ]);
+
+        return $this->respond(['message' => 'Вы успешно зарегистрировались на мероприятие']);
     }
 
     public function show($id = null): ResponseInterface {

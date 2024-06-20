@@ -1,57 +1,93 @@
-import React from 'react'
-import { Button, Form, Grid } from 'semantic-ui-react'
+import { API, ApiType, useAppSelector } from '@/api'
+import React, { useCallback, useState } from 'react'
+import { Button, Form, Grid, Message } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
-interface EventBookingFormProps {}
+interface EventBookingFormProps {
+    eventId?: string
+}
 
-const EventBookingForm: React.FC<EventBookingFormProps> = () => {
-    // const [submitted, setSubmitted] = useState<boolean>(false)
-    // const [formState, setFormState] = useState<any>()
+type EventBookingFormState = {
+    name?: string
+    phone?: string
+    adults?: string
+    children?: string
+}
 
-    // const handleChange = ({
-    //     target: { name, value }
-    // }: React.ChangeEvent<HTMLInputElement>) =>
-    //     setFormState((prev) => ({ ...prev, [name]: value }))
+const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
+    const user = useAppSelector((state) => state.auth.user)
 
-    // const handleKeyDown = (e: { key: string }) =>
-    //     e.key === 'Enter' && handleSubmit()
+    const [submitted, setSubmitted] = useState<boolean>(false)
+    const [formState, setFormState] = useState<EventBookingFormState>({
+        adults: '1',
+        children: '0',
+        name: user?.name || '',
+        phone: user?.phone || ''
+    })
 
-    // const handleSubmit = useCallback(() => {
-    //     setSubmitted(true)
-    // }, [formState])
+    const [bookEvent, { isLoading, isSuccess, isError, error, data }] =
+        API.useEventsRegistrationPostMutation()
+
+    const findError = (field: keyof ApiType.Events.ReqRegistration) =>
+        (error as ApiType.ResError)?.messages?.[field] || undefined
+
+    const handleChange = ({
+        target: { name, value }
+    }: React.ChangeEvent<HTMLInputElement>) =>
+        setFormState((prev) => ({ ...prev, [name]: value }))
+
+    const handleKeyDown = (e: { key: string }) =>
+        e.key === 'Enter' && handleSubmit()
+
+    const handleSubmit = useCallback(() => {
+        if (!eventId) {
+            return
+        }
+
+        setSubmitted(true)
+
+        bookEvent({
+            adults: Number(formState.adults || 1),
+            children: Number(formState.children || 1),
+            eventId: eventId,
+            name: formState.name,
+            phone: formState.phone?.length ? formState.phone : undefined
+        })
+    }, [formState])
 
     return (
         <Form
             className={styles.form}
-            // onSubmit={handleSubmit}
+            onSubmit={handleSubmit}
             inverted={true}
-            // loading={createLoading || updateLoading}
-            // success={(createSuccess || updateSuccess) && submitted}
-            // error={(createError || updateError) && submitted}
+            loading={isLoading}
+            success={isSuccess && submitted}
+            error={isError && submitted}
             size={'small'}
         >
-            {/*<Message*/}
-            {/*    error*/}
-            {/*    header={'Ошибка сохранения'}*/}
-            {/*    content={*/}
-            {/*        'При сохранении категории были допущены ошибки, проверьте правильность заполнения полей'*/}
-            {/*    }*/}
-            {/*/>*/}
-            {/*<Message*/}
-            {/*    success*/}
-            {/*    header={'Категория сохранена'}*/}
-            {/*    content={'Все данные категории успешно сохранены'}*/}
-            {/*/>*/}
+            <Message
+                error
+                header={'Ошибка'}
+                content={
+                    (error as any)?.messages?.error ||
+                    'При регистрации были допущены ошибки, проверьте правильность заполнения полей'
+                }
+            />
+            <Message
+                success
+                header={'Успешно!'}
+                content={'Вы зарегистрировались на мероприятие'}
+            />
             <Form.Input
                 fluid
                 label={'Укажите ваше имя'}
                 name={'name'}
                 placeholder={'Укажите ваше имя'}
-                // onChange={handleChange}
-                // onKeyDown={handleKeyDown}
-                // defaultValue={value?.name}
-                // error={findError('name')}
+                value={formState.name || ''}
+                error={findError('name')}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
             />
 
             <Form.Input
@@ -59,10 +95,10 @@ const EventBookingForm: React.FC<EventBookingFormProps> = () => {
                 label={'Укажите ваш номер телефона'}
                 name={'phone'}
                 placeholder={'Укажите ваш номер телефона'}
-                // onChange={handleChange}
-                // onKeyDown={handleKeyDown}
-                // defaultValue={value?.name}
-                // error={findError('name')}
+                value={formState.phone || ''}
+                error={findError('phone')}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
             />
 
             <Grid style={{ marginBottom: '15px' }}>
@@ -71,12 +107,11 @@ const EventBookingForm: React.FC<EventBookingFormProps> = () => {
                         fluid
                         label={'Количество взрослых'}
                         name={'adults'}
-                        value={1}
                         type={'number'}
-                        // onChange={handleChange}
-                        // onKeyDown={handleKeyDown}
-                        // defaultValue={value?.name}
-                        // error={findError('name')}
+                        value={formState.adults || ''}
+                        error={findError('adults')}
+                        onChange={handleChange}
+                        onKeyDown={handleKeyDown}
                     />
                 </Grid.Column>
                 <Grid.Column width={8}>
@@ -84,12 +119,11 @@ const EventBookingForm: React.FC<EventBookingFormProps> = () => {
                         fluid
                         label={'Количество детей'}
                         name={'children'}
-                        value={0}
                         type={'number'}
-                        // onChange={handleChange}
-                        // onKeyDown={handleKeyDown}
-                        // defaultValue={value?.name}
-                        // error={findError('name')}
+                        value={formState.children || ''}
+                        error={findError('children')}
+                        onChange={handleChange}
+                        onKeyDown={handleKeyDown}
                     />
                 </Grid.Column>
             </Grid>
@@ -98,9 +132,9 @@ const EventBookingForm: React.FC<EventBookingFormProps> = () => {
                 fluid={true}
                 size={'tiny'}
                 color={'green'}
-                // onClick={onClickSave}
-                // disabled={disabled}
-                // loading={loading}
+                onClick={handleSubmit}
+                disabled={isLoading || isSuccess}
+                loading={isLoading}
             >
                 {'Забронировать'}
             </Button>

@@ -1,5 +1,5 @@
 export type Event = {
-    id: number
+    id: string
     title: string
     content?: string
     cover?: string

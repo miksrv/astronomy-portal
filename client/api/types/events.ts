@@ -7,10 +7,11 @@ export interface ResList {
 
 /* Registration */
 export interface ReqRegistration {
-    event: string
-    user: number
+    eventId: string
     adults?: number
     children?: number
+    name?: string
+    phone?: string
 }
 
 export interface ResRegistration {

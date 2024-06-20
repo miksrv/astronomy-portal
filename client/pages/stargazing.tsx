@@ -81,7 +81,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                         )}
 
                         {user?.id ? (
-                            <EventBookingForm />
+                            <EventBookingForm eventId={event.id} />
                         ) : (
                             <div
                                 style={{
