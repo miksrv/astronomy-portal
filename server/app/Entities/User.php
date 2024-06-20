@@ -7,6 +7,7 @@ class User extends Entity {
         'id'          => 'string',
         'name'        => 'string',
         'email'       => 'string',
+        'phone'       => 'string',
         'password'    => 'string',
         'auth_type'   => 'string',
         'role'        => 'string',

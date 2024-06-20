@@ -1,22 +1,18 @@
 <?php namespace App\Models;
 
-use CodeIgniter\Model;
-
-class Events extends MyBaseModel {
-    protected $table            = 'events';
+class EventUsersModel extends MyBaseModel {
+    protected $table            = 'event_users';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = false;
-    protected $returnType       = \App\Entities\Event::class;
+    protected $returnType       = \App\Entities\EventUser::class;
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'title',
-        'content',
-        'cover',
-        'max_tickets',
-        'registration_start',
-        'registration_end',
-        'date',
+        'event_id',
+        'user_id',
+        'adults',
+        'adults',
+        'children',
     ];
 
     protected bool $allowEmptyInserts = false;

@@ -1,7 +1,7 @@
 <?php namespace App\Controllers;
 
 use App\Libraries\SessionLibrary;
-use App\Models\EventUsers;
+use App\Models\EventUsersModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\RESTful\ResourceController;
@@ -19,7 +19,7 @@ class Events extends ResourceController {
 
     public function __construct() {
         $this->session = new SessionLibrary();
-        $this->model   = new \App\Models\Events();
+        $this->model   = new \App\Models\EventsModel();
     }
 
     public function list(): ResponseInterface {
@@ -29,7 +29,7 @@ class Events extends ResourceController {
             return $this->respond(['items' => $eventsData]);
         }
 
-        $eventUsersModel = new EventUsers();
+        $eventUsersModel = new EventUsersModel();
         $bookedEvents    = $eventUsersModel->where(['user_id' => $this->session->user->id])->findAll();
 
         foreach ($eventsData as $event) {
@@ -82,7 +82,7 @@ class Events extends ResourceController {
             $this->failValidationErrors(['error' => 'Такого мероприятия не существует']);
         }
 
-        $eventUsersModel = new EventUsers();
+        $eventUsersModel = new EventUsersModel();
 
         // Check that user not already registered at this event
         if ($eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->first()) {

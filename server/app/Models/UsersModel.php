@@ -20,6 +20,7 @@ class UsersModel extends Model {
         'email',
         'password',
         'auth_type',
+        'phone',
         'role',
         'locale',
         'avatar',
