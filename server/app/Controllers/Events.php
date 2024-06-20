@@ -28,8 +28,18 @@ class Events extends ResourceController {
         $bookedEvents    = $eventUsersModel->where(['user_id' => $this->session->user->id])->findAll();
 
         foreach ($eventsData as $event) {
+            // TODO Refactoring this method, only for active registration
+            $currentTickets = $eventUsersModel
+                ->selectSum('adults')
+                ->selectSum('children')
+                ->where('event_id', $event->id)
+                ->first();
+
+            $currentTickets = $currentTickets->adults + $currentTickets->children;
+
             $searchIndex = in_array($event->id, array_column($bookedEvents, 'event_id'));
-            $event->registered = $searchIndex !== false;
+            $event->registered  = $searchIndex !== false;
+            $event->max_tickets = abs($event->max_tickets - $currentTickets);
         }
 
         return $this->respond(['items' => $eventsData]);
@@ -77,6 +87,19 @@ class Events extends ResourceController {
 
         if ($timeDiffStart->getSeconds() >= 0 || $timeDiffEnd->getSeconds() <= 0) {
             return $this->failValidationErrors(['error' => 'Регистрация на мероприятие уже знакончилась или еще не начиналась']);
+        }
+
+        // Check available tickets
+        $currentTickets = $eventUsersModel
+            ->selectSum('adults')
+            ->selectSum('children')
+            ->where('event_id', $input['eventId'])
+            ->first();
+
+        $currentTickets = $currentTickets->adults + $currentTickets->children;
+
+        if ($currentTickets >= (int) $event->max_tickets) {
+            return $this->failValidationErrors(['error' => 'Регистрация на мероприятие уже закончилась из-за того, что все места уже забронированы']);
         }
 
         $eventUsersModel->insert([

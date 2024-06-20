@@ -1,6 +1,6 @@
 import { API, useAppDispatch, useAppSelector } from '@/api'
 // import { wrapper } from '@/api/store'
-import { formatUTCDate, isOutdated, isUTCOutdated } from '@/functions/helpers'
+import { formatUTCDate } from '@/functions/helpers'
 import dayjs from 'dayjs'
 import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
@@ -21,7 +21,6 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
     const { data } = API.useEventsGetListQuery()
 
     const eventsData = data?.items
-    const currentDate = dayjs().toISOString()
 
     return (
         <main>
@@ -72,7 +71,13 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
                             </div>
                             <div>{formatUTCDate(event.date?.date, 'H:mm')}</div>
                             <div>{event.content}</div>
-                            <div>Свободные места: {event.availableTickets}</div>
+
+                            <div>
+                                {event.availableTickets === 0
+                                    ? 'Места закончились'
+                                    : `Свободные места: ${event.availableTickets}`}
+                            </div>
+
                             {dayjs
                                 .utc(event.registrationStart?.date)
                                 .local()
