@@ -1,4 +1,5 @@
 import { API, useAppDispatch, useAppSelector } from '@/api'
+import { ApiModel } from '@/api'
 // import { wrapper } from '@/api/store'
 import { formatUTCDate } from '@/functions/helpers'
 import dayjs from 'dayjs'
@@ -21,6 +22,32 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
     const { data } = API.useEventsGetListQuery()
 
     const eventsData = data?.items
+
+    const checkAvailabilityRegistration = (event: ApiModel.Event) => {
+        // Закончились слоты для регистрации
+        if (event.availableTickets === 0) {
+            return false
+        }
+
+        // Дата регистрации еще не наступила
+        if (
+            dayjs.utc(event.registrationStart?.date).local().diff(dayjs()) >= 0
+        ) {
+            return false
+        }
+
+        // Дата регистрации уже закончилась
+        if (dayjs.utc(event.registrationEnd?.date).local().diff(dayjs()) <= 0) {
+            return false
+        }
+
+        // Дата мероприятия уже наступило
+        if (dayjs.utc(event.date?.date).local().diff(dayjs()) <= 0) {
+            return false
+        }
+
+        return true
+    }
 
     return (
         <main>
@@ -81,15 +108,15 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
                             {dayjs
                                 .utc(event.registrationStart?.date)
                                 .local()
-                                .diff(dayjs()) <= 0 && (
-                                <div>Дата регистрации наступила</div>
+                                .diff(dayjs()) >= 0 && (
+                                <div>Дата регистрации еще не наступила</div>
                             )}
 
                             {dayjs
                                 .utc(event.registrationEnd?.date)
                                 .local()
-                                .diff(dayjs()) >= 0 && (
-                                <div>Дата окончания еще не прошла</div>
+                                .diff(dayjs()) <= 0 && (
+                                <div>Дата окончания регистрации уже прошла</div>
                             )}
 
                             <div>
@@ -103,41 +130,47 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
                             {dayjs
                                 .utc(event.date?.date)
                                 .local()
-                                .diff(dayjs()) >= 0 && (
-                                <div>Мероприятие еще не наступило</div>
+                                .diff(dayjs()) <= 0 && (
+                                <div>Дата мероприятия уже наступило</div>
                             )}
 
-                            {user?.id ? (
-                                event?.registered ? (
-                                    <div>
-                                        Вы уже зарегистрированы на мероприятие
-                                    </div>
-                                ) : (
-                                    <EventBookingForm eventId={event.id} />
-                                )
-                            ) : (
-                                <div
-                                    style={{
-                                        margin: '20px auto',
-                                        maxWidth: '500px',
-                                        textAlign: 'center'
-                                    }}
-                                >
-                                    <h3>
-                                        {
-                                            'Для бронирования войдите под своим профилем'
-                                        }
-                                    </h3>
-                                    <Button
-                                        fluid={true}
-                                        size={'tiny'}
-                                        color={'green'}
-                                        onClick={() => dispatch(show())}
-                                    >
-                                        {'Войти'}
-                                    </Button>
+                            {checkAvailabilityRegistration(event) && (
+                                <div>
+                                    {!user?.id && (
+                                        <div
+                                            style={{
+                                                margin: '20px auto',
+                                                maxWidth: '500px',
+                                                textAlign: 'center'
+                                            }}
+                                        >
+                                            <h3>
+                                                {
+                                                    'Для бронирования войдите под своим профилем'
+                                                }
+                                            </h3>
+                                            <Button
+                                                fluid={true}
+                                                size={'tiny'}
+                                                color={'green'}
+                                                onClick={() => dispatch(show())}
+                                            >
+                                                {'Войти'}
+                                            </Button>
+                                        </div>
+                                    )}
+
+                                    {user?.id && !event?.registered && (
+                                        <EventBookingForm eventId={event.id} />
+                                    )}
                                 </div>
                             )}
+
+                            <div>
+                                {user?.id && event?.registered && (
+                                    <h3>Вы зарегистрированы на мероприятие</h3>
+                                )}
+                            </div>
                         </div>
                     </div>
                 ))}
