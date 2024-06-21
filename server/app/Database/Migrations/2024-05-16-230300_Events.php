@@ -30,6 +30,16 @@ class Events extends Migration {
                 'constraint' => 5,
                 'unsigned'   => true
             ],
+            'yandex_map_link' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 70,
+                'null'       => true
+            ],
+            'google_map_link' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 70,
+                'null'       => true
+            ],
             'date' => [
                 'type' => 'DATETIME',
                 'null' => true

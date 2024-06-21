@@ -1,11 +1,17 @@
 <?php namespace App\Controllers;
 
 use App\Libraries\SessionLibrary;
-use App\Models\EventUsers;
+use App\Models\EventUsersModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\RESTful\ResourceController;
 use Config\Services;
+use Exception;
+use Longman\TelegramBot\Entities\Update;
+use Longman\TelegramBot\Exception\TelegramException;
+use Longman\TelegramBot\Request;
+use Longman\TelegramBot\Telegram;
+use ReflectionException;
 
 class Events extends ResourceController {
     private SessionLibrary $session;
@@ -14,7 +20,7 @@ class Events extends ResourceController {
 
     public function __construct() {
         $this->session = new SessionLibrary();
-        $this->model   = new \App\Models\Events();
+        $this->model   = new \App\Models\EventsModel();
     }
 
     public function list(): ResponseInterface {
@@ -24,7 +30,7 @@ class Events extends ResourceController {
             return $this->respond(['items' => $eventsData]);
         }
 
-        $eventUsersModel = new EventUsers();
+        $eventUsersModel = new EventUsersModel();
         $bookedEvents    = $eventUsersModel->where(['user_id' => $this->session->user->id])->findAll();
 
         foreach ($eventsData as $event) {
@@ -40,11 +46,26 @@ class Events extends ResourceController {
             $searchIndex = in_array($event->id, array_column($bookedEvents, 'event_id'));
             $event->registered  = $searchIndex !== false;
             $event->max_tickets = abs($event->max_tickets - $currentTickets);
+
+            if ($event->cover) {
+                $event->cover = '/stargazing/' . $event->cover;
+            }
+
+            if (!$event->registered) {
+                unset($event->yandexMap, $event->googleMap);
+            }
+
+            unset($event->created_at, $event->updated_at, $event->deleted_at);
         }
 
         return $this->respond(['items' => $eventsData]);
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws TelegramException
+     * @throws Exception
+     */
     public function booking(): ResponseInterface {
         // Check that user is auth
         if (!$this->session->isAuth) {
@@ -73,7 +94,7 @@ class Events extends ResourceController {
             $this->failValidationErrors(['error' => 'Такого мероприятия не существует']);
         }
 
-        $eventUsersModel = new EventUsers();
+        $eventUsersModel = new EventUsersModel();
 
         // Check that user not already registered at this event
         if ($eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->first()) {
@@ -108,6 +129,18 @@ class Events extends ResourceController {
             'adults'   => $input['adults'],
             'children' => $input['children'],
         ]);
+
+        new Telegram(getenv('app.telegramBotKey'), '');
+
+//        Request::sendMessage([
+//            'chat_id'    => getenv('app.telegramChatID'),
+//            'parse_mode' => 'HTML',
+//            'text'       => "<b>Astro:</b> 🙋Регистрация на астровыезд\n" .
+//                "<b>{$event->title}</b>\n" .
+//                "🔹Имя: <i>{$input['name']}</i>\n" .
+//                "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
+//                "🔹Осталось мест: <b>" . ($event->max_tickets - $currentTickets) . "</b>"
+//        ]);
 
         return $this->respond(['message' => 'Вы успешно зарегистрировались на мероприятие']);
     }

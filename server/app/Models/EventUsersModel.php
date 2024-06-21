@@ -1,6 +1,6 @@
 <?php namespace App\Models;
 
-class EventUsers extends MyBaseModel {
+class EventUsersModel extends MyBaseModel {
     protected $table            = 'event_users';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = false;

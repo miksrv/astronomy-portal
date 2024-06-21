@@ -2,7 +2,7 @@
 
 use CodeIgniter\Model;
 
-class Events extends MyBaseModel {
+class EventsModel extends MyBaseModel {
     protected $table            = 'events';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = false;
@@ -14,6 +14,7 @@ class Events extends MyBaseModel {
         'content',
         'cover',
         'max_tickets',
+        'yandex_map_link',
         'registration_start',
         'registration_end',
         'date',
