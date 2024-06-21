@@ -46,6 +46,16 @@ class Events extends ResourceController {
             $searchIndex = in_array($event->id, array_column($bookedEvents, 'event_id'));
             $event->registered  = $searchIndex !== false;
             $event->max_tickets = abs($event->max_tickets - $currentTickets);
+
+            if ($event->cover) {
+                $event->cover = '/stargazing/' . $event->cover;
+            }
+
+            if (!$event->registered) {
+                unset($event->yandexMap, $event->googleMap);
+            }
+
+            unset($event->created_at, $event->updated_at, $event->deleted_at);
         }
 
         return $this->respond(['items' => $eventsData]);
