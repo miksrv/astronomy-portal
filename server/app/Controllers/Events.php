@@ -122,15 +122,15 @@ class Events extends ResourceController {
 
         new Telegram(getenv('app.telegramBotKey'), '');
 
-        Request::sendMessage([
-            'chat_id'    => getenv('app.telegramChatID'),
-            'parse_mode' => 'HTML',
-            'text'       => "<b>Astro:</b> 🙋Регистрация на астровыезд\n" .
-                "<b>{$event->title}</b>\n" .
-                "🔹Имя: <i>{$input['name']}</i>\n" .
-                "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
-                "🔹Осталось мест: <b>" . ($event->max_tickets - $currentTickets) . "</b>"
-        ]);
+//        Request::sendMessage([
+//            'chat_id'    => getenv('app.telegramChatID'),
+//            'parse_mode' => 'HTML',
+//            'text'       => "<b>Astro:</b> 🙋Регистрация на астровыезд\n" .
+//                "<b>{$event->title}</b>\n" .
+//                "🔹Имя: <i>{$input['name']}</i>\n" .
+//                "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
+//                "🔹Осталось мест: <b>" . ($event->max_tickets - $currentTickets) . "</b>"
+//        ]);
 
         return $this->respond(['message' => 'Вы успешно зарегистрировались на мероприятие']);
     }
