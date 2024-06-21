@@ -1,25 +1,40 @@
-import { API, useAppDispatch, useAppSelector } from '@/api'
-import { ApiModel } from '@/api'
-// import { wrapper } from '@/api/store'
+import { API, ApiModel, useAppDispatch, useAppSelector } from '@/api'
 import { formatUTCDate } from '@/functions/helpers'
 import dayjs from 'dayjs'
 import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
-import React from 'react'
-import { Button } from 'semantic-ui-react'
+import React, { useState } from 'react'
+import Gallery from 'react-photo-gallery'
+import { Button, Dimmer, Loader } from 'semantic-ui-react'
 
 import EventBookingForm from '@/components/event-booking-form/EventBookingForm'
 import { show } from '@/components/login-form/loginFormSlice'
+import PhotoLightbox from '@/components/photo-lightbox'
+
+import photoStargazing4 from '@/public/photos/stargazing-4.jpeg'
+import photoStargazing7 from '@/public/photos/stargazing-7.jpeg'
+import photoStargazing9 from '@/public/photos/stargazing-9.jpeg'
+import photoStargazing10 from '@/public/photos/stargazing-10.jpeg'
 
 interface StargazingPageProps {
     // events: ApiModel.Event[]
 }
 
+const galleryStargazing: any[] = [
+    photoStargazing4,
+    photoStargazing7,
+    photoStargazing9,
+    photoStargazing10
+]
+
 const StargazingPage: NextPage<StargazingPageProps> = () => {
     const dispatch = useAppDispatch()
 
     const user = useAppSelector((state) => state.auth.user)
-    const { data } = API.useEventsGetListQuery()
+    const { data, isLoading, isFetching } = API.useEventsGetListQuery()
+
+    const [showLightbox, setShowLightbox] = useState<boolean>(false)
+    const [photoIndex, setPhotoIndex] = useState<number>(0)
 
     const eventsData = data?.items
 
@@ -47,6 +62,15 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
         }
 
         return true
+    }
+
+    const handlePhotoClick = (index: number) => {
+        setPhotoIndex(index)
+        setShowLightbox(true)
+    }
+
+    const handleHideLightbox = () => {
+        setShowLightbox(false)
     }
 
     return (
@@ -77,7 +101,49 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
                     наблюдения и захватывающие открытия ждут вас на каждом
                     астровыезде.
                 </p>
+                <p>
+                    Астровыезд - это формат проведения научно-популярных
+                    мероприятий, когда участники вечером выезжают за город для
+                    того, чтобы принять участие в ночной экскурсии по звездному
+                    небу. На астровыездах с помощью мультимедиа мы разбираем
+                    интересные темы, связанные с космосом и астрономией,
+                    наблюдаем в телескопы и общаемся с такими же интересными и
+                    увлечёнными людьми.
+                </p>
+                <Gallery
+                    photos={galleryStargazing}
+                    columns={4}
+                    direction={'row'}
+                    targetRowHeight={200}
+                    onClick={(event, photos) => {
+                        handlePhotoClick(photos.index)
+                    }}
+                />
+                <PhotoLightbox
+                    photos={galleryStargazing.map((image) => image.src)}
+                    photoIndex={photoIndex}
+                    showLightbox={showLightbox}
+                    onCloseLightBox={handleHideLightbox}
+                    onChangeIndex={setPhotoIndex}
+                />
             </div>
+
+            {isFetching && (
+                <div
+                    className={'box'}
+                    style={{
+                        height: 200,
+                        marginBottom: '15px',
+                        marginTop: '15px',
+                        width: '100%'
+                    }}
+                >
+                    <Dimmer active={true}>
+                        <Loader content={'Подождите, идет загрузка...'} />
+                    </Dimmer>
+                </div>
+            )}
+
             {eventsData?.map((event) => (
                 <div
                     className={'box'}
@@ -85,13 +151,7 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
                     style={{ marginBottom: '15px', marginTop: '15px' }}
                 >
                     <div style={{ textAlign: 'center' }}>
-                        <h2
-                            style={{
-                                fontSize: '2em !important'
-                            }}
-                        >
-                            {event.title}
-                        </h2>
+                        <h2>{event.title}</h2>
                         <div>
                             {formatUTCDate(event.date?.date, 'D MMMM YYYY')}
                         </div>
