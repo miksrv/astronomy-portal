@@ -2,6 +2,7 @@
 
 use App\Libraries\SessionLibrary;
 use App\Models\EventUsersModel;
+use App\Models\UsersModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\RESTful\ResourceController;
@@ -26,12 +27,13 @@ class Events extends ResourceController {
     public function list(): ResponseInterface {
         $eventsData = $this->model->findAll();
 
-        if (!$this->session->isAuth || !$this->session->user->id) {
-            return $this->respond(['items' => $eventsData]);
-        }
-
+//        if (!$this->session->isAuth || !$this->session->user->id) {
+//            return $this->respond(['items' => $eventsData]);
+//        }
         $eventUsersModel = new EventUsersModel();
-        $bookedEvents    = $eventUsersModel->where(['user_id' => $this->session->user->id])->findAll();
+        $bookedEvents    = $this->session->isAuth && $this->session->user->id
+            ? $eventUsersModel->where(['user_id' => $this->session->user->id])->findAll()
+            : false;
 
         foreach ($eventsData as $event) {
             // TODO Refactoring this method, only for active registration
@@ -43,9 +45,16 @@ class Events extends ResourceController {
 
             $currentTickets = $currentTickets->adults + $currentTickets->children;
 
-            $searchIndex = in_array($event->id, array_column($bookedEvents, 'event_id'));
-            $event->registered  = $searchIndex !== false;
-            $event->max_tickets = abs($event->max_tickets - $currentTickets);
+            if ($bookedEvents) {
+                $searchIndex = in_array($event->id, array_column($bookedEvents, 'event_id'));
+                $event->registered  = $searchIndex !== false;
+            }
+
+            $event->max_tickets = $event->max_tickets - $currentTickets;
+
+            if ($event->max_tickets < 0) {
+                $event->max_tickets = 0;
+            }
 
             if ($event->cover) {
                 $event->cover = '/stargazing/' . $event->cover;
@@ -77,8 +86,8 @@ class Events extends ResourceController {
             'eventId'  => 'required|string|max_length[13]',
             'name'     => 'required|string|min_length[3]|max_length[40]',
             'phone'    => 'if_exist|min_length[6]|max_length[13]',
-            'adults'   => 'required|integer|greater_than[0]|less_than[5]',
-            'children' => 'integer|greater_than[-1]|less_than[5]',
+            'adults'   => 'required|integer|greater_than[0]|less_than[6]',
+            'children' => 'integer|greater_than[-1]|less_than[6]',
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -132,15 +141,21 @@ class Events extends ResourceController {
 
         new Telegram(getenv('app.telegramBotKey'), '');
 
-//        Request::sendMessage([
-//            'chat_id'    => getenv('app.telegramChatID'),
-//            'parse_mode' => 'HTML',
-//            'text'       => "<b>Astro:</b> 🙋Регистрация на астровыезд\n" .
-//                "<b>{$event->title}</b>\n" .
-//                "🔹Имя: <i>{$input['name']}</i>\n" .
-//                "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
-//                "🔹Осталось мест: <b>" . ($event->max_tickets - $currentTickets) . "</b>"
-//        ]);
+        Request::sendMessage([
+            'chat_id'    => getenv('app.telegramChatID'),
+            'parse_mode' => 'HTML',
+            'text'       => "<b>Astro:</b> 🙋Регистрация на астровыезд\n" .
+                "<b>{$event->title}</b>\n" .
+                "🔹Имя: <i>{$input['name']}</i>\n" .
+                "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
+                "🔹Осталось мест: <b>" . ($event->max_tickets - $currentTickets) . "</b>"
+        ]);
+
+        $userModel = new UsersModel();
+        $userModel->update($this->session->user->id, [
+            'name'  => $input['name'],
+            'phone' => $input['phone'],
+        ]);
 
         return $this->respond(['message' => 'Вы успешно зарегистрировались на мероприятие']);
     }
