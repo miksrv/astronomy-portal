@@ -105,7 +105,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
                 <Grid.Column width={8}>
                     <Form.Input
                         fluid
-                        label={'Количество взрослых'}
+                        label={'Количество взрослых *'}
                         name={'adults'}
                         type={'number'}
                         value={formState.adults || ''}
@@ -117,7 +117,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
                 <Grid.Column width={8}>
                     <Form.Input
                         fluid
-                        label={'Количество детей'}
+                        label={'Количество детей *'}
                         name={'children'}
                         type={'number'}
                         value={formState.children || ''}
@@ -127,6 +127,11 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
                     />
                 </Grid.Column>
             </Grid>
+            <p style={{ marginTop: '-20px' }}>
+                * Максимум <b>5</b> взрослых и <b>5</b> детей на одну заявку.
+                Если с вами поедет большее количество человек - просто попросите
+                их тоже зарегистрироваться.
+            </p>
 
             <Button
                 fluid={true}
