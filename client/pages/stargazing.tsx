@@ -1,4 +1,4 @@
-import { API, ApiModel, useAppDispatch, useAppSelector } from '@/api'
+import { API, ApiModel, useAppSelector } from '@/api'
 import { formatUTCDate, getTimeFromSec } from '@/functions/helpers'
 import dayjs from 'dayjs'
 import { NextPage } from 'next'
@@ -7,10 +7,10 @@ import Image from 'next/image'
 import React, { useState } from 'react'
 import Markdown from 'react-markdown'
 import Gallery from 'react-photo-gallery'
-import { Button, Dimmer, Grid, Loader } from 'semantic-ui-react'
+import { Dimmer, Grid, Loader } from 'semantic-ui-react'
 
 import EventBookingForm from '@/components/event-booking-form/EventBookingForm'
-import { show } from '@/components/login-form/loginFormSlice'
+import LoginForm from '@/components/login-form/LoginForm'
 import PhotoLightbox from '@/components/photo-lightbox'
 
 import photoStargazing4 from '@/public/photos/stargazing-4.jpeg'
@@ -30,8 +30,6 @@ const galleryStargazing: any[] = [
 ]
 
 const StargazingPage: NextPage<StargazingPageProps> = () => {
-    const dispatch = useAppDispatch()
-
     const user = useAppSelector((state) => state.auth.user)
     const { data, isFetching } = API.useEventsGetListQuery()
 
@@ -137,6 +135,11 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
                                         fill={true}
                                         src={`${process.env.NEXT_PUBLIC_API_HOST}${event.cover}`}
                                         alt={`Астровыезд: ${event.title}`}
+                                        style={{
+                                            maxHeight: '440px',
+                                            objectFit: 'cover',
+                                            width: '100%'
+                                        }}
                                     />
                                 </Grid.Column>
                                 <Grid.Column
@@ -269,19 +272,10 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
                                                     >
                                                         <h3>
                                                             {
-                                                                'Для бронирования войдите нажмите кнопку "Войти"'
+                                                                'Для бронирования войдите под своей учетной записью'
                                                             }
                                                         </h3>
-                                                        <Button
-                                                            fluid={true}
-                                                            size={'tiny'}
-                                                            color={'green'}
-                                                            onClick={() =>
-                                                                dispatch(show())
-                                                            }
-                                                        >
-                                                            {'Войти'}
-                                                        </Button>
+                                                        <LoginForm />
                                                     </div>
                                                 )}
 
@@ -308,16 +302,7 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
                                                             следующее
                                                             мероприятие
                                                         </p>
-                                                        <Button
-                                                            fluid={true}
-                                                            size={'tiny'}
-                                                            color={'green'}
-                                                            onClick={() =>
-                                                                dispatch(show())
-                                                            }
-                                                        >
-                                                            {'Войти'}
-                                                        </Button>
+                                                        <LoginForm />
                                                     </div>
                                                 ) : (
                                                     ''

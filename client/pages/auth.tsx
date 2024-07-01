@@ -35,7 +35,9 @@ const AuthPage: NextPage<AuthPageProps> = () => {
         if (code && service) {
             serviceLogin({
                 code,
-                service: service as ApiType.Auth.AuthServiceType
+                device_id: searchParams.get('device_id') ?? undefined,
+                service: service as ApiType.Auth.AuthServiceType,
+                state: searchParams.get('state') ?? undefined
             })
         }
     }, [code, service])

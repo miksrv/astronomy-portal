@@ -39,11 +39,12 @@ class Events extends ResourceController {
             // TODO Refactoring this method, only for active registration
             $currentTickets = $eventUsersModel
                 ->selectSum('adults')
-                ->selectSum('children')
+                // ->selectSum('children')
                 ->where('event_id', $event->id)
                 ->first();
 
-            $currentTickets = $currentTickets->adults + $currentTickets->children;
+            // $currentTickets = $currentTickets->adults + $currentTickets->children;
+            $currentTickets = (int) $currentTickets->adults;
 
             if ($bookedEvents) {
                 $searchIndex = in_array($event->id, array_column($bookedEvents, 'event_id'));
@@ -87,7 +88,7 @@ class Events extends ResourceController {
             'name'     => 'required|string|min_length[3]|max_length[40]',
             'phone'    => 'if_exist|min_length[6]|max_length[13]',
             'adults'   => 'required|integer|greater_than[0]|less_than[6]',
-            'children' => 'integer|greater_than[-1]|less_than[6]',
+            'children' => 'integer|greater_than[-1]|less_than[6]'
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -122,21 +123,25 @@ class Events extends ResourceController {
         // Check available tickets
         $currentTickets = $eventUsersModel
             ->selectSum('adults')
-            ->selectSum('children')
+            // ->selectSum('children')
             ->where('event_id', $input['eventId'])
             ->first();
 
-        $currentTickets = $currentTickets->adults + $currentTickets->children;
+        // $currentTickets = $currentTickets->adults + $currentTickets->children;
+        $currentTickets = (int) $currentTickets->adults;
 
         if ($currentTickets >= (int) $event->max_tickets) {
             return $this->failValidationErrors(['error' => 'Регистрация на мероприятие уже закончилась из-за того, что все места уже забронированы']);
         }
 
+        $childrenAges = $input['childrenAges'] ?? [];
         $eventUsersModel->insert([
             'event_id' => $input['eventId'],
             'user_id'  => $this->session->user->id,
             'adults'   => $input['adults'],
             'children' => $input['children'],
+
+            'children_ages' => json_encode($childrenAges),
         ]);
 
         new Telegram(getenv('app.telegramBotKey'), '');
@@ -148,14 +153,24 @@ class Events extends ResourceController {
                 "<b>{$event->title}</b>\n" .
                 "🔹Имя: <i>{$input['name']}</i>\n" .
                 "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
-                "🔹Осталось мест: <b>" . ($event->max_tickets - $currentTickets) . "</b>"
+                "🔹Осталось мест: <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b>" .
+                (count($childrenAges) > 0 ? "\n🔹Возраст детей: <b>" . implode(', ', $childrenAges) . "</b>" : '')
         ]);
 
-        $userModel = new UsersModel();
-        $userModel->update($this->session->user->id, [
-            'name'  => $input['name'],
-            'phone' => $input['phone'],
-        ]);
+        $userModel  = new UsersModel();
+        $updateData = [];
+
+        if (!empty($input['name'])) {
+            $updateData['name'] = $input['name'];
+        }
+
+        if (!empty($input['phone'])) {
+            $updateData['phone'] = $input['phone'];
+        }
+
+        if (!empty($updateData)) {
+            $userModel->update($this->session->user->id, $updateData);
+        }
 
         return $this->respond(['message' => 'Вы успешно зарегистрировались на мероприятие']);
     }

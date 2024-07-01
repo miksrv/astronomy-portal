@@ -12,6 +12,7 @@ export interface ReqRegistration {
     children?: number
     name?: string
     phone?: string
+    childrenAges?: number[]
 }
 
 export interface ResRegistration {

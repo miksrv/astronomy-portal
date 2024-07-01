@@ -33,6 +33,10 @@ class EventUsers extends Migration {
                 'null'       => false,
                 'default'    => 1
             ],
+            'children_ages' => [
+                'type' => 'TEXT',
+                'null' => true,
+            ],
             'created_at DATETIME default current_timestamp',
             'updated_at DATETIME default current_timestamp',
             'deleted_at' => [

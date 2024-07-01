@@ -4,9 +4,9 @@ interface InitialStateProps {
     visible: boolean
 }
 
-export const loginFormSlice = createSlice({
+export const loginModalSlice = createSlice({
     initialState: { visible: false } as InitialStateProps,
-    name: 'loginform',
+    name: 'loginModal',
     reducers: {
         hide: (state) => {
             state.visible = false
@@ -20,6 +20,6 @@ export const loginFormSlice = createSlice({
     }
 })
 
-export const { show, hide, toggle } = loginFormSlice.actions
+export const { show, hide, toggle } = loginModalSlice.actions
 
-export default loginFormSlice.reducer
+export default loginModalSlice.reducer

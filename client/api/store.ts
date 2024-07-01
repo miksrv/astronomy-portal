@@ -2,7 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import { createWrapper } from 'next-redux-wrapper'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
-import loginFormSlice from '@/components/login-form/loginFormSlice'
+import loginModalSlice from '@/components/login-modal/loginModalSlice'
 import sidebarSlice from '@/components/sidebar/sidebarSlice'
 
 import { API } from './api'
@@ -12,7 +12,7 @@ import authSlice from './authSlice'
 export const reducers = {
     application: applicationSlice,
     auth: authSlice,
-    loginForm: loginFormSlice,
+    loginModal: loginModalSlice,
     sidebar: sidebarSlice,
 
     [API.reducerPath]: API.reducer

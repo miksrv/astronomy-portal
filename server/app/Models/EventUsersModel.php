@@ -13,6 +13,7 @@ class EventUsersModel extends MyBaseModel {
         'adults',
         'adults',
         'children',
+        'children_ages'
     ];
 
     protected bool $allowEmptyInserts = false;

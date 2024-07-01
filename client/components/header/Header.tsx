@@ -16,7 +16,7 @@ import {
     Menu
 } from 'semantic-ui-react'
 
-import { show } from '@/components/login-form/loginFormSlice'
+import { show } from '@/components/login-modal/loginModalSlice'
 import { toggle } from '@/components/sidebar/sidebarSlice'
 
 import logo from '@/public/images/logo-w.svg'
@@ -34,7 +34,7 @@ const PhotoFormModal = dynamic(() => import('@/components/photo-form-modal'), {
     ssr: false
 })
 
-const LoginForm = dynamic(() => import('@/components/login-form'), {
+const LoginModal = dynamic(() => import('@/components/login-modal'), {
     ssr: false
 })
 
@@ -183,7 +183,7 @@ const Header: React.FC = () => {
                     )}
                 </Menu.Menu>
             </Container>
-            {!authSlice.isAuth && <LoginForm />}
+            {!authSlice.isAuth && <LoginModal />}
             {authSlice.isAuth && authSlice?.user?.role === 'admin' && (
                 <ObjectFormModal />
             )}
