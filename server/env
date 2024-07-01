@@ -53,6 +53,10 @@ auth.yandex.clientID = ''
 auth.yandex.secret   = ''
 auth.yandex.redirect = ''
 
+auth.vk.clientID = ''
+auth.vk.secret   = ''
+auth.vk.redirect = ''
+
 #--------------------------------------------------------------------
 # DATABASE
 #--------------------------------------------------------------------
