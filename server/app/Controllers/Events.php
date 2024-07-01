@@ -144,7 +144,7 @@ class Events extends ResourceController {
         new Telegram(getenv('app.telegramBotKey'), '');
 
         Request::sendMessage([
-            'chat_id'    => '167202974',
+            'chat_id'    => getenv('app.telegramChatID'),
             'parse_mode' => 'HTML',
             'text'       => "<b>Astro:</b> 🙋Регистрация на астровыезд\n" .
                 "<b>{$event->title}</b>\n" .
