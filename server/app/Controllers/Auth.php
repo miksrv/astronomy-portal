@@ -4,6 +4,7 @@ use App\Entities\User;
 use App\Libraries\GoogleClient;
 use App\Libraries\SessionLibrary;
 use App\Libraries\YandexClient;
+use App\Libraries\VkClient;
 use App\Models\UsersModel;
 use CodeIgniter\Files\File;
 use CodeIgniter\HTTP\IncomingRequest;

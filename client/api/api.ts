@@ -47,8 +47,8 @@ export const API = createApi({
             ApiType.Auth.ResAuthService,
             ApiType.Auth.ReqAuthService
         >({
-            query: ({ service, code }) =>
-                `auth/${service}${code ? `?code=${code}` : ''}`,
+            query: ({ service, ...params }) =>
+                `auth/${service}${params?.code ? encodeQueryData(params) : ''}`,
             transformErrorResponse: (response) => response.data
         }),
         authPostLogin: builder.mutation<

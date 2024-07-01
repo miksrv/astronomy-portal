@@ -17,6 +17,8 @@ export interface ReqLogin {
 export interface ReqAuthService {
     service: AuthServiceType
     code?: string
+    device_id?: string
+    state?: string
 }
 
 export interface ResAuthService {

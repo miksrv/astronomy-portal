@@ -39,11 +39,12 @@ class Events extends ResourceController {
             // TODO Refactoring this method, only for active registration
             $currentTickets = $eventUsersModel
                 ->selectSum('adults')
-                ->selectSum('children')
+                // ->selectSum('children')
                 ->where('event_id', $event->id)
                 ->first();
 
-            $currentTickets = $currentTickets->adults + $currentTickets->children;
+            // $currentTickets = $currentTickets->adults + $currentTickets->children;
+            $currentTickets = (int) $currentTickets->adults;
 
             if ($bookedEvents) {
                 $searchIndex = in_array($event->id, array_column($bookedEvents, 'event_id'));
@@ -122,11 +123,12 @@ class Events extends ResourceController {
         // Check available tickets
         $currentTickets = $eventUsersModel
             ->selectSum('adults')
-            ->selectSum('children')
+            // ->selectSum('children')
             ->where('event_id', $input['eventId'])
             ->first();
 
-        $currentTickets = $currentTickets->adults + $currentTickets->children;
+        // $currentTickets = $currentTickets->adults + $currentTickets->children;
+        $currentTickets = (int) $currentTickets->adults;
 
         if ($currentTickets >= (int) $event->max_tickets) {
             return $this->failValidationErrors(['error' => 'Регистрация на мероприятие уже закончилась из-за того, что все места уже забронированы']);
@@ -142,20 +144,29 @@ class Events extends ResourceController {
         new Telegram(getenv('app.telegramBotKey'), '');
 
         Request::sendMessage([
-            'chat_id'    => getenv('app.telegramChatID'),
+            'chat_id'    => '167202974',
             'parse_mode' => 'HTML',
             'text'       => "<b>Astro:</b> 🙋Регистрация на астровыезд\n" .
                 "<b>{$event->title}</b>\n" .
                 "🔹Имя: <i>{$input['name']}</i>\n" .
                 "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
-                "🔹Осталось мест: <b>" . ($event->max_tickets - $currentTickets) . "</b>"
+                "🔹Осталось мест: <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b>"
         ]);
 
-        $userModel = new UsersModel();
-        $userModel->update($this->session->user->id, [
-            'name'  => $input['name'],
-            'phone' => $input['phone'],
-        ]);
+        $userModel  = new UsersModel();
+        $updateData = [];
+
+        if (!empty($input['name'])) {
+            $updateData['name'] = $input['name'];
+        }
+
+        if (!empty($input['phone'])) {
+            $updateData['phone'] = $input['phone'];
+        }
+
+        if (!empty($updateData)) {
+            $userModel->update($this->session->user->id, $updateData);
+        }
 
         return $this->respond(['message' => 'Вы успешно зарегистрировались на мероприятие']);
     }

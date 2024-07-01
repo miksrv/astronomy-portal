@@ -59,6 +59,14 @@ const LoginForm: React.FC = () => {
             <Modal.Header>{'Авторизация'}</Modal.Header>
             <Modal.Content className={styles.loginModalContent}>
                 <Button
+                    color={'vk'}
+                    fluid={true}
+                    onClick={() => handleLoginServiceButton('vk')}
+                >
+                    <Icon name={'vk'} /> {'Vk'}
+                </Button>
+
+                <Button
                     color={'google plus'}
                     fluid={true}
                     onClick={() => handleLoginServiceButton('google')}
