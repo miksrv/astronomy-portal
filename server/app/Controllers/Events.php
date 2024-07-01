@@ -88,7 +88,7 @@ class Events extends ResourceController {
             'name'     => 'required|string|min_length[3]|max_length[40]',
             'phone'    => 'if_exist|min_length[6]|max_length[13]',
             'adults'   => 'required|integer|greater_than[0]|less_than[6]',
-            'children' => 'integer|greater_than[-1]|less_than[6]',
+            'children' => 'integer|greater_than[-1]|less_than[6]'
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -134,11 +134,14 @@ class Events extends ResourceController {
             return $this->failValidationErrors(['error' => 'Регистрация на мероприятие уже закончилась из-за того, что все места уже забронированы']);
         }
 
+        $childrenAges = $input['childrenAges'] ?? [];
         $eventUsersModel->insert([
             'event_id' => $input['eventId'],
             'user_id'  => $this->session->user->id,
             'adults'   => $input['adults'],
             'children' => $input['children'],
+
+            'children_ages' => json_encode($childrenAges),
         ]);
 
         new Telegram(getenv('app.telegramBotKey'), '');
@@ -150,7 +153,8 @@ class Events extends ResourceController {
                 "<b>{$event->title}</b>\n" .
                 "🔹Имя: <i>{$input['name']}</i>\n" .
                 "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
-                "🔹Осталось мест: <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b>"
+                "🔹Осталось мест: <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b>" .
+                (count($childrenAges) > 0 ? "\n🔹Возраст детей: <b>" . implode(', ', $childrenAges) . "</b>" : '')
         ]);
 
         $userModel  = new UsersModel();

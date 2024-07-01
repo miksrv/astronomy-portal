@@ -135,6 +135,11 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
                                         fill={true}
                                         src={`${process.env.NEXT_PUBLIC_API_HOST}${event.cover}`}
                                         alt={`Астровыезд: ${event.title}`}
+                                        style={{
+                                            maxHeight: '440px',
+                                            objectFit: 'cover',
+                                            width: '100%'
+                                        }}
                                     />
                                 </Grid.Column>
                                 <Grid.Column

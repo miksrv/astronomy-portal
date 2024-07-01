@@ -5,7 +5,7 @@ import { LOCAL_STORAGE } from '@/functions/constants'
 import useLocalStorage from '@/functions/hooks/useLocalStorage'
 import { useRouter } from 'next/router'
 import React, { useEffect } from 'react'
-import { Button, Icon } from 'semantic-ui-react'
+import { Button } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
