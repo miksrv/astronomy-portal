@@ -7,7 +7,7 @@ import Image from 'next/image'
 import React, { useState } from 'react'
 import Markdown from 'react-markdown'
 import Gallery from 'react-photo-gallery'
-import { Dimmer, Grid, Loader } from 'semantic-ui-react'
+import { Dimmer, Grid, Icon, Loader, Message } from 'semantic-ui-react'
 
 import EventBookingForm from '@/components/event-booking-form/EventBookingForm'
 import LoginForm from '@/components/login-form/LoginForm'
@@ -127,11 +127,11 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
                                     tablet={9}
                                     mobile={16}
                                     style={{
-                                        minHeight: '350px',
                                         width: '100%'
                                     }}
                                 >
                                     <Image
+                                        className={'stargazingImage'}
                                         fill={true}
                                         src={`${process.env.NEXT_PUBLIC_API_HOST}${event.cover}`}
                                         alt={`Астровыезд: ${event.title}`}
@@ -387,7 +387,27 @@ const StargazingPage: NextPage<StargazingPageProps> = () => {
                             </Grid.Row>
                         </Grid>
                     </div>
-                    <Markdown>{event.content}</Markdown>
+                    <Message
+                        color={'blue'}
+                        className={'telegramMessage'}
+                    >
+                        <a
+                            href={'https://t.me/nearspace'}
+                            target={'_blank'}
+                            rel='noreferrer'
+                        >
+                            <Icon
+                                name={'telegram'}
+                                size={'big'}
+                            />
+                            <strong>
+                                Telegram: следите за новостями (подпишитесь)
+                            </strong>
+                        </a>
+                    </Message>
+                    <div className={'stargazingText'}>
+                        <Markdown>{event.content}</Markdown>
+                    </div>
                 </div>
             ))}
 

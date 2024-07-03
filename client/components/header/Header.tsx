@@ -51,7 +51,7 @@ export const menuItems: MenuItemsType[] = [
     { label: 'photos', link: '/photos', name: 'Фото' },
     { label: 'objects', link: '/objects', name: 'Объекты' },
     { link: '/dashboard', name: 'Обсерватория' },
-    // { link: '/stargazing', name: 'Астровыезд' },
+    { link: '/stargazing', name: 'Астровыезд' },
     { link: '/about', name: 'О проекте' }
 ]
 
