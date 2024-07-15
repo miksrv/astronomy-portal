@@ -1,5 +1,9 @@
 import dayjs, { Dayjs } from 'dayjs'
 
+export const concatClassNames = (
+    ...args: Array<string | boolean | null | undefined>
+): string => args.filter((item) => !!item).join(' ')
+
 /**
  * Generates an array of numbers in a certain range and with a given step
  * @param from
@@ -88,7 +92,7 @@ export const isUTCOutdated = (date: string) =>
  * @param format
  */
 export const formatDate = (
-    date: string | Date | Dayjs | undefined,
+    date?: string | Date | Dayjs,
     format?: string
 ): string | undefined =>
     date ? dayjs(date).format(format ?? 'D.MM.YYYY, H:mm') : undefined

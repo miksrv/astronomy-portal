@@ -1,11 +1,11 @@
 import { wrapper } from '@/api/store'
 import '@/styles/globals.sass'
+import '@/styles/theme.css'
 import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import utc from 'dayjs/plugin/utc'
 import type { AppProps } from 'next/app'
-import { Montserrat } from 'next/font/google'
 import NextNProgress from 'nextjs-progressbar'
 import React from 'react'
 import 'react-image-lightbox/style.css'
@@ -21,14 +21,12 @@ dayjs.locale('ru')
 dayjs.extend(utc)
 dayjs.extend(relativeTime)
 
-export const montserrat = Montserrat({ subsets: ['latin'] })
-
 const App = ({ Component, pageProps }: AppProps) => {
     const { store } = wrapper.useWrappedStore(pageProps)
 
     return (
         <Provider store={store}>
-            <main className={montserrat.className}>
+            <main>
                 <NextNProgress
                     color={'#fbbd08'}
                     options={{ showSpinner: false }}

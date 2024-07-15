@@ -1,9 +1,10 @@
 import { ApiModel } from '@/api'
 
-/* List */
 export interface ResList {
     items?: ApiModel.Event[]
 }
+
+export interface ResItem extends ApiModel.Event {}
 
 /* Registration */
 export interface ReqRegistration {

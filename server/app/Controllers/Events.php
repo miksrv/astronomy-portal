@@ -86,7 +86,7 @@ class Events extends ResourceController {
         $rules = [
             'eventId'  => 'required|string|max_length[13]',
             'name'     => 'required|string|min_length[3]|max_length[40]',
-            'phone'    => 'if_exist|min_length[6]|max_length[13]',
+            'phone'    => 'if_exist|min_length[6]|max_length[40]',
             'adults'   => 'required|integer|greater_than[0]|less_than[6]',
             'children' => 'integer|greater_than[-1]|less_than[6]'
         ];
@@ -123,11 +123,12 @@ class Events extends ResourceController {
         // Check available tickets
         $currentTickets = $eventUsersModel
             ->selectSum('adults')
-            // ->selectSum('children')
+            ->selectSum('children')
             ->where('event_id', $input['eventId'])
             ->first();
 
         // $currentTickets = $currentTickets->adults + $currentTickets->children;
+        $totalMembers   = (int) $currentTickets->adults + (int) $currentTickets->children;
         $currentTickets = (int) $currentTickets->adults;
 
         if ($currentTickets >= (int) $event->max_tickets) {
@@ -153,8 +154,9 @@ class Events extends ResourceController {
                 "<b>{$event->title}</b>\n" .
                 "🔹Имя: <i>{$input['name']}</i>\n" .
                 "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
-                "🔹Осталось мест: <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b>" .
-                (count($childrenAges) > 0 ? "\n🔹Возраст детей: <b>" . implode(', ', $childrenAges) . "</b>" : '')
+                "🔹Осталось мест: <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b>\n" .
+                (count($childrenAges) > 0 ? "🔹Возраст детей: <b>" . implode(', ', $childrenAges) . "</b>\n" : "") .
+                "🔹Зарегистрировано: <b>" . ($totalMembers + (int) $input['adults'] + (int) $input['children']) . "</b>"
         ]);
 
         $userModel  = new UsersModel();
