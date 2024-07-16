@@ -1,11 +1,16 @@
-'use client'
-
+import { ApiModel } from '@/api'
+import { imageHost } from '@/api/api'
 import React from 'react'
-import Lightbox from 'react-image-lightbox'
+import Lightbox, { Slide } from 'yet-another-react-lightbox'
+import Captions from 'yet-another-react-lightbox/plugins/captions'
+import 'yet-another-react-lightbox/plugins/captions.css'
+import Zoom from 'yet-another-react-lightbox/plugins/zoom'
+import 'yet-another-react-lightbox/styles.css'
+
+import ImageSlide from './ImageSlide'
 
 interface PhotoLightboxProps {
-    photos?: string[]
-    thumbnail?: string[]
+    photos?: ApiModel.EventPhoto[]
     photoIndex?: number
     showLightbox?: boolean
     onCloseLightBox?: () => void
@@ -14,46 +19,41 @@ interface PhotoLightboxProps {
 
 const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
     photos,
-    thumbnail,
     photoIndex = 0,
     showLightbox,
-    onCloseLightBox,
-    onChangeIndex
-}) => (
-    <>
-        {showLightbox && !!photos?.length && (
-            <Lightbox
-                mainSrc={photos?.[photoIndex]}
-                nextSrc={photos?.[(photoIndex + 1) % (photos.length || 0)]}
-                prevSrc={
-                    photos?.[
-                        (photoIndex + (photos.length || 0) - 1) %
-                            (photos.length || 0)
-                    ]
-                }
-                mainSrcThumbnail={photos?.[photoIndex]}
-                prevSrcThumbnail={
-                    thumbnail?.[
-                        (photoIndex + (photos.length || 0) - 1) %
-                            (photos.length || 0)
-                    ]
-                }
-                nextSrcThumbnail={
-                    thumbnail?.[(photoIndex + 1) % (photos.length || 0)]
-                }
-                onCloseRequest={() => onCloseLightBox?.()}
-                onMovePrevRequest={() =>
-                    onChangeIndex?.(
-                        (photoIndex + (photos.length || 0) - 1) %
-                            (photos.length || 0)
-                    )
-                }
-                onMoveNextRequest={() =>
-                    onChangeIndex?.((photoIndex + 1) % (photos.length || 0))
-                }
-            />
-        )}
-    </>
-)
+    onCloseLightBox
+}) => {
+    const makeImageLink = (link?: string) =>
+        link?.includes('http://') || link?.includes('https://')
+            ? link
+            : `${imageHost}${link}`
+
+    return (
+        <Lightbox
+            open={!!showLightbox}
+            index={photoIndex}
+            plugins={[Captions, Zoom]}
+            close={onCloseLightBox}
+            render={{ slide: ImageSlide as any }}
+            slides={photos?.map(
+                (photo) =>
+                    ({
+                        alt: photo?.title,
+                        height: photo?.height,
+                        src: makeImageLink(photo?.full),
+                        srcSet: [
+                            {
+                                height: 200,
+                                src: makeImageLink(photo?.preview),
+                                width: 300
+                            }
+                        ],
+                        title: photo.title || '',
+                        width: photo?.width
+                    } as Slide)
+            )}
+        />
+    )
+}
 
 export default PhotoLightbox

@@ -6,6 +6,13 @@ export interface ResList {
 
 export interface ResItem extends ApiModel.Event {}
 
+export interface ResUploadPhoto extends ApiModel.EventPhoto {}
+
+export interface ReqUploadPhoto {
+    formData?: FormData
+    eventId?: string
+}
+
 /* Registration */
 export interface ReqRegistration {
     eventId: string

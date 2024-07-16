@@ -2,7 +2,7 @@
     --font-size: 14px;
     --font-size-small: 11px;
     --font-family: -apple-system, system-ui, 'Helvetica Neue', Roboto,
-    sans-serif;
+        sans-serif;
     --letter-spacing: 0.00938em;
     --line-height: 1.5;
 
@@ -20,13 +20,13 @@
     --text-color-primary: #e1e3e6;
     --text-color-secondary: #76787a;
     --icon-color-primary: #e1e3e6;
-    --icon-color-primary-hover: #E2E4E7;
+    --icon-color-primary-hover: #e2e4e7;
     --icon-color-secondary: #76787a;
-    --icon-color-secondary-hover: #7B7D7F;
+    --icon-color-secondary-hover: #7b7d7f;
 
     --container-background-color-error: #522e2e;
     --container-color-error: #ff5c5c;
-    --container-background-color-success: #2E3E2B;
+    --container-background-color-success: #2e3e2b;
     --container-color-success: #4bb34b;
     --container-background: #282828;
     --container-border-separator: 0.5px solid #444546;
@@ -55,13 +55,13 @@
     --button-default-background-active: rgba(255, 255, 255, 0.08);
     --button-primary-background: var(--text-color-primary);
     --button-primary-color: var(--body-background);
-    --button-primary-background-hover: #EBEDF0;
-    --button-primary-background-active: #D7D8DB;
+    --button-primary-background-hover: #ebedf0;
+    --button-primary-background-active: #d7d8db;
     --button-negative-background: #ff5c5c;
     --button-negative-color: var(--text-color-primary);
-    --button-negative-background-hover: #FF6363;
-    --button-negative-background-active: #FF6969;
-    --button-secondary-background: rgba(255, 255, 255, 0.10);
+    --button-negative-background-hover: #ff6363;
+    --button-negative-background-active: #ff6969;
+    --button-secondary-background: rgba(255, 255, 255, 0.1);
     --button-secondary-color: var(--text-color-primary);
     --button-secondary-background-hover: rgba(255, 255, 255, 0.12);
     --button-secondary-color-hover: var(--text-color-primary);

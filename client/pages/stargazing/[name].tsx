@@ -1,53 +1,114 @@
-import { API, ApiModel } from '@/api'
+import { API, ApiModel, useAppSelector } from '@/api'
 import { wrapper } from '@/api/store'
 import { sliceText } from '@/functions/helpers'
 import Container from '@/ui/container'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import Image from 'next/image'
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
+import { Button } from 'semantic-ui-react'
+
+import EventPhotoUploader from '@/components/event-photo-uploader/EventPhotoUploader'
+import PhotoGallery from '@/components/photo-gallery'
 
 interface StargazingItemPageProps {
+    eventId: string
     event: ApiModel.Event | null
 }
 
-const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ event }) => (
-    <main>
-        <NextSeo
-            title={`Астровыезд - ${event?.title}`}
-            description={sliceText(event?.content ?? '', 300)}
-            openGraph={{
-                images: [
-                    {
-                        height: 743,
-                        url: `${process.env.NEXT_PUBLIC_API_HOST}${event?.cover}`,
-                        width: 1280
-                    }
-                ],
-                locale: 'ru'
-            }}
-        />
+const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
+    eventId,
+    event
+}) => {
+    const user = useAppSelector((state) => state.auth.user)
 
-        <Container>
-            <h1 className={'pageTitle'}>{`Астровыезд - ${event?.title}`}</h1>
+    const inputFileRef = useRef<HTMLInputElement>()
 
-            <Image
-                className={'stargazingImage'}
-                src={`${process.env.NEXT_PUBLIC_API_HOST}${event?.cover}`}
-                alt={`Астровыезд: ${event?.title}`}
-                width={1024}
-                height={768}
-                style={{ width: '100%' }}
+    const [localPhotos, setLocalPhotos] = useState<ApiModel.EventPhoto[]>([])
+    const [uploadingPhotos, setUploadingPhotos] = useState<string[]>()
+
+    const handleUploadPhotoClick = (event: React.MouseEvent | undefined) => {
+        event?.preventDefault()
+
+        if (user?.role !== 'admin') {
+            return
+        }
+
+        inputFileRef?.current?.click()
+    }
+
+    useEffect(() => {
+        setLocalPhotos(event?.photos ?? [])
+    }, [event?.photos])
+
+    return (
+        <main>
+            <NextSeo
+                title={`Астровыезд - ${event?.title}`}
+                description={sliceText(event?.content ?? '', 300)}
+                openGraph={{
+                    images: [
+                        {
+                            height: 743,
+                            url: `${process.env.NEXT_PUBLIC_API_HOST}${event?.cover}`,
+                            width: 1280
+                        }
+                    ],
+                    locale: 'ru'
+                }}
             />
 
-            <br />
-            <br />
+            <Container>
+                <h1
+                    className={'pageTitle'}
+                >{`Астровыезд - ${event?.title}`}</h1>
 
-            <Markdown>{event?.content}</Markdown>
-        </Container>
-    </main>
-)
+                <Image
+                    className={'stargazingImage'}
+                    src={`${process.env.NEXT_PUBLIC_API_HOST}${event?.cover}`}
+                    alt={`Астровыезд: ${event?.title}`}
+                    width={1024}
+                    height={768}
+                    style={{ width: '100%' }}
+                />
+
+                <br />
+                <br />
+
+                <Markdown>{event?.content}</Markdown>
+            </Container>
+
+            <Container>
+                <h2
+                    className={'subTitle'}
+                >{`Фотографии с астровыезда - ${event?.title}`}</h2>
+
+                {user?.role === 'admin' && (
+                    <Button
+                        onClick={handleUploadPhotoClick}
+                        disabled={!!uploadingPhotos?.length}
+                    >
+                        {!uploadingPhotos?.length
+                            ? 'Загрузить фотки'
+                            : `Загрузка ${uploadingPhotos?.length} фото`}
+                    </Button>
+                )}
+
+                <PhotoGallery photos={localPhotos} />
+
+                <EventPhotoUploader
+                    eventId={eventId}
+                    fileInputRef={inputFileRef}
+                    onSelectFiles={setUploadingPhotos}
+                    onUploadPhoto={(photo) => {
+                        setLocalPhotos([...localPhotos, photo])
+                    }}
+                />
+            </Container>
+        </main>
+    )
+}
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
@@ -72,7 +133,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             return {
                 props: {
-                    event: data || null
+                    event: data || null,
+                    eventId: eventId
                 }
             }
         }

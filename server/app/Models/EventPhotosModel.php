@@ -1,10 +1,10 @@
 <?php namespace App\Models;
 
-class EventMedia extends MyBaseModel {
-    protected $table            = 'event_media';
+class EventPhotosModel extends MyBaseModel {
+    protected $table            = 'event_photos';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = false;
-    protected $returnType       = \App\Entities\EventMedia::class;
+    protected $returnType       = \App\Entities\EventPhoto::class;
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
     protected $allowedFields    = [

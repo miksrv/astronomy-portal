@@ -9,7 +9,20 @@ export type Event = {
     registered?: boolean
     yandexMap?: string
     googleMap?: string
+    photos?: EventPhoto[]
     registrationStart?: DateTime
     registrationEnd?: DateTime
     availableTickets?: number
+}
+
+export type EventPhoto = {
+    id?: string
+    title?: string
+    full: string
+    preview: string
+    width: number
+    height: number
+    created?: DateTime
+    filesize?: number
+    eventId?: string
 }

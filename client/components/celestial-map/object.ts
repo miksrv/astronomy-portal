@@ -1,8 +1,6 @@
-import { montserrat } from '@/pages/_app'
-
 import config from './config'
 
-const FONT = montserrat.style.fontFamily
+const FONT = '-apple-system, system-ui, sans-serif'
 
 const object = {
     adaptable: false,

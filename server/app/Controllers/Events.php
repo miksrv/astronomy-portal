@@ -1,11 +1,14 @@
 <?php namespace App\Controllers;
 
+use App\Entities\EventPhoto;
 use App\Libraries\SessionLibrary;
+use App\Models\EventPhotosModel;
 use App\Models\EventUsersModel;
 use App\Models\UsersModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\RESTful\ResourceController;
+use CodeIgniter\Files\File;
 use Config\Services;
 use Exception;
 use Longman\TelegramBot\Exception\TelegramException;
@@ -94,14 +97,32 @@ class Events extends ResourceController {
     }
 
     public function show($id = null): ResponseInterface {
-        $eventData = $this->model->find($id);
+        $eventData = $this->model->select('title, content, cover, date')->find($id);
         $eventData->cover = '/stargazing/' . $eventData->cover;
 
-        if ($eventData) {
-            return $this->respond($eventData);
+        if (empty($eventData)) {
+            return $this->failNotFound();
         }
 
-        return $this->failNotFound();
+        $eventPhotosModel = new EventPhotosModel();
+        $eventPhotosData  = $eventPhotosModel->where(['event_id' => $id])->findAll();
+
+        if (!empty($eventPhotosData)) {
+            foreach ($eventPhotosData as $photo) {
+                $photo->title = $eventData->title;
+                $photo->full = 'stargazing/' . $id . '/' . $photo->filename . '.' . $photo->extension;
+                $photo->preview = 'stargazing/' . $id . '/' . $photo->filename . '_preview.' . $photo->extension;
+
+                unset(
+                    $photo->user_id, $photo->extension, $photo->filesize,
+                    $photo->filename, $photo->id, $photo->event_id,
+                    $photo->created_at, $photo->updated_at, $photo->deleted_at);
+            }
+
+            $eventData->photos = $eventPhotosData;
+        }
+
+        return $this->respond($eventData);
     }
 
     /**
@@ -226,12 +247,83 @@ class Events extends ResourceController {
         return $this->respond();
     }
 
+    /**
+     * Uploading a photo by place ID
+     * @param null $id
+     * @return ResponseInterface
+     * @throws ReflectionException
+     */
     public function upload($id = null): ResponseInterface {
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->isAuth || $this->session->user->role !== 'admin') {
             return $this->failValidationErrors('Ошибка прав доступа');
         }
 
-        return $this->respond();
+        if (!$photo = $this->request->getFile('photo')) {
+            return $this->failValidationErrors('No photo for upload');
+        }
+
+        $eventData = $this->model->find($id);
+
+        if (!$eventData || !$eventData->id) {
+            return $this->failValidationErrors('There is no event with this ID');
+        }
+
+        if ($photo->hasMoved()) {
+            return $this->failValidationErrors($photo->getErrorString());
+        }
+
+        $eventDir = UPLOAD_EVENTS . $eventData->id . '/';
+        $newName  = $photo->getRandomName();
+        $photo->move($eventDir, $newName, true);
+
+        $file = new File($eventDir . $newName);
+        $name = pathinfo($file, PATHINFO_FILENAME);
+        $ext  = $file->getExtension();
+
+        list($width, $height) = getimagesize($file->getRealPath());
+
+        // Calculating Aspect Ratio
+        $orientation = $width > $height ? 'h' : 'v';
+        $width       = $orientation === 'h' ? $width : $height;
+        $height      = $orientation === 'h' ? $height : $width;
+
+        // If the uploaded image dimensions exceed the maximum
+        if ($width > PHOTO_MAX_WIDTH || $height > PHOTO_MAX_HEIGHT) {
+            $image = Services::image('gd');
+            $image->withFile($file->getRealPath())
+                ->fit(PHOTO_MAX_WIDTH, PHOTO_MAX_HEIGHT)
+                ->reorient(true)
+                ->save($eventDir . $name . '.' . $ext);
+
+            list($width, $height) = getimagesize($file->getRealPath());
+        }
+
+        $image = Services::image('gd'); // imagick
+        $image->withFile($file->getRealPath())
+            ->fit(PHOTO_PREVIEW_WIDTH, PHOTO_PREVIEW_HEIGHT)
+            ->save($eventDir . $name . '_preview.' . $ext);
+
+        $eventPhotosModel = new EventPhotosModel();
+
+        $photo = new EventPhoto();
+        $photo->event_id  = $eventData->id;
+        $photo->user_id   = $this->session->user?->id;
+        $photo->title     = $eventData->title;
+        $photo->filename  = $name;
+        $photo->extension = $ext;
+        $photo->filesize  = $file->getSize();
+        $photo->width     = $width;
+        $photo->height    = $height;
+
+        $eventPhotosModel->insert($photo);
+        return $this->respondCreated((object) [
+            'full'    => 'stargazing/' . $id . '/' . $name . '.' . $ext,
+            'preview' => 'stargazing/' . $id . '/' . $name . '_preview.' . $ext,
+            'width'   => $photo->width,
+            'height'  => $photo->height,
+            'title'   => $photo->title,
+            'eventId' => $photo->event_id
+        ]);
     }
 
     public function delete($id = null): ResponseInterface {

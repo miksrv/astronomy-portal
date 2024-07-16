@@ -23,9 +23,12 @@ import photoStargazing6 from '@/public/photos/stargazing-6.jpeg'
 import photoStargazing7 from '@/public/photos/stargazing-7.jpeg'
 import photoStargazing8 from '@/public/photos/stargazing-8.jpeg'
 
-const PhotoLightbox = dynamic(() => import('@/components/photo-lightbox'), {
-    ssr: false
-})
+const PhotoLightboxOld = dynamic(
+    () => import('@/components/photo-lightbox-old/PhotoLightboxOld'),
+    {
+        ssr: false
+    }
+)
 
 const galleryObservatory = [
     photoObservatory3,
@@ -239,7 +242,7 @@ const AboutPage: NextPage = () => {
                     становится ближе!
                 </p>
             </div>
-            <PhotoLightbox
+            <PhotoLightboxOld
                 photos={allPhotos}
                 photoIndex={photoIndex}
                 showLightbox={showLightbox}

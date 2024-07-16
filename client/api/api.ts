@@ -203,6 +203,20 @@ export const API = createApi({
             providesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
             query: () => 'events/upcoming'
         }),
+        eventPhotoUploadPost: builder.mutation<
+            ApiType.Events.ResUploadPhoto,
+            ApiType.Events.ReqUploadPhoto
+        >({
+            invalidatesTags: (res, err, arg) => [
+                { id: arg.eventId, type: 'Events' }
+            ],
+            query: (data) => ({
+                body: data.formData,
+                method: 'POST',
+                url: `events/upload/${data.eventId}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
         eventsGetList: builder.query<ApiType.Events.ResList, void>({
             providesTags: () => [{ id: 'LIST', type: 'Events' }],
             query: () => 'events'

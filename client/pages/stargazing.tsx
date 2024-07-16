@@ -9,7 +9,7 @@ import { Icon, Message } from 'semantic-ui-react'
 
 import EventUpcoming from '@/components/event-upcoming'
 import EventsList from '@/components/events-list'
-import PhotoLightbox from '@/components/photo-lightbox'
+import PhotoLightboxOld from '@/components/photo-lightbox-old'
 
 import photoStargazing4 from '@/public/photos/stargazing-4.jpeg'
 import photoStargazing7 from '@/public/photos/stargazing-7.jpeg'
@@ -110,7 +110,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                         handlePhotoClick(photos.index)
                     }}
                 />
-                <PhotoLightbox
+                <PhotoLightboxOld
                     photos={galleryStargazing.map((image) => image.src)}
                     photoIndex={photoIndex}
                     showLightbox={showLightbox}
