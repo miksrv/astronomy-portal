@@ -11,6 +11,7 @@ $routes->options('weather/(:any)', 'Weather');
 
 // Events
 $routes->get('events', 'Events::list');
+$routes->get('events/upcoming', 'Events::upcoming');
 $routes->post('events/booking', 'Events::booking');
 $routes->options('events', 'Events');
 $routes->options('events/(:any)', 'Events');

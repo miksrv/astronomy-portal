@@ -199,6 +199,10 @@ export const API = createApi({
             providesTags: (result, error, id) => [{ id, type: 'Events' }],
             query: (id) => `events/${id}`
         }),
+        eventGetUpcoming: builder.query<ApiType.Events.ResItem, void>({
+            providesTags: () => [{ type: 'Events' }],
+            query: () => 'events/upcoming'
+        }),
         eventsGetList: builder.query<ApiType.Events.ResList, void>({
             providesTags: () => [{ id: 'LIST', type: 'Events' }],
             query: () => 'events'

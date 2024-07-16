@@ -8,7 +8,6 @@ use CodeIgniter\I18n\Time;
 use CodeIgniter\RESTful\ResourceController;
 use Config\Services;
 use Exception;
-use Longman\TelegramBot\Entities\Update;
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\Telegram;
@@ -24,48 +23,71 @@ class Events extends ResourceController {
         $this->model   = new \App\Models\EventsModel();
     }
 
-    public function list(): ResponseInterface {
-        $eventsData = $this->model->findAll();
+    public function upcoming(): ResponseInterface {
+        $eventData = $this->model
+            ->where('date >=', new Time('now'))
+            ->orderBy('date', 'DESC')
+            ->first();
 
-//        if (!$this->session->isAuth || !$this->session->user->id) {
-//            return $this->respond(['items' => $eventsData]);
-//        }
+        if (empty($eventData)) {
+            return $this->failResourceGone('No data');
+        }
+
         $eventUsersModel = new EventUsersModel();
         $bookedEvents    = $this->session->isAuth && $this->session->user->id
             ? $eventUsersModel->where(['user_id' => $this->session->user->id])->findAll()
             : false;
 
+        $currentTickets = $eventUsersModel
+            ->selectSum('adults')
+            // ->selectSum('children')
+            ->where('event_id', $eventData->id)
+            ->first();
+
+        // $currentTickets = $currentTickets->adults + $currentTickets->children;
+        $currentTickets = (int) $currentTickets->adults;
+
+        if ($bookedEvents) {
+            $searchIndex = in_array($eventData->id, array_column($bookedEvents, 'event_id'));
+            $eventData->registered  = $searchIndex !== false;
+        }
+
+        $eventData->max_tickets = $eventData->max_tickets - $currentTickets;
+
+        if ($eventData->max_tickets < 0) {
+            $eventData->max_tickets = 0;
+        }
+
+        if ($eventData->cover) {
+            $eventData->cover = '/stargazing/' . $eventData->cover;
+        }
+
+        if (!$eventData->registered) {
+            unset($eventData->yandexMap, $eventData->googleMap);
+        }
+
+        unset($eventData->created_at, $eventData->updated_at, $eventData->deleted_at);
+
+        return $this->respond($eventData);
+    }
+
+    public function list(): ResponseInterface {
+        $eventsData = $this->model
+            ->select('id, title, date, cover')
+            ->where('date >', new Time('now'))
+            ->orderBy('date', 'DESC')
+            ->findAll();
+
+        if (empty($eventsData)) {
+            return $this->respond(['items' => []]);
+        }
+
         foreach ($eventsData as $event) {
-            // TODO Refactoring this method, only for active registration
-            $currentTickets = $eventUsersModel
-                ->selectSum('adults')
-                // ->selectSum('children')
-                ->where('event_id', $event->id)
-                ->first();
-
-            // $currentTickets = $currentTickets->adults + $currentTickets->children;
-            $currentTickets = (int) $currentTickets->adults;
-
-            if ($bookedEvents) {
-                $searchIndex = in_array($event->id, array_column($bookedEvents, 'event_id'));
-                $event->registered  = $searchIndex !== false;
-            }
-
-            $event->max_tickets = $event->max_tickets - $currentTickets;
-
-            if ($event->max_tickets < 0) {
-                $event->max_tickets = 0;
-            }
-
             if ($event->cover) {
                 $event->cover = '/stargazing/' . $event->cover;
             }
 
-            if (!$event->registered) {
-                unset($event->yandexMap, $event->googleMap);
-            }
-
-            unset($event->created_at, $event->updated_at, $event->deleted_at);
+            unset($event->registrationStart, $event->registrationEnd, $event->availableTickets, $event->yandexMap, $event->googleMap);
         }
 
         return $this->respond(['items' => $eventsData]);
