@@ -4,6 +4,7 @@ import { sliceText } from '@/functions/helpers'
 import Container from '@/ui/container'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { NextSeo } from 'next-seo'
+import Image from 'next/image'
 import React from 'react'
 import Markdown from 'react-markdown'
 
@@ -30,6 +31,18 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ event }) => (
 
         <Container>
             <h1 className={'pageTitle'}>{`Астровыезд - ${event?.title}`}</h1>
+
+            <Image
+                className={'stargazingImage'}
+                src={`${process.env.NEXT_PUBLIC_API_HOST}${event?.cover}`}
+                alt={`Астровыезд: ${event?.title}`}
+                width={1024}
+                height={768}
+                style={{ width: '100%' }}
+            />
+
+            <br />
+            <br />
 
             <Markdown>{event?.content}</Markdown>
         </Container>

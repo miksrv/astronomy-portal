@@ -93,6 +93,17 @@ class Events extends ResourceController {
         return $this->respond(['items' => $eventsData]);
     }
 
+    public function show($id = null): ResponseInterface {
+        $eventData = $this->model->find($id);
+        $eventData->cover = '/stargazing/' . $eventData->cover;
+
+        if ($eventData) {
+            return $this->respond($eventData);
+        }
+
+        return $this->failNotFound();
+    }
+
     /**
      * @throws ReflectionException
      * @throws TelegramException
@@ -197,10 +208,6 @@ class Events extends ResourceController {
         }
 
         return $this->respond(['message' => 'Вы успешно зарегистрировались на мероприятие']);
-    }
-
-    public function show($id = null): ResponseInterface {
-        return $this->respond();
     }
 
     public function create(): ResponseInterface {
