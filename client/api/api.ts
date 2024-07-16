@@ -200,7 +200,7 @@ export const API = createApi({
             query: (id) => `events/${id}`
         }),
         eventGetUpcoming: builder.query<ApiType.Events.ResItem, void>({
-            providesTags: () => [{ type: 'Events' }],
+            providesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
             query: () => 'events/upcoming'
         }),
         eventsGetList: builder.query<ApiType.Events.ResList, void>({
@@ -211,7 +211,7 @@ export const API = createApi({
             ApiType.Events.ResRegistration | ApiType.ResError,
             ApiType.Events.ReqRegistration
         >({
-            invalidatesTags: () => [{ id: 'LIST', type: 'Events' }],
+            invalidatesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
             query: (formState) => ({
                 body: formState,
                 method: 'POST',

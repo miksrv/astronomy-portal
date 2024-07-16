@@ -167,19 +167,19 @@ class Events extends ResourceController {
             'children_ages' => json_encode($childrenAges),
         ]);
 
-        new Telegram(getenv('app.telegramBotKey'), '');
-
-        Request::sendMessage([
-            'chat_id'    => getenv('app.telegramChatID'),
-            'parse_mode' => 'HTML',
-            'text'       => "<b>Astro:</b> 🙋Регистрация на астровыезд\n" .
-                "<b>{$event->title}</b>\n" .
-                "🔹Имя: <i>{$input['name']}</i>\n" .
-                "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
-                "🔹Осталось мест: <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b>\n" .
-                (count($childrenAges) > 0 ? "🔹Возраст детей: <b>" . implode(', ', $childrenAges) . "</b>\n" : "") .
-                "🔹Зарегистрировано: <b>" . ($totalMembers + (int) $input['adults'] + (int) $input['children']) . "</b>"
-        ]);
+//        new Telegram(getenv('app.telegramBotKey'), '');
+//
+//        Request::sendMessage([
+//            'chat_id'    => getenv('app.telegramChatID'),
+//            'parse_mode' => 'HTML',
+//            'text'       => "<b>Astro:</b> 🙋Регистрация на астровыезд\n" .
+//                "<b>{$event->title}</b>\n" .
+//                "🔹Имя: <i>{$input['name']}</i>\n" .
+//                "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
+//                "🔹Осталось мест: <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b>\n" .
+//                (count($childrenAges) > 0 ? "🔹Возраст детей: <b>" . implode(', ', $childrenAges) . "</b>\n" : "") .
+//                "🔹Зарегистрировано: <b>" . ($totalMembers + (int) $input['adults'] + (int) $input['children']) . "</b>"
+//        ]);
 
         $userModel  = new UsersModel();
         $updateData = [];
