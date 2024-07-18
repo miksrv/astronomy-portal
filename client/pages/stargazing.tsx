@@ -75,7 +75,8 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                         size={'big'}
                     />
                     <strong>
-                        Telegram: следите за новостями (подпишитесь)
+                        Чтобы не пропустить анонсы - подпишитесь на Telegram
+                        канал
                     </strong>
                 </a>
             </Message>
