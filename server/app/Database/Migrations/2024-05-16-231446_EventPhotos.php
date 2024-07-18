@@ -62,10 +62,10 @@ class EventMedia extends Migration {
         $this->forge->addPrimaryKey('id');
         $this->forge->addForeignKey('event_id', 'events', 'id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('user_id', 'users', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('event_media');
+        $this->forge->createTable('event_photos');
     }
 
     public function down() {
-        $this->forge->dropTable('event_media');
+        $this->forge->dropTable('event_photos');
     }
 }

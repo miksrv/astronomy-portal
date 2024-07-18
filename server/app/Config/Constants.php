@@ -102,6 +102,12 @@ defined('UPLOAD_TEMP') || define('UPLOAD_TEMP', FCPATH . 'temp/');
 defined('UPLOAD_MAPS') || define('UPLOAD_MAPS', FCPATH . 'maps/');
 defined('UPLOAD_FITS') || define('UPLOAD_FITS', FCPATH . 'fits/');
 defined('UPLOAD_USERS') || define('UPLOAD_USERS', FCPATH . 'users/');
+defined('UPLOAD_EVENTS') || define('UPLOAD_EVENTS', FCPATH . 'stargazing/');
+
+defined('PHOTO_MAX_WIDTH') || define('PHOTO_MAX_WIDTH', 4048);
+defined('PHOTO_MAX_HEIGHT') || define('PHOTO_MAX_HEIGHT', 3036);
+defined('PHOTO_PREVIEW_WIDTH') || define('PHOTO_PREVIEW_WIDTH', 700);
+defined('PHOTO_PREVIEW_HEIGHT') || define('PHOTO_PREVIEW_HEIGHT', 500);
 
 defined('AVATAR_WIDTH') || define('AVATAR_WIDTH', 400);
 defined('AVATAR_HEIGHT') || define('AVATAR_HEIGHT', 400);

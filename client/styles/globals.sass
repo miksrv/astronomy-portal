@@ -1,12 +1,13 @@
 @import variables.sass
 
 body
-  font-size: 12px !important
-  line-height: 1.5
+  font-size: var(--font-size)
+  line-height: var(--line-height)
+  letter-spacing: var(--letter-spacing)
   background-color: $colorBackground !important
   color: $text-main !important
   margin: 0
-  //font-family: -apple-system, system-ui, "Helvetica Neue", Roboto,sans-serif
+  font-family: -apple-system, system-ui, "Helvetica Neue", Roboto, sans-serif !important
 
 h1
   font-size: 21px !important
@@ -228,36 +229,6 @@ main
     .column
       padding-top: 5px !important
       padding-bottom: 5px !important
-
-
-.stargazing
-  text-align: center
-
-  .title
-    font-size: 26px !important
-
-  .date
-    font-size: 18px
-
-  .time
-    margin: 10px 0 5px
-    font-size: 24px !important
-
-  .registered
-    margin-top: 20px
-    margin-bottom: 20px
-
-    h3
-      font-size: 20px !important
-      color: $green
-
-  .bookingLogin
-    max-width: 400px
-    margin: 20px auto 0
-
-    h3
-      font-size: 20px !important
-      color: $red
 
 .stargazingText
   font-size: 14px

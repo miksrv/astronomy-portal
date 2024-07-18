@@ -1,7 +1,4 @@
-import { montserrat } from '@/pages/_app'
-
-const FONT = montserrat.style.fontFamily
-
+const FONT = '-apple-system, system-ui, sans-serif'
 const config = {
     adaptable: true, // Sizes are increased with higher zoom-levels
     advanced: false, // Display fewer form fields if false

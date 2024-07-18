@@ -195,6 +195,40 @@ export const API = createApi({
         }),
 
         /* Events Controller */
+        eventGetItem: builder.query<ApiType.Events.ResItem, string>({
+            providesTags: (result, error, id) => [{ id, type: 'Events' }],
+            query: (id) => `events/${id}`
+        }),
+        eventGetUpcoming: builder.query<ApiType.Events.ResItem, void>({
+            providesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
+            query: () => 'events/upcoming'
+        }),
+        eventPhotoUploadPost: builder.mutation<
+            ApiType.Events.ResUploadPhoto,
+            ApiType.Events.ReqUploadPhoto
+        >({
+            invalidatesTags: (res, err, arg) => [
+                { id: arg.eventId, type: 'Events' }
+            ],
+            query: (data) => ({
+                body: data.formData,
+                method: 'POST',
+                url: `events/upload/${data.eventId}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        eventsCancelRegistrationPost: builder.mutation<
+            ApiType.Events.ResRegistration | ApiType.ResError,
+            Pick<ApiType.Events.ReqRegistration, 'eventId'>
+        >({
+            invalidatesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
+            query: (formState) => ({
+                body: formState,
+                method: 'POST',
+                url: 'events/cancel'
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
         eventsGetList: builder.query<ApiType.Events.ResList, void>({
             providesTags: () => [{ id: 'LIST', type: 'Events' }],
             query: () => 'events'
@@ -203,7 +237,7 @@ export const API = createApi({
             ApiType.Events.ResRegistration | ApiType.ResError,
             ApiType.Events.ReqRegistration
         >({
-            invalidatesTags: () => [{ id: 'LIST', type: 'Events' }],
+            invalidatesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
             query: (formState) => ({
                 body: formState,
                 method: 'POST',

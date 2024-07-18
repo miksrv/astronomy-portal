@@ -30,6 +30,7 @@
         "react-dom": "18.3.1",
         "react-image-lightbox": "^5.1.4",
         "react-markdown": "^9.0.1",
+        "react-photo-album": "^2.4.1",
         "react-photo-gallery": "^8.0.0",
         "react-redux": "^9.1.0",
         "react-semantic-ui-datepickers": "^2.17.2",
@@ -39,7 +40,8 @@
         "semantic-ui-react-numberinput": "^1.5.1",
         "sharp": "^0.33.4",
         "suncalc": "^1.9.0",
-        "typescript": "5.5.2"
+        "typescript": "5.5.2",
+        "yet-another-react-lightbox": "^3.21.1"
     },
     "devDependencies": {
         "@reduxjs/toolkit": "^2.2.1",

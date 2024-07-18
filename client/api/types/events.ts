@@ -1,8 +1,16 @@
 import { ApiModel } from '@/api'
 
-/* List */
 export interface ResList {
     items?: ApiModel.Event[]
+}
+
+export interface ResItem extends ApiModel.Event {}
+
+export interface ResUploadPhoto extends ApiModel.EventPhoto {}
+
+export interface ReqUploadPhoto {
+    formData?: FormData
+    eventId?: string
 }
 
 /* Registration */
