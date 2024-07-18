@@ -345,7 +345,11 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
             {/*</div>*/}
         </Container>
     ) : (
-        ''
+        <Container>
+            <div style={{ margin: '20px', textAlign: 'center' }}>
+                {'Нет предстоящих астровыездов'}
+            </div>
+        </Container>
     )
 }
 

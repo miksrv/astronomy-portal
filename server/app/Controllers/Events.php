@@ -77,7 +77,7 @@ class Events extends ResourceController {
     public function list(): ResponseInterface {
         $eventsData = $this->model
             ->select('id, title, date, cover')
-            ->where('date >', new Time('now'))
+            ->where('date <', new Time('now'))
             ->orderBy('date', 'DESC')
             ->findAll();
 
