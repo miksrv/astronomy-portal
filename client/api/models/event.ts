@@ -7,6 +7,7 @@ export type Event = {
     cover?: string
     date?: DateTime
     registered?: boolean
+    canceled?: boolean
     yandexMap?: string
     googleMap?: string
     photos?: EventPhoto[]

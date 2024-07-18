@@ -14,6 +14,7 @@ $routes->get('events', 'Events::list');
 $routes->get('events/upcoming', 'Events::upcoming');
 $routes->get('events/(:any)', 'Events::show/$1');
 $routes->post('events/booking', 'Events::booking');
+$routes->post('events/cancel', 'Events::cancel');
 $routes->post('events/upload/(:alphanum)', 'Events::upload/$1');
 $routes->options('events', 'Events');
 $routes->options('events/(:any)', 'Events');

@@ -38,7 +38,7 @@ class Events extends ResourceController {
 
         $eventUsersModel = new EventUsersModel();
         $bookedEvents    = $this->session->isAuth && $this->session->user->id
-            ? $eventUsersModel->where(['user_id' => $this->session->user->id])->findAll()
+            ? $eventUsersModel->where(['event_id' => $eventData->id, 'user_id' => $this->session->user->id])->withDeleted()->first()
             : false;
 
         $currentTickets = $eventUsersModel
@@ -51,8 +51,8 @@ class Events extends ResourceController {
         $currentTickets = (int) $currentTickets->adults;
 
         if ($bookedEvents) {
-            $searchIndex = in_array($eventData->id, array_column($bookedEvents, 'event_id'));
-            $eventData->registered  = $searchIndex !== false;
+            $eventData->registered = true;
+            $eventData->canceled   = !empty($bookedEvents->deleted_at);
         }
 
         $eventData->max_tickets = $eventData->max_tickets - $currentTickets;
@@ -161,7 +161,7 @@ class Events extends ResourceController {
         $eventUsersModel = new EventUsersModel();
 
         // Check that user not already registered at this event
-        if ($eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->first()) {
+        if ($eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->withDeleted()->first()) {
             return $this->failValidationErrors(['error' => 'Вы уже зарегистрировались на это мероприятие']);
         }
 
@@ -199,19 +199,19 @@ class Events extends ResourceController {
             'children_ages' => json_encode($childrenAges),
         ]);
 
-//        new Telegram(getenv('app.telegramBotKey'), '');
-//
-//        Request::sendMessage([
-//            'chat_id'    => getenv('app.telegramChatID'),
-//            'parse_mode' => 'HTML',
-//            'text'       => "<b>Astro:</b> 🙋Регистрация на астровыезд\n" .
-//                "<b>{$event->title}</b>\n" .
-//                "🔹Имя: <i>{$input['name']}</i>\n" .
-//                "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
-//                "🔹Осталось мест: <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b>\n" .
-//                (count($childrenAges) > 0 ? "🔹Возраст детей: <b>" . implode(', ', $childrenAges) . "</b>\n" : "") .
-//                "🔹Зарегистрировано: <b>" . ($totalMembers + (int) $input['adults'] + (int) $input['children']) . "</b>"
-//        ]);
+        new Telegram(getenv('app.telegramBotKey'), '');
+
+        Request::sendMessage([
+            'chat_id'    => getenv('app.telegramChatID'),
+            'parse_mode' => 'HTML',
+            'text'       => "<b>Astro:</b> 🙋Регистрация на астровыезд\n" .
+                "<b>{$event->title}</b>\n" .
+                "🔹Имя: <i>{$input['name']}</i>\n" .
+                "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
+                "🔹Осталось слотов: <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b>\n" .
+                (count($childrenAges) > 0 ? "🔹Возраст детей: <b>" . implode(', ', $childrenAges) . "</b>\n" : "") .
+                "🔹Зарегистрировано: <b>" . ($totalMembers + (int) $input['adults'] + (int) $input['children']) . "</b>"
+        ]);
 
         $userModel  = new UsersModel();
         $updateData = [];
@@ -229,6 +229,73 @@ class Events extends ResourceController {
         }
 
         return $this->respond(['message' => 'Вы успешно зарегистрировались на мероприятие']);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws TelegramException
+     * @throws Exception
+     */
+    public function cancel(): ResponseInterface {
+        // Check that user is auth
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized();
+        }
+
+        $input = $this->request->getJSON(true);
+        $rules = ['eventId' => 'required|string|max_length[13]'];
+
+        $this->validator = Services::Validation()->setRules($rules);
+
+        // Check input data validation rules
+        if (!$this->validator->run($input)) {
+            return $this->failValidationErrors($this->validator->getErrors());
+        }
+
+        $event = $this->model->find($input['eventId']);
+        // Check that event with ID is exists
+        if (!$event) {
+            $this->failValidationErrors(['error' => 'Такого мероприятия не существует']);
+        }
+
+        $eventUsersModel  = new EventUsersModel();
+        $userRegistration = $eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->first();
+
+        // Check that user not already registered at this event
+        if (empty($userRegistration)) {
+            return $this->failValidationErrors(['error' => 'Вы еще не регистрировались на это мероприятие']);
+        }
+
+        // Check registration start and end dates
+        $currentTime   = new Time('now');
+        $timeDiffStart = $currentTime->difference($event->registration_start);
+        $timeDiffEnd   = $currentTime->difference($event->registration_end);
+
+        if ($timeDiffStart->getSeconds() >= 0 || $timeDiffEnd->getSeconds() <= 0) {
+            return $this->failValidationErrors(['error' => 'Регистрация на мероприятие уже знакончилась или еще не начиналась']);
+        }
+
+        // Check available tickets
+        $currentTickets = $eventUsersModel
+            ->selectSum('adults')
+            ->where('event_id', $input['eventId'])
+            ->first();
+
+        $eventUsersModel->delete($userRegistration->id);
+
+        new Telegram(getenv('app.telegramBotKey'), '');
+
+        Request::sendMessage([
+            'chat_id'    => getenv('app.telegramChatID'),
+            'parse_mode' => 'HTML',
+            'text'       => "<b>Astro:</b> ❌ Отмена бронирования\n" .
+                "<b>{$event->title}</b>\n" .
+                "🔹Имя: <i>{$this->session->user->name}</i>\n" .
+                "🔹Взрослых: <b>{$userRegistration->adults}</b>, детей: {$userRegistration->children}\n" .
+                "🔹Осталось слотов: <b>" . ($event->max_tickets - (abs($currentTickets->adults - (int) $userRegistration->adults))) . "</b>\n"
+        ]);
+
+        return $this->respond(['message' => 'Вы отменили бронирование на это мероприятие']);
     }
 
     public function create(): ResponseInterface {

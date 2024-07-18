@@ -217,6 +217,18 @@ export const API = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
+        eventsCancelRegistrationPost: builder.mutation<
+            ApiType.Events.ResRegistration | ApiType.ResError,
+            Pick<ApiType.Events.ReqRegistration, 'eventId'>
+        >({
+            invalidatesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
+            query: (formState) => ({
+                body: formState,
+                method: 'POST',
+                url: 'events/cancel'
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
         eventsGetList: builder.query<ApiType.Events.ResList, void>({
             providesTags: () => [{ id: 'LIST', type: 'Events' }],
             query: () => 'events'

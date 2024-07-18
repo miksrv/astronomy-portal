@@ -3,8 +3,8 @@ import { formatUTCDate, getTimeFromSec } from '@/functions/helpers'
 import Container from '@/ui/container'
 import dayjs from 'dayjs'
 import Image from 'next/image'
-import React from 'react'
-import { Dimmer, Loader } from 'semantic-ui-react'
+import React, { useState } from 'react'
+import { Button, Confirm, Dimmer, Loader } from 'semantic-ui-react'
 
 import EventBookingForm from '@/components/event-booking-form'
 import LoginForm from '@/components/login-form'
@@ -16,7 +16,16 @@ interface EventBookingFormProps {}
 const EventUpcoming: React.FC<EventBookingFormProps> = () => {
     const user = useAppSelector((state) => state.auth.user)
 
+    const [confirmation, showConfirmation] = useState<boolean>(false)
+
     const { data, isFetching } = API.useEventGetUpcomingQuery()
+    const [cancelRegistration, { isLoading }] =
+        API.useEventsCancelRegistrationPostMutation()
+
+    const handleCancelRegistration = () => {
+        cancelRegistration({ eventId: data?.id || '' })
+        showConfirmation(false)
+    }
 
     const checkAvailabilityRegistration = (event?: ApiModel.Event) => {
         // Закончились слоты для регистрации
@@ -201,12 +210,11 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                         ''
                     )}
 
-                    {user?.id && data?.registered && (
+                    {user?.id && data?.registered && !data?.canceled && (
                         <div className={styles.registered}>
                             <h3>Вы зарегистрированы на мероприятие</h3>
                             <p>
-                                Приезжайте на место проведения <br />
-                                мероприятия{' '}
+                                Приезжайте{' '}
                                 <b>
                                     {formatUTCDate(
                                         data?.date?.date,
@@ -216,10 +224,14 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                                 к{' '}
                                 <b>{formatUTCDate(data?.date?.date, 'H:mm')}</b>{' '}
                                 часам
+                                <br />
+                                на место проведения мероприятия.
                             </p>
-                            <h2>Место проведения мероприятия</h2>
-                            <br />
-                            <div>
+                            <p>
+                                Используйте ссылки ниже, чтобы найти точное
+                                местоположение проведения мероприятия:
+                            </p>
+                            <div className={styles.mapLinks}>
                                 <a
                                     style={{
                                         fontSize: '16px'
@@ -231,8 +243,6 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                                 >
                                     Яндекс Карты
                                 </a>
-                            </div>
-                            <div>
                                 <a
                                     style={{
                                         fontSize: '16px'
@@ -245,9 +255,89 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                                     Google Карты
                                 </a>
                             </div>
+
+                            {!(
+                                dayjs
+                                    .utc(data?.registrationEnd?.date)
+                                    .local()
+                                    .diff(dayjs()) <= 0
+                            ) &&
+                                !(
+                                    dayjs
+                                        .utc(data?.date?.date)
+                                        .local()
+                                        .diff(dayjs()) <= 0
+                                ) && (
+                                    <div className={styles.cancelRegistration}>
+                                        <p style={{ fontWeight: '100' }}>
+                                            Если вы не сможете поехать на
+                                            мероприятие - отмените бронирование,
+                                            ваши места будут доступны другим
+                                        </p>
+                                        <Button
+                                            fluid={true}
+                                            color={'red'}
+                                            loading={isLoading}
+                                            disabled={isLoading}
+                                            onClick={() =>
+                                                showConfirmation(true)
+                                            }
+                                        >
+                                            {'Отменить бронирование'}
+                                        </Button>
+                                    </div>
+                                )}
+                        </div>
+                    )}
+
+                    {user?.id && data?.registered && data?.canceled && (
+                        <div
+                            style={{
+                                marginTop: '40px'
+                            }}
+                            className={styles.bookingLogin}
+                        >
+                            <h3>Вы отменили свое бронирование на астровыезд</h3>
+                            <p>
+                                Если вы хотите приехать на астровыезд -
+                                пожалуйста, дождитесь следующего мероприятия
+                            </p>
                         </div>
                     )}
                 </div>
+
+                <Confirm
+                    open={confirmation}
+                    size={'tiny'}
+                    className={'confirm'}
+                    header={'Подтвердите отмену бронирования'}
+                    content={() => (
+                        <div className={styles.confirmContent}>
+                            <p>
+                                Если вы отмените свое бронирование на этот
+                                астровыезд, то освободившимися местами смогут
+                                воспользоваться другие участники, которые хотят
+                                поехать на астровыезд.
+                            </p>
+                            <p>
+                                Если вы подтвердите отмену, то вы не сможете
+                                повторно зарегистрироваться на этот астровыезд,
+                                только на последующие.
+                            </p>
+                        </div>
+                    )}
+                    onCancel={() => showConfirmation(false)}
+                    cancelButton={<Button>{'Я передумал(а)'}</Button>}
+                    confirmButton={
+                        <Button
+                            color={'red'}
+                            primary={false}
+                            onClick={handleCancelRegistration}
+                        >
+                            {'Подтверждаю'}
+                        </Button>
+                    }
+                />
             </div>
 
             {/*<div className={'stargazingText'}>*/}
