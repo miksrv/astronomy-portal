@@ -77,10 +77,10 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                 <div className={styles.stargazing}>
                     <h2 className={styles.title}>{data?.title}</h2>
                     <div className={styles.date}>
-                        {formatUTCDate(data?.date?.date, 'D MMMM, YYYY г.')}
-                    </div>
-                    <div className={styles.time}>
-                        {formatUTCDate(data?.date?.date, 'H:mm')}
+                        {formatUTCDate(
+                            data?.date?.date,
+                            'D MMMM, YYYY г., H:mm'
+                        )}
                     </div>
 
                     {dayjs
@@ -182,7 +182,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                         </div>
                     ) : !data?.registered ? (
                         <div>
-                            {!user?.id ? (
+                            {!user?.id && (
                                 <div
                                     style={{
                                         margin: '10px auto',
@@ -195,8 +195,6 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                                     </p>
                                     <LoginForm />
                                 </div>
-                            ) : (
-                                ''
                             )}
                         </div>
                     ) : (

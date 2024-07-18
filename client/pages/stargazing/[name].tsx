@@ -86,11 +86,13 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
 
                 {user?.role === 'admin' && (
                     <Button
+                        fluid
                         onClick={handleUploadPhotoClick}
                         disabled={!!uploadingPhotos?.length}
+                        style={{ marginBottom: 20 }}
                     >
                         {!uploadingPhotos?.length
-                            ? 'Загрузить фотки'
+                            ? 'Загрузить фотографии'
                             : `Загрузка ${uploadingPhotos?.length} фото`}
                     </Button>
                 )}
