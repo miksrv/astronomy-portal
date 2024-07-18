@@ -4,6 +4,7 @@ import Container from '@/ui/container'
 import dayjs from 'dayjs'
 import Image from 'next/image'
 import React, { useState } from 'react'
+import Markdown from 'react-markdown'
 import { Button, Confirm, Dimmer, Loader } from 'semantic-ui-react'
 
 import EventBookingForm from '@/components/event-booking-form'
@@ -297,10 +298,14 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                             }}
                             className={styles.bookingLogin}
                         >
-                            <h3>Вы отменили свое бронирование на астровыезд</h3>
+                            <h3>
+                                Вы отменили свое бронирование
+                                <br />
+                                на это мероприятие
+                            </h3>
                             <p>
                                 Если вы хотите приехать на астровыезд -
-                                пожалуйста, дождитесь следующего мероприятия
+                                пожалуйста, дождитесь следующего
                             </p>
                         </div>
                     )}
@@ -340,9 +345,9 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                 />
             </div>
 
-            {/*<div className={'stargazingText'}>*/}
-            {/*    <Markdown>{data?.content}</Markdown>*/}
-            {/*</div>*/}
+            <div className={styles.content}>
+                <Markdown>{data?.content}</Markdown>
+            </div>
         </Container>
     ) : (
         <Container>

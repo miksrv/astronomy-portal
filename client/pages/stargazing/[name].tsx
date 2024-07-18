@@ -79,35 +79,37 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                 <Markdown>{event?.content}</Markdown>
             </Container>
 
-            <Container>
-                <h2
-                    className={'subTitle'}
-                >{`Фотографии с астровыезда - ${event?.title}`}</h2>
+            {(!!localPhotos?.length || user?.role === 'admin') && (
+                <Container>
+                    <h2
+                        className={'subTitle'}
+                    >{`Фотографии с астровыезда - ${event?.title}`}</h2>
 
-                {user?.role === 'admin' && (
-                    <Button
-                        fluid
-                        onClick={handleUploadPhotoClick}
-                        disabled={!!uploadingPhotos?.length}
-                        style={{ marginBottom: 20 }}
-                    >
-                        {!uploadingPhotos?.length
-                            ? 'Загрузить фотографии'
-                            : `Загрузка ${uploadingPhotos?.length} фото`}
-                    </Button>
-                )}
+                    {user?.role === 'admin' && (
+                        <Button
+                            fluid
+                            onClick={handleUploadPhotoClick}
+                            disabled={!!uploadingPhotos?.length}
+                            style={{ marginBottom: 20 }}
+                        >
+                            {!uploadingPhotos?.length
+                                ? 'Загрузить фотографии'
+                                : `Загрузка ${uploadingPhotos?.length} фото`}
+                        </Button>
+                    )}
 
-                <PhotoGallery photos={localPhotos} />
+                    <PhotoGallery photos={localPhotos} />
 
-                <EventPhotoUploader
-                    eventId={eventId}
-                    fileInputRef={inputFileRef}
-                    onSelectFiles={setUploadingPhotos}
-                    onUploadPhoto={(photo) => {
-                        setLocalPhotos([...localPhotos, photo])
-                    }}
-                />
-            </Container>
+                    <EventPhotoUploader
+                        eventId={eventId}
+                        fileInputRef={inputFileRef}
+                        onSelectFiles={setUploadingPhotos}
+                        onUploadPhoto={(photo) => {
+                            setLocalPhotos([...localPhotos, photo])
+                        }}
+                    />
+                </Container>
+            )}
         </main>
     )
 }
