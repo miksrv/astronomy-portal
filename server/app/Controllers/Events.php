@@ -33,7 +33,7 @@ class Events extends ResourceController {
             ->first();
 
         if (empty($eventData)) {
-            return $this->failResourceGone('No data');
+            return $this->respond();
         }
 
         $eventUsersModel = new EventUsersModel();

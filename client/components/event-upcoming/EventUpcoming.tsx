@@ -55,7 +55,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
         return true
     }
 
-    return (
+    return data?.id ? (
         <Container>
             {isFetching && (
                 <div
@@ -344,6 +344,8 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
             {/*    <Markdown>{data?.content}</Markdown>*/}
             {/*</div>*/}
         </Container>
+    ) : (
+        ''
     )
 }
 
