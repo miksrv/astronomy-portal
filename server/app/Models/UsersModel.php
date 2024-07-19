@@ -24,6 +24,9 @@ class UsersModel extends Model {
         'role',
         'locale',
         'avatar',
+        'birthday',
+        'service_id',
+        'sex',
         'updated_at',
         'activity_at'
     ];

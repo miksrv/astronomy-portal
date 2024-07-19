@@ -6,6 +6,7 @@ use App\Libraries\SessionLibrary;
 use App\Libraries\YandexClient;
 use App\Libraries\VkClient;
 use App\Models\UsersModel;
+use CodeIgniter\I18n\Time;
 use CodeIgniter\Files\File;
 use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -225,9 +226,18 @@ class Auth extends ResourceController {
             $createUser->auth_type = $authType;
             $createUser->locale    = !empty($serviceProfile->locale) ? $serviceProfile->locale : $locale = $this->request->getLocale();
 
-            // TODO
-            // $user->sex      = $serviceProfile->sex ?? null;
-            // $user->birthday = $serviceProfile->birthday ?? null;
+            if (!empty($serviceProfile->sex)) {
+                $createUser->sex = $serviceProfile->sex === 'male' || $serviceProfile->sex === 1 ? 'm' : 'f';
+            }
+
+            if (!empty($serviceProfile->birthday)) {
+                $birthdayTime = new Time($serviceProfile->birthday);
+                $createUser->birthday = $birthdayTime->format('Y-m-d');
+            }
+
+            if (!empty($serviceProfile->id)) {
+                $createUser->service_id = $serviceProfile->id;
+            }
 
             $userModel->insert($createUser);
 
@@ -265,6 +275,21 @@ class Auth extends ResourceController {
         // But if the authorization type is already specified, you should authorize only this way.
         if ($userData->auth_type !== null && $userData->auth_type !== $authType) {
             return $this->failValidationErrors(lang('Auth.authWrongService'));
+        }
+
+        if (empty($userData->service_id) && !empty($serviceProfile->id)) {
+            $updateData = ['service_id' => $serviceProfile->id];
+
+            if (!empty($serviceProfile->sex)) {
+                $updateData['sex'] = $serviceProfile->sex === 'male' || $serviceProfile->sex === 1 ? 'm' : 'f';
+            }
+
+            if (!empty($serviceProfile->birthday)) {
+                $birthdayTime = new Time($serviceProfile->birthday);
+                $updateData['birthday'] = $birthdayTime->format('Y-m-d');
+            }
+
+            $userModel->update($userData->id, $updateData);
         }
 
         if ($userData->auth_type !== $authType) {

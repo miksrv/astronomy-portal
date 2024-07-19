@@ -52,6 +52,18 @@ class AddUser extends Migration {
                 'default' => 'ru',
                 'null'    => false,
             ],
+            'sex' => [
+                'type' => 'ENUM("m", "f")',
+                'null' => true,
+            ],
+            'birthday' => [
+                'type' => 'DATE',
+                'null' => true,
+            ],
+            'service_id' => [
+                'type' => 'INT',
+                'null' => true,
+            ],
             'created_at DATETIME default current_timestamp',
             'updated_at DATETIME default current_timestamp',
             'activity_at' => [

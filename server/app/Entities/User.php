@@ -13,6 +13,9 @@ class User extends Entity {
         'role'        => 'string',
         'locale'      => 'string',
         'avatar'      => 'string',
+        'birthday'    => 'string',
+        'service_id'  => 'string',
+        'sex'         => 'string',
         'updated_at'  => 'datetime',
         'activity_at' => 'datetime',
     ];
