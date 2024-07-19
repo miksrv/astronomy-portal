@@ -19,7 +19,11 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
 
     const [confirmation, showConfirmation] = useState<boolean>(false)
 
-    const { data, isFetching } = API.useEventGetUpcomingQuery()
+    const {
+        data,
+        isFetching,
+        isLoading: upcomingLoading
+    } = API.useEventGetUpcomingQuery()
     const [cancelRegistration, { isLoading }] =
         API.useEventsCancelRegistrationPostMutation()
 
@@ -58,7 +62,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
 
     return data?.id ? (
         <Container>
-            {isFetching && (
+            {upcomingLoading && (
                 <div
                     className={'box'}
                     style={{
@@ -226,11 +230,14 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                                 <b>{formatUTCDate(data?.date?.date, 'H:mm')}</b>{' '}
                                 часам
                                 <br />
-                                на место проведения мероприятия.
+                                на место проведения мероприятия: Оренбургский
+                                район, г. Горюн (40 км от центра Оренбурга)
                             </p>
                             <p>
-                                Используйте ссылки ниже, чтобы найти точное
-                                местоположение проведения мероприятия:
+                                <strong style={{ color: 'red' }}>
+                                    Используйте ссылки ниже, чтобы найти точное
+                                    местоположение проведения мероприятия:
+                                </strong>
                             </p>
                             <div className={styles.mapLinks}>
                                 <a
@@ -352,7 +359,9 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
     ) : (
         <Container>
             <div style={{ margin: '20px', textAlign: 'center' }}>
-                {'Нет предстоящих астровыездов'}
+                {isFetching
+                    ? 'Пожалуйста, подождите...'
+                    : 'Нет предстоящих астровыездов'}
             </div>
         </Container>
     )
