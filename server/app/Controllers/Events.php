@@ -27,13 +27,14 @@ class Events extends ResourceController {
     }
 
     public function upcoming(): ResponseInterface {
+        $datetime  = new Time('now');
         $eventData = $this->model
-            ->where('date >=', new Time('now'))
+            ->where('date >=', $datetime->format('Y-m-d H:m:s'))
             ->orderBy('date', 'DESC')
             ->first();
 
         if (empty($eventData)) {
-            return $this->respond();
+            return $this->respond('');
         }
 
         $eventUsersModel = new EventUsersModel();
@@ -75,9 +76,10 @@ class Events extends ResourceController {
     }
 
     public function list(): ResponseInterface {
+        $datetime   = new Time('now');
         $eventsData = $this->model
             ->select('id, title, date, cover')
-            ->where('date <', new Time('now'))
+            ->where('date <', $datetime->format('Y-m-d H:m:s'))
             ->orderBy('date', 'DESC')
             ->findAll();
 
