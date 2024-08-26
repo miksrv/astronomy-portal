@@ -41,13 +41,13 @@ const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
                         alt: photo?.title,
                         height: photo?.height,
                         src: makeImageLink(photo?.full),
-                        srcSet: [
-                            {
-                                height: 200,
-                                src: makeImageLink(photo?.preview),
-                                width: 300
-                            }
-                        ],
+                        // srcSet: [
+                        //     {
+                        //         height: 200,
+                        //         src: makeImageLink(photo?.preview),
+                        //         width: 300
+                        //     }
+                        // ],
                         title: photo.title || '',
                         width: photo?.width
                     } as Slide)
