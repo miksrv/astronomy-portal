@@ -5,9 +5,6 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->get('weather/current', 'Weather::current');
-$routes->get('weather/statistic', 'Weather::statistic');
-$routes->options('weather/(:any)', 'Weather');
 
 // Events
 $routes->get('events', 'Events::list');

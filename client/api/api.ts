@@ -7,7 +7,7 @@ import { RootState } from './store'
 
 type Maybe<T> = T | void
 
-const encodeQueryData = (data: any): string => {
+export const encodeQueryData = (data: any): string => {
     const ret = []
     for (let d in data) {
         if (d && data[d]) {

@@ -10,19 +10,21 @@ import { API } from './api'
 import applicationSlice from './applicationSlice'
 import authSlice from './authSlice'
 
+export const reducer = {
+    application: applicationSlice,
+    auth: authSlice,
+    loginModal: loginModalSlice,
+    sidebar: sidebarSlice,
+
+    [API.reducerPath]: API.reducer,
+    [APIMeteo.reducerPath]: APIMeteo.reducer
+}
+
 export const store = () =>
     configureStore({
         devTools: process.env.NODE_ENV !== 'production',
         middleware: (gDM) => gDM().concat(API.middleware, APIMeteo.middleware),
-        reducer: {
-            application: applicationSlice,
-            auth: authSlice,
-            loginModal: loginModalSlice,
-            sidebar: sidebarSlice,
-
-            [API.reducerPath]: API.reducer,
-            [APIMeteo.reducerPath]: APIMeteo.reducer
-        }
+        reducer
     })
 
 export type AppStore = ReturnType<typeof store>

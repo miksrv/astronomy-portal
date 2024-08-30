@@ -124,9 +124,11 @@ export const dateAddMonth = (
 ): Date => dayjs(date).add(monthCount, 'month').toDate()
 
 export const timeAgo = (seconds?: number | string): string => {
+    if (typeof seconds === 'undefined') return ''
+
     let sec = Number(seconds)
 
-    if (!sec || sec <= 0) return ''
+    if (sec <= 0) return 'обновлено недавно'
 
     let h = (sec / 3600) ^ 0
     let m = ((sec - h * 3600) / 60) ^ 0
