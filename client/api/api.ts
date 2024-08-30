@@ -348,9 +348,6 @@ export const API = createApi({
         }),
 
         /* Weather Controller */
-        weatherGetCurrent: builder.query<ApiType.Weather.ResCurrent, void>({
-            query: () => 'weather/current'
-        }),
         weatherGetStatistic: builder.query<
             ApiType.Weather.ResStatistic,
             Maybe<ApiType.Weather.ReqStatistic>
