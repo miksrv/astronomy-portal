@@ -1,76 +1,76 @@
 @import @/styles/variables.sass
 
 @mixin switchButtons
-  background: transparent !important
-  color: $text-second
-  border: 1px solid $text-main
-  padding: 5px 10px
-  width: 50px
-  text-transform: uppercase
+    background: transparent !important
+    color: $text-second
+    border: 1px solid $text-main
+    padding: 5px 10px
+    width: 50px
+    text-transform: uppercase
 
 @mixin ledIndicator
-  margin-right: 5px
-  display: inline-block
-  background-color: $brown
-  width: 8px
-  height: 8px
-  border-radius: 50%
+    margin-right: 5px
+    display: inline-block
+    background-color: $brown
+    width: 8px
+    height: 8px
+    border-radius: 50%
 
 .relayList
-  padding: 11px !important
+    padding: 11px !important
 
-  @media only screen and (max-width: 768px)
-    margin-bottom: 5px
+    @media only screen and (max-width: 768px)
+        margin-bottom: 5px
 
-  &.loader
-    height: 244.4px
+    &.loader
+        height: 244.4px
 
-  .item
-    display: flex
-    justify-content: space-between
-    margin: 0
-    padding: 4px 0 3.5px 4px
+    .item
+        display: flex
+        justify-content: space-between
+        margin: 0
+        padding: 5px 0 4.8px 4px
 
-    button
-      height: 24.15px !important
-      line-height: 0px
-      text-transform: uppercase
-      padding: 0
+        button
+            height: 24.15px !important
+            line-height: 0
+            text-transform: uppercase
+            padding: 0
 
-    &:hover
-      background-color: #373737
+        &:hover
+            background-color: #373737
 
-  .name
-    line-height: 9px
-    padding-top: 8px
-    margin-bottom: 0
+    .name
+        line-height: 9px
+        padding-top: 8px
+        margin-bottom: 0
 
-  .description
-    padding-top: 3px
-    color: $text-footer
+    .description
+        padding-top: 3px
+        color: $text-footer
 
-  .ledOn
-    @include ledIndicator
-    background-color: $green
+    .ledOn
+        @include ledIndicator
+        background-color: $green
 
-  .ledOff
-    @include ledIndicator
-    background-color: $red
+    .ledOff
+        @include ledIndicator
+        background-color: $red
 
-  .switchOff
-    @include switchButtons
-    color: $orange !important
-    border: 1px solid $orange !important
+    .switchOff
+        @include switchButtons
+        color: $orange !important
+        border: 1px solid $orange !important
 
-    &:hover, &:active, &:focus
-      background: rgba(221, 145, 36, 0.18) !important
-      color: $text-main !important
+        &:hover, &:active, &:focus
+            background: rgba(221, 145, 36, 0.18) !important
+            color: $text-main !important
 
-  .switchOn
-    @include switchButtons
-    color: $green !important
-    border: 1px solid $green !important
+    .switchOn
+        @include switchButtons
+        color: $green !important
+        border: 1px solid $green !important
 
-    &:hover, &:active, &:focus
-      background: rgba(46, 140, 71, 0.18) !important
-      color: $text-main !important
+        &:hover, &:active, &:focus
+            background: rgba(46, 140, 71, 0.18) !important
+            color: $text-main !important

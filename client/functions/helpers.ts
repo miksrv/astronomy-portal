@@ -97,6 +97,16 @@ export const formatDate = (
 ): string | undefined =>
     date ? dayjs(date).format(format ?? 'D.MM.YYYY, H:mm') : undefined
 
+export const formatDateUTC = (
+    date?: string | Date,
+    format: string = 'D MMMM YYYY, HH:mm'
+): string => (date ? dayjs.utc(date).local().format(format) : '')
+
+export const minutesAgo = (
+    date?: string | Date,
+    withoutSuffix?: boolean
+): string => (date ? dayjs.utc(date).fromNow(withoutSuffix) : '')
+
 export const formatTimestamp = (
     timestamp: number | undefined,
     format?: string
@@ -113,8 +123,12 @@ export const dateAddMonth = (
     monthCount: number
 ): Date => dayjs(date).add(monthCount, 'month').toDate()
 
-export const timeAgo = (sec: number | null): string => {
-    if (sec === null || sec <= 0) return 'обновлено недавно'
+export const timeAgo = (seconds?: number | string): string => {
+    if (typeof seconds === 'undefined') return ''
+
+    let sec = Number(seconds)
+
+    if (sec <= 0) return 'обновлено недавно'
 
     let h = (sec / 3600) ^ 0
     let m = ((sec - h * 3600) / 60) ^ 0

@@ -1,73 +1,73 @@
 @import @/styles/variables.sass
 
 @mixin weatherCondition
-  display: inline-block
-  width: 8px
-  height: 8px
-  background-color: $brown
-  margin-right: 5px
+    display: inline-block
+    width: 8px
+    height: 8px
+    background-color: $brown
+    margin-right: 5px
 
 @mixin state
-  color: $brown
-  margin-left: 5px
-  text-transform: lowercase
+    color: $brown
+    margin-left: 5px
+    text-transform: lowercase
 
 .weather
-  padding: 14px !important
-  min-height: 130px
-  margin-bottom: $sectionMarginBottom
+    padding: 14px !important
+    min-height: 130px
+    margin-bottom: $sectionMarginBottom
 
-  @media only screen and (max-width: 768px)
-    margin-top: -5px
-    margin-bottom: 15px
+    @media only screen and (max-width: 768px)
+        margin-top: -5px
+        margin-bottom: 15px
 
-  .blockTitle
-    margin: 0
+    .blockTitle
+        margin: 0
 
-  .update
-    margin: 2px 0 5px 0
-      font-size: .9em
-      color: $text-second
+    .update
+        margin: 2px 0 5px 0
+        font-size: 11px
+        color: $text-second
 
-  .grid
-    margin: 10px 0 0 !important
+    .grid
+        margin: 10px 0 0 !important
 
-    .column
-      padding: 1px 0 !important
+        .column
+            padding: 1px 0 !important
 
-  .key
-    color: $text-second
+    .key
+        color: $text-second
 
-  .val
-    color: $text-main
-    margin-left: 5px
+    .val
+        color: $text-main
+        margin-left: 5px
 
-  .weatherState0
-    @include weatherCondition
-    background-color: $green
+    .weatherState0
+        @include weatherCondition
+        background-color: $green
 
-  .weatherState1
-    @include weatherCondition
-    background-color: $orange
+    .weatherState1
+        @include weatherCondition
+        background-color: $orange
 
-  .weatherState2
-    @include weatherCondition
-    background-color: $red
+    .weatherState2
+        @include weatherCondition
+        background-color: $red
 
-  .weatherState3
-    @include weatherCondition
+    .weatherState3
+        @include weatherCondition
 
-  .state0
-    @include state
-    color: $green
+    .state0
+        @include state
+        color: $green
 
-  .state1
-    @include state
-    color: $orange
+    .state1
+        @include state
+        color: $orange
 
-  .state2
-    @include state
-    color: $red
+    .state2
+        @include state
+        color: $red
 
-  .state3
-    @include state
+    .state3
+        @include state

@@ -1,4 +1,5 @@
 import { ApiModel } from '@/api'
+import { Weather } from '@/api/apiMeteo'
 import { formatDate } from '@/functions/helpers'
 import classNames from 'classnames'
 import dayjs, { Dayjs } from 'dayjs'
@@ -18,7 +19,7 @@ const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
 
 interface RenderCalendarProps {
     calendarDate: Date | Dayjs
-    eventsWeather?: ApiModel.Statistic.Weather[]
+    eventsWeather?: Weather[]
     eventsTelescope?: ApiModel.Statistic.Telescope[]
 }
 
@@ -136,7 +137,7 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
                                     name={'cloud'}
                                     style={{ marginRight: 5 }}
                                 />
-                                {Math.round(itemWeatherEvent.clouds)}
+                                {Math.round(itemWeatherEvent?.clouds ?? 0)}
                             </span>
                         )}
                         <span>
@@ -148,7 +149,7 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
                         </span>
                         <span>
                             <Icon name={'send'} />
-                            {itemWeatherEvent.wind_speed}
+                            {itemWeatherEvent.windSpeed}
                         </span>
                     </div>
                 )}

@@ -1,6 +1,8 @@
-import { API, ApiModel } from '@/api'
+import { ApiModel } from '@/api'
+import { APIMeteo } from '@/api/apiMeteo'
 import { dateAddMonth, dateExtractMonth, formatDate } from '@/functions/helpers'
 import classNames from 'classnames'
+import dayjs from 'dayjs'
 import React, { useMemo, useState } from 'react'
 import { Button, Dimmer, Loader } from 'semantic-ui-react'
 
@@ -22,8 +24,12 @@ const Calendar: React.FC<CalendarProps> = ({ eventsTelescope }) => {
     const daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС']
 
     const { data: weatherData, isFetching: weatherLoading } =
-        API.useWeatherGetStatisticQuery({
-            period: formatDate(calendarDate, 'MM-YYYY')
+        APIMeteo.useGetHistoryQuery({
+            end_date: dayjs(calendarDate).isSame(dayjs(), 'month')
+                ? dayjs().format('YYYY-MM-DD')
+                : dayjs(calendarDate).endOf('month').format('YYYY-MM-DD'),
+            start_date:
+                dayjs(calendarDate).startOf('month').format('YYYY-MM-DD') ?? ''
         })
 
     const weatherDays = useMemo(() => {
@@ -33,18 +39,20 @@ const Calendar: React.FC<CalendarProps> = ({ eventsTelescope }) => {
             middle: 0
         }
 
-        weatherData?.weather.forEach((weather) => {
-            if (weather.clouds <= 35) {
-                return initialData.good++
-            } else if (weather.clouds > 35 && weather.clouds <= 65) {
-                return initialData.middle++
-            } else {
-                return initialData.bad++
+        weatherData?.forEach((weather) => {
+            if (typeof weather?.clouds !== 'undefined') {
+                if (weather?.clouds <= 35) {
+                    return initialData.good++
+                } else if (weather?.clouds > 35 && weather?.clouds <= 65) {
+                    return initialData.middle++
+                } else {
+                    return initialData.bad++
+                }
             }
         })
 
         return initialData
-    }, [weatherData?.weather])
+    }, [weatherData])
 
     return (
         <div className={classNames(styles.section, 'box', 'table')}>
@@ -99,7 +107,7 @@ const Calendar: React.FC<CalendarProps> = ({ eventsTelescope }) => {
                     <tbody>
                         <RenderCalendar
                             calendarDate={calendarDate}
-                            eventsWeather={weatherData?.weather}
+                            eventsWeather={weatherData}
                             eventsTelescope={eventsTelescope}
                         />
                     </tbody>

@@ -1,13 +1,17 @@
-import { API } from '@/api'
-import { formatTimestamp, timeAgo } from '@/functions/helpers'
+import { APIMeteo } from '@/api/apiMeteo'
+import { formatDateUTC, minutesAgo } from '@/functions/helpers'
 import classNames from 'classnames'
 import React from 'react'
 import { Dimmer, Grid, Loader } from 'semantic-ui-react'
 
 import styles from './styles.module.sass'
 
-const getRange = (value: number | null, min: number, max: number): number => {
-    if (value === null) return 3
+const getRange = (
+    value?: number,
+    min: number = 0,
+    max: number = 10
+): number => {
+    if (typeof value === 'undefined') return 3
 
     const percent = 15
     const calcVal = value * (1 + percent / 100)
@@ -24,18 +28,14 @@ const getRange = (value: number | null, min: number, max: number): number => {
 }
 
 const Weather: React.FC = () => {
-    const { data, isLoading } = API.useWeatherGetCurrentQuery()
+    const { data, isLoading } = APIMeteo.useGetCurrentQuery()
 
-    const lastUpdate = data ? data.timestamp.server - data.timestamp.update : 0
-
-    const rangeTemp = data ? getRange(data.conditions.temperature, -24, 24) : 3
-    const rangeHumd = data ? getRange(data.conditions.humidity, 0, 75) : 3
-    const rangeCloud = data ? getRange(data.conditions.clouds, 0, 50) : 3
-    const rangeWind = data ? getRange(data.conditions.wind_speed, 0, 10) : 3
-    const rangeRain = data
-        ? getRange(data.conditions.precipitation, 0.1, 0.1)
-        : 3
-    const rangeGust = data ? getRange(data.conditions.precipitation, 0, 8) : 3
+    const rangeTemp = getRange(data?.temperature, -24, 24)
+    const rangeHumd = getRange(data?.humidity, 0, 90)
+    const rangeCloud = getRange(data?.clouds, 0, 50)
+    const rangeWind = getRange(data?.windSpeed, 0, 10)
+    const rangeRain = getRange(data?.precipitation, 0.1, 0.1)
+    const rangeGust = getRange(data?.windGust, 0, 8)
 
     let weatherState: number
     let weatherCondition: string
@@ -79,11 +79,9 @@ const Weather: React.FC = () => {
             <div className={classNames(styles.update, 'small')}>
                 Обновлено:{' '}
                 <strong>
-                    {data
-                        ? formatTimestamp(data.timestamp.update)
-                        : 'Загрузка...'}
+                    {!isLoading ? formatDateUTC(data?.date) : 'Загрузка...'}
                 </strong>{' '}
-                ({timeAgo(lastUpdate)})
+                {data?.date && `(${minutesAgo(data.date)})`}
             </div>
             <Grid className={styles.grid}>
                 <Grid.Column
@@ -96,7 +94,7 @@ const Weather: React.FC = () => {
                         <span className={styles['weatherState' + rangeTemp]} />
                         Температура:
                         <span className={styles.val}>
-                            {data?.conditions.temperature}℃
+                            {data?.temperature ?? ''}℃
                         </span>
                     </div>
                 </Grid.Column>
@@ -110,7 +108,7 @@ const Weather: React.FC = () => {
                         <span className={styles['weatherState' + rangeHumd]} />
                         Влажность:
                         <span className={styles.val}>
-                            {data?.conditions.humidity || '?'}%
+                            {data?.humidity ?? '?'}%
                         </span>
                     </div>
                 </Grid.Column>
@@ -124,7 +122,7 @@ const Weather: React.FC = () => {
                         <span className={styles['weatherState' + rangeCloud]} />
                         Облачность:
                         <span className={styles.val}>
-                            {data?.conditions.clouds || '?'}%
+                            {data?.clouds ?? '?'}%
                         </span>
                     </div>
                 </Grid.Column>
@@ -138,7 +136,7 @@ const Weather: React.FC = () => {
                         <span className={styles['weatherState' + rangeWind]} />
                         Скорость ветра:
                         <span className={styles.val}>
-                            {data?.conditions.wind_speed || '?'} м\с
+                            {data?.windSpeed ?? '?'} м\с
                         </span>
                     </div>
                 </Grid.Column>
@@ -152,7 +150,7 @@ const Weather: React.FC = () => {
                         <span className={styles['weatherState' + rangeRain]} />
                         Осадки:
                         <span className={styles.val}>
-                            {data?.conditions.precipitation} мм
+                            {data?.precipitation ?? '?'} мм
                         </span>
                     </div>
                 </Grid.Column>
@@ -166,7 +164,7 @@ const Weather: React.FC = () => {
                         <span className={styles['weatherState' + rangeGust]} />
                         Порывы ветра:
                         <span className={styles.val}>
-                            {data?.conditions.wind_gust || '?'} м\с
+                            {data?.windGust ?? '?'} м\с
                         </span>
                     </div>
                 </Grid.Column>

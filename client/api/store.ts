@@ -1,3 +1,4 @@
+import { APIMeteo } from '@/api/apiMeteo'
 import { configureStore } from '@reduxjs/toolkit'
 import { createWrapper } from 'next-redux-wrapper'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
@@ -9,19 +10,21 @@ import { API } from './api'
 import applicationSlice from './applicationSlice'
 import authSlice from './authSlice'
 
-export const reducers = {
+export const reducer = {
     application: applicationSlice,
     auth: authSlice,
     loginModal: loginModalSlice,
     sidebar: sidebarSlice,
 
-    [API.reducerPath]: API.reducer
+    [API.reducerPath]: API.reducer,
+    [APIMeteo.reducerPath]: APIMeteo.reducer
 }
 
 export const store = () =>
     configureStore({
-        middleware: (gDM) => gDM().concat(API.middleware),
-        reducer: reducers
+        devTools: process.env.NODE_ENV !== 'production',
+        middleware: (gDM) => gDM().concat(API.middleware, APIMeteo.middleware),
+        reducer
     })
 
 export type AppStore = ReturnType<typeof store>

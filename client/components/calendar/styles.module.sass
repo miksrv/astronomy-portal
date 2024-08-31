@@ -1,155 +1,159 @@
 @import @/styles/variables.sass
 
 .eventCalendarBlock
-  display: flex
-  padding: 1px 1px 1px 4px
-  margin-top: 3px
-  background-color: #43464d
+    display: flex
+    padding: 1px 1px 1px 4px
+    margin-top: 3px
+    background-color: #43464d
 
-  @media only screen and (max-width: 768px)
-    flex-direction: column
+    @media only screen and (max-width: 768px)
+        flex-direction: column
 
 .eventCalendarBlockBox
-  margin-right: 6px
-  white-space: nowrap
+    margin-right: 6px
+    white-space: nowrap
 
-  @media only screen and (max-width: 768px)
-    margin-right: 0
+    @media only screen and (max-width: 768px)
+        margin-right: 0
 
 .section
-  display: block
-  overflow: hidden
-  border-collapse: separate
-  margin-bottom: $sectionMarginBottom
-
-  .mobileMoonIcon
-    position: absolute
-    right: -1px
-    top: 4px
-
-    @media only screen and (min-width: 768px)
-      display: none
-
-  .moonEvent, .sunEvent
-    @extend .eventCalendarBlock
-    @media only screen and (max-width: 768px)
-      display: none
-
-    .sunIcon
-      margin-left: 1px
-      margin-right: 7px
-
-    .rise
-      &:before
-        content: '↑'
-        margin-right: 5px
-
-    .set
-      &:before
-        content: '↓'
-        margin-left: 10px
-        margin-right: 5px
-
-  .weatherEvent
-    @extend .eventCalendarBlock
-    background-color: #475e85
-    padding-left: 6px
-
-    span
-      @extend .eventCalendarBlockBox
-
-    i
-      color: $lightblue
-
-  .telescopeEvent
-    @extend .eventCalendarBlock
-    background-color: #7a5f5f
-    padding-left: 6px
-
-    span
-      @extend .eventCalendarBlockBox
-
-    i
-      color: $orange
-
-  .calendarToolbar
-    margin: 0 0 5px
-    display: flex
-    justify-content: space-between
-
-    button
-      padding: 5px !important
-
-    .currentMonth
-      display: inline-block
-      margin: 0 10px
-      text-transform: capitalize
-
-    .dayStatistic
-      & > div
-        margin: 0 8px
-
-        &:last-of-type
-          margin-right: 0
-
-  .dayNumber
-    display: inline-block
-    border: 1px solid #6b6b6b
-    padding: 1px 3px
-    width: 23px
-    height: 20px
-    text-align: center
-
-    &.green
-      background-color: $green
-      border-color: #a5ff2c
-
-    &.orange
-      background-color: $orange
-      border-color: #FFB804
-
-    &.red
-      background-color: $red
-      border-color: #ffa494
-
-  .grid
-    margin: 0
-    padding: 0
     display: block
+    overflow: hidden
+    border-collapse: separate
+    margin-bottom: $sectionMarginBottom
 
-    table
-      width: 100%
-      margin: 0
-      padding: 0
-      border-spacing: 0
-      border-collapse: collapse
+    .mobileMoonIcon
+        position: absolute
+        right: -1px
+        top: 4px
 
-      thead tr > th
-        height: 50px
-        border: 1px solid #3f3f3f
-        background-color: #242424
-        text-transform: uppercase
+        @media only screen and (min-width: 768px)
+            display: none
 
-      tbody tr > *
-        background-color: #333
+    .moonEvent, .sunEvent
+        @extend .eventCalendarBlock
+        @media only screen and (max-width: 768px)
+            display: none
 
-        &.calendarDay
-          position: relative
-          border: 1px solid #565656
-          vertical-align: top
-          padding: 3px
-          width: 14.2%
+        .sunIcon
+            margin-left: 1px
+            margin-right: 7px
 
-          &.currentDay
-            background-color: #414141
+        .rise
+            &:before
+                content: '↑'
+                margin-right: 5px
 
-        &.empty, &.disable
-          cursor: not-allowed
-          background-color: #424242
+        .set
+            &:before
+                content: '↓'
+                margin-left: 10px
+                margin-right: 5px
 
-        &.today
-          background-color: #414141
+    .weatherEvent
+        @extend .eventCalendarBlock
+        background-color: #475e85
+        padding-left: 6px
 
-          .dayNumber
-            font-weight: 900
-            border-width: 2px
+        span
+            @extend .eventCalendarBlockBox
+
+        i
+            color: $lightblue
+
+    .telescopeEvent
+        @extend .eventCalendarBlock
+        background-color: #7a5f5f
+        padding-left: 6px
+
+        span
+            @extend .eventCalendarBlockBox
+
+        i
+            color: $orange
+
+    .calendarToolbar
+        margin: 0 0 5px
+        display: flex
+        justify-content: space-between
+
+        button
+            padding: 5px !important
+
+        .currentMonth
+            display: inline-block
+            margin: 0 10px
+            text-transform: capitalize
+
+        .dayStatistic
+            & > div
+                margin: 0 8px
+
+                &:last-of-type
+                    margin-right: 0
+
+    .dayNumber
+        display: inline-block
+        border: 1px solid #6b6b6b
+        padding: 1px 3px
+        width: 23px
+        height: 23px
+        line-height: 20px
+        text-align: center
+        color: #FFF
+
+        &.green
+            background-color: $green
+            border-color: #a5ff2c
+
+        &.orange
+            background-color: $orange
+            border-color: #FFB804
+
+        &.red
+            background-color: $red
+            border-color: #ffa494
+
+    .grid
+        margin: 0
+        padding: 0
+        display: block
+
+        table
+            width: 100%
+            margin: 0
+            padding: 0
+            border-spacing: 0
+            border-collapse: collapse
+
+            thead tr > th
+                height: 50px
+                border: 1px solid #3f3f3f
+                background-color: #242424
+                text-transform: uppercase
+
+            tbody tr > *
+                background-color: #333
+
+                &.calendarDay
+                    position: relative
+                    border: 1px solid #565656
+                    vertical-align: top
+                    padding: 3px
+                    width: 14.2%
+                    font-size: 12px
+                    color: #c8c8c8
+
+                    &.currentDay
+                        background-color: #414141
+
+                &.empty, &.disable
+                    cursor: not-allowed
+                    background-color: #424242
+
+                &.today
+                    background-color: #414141
+
+                    .dayNumber
+                        font-weight: 900
+                        border-width: 2px

@@ -7,7 +7,7 @@ import { RootState } from './store'
 
 type Maybe<T> = T | void
 
-const encodeQueryData = (data: any): string => {
+export const encodeQueryData = (data: any): string => {
     const ret = []
     for (let d in data) {
         if (d && data[d]) {
@@ -348,9 +348,6 @@ export const API = createApi({
         }),
 
         /* Weather Controller */
-        weatherGetCurrent: builder.query<ApiType.Weather.ResCurrent, void>({
-            query: () => 'weather/current'
-        }),
         weatherGetStatistic: builder.query<
             ApiType.Weather.ResStatistic,
             Maybe<ApiType.Weather.ReqStatistic>

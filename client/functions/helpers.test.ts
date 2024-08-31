@@ -66,7 +66,7 @@ describe('helpers', () => {
 
     describe('timeAgo function', () => {
         it('returns "обновлено недавно" for null or non-positive seconds', () => {
-            expect(timeAgo(null)).toBe('обновлено недавно')
+            expect(timeAgo(undefined)).toBe('')
             expect(timeAgo(0)).toBe('обновлено недавно')
             expect(timeAgo(-5)).toBe('обновлено недавно')
         })
