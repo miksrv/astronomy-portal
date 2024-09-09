@@ -95,7 +95,7 @@ export const formatDate = (
     date?: string | Date | Dayjs,
     format?: string
 ): string | undefined =>
-    date ? dayjs(date).format(format ?? 'D.MM.YYYY, H:mm') : undefined
+    date ? dayjs(date).format(format ?? 'DD.MM.YYYY, HH:mm') : undefined
 
 export const formatDateUTC = (
     date?: string | Date,

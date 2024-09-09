@@ -31,7 +31,7 @@ const Footer: React.FC = () => (
             </a>{' '}
             {formatDate(new Date(), 'YYYY')}, Version{' '}
             <span>{packageInfo.version}</span>{' '}
-            <span>({formatDate(update)})</span>
+            <span>({formatDate(update, 'DD.MM.YYYY, HH:mm')})</span>
         </div>
     </footer>
 )
