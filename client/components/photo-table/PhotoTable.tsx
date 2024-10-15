@@ -76,7 +76,7 @@ const PhotoTable: React.FC<PhotoTableProps> = ({ photos }) => {
                             <Table.Cell
                                 textAlign={'center'}
                                 colSpan={headerFields.length}
-                                content={'Астрофотографй объекта не найдено'}
+                                content={'Астрофотографий объекта не найдено'}
                             />
                         </Table.Row>
                     )}
