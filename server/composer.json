@@ -7,7 +7,7 @@
     "require": {
         "php": "^8.0",
         "ext-json": "*",
-        "codeigniter4/framework": "^4.4",
+        "codeigniter4/framework": "^4.5",
         "firebase/php-jwt": "^6.9",
         "longman/telegram-bot": "^0.83.1"
     },
