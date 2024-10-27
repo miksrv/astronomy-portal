@@ -1,87 +1,169 @@
-import { API, ApiModel, ApiType } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
-import { GetServerSidePropsResult, NextPage } from 'next'
-import { NextSeo } from 'next-seo'
-import React from 'react'
+import type { GetServerSidePropsResult, NextPage } from 'next'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import Link from 'next/link'
+import React, { useEffect } from 'react'
 
-import Calendar from '@/components/calendar'
-import PhotoGrid from '@/components/photo-grid'
-import Statistic from '@/components/statistic'
-import TelescopeWorkdays from '@/components/telescope-workdays'
+import AppLayout from '@/components/app-layout'
 
-interface HomePageProps {
-    photos: ApiModel.Photo[]
-    catalog: ApiModel.Catalog[]
-    telescope: ApiModel.Statistic.Telescope[]
-    statistic: ApiType.Statistic.ResGeneral | null
+interface HomePageProps {}
+
+const headerHeight = 50
+
+const HomePage: NextPage<HomePageProps> = () => {
+    useEffect(() => {
+        const sections = document.querySelectorAll('section')
+        const options = {
+            root: null, // Весь viewport
+            threshold: 0.2 // 50% секции должно быть видно, чтобы сработал скролл
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const target = entry.target as HTMLElement // Приведение типа
+                    window.scrollTo({
+                        behavior: 'smooth', // Плавный скроллинг
+                        top: target.offsetTop - headerHeight // Теперь offsetTop будет доступен
+                    })
+                }
+            })
+        }, options)
+
+        sections.forEach((section) => {
+            observer.observe(section)
+        })
+
+        return () => observer.disconnect()
+    }, [])
+
+    useEffect(() => {
+        const headings = document.querySelectorAll('.animate')
+
+        const options = {
+            root: null,
+            threshold: 0.1
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => entry.target.classList.add('visible'), 400)
+                    observer.unobserve(entry.target)
+                }
+            })
+        }, options)
+
+        headings.forEach((heading) => {
+            observer.observe(heading)
+        })
+
+        return () => observer.disconnect()
+    }, [])
+
+    return (
+        <AppLayout
+            fullWidth={true}
+            hideFooter={true}
+        >
+            <section style={{ height: '100%', position: 'relative' }}>
+                <div
+                    style={{
+                        backgroundImage: 'url(/photos/stargazing-4.jpeg)',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: 'cover',
+                        height: '100%',
+                        position: 'absolute',
+                        width: '100%'
+                    }}
+                />
+                <div className={'textContainer'}>
+                    <h2 className={'animate'}>Астровыезды</h2>
+                    <p className={'animate'}>
+                        Организуем регулярные поездки под открытое небо, чтобы
+                        наблюдать за звездами и планетами через мощные
+                        телескопы.
+                    </p>
+                    <Link
+                        href='/'
+                        className={'animate'}
+                    >
+                        Подробнее
+                    </Link>
+                </div>
+            </section>
+            <section style={{ height: '100%', position: 'relative' }}>
+                <div
+                    style={{
+                        backgroundImage:
+                            'url(https://api.astro.miksoft.pro/photos/NGC_281-2023.10.05.jpg)',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: 'cover',
+                        height: '100%',
+                        position: 'absolute',
+                        width: '100%'
+                    }}
+                />
+                <div className={'textContainer'}>
+                    <h2 className={'animate'}>Астрофотографии</h2>
+                    <p className={'animate'}>
+                        Коллекция снимков космоса, сделанных на нашей
+                        обсерватории, раскрывающая красоту далеких галактик,
+                        туманностей и звездных скоплений.
+                    </p>
+                    <Link
+                        href='/'
+                        className={'animate'}
+                    >
+                        Подробнее
+                    </Link>
+                </div>
+            </section>
+            <section style={{ height: '100%', position: 'relative' }}>
+                <div
+                    style={{
+                        backgroundImage: 'url(/photos/observatory-1.jpeg)',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: 'cover',
+                        height: '100%',
+                        position: 'absolute',
+                        width: '100%'
+                    }}
+                />
+                <div className={'textContainer'}>
+                    <h2 className={'animate'}>Обсерватория</h2>
+                    <p className={'animate'}>
+                        Откройте для себя вселенную с нашего стационарного
+                        наблюдательного пункта, оборудованного передовыми
+                        телескопами.
+                    </p>
+                    <Link
+                        href='/'
+                        className={'animate'}
+                    >
+                        Подробнее
+                    </Link>
+                </div>
+            </section>
+        </AppLayout>
+    )
 }
 
-const HomePage: NextPage<HomePageProps> = ({
-    photos,
-    catalog,
-    telescope,
-    statistic
-}) => (
-    <main>
-        <NextSeo
-            title={'Любительская астрономическая обсерватория'}
-            description={
-                'Самодельная любительская астрономическая обсерватория с удаленным доступом из любой точки мира через интернет. Статистика работы обсерватории, количество отснятых кадров и накопленных данных. Календарь работы телескопа.'
-            }
-            openGraph={{
-                images: [
-                    {
-                        height: 819,
-                        url: '/screenshots/main.jpg',
-                        width: 1280
-                    }
-                ],
-                locale: 'ru'
-            }}
-        />
-
-        {statistic && <Statistic {...statistic} />}
-
-        <PhotoGrid
-            photos={photos}
-            catalog={catalog}
-        />
-
-        <TelescopeWorkdays eventsTelescope={telescope} />
-
-        <Calendar eventsTelescope={telescope} />
-    </main>
-)
-
 export const getServerSideProps = wrapper.getServerSideProps(
-    (store) => async (): Promise<GetServerSidePropsResult<HomePageProps>> => {
-        const { data: catalog } = await store.dispatch(
-            API.endpoints?.catalogGetList.initiate()
-        )
+    (store) =>
+        async (context): Promise<GetServerSidePropsResult<HomePageProps>> => {
+            const locale = context.locale ?? 'en'
+            const translations = await serverSideTranslations(locale)
 
-        const { data: telescope } = await store.dispatch(
-            API.endpoints?.statisticGetTelescope.initiate()
-        )
+            store.dispatch(setLocale(locale))
 
-        const { data: photos } = await store.dispatch(
-            API.endpoints?.photoGetList.initiate({ limit: 4, order: 'random' })
-        )
-
-        const { data: statistic } = await store.dispatch(
-            API.endpoints?.statisticGet.initiate()
-        )
-
-        await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
-
-        return {
-            props: {
-                catalog: catalog?.items || [],
-                photos: photos?.items || [],
-                statistic: statistic || null,
-                telescope: telescope?.items || []
+            return {
+                props: {
+                    ...translations
+                }
             }
         }
-    }
 )
 
 export default HomePage
