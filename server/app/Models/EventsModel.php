@@ -1,14 +1,19 @@
-<?php namespace App\Models;
+<?php
+
+namespace App\Models;
 
 use CodeIgniter\Model;
+use App\Entities\EventEntity;
 
-class EventsModel extends MyBaseModel {
-    protected $table            = 'events';
-    protected $primaryKey       = 'id';
-    protected $useAutoIncrement = false;
-    protected $returnType       = \App\Entities\Event::class;
+class EventsModel extends ApplicationBaseModel {
+    protected $table      = 'events';
+    protected $primaryKey = 'id';
+    protected $returnType = EventEntity::class;
+
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
+    protected $useAutoIncrement = false;
+
     protected $allowedFields    = [
         'title',
         'content',
@@ -22,20 +27,17 @@ class EventsModel extends MyBaseModel {
 
     protected bool $allowEmptyInserts = false;
 
-    // Dates
     protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
 
-    // Validation
     protected $validationRules      = [];
     protected $validationMessages   = [];
     protected $skipValidation       = true;
     protected $cleanValidationRules = true;
 
-    // Callbacks
     protected $allowCallbacks = true;
     protected $beforeInsert   = ['generateId'];
     protected $afterInsert    = [];
