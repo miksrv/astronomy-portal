@@ -98,20 +98,18 @@ class ObjectsModel extends Model
 
         // Prepare base query to retrieve object-category relationships with localized category titles
         $objectCategoryModel = new ObjectCategoryModel();
-        $objectCategoryQuery = $objectCategoryModel
-            ->select('objects_categories.object_name, objects_categories.category_id, categories.title_en, categories.title_ru')
-            ->join('categories', 'objects_categories.category_id = categories.id');
-        
+        $objectCategoryQuery = $objectCategoryModel->select('object_name, category_id');
+
         // Filter by object name if specified
         if ($object !== null) {
             $objectCategoryQuery->where('objects_categories.object_name', $object);
         }
 
-        $objectCategory = $objectCategoryQuery->findAll();
+        $objectsCategories = $objectCategoryQuery->findAll();
 
         // Map each object with localized titles and its associated categories
         foreach ($objects as $objectItem) {
-            $objectItem->name = $objectItem->catalog_name;
+            $objectItem->name  = $objectItem->catalog_name;
             $objectItem->title = getLocalizedString($locale, $objectItem->title_en, $objectItem->title_ru);
 
             if ($object !== null) {
@@ -126,11 +124,8 @@ class ObjectsModel extends Model
 
             // Filter and map categories belonging to the object with localized titles
             $objectItem->categories = array_values(array_map(
-                fn($category) => [
-                    'id' => $category->category_id,
-                    'title' => getLocalizedString($locale, $category->title_en, $category->title_ru),
-                ],
-                array_filter($objectCategory, fn($category) => $category->object_name === $objectItem->catalog_name)
+                fn($category) => $category->category_id,
+                array_filter($objectsCategories, fn($category) => $category->object_name === $objectItem->catalog_name)
             ));
 
             // Remove unnecessary fields
