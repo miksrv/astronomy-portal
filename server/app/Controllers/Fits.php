@@ -1,20 +1,40 @@
-<?php namespace App\Controllers;
+<?php
 
-use App\Models\CatalogModel;
-use App\Models\FilesModel;
+namespace App\Controllers;
+
+use App\Models\ObjectModel;
+use App\Models\ObjectFitsFilesModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 use Config\Services;
 use Exception;
 
-class Fits extends ResourceController {
+class Fits extends ResourceController
+{
     use ResponseTrait;
+
+    private ObjectFitsFilesModel $filesModel;
+
+    public function __construct() {
+        $this->filesModel = new ObjectFitsFilesModel();
+    }
+
+    public function show($id = null): ResponseInterface
+    {
+        $result = $this->filesModel->getFilesByObject($id);
+
+        return $this->respond([
+            'count' => count($result),
+            'items' => $result
+        ]);
+    }
 
     /**
      * @return ResponseInterface
      */
-    public function data(): ResponseInterface {
+    public function updates(): ResponseInterface
+    {
         $apiKey = $this->request->getGet('key', FILTER_SANITIZE_SPECIAL_CHARS) ?? '';
         $input  = json_decode($this->request->getJSON(true));
 
@@ -27,8 +47,8 @@ class Fits extends ResourceController {
         }
 
         try {
-            $modelCatalog = new CatalogModel();
-            $modelFiles   = new FilesModel();
+            $objectsModel = new ObjectModel();
+            $modelFiles   = new ObjectFitsFileModel();
             $fileId       = md5($input->FILE_NAME);
             $fileObject   = str_replace(' ', '_', $input->OBJECT);
 
@@ -82,7 +102,7 @@ class Fits extends ResourceController {
                 'fwhm'  => isset($input->MEAN_SNR) ? floatval($input->MEAN_SNR) : null,
             ];
 
-            if (!$modelCatalog->find($fileObject)) {
+            if (!$objectsModel->find($fileObject)) {
                 $dataCatalog = [
                     'name'        => $fileObject,
                     'title'       => str_replace('_', ' ', $fileObject),
@@ -94,7 +114,7 @@ class Fits extends ResourceController {
                     'coord_dec'   => $dataFile['dec'],
                 ];
 
-                $modelCatalog->insert($dataCatalog);
+                $objectsModel->insert($dataCatalog);
             }
 
             if ($modelFiles->find($fileId)) {
@@ -118,7 +138,8 @@ class Fits extends ResourceController {
     /**
      * @return ResponseInterface
      */
-    public function image(): ResponseInterface {
+    public function image(): ResponseInterface
+    {
         $apiKey = $this->request->getGet('key', FILTER_SANITIZE_SPECIAL_CHARS) ?? '';
         $files  = $this->request->getFiles();
 

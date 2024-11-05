@@ -1,9 +1,13 @@
-<?php namespace App\Controllers;
+<?php
 
+namespace App\Controllers;
+
+use App\Libraries\LocaleLibrary;
 use App\Libraries\PhotosLibrary;
 use App\Libraries\SessionLibrary;
 use App\Models\CatalogModel;
-use App\Models\PhotoModel;
+use App\Models\PhotosModel;
+use App\Models\PhotosFiltersModel;
 use CodeIgniter\Files\File;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
@@ -11,28 +15,44 @@ use CodeIgniter\API\ResponseTrait;
 use Config\Services;
 use Exception;
 
-class Photo extends ResourceController {
+class Photos extends ResourceController
+{
     use ResponseTrait;
 
     private SessionLibrary $session;
 
-    public function __construct() {
+    public function __construct()
+    {
+        new LocaleLibrary();
+
         $this->session = new SessionLibrary();
     }
 
     /**
-     * List of all photos
-     * @return ResponseInterface
+     * Retrieves a list of photos and their related filters with statistics (frames, exposure).
+     *
+     * @return ResponseInterface Returns a response containing the photo list with filter statistics.
      */
-    public function list(): ResponseInterface {
-        $filterObject = $this->request->getGet('object', FILTER_SANITIZE_SPECIAL_CHARS);
-        $filterLimit  = $this->request->getGet('limit', FILTER_SANITIZE_NUMBER_INT);
-        $orderColumn  = $this->request->getGet('order', FILTER_SANITIZE_SPECIAL_CHARS) ?? 'date';
-        $photoLibrary = new PhotosLibrary();
+    public function list(): ResponseInterface
+    {
+        try {
+            $locale = $this->request->getLocale();
 
-        return $this->respond([
-            'items' => $photoLibrary->getPhotoList($filterObject, $filterLimit ?? 0, $orderColumn)
-        ]);
+            // Fetch data from models
+            $photosModel  = new PhotosModel();
+            $filtersModel = new PhotosFiltersModel();
+            $photosData   = $photosModel->getPhotosWithCategories($locale);
+
+            // Return the response with count and items
+            return $this->respond([
+                'count' => count($photosData),
+                'items' => $photosData
+            ]);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('Objects.serverError'));
+        }
     }
 
     /**
@@ -68,7 +88,7 @@ class Photo extends ResourceController {
      */
     public function download($id = null, $date = null): ResponseInterface {
         try {
-            $photoModel = new PhotoModel();
+            $photoModel = new PhotosModel();
             $photoData  = $photoModel
                 ->select('image_name, image_ext')
                 ->where(['object' => $id, 'date' => $date])
@@ -152,7 +172,7 @@ class Photo extends ResourceController {
             $input['image_height'] = $height;
             $input['filters']      = isset($input['filters']) ? json_encode($input['filters']) : null;
 
-            $catalogModel = new PhotoModel();
+            $catalogModel = new PhotosModel();
             $catalogModel->insert($input);
 
             return $this->respondCreated($input);
@@ -233,7 +253,7 @@ class Photo extends ResourceController {
         }
 
         try {
-            $photoModel = new PhotoModel();
+            $photoModel = new PhotosModel();
             $photoData  = $photoModel->find($id);
 
             if ($photoData) {
@@ -262,7 +282,7 @@ class Photo extends ResourceController {
         }
         
         try {
-            $photoModel = new PhotoModel();
+            $photoModel = new PhotosModel();
             $photoData  = $photoModel->find($id);
 
             if ($photoData) {
