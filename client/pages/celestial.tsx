@@ -3,8 +3,10 @@ import { wrapper } from '@/api/store'
 import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import dynamic from 'next/dynamic'
+import Script from 'next/script'
 import React, { useMemo, useState } from 'react'
 
+import AppLayout from '@/components/app-layout'
 import ObjectCloudSkyMap from '@/components/celestial-map/ObjectCloudSkyMap'
 
 const CelestialMap = dynamic(() => import('@/components/celestial-map'), {
@@ -30,7 +32,20 @@ const CelestialPage: NextPage = () => {
     )
 
     return (
-        <main>
+        <AppLayout fullWidth={true}>
+            <Script
+                src='/scripts/d3.min.js'
+                strategy='beforeInteractive'
+            />
+            <Script
+                src='/scripts/d3.geo.projection.min.js'
+                strategy='beforeInteractive'
+            />
+            <Script
+                src='/scripts/celestial.min.js'
+                strategy='beforeInteractive'
+            />
+
             <NextSeo
                 title={'Карта астрономических объектов'}
                 description={
@@ -48,20 +63,18 @@ const CelestialPage: NextPage = () => {
                 }}
             />
 
-            <div className={'box table global-map section'}>
-                <CelestialMap
-                    objects={listObjects}
-                    interactive={true}
-                    goto={goToObject}
-                />
-            </div>
+            <CelestialMap
+                objects={listObjects}
+                interactive={true}
+                goto={goToObject}
+            />
 
             <ObjectCloudSkyMap
                 loading={isFetching || !listObjects?.length}
                 objects={listObjects}
                 handleClick={(ra, dec) => setGoToObject([ra, dec])}
             />
-        </main>
+        </AppLayout>
     )
 }
 

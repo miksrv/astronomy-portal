@@ -7,6 +7,7 @@ import { NextSeo } from 'next-seo'
 import React, { useMemo } from 'react'
 import { Grid, Message } from 'semantic-ui-react'
 
+import AppLayout from '@/components/app-layout'
 import Coordinates from '@/components/charts/Coordinates'
 import Deviation from '@/components/charts/Deviation'
 import FilesQuality from '@/components/charts/FilesQuality'
@@ -79,7 +80,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
     }, [catalog?.files])
 
     return (
-        <main>
+        <AppLayout>
             <NextSeo
                 title={`${objectTitle} - Объект`}
                 description={
@@ -159,7 +160,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 names={catalogObjects?.items}
                 link={'objects'}
             />
-        </main>
+        </AppLayout>
     )
 }
 

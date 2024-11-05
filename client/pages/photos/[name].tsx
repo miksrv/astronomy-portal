@@ -7,6 +7,7 @@ import { NextSeo } from 'next-seo'
 import React, { useMemo, useState } from 'react'
 import { Accordion, Icon, Message } from 'semantic-ui-react'
 
+import AppLayout from '@/components/app-layout'
 import ObjectCloud from '@/components/object-cloud'
 import PhotoSection from '@/components/photo-section'
 import PhotoTable from '@/components/photo-table'
@@ -40,7 +41,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
     )
 
     return (
-        <main>
+        <AppLayout>
             <NextSeo
                 title={`${objectTitle} - Астрофотография${
                     date ? ` - ${date}` : ''
@@ -98,7 +99,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                 names={photoObjects?.items}
                 link={'photos'}
             />
-        </main>
+        </AppLayout>
     )
 }
 

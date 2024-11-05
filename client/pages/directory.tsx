@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import React, { useState } from 'react'
 import { Button, Confirm, Grid, Icon, Message } from 'semantic-ui-react'
 
+import AppLayout from '@/components/app-layout'
 import AuthorTable from '@/components/author-table'
 import CategoryTable from '@/components/category-table'
 
@@ -107,7 +108,7 @@ const DirectoryPage: NextPage = () => {
     }
 
     return (
-        <main>
+        <AppLayout>
             <NextSeo
                 title={'Справочники'}
                 description={
@@ -268,7 +269,7 @@ const DirectoryPage: NextPage = () => {
                     />
                 </>
             )}
-        </main>
+        </AppLayout>
     )
 }
 

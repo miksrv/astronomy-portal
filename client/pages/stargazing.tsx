@@ -7,6 +7,7 @@ import React, { useState } from 'react'
 import Gallery from 'react-photo-gallery'
 import { Icon, Message } from 'semantic-ui-react'
 
+import AppLayout from '@/components/app-layout'
 import EventUpcoming from '@/components/event-upcoming'
 import EventsList from '@/components/events-list'
 import PhotoLightboxOld from '@/components/photo-lightbox-old'
@@ -41,7 +42,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
     }
 
     return (
-        <main>
+        <AppLayout>
             <NextSeo
                 title={'Астровыезд'}
                 description={
@@ -121,7 +122,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
             </Container>
 
             <EventsList events={events} />
-        </main>
+        </AppLayout>
     )
 }
 

@@ -9,6 +9,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
 import { Button } from 'semantic-ui-react'
 
+import AppLayout from '@/components/app-layout'
 import EventPhotoUploader from '@/components/event-photo-uploader/EventPhotoUploader'
 import PhotoGallery from '@/components/photo-gallery'
 
@@ -43,7 +44,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
     }, [event?.photos])
 
     return (
-        <main>
+        <AppLayout>
             <NextSeo
                 title={`Астровыезд - ${event?.title}`}
                 description={sliceText(event?.content ?? '', 300)}
@@ -110,7 +111,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                     />
                 </Container>
             )}
-        </main>
+        </AppLayout>
     )
 }
 

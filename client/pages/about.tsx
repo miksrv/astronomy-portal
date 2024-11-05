@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import React, { useState } from 'react'
 import Gallery from 'react-photo-gallery'
 
+import AppLayout from '@/components/app-layout'
 import Team from '@/components/project-team'
 
 import photoObservatory1 from '@/public/photos/observatory-1.jpeg'
@@ -106,7 +107,7 @@ const AboutPage: NextPage = () => {
     }
 
     return (
-        <main>
+        <AppLayout>
             <NextSeo
                 title={'О нас - обсерватория в Оренбурге и Астровыезды'}
                 description={
@@ -249,7 +250,7 @@ const AboutPage: NextPage = () => {
                 onCloseLightBox={handleHideLightbox}
                 onChangeIndex={setPhotoIndex}
             />
-        </main>
+        </AppLayout>
     )
 }
 

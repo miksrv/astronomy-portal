@@ -4,6 +4,7 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import React, { useMemo, useState } from 'react'
 
+import AppLayout from '@/components/app-layout'
 import CatalogToolbar from '@/components/catalog-toolbar'
 import PhotoGrid from '@/components/photo-grid'
 
@@ -45,7 +46,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
     )
 
     return (
-        <main>
+        <AppLayout>
             <NextSeo
                 title={'Астрофотографии'}
                 description={
@@ -73,7 +74,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
                 photos={listPhotos}
                 catalog={catalog}
             />
-        </main>
+        </AppLayout>
     )
 }
 

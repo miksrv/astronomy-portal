@@ -3,13 +3,14 @@ import { NextSeo } from 'next-seo'
 import React from 'react'
 import { Grid } from 'semantic-ui-react'
 
+import AppLayout from '@/components/app-layout'
 import AstronomyCalc from '@/components/astronomy-calc'
 import Camera from '@/components/camera'
 import RelayList from '@/components/relay-list'
 import Weather from '@/components/weather'
 
 const DashboardPage: NextPage = () => (
-    <main>
+    <AppLayout>
         <NextSeo
             title={'Панель управления обсерваторией'}
             description={
@@ -68,7 +69,7 @@ const DashboardPage: NextPage = () => (
             </Grid.Row>
         </Grid>
         <br />
-    </main>
+    </AppLayout>
 )
 
 export default DashboardPage
