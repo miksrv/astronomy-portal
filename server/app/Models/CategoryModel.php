@@ -10,6 +10,7 @@ class CategoryModel extends Model
     protected $table      = 'categories';
     protected $primaryKey = 'id';
     protected $returnType = CategoryEntity::class;
+
     protected $useSoftDeletes = false;
 
     protected $allowedFields = [
