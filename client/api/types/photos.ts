@@ -1,8 +1,22 @@
 import { ApiModel } from '@/api'
 
+export interface PostResponse {
+    result?: boolean
+}
+
 export interface Response {
     count?: number
     items?: ApiModel.Photo[]
+}
+
+export interface PostRequest {
+    photoId?: string
+    categories?: number[]
+    objects?: string[]
+    equipment?: number[]
+    date?: string
+    filters?: ApiModel.Filters
+    upload?: FormData
 }
 
 export interface Request {
