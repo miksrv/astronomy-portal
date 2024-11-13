@@ -8,13 +8,15 @@ class EventEntity extends Entity
 {
     protected $attributes = [
         'id'                 => null,
-        'title'              => null,
-        'content'            => null,
-        'cover'              => null,
+        'title_en'           => null,
+        'title_ru'           => null,
+        'content_en'         => null,
+        'content_ru'         => null,
+        'file_image'         => null,
         'max_tickets'        => null,
-        'date'               => null,
         'yandex_map_link'    => null,
         'google_map_link'    => null,
+        'date'               => null,
         'registration_start' => null,
         'registration_end'   => null,
         'created_at'         => null,
@@ -23,9 +25,9 @@ class EventEntity extends Entity
     ];
 
     protected $datamap = [
-        'registrationStart' => 'registration_start',
-        'registrationEnd'   => 'registration_end',
-        'availableTickets'  => 'max_tickets',
+        // 'registrationStart' => 'registration_start',
+        // 'registrationEnd'   => 'registration_end',
+        // 'availableTickets'  => 'max_tickets',
         'yandexMap' => 'yandex_map_link',
         'googleMap' => 'google_map_link',
     ];

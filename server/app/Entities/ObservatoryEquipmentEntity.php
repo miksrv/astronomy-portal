@@ -13,4 +13,8 @@ class ObservatoryEquipmentEntity extends Entity
         'model'          => 'string',
         'specifications' => 'string',
     ];
+
+    protected $datamap = [
+        'type' => 'equipment_type',
+    ];
 }
