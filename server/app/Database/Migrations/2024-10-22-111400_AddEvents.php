@@ -33,7 +33,7 @@ class CreateEventsTable extends Migration
                 'type' => 'TEXT',
                 'null' => true
             ],
-            'file_cover' => [
+            'file_image' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 150,
                 'null'       => true
