@@ -1,16 +1,17 @@
-import { ApiModel } from '@/api'
+import { ApiModel, ApiType } from '@/api'
 
 export type Photo = {
-    id: number
-    object: string
-    date: string
-    author?: ApiModel.Author
-    image_name: string
-    image_ext: string
-    image_size: number
-    image_width: number
-    image_height: number
-    custom?: boolean
-    statistic: ApiModel.File.Statistic
-    filters: ApiModel.Filter.ListItems
+    id: string
+    date?: string
+    objects?: string[]
+    categories?: string[]
+    dirName?: string
+    fileName?: string
+    fileExt?: string
+    fileSize?: number
+    imageWidth?: number
+    imageHeight?: number
+    updated?: ApiType.DateTime
+    statistic?: ApiModel.Statistic
+    filters?: ApiModel.Filters
 }

@@ -4,7 +4,6 @@ import { createWrapper } from 'next-redux-wrapper'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
 import loginModalSlice from '@/components/login-modal/loginModalSlice'
-import sidebarSlice from '@/components/sidebar/sidebarSlice'
 
 import { API } from './api'
 import applicationSlice from './applicationSlice'
@@ -14,7 +13,6 @@ export const reducer = {
     application: applicationSlice,
     auth: authSlice,
     loginModal: loginModalSlice,
-    sidebar: sidebarSlice,
 
     [API.reducerPath]: API.reducer,
     [APIMeteo.reducerPath]: APIMeteo.reducer
