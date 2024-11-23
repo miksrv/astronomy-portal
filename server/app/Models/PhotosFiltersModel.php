@@ -10,7 +10,7 @@ class PhotosFiltersModel extends Model
     protected $table      = 'photos_filters';
     protected $primaryKey = 'id';
 
-    protected $useAutoIncrement = false;
+    protected $useAutoIncrement = true;
 
     protected $returnType     = PhotosFiltersEntity::class;
     protected $useSoftDeletes = false;

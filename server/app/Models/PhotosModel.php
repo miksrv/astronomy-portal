@@ -15,18 +15,19 @@ class PhotosModel extends ApplicationBaseModel
         'id',
         'date',
         'author_id',
+        'dir_name',
         'file_name',
         'file_ext',
         'file_size',
         'image_width',
         'image_height',
-        'equipment_info',
         'created_at',
         'updated_at',
         'deleted_at',
     ];
 
     protected $validationRules = [
+        'dir_name'     => 'required|max_length[100]',
         'file_name'    => 'required|max_length[50]',
         'file_ext'     => 'required|max_length[5]',
         'file_size'    => 'integer',
@@ -68,52 +69,58 @@ class PhotosModel extends ApplicationBaseModel
         'deleted_at'   => '?datetime',
     ];
 
-    protected $allowCallbacks = true;
-    protected $beforeInsert   = ['generateId'];
+    // protected $allowCallbacks = false;
+    //protected $beforeInsert   = ['generateId'];
 
+     // Основной метод для получения фотографий и связанных данных
     /**
      * Retrieves a list of photos with their localized titles and associated categories.
      *
      * @param string $locale The locale used for selecting the language ('ru' or 'en').
-     * @param string|null $photo_id Optional ID to filter the specific photo.
-     * @return array An array of photos, each containing localized titles and associated categories.
+     * @param string|null $photo_id Optional ID to filter a specific photo.
+     * @param string|null $object Optional object to filter photos by.
+     * @return array An array of photos with associated categories and objects.
      */
-    public function getPhotosWithCategories(string $locale = 'ru', string $photo_id = null): array
+    protected function fetchPhotos(string $locale = 'ru', ?string $photo_id = null, ?string $object = null): array
     {
         helper('locale');
 
-        // Prepare base query to retrieve photos with their titles in both languages
+        // Base query
         $photosQuery = $this->select('*');
 
-        // Apply filter if a specific object is requested
-        if ($photo_id !== null) {
-            $photosQuery->where('photo_id', $photo_id);
-        }
-
-        $photos = $photosQuery->findAll();
-
-        if (empty($photos)) {
-            return [];
-        }
-
-        // Prepare base query to retrieve object-category relationships with localized category titles
+        // Retrieve related categories and objects
         $photoCategoryModel = new PhotosCategoryModel();
         $photoObjectsModel  = new PhotosObjectModel();
+
         $photoCategoryQuery = $photoCategoryModel->select('photo_id, category_id');
         $photoObjectsQuery  = $photoObjectsModel->select('photo_id, object_id');
 
-        // Filter by photo id if specified
         if ($photo_id !== null) {
-            $photoCategoryQuery->where('photos_categories.photo_id', $photo_id);
-            $photoObjectsQuery->where('photos_objects.photo_id', $photo_id);
+            $photoCategoryQuery->where('photo_id', $photo_id);
+            $photoObjectsQuery->where('photo_id', $photo_id);
+            $photosQuery->where('photo_id', $photo_id);
+        }
+
+        if ($object !== null) {
+            $photoObjectsQuery->where('object_id', $object);
         }
 
         $photosCategories = $photoCategoryQuery->findAll();
         $photosObjects    = $photoObjectsQuery->findAll();
 
-        // Map each photo with associated categories
-        foreach ($photos as $photoItem) {
-            // Filter and map categories belonging to the object with localized titles
+        if ($object !== null) {
+            $photosIds = array_map(fn($photo) => $photo->photo_id, $photosObjects);
+            $photosQuery->whereIn('id', $photosIds);
+        }
+
+        $photosList = $photosQuery->findAll();
+
+        if (empty($photosList)) {
+            return [];
+        }
+
+        // Map categories and objects
+        foreach ($photosList as $photoItem) {
             $photoItem->categories = array_values(array_map(
                 fn($category) => $category->category_id,
                 array_filter($photosCategories, fn($category) => $category->photo_id === $photoItem->id)
@@ -124,14 +131,37 @@ class PhotosModel extends ApplicationBaseModel
                 array_filter($photosObjects, fn($objects) => $objects->photo_id === $photoItem->id)
             ));
 
-            // Remove unnecessary fields
             unset(
-                $photoItem->file_name, $photoItem->file_ext, $photoItem->file_size,
+                $photoItem->file_size,
                 $photoItem->image_width, $photoItem->image_height,
                 $photoItem->deleted_at, $photoItem->created_at
             );
         }
 
-        return $photos;
+        return $photosList;
+    }
+
+    /**
+     * Retrieves a list of photos with optional filtering by photo ID.
+     *
+     * @param string $locale   The locale used for selecting the language ('ru' or 'en'). Default is 'ru'.
+     * @param string|null $photo_id Optional photo ID to filter a specific photo. Default is null.
+     * @return array An array of photos with their localized titles and associated categories.
+     */
+    public function getPhotos(string $locale = 'ru', ?string $photo_id = null): array
+    {
+        return $this->fetchPhotos($locale, $photo_id);
+    }
+
+    /**
+     * Retrieves a list of photos filtered by a specific object.
+     *
+     * @param string $object   The object to filter photos by.
+     * @param string $locale   The locale used for selecting the language ('ru' or 'en'). Default is 'ru'.
+     * @return array An array of photos filtered by the specified object, with their localized titles and associated categories.
+     */
+    public function getPhotosByObjects(string $object, string $locale = 'ru'): array
+    {
+        return $this->fetchPhotos($locale, null, $object);
     }
 }

@@ -78,6 +78,7 @@ class ObjectFitsFilesModel extends Model
     public function getFilesByObject(string $object)
     {
         return $this
+        ->select('file_name, filter, date_obs, exptime, ccd_temp, gain, offset')
         ->where('object', $object)
         ->findAll();
     }
