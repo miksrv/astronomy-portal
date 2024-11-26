@@ -21,13 +21,15 @@ class System extends ResourceController
 	 */
 	public function relaclulateFitsFilters(): void
 	{
+		helper('filters')
+
 		$dataObjects = [];
 		$filterModel = new ObjectFitsFiltersModel();
 		$filesModel  = new ObjectFitsFilesModel();
 		$filesData   = $filesModel->getObjectStatistic();
 
 		foreach ($filesData as $file) {
-			$filter = $this->mappingFilters($file->filter);
+			$filter = mappingFilters($file->filter);
 
 			if (!isset($dataObjects[$file->object][$filter])) {
 				$dataObjects[$file->object][$filter] = [
@@ -75,30 +77,5 @@ class System extends ResourceController
 				}
 			}
 		}
-	}
-
-	/**
-	 * Maps filter name to a short representation used in the system.
-	 * 
-	 * This function converts filter names (e.g., 'luminance', 'red') 
-	 * into standardized short names like 'L', 'R'.
-	 * 
-	 * @param string $filter The original filter name.
-	 * 
-	 * @return string The standardized filter name.
-	 */
-	protected function mappingFilters(string $filter): string
-	{
-	    $map = [
-	        'luminance' => 'L', 'l' => 'L',
-	        'red' => 'R', 'r' => 'R',
-	        'green' => 'G', 'g' => 'G',
-	        'blue' => 'B', 'b' => 'B',
-	        'ha' => 'H', 'h' => 'H',
-	        'oiii' => 'O', 'o' => 'O',
-	        'sii' => 'S', 's' => 'S',
-	    ];
-
-	    return $map[strtolower($filter)] ?? 'N';  // Default to 'N' if not found
 	}
 }

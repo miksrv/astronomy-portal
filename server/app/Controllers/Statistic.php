@@ -1,4 +1,6 @@
-<?php namespace App\Controllers;
+<?php
+
+namespace App\Controllers;
 
 use App\Models\CatalogModel;
 use App\Models\FilesModel;
@@ -7,14 +9,16 @@ use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 
-class Statistic extends ResourceController {
+class Statistic extends ResourceController
+{
     use ResponseTrait;
 
     /**
      * List of statistic summary data
      * @return ResponseInterface
      */
-    public function list(): ResponseInterface {
+    public function list(): ResponseInterface
+    {
         $catalogModel = new CatalogModel();
         $photoModel   = new PhotoModel();
         $filesModel   = new FilesModel();
@@ -34,7 +38,8 @@ class Statistic extends ResourceController {
     /**
      * @return ResponseInterface
      */
-    public function catalog(): ResponseInterface {
+    public function catalog(): ResponseInterface
+    {
         $catalogModel  = new CatalogModel();
         $catalogData   = $catalogModel->select('name')->findAll();
         $catalogResult = [];
@@ -51,7 +56,8 @@ class Statistic extends ResourceController {
     /**
      * @return ResponseInterface
      */
-    public function photos(): ResponseInterface {
+    public function photos(): ResponseInterface
+    {
         $photoModel  = new PhotoModel();
         $photoData   = $photoModel->select('object')->findAll();
         $photoResult = [];
@@ -72,7 +78,8 @@ class Statistic extends ResourceController {
     /**
      * @return ResponseInterface
      */
-    public function telescope(): ResponseInterface {
+    public function telescope(): ResponseInterface
+    {
         $period = $this->request->getGet('period', FILTER_SANITIZE_SPECIAL_CHARS);
         $date   = strtotime("01-{$period}");
         $where  = [];
