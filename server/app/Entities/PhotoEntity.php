@@ -10,6 +10,7 @@ class PhotoEntity extends Entity
         'id'             => 'string',
         'date'           => 'string',
         'author_id'      => 'string',
+        'dir_name'       => 'string',
         'file_name'      => 'string',
         'file_ext'       => 'string',
         'file_size'      => 'integer',
@@ -20,11 +21,12 @@ class PhotoEntity extends Entity
         'deleted_at'     => 'datetime'
     ];
 
-    // protected $datamap = [
-    //     'fileName'    => 'file_name',
-    //     'fileExt'     => 'file_ext',
-    //     'fileSize'    => 'file_size',
-    //     'imageWidth'  => 'image_width',
-    //     'imageHeight' => 'image_height'
-    // ];
+    protected $datamap = [
+        'dirName'     => 'dir_name',
+        'fileName'    => 'file_name',
+        'fileExt'     => 'file_ext',
+        'fileSize'    => 'file_size',
+        'imageWidth'  => 'image_width',
+        'imageHeight' => 'image_height'
+    ];
 }
