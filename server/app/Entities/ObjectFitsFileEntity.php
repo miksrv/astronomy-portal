@@ -56,6 +56,13 @@ class ObjectFitsFileEntity extends Entity
         'fwhm'           => 'float',
         'created_at'     => 'datetime',
         'updated_at'     => 'datetime',
-        'deleted_at'     => 'datetime',
+        'deleted_at'     => 'datetime'
+    ];
+
+    protected $datamap = [
+        'fileName' => 'file_name',
+        'exposure' => 'exptime',
+        'ccdTemp'  => 'ccd_temp',
+        'date'     => 'date_obs'
     ];
 }
