@@ -1,0 +1,46 @@
+.formElement
+    margin-bottom: 10px
+
+.formLabel
+    color: var(--input-label-color)
+    margin-bottom: 10px
+    display: block
+
+.addFilter
+    display: flex
+    justify-content: space-between
+    align-items: flex-end
+
+    .filtersDropdown
+        flex: 1
+        margin-right: 10px
+
+.filterList
+    margin-top: 10px
+
+    .filterItem
+        display: flex
+        justify-content: flex-start
+        align-items: center
+        padding: 5px 5px 5px 0
+        border-radius: var(--border-radius)
+
+        label
+            display: block
+            min-width: 40px
+            text-align: center
+            font-weight: 600
+
+        & > div
+            flex: 1
+            margin-right: 5px
+
+        &:not(:last-child)
+            margin-bottom: 5px
+
+.footer
+    border-top: var(--input-border)
+    margin-top: 10px
+    padding-top: 10px
+    display: flex
+    justify-content: flex-end
