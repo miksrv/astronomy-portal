@@ -1,7 +1,9 @@
-import { ApiType } from '@/api'
+import { ApiType, useAppDispatch } from '@/api'
+import '@/api/applicationSlice'
+import { setHeaderHeight } from '@/api/applicationSlice'
 import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Icon, cn } from 'simple-react-ui-kit'
 
 import { Menu } from '@/components/app-layout'
@@ -33,8 +35,6 @@ interface AppHeaderProps {
 }
 
 const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) => {
-    // const dispatch = useAppDispatch()
-
     // const [authGetMe, { data: meData, error }] = useAuthGetMeMutation()
     // const authSlice = useAppSelector((state) => state.auth)
 
