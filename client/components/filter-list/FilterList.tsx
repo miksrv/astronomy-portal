@@ -1,36 +1,47 @@
 import { ApiModel } from '@/api'
-import { declOfNum } from '@/functions/helpers'
-import classNames from 'classnames'
+import { getFilterColor } from '@/tools/colors'
+import { useTranslation } from 'next-i18next'
 import React from 'react'
 
 import styles from './styles.module.sass'
 
 interface FilterListProps {
-    filters?: ApiModel.Filter.ListItems
+    filters?: ApiModel.Filters
 }
 
-const FilterList: React.FC<FilterListProps> = ({ filters }) => (
-    <ul className={styles.filterList}>
-        {Object.entries(filters || [])
-            .filter(([, filter]) => filter.frames)
-            .map(([name, filter]) => (
-                <li key={name}>
-                    <span
-                        className={classNames(styles.filterItem, styles[name])}
-                    >
-                        {name}
-                    </span>
-                    {Math.round(filter.exposure / 60)}{' '}
-                    {declOfNum(Math.round(filter.exposure / 60), [
-                        'минута',
-                        'минуты',
-                        'минут'
-                    ])}{' '}
-                    ({filter.frames}{' '}
-                    {declOfNum(filter.frames, ['кадр', 'кадра', 'кадров'])})
-                </li>
-            ))}
-    </ul>
-)
+const FilterList: React.FC<FilterListProps> = ({ filters }) => {
+    const { t } = useTranslation()
+
+    const filterList = Object.entries(filters || [])
+
+    return (
+        !!filterList?.length && (
+            <ul className={styles.filterList}>
+                {filterList.map(([name, statistic]) => (
+                    <li key={name}>
+                        <span
+                            className={styles.filterItem}
+                            style={{
+                                backgroundColor: getFilterColor(
+                                    name as ApiModel.FilterTypes
+                                )
+                            }}
+                        >
+                            {name}
+                        </span>
+                        {t('plurals.minutes', {
+                            count: statistic.exposure
+                                ? Math.round(statistic.exposure / 60)
+                                : 0
+                        })}{' '}
+                        {`(${t('plurals.frames', {
+                            count: statistic.frames
+                        })})`}
+                    </li>
+                ))}
+            </ul>
+        )
+    )
+}
 
 export default FilterList
