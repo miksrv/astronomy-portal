@@ -1,50 +1,40 @@
-import { useTranslation } from 'next-i18next'
+import dynamic from 'next/dynamic'
 import Script from 'next/script'
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 
-import { customConfig } from './config'
-import styles from './styles.module.sass'
+const StarMapRender = dynamic(() => import('./StarMapRender'), {
+    ssr: false
+})
 
-interface StarMapProps {}
-
-const StarMap: React.FC<StarMapProps> = () => {
-    const { t, i18n } = useTranslation()
-
-    const ref = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        if (ref.current) {
-            customConfig.width = ref.current.offsetWidth
-        }
-
-        customConfig.lang = i18n.language
-
-        Celestial.clear()
-        Celestial.display(customConfig)
-    }, [])
-
-    return (
-        <>
-            <Script
-                src='/scripts/d3.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/d3.geo.projection.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/celestial.min.js'
-                strategy='beforeInteractive'
-            />
-
-            <div
-                ref={ref}
-                id={'celestial-map'}
-                className={styles.skyMap}
-            />
-        </>
-    )
+export type StarMapObject = {
+    ra: number
+    dec: number
+    name: string
 }
+
+export interface StarMapProps {
+    objects?: StarMapObject[]
+    interactive?: boolean
+    goto?: [number, number]
+}
+
+const StarMap: React.FC<StarMapProps> = ({ ...props }) => (
+    <>
+        <Script
+            src='/scripts/d3.min.js'
+            strategy='beforeInteractive'
+        />
+        <Script
+            src='/scripts/d3.geo.projection.min.js'
+            strategy='beforeInteractive'
+        />
+        <Script
+            src='/scripts/celestial.min.js'
+            strategy='beforeInteractive'
+        />
+
+        <StarMapRender {...props} />
+    </>
+)
 
 export default StarMap

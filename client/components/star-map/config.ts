@@ -1,4 +1,4 @@
-const FONT = '-apple-system, system-ui, sans-serif'
+export const FONT = '-apple-system, system-ui, sans-serif'
 
 export const defaultConfig = {
     width: 0, // Default width, 0 = full parent element
@@ -38,7 +38,7 @@ export const defaultConfig = {
         // 3 letter designation (desig) or other language (see list below)
         namesType: 'iau'
     },
-    controls: false, // Display zoom controls
+    controls: true, // Display zoom controls
     // otherwise center
     datapath: '/data',
     daylight: {
