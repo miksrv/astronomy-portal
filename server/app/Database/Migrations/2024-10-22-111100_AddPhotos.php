@@ -24,6 +24,11 @@ class CreatePhotosTable extends Migration
                 'constraint' => 15,
                 'null'       => true
             ],
+            'dir_name' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 100,
+                'null'       => false
+            ],
             'file_name' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 50,
