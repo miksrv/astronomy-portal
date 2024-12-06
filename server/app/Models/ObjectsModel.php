@@ -81,8 +81,8 @@ class ObjectsModel extends Model
         helper('locale');
 
         // Prepare base query to retrieve objects with their titles in both languages
-        $objectsQuery = $this->select('catalog_name, title_en, title_ru, image_file' . (
-            $object !== null ? ', description_en, description_ru, fits_cloud_link, ra, dec' : '')
+        $objectsQuery = $this->select('catalog_name, title_en, title_ru, image_file, ra, dec' . (
+            $object !== null ? ', description_en, description_ru, fits_cloud_link' : '')
         );
         
         // Apply filter if a specific object is requested

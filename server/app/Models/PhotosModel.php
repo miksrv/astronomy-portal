@@ -89,8 +89,9 @@ class PhotosModel extends ApplicationBaseModel
         $photosQuery = $this->select('*');
 
         // Retrieve related categories and objects
-        $photoCategoryModel = new PhotosCategoryModel();
-        $photoObjectsModel  = new PhotosObjectModel();
+        $photoCategoryModel   = new PhotosCategoryModel();
+        $photoObjectsModel    = new PhotosObjectModel();
+        $photoEquipmentsModel = new PhotosEquipmentsModel();  
 
         $photoCategoryQuery = $photoCategoryModel->select('photo_id, category_id');
         $photoObjectsQuery  = $photoObjectsModel->select('photo_id, object_id');
@@ -98,7 +99,7 @@ class PhotosModel extends ApplicationBaseModel
         if ($photo_id !== null) {
             $photoCategoryQuery->where('photo_id', $photo_id);
             $photoObjectsQuery->where('photo_id', $photo_id);
-            $photosQuery->where('photo_id', $photo_id);
+            $photosQuery->where('id', $photo_id);
         }
 
         if ($object !== null) {
@@ -107,6 +108,9 @@ class PhotosModel extends ApplicationBaseModel
 
         $photosCategories = $photoCategoryQuery->findAll();
         $photosObjects    = $photoObjectsQuery->findAll();
+        $photosEquipments = $photo_id !== null
+            ? $photoEquipmentsModel->where('photo_id', $photo_id)->findAll()
+            : [];
 
         if ($object !== null) {
             $photosIds = array_map(fn($photo) => $photo->photo_id, $photosObjects);
@@ -130,6 +134,13 @@ class PhotosModel extends ApplicationBaseModel
                 fn($objects) => $objects->object_id,
                 array_filter($photosObjects, fn($objects) => $objects->photo_id === $photoItem->id)
             ));
+
+            if ($photo_id !== null && count($photosEquipments)) {
+                $photoItem->equipments = array_values(array_map(
+                    fn($equipments) => $equipments->equipment_id,
+                    array_filter($photosEquipments, fn($equipments) => $equipments->photo_id === $photoItem->id)
+                ));
+            }
 
             unset(
                 $photoItem->file_size,
