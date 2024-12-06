@@ -1,0 +1,34 @@
+{
+    "star-map": "Star Map",
+    "astrophoto": "Astrophoto",
+    "objects": "Objects",
+    "observatory": "Observatory",
+    "stargazing": "Stargazing",
+    "about": "About",
+    "blog": "Blog",
+    "list-astronomical-objects": "List of astronomical objects",
+    "description-object-list-page": "Catalog of astronomical objects photographed by the observatory: galaxies, nebulae, asteroids and comets. The table with objects includes information on the total exposure, availability of processed photos and data for each filter: Luminance, Red, Green, Blue, Ha, OIII, SII. Find out more about each object and the details of the observations conducted by the observatory.",
+    "description-photos-list-page": "A collection of astrophotographs of galaxies, star clusters, nebulae, planets and other celestial objects captured by an amateur observatory. Browse and filter images by category and parameters to see unique images of the Universe with details for each filter and exposure.",
+    "object": "Object",
+    "frames": "Frames",
+    "exposure": "Exposure",
+    "filter-by-category": "Filter by category",
+    "plurals": {
+        "minutes_one": "{{count}} minute",
+        "minutes_few": "{{count}} minutes",
+        "minutes_many": "{{count}} minutes",
+        "frames_one": "{{count}} frame",
+        "frames_few": "{{count}} frames",
+        "frames_many": "{{count}} frames"
+    },
+    "filters": {
+        "luminance": "L",
+        "red": "R",
+        "green": "G",
+        "blue": "B",
+        "hydrogen": "Ha",
+        "oxygen": "OIII",
+        "sulfur": "SII",
+        "unknown": "Unknown"
+    }
+}
