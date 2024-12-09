@@ -65,8 +65,12 @@ const createObjectsJSON = (objects: TObject[]) => {
     return geoJSON
 }
 
-const RenderMap: React.FC<RenderMapProps> = (props) => {
-    const { objects, width, config: customConfig, goto } = props
+const RenderMap: React.FC<RenderMapProps> = ({
+    objects,
+    width,
+    config: customConfig,
+    goto
+}) => {
     const prevJSON = usePrevious({ objects })
 
     // const box = document.createElement('div')
@@ -165,7 +169,7 @@ const RenderMap: React.FC<RenderMapProps> = (props) => {
                 ]
             }
 
-            config.width = width
+            // config.width = width
             config.interactive = customConfig.interactive
 
             if (customConfig.interactive && window.innerWidth <= 760) {

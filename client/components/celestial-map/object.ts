@@ -76,7 +76,6 @@ const object = {
         style: { fill: '#ffffff', opacity: 1 }
     },
     transform: 'equatorial',
-    width: 0,
     zoomlevel: 5
 }
 

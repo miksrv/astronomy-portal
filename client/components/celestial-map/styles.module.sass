@@ -1,40 +1,41 @@
 @import @/styles/variables.sass
 
 .celestialContainer
-  position: relative
-  min-height: inherit
+    position: relative
+    min-height: inherit
 
 .skyMap
-  position: relative
-  border: 1px solid rgba(255, 255, 255, 0.1)
-  overflow: hidden
+    position: relative
+    border: 1px solid rgba(255, 255, 255, 0.1)
+    overflow: hidden
+    height: 100%
 
-  #celestial-zoomout
-    top: 27px
+    #celestial-zoomout
+        top: 27px
 
 .section
-  display: flex
-  flex-wrap: wrap
-  justify-content: center
-  margin-bottom: $sectionMarginBottom
+    display: flex
+    flex-wrap: wrap
+    justify-content: center
+    margin-bottom: $sectionMarginBottom
 
-  & > span
-    &:last-of-type
-      .divider
-        display: none
+    & > span
+        &:last-of-type
+            .divider
+                display: none
 
-  .divider
-    color: $text-main
-    margin: 0 5px
+    .divider
+        color: $text-main
+        margin: 0 5px
 
-  .item
-    margin: 1px
-    color: $text-second
-    cursor: pointer
+    .item
+        margin: 1px
+        color: $text-second
+        cursor: pointer
 
-    &.active
-      font-weight: bold
-      color: $text-main
+        &.active
+            font-weight: bold
+            color: $text-main
 
-    &:hover
-      color: $text-main
+        &:hover
+            color: $text-main
