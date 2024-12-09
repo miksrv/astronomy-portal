@@ -1,87 +1,48 @@
 import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
 import { sliceText } from '@/functions/helpers'
-import classNames from 'classnames'
+import { createMediumPhotoUrl } from '@/tools/photos'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
-import { Reveal } from 'semantic-ui-react'
+import { Container, cn } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
 interface PhotoGridProps {
     threeColumns?: boolean
-    photos?: ApiModel.Photo[]
+    photosList?: ApiModel.Photo[]
     catalog?: ApiModel.Catalog[]
 }
 
 const PhotoGrid: React.FC<PhotoGridProps> = ({
     threeColumns,
-    photos,
+    photosList,
     catalog
 }) => (
-    <div className={classNames(styles.section, 'box')}>
-        {!photos?.length && (
-            <div className={styles.notFound}>
-                {'Ничего не найдено, попробуйте изменить условия поиска.'}
-            </div>
-        )}
-
-        {photos?.map((photo) => {
-            const catalogItem = catalog?.find(
-                ({ name }) => name === photo.object
-            )
-
-            return (
-                <Link
-                    key={photo.id}
-                    href={`/photos/${photo.object}?date=${photo.date}`}
-                    title={`${photo.object} - Фотография объекта`}
-                    className={classNames(
-                        styles.item,
-                        threeColumns ? styles.item4 : undefined
-                    )}
-                >
-                    {catalogItem?.title ? (
-                        <Reveal animated={'small fade'}>
-                            <Reveal.Content visible>
-                                <PhotoImage
-                                    photo={photo}
-                                    title={catalogItem.title}
-                                />
-                            </Reveal.Content>
-                            <Reveal.Content hidden>
-                                <div className={styles.info}>
-                                    <h4>{catalogItem.title}</h4>
-                                    <p>{sliceText(catalogItem?.text)}</p>
-                                </div>
-                            </Reveal.Content>
-                        </Reveal>
-                    ) : (
-                        <PhotoImage
-                            photo={photo}
-                            title={catalogItem?.name ?? ''}
-                        />
-                    )}
-                </Link>
-            )
-        })}
-    </div>
-)
-
-interface PhotoImageProps {
-    photo: ApiModel.Photo
-    title: string
-}
-
-export const PhotoImage: React.FC<PhotoImageProps> = ({ photo, title }) => (
-    <Image
-        src={`${hosts.photo}${photo.image_name}_thumb.${photo.image_ext}`}
-        className={styles.photo}
-        alt={`${title} Фотография объекта`}
-        width={300}
-        height={200}
-    />
+    <Container className={styles.photoGrid}>
+        {photosList?.map((photo) => (
+            <Link
+                key={photo.id}
+                href={`/photos/${photo.id}`}
+                title={'Фотография объекта'}
+                className={styles.photoItem}
+            >
+                <Image
+                    src={createMediumPhotoUrl(photo)}
+                    className={styles.image}
+                    alt={photo.id}
+                    fill={true}
+                />
+                <div className={styles.description}>
+                    <h4>M31 Туманность андромеды</h4>
+                    <div className={styles.info}>
+                        Выдержка: 20 мин, кадров: 30
+                    </div>
+                </div>
+            </Link>
+        ))}
+    </Container>
 )
 
 export default PhotoGrid
