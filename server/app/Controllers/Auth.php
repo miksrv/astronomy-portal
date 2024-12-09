@@ -1,4 +1,6 @@
-<?php namespace App\Controllers;
+<?php
+
+namespace App\Controllers;
 
 use App\Entities\User;
 use App\Libraries\GoogleClient;
@@ -20,10 +22,12 @@ define('AUTH_TYPE_GOOGLE', 'google');
 define('AUTH_TYPE_YANDEX', 'yandex');
 define('AUTH_TYPE_VK', 'vk');
 
-class Auth extends ResourceController {
+class Auth extends ResourceController
+{
     private SessionLibrary $session;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->session = new SessionLibrary();
     }
 
@@ -33,7 +37,8 @@ class Auth extends ResourceController {
      * @return ResponseInterface
      * @throws ReflectionException
      */
-    public function login(): ResponseInterface {
+    public function login(): ResponseInterface
+    {
         if ($this->session->isAuth) {
             return $this->failForbidden('Already authorized');
         }
@@ -67,7 +72,8 @@ class Auth extends ResourceController {
     /**
      * @throws Exception
      */
-    public function me(): ResponseInterface {
+    public function me(): ResponseInterface
+    {
         $this->session->update();
         return $this->responseAuth();
     }
@@ -77,7 +83,8 @@ class Auth extends ResourceController {
      * @link https://console.developers.google.com/
      * @throws ReflectionException
      */
-    public function google(): ResponseInterface {
+    public function google(): ResponseInterface
+    {
         if ($this->session->isAuth) {
             return $this->failForbidden(lang('Auth.alreadyAuthorized'));
         }
@@ -111,7 +118,8 @@ class Auth extends ResourceController {
      * @return ResponseInterface
      * @throws ReflectionException
      */
-    public function yandex(): ResponseInterface {
+    public function yandex(): ResponseInterface
+    {
         if ($this->session->isAuth) {
             return $this->failForbidden('Вы уже авторизованы');
         }
@@ -144,7 +152,8 @@ class Auth extends ResourceController {
      * @link https://console.developers.google.com/
      * @throws ReflectionException
      */
-    public function vk(): ResponseInterface {
+    public function vk(): ResponseInterface
+    {
         if ($this->session->isAuth) {
             return $this->failForbidden(lang('Auth.alreadyAuthorized'));
         }
@@ -180,7 +189,8 @@ class Auth extends ResourceController {
      * @param array $messages
      * @return bool
      */
-    public function validateRequest($input, array $rules, array $messages =[]): bool {
+    public function validateRequest($input, array $rules, array $messages =[]): bool
+    {
         $this->validator = Services::Validation()->setRules($rules);
 
         return $this->validator->setRules($rules, $messages)->run($input);
@@ -190,7 +200,8 @@ class Auth extends ResourceController {
      * @param IncomingRequest $request
      * @return array|bool|float|int|mixed|object|string|null
      */
-    public function getRequestInput(IncomingRequest $request): mixed {
+    public function getRequestInput(IncomingRequest $request): mixed
+    {
         $input = $request->getPost();
 
         if (empty($input)) {
@@ -304,7 +315,8 @@ class Auth extends ResourceController {
     /**
      * @return ResponseInterface
      */
-    protected function responseAuth(): ResponseInterface {
+    protected function responseAuth(): ResponseInterface
+    {
         $response = (object) ['auth' => $this->session->isAuth];
 
         if ($this->session->isAuth && $this->session->user) {

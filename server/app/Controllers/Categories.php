@@ -46,7 +46,7 @@ class Categories extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('Categories.serverError'));
+            return $this->failServerError(lang('General.serverError'));
         }
     }
 }

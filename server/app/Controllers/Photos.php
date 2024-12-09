@@ -5,8 +5,12 @@ namespace App\Controllers;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\PhotosLibrary;
 use App\Libraries\SessionLibrary;
+use App\Libraries\PhotoUploadLibrary;
 use App\Models\CatalogModel;
 use App\Models\PhotosModel;
+use App\Models\PhotosCategoryModel;
+use App\Models\PhotosObjectModel;
+use App\Models\PhotosEquipmentsModel;
 use App\Models\PhotosFiltersModel;
 use CodeIgniter\Files\File;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -35,13 +39,23 @@ class Photos extends ResourceController
      */
     public function list(): ResponseInterface
     {
+        helper('filters');
+
         try {
             $locale = $this->request->getLocale();
+            $object = $this->request->getGet('object');
 
             // Fetch data from models
             $photosModel  = new PhotosModel();
             $filtersModel = new PhotosFiltersModel();
-            $photosData   = $photosModel->getPhotosWithCategories($locale);
+
+            $filtersData  = $filtersModel->findAll();
+            $photosData   = $object
+                ? $photosModel->getPhotosByObjects($object, $locale)
+                : $photosModel->getPhotos($locale);
+
+            // Prepare photos with filters and statistics
+            $result = prepareObjectDataWithFilters($photosData, $filtersData);
 
             // Return the response with count and items
             return $this->respond([
@@ -51,7 +65,7 @@ class Photos extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('Objects.serverError'));
+            return $this->failServerError(lang('General.serverError'));
         }
     }
 
@@ -63,20 +77,30 @@ class Photos extends ResourceController
      * @param null $date
      * @return ResponseInterface
      */
-    public function show($id = null, $date = null): ResponseInterface {
-        try {
-            $photoLibrary = new PhotosLibrary();
-            $photoItem    = $photoLibrary->getPhotoByObject($id, $date);
+    public function show($id = null, $date = null): ResponseInterface
+    {
+        helper('filters');
 
-            if ($photoItem) {
-                return $this->respond($photoItem);
+        try {
+            $locale = $this->request->getLocale();
+
+            $photosModel  = new PhotosModel();
+            $filtersModel = new PhotosFiltersModel();
+            $photosData   = $photosModel->getPhotos($locale, $id);
+            $filtersData  = $filtersModel->findAll();
+
+            // Prepare photos with filters and statistics
+            $result = prepareObjectDataWithFilters($photosData, $filtersData);
+
+            if ($photosData) {
+                return $this->respond($result[0]);
             }
 
             return $this->failNotFound();
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failNotFound();
+            return $this->failServerError(lang('General.serverError'));
         }
     }
 
@@ -114,72 +138,134 @@ class Photos extends ResourceController
      * @param null $id
      * @return ResponseInterface
      */
-    public function create($id = null): ResponseInterface {
-        $input = $this->request->getJSON(true);
+    public function create(): ResponseInterface
+    {
+        // Get the uploaded file and post data
+        $fileUpload = $this->request->getFile('upload');
+        $photoData  = $this->request->getPost();
+
+        // Set validation rules
         $rules = [
-            'object' => 'required|alpha_dash|min_length[3]|max_length[40]',
-            'date'   => 'required|string|valid_date[Y-m-d]',
-            'author_id'  => 'numeric',
-            'image_name' => 'required|alpha_dash',
-            'image_ext'  => 'required|alpha_dash'
+            'date'       => 'required|valid_date[Y-m-d]',
+            'categories' => 'required|string',
+            'objects'    => 'required|string',
+            'equipment'  => 'required|string',
+            'filters'    => 'required|string'
         ];
 
-        $this->validator = Services::Validation()->setRules($rules);
-
-        if (!$this->validator->run($input)) {
+        // Validate input data
+        $this->validator = \Config\Services::validation()->setRules($rules);
+        if (!$this->validator->run($photoData)) {
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
-        if ($this->session->user->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
+        // Additional access check
+        // if ($this->session->user->role !== 'admin') {
+        //     return $this->failForbidden('Access Denied');
+        // }
+
+        // Decode JSON fields
+        $photoData['categories'] = json_decode($photoData['categories'], true);
+        $photoData['objects']    = json_decode($photoData['objects'], true);
+        $photoData['equipment']  = json_decode($photoData['equipment'], true);
+        $photoData['filters']    = json_decode($photoData['filters'], true);
+
+        // TODO: Добавить проверку на существование categories, objects, equipment и filters
+
+        // Validate the decoded fields (ensure arrays)
+        if (!is_array($photoData['categories']) || !is_array($photoData['objects']) ||
+            !is_array($photoData['equipment']) || !is_array($photoData['filters'])) {
+            return $this->failValidationErrors('Invalid format for categories, objects, equipment, or filters');
         }
 
-        $catalogModel = new CatalogModel();
-        $catalogData  = $catalogModel->find($input['object']);
+        $photoUploadLibrary = new PhotoUploadLibrary();
 
-        if (!$catalogData)  {
-            return $this->failValidationErrors('Object by name "' . $input['object'] . '" not found');
+        // Вызов метода для загрузки файла
+        if ($fileUpload && $fileUpload->isValid()) {
+            $uploadResult = $photoUploadLibrary->handleFileUpload(
+                $fileUpload, 
+                $photoData['objects'], 
+                $photoData['date']
+            );
+        } else {
+            return $this->failValidationErrors('File upload failed or invalid file');
         }
 
-        $photoOrigPath  = UPLOAD_TEMP . $input['image_name'] . '.' . $input['image_ext'];
-        $photoThumbPath = UPLOAD_TEMP . $input['image_name'] . '_thumb.' . $input['image_ext'];
-
-        if (!file_exists($photoOrigPath) || !file_exists($photoThumbPath)) {
-            return $this->failValidationErrors('Uploaded photo files for this object not found');
-        }
-
+        // Insert into database
         try {
-            $dateFormat = date_format(date_create($input['date']), 'Y.m.d');
-            $photosName = $input['object'] . '-' . $dateFormat;
-            $imageFull  = new File($photoOrigPath);
-            $imageThumb = new File($photoThumbPath);
+            $photosModel = new PhotosModel();
 
-            $imageFull->move(UPLOAD_PHOTOS, $photosName . '.' . $input['image_ext']);
-            $imageThumb->move(UPLOAD_PHOTOS, $photosName . '_thumb.' . $input['image_ext']);
+            // Сохраняем фотографию
+            $photo = new \App\Entities\PhotoEntity();
+            $photo->id           = uniqid();
+            $photo->date         = $photoData['date'];
+            $photo->dirName      = $uploadResult['dir_name'];
+            $photo->file_name    = $uploadResult['file_name'];
+            $photo->file_ext     = $uploadResult['file_ext'];
+            $photo->file_size    = $uploadResult['file_size'];
+            $photo->image_width  = $uploadResult['image_width'];
+            $photo->image_height = $uploadResult['image_height'];
 
-            $image = Services::image('gd'); // imagick
-            $image->withFile(UPLOAD_PHOTOS . $photosName . '.' . $input['image_ext'])
-                ->fit(160, 36, 'center')
-                ->save(UPLOAD_PHOTOS . $photosName . '_80x18.' . $input['image_ext']);
+            $insertedPhoto = $photosModel->insert($photo);
 
-            $movedOriginal = new File(UPLOAD_PHOTOS . $photosName . '.' . $input['image_ext']);
+            // Сохраняем категории
+            if ($photoData['categories']) {
+                $photosCategoryModel = new PhotosCategoryModel();
 
-            list($width, $height) = getimagesize($movedOriginal);
+                foreach ($photoData['categories'] as $categoryId) {
+                    $photosCategoryModel->insert([
+                        'photo_id'    => $photo->id,
+                        'category_id' => $categoryId,
+                    ]);
+                }
+            }
 
-            $input['image_name']   = $photosName;
-            $input['image_size']   = $movedOriginal->getSize();
-            $input['image_width']  = $width;
-            $input['image_height'] = $height;
-            $input['filters']      = isset($input['filters']) ? json_encode($input['filters']) : null;
+            // Сохраняем объекты
+            if ($photoData['objects']) {
+                $photosObjectModel = new PhotosObjectModel();
 
-            $catalogModel = new PhotosModel();
-            $catalogModel->insert($input);
+                foreach ($photoData['objects'] as $objectId) {
+                    $photosObjectModel->insert([
+                        'photo_id'  => $photo->id,
+                        'object_id' => $objectId,
+                    ]);
+                }
+            }
 
-            return $this->respondCreated($input);
-        } catch (Exception $e) {
-            log_message('error', '{exception}', ['exception' => $e]);
+            // Сохраняем оборудование
+            if ($photoData['equipment']) {
+                $photosEquipmentsModel = new PhotosEquipmentsModel();
 
-            return $this->failServerError();
+                foreach ($photoData['equipment'] as $equipmentId) {
+                    $photosEquipmentsModel->insert([
+                        'photo_id'     => $photo->id,
+                        'equipment_id' => $equipmentId,
+                    ]);
+                }
+            }
+
+            // Сохраняем фильтры
+            if ($photoData['filters']) {
+                $photosFiltersModel = new PhotosFiltersModel();
+
+                foreach ($photoData['filters'] as $filterType => $filterData) {
+                    if (empty($filterData['exposure']) || empty($filterData['frames'])) {
+                        continue;
+                    }
+
+                    $photosFiltersModel->insert([
+                        'photo_id'      => $photo->id,
+                        'filter'        => $filterType,
+                        'exposure_time' => $filterData['exposure'],
+                        'frames_count'  => $filterData['frames']
+                    ]);
+                }
+            }
+
+            return $this->respondCreated($photoData);
+        } catch (\Exception $e) {
+            log_message('error', $e->getMessage());
+            return $this->failServerError('Could not save photo data');
         }
     }
 

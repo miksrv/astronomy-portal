@@ -32,6 +32,8 @@ class Objects extends ResourceController
      */
     public function list(): ResponseInterface
     {
+        helper('filters');
+
         try {
             $locale = $this->request->getLocale();
 
@@ -42,7 +44,7 @@ class Objects extends ResourceController
             $filtersData  = $filtersModel->findAll();
 
             // Prepare objects with filters and statistics
-            $result = $this->_prepareObjectDataWithFilters($objectsData, $filtersData);
+            $result = prepareObjectDataWithFilters($objectsData, $filtersData);
 
             // Return the response with count and items
             return $this->respond([
@@ -52,7 +54,7 @@ class Objects extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('Objects.serverError'));
+            return $this->failServerError(lang('General.serverError'));
         }
     }
 
@@ -64,6 +66,8 @@ class Objects extends ResourceController
      */
     public function show($id = null): ResponseInterface
     {
+        helper('filters');
+
         try {
             $locale = $this->request->getLocale();
 
@@ -74,17 +78,17 @@ class Objects extends ResourceController
             $filtersData  = $filtersModel->findAll();
 
             // Prepare the object data with filters and statistics
-            $result = $this->_prepareObjectDataWithFilters($objectsData, $filtersData);
+            $result = prepareObjectDataWithFilters($objectsData, $filtersData);
 
             if (!empty($result)) {
                 return $this->respond($result[0]);
-            } else {
-                return $this->failValidationErrors(lang('Objects.notFound'));
             }
+
+            return $this->failValidationErrors(lang('Objects.notFound'));
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('Objects.serverError'));
+            return $this->failServerError(lang('General.serverError'));
         }
     }
     
@@ -182,56 +186,4 @@ class Objects extends ResourceController
     //         return $this->failServerError();
     //     }
     // }
-
-    /**
-     * Helper method to prepare object data with associated filter statistics.
-     *
-     * @param array $objectsData Array of objects to be processed.
-     * @param array $filtersData Array of filters to associate with objects.
-     * @return array An array of objects each with associated filter statistics.
-     */
-    private function _prepareObjectDataWithFilters(array $objectsData, array $filtersData): array
-    {
-        // Group filters by object_name for faster lookup
-        $filtersGroupedByObject = [];
-        foreach ($filtersData as $filter) {
-            $filtersGroupedByObject[$filter->object_name][] = $filter;
-        }
-
-        // Iterate over objects and calculate statistics for related filters
-        foreach ($objectsData as $object) {
-            $relatedFilters = $filtersGroupedByObject[$object->name] ?? [];
-
-            if (!empty($relatedFilters)) {
-                $filterStatistic = [];
-                $totalFrames   = 0;
-                $totalExposure = 0;
-                $totalFileSize = 0;
-
-                // Aggregate statistics for each related filter
-                foreach ($relatedFilters as $filter) {
-                    $totalFrames   += $filter->frames_count;
-                    $totalExposure += $filter->exposure_time;
-                    $totalFileSize += $filter->files_size;
-
-                    // Store individual filter statistics
-                    $filterStatistic[$filter->filter] = [
-                        'frames'   => $filter->frames_count,
-                        'exposure' => $filter->exposure_time,
-                        'fileSize' => $filter->files_size
-                    ];
-                }
-
-                // Add filter statistics to the object
-                $object->filters   = $filterStatistic;
-                $object->statistic = [
-                    'frames'   => $totalFrames,
-                    'exposure' => $totalExposure,
-                    'fileSize' => $totalFileSize
-                ];
-            }
-        }
-
-        return $objectsData;
-    }
 }
