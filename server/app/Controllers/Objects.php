@@ -6,12 +6,17 @@ use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
 use App\Models\ObjectsModel;
 use App\Models\ObjectFitsFiltersModel;
+use App\Models\ObjectCategoryModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 use Config\Services;
 use Exception;
 
+// TODO: Добавить локали для всех мотодов в этом классе
+// TODO: $objectsModel вынести в $this->model, в конструктор класса
+// TODO: Исправить |is_unique[objects.catalog_name,catalog_name,{id}] для метода update
+// TODO: Раскомментировать проверку прав доступа
 class Objects extends ResourceController
 {
     use ResponseTrait;
@@ -91,99 +96,120 @@ class Objects extends ResourceController
             return $this->failServerError(lang('General.serverError'));
         }
     }
-    
-    /**
-     * Create new catalog item
-     * @return ResponseInterface
-     */
-    // public function create(): ResponseInterface {
-    //     $input = $this->request->getJSON(true);
-    //     $rules = [
-    //         'name' => 'required|min_length[3]|max_length[40]|is_unique[category.name]'
-    //     ];
-
-    //     if (!$this->validate($rules)) {
-    //         return $this->failValidationErrors($this->validator->getErrors());
-    //     }
-
-    //     if ($this->session->user->role !== 'admin') {
-    //         return $this->failValidationErrors('Ошибка прав доступа');
-    //     }
-
-    //     try {
-    //         $objectsModel = new CategoryModel();
-    //         $objectsModel->insert($input);
-
-    //         return $this->respondCreated($input);
-    //     } catch (Exception $e) {
-    //         log_message('error', '{exception}', ['exception' => $e]);
-
-    //         return $this->failServerError();
-    //     }
-    // }
 
     /**
-     * Update exist category item
-     * @param null $id
-     * @return ResponseInterface
+     * Create a new object item.
+     *
+     * @return ResponseInterface Returns a response indicating the result of the creation operation.
      */
-    // public function update($id = null): ResponseInterface {
-    //     $input = $this->request->getJSON(true);
-    //     $rules = [
-    //         'name' => 'required|min_length[3]|max_length[40]|is_unique[category.name]'
-    //     ];
+    public function create(): ResponseInterface
+    {
+        $input = $this->request->getJSON(true);
+        $rules = [
+            'name' => 'required|min_length[3]|max_length[40]|is_unique[objects.catalog_name]'
+        ];
 
-    //     $this->validator = Services::Validation()->setRules($rules);
+        if (!$this->validate($rules)) {
+            return $this->failValidationErrors($this->validator->getErrors());
+        }
 
-    //     if (!$this->validator->run($input)) {
-    //         return $this->failValidationErrors($this->validator->getErrors());
-    //     }
+        // if ($this->session?->user?->role !== 'admin') {
+        //     return $this->failValidationErrors('Ошибка прав доступа');
+        // }
 
-    //     if ($this->session->user->role !== 'admin') {
-    //         return $this->failValidationErrors('Ошибка прав доступа');
-    //     }
+        try {
+            $objectsModel = new ObjectsModel();
+            $objectsModel->insert($input);
 
-    //     try {
-    //         $objectsModel = new CategoryModel();
-    //         $objectsData  = $objectsModel->find($id);
+            return $this->respondCreated($input);
+        } catch (Exception $e) {
+            log_message('error', $e->getMessage(), ['exception' => $e]);
 
-    //         if ($objectsData) {
-    //             $objectsModel->update($id, $input);
-    //             return $this->respondUpdated($input);
-    //         }
-
-    //         return $this->failNotFound();
-    //     } catch (Exception $e) {
-    //         log_message('error', '{exception}', ['exception' => $e]);
-
-    //         return $this->failServerError();
-    //     }
-    // }
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
 
     /**
-     * Hard delete category item
-     * @param string|null $id
-     * @return ResponseInterface
+     * Update an existing object.
+     *
+     * @param string|null $id The ID of the object to update.
+     * @return ResponseInterface Returns a response indicating the result of the update operation.
      */
-    // public function delete($id = null): ResponseInterface {
-    //     if ($this->session->user->role !== 'admin') {
-    //         return $this->failValidationErrors('Ошибка прав доступа');
-    //     }
+    public function update($id = null): ResponseInterface
+    {
+        $input = $this->request->getJSON(true);
+        $rules = [
+            'name' => 'required|min_length[3]|max_length[40]' // |is_unique[objects.catalog_name,catalog_name,{id}]
+        ];
 
-    //     try {
-    //         $objectsModel = new CategoryModel();
-    //         $objectsData   = $objectsModel->find($id);
+        $this->validator = Services::Validation()->setRules($rules);
 
-    //         if ($objectsData) {
-    //             $objectsModel->delete($id, true);
-    //             return $this->respondDeleted($objectsData);
-    //         }
+        if (!$this->validator->run($input)) {
+            return $this->failValidationErrors($this->validator->getErrors());
+        }
 
-    //         return $this->failNotFound();
-    //     } catch (Exception $e) {
-    //         log_message('error', '{exception}', ['exception' => $e]);
+        // if ($this->session?->user?->role !== 'admin') {
+        //     return $this->failValidationErrors('Ошибка прав доступа');
+        // }
 
-    //         return $this->failServerError();
-    //     }
-    // }
+        // Validate the decoded fields (ensure arrays)
+        if ((!empty($input) && !is_array($input['categories'])) || (!empty($input['equipment']) && !is_array($input['equipment']))) {
+            return $this->failValidationErrors('Invalid format for categories, objects, equipment, or filters');
+        }
+
+        try {
+            $objectsModel = new ObjectsModel();
+            $objectsData  = $objectsModel->where('catalog_name', $id)->first();
+
+            // Сохраняем категории
+            if (!empty($input['categories'])) {
+                $objectCategoryModel = new ObjectCategoryModel();
+
+                foreach ($input['categories'] as $categoryId) {
+                    $objectCategoryModel->insert([
+                        'object_name' => $id,
+                        'category_id' => $categoryId,
+                    ]);
+                }
+            }
+
+            if ($objectsData) {
+                $objectsModel->update($id, $input);
+                return $this->respondUpdated($input);
+            }
+
+            return $this->failNotFound('Объект не найден');
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+            return $this->failServerError('Внутренняя ошибка сервера');
+        }
+    }
+
+    /**
+     * Hard delete an object item by ID.
+     *
+     * @param string|null $id The ID of the object to delete.
+     * @return ResponseInterface Returns a response indicating the result of the delete operation.
+     */
+    public function delete($id = null): ResponseInterface
+    {
+        // if ($this->session?->user?->role !== 'admin') {
+        //     return $this->failValidationErrors('Ошибка прав доступа');
+        // }
+
+        try {
+            $objectsModel = new ObjectsModel();
+            $objectsData  = $objectsModel->where('catalog_name', $id)->first();
+
+            if (!$objectsData) {
+                return $this->failNotFound();
+            }
+
+            $objectsModel->delete($id, true);
+            return $this->respondDeleted($objectsData);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+            return $this->failServerError();
+        }
+    }
 }

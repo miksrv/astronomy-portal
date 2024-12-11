@@ -19,6 +19,8 @@ use CodeIgniter\API\ResponseTrait;
 use Config\Services;
 use Exception;
 
+// TODO: Раскоментировать проверку прав доступа
+// TODO: Добавить проверку на существование categories, objects, equipment и filters при создании и редактировании
 class Photos extends ResourceController
 {
     use ResponseTrait;
@@ -160,7 +162,7 @@ class Photos extends ResourceController
         }
 
         // Additional access check
-        // if ($this->session->user->role !== 'admin') {
+        // if ($this->session?->user?->role !== 'admin') {
         //     return $this->failForbidden('Access Denied');
         // }
 
@@ -169,8 +171,6 @@ class Photos extends ResourceController
         $photoData['objects']    = json_decode($photoData['objects'], true);
         $photoData['equipment']  = json_decode($photoData['equipment'], true);
         $photoData['filters']    = json_decode($photoData['filters'], true);
-
-        // TODO: Добавить проверку на существование categories, objects, equipment и filters
 
         // Validate the decoded fields (ensure arrays)
         if (!is_array($photoData['categories']) || !is_array($photoData['objects']) ||
@@ -183,8 +183,8 @@ class Photos extends ResourceController
         // Вызов метода для загрузки файла
         if ($fileUpload && $fileUpload->isValid()) {
             $uploadResult = $photoUploadLibrary->handleFileUpload(
-                $fileUpload, 
-                $photoData['objects'], 
+                $fileUpload,
+                $photoData['objects'],
                 $photoData['date']
             );
         } else {
@@ -209,7 +209,7 @@ class Photos extends ResourceController
             $insertedPhoto = $photosModel->insert($photo);
 
             // Сохраняем категории
-            if ($photoData['categories']) {
+            if (!empty($photoData['categories'])) {
                 $photosCategoryModel = new PhotosCategoryModel();
 
                 foreach ($photoData['categories'] as $categoryId) {
@@ -221,7 +221,7 @@ class Photos extends ResourceController
             }
 
             // Сохраняем объекты
-            if ($photoData['objects']) {
+            if (!empty($photoData['objects'])) {
                 $photosObjectModel = new PhotosObjectModel();
 
                 foreach ($photoData['objects'] as $objectId) {
@@ -233,7 +233,7 @@ class Photos extends ResourceController
             }
 
             // Сохраняем оборудование
-            if ($photoData['equipment']) {
+            if (!empty($photoData['equipment'])) {
                 $photosEquipmentsModel = new PhotosEquipmentsModel();
 
                 foreach ($photoData['equipment'] as $equipmentId) {
@@ -245,7 +245,7 @@ class Photos extends ResourceController
             }
 
             // Сохраняем фильтры
-            if ($photoData['filters']) {
+            if (!empty($photoData['filters'])) {
                 $photosFiltersModel = new PhotosFiltersModel();
 
                 foreach ($photoData['filters'] as $filterType => $filterData) {
@@ -282,7 +282,7 @@ class Photos extends ResourceController
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if ($this->session?->user?->role !== 'admin') {
             return $this->failValidationErrors('Ошибка прав доступа');
         }
 
@@ -334,7 +334,7 @@ class Photos extends ResourceController
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if ($this->session?->user?->role !== 'admin') {
             return $this->failValidationErrors('Ошибка прав доступа');
         }
 
@@ -363,10 +363,10 @@ class Photos extends ResourceController
      * @return ResponseInterface
      */
     public function delete($id = null): ResponseInterface {
-        if ($this->session->user->role !== 'admin') {
+        if ($this->session?->user?->role !== 'admin') {
             return $this->failValidationErrors('Ошибка прав доступа');
         }
-        
+
         try {
             $photoModel = new PhotosModel();
             $photoData  = $photoModel->find($id);
