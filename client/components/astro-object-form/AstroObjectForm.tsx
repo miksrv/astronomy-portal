@@ -1,5 +1,5 @@
 import { API, ApiModel } from '@/api'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Container, Input, MultiSelect } from 'simple-react-ui-kit'
 
 import StarMap from '@/components/star-map'
@@ -12,12 +12,17 @@ export type AstroObjectFormType = Partial<
 
 interface AstroObjectFormProps {
     disabled?: boolean
+    initialData?: AstroObjectFormType
     onSubmit?: (formData?: AstroObjectFormType) => void
+    onCancel?: () => void
 }
 
+// TODO: При window resize нужно перестраивать карту под новое разрешение
 const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
     disabled,
-    onSubmit
+    initialData,
+    onSubmit,
+    onCancel
 }) => {
     // const dispatch = useAppDispatch()
     // const application = useAppSelector((state) => state.application)
@@ -27,9 +32,6 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
 
     const { data: categoriesListData, isLoading: categoriesListLoading } =
         API.useCategoriesGetListQuery()
-
-    const { data: equipmentListData, isLoading: equipmentListLoading } =
-        API.useEquipmentGetListQuery()
 
     // const { data: categoriesData } = API.useCategoryGetListQuery()
     // const { data: catalogData, isFetching } = API.useCatalogGetItemQuery(
@@ -115,6 +117,12 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
         onSubmit?.(formData)
     }
 
+    useEffect(() => {
+        if (initialData) {
+            setFormData(initialData)
+        }
+    }, [initialData])
+
     return (
         <Container>
             <MultiSelect<number>
@@ -125,7 +133,7 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                 notFoundCaption={'Ничего не найдено'}
                 placeholder={'Выберите одну или несколько категорий'}
                 loading={categoriesListLoading}
-                value={formData.categories}
+                value={formData?.categories}
                 options={categoriesListData?.items?.map((item) => ({
                     key: item.id,
                     value: item.title
@@ -138,26 +146,6 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                 }
             />
 
-            <MultiSelect<number>
-                disabled={disabled}
-                className={styles.formElement}
-                label={'Оборудование'}
-                notFoundCaption={'Ничего не найдено'}
-                placeholder={'Выберите астрономическое оборудование'}
-                loading={equipmentListLoading}
-                value={formData.equipment}
-                options={equipmentListData?.items?.map((item) => ({
-                    key: item.id,
-                    value: `${item.brand} ${item.model}`
-                }))}
-                onSelect={(values) =>
-                    setFormData({
-                        ...formData,
-                        equipment: values?.map(({ key }) => key)
-                    })
-                }
-            />
-
             <div className={styles.sections}>
                 <div className={styles.inputSection}>
                     <Input
@@ -165,7 +153,7 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                         disabled={disabled}
                         className={styles.formElement}
                         label={'Имя объекта в каталогах'}
-                        value={formData.name}
+                        value={formData?.name}
                         onChange={(e) =>
                             setFormData({ ...formData, name: e.target.value })
                         }
@@ -176,7 +164,7 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                         disabled={disabled}
                         className={styles.formElement}
                         label={'Название объекта'}
-                        value={formData.title}
+                        value={formData?.title}
                         onChange={(e) =>
                             setFormData({ ...formData, title: e.target.value })
                         }
@@ -188,7 +176,7 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                         className={styles.formElement}
                         label={'RA'}
                         type={'number'}
-                        value={formData.ra}
+                        value={formData?.ra}
                         onChange={(e) =>
                             setFormData({
                                 ...formData,
@@ -203,7 +191,7 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                         className={styles.formElement}
                         label={'DEC'}
                         type={'number'}
-                        value={formData.dec}
+                        value={formData?.dec}
                         onChange={(e) =>
                             setFormData({
                                 ...formData,
@@ -229,6 +217,13 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
             </div>
 
             <div className={styles.footer}>
+                <Button
+                    mode={'secondary'}
+                    label={'Отмена'}
+                    disabled={disabled}
+                    onClick={onCancel}
+                />
+
                 <Button
                     mode={'primary'}
                     variant={'positive'}
