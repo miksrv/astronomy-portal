@@ -27,7 +27,7 @@ export const Menu: React.FC<MenuProps> = ({ className, onClick }) => {
             text: t('blog')
         },
         {
-            link: '/celestial',
+            link: '/starmap',
             text: t('star-map')
         },
         {
@@ -39,7 +39,7 @@ export const Menu: React.FC<MenuProps> = ({ className, onClick }) => {
             text: t('objects')
         },
         {
-            link: '/dashboard',
+            link: '/observatory',
             text: t('observatory')
         },
         {

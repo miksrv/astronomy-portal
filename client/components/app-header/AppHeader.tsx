@@ -21,8 +21,8 @@ export type MenuItemsType = {
 
 export const menuItems: MenuItemsType[] = [
     { external: true, link: 'https://t.me/nearspace', name: 'Блог' },
-    { link: '/celestial', name: 'Карта' },
-    { label: 'photos', link: '/photos', name: 'Фото' },
+    { link: '/starmap', name: 'Карта звездного неба' },
+    { label: 'photos', link: '/photos', name: 'Астрофото' },
     { label: 'objects', link: '/objects', name: 'Объекты' },
     { link: '/dashboard', name: 'Обсерватория' },
     { link: '/stargazing', name: 'Астровыезд' },
