@@ -1,6 +1,6 @@
-import * as LocalStorage from '@/functions/localstorage'
+import * as LocalStorage from '@/tools/localstorage'
 import { ApiModel } from '@/api'
-import { LOCAL_STORAGE } from '@/functions/constants'
+import { LOCAL_STORAGE } from '@/tools/constants'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 import i18Config from '../next-i18next.config'

@@ -107,103 +107,11 @@ export const API = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
-        /* Catalog Controller */
-        catalogDelete: builder.mutation<void, string>({
-            invalidatesTags: (result, error, object) => [
-                { object, type: 'Catalog' },
-                { type: 'Statistic' }
-            ],
-            query: (object) => ({
-                method: 'DELETE',
-                url: `catalog/${object}`
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-        catalogGetItem: builder.query<ApiType.Catalog.ResItem, string>({
-            providesTags: (result, error, id) => [{ id, type: 'Catalog' }],
-            query: (object) => `catalog/${object}`,
-            transformErrorResponse: (response) => response.data
-        }),
-        catalogGetList: builder.query<ApiType.Catalog.ResList, void>({
-            providesTags: () => [{ id: 'LIST', type: 'Catalog' }],
-            query: () => 'catalog'
-        }),
-        catalogPatch: builder.mutation<
-            ApiType.Catalog.ResSet | ApiType.ResError,
-            Partial<ApiType.Catalog.ReqSet> &
-                Pick<ApiType.Catalog.ReqSet, 'name'>
-        >({
-            invalidatesTags: (result, error, { name }) => [
-                { name, type: 'Catalog' }
-            ],
-            query: ({ name, ...formState }) => ({
-                body: formState,
-                method: 'PATCH',
-                url: `catalog/${name}`
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-        catalogPost: builder.mutation<
-            ApiType.Catalog.ResSet | ApiType.ResError,
-            Partial<ApiType.Catalog.ReqSet>
-        >({
-            invalidatesTags: (result, error, { name }) => [
-                { name, type: 'Catalog' },
-                { type: 'Statistic' }
-            ],
-            query: ({ ...formState }) => ({
-                body: formState,
-                method: 'POST',
-                url: 'catalog'
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-
-        /* Category Controller */
-        // categoryDelete: builder.mutation<void, number>({
-        //     invalidatesTags: () => [{ type: 'Category' }],
-        //     query: (id) => ({
-        //         method: 'DELETE',
-        //         url: `category/${id}`
-        //     }),
-        //     transformErrorResponse: (response) => response.data
-        // }),
+        /* Categories Controller */
         categoriesGetList: builder.query<ApiType.Category.Response, void>({
             providesTags: () => [{ id: 'LIST', type: 'Category' }],
             query: () => 'categories'
         }),
-
-        /* Equipment controller */
-        equipmentGetList: builder.query<ApiType.Equipment.Response, void>({
-            providesTags: () => [{ id: 'LIST', type: 'Equipment' }],
-            query: () => 'equipment'
-        }),
-
-        // categoryPatch: builder.mutation<
-        //     ApiType.Category.ResSet | ApiType.ResError,
-        //     Partial<ApiType.Category.ReqSet> &
-        //         Pick<ApiType.Category.ReqSet, 'id'>
-        // >({
-        //     invalidatesTags: () => [{ type: 'Category' }],
-        //     query: ({ id, ...formState }) => ({
-        //         body: formState,
-        //         method: 'PATCH',
-        //         url: `category/${id}`
-        //     }),
-        //     transformErrorResponse: (response) => response.data
-        // }),
-        // categoryPost: builder.mutation<
-        //     ApiType.Category.ResSet | ApiType.ResError,
-        //     Partial<ApiType.Category.ReqSet>
-        // >({
-        //     invalidatesTags: () => [{ type: 'Category' }],
-        //     query: ({ ...formState }) => ({
-        //         body: formState,
-        //         method: 'POST',
-        //         url: 'category'
-        //     }),
-        //     transformErrorResponse: (response) => response.data
-        // }),
 
         /* Events Controller */
         eventGetItem: builder.query<ApiType.Events.ResItem, string>({
@@ -266,20 +174,66 @@ export const API = createApi({
             providesTags: (res, err, id) => [{ id, type: 'Objects' }],
             query: (id) => `objects/${id}`
         }),
+        objectsPatch: builder.mutation<
+            ApiType.Objects.Response | ApiType.ResError,
+            Partial<ApiType.Objects.Request>
+        >({
+            invalidatesTags: (result, error, { name }) => [
+                { id: name, type: 'Events' }
+            ],
+            query: (formState) => ({
+                body: formState,
+                method: 'PATCH',
+                url: `objects/${formState.name}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        objectsPost: builder.mutation<
+            ApiType.Objects.Response | ApiType.ResError,
+            Partial<ApiType.Objects.Request>
+        >({
+            invalidatesTags: () => [{ type: 'Objects' }],
+            query: ({ ...formState }) => ({
+                body: formState,
+                method: 'POST',
+                url: 'objects'
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        objectsDelete: builder.mutation<void, string>({
+            invalidatesTags: () => [{ type: 'Objects' }],
+            query: (name) => ({
+                method: 'DELETE',
+                url: `objects/${name}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+
+        /* Files controller */
+        filesGetList: builder.query<ApiType.Files.Response, string>({
+            providesTags: (res, err, id) => [{ id, type: 'Files' }],
+            query: (object) => `files/${object}`
+        }),
+
+        /* Equipments controller */
+        equipmentsGetList: builder.query<ApiType.Equipment.Response, void>({
+            providesTags: () => ['Equipment'],
+            query: () => 'equipments'
+        }),
 
         /* Photo Controller */
-        // photoPatch: builder.mutation<
-        //     ApiType.Photo.ResSet | ApiType.ResError,
-        //     Partial<ApiType.Photo.ReqSet> & Pick<ApiType.Photo.ReqSet, 'id'>
-        // >({
-        //     invalidatesTags: (result, error, { id }) => [{ id, type: 'Photo' }],
-        //     query: ({ id, ...formState }) => ({
-        //         body: formState,
-        //         method: 'PATCH',
-        //         url: `photo/${id}`
-        //     }),
-        //     transformErrorResponse: (response) => response.data
-        // }),
+        photosGetItem: builder.query<ApiModel.Photo, string>({
+            providesTags: (res, err, id) => [{ id, type: 'Photos' }],
+            query: (id) => `photos/${id}`
+        }),
+        photosGetList: builder.query<
+            ApiType.Photos.Response,
+            Maybe<ApiType.Photos.Request>
+        >({
+            providesTags: () => [{ id: 'LIST', type: 'Photos' }],
+            query: (params) => `photos${encodeQueryData(params)}`,
+            transformErrorResponse: (response) => response.data
+        }),
         photosPost: builder.mutation<
             ApiType.Photos.PostResponse | ApiType.ResError,
             ApiType.Photos.PostRequest
@@ -295,27 +249,26 @@ export const API = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-        // photoPostUpload: builder.mutation<
-        //     ApiType.Photo.ResUpload | ApiType.ResError,
-        //     FormData
-        // >({
-        //     query: (formData) => ({
-        //         body: formData,
-        //         method: 'POST',
-        //         url: 'photo/upload'
-        //     }),
-        //     transformErrorResponse: (response) => response.data
-        // }),
-        photosGetItem: builder.query<ApiModel.Photo, string>({
-            providesTags: (res, err, id) => [{ id, type: 'Photos' }],
-            query: (id) => `photos/${id}`
-        }),
-        photosGetList: builder.query<
-            ApiType.Photos.Response,
-            Maybe<ApiType.Photos.Request>
+        photoPatch: builder.mutation<
+            ApiType.Photos.PostResponse | ApiType.ResError,
+            ApiType.Photos.PostRequest
         >({
-            providesTags: () => [{ id: 'LIST', type: 'Photos' }],
-            query: (params) => `photos${encodeQueryData(params)}`,
+            invalidatesTags: (result, error, { photoId }) => [
+                { photoId, type: 'Photos' }
+            ],
+            query: ({ photoId, ...formState }) => ({
+                body: formState,
+                method: 'PATCH',
+                url: `photo/${photoId}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        photosDelete: builder.mutation<void, string>({
+            invalidatesTags: () => [{ type: 'Photos' }],
+            query: (photoId) => ({
+                method: 'DELETE',
+                url: `photos/${photoId}`
+            }),
             transformErrorResponse: (response) => response.data
         }),
 
@@ -383,6 +336,7 @@ export const API = createApi({
     reducerPath: 'api',
     tagTypes: [
         'Equipment',
+        'Files',
         'Objects',
         'Catalog',
         'Events',
@@ -395,9 +349,4 @@ export const API = createApi({
 })
 
 // Export hooks for usage in functional components
-export const {
-    useAuthGetMeMutation,
-    useAuthorPatchMutation,
-    useAuthorPostMutation,
-    useStatisticGetQuery
-} = API
+export const { useAuthorPatchMutation, useAuthorPostMutation } = API

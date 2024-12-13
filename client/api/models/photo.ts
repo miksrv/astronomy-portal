@@ -4,7 +4,8 @@ export type Photo = {
     id: string
     date?: string
     objects?: string[]
-    categories?: string[]
+    categories?: number[]
+    equipments?: number[]
     dirName?: string
     fileName?: string
     fileExt?: string

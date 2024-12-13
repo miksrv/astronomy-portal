@@ -5,6 +5,7 @@ export type Object = {
     title: string
     description?: string
     categories?: number[]
+    equipment?: number[]
     ra?: number
     dec?: number
     updated?: ApiType.DateTime
