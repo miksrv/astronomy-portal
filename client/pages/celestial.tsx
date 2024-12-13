@@ -33,19 +33,6 @@ const CelestialPage: NextPage = () => {
 
     return (
         <AppLayout fullWidth={true}>
-            <Script
-                src='/scripts/d3.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/d3.geo.projection.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/celestial.min.js'
-                strategy='beforeInteractive'
-            />
-
             <NextSeo
                 title={'Карта астрономических объектов'}
                 description={

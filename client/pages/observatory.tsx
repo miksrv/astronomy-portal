@@ -1,6 +1,8 @@
 import { API, ApiModel, ApiType } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import React from 'react'
 
@@ -10,19 +12,21 @@ import PhotoGrid from '@/components/photo-grid'
 import Statistic from '@/components/statistic'
 import TelescopeWorkdays from '@/components/telescope-workdays'
 
-interface HomePageProps {
-    photos: ApiModel.Photo[]
-    catalog: ApiModel.Catalog[]
-    telescope: ApiModel.Statistic.Telescope[]
-    statistic: ApiType.Statistic.ResGeneral | null
+interface ObservatoryPageProps {
+    // photos: ApiModel.Photo[]
+    // catalog: ApiModel.Catalog[]
+    // telescope: ApiModel.Statistic.Telescope[]
+    // statistic: ApiType.Statistic.ResGeneral | null
 }
 
-const HomePage: NextPage<HomePageProps> = ({
-    photos,
-    catalog,
-    telescope,
-    statistic
-}) => (
+const ObservatoryPage: NextPage<ObservatoryPageProps> = (
+    {
+        // photos,
+        // catalog,
+        // telescope,
+        // statistic
+    }
+) => (
     <AppLayout>
         <NextSeo
             title={'Любительская астрономическая обсерватория'}
@@ -41,48 +45,62 @@ const HomePage: NextPage<HomePageProps> = ({
             }}
         />
 
-        {statistic && <Statistic {...statistic} />}
+        <Calendar />
 
-        <PhotoGrid
-            photos={photos}
-            catalog={catalog}
-        />
+        {/*{statistic && <Statistic {...statistic} />}*/}
 
-        <TelescopeWorkdays eventsTelescope={telescope} />
+        {/*<PhotoGrid*/}
+        {/*    photos={photos}*/}
+        {/*    catalog={catalog}*/}
+        {/*/>*/}
 
-        <Calendar eventsTelescope={telescope} />
+        {/*<TelescopeWorkdays eventsTelescope={telescope} />*/}
+
+        {/*<Calendar eventsTelescope={telescope} />*/}
     </AppLayout>
 )
 
 export const getServerSideProps = wrapper.getServerSideProps(
-    (store) => async (): Promise<GetServerSidePropsResult<HomePageProps>> => {
-        const { data: catalog } = await store.dispatch(
-            API.endpoints?.catalogGetList.initiate()
-        )
+    (store) =>
+        async (
+            context
+        ): Promise<GetServerSidePropsResult<ObservatoryPageProps>> => {
+            const locale = context.locale ?? 'en'
+            const translations = await serverSideTranslations(locale)
 
-        const { data: telescope } = await store.dispatch(
-            API.endpoints?.statisticGetTelescope.initiate()
-        )
+            store.dispatch(setLocale(locale))
 
-        const { data: photos } = await store.dispatch(
-            API.endpoints?.photoGetList.initiate({ limit: 4, order: 'random' })
-        )
+            // const { data: catalog } = await store.dispatch(
+            //     API.endpoints?.catalogGetList.initiate()
+            // )
+            //
+            // const { data: telescope } = await store.dispatch(
+            //     API.endpoints?.statisticGetTelescope.initiate()
+            // )
+            //
+            // const { data: photos } = await store.dispatch(
+            //     API.endpoints?.photoGetList.initiate({
+            //         limit: 4,
+            //         order: 'random'
+            //     })
+            // )
+            //
+            // const { data: statistic } = await store.dispatch(
+            //     API.endpoints?.statisticGet.initiate()
+            // )
 
-        const { data: statistic } = await store.dispatch(
-            API.endpoints?.statisticGet.initiate()
-        )
+            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
-        await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
-
-        return {
-            props: {
-                catalog: catalog?.items || [],
-                photos: photos?.items || [],
-                statistic: statistic || null,
-                telescope: telescope?.items || []
+            return {
+                props: {
+                    ...translations
+                    // catalog: catalog?.items || [],
+                    // photos: photos?.items || [],
+                    // statistic: statistic || null,
+                    // telescope: telescope?.items || []
+                }
             }
         }
-    }
 )
 
-export default HomePage
+export default ObservatoryPage

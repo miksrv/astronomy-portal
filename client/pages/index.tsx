@@ -2,6 +2,7 @@ import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import type { GetServerSidePropsResult, NextPage } from 'next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { NextSeo } from 'next-seo'
 import Link from 'next/link'
 import React, { useEffect } from 'react'
 
@@ -16,8 +17,19 @@ const HomePage: NextPage<HomePageProps> = () => {
         const sections = document.querySelectorAll('section')
         const options = {
             root: null, // Весь viewport
-            threshold: 0.2 // 50% секции должно быть видно, чтобы сработал скролл
+            threshold: 0.1 // 50% секции должно быть видно, чтобы сработал скролл
         }
+
+        const setSectionHeight = () => {
+            const windowHeight = window.innerHeight
+            const sectionHeight = windowHeight - headerHeight
+            sections.forEach((section) => {
+                ;(section as HTMLElement).style.height = `${sectionHeight}px`
+            })
+        }
+
+        setSectionHeight()
+        window.addEventListener('resize', setSectionHeight)
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
@@ -35,7 +47,10 @@ const HomePage: NextPage<HomePageProps> = () => {
             observer.observe(section)
         })
 
-        return () => observer.disconnect()
+        return () => {
+            observer.disconnect()
+            window.removeEventListener('resize', setSectionHeight)
+        }
     }, [])
 
     useEffect(() => {
@@ -63,10 +78,16 @@ const HomePage: NextPage<HomePageProps> = () => {
     }, [])
 
     return (
-        <AppLayout
-            fullWidth={true}
-            hideFooter={true}
-        >
+        <AppLayout fullWidth={true}>
+            <NextSeo
+                title={'222'}
+                description={'111'}
+                noindex={true}
+                openGraph={{
+                    locale: 'ru'
+                }}
+            />
+
             <section style={{ height: '100%', position: 'relative' }}>
                 <div
                     style={{
@@ -86,7 +107,7 @@ const HomePage: NextPage<HomePageProps> = () => {
                         телескопы.
                     </p>
                     <Link
-                        href='/'
+                        href='/stargazing'
                         className={'animate'}
                     >
                         Подробнее
@@ -113,7 +134,7 @@ const HomePage: NextPage<HomePageProps> = () => {
                         туманностей и звездных скоплений.
                     </p>
                     <Link
-                        href='/'
+                        href='/photos'
                         className={'animate'}
                     >
                         Подробнее
@@ -139,7 +160,7 @@ const HomePage: NextPage<HomePageProps> = () => {
                         телескопами.
                     </p>
                     <Link
-                        href='/'
+                        href='/observatory'
                         className={'animate'}
                     >
                         Подробнее

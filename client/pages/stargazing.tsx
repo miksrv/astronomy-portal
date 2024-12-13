@@ -1,11 +1,12 @@
 import { API, ApiModel } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
-import Container from '@/ui/container'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import React, { useState } from 'react'
 import Gallery from 'react-photo-gallery'
-import { Icon, Message } from 'semantic-ui-react'
+import { Container } from 'simple-react-ui-kit'
 
 import AppLayout from '@/components/app-layout'
 import EventUpcoming from '@/components/event-upcoming'
@@ -45,42 +46,20 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
         <AppLayout>
             <NextSeo
                 title={'Астровыезд'}
-                description={
-                    'Астровыезд в Оренбурге - это уникальная возможность насладиться звёздным небом в полной темноте. Присоединяйтесь к нашим поездкам с телескопами за город, чтобы увидеть космические объекты в полях Оренбуржья. Увлекательные наблюдения и захватывающие открытия ждут вас на каждом астровыезде.'
-                }
+                description={''}
                 openGraph={{
-                    images: [
-                        {
-                            height: 853,
-                            url: '/photos/stargazing7.jpeg',
-                            width: 1280
-                        }
-                    ],
+                    // images: [
+                    //     {
+                    //         height: 853,
+                    //         url: '/photos/stargazing7.jpeg',
+                    //         width: 1280
+                    //     }
+                    // ],
                     locale: 'ru'
                 }}
             />
 
             <br />
-
-            <Message
-                color={'blue'}
-                className={'telegramMessage'}
-            >
-                <a
-                    href={'https://t.me/nearspace'}
-                    target={'_blank'}
-                    rel='noreferrer'
-                >
-                    <Icon
-                        name={'telegram'}
-                        size={'big'}
-                    />
-                    <strong>
-                        Чтобы не пропустить анонсы - подпишитесь на Telegram
-                        канал
-                    </strong>
-                </a>
-            </Message>
 
             <EventUpcoming />
 
@@ -128,7 +107,14 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (): Promise<GetServerSidePropsResult<StargazingPageProps>> => {
+        async (
+            context
+        ): Promise<GetServerSidePropsResult<StargazingPageProps>> => {
+            const locale = context.locale ?? 'en'
+            const translations = await serverSideTranslations(locale)
+
+            store.dispatch(setLocale(locale))
+
             const { data } = await store.dispatch(
                 API.endpoints?.eventsGetList.initiate()
             )
@@ -137,6 +123,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             return {
                 props: {
+                    ...translations,
                     events: data?.items || []
                 }
             }

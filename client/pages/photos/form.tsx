@@ -18,14 +18,15 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
     const router = useRouter()
     const { t, i18n } = useTranslation()
 
-    // const { id } = router.query
+    const { id } = router.query
 
-    // const { data, isLoading, isError } = API.usePhotosGetItemQuery(
-    //     id as string,
-    //     {
-    //         skip: !id
-    //     }
-    // )
+    const {
+        data: photoData,
+        isLoading: photoLoading
+        // isError
+    } = API.usePhotosGetItemQuery(id as string, {
+        skip: !id
+    })
 
     const [savePhoto, { data, error, isLoading, isSuccess }] =
         API.usePhotosPostMutation()
@@ -44,10 +45,10 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
                     'objects',
                     JSON.stringify(formData.objects)
                 )
-            if (formData.equipment)
+            if (formData.equipments)
                 formDataObject.append(
                     'equipment',
-                    JSON.stringify(formData.equipment)
+                    JSON.stringify(formData.equipments)
                 )
             if (formData.date) formDataObject.append('date', formData.date)
             if (formData.filters)
@@ -63,6 +64,10 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
         }
     }
 
+    const handleCancel = () => {
+        router.back()
+    }
+
     return (
         <AppLayout>
             <NextSeo
@@ -73,11 +78,16 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
                     locale: 'ru'
                 }}
             />
-
-            <h1>{'Добавление / редактирование астро фотографий'}</h1>
+            <div className={'toolbarHeader'}>
+                <h1 className={'pageTitle'}>
+                    {'Добавление / редактирование астро фотографий'}
+                </h1>
+            </div>
             <AstroPhotoForm
+                disabled={photoLoading || isLoading}
+                initialData={photoData}
                 onSubmit={handleSubmit}
-                disabled={isLoading}
+                onCancel={handleCancel}
             />
         </AppLayout>
     )

@@ -1,4 +1,8 @@
-import { NextPage } from 'next'
+import { API } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
+import { GetServerSidePropsResult, NextPage } from 'next'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import dynamic from 'next/dynamic'
 import React, { useState } from 'react'
@@ -88,7 +92,9 @@ const contributors2: string[] = [
     'Владимир Уваров (Сетевой коммутатор D-Link)'
 ]
 
-const AboutPage: NextPage = () => {
+type AboutPageProps = {}
+
+const AboutPage: NextPage<AboutPageProps> = () => {
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
 
@@ -109,18 +115,16 @@ const AboutPage: NextPage = () => {
     return (
         <AppLayout>
             <NextSeo
-                title={'О нас - обсерватория в Оренбурге и Астровыезды'}
-                description={
-                    'Самодельная астрономическая обсерватория в Оренбурге и астровыезды - это уникальные научно-популяризаторские проекты в Оренбургской области. Целью проектов является создание доступности астрономии для всех желающих. Мы делаем космос ближе!'
-                }
+                title={'О Проекте'}
+                description={''}
                 openGraph={{
-                    images: [
-                        {
-                            height: 853,
-                            url: '/photos/stargazing-2.jpeg',
-                            width: 1280
-                        }
-                    ],
+                    // images: [
+                    //     {
+                    //         height: 853,
+                    //         url: '/photos/stargazing-2.jpeg',
+                    //         width: 1280
+                    //     }
+                    // ],
                     locale: 'ru'
                 }}
             />
@@ -253,5 +257,23 @@ const AboutPage: NextPage = () => {
         </AppLayout>
     )
 }
+
+export const getServerSideProps = wrapper.getServerSideProps(
+    (store) =>
+        async (context): Promise<GetServerSidePropsResult<AboutPageProps>> => {
+            const locale = context.locale ?? 'en'
+            const translations = await serverSideTranslations(locale)
+
+            store.dispatch(setLocale(locale))
+
+            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+
+            return {
+                props: {
+                    ...translations
+                }
+            }
+        }
+)
 
 export default AboutPage

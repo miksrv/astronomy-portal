@@ -1,57 +1,61 @@
 import { API, ApiModel } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useTranslation } from 'next-i18next'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import React, { useMemo, useState } from 'react'
+import { useRouter } from 'next/router'
+import React from 'react'
+import { Button } from 'simple-react-ui-kit'
 
 import AppLayout from '@/components/app-layout'
-import CatalogToolbar from '@/components/catalog-toolbar'
 import PhotoGrid from '@/components/photo-grid'
 
 interface PhotosPageProps {
-    catalog: ApiModel.Catalog[]
-    categories: ApiModel.Category[]
-    photos: ApiModel.Photo[]
+    photosList: ApiModel.Photo[]
+    photosCount: number
 }
 
-const PhotosPage: NextPage<PhotosPageProps> = ({
-    catalog,
-    categories,
-    photos
-}) => {
-    const [search, setSearch] = useState<string>('')
-    const [localCategories, setLocalCategories] = useState<number[]>([])
+const PhotosPage: NextPage<PhotosPageProps> = ({ photosList, photosCount }) => {
+    const { t, i18n } = useTranslation()
+    const router = useRouter()
 
-    const listPhotos: ApiModel.Photo[] | undefined = useMemo(
-        () =>
-            photos?.filter((photo) => {
-                const catalogItem = catalog?.find(
-                    ({ name }) => name === photo.object
-                )
+    // const [search, setSearch] = useState<string>('')
+    // const [localCategories, setLocalCategories] = useState<number[]>([])
 
-                return (
-                    (search === '' ||
-                        catalogItem?.name
-                            .toLowerCase()
-                            .includes(search.toLowerCase()) ||
-                        catalogItem?.title
-                            ?.toLowerCase()
-                            .includes(search.toLowerCase())) &&
-                    (!localCategories?.length ||
-                        (catalogItem?.category &&
-                            localCategories.includes(catalogItem.category)))
-                )
-            }),
-        [photos, catalog, localCategories, search]
-    )
+    // const listPhotos: ApiModel.Photo[] | undefined = useMemo(
+    //     () =>
+    //         photos?.filter((photo) => {
+    //             const catalogItem = catalog?.find(
+    //                 ({ name }) => name === photo.object
+    //             )
+    //
+    //             return (
+    //                 (search === '' ||
+    //                     catalogItem?.name
+    //                         .toLowerCase()
+    //                         .includes(search.toLowerCase()) ||
+    //                     catalogItem?.title
+    //                         ?.toLowerCase()
+    //                         .includes(search.toLowerCase())) &&
+    //                 (!localCategories?.length ||
+    //                     (catalogItem?.category &&
+    //                         localCategories.includes(catalogItem.category)))
+    //             )
+    //         }),
+    //     [photos, catalog, localCategories, search]
+    // )
+
+    const handleCreate = () => {
+        router.push('/photos/form')
+    }
 
     return (
         <AppLayout>
             <NextSeo
-                title={'Астрофотографии'}
-                description={
-                    'Астрофотографии галактик, звезд, планет и других космических объектов, сделанных с помощью любительского телескопа'
-                }
+                title={t('astrophoto')}
+                description={t('description-photos-list-page')}
                 openGraph={{
                     images: [
                         {
@@ -60,48 +64,61 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
                             width: 1280
                         }
                     ],
-                    locale: 'ru'
+                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
-            <CatalogToolbar
-                search={search}
-                categories={categories}
-                onChangeSearch={setSearch}
-                onChangeCategories={setLocalCategories}
-            />
+
+            <div className={'toolbarHeader'}>
+                <h1 className={'pageTitle'}>{t('astrophoto')}</h1>
+
+                <div className={'toolbarActions'}>
+                    <Button
+                        icon={'PlusCircle'}
+                        mode={'secondary'}
+                        label={'Добавить'}
+                        onClick={handleCreate}
+                    />
+                </div>
+            </div>
+
+            {/*<CatalogToolbar*/}
+            {/*    search={search}*/}
+            {/*    categories={categories}*/}
+            {/*    onChangeSearch={setSearch}*/}
+            {/*    onChangeCategories={setLocalCategories}*/}
+            {/*/>*/}
+
             <PhotoGrid
                 threeColumns={true}
-                photos={listPhotos}
-                catalog={catalog}
+                photosList={photosList}
+                // catalog={catalog}
             />
         </AppLayout>
     )
 }
 
 export const getServerSideProps = wrapper.getServerSideProps(
-    (store) => async (): Promise<GetServerSidePropsResult<PhotosPageProps>> => {
-        const { data: catalog } = await store.dispatch(
-            API.endpoints?.catalogGetList.initiate()
-        )
+    (store) =>
+        async (context): Promise<GetServerSidePropsResult<PhotosPageProps>> => {
+            const locale = context.locale ?? 'en'
+            const translations = await serverSideTranslations(locale)
 
-        const { data: categories } = await store.dispatch(
-            API.endpoints?.categoryGetList.initiate()
-        )
+            store.dispatch(setLocale(locale))
 
-        const { data: photos } = await store.dispatch(
-            API.endpoints?.photoGetList.initiate()
-        )
+            const { data: photos } = await store.dispatch(
+                API.endpoints?.photosGetList.initiate()
+            )
 
-        await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
-        return {
-            props: {
-                catalog: catalog?.items || [],
-                categories: categories?.items || [],
-                photos: photos?.items || []
+            return {
+                props: {
+                    ...translations,
+                    photosCount: photos?.count || 0,
+                    photosList: photos?.items || []
+                }
             }
         }
-    }
 )
 
 export default PhotosPage

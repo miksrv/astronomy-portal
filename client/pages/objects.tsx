@@ -7,8 +7,9 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
+import { useRouter } from 'next/router'
 import React, { useMemo, useState } from 'react'
-import { Dropdown } from 'simple-react-ui-kit'
+import { Button, Dropdown } from 'simple-react-ui-kit'
 
 // import { Confirm, Message } from 'semantic-ui-react'
 import AppLayout from '@/components/app-layout'
@@ -18,15 +19,19 @@ import ObjectTable from '@/components/objects-table'
 interface ObjectsPageProps {
     categoriesList: ApiModel.Category[]
     objectsList: ApiModel.Object[]
+    photosList: ApiModel.Photo[]
     objectsCount: number
 }
 
+// TODO Для кнопки "Добавить" добавить проверку на права доступа
 const ObjectsPage: NextPage<ObjectsPageProps> = ({
     categoriesList,
     objectsList,
+    photosList,
     objectsCount
 }) => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
+    const router = useRouter()
 
     const [categoryFilter, setCategoryFilter] = useState<number | undefined>()
 
@@ -86,6 +91,10 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
     //     }
     // }
 
+    const handleCreate = () => {
+        router.push('/objects/form')
+    }
+
     const filteredCategoriesList = useMemo(
         () =>
             categoriesList?.filter(({ id }) =>
@@ -117,25 +126,41 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
                             width: 1280
                         }
                     ],
-                    locale: 'ru'
+                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
 
             <div className={'toolbarHeader'}>
-                <h1>{t('list-astronomical-objects')}</h1>
-                <Dropdown<number>
-                    clearable={true}
-                    value={categoryFilter}
-                    placeholder={t('filter-by-category')}
-                    onSelect={(category) => setCategoryFilter(category?.key)}
-                    options={filteredCategoriesList?.map((category) => ({
-                        key: category.id,
-                        value: category.title
-                    }))}
-                />
+                <h1 className={'pageTitle'}>
+                    {t('list-astronomical-objects')}
+                </h1>
+                <div className={'toolbarActions'}>
+                    <Dropdown<number>
+                        clearable={true}
+                        value={categoryFilter}
+                        placeholder={t('filter-by-category')}
+                        onSelect={(category) =>
+                            setCategoryFilter(category?.key)
+                        }
+                        options={filteredCategoriesList?.map((category) => ({
+                            key: category.id,
+                            value: category.title
+                        }))}
+                    />
+
+                    <Button
+                        icon={'PlusCircle'}
+                        mode={'secondary'}
+                        label={'Добавить'}
+                        onClick={handleCreate}
+                    />
+                </div>
             </div>
 
-            <ObjectTable objectsList={filteredObjectsList} />
+            <ObjectTable
+                objectsList={filteredObjectsList}
+                photosList={photosList}
+            />
 
             {/*{deleteError && (*/}
             {/*    <Message*/}
@@ -199,6 +224,10 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             store.dispatch(setLocale(locale))
 
+            const { data: photos } = await store.dispatch(
+                API.endpoints?.photosGetList.initiate()
+            )
+
             const { data: objects } = await store.dispatch(
                 API.endpoints?.objectsGetList.initiate()
             )
@@ -214,7 +243,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
                     ...translations,
                     categoriesList: categories?.items || [],
                     objectsCount: objects?.count || 0,
-                    objectsList: objects?.items || []
+                    objectsList: objects?.items || [],
+                    photosList: photos?.items || []
                 }
             }
         }

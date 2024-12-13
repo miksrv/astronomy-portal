@@ -10,6 +10,7 @@ import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import React from 'react'
 import { Provider } from 'react-redux'
+import Script from "next/script";
 
 dayjs.locale('ru')
 dayjs.extend(utc)
@@ -20,6 +21,19 @@ const App = ({ Component, pageProps }: AppProps) => {
 
     return (
         <>
+            <Script
+                src='/scripts/d3.min.js'
+                strategy='beforeInteractive'
+            />
+            <Script
+                src='/scripts/d3.geo.projection.min.js'
+                strategy='beforeInteractive'
+            />
+            <Script
+                src='/scripts/celestial.min.js'
+                strategy='beforeInteractive'
+            />
+
             <Head>
                 <meta
                     name={'mobile-web-app-capable'}
