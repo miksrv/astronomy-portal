@@ -169,12 +169,12 @@ class Photos extends ResourceController
         // Decode JSON fields
         $photoData['categories'] = json_decode($photoData['categories'], true);
         $photoData['objects']    = json_decode($photoData['objects'], true);
-        $photoData['equipment']  = json_decode($photoData['equipment'], true);
+        $photoData['equipments'] = json_decode($photoData['equipments'], true);
         $photoData['filters']    = json_decode($photoData['filters'], true);
 
         // Validate the decoded fields (ensure arrays)
         if (!is_array($photoData['categories']) || !is_array($photoData['objects']) ||
-            !is_array($photoData['equipment']) || !is_array($photoData['filters'])) {
+            !is_array($photoData['equipments']) || !is_array($photoData['filters'])) {
             return $this->failValidationErrors('Invalid format for categories, objects, equipment, or filters');
         }
 
@@ -233,10 +233,10 @@ class Photos extends ResourceController
             }
 
             // Сохраняем оборудование
-            if (!empty($photoData['equipment'])) {
+            if (!empty($photoData['equipments'])) {
                 $photosEquipmentsModel = new PhotosEquipmentsModel();
 
-                foreach ($photoData['equipment'] as $equipmentId) {
+                foreach ($photoData['equipments'] as $equipmentId) {
                     $photosEquipmentsModel->insert([
                         'photo_id'     => $photo->id,
                         'equipment_id' => $equipmentId,
