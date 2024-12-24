@@ -40,7 +40,6 @@ const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({ filesList }) => {
     const tableColumns: ColumnProps<FlattenedFile>[] = [
         {
             accessor: 'date',
-            className: styles.cellCenter,
             formatter: (date) => (date ? formatDate(date as string) : ''),
             header: t('date'),
             isSortable: true
@@ -99,8 +98,10 @@ const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({ filesList }) => {
                 className={styles.filesListTable}
                 columns={tableColumns}
                 verticalBorder={true}
+                stickyHeader={true}
                 data={flattenedFilesList}
                 defaultSort={{ direction: 'desc', key: 'date' }}
+                height={300}
             />
         </Container>
     )

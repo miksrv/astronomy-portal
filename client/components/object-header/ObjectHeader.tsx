@@ -49,8 +49,6 @@ const ObjectHeader: React.FC<ObjectHeaderProps> = ({
     return (
         <Container className={styles.objectContainer}>
             <div className={styles.infoContainer}>
-                <h1 className={styles.title}>{props.title}</h1>
-
                 <div className={styles.parameters}>
                     <div className={styles.item}>
                         <span className={styles.key}>Имя в каталоге:</span>
