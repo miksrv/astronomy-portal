@@ -19,7 +19,7 @@ class PhotoUploadLibrary {
     public function handleFileUpload(File $file, array $objects, string $date): array
     {
         // Генерация шаблона имени файла
-        $directoryName = implode('-', str_replace(['.', '/', '\\', '_', '-', ' '], '', $objects));
+        $directoryName = $this->generateDirectoryName($objects);
         $directoryPath = UPLOAD_PHOTOS . $directoryName;
 
         // Создание директории, если её нет
@@ -67,6 +67,40 @@ class PhotoUploadLibrary {
         ];
     }
 
+    public function handleFileDelete(array $objects, string $fileFullName): bool
+    {
+        $directoryName = $this->generateDirectoryName($objects);
+        $directoryPath = UPLOAD_PHOTOS . $directoryName;
+        $filePath = $directoryPath . '/' . $fileFullName;
+
+        if (!file_exists($filePath)) {
+            return false;
+        }
+
+        // Get the file name and extension
+        $fileName = pathinfo($directoryPath . '/' . $fileFullName, PATHINFO_FILENAME);
+        $fileExtension = pathinfo($directoryPath . '/' . $fileFullName, PATHINFO_EXTENSION);
+
+        // Define the preview file names
+        $previewFiles = [
+            $directoryPath . '/' . $fileName . '_small.' . $fileExtension,
+            $directoryPath . '/' . $fileName . '_medium.' . $fileExtension,
+            $directoryPath . '/' . $fileName . '_large.' . $fileExtension,
+        ];
+
+        // Delete the main file
+        $deleted = unlink($filePath);
+
+        // Delete the preview files
+        foreach ($previewFiles as $previewFile) {
+            if (file_exists($previewFile)) {
+                $deleted = $deleted && unlink($previewFile);
+            }
+        }
+
+        return $deleted;
+    }
+
     /**
      * Создает несколько превью изображений с разными размерами.
      *
@@ -79,7 +113,7 @@ class PhotoUploadLibrary {
         // Получаем имя файла и его расширение
         $fileName      = pathinfo($filePath, PATHINFO_FILENAME);
         $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
-        
+
         // Список для хранения путей к сохраненным превью
         $previewFiles = [];
 
@@ -120,6 +154,10 @@ class PhotoUploadLibrary {
         return $previewFiles;
     }
 
+    private function generateDirectoryName(array $objects) {
+        return implode('-', str_replace(['.', '/', '\\', '_', '-', ' '], '', $objects));
+    }
+
     /**
      * Накладывает watermark на изображение.
      *
@@ -146,12 +184,12 @@ class PhotoUploadLibrary {
         // Загружаем изображение
         $image = \Config\Services::image('gd');
         $image->withFile($filePath);
-        
+
         // Определяем размеры изображения и пропорциональный размер шрифта
         $imageWidth  = $image->getWidth();
         $imageHeight = $image->getHeight();
         $baseFontSize = min($imageWidth, $imageHeight) * 0.030;  // Размер шрифта ~5% от меньшей стороны
-        
+
         // Устанавливаем путь к шрифту
         $fontPath = WRITEPATH . 'uploads/NavineDemo-SemiCondensed.ttf';
         $fontPathBold = WRITEPATH . 'uploads/GOST_A_.ttf';
