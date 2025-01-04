@@ -1,4 +1,4 @@
-import { API } from '@/api'
+import { API, ApiType } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -14,6 +14,7 @@ import { AstroPhotoFormType } from '@/components/astro-photo-form/AstroPhotoForm
 
 type PhotoFormPageProps = {}
 
+// TODO: Добавить проерку на редактирование фото - сохранять только если есть изменения
 const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
     const router = useRouter()
     const { t, i18n } = useTranslation()
@@ -28,39 +29,71 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
         skip: !id
     })
 
-    const [savePhoto, { data, error, isLoading, isSuccess }] =
-        API.usePhotosPostMutation()
+    const [
+        createPhoto,
+        {
+            data: createdData,
+            error: createError,
+            isLoading: createLoading,
+            isSuccess: createSuccess
+        }
+    ] = API.usePhotosPostMutation()
+
+    const [
+        updatePhoto,
+        {
+            data: updatedData,
+            error: updateError,
+            isLoading: updateLoading,
+            isSuccess: updateSuccess
+        }
+    ] = API.usePhotoPatchMutation()
+
+    const [
+        uploadPhoto,
+        {
+            data: uploadedData,
+            error: uploadError,
+            isLoading: uploadLoading,
+            isSuccess: uploadSuccess
+        }
+    ] = API.usePhotosPostUploadMutation()
 
     const handleSubmit = (formData?: AstroPhotoFormType) => {
-        if (formData) {
+        if (!formData) {
+            return
+        }
+
+        // const formDataObject = new FormData()
+        //
+        // if (formData?.id) formDataObject.append('id', formData.id)
+        // if (formData?.categories)
+        //     formDataObject.append(
+        //         'categories',
+        //         JSON.stringify(formData.categories)
+        //     )
+        // if (formData?.objects)
+        //     formDataObject.append('objects', JSON.stringify(formData.objects))
+        // if (formData?.equipments)
+        //     formDataObject.append(
+        //         'equipments',
+        //         JSON.stringify(formData.equipments)
+        //     )
+        // if (formData?.date) formDataObject.append('date', formData.date)
+        // if (formData?.filters)
+        //     formDataObject.append('filters', JSON.stringify(formData.filters))
+
+        if (formData?.id) {
+            updatePhoto(formData as ApiType.Photos.PostRequest)
+        } else {
+            createPhoto(formData as ApiType.Photos.PostRequest)
+        }
+
+        if (formData?.upload && formData?.id) {
             const formDataObject = new FormData()
-
-            if (formData.categories)
-                formDataObject.append(
-                    'categories',
-                    JSON.stringify(formData.categories)
-                )
-            if (formData.objects)
-                formDataObject.append(
-                    'objects',
-                    JSON.stringify(formData.objects)
-                )
-            if (formData.equipments)
-                formDataObject.append(
-                    'equipment',
-                    JSON.stringify(formData.equipments)
-                )
-            if (formData.date) formDataObject.append('date', formData.date)
-            if (formData.filters)
-                formDataObject.append(
-                    'filters',
-                    JSON.stringify(formData.filters)
-                )
-
-            if (formData.upload)
-                formDataObject.append('upload', formData.upload)
-
-            savePhoto(formDataObject as any)
+            formDataObject.append('id', formData.id)
+            formDataObject.append('file', formData.upload)
+            uploadPhoto(formDataObject)
         }
     }
 
@@ -84,7 +117,12 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
                 </h1>
             </div>
             <AstroPhotoForm
-                disabled={photoLoading || isLoading}
+                disabled={
+                    photoLoading ||
+                    createLoading ||
+                    updateLoading ||
+                    updateLoading
+                }
                 initialData={photoData}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}

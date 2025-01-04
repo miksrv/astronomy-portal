@@ -1,40 +1,25 @@
 import { API } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
-import { formatObjectName } from '@/tools/strings'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { Container } from 'simple-react-ui-kit'
 
 import AppLayout from '@/components/app-layout'
 import StarMap from '@/components/star-map'
-import { StarMapObject } from '@/components/star-map/StarMap'
 
 type CelestialPageProps = {}
 
+// TODO: При добавить URL параметр названия объекта для центрирования карты на нем
 const CelestialPage: NextPage<CelestialPageProps> = () => {
     const { t } = useTranslation()
 
     const [goToObject, setGoToObject] = useState<[number, number]>([0, 0])
 
     const { data } = API.useObjectsGetListQuery()
-
-    const starMapObjects: StarMapObject[] = useMemo(
-        () =>
-            data?.items
-                ?.filter(
-                    (item) => item.ra !== undefined && item.dec !== undefined
-                )
-                ?.map((item) => ({
-                    ra: item.ra as number,
-                    dec: item.dec as number,
-                    name: formatObjectName(item.name)
-                })) || [],
-        [data]
-    )
 
     return (
         <AppLayout>
@@ -61,7 +46,7 @@ const CelestialPage: NextPage<CelestialPageProps> = () => {
 
             <Container>
                 <StarMap
-                    objects={starMapObjects}
+                    objects={data?.items}
                     // interactive={true}
                     // goto={goToObject}
                 />

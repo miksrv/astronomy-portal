@@ -1,4 +1,4 @@
-import { API, ApiModel, useAppDispatch } from '@/api'
+import { API, ApiModel } from '@/api'
 // import { editCatalog, openFormCatalog } from '@/api/applicationSlice'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
@@ -24,6 +24,7 @@ interface ObjectsPageProps {
 }
 
 // TODO Для кнопки "Добавить" добавить проверку на права доступа
+// TODO В toolbar добавить быстрый поиск по названию объекта
 const ObjectsPage: NextPage<ObjectsPageProps> = ({
     categoriesList,
     objectsList,

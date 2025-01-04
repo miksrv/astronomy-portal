@@ -1,4 +1,4 @@
-import { API, ApiModel } from '@/api'
+import { API, ApiModel, HOST_IMG } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { sliceText } from '@/tools/strings'
@@ -113,16 +113,15 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                     sliceText(objectData?.description)
                 }
                 openGraph={{
-                    // images: [
-                    //     {
-                    //         height: 244,
-                    //         url: catalog?.image
-                    //             ? `${hosts.maps}${catalog?.image}`
-                    //             : 'images/no-photo.png',
-                    //         width: 487
-                    //     }
-                    // ],
-                    // locale: 'ru'
+                    images: [
+                        {
+                            height: 244,
+                            url: objectData?.image
+                                ? `${HOST_IMG}${objectData?.image}`
+                                : 'images/no-photo.png',
+                            width: 487
+                        }
+                    ],
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
