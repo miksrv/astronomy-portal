@@ -8,7 +8,9 @@ import styles from './styles.module.sass'
 
 export type AstroObjectFormType = Partial<
     Omit<ApiModel.Object, 'updated' | 'statistic' | 'filters'>
-> & {}
+> & {
+    image?: string
+}
 
 interface AstroObjectFormProps {
     disabled?: boolean
@@ -114,7 +116,12 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
     // }, [catalogData])
 
     const handleSubmit = () => {
-        onSubmit?.(formData)
+        const canvasImage = document
+            ?.getElementById('celestial-map')
+            ?.getElementsByTagName('canvas')?.[0]
+            ?.toDataURL()
+
+        onSubmit?.({ ...formData, image: canvasImage })
     }
 
     useEffect(() => {
@@ -174,6 +181,20 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                         required={true}
                         disabled={disabled}
                         className={styles.formElement}
+                        label={'Ссылка на FITS файлы'}
+                        value={formData?.fitsCloudLink}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                fitsCloudLink: e.target.value
+                            })
+                        }
+                    />
+
+                    <Input
+                        required={true}
+                        disabled={disabled}
+                        className={styles.formElement}
                         label={'RA'}
                         type={'number'}
                         value={formData?.ra}
@@ -201,18 +222,19 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                     />
                 </div>
                 <StarMap
-                // className={styles.mapSection}
-                // objects={
-                //     formData?.ra && formData?.dec
-                //         ? [
-                //               {
-                //                   ra: formData.ra,
-                //                   dec: formData.dec,
-                //                   name: formData?.name ?? ''
-                //               }
-                //           ]
-                //         : undefined
-                // }
+                    // className={styles.mapSection}
+                    zoom={14}
+                    objects={
+                        formData?.ra && formData?.dec
+                            ? [
+                                  {
+                                      ra: formData.ra,
+                                      dec: formData.dec,
+                                      name: formData?.name ?? 'Unknown'
+                                  }
+                              ]
+                            : undefined
+                    }
                 />
             </div>
 

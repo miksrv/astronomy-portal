@@ -1,6 +1,8 @@
 import { API, ApiModel } from '@/api'
 import { getFilterColor } from '@/tools/colors'
+import { createLargePhotoUrl } from '@/tools/photos'
 import { formatObjectName } from '@/tools/strings'
+import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
 import {
     Button,
@@ -12,19 +14,7 @@ import {
 
 import styles from './styles.module.sass'
 
-export type AstroPhotoFormType = Partial<
-    Omit<
-        ApiModel.Photo,
-        | 'dirName'
-        | 'fileName'
-        | 'fileExt'
-        | 'fileSize'
-        | 'imageWidth'
-        | 'imageHeight'
-        | 'updated'
-        | 'statistic'
-    >
-> & {
+export type AstroPhotoFormType = Partial<ApiModel.Photo> & {
     upload?: File
 }
 
@@ -255,8 +245,22 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
                 ))}
             </div>
 
+            <div className={styles.imageSection}>
+                {!!initialData?.fileName && (
+                    <Image
+                        className={styles.image}
+                        src={createLargePhotoUrl(initialData as ApiModel.Photo)}
+                        fill={true}
+                        alt={''}
+                    />
+                )}
+            </div>
             <div style={{ marginTop: 15 }}>
-                <label>Загрузить изображение:</label>
+                <label>
+                    {initialData?.fileName
+                        ? 'Заменить фотографию:'
+                        : 'Загрузить фотографию:'}
+                </label>
                 <input
                     onChange={handleImageUpload}
                     type={'file'}
