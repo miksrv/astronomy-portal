@@ -3,6 +3,8 @@ import { ApiModel, ApiType } from '@/api'
 export type Object = {
     name: string
     title: string
+    image?: string
+    fitsCloudLink?: string
     description?: string
     categories?: number[]
     equipment?: number[]
