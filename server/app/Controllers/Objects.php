@@ -106,7 +106,8 @@ class Objects extends ResourceController
     {
         $input = $this->request->getJSON(true);
         $rules = [
-            'name' => 'required|min_length[3]|max_length[40]|is_unique[objects.catalog_name]'
+            'name'  => 'required|min_length[3]|max_length[40]|is_unique[objects.catalog_name]',
+            'image' => 'string',
         ];
 
         if (!$this->validate($rules)) {
@@ -139,7 +140,8 @@ class Objects extends ResourceController
     {
         $input = $this->request->getJSON(true);
         $rules = [
-            'name' => 'required|min_length[3]|max_length[40]' // |is_unique[objects.catalog_name,catalog_name,{id}]
+            'name'  => 'required|min_length[3]|max_length[40]', // |is_unique[objects.catalog_name,catalog_name,{id}]
+            'image' => 'string',
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -157,6 +159,12 @@ class Objects extends ResourceController
             return $this->failValidationErrors('Invalid format for categories, objects, equipment, or filters');
         }
 
+        // Save the catalog image
+        if (!empty($input['image'])) {
+            $input['image_file'] = $this->_saveCatalogImage($id, $input['image']);
+            unset($input['image']);
+        }
+
         try {
             $objectsModel = new ObjectsModel();
             $objectsData  = $objectsModel->where('catalog_name', $id)->first();
@@ -164,6 +172,7 @@ class Objects extends ResourceController
             // Сохраняем категории
             if (!empty($input['categories'])) {
                 $objectCategoryModel = new ObjectCategoryModel();
+                $objectCategoryModel->where('object_name', $id)->delete();
 
                 foreach ($input['categories'] as $categoryId) {
                     $objectCategoryModel->insert([
@@ -210,6 +219,40 @@ class Objects extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
             return $this->failServerError();
+        }
+    }
+
+    /**
+     * Saves a catalog image from a base64 encoded string.
+     *
+     * @param string $name The name of the catalog image.
+     * @param string $imageString The base64 encoded image string.
+     * @return string|null The file name of the saved image or null on failure.
+     */
+    protected function _saveCatalogImage(string $name, string $imageString): ?string {
+        $fileName = $name . '.png';
+
+        if (empty($imageString))
+            return null;
+
+        try {
+            if (!is_dir(UPLOAD_STAR_MAPS))
+            {
+                mkdir(UPLOAD_STAR_MAPS,0777, TRUE);
+            }
+
+            $imageString = str_replace('data:image/png;base64,', '', $imageString);
+            $imageString = str_replace(' ', '+', $imageString);
+            $imageString = base64_decode($imageString);
+
+            helper('filesystem');
+            write_file(UPLOAD_STAR_MAPS . $fileName, $imageString);
+
+            return $fileName;
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return null;
         }
     }
 }
