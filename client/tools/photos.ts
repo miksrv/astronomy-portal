@@ -1,5 +1,8 @@
 import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
+import { formatDate } from '@/tools/dates'
+import { formatObjectName } from '@/tools/strings'
+import { TFunction } from 'i18next'
 
 const createPhotoUrl = (
     photo?: ApiModel.Photo,
@@ -20,3 +23,8 @@ export const createMediumPhotoUrl = (photo?: ApiModel.Photo): string =>
 
 export const createLargePhotoUrl = (photo?: ApiModel.Photo): string =>
     createPhotoUrl(photo, 'large')
+
+export const createPhotoTitle = (photo?: ApiModel.Photo, t?: TFunction) =>
+    `${t?.('photo')} ${photo?.objects
+        ?.map((name) => formatObjectName(name))
+        ?.join(', ')} ${t?.('from')} ${formatDate(photo?.date, 'DD.MM.YYYY')}`

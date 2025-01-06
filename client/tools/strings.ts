@@ -21,3 +21,15 @@ export const sliceText = (text?: string, length: number = 350): string => {
     const sliced = cleanedText.slice(0, length)
     return sliced + (sliced.length < cleanedText.length ? '...' : '')
 }
+
+/**
+ * Converts a file size in bytes to a human-readable format.
+ * @param {number} bytes - The file size in bytes.
+ * @returns {string} The humanized file size.
+ */
+export const humanizeFileSize = (bytes: number): string => {
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+    if (bytes === 0) return '0 Byte'
+    const i = Math.floor(Math.log(bytes) / Math.log(1024))
+    return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i]
+}
