@@ -37,8 +37,8 @@
     --font-size: 14px;
     --font-size-small: 12px;
     --font-family: -apple-system, system-ui, 'Helvetica Neue', Roboto, sans-serif;
-    --text-color-primary: #e1e3e6;
-    --text-color-secondary: #76787a;
+    --text-color-primary: #ffffff;
+    --text-color-secondary: #bdbdbd;
     --text-color-secondary-hover: #7B7D7F;
 
     /* Layout and Containers */

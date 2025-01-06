@@ -24,8 +24,10 @@ body
     h1
         font-size: 18px
         font-weight: 400
+        margin: 0
 
     a
+        text-decoration: none
         color: var(--link-color)
 
         &:hover
@@ -33,11 +35,6 @@ body
 
         &:active
             color: var(--link-color-active)
-
-.toolbarHeader
-    display: flex
-    justify-content: space-between
-    align-items: center
 
 //a[href^="https://"]
 //  &::after
@@ -116,26 +113,26 @@ body
             font-weight: 600
             text-transform: uppercase
 
-.subTitle, .pageTitle
-    font-weight: 400
-    position: relative
-    margin: 0 0 0
-    padding: 2px 20px 2px
-
-    &:before
-        content: ""
-        display: inline-block
-        width: 5px
-        height: 100%
-        background: #dd9124
-        position: absolute
-        left: 0
-        top: 0
-
-.pageTitle
-    margin-bottom: 15px
-    font-size: 20px !important
-    font-weight: 400
+//.subTitle, .pageTitle
+//    font-weight: 400
+//    position: relative
+//    margin: 0 0 0
+//    padding: 2px 20px 2px
+//
+//    &:before
+//        content: ""
+//        display: inline-block
+//        width: 5px
+//        height: 100%
+//        background: #dd9124
+//        position: absolute
+//        left: 0
+//        top: 0
+//
+//.pageTitle
+//    margin-bottom: 15px
+//    font-size: 20px !important
+//    font-weight: 400
 
 .tableHeaderSticky
     position: sticky
