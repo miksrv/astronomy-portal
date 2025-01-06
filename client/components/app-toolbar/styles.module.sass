@@ -1,0 +1,32 @@
+@import @/styles/variables.sass
+
+.toolbarHeader
+    display: flex
+    justify-content: space-between
+    align-items: center
+    margin-bottom: 10px
+
+    .toolbarActions
+        display: flex
+        justify-content: space-between
+        align-items: center
+        gap: 10px
+
+    .toolbarTitle
+        position: relative
+
+        h1
+            margin: 0 0 0
+            font-size: 16px
+            padding: 2px 20px 2px
+            font-weight: 400
+
+        &:before
+            content: ""
+            display: inline-block
+            width: 5px
+            height: 100%
+            background: #dd9124
+            position: absolute
+            left: 0
+            top: 0
