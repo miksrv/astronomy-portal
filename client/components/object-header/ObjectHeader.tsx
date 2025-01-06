@@ -1,12 +1,10 @@
-import { ApiModel, useAppDispatch, useAppSelector } from '@/api'
-import { editCatalog, openFormCatalog } from '@/api/applicationSlice'
-import { hosts } from '@/api/constants'
-import { formatDate, getTimeFromSec } from '@/functions/helpers'
-import classNames from 'classnames'
-import uniq from 'lodash-es/uniq'
+import { ApiModel, HOST_IMG } from '@/api'
+import { getTimeFromSec } from '@/functions/helpers'
+import { humanizeFileSize } from '@/tools/strings'
+import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
+import Link from 'next/link'
 import React, { useMemo } from 'react'
-import { Grid, Icon } from 'semantic-ui-react'
 import { Container } from 'simple-react-ui-kit'
 
 import FilterList from '@/components/filter-list'
@@ -24,21 +22,7 @@ const ObjectHeader: React.FC<ObjectHeaderProps> = ({
     categoriesList,
     ...props
 }) => {
-    // const dispatch = useAppDispatch()
-    // const user = useAppSelector((state) => state.auth.user)
-    //
-    // const date = catalog?.updated ? formatDate(catalog.updated) : '---'
-    // const exposure = catalog?.statistic?.exposure
-    //     ? getTimeFromSec(catalog.statistic.exposure, true)
-    //     : '---'
-    // const size = catalog?.statistic?.data_size
-    //     ? Math.round((catalog.statistic.data_size / 1024) * 100) / 100
-    //     : undefined
-    //
-    // const handleEditCatalog = () => {
-    //     dispatch(editCatalog(catalog))
-    //     dispatch(openFormCatalog(true))
-    // }
+    const { t } = useTranslation()
 
     const categoriesData = useMemo(
         () =>
@@ -51,33 +35,67 @@ const ObjectHeader: React.FC<ObjectHeaderProps> = ({
             <div className={styles.infoContainer}>
                 <div className={styles.parameters}>
                     <div className={styles.item}>
-                        <span className={styles.key}>Имя в каталоге:</span>
-                        {props.name ?? '---'}
+                        <span className={styles.key}>
+                            {t('name-in-the-directory')}:
+                        </span>
+                        {props.name}
                     </div>
+
+                    {!!categoriesData?.length && (
+                        <div className={styles.item}>
+                            <span className={styles.key}>{t('category')}:</span>
+                            {categoriesData
+                                .map(({ title }) => title)
+                                .join(', ')}
+                        </div>
+                    )}
+
                     <div className={styles.item}>
-                        <span className={styles.key}>Категория:</span>
-                        {!categoriesData?.length
-                            ? '---'
-                            : categoriesData
-                                  ?.map(({ title }) => title)
-                                  .join(', ')}
-                    </div>
-                    <div className={styles.item}>
-                        <span className={styles.key}>Координаты:</span>
+                        <span className={styles.key}>{t('coordinates')}:</span>
                         {'RA: ' + props.ra + ', DEC: ' + props.dec}
                     </div>
-                    <div className={styles.item}>
-                        <span className={styles.key}>Количество кадров:</span>
-                        {props.statistic?.frames ?? '---'}
-                    </div>
-                    <div className={styles.item}>
-                        <span className={styles.key}>Общее накопление:</span>
-                        {props.statistic?.exposure ?? '---'}
-                    </div>
-                    <div className={styles.item}>
-                        <span className={styles.key}>Размер данных:</span>
-                        {props.statistic?.exposure ?? '---'}
-                    </div>
+
+                    {props.statistic?.exposure && (
+                        <div className={styles.item}>
+                            <span className={styles.key}>
+                                {t('total-exposure')}:
+                            </span>
+                            {getTimeFromSec(props.statistic.exposure, true)}
+                        </div>
+                    )}
+
+                    {props.statistic?.frames && (
+                        <div className={styles.item}>
+                            <span className={styles.key}>
+                                {t('number-of-frames')}:
+                            </span>
+                            {props.statistic.frames}
+                        </div>
+                    )}
+
+                    {!!props.statistic?.fileSize && (
+                        <div className={styles.item}>
+                            <span className={styles.key}>
+                                {t('data-size')}:
+                            </span>
+                            {humanizeFileSize(props.statistic.fileSize)}
+                        </div>
+                    )}
+
+                    {props?.fitsCloudLink && (
+                        <div className={styles.item}>
+                            <span className={styles.key}>
+                                {t('link-to-FITS-files')}:
+                            </span>
+                            <Link
+                                href={props?.fitsCloudLink}
+                                target={'_blank'}
+                                title={''}
+                            >
+                                {t('download')}
+                            </Link>
+                        </div>
+                    )}
                 </div>
 
                 {!!Object.values(props.filters ?? {})?.length && (
@@ -85,145 +103,23 @@ const ObjectHeader: React.FC<ObjectHeaderProps> = ({
                         <FilterList filters={props.filters} />
                     </div>
                 )}
-            </div>
-            <div className={styles.mapImageContainer}>
-                {/*<Image*/}
-                {/*    src={*/}
-                {/*        catalog?.image*/}
-                {/*            ? `${hosts.maps}${catalog.image}`*/}
-                {/*            : noImageServerUrl*/}
-                {/*    }*/}
-                {/*    className={styles.celestialMapImage}*/}
-                {/*    width={395}*/}
-                {/*    height={182}*/}
-                {/*    alt={`${title} - Расположение на астрономической карте`}*/}
-                {/*    priority={true}*/}
-                {/*/>*/}
+
+                <Image
+                    src={
+                        props?.image
+                            ? `${HOST_IMG}${props.image}`
+                            : noImageServerUrl
+                    }
+                    className={styles.starMapImage}
+                    width={395}
+                    height={182}
+                    alt={`${props.title} - ${t(
+                        'location-on-the-astronomical-map'
+                    )}`}
+                    priority={true}
+                />
             </div>
         </Container>
-
-        // <div className={classNames(styles.section, 'box')}>
-        //     <Grid>
-        //         <Grid.Column
-        //             computer={10}
-        //             tablet={10}
-        //             mobile={16}
-        //         >
-        //             <h1>
-        //                 {title}
-        //                 {user?.role === 'admin' && (
-        //                     <span
-        //                         className={styles.controlButton}
-        //                         role={'button'}
-        //                         tabIndex={0}
-        //                         onKeyUp={() => {}}
-        //                         onClick={handleEditCatalog}
-        //                     >
-        //                         <Icon name={'edit outline'} />
-        //                     </span>
-        //                 )}
-        //             </h1>
-        //             <Grid>
-        //                 <Grid.Column
-        //                     computer={8}
-        //                     tablet={8}
-        //                     mobile={16}
-        //                 >
-        //                     <div className={styles.parameters}>
-        //                         <div>
-        //                             <span className={styles.value}>
-        //                                 Категория:
-        //                             </span>
-        //                             {catalog?.category_name || '---'}
-        //                         </div>
-        //                         <div>
-        //                             <span className={styles.value}>
-        //                                 Последний кадр:
-        //                             </span>
-        //                             {date}
-        //                         </div>
-        //                         <div>
-        //                             <span className={styles.value}>
-        //                                 Сделано кадров:
-        //                             </span>
-        //                             {catalog?.statistic?.frames || '---'}
-        //                         </div>
-        //                         <div>
-        //                             <span className={styles.value}>
-        //                                 Общая выдержка:
-        //                             </span>
-        //                             {exposure}
-        //                         </div>
-        //                         <div>
-        //                             <span className={styles.value}>
-        //                                 Накоплено данных:
-        //                             </span>
-        //                             {catalog?.statistic?.data_size
-        //                                 ? `${size} Гб`
-        //                                 : '---'}
-        //                         </div>
-        //                         <div>
-        //                             <span className={styles.value}>
-        //                                 Отклонение (RA / DEC):
-        //                             </span>
-        //                             {deviationRa} / {deviationDec}
-        //                         </div>
-        //                         <div>
-        //                             <span className={styles.value}>
-        //                                 Координаты:
-        //                             </span>
-        //                             RA: {catalog?.coord_ra}, DEC:{' '}
-        //                             {catalog?.coord_dec}
-        //                         </div>
-        //                         {catalog?.source_link && (
-        //                             <div>
-        //                                 <span className={styles.value}>
-        //                                     Исходные данные (FITS):
-        //                                 </span>
-        //                                 <a
-        //                                     href={catalog?.source_link}
-        //                                     rel={'nofollow noreferrer'}
-        //                                     target={'_blank'}
-        //                                     title={`Ссылка на скачивание исходных данных телескопа (FITS) для ${catalog.name}`}
-        //                                     className={styles.downloadLink}
-        //                                 >
-        //                                     <Icon name={'download'} />
-        //                                     СКАЧАТЬ
-        //                                 </a>
-        //                             </div>
-        //                         )}
-        //                     </div>
-        //                 </Grid.Column>
-        //                 <Grid.Column
-        //                     computer={8}
-        //                     tablet={8}
-        //                     mobile={16}
-        //                     className={styles.filterContainer}
-        //                 >
-        //                     <FilterList filters={catalog?.filters} />
-        //                 </Grid.Column>
-        //             </Grid>
-        //         </Grid.Column>
-        //         <Grid.Column
-        //             computer={6}
-        //             tablet={6}
-        //             mobile={16}
-        //         >
-        //             <Image
-        //                 src={
-        //                     catalog?.image
-        //                         ? `${hosts.maps}${catalog.image}`
-        //                         : noImageServerUrl
-        //                 }
-        //                 className={styles.celestialMapImage}
-        //                 width={395}
-        //                 height={182}
-        //                 alt={`${title} - Расположение на астрономической карте`}
-        //                 priority={true}
-        //             />
-        //         </Grid.Column>
-        //     </Grid>
-        // </div>
     )
 }
 
