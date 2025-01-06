@@ -10,42 +10,16 @@ import React from 'react'
 import { Button } from 'simple-react-ui-kit'
 
 import AppLayout from '@/components/app-layout'
+import AppToolbar from '@/components/app-toolbar'
 import PhotoGrid from '@/components/photo-grid'
 
 interface PhotosPageProps {
     photosList: ApiModel.Photo[]
-    photosCount: number
 }
 
-const PhotosPage: NextPage<PhotosPageProps> = ({ photosList, photosCount }) => {
+const PhotosPage: NextPage<PhotosPageProps> = ({ photosList }) => {
     const { t, i18n } = useTranslation()
     const router = useRouter()
-
-    // const [search, setSearch] = useState<string>('')
-    // const [localCategories, setLocalCategories] = useState<number[]>([])
-
-    // const listPhotos: ApiModel.Photo[] | undefined = useMemo(
-    //     () =>
-    //         photos?.filter((photo) => {
-    //             const catalogItem = catalog?.find(
-    //                 ({ name }) => name === photo.object
-    //             )
-    //
-    //             return (
-    //                 (search === '' ||
-    //                     catalogItem?.name
-    //                         .toLowerCase()
-    //                         .includes(search.toLowerCase()) ||
-    //                     catalogItem?.title
-    //                         ?.toLowerCase()
-    //                         .includes(search.toLowerCase())) &&
-    //                 (!localCategories?.length ||
-    //                     (catalogItem?.category &&
-    //                         localCategories.includes(catalogItem.category)))
-    //             )
-    //         }),
-    //     [photos, catalog, localCategories, search]
-    // )
 
     const handleCreate = () => {
         router.push('/photos/form')
@@ -68,31 +42,19 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ photosList, photosCount }) => {
                 }}
             />
 
-            <div className={'toolbarHeader'}>
-                <h1 className={'pageTitle'}>{t('astrophoto')}</h1>
+            <AppToolbar
+                title={t('astrophoto')}
+                currentPage={t('astrophoto')}
+            >
+                <Button
+                    icon={'PlusCircle'}
+                    mode={'secondary'}
+                    label={t('add')}
+                    onClick={handleCreate}
+                />
+            </AppToolbar>
 
-                <div className={'toolbarActions'}>
-                    <Button
-                        icon={'PlusCircle'}
-                        mode={'secondary'}
-                        label={'Добавить'}
-                        onClick={handleCreate}
-                    />
-                </div>
-            </div>
-
-            {/*<CatalogToolbar*/}
-            {/*    search={search}*/}
-            {/*    categories={categories}*/}
-            {/*    onChangeSearch={setSearch}*/}
-            {/*    onChangeCategories={setLocalCategories}*/}
-            {/*/>*/}
-
-            <PhotoGrid
-                threeColumns={true}
-                photosList={photosList}
-                // catalog={catalog}
-            />
+            <PhotoGrid photosList={photosList} />
         </AppLayout>
     )
 }
@@ -114,7 +76,6 @@ export const getServerSideProps = wrapper.getServerSideProps(
             return {
                 props: {
                     ...translations,
-                    photosCount: photos?.count || 0,
                     photosList: photos?.items || []
                 }
             }

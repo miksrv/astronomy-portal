@@ -11,6 +11,7 @@ import React, { useMemo } from 'react'
 import { Button } from 'simple-react-ui-kit'
 
 import AppLayout from '@/components/app-layout'
+import AppToolbar from '@/components/app-toolbar'
 import ObjectsCloud from '@/components/object-cloud'
 import ObjectDescription from '@/components/object-description'
 import ObjectFilesTable from '@/components/object-files-table'
@@ -55,59 +56,10 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
         router.push('/objects/form')
     }
 
-    // const objectTitle = useMemo(
-    //     () => catalog?.title || catalog?.name || object.toString(),
-    //     [catalog, object]
-    // )
-
-    // const filesSorted = useMemo(
-    //     () =>
-    //         [...(catalog?.files || [])]?.sort(
-    //             (a, b) =>
-    //                 new Date(a.date_obs).getTime() -
-    //                 new Date(b.date_obs).getTime()
-    //         ),
-    //     [catalog?.files]
-    // )
-
-    // const deviationRa: number = useMemo(() => {
-    //     if (!catalog?.files?.length) {
-    //         return 0
-    //     }
-    //
-    //     const max = Math.max.apply(
-    //         null,
-    //         catalog?.files?.map(({ ra }) => ra) || []
-    //     )
-    //     const min = Math.min.apply(
-    //         null,
-    //         catalog?.files?.map(({ ra }) => ra) || []
-    //     )
-    //
-    //     return Math.round((max - min) * 100) / 100
-    // }, [catalog?.files])
-
-    // const deviationDec: number = useMemo(() => {
-    //     if (!catalog?.files?.length) {
-    //         return 0
-    //     }
-    //
-    //     const max = Math.max.apply(
-    //         null,
-    //         catalog?.files?.map(({ dec }) => dec) || []
-    //     )
-    //     const min = Math.min.apply(
-    //         null,
-    //         catalog?.files?.map(({ dec }) => dec) || []
-    //     )
-    //
-    //     return Math.round((max - min) * 100) / 100
-    // }, [catalog?.files])
-
     return (
         <AppLayout>
             <NextSeo
-                title={objectData?.title}
+                title={objectData?.title || objectName}
                 description={
                     'Описание объекта наблюдения: ' +
                     sliceText(objectData?.description)
@@ -126,27 +78,31 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 }}
             />
 
-            <div className={'toolbarHeader'}>
-                <h1 className={'pageTitle'}>
-                    {objectData?.title || objectName}
-                </h1>
-                <div className={'toolbarActions'}>
-                    <Button
-                        icon={'Pencil'}
-                        mode={'secondary'}
-                        label={'Редактировать'}
-                        disabled={!objectName}
-                        onClick={handleEdit}
-                    />
+            <AppToolbar
+                title={objectData?.title || objectName}
+                currentPage={objectData?.title || objectName}
+                links={[
+                    {
+                        link: '/objects',
+                        text: t('objects')
+                    }
+                ]}
+            >
+                <Button
+                    icon={'Pencil'}
+                    mode={'secondary'}
+                    label={t('edit')}
+                    disabled={!objectName}
+                    onClick={handleEdit}
+                />
 
-                    <Button
-                        icon={'PlusCircle'}
-                        mode={'secondary'}
-                        label={'Добавить'}
-                        onClick={handleCreate}
-                    />
-                </div>
-            </div>
+                <Button
+                    icon={'PlusCircle'}
+                    mode={'secondary'}
+                    label={t('add')}
+                    onClick={handleCreate}
+                />
+            </AppToolbar>
 
             <ObjectHeader
                 {...objectData}

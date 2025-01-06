@@ -2,6 +2,7 @@ import { API, ApiModel } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import React, { useState } from 'react'
@@ -9,6 +10,7 @@ import Gallery from 'react-photo-gallery'
 import { Container } from 'simple-react-ui-kit'
 
 import AppLayout from '@/components/app-layout'
+import AppToolbar from '@/components/app-toolbar'
 import EventUpcoming from '@/components/event-upcoming'
 import EventsList from '@/components/events-list'
 import PhotoLightboxOld from '@/components/photo-lightbox-old'
@@ -30,6 +32,8 @@ const galleryStargazing: any[] = [
 ]
 
 const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
+    const { t, i18n } = useTranslation()
+
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
 
@@ -45,7 +49,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
     return (
         <AppLayout>
             <NextSeo
-                title={'Астровыезд'}
+                title={t('stargazing')}
                 description={''}
                 openGraph={{
                     // images: [
@@ -55,16 +59,18 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                     //         width: 1280
                     //     }
                     // ],
-                    locale: 'ru'
+                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
 
-            <br />
+            <AppToolbar
+                title={t('stargazing')}
+                currentPage={t('stargazing')}
+            />
 
             <EventUpcoming />
 
             <Container>
-                <h1 className={'pageTitle'}>Астровыезд</h1>
                 <p>
                     Астровыезд в Оренбурге - это уникальная возможность
                     насладиться звёздным небом в полной темноте. Присоединяйтесь

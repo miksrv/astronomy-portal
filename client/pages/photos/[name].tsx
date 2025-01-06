@@ -1,23 +1,18 @@
 import { API, ApiModel } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
-import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
-import { isOutdated, sliceText } from '@/functions/helpers'
+import { createPhotoTitle } from '@/tools/photos'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/router'
-import React, { useMemo, useState } from 'react'
-import { Accordion, Icon, Message } from 'semantic-ui-react'
+import React from 'react'
 import { Button } from 'simple-react-ui-kit'
 
 import AppLayout from '@/components/app-layout'
-import ObjectsCloud from '@/components/object-cloud'
+import AppToolbar from '@/components/app-toolbar'
 import PhotoHeader from '@/components/photo-header'
-import PhotoSection from '@/components/photo-section'
-
-// import PhotoTable from '@/components/photo-table'
 
 interface PhotoItemPageProps {
     photoId: string
@@ -36,20 +31,6 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
 }) => {
     const { t, i18n } = useTranslation()
     const router = useRouter()
-    // const [showSpoiler, setShowSpoiler] = useState<boolean>(false)
-    //
-    // const { data: photoObjects, isLoading: objectsLoading } =
-    //     API.useStatisticGetPhotosItemsQuery()
-    //
-    // const photoItem: ApiModel.Photo | undefined = useMemo(
-    //     () => photos?.find((photo) => photo.date === date) || photos?.[0],
-    //     [photos, date]
-    // )
-    //
-    // const objectTitle = useMemo(
-    //     () => catalog?.title || catalog?.name || object.toString(),
-    //     [catalog, object]
-    // )
 
     const handleEdit = () => {
         if (photoId) {
@@ -64,7 +45,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
     return (
         <AppLayout>
             <NextSeo
-                title={''}
+                title={createPhotoTitle(photoData, t)}
                 description={''}
                 openGraph={{
                     // images: [
@@ -76,30 +57,35 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                     //         width: 487
                     //     }
                     // ],
-                    // locale: 'ru'
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
 
-            <div className={'toolbarHeader'}>
-                <h1 className={'pageTitle'}>{'Придумать заголовок'}</h1>
-                <div className={'toolbarActions'}>
-                    <Button
-                        icon={'Pencil'}
-                        mode={'secondary'}
-                        label={'Редактировать'}
-                        disabled={!photoId}
-                        onClick={handleEdit}
-                    />
+            <AppToolbar
+                title={createPhotoTitle(photoData, t)}
+                currentPage={createPhotoTitle(photoData, t)}
+                links={[
+                    {
+                        link: '/photos',
+                        text: t('astrophoto')
+                    }
+                ]}
+            >
+                <Button
+                    icon={'Pencil'}
+                    mode={'secondary'}
+                    label={t('edit')}
+                    disabled={!photoId}
+                    onClick={handleEdit}
+                />
 
-                    <Button
-                        icon={'PlusCircle'}
-                        mode={'secondary'}
-                        label={'Добавить'}
-                        onClick={handleCreate}
-                    />
-                </div>
-            </div>
+                <Button
+                    icon={'PlusCircle'}
+                    mode={'secondary'}
+                    label={t('add')}
+                    onClick={handleCreate}
+                />
+            </AppToolbar>
 
             <PhotoHeader
                 {...photoData}
@@ -107,63 +93,6 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                 categoriesList={categoriesList}
                 equipmentsList={equipmentsList}
             />
-            {/*<NextSeo*/}
-            {/*    title={`${objectTitle} - Астрофотография${*/}
-            {/*        date ? ` - ${date}` : ''*/}
-            {/*    }`}*/}
-            {/*    description={*/}
-            {/*        'Описание астрофотографии: ' +*/}
-            {/*        sliceText(catalog?.text ?? '', 200)*/}
-            {/*    }*/}
-            {/*    // openGraph={{*/}
-            {/*    //     images: [*/}
-            {/*    //         {*/}
-            {/*    //             height: 743,*/}
-            {/*    //             url: `${hosts.photo}${photoItem?.image_name}_thumb.${photoItem?.image_ext}`,*/}
-            {/*    //             width: 1280*/}
-            {/*    //         }*/}
-            {/*    //     ],*/}
-            {/*    //     locale: 'ru'*/}
-            {/*    // }}*/}
-            {/*/>*/}
-            {/*<PhotoSection*/}
-            {/*    title={objectTitle}*/}
-            {/*    photo={photoItem}*/}
-            {/*    catalog={catalog ?? undefined}*/}
-            {/*/>*/}
-            {/*<Message*/}
-            {/*    warning={true}*/}
-            {/*    hidden={!isOutdated(photos?.[0]?.date, catalog?.updated!)}*/}
-            {/*    className={'section'}*/}
-            {/*    icon={'warning sign'}*/}
-            {/*    header={'Новые данные'}*/}
-            {/*    content={*/}
-            {/*        'Фотографии устарели - есть новые данные с телескопа, с помощью которых можно собрать новое изображение объекта'*/}
-            {/*    }*/}
-            {/*/>*/}
-            {/*{catalog?.text && (*/}
-            {/*    <div className={'section box table'}>*/}
-            {/*        <Accordion inverted>*/}
-            {/*            <Accordion.Title*/}
-            {/*                active={showSpoiler}*/}
-            {/*                onClick={() => setShowSpoiler(!showSpoiler)}*/}
-            {/*            >*/}
-            {/*                <Icon name={'dropdown'} /> Описание объекта{' '}*/}
-            {/*                {catalog?.name.replace(/_/g, ' ')}*/}
-            {/*            </Accordion.Title>*/}
-            {/*            <Accordion.Content active={showSpoiler}>*/}
-            {/*                <div className={'textBlock'}>{catalog?.text}</div>*/}
-            {/*            </Accordion.Content>*/}
-            {/*        </Accordion>*/}
-            {/*    </div>*/}
-            {/*)}*/}
-            {/*<PhotoTable photos={photos} />*/}
-            {/*<ObjectsCloud*/}
-            {/*    loader={objectsLoading}*/}
-            {/*    current={object}*/}
-            {/*    names={photoObjects?.items}*/}
-            {/*    link={'photos'}*/}
-            {/*/>*/}
         </AppLayout>
     )
 }
@@ -186,12 +115,6 @@ export const getServerSideProps = wrapper.getServerSideProps(
             const { data: photoData, isError } = await store.dispatch(
                 API.endpoints?.photosGetItem.initiate(photoId)
             )
-
-            // const { data: photosData } = await store.dispatch(
-            //     API.endpoints?.photosGetList.initiate({
-            //         object: photoId
-            //     })
-            // )
 
             if (isError) {
                 return { notFound: true }
