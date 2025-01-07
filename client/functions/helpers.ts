@@ -79,6 +79,29 @@ export const getTimeFromSec = (sec: number, full: boolean = false): string => {
     return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m)
 }
 
+export const formatSecondsToExposure = (
+    sec: number | string,
+    full: boolean = false
+): string => {
+    const seconds = Number(sec)
+
+    if (seconds <= 0) return '0'
+
+    let h = (seconds / 3600) ^ 0
+    let m = ((seconds - h * 3600) / 60) ^ 0
+
+    if (full) {
+        let text = ''
+
+        text += h ? h + ' ' + declOfNum(h, ['час', 'часа', 'часов']) + ' ' : ''
+        text += m ? m + ' ' + declOfNum(m, ['минута', 'минуты', 'минут']) : ''
+
+        return text
+    }
+
+    return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m)
+}
+
 export const formatUTCDate = (
     date?: string | Date,
     format: string = 'D MMMM YYYY, HH:mm'
@@ -162,4 +185,20 @@ export const shuffle = (array: any[]): any[] => {
     }
 
     return array
+}
+
+export const isValidJSON = (string: string) => {
+    if (!string || !string.length) {
+        return true
+    }
+
+    try {
+        JSON.parse(string)
+    } catch (e) {
+        console.error(e)
+
+        return false
+    }
+
+    return true
 }

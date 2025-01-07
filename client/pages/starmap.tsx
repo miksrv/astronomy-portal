@@ -9,13 +9,14 @@ import React, { useState } from 'react'
 import { Container } from 'simple-react-ui-kit'
 
 import AppLayout from '@/components/app-layout'
+import AppToolbar from '@/components/app-toolbar'
 import StarMap from '@/components/star-map'
 
 type CelestialPageProps = {}
 
 // TODO: При добавить URL параметр названия объекта для центрирования карты на нем
 const CelestialPage: NextPage<CelestialPageProps> = () => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     const [goToObject, setGoToObject] = useState<[number, number]>([0, 0])
 
@@ -24,7 +25,7 @@ const CelestialPage: NextPage<CelestialPageProps> = () => {
     return (
         <AppLayout>
             <NextSeo
-                title={'Карта звездного неба'}
+                title={'star-map'}
                 description={
                     'Карта звездного неба с галактиками, туманностями, кометами, сверхновыми и другими космическими объектами, снятых любительским телескопом'
                 }
@@ -36,13 +37,14 @@ const CelestialPage: NextPage<CelestialPageProps> = () => {
                             width: 1280
                         }
                     ],
-                    locale: 'ru'
+                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
 
-            <div className={'toolbarHeader'}>
-                <h1 className={'pageTitle'}>{t('star-map')}</h1>
-            </div>
+            <AppToolbar
+                title={t('star-map')}
+                currentPage={t('star-map')}
+            />
 
             <Container>
                 <StarMap

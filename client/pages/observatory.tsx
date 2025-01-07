@@ -1,16 +1,20 @@
-import { API, ApiModel, ApiType } from '@/api'
+import { API } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import React from 'react'
 
 import AppLayout from '@/components/app-layout'
+import AppToolbar from '@/components/app-toolbar'
+import AstronomyCalc from '@/components/astronomy-calc'
 import Calendar from '@/components/calendar'
-import PhotoGrid from '@/components/photo-grid'
-import Statistic from '@/components/statistic'
+import Camera from '@/components/camera'
+import RelayList from '@/components/relay-list'
 import TelescopeWorkdays from '@/components/telescope-workdays'
+import Weather from '@/components/weather'
 
 interface ObservatoryPageProps {
     // photos: ApiModel.Photo[]
@@ -26,39 +30,56 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = (
         // telescope,
         // statistic
     }
-) => (
-    <AppLayout>
-        <NextSeo
-            title={'Любительская астрономическая обсерватория'}
-            description={
-                'Самодельная любительская астрономическая обсерватория с удаленным доступом из любой точки мира через интернет. Статистика работы обсерватории, количество отснятых кадров и накопленных данных. Календарь работы телескопа.'
-            }
-            openGraph={{
-                images: [
-                    {
-                        height: 819,
-                        url: '/screenshots/main.jpg',
-                        width: 1280
-                    }
-                ],
-                locale: 'ru'
-            }}
-        />
+) => {
+    const { t, i18n } = useTranslation()
 
-        <Calendar />
+    const { data } = API.useStatisticGetTelescopeQuery()
 
-        {/*{statistic && <Statistic {...statistic} />}*/}
+    return (
+        <AppLayout>
+            <NextSeo
+                title={t('observatory')}
+                description={
+                    'Самодельная любительская астрономическая обсерватория с удаленным доступом из любой точки мира через интернет. Статистика работы обсерватории, количество отснятых кадров и накопленных данных. Календарь работы телескопа.'
+                }
+                openGraph={{
+                    images: [
+                        {
+                            height: 819,
+                            url: '/screenshots/main.jpg',
+                            width: 1280
+                        }
+                    ],
+                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
+                }}
+            />
 
-        {/*<PhotoGrid*/}
-        {/*    photos={photos}*/}
-        {/*    catalog={catalog}*/}
-        {/*/>*/}
+            <AppToolbar
+                title={t('observatory')}
+                currentPage={t('observatory')}
+            />
 
-        {/*<TelescopeWorkdays eventsTelescope={telescope} />*/}
+            <Weather />
+            <AstronomyCalc />
 
-        {/*<Calendar eventsTelescope={telescope} />*/}
-    </AppLayout>
-)
+            <RelayList />
+
+            <Camera
+                cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/2`}
+                interval={5}
+            />
+
+            <Camera
+                cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/1`}
+                interval={30}
+            />
+
+            <Calendar eventsTelescope={data?.items} />
+
+            <TelescopeWorkdays eventsTelescope={data?.items} />
+        </AppLayout>
+    )
+}
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
@@ -70,34 +91,11 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             store.dispatch(setLocale(locale))
 
-            // const { data: catalog } = await store.dispatch(
-            //     API.endpoints?.catalogGetList.initiate()
-            // )
-            //
-            // const { data: telescope } = await store.dispatch(
-            //     API.endpoints?.statisticGetTelescope.initiate()
-            // )
-            //
-            // const { data: photos } = await store.dispatch(
-            //     API.endpoints?.photoGetList.initiate({
-            //         limit: 4,
-            //         order: 'random'
-            //     })
-            // )
-            //
-            // const { data: statistic } = await store.dispatch(
-            //     API.endpoints?.statisticGet.initiate()
-            // )
-
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
             return {
                 props: {
                     ...translations
-                    // catalog: catalog?.items || [],
-                    // photos: photos?.items || [],
-                    // statistic: statistic || null,
-                    // telescope: telescope?.items || []
                 }
             }
         }

@@ -2,6 +2,7 @@ import { API } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import dynamic from 'next/dynamic'
@@ -9,6 +10,7 @@ import React, { useState } from 'react'
 import Gallery from 'react-photo-gallery'
 
 import AppLayout from '@/components/app-layout'
+import AppToolbar from '@/components/app-toolbar'
 import Team from '@/components/project-team'
 
 import photoObservatory1 from '@/public/photos/observatory-1.jpeg'
@@ -95,6 +97,8 @@ const contributors2: string[] = [
 type AboutPageProps = {}
 
 const AboutPage: NextPage<AboutPageProps> = () => {
+    const { t, i18n } = useTranslation()
+
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
 
@@ -125,11 +129,16 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     //         width: 1280
                     //     }
                     // ],
-                    locale: 'ru'
+                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
+
+            <AppToolbar
+                title={t('about')}
+                currentPage={t('about')}
+            />
+
             <div className={'box section'}>
-                <h1>Самодельная астрономическая обсерватория</h1>
                 <p>
                     Привет 👋! Этот сайт посвящен нашему любительскому проекту -
                     самодельной астрономической обсерватории, работающей в
