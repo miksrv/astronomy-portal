@@ -1,9 +1,10 @@
-// export type Telescope = {
-//     telescope_date: string
-//     total_exposure: number
-//     frames_count: number
-//     catalog_items: string[]
-// }
+// TODO Refactor this file to use the new API
+export type Telescope = {
+    telescope_date: string
+    total_exposure: number
+    frames_count: number
+    catalog_items: string[]
+}
 //
 // export type Weather = {
 //     date: string

@@ -21,12 +21,14 @@ export const encodeQueryData = (data: any): string => {
 const isHydrateAction = (action: Action): action is PayloadAction<RootState> =>
     action.type === HYDRATE
 
-export const imageHost =
-    process.env.NEXT_PUBLIC_IMG_HOST || process.env.NEXT_PUBLIC_API_HOST
+export const HOST_API =
+    process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:8080/'
+
+export const HOST_IMG = process.env.NEXT_PUBLIC_IMG_HOST || HOST_API
 
 export const API = createApi({
     baseQuery: fetchBaseQuery({
-        baseUrl: process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:8080/',
+        baseUrl: HOST_API,
         prepareHeaders: (headers, { getState }) => {
             // By default, if we have a token in the store, let's use that for authenticated requests
             const token = (getState() as RootState).auth.token
@@ -238,8 +240,8 @@ export const API = createApi({
             ApiType.Photos.PostResponse | ApiType.ResError,
             ApiType.Photos.PostRequest
         >({
-            invalidatesTags: (result, error, { photoId }) => [
-                { photoId, type: 'Photos' },
+            invalidatesTags: (result, error, { id }) => [
+                { id, type: 'Photos' },
                 { type: 'Statistic' }
             ],
             query: (formState) => ({
@@ -249,25 +251,36 @@ export const API = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
+        photosPostUpload: builder.mutation<
+            ApiType.Photos.PostResponse | ApiType.ResError,
+            FormData
+        >({
+            query: (formData) => ({
+                body: formData,
+                method: 'POST',
+                url: `photos/${formData.get('id')}/upload`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
         photoPatch: builder.mutation<
             ApiType.Photos.PostResponse | ApiType.ResError,
             ApiType.Photos.PostRequest
         >({
-            invalidatesTags: (result, error, { photoId }) => [
-                { photoId, type: 'Photos' }
+            invalidatesTags: (result, error, { id }) => [
+                { id, type: 'Photos' }
             ],
-            query: ({ photoId, ...formState }) => ({
+            query: ({ id, ...formState }) => ({
                 body: formState,
                 method: 'PATCH',
-                url: `photo/${photoId}`
+                url: `photos/${id}`
             }),
             transformErrorResponse: (response) => response.data
         }),
         photosDelete: builder.mutation<void, string>({
             invalidatesTags: () => [{ type: 'Photos' }],
-            query: (photoId) => ({
+            query: (id) => ({
                 method: 'DELETE',
-                url: `photos/${photoId}`
+                url: `photos/${id}`
             }),
             transformErrorResponse: (response) => response.data
         }),
