@@ -1,5 +1,5 @@
 import { ApiModel } from '@/api'
-import { imageHost } from '@/api/api'
+import { HOST_IMG } from '@/api/api'
 import React, { useState } from 'react'
 import PhotoAlbum from 'react-photo-album'
 
@@ -30,7 +30,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ photos }) => {
                 photos={
                     photos?.map((photo) => ({
                         height: photo.height,
-                        src: `${imageHost}${photo.preview}`,
+                        src: `${HOST_IMG}${photo.preview}`,
                         width: photo.width
                     })) || []
                 }

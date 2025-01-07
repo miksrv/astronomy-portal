@@ -1,5 +1,5 @@
 import { ApiModel } from '@/api'
-import { imageHost } from '@/api/api'
+import { HOST_IMG } from '@/api/api'
 import React from 'react'
 import Lightbox, { Slide } from 'yet-another-react-lightbox'
 import Captions from 'yet-another-react-lightbox/plugins/captions'
@@ -26,7 +26,7 @@ const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
     const makeImageLink = (link?: string) =>
         link?.includes('http://') || link?.includes('https://')
             ? link
-            : `${imageHost}${link}`
+            : `${HOST_IMG}${link}`
 
     return (
         <Lightbox

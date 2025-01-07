@@ -1,19 +1,16 @@
-import { ApiModel, useAppDispatch, useAppSelector } from '@/api'
-import { editCatalog, openFormCatalog } from '@/api/applicationSlice'
-import { hosts } from '@/api/constants'
-import { formatDate, getTimeFromSec } from '@/functions/helpers'
+import { ApiModel } from '@/api'
+import { getTimeFromSec } from '@/functions/helpers'
+import { formatDate } from '@/tools/dates'
 import { createLargePhotoUrl } from '@/tools/photos'
-import { formatObjectName } from '@/tools/strings'
-import classNames from 'classnames'
-import uniq from 'lodash-es/uniq'
+import { formatObjectName, humanizeFileSize } from '@/tools/strings'
+import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
+import Link from 'next/link'
 import React, { useMemo } from 'react'
-import { Grid, Icon } from 'semantic-ui-react'
-import { Badge, Container } from 'simple-react-ui-kit'
+import { Container } from 'simple-react-ui-kit'
 
 import FilterList from '@/components/filter-list'
-
-import noImageServerUrl from '@/public/images/no-photo.png'
+import StarMap from '@/components/star-map'
 
 import styles from './styles.module.sass'
 
@@ -30,21 +27,7 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
     equipmentsList,
     ...props
 }) => {
-    // const dispatch = useAppDispatch()
-    // const user = useAppSelector((state) => state.auth.user)
-    //
-    // const date = catalog?.updated ? formatDate(catalog.updated) : '---'
-    // const exposure = catalog?.statistic?.exposure
-    //     ? getTimeFromSec(catalog.statistic.exposure, true)
-    //     : '---'
-    // const size = catalog?.statistic?.data_size
-    //     ? Math.round((catalog.statistic.data_size / 1024) * 100) / 100
-    //     : undefined
-    //
-    // const handleEditCatalog = () => {
-    //     dispatch(editCatalog(catalog))
-    //     dispatch(openFormCatalog(true))
-    // }
+    const { t } = useTranslation()
 
     const objectsData = useMemo(
         () => objectsList?.filter(({ name }) => props.objects?.includes(name)),
@@ -83,7 +66,14 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
 
                 <div className={styles.item}>
                     <span className={styles.key}>Дата снимка:</span>
-                    {props.date ?? '---'}
+                    {props.date ? formatDate(props.date, 'DD MMM YYYY') : '---'}
+                </div>
+
+                <div className={styles.item}>
+                    <span className={styles.key}>Общее накопление:</span>
+                    {props.statistic?.exposure
+                        ? getTimeFromSec(props.statistic.exposure, true)
+                        : '---'}
                 </div>
 
                 <div className={styles.item}>
@@ -91,34 +81,31 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                     {props.statistic?.frames ?? '---'}
                 </div>
 
-                <div className={styles.item}>
-                    <span className={styles.key}>Общее накопление:</span>
-                    {props.statistic?.exposure ?? '---'}
-                </div>
-
                 {props.imageHeight && props.imageWidth && (
                     <div className={styles.item}>
                         <span className={styles.key}>Размер фотографии:</span>
-                        {`${props.imageWidth}x${props.imageHeight} px`}
+                        {`${props.imageWidth}x${props.imageHeight}px`}
                     </div>
                 )}
 
                 <div className={styles.item}>
                     <span className={styles.key}>Размер файла:</span>
-                    {props.fileSize ?? '---'}
+                    {props.fileSize ? humanizeFileSize(props.fileSize) : '---'}
                 </div>
 
                 {objectsData?.length && (
                     <div className={styles.item}>
                         <span className={styles.key}>Объекты на фото:</span>
-                        {objectsData?.map(({ name }) => name)?.join(', ')}
-                    </div>
-                )}
-
-                {equipmentsData?.length && (
-                    <div className={styles.item}>
-                        <span className={styles.key}>Обордование:</span>
-                        {equipmentsData?.map(({ model }) => model)?.join(', ')}
+                        {objectsData.map(({ name }) => (
+                            <Link
+                                key={name}
+                                href={`/objects/${name}`}
+                                className={styles.objectLink}
+                                title={''}
+                            >
+                                {formatObjectName(name)}
+                            </Link>
+                        ))}
                     </div>
                 )}
 
@@ -127,6 +114,29 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                         <FilterList filters={props.filters} />
                     </div>
                 )}
+
+                {equipmentsData?.length && (
+                    <div className={styles.equipmentList}>
+                        {equipmentsData.map((item) => (
+                            <div
+                                key={item.id}
+                                className={styles.item}
+                            >
+                                <span className={styles.key}>
+                                    {t(`${item.type}`)}
+                                </span>
+                                {item.brand} {item.model}
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                <div className={styles.starMapSection}>
+                    <StarMap
+                        zoom={14}
+                        objects={objectsData}
+                    />
+                </div>
             </div>
         </Container>
     )
