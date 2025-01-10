@@ -13,17 +13,4 @@ class ObjectEntity extends Entity
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
-
-    public function getCoordinates()
-    {
-        return [
-            'ra'  => $this->ra,
-            'dec' => $this->dec,
-        ];
-    }
-
-    public function isDeleted()
-    {
-        return !is_null($this->deleted_at);
-    }
 }
