@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\CatalogModel;
-use App\Models\FilesModel;
+use App\Models\ObjectFitsFilesModel;
 use App\Models\PhotoModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
@@ -21,7 +21,7 @@ class Statistic extends ResourceController
     {
         $catalogModel = new CatalogModel();
         $photoModel   = new PhotoModel();
-        $filesModel   = new FilesModel();
+        $filesModel   = new ObjectFitsFilesModel();
 
         $framesCount = $filesModel->select('id')->countAllResults();
         $exposureSum = $filesModel->selectSum('exptime')->first();
@@ -66,7 +66,7 @@ class Statistic extends ResourceController
             if (in_array($item->object, $photoResult)) {
                 continue;
             }
-            
+
             $photoResult[] = $item->object;
         }
 
@@ -90,7 +90,7 @@ class Statistic extends ResourceController
             $where = ['MONTH(date_obs)' => $month, 'YEAR(date_obs)' => $year];
         }
 
-        $filesModel = new FilesModel();
+        $filesModel = new ObjectFitsFilesModel();
         $filesData  = $filesModel
             ->select('date_obs, exptime, object')
             ->where($where)

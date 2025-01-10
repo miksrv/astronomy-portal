@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Libraries\RelayLibrary;
 use App\Libraries\SessionLibrary;
-use App\Models\SettingsModel;
+use App\Models\ObservatorySettingsModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\RESTful\ResourceController;
@@ -20,7 +20,7 @@ class Relay extends ResourceController
 {
     use ResponseTrait;
 
-    private SettingsModel $settingsModel;
+    private ObservatorySettingsModel $settingsModel;
 
     private RelayLibrary $relayLibrary;
 
@@ -28,7 +28,7 @@ class Relay extends ResourceController
 
     public function __construct()
     {
-        $this->settingsModel = new SettingsModel();
+        $this->settingsModel = new ObservatorySettingsModel();
         $this->relayLibrary  = new RelayLibrary();
         $this->session       = new SessionLibrary();
     }

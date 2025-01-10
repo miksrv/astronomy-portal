@@ -13,15 +13,15 @@ class System extends ResourceController
 {
 	/**
 	 * Recalculates the FITS filter statistics for each object.
-	 * 
+	 *
 	 * It aggregates data from the files and updates the corresponding filters
 	 * in the database if there are changes in frame count, exposure time, or file size.
-	 * 
+	 *
 	 * @return void
 	 */
-	public function relaclulateFitsFilters(): void
+	public function recalculateFitsFilters(): void
 	{
-		helper('filters')
+		helper('filters');
 
 		$dataObjects = [];
 		$filterModel = new ObjectFitsFiltersModel();
@@ -48,7 +48,7 @@ class System extends ResourceController
 
 		foreach ($dataObjects as $objectName => $filter) {
 			foreach ($filter as $filterName => $filterData) {
-	            $objectFitsFilters = 
+	            $objectFitsFilters =
 	            	$filterModel->getDataByObjectFilter($objectName, $filterName)
 	            	?? new ObjectFitsFiltersEntity();
 

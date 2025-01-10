@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Entities\User;
+use App\Entities\UserEntity;
 use App\Libraries\GoogleClient;
 use App\Libraries\SessionLibrary;
 use App\Libraries\YandexClient;
@@ -30,44 +30,6 @@ class Auth extends ResourceController
     {
         $this->session = new SessionLibrary();
     }
-
-
-    /**
-     * Authenticate Existing User
-     * @return ResponseInterface
-     * @throws ReflectionException
-     */
-    public function login(): ResponseInterface
-    {
-        if ($this->session->isAuth) {
-            return $this->failForbidden('Already authorized');
-        }
-
-        $rules = [
-            'email'    => 'required|min_length[6]|max_length[50]|valid_email',
-            'password' => 'required|min_length[8]|max_length[255]|validateUser[email, password]'
-        ];
-
-        $errors = [
-            'password' => [
-                'validateUser' => 'Invalid login credentials provided'
-            ]
-        ];
-
-        $input = $this->getRequestInput($this->request);
-
-        if (!$this->validateRequest($input, $rules, $errors)) {
-            return $this->failValidationErrors($this->validator->getErrors());
-        }
-
-        $userModel = new UsersModel();
-        $userData  = $userModel->findUserByEmailAddress($input['email']);
-
-        $this->session->authorization($userData);
-
-        return $this->responseAuth();
-    }
-
 
     /**
      * @throws Exception
@@ -111,7 +73,6 @@ class Auth extends ResourceController
         );
     }
 
-
     /**
      * Auth via Yandex
      * @link https://oauth.yandex.ru/
@@ -145,7 +106,6 @@ class Auth extends ResourceController
             $serviceClient->authUser($code)
         );
     }
-
 
     /**
      * Auth via VK
@@ -231,7 +191,7 @@ class Auth extends ResourceController
 
         // If there is no user with this email, then register a new user
         if (empty($userData)) {
-            $createUser = new User();
+            $createUser = new UserEntity();
             $createUser->name      = $serviceProfile->name;
             $createUser->email     = $serviceProfile->email;
             $createUser->auth_type = $authType;
@@ -324,7 +284,7 @@ class Auth extends ResourceController
             $response->token = generateAuthToken($this->session->user->email);
 
             unset($response->user->email, $response->user->auth_type);
-            
+
             if ($response->user->role === 'user') {
                 unset($response->user->role);
             }

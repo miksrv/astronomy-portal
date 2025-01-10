@@ -11,7 +11,7 @@ class Camera extends ResourceController
 {
     use ResponseTrait;
 
-    const CACHE_TIME = 5;
+    const CACHE_TIME = 2;
 
     /**
      * Camera image by id
