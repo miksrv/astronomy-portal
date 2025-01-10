@@ -10,10 +10,10 @@ class CreateObjectsCategoriesTable extends Migration
     {
         $this->forge->addField([
             'id' => [
-                'type'           => 'INT',
-                'constraint'     => 11,
-                'unsigned'       => true,
-                'auto_increment' => true,
+                'type'       => 'VARCHAR',
+                'constraint' => 15,
+                'null'       => false,
+                'unique'     => true
             ],
             'object_name' => [
                 'type'       => 'VARCHAR',
@@ -28,7 +28,7 @@ class CreateObjectsCategoriesTable extends Migration
             ],
         ]);
 
-        $this->forge->addKey('id', true);
+        $this->forge->addPrimaryKey('id');
         $this->forge->addKey('object_name');
         $this->forge->addForeignKey('category_id', 'categories', 'id', 'CASCADE', 'CASCADE');
 

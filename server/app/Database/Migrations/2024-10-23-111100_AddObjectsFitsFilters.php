@@ -10,10 +10,10 @@ class CreateObjectsFitsFiltersTable extends Migration
     {
         $this->forge->addField([
             'id' => [
-                'type'           => 'INT',
-                'auto_increment' => true,
-                'null'           => false,
-                'unsigned'       => true,
+                'type'       => 'VARCHAR',
+                'constraint' => 15,
+                'null'       => false,
+                'unique'     => true
             ],
             'object_name' => [
                 'type'       => 'VARCHAR',

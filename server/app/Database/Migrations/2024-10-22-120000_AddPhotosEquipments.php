@@ -10,10 +10,10 @@ class CreatePhotosEquipmentsTable extends Migration
     {
         $this->forge->addField([
             'id' => [
-                'type'           => 'INT',
-                'constraint'     => 11,
-                'unsigned'       => true,
-                'auto_increment' => true,
+                'type'       => 'VARCHAR',
+                'constraint' => 15,
+                'null'       => false,
+                'unique'     => true
             ],
             'photo_id' => [
                 'type'       => 'VARCHAR',

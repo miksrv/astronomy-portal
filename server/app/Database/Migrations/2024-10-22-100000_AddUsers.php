@@ -36,14 +36,8 @@ class AddUser extends Migration
                 'constraint' => 50,
                 'null'       => true,
             ],
-            'password' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 255,
-                'null'       => false,
-                'unique'     => true
-            ],
             'auth_type' => [
-                'type' => 'ENUM("native", "google", "yandex")',
+                'type' => 'ENUM("native", "google", "yandex", "vk")',
                 'null' => true
             ],
             'role' => [
@@ -65,8 +59,9 @@ class AddUser extends Migration
                 'null' => true,
             ],
             'service_id' => [
-                'type' => 'INT',
-                'null' => true,
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+                'null'       => true,
             ],
             'created_at DATETIME default current_timestamp',
             'updated_at DATETIME default current_timestamp',

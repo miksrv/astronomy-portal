@@ -10,10 +10,10 @@ class CreatePhotosObjectsTable extends Migration
     {
         $this->forge->addField([
             'id' => [
-                'type'           => 'INT',
-                'constraint'     => 11,
-                'unsigned'       => true,
-                'auto_increment' => true,
+                'type'       => 'VARCHAR',
+                'constraint' => 15,
+                'null'       => false,
+                'unique'     => true
             ],
             'photo_id' => [
                 'type'       => 'VARCHAR',
@@ -30,7 +30,7 @@ class CreatePhotosObjectsTable extends Migration
         $this->forge->addPrimaryKey('id');
         $this->forge->addForeignKey('photo_id', 'photos', 'id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('object_id', 'objects', 'catalog_name', 'CASCADE', 'CASCADE');
-        
+
         $this->forge->createTable('photos_objects');
     }
 

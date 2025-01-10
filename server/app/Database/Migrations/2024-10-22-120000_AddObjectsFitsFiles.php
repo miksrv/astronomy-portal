@@ -215,8 +215,9 @@ class CreateObjectsFitsFilesTable extends Migration
             ],
             'object' => [
                 'type'       => 'VARCHAR',
-                'constraint' => 200,
-                'null'       => true
+                'constraint' => 255,
+                'null'       => false,
+                'default'    => 'Unknown'
             ],
             'airmass' => [
                 'type' => 'FLOAT',

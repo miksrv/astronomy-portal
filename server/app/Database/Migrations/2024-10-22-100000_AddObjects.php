@@ -17,12 +17,12 @@ class CreateObjectsTable extends Migration
             'title_en' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 255,
-                'null'       => false,
+                'null'       => true,
             ],
             'title_ru' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 255,
-                'null'       => false,
+                'null'       => true,
             ],
             'description_en' => [
                 'type' => 'TEXT',

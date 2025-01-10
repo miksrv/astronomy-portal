@@ -18,12 +18,12 @@ class CreateEventsTable extends Migration
             'title_en' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 150,
-                'null'       => false
+                'null'       => true
             ],
             'title_ru' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 150,
-                'null'       => false
+                'null'       => true
             ],
             'content_en' => [
                 'type' => 'TEXT',
