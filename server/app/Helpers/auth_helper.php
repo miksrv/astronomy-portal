@@ -1,6 +1,6 @@
 <?php
 
-use App\Entities\User;
+use App\Entities\UserEntity;
 use App\Models\UsersModel;
 use Config\Services;
 use Firebase\JWT\JWT;
@@ -10,7 +10,7 @@ use Firebase\JWT\Key;
  * @param string|null $encodedToken
  * @return User|null
  */
-function validateAuthToken(string $encodedToken = null):? User {
+function validateAuthToken(string $encodedToken = null):? UserEntity {
     if (!$encodedToken) {
         return null;
     }
