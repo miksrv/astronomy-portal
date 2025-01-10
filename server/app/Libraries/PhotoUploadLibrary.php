@@ -132,7 +132,7 @@ class PhotoUploadLibrary {
         $mediumFileName = $fileName . '_medium.' . $fileExtension;
         $mediumImagePath = $uploadPath . '/' . $mediumFileName;
         $image->withFile($filePath)
-              ->fit(355, 300, 'center') // Уменьшаем до 355x200, сохраняя пропорции
+              ->fit(500, 400, 'center') // Уменьшаем до 355x200, сохраняя пропорции
               ->save($mediumImagePath);
         $previewFiles['medium'] = $mediumFileName;
 
@@ -140,7 +140,7 @@ class PhotoUploadLibrary {
         $largeFileName = $fileName . '_large.' . $fileExtension;
         $largeImagePath = $uploadPath . '/' . $largeFileName;
         $image->withFile($filePath)
-              ->resize(2048, 1024, true)
+              ->resize(4096, 3423, true)
               ->save($largeImagePath);
         $previewFiles['large'] = $largeFileName;
 
