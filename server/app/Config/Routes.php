@@ -27,18 +27,6 @@ $routes->delete('author/(:num)', 'Author::delete/$1');
 $routes->options('author', 'Author');
 $routes->options('author/(:num)', 'Author');
 
-$routes->get('photos', 'Photos::list');
-$routes->get('photos/download/(:any)/(:any)', 'Photos::download/$1/$2');
-$routes->get('photos/(:any)', 'Photos::show/$1');
-$routes->get('photos/(:any)/(:any)', 'Photos::show/$1/$2');
-$routes->post('photos', 'Photos::create');
-$routes->post('photos/upload', 'Photos::upload');
-$routes->patch('photos/(:any)', 'Photos::update/$1');
-$routes->delete('photos/(:any)', 'Photos::delete/$1');
-$routes->options('photos', 'Photos');
-$routes->options('photos/(:any)', 'Photos');
-$routes->options('photos/(:any)/(:any)', 'Photos');
-
 $routes->get('auth/me', 'Auth::me');
 $routes->get('auth/google', 'Auth::google');
 $routes->get('auth/yandex', 'Auth::yandex');
@@ -61,7 +49,7 @@ $routes->get('sensors', 'Sensors::list');
 
 $routes->get('camera/(:num)', 'Camera::show/$1');
 
-$routes->get('system/recalculate/fits', 'System::relaclulateFitsFilters');
+$routes->get('system/recalculate/fits', 'System::recalculateFitsFilters');
 
 /** Files Controller **/
 $routes->get('files/(:any)', 'Files::show/$1');
@@ -85,6 +73,19 @@ $routes->patch('objects/(:any)', 'Objects::update/$1');
 $routes->delete('objects/(:any)', 'Objects::delete/$1');
 $routes->options('objects', 'Objects');
 $routes->options('objects/(:any)', 'Objects');
+
+/** Photos Controller **/
+$routes->get('photos', 'Photos::list');
+$routes->get('photos/download/(:any)/(:any)', 'Photos::download/$1/$2');
+$routes->get('photos/(:any)', 'Photos::show/$1');
+$routes->get('photos/(:any)/(:any)', 'Photos::show/$1/$2');
+$routes->post('photos', 'Photos::create');
+$routes->post('photos/(:any)/upload', 'Photos::upload/$1');
+$routes->patch('photos/(:any)', 'Photos::update/$1');
+$routes->delete('photos/(:any)', 'Photos::delete/$1');
+$routes->options('photos', 'Photos');
+$routes->options('photos/(:any)', 'Photos');
+$routes->options('photos/(:any)/(:any)', 'Photos');
 
 /** Equipments Controller **/
 $routes->get('equipments', 'Equipment::list');
