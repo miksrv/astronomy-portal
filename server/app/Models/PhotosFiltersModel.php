@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
 use App\Entities\PhotosFiltersEntity;
 
-class PhotosFiltersModel extends Model
+class PhotosFiltersModel extends ApplicationBaseModel
 {
     protected $table      = 'photos_filters';
     protected $primaryKey = 'id';
@@ -32,9 +31,8 @@ class PhotosFiltersModel extends Model
     protected $skipValidation       = true;
     protected $cleanValidationRules = true;
 
-    // Callbacks
-    protected $allowCallbacks = false;
-    protected $beforeInsert   = [];
+    protected $allowCallbacks = true;
+    protected $beforeInsert   = ['generateId'];
     protected $afterInsert    = [];
     protected $beforeUpdate   = [];
     protected $afterUpdate    = [];
@@ -47,7 +45,7 @@ class PhotosFiltersModel extends Model
      * Retrieves the FITS filter data for a given photo and filter.
      *
      * This function queries the database for the record that matches
-     * the specified photo and filter. If found, it returns an 
+     * the specified photo and filter. If found, it returns an
      * instance of PhotosFiltersEntity, otherwise returns null.
      *
      * @param string $photo_id The ID of the photo for which to retrieve the filter data.

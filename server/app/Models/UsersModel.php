@@ -19,16 +19,14 @@ class UsersModel extends ApplicationBaseModel {
     protected $allowedFields = [
         'name',
         'email',
-        'password',
-        'role',
-        'auth_type',
-        'language',
-        'experience',
-        'level',
+        'phone',
         'avatar',
-        'website',
-        'reputation',
-        'settings',
+        'auth_type',
+        'role',
+        'locale',
+        'sex',
+        'birthday',
+        'service_id',
         'created_at',
         'updated_at',
         'activity_at',
@@ -62,7 +60,7 @@ class UsersModel extends ApplicationBaseModel {
     public function findUserByEmailAddress(string $emailAddress): UserEntity | array | null
     {
         return $this
-            ->select('id, name, avatar, email, password, auth_type, role, locale, settings, level, experience')
+            ->select('id, name, avatar, email, auth_type, role, locale')
             ->where('email', $emailAddress)
             ->first();
     }

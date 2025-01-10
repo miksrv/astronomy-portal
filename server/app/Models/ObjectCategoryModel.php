@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
 use App\Entities\ObjectCategoryEntity;
 
-class ObjectCategoryModel extends Model
+class ObjectCategoryModel extends ApplicationBaseModel
 {
     protected $table      = 'objects_categories';
     protected $primaryKey = 'id';
@@ -19,4 +18,14 @@ class ObjectCategoryModel extends Model
     protected $useSoftDeletes = false;
 
     protected $useTimestamps = false;
+
+    protected $allowCallbacks = true;
+    protected $beforeInsert   = ['generateId'];
+    protected $afterInsert    = [];
+    protected $beforeUpdate   = [];
+    protected $afterUpdate    = [];
+    protected $beforeFind     = [];
+    protected $afterFind      = [];
+    protected $beforeDelete   = [];
+    protected $afterDelete    = [];
 }

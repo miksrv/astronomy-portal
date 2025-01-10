@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
 use App\Entities\ObjectFitsFiltersEntity;
 
 class ObjectFitsFiltersModel extends ApplicationBaseModel
@@ -40,7 +39,7 @@ class ObjectFitsFiltersModel extends ApplicationBaseModel
 
     // Callbacks
     protected $allowCallbacks = true;
-    protected $beforeInsert   = [];
+    protected $beforeInsert   = ['generateId'];
     protected $afterInsert    = [];
     protected $beforeUpdate   = [];
     protected $afterUpdate    = [];
@@ -53,7 +52,7 @@ class ObjectFitsFiltersModel extends ApplicationBaseModel
      * Retrieves the FITS filter data for a given object and filter.
      *
      * This function queries the database for the record that matches
-     * the specified object and filter. If found, it returns an 
+     * the specified object and filter. If found, it returns an
      * instance of ObjectFitsFiltersEntity, otherwise returns null.
      *
      * @param string $object The name of the object for which to retrieve the filter data.

@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
 use App\Entities\PhotosObjectEntity;
 
-class PhotosObjectModel extends Model
+class PhotosObjectModel extends ApplicationBaseModel
 {
     protected $table      = 'photos_objects';
     protected $primaryKey = 'id';
@@ -33,4 +32,14 @@ class PhotosObjectModel extends Model
     ];
 
     protected $useTimestamps = false;
+
+    protected $allowCallbacks = true;
+    protected $beforeInsert   = ['generateId'];
+    protected $afterInsert    = [];
+    protected $beforeUpdate   = [];
+    protected $afterUpdate    = [];
+    protected $beforeFind     = [];
+    protected $afterFind      = [];
+    protected $beforeDelete   = [];
+    protected $afterDelete    = [];
 }

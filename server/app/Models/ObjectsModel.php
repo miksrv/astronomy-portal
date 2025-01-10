@@ -84,7 +84,7 @@ class ObjectsModel extends Model
         $objectsQuery = $this->select('catalog_name, title_en, title_ru, image_file, ra, dec' . (
             $object !== null ? ', description_en, description_ru, fits_cloud_link' : '')
         );
-        
+
         // Apply filter if a specific object is requested
         if ($object !== null) {
             $objectsQuery->where('catalog_name', $object);
@@ -113,14 +113,15 @@ class ObjectsModel extends Model
             $objectItem->title = getLocalizedString($locale, $objectItem->title_en, $objectItem->title_ru);
 
             if ($object !== null) {
-                $objectItem->description = getLocalizedString($locale, $objectItem->description_en, $objectItem->description_ru);
+                $objectItem->description   = getLocalizedString($locale, $objectItem->description_en, $objectItem->description_ru);
+                $objectItem->fitsCloudLink = $objectItem->fits_cloud_link;
             }
 
-            // TODO
-            // if (!empty($objectItem->image_file)) {
-            //    $imageFile = explode('.', $objectItem->image_file);
-            //    $objectItem->imageFile = PATH_PHOTOS . $objectItem->name . '/' . $imageFile[0] . '.' . $imageFile[1];
-            //}
+            // Add object star map image file if available
+            if (!empty($objectItem->image_file) && file_exists(UPLOAD_STAR_MAPS . $objectItem->image_file)) {
+               $imageFile = explode('.', $objectItem->image_file);
+               $objectItem->image = PATH_STAR_MAPS . $imageFile[0] . '.' . $imageFile[1];
+            }
 
             // Filter and map categories belonging to the object with localized titles
             $objectItem->categories = array_values(array_map(
@@ -130,9 +131,9 @@ class ObjectsModel extends Model
 
             // Remove unnecessary fields
             unset(
-                $objectItem->catalog_name, $objectItem->title_en, $objectItem->title_ru, 
+                $objectItem->catalog_name, $objectItem->title_en, $objectItem->title_ru,
                 $objectItem->description_en, $objectItem->description_ru,
-                $objectItem->image_file
+                $objectItem->image_file, $objectItem->fits_cloud_link
             );
         }
 

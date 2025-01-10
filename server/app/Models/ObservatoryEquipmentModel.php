@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
 use App\Entities\ObservatoryEquipmentEntity;
 
-class ObservatoryEquipmentModel extends Model
+class ObservatoryEquipmentModel extends ApplicationBaseModel
 {
     protected $table      = 'observatory_equipment';
     protected $primaryKey = 'id';
@@ -28,4 +27,14 @@ class ObservatoryEquipmentModel extends Model
         'model'          => 'permit_empty|string|max_length[255]',
         'specifications' => 'permit_empty|string'
     ];
+
+    protected $allowCallbacks = true;
+    protected $beforeInsert   = ['generateId'];
+    protected $afterInsert    = [];
+    protected $beforeUpdate   = [];
+    protected $afterUpdate    = [];
+    protected $beforeFind     = [];
+    protected $afterFind      = [];
+    protected $beforeDelete   = [];
+    protected $afterDelete    = [];
 }

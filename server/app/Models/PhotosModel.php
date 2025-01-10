@@ -69,8 +69,9 @@ class PhotosModel extends ApplicationBaseModel
         'deleted_at'   => '?datetime',
     ];
 
+    // ID Генерируется в контроллере при создании новой фото
     // protected $allowCallbacks = false;
-    //protected $beforeInsert   = ['generateId'];
+    // protected $beforeInsert   = ['generateId'];
 
      // Основной метод для получения фотографий и связанных данных
     /**
@@ -91,7 +92,7 @@ class PhotosModel extends ApplicationBaseModel
         // Retrieve related categories and objects
         $photoCategoryModel   = new PhotosCategoryModel();
         $photoObjectsModel    = new PhotosObjectModel();
-        $photoEquipmentsModel = new PhotosEquipmentsModel();  
+        $photoEquipmentsModel = new PhotosEquipmentsModel();
 
         $photoCategoryQuery = $photoCategoryModel->select('photo_id, category_id');
         $photoObjectsQuery  = $photoObjectsModel->select('photo_id, object_id');
