@@ -1,17 +1,21 @@
-<?php namespace App\Libraries;
+<?php
 
-use App\Entities\User;
+namespace App\Libraries;
+
+use App\Entities\UserEntity;
 use App\Models\UsersModel;
 use Config\Services;
 use ReflectionException;
 
-class SessionLibrary {
-    public User | null $user = null;
+class SessionLibrary
+{
+    public UserEntity | null $user = null;
     public bool $isAuth = false;
 
     private \CodeIgniter\HTTP\IncomingRequest|\CodeIgniter\HTTP\CLIRequest $request;
 
-    public function __construct() {
+    public function __construct()
+    {
         helper('auth');
 
         $this->request = Services::request();
@@ -28,7 +32,8 @@ class SessionLibrary {
     /**
      * @throws ReflectionException
      */
-    public function authorization(User $user): static {
+    public function authorization(UserEntity $user): static
+    {
         $this->user   = $user;
         $this->isAuth = true;
         $this->update();
@@ -39,7 +44,8 @@ class SessionLibrary {
     /**
      * @throws ReflectionException
      */
-    public function update(): static {
+    public function update(): static
+    {
         if ($this->user) {
             $usersModel = new UsersModel();
             $usersModel->updateUserActivity($this->user->id);

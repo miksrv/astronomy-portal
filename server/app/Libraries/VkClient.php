@@ -1,4 +1,6 @@
-<?php namespace App\Libraries;
+<?php
+
+namespace App\Libraries;
 
 use Config\Services;
 
@@ -18,7 +20,8 @@ const VK_API_VERSION = '5.199';
  *      *string birthday (d.m.Y)
  * ]
  */
-class VkClient {
+class VkClient
+{
     private string $clientId;
 
     private string $redirectUri;
