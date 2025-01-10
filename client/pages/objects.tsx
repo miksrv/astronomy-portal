@@ -1,4 +1,4 @@
-import { API, ApiModel } from '@/api'
+import { API, ApiModel, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import uniq from 'lodash-es/uniq'
@@ -20,7 +20,6 @@ interface ObjectsPageProps {
     photosList: ApiModel.Photo[]
 }
 
-// TODO Для кнопки "Добавить" добавить проверку на права доступа
 // TODO В toolbar добавить быстрый поиск по названию объекта
 const ObjectsPage: NextPage<ObjectsPageProps> = ({
     categoriesList,
@@ -29,6 +28,8 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
 }) => {
     const { t, i18n } = useTranslation()
     const router = useRouter()
+
+    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     const [categoryFilter, setCategoryFilter] = useState<number | undefined>()
 
@@ -60,13 +61,15 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
                 title={t('list-astronomical-objects')}
                 description={t('description-object-list-page')}
                 openGraph={{
-                    images: [
-                        {
-                            height: 814,
-                            url: '/screenshots/objects.jpg',
-                            width: 1280
-                        }
-                    ],
+                    // images: [
+                    //     {
+                    //         height: 814,
+                    //         url: '/screenshots/objects.jpg',
+                    //         width: 1280
+                    //     }
+                    // ],
+                    siteName: t('look-at-the-stars'),
+                    title: t('list-astronomical-objects'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
@@ -86,12 +89,14 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
                     }))}
                 />
 
-                <Button
-                    icon={'PlusCircle'}
-                    mode={'secondary'}
-                    label={t('add')}
-                    onClick={handleCreate}
-                />
+                {userRole === 'admin' && (
+                    <Button
+                        icon={'PlusCircle'}
+                        mode={'secondary'}
+                        label={t('add')}
+                        onClick={handleCreate}
+                    />
+                )}
             </AppToolbar>
 
             <ObjectTable

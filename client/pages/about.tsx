@@ -5,12 +5,13 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import dynamic from 'next/dynamic'
 import React, { useState } from 'react'
 import Gallery from 'react-photo-gallery'
+import { Container } from 'simple-react-ui-kit'
 
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
+import PhotoLightbox from '@/components/photo-lightbox'
 import Team from '@/components/project-team'
 
 import photoObservatory1 from '@/public/photos/observatory-1.jpeg'
@@ -29,13 +30,6 @@ import photoStargazing5 from '@/public/photos/stargazing-5.jpeg'
 import photoStargazing6 from '@/public/photos/stargazing-6.jpeg'
 import photoStargazing7 from '@/public/photos/stargazing-7.jpeg'
 import photoStargazing8 from '@/public/photos/stargazing-8.jpeg'
-
-const PhotoLightboxOld = dynamic(
-    () => import('@/components/photo-lightbox-old/PhotoLightboxOld'),
-    {
-        ssr: false
-    }
-)
 
 const galleryObservatory = [
     photoObservatory3,
@@ -103,8 +97,8 @@ const AboutPage: NextPage<AboutPageProps> = () => {
     const [photoIndex, setPhotoIndex] = useState<number>(0)
 
     const allPhotos = [
-        ...galleryObservatory.map((image) => image.src),
-        ...galleryStargazing.map((image) => image.src)
+        ...galleryObservatory.map((image) => image),
+        ...galleryStargazing.map((image) => image)
     ]
 
     const handlePhotoClick = (index: number) => {
@@ -138,8 +132,8 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 currentPage={t('about')}
             />
 
-            <div className={'box section'}>
-                <p>
+            <Container style={{ marginBottom: '10px' }}>
+                <p style={{ marginTop: 0 }}>
                     Привет 👋! Этот сайт посвящен нашему любительскому проекту -
                     самодельной астрономической обсерватории, работающей в
                     удаленном режиме. Это уникальный проект в Оренбургской
@@ -160,16 +154,23 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                         handlePhotoClick(photos.index)
                     }}
                 />
-                <br />
-                <h2> Наша команда</h2>
-                <p>
+            </Container>
+
+            <Container style={{ marginBottom: '10px' }}>
+                <h2 style={{ marginTop: 0 }}> Наша команда</h2>
+                <p style={{ marginTop: 0 }}>
                     Мы работаем в самых разных сферах, но всех нас объединяет
                     одно - любовь к космосу. С 2016 года мы вместе смотрим на
                     звезды, популяризируем астрономию и развиваем наши проекты.
                 </p>
                 <Team />
-                <h2>Астрономический проект &quot;Смотри на звезды&quot;</h2>
-                <p>
+            </Container>
+
+            <Container style={{ marginBottom: '10px' }}>
+                <h2 style={{ marginTop: 0 }}>
+                    Астрономический проект &quot;Смотри на звезды&quot;
+                </h2>
+                <p style={{ marginTop: 0 }}>
                     В 2016 году в Оренбургской области мы запустили
                     научно-популярный проект под названием «Смотри на звезды». С
                     тех пор каждый сезон наша команда устраивает бесплатные
@@ -179,7 +180,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     создание доступной астрономии для всех желающих. Мы делаем
                     космос ближе!
                 </p>
-                <p>
+                <p style={{ marginTop: 0 }}>
                     Наш проект «Смотри на звезды» с первых дней привлек внимание
                     широкой аудитории. Мы стремимся разбудить интерес к космосу
                     у детей, подростков и взрослых, показывая им его величие и
@@ -200,7 +201,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     }}
                 />
                 <br />
-                <p>
+                <p style={{ marginTop: 0 }}>
                     Наши мероприятия охватывают не только города и поселки
                     Оренбургской области, но и соседние регионы. Мы организуем
                     выездные экскурсии в удаленные места, где нет сильного
@@ -210,7 +211,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     опытом, чтобы каждый желающий мог лучше понять и полюбить
                     астрономию.
                 </p>
-                <p>
+                <p style={{ marginTop: 0 }}>
                     Одной из ключевых составляющих проекта являются лекции,
                     которые проводят опытные астрономы-любители. Мы рассказываем
                     о научных открытиях, об истории астрономии и ее современных
@@ -219,19 +220,21 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     удивительной науки. Все лекции проводим в простом формате.
                     Рассказываем аудитории сложные вещи простым языком.
                 </p>
-                <p>
+                <p style={{ marginTop: 0 }}>
                     Особое внимание мы уделяем вечерам тротуарной астрономии.
                     Это неформальные встречи, которые проводятся под открытым
                     небом в самых доступных местах города.
                 </p>
-                <h2>Ваша помощь</h2>
-                <p>
+            </Container>
+            <Container style={{ marginBottom: '10px' }}>
+                <h2 style={{ marginTop: 0 }}>Ваша помощь</h2>
+                <p style={{ marginTop: 0 }}>
                     Большой вклад в развитие проекта «Смотри на звезды» делает
                     поддержка программы социальных инвестиций «Родные города»
                     компании «Газпром нефть» и команда информационного агентства
                     «Оренбург Медиа».
                 </p>
-                <p>
+                <p style={{ marginTop: 0 }}>
                     Наш астрономический проект самодельной обсерватории также
                     поддержало множество участников! У нас масштабные планы по
                     развитию этого проекта. А наша обсерватория всегда нуждается
@@ -255,9 +258,15 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     напишите, это важно. Благодаря вам - космос действительно
                     становится ближе!
                 </p>
-            </div>
-            <PhotoLightboxOld
-                photos={allPhotos}
+            </Container>
+
+            <PhotoLightbox
+                photos={allPhotos.map((image) => ({
+                    src: image.src,
+                    width: image.width,
+                    height: image.height,
+                    title: ''
+                }))}
                 photoIndex={photoIndex}
                 showLightbox={showLightbox}
                 onCloseLightBox={handleHideLightbox}

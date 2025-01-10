@@ -9,7 +9,7 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/dist/client/router'
 import { useSearchParams } from 'next/navigation'
 import React, { useEffect } from 'react'
-import { Dimmer, Loader } from 'semantic-ui-react'
+import { Spinner } from 'simple-react-ui-kit'
 
 interface AuthPageProps {}
 
@@ -57,9 +57,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
 
     return (
         <div>
-            <Dimmer active={true}>
-                <Loader content='Пожалуйста, подождите...' />
-            </Dimmer>
+            <Spinner />
         </div>
     )
 }

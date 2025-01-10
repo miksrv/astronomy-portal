@@ -1,4 +1,4 @@
-import { API, ApiModel } from '@/api'
+import { API, ApiModel, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { createPhotoTitle } from '@/tools/photos'
@@ -7,16 +7,18 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Button } from 'simple-react-ui-kit'
 
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
+import ObjectPhotoTable from '@/components/object-photos-table'
 import PhotoHeader from '@/components/photo-header'
 
 interface PhotoItemPageProps {
     photoId: string
     photoData?: ApiModel.Photo
+    photosList?: ApiModel.Photo[]
     objectsList?: ApiModel.Object[]
     categoriesList?: ApiModel.Category[]
     equipmentsList?: ApiModel.Equipment[]
@@ -25,12 +27,28 @@ interface PhotoItemPageProps {
 const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
     photoId,
     photoData,
+    photosList,
     objectsList,
     categoriesList,
     equipmentsList
 }) => {
     const { t, i18n } = useTranslation()
     const router = useRouter()
+
+    const photoTitle = createPhotoTitle(photoData, t)
+
+    const userRole = useAppSelector((state) => state.auth?.user?.role)
+
+    const filteredPhotosList = useMemo(
+        () =>
+            photosList?.filter(
+                (photo) =>
+                    photo.objects?.some((object) =>
+                        photoData?.objects?.includes(object)
+                    ) && photo.id !== photoData?.id
+            ),
+        [photosList]
+    )
 
     const handleEdit = () => {
         if (photoId) {
@@ -45,7 +63,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
     return (
         <AppLayout>
             <NextSeo
-                title={createPhotoTitle(photoData, t)}
+                title={photoTitle}
                 description={''}
                 openGraph={{
                     // images: [
@@ -62,8 +80,8 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
             />
 
             <AppToolbar
-                title={createPhotoTitle(photoData, t)}
-                currentPage={createPhotoTitle(photoData, t)}
+                title={photoTitle}
+                currentPage={photoTitle}
                 links={[
                     {
                         link: '/photos',
@@ -71,28 +89,37 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                     }
                 ]}
             >
-                <Button
-                    icon={'Pencil'}
-                    mode={'secondary'}
-                    label={t('edit')}
-                    disabled={!photoId}
-                    onClick={handleEdit}
-                />
+                {userRole === 'admin' && (
+                    <>
+                        <Button
+                            icon={'Pencil'}
+                            mode={'secondary'}
+                            label={t('edit')}
+                            disabled={!photoId}
+                            onClick={handleEdit}
+                        />
 
-                <Button
-                    icon={'PlusCircle'}
-                    mode={'secondary'}
-                    label={t('add')}
-                    onClick={handleCreate}
-                />
+                        <Button
+                            icon={'PlusCircle'}
+                            mode={'secondary'}
+                            label={t('add')}
+                            onClick={handleCreate}
+                        />
+                    </>
+                )}
             </AppToolbar>
 
             <PhotoHeader
                 {...photoData}
+                photoTitle={photoTitle}
                 objectsList={objectsList}
                 categoriesList={categoriesList}
                 equipmentsList={equipmentsList}
             />
+
+            {!!filteredPhotosList?.length && (
+                <ObjectPhotoTable photosList={filteredPhotosList} />
+            )}
         </AppLayout>
     )
 }
@@ -124,6 +151,10 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 API.endpoints?.objectsGetList.initiate()
             )
 
+            const { data: photosData } = await store.dispatch(
+                API.endpoints?.photosGetList.initiate()
+            )
+
             const { data: categoriesData } = await store.dispatch(
                 API.endpoints?.categoriesGetList.initiate()
             )
@@ -140,6 +171,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
                     photoId,
                     photoData: photoData,
                     objectsList: objectsData?.items || [],
+                    photosList: photosData?.items || [],
                     categoriesList: categoriesData?.items || [],
                     equipmentsList: equipmentsData?.items || []
                 }

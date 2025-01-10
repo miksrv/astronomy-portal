@@ -1,4 +1,4 @@
-import { API, ApiModel } from '@/api'
+import { API, ApiModel, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -21,6 +21,8 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ photosList }) => {
     const { t, i18n } = useTranslation()
     const router = useRouter()
 
+    const userRole = useAppSelector((state) => state.auth?.user?.role)
+
     const handleCreate = () => {
         router.push('/photos/form')
     }
@@ -31,13 +33,15 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ photosList }) => {
                 title={t('astrophoto')}
                 description={t('description-photos-list-page')}
                 openGraph={{
-                    images: [
-                        {
-                            height: 743,
-                            url: '/screenshots/photos.jpg',
-                            width: 1280
-                        }
-                    ],
+                    // images: [
+                    //     {
+                    //         height: 743,
+                    //         url: '/screenshots/photos.jpg',
+                    //         width: 1280
+                    //     }
+                    // ],
+                    siteName: t('look-at-the-stars'),
+                    title: t('astrophoto'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
@@ -46,12 +50,14 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ photosList }) => {
                 title={t('astrophoto')}
                 currentPage={t('astrophoto')}
             >
-                <Button
-                    icon={'PlusCircle'}
-                    mode={'secondary'}
-                    label={t('add')}
-                    onClick={handleCreate}
-                />
+                {userRole === 'admin' && (
+                    <Button
+                        icon={'PlusCircle'}
+                        mode={'secondary'}
+                        label={t('add')}
+                        onClick={handleCreate}
+                    />
+                )}
             </AppToolbar>
 
             <PhotoGrid photosList={photosList} />

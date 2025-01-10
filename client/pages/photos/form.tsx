@@ -1,4 +1,4 @@
-import { API, ApiType } from '@/api'
+import { API, ApiModel, ApiType, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -6,9 +6,10 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import AppLayout from '@/components/app-layout'
+import AppToolbar from '@/components/app-toolbar'
 import AstroPhotoForm from '@/components/astro-photo-form'
 import { AstroPhotoFormType } from '@/components/astro-photo-form/AstroPhotoForm'
 
@@ -17,9 +18,14 @@ type PhotoFormPageProps = {}
 // TODO: Добавить проерку на редактирование фото - сохранять только если есть изменения
 const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
     const router = useRouter()
-    const { t, i18n } = useTranslation()
 
     const { id } = router.query
+    const { t, i18n } = useTranslation()
+
+    const userRole = useAppSelector((state) => state.auth?.user?.role)
+
+    const [formData, setFormData] = useState<AstroPhotoFormType>()
+    const [formFile, setFormFile] = useState<File>()
 
     const {
         data: photoData,
@@ -59,41 +65,20 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
         }
     ] = API.usePhotosPostUploadMutation()
 
-    const handleSubmit = (formData?: AstroPhotoFormType) => {
-        if (!formData) {
+    const handleSubmit = (data?: AstroPhotoFormType) => {
+        if (!data) {
             return
         }
 
-        // const formDataObject = new FormData()
-        //
-        // if (formData?.id) formDataObject.append('id', formData.id)
-        // if (formData?.categories)
-        //     formDataObject.append(
-        //         'categories',
-        //         JSON.stringify(formData.categories)
-        //     )
-        // if (formData?.objects)
-        //     formDataObject.append('objects', JSON.stringify(formData.objects))
-        // if (formData?.equipments)
-        //     formDataObject.append(
-        //         'equipments',
-        //         JSON.stringify(formData.equipments)
-        //     )
-        // if (formData?.date) formDataObject.append('date', formData.date)
-        // if (formData?.filters)
-        //     formDataObject.append('filters', JSON.stringify(formData.filters))
+        const updatedFormData = { ...formData, ...data, upload: undefined }
 
-        if (formData?.id) {
-            updatePhoto(formData as ApiType.Photos.PostRequest)
+        setFormData(updatedFormData)
+        setFormFile(data?.upload)
+
+        if (updatedFormData?.id) {
+            updatePhoto(updatedFormData)
         } else {
-            createPhoto(formData as ApiType.Photos.PostRequest)
-        }
-
-        if (formData?.upload && formData?.id) {
-            const formDataObject = new FormData()
-            formDataObject.append('id', formData.id)
-            formDataObject.append('file', formData.upload)
-            uploadPhoto(formDataObject)
+            createPhoto(updatedFormData)
         }
     }
 
@@ -101,21 +86,56 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
         router.back()
     }
 
+    const currentPageTitle = photoData?.id
+        ? 'Редактирование фотографии'
+        : 'Добавление фотографии'
+
+    useEffect(() => {
+        if (userRole !== 'admin') {
+            router.push('/photos')
+        }
+    }, [userRole])
+
+    useEffect(() => {
+        if ((createdData as ApiModel.Photo)?.id) {
+            setFormData({
+                ...formData,
+                id: (createdData as ApiModel.Photo).id
+            })
+        }
+    }, [createdData])
+
+    useEffect(() => {
+        if ((formData?.id || photoData?.id) && formFile) {
+            const formDataObject = new FormData()
+            formDataObject.append('id', formData?.id || photoData?.id || '')
+            formDataObject.append('file', formFile)
+            uploadPhoto(formDataObject)
+        }
+    }, [formData?.id, photoData?.id, formFile])
+
     return (
         <AppLayout>
             <NextSeo
-                title={'222'}
-                description={'111'}
+                title={currentPageTitle}
+                description={''}
                 noindex={true}
                 openGraph={{
-                    locale: 'ru'
+                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
-            <div className={'toolbarHeader'}>
-                <h1 className={'pageTitle'}>
-                    {'Добавление / редактирование астро фотографий'}
-                </h1>
-            </div>
+
+            <AppToolbar
+                title={currentPageTitle}
+                currentPage={currentPageTitle}
+                links={[
+                    {
+                        link: '/photos',
+                        text: t('astrophoto')
+                    }
+                ]}
+            />
+
             <AstroPhotoForm
                 disabled={
                     photoLoading ||

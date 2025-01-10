@@ -11,9 +11,9 @@ import { Container } from 'simple-react-ui-kit'
 
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
-import EventUpcoming from '@/components/event-upcoming'
+// import EventUpcoming from '@/components/event-upcoming'
 import EventsList from '@/components/events-list'
-import PhotoLightboxOld from '@/components/photo-lightbox-old'
+import PhotoLightbox from '@/components/photo-lightbox'
 
 import photoStargazing4 from '@/public/photos/stargazing-4.jpeg'
 import photoStargazing7 from '@/public/photos/stargazing-7.jpeg'
@@ -59,6 +59,8 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                     //         width: 1280
                     //     }
                     // ],
+                    siteName: t('look-at-the-stars'),
+                    title: t('stargazing'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
@@ -68,26 +70,13 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                 currentPage={t('stargazing')}
             />
 
-            <EventUpcoming />
+            {/*TODO*/}
+            {/*<EventUpcoming />*/}
 
             <Container>
-                <p>
-                    Астровыезд в Оренбурге - это уникальная возможность
-                    насладиться звёздным небом в полной темноте. Присоединяйтесь
-                    к нашим поездкам с телескопами за город, чтобы увидеть
-                    космические объекты в полях Оренбуржья. Увлекательные
-                    наблюдения и захватывающие открытия ждут вас на каждом
-                    астровыезде.
-                </p>
-                <p>
-                    Астровыезд - это формат проведения научно-популярных
-                    мероприятий, когда участники вечером выезжают за город для
-                    того, чтобы принять участие в ночной экскурсии по звездному
-                    небу. На астровыездах с помощью мультимедиа мы разбираем
-                    интересные темы, связанные с космосом и астрономией,
-                    наблюдаем в телескопы и общаемся с такими же интересными и
-                    увлечёнными людьми.
-                </p>
+                <p style={{ marginTop: 0 }}>{t('stargazing-page.intro')}</p>
+                <p>{t('stargazing-page.description')}</p>
+
                 <Gallery
                     photos={galleryStargazing}
                     columns={4}
@@ -97,8 +86,14 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                         handlePhotoClick(photos.index)
                     }}
                 />
-                <PhotoLightboxOld
-                    photos={galleryStargazing.map((image) => image.src)}
+
+                <PhotoLightbox
+                    photos={galleryStargazing.map((image) => ({
+                        src: image.src,
+                        width: image.width,
+                        height: image.height,
+                        title: ''
+                    }))}
                     photoIndex={photoIndex}
                     showLightbox={showLightbox}
                     onCloseLightBox={handleHideLightbox}

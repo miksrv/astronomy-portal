@@ -1,14 +1,16 @@
-import { API } from '@/api'
+import { API, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
+import { formatObjectName } from '@/tools/strings'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import AppLayout from '@/components/app-layout'
+import AppToolbar from '@/components/app-toolbar'
 import AstroObjectForm from '@/components/astro-object-form'
 import { AstroPhotoFormType } from '@/components/astro-photo-form/AstroPhotoForm'
 
@@ -17,11 +19,14 @@ type ObjectFormPageProps = {}
 // TODO: Добавить обработку ошибки, когда пытаемся отредактировать объект, которого нет
 // TODO: Добавить индикатор загрузки когда загружаем редактируемый объет
 // TODO: Для handleCancel добавить проверку на изменения в форме
+// TODO: Добавить Message компонент для обработки выполнения действий
 const ObjectFormPage: NextPage<ObjectFormPageProps> = () => {
     const router = useRouter()
 
     const { id } = router.query
     const { t, i18n } = useTranslation()
+
+    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     const {
         data: objectData,
@@ -67,17 +72,38 @@ const ObjectFormPage: NextPage<ObjectFormPageProps> = () => {
         router.back()
     }
 
+    const currentPageTitle = objectData?.name
+        ? `Редактирование ${formatObjectName(objectData.name)}`
+        : 'Добавление объекта'
+
+    useEffect(() => {
+        if (userRole !== 'admin') {
+            router.push('/objects')
+        }
+    }, [userRole])
+
     return (
         <AppLayout>
             <NextSeo
-                title={'Добавление / редактирование астрономических объектов'}
+                title={currentPageTitle}
                 description={''}
+                noindex={true}
+                openGraph={{
+                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
+                }}
             />
-            <div className={'toolbarHeader'}>
-                <h1 className={'pageTitle'}>
-                    {'Добавление / редактирование астрономических объектов'}
-                </h1>
-            </div>
+
+            <AppToolbar
+                title={currentPageTitle}
+                currentPage={currentPageTitle}
+                links={[
+                    {
+                        link: '/objects',
+                        text: t('objects')
+                    }
+                ]}
+            />
+
             <AstroObjectForm
                 disabled={objectLoading || createLoading || updateLoading}
                 initialData={objectData}

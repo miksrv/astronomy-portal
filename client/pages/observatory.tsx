@@ -13,24 +13,11 @@ import AstronomyCalc from '@/components/astronomy-calc'
 import Calendar from '@/components/calendar'
 import Camera from '@/components/camera'
 import RelayList from '@/components/relay-list'
-import TelescopeWorkdays from '@/components/telescope-workdays'
 import Weather from '@/components/weather'
 
-interface ObservatoryPageProps {
-    // photos: ApiModel.Photo[]
-    // catalog: ApiModel.Catalog[]
-    // telescope: ApiModel.Statistic.Telescope[]
-    // statistic: ApiType.Statistic.ResGeneral | null
-}
+interface ObservatoryPageProps {}
 
-const ObservatoryPage: NextPage<ObservatoryPageProps> = (
-    {
-        // photos,
-        // catalog,
-        // telescope,
-        // statistic
-    }
-) => {
+const ObservatoryPage: NextPage<ObservatoryPageProps> = () => {
     const { t, i18n } = useTranslation()
 
     const { data } = API.useStatisticGetTelescopeQuery()
@@ -39,17 +26,17 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = (
         <AppLayout>
             <NextSeo
                 title={t('observatory')}
-                description={
-                    'Самодельная любительская астрономическая обсерватория с удаленным доступом из любой точки мира через интернет. Статистика работы обсерватории, количество отснятых кадров и накопленных данных. Календарь работы телескопа.'
-                }
+                description={t('description-observatory')}
                 openGraph={{
-                    images: [
-                        {
-                            height: 819,
-                            url: '/screenshots/main.jpg',
-                            width: 1280
-                        }
-                    ],
+                    // images: [
+                    //     {
+                    //         height: 819,
+                    //         url: '/screenshots/main.jpg',
+                    //         width: 1280
+                    //     }
+                    // ],
+                    siteName: t('look-at-the-stars'),
+                    title: t('astrophoto'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
@@ -59,24 +46,29 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = (
                 currentPage={t('observatory')}
             />
 
-            <Weather />
-            <AstronomyCalc />
+            <div className={'observatoryGrid'}>
+                <div>
+                    <Weather />
+                    <AstronomyCalc />
+                </div>
+                <div>
+                    <RelayList />
+                </div>
+            </div>
 
-            <RelayList />
+            <div className={'observatoryGrid'}>
+                <Camera
+                    cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/2`}
+                    interval={2}
+                />
 
-            <Camera
-                cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/2`}
-                interval={5}
-            />
-
-            <Camera
-                cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/1`}
-                interval={30}
-            />
+                <Camera
+                    cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/1`}
+                    interval={30}
+                />
+            </div>
 
             <Calendar eventsTelescope={data?.items} />
-
-            <TelescopeWorkdays eventsTelescope={data?.items} />
         </AppLayout>
     )
 }

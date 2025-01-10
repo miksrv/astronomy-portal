@@ -1,6 +1,7 @@
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import type { GetServerSidePropsResult, NextPage } from 'next'
+import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import Link from 'next/link'
@@ -13,6 +14,8 @@ interface HomePageProps {}
 const headerHeight = 50
 
 const HomePage: NextPage<HomePageProps> = () => {
+    const { t, i18n } = useTranslation()
+
     useEffect(() => {
         const sections = document.querySelectorAll('section')
         const options = {
@@ -80,11 +83,13 @@ const HomePage: NextPage<HomePageProps> = () => {
     return (
         <AppLayout fullWidth={true}>
             <NextSeo
-                title={'222'}
-                description={'111'}
+                title={t('look-at-the-stars')}
+                description={''}
                 noindex={true}
                 openGraph={{
-                    locale: 'ru'
+                    siteName: t('look-at-the-stars'),
+                    title: t('look-at-the-stars'),
+                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
 

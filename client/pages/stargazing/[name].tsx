@@ -6,7 +6,7 @@ import { NextSeo } from 'next-seo'
 import Image from 'next/image'
 import React, { useEffect, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
-import { Button, Container } from 'semantic-ui-react'
+import { Button, Container } from 'simple-react-ui-kit'
 
 import AppLayout from '@/components/app-layout'
 import EventPhotoUploader from '@/components/event-photo-uploader/EventPhotoUploader'
@@ -87,7 +87,6 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
 
                     {user?.role === 'admin' && (
                         <Button
-                            fluid
                             onClick={handleUploadPhotoClick}
                             disabled={!!uploadingPhotos?.length}
                             style={{ marginBottom: 20 }}

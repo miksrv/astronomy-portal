@@ -1,4 +1,4 @@
-import { API, ApiModel, HOST_IMG } from '@/api'
+import { API, ApiModel, HOST_IMG, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { sliceText } from '@/tools/strings'
@@ -26,7 +26,6 @@ interface ObjectItemPageProps {
     photosList: ApiModel.Photo[]
 }
 
-// TODO: Добавить проверку на права доступа для отображения кнопок редактирования
 const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
     objectName,
     objectData,
@@ -36,6 +35,8 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 }) => {
     const { t, i18n } = useTranslation()
     const router = useRouter()
+
+    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     const { data: objectFilesData } = API.useFilesGetListQuery(objectName, {
         skip: !objectName
@@ -88,20 +89,24 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                     }
                 ]}
             >
-                <Button
-                    icon={'Pencil'}
-                    mode={'secondary'}
-                    label={t('edit')}
-                    disabled={!objectName}
-                    onClick={handleEdit}
-                />
+                {userRole === 'admin' && (
+                    <>
+                        <Button
+                            icon={'Pencil'}
+                            mode={'secondary'}
+                            label={t('edit')}
+                            disabled={!objectName}
+                            onClick={handleEdit}
+                        />
 
-                <Button
-                    icon={'PlusCircle'}
-                    mode={'secondary'}
-                    label={t('add')}
-                    onClick={handleCreate}
-                />
+                        <Button
+                            icon={'PlusCircle'}
+                            mode={'secondary'}
+                            label={t('add')}
+                            onClick={handleCreate}
+                        />
+                    </>
+                )}
             </AppToolbar>
 
             <ObjectHeader

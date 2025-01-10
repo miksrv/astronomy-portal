@@ -5,19 +5,22 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import utc from 'dayjs/plugin/utc'
-import { appWithTranslation } from 'next-i18next'
+import { appWithTranslation, useTranslation } from 'next-i18next'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
+import Script from 'next/script'
 import React from 'react'
 import { Provider } from 'react-redux'
-import Script from "next/script";
 
-dayjs.locale('ru')
-dayjs.extend(utc)
-dayjs.extend(relativeTime)
+import i18Config from '../next-i18next.config'
 
 const App = ({ Component, pageProps }: AppProps) => {
+    const { i18n } = useTranslation()
     const { store } = wrapper.useWrappedStore(pageProps)
+
+    dayjs.locale(i18n.language ?? i18Config.i18n.defaultLocale)
+    dayjs.extend(utc)
+    dayjs.extend(relativeTime)
 
     return (
         <>

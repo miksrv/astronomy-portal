@@ -5,7 +5,7 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import React, { useState } from 'react'
+import React from 'react'
 import { Container } from 'simple-react-ui-kit'
 
 import AppLayout from '@/components/app-layout'
@@ -18,25 +18,23 @@ type CelestialPageProps = {}
 const CelestialPage: NextPage<CelestialPageProps> = () => {
     const { t, i18n } = useTranslation()
 
-    const [goToObject, setGoToObject] = useState<[number, number]>([0, 0])
-
     const { data } = API.useObjectsGetListQuery()
 
     return (
         <AppLayout>
             <NextSeo
-                title={'star-map'}
-                description={
-                    'Карта звездного неба с галактиками, туманностями, кометами, сверхновыми и другими космическими объектами, снятых любительским телескопом'
-                }
+                title={t('star-map')}
+                description={t('description-star-map')}
                 openGraph={{
-                    images: [
-                        {
-                            height: 815,
-                            url: '/screenshots/celestial.jpg',
-                            width: 1280
-                        }
-                    ],
+                    // images: [
+                    //     {
+                    //         height: 815,
+                    //         url: '/screenshots/celestial.jpg',
+                    //         width: 1280
+                    //     }
+                    // ],
+                    siteName: t('look-at-the-stars'),
+                    title: t('star-map'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
@@ -46,12 +44,8 @@ const CelestialPage: NextPage<CelestialPageProps> = () => {
                 currentPage={t('star-map')}
             />
 
-            <Container>
-                <StarMap
-                    objects={data?.items}
-                    // interactive={true}
-                    // goto={goToObject}
-                />
+            <Container style={{ padding: '5px' }}>
+                <StarMap objects={data?.items} />
             </Container>
         </AppLayout>
     )
