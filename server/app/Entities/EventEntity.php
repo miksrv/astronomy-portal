@@ -28,6 +28,7 @@ class EventEntity extends Entity
         // 'registrationStart' => 'registration_start',
         // 'registrationEnd'   => 'registration_end',
         // 'availableTickets'  => 'max_tickets',
+        'cover'     => 'file_image',
         'yandexMap' => 'yandex_map_link',
         'googleMap' => 'google_map_link',
     ];

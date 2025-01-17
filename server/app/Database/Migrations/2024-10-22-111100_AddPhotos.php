@@ -43,17 +43,20 @@ class CreatePhotosTable extends Migration
             'file_size' => [
                 'type'       => 'INT',
                 'constraint' => 11,
-                'null'       => true
+                'null'       => false
+                'default'    => 0
             ],
             'image_width' => [
                 'type'       => 'SMALLINT',
                 'constraint' => 5,
-                'null'       => true
+                'null'       => false
+                'default'    => 0
             ],
             'image_height' => [
                 'type'       => 'SMALLINT',
                 'constraint' => 5,
-                'null'       => true
+                'null'       => false
+                'default'    => 0
             ],
             'created_at DATETIME default current_timestamp',
             'updated_at DATETIME default current_timestamp',
@@ -67,7 +70,7 @@ class CreatePhotosTable extends Migration
         $this->forge->addKey('date');
 
         $this->forge->addForeignKey('author_id', 'photos_authors', 'id', 'SET NULL', 'CASCADE');
-        
+
         $this->forge->createTable('photos');
     }
 

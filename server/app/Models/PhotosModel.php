@@ -55,6 +55,9 @@ class PhotosModel extends ApplicationBaseModel
         ],
     ];
 
+    protected $skipValidation       = true;
+    protected $cleanValidationRules = true;
+
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -114,6 +117,10 @@ class PhotosModel extends ApplicationBaseModel
             : [];
 
         if ($object !== null) {
+            if (empty($photosObjects)) {
+                return [];
+            }
+
             $photosIds = array_map(fn($photo) => $photo->photo_id, $photosObjects);
             $photosQuery->whereIn('id', $photosIds);
         }

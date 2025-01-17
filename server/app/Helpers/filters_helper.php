@@ -1,24 +1,25 @@
 <?php
 
-if (!function_exists('prepareObjectDataWithFilters')) {
+if (!function_exists('prepareDataWithFilters')) {
     /**
-     * Prepares object data by grouping and associating filters with statistics.
+     * Prepares data by grouping and associating filters with statistics.
      *
-     * @param array $objectsData Array of objects to be processed.
-     * @param array $filtersData Array of filters to associate with objects.
-     * @return array An array of objects, each containing associated filters and statistics.
+     * @param array $data Array of data to be processed.
+     * @param array $filters Array of filters to associate with data.
+     * @param string $groupByKey The key to group filters by (e.g., 'object_name' or 'photo_id').
+     * @return array An array of data, each containing associated filters and statistics.
      */
-    function prepareObjectDataWithFilters(array $objectsData, array $filtersData): array
+    function prepareDataWithFilters(array $data, array $filters, string $groupByKey, string $objectKey): array
     {
-        // Group filters by object_name for faster lookup
-        $filtersGroupedByObject = [];
-        foreach ($filtersData as $filter) {
-            $filtersGroupedByObject[$filter->object_name][] = $filter;
+        // Group filters by the specified key for faster lookup
+        $filtersGroupedByKey = [];
+        foreach ($filters as $filter) {
+            $filtersGroupedByKey[$filter->$groupByKey][] = $filter;
         }
 
-        // Iterate over objects and calculate statistics for related filters
-        foreach ($objectsData as $object) {
-            $relatedFilters = $filtersGroupedByObject[$object->name] ?? [];
+        // Iterate over data and calculate statistics for related filters
+        foreach ($data as $item) {
+            $relatedFilters = $filtersGroupedByKey[$item->$objectKey] ?? [];
 
             if (!empty($relatedFilters)) {
                 $filterStatistic = [];
@@ -40,9 +41,9 @@ if (!function_exists('prepareObjectDataWithFilters')) {
                     ];
                 }
 
-                // Add filter statistics to the object
-                $object->filters   = $filterStatistic;
-                $object->statistic = [
+                // Add filter statistics to the item
+                $item->filters   = $filterStatistic;
+                $item->statistic = [
                     'frames'   => $totalFrames,
                     'exposure' => $totalExposure,
                     'fileSize' => $totalFileSize
@@ -50,19 +51,33 @@ if (!function_exists('prepareObjectDataWithFilters')) {
             }
         }
 
-        return $objectsData;
+        return $data;
+    }
+}
+
+if (!function_exists('prepareObjectDataWithFilters')) {
+    function prepareObjectDataWithFilters(array $objectsData, array $filtersData): array
+    {
+        return prepareDataWithFilters($objectsData, $filtersData, 'object_name', 'name');
+    }
+}
+
+if (!function_exists('preparePhotoDataWithFilters')) {
+    function preparePhotoDataWithFilters(array $objectsData, array $filtersData): array
+    {
+        return prepareDataWithFilters($objectsData, $filtersData, 'photo_id', 'id');
     }
 }
 
 if (!function_exists('mappingFilters')) {
     /**
      * Maps filter name to a short representation used in the system.
-     * 
-     * This function converts filter names (e.g., 'luminance', 'red') 
+     *
+     * This function converts filter names (e.g., 'luminance', 'red')
      * into standardized short names like 'L', 'R'.
-     * 
+     *
      * @param string $filter The original filter name.
-     * 
+     *
      * @return string The standardized filter name.
      */
     function mappingFilters(string $filter): string

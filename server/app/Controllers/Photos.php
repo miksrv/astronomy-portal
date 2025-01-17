@@ -266,7 +266,6 @@ class Photos extends ResourceController
 
         // Insert into database
         try {
-            $photoId     =
             $photosModel = new PhotosModel();
 
             // Сохраняем фотографию
@@ -274,10 +273,9 @@ class Photos extends ResourceController
             $photo->id   = $id ?? uniqid();
             $photo->date = $input['date'];
 
-            if ($id) {
+            if (!$id) {
                 $photosModel->insert($photo);
             } else {
-                unset($photo->id);
                 $photosModel->update($id, $photo);
             }
 
@@ -333,13 +331,13 @@ class Photos extends ResourceController
                     $photosFiltersModel->insert([
                         'photo_id'      => $photo->id,
                         'filter'        => $filterType,
-                        'exposure_time' => $filterData['exposure'],
+                        'exposure_time' => $filterData['exposure'] * 60,
                         'frames_count'  => $filterData['frames']
                     ]);
                 }
             }
 
-            return $this->respondCreated($input);
+            return $this->respondCreated($photo);
         } catch (\Exception $e) {
             log_message('error', $e->getMessage());
             return $this->failServerError('Could not save photo data');

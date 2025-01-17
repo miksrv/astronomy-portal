@@ -35,7 +35,7 @@
         "test": "phpunit",
         "serve": [
             "Composer\\Config::disableProcessTimeout",
-            "php spark serve"
+            "php -d upload_max_filesize=70M -d post_max_size=70M spark serve"
         ],
         "kill": "pkill -9 php",
         "migration:create": "php spark migrate:create",

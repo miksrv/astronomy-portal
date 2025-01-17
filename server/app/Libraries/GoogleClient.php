@@ -1,4 +1,6 @@
-<?php namespace App\Libraries;
+<?php
+
+namespace App\Libraries;
 
 /**
  * @link https://console.developers.google.com/
@@ -12,7 +14,8 @@
  *      *string avatar (url link for avatar)
  * ]
  */
-class GoogleClient {
+class GoogleClient
+{
     private string $clientId;
 
     private string $redirectUri;
