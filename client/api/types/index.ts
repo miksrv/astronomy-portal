@@ -11,6 +11,8 @@ export * as Equipment from './equipment'
 export * as Author from './author'
 export * as Auth from './auth'
 
+export type Locale = 'en' | 'ru'
+
 export interface ResError {
     status?: number
     code?: number

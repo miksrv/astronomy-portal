@@ -1,20 +1,14 @@
 import * as LocalStorage from '@/tools/localstorage'
-import { ApiModel } from '@/api'
+import { ApiType } from '@/api'
 import { LOCAL_STORAGE } from '@/tools/constants'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 import i18Config from '../next-i18next.config'
 
 interface ApplicationSliceProps {
-    isActiveFormCatalog: boolean
-    isActiveFormPhoto: boolean
-    editableItemCatalog?: ApiModel.Catalog
-    editableItemPhoto?: ApiModel.Photo
-
     showOverlay?: boolean
-    headerHeight?: number
-    footerHeight?: number
-    locale?: 'ru' | 'en' | string
+    showAuthDialog?: boolean
+    locale?: ApiType.Locale | string
 }
 
 export const getStorageLocale = (): string | undefined =>
@@ -24,73 +18,33 @@ export const getStorageLocale = (): string | undefined =>
         : i18Config.i18n.defaultLocale
 
 const initialState: ApplicationSliceProps = {
-    footerHeight: 0,
-    headerHeight: 0,
-
-    isActiveFormCatalog: false,
-    isActiveFormPhoto: false,
     locale: getStorageLocale(),
-    showOverlay: false
+    showOverlay: false,
+    showAuthDialog: false
 }
 
 const applicationSlice = createSlice({
     initialState,
     name: 'application',
     reducers: {
-        editCatalog: (
-            state,
-            action: PayloadAction<ApiModel.Catalog | undefined>
-        ) => {
-            state.editableItemCatalog = action.payload
-        },
-        editPhoto: (
-            state,
-            action: PayloadAction<ApiModel.Photo | undefined>
-        ) => {
-            state.editableItemPhoto = action.payload
-        },
-        openFormCatalog: (state, action: PayloadAction<boolean>) => {
-            state.isActiveFormCatalog = action.payload
-
-            if (action.payload === false) {
-                state.editableItemCatalog = undefined
-            }
-        },
-        openFormPhoto: (state, action: PayloadAction<boolean>) => {
-            state.isActiveFormPhoto = action.payload
-
-            if (action.payload === false) {
-                state.editableItemPhoto = undefined
-            }
-        },
-
-        setFooterHeight: (state, { payload }: PayloadAction<number>) => {
-            state.footerHeight = payload
-        },
-        setHeaderHeight: (state, { payload }: PayloadAction<number>) => {
-            state.headerHeight = payload
-        },
         setLocale: (
             state,
-            { payload }: PayloadAction<'ru' | 'en' | string>
+            { payload }: PayloadAction<ApiType.Locale | string>
         ) => {
             state.locale = payload
         },
-        toggleOverlay: (state, { payload }: PayloadAction<boolean>) => {
-            state.showOverlay = payload
+        closeAuthDialog: (state) => {
+            state.showOverlay = false
+            state.showAuthDialog = false
+        },
+        openAuthDialog: (state) => {
+            state.showOverlay = true
+            state.showAuthDialog = true
         }
     }
 })
 
-export const {
-    editCatalog,
-    editPhoto,
-    openFormCatalog,
-    openFormPhoto,
-    setFooterHeight,
-    setHeaderHeight,
-    toggleOverlay,
-    setLocale
-} = applicationSlice.actions
+export const { setLocale, closeAuthDialog, openAuthDialog } =
+    applicationSlice.actions
 
 export default applicationSlice.reducer

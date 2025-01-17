@@ -1,7 +1,6 @@
+import * as LocalStorage from '@/tools/localstorage'
 import { ApiModel, ApiType } from '@/api'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-
-export const ACCESS_TOKEN_KEY = 'AstroAuthToken'
 
 type InitialStateProps = {
     isAuth?: boolean
@@ -11,8 +10,8 @@ type InitialStateProps = {
 }
 
 export const getStorageToken = (): string | undefined =>
-    typeof window !== 'undefined' && localStorage.getItem(ACCESS_TOKEN_KEY)
-        ? localStorage.getItem(ACCESS_TOKEN_KEY) ?? ''
+    typeof window !== 'undefined' && LocalStorage.getItem('AUTH_TOKEN')
+        ? LocalStorage.getItem('AUTH_TOKEN') ?? ''
         : ''
 
 const authSlice = createSlice({
@@ -27,9 +26,9 @@ const authSlice = createSlice({
             state.isAuth = true
 
             if (payload?.auth && !!payload?.token) {
-                localStorage.setItem(ACCESS_TOKEN_KEY, payload.token)
+                LocalStorage.setItem('AUTH_TOKEN', payload.token)
             } else {
-                localStorage.removeItem(ACCESS_TOKEN_KEY)
+                LocalStorage.removeItem('AUTH_TOKEN')
             }
         },
         logout: (state) => {
@@ -37,7 +36,7 @@ const authSlice = createSlice({
             state.user = undefined
             state.isAuth = false
 
-            localStorage.removeItem(ACCESS_TOKEN_KEY)
+            localStorage.removeItem('AUTH_TOKEN')
         }
     }
 })

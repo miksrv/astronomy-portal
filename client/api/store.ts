@@ -3,8 +3,6 @@ import { configureStore } from '@reduxjs/toolkit'
 import { createWrapper } from 'next-redux-wrapper'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
-import loginModalSlice from '@/components/login-modal/loginModalSlice'
-
 import { API } from './api'
 import applicationSlice from './applicationSlice'
 import authSlice from './authSlice'
@@ -12,7 +10,6 @@ import authSlice from './authSlice'
 export const reducer = {
     application: applicationSlice,
     auth: authSlice,
-    loginModal: loginModalSlice,
 
     [API.reducerPath]: API.reducer,
     [APIMeteo.reducerPath]: APIMeteo.reducer
