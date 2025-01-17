@@ -1,9 +1,12 @@
-import { useAppSelector } from '@/api/store'
+import { useAppDispatch, useAppSelector } from '@/api'
+import { closeAuthDialog } from '@/api/applicationSlice'
+import Dialog from '@/ui/dialog/Dialog'
 import NextNProgress from 'nextjs-progressbar'
 import React, { useEffect, useState } from 'react'
 import { cn } from 'simple-react-ui-kit'
 
 import AppHeader from '@/components/app-header'
+import LoginForm from '@/components/login-form'
 
 import { Menu } from './Menu'
 import styles from './styles.module.sass'
@@ -14,6 +17,8 @@ interface AppLayoutProps {
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
+    const dispatch = useAppDispatch()
+
     const application = useAppSelector((store) => store.application)
 
     const [overlayHeight, setOverlayHeight] = useState<number | string>('100%')
@@ -25,6 +30,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
 
     const handleOpenSideBar = () => {
         setSidebarOpen(true)
+    }
+
+    const handleCloseAuthDialog = () => {
+        dispatch(closeAuthDialog())
     }
 
     useEffect(() => {
@@ -99,6 +108,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
             >
                 {children}
             </main>
+
+            <Dialog
+                open={application.showAuthDialog}
+                onCloseDialog={handleCloseAuthDialog}
+                maxWidth={'400px'}
+            >
+                <LoginForm />
+            </Dialog>
         </div>
     )
 }

@@ -23,14 +23,6 @@ export const Menu: React.FC<MenuProps> = ({ className, onClick }) => {
 
     const menuItems: MenuItemType[] = [
         {
-            link: 'https://t.me/nearspace',
-            text: t('blog')
-        },
-        {
-            link: '/starmap',
-            text: t('star-map')
-        },
-        {
             link: '/photos',
             text: t('astrophoto')
         },
@@ -39,16 +31,24 @@ export const Menu: React.FC<MenuProps> = ({ className, onClick }) => {
             text: t('objects')
         },
         {
-            link: '/observatory',
-            text: t('observatory')
-        },
-        {
             link: '/stargazing',
             text: t('stargazing')
         },
         {
+            link: '/observatory',
+            text: t('observatory')
+        },
+        {
+            link: '/starmap',
+            text: t('star-map')
+        },
+        {
             link: '/about',
             text: t('about')
+        },
+        {
+            link: 'https://t.me/nearspace',
+            text: t('telegram')
         }
     ]
 

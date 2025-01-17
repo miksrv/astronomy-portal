@@ -1,2 +1,1 @@
-export { default, menuItems } from './AppHeader'
-export type { MenuItemsType } from './AppHeader'
+export { default } from './AppHeader'

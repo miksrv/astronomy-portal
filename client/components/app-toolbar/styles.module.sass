@@ -1,16 +1,21 @@
-@import @/styles/variables.sass
-
 .toolbarHeader
     display: flex
     justify-content: space-between
     align-items: center
     margin-bottom: 10px
 
+    @media only screen and (max-width: 768px)
+        flex-direction: column
+        align-items: self-start
+
     .toolbarActions
         display: flex
         justify-content: space-between
         align-items: center
         gap: 10px
+
+        @media only screen and (max-width: 768px)
+            margin-top: 10px
 
     .toolbarTitle
         position: relative

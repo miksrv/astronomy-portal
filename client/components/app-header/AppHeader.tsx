@@ -1,33 +1,19 @@
-import { ApiType, useAppDispatch } from '@/api'
-import '@/api/applicationSlice'
-import { setHeaderHeight } from '@/api/applicationSlice'
+import { API, HOST_IMG, useAppDispatch, useAppSelector } from '@/api'
+import { openAuthDialog } from '@/api/applicationSlice'
+import { login, logout } from '@/api/authSlice'
+import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useEffect, useRef } from 'react'
-import { Icon, cn } from 'simple-react-ui-kit'
+import React, { useEffect } from 'react'
+import { Button, Icon, Popout, cn } from 'simple-react-ui-kit'
 
 import { Menu } from '@/components/app-layout'
+import LanguageSwitcher from '@/components/language-switcher'
 
 import logo from '@/public/images/logo-w.svg'
+import defaultAvatar from '@/public/images/no-avatar.png'
 
 import styles from './styles.module.sass'
-
-export type MenuItemsType = {
-    link: string
-    name: string
-    label?: keyof ApiType.Statistic.ResGeneral
-    external?: boolean
-}
-
-export const menuItems: MenuItemsType[] = [
-    { external: true, link: 'https://t.me/nearspace', name: 'Блог' },
-    { link: '/starmap', name: 'Карта звездного неба' },
-    { label: 'photos', link: '/photos', name: 'Астрофото' },
-    { label: 'objects', link: '/objects', name: 'Объекты' },
-    { link: '/dashboard', name: 'Обсерватория' },
-    { link: '/stargazing', name: 'Астровыезд' },
-    { link: '/about', name: 'О проекте' }
-]
 
 interface AppHeaderProps {
     fullWidth?: boolean
@@ -35,36 +21,45 @@ interface AppHeaderProps {
 }
 
 const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) => {
-    // const [authGetMe, { data: meData, error }] = useAuthGetMeMutation()
-    // const authSlice = useAppSelector((state) => state.auth)
+    const { t } = useTranslation()
+    const dispatch = useAppDispatch()
+    const authSlice = useAppSelector((state) => state.auth)
 
-    // useEffect(() => {
-    //     if (meData?.auth) {
-    //         dispatch(login(meData))
-    //     } else {
-    //         if (error) {
-    //             dispatch(logout())
-    //         }
-    //     }
-    // }, [meData, error])
+    const [authGetMe, { data: meData, error }] = API.useAuthGetMeMutation()
 
-    // useEffect(() => {
-    //     if (authSlice.token) {
-    //         authGetMe()
-    //     }
-    // }, [])
+    const handleLoginClick = () => {
+        dispatch(openAuthDialog())
+    }
+
+    const handleLogout = () => {
+        dispatch(logout())
+    }
+
+    useEffect(() => {
+        if (meData?.auth === true) {
+            dispatch(login(meData))
+        } else if (meData?.auth === false) {
+            dispatch(logout())
+        }
+    }, [meData, error])
+
+    useEffect(() => {
+        if (authSlice.token) {
+            authGetMe()
+        }
+    }, [])
 
     return (
         <header className={styles.appHeader}>
             <div className={cn(fullWidth && styles.fullWidth, styles.wrapper)}>
                 <Link
                     href={'/'}
-                    title={'Главная страница'}
+                    title={t('main-page')}
                     className={styles.logoLink}
                 >
                     <Image
                         src={logo}
-                        alt={'Самодельная обсерватория'}
+                        alt={''}
                         width={30}
                         height={30}
                     />
@@ -79,6 +74,54 @@ const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) => {
                 </button>
 
                 <Menu className={styles.appMenu} />
+
+                <div className={styles.rightSection}>
+                    <LanguageSwitcher />
+
+                    {!authSlice.isAuth && (
+                        <Button
+                            mode={'secondary'}
+                            className={styles.loginButton}
+                            onClick={handleLoginClick}
+                            label={t('sign-in')}
+                        />
+                    )}
+
+                    {authSlice.isAuth && (
+                        <Popout
+                            mode={'outline'}
+                            action={
+                                <Image
+                                    alt={''}
+                                    className={styles.avatarImage}
+                                    src={
+                                        authSlice?.user
+                                            ? `${HOST_IMG}/users/${authSlice?.user.id}/${authSlice?.user.avatar}`
+                                            : defaultAvatar.src
+                                    }
+                                    width={32}
+                                    height={32}
+                                />
+                            }
+                        >
+                            <ul className={styles.contextListMenu}>
+                                <li>
+                                    <Link
+                                        href={'/'}
+                                        title={''}
+                                        onClick={(event) => {
+                                            event.preventDefault()
+                                            handleLogout()
+                                        }}
+                                    >
+                                        <Icon name={'Exit'} />
+                                        {t('logout')}
+                                    </Link>
+                                </li>
+                            </ul>
+                        </Popout>
+                    )}
+                </div>
             </div>
         </header>
     )

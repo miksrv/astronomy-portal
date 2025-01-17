@@ -28,7 +28,7 @@ const AppToolbar: React.FC<AppHeaderProps> = ({
                     <Breadcrumbs
                         links={links}
                         currentPage={currentPage}
-                        homePageTitle={t('amateur-astronomy')}
+                        homePageTitle={t('look-at-the-stars')}
                     />
                 )}
             </div>
