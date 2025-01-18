@@ -1,19 +1,22 @@
+import { API, ApiModel } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import type { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import Link from 'next/link'
 import React, { useEffect } from 'react'
 
 import AppLayout from '@/components/app-layout'
+import MainSection from '@/components/main-sections'
 
-interface HomePageProps {}
+interface HomePageProps {
+    photosList: ApiModel.Photo[]
+}
 
 const headerHeight = 50
 
-const HomePage: NextPage<HomePageProps> = () => {
+const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
     const { t, i18n } = useTranslation()
 
     useEffect(() => {
@@ -92,86 +95,9 @@ const HomePage: NextPage<HomePageProps> = () => {
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
-
-            <section style={{ height: '100%', position: 'relative' }}>
-                <div
-                    style={{
-                        backgroundImage: 'url(/photos/stargazing-4.jpeg)',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundSize: 'cover',
-                        height: '100%',
-                        position: 'absolute',
-                        width: '100%'
-                    }}
-                />
-                <div className={'textContainer'}>
-                    <h2 className={'animate'}>Астровыезды</h2>
-                    <p className={'animate'}>
-                        Организуем регулярные поездки под открытое небо, чтобы
-                        наблюдать за звездами и планетами через мощные
-                        телескопы.
-                    </p>
-                    <Link
-                        href='/stargazing'
-                        className={'animate'}
-                    >
-                        Подробнее
-                    </Link>
-                </div>
-            </section>
-            <section style={{ height: '100%', position: 'relative' }}>
-                <div
-                    style={{
-                        backgroundImage:
-                            'url(https://api.astro.miksoft.pro/photos/NGC_281-2023.10.05.jpg)',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundSize: 'cover',
-                        height: '100%',
-                        position: 'absolute',
-                        width: '100%'
-                    }}
-                />
-                <div className={'textContainer'}>
-                    <h2 className={'animate'}>Астрофотографии</h2>
-                    <p className={'animate'}>
-                        Коллекция снимков космоса, сделанных на нашей
-                        обсерватории, раскрывающая красоту далеких галактик,
-                        туманностей и звездных скоплений.
-                    </p>
-                    <Link
-                        href='/photos'
-                        className={'animate'}
-                    >
-                        Подробнее
-                    </Link>
-                </div>
-            </section>
-            <section style={{ height: '100%', position: 'relative' }}>
-                <div
-                    style={{
-                        backgroundImage: 'url(/photos/observatory-1.jpeg)',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundSize: 'cover',
-                        height: '100%',
-                        position: 'absolute',
-                        width: '100%'
-                    }}
-                />
-                <div className={'textContainer'}>
-                    <h2 className={'animate'}>Обсерватория</h2>
-                    <p className={'animate'}>
-                        Откройте для себя вселенную с нашего стационарного
-                        наблюдательного пункта, оборудованного передовыми
-                        телескопами.
-                    </p>
-                    <Link
-                        href='/observatory'
-                        className={'animate'}
-                    >
-                        Подробнее
-                    </Link>
-                </div>
-            </section>
+            <MainSection.Astrophotos photos={photosList} />
+            <MainSection.Stargazing />
+            <MainSection.Observatory />
         </AppLayout>
     )
 }
@@ -184,9 +110,16 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             store.dispatch(setLocale(locale))
 
+            const { data: photos } = await store.dispatch(
+                API.endpoints?.photosGetList.initiate()
+            )
+
+            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+
             return {
                 props: {
-                    ...translations
+                    ...translations,
+                    photosList: photos?.items || []
                 }
             }
         }

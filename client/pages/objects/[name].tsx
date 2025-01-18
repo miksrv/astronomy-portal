@@ -1,7 +1,7 @@
 import { API, ApiModel, HOST_IMG, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
-import { sliceText } from '@/tools/strings'
+import { removeMarkdown, sliceText } from '@/tools/strings'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -10,6 +10,7 @@ import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
 import { Button } from 'simple-react-ui-kit'
 
+import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import ObjectsCloud from '@/components/object-cloud'
@@ -38,9 +39,10 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
-    const { data: objectFilesData } = API.useFilesGetListQuery(objectName, {
-        skip: !objectName
-    })
+    const { data: objectFilesData, isLoading: objectFilesLoading } =
+        API.useFilesGetListQuery(objectName, {
+            skip: !objectName
+        })
 
     const allObjectsNames = useMemo(
         () => objectsList?.map(({ name }) => name),
@@ -61,10 +63,10 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
         <AppLayout>
             <NextSeo
                 title={objectData?.title || objectName}
-                description={
-                    'Описание объекта наблюдения: ' +
-                    sliceText(objectData?.description)
-                }
+                description={sliceText(
+                    removeMarkdown(objectData?.description),
+                    160
+                )}
                 openGraph={{
                     images: [
                         {
@@ -75,6 +77,8 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                             width: 487
                         }
                     ],
+                    siteName: t('look-at-the-stars'),
+                    title: objectData?.title || objectName,
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
@@ -95,6 +99,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                             icon={'Pencil'}
                             mode={'secondary'}
                             label={t('edit')}
+                            size={'medium'}
                             disabled={!objectName}
                             onClick={handleEdit}
                         />
@@ -102,6 +107,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                         <Button
                             icon={'PlusCircle'}
                             mode={'secondary'}
+                            size={'medium'}
                             label={t('add')}
                             onClick={handleCreate}
                         />
@@ -122,9 +128,10 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 <ObjectPhotoTable photosList={photosList} />
             )}
 
-            {!!objectFilesData?.items?.length && (
-                <ObjectFilesTable filesList={objectFilesData?.items} />
-            )}
+            <ObjectFilesTable
+                filesList={objectFilesData?.items}
+                loading={objectFilesLoading}
+            />
 
             {!!allObjectsNames?.length && (
                 <ObjectsCloud
@@ -132,6 +139,8 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                     selectedObject={objectName}
                 />
             )}
+
+            <AppFooter />
         </AppLayout>
     )
 }

@@ -7,6 +7,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import React from 'react'
 
+import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import AstronomyCalc from '@/components/astronomy-calc'
@@ -28,13 +29,13 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = () => {
                 title={t('observatory')}
                 description={t('description-observatory')}
                 openGraph={{
-                    // images: [
-                    //     {
-                    //         height: 819,
-                    //         url: '/screenshots/main.jpg',
-                    //         width: 1280
-                    //     }
-                    // ],
+                    images: [
+                        {
+                            height: 854,
+                            url: '/screenshots/observatory.jpg',
+                            width: 1280
+                        }
+                    ],
                     siteName: t('look-at-the-stars'),
                     title: t('astrophoto'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
@@ -69,6 +70,8 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = () => {
             </div>
 
             <Calendar eventsTelescope={data?.items} />
+
+            <AppFooter />
         </AppLayout>
     )
 }

@@ -9,6 +9,7 @@ import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/router'
 import React, { useEffect } from 'react'
 
+import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import AstroObjectForm from '@/components/astro-object-form'
@@ -110,6 +111,8 @@ const ObjectFormPage: NextPage<ObjectFormPageProps> = () => {
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
             />
+
+            <AppFooter />
         </AppLayout>
     )
 }
