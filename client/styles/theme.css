@@ -1,4 +1,9 @@
 :root {
+    --modal-background: #2c2d2e;
+
+
+
+
     --letter-spacing: 0.00938em;
     --width-max: 1127px;
     --width-menu: 280px;

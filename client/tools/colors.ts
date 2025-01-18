@@ -58,6 +58,8 @@ export const getFilterColorType = (
             return 'cyan'
         case 'S':
             return 'magenta'
+        case 'N':
+            return 'air'
         default:
             return undefined
     }

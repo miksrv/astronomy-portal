@@ -1,4 +1,5 @@
-import { isValidJSON } from '../functions/helpers'
+import { isValidJSON } from '@/functions/helpers'
+
 import { LOCAL_STORAGE, LOCAL_STORAGE_KEY } from './constants'
 
 const _getLocalStorage = (): undefined | typeof LOCAL_STORAGE => {
