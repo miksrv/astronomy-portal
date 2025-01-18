@@ -3,6 +3,8 @@
     justify-content: space-between
     align-items: center
     margin-bottom: 10px
+    flex-wrap: wrap
+    gap: 10px
 
     @media only screen and (max-width: 768px)
         flex-direction: column
@@ -16,6 +18,14 @@
 
         @media only screen and (max-width: 768px)
             margin-top: 10px
+            flex-direction: column
+            width: 100%
+
+            & > div
+                width: 100%
+
+            & > button
+                margin-right: auto
 
     .toolbarTitle
         position: relative
