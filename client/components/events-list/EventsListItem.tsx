@@ -1,8 +1,9 @@
-import { ApiModel } from '@/api'
+import { ApiModel, HOST_IMG } from '@/api'
 import { formatDate } from '@/functions/helpers'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
+import { Container } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
@@ -11,7 +12,7 @@ interface EventsListItemProps {
 }
 
 const EventsListItem: React.FC<EventsListItemProps> = ({ event }) => (
-    <article className={styles.eventListItem}>
+    <Container className={styles.eventListItem}>
         <div className={styles.photoSection}>
             <Link
                 href={`/stargazing/${event.id}`}
@@ -24,7 +25,7 @@ const EventsListItem: React.FC<EventsListItemProps> = ({ event }) => (
                         quality={70}
                         height={240}
                         width={370}
-                        src={`${process.env.NEXT_PUBLIC_API_HOST}${event.cover}`}
+                        src={`${HOST_IMG}stargazing/${event.cover}`}
                     />
                 )}
             </Link>
@@ -44,7 +45,7 @@ const EventsListItem: React.FC<EventsListItemProps> = ({ event }) => (
                 {formatDate(event?.date?.date, 'D MMMM YYYY')}
             </div>
         </div>
-    </article>
+    </Container>
 )
 
 export default EventsListItem

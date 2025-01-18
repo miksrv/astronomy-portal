@@ -18,6 +18,13 @@ export type AstroPhotoFormType = Partial<ApiModel.Photo> & {
     upload?: File
 }
 
+// Preset equipment sets
+const equipmentPresets = [
+    { name: 'HEQ5 + ASI1600', equipments: [1, 5, 7, 10, 12, 14, 15, 17] },
+    { name: 'EQ6 + ASI6200', equipments: [2, 5, 8, 11, 13, 14, 16, 18] },
+    { name: 'Dob + Canon', equipments: [4, 9] }
+]
+
 interface AstroPhotoFormProps {
     disabled?: boolean
     initialData?: AstroPhotoFormType
@@ -95,7 +102,18 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
                 : []
 
             setAddedFilters(transformedFilters)
-            setFormData(initialData)
+            setFormData({
+                ...initialData,
+                filters: transformedFilters.reduce((acc, filter) => {
+                    acc[filter] = {
+                        ...initialData?.filters?.[filter],
+                        exposure: initialData?.filters?.[filter]?.exposure
+                            ? initialData.filters[filter].exposure / 60
+                            : 0
+                    }
+                    return acc
+                }, {} as Record<ApiModel.FilterTypes, any>)
+            })
         }
     }, [initialData])
 
@@ -164,6 +182,12 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
                 }
             />
 
+            <EquipmentPresets
+                onSelect={(equipments) =>
+                    setFormData({ ...formData, equipments })
+                }
+            />
+
             <Input
                 required={true}
                 disabled={disabled}
@@ -223,8 +247,8 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
 
                         <Input
                             disabled={disabled}
-                            type='number'
-                            placeholder='Выдержка (сек)'
+                            type={'number'}
+                            placeholder={'Выдержка (минут)'}
                             value={formData?.filters?.[filter]?.exposure || ''}
                             onChange={(e) =>
                                 handleFilterChange(
@@ -287,5 +311,20 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
         </Container>
     )
 }
+
+const EquipmentPresets: React.FC<{
+    onSelect: (equipments: number[]) => void
+}> = ({ onSelect }) => (
+    <div className={styles.presets}>
+        {equipmentPresets.map((preset) => (
+            <Button
+                key={preset.name}
+                label={preset.name}
+                mode={'link'}
+                onClick={() => onSelect(preset.equipments)}
+            />
+        ))}
+    </div>
+)
 
 export default AstroPhotoForm

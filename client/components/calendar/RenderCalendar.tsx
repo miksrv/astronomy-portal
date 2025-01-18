@@ -1,14 +1,12 @@
-import { ApiModel } from '@/api'
 import { Weather } from '@/api/apiMeteo'
 import { formatDate } from '@/functions/helpers'
-import classNames from 'classnames'
 import dayjs, { Dayjs } from 'dayjs'
 import Image from 'next/image'
 import React from 'react'
-import { Icon, Popup } from 'semantic-ui-react'
+import { Icon, cn } from 'simple-react-ui-kit'
 import SunCalc from 'suncalc'
 
-import MoonPhase from '@/components/moon-phase'
+import MoonPhaseIcon from '@/components/moon-phase-icon'
 
 import SunIcon from '@/public/images/sun.png'
 
@@ -20,7 +18,7 @@ const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
 interface RenderCalendarProps {
     calendarDate: Date | Dayjs
     eventsWeather?: Weather[]
-    eventsTelescope?: ApiModel.Statistic.Telescope[]
+    eventsTelescope?: any[] // ApiModel.Statistic.Telescope[]
 }
 
 const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
@@ -46,7 +44,7 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
         blanks.push(
             <td
                 key={`empty${i}`}
-                className={classNames(styles.calendarDay, styles.empty)}
+                className={cn(styles.calendarDay, styles.empty)}
             ></td>
         )
     }
@@ -73,13 +71,13 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
         daysMonth.push(
             <td
                 key={`day${d}`}
-                className={classNames(
+                className={cn(
                     styles.calendarDay,
                     currentDay ? styles.currentDay : undefined
                 )}
             >
                 <div
-                    className={classNames(
+                    className={cn(
                         styles.dayNumber,
                         getWeatherClass(itemWeatherEvent?.clouds)
                     )}
@@ -91,10 +89,10 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
                     {d < 10 ? `0${d}` : d}
                 </div>
                 <div className={styles.mobileMoonIcon}>
-                    <MoonPhase date={currentDayDate.toDate()} />
+                    <MoonPhaseIcon date={currentDayDate.toDate()} />
                 </div>
                 <div className={styles.moonEvent}>
-                    <MoonPhase date={currentDayDate.toDate()} />
+                    <MoonPhaseIcon date={currentDayDate.toDate()} />
 
                     {moonTimes.rise && (
                         <span className={styles.rise}>
@@ -134,7 +132,7 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
                         {itemWeatherEvent.clouds !== null && (
                             <span>
                                 <Icon
-                                    name={'cloud'}
+                                    name={'Cloud'}
                                     style={{ marginRight: 5 }}
                                 />
                                 {Math.round(itemWeatherEvent?.clouds ?? 0)}
@@ -142,40 +140,32 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
                         )}
                         <span>
                             <Icon
-                                name={'thermometer'}
+                                name={'Thermometer'}
                                 style={{ marginRight: 0 }}
                             />
                             {itemWeatherEvent.temperature}
                         </span>
                         <span>
-                            <Icon name={'send'} />
+                            <Icon name={'Wind'} />
                             {itemWeatherEvent.windSpeed}
                         </span>
                     </div>
                 )}
                 {itemAstroEvents && (
-                    <Popup
-                        content={itemAstroEvents.catalog_items.join(', ')}
-                        size='mini'
-                        trigger={
-                            <div className={styles.telescopeEvent}>
-                                <span>
-                                    <Icon name='star outline' />
-                                    {itemAstroEvents.catalog_items.length}
-                                </span>
-                                <span>
-                                    <Icon name='clock outline' />
-                                    {Math.round(
-                                        itemAstroEvents.total_exposure / 60
-                                    )}
-                                </span>
-                                <span>
-                                    <Icon name='image outline' />
-                                    {itemAstroEvents.frames_count}
-                                </span>
-                            </div>
-                        }
-                    />
+                    <div className={styles.telescopeEvent}>
+                        <span>
+                            <Icon name={'StarEmpty'} />
+                            {itemAstroEvents.catalog_items.length}
+                        </span>
+                        <span>
+                            <Icon name={'Time'} />
+                            {Math.round(itemAstroEvents.total_exposure / 60)}
+                        </span>
+                        <span>
+                            <Icon name={'Photo'} />
+                            {itemAstroEvents.frames_count}
+                        </span>
+                    </div>
                 )}
             </td>
         )
@@ -206,7 +196,7 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
                 d.push(
                     <td
                         key={`last${i}`}
-                        className={classNames(styles.calendarDay, styles.empty)}
+                        className={cn(styles.calendarDay, styles.empty)}
                     ></td>
                 )
             }

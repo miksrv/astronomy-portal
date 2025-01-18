@@ -1,8 +1,8 @@
-import classNames from 'classnames'
 import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
-import Lightbox from 'react-image-lightbox'
-import { Dimmer, Message, Progress } from 'semantic-ui-react'
+import { Container, Message } from 'simple-react-ui-kit'
+
+import PhotoLightbox from '@/components/photo-lightbox'
 
 import styles from './styles.module.sass'
 
@@ -41,15 +41,20 @@ const Camera: React.FC<CameraProps> = ({ cameraURL, interval }) => {
     })
 
     return (
-        <div
-            className={classNames(styles.cameraSection, 'box')}
-            data-testid={'camera-section'}
-        >
+        <Container className={styles.cameraSection}>
             {cameraURL && lightbox && (
-                <Lightbox
-                    data-testid={'lightbox'}
-                    mainSrc={cameraSrc}
-                    onCloseRequest={() => setLightbox(false)}
+                <PhotoLightbox
+                    photos={[
+                        {
+                            src: cameraSrc,
+                            width: 1024,
+                            height: 768,
+                            title: ''
+                        }
+                    ]}
+                    photoIndex={0}
+                    showLightbox={lightbox}
+                    onCloseLightBox={() => setLightbox(false)}
                 />
             )}
             {cameraURL ? (
@@ -69,25 +74,23 @@ const Camera: React.FC<CameraProps> = ({ cameraURL, interval }) => {
                             width={400}
                         />
                     </span>
-                    <Progress
-                        size={'tiny'}
-                        className={styles.progress}
-                        data-testid={'progress-bar'}
-                        percent={Math.round((seconds / timeoutInt) * 100)}
-                        success
-                    />
+                    {/*<Progress*/}
+                    {/*    size={'tiny'}*/}
+                    {/*    className={styles.progress}*/}
+                    {/*    data-testid={'progress-bar'}*/}
+                    {/*    percent={Math.round((seconds / timeoutInt) * 100)}*/}
+                    {/*    success*/}
+                    {/*/>*/}
                 </>
             ) : (
-                <Dimmer active>
-                    <Message
-                        error
-                        icon={'photo'}
-                        header={'Камера не доступна'}
-                        content={'Изображение камеры не доступно'}
-                    />
-                </Dimmer>
+                <Message
+                    type={'error'}
+                    title={'Камера не доступна'}
+                >
+                    {'Изображение камеры не доступно'}
+                </Message>
             )}
-        </div>
+        </Container>
     )
 }
 
