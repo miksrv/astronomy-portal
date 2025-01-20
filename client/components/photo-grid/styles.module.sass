@@ -7,13 +7,16 @@
         display: block
         flex-grow: 1
         flex-shrink: 0
-        flex-basis: calc(25%)
+        flex-basis: 23%
         border: var(--input-border)
         border-radius: var(--border-radius)
         cursor: pointer
         color: var(--text-main)
         height: 200px
         position: relative
+
+        @media only screen and (max-width: 768px)
+            flex-basis: 100%
 
         .image
             object-fit: cover

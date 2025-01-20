@@ -26,20 +26,24 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ photosList }) => {
                     className={styles.photoItem}
                 >
                     <Image
-                        src={createMediumPhotoUrl(photo)}
                         className={styles.image}
-                        alt={photo.id}
+                        src={createMediumPhotoUrl(photo)}
+                        alt={createPhotoTitle(photo, t)}
                         fill={true}
                     />
                     <div className={styles.description}>
                         <h4>{createPhotoTitle(photo, t)}</h4>
                         <div className={styles.info}>
-                            {t('exposure')}:{' '}
-                            {getTimeFromSec(
-                                photo?.statistic?.exposure || 0,
-                                true
-                            )}
-                            , {t('frames')}: {photo?.statistic?.frames || 0}
+                            <div>
+                                {t('exposure')}:{' '}
+                                {getTimeFromSec(
+                                    photo?.statistic?.exposure || 0,
+                                    true
+                                )}
+                            </div>
+                            <div>
+                                {t('frames')}: {photo?.statistic?.frames || 0}
+                            </div>
                         </div>
                     </div>
                 </Link>
