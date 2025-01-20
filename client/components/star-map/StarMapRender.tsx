@@ -1,10 +1,9 @@
+import { formatObjectName } from '@/tools/strings'
 import { useTranslation } from 'next-i18next'
 import React, { useEffect, useMemo, useRef } from 'react'
 
-import config from '@/components/celestial-map/object'
-
 import { StarMapObject, StarMapProps } from './StarMap'
-import { FONT, customConfig } from './config'
+import { FONT, customConfig, defaultConfig } from './config'
 import styles from './styles.module.sass'
 
 type geoJSONType = {
@@ -43,6 +42,7 @@ const styleText = {
 
 const StarMapRender: React.FC<StarMapProps> = ({
     objects,
+    zoom,
     interactive,
     goto
 }) => {
@@ -58,7 +58,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
             return null
         }
 
-        let skyPoint = Celestial.getData(objectsJSON, config.transform)
+        let skyPoint = Celestial.getData(objectsJSON, defaultConfig.transform)
 
         Celestial.container
             .selectAll('.sky-points')
@@ -115,12 +115,15 @@ const StarMapRender: React.FC<StarMapProps> = ({
             customConfig.lang = i18n.language
         }
 
+        customConfig.zoomlevel = zoom || customConfig.zoomlevel
+
         Celestial.clear()
         Celestial.display(customConfig)
     }, [])
 
     useEffect(() => {
-        if (objects && objects.length) {
+        if (objects?.length) {
+            Celestial.clear()
             Celestial.add(
                 {
                     callback: handleCallback,
@@ -130,7 +133,16 @@ const StarMapRender: React.FC<StarMapProps> = ({
                 [objectsJSON]
             )
 
-            Celestial.reload(customConfig)
+            if (objects?.length === 1) {
+                customConfig.follow = [objects[0].ra || 0, objects[0].dec || 0]
+                customConfig.center = [
+                    objects[0].ra || 0,
+                    objects[0].dec || 0,
+                    1
+                ]
+            }
+
+            Celestial.display(customConfig)
         }
     }, [objects])
 
@@ -154,7 +166,7 @@ const createObjectsJSON = (
         type: 'FeatureCollection',
         features: objects.map((item) => ({
             type: 'Feature',
-            id: item.name?.replace(/_/g, ' '),
+            id: item.name,
             geometry: {
                 type: 'Point',
                 coordinates: [Number(item.ra), Number(item.dec)]
@@ -162,7 +174,7 @@ const createObjectsJSON = (
             properties: {
                 dim: 30,
                 mag: 10,
-                name: item.name?.replace(/_/g, ' ')
+                name: formatObjectName(item.name)
             }
         }))
     }

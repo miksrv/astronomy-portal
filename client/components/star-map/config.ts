@@ -228,7 +228,7 @@ export const defaultConfig = {
             align: 'left',
             baseline: 'top',
             fill: '#ddddbb',
-            font: `11px ${FONT}`
+            font: `10px ${FONT}`
         },
         // i.e. whichever of the previous applies first; may vary with culture setting
         designationType: 'desig', // Which kind of name is displayed as designation (fieldname in starnames.json)
@@ -241,7 +241,7 @@ export const defaultConfig = {
             align: 'right',
             baseline: 'bottom',
             fill: '#ddddbb',
-            font: `13px ${FONT}`
+            font: `19px ${FONT}`
         },
         propernameType: 'name', // Languge for proper name, default IAU name; may vary with culture setting
         show: true, // Show stars
@@ -273,18 +273,30 @@ export const customConfig = {
             align: 'center',
             baseline: 'middle',
             fill: '#ffa51f',
-            font: `15px ${FONT}`
+            font: `13px ${FONT}`
         },
         names: true,
         namesType: 'iau'
     },
     datapath: defaultConfig.datapath,
-    daylight: { show: false },
-    dsos: { show: false },
+    daylight: {
+        show: false
+    },
+    dsos: {
+        show: false
+    },
     follow: [0, 0],
     form: false,
     geopos: defaultConfig.geopos,
-    horizon: { show: false },
+    horizon: {
+        show: false
+    },
+    // mw: {
+    //     show: false
+    // },
+    // planets: {
+    //     show: false
+    // },
     // interactive: false,
     lang: 'en',
     lines: {
@@ -297,8 +309,6 @@ export const customConfig = {
             width: 0.6
         } // vert
     },
-    mw: { show: false },
-    planets: { show: false },
     // projection: 'aitoff',
     // projectionRatio: null,
     stars: {
@@ -310,7 +320,7 @@ export const customConfig = {
             align: 'left',
             baseline: 'top',
             fill: '#ffffff',
-            font: `13px ${FONT}`
+            font: `10px ${FONT}`
         },
         designationType: 'desig',
         exponent: -0.28,
@@ -321,11 +331,11 @@ export const customConfig = {
             align: 'right',
             baseline: 'bottom',
             fill: '#ffffff',
-            font: `13px ${FONT}`
+            font: `11px ${FONT}`
         },
         propernameType: 'name',
         show: true,
-        size: 11,
+        size: 10,
         style: { fill: '#ffffff', opacity: 1 }
     },
     transform: 'equatorial',
