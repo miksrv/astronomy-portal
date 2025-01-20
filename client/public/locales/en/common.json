@@ -20,6 +20,8 @@
     "description-photos-list-page": "A collection of astrophotographs of galaxies, star clusters, nebulae, planets and other celestial objects captured by an amateur observatory. Browse and filter images by category and parameters to see unique images of the Universe with details for each filter and exposure.",
     "description-observatory": "A homemade amateur astronomical observatory with remote access from anywhere in the world via the Internet. Observatory operation statistics, number of shots and accumulated data. Telescope operation calendar.",
     "main-page": "Main Page",
+    "search-by-name": "Search by name",
+    "search-by-object": "Search by object",
     "sign-in": "Sign in",
     "gain": "Gain",
     "offset": "Offset",

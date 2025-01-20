@@ -1,9 +1,5 @@
 import dayjs, { Dayjs } from 'dayjs'
 
-export const concatClassNames = (
-    ...args: Array<string | boolean | null | undefined>
-): string => args.filter((item) => !!item).join(' ')
-
 /**
  * Generates an array of numbers in a certain range and with a given step
  * @param from

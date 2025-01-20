@@ -1,4 +1,4 @@
-import { API, ApiModel, ApiType, useAppSelector } from '@/api'
+import { API, ApiModel, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -7,7 +7,9 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
+import { Message } from 'simple-react-ui-kit'
 
+import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import AstroPhotoForm from '@/components/astro-photo-form'
@@ -136,17 +138,38 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
                 ]}
             />
 
+            {(createError ||
+                updateError ||
+                createSuccess ||
+                updateSuccess ||
+                uploadSuccess) && (
+                <Message
+                    style={{ marginBottom: '10px' }}
+                    type={createError || updateError ? 'error' : 'success'}
+                >
+                    {(createError || updateError) && (
+                        <div>{'Ошибка сохранения'}</div>
+                    )}
+                    {(createSuccess || updateSuccess) && (
+                        <div>{'Фотография сохранена'}</div>
+                    )}
+                    {uploadSuccess && <div>{'Фотография загружена'}</div>}
+                </Message>
+            )}
+
             <AstroPhotoForm
                 disabled={
                     photoLoading ||
                     createLoading ||
                     updateLoading ||
-                    updateLoading
+                    uploadLoading
                 }
                 initialData={photoData}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
             />
+
+            <AppFooter />
         </AppLayout>
     )
 }

@@ -5,10 +5,12 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
+import Link from 'next/link'
 import React, { useState } from 'react'
 import Gallery from 'react-photo-gallery'
-import { Container } from 'simple-react-ui-kit'
+import { Container, Icon, Message } from 'simple-react-ui-kit'
 
+import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 // import EventUpcoming from '@/components/event-upcoming'
@@ -73,6 +75,16 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
             {/*TODO*/}
             {/*<EventUpcoming />*/}
 
+            <Link
+                href={'https://t.me/nearspace'}
+                className={'telegram-message'}
+                title={t('telegram')}
+                rel={'noindex nofollow'}
+                target={'_blank'}
+            >
+                <Icon name={'Telegram'} /> {t('telegram-subscription-1')}
+            </Link>
+
             <Container>
                 <p style={{ marginTop: 0 }}>{t('stargazing-page.intro')}</p>
                 <p>{t('stargazing-page.description')}</p>
@@ -102,6 +114,8 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
             </Container>
 
             <EventsList events={events} />
+
+            <AppFooter />
         </AppLayout>
     )
 }

@@ -8,6 +8,7 @@ import { NextSeo } from 'next-seo'
 import React from 'react'
 import { Container } from 'simple-react-ui-kit'
 
+import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import StarMap from '@/components/star-map'
@@ -26,13 +27,13 @@ const CelestialPage: NextPage<CelestialPageProps> = () => {
                 title={t('star-map')}
                 description={t('description-star-map')}
                 openGraph={{
-                    // images: [
-                    //     {
-                    //         height: 815,
-                    //         url: '/screenshots/celestial.jpg',
-                    //         width: 1280
-                    //     }
-                    // ],
+                    images: [
+                        {
+                            height: 815,
+                            url: '/screenshots/starmap.jpg',
+                            width: 1280
+                        }
+                    ],
                     siteName: t('look-at-the-stars'),
                     title: t('star-map'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
@@ -47,6 +48,8 @@ const CelestialPage: NextPage<CelestialPageProps> = () => {
             <Container style={{ padding: '5px' }}>
                 <StarMap objects={data?.items} />
             </Container>
+
+            <AppFooter />
         </AppLayout>
     )
 }
