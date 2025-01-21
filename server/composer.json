@@ -5,16 +5,16 @@
     "homepage": "https://codeigniter.com",
     "license": "MIT",
     "require": {
-        "php": "^8.0",
+        "php": "^8.2",
         "ext-json": "*",
-        "codeigniter4/framework": "^4.5",
-        "firebase/php-jwt": "^6.9",
+        "codeigniter4/framework": "^4.6",
+        "firebase/php-jwt": "^6.10",
         "longman/telegram-bot": "^0.83.1"
     },
     "require-dev": {
-        "fakerphp/faker": "^1.9",
+        "fakerphp/faker": "^1.24",
         "mikey179/vfsstream": "^1.6",
-        "phpunit/phpunit": "^9.6"
+        "phpunit/phpunit": "^11.5"
     },
     "config": {
         "optimize-autoloader": true,
