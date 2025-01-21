@@ -17,7 +17,7 @@ const phases: { [key: string]: string } = {
 }
 
 interface MoonPhaseProps {
-    date?: string
+    date?: string | Date
 }
 
 const MoonPhaseIcon: React.FC<MoonPhaseProps> = ({ date }) => {
