@@ -78,10 +78,6 @@ defined('EXIT_DATABASE')       || define('EXIT_DATABASE', 8);       // database 
 defined('EXIT__AUTO_MIN')      || define('EXIT__AUTO_MIN', 9);      // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      || define('EXIT__AUTO_MAX', 125);    // highest automatically-assigned error code
 
-define('PRIORITY_LOW', 200);
-define('PRIORITY_NORMAL', 100);
-define('PRIORITY_HIGH', 10);
-
 // FIT file size in byte for 16 bit mask (Mb)
 defined('FITS_FILE_SIZE') || define('FITS_FILE_SIZE', 32.78592);
 

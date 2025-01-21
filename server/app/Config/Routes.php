@@ -12,38 +12,24 @@ $routes->get('statistic/telescope', 'Statistic::telescope');
 $routes->options('statistic', 'Statistic');
 $routes->options('statistic/(:any)', 'Statistic');
 
-$routes->get('catalog', 'Catalog::list');
-$routes->get('catalog/(:any)', 'Catalog::show/$1');
-$routes->post('catalog', 'Catalog::create');
-$routes->patch('catalog/(:any)', 'Catalog::update/$1');
-$routes->delete('catalog/(:any)', 'Catalog::delete/$1');
-$routes->options('catalog', 'Catalog');
-$routes->options('catalog/(:any)', 'Catalog');
+/**  Auth Controller **/
+$routes->group('auth', static function ($routes) {
+    $routes->get('me', 'Auth::me');
+    $routes->get('google', 'Auth::google');
+    $routes->get('yandex', 'Auth::yandex');
+    $routes->get('vk', 'Auth::vk');
+    //$routes->post('register', 'Auth::register');
+    //$routes->post('login', 'Auth::login');
+    $routes->options('(:any)', static function () {});
+});
 
-$routes->get('author', 'Author::list');
-$routes->post('author', 'Author::create');
-$routes->patch('author/(:num)', 'Author::update/$1');
-$routes->delete('author/(:num)', 'Author::delete/$1');
-$routes->options('author', 'Author');
-$routes->options('author/(:num)', 'Author');
-
-$routes->get('auth/me', 'Auth::me');
-$routes->get('auth/google', 'Auth::google');
-$routes->get('auth/yandex', 'Auth::yandex');
-$routes->get('auth/vk', 'Auth::vk');
-//$routes->post('auth/register', 'Auth::register');
-//$routes->post('auth/login', 'Auth::login');
-$routes->options('auth/(:any)', 'Auth');
-
-$routes->get('relay/list', 'Relay::list');
-$routes->get('relay/light', 'Relay::light');
-$routes->put('relay/set', 'Relay::set');
-$routes->options('relay/(:any)', 'Relay');
-
-$routes->get('fits/(:any)', 'Fits::show/$1');
-$routes->post('fits/update', 'Fits::update');
-$routes->post('fits/image', 'Fits::image');
-$routes->options('fits/(:any)', 'Fits');
+/** Relay Controller **/
+$routes->group('relay', static function ($routes) {
+    $routes->get('list', 'Relay::list');
+    $routes->get('light', 'Relay::light');
+    $routes->put('set', 'Relay::set');
+    $routes->options('(:any)', static function () {});
+});
 
 $routes->get('sensors', 'Sensors::list');
 
@@ -66,13 +52,23 @@ $routes->get('categories', 'Categories::list');
 $routes->options('categories', 'Categories');
 
 /** Objects Controller **/
-$routes->get('objects', 'Objects::list');
-$routes->get('objects/(:any)', 'Objects::show/$1');
-$routes->post('objects', 'Objects::create');
-$routes->patch('objects/(:any)', 'Objects::update/$1');
-$routes->delete('objects/(:any)', 'Objects::delete/$1');
-$routes->options('objects', 'Objects');
-$routes->options('objects/(:any)', 'Objects');
+$routes->group('objects', static function ($routes) {
+    $routes->get('/', 'Objects::list');
+    $routes->get('(:any)', 'Objects::show/$1');
+    $routes->post('/', 'Objects::create');
+    $routes->patch('(:any)', 'Objects::update/$1');
+    $routes->delete('(:any)', 'Objects::delete/$1');
+    $routes->options('/', static function () {});
+    $routes->options('(:any)', static function () {});
+});
+
+$routes->group('fits', static function ($routes) {
+    $routes->get('(:any)', 'Fits::show/$1');
+    // $routes->post('update', 'Fits::update');
+    // $routes->post('image', 'Fits::image');
+    $routes->options('(:any)', static function () {});
+});
+
 
 /** Photos Controller **/
 $routes->get('photos', 'Photos::list');
