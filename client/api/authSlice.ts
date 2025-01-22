@@ -36,7 +36,7 @@ const authSlice = createSlice({
             state.user = undefined
             state.isAuth = false
 
-            localStorage.removeItem('AUTH_TOKEN')
+            LocalStorage.removeItem('AUTH_TOKEN')
         }
     }
 })

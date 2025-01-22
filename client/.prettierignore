@@ -1,6 +1,7 @@
 .next
 .vscode
 .github
+.yarn
 *.json
 *.topojson
 node_modules
