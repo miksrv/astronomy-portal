@@ -1,6 +1,5 @@
-import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
-import { Container, Message } from 'simple-react-ui-kit'
+import { Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import PhotoLightbox from '@/components/photo-lightbox'
 
@@ -11,83 +10,66 @@ interface CameraProps {
     interval?: number
 }
 
-const DEFAULT_INTERVAL = 5
+const DEFAULT_INTERVAL = 5000
 
 const Camera: React.FC<CameraProps> = ({ cameraURL, interval }) => {
-    const timeoutInt = interval || DEFAULT_INTERVAL
+    const refreshInterval = interval ? interval * 1000 : DEFAULT_INTERVAL
 
     const [cameraSrc, setCameraSrc] = useState<string>(cameraURL || '')
-    const [seconds, setSeconds] = useState<number>(0)
     const [lightbox, setLightbox] = useState<boolean>(false)
 
     useEffect(() => {
-        if (cameraURL) {
-            const crypto = window.crypto
-            let array = new Uint32Array(1)
+        if (!cameraURL) return
 
-            const interval = setInterval(() => {
-                if (seconds < timeoutInt) {
-                    setSeconds((seconds) => seconds + 1)
-                } else {
-                    setCameraSrc(
-                        cameraURL + '?r=' + crypto.getRandomValues(array)
-                    )
-                    setSeconds(0)
-                }
-            }, 1000)
-
-            return () => clearInterval(interval)
+        const updateImage = () => {
+            setCameraSrc(`${cameraURL}?r=${Date.now()}`)
         }
-    })
+
+        updateImage()
+        const intervalId = setInterval(updateImage, refreshInterval)
+
+        return () => clearInterval(intervalId)
+    }, [cameraURL, refreshInterval])
 
     return (
         <Container className={styles.cameraSection}>
-            {cameraURL && lightbox && (
-                <PhotoLightbox
-                    photos={[
-                        {
-                            src: cameraSrc,
-                            width: 1024,
-                            height: 768,
-                            title: ''
-                        }
-                    ]}
-                    photoIndex={0}
-                    showLightbox={lightbox}
-                    onCloseLightBox={() => setLightbox(false)}
-                />
-            )}
             {cameraURL ? (
                 <>
-                    <span
+                    {lightbox && (
+                        <PhotoLightbox
+                            photos={[
+                                {
+                                    src: cameraSrc,
+                                    width: 1024,
+                                    height: 768,
+                                    title: ''
+                                }
+                            ]}
+                            photoIndex={0}
+                            showLightbox={lightbox}
+                            onCloseLightBox={() => setLightbox(false)}
+                        />
+                    )}
+                    <button
                         className={styles.lightboxTrigger}
-                        role={'button'}
                         tabIndex={0}
-                        onKeyUp={() => {}}
                         onClick={() => setLightbox(true)}
                     >
-                        <Image
+                        <Spinner />
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
                             className={styles.photoImage}
                             src={cameraSrc}
-                            alt={'Изображение с камеры обсерватории'}
-                            height={428}
-                            width={400}
+                            alt='Изображение с камеры обсерватории'
                         />
-                    </span>
-                    {/*<Progress*/}
-                    {/*    size={'tiny'}*/}
-                    {/*    className={styles.progress}*/}
-                    {/*    data-testid={'progress-bar'}*/}
-                    {/*    percent={Math.round((seconds / timeoutInt) * 100)}*/}
-                    {/*    success*/}
-                    {/*/>*/}
+                    </button>
                 </>
             ) : (
                 <Message
-                    type={'error'}
-                    title={'Камера не доступна'}
+                    type='error'
+                    title='Камера не доступна'
                 >
-                    {'Изображение камеры не доступно'}
+                    Изображение камеры не доступно
                 </Message>
             )}
         </Container>
