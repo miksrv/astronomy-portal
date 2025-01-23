@@ -60,7 +60,7 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = () => {
             <div className={'observatoryGrid'}>
                 <Camera
                     cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/2`}
-                    interval={2}
+                    interval={4}
                 />
 
                 <Camera

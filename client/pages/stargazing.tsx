@@ -8,7 +8,7 @@ import { NextSeo } from 'next-seo'
 import Link from 'next/link'
 import React, { useState } from 'react'
 import Gallery from 'react-photo-gallery'
-import { Container, Icon, Message } from 'simple-react-ui-kit'
+import { Container, Icon } from 'simple-react-ui-kit'
 
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'

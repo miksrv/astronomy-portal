@@ -40,9 +40,9 @@ const ObjectFormPage: NextPage<ObjectFormPageProps> = () => {
     const [
         createObject,
         {
-            data: createdData,
-            error: createError,
-            isSuccess: createSuccess,
+            // data: createdData,
+            // error: createError,
+            // isSuccess: createSuccess,
             isLoading: createLoading
         }
     ] = API.useObjectsPostMutation()
@@ -50,9 +50,9 @@ const ObjectFormPage: NextPage<ObjectFormPageProps> = () => {
     const [
         updateObject,
         {
-            data: updatedData,
-            error: updateError,
-            isSuccess: updateSuccess,
+            // data: updatedData,
+            // error: updateError,
+            // isSuccess: updateSuccess,
             isLoading: updateLoading
         }
     ] = API.useObjectsPatchMutation()

@@ -1,6 +1,8 @@
+import * as LocalStorage from '@/tools/localstorage'
 import { wrapper } from '@/api/store'
 import '@/styles/globals.sass'
 import '@/styles/theme.css'
+import { LOCAL_STORAGE } from '@/tools/constants'
 import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -8,15 +10,29 @@ import utc from 'dayjs/plugin/utc'
 import { appWithTranslation, useTranslation } from 'next-i18next'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import Script from 'next/script'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Provider } from 'react-redux'
 
 import i18Config from '../next-i18next.config'
 
+const locale = LocalStorage.getItem(LOCAL_STORAGE.LOCALE as any)
+
 const App = ({ Component, pageProps }: AppProps) => {
+    const router = useRouter()
     const { i18n } = useTranslation()
     const { store } = wrapper.useWrappedStore(pageProps)
+
+    useEffect(() => {
+        if (
+            i18n.language !== locale &&
+            i18Config.i18n.locales.includes(locale) &&
+            router.pathname !== '/404'
+        ) {
+            router.replace(router.asPath, router.asPath, { locale })
+        }
+    }, [])
 
     dayjs.locale(i18n.language ?? i18Config.i18n.defaultLocale)
     dayjs.extend(utc)
@@ -47,6 +63,15 @@ const App = ({ Component, pageProps }: AppProps) => {
                     content={
                         'width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no'
                     }
+                />
+                <meta
+                    name={'apple-mobile-web-app-status-bar-style'}
+                    content={'black-translucent'}
+                />
+                <meta
+                    name={'theme-color'}
+                    content={'#1b1b1b'}
+                    media={'(prefers-color-scheme: dark)'}
                 />
                 <link
                     rel={'apple-touch-icon'}

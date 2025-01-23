@@ -50,7 +50,7 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
     const [
         updatePhoto,
         {
-            data: updatedData,
+            // data: updatedData,
             error: updateError,
             isLoading: updateLoading,
             isSuccess: updateSuccess
@@ -60,8 +60,8 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
     const [
         uploadPhoto,
         {
-            data: uploadedData,
-            error: uploadError,
+            // data: uploadedData,
+            // error: uploadError,
             isLoading: uploadLoading,
             isSuccess: uploadSuccess
         }
