@@ -312,31 +312,14 @@ export const customConfig = {
     // projection: 'aitoff',
     // projectionRatio: null,
     stars: {
-        colors: true,
-        data: 'stars.6.json',
-        designation: true,
-        designationLimit: 4,
-        designationStyle: {
-            align: 'left',
-            baseline: 'top',
-            fill: '#ffffff',
-            font: `10px ${FONT}`
-        },
+        ...defaultConfig.stars,
         designationType: 'desig',
-        exponent: -0.28,
-        limit: 4,
-        propername: true,
-        propernameLimit: 3,
         propernameStyle: {
-            align: 'right',
-            baseline: 'bottom',
-            fill: '#ffffff',
+            ...defaultConfig.stars.propernameStyle,
+            // fill: '#ffffff',
             font: `11px ${FONT}`
         },
-        propernameType: 'name',
-        show: true,
-        size: 10,
-        style: { fill: '#ffffff', opacity: 1 }
+        size: 8
     },
     transform: 'equatorial',
     width: 0,

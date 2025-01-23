@@ -39,14 +39,8 @@ const styleText = {
 // TODO: On screen resize rerender StarMap
 // TODO: Implement interactive mode
 // TODO: Implement goto method
-
-const StarMapRender: React.FC<StarMapProps> = ({
-    objects,
-    zoom,
-    interactive,
-    goto
-}) => {
-    const { t, i18n } = useTranslation()
+const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom }) => {
+    const { i18n } = useTranslation()
 
     const ref = useRef<HTMLDivElement>(null)
 
