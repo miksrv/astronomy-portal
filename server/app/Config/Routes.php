@@ -5,14 +5,23 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->get('statistic', 'Statistic::list');
-$routes->get('statistic/catalog', 'Statistic::catalog');
-$routes->get('statistic/photos', 'Statistic::photos');
-$routes->get('statistic/telescope', 'Statistic::telescope');
-$routes->options('statistic', 'Statistic');
-$routes->options('statistic/(:any)', 'Statistic');
 
-/**  Auth Controller **/
+/** System Controller **/
+$routes->get('system/recalculate/fits', 'System::recalculateFitsFilters');
+
+/** Camera Controller **/
+$routes->get('camera/(:num)', 'Camera::show/$1');
+
+/** Statistic Controller **/
+$routes->group('statistic', static function ($routes) {
+    // $routes->get('/', 'Statistic::list');
+    // $routes->get('statistic/catalog', 'Statistic::catalog');
+    // $routes->get('statistic/photos', 'Statistic::photos');
+    $routes->get('telescope', 'Statistic::telescope');
+    $routes->options('(:any)', static function () {});
+});
+
+/** Auth Controller **/
 $routes->group('auth', static function ($routes) {
     $routes->get('me', 'Auth::me');
     $routes->get('google', 'Auth::google');
@@ -31,25 +40,21 @@ $routes->group('relay', static function ($routes) {
     $routes->options('(:any)', static function () {});
 });
 
-$routes->get('sensors', 'Sensors::list');
-
-$routes->get('camera/(:num)', 'Camera::show/$1');
-
-$routes->get('system/recalculate/fits', 'System::recalculateFitsFilters');
-
 /** Files Controller **/
-$routes->get('files/(:any)', 'Files::show/$1');
-$routes->post('files/update', 'Files::update');
-$routes->post('files/image', 'Files::image');
-$routes->options('files/(:any)', 'Files');
+$routes->group('files', static function ($routes) {
+    $routes->get('(:any)', 'Files::show/$1');
+    // $routes->post('update', 'Files::update');
+    // $routes->post('image', 'Files::image');
+    $routes->options('(:any)', static function () {});
+});
 
 /** Equipment Controller **/
-$routes->get('equipment', 'Equipment::list');
-$routes->options('equipment', 'Equipment');
+$routes->get('equipments', 'Equipment::list');
+$routes->options('equipments', static function () {});
 
-/** Objects Controller **/
+/** Categories Controller **/
 $routes->get('categories', 'Categories::list');
-$routes->options('categories', 'Categories');
+$routes->options('categories', static function () {});
 
 /** Objects Controller **/
 $routes->group('objects', static function ($routes) {
@@ -62,6 +67,7 @@ $routes->group('objects', static function ($routes) {
     $routes->options('(:any)', static function () {});
 });
 
+/** Objects Controller **/
 $routes->group('fits', static function ($routes) {
     $routes->get('(:any)', 'Fits::show/$1');
     // $routes->post('update', 'Fits::update');
@@ -71,28 +77,28 @@ $routes->group('fits', static function ($routes) {
 
 
 /** Photos Controller **/
-$routes->get('photos', 'Photos::list');
-$routes->get('photos/download/(:any)/(:any)', 'Photos::download/$1/$2');
-$routes->get('photos/(:any)', 'Photos::show/$1');
-$routes->get('photos/(:any)/(:any)', 'Photos::show/$1/$2');
-$routes->post('photos', 'Photos::create');
-$routes->post('photos/(:any)/upload', 'Photos::upload/$1');
-$routes->patch('photos/(:any)', 'Photos::update/$1');
-$routes->delete('photos/(:any)', 'Photos::delete/$1');
-$routes->options('photos', 'Photos');
-$routes->options('photos/(:any)', 'Photos');
-$routes->options('photos/(:any)/(:any)', 'Photos');
-
-/** Equipments Controller **/
-$routes->get('equipments', 'Equipment::list');
-$routes->options('equipments', 'Equipment');
+$routes->group('photos', static function ($routes) {
+    $routes->get('/', 'Photos::list');
+    // $routes->get('download/(:any)/(:any)', 'Photos::download/$1/$2');
+    $routes->get('(:any)', 'Photos::show/$1');
+    // $routes->get('photos/(:any)/(:any)', 'Photos::show/$1/$2');
+    $routes->post('/', 'Photos::create');
+    $routes->post('(:any)/upload', 'Photos::upload/$1');
+    $routes->patch('(:any)', 'Photos::update/$1');
+    $routes->delete('(:any)', 'Photos::delete/$1');
+    $routes->options('/', static function () {});
+    $routes->options('(:any)', static function () {});
+    // $routes->options('photos/(:any)/(:any)', static function () {});
+});
 
 /** Events Controller **/
-$routes->get('events', 'Events::list');
-$routes->get('events/upcoming', 'Events::upcoming');
-$routes->get('events/(:any)', 'Events::show/$1');
-$routes->post('events/booking', 'Events::booking');
-$routes->post('events/cancel', 'Events::cancel');
-$routes->post('events/upload/(:alphanum)', 'Events::upload/$1');
-$routes->options('events', 'Events');
-$routes->options('events/(:any)', 'Events');
+$routes->group('events', static function ($routes) {
+    $routes->get('/', 'Events::list');
+    $routes->get('upcoming', 'Events::upcoming');
+    $routes->get('(:any)', 'Events::show/$1');
+    $routes->post('booking', 'Events::booking');
+    $routes->post('cancel', 'Events::cancel');
+    $routes->post('upload/(:alphanum)', 'Events::upload/$1');
+    $routes->options('/', static function () {});
+    $routes->options('(:any)', static function () {});
+});
