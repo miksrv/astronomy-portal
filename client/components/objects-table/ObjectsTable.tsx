@@ -14,6 +14,7 @@ import styles from './styles.module.sass'
 interface ObjectsTableProps {
     objectsList?: ApiModel.Object[]
     photosList?: ApiModel.Photo[]
+    combinedHeight?: number
 }
 
 export type FlattenedObject = {
@@ -68,7 +69,8 @@ export const flattenObjects = (
 
 const ObjectsTable: React.FC<ObjectsTableProps> = ({
     objectsList,
-    photosList
+    photosList,
+    combinedHeight
 }) => {
     const { t } = useTranslation()
 
@@ -194,8 +196,9 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({
         const calculateTableHeight = () => {
             if (document.documentElement.clientHeight) {
                 const containerHeight = document.documentElement.clientHeight
-                const titleHeight = 110 // #TODO
-                const calculatedHeight = containerHeight - titleHeight
+                const minusHeight = combinedHeight || 130
+                const calculatedHeight = containerHeight - minusHeight
+
                 setTableHeight(calculatedHeight)
             }
         }
@@ -207,14 +210,14 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({
         return () => {
             window.removeEventListener('resize', calculateTableHeight)
         }
-    }, [])
+    }, [combinedHeight])
 
     return (
         <Container className={styles.tableContainer}>
             <Table<FlattenedObject>
                 className={styles.objectsListTable}
                 columns={tableColumns}
-                height={tableHeight}
+                maxHeight={tableHeight}
                 stickyHeader={true}
                 verticalBorder={true}
                 data={flattenObjects(objectsList, photosList)}

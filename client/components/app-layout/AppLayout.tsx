@@ -21,7 +21,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
 
     const application = useAppSelector((store) => store.application)
 
-    const [overlayHeight, setOverlayHeight] = useState<number | string>('100%')
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
 
     const handleCloseOverlay = () => {
@@ -48,22 +47,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
         }
     }, [application.showOverlay, sidebarOpen])
 
-    useEffect(() => {
-        const calculatePageHeight = () => {
-            if (document.documentElement.scrollHeight) {
-                setOverlayHeight(document.documentElement.clientHeight)
-            }
-        }
-
-        calculatePageHeight()
-
-        window.addEventListener('resize', calculatePageHeight)
-
-        return () => {
-            window.removeEventListener('resize', calculatePageHeight)
-        }
-    }, [])
-
     return (
         <div className={styles.appLayout}>
             <NextNProgress
@@ -74,8 +57,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
             <div
                 role={'button'}
                 tabIndex={0}
-                // style={{ height: overlayHeight }}
-                style={{ height: '100%' }}
                 className={cn(
                     styles.overlay,
                     application.showOverlay || sidebarOpen

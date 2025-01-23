@@ -1,6 +1,6 @@
 import { API, ApiType, useAppSelector } from '@/api'
 import React, { useCallback, useEffect, useState } from 'react'
-import { Button, Dropdown, Input, Message } from 'simple-react-ui-kit'
+import { Button, Input, Message } from 'simple-react-ui-kit'
 
 interface EventBookingFormProps {
     eventId?: string
@@ -17,7 +17,7 @@ type EventBookingFormState = {
 const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
     const user = useAppSelector((state) => state.auth.user)
 
-    const [submitted, setSubmitted] = useState<boolean>(false)
+    // const [submitted, setSubmitted] = useState<boolean>(false)
     const [formState, setFormState] = useState<EventBookingFormState>({
         adults: '1',
         children: '0',
@@ -26,7 +26,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
         phone: user?.phone || ''
     })
 
-    const [bookEvent, { isLoading, isSuccess, isError, error }] =
+    const [bookEvent, { isLoading, isSuccess, error }] =
         API.useEventsRegistrationPostMutation()
 
     const findError = (field: keyof ApiType.Events.ReqRegistration) =>
@@ -45,7 +45,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
             return
         }
 
-        setSubmitted(true)
+        // setSubmitted(true)
 
         bookEvent({
             adults: Number(formState.adults || 1),

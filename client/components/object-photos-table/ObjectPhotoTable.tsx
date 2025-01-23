@@ -1,9 +1,11 @@
 import { ApiModel } from '@/api'
 import { formatSecondsToExposure } from '@/functions/helpers'
 import { getFilterColor } from '@/tools/colors'
-import { createSmallPhotoUrl } from '@/tools/photos'
+import { formatDate } from '@/tools/dates'
+import { createPhotoTitle, createSmallPhotoUrl } from '@/tools/photos'
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
 import { ColumnProps, Container, Table } from 'simple-react-ui-kit'
 
@@ -11,10 +13,13 @@ import styles from './styles.module.sass'
 
 interface ObjectPhotoTableProps {
     photosList?: ApiModel.Photo[]
+    currentPhotoId?: string
 }
 
 export type FlattenedPhoto = {
+    id?: string
     photo?: string
+    objects?: string[]
     date?: string
     frames?: number
     exposure?: number
@@ -33,7 +38,9 @@ export const flattenPhotos = (
     photosList?.map(
         (photo) =>
             ({
+                id: photo.id,
                 photo: createSmallPhotoUrl(photo),
+                objects: photo.objects,
                 date: photo.date,
                 frames: photo.statistic?.frames || 0,
                 exposure: photo.statistic?.exposure || 0,
@@ -47,21 +54,32 @@ export const flattenPhotos = (
             } as FlattenedPhoto)
     ) || []
 
-const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList }) => {
+const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({
+    photosList,
+    currentPhotoId
+}) => {
     const { t } = useTranslation()
 
     const tableColumns: ColumnProps<FlattenedPhoto>[] = [
         {
             accessor: 'photo',
             className: styles.cellPhoto,
-            formatter: (data) =>
+            formatter: (data, row, i) =>
                 data ? (
-                    <Image
-                        src={data as string}
-                        width={106}
-                        height={24}
-                        alt={''}
-                    />
+                    <Link
+                        href={`/photos/${row[i].id}`}
+                        title={createPhotoTitle(row[i] as ApiModel.Photo, t)}
+                        className={
+                            currentPhotoId === row[i].id ? styles.active : ''
+                        }
+                    >
+                        <Image
+                            src={data as string}
+                            width={106}
+                            height={24}
+                            alt={''}
+                        />
+                    </Link>
                 ) : undefined,
             header: t('photo'),
             isSortable: true
@@ -69,7 +87,7 @@ const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList }) => {
         {
             accessor: 'date',
             className: styles.cellCenter,
-            formatter: (data) => (data as number) || '',
+            formatter: (data) => formatDate(data as string, 'DD MMM YYYY'),
             header: t('date'),
             isSortable: true
         },
@@ -160,7 +178,7 @@ const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList }) => {
                 columns={tableColumns}
                 verticalBorder={true}
                 data={flattenPhotos(photosList)}
-                defaultSort={{ direction: 'asc', key: 'date' }}
+                defaultSort={{ direction: 'desc', key: 'date' }}
             />
         </Container>
     )

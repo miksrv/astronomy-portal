@@ -17,9 +17,13 @@ export type FlattenedFile = Omit<ApiModel.File, 'date'> & {
 
 interface ObjectFilesTableProps {
     filesList?: ApiModel.File[]
+    loading?: boolean
 }
 
-const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({ filesList }) => {
+const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({
+    filesList,
+    loading
+}) => {
     const { t } = useTranslation()
 
     const flattenedFilesList: FlattenedFile[] = useMemo(
@@ -67,7 +71,7 @@ const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({ filesList }) => {
             accessor: 'ccdTemp',
             className: styles.cellCenter,
             formatter: (data) => `${data}°C`,
-            header: t('sensor_temperature'),
+            header: t('ccd-temperature'),
             isSortable: true
         },
         {
@@ -99,9 +103,11 @@ const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({ filesList }) => {
                 columns={tableColumns}
                 verticalBorder={true}
                 stickyHeader={true}
+                loading={loading}
                 data={flattenedFilesList}
+                noDataCaption={t('no-fits-files')}
                 defaultSort={{ direction: 'desc', key: 'date' }}
-                height={300}
+                maxHeight={280}
             />
         </Container>
     )

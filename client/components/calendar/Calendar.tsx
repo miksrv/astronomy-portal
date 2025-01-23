@@ -27,6 +27,7 @@ const Calendar: React.FC<CalendarProps> = ({ eventsTelescope }) => {
         <Container className={styles.section}>
             <div className={styles.calendarToolbar}>
                 <Button
+                    mode={'secondary'}
                     icon={'KeyboardLeft'}
                     onClick={() =>
                         setCalendarDate(dateExtractMonth(calendarDate, 1))
@@ -36,6 +37,7 @@ const Calendar: React.FC<CalendarProps> = ({ eventsTelescope }) => {
                     {formatDate(calendarDate, 'MMMM YYYY')}
                 </span>
                 <Button
+                    mode={'secondary'}
                     icon={'KeyboardRight'}
                     onClick={() =>
                         setCalendarDate(dateAddMonth(calendarDate, 1))

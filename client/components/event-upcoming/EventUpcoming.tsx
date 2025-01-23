@@ -2,7 +2,7 @@ import { API, ApiModel, useAppSelector } from '@/api'
 import { formatUTCDate, getTimeFromSec } from '@/functions/helpers'
 import dayjs from 'dayjs'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React from 'react'
 import Markdown from 'react-markdown'
 import { Button, Container, Spinner } from 'simple-react-ui-kit'
 
@@ -16,20 +16,19 @@ interface EventBookingFormProps {}
 const EventUpcoming: React.FC<EventBookingFormProps> = () => {
     const user = useAppSelector((state) => state.auth.user)
 
-    const [confirmation, showConfirmation] = useState<boolean>(false)
+    // const [confirmation, showConfirmation] = useState<boolean>(false)
 
     const {
         data,
         isFetching,
         isLoading: upcomingLoading
     } = API.useEventGetUpcomingQuery()
-    const [cancelRegistration, { isLoading }] =
-        API.useEventsCancelRegistrationPostMutation()
+    // const [{ isLoading }] = API.useEventsCancelRegistrationPostMutation() // cancelRegistration
 
-    const handleCancelRegistration = () => {
-        cancelRegistration({ eventId: data?.id || '' })
-        showConfirmation(false)
-    }
+    // const handleCancelRegistration = () => {
+    //     cancelRegistration({ eventId: data?.id || '' })
+    //     showConfirmation(false)
+    // }
 
     const checkAvailabilityRegistration = (event?: ApiModel.Event) => {
         // Закончились слоты для регистрации
@@ -282,11 +281,11 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                                         <Button
                                             // fluid={true}
                                             color={'red'}
-                                            loading={isLoading}
-                                            disabled={isLoading}
-                                            onClick={() =>
-                                                showConfirmation(true)
-                                            }
+                                            // loading={isLoading}
+                                            // disabled={isLoading}
+                                            // onClick={() =>
+                                            //     showConfirmation(true)
+                                            // }
                                         >
                                             {'Отменить бронирование'}
                                         </Button>
