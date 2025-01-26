@@ -21,27 +21,27 @@ const Team: React.FC = () => {
 
     const teamList: TeamMemberType[] = [
         {
-            name: t('team.mike'),
+            name: t('about-page.team-members.mike'),
             photo: photoMisha
         },
         {
-            name: t('team.tanya'),
+            name: t('about-page.team-members.tanya'),
             photo: photoTanya
         },
         {
-            name: t('team.igor'),
+            name: t('about-page.team-members.igor'),
             photo: photoIgor
         },
         {
-            name: t('team.sergey'),
+            name: t('about-page.team-members.sergey'),
             photo: photoSergey
         },
         {
-            name: t('team.eugene'),
+            name: t('about-page.team-members.eugene'),
             photo: photoZhenya
         },
         {
-            name: t('team.vladimir'),
+            name: t('about-page.team-members.vladimir'),
             photo: photoVladimir
         }
     ]

@@ -33,6 +33,7 @@ const galleryStargazing: any[] = [
     photoStargazing10
 ]
 
+// TODO Вместо галерии постоянных изображений тут, использовать загруженные фото астровыездов из API
 const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
     const { t, i18n } = useTranslation()
 
@@ -54,13 +55,13 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                 title={t('stargazing')}
                 description={''}
                 openGraph={{
-                    // images: [
-                    //     {
-                    //         height: 853,
-                    //         url: '/photos/stargazing7.jpeg',
-                    //         width: 1280
-                    //     }
-                    // ],
+                    images: [
+                        {
+                            height: 853,
+                            url: '/photos/stargazing-1.jpeg',
+                            width: 1280
+                        }
+                    ],
                     siteName: t('look-at-the-stars'),
                     title: t('stargazing'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
@@ -82,12 +83,47 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                 rel={'noindex nofollow'}
                 target={'_blank'}
             >
-                <Icon name={'Telegram'} /> {t('telegram-subscription-1')}
+                <Icon name={'Telegram'} /> {t('telegram-subscription')}
             </Link>
 
             <Container>
                 <p style={{ marginTop: 0 }}>{t('stargazing-page.intro')}</p>
                 <p>{t('stargazing-page.description')}</p>
+
+                <ul>
+                    <li>
+                        <Link
+                            href={'/stargazing/rules'}
+                            title={t('stargazing-rules')}
+                        >
+                            {t('stargazing-rules')}
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            href={'/stargazing/howto'}
+                            title={t('stargazing-howto')}
+                        >
+                            {t('stargazing-howto')}
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            href={'/stargazing/where'}
+                            title={t('stargazing-where')}
+                        >
+                            {t('stargazing-where')}
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            href={'/stargazing/faq'}
+                            title={t('stargazing-faq')}
+                        >
+                            {t('stargazing-faq')}
+                        </Link>
+                    </li>
+                </ul>
 
                 <Gallery
                     photos={galleryStargazing}

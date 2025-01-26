@@ -40,7 +40,12 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({ photos }) => {
             />
 
             <PhotoLightbox
-                photos={photos}
+                photos={photos?.map((photo) => ({
+                    height: photo.height,
+                    src: `${HOST_IMG}${photo.full}`,
+                    width: photo.width,
+                    title: photo.title || ''
+                }))}
                 photoIndex={photoIndex}
                 showLightbox={showLightbox}
                 onCloseLightBox={handleCloseLightbox}

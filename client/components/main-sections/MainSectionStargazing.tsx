@@ -44,12 +44,12 @@ const MainSectionStargazing: React.FC = () => {
                         end={PEOPLES}
                         className={styles.counter}
                     />
-                    <div>{t('peoples')}</div>
+                    <div>{t('members')}</div>
                 </div>
             </div>
 
             <div className={styles.bottomContainer}>
-                <h2 className={'animate'}>{t('stargazings')}</h2>
+                <h2 className={'animate'}>{t('stargazing')}</h2>
                 <p className={'animate'}>
                     {t('stargazings-section-description')}
                 </p>
