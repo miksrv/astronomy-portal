@@ -5,17 +5,43 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import Link from 'next/link'
-import React from 'react'
+import React, { useState } from 'react'
+import Gallery from 'react-photo-gallery'
 import { Container } from 'simple-react-ui-kit'
 
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
+import PhotoLightbox from '@/components/photo-lightbox'
+
+import photoSidewalk1 from '@/public/photos/sidewalk-asrtronomy-1.jpeg'
+import photoSidewalk2 from '@/public/photos/sidewalk-asrtronomy-2.jpeg'
+import photoSidewalk3 from '@/public/photos/sidewalk-asrtronomy-3.jpeg'
+import photoSidewalk4 from '@/public/photos/sidewalk-asrtronomy-4.jpeg'
+
+const gallerySidewalk = [
+    photoSidewalk1,
+    photoSidewalk2,
+    photoSidewalk3,
+    photoSidewalk4
+]
 
 type StargazingWherePageProps = {}
 
 const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
     const { t, i18n } = useTranslation()
+
+    const [showLightbox, setShowLightbox] = useState<boolean>(false)
+    const [photoIndex, setPhotoIndex] = useState<number>(0)
+
+    const handlePhotoClick = (index: number) => {
+        setPhotoIndex(index)
+        setShowLightbox(true)
+    }
+
+    const handleHideLightbox = () => {
+        setShowLightbox(false)
+    }
 
     return (
         <AppLayout>
@@ -55,7 +81,7 @@ const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
                         'Тротуарная астрономия — это уникальный формат, благодаря которому космос становится ближе. Весной, летом и осенью мы выставляем телескопы прямо на тротуарах и площадях Оренбурга, чтобы любой желающий мог подойти и бесплатно взглянуть на звезды, планеты и Луну. Это отличная возможность для жителей города познакомиться с астрономией в непринужденной и дружественной атмосфере.'
                     }
                 </p>
-                <p style={{ marginBottom: 0 }}>
+                <p>
                     {
                         'Анонсы вечеров тротуарной астрономии мы почти всегда публикуем в нашем'
                     }
@@ -72,6 +98,15 @@ const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
                         ', но иногда наши телескопы можно встретить на улицах города и без предупреждения. Один из вдохновителей проекта, астролектор Владимир Иванович, нередко делится своими знаниями, показывая всем желающим интересные астрономические объекты. Просто ищите телескоп — и вы точно попадете на незабываемую экскурсию по звездному небу!'
                     }
                 </p>
+                <Gallery
+                    photos={gallerySidewalk}
+                    columns={4}
+                    direction={'row'}
+                    targetRowHeight={200}
+                    onClick={(event, photos) => {
+                        handlePhotoClick(gallerySidewalk.length + photos.index)
+                    }}
+                />
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>
@@ -126,6 +161,19 @@ const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
                     {'Пусть звезды станут ближе!'}
                 </p>
             </Container>
+
+            <PhotoLightbox
+                photos={gallerySidewalk.map((image) => ({
+                    src: image.src,
+                    width: image.width,
+                    height: image.height,
+                    title: ''
+                }))}
+                photoIndex={photoIndex}
+                showLightbox={showLightbox}
+                onCloseLightBox={handleHideLightbox}
+                onChangeIndex={setPhotoIndex}
+            />
 
             <AppFooter />
         </AppLayout>
