@@ -308,24 +308,24 @@ export const API = createApi({
         }),
 
         /* Statistic Controller */
-        statisticGet: builder.query<ApiType.Statistic.ResGeneral, void>({
-            providesTags: () => ['Statistic'],
-            query: () => 'statistic'
-        }),
-        statisticGetCatalogItems: builder.query<
-            ApiType.Statistic.ResCatalogNames,
-            void
-        >({
-            providesTags: () => ['Statistic'],
-            query: () => 'statistic/catalog'
-        }),
-        statisticGetPhotosItems: builder.query<
-            ApiType.Statistic.ResPhotoNames,
-            void
-        >({
-            providesTags: () => ['Statistic'],
-            query: () => 'statistic/photos'
-        }),
+        // statisticGet: builder.query<ApiType.Statistic.ResGeneral, void>({
+        //     providesTags: () => ['Statistic'],
+        //     query: () => 'statistic'
+        // }),
+        // statisticGetCatalogItems: builder.query<
+        //     ApiType.Statistic.ResCatalogNames,
+        //     void
+        // >({
+        //     providesTags: () => ['Statistic'],
+        //     query: () => 'statistic/catalog'
+        // }),
+        // statisticGetPhotosItems: builder.query<
+        //     ApiType.Statistic.ResPhotoNames,
+        //     void
+        // >({
+        //     providesTags: () => ['Statistic'],
+        //     query: () => 'statistic/photos'
+        // }),
         statisticGetTelescope: builder.query<
             ApiType.Statistic.ResTelescope,
             Maybe<ApiType.Statistic.ReqTelescope>
