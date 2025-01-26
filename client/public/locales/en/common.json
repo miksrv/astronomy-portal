@@ -9,6 +9,8 @@
     "observatory": "Observatory",
     "stargazing": "Stargazing",
     "stargazings": "Stargazings",
+    "members": "Members",
+    "near_space": "Near Space",
     "stargazings-section-description": "We organize regular trips under the open sky to observe stars and planets through powerful telescopes.",
     "astrophoto-section-description": "A collection of space photos taken at our observatory, revealing the beauty of distant galaxies, nebulae, and star clusters.",
     "observatory-section-description": "Discover the universe from our stationary observation point, equipped with advanced telescopes.",
@@ -40,7 +42,6 @@
     "edit": "Edit",
     "from": "from",
     "years": "Years",
-    "peoples": "Peoples",
     "read-more": "Read more",
     "name-in-the-directory": "Name in the directory",
     "category": "Category",
@@ -71,16 +72,7 @@
     "azimuth": "Azimuth",
     "moon": "Moon",
     "no-fits-files": "No saved FITS files for this object",
-    "telegram-subscription-1": "To not miss announcements - subscribe to the Telegram channel",
-    "telegram-subscription-2": "Subscribe to the author's Telegram channel of this project",
-    "team": {
-        "mike": "Mikhail Topchilo",
-        "tanya": "Tatyana Gavrish",
-        "igor": "Igor Kommissarchik",
-        "sergey": "Sergey Medvedev",
-        "eugene": "Evgeny Zimin",
-        "vladimir": "Vladimir Ivanovich"
-    },
+    "telegram-subscription": "To not miss announcements - subscribe to the Telegram channel",
     "equipment": {
         "mount": "Mount",
         "scope": "Telescope",
@@ -91,26 +83,163 @@
         "filter_wheel": "Filter Wheel",
         "filter": "Filters"
     },
+    "stargazing-rules": "Stargazing Rules",
+    "stargazing-howto": "How Stargazing Works",
+    "stargazing-where": "Where to Look Through a Telescope in Orenburg",
+    "stargazing-faq": "Frequently Asked Questions",
     "stargazing-page": {
-        "intro": "Stargazing in Orenburg is a unique opportunity to enjoy the starry sky in complete darkness. Join our trips with telescopes outside the city to see space objects in the fields of the Orenburg region. Fascinating observations and exciting discoveries await you at each stargazing.",
-        "description": "Stargazing is a format for holding popular science events, when participants go out of town in the evening to take part in a night excursion through the starry sky. At stargazing, with the help of multimedia, we discuss interesting topics related to space and astronomy, observe through telescopes and communicate with equally interesting and passionate people."
+        "intro": "Stargazing in Orenburg is an opportunity to touch the mysteries of the Universe by observing the starry sky in complete darkness. We invite you to exciting trips out of town, where telescopes open cosmic horizons right in the fields of Orenburg.",
+        "description": "Each stargazing trip is an evening of scientific discoveries, inspiring lectures, and live communication with like-minded people. You will learn how our events are held, get acquainted with the basic rules of behavior at stargazing trips, and be able to prepare in advance for observing the stars."
+    },
+    "stargazing-rules-page": {
+        "description": "Learn the rules of behavior at stargazing trips in Orenburg: what not to do when observing stars and planets through a telescope. Follow the recommendations to make the stargazing trip safe and comfortable for all participants.",
+        "welcome": "Welcome to the stargazing trips in Orenburg organized by the \"Look at the Stars\" project! To make the joint observation of the starry sky and planets comfortable and safe for all participants, it is important to follow a few simple rules. These recommendations help maintain the atmosphere of night observation and ensure that everyone can enjoy the view of stars and planets through a telescope.",
+        "prohibited-title": "What Not to Do at Stargazing Trips:",
+        "prohibited-items": [
+            {
+                "title": "Use Bright Light Sources",
+                "description": "Flashlights, phone screens, and any bright light devices disrupt the eyes' adaptation to darkness, reducing the visibility of the starry sky. Use only red flashlights or special light filters for devices."
+            },
+            {
+                "title": "Light Fires and Use Open Flames",
+                "description": "Stargazing trips are held in fields and open areas where there is a high risk of fires. Lighting fires is strictly prohibited."
+            },
+            {
+                "title": "Consume Alcohol and Smoke",
+                "description": "Alcoholic beverages, cigarettes, electronic cigarettes, vapes, and hookahs are prohibited. This is not only a matter of fire safety but also respect for other participants who value a clear night sky and fresh air."
+            },
+            {
+                "title": "Make Noise and Disturb Other Participants",
+                "description": "Loud music, shouting, or other sudden noises can distract and interfere with concentration when observing through a telescope. Respect the silence and the mood of those around you."
+            }
+        ],
+        "recommendations-title": "Recommendations for Stargazing Trip Participants:",
+        "recommendations-items": [
+            {
+                "title": "Protect Nature",
+                "description": "Take all your trash with you after the observations. We strive to leave the stargazing sites as clean as they were before our arrival."
+            },
+            {
+                "title": "Follow Safety Rules",
+                "description": "Move carefully to avoid damaging equipment and harming yourself."
+            },
+            {
+                "title": "Respect Other Participants",
+                "description": "Everyone came to the stargazing trip to enjoy the beauty of space. Respectful behavior towards each other creates a friendly and comfortable atmosphere."
+            }
+        ],
+        "importance-title": "Why Is It Important to Follow the Rules?",
+        "importance-description": "Following these recommendations helps make stargazing in Orenburg as comfortable as possible for everyone. We create an atmosphere where each participant can see amazing celestial phenomena, study planets through a telescope, and have an unforgettable experience.",
+        "join-title": "Join Our Stargazing Trips!",
+        "join-description": "Want to learn more about our events organized in Orenburg?",
+        "subscribe": "Subscribe"
+    },
+    "stargazing-howto-page": {
+        "description": "Learn how stargazing trips in Orenburg are conducted: registration, space lectures, telescope observations, and star navigation training. Subscribe to the Telegram channel \"Near Space\" and join unique astronomical events under the starry sky!",
+        "unique_event": "Each stargazing trip is unique, but we follow a general scenario to make the event interesting and convenient for all participants.",
+        "event_announcement": "Event Announcement",
+        "event_announcement_text": "Stargazing trips in Orenburg are held in favorable weather conditions, so the exact date becomes known only 2-3 days before the event. We announce upcoming trips in advance on our Telegram channel \"Near Space\", where we publish announcements and important updates. Subscribing to the channel is mandatory to not miss a new stargazing trip.",
+        "registration": "Stargazing Trip Registration",
+        "registration_text": "Pre-registration through our website is required to participate. It is free and takes only one minute. Please note: beware of scammers, if someone asks for payment for participation - it is a scam! We welcome donations, but participation always remains free.",
+        "location": "Event Location",
+        "location_text": "Stargazing trips are held out of town, away from city lights, usually 40 km from Orenburg. The exact location will be revealed after registration. You need to get to the field on your own, so check the route in advance. The last section of the road is a dirt road about 300 meters long.",
+        "event_plan": "Stargazing Trip Plan",
+        "arrival": "Arrival at the Location",
+        "arrival_text": "Arrive 15-20 minutes before the start to take a comfortable place on the astronomical field. Bring camping chairs or mats for comfortable seating.",
+        "lecture": "Astro Lecture",
+        "lecture_text": "As soon as dusk falls, our astro lecture begins. We show videos and photos on a big screen, talking about space in an accessible and interesting way. Lecture topics vary: from \"Perseid Meteor Shower\" to \"What Black Holes Hide\". Lectures are designed for participants from 8 years old and last about an hour.",
+        "orientation": "Star Navigation",
+        "orientation_text": "After the lecture, we teach you to find the main stars and constellations, showing them in the sky. This part lasts about 20 minutes.",
+        "telescope_observation": "Telescope Observation",
+        "telescope_observation_text": "Several telescopes are set up on the astronomical site, each focused on specific cosmic objects. You can look through the telescopes, ask questions, and communicate with astronomers.",
+        "event_duration": "Event Duration",
+        "event_duration_text": "The entire stargazing trip takes from 2 to 4 hours. You can leave the site at any time, but many stay until the end, enjoying the views of the starry sky.",
+        "recommendations": "Mandatory Recommendations",
+        "recommendations_text": "Please read the \"Stargazing Trip Rules\" section to make the event comfortable and safe for everyone.",
+        "thematic_evenings": "Thematic Evenings",
+        "thematic_evenings_text": "Sometimes we conduct sidewalk astronomy right in the city. Read more about such events in the \"Where to Look Through a Telescope in Orenburg\" section.",
+        "faq": "Didn't find the answer to your question? Check the",
+        "telegram": "or write in our Telegram channel"
+    },
+    "stargazing-faq-page": {
+        "description": "Find answers to frequently asked questions about stargazing trips: registration, what to bring, cost, duration, and how to get there. Prepare for a night under the stars with comfort!",
+        "intro": "On this page, you will find answers to the most frequently asked questions that participants of our stargazing trips ask. We have tried to gather all the important information here to make your participation in the event as comfortable and pleasant as possible. If you did not find the answer to your question, you can always ask it in our Telegram channel",
+        "questions": [
+            {
+                "question": "Can I come without registration?",
+                "answer": "No, you can't. Registration is mandatory as it allows us to plan the event, notify participants of possible changes, and ensure comfort for everyone."
+            },
+            {
+                "question": "What should I bring?",
+                "answer": "We recommend bringing: mats or chairs for comfortable observation, warm clothes (it can be cool at night in the open air), insect repellent, camping flashlights (preferably with red light to avoid disturbing observations), a thermos with tea or coffee, snacks (sandwiches, dried fruits, etc.), a camera or smartphone if you want to try to capture the stars."
+            },
+            {
+                "question": "Can I get to the stargazing trip location by public transport?",
+                "answer": "Unfortunately, no. The event location is far from public transport routes. You can get there by your own car or join other participants if they are willing to take you with them. We recommend arranging this in advance through our Telegram channel."
+            },
+            {
+                "question": "How much does the event cost?",
+                "answer": "Our stargazing trips are free! However, if you want to support us, you can buy merchandise on-site or make a small donation. Your help allows us to organize more events."
+            },
+            {
+                "question": "How long does the stargazing trip last?",
+                "answer": "Usually, the stargazing trip lasts 2-3 hours, but you can leave the event at any time. We try not to prolong it to ensure everyone's comfort."
+            },
+            {
+                "question": "What if it's cloudy or rainy?",
+                "answer": "If the weather forecast is unfavorable (clouds or precipitation), the event may be canceled or rescheduled. We always notify participants of such changes through our Telegram channel, so be sure to follow the updates."
+            },
+            {
+                "question": "Do I need to bring my own telescope?",
+                "answer": "No, bringing a telescope is not necessary. We always have several telescopes for general use. If you have your own instrument, you can bring it, and our experts will help you set it up and use it."
+            },
+            {
+                "question": "Is the event suitable for children?",
+                "answer": "Yes, stargazing trips are suitable for children, but they must be supervised by adults. We strive to make our events interesting and educational for all ages."
+            },
+            {
+                "question": "Can I take photos?",
+                "answer": "Of course! You can take photos, but please follow the etiquette rules to avoid disturbing other participants. Do not use bright flashes or lights as this can spoil the night observation."
+            }
+        ]
     },
     "about-page": {
-        "intro": "Hello! This site is dedicated to an amateur project - a homemade astronomical observatory operating remotely. This is a unique project in the Orenburg region. Our observatory operates autonomously and allows you to take pictures of deep space objects. The goal of this project is to make astronomy accessible to everyone. Therefore, the observatory is open to everyone - anyone can use it to get images of space. In the near future, a free telescope control service will be launched on this site.",
-        "our-team": "Our Team",
-        "our-team-intro": "We work in various fields, but we are all united by one thing - a love for space. Since 2016, we have been looking at the stars together, popularizing astronomy, and developing our projects.",
-        "stargazing": "Astronomical Project \"Look at the Stars\"",
-        "stargazing-intro": "In 2016, we launched a popular science project called \"Look at the Stars\" in the Orenburg region. Since then, every season our team has been organizing free astronomical lectures in the open air. We go out of town with telescopes, hold astrolectures, and organize sidewalk astronomy evenings. The goal of the project is to create accessible astronomy for everyone. We bring space closer!",
-        "stargazing-description-1": "Our project \"Look at the Stars\" has attracted a wide audience from the very beginning. We strive to awaken interest in space among children, teenagers, and adults by showing them its grandeur and mystery. The main idea is that everyone can enjoy the night sky and be inspired by the wonders of the Universe through our astronomy evenings and astro trips.",
-        "stargazing-description-2": "Our events cover not only the cities and towns of the Orenburg region but also neighboring regions. We organize field trips to remote places where there is no strong light pollution, allowing us to observe the stars in all their glory. Our team of astronomers, volunteers, and scientists is always ready to share their knowledge and experience so that everyone can better understand and love astronomy.",
-        "stargazing-description-3": "One of the key components of the project is the lectures given by experienced amateur astronomers. We talk about scientific discoveries, the history of astronomy, and its modern achievements. The lectures not only expand the knowledge of the audience but also inspire further study of this amazing science. We conduct all lectures in a simple format, explaining complex things in simple terms.",
-        "stargazing-description-4": "We pay special attention to sidewalk astronomy evenings. These are informal meetings held outdoors in the most accessible places in the city.",
-        "your-help": "Your Help",
-        "your-help-intro": "A significant contribution to the development of the \"Look at the Stars\" project is made by the support of the social investment program \"Native Towns\" of Gazprom Neft and the team of the information agency \"Orenburg Media\".",
-        "your-help-description": "Our astronomical project of a homemade observatory has also been supported by many participants! We have ambitious plans for the development of this project. And our observatory always needs your support.",
-        "financial-support": "Financial Support",
-        "technical-and-software-support": "Technical and Software Support",
-        "thanks-for-help": "Many thanks to everyone who helped with advice, consultations, and recommendations. If someone was not included in the list - please write, it is important. Thanks to you - space really becomes closer!"
+        "description": "Learn more about the \"Look at the Stars\" project, our team, and the homemade astronomical observatory. Join us and discover the beauty of space!",
+        "my-name": "My name is",
+        "misha": "Misha",
+        "intro": ", and this site is my attempt to tell you about my hobby, gather all the information together, and capture the achievements made on the way to studying space. Astronomy for me is not just a hobby, but a whole world that has changed my life. Thanks to it, I found incredible friends, learned a lot of new things, and realized how vast and mysterious the expanses of the Universe are. This project is our joint contribution to the popularization and development of astronomy. We sincerely believe that thanks to our efforts, space will become closer and more accessible to everyone.",
+        "telegram-channel": "Subscribe to the author's Telegram channel of this project",
+        "team-title": "Our Team",
+        "team-description": "We work in various fields, but we are all united by one thing - the love for stars and the night sky. Since 2016, we have been popularizing astronomy, organizing astro trips in the Orenburg region, and sidewalk astronomy evenings in Orenburg. Together we look at the stars, share knowledge, and inspire others.",
+        "team-members": {
+            "mike": "Mikhail Topchilo",
+            "tanya": "Tatyana Gavrish",
+            "igor": "Igor Kommissarchik",
+            "sergey": "Sergey Medvedev",
+            "eugene": "Evgeny Zimin",
+            "vladimir": "Vladimir Ivanovich"
+        },
+        "project-title": "Astronomical Project \"Look at the Stars\"",
+        "project-description": "In 2016, we launched the \"Look at the Stars\" project in the Orenburg region to make astronomy accessible to everyone. Since then, every season we have been holding free open-air lectures, organizing trips out of town with telescopes, and conducting informal sidewalk astronomy evenings.",
+        "project-goal": "The main goal of the project is to show the greatness and beauty of the Universe, to inspire people to study space. We cover not only the Orenburg region but also neighboring regions, traveling to places where the night sky is especially bright. You can learn more about our current and past events on the page",
+        "project-sidewalk": ", and for those who want to see the stars within the city, we have prepared a section",
+        "project-sidewalk-link": "Where to Look Through a Telescope in Orenburg",
+        "project-locations": "Our events are held not only in the cities and towns of the Orenburg region but also in neighboring regions. We organize field trips to remote places where minimal light pollution allows you to fully enjoy the starry sky. Our team of amateur astronomers and volunteers shares their knowledge and experience so that everyone can discover the beauty and mysteries of the Universe.",
+        "project-lectures": "One of the most important components of the project is the lectures given by experienced amateur astronomers. We talk about scientific discoveries, the history of astronomy, and its modern achievements. The lectures are held in an easy format, where complex things are explained in simple and understandable language. This helps listeners not only to broaden their horizons but also inspires them to study astronomy independently.",
+        "project-sidewalk-astronomy": "We pay special attention to sidewalk astronomy evenings. These open-air meetings are held in the most accessible places in the city. At such events, anyone can come, look through a telescope, and learn more about what the starry sky hides.",
+        "observatory-title": "Homemade Astronomical Observatory",
+        "observatory-intro": "This project is one of the most significant stages of my life. Our homemade astronomical observatory is a unique phenomenon for the Orenburg region. It operates autonomously and allows you to get images of deep space objects, making astronomy accessible to everyone.",
+        "observatory-work-1": "The observatory is open to everyone. Anyone can use its capabilities to get images of cosmic objects. Moreover, there is a section on the website",
+        "observatory-work-2": ", where you will find an archive of FITS files. This data can be used for training, asteroid search, astrophotography creation, and other scientific or creative purposes.",
+        "observatory-photos-1": "Soon we will launch a free telescope control service so that even more people can join the beauty of the night sky. Don't forget to check out the section",
+        "observatory-photos-2": ", where photos taken with the observatory and during our astro trips are collected. These photos were processed by me and my friends and reflect our passion for space.",
+        "observatory-conclusion": "This project is our contribution to the popularization of astronomy. We sincerely hope that it will inspire you to discover the Universe!",
+        "your-help-title": "Your Help",
+        "your-help-intro": "The development of the \"Look at the Stars\" project has largely become possible thanks to the support of the \"Native Cities\" social investment program of Gazprom Neft and the assistance of the Orenburg Media information agency team.",
+        "your-help-description": "Our homemade observatory project has also found a response from many caring participants. We have large-scale plans for the development of this direction, and your support plays a key role. We are grateful to everyone who helps with advice, consultations, and recommendations. If we accidentally did not mention someone in the list of thanks, write to us - it is very important.",
+        "your-help-financial-support": "Financial Support",
+        "your-help-technical-support": "Technical and Software Support",
+        "your-help-conclusion": "Thanks to your help, space really becomes closer!"
     },
     "plurals": {
         "minutes_one": "{{count}} minute",
