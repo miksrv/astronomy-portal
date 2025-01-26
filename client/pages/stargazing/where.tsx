@@ -47,9 +47,7 @@ const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
         <AppLayout>
             <NextSeo
                 title={t('stargazing-where')}
-                description={
-                    'Узнайте, где в Оренбурге можно посмотреть в телескоп. Тротуарная астрономия: бесплатные наблюдения Луны, планет и звезд на улицах города. Хотите увидеть больше — отправляйтесь на выезд за город для наблюдения туманностей и галактик!'
-                }
+                description={t('stargazing-where-page.description')}
                 openGraph={{
                     images: [
                         // {
@@ -77,14 +75,10 @@ const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
 
             <Container style={{ marginBottom: '10px' }}>
                 <p style={{ marginTop: 0 }}>
-                    {
-                        'Тротуарная астрономия — это уникальный формат, благодаря которому космос становится ближе. Весной, летом и осенью мы выставляем телескопы прямо на тротуарах и площадях Оренбурга, чтобы любой желающий мог подойти и бесплатно взглянуть на звезды, планеты и Луну. Это отличная возможность для жителей города познакомиться с астрономией в непринужденной и дружественной атмосфере.'
-                    }
+                    {t('stargazing-where-page.intro')}
                 </p>
                 <p>
-                    {
-                        'Анонсы вечеров тротуарной астрономии мы почти всегда публикуем в нашем'
-                    }
+                    {t('stargazing-where-page.announcement-1')}
                     <Link
                         style={{ margin: '0 5px' }}
                         href={'https://t.me/nearspace'}
@@ -92,11 +86,9 @@ const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
                         rel={'noindex nofollow'}
                         target={'_blank'}
                     >
-                        {'Telegram-канале'}
+                        {t('stargazing-where-page.telegram-channel')}
                     </Link>
-                    {
-                        ', но иногда наши телескопы можно встретить на улицах города и без предупреждения. Один из вдохновителей проекта, астролектор Владимир Иванович, нередко делится своими знаниями, показывая всем желающим интересные астрономические объекты. Просто ищите телескоп — и вы точно попадете на незабываемую экскурсию по звездному небу!'
-                    }
+                    {t('stargazing-where-page.announcement-2')}
                 </p>
                 <Gallery
                     photos={gallerySidewalk}
@@ -111,54 +103,28 @@ const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
 
             <Container style={{ marginBottom: '10px' }}>
                 <h2 style={{ marginTop: 0 }}>
-                    {'Что можно увидеть в телескоп из города?'}
+                    {t('stargazing-where-page.what-you-can-see-title')}
                 </h2>
-                <p>
-                    {
-                        'В условиях городского светового загрязнения наиболее яркие объекты остаются видимыми. Например, вы сможете рассмотреть:'
-                    }
-                </p>
+                <p>{t('stargazing-where-page.what-you-can-see-description')}</p>
                 <ul>
-                    <li>
-                        {
-                            'Кратеры и горы на Луне, особенно впечатляющие в фазах первой и последней четверти;'
-                        }
-                    </li>
-                    <li>
-                        {'Кольца Сатурна, которые неизменно вызывают восторг;'}
-                    </li>
-                    <li>
-                        {'Яркие звезды и двойные звезды, такие как Альбирео;'}
-                    </li>
-                    <li>
-                        {
-                            'Парады планет, если они происходят в подходящее время года.'
-                        }
-                    </li>
+                    <li>{t('stargazing-where-page.what-you-can-see-1')}</li>
+                    <li>{t('stargazing-where-page.what-you-can-see-2')}</li>
+                    <li>{t('stargazing-where-page.what-you-can-see-3')}</li>
+                    <li>{t('stargazing-where-page.what-you-can-see-4')}</li>
                 </ul>
                 <p style={{ marginBottom: 0 }}>
-                    {
-                        'Однако городское освещение ограничивает наши возможности. Туманности, галактики, метеорные потоки и даже крупные звездные скопления часто остаются скрытыми от взгляда.'
-                    }
+                    {t('stargazing-where-page.what-you-can-see-conclusion')}
                 </p>
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>
                 <h2 style={{ marginTop: 0 }}>
-                    {'Хотите увидеть больше? Выезжайте за город!'}
+                    {t('stargazing-where-page.want-to-see-more')}
                 </h2>
-                <p>
-                    {
-                        'Для наблюдения слабосветящихся объектов, таких как туманности Ориона, Андромеды, метеорные потоки и звездные скопления, необходимо отправиться подальше от городских огней. В таких местах, как Оренбургская степь или другие удаленные районы, ночное небо поражает своей красотой.'
-                    }
-                </p>
-                <p>
-                    {
-                        'Мы регулярно организуем выездные астрономические мероприятия, где можно насладиться полной палитрой космических объектов. Следите за анонсами на нашей странице «Астровыезды» или в Telegram-канале, чтобы присоединиться к одному из таких наблюдений.'
-                    }
-                </p>
+                <p>{t('stargazing-where-page.want-to-see-description-1')}</p>
+                <p>{t('stargazing-where-page.want-to-see-description-2')}</p>
                 <p style={{ marginBottom: 0 }}>
-                    {'Пусть звезды станут ближе!'}
+                    {t('stargazing-where-page.want-to-see-description-3')}
                 </p>
             </Container>
 

@@ -203,6 +203,24 @@
             }
         ]
     },
+    "stargazing-where-page": {
+        "description": "Find out where you can look through a telescope in Orenburg. Sidewalk astronomy: free observations of the Moon, planets, and stars on the streets of the city. Want to see more? Go out of town to observe nebulae and galaxies!",
+        "intro": "Sidewalk astronomy is a unique format that brings space closer. In spring, summer, and autumn, we set up telescopes right on the sidewalks and squares of Orenburg so that anyone can come and look at the stars, planets, and the Moon for free. This is a great opportunity for city residents to get acquainted with astronomy in a relaxed and friendly atmosphere.",
+        "announcement-1": "We almost always publish announcements of sidewalk astronomy evenings in our",
+        "telegram-channel": "Telegram channel",
+        "announcement-2": ", but sometimes our telescopes can be found on the streets of the city without warning. One of the project’s inspirers, astro lecturer Vladimir Ivanovich, often shares his knowledge, showing interesting astronomical objects to everyone. Just look for the telescope, and you will definitely get an unforgettable tour of the starry sky!",
+        "what-you-can-see-title": "What can you see through a telescope from the city?",
+        "what-you-can-see-description": "In conditions of urban light pollution, the brightest objects remain visible. For example, you can see:",
+        "what-you-can-see-1": "Craters and mountains on the Moon, especially impressive in the phases of the first and last quarter;",
+        "what-you-can-see-2": "The rings of Saturn, which invariably cause delight;",
+        "what-you-can-see-3": "Bright stars and double stars, such as Albireo;",
+        "what-you-can-see-4": "Planet parades, if they occur at the right time of the year.",
+        "what-you-can-see-conclusion": "However, city lighting limits our capabilities. Nebulae, galaxies, meteor showers, and even large star clusters often remain hidden from view.",
+        "want-to-see-more": "Want to see more? Go out of town!",
+        "want-to-see-description-1": "To observe faint objects, such as the Orion Nebula, Andromeda, meteor showers, and star clusters, you need to go away from city lights. In places like the Orenburg steppe or other remote areas, the night sky is stunningly beautiful.",
+        "want-to-see-description-2": "We regularly organize field astronomical events where you can enjoy the full range of cosmic objects. Follow the announcements on our \"Astro Trips\" page or in the Telegram channel to join one of these observations.",
+        "want-to-see-description-3": "Let the stars become closer!"
+    },
     "about-page": {
         "description": "Learn more about the \"Look at the Stars\" project, our team, and the homemade astronomical observatory. Join us and discover the beauty of space!",
         "my-name": "My name is",
