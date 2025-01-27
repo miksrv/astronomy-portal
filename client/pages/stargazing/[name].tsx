@@ -1,5 +1,6 @@
 import { API, ApiModel, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
+import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
 import { sliceText } from '@/functions/helpers'
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -9,13 +10,14 @@ import { NextSeo } from 'next-seo'
 import Image from 'next/image'
 import React, { useEffect, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
+import Gallery from 'react-photo-gallery'
 import { Button, Container } from 'simple-react-ui-kit'
 
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import EventPhotoUploader from '@/components/event-photo-uploader/EventPhotoUploader'
-import PhotoGallery from '@/components/photo-gallery'
+import PhotoLightbox from '@/components/photo-lightbox'
 
 interface StargazingItemPageProps {
     eventId: string
@@ -34,6 +36,17 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
 
     const [localPhotos, setLocalPhotos] = useState<ApiModel.EventPhoto[]>([])
     const [uploadingPhotos, setUploadingPhotos] = useState<string[]>()
+    const [showLightbox, setShowLightbox] = useState<boolean>(false)
+    const [photoIndex, setPhotoIndex] = useState<number>()
+
+    const handleCloseLightbox = () => {
+        setShowLightbox(false)
+    }
+
+    const handlePhotoClick = (index: number) => {
+        setPhotoIndex(index)
+        setShowLightbox(true)
+    }
 
     const handleUploadPhotoClick = (event: React.MouseEvent | undefined) => {
         event?.preventDefault()
@@ -58,7 +71,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                     images: [
                         {
                             height: 743,
-                            url: `${process.env.NEXT_PUBLIC_API_HOST}${event?.cover}`,
+                            url: `${hosts.stargazing}${event?.id}.jpg`,
                             width: 1280
                         }
                     ],
@@ -80,7 +93,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
             <Container style={{ marginBottom: '10px' }}>
                 <Image
                     className={'stargazingImage'}
-                    src={`${process.env.NEXT_PUBLIC_API_HOST}${event?.cover}`}
+                    src={`${hosts.stargazing}${event?.id}.jpg`}
                     alt={`Астровыезд: ${event?.title}`}
                     width={1024}
                     height={768}
@@ -92,38 +105,61 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                 <Markdown>{event?.content}</Markdown>
             </Container>
 
-            {(!!localPhotos?.length || user?.role === 'admin') && (
-                <Container style={{ marginBottom: '10px' }}>
-                    <h2
-                        className={'subTitle'}
-                    >{`Фотографии с астровыезда - ${event?.title}`}</h2>
+            <Container style={{ marginBottom: '10px' }}>
+                <h2
+                    className={'subTitle'}
+                    style={{ marginTop: 0 }}
+                >{`Фотографии с астровыезда - ${event?.title}`}</h2>
 
-                    {user?.role === 'admin' && (
-                        <Button
-                            onClick={handleUploadPhotoClick}
-                            disabled={!!uploadingPhotos?.length}
-                            style={{ marginBottom: 20 }}
-                        >
-                            {!uploadingPhotos?.length
-                                ? 'Загрузить фотографии'
-                                : `Загрузка ${uploadingPhotos?.length} фото`}
-                        </Button>
-                    )}
+                {user?.role === 'admin' && (
+                    <Button
+                        onClick={handleUploadPhotoClick}
+                        disabled={!!uploadingPhotos?.length}
+                        style={{ marginBottom: 20 }}
+                    >
+                        {!uploadingPhotos?.length
+                            ? 'Загрузить фотографии'
+                            : `Загрузка ${uploadingPhotos?.length} фото`}
+                    </Button>
+                )}
 
-                    <PhotoGallery photos={localPhotos} />
+                <Gallery
+                    photos={
+                        localPhotos?.map((photo) => ({
+                            height: photo.height,
+                            src: `${hosts.stargazing}${eventId}/${photo.name}_preview.${photo?.ext}`,
+                            width: photo.width
+                        })) || []
+                    }
+                    columns={4}
+                    direction={'row'}
+                    targetRowHeight={200}
+                    onClick={(event, photos) => {
+                        handlePhotoClick(photos.index)
+                    }}
+                />
 
-                    <EventPhotoUploader
-                        eventId={eventId}
-                        fileInputRef={inputFileRef}
-                        onSelectFiles={setUploadingPhotos}
-                        onUploadPhoto={(photo) => {
-                            setLocalPhotos([...localPhotos, photo])
-                        }}
-                    />
+                <EventPhotoUploader
+                    eventId={eventId}
+                    fileInputRef={inputFileRef}
+                    onSelectFiles={setUploadingPhotos}
+                    onUploadPhoto={(photo) => {
+                        setLocalPhotos([...localPhotos, photo])
+                    }}
+                />
+            </Container>
 
-                    <AppFooter />
-                </Container>
-            )}
+            <PhotoLightbox
+                photos={localPhotos?.map((photo, index) => ({
+                    height: photo.height,
+                    src: `${hosts.stargazing}${eventId}/${photo.name}.${photo?.ext}`,
+                    width: photo.width,
+                    title: `${event?.title} - Photo ${index}`
+                }))}
+                photoIndex={photoIndex}
+                showLightbox={showLightbox}
+                onCloseLightBox={handleCloseLightbox}
+            />
 
             <AppFooter />
         </AppLayout>

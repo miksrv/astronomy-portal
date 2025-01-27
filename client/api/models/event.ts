@@ -17,13 +17,8 @@ export type Event = {
 }
 
 export type EventPhoto = {
-    id?: string
-    title?: string
-    full: string
-    preview: string
+    name: string
+    ext: string
     width: number
     height: number
-    created?: DateTime
-    filesize?: number
-    eventId?: string
 }

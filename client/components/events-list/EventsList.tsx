@@ -9,14 +9,14 @@ interface EventsListProps {
 }
 
 const EventsList: React.FC<EventsListProps> = ({ events }) => (
-    <section className={styles.eventsList}>
+    <div className={styles.eventsList}>
         {events?.map((place) => (
             <EventsListItem
                 key={place.id}
                 event={place}
             />
         ))}
-    </section>
+    </div>
 )
 
 export default EventsList

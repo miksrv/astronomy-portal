@@ -3,15 +3,17 @@
 .eventsList
     display: flex
     flex-wrap: wrap
-    margin: 10px -5px -5px
+    gap: 10px
+    justify-content: space-between
+    margin: 10px 0
 
 .eventListItem
     position: relative
     border-radius: var(--border-radius)
     background: var(--container-background)
     overflow: hidden
-    flex-basis: calc(33.3333% - 10px)
-    margin: 5px
+    flex-basis: calc(33.3333% - 7px)
+    padding: 5px !important
 
     @media only screen and (max-width: $mobileMaxWidth)
         flex-basis: 100%
@@ -50,7 +52,7 @@
             font-size: 0
 
     .bottomPanel
-        padding-top: 10px
+        padding-top: 5px
 
         .title
             white-space: pre
