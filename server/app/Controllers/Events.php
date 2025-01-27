@@ -5,8 +5,8 @@ namespace App\Controllers;
 use App\Entities\EventPhoto;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
-use App\Models\EventPhotosModel;
-use App\Models\EventUsersModel;
+use App\Models\EventsPhotosModel;
+use App\Models\EventsUsersModel;
 use App\Models\UsersModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
@@ -42,7 +42,7 @@ class Events extends ResourceController
             return $this->respond('');
         }
 
-        $eventUsersModel = new EventUsersModel();
+        $eventUsersModel = new EventsUsersModel();
         $bookedEvents    = $this->session->isAuth && $this->session->user->id
             ? $eventUsersModel->where(['event_id' => $eventData->id, 'user_id' => $this->session->user->id])->withDeleted()->first()
             : false;
@@ -83,8 +83,8 @@ class Events extends ResourceController
     /**
      * Retrieves a list of past events with localized details and returns them in a structured response.
      *
-     * This method fetches the list of past events using the specified locale, which is obtained from the 
-     * request object. The response includes the count of events and an array of event items. 
+     * This method fetches the list of past events using the specified locale, which is obtained from the
+     * request object. The response includes the count of events and an array of event items.
      * If an error occurs, a server error response is returned and the exception is logged.
      *
      * @return ResponseInterface Returns a JSON response with the count and items or an error message on failure.
@@ -112,14 +112,14 @@ class Events extends ResourceController
     /**
      * Retrieves detailed information for a specific past event by its ID with localized content.
      *
-     * This method fetches event details based on the provided event ID, utilizing the specified locale 
-     * from the request to return translated content if available. If the event is not found, a 404 
-     * response is returned. Additionally, any exceptions encountered are logged, and a server error 
+     * This method fetches event details based on the provided event ID, utilizing the specified locale
+     * from the request to return translated content if available. If the event is not found, a 404
+     * response is returned. Additionally, any exceptions encountered are logged, and a server error
      * response is returned.
      *
      * @param int|null $id The ID of the event to retrieve. Defaults to null.
      *
-     * @return ResponseInterface Returns a JSON response with the event details if found, or a 404 
+     * @return ResponseInterface Returns a JSON response with the event details if found, or a 404
      * error response if the event does not exist. In case of an error, a server error message is returned.
      */
     public function show($id = null): ResponseInterface
@@ -134,11 +134,27 @@ class Events extends ResourceController
                 return $this->failNotFound();
             }
 
-            // $eventPhotosModel = new EventPhotosModel();
-            // $eventPhotosData  = $eventPhotosModel->where(['event_id' => $id])->findAll();
+            $eventPhotosModel = new EventsPhotosModel();
+            $eventPhotosData  = $eventPhotosModel->where(['event_id' => $id])->findAll();
 
-            // Return the response
-            return $this->respond($result[0]);
+            $result = $result[0];
+
+            if ($eventPhotosData) {
+                $photos = [];
+
+                foreach ($eventPhotosData as $eventPhoto) {
+                    $photos[] = [
+                        'name'   => $eventPhoto->file_name,
+                        'ext'    => $eventPhoto->file_ext,
+                        'width'  => $eventPhoto->image_width,
+                        'height' => $eventPhoto->image_height
+                    ];
+                }
+
+                $result->photos = $photos;
+            }
+
+            return $this->respond($result);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
