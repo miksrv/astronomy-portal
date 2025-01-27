@@ -1,262 +1,122 @@
 @import variables.sass
+@import theme.css
+
+*, ::before, ::after
+    box-sizing: border-box
+
+html, body
+    margin: 0
+
+html
+    -moz-osx-font-smoothing: grayscale
+    -webkit-text-size-adjust: 100%
 
 body
-  font-size: var(--font-size)
-  line-height: var(--line-height)
-  letter-spacing: var(--letter-spacing)
-  background-color: $colorBackground !important
-  color: $text-main !important
-  margin: 0
-  font-family: -apple-system, system-ui, "Helvetica Neue", Roboto, sans-serif !important
+    background-color: var(--body-background)
+    margin: 0
+    line-height: 1.5
+    font-size: var(--font-size)
+    letter-spacing: var(--letter-spacing)
+    font-family: var(--font-family), sans-serif
+    color: var(--text-color-primary)
+    transition: background-color 0.5s ease
 
-h1
-  font-size: 21px !important
-  font-weight: 400 !important
-  @media only screen and (max-width: 768px)
-    font-size: 18px !important
-    margin-bottom: 20px !important
+    h1
+        font-size: 18px
+        font-weight: 400
+        margin: 0
 
-h2
-  font-size: 18px !important
-  font-weight: 400 !important
-  margin-bottom: 10px !important
+    a
+        text-decoration: none
+        color: var(--link-color)
 
-h3
-  font-size: 16px !important
-  font-weight: 400 !important
-  margin-top: 0px !important
+        &:hover
+            color: var(--link-color-hover)
 
-h4
-  font-weight: 400 !important
+        &:active
+            color: var(--link-color-active)
 
-//a[href^="https://"]
-//  &::after
-//    content: ""
-//    width: 11px
-//    height: 11px
-//    margin-left: 4px
-//    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='lightblue' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z'/%3E%3Cpath fill-rule='evenodd' d='M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z'/%3E%3C/svg%3E")
-//    background-position: center
-//    background-repeat: no-repeat
-//    background-size: contain
-//    display: inline-block
-
-.rootContainer
-  margin-top: $bodyMarginTop
-
-.section
-  margin-bottom: $sectionMarginBottom !important
-
-.textBlock
-  white-space: pre-wrap
-
-.second-color
-  color: $text-second
-
-.paging-item
-  height: 5px
-
-.box
-  position: relative
-  background: $box-background
-  border-radius: $borderRadius
-  padding: 13px
-  box-shadow: 0 0 3px rgba(0,0,0,0.5)
-
-  &.table
-    padding: 5px !important
-
-    .textBlock
-      padding: 10px
-
-  &.global-map
-    min-height: 560px
-
-  #celestial-zoomin, #celestial-zoomout
-    position: absolute
-    left: 5px
-    top: 5px
-    color: $text-main
-    background: $box-background
-    border: 1px solid rgba(255, 255, 255, 0.04)
-    cursor: pointer
-    font-weight: 900
-    width: 22px
-    height: 22px
-
-    &:hover
-      background: #484848
-
-  #celestial-zoomout
-    top: 32px
-
-  @media only screen and (max-width: 768px)
-    &.global-map
-      min-height: 260px
-
-  .dimmer
-    border-radius: $borderRadius
-
-  &.loader
-    height: 40vh
-
-  .accordion
-    .title
-      margin-left: 10px
-      font-weight: 600
-      text-transform: uppercase
-
-.subTitle, .pageTitle
-  font-weight: 400
-  position: relative
-  margin: 0 0 0
-  padding: 2px 20px 2px
-
-  &:before
-    content: ""
-    display: inline-block
-    width: 5px
-    height: 100%
-    background: #dd9124
-    position: absolute
-    left: 0
-    top: 0
-
-.pageTitle
-  margin-bottom: 15px
-  font-size: 20px !important
-  font-weight: 400
-
-.tableHeaderSticky
-  position: sticky
-  top: 50px
-  z-index: 1
-
-  @media only screen and (max-width: 768px)
-    position: initial
-
-.errorPage
-  text-align: center
-  padding: 50px 0 100px
-
-  $background404Image: '/images/error404_background.jpg'
-
-  h1
-    font-size: 80px !important
-    line-height: 80px
-    font-weight: 900
-    max-width: 700px
-    margin: 0 auto 70px
-    background: url($background404Image) no-repeat 100% 50%
-    background-size: cover
-    text-transform: uppercase
-    -webkit-background-clip: text
-    -webkit-text-fill-color: transparent
-
-    @media only screen and (max-width: 768px)
-      font-size: 60px !important
-      line-height: 60px
-
-main .ui.multiple.search.dropdown > input.search
-  color: $text-main !important
-
-main .ui.selection.active.dropdown .menu
-  border-color: transparent !important
-  background-color: #4e4e4e !important
-
-  > .item
-    border-top-color: #464646 !important
-    color: $text-main
-    font-size: 12px
-
-main
-  .ui.input > input, .ui.multiple.search.dropdown
-    background-color: #4e4e4e
-
-  .ui.page.modals.dimmer.active
-    z-index: 2000 !important
-
-  .ui.inverted.sortable.table thead th.sorted
-    background: #4f4f4f
-
-  .ui.inverted.table th
-    background: #2b2b2b
-
-  .ui.inverted.sortable.table thead th:hover
-    background: #404040
-
-  .ui.selection.active.dropdown
-    &:focus, &.active
-      background-color: $input-focus-BackgroundColor !important
-      border-color: $input-focus-BorderColor !important
-
-  .ui.selection.dropdown .menu > .message
-    color: $text-second !important
-
-  .ui.input.focus > input, .ui.input > input:focus
-    background-color: #565656
-
-  .ui.multiple.dropdown>.label
-    color: rgb(59 59 59 / 95%) !important
-    font-weight: 500 !important
-
-  .ui.label>.close.icon, .ui.label>.delete.icon
-    color: $box-background !important
-
-  .ui.grid
-    margin-left: -.5rem !important
-    margin-right: -.5rem !important
-
-  .ui.grid>.row
-    padding-bottom: 0 !important
-
-    @media only screen and (max-width: 768px)
-      &:last-of-type
-        padding-top: 0 !important
-
-  .ui.grid>.column:not(.row), .ui.grid>.row>.column
-    padding-left: 0.5rem !important
-    padding-right: 0.5rem !important
-
-.ui.modal > .content
-  color: $colorBackground !important
-
-.ui.modal:not(.confirm)>.content
-  padding: 0.5em 1em 1em !important
-
-@media only screen and (max-width: 768px)
-  .ui.grid
-    .column
-      padding-top: 5px !important
-      padding-bottom: 5px !important
-
-.stargazingText
-  font-size: 14px
-
-.stargazingImage
-  @media only screen and (max-width: 768px)
-    margin-top: 10px
-    height: auto !important
-    position: relative !important
-
-.telegramMessage
-  margin-top: -20px !important
-  margin-bottom: 20px !important
-  display: flex
-  align-items: center
-
-  @media only screen and (max-width: 768px)
-    margin-top: -30px !important
-
-  a
+.telegram-message
+    color: var(--color-contrast)
+    border-radius: var(--border-radius)
+    background: var(--color-main-background)
+    transition: background-color .15s ease-out,opacity .15s ease-out
+    font-weight: 600
+    padding: 10px
     display: flex
     align-items: center
+    margin-bottom: 10px
+    text-decoration: none
 
-  strong
-    font-size: 15px
+    &:hover, &:active, &:focus
+        background: var(--color-main-active)
+        color: var(--color-contrast)
+
+    svg
+        width: 24px
+        height: 24px
+        margin: 0 10px
+        fill: var(--color-contrast)
+
+.observatoryGrid
+    display: flex
+    justify-content: space-between
+    gap: 10px
+    margin-bottom: 10px
+    flex-wrap: nowrap
+
+    > div
+        flex-basis: 50%
+        width: 50%
 
     @media only screen and (max-width: 768px)
-      font-size: 13px
+        flex-wrap: wrap
 
-  i
-    margin-right: 10px !important
+        > div
+            flex-basis: 100%
+            width: 100%
+
+/* Auth page or unsubscribe page */
+.centerPageContainer
+    display: flex
+    justify-content: center
+    align-items: center
+    height: 100vh
+
+    .wrapper
+        width: 500px
+        text-align: center
+
+    .header
+        text-align: center
+        margin-bottom: 20px
+        font-size: 20px
+
+    .loaderWrapper
+        margin: 40px auto 20px
+        width: 100px
+
+    .description
+        color: var(--text-color-secondary)
+
+.errorPage
+    text-align: center
+    padding: 50px 0 100px
+
+    $background404Image: '/images/error404_background.jpg'
+
+    h1
+        font-size: 80px !important
+        line-height: 80px
+        font-weight: 900
+        max-width: 700px
+        margin: 0 auto 70px
+        background: url($background404Image) no-repeat 100% 50%
+        background-size: cover
+        text-transform: uppercase
+        -webkit-background-clip: text
+        -webkit-text-fill-color: transparent
+
+        @media only screen and (max-width: 768px)
+            font-size: 60px !important
+            line-height: 60px

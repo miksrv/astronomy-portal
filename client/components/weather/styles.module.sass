@@ -13,13 +13,7 @@
     text-transform: lowercase
 
 .weather
-    padding: 14px !important
-    min-height: 130px
-    margin-bottom: $sectionMarginBottom
-
-    @media only screen and (max-width: 768px)
-        margin-top: -5px
-        margin-bottom: 15px
+    margin-bottom: 10px
 
     .blockTitle
         margin: 0
@@ -27,20 +21,26 @@
     .update
         margin: 2px 0 5px 0
         font-size: 11px
-        color: $text-second
+        color: var(--text-color-secondary)
+
+        strong
+            margin: 0 4px
 
     .grid
-        margin: 10px 0 0 !important
+        display: flex
+        flex-wrap: wrap
 
         .column
             padding: 1px 0 !important
 
-    .key
-        color: $text-second
+        .key
+            flex-basis: 50%
+            width: 50%
+            color: var(--text-color-secondary)
 
-    .val
-        color: $text-main
-        margin-left: 5px
+        .val
+            color: var(--text-color-main)
+            margin-left: 5px
 
     .weatherState0
         @include weatherCondition

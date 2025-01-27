@@ -1,37 +1,42 @@
-<?php namespace App\Controllers;
+<?php
+
+namespace App\Controllers;
 
 use App\Entities\EventPhoto;
+use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
 use App\Models\EventPhotosModel;
 use App\Models\EventUsersModel;
 use App\Models\UsersModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\I18n\Time;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\Files\File;
 use Config\Services;
-use Exception;
+
 use Longman\TelegramBot\Exception\TelegramException;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\Telegram;
-use ReflectionException;
 
-class Events extends ResourceController {
+use ReflectionException;
+use Exception;
+
+class Events extends ResourceController
+{
     private SessionLibrary $session;
 
     protected $model;
 
-    public function __construct() {
+    public function __construct()
+    {
+        new LocaleLibrary();
+
         $this->session = new SessionLibrary();
         $this->model   = new \App\Models\EventsModel();
     }
 
-    public function upcoming(): ResponseInterface {
-        $datetime  = new Time('now');
-        $eventData = $this->model
-            ->where('date >=', $datetime->format('Y-m-d H:m:s'))
-            ->orderBy('date', 'DESC')
-            ->first();
+    public function upcoming(): ResponseInterface
+    {
+        $eventData = $this->model->getUpcomingEvent();
 
         if (empty($eventData)) {
             return $this->respond('');
@@ -75,56 +80,70 @@ class Events extends ResourceController {
         return $this->respond($eventData);
     }
 
-    public function list(): ResponseInterface {
-        $datetime   = new Time('now');
-        $eventsData = $this->model
-            ->select('id, title, date, cover')
-            ->where('date <', $datetime->format('Y-m-d H:m:s'))
-            ->orderBy('date', 'DESC')
-            ->findAll();
+    /**
+     * Retrieves a list of past events with localized details and returns them in a structured response.
+     *
+     * This method fetches the list of past events using the specified locale, which is obtained from the 
+     * request object. The response includes the count of events and an array of event items. 
+     * If an error occurs, a server error response is returned and the exception is logged.
+     *
+     * @return ResponseInterface Returns a JSON response with the count and items or an error message on failure.
+     */
+    public function list(): ResponseInterface
+    {
+        try {
+            $locale = $this->request->getLocale();
 
-        if (empty($eventsData)) {
-            return $this->respond(['items' => []]);
+            // Fetch data from models
+            $result = $this->model->getPastEventsList($locale);
+
+            // Return the response with count and items
+            return $this->respond([
+                'count' => count($result),
+                'items' => $result
+            ]);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
         }
-
-        foreach ($eventsData as $event) {
-            if ($event->cover) {
-                $event->cover = '/stargazing/' . $event->cover;
-            }
-
-            unset($event->registrationStart, $event->registrationEnd, $event->availableTickets, $event->yandexMap, $event->googleMap);
-        }
-
-        return $this->respond(['items' => $eventsData]);
     }
 
-    public function show($id = null): ResponseInterface {
-        $eventData = $this->model->select('title, content, cover, date')->find($id);
-        $eventData->cover = '/stargazing/' . $eventData->cover;
+    /**
+     * Retrieves detailed information for a specific past event by its ID with localized content.
+     *
+     * This method fetches event details based on the provided event ID, utilizing the specified locale 
+     * from the request to return translated content if available. If the event is not found, a 404 
+     * response is returned. Additionally, any exceptions encountered are logged, and a server error 
+     * response is returned.
+     *
+     * @param int|null $id The ID of the event to retrieve. Defaults to null.
+     *
+     * @return ResponseInterface Returns a JSON response with the event details if found, or a 404 
+     * error response if the event does not exist. In case of an error, a server error message is returned.
+     */
+    public function show($id = null): ResponseInterface
+    {
+        try {
+            $locale = $this->request->getLocale();
 
-        if (empty($eventData)) {
-            return $this->failNotFound();
-        }
+            // Fetch data from models
+            $result = $this->model->getPastEventsList($locale, $id);
 
-        $eventPhotosModel = new EventPhotosModel();
-        $eventPhotosData  = $eventPhotosModel->where(['event_id' => $id])->findAll();
-
-        if (!empty($eventPhotosData)) {
-            foreach ($eventPhotosData as $photo) {
-                $photo->title = $eventData->title;
-                $photo->full = 'stargazing/' . $id . '/' . $photo->filename . '.' . $photo->extension;
-                $photo->preview = 'stargazing/' . $id . '/' . $photo->filename . '_preview.' . $photo->extension;
-
-                unset(
-                    $photo->user_id, $photo->extension, $photo->filesize,
-                    $photo->filename, $photo->id, $photo->event_id,
-                    $photo->created_at, $photo->updated_at, $photo->deleted_at);
+            if (empty($result)) {
+                return $this->failNotFound();
             }
 
-            $eventData->photos = $eventPhotosData;
-        }
+            // $eventPhotosModel = new EventPhotosModel();
+            // $eventPhotosData  = $eventPhotosModel->where(['event_id' => $id])->findAll();
 
-        return $this->respond($eventData);
+            // Return the response
+            return $this->respond($result[0]);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
+        }
     }
 
     /**

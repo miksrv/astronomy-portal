@@ -1,5 +1,4 @@
-import { ApiModel } from '@/api'
-import { imageHost } from '@/api/api'
+// import { HOST_IMG } from '@/api/api'
 import React from 'react'
 import Lightbox, { Slide } from 'yet-another-react-lightbox'
 import Captions from 'yet-another-react-lightbox/plugins/captions'
@@ -9,8 +8,15 @@ import 'yet-another-react-lightbox/styles.css'
 
 import ImageSlide from './ImageSlide'
 
+type Photo = {
+    height: number
+    width: number
+    title: string
+    src: string
+}
+
 interface PhotoLightboxProps {
-    photos?: ApiModel.EventPhoto[]
+    photos?: Photo[]
     photoIndex?: number
     showLightbox?: boolean
     onCloseLightBox?: () => void
@@ -23,10 +29,10 @@ const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
     showLightbox,
     onCloseLightBox
 }) => {
-    const makeImageLink = (link?: string) =>
-        link?.includes('http://') || link?.includes('https://')
-            ? link
-            : `${imageHost}${link}`
+    // const makeImageLink = (link?: string) =>
+    //     link?.includes('http://') || link?.includes('https://')
+    //         ? link
+    //         : `${HOST_IMG}${link}`
 
     return (
         <Lightbox
@@ -40,7 +46,8 @@ const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
                     ({
                         alt: photo?.title,
                         height: photo?.height,
-                        src: makeImageLink(photo?.full),
+                        // src: makeImageLink(photo?.src),
+                        src: photo?.src,
                         // srcSet: [
                         //     {
                         //         height: 200,

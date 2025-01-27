@@ -1,8 +1,11 @@
+const { i18n } = require('./next-i18next.config.js')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     compiler: {
         removeConsole: process.env.NODE_ENV === 'production'
     },
+    i18n,
     images: {
         remotePatterns: [
             {
@@ -33,7 +36,19 @@ const nextConfig = {
         '/scripts/celestial.min.js',
         '@/components/celestial-map',
         'recharts'
-    ]
+    ],
+
+    webpack(config) {
+        config.resolve.fallback = {
+            // if you miss it, all the other options in fallback, specified
+            // by next.js will be dropped.
+            ...config.resolve.fallback,
+
+            fs: false // the solution
+        }
+
+        return config
+    }
 }
 
 module.exports = nextConfig

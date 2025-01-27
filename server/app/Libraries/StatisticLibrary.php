@@ -2,21 +2,21 @@
 
 class StatisticLibrary {
     protected array $filterEnum = [
-        'Luminance' => 'luminance',
-        'L'         => 'luminance',
-        'Red'       => 'red',
-        'R'         => 'red',
-        'Green'     => 'green',
-        'G'         => 'green',
-        'Blue'      => 'blue',
-        'B'         => 'blue',
-        'Ha'        => 'hydrogen',
-        'H'         => 'hydrogen',
-        'OIII'      => 'oxygen',
-        'O'         => 'oxygen',
-        'SII'       => 'sulfur',
-        'S'         => 'sulfur',
-        'CLEAR'     => 'clear'
+        'luminance' => 'luminance',
+        'l'         => 'luminance',
+        'red'       => 'red',
+        'r'         => 'red',
+        'green'     => 'green',
+        'g'         => 'green',
+        'blue'      => 'blue',
+        'b'         => 'blue',
+        'ha'        => 'hydrogen',
+        'h'         => 'hydrogen',
+        'oiii'      => 'oxygen',
+        'o'         => 'oxygen',
+        'sii'       => 'sulfur',
+        's'         => 'sulfur',
+        'clear'     => 'unknown'
     ];
 
     /**
@@ -57,7 +57,7 @@ class StatisticLibrary {
                 $lastUpdatedDate = max($lastUpdatedDate, $file->date_obs);
             }
 
-            $filterName = $this->filterEnum[$file->filter] ?? 'unknown';
+            $filterName = $this->filterEnum[strtolower($file->filter)] ?? 'unknown';
 
             $objectStatistic->frames   += 1;
             $objectStatistic->exposure += $file->exptime;

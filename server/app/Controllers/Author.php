@@ -1,4 +1,6 @@
-<?php namespace App\Controllers;
+<?php
+
+namespace App\Controllers;
 
 use App\Libraries\SessionLibrary;
 use App\Models\AuthorModel;
@@ -9,12 +11,14 @@ use CodeIgniter\API\ResponseTrait;
 use Config\Services;
 use Exception;
 
-class Author extends ResourceController {
+class Author extends ResourceController
+{
     use ResponseTrait;
 
     private SessionLibrary $session;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->session = new SessionLibrary();
     }
 
@@ -22,7 +26,8 @@ class Author extends ResourceController {
      * List of all authors
      * @return ResponseInterface
      */
-    public function list(): ResponseInterface {
+    public function list(): ResponseInterface
+    {
         $modelAuthor = new AuthorModel();
         $modelPhotos = new PhotoModel();
 
@@ -51,7 +56,8 @@ class Author extends ResourceController {
      * @param null $id
      * @return ResponseInterface
      */
-    public function create($id = null): ResponseInterface {
+    public function create($id = null): ResponseInterface
+    {
         $input = $this->request->getJSON(true);
         $rules = [
             'name' => 'required|min_length[3]|max_length[100]',
@@ -82,7 +88,8 @@ class Author extends ResourceController {
      * @param null $id
      * @return ResponseInterface
      */
-    public function update($id = null): ResponseInterface {
+    public function update($id = null): ResponseInterface
+    {
         $input = $this->request->getJSON(true);
         $rules = [
             'name' => 'required|min_length[3]|max_length[100]'
@@ -120,7 +127,8 @@ class Author extends ResourceController {
      * @param string|null $id
      * @return ResponseInterface
      */
-    public function delete($id = null): ResponseInterface {
+    public function delete($id = null): ResponseInterface
+    {
         if ($this->session->user->role !== 'admin') {
             return $this->failValidationErrors('Ошибка прав доступа');
         }

@@ -12,6 +12,8 @@
 .eventCalendarBlockBox
     margin-right: 6px
     white-space: nowrap
+    display: flex
+    align-items: center
 
     @media only screen and (max-width: 768px)
         margin-right: 0
@@ -20,7 +22,8 @@
     display: block
     overflow: hidden
     border-collapse: separate
-    margin-bottom: $sectionMarginBottom
+    padding: 5px !important
+    margin-bottom: 10px
 
     .mobileMoonIcon
         position: absolute
@@ -58,8 +61,11 @@
         span
             @extend .eventCalendarBlockBox
 
-        i
-            color: $lightblue
+        svg
+            width: 14px
+            height: 14px
+            fill: var(--text-color-primary)
+            margin-right: 4px
 
     .telescopeEvent
         @extend .eventCalendarBlock
@@ -68,6 +74,12 @@
 
         span
             @extend .eventCalendarBlockBox
+
+        svg
+            width: 14px
+            height: 14px
+            fill: var(--text-color-primary)
+            margin-right: 4px
 
         i
             color: $orange
@@ -79,6 +91,9 @@
 
         button
             padding: 5px !important
+            min-height: 20px
+            height: 20px
+            width: 20px
 
         .currentMonth
             display: inline-block
@@ -118,6 +133,8 @@
         margin: 0
         padding: 0
         display: block
+        overflow: hidden
+        overflow-x: auto
 
         table
             width: 100%

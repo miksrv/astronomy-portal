@@ -1,8 +1,7 @@
 import { API, ApiType, useAppSelector } from '@/api'
 import { declOfNum } from '@/functions/helpers'
-import classNames from 'classnames'
 import React, { useEffect, useState } from 'react'
-import { Button, Dimmer, Loader, Message } from 'semantic-ui-react'
+import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
@@ -33,9 +32,8 @@ export const RelayListItem: React.FC<RelayListItemProps> = ({
             className={styles[state ? 'switchOn' : 'switchOff']}
             disabled={loading || !isAdmin}
             onClick={() => handleClick?.({ id, state: state ? 0 : 1 })}
-            size={'mini'}
         >
-            {state ? 'on' : 'off'}
+            {!loading ? (state ? 'on' : 'off') : ''}
         </Button>
     </div>
 )
@@ -87,110 +85,107 @@ export const RelayList: React.FC = () => {
         return () => clearInterval(timer)
     })
 
-    return isLoading ? (
-        <div className={classNames(styles.relayList, styles.loader, 'box')}>
-            <Dimmer
-                active
-                data-testid={'relay-list-loader'}
-            >
-                <Loader />
-            </Dimmer>
-        </div>
-    ) : isError || !relayList?.items.length ? (
-        <div className={classNames(styles.relayList, styles.loader, 'box')}>
-            <Dimmer active>
-                <Message
-                    error
-                    content={'Ошибка при получении списка реле'}
-                />
-            </Dimmer>
-        </div>
-    ) : (
-        <div className={classNames(styles.relayList, 'box')}>
-            {user?.role === 'admin' && isError && (
-                <Dimmer active>
-                    <Message
-                        error
-                        icon={'warning sign'}
-                        header={'Ошибка получения состояния реле'}
-                        content={
-                            'Контроллер обсерватории не отвечает на запрос'
-                        }
-                    />
-                </Dimmer>
+    return (
+        <Container className={styles.relayListContainer}>
+            {isLoading && (
+                <div className={styles.loader}>
+                    <Spinner className={styles.spinner} />
+                </div>
             )}
-            {relayList?.items.map((item) => (
-                <RelayListItem
-                    key={item.id}
-                    id={item.id}
-                    name={item.name}
-                    state={
-                        item.state === 1 ||
-                        (relaySet?.state === 1 && relaySet?.id === item.id)
-                    }
-                    loading={loaderSet && relayLoading === item.id}
-                    isAdmin={user?.role === 'admin'}
-                    handleClick={async (relay) => await handleSetRelay(relay)}
-                />
-            ))}
 
-            <div className={styles.item}>
-                <div className={styles.name}>
-                    <span
-                        className={
-                            styles[
-                                relayList?.items?.[1]?.state
-                                    ? 'ledOn'
-                                    : 'ledOff'
-                            ]
+            {isError && (
+                <Message type={'error'}>
+                    {'Ошибка при получении списка реле'}
+                </Message>
+            )}
+
+            <>
+                {relayList?.items.map((item) => (
+                    <RelayListItem
+                        key={item.id}
+                        id={item.id}
+                        name={item.name}
+                        state={
+                            item.state === 1 ||
+                            (relaySet?.state === 1 && relaySet?.id === item.id)
+                        }
+                        loading={loaderSet && relayLoading === item.id}
+                        isAdmin={user?.role === 'admin'}
+                        handleClick={async (relay) =>
+                            await handleSetRelay(relay)
                         }
                     />
-                    {'ОСВЕЩЕНИЕ'}
-                </div>
-                <div className={styles.description}>
-                    {countdownTimer > 0 ? (
-                        <>
-                            {'Доступно через'} <b>{countdownTimer}</b> {'сек'}
-                        </>
-                    ) : (
-                        <>
-                            {'Включили'} <b>{relayList?.light.counter}</b>{' '}
-                            {declOfNum(relayList?.light.counter || 0, [
-                                'раз',
-                                'раза',
-                                'раз'
-                            ])}
-                        </>
-                    )}
-                </div>
-                <Button
-                    loading={(isLoading && relayLoading === 1) || lightLoading}
-                    className={
-                        styles[
-                            relayList?.items?.[1]?.state
-                                ? 'switchOn'
-                                : 'switchOff'
-                        ]
-                    }
-                    disabled={
-                        loaderSet ||
-                        lightLoading ||
-                        relayLoading === 1 ||
-                        !relayList.light.enable ||
-                        countdownTimer > 0 ||
-                        relayList?.items?.[1]?.state === 1
-                    }
-                    onClick={() => {
-                        if (countdownTimer === 0) {
-                            setLightOn()
-                        }
-                    }}
-                    size={'mini'}
-                >
-                    {relayList?.items?.[1]?.state ? 'on' : 'off'}
-                </Button>
-            </div>
-        </div>
+                ))}
+
+                {!!relayList?.items?.length && (
+                    <div className={styles.item}>
+                        <div className={styles.name}>
+                            <span
+                                className={
+                                    styles[
+                                        relayList?.items?.[1]?.state
+                                            ? 'ledOn'
+                                            : 'ledOff'
+                                    ]
+                                }
+                            />
+                            {'ОСВЕЩЕНИЕ'}
+                        </div>
+                        <div className={styles.description}>
+                            {countdownTimer > 0 ? (
+                                <>
+                                    {'Доступно через'} <b>{countdownTimer}</b>{' '}
+                                    {'сек'}
+                                </>
+                            ) : (
+                                <>
+                                    {'Включили'}{' '}
+                                    <b>{relayList?.light.counter}</b>{' '}
+                                    {declOfNum(relayList?.light.counter || 0, [
+                                        'раз',
+                                        'раза',
+                                        'раз'
+                                    ])}
+                                </>
+                            )}
+                        </div>
+                        <Button
+                            size={'small'}
+                            loading={
+                                (isLoading && relayLoading === 1) ||
+                                lightLoading
+                            }
+                            className={
+                                styles[
+                                    relayList?.items?.[1]?.state
+                                        ? 'switchOn'
+                                        : 'switchOff'
+                                ]
+                            }
+                            disabled={
+                                loaderSet ||
+                                lightLoading ||
+                                relayLoading === 1 ||
+                                !relayList?.light.enable ||
+                                countdownTimer > 0 ||
+                                relayList?.items?.[1]?.state === 1
+                            }
+                            onClick={() => {
+                                if (countdownTimer === 0) {
+                                    setLightOn()
+                                }
+                            }}
+                        >
+                            {!(isLoading && relayLoading === 1) && !lightLoading
+                                ? relayList?.items?.[1]?.state
+                                    ? 'on'
+                                    : 'off'
+                                : ''}
+                        </Button>
+                    </div>
+                )}
+            </>
+        </Container>
     )
 }
 

@@ -1,9 +1,9 @@
-import { imageHost } from '@/api/api'
+import { HOST_IMG } from '@/api/api'
 
+// TODO Refactoring this file
 export const hosts = {
-    fits: `${imageHost}fits/`,
-    maps: `${imageHost}maps/`,
-    photo: `${imageHost}photos/`,
-    post: `${imageHost}posts/`,
-    temp: `${imageHost}temp/`
+    fits: `${HOST_IMG}fits/`,
+    maps: `${HOST_IMG}maps/`,
+    photo: `${HOST_IMG}astrophotos/`,
+    temp: `${HOST_IMG}temp/`
 }

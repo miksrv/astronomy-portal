@@ -1,171 +1,190 @@
-import { API, ApiModel, useAppDispatch } from '@/api'
-import { editCatalog, openFormCatalog } from '@/api/applicationSlice'
+import { API, ApiModel, useAppSelector } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
+import { formatObjectName } from '@/tools/strings'
+import uniq from 'lodash-es/uniq'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useTranslation } from 'next-i18next'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import React, { useMemo, useState } from 'react'
-import { Confirm, Message } from 'semantic-ui-react'
+import { useRouter } from 'next/router'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Button, Dropdown, Input } from 'simple-react-ui-kit'
 
-import CatalogToolbar from '@/components/catalog-toolbar'
-import ObjectTable from '@/components/object-table'
+import AppFooter from '@/components/app-footer'
+import AppLayout from '@/components/app-layout'
+import AppToolbar from '@/components/app-toolbar'
+import ObjectTable from '@/components/objects-table'
 
 interface ObjectsPageProps {
-    catalog: ApiModel.Catalog[]
-    categories: ApiModel.Category[]
-    photos: ApiModel.Photo[]
+    categoriesList: ApiModel.Category[]
+    objectsList: ApiModel.Object[]
+    photosList: ApiModel.Photo[]
 }
 
 const ObjectsPage: NextPage<ObjectsPageProps> = ({
-    catalog,
-    categories,
-    photos
+    categoriesList,
+    objectsList,
+    photosList
 }) => {
-    const dispatch = useAppDispatch()
+    const { t, i18n } = useTranslation()
+    const router = useRouter()
 
-    const [search, setSearch] = useState<string>('')
-    const [showMessage, setShowMessage] = useState<boolean>(false)
-    const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false)
-    const [modifyItemName, setModifyItemName] = useState<string>()
-    const [localCategories, setLocalCategories] = useState<number[]>([])
+    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
-    const [
-        deleteItem,
-        {
-            isLoading: deleteLoading,
-            isSuccess: deleteSuccess,
-            isError: deleteError
-        }
-    ] = API.useCatalogDeleteMutation()
+    const [searchFilter, setSearchFilter] = useState<string>()
+    const [categoryFilter, setCategoryFilter] = useState<number | undefined>()
+    const [toolbarHeight, setToolbarHeight] = useState<number>(0)
+    const [footerHeight, setFooterHeight] = useState<number>(0)
 
-    const filteredCatalog: ApiModel.Catalog[] | undefined = useMemo(
+    const toolbarRef = useRef<HTMLDivElement>(null)
+    const footerRef = useRef<HTMLDivElement>(null)
+
+    const handleCreate = () => {
+        router.push('/objects/form')
+    }
+
+    const filteredCategoriesList = useMemo(
         () =>
-            catalog?.filter(
-                (item) =>
-                    (search === '' ||
-                        item.name
-                            .toLowerCase()
-                            .includes(search.toLowerCase()) ||
-                        item.title
-                            ?.toLowerCase()
-                            .includes(search.toLowerCase())) &&
-                    (!localCategories?.length ||
-                        (item?.category &&
-                            localCategories.includes(item.category)))
+            categoriesList?.filter(({ id }) =>
+                uniq(
+                    objectsList?.flatMap(({ categories }) => categories)
+                )?.includes(id)
             ),
-        [catalog, search, localCategories]
+        [categoriesList, objectsList]
     )
 
-    const handleEditCatalog = (item: string) => {
-        const editableObject = catalog?.find(({ name }) => name === item)
+    const filteredObjectsList = useMemo(
+        () =>
+            objectsList
+                ?.filter(({ categories }) =>
+                    categoryFilter ? categories?.includes(categoryFilter) : true
+                )
+                ?.filter(({ name, title }) =>
+                    searchFilter
+                        ? formatObjectName(name)
+                              ?.toLowerCase()
+                              .includes(searchFilter.toLowerCase()) ||
+                          title
+                              ?.toLowerCase()
+                              .includes(searchFilter.toLowerCase())
+                        : true
+                ),
+        [objectsList, categoryFilter, searchFilter]
+    )
 
-        dispatch(editCatalog(editableObject))
-        dispatch(openFormCatalog(true))
-    }
-
-    const handleDeleteCatalog = (item: string) => {
-        setModifyItemName(item)
-        setDeleteModalVisible(true)
-    }
-
-    const confirmDeleteCatalog = () => {
-        if (modifyItemName) {
-            deleteItem(modifyItemName)
-            setShowMessage(true)
-            setDeleteModalVisible(false)
-            setModifyItemName(undefined)
+    useEffect(() => {
+        const updateHeights = () => {
+            if (toolbarRef.current) {
+                setToolbarHeight(toolbarRef.current.clientHeight)
+            }
+            if (footerRef.current) {
+                setFooterHeight(footerRef.current.clientHeight)
+            }
         }
-    }
+
+        updateHeights()
+        window.addEventListener('resize', updateHeights)
+
+        return () => {
+            window.removeEventListener('resize', updateHeights)
+        }
+    }, [])
 
     return (
-        <main>
+        <AppLayout>
             <NextSeo
-                title={'Список астрономических объектов'}
-                description={
-                    'Список галактик, туманностей, астероидов, комет, сверхновых и других космических объектов, снятых любительским телескопом'
-                }
+                title={t('list-astronomical-objects')}
+                description={t('description-object-list-page')}
                 openGraph={{
                     images: [
                         {
-                            height: 814,
+                            height: 773,
                             url: '/screenshots/objects.jpg',
                             width: 1280
                         }
                     ],
-                    locale: 'ru'
+                    siteName: t('look-at-the-stars'),
+                    title: t('list-astronomical-objects'),
+                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
-            {deleteError && (
-                <Message
-                    error
-                    onDismiss={() => {
-                        setShowMessage(false)
-                    }}
-                    hidden={!showMessage}
-                    header={'Ошибка удаления'}
-                    content={
-                        'При удалении объекта возникла ошибка, удаление временно невозможно'
-                    }
+
+            <AppToolbar
+                ref={toolbarRef}
+                title={t('list-astronomical-objects')}
+                currentPage={t('list-astronomical-objects')}
+            >
+                <Input
+                    placeholder={t('search-by-name')}
+                    value={searchFilter}
+                    onChange={(e) => setSearchFilter(e.target.value)}
                 />
-            )}
-            {deleteSuccess && (
-                <Message
-                    success
-                    onDismiss={() => {
-                        setShowMessage(false)
-                    }}
-                    hidden={!showMessage}
-                    header={'Объект удален'}
-                    content={'Все данные объекта успешно удалены'}
+
+                <Dropdown<number>
+                    size={'medium'}
+                    clearable={true}
+                    value={categoryFilter}
+                    placeholder={t('filter-by-category')}
+                    onSelect={(category) => setCategoryFilter(category?.key)}
+                    options={filteredCategoriesList?.map((category) => ({
+                        key: category.id,
+                        value: category.title
+                    }))}
                 />
-            )}
-            <CatalogToolbar
-                search={search}
-                categories={categories}
-                onChangeSearch={setSearch}
-                onChangeCategories={setLocalCategories}
-            />
+
+                {userRole === 'admin' && (
+                    <Button
+                        icon={'PlusCircle'}
+                        mode={'secondary'}
+                        size={'medium'}
+                        label={t('add')}
+                        onClick={handleCreate}
+                    />
+                )}
+            </AppToolbar>
+
             <ObjectTable
-                loading={deleteLoading}
-                catalog={filteredCatalog}
-                photos={photos}
-                categories={categories}
-                onClickEdit={handleEditCatalog}
-                onClickDelete={handleDeleteCatalog}
+                objectsList={filteredObjectsList}
+                photosList={photosList}
+                combinedHeight={toolbarHeight + footerHeight + 95}
             />
-            <Confirm
-                open={deleteModalVisible}
-                size={'mini'}
-                className={'confirm'}
-                content={'Подтверждате удаление объекта из каталога?'}
-                onCancel={() => setDeleteModalVisible(false)}
-                onConfirm={confirmDeleteCatalog}
-            />
-        </main>
+
+            <AppFooter ref={footerRef} />
+        </AppLayout>
     )
 }
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (): Promise<GetServerSidePropsResult<ObjectsPageProps>> => {
-            const { data: catalog } = await store.dispatch(
-                API.endpoints?.catalogGetList.initiate()
+        async (
+            context
+        ): Promise<GetServerSidePropsResult<ObjectsPageProps>> => {
+            const locale = context.locale ?? 'en'
+            const translations = await serverSideTranslations(locale)
+
+            store.dispatch(setLocale(locale))
+
+            const { data: photos } = await store.dispatch(
+                API.endpoints?.photosGetList.initiate()
+            )
+
+            const { data: objects } = await store.dispatch(
+                API.endpoints?.objectsGetList.initiate()
             )
 
             const { data: categories } = await store.dispatch(
-                API.endpoints?.categoryGetList.initiate()
-            )
-
-            const { data: photos } = await store.dispatch(
-                API.endpoints?.photoGetList.initiate()
+                API.endpoints?.categoriesGetList.initiate()
             )
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
             return {
                 props: {
-                    catalog: catalog?.items || [],
-                    categories: categories?.items || [],
-                    photos: photos?.items || []
+                    ...translations,
+                    categoriesList: categories?.items || [],
+                    objectsList: objects?.items || [],
+                    photosList: photos?.items || []
                 }
             }
         }

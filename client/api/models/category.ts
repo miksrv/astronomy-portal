@@ -1,5 +1,5 @@
 export type Category = {
     id: number
-    name: string
-    object_count?: number
+    title: string
+    description?: string
 }

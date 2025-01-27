@@ -1,11 +1,10 @@
 import { API, ApiModel, useAppSelector } from '@/api'
 import { formatUTCDate, getTimeFromSec } from '@/functions/helpers'
-import Container from '@/ui/container'
 import dayjs from 'dayjs'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React from 'react'
 import Markdown from 'react-markdown'
-import { Button, Confirm, Dimmer, Loader } from 'semantic-ui-react'
+import { Button, Container, Spinner } from 'simple-react-ui-kit'
 
 import EventBookingForm from '@/components/event-booking-form'
 import LoginForm from '@/components/login-form'
@@ -17,20 +16,19 @@ interface EventBookingFormProps {}
 const EventUpcoming: React.FC<EventBookingFormProps> = () => {
     const user = useAppSelector((state) => state.auth.user)
 
-    const [confirmation, showConfirmation] = useState<boolean>(false)
+    // const [confirmation, showConfirmation] = useState<boolean>(false)
 
     const {
         data,
         isFetching,
         isLoading: upcomingLoading
     } = API.useEventGetUpcomingQuery()
-    const [cancelRegistration, { isLoading }] =
-        API.useEventsCancelRegistrationPostMutation()
+    // const [{ isLoading }] = API.useEventsCancelRegistrationPostMutation() // cancelRegistration
 
-    const handleCancelRegistration = () => {
-        cancelRegistration({ eventId: data?.id || '' })
-        showConfirmation(false)
-    }
+    // const handleCancelRegistration = () => {
+    //     cancelRegistration({ eventId: data?.id || '' })
+    //     showConfirmation(false)
+    // }
 
     const checkAvailabilityRegistration = (event?: ApiModel.Event) => {
         // Закончились слоты для регистрации
@@ -72,9 +70,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                         width: '100%'
                     }}
                 >
-                    <Dimmer active={true}>
-                        <Loader content={'Подождите, идет загрузка...'} />
-                    </Dimmer>
+                    <Spinner />
                 </div>
             )}
 
@@ -283,13 +279,13 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                                             ваши места будут доступны другим
                                         </p>
                                         <Button
-                                            fluid={true}
+                                            // fluid={true}
                                             color={'red'}
-                                            loading={isLoading}
-                                            disabled={isLoading}
-                                            onClick={() =>
-                                                showConfirmation(true)
-                                            }
+                                            // loading={isLoading}
+                                            // disabled={isLoading}
+                                            // onClick={() =>
+                                            //     showConfirmation(true)
+                                            // }
                                         >
                                             {'Отменить бронирование'}
                                         </Button>
@@ -318,38 +314,38 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                     )}
                 </div>
 
-                <Confirm
-                    open={confirmation}
-                    size={'tiny'}
-                    className={'confirm'}
-                    header={'Подтвердите отмену бронирования'}
-                    content={() => (
-                        <div className={styles.confirmContent}>
-                            <p>
-                                Если вы отмените свое бронирование на этот
-                                астровыезд, то освободившимися местами смогут
-                                воспользоваться другие участники, которые хотят
-                                поехать на астровыезд.
-                            </p>
-                            <p>
-                                Если вы подтвердите отмену, то вы не сможете
-                                повторно зарегистрироваться на этот астровыезд,
-                                только на последующие.
-                            </p>
-                        </div>
-                    )}
-                    onCancel={() => showConfirmation(false)}
-                    cancelButton={<Button>{'Я передумал(а)'}</Button>}
-                    confirmButton={
-                        <Button
-                            color={'red'}
-                            primary={false}
-                            onClick={handleCancelRegistration}
-                        >
-                            {'Подтверждаю'}
-                        </Button>
-                    }
-                />
+                {/*<Confirm*/}
+                {/*    open={confirmation}*/}
+                {/*    size={'tiny'}*/}
+                {/*    className={'confirm'}*/}
+                {/*    header={'Подтвердите отмену бронирования'}*/}
+                {/*    content={() => (*/}
+                {/*        <div className={styles.confirmContent}>*/}
+                {/*            <p>*/}
+                {/*                Если вы отмените свое бронирование на этот*/}
+                {/*                астровыезд, то освободившимися местами смогут*/}
+                {/*                воспользоваться другие участники, которые хотят*/}
+                {/*                поехать на астровыезд.*/}
+                {/*            </p>*/}
+                {/*            <p>*/}
+                {/*                Если вы подтвердите отмену, то вы не сможете*/}
+                {/*                повторно зарегистрироваться на этот астровыезд,*/}
+                {/*                только на последующие.*/}
+                {/*            </p>*/}
+                {/*        </div>*/}
+                {/*    )}*/}
+                {/*    onCancel={() => showConfirmation(false)}*/}
+                {/*    cancelButton={<Button>{'Я передумал(а)'}</Button>}*/}
+                {/*    confirmButton={*/}
+                {/*        <Button*/}
+                {/*            color={'red'}*/}
+                {/*            // primary={false}*/}
+                {/*            onClick={handleCancelRegistration}*/}
+                {/*        >*/}
+                {/*            {'Подтверждаю'}*/}
+                {/*        </Button>*/}
+                {/*    }*/}
+                {/*/>*/}
             </div>
 
             <div className={styles.content}>

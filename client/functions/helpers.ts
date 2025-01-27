@@ -1,9 +1,5 @@
 import dayjs, { Dayjs } from 'dayjs'
 
-export const concatClassNames = (
-    ...args: Array<string | boolean | null | undefined>
-): string => args.filter((item) => !!item).join(' ')
-
 /**
  * Generates an array of numbers in a certain range and with a given step
  * @param from
@@ -66,6 +62,29 @@ export const getTimeFromSec = (sec: number, full: boolean = false): string => {
 
     let h = (sec / 3600) ^ 0
     let m = ((sec - h * 3600) / 60) ^ 0
+
+    if (full) {
+        let text = ''
+
+        text += h ? h + ' ' + declOfNum(h, ['час', 'часа', 'часов']) + ' ' : ''
+        text += m ? m + ' ' + declOfNum(m, ['минута', 'минуты', 'минут']) : ''
+
+        return text
+    }
+
+    return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m)
+}
+
+export const formatSecondsToExposure = (
+    sec: number | string,
+    full: boolean = false
+): string => {
+    const seconds = Number(sec)
+
+    if (seconds <= 0) return '0'
+
+    let h = (seconds / 3600) ^ 0
+    let m = ((seconds - h * 3600) / 60) ^ 0
 
     if (full) {
         let text = ''
@@ -162,4 +181,20 @@ export const shuffle = (array: any[]): any[] => {
     }
 
     return array
+}
+
+export const isValidJSON = (string: string) => {
+    if (!string || !string.length) {
+        return true
+    }
+
+    try {
+        JSON.parse(string)
+    } catch (e) {
+        console.error(e)
+
+        return false
+    }
+
+    return true
 }

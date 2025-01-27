@@ -1,26 +1,28 @@
-@import @/styles/variables.sass
+.objectsCloud
+    padding: 5px !important
+    margin-bottom: 10px
 
-.section
-  display: flex
-  flex-wrap: wrap
-  justify-content: center
-  margin-bottom: $sectionMarginBottom
+    .objectsList
+        margin: 0
+        padding: 0
+        display: flex
+        flex-wrap: wrap
+        list-style: none
+        justify-content: center
 
-  & > span
-    &:last-of-type
-      .divider
-        display: none
+        li:last-of-type .divider
+            display: none
 
-  .divider
-    color: $text-main
-    margin: 0 5px
+        .divider
+            color: var(--text-color-primary)
+            margin: 0 5px
 
-  a
-    color: $text-second
+        a
+            color: var(--text-color-secondary)
 
-    &.active
-      font-weight: bold
-      color: $text-main
+            &.active
+                font-weight: bold
+                color: var(--text-color-primary)
 
-    &:hover
-      color: $text-main
+            &:hover
+                color: var(--text-color-primary)

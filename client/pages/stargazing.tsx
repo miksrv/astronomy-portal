@@ -1,15 +1,21 @@
 import { API, ApiModel } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
-import Container from '@/ui/container'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useTranslation } from 'next-i18next'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
+import Link from 'next/link'
 import React, { useState } from 'react'
 import Gallery from 'react-photo-gallery'
-import { Icon, Message } from 'semantic-ui-react'
+import { Container, Icon } from 'simple-react-ui-kit'
 
-import EventUpcoming from '@/components/event-upcoming'
+import AppFooter from '@/components/app-footer'
+import AppLayout from '@/components/app-layout'
+import AppToolbar from '@/components/app-toolbar'
+// import EventUpcoming from '@/components/event-upcoming'
 import EventsList from '@/components/events-list'
-import PhotoLightboxOld from '@/components/photo-lightbox-old'
+import PhotoLightbox from '@/components/photo-lightbox'
 
 import photoStargazing4 from '@/public/photos/stargazing-4.jpeg'
 import photoStargazing7 from '@/public/photos/stargazing-7.jpeg'
@@ -27,7 +33,10 @@ const galleryStargazing: any[] = [
     photoStargazing10
 ]
 
+// TODO Вместо галерии постоянных изображений тут, использовать загруженные фото астровыездов из API
 const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
+    const { t, i18n } = useTranslation()
+
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
 
@@ -41,67 +50,81 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
     }
 
     return (
-        <main>
+        <AppLayout>
             <NextSeo
-                title={'Астровыезд'}
-                description={
-                    'Астровыезд в Оренбурге - это уникальная возможность насладиться звёздным небом в полной темноте. Присоединяйтесь к нашим поездкам с телескопами за город, чтобы увидеть космические объекты в полях Оренбуржья. Увлекательные наблюдения и захватывающие открытия ждут вас на каждом астровыезде.'
-                }
+                title={t('stargazing')}
+                description={''}
                 openGraph={{
                     images: [
                         {
                             height: 853,
-                            url: '/photos/stargazing7.jpeg',
+                            url: '/photos/stargazing-1.jpeg',
                             width: 1280
                         }
                     ],
-                    locale: 'ru'
+                    siteName: t('look-at-the-stars'),
+                    title: t('stargazing'),
+                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
 
-            <br />
+            <AppToolbar
+                title={t('stargazing')}
+                currentPage={t('stargazing')}
+            />
 
-            <Message
-                color={'blue'}
-                className={'telegramMessage'}
+            {/*TODO*/}
+            {/*<EventUpcoming />*/}
+
+            <Link
+                href={'https://t.me/nearspace'}
+                className={'telegram-message'}
+                title={t('telegram')}
+                rel={'noindex nofollow'}
+                target={'_blank'}
             >
-                <a
-                    href={'https://t.me/nearspace'}
-                    target={'_blank'}
-                    rel='noreferrer'
-                >
-                    <Icon
-                        name={'telegram'}
-                        size={'big'}
-                    />
-                    <strong>
-                        Чтобы не пропустить анонсы - подпишитесь на Telegram
-                        канал
-                    </strong>
-                </a>
-            </Message>
-
-            <EventUpcoming />
+                <Icon name={'Telegram'} /> {t('telegram-subscription')}
+            </Link>
 
             <Container>
-                <h1 className={'pageTitle'}>Астровыезд</h1>
-                <p>
-                    Астровыезд в Оренбурге - это уникальная возможность
-                    насладиться звёздным небом в полной темноте. Присоединяйтесь
-                    к нашим поездкам с телескопами за город, чтобы увидеть
-                    космические объекты в полях Оренбуржья. Увлекательные
-                    наблюдения и захватывающие открытия ждут вас на каждом
-                    астровыезде.
-                </p>
-                <p>
-                    Астровыезд - это формат проведения научно-популярных
-                    мероприятий, когда участники вечером выезжают за город для
-                    того, чтобы принять участие в ночной экскурсии по звездному
-                    небу. На астровыездах с помощью мультимедиа мы разбираем
-                    интересные темы, связанные с космосом и астрономией,
-                    наблюдаем в телескопы и общаемся с такими же интересными и
-                    увлечёнными людьми.
-                </p>
+                <p style={{ marginTop: 0 }}>{t('stargazing-page.intro')}</p>
+                <p>{t('stargazing-page.description')}</p>
+
+                <ul>
+                    <li>
+                        <Link
+                            href={'/stargazing/rules'}
+                            title={t('stargazing-rules')}
+                        >
+                            {t('stargazing-rules')}
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            href={'/stargazing/howto'}
+                            title={t('stargazing-howto')}
+                        >
+                            {t('stargazing-howto')}
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            href={'/stargazing/where'}
+                            title={t('stargazing-where')}
+                        >
+                            {t('stargazing-where')}
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            href={'/stargazing/faq'}
+                            title={t('stargazing-faq')}
+                        >
+                            {t('stargazing-faq')}
+                        </Link>
+                    </li>
+                </ul>
+
                 <Gallery
                     photos={galleryStargazing}
                     columns={4}
@@ -111,8 +134,14 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                         handlePhotoClick(photos.index)
                     }}
                 />
-                <PhotoLightboxOld
-                    photos={galleryStargazing.map((image) => image.src)}
+
+                <PhotoLightbox
+                    photos={galleryStargazing.map((image) => ({
+                        src: image.src,
+                        width: image.width,
+                        height: image.height,
+                        title: ''
+                    }))}
                     photoIndex={photoIndex}
                     showLightbox={showLightbox}
                     onCloseLightBox={handleHideLightbox}
@@ -121,13 +150,22 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
             </Container>
 
             <EventsList events={events} />
-        </main>
+
+            <AppFooter />
+        </AppLayout>
     )
 }
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (): Promise<GetServerSidePropsResult<StargazingPageProps>> => {
+        async (
+            context
+        ): Promise<GetServerSidePropsResult<StargazingPageProps>> => {
+            const locale = context.locale ?? 'en'
+            const translations = await serverSideTranslations(locale)
+
+            store.dispatch(setLocale(locale))
+
             const { data } = await store.dispatch(
                 API.endpoints?.eventsGetList.initiate()
             )
@@ -136,6 +174,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             return {
                 props: {
+                    ...translations,
                     events: data?.items || []
                 }
             }

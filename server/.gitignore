@@ -126,12 +126,10 @@ nb-configuration.xml
 /.phpunit.*.cache
 
 # Madeline Telegram session
-/public/MadelineProto.log
-/public/session*
-/public/photos/
+/public/astrophotos/
 /public/posts/
 /public/fits/
-/public/maps/
+/public/starmaps/
 /public/temp/
 /public/users/
 /public/stargazing/

@@ -1,87 +1,55 @@
 import { ApiModel } from '@/api'
-import { hosts } from '@/api/constants'
-import { sliceText } from '@/functions/helpers'
-import classNames from 'classnames'
+import { getTimeFromSec } from '@/functions/helpers'
+import { createMediumPhotoUrl, createPhotoTitle } from '@/tools/photos'
+import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
-import { Reveal } from 'semantic-ui-react'
+import { Container } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
 interface PhotoGridProps {
-    threeColumns?: boolean
-    photos?: ApiModel.Photo[]
-    catalog?: ApiModel.Catalog[]
+    photosList?: ApiModel.Photo[]
 }
 
-const PhotoGrid: React.FC<PhotoGridProps> = ({
-    threeColumns,
-    photos,
-    catalog
-}) => (
-    <div className={classNames(styles.section, 'box')}>
-        {!photos?.length && (
-            <div className={styles.notFound}>
-                {'Ничего не найдено, попробуйте изменить условия поиска.'}
-            </div>
-        )}
+const PhotoGrid: React.FC<PhotoGridProps> = ({ photosList }) => {
+    const { t } = useTranslation()
 
-        {photos?.map((photo) => {
-            const catalogItem = catalog?.find(
-                ({ name }) => name === photo.object
-            )
-
-            return (
+    return (
+        <Container className={styles.photoGrid}>
+            {photosList?.map((photo) => (
                 <Link
                     key={photo.id}
-                    href={`/photos/${photo.object}?date=${photo.date}`}
-                    title={`${photo.object} - Фотография объекта`}
-                    className={classNames(
-                        styles.item,
-                        threeColumns ? styles.item4 : undefined
-                    )}
+                    href={`/photos/${photo.id}`}
+                    title={createPhotoTitle(photo, t)}
+                    className={styles.photoItem}
                 >
-                    {catalogItem?.title ? (
-                        <Reveal animated={'small fade'}>
-                            <Reveal.Content visible>
-                                <PhotoImage
-                                    photo={photo}
-                                    title={catalogItem.title}
-                                />
-                            </Reveal.Content>
-                            <Reveal.Content hidden>
-                                <div className={styles.info}>
-                                    <h4>{catalogItem.title}</h4>
-                                    <p>{sliceText(catalogItem?.text)}</p>
-                                </div>
-                            </Reveal.Content>
-                        </Reveal>
-                    ) : (
-                        <PhotoImage
-                            photo={photo}
-                            title={catalogItem?.name ?? ''}
-                        />
-                    )}
+                    <Image
+                        className={styles.image}
+                        src={createMediumPhotoUrl(photo)}
+                        alt={createPhotoTitle(photo, t)}
+                        fill={true}
+                    />
+                    <div className={styles.description}>
+                        <h4>{createPhotoTitle(photo, t)}</h4>
+                        <div className={styles.info}>
+                            <div>
+                                {t('exposure')}:{' '}
+                                {getTimeFromSec(
+                                    photo?.statistic?.exposure || 0,
+                                    true
+                                )}
+                            </div>
+                            <div>
+                                {t('frames')}: {photo?.statistic?.frames || 0}
+                            </div>
+                        </div>
+                    </div>
                 </Link>
-            )
-        })}
-    </div>
-)
-
-interface PhotoImageProps {
-    photo: ApiModel.Photo
-    title: string
+            ))}
+        </Container>
+    )
 }
-
-export const PhotoImage: React.FC<PhotoImageProps> = ({ photo, title }) => (
-    <Image
-        src={`${hosts.photo}${photo.image_name}_thumb.${photo.image_ext}`}
-        className={styles.photo}
-        alt={`${title} Фотография объекта`}
-        width={300}
-        height={200}
-    />
-)
 
 export default PhotoGrid

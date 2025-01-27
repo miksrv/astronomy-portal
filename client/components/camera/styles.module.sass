@@ -1,29 +1,44 @@
-@import @/styles/variables.sass
-
 .cameraSection
-  padding: 6px !important
-  margin-bottom: $sectionMarginBottom
+    padding: 5px !important
+    font-size: 0 !important
 
-  @media only screen and (max-width: 768px)
-    margin-bottom: 5px
+    @media only screen and (max-width: 768px)
+        margin-bottom: 5px
 
-  .lightboxTrigger
-    display: inline-block
-    width: 100%
+    .lightboxTrigger
+        border: none
+        background: none
+        padding: 0
+        margin: 0
+        display: inline-block
+        width: 100%
+        height: 100%
+        min-height: 400px
+        position: relative
 
-  .photoImage
-    height: 428px
-    width: 100%
-    object-fit: cover
-    cursor: pointer
+        svg
+            position: absolute
+            width: 32px
+            height: 32px
+            z-index: 0
+            left: 47%
+            top: 47%
 
-  @media only screen and (max-width: 768px)
     .photoImage
-      height: auto
-      min-height: 300px
+        position: relative
+        cursor: pointer
+        height: 100%
+        width: 100%
+        object-fit: cover
+        z-index: 1
 
-  .progress
-    margin: -6px 0px 0px 0px !important
+    @media only screen and (max-width: 768px)
+        .photoImage
+            height: auto
+            min-height: 300px
 
-    :global(.bar)
-      height: 2px !important
+    .progress
+        margin: -6px 0px 0px 0px !important
+
+        :global(.bar)
+            height: 2px !important

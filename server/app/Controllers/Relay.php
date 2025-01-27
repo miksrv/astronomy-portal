@@ -1,8 +1,10 @@
-<?php namespace App\Controllers;
+<?php
+
+namespace App\Controllers;
 
 use App\Libraries\RelayLibrary;
 use App\Libraries\SessionLibrary;
-use App\Models\SettingsModel;
+use App\Models\ObservatorySettingsModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\RESTful\ResourceController;
@@ -14,17 +16,19 @@ define('LIGHT_SWITCH_COOLDOWN', 60 * 5);
 define('LIGHT_SWITCH_OFF_INTERVAL', 60);
 define('LIGHT_SWITCH_NAME', 'LED Flat панель');
 
-class Relay extends ResourceController {
+class Relay extends ResourceController
+{
     use ResponseTrait;
 
-    private SettingsModel $settingsModel;
+    private ObservatorySettingsModel $settingsModel;
 
     private RelayLibrary $relayLibrary;
 
     private SessionLibrary $session;
 
-    public function __construct() {
-        $this->settingsModel = new SettingsModel();
+    public function __construct()
+    {
+        $this->settingsModel = new ObservatorySettingsModel();
         $this->relayLibrary  = new RelayLibrary();
         $this->session       = new SessionLibrary();
     }
@@ -34,7 +38,8 @@ class Relay extends ResourceController {
      * @api GET /relay/list
      * @return ResponseInterface
      */
-    public function list(): ResponseInterface {
+    public function list(): ResponseInterface
+    {
         try {
             $relayStatuses = $this->relayLibrary->getList();
             $turnedCounter = (int) $this->settingsModel->find('light_turned_counter')->value;
@@ -63,7 +68,8 @@ class Relay extends ResourceController {
      * @api PUT /relay/set
      * @param {id: int, state: int}
      */
-    public function set(): ResponseInterface {
+    public function set(): ResponseInterface
+    {
         $inputJSON = $this->request->getJSON();
 
         if (empty($inputJSON)) {
@@ -104,7 +110,8 @@ class Relay extends ResourceController {
      * @api GET /relay/light
      * @throws Exception
      */
-    public function light(): ResponseInterface {
+    public function light(): ResponseInterface
+    {
         // For reliability, to know exactly the ID of the relay that turns on the light
         $lightRelayIndex  = $this->relayLibrary->getIndexByName(LIGHT_SWITCH_NAME);
         $userCanTurnLight = $this->_userCanTurnLight($this->relayLibrary->getList());
@@ -140,7 +147,8 @@ class Relay extends ResourceController {
      * @return bool
      * @throws Exception
      */
-    protected function _userCanTurnLight(array $relayStates): bool {
+    protected function _userCanTurnLight(array $relayStates): bool
+    {
         if (empty($relayStates)) {
             return false;
         }
@@ -164,7 +172,8 @@ class Relay extends ResourceController {
      * @return int|null
      * @throws Exception
      */
-    protected function _userTurnLightCooldown(): int {
+    protected function _userTurnLightCooldown(): int
+    {
         $lastTimeLight = $this->settingsModel->find('last_time_light_turned_user')->value;
 
         if ($lastTimeLight === null) {
@@ -187,7 +196,8 @@ class Relay extends ResourceController {
      * @return void
      * @throws Exception
      */
-    protected function _checkUserLightAndTurn(array $relayStates): void {
+    protected function _checkUserLightAndTurn(array $relayStates): void
+    {
         $searchIndex = array_search(LIGHT_SWITCH_NAME, array_column($relayStates, 'name'));
         $turnedUser  = (bool) $this->settingsModel->find('light_turned_by_user')->value;
 

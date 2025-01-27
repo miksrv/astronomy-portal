@@ -1,23 +1,27 @@
-<?php namespace App\Controllers;
+<?php
+
+namespace App\Controllers;
 
 use App\Models\CatalogModel;
-use App\Models\FilesModel;
+use App\Models\ObjectFitsFilesModel;
 use App\Models\PhotoModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 
-class Statistic extends ResourceController {
+class Statistic extends ResourceController
+{
     use ResponseTrait;
 
     /**
      * List of statistic summary data
      * @return ResponseInterface
      */
-    public function list(): ResponseInterface {
+    public function list(): ResponseInterface
+    {
         $catalogModel = new CatalogModel();
         $photoModel   = new PhotoModel();
-        $filesModel   = new FilesModel();
+        $filesModel   = new ObjectFitsFilesModel();
 
         $framesCount = $filesModel->select('id')->countAllResults();
         $exposureSum = $filesModel->selectSum('exptime')->first();
@@ -34,7 +38,8 @@ class Statistic extends ResourceController {
     /**
      * @return ResponseInterface
      */
-    public function catalog(): ResponseInterface {
+    public function catalog(): ResponseInterface
+    {
         $catalogModel  = new CatalogModel();
         $catalogData   = $catalogModel->select('name')->findAll();
         $catalogResult = [];
@@ -51,7 +56,8 @@ class Statistic extends ResourceController {
     /**
      * @return ResponseInterface
      */
-    public function photos(): ResponseInterface {
+    public function photos(): ResponseInterface
+    {
         $photoModel  = new PhotoModel();
         $photoData   = $photoModel->select('object')->findAll();
         $photoResult = [];
@@ -60,7 +66,7 @@ class Statistic extends ResourceController {
             if (in_array($item->object, $photoResult)) {
                 continue;
             }
-            
+
             $photoResult[] = $item->object;
         }
 
@@ -72,7 +78,8 @@ class Statistic extends ResourceController {
     /**
      * @return ResponseInterface
      */
-    public function telescope(): ResponseInterface {
+    public function telescope(): ResponseInterface
+    {
         $period = $this->request->getGet('period', FILTER_SANITIZE_SPECIAL_CHARS);
         $date   = strtotime("01-{$period}");
         $where  = [];
@@ -83,7 +90,7 @@ class Statistic extends ResourceController {
             $where = ['MONTH(date_obs)' => $month, 'YEAR(date_obs)' => $year];
         }
 
-        $filesModel = new FilesModel();
+        $filesModel = new ObjectFitsFilesModel();
         $filesData  = $filesModel
             ->select('date_obs, exptime, object')
             ->where($where)

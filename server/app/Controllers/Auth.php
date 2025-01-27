@@ -1,6 +1,8 @@
-<?php namespace App\Controllers;
+<?php
 
-use App\Entities\User;
+namespace App\Controllers;
+
+use App\Entities\UserEntity;
 use App\Libraries\GoogleClient;
 use App\Libraries\SessionLibrary;
 use App\Libraries\YandexClient;
@@ -20,54 +22,20 @@ define('AUTH_TYPE_GOOGLE', 'google');
 define('AUTH_TYPE_YANDEX', 'yandex');
 define('AUTH_TYPE_VK', 'vk');
 
-class Auth extends ResourceController {
+class Auth extends ResourceController
+{
     private SessionLibrary $session;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->session = new SessionLibrary();
     }
-
-
-    /**
-     * Authenticate Existing User
-     * @return ResponseInterface
-     * @throws ReflectionException
-     */
-    public function login(): ResponseInterface {
-        if ($this->session->isAuth) {
-            return $this->failForbidden('Already authorized');
-        }
-
-        $rules = [
-            'email'    => 'required|min_length[6]|max_length[50]|valid_email',
-            'password' => 'required|min_length[8]|max_length[255]|validateUser[email, password]'
-        ];
-
-        $errors = [
-            'password' => [
-                'validateUser' => 'Invalid login credentials provided'
-            ]
-        ];
-
-        $input = $this->getRequestInput($this->request);
-
-        if (!$this->validateRequest($input, $rules, $errors)) {
-            return $this->failValidationErrors($this->validator->getErrors());
-        }
-
-        $userModel = new UsersModel();
-        $userData  = $userModel->findUserByEmailAddress($input['email']);
-
-        $this->session->authorization($userData);
-
-        return $this->responseAuth();
-    }
-
 
     /**
      * @throws Exception
      */
-    public function me(): ResponseInterface {
+    public function me(): ResponseInterface
+    {
         $this->session->update();
         return $this->responseAuth();
     }
@@ -77,7 +45,8 @@ class Auth extends ResourceController {
      * @link https://console.developers.google.com/
      * @throws ReflectionException
      */
-    public function google(): ResponseInterface {
+    public function google(): ResponseInterface
+    {
         if ($this->session->isAuth) {
             return $this->failForbidden(lang('Auth.alreadyAuthorized'));
         }
@@ -104,14 +73,14 @@ class Auth extends ResourceController {
         );
     }
 
-
     /**
      * Auth via Yandex
      * @link https://oauth.yandex.ru/
      * @return ResponseInterface
      * @throws ReflectionException
      */
-    public function yandex(): ResponseInterface {
+    public function yandex(): ResponseInterface
+    {
         if ($this->session->isAuth) {
             return $this->failForbidden('Вы уже авторизованы');
         }
@@ -138,13 +107,13 @@ class Auth extends ResourceController {
         );
     }
 
-
     /**
      * Auth via VK
      * @link https://console.developers.google.com/
      * @throws ReflectionException
      */
-    public function vk(): ResponseInterface {
+    public function vk(): ResponseInterface
+    {
         if ($this->session->isAuth) {
             return $this->failForbidden(lang('Auth.alreadyAuthorized'));
         }
@@ -180,7 +149,8 @@ class Auth extends ResourceController {
      * @param array $messages
      * @return bool
      */
-    public function validateRequest($input, array $rules, array $messages =[]): bool {
+    public function validateRequest($input, array $rules, array $messages =[]): bool
+    {
         $this->validator = Services::Validation()->setRules($rules);
 
         return $this->validator->setRules($rules, $messages)->run($input);
@@ -190,7 +160,8 @@ class Auth extends ResourceController {
      * @param IncomingRequest $request
      * @return array|bool|float|int|mixed|object|string|null
      */
-    public function getRequestInput(IncomingRequest $request): mixed {
+    public function getRequestInput(IncomingRequest $request): mixed
+    {
         $input = $request->getPost();
 
         if (empty($input)) {
@@ -220,7 +191,7 @@ class Auth extends ResourceController {
 
         // If there is no user with this email, then register a new user
         if (empty($userData)) {
-            $createUser = new User();
+            $createUser = new UserEntity();
             $createUser->name      = $serviceProfile->name;
             $createUser->email     = $serviceProfile->email;
             $createUser->auth_type = $authType;
@@ -304,7 +275,8 @@ class Auth extends ResourceController {
     /**
      * @return ResponseInterface
      */
-    protected function responseAuth(): ResponseInterface {
+    protected function responseAuth(): ResponseInterface
+    {
         $response = (object) ['auth' => $this->session->isAuth];
 
         if ($this->session->isAuth && $this->session->user) {
@@ -312,7 +284,7 @@ class Auth extends ResourceController {
             $response->token = generateAuthToken($this->session->user->email);
 
             unset($response->user->email, $response->user->auth_type);
-            
+
             if ($response->user->role === 'user') {
                 unset($response->user->role);
             }

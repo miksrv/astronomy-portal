@@ -1,4 +1,6 @@
-<?php namespace Config;
+<?php
+
+namespace Config;
 
 use CodeIgniter\Config\BaseService;
 
@@ -15,7 +17,8 @@ use CodeIgniter\Config\BaseService;
  * method format you should use for your service methods. For more examples,
  * see the core Services file at system/Config/Services.php.
  */
-class Services extends BaseService {
+class Services extends BaseService
+{
     /*
      * public static function example($getShared = true)
      * {
@@ -27,9 +30,9 @@ class Services extends BaseService {
      * }
      */
 
-    /**
-     * @return array|false|string
-     */
+     /**
+      * @return array|false|string
+      */
     public static function getSecretKey(): bool|array|string {
         return getenv('auth.token.secret');
     }

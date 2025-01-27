@@ -1,52 +1,50 @@
-import { ApiModel } from '@/api'
+import * as LocalStorage from '@/tools/localstorage'
+import { ApiType } from '@/api'
+import { LOCAL_STORAGE } from '@/tools/constants'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-type TApplicationSlice = {
-    isActiveFormCatalog: boolean
-    isActiveFormPhoto: boolean
-    editableItemCatalog?: ApiModel.Catalog
-    editableItemPhoto?: ApiModel.Photo
+import i18Config from '../next-i18next.config'
+
+interface ApplicationSliceProps {
+    showOverlay?: boolean
+    showAuthDialog?: boolean
+    locale?: ApiType.Locale | string
 }
 
-const initialState: TApplicationSlice = {
-    isActiveFormCatalog: false,
-    isActiveFormPhoto: false
+export const getStorageLocale = (): string | undefined =>
+    typeof window !== 'undefined'
+        ? LocalStorage.getItem(LOCAL_STORAGE.LOCALE as any) ??
+          i18Config.i18n.defaultLocale
+        : i18Config.i18n.defaultLocale
+
+const initialState: ApplicationSliceProps = {
+    locale: getStorageLocale(),
+    showOverlay: false,
+    showAuthDialog: false
 }
 
 const applicationSlice = createSlice({
     initialState,
     name: 'application',
     reducers: {
-        editCatalog: (
+        setLocale: (
             state,
-            action: PayloadAction<ApiModel.Catalog | undefined>
+            { payload }: PayloadAction<ApiType.Locale | string>
         ) => {
-            state.editableItemCatalog = action.payload
+            state.locale = payload
         },
-        editPhoto: (
-            state,
-            action: PayloadAction<ApiModel.Photo | undefined>
-        ) => {
-            state.editableItemPhoto = action.payload
+        closeAuthDialog: (state) => {
+            state.showOverlay = false
+            state.showAuthDialog = false
         },
-        openFormCatalog: (state, action: PayloadAction<boolean>) => {
-            state.isActiveFormCatalog = action.payload
-
-            if (action.payload === false) {
-                state.editableItemCatalog = undefined
-            }
-        },
-        openFormPhoto: (state, action: PayloadAction<boolean>) => {
-            state.isActiveFormPhoto = action.payload
-
-            if (action.payload === false) {
-                state.editableItemPhoto = undefined
-            }
+        openAuthDialog: (state) => {
+            state.showOverlay = true
+            state.showAuthDialog = true
         }
     }
 })
 
-export const { editCatalog, editPhoto, openFormCatalog, openFormPhoto } =
+export const { setLocale, closeAuthDialog, openAuthDialog } =
     applicationSlice.actions
 
 export default applicationSlice.reducer

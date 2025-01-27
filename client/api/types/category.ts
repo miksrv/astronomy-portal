@@ -1,11 +1,8 @@
 import { ApiModel } from '@/api'
 
-/* List */
-export interface ResList {
+export interface Request {}
+
+export interface Response {
+    count?: number
     items: ApiModel.Category[]
 }
-
-/* Set */
-export interface ResSet extends ApiModel.Category {}
-
-export interface ReqSet extends ApiModel.Category {}

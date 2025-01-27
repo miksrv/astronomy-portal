@@ -1,4 +1,6 @@
-<?php namespace App\Libraries;
+<?php
+
+namespace App\Libraries;
 
 /**
  * @link https://oauth.yandex.ru/
@@ -13,7 +15,8 @@
  *       *string sex (male \ female?)
  *  ]
  */
-class YandexClient {
+class YandexClient
+{
     private string $clientId;
 
     private string $redirectUri;

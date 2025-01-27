@@ -1,105 +1,190 @@
-import { API, ApiModel } from '@/api'
-import { hosts } from '@/api/constants'
+import { API, ApiModel, useAppSelector } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
-import { isOutdated, sliceText } from '@/functions/helpers'
+import { createLargePhotoUrl, createPhotoTitle } from '@/tools/photos'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useTranslation } from 'next-i18next'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import React, { useMemo, useState } from 'react'
-import { Accordion, Icon, Message } from 'semantic-ui-react'
+import { useRouter } from 'next/router'
+import React, { useMemo } from 'react'
+import { Button } from 'simple-react-ui-kit'
 
-import ObjectCloud from '@/components/object-cloud'
-import PhotoSection from '@/components/photo-section'
-import PhotoTable from '@/components/photo-table'
+import AppFooter from '@/components/app-footer'
+import AppLayout from '@/components/app-layout'
+import AppToolbar from '@/components/app-toolbar'
+import ObjectPhotoTable from '@/components/object-photos-table'
+import PhotoCloud from '@/components/photo-cloud'
+import PhotoHeader from '@/components/photo-header'
 
 interface PhotoItemPageProps {
-    object: string
-    date: string
-    photos: ApiModel.Photo[]
-    catalog: ApiModel.Catalog | null
+    photoId: string
+    photoData?: ApiModel.Photo
+    photosList?: ApiModel.Photo[]
+    objectsList?: ApiModel.Object[]
+    categoriesList?: ApiModel.Category[]
+    equipmentsList?: ApiModel.Equipment[]
 }
 
 const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
-    object,
-    date,
-    photos,
-    catalog
+    photoId,
+    photoData,
+    photosList,
+    objectsList,
+    categoriesList,
+    equipmentsList
 }) => {
-    const [showSpoiler, setShowSpoiler] = useState<boolean>(false)
+    const { t, i18n } = useTranslation()
+    const router = useRouter()
 
-    const { data: photoObjects, isLoading: objectsLoading } =
-        API.useStatisticGetPhotosItemsQuery()
+    const photoTitle = createPhotoTitle(photoData, t)
 
-    const photoItem: ApiModel.Photo | undefined = useMemo(
-        () => photos?.find((photo) => photo.date === date) || photos?.[0],
-        [photos, date]
+    const userRole = useAppSelector((state) => state.auth?.user?.role)
+
+    const filteredPhotosList = useMemo(
+        () =>
+            photosList?.filter(
+                (photo) =>
+                    photo.objects?.some((object) =>
+                        photoData?.objects?.includes(object)
+                    ) // && photo.id !== photoData?.id
+            ),
+        [photosList]
     )
 
-    const objectTitle = useMemo(
-        () => catalog?.title || catalog?.name || object.toString(),
-        [catalog, object]
+    const normalizeAndFilterPhotos = useMemo(
+        () => normalizeAndFilterObjects(photosList),
+        [photosList]
     )
+
+    const handleEdit = () => {
+        if (photoId) {
+            router.push(`/photos/form/?id=${photoId}`)
+        }
+    }
+
+    const handleCreate = () => {
+        router.push('/photos/form')
+    }
 
     return (
-        <main>
+        <AppLayout>
             <NextSeo
-                title={`${objectTitle} - Астрофотография${
-                    date ? ` - ${date}` : ''
-                }`}
-                description={
-                    'Описание астрофотографии: ' +
-                    sliceText(catalog?.text ?? '', 200)
-                }
+                title={photoTitle}
+                description={''}
                 openGraph={{
                     images: [
                         {
-                            height: 743,
-                            url: `${hosts.photo}${photoItem?.image_name}_thumb.${photoItem?.image_ext}`,
-                            width: 1280
+                            height: 752,
+                            url: createLargePhotoUrl(photoData),
+                            width: 1000
                         }
                     ],
-                    locale: 'ru'
+                    siteName: t('look-at-the-stars'),
+                    title: photoTitle,
+                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
-            <PhotoSection
-                title={objectTitle}
-                photo={photoItem}
-                catalog={catalog ?? undefined}
+
+            <AppToolbar
+                title={photoTitle}
+                currentPage={photoTitle}
+                links={[
+                    {
+                        link: '/photos',
+                        text: t('astrophoto')
+                    }
+                ]}
+            >
+                {userRole === 'admin' && (
+                    <>
+                        <Button
+                            icon={'Pencil'}
+                            mode={'secondary'}
+                            size={'medium'}
+                            label={t('edit')}
+                            disabled={!photoId}
+                            onClick={handleEdit}
+                        />
+
+                        <Button
+                            icon={'PlusCircle'}
+                            mode={'secondary'}
+                            size={'medium'}
+                            label={t('add')}
+                            onClick={handleCreate}
+                        />
+                    </>
+                )}
+            </AppToolbar>
+
+            <PhotoHeader
+                {...photoData}
+                photoTitle={photoTitle}
+                objectsList={objectsList}
+                categoriesList={categoriesList}
+                equipmentsList={equipmentsList}
             />
-            <Message
-                warning={true}
-                hidden={!isOutdated(photos?.[0]?.date, catalog?.updated!)}
-                className={'section'}
-                icon={'warning sign'}
-                header={'Новые данные'}
-                content={
-                    'Фотографии устарели - есть новые данные с телескопа, с помощью которых можно собрать новое изображение объекта'
-                }
-            />
-            {catalog?.text && (
-                <div className={'section box table'}>
-                    <Accordion inverted>
-                        <Accordion.Title
-                            active={showSpoiler}
-                            onClick={() => setShowSpoiler(!showSpoiler)}
-                        >
-                            <Icon name={'dropdown'} /> Описание объекта{' '}
-                            {catalog?.name.replace(/_/g, ' ')}
-                        </Accordion.Title>
-                        <Accordion.Content active={showSpoiler}>
-                            <div className={'textBlock'}>{catalog?.text}</div>
-                        </Accordion.Content>
-                    </Accordion>
-                </div>
+
+            {!!filteredPhotosList?.length && (
+                <ObjectPhotoTable
+                    photosList={filteredPhotosList}
+                    currentPhotoId={photoId}
+                />
             )}
-            <PhotoTable photos={photos} />
-            <ObjectCloud
-                loader={objectsLoading}
-                current={object}
-                names={photoObjects?.items}
-                link={'photos'}
-            />
-        </main>
+
+            {!!normalizeAndFilterPhotos?.length && (
+                <PhotoCloud
+                    selectedObject={photoData?.objects?.[0]}
+                    photosList={normalizeAndFilterPhotos?.map((item) => ({
+                        object: item.objects?.[0],
+                        photoId: item.id
+                    }))}
+                />
+            )}
+
+            <AppFooter />
+        </AppLayout>
     )
+}
+
+const normalizeAndFilterObjects = (
+    data?: ApiModel.Photo[]
+): ApiModel.Photo[] => {
+    const splitData = data?.flatMap((item) =>
+        item?.objects?.map((obj) => ({
+            ...item,
+            objects: [obj]
+        }))
+    )
+
+    const uniqueMap = splitData?.reduce<Record<string, ApiModel.Photo>>(
+        (acc, item) => {
+            if (!item) return acc // Ensure item is not undefined
+
+            const key = item.objects?.[0] as string
+
+            if (acc[key]) {
+                const existingDate = new Date(acc[key]?.date ?? '')
+                const currentDate = new Date(item.date ?? '')
+
+                if (currentDate > existingDate) {
+                    if (acc) {
+                        acc[key] = item
+                    }
+                }
+            } else {
+                if (acc) {
+                    acc[key] = item
+                }
+            }
+
+            return acc
+        },
+        {}
+    )
+
+    return Object.values(uniqueMap ?? {})
 }
 
 export const getServerSideProps = wrapper.getServerSideProps(
@@ -107,33 +192,51 @@ export const getServerSideProps = wrapper.getServerSideProps(
         async (
             context
         ): Promise<GetServerSidePropsResult<PhotoItemPageProps>> => {
-            const object = context.params?.name
-            const date = context.query?.date as string
+            const locale = context.locale ?? 'en'
+            const photoId = context.params?.name
+            const translations = await serverSideTranslations(locale)
 
-            if (typeof object !== 'string') {
+            store.dispatch(setLocale(locale))
+
+            if (typeof photoId !== 'string') {
                 return { notFound: true }
             }
 
-            const { data: catalog } = await store.dispatch(
-                API.endpoints?.catalogGetItem.initiate(object)
-            )
-
-            const { data: photos, isError } = await store.dispatch(
-                API.endpoints?.photoGetList.initiate({ object })
+            const { data: photoData, isError } = await store.dispatch(
+                API.endpoints?.photosGetItem.initiate(photoId)
             )
 
             if (isError) {
                 return { notFound: true }
             }
 
+            const { data: objectsData } = await store.dispatch(
+                API.endpoints?.objectsGetList.initiate()
+            )
+
+            const { data: photosData } = await store.dispatch(
+                API.endpoints?.photosGetList.initiate()
+            )
+
+            const { data: categoriesData } = await store.dispatch(
+                API.endpoints?.categoriesGetList.initiate()
+            )
+
+            const { data: equipmentsData } = await store.dispatch(
+                API.endpoints?.equipmentsGetList.initiate()
+            )
+
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
             return {
                 props: {
-                    catalog: catalog || null,
-                    date: date ?? '',
-                    object,
-                    photos: photos?.items || []
+                    ...translations,
+                    photoId,
+                    photoData: photoData,
+                    objectsList: objectsData?.items || [],
+                    photosList: photosData?.items || [],
+                    categoriesList: categoriesData?.items || [],
+                    equipmentsList: equipmentsData?.items || []
                 }
             }
         }

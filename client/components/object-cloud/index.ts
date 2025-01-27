@@ -1,1 +1,1 @@
-export { default } from './ObjectCloud'
+export { default } from './ObjectsCloud'

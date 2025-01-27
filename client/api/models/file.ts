@@ -1,25 +1,11 @@
-import * as Filter from './filter'
+import { ApiModel, ApiType } from '@/api'
 
-export type Item = {
-    id: string
-    object: string
-    date_obs: string
-    filter: Filter.Type
-    exptime: number
-    file_name: string
-    ccd_temp: number
-    offset: number
-    gain: number
-    dec: number
-    ra: number
-    star_count: number
-    sky_background: number
-    hfr: number
-    preview: boolean
-}
-
-export type Statistic = {
-    frames: number
-    data_size: number
-    exposure: number
+export type File = {
+    filter: ApiModel.FilterTypes
+    fileName?: string
+    exposure?: number
+    gain?: number
+    offset?: number
+    ccdTemp?: number
+    date?: ApiType.DateTime
 }

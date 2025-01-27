@@ -16,5 +16,5 @@ export interface ReqStatistic {
 
 export interface ResStatistic {
     date: string
-    weather: ApiModel.Statistic.Weather[]
+    weather: ApiModel.Weather[]
 }

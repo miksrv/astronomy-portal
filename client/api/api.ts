@@ -1,4 +1,4 @@
-import { ApiType } from '@/api'
+import { ApiModel, ApiType } from '@/api'
 import type { Action, PayloadAction } from '@reduxjs/toolkit'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { HYDRATE } from 'next-redux-wrapper'
@@ -21,18 +21,25 @@ export const encodeQueryData = (data: any): string => {
 const isHydrateAction = (action: Action): action is PayloadAction<RootState> =>
     action.type === HYDRATE
 
-export const imageHost =
-    process.env.NEXT_PUBLIC_IMG_HOST || process.env.NEXT_PUBLIC_API_HOST
+export const HOST_API =
+    process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:8080/'
+
+export const HOST_IMG = process.env.NEXT_PUBLIC_IMG_HOST || HOST_API
 
 export const API = createApi({
     baseQuery: fetchBaseQuery({
-        baseUrl: process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:8080/',
+        baseUrl: HOST_API,
         prepareHeaders: (headers, { getState }) => {
             // By default, if we have a token in the store, let's use that for authenticated requests
             const token = (getState() as RootState).auth.token
+            const locale = (getState() as RootState).application.locale
 
             if (token) {
                 headers.set('Authorization', token)
+            }
+
+            if (locale) {
+                headers.set('Locale', locale)
             }
 
             return headers
@@ -102,96 +109,10 @@ export const API = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
-        /* Catalog Controller */
-        catalogDelete: builder.mutation<void, string>({
-            invalidatesTags: (result, error, object) => [
-                { object, type: 'Catalog' },
-                { type: 'Statistic' }
-            ],
-            query: (object) => ({
-                method: 'DELETE',
-                url: `catalog/${object}`
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-        catalogGetItem: builder.query<ApiType.Catalog.ResItem, string>({
-            providesTags: (result, error, id) => [{ id, type: 'Catalog' }],
-            query: (object) => `catalog/${object}`,
-            transformErrorResponse: (response) => response.data
-        }),
-        catalogGetList: builder.query<ApiType.Catalog.ResList, void>({
-            providesTags: () => [{ id: 'LIST', type: 'Catalog' }],
-            query: () => 'catalog'
-        }),
-        catalogPatch: builder.mutation<
-            ApiType.Catalog.ResSet | ApiType.ResError,
-            Partial<ApiType.Catalog.ReqSet> &
-                Pick<ApiType.Catalog.ReqSet, 'name'>
-        >({
-            invalidatesTags: (result, error, { name }) => [
-                { name, type: 'Catalog' }
-            ],
-            query: ({ name, ...formState }) => ({
-                body: formState,
-                method: 'PATCH',
-                url: `catalog/${name}`
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-        catalogPost: builder.mutation<
-            ApiType.Catalog.ResSet | ApiType.ResError,
-            Partial<ApiType.Catalog.ReqSet>
-        >({
-            invalidatesTags: (result, error, { name }) => [
-                { name, type: 'Catalog' },
-                { type: 'Statistic' }
-            ],
-            query: ({ ...formState }) => ({
-                body: formState,
-                method: 'POST',
-                url: 'catalog'
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-
-        /* Category Controller */
-        categoryDelete: builder.mutation<void, number>({
-            invalidatesTags: () => [{ type: 'Category' }],
-            query: (id) => ({
-                method: 'DELETE',
-                url: `category/${id}`
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-        categoryGetList: builder.query<ApiType.Category.ResList, void>({
-            keepUnusedDataFor: 3600,
+        /* Categories Controller */
+        categoriesGetList: builder.query<ApiType.Category.Response, void>({
             providesTags: () => [{ id: 'LIST', type: 'Category' }],
-            query: () => 'category'
-        }),
-        categoryPatch: builder.mutation<
-            ApiType.Category.ResSet | ApiType.ResError,
-            Partial<ApiType.Category.ReqSet> &
-                Pick<ApiType.Category.ReqSet, 'id'>
-        >({
-            invalidatesTags: () => [{ type: 'Category' }],
-            query: ({ id, ...formState }) => ({
-                body: formState,
-                method: 'PATCH',
-                url: `category/${id}`
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-        categoryPost: builder.mutation<
-            ApiType.Category.ResSet | ApiType.ResError,
-            Partial<ApiType.Category.ReqSet>
-        >({
-            invalidatesTags: () => [{ type: 'Category' }],
-            query: ({ ...formState }) => ({
-                body: formState,
-                method: 'POST',
-                url: 'category'
-            }),
-            transformErrorResponse: (response) => response.data
+            query: () => 'categories'
         }),
 
         /* Events Controller */
@@ -246,55 +167,120 @@ export const API = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
-        /* Photo Controller */
-        photoGetItem: builder.query<ApiType.Photo.ResItem, string>({
-            keepUnusedDataFor: 3600,
-            query: (object) => `photo/${object}`
+        /* Objects controller */
+        objectsGetList: builder.query<ApiType.Objects.Response, void>({
+            providesTags: () => [{ id: 'LIST', type: 'Objects' }],
+            query: () => 'objects'
         }),
-        photoGetList: builder.query<
-            ApiType.Photo.ResList,
-            Maybe<ApiType.Photo.ReqList>
-        >({
-            keepUnusedDataFor: 3600,
-            providesTags: () => ['Photo'],
-            query: (params) => `photo${encodeQueryData(params)}`,
-            transformErrorResponse: (response) => response.data
+        objectsGetItem: builder.query<ApiModel.Object, string>({
+            providesTags: (res, err, id) => [{ id, type: 'Objects' }],
+            query: (id) => `objects/${id}`
         }),
-        photoPatch: builder.mutation<
-            ApiType.Photo.ResSet | ApiType.ResError,
-            Partial<ApiType.Photo.ReqSet> & Pick<ApiType.Photo.ReqSet, 'id'>
+        objectsPatch: builder.mutation<
+            ApiType.Objects.Response | ApiType.ResError,
+            Partial<ApiType.Objects.Request>
         >({
-            invalidatesTags: (result, error, { id }) => [{ id, type: 'Photo' }],
-            query: ({ id, ...formState }) => ({
+            invalidatesTags: (result, error, { name }) => [
+                { id: name, type: 'Events' }
+            ],
+            query: (formState) => ({
                 body: formState,
                 method: 'PATCH',
-                url: `photo/${id}`
+                url: `objects/${formState.name}`
             }),
             transformErrorResponse: (response) => response.data
         }),
-        photoPost: builder.mutation<
-            ApiType.Photo.ResSet | ApiType.ResError,
-            Partial<ApiType.Photo.ReqSet>
+        objectsPost: builder.mutation<
+            ApiType.Objects.Response | ApiType.ResError,
+            Partial<ApiType.Objects.Request>
         >({
-            invalidatesTags: (result, error, { object }) => [
-                { object, type: 'Photo' },
-                { type: 'Statistic' }
-            ],
+            invalidatesTags: () => [{ type: 'Objects' }],
             query: ({ ...formState }) => ({
                 body: formState,
                 method: 'POST',
-                url: 'photo'
+                url: 'objects'
             }),
             transformErrorResponse: (response) => response.data
         }),
-        photoPostUpload: builder.mutation<
-            ApiType.Photo.ResUpload | ApiType.ResError,
+        objectsDelete: builder.mutation<void, string>({
+            invalidatesTags: () => [{ type: 'Objects' }],
+            query: (name) => ({
+                method: 'DELETE',
+                url: `objects/${name}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+
+        /* Files controller */
+        filesGetList: builder.query<ApiType.Files.Response, string>({
+            providesTags: (res, err, id) => [{ id, type: 'Files' }],
+            query: (object) => `files/${object}`
+        }),
+
+        /* Equipments controller */
+        equipmentsGetList: builder.query<ApiType.Equipment.Response, void>({
+            providesTags: () => ['Equipment'],
+            query: () => 'equipments'
+        }),
+
+        /* Photo Controller */
+        photosGetItem: builder.query<ApiModel.Photo, string>({
+            providesTags: (res, err, id) => [{ id, type: 'Photos' }],
+            query: (id) => `photos/${id}`
+        }),
+        photosGetList: builder.query<
+            ApiType.Photos.Response,
+            Maybe<ApiType.Photos.Request>
+        >({
+            providesTags: () => [{ id: 'LIST', type: 'Photos' }],
+            query: (params) => `photos${encodeQueryData(params)}`,
+            transformErrorResponse: (response) => response.data
+        }),
+        photosPost: builder.mutation<
+            ApiType.Photos.PostResponse | ApiType.ResError,
+            ApiType.Photos.PostRequest
+        >({
+            invalidatesTags: (result, error, { id }) => [
+                { id, type: 'Photos' },
+                { type: 'Statistic' }
+            ],
+            query: (formState) => ({
+                body: formState,
+                method: 'POST',
+                url: 'photos'
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        photosPostUpload: builder.mutation<
+            ApiType.Photos.PostResponse | ApiType.ResError,
             FormData
         >({
             query: (formData) => ({
                 body: formData,
                 method: 'POST',
-                url: 'photo/upload'
+                url: `photos/${formData.get('id')}/upload`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        photoPatch: builder.mutation<
+            ApiType.Photos.PostResponse | ApiType.ResError,
+            ApiType.Photos.PostRequest
+        >({
+            invalidatesTags: (result, error, { id }) => [
+                { id, type: 'Photos' }
+            ],
+            query: ({ id, ...formState }) => ({
+                body: formState,
+                method: 'PATCH',
+                url: `photos/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        photosDelete: builder.mutation<void, string>({
+            invalidatesTags: () => [{ type: 'Photos' }],
+            query: (id) => ({
+                method: 'DELETE',
+                url: `photos/${id}`
             }),
             transformErrorResponse: (response) => response.data
         }),
@@ -322,24 +308,24 @@ export const API = createApi({
         }),
 
         /* Statistic Controller */
-        statisticGet: builder.query<ApiType.Statistic.ResGeneral, void>({
-            providesTags: () => ['Statistic'],
-            query: () => 'statistic'
-        }),
-        statisticGetCatalogItems: builder.query<
-            ApiType.Statistic.ResCatalogNames,
-            void
-        >({
-            providesTags: () => ['Statistic'],
-            query: () => 'statistic/catalog'
-        }),
-        statisticGetPhotosItems: builder.query<
-            ApiType.Statistic.ResPhotoNames,
-            void
-        >({
-            providesTags: () => ['Statistic'],
-            query: () => 'statistic/photos'
-        }),
+        // statisticGet: builder.query<ApiType.Statistic.ResGeneral, void>({
+        //     providesTags: () => ['Statistic'],
+        //     query: () => 'statistic'
+        // }),
+        // statisticGetCatalogItems: builder.query<
+        //     ApiType.Statistic.ResCatalogNames,
+        //     void
+        // >({
+        //     providesTags: () => ['Statistic'],
+        //     query: () => 'statistic/catalog'
+        // }),
+        // statisticGetPhotosItems: builder.query<
+        //     ApiType.Statistic.ResPhotoNames,
+        //     void
+        // >({
+        //     providesTags: () => ['Statistic'],
+        //     query: () => 'statistic/photos'
+        // }),
         statisticGetTelescope: builder.query<
             ApiType.Statistic.ResTelescope,
             Maybe<ApiType.Statistic.ReqTelescope>
@@ -362,9 +348,12 @@ export const API = createApi({
     },
     reducerPath: 'api',
     tagTypes: [
+        'Equipment',
+        'Files',
+        'Objects',
         'Catalog',
         'Events',
-        'Photo',
+        'Photos',
         'Statistic',
         'Category',
         'Author',
@@ -373,9 +362,4 @@ export const API = createApi({
 })
 
 // Export hooks for usage in functional components
-export const {
-    useAuthGetMeMutation,
-    useAuthorPatchMutation,
-    useAuthorPostMutation,
-    useStatisticGetQuery
-} = API
+export const { useAuthorPatchMutation, useAuthorPostMutation } = API

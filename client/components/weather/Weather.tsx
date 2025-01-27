@@ -1,34 +1,36 @@
 import { APIMeteo } from '@/api/apiMeteo'
 import { formatDateUTC, minutesAgo } from '@/functions/helpers'
-import classNames from 'classnames'
+import { useTranslation } from 'next-i18next'
 import React from 'react'
-import { Dimmer, Grid, Loader } from 'semantic-ui-react'
+import { Container } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
-const getRange = (
-    value?: number,
-    min: number = 0,
-    max: number = 10
-): number => {
-    if (typeof value === 'undefined') return 3
-
-    const percent = 15
-    const calcVal = value * (1 + percent / 100)
-
-    if (value === 0) {
-        return 0
-    } else if (value > max || value < min) {
-        return 2
-    } else if (calcVal > max || calcVal < min) {
-        return 1
-    }
-
-    return 0
-}
-
 const Weather: React.FC = () => {
+    const { t } = useTranslation()
+
     const { data, isLoading } = APIMeteo.useGetCurrentQuery()
+
+    const getRange = (
+        value?: number,
+        min: number = 0,
+        max: number = 10
+    ): number => {
+        if (typeof value === 'undefined') return 3
+
+        const percent = 15
+        const calcVal = value * (1 + percent / 100)
+
+        if (value === 0) {
+            return 0
+        } else if (value > max || value < min) {
+            return 2
+        } else if (calcVal > max || calcVal < min) {
+            return 1
+        }
+
+        return 0
+    }
 
     const rangeTemp = getRange(data?.temperature, -24, 24)
     const rangeHumd = getRange(data?.humidity, 0, 90)
@@ -49,7 +51,7 @@ const Weather: React.FC = () => {
         rangeGust === 0
     ) {
         weatherState = 0
-        weatherCondition = 'Безопасно'
+        weatherCondition = t('safely')
     } else if (
         rangeTemp === 2 ||
         rangeHumd === 2 ||
@@ -59,117 +61,83 @@ const Weather: React.FC = () => {
         rangeGust === 2
     ) {
         weatherState = 2
-        weatherCondition = 'Критическое'
+        weatherCondition = t('critical')
     } else {
         weatherState = 1
-        weatherCondition = 'Опасно'
+        weatherCondition = t('dangerous')
     }
 
     return (
-        <div className={classNames(styles.weather, 'box')}>
-            <Dimmer active={isLoading}>
-                <Loader />
-            </Dimmer>
+        <Container className={styles.weather}>
             <h4 className={styles.blockTitle}>
-                Состояние погоды:
+                {t('weather-conditions')}
+                {':'}
                 <span className={styles['state' + weatherState]}>
                     {weatherCondition}
                 </span>
             </h4>
-            <div className={classNames(styles.update, 'small')}>
-                Обновлено:{' '}
+            <div className={styles.update}>
+                {t('updated')}
+                {':'}
                 <strong>
-                    {!isLoading ? formatDateUTC(data?.date) : 'Загрузка...'}
-                </strong>{' '}
+                    {!isLoading ? formatDateUTC(data?.date) : t('loading')}
+                </strong>
                 {data?.date && `(${minutesAgo(data.date)})`}
             </div>
-            <Grid className={styles.grid}>
-                <Grid.Column
-                    computer={8}
-                    tablet={8}
-                    mobile={16}
-                    className={styles.column}
-                >
-                    <div className={styles.key}>
-                        <span className={styles['weatherState' + rangeTemp]} />
-                        Температура:
-                        <span className={styles.val}>
-                            {data?.temperature ?? ''}℃
-                        </span>
-                    </div>
-                </Grid.Column>
-                <Grid.Column
-                    computer={8}
-                    tablet={8}
-                    mobile={16}
-                    className={styles.column}
-                >
-                    <div className={styles.key}>
-                        <span className={styles['weatherState' + rangeHumd]} />
-                        Влажность:
-                        <span className={styles.val}>
-                            {data?.humidity ?? '?'}%
-                        </span>
-                    </div>
-                </Grid.Column>
-                <Grid.Column
-                    computer={8}
-                    tablet={8}
-                    mobile={16}
-                    className={styles.column}
-                >
-                    <div className={styles.key}>
-                        <span className={styles['weatherState' + rangeCloud]} />
-                        Облачность:
-                        <span className={styles.val}>
-                            {data?.clouds ?? '?'}%
-                        </span>
-                    </div>
-                </Grid.Column>
-                <Grid.Column
-                    computer={8}
-                    tablet={8}
-                    mobile={16}
-                    className={styles.column}
-                >
-                    <div className={styles.key}>
-                        <span className={styles['weatherState' + rangeWind]} />
-                        Скорость ветра:
-                        <span className={styles.val}>
-                            {data?.windSpeed ?? '?'} м\с
-                        </span>
-                    </div>
-                </Grid.Column>
-                <Grid.Column
-                    computer={8}
-                    tablet={8}
-                    mobile={16}
-                    className={styles.column}
-                >
-                    <div className={styles.key}>
-                        <span className={styles['weatherState' + rangeRain]} />
-                        Осадки:
-                        <span className={styles.val}>
-                            {data?.precipitation ?? '?'} мм
-                        </span>
-                    </div>
-                </Grid.Column>
-                <Grid.Column
-                    computer={8}
-                    tablet={8}
-                    mobile={16}
-                    className={styles.column}
-                >
-                    <div className={styles.key}>
-                        <span className={styles['weatherState' + rangeGust]} />
-                        Порывы ветра:
-                        <span className={styles.val}>
-                            {data?.windGust ?? '?'} м\с
-                        </span>
-                    </div>
-                </Grid.Column>
-            </Grid>
-        </div>
+            <div className={styles.grid}>
+                <div className={styles.key}>
+                    <span className={styles['weatherState' + rangeTemp]} />
+                    {t('temperature')}
+                    {':'}
+                    <span className={styles.val}>
+                        {data?.temperature || ''}
+                        {'℃'}
+                    </span>
+                </div>
+                <div className={styles.key}>
+                    <span className={styles['weatherState' + rangeHumd]} />
+                    {t('humidity')}
+                    {':'}
+                    <span className={styles.val}>
+                        {data?.humidity || '?'}
+                        {'%'}
+                    </span>
+                </div>
+                <div className={styles.key}>
+                    <span className={styles['weatherState' + rangeCloud]} />
+                    {t('cloudiness')}
+                    {':'}
+                    <span className={styles.val}>
+                        {data?.clouds || '?'}
+                        {'%'}
+                    </span>
+                </div>
+                <div className={styles.key}>
+                    <span className={styles['weatherState' + rangeWind]} />
+                    {t('wind-speed')}
+                    {':'}
+                    <span className={styles.val}>
+                        {data?.windSpeed || '?'} {'м\\с'}
+                    </span>
+                </div>
+                <div className={styles.key}>
+                    <span className={styles['weatherState' + rangeRain]} />
+                    {t('precipitation')}
+                    {':'}
+                    <span className={styles.val}>
+                        {data?.precipitation || '?'} {'мм'}
+                    </span>
+                </div>
+                <div className={styles.key}>
+                    <span className={styles['weatherState' + rangeGust]} />
+                    {t('gusts-of-wind')}
+                    {':'}
+                    <span className={styles.val}>
+                        {data?.windGust || '?'} {'м\\с'}
+                    </span>
+                </div>
+            </div>
+        </Container>
     )
 }
 

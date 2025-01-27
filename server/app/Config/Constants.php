@@ -78,28 +78,13 @@ defined('EXIT_DATABASE')       || define('EXIT_DATABASE', 8);       // database 
 defined('EXIT__AUTO_MIN')      || define('EXIT__AUTO_MIN', 9);      // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      || define('EXIT__AUTO_MAX', 125);    // highest automatically-assigned error code
 
-/**
- * @deprecated Use \CodeIgniter\Events\Events::PRIORITY_LOW instead.
- */
-define('EVENT_PRIORITY_LOW', 200);
-
-/**
- * @deprecated Use \CodeIgniter\Events\Events::PRIORITY_NORMAL instead.
- */
-define('EVENT_PRIORITY_NORMAL', 100);
-
-/**
- * @deprecated Use \CodeIgniter\Events\Events::PRIORITY_HIGH instead.
- */
-define('EVENT_PRIORITY_HIGH', 10);
-
 // FIT file size in byte for 16 bit mask (Mb)
 defined('FITS_FILE_SIZE') || define('FITS_FILE_SIZE', 32.78592);
 
-defined('UPLOAD_PHOTOS') || define('UPLOAD_PHOTOS', FCPATH . 'photos/');
+defined('UPLOAD_PHOTOS') || define('UPLOAD_PHOTOS', FCPATH . 'astrophotos/');
 defined('UPLOAD_POST') || define('UPLOAD_POST', FCPATH . 'posts/');
 defined('UPLOAD_TEMP') || define('UPLOAD_TEMP', FCPATH . 'temp/');
-defined('UPLOAD_MAPS') || define('UPLOAD_MAPS', FCPATH . 'maps/');
+defined('UPLOAD_STAR_MAPS') || define('UPLOAD_STAR_MAPS', FCPATH . 'starmaps/');
 defined('UPLOAD_FITS') || define('UPLOAD_FITS', FCPATH . 'fits/');
 defined('UPLOAD_USERS') || define('UPLOAD_USERS', FCPATH . 'users/');
 defined('UPLOAD_EVENTS') || define('UPLOAD_EVENTS', FCPATH . 'stargazing/');
@@ -111,3 +96,7 @@ defined('PHOTO_PREVIEW_HEIGHT') || define('PHOTO_PREVIEW_HEIGHT', 500);
 
 defined('AVATAR_WIDTH') || define('AVATAR_WIDTH', 400);
 defined('AVATAR_HEIGHT') || define('AVATAR_HEIGHT', 400);
+
+// Relative uploads path for web
+defined('PATH_PHOTOS') || define('PATH_PHOTOS', 'astrophotos/');
+defined('PATH_STAR_MAPS') || define('PATH_STAR_MAPS', 'starmaps/');
