@@ -1,4 +1,4 @@
-import { API, ApiModel } from '@/api'
+import { API, ApiModel, SITE_LINK } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -37,6 +37,8 @@ const galleryStargazing: any[] = [
 const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
     const { t, i18n } = useTranslation()
 
+    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
 
@@ -53,7 +55,8 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
         <AppLayout>
             <NextSeo
                 title={t('stargazing')}
-                description={''}
+                description={t('description-stargazing')}
+                canonical={`${canonicalUrl}stargazing`}
                 openGraph={{
                     images: [
                         {
@@ -63,7 +66,6 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                         }
                     ],
                     siteName: t('look-at-the-stars'),
-                    title: t('stargazing'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />

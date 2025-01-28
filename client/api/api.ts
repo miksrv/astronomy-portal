@@ -21,6 +21,8 @@ export const encodeQueryData = (data: any): string => {
 const isHydrateAction = (action: Action): action is PayloadAction<RootState> =>
     action.type === HYDRATE
 
+export const SITE_LINK = process.env.NEXT_PUBLIC_SITE_LINK
+
 export const HOST_API =
     process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:8080/'
 

@@ -1,4 +1,4 @@
-import { API } from '@/api'
+import { API, SITE_LINK } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -23,11 +23,14 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = () => {
 
     const { data } = API.useStatisticGetTelescopeQuery()
 
+    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+
     return (
         <AppLayout>
             <NextSeo
                 title={t('observatory')}
                 description={t('description-observatory')}
+                canonical={`${canonicalUrl}observatory`}
                 openGraph={{
                     images: [
                         {
@@ -37,7 +40,6 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = () => {
                         }
                     ],
                     siteName: t('look-at-the-stars'),
-                    title: t('astrophoto'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />

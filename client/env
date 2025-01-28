@@ -1,3 +1,4 @@
+NEXT_PUBLIC_SITE_LINK = 'http://localhost:3000/'
 # Optional, default -> NEXT_PUBLIC_API_HOST
 # NEXT_PUBLIC_IMG_HOST = 'https://astro.miksoft.pro/api/'
 NEXT_PUBLIC_API_HOST = 'https://astro.miksoft.pro/api/'

@@ -1,3 +1,4 @@
+import { SITE_LINK } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -105,6 +106,8 @@ type AboutPageProps = {}
 const AboutPage: NextPage<AboutPageProps> = () => {
     const { t, i18n } = useTranslation()
 
+    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
 
@@ -128,6 +131,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
             <NextSeo
                 title={t('about')}
                 description={t('about-page.description')}
+                canonical={`${canonicalUrl}about`}
                 openGraph={{
                     images: [
                         {
@@ -137,7 +141,6 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                         }
                     ],
                     siteName: t('look-at-the-stars'),
-                    title: t('about'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />

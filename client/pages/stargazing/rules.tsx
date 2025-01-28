@@ -1,3 +1,4 @@
+import { SITE_LINK } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -17,21 +18,16 @@ type StargazingRulesPageProps = {}
 const StargazingRulesPage: NextPage<StargazingRulesPageProps> = () => {
     const { t, i18n } = useTranslation()
 
+    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+
     return (
         <AppLayout>
             <NextSeo
                 title={t('stargazing-rules')}
                 description={t('stargazing-rules-page.description')}
+                canonical={`${canonicalUrl}stargazing/rules`}
                 openGraph={{
-                    images: [
-                        // {
-                        //     height: 853,
-                        //     url: '/photos/stargazing-2.jpeg',
-                        //     width: 1280
-                        // }
-                    ],
                     siteName: t('look-at-the-stars'),
-                    title: t('stargazing-rules'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />

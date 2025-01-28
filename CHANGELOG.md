@@ -1,5 +1,19 @@
 # Changelog
 
+## 4.0.2
+
+### Patch Changes
+
+-   Modified GitHub Actions (added NEXT_PUBLIC_SITE_LINK)
+-   Updated UI Libraries
+-   Modified UI API - added SITE_LINK constant
+-   Implemented Canonical Url for all pages
+-   Added nofollow for objects forms
+-   Removed duplicated UI OpenGraph title
+-   Implemented UI Photo Item page description
+-   Implemented description and title for UI Event page
+-   Fixed UI index page scroll detection
+
 ## 4.0.1
 
 ### Patch Changes

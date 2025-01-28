@@ -1,8 +1,9 @@
-import { API, ApiModel, useAppSelector } from '@/api'
+import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
 import { sliceText } from '@/functions/helpers'
+import { removeMarkdown } from '@/tools/strings'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -30,6 +31,8 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
 }) => {
     const { t, i18n } = useTranslation()
 
+    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+
     const user = useAppSelector((state) => state.auth.user)
 
     const inputFileRef = useRef<HTMLInputElement>()
@@ -38,6 +41,8 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
     const [uploadingPhotos, setUploadingPhotos] = useState<string[]>()
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>()
+
+    const title = `${t('stargazing')} - ${event?.title}`
 
     const handleCloseLightbox = () => {
         setShowLightbox(false)
@@ -65,8 +70,12 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
     return (
         <AppLayout>
             <NextSeo
-                title={`Астровыезд - ${event?.title}`}
-                description={sliceText(event?.content ?? '', 300)}
+                title={title}
+                description={sliceText(
+                    removeMarkdown(event?.content || ''),
+                    300
+                )}
+                canonical={`${canonicalUrl}stargazing/${event?.id}`}
                 openGraph={{
                     images: [
                         {
@@ -75,13 +84,14 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                             width: 1280
                         }
                     ],
+                    siteName: t('look-at-the-stars'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
 
             <AppToolbar
-                title={t('stargazing-rules')}
-                currentPage={t('stargazing-rules')}
+                title={title}
+                currentPage={event?.title}
                 links={[
                     {
                         link: '/stargazing',
@@ -92,12 +102,15 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
 
             <Container style={{ marginBottom: '10px' }}>
                 <Image
-                    className={'stargazingImage'}
+                    style={{
+                        objectFit: 'cover',
+                        height: 'auto',
+                        width: '100%'
+                    }}
                     src={`${hosts.stargazing}${event?.id}.jpg`}
-                    alt={`Астровыезд: ${event?.title}`}
+                    alt={title}
                     width={1024}
                     height={768}
-                    style={{ width: '100%' }}
                 />
 
                 <br />

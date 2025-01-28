@@ -1,4 +1,4 @@
-import { API, ApiModel } from '@/api'
+import { API, ApiModel, SITE_LINK } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import type { GetServerSidePropsResult, NextPage } from 'next'
@@ -19,11 +19,13 @@ const headerHeight = 50
 const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
     const { t, i18n } = useTranslation()
 
+    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+
     useEffect(() => {
         const sections = document.querySelectorAll('section')
         const options = {
-            root: null, // Весь viewport
-            threshold: 0.1 // 50% секции должно быть видно, чтобы сработал скролл
+            root: null,
+            threshold: 0.4
         }
 
         const setSectionHeight = () => {
@@ -40,10 +42,10 @@ const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
                 if (entry.isIntersecting) {
-                    const target = entry.target as HTMLElement // Приведение типа
+                    const target = entry.target as HTMLElement
                     window.scrollTo({
-                        behavior: 'smooth', // Плавный скроллинг
-                        top: target.offsetTop - headerHeight // Теперь offsetTop будет доступен
+                        behavior: 'smooth',
+                        top: target.offsetTop - headerHeight
                     })
                 }
             })
@@ -88,10 +90,9 @@ const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
             <NextSeo
                 title={t('look-at-the-stars')}
                 description={''}
-                noindex={true}
+                canonical={canonicalUrl}
                 openGraph={{
                     siteName: t('look-at-the-stars'),
-                    title: t('look-at-the-stars'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />

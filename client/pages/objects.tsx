@@ -1,4 +1,4 @@
-import { API, ApiModel, useAppSelector } from '@/api'
+import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { formatObjectName } from '@/tools/strings'
@@ -29,6 +29,8 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
 }) => {
     const { t, i18n } = useTranslation()
     const router = useRouter()
+
+    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
@@ -96,6 +98,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
             <NextSeo
                 title={t('list-astronomical-objects')}
                 description={t('description-object-list-page')}
+                canonical={`${canonicalUrl}objects`}
                 openGraph={{
                     images: [
                         {
@@ -105,7 +108,6 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
                         }
                     ],
                     siteName: t('look-at-the-stars'),
-                    title: t('list-astronomical-objects'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
