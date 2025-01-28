@@ -1,4 +1,4 @@
-import { API, ApiModel, HOST_IMG, useAppSelector } from '@/api'
+import { API, ApiModel, HOST_IMG, SITE_LINK, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { removeMarkdown, sliceText } from '@/tools/strings'
@@ -37,6 +37,8 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
     const { t, i18n } = useTranslation()
     const router = useRouter()
 
+    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     const { data: objectFilesData, isLoading: objectFilesLoading } =
@@ -67,6 +69,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                     removeMarkdown(objectData?.description),
                     160
                 )}
+                canonical={`${canonicalUrl}objects/${objectName}`}
                 openGraph={{
                     images: [
                         {
@@ -78,7 +81,6 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                         }
                     ],
                     siteName: t('look-at-the-stars'),
-                    title: objectData?.title || objectName,
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />

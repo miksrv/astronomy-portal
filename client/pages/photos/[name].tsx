@@ -1,4 +1,4 @@
-import { API, ApiModel, useAppSelector } from '@/api'
+import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { createLargePhotoUrl, createPhotoTitle } from '@/tools/photos'
@@ -37,17 +37,18 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
     const { t, i18n } = useTranslation()
     const router = useRouter()
 
+    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+
     const photoTitle = createPhotoTitle(photoData, t)
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     const filteredPhotosList = useMemo(
         () =>
-            photosList?.filter(
-                (photo) =>
-                    photo.objects?.some((object) =>
-                        photoData?.objects?.includes(object)
-                    ) // && photo.id !== photoData?.id
+            photosList?.filter((photo) =>
+                photo.objects?.some((object) =>
+                    photoData?.objects?.includes(object)
+                )
             ),
         [photosList]
     )
@@ -55,6 +56,15 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
     const normalizeAndFilterPhotos = useMemo(
         () => normalizeAndFilterObjects(photosList),
         [photosList]
+    )
+
+    const equipmentsDataDescription = useMemo(
+        () =>
+            equipmentsList
+                ?.filter(({ id }) => photoData?.equipments?.includes(id))
+                ?.map(({ brand, model }) => `${brand} ${model}`)
+                ?.join('; '),
+        [equipmentsList, photoData?.equipments]
     )
 
     const handleEdit = () => {
@@ -71,7 +81,11 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
         <AppLayout>
             <NextSeo
                 title={photoTitle}
-                description={''}
+                description={t('description-photo-page', {
+                    photoTitle,
+                    equipment: equipmentsDataDescription
+                })}
+                canonical={`${canonicalUrl}photos/${photoId}`}
                 openGraph={{
                     images: [
                         {
@@ -81,7 +95,6 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                         }
                     ],
                     siteName: t('look-at-the-stars'),
-                    title: photoTitle,
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />

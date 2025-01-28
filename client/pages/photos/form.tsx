@@ -122,6 +122,7 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
                 title={currentPageTitle}
                 description={''}
                 noindex={true}
+                nofollow={true}
                 openGraph={{
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}

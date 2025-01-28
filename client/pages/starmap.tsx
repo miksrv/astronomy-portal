@@ -1,4 +1,4 @@
-import { API } from '@/api'
+import { API, SITE_LINK } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -21,11 +21,14 @@ const CelestialPage: NextPage<CelestialPageProps> = () => {
 
     const { data } = API.useObjectsGetListQuery()
 
+    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+
     return (
         <AppLayout>
             <NextSeo
                 title={t('star-map')}
                 description={t('description-star-map')}
+                canonical={`${canonicalUrl}starmap`}
                 openGraph={{
                     images: [
                         {
@@ -35,7 +38,6 @@ const CelestialPage: NextPage<CelestialPageProps> = () => {
                         }
                     ],
                     siteName: t('look-at-the-stars'),
-                    title: t('star-map'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />
