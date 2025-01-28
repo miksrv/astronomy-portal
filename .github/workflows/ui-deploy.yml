@@ -53,7 +53,8 @@ jobs:
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
         name: Configure Client
         run: |
-          echo "NEXT_PUBLIC_API_HOST = '${{ secrets.NEXT_PUBLIC_API_HOST }}'
+          echo "NEXT_PUBLIC_SITE_LINK = '${{ secrets.NEXT_PUBLIC_SITE_LINK }}'
+          NEXT_PUBLIC_API_HOST = '${{ secrets.NEXT_PUBLIC_API_HOST }}'
           NEXT_PUBLIC_LAT = 51.7
           NEXT_PUBLIC_LON = 55.2" > .env
         working-directory: client
