@@ -1,17 +1,3 @@
-@import @/styles/variables.sass
-
-@mixin weatherCondition
-    display: inline-block
-    width: 8px
-    height: 8px
-    background-color: $brown
-    margin-right: 5px
-
-@mixin state
-    color: $brown
-    margin-left: 5px
-    text-transform: lowercase
-
 .weather
     margin-bottom: 10px
 
@@ -39,35 +25,34 @@
             color: var(--text-color-secondary)
 
         .val
-            color: var(--text-color-main)
-            margin-left: 5px
+            color: var(--text-color-primary)
 
-    .weatherState0
-        @include weatherCondition
-        background-color: $green
+    .weatherCondition
+        display: inline-block
+        width: 8px
+        height: 8px
+        background-color: var(--color-orange-background)
+        margin-right: 5px
 
-    .weatherState1
-        @include weatherCondition
-        background-color: $orange
+        &.good
+            background-color: var(--color-green)
 
-    .weatherState2
-        @include weatherCondition
-        background-color: $red
+        &.warning
+            background-color: var(--color-orange)
 
-    .weatherState3
-        @include weatherCondition
+        &.danger
+            background-color: var(--color-red)
 
-    .state0
-        @include state
-        color: $green
+    .weatherState
+        color: var(--color-orange-background)
+        margin-left: 2px
+        text-transform: lowercase
 
-    .state1
-        @include state
-        color: $orange
+        &.good
+            color: var(--color-green)
 
-    .state2
-        @include state
-        color: $red
+        &.warning
+            color: var(--color-orange)
 
-    .state3
-        @include state
+        &.danger
+            color: var(--color-red)

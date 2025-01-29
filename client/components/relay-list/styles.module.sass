@@ -1,25 +1,3 @@
-@import @/styles/variables.sass
-
-@mixin switchButtons
-    background: transparent !important
-    color: $text-second
-    border: 1px solid $text-main
-    padding: 5px 10px
-    width: 50px
-    text-transform: uppercase
-
-@mixin ledIndicator
-    margin-right: 5px
-    display: inline-block
-    background-color: $brown
-    width: 8px
-    height: 8px
-    border-radius: 50%
-
-.spinner
-    width: 32px
-    height: 32px
-
 .relayListContainer
     display: flex
     flex-direction: column
@@ -59,30 +37,42 @@
 
     .description
         padding-top: 3px
-        color: $text-footer
+        color: var(--text-color-secondary)
 
-    .ledOn
-        @include ledIndicator
-        background-color: $green
+    .ledIndicator
+        margin-right: 5px
+        display: inline-block
+        background-color: var(--color-orange-background)
+        width: 8px
+        height: 8px
+        border-radius: 50%
 
-    .ledOff
-        @include ledIndicator
-        background-color: $red
+        &.on
+            background-color: var(--color-green)
 
-    .switchOff
-        @include switchButtons
-        color: $orange !important
-        border: 1px solid $orange !important
+        &.off
+            background-color: var(--color-red)
 
-        &:hover, &:active, &:focus
-            background: rgba(221, 145, 36, 0.18) !important
-            color: $text-main !important
+    .switchButton
+        background: transparent !important
+        color: var(--text-color-secondary)
+        border: 1px solid var(--text-color-primary)
+        padding: 5px 10px
+        width: 50px
+        text-transform: uppercase
 
-    .switchOn
-        @include switchButtons
-        color: $green !important
-        border: 1px solid $green !important
+        &.off
+            color: var(--color-orange) !important
+            border: 1px solid var(--color-orange) !important
 
-        &:hover, &:active, &:focus
-            background: rgba(46, 140, 71, 0.18) !important
-            color: $text-main !important
+            &:hover, &:active, &:focus
+                background: rgba(221, 145, 36, 0.18) !important
+                color: var(--text-color-primary) !important
+
+        &.on
+            color: var(--color-green) !important
+            border: 1px solid var(--color-green) !important
+
+            &:hover, &:active, &:focus
+                background: rgba(46, 140, 71, 0.18) !important
+                color: var(--text-color-primary) !important

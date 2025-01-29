@@ -1,6 +1,6 @@
 {
     "name": "astronomy-portal",
-    "version": "4.0.2",
+    "version": "4.0.3",
     "private": true,
     "engines": {
         "node": ">=20.11.0"
@@ -21,6 +21,8 @@
     "dependencies": {
         "cookies-next": "^5.1.0",
         "dayjs": "^1.11.13",
+        "embla-carousel-auto-scroll": "^8.5.2",
+        "embla-carousel-react": "^8.5.2",
         "i18next": "^23.16.8",
         "lodash": "^4.17.21",
         "next": "15.1.6",

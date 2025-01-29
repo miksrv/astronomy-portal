@@ -1,4 +1,4 @@
-@import @/styles/variables.sass
+@use '../../styles/variables' as variables
 
 .appLayout
     min-height: calc(100% - var(--header-height))
@@ -38,18 +38,18 @@
     .sidebar
         position: fixed
         background-color: var(--container-background-color)
-        width: $sideBarWidth
+        width: variables.$sideBarWidth
         height: 100vh
         z-index: 600
         top: 0
-        left: -$sideBarWidth
+        left: -(variables.$sideBarWidth)
         transition: left 167ms ease-out
 
         &.opened
             left: 0
 
         &.closed
-            left: -$sideBarWidth
+            left: -(variables.$sideBarWidth)
 
 .menu
     list-style: none

@@ -1,7 +1,7 @@
 import { API, ApiType, useAppSelector } from '@/api'
 import { declOfNum } from '@/functions/helpers'
 import React, { useEffect, useState } from 'react'
-import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
+import { Button, Container, Message, Spinner, cn } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
@@ -24,12 +24,17 @@ export const RelayListItem: React.FC<RelayListItemProps> = ({
 }) => (
     <div className={styles.item}>
         <div className={styles.name}>
-            <span className={styles[state ? 'ledOn' : 'ledOff']} />
+            <span
+                className={cn(
+                    styles.ledIndicator,
+                    state ? styles.on : styles.off
+                )}
+            />
             {name}
         </div>
         <Button
             loading={loading}
-            className={styles[state ? 'switchOn' : 'switchOff']}
+            className={cn(styles.switchButton, state ? styles.on : styles.off)}
             disabled={loading || !isAdmin}
             onClick={() => handleClick?.({ id, state: state ? 0 : 1 })}
         >
@@ -89,7 +94,7 @@ export const RelayList: React.FC = () => {
         <Container className={styles.relayListContainer}>
             {isLoading && (
                 <div className={styles.loader}>
-                    <Spinner className={styles.spinner} />
+                    <Spinner />
                 </div>
             )}
 
@@ -121,13 +126,12 @@ export const RelayList: React.FC = () => {
                     <div className={styles.item}>
                         <div className={styles.name}>
                             <span
-                                className={
-                                    styles[
-                                        relayList?.items?.[1]?.state
-                                            ? 'ledOn'
-                                            : 'ledOff'
-                                    ]
-                                }
+                                className={cn(
+                                    styles.ledIndicator,
+                                    relayList?.items?.[1]?.state
+                                        ? styles.on
+                                        : styles.off
+                                )}
                             />
                             {'ОСВЕЩЕНИЕ'}
                         </div>
@@ -155,13 +159,12 @@ export const RelayList: React.FC = () => {
                                 (isLoading && relayLoading === 1) ||
                                 lightLoading
                             }
-                            className={
-                                styles[
-                                    relayList?.items?.[1]?.state
-                                        ? 'switchOn'
-                                        : 'switchOff'
-                                ]
-                            }
+                            className={cn(
+                                styles.switchButton,
+                                relayList?.items?.[1]?.state
+                                    ? styles.on
+                                    : styles.off
+                            )}
                             disabled={
                                 loaderSet ||
                                 lightLoading ||

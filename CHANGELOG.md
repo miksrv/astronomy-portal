@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.0.3
+
+### Patch Changes
+
+-   Install new UI dependencies - embla-carousel-react and embla-carousel-auto-scroll
+-   Added new UI components - UI Carousel
+-   Replaced UI photos for teams members
+-   Added new team member
+-   Refactoring CSS variables (variables.sass)
+-   Refactoring UI Weather Component
+-   Refactoring UI RelayList Component
+
 ## 4.0.2
 
 ### Patch Changes

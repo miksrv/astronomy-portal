@@ -1,4 +1,4 @@
-@import @/styles/variables.sass
+@use '../../styles/variables' as variables
 
 .appHeader
     position: fixed
@@ -28,7 +28,7 @@
         margin-right: 15px
         display: flex
 
-        @media only screen and (max-width: $mobileMaxWidth)
+        @media only screen and (max-width: variables.$mobileMaxWidth)
             display: none
 
     .hamburgerButton
@@ -42,7 +42,7 @@
         opacity: .7
         transition: opacity .3s
 
-        @media only screen and (max-width: $mobileMaxWidth)
+        @media only screen and (max-width: variables.$mobileMaxWidth)
             display: block
 
         &:hover
@@ -60,7 +60,7 @@
         overflow-x: scroll
         margin: 0 0 -20px
 
-        @media only screen and (max-width: $mobileMaxWidth)
+        @media only screen and (max-width: variables.$mobileMaxWidth)
             display: none
 
         li
