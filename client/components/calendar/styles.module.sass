@@ -1,5 +1,3 @@
-@import @/styles/variables.sass
-
 .eventCalendarBlock
     display: flex
     padding: 1px 1px 1px 4px
@@ -82,7 +80,7 @@
             margin-right: 4px
 
         i
-            color: $orange
+            color: var(--color-orange)
 
     .calendarToolbar
         margin: 0 0 5px
@@ -118,16 +116,16 @@
         color: #FFF
 
         &.green
-            background-color: $green
-            border-color: #a5ff2c
+            background-color: var(--color-green-background)
+            border-color: var(--color-green)
 
         &.orange
-            background-color: $orange
-            border-color: #FFB804
+            background-color: var(--color-orange-background)
+            border-color: var(--color-orange)
 
         &.red
-            background-color: $red
-            border-color: #ffa494
+            background-color: var(--color-red-background)
+            border-color: var(--color-red)
 
     .grid
         margin: 0

@@ -61,9 +61,9 @@
     "loading": "Loading",
     "temperature": "Temperature",
     "humidity": "Humidity",
-    "cloudiness": "Cloudiness",
-    "wind-speed": "Wind Speed",
-    "gusts-of-wind": "Gusts of wind",
+    "clouds": "Cloudiness",
+    "windSpeed": "Wind Speed",
+    "windGust": "Gusts of wind",
     "precipitation": "Precipitation",
     "weather-conditions": "Weather Conditions",
     "updated": "Updated",
@@ -234,10 +234,11 @@
         "team-members": {
             "mike": "Mikhail Topchilo",
             "tanya": "Tatyana Gavrish",
-            "igor": "Igor Kommissarchik",
+            "igor": "Igor Komissarchik",
             "sergey": "Sergey Medvedev",
             "eugene": "Evgeny Zimin",
-            "vladimir": "Vladimir Ivanovich"
+            "vladimir": "Vladimir Ivanovich",
+            "nikolay": "Nikolay Cherepanov"
         },
         "project-title": "Astronomical Project \"Look at the Stars\"",
         "project-description": "In 2016, we launched the \"Look at the Stars\" project in the Orenburg region to make astronomy accessible to everyone. Since then, every season we have been holding free open-air lectures, organizing trips out of town with telescopes, and conducting informal sidewalk astronomy evenings.",

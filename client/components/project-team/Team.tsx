@@ -1,9 +1,11 @@
+import Carousel from '@/ui/carousel'
 import { useTranslation } from 'next-i18next'
 import Image, { StaticImageData } from 'next/image'
 import React from 'react'
 
 import photoIgor from '@/public/photos/team-Igor.jpg'
 import photoMisha from '@/public/photos/team-Misha.jpg'
+import photoNikolay from '@/public/photos/team-Nikolay.jpg'
 import photoSergey from '@/public/photos/team-Sergey.jpg'
 import photoTanya from '@/public/photos/team-Tanya.jpg'
 import photoVladimir from '@/public/photos/team-Vladimir.jpg'
@@ -43,27 +45,36 @@ const Team: React.FC = () => {
         {
             name: t('about-page.team-members.vladimir'),
             photo: photoVladimir
+        },
+        {
+            name: t('about-page.team-members.nikolay'),
+            photo: photoNikolay
         }
     ]
 
     return (
         <div className={styles.section}>
-            {teamList?.map((item) => (
-                <div
-                    key={item.name}
-                    className={styles.item}
-                    role={'listitem'}
-                >
-                    <Image
-                        className={styles.photo}
-                        src={item.photo?.src!}
-                        alt={item?.name ?? ''}
-                        width={item.photo?.width}
-                        height={item.photo?.height}
-                    />
-                    <div className={styles.title}>{item.name}</div>
-                </div>
-            ))}
+            <Carousel
+                options={{ dragFree: true, loop: true }}
+                autoScroll={true}
+            >
+                {teamList?.map((item) => (
+                    <div
+                        key={item.name}
+                        className={styles.item}
+                        role={'listitem'}
+                    >
+                        <Image
+                            className={styles.photo}
+                            src={item.photo?.src!}
+                            alt={item?.name ?? ''}
+                            width={item.photo?.width}
+                            height={item.photo?.height}
+                        />
+                        <div className={styles.title}>{item.name}</div>
+                    </div>
+                ))}
+            </Carousel>
         </div>
     )
 }
