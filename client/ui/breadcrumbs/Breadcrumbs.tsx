@@ -49,7 +49,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
                     </Link>
                 </li>
             ))}
-        {currentPage && <li>{currentPage}</li>}
+        {currentPage && <li className={styles.currentPage}>{currentPage}</li>}
     </ul>
 )
 

@@ -3,12 +3,14 @@
     justify-content: space-between
     align-items: center
     margin-bottom: 10px
-    flex-wrap: wrap
+    flex-wrap: nowrap
     gap: 10px
+    overflow: hidden
 
     @media only screen and (max-width: 768px)
         flex-direction: column
         align-items: self-start
+        flex-wrap: wrap
 
     .toolbarActions
         display: flex
@@ -17,7 +19,6 @@
         gap: 10px
 
         @media only screen and (max-width: 768px)
-            margin-top: 10px
             flex-direction: column
             width: 100%
 
@@ -29,6 +30,9 @@
 
     .toolbarTitle
         position: relative
+
+        @media only screen and (max-width: 768px)
+            width: 100%
 
         h1
             margin: 0 0 0

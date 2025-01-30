@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.0.4
+
+### Patch Changes
+
+-   Fixed UI AppToolbar display in mobile devices
+-   Updated UI Library
+-   Added title for UI Photo Item page
+-   Added blur effect for UI Photo Item page
+-   Implemented hidden columns for object photos table
+-   Added memoization for UI object photos table
+
 ## 4.0.3
 
 ### Patch Changes
