@@ -1,7 +1,7 @@
 import { ApiModel } from '@/api'
 import { getTimeFromSec } from '@/functions/helpers'
 import { formatDate } from '@/tools/dates'
-import { createLargePhotoUrl } from '@/tools/photos'
+import { createLargePhotoUrl, createMediumPhotoUrl } from '@/tools/photos'
 import { formatObjectName, humanizeFileSize } from '@/tools/strings'
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
@@ -63,7 +63,11 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                         className={styles.image}
                         src={createLargePhotoUrl(props as ApiModel.Photo)}
                         fill={true}
-                        alt={''}
+                        placeholder={'blur'}
+                        blurDataURL={createMediumPhotoUrl(
+                            props as ApiModel.Photo
+                        )}
+                        alt={photoTitle || ''}
                     />
                 </button>
             </div>
