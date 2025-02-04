@@ -17,7 +17,7 @@ import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
 interface AuthPageProps {}
 
 const AuthPage: NextPage<AuthPageProps> = () => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     const dispatch = useAppDispatch()
     const router = useRouter()
@@ -80,6 +80,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
             <NextSeo
                 nofollow={true}
                 noindex={true}
+                canonical={`${i18n.language === 'en' ? 'en/' : ''}auth`}
                 title={t('authorization-on-site')}
             />
             <div className={'centerPageContainer'}>

@@ -1,10 +1,12 @@
+@use '../../styles/variables' as variables
+
 .eventCalendarBlock
     display: flex
     padding: 1px 1px 1px 4px
     margin-top: 3px
     background-color: #43464d
 
-    @media only screen and (max-width: 768px)
+    @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-direction: column
 
 .eventCalendarBlockBox
@@ -13,7 +15,7 @@
     display: flex
     align-items: center
 
-    @media only screen and (max-width: 768px)
+    @media only screen and (max-width: variables.$mobileMaxWidth)
         margin-right: 0
 
 .section
@@ -28,12 +30,12 @@
         right: -1px
         top: 4px
 
-        @media only screen and (min-width: 768px)
+        @media only screen and (min-width: variables.$mobileMaxWidth)
             display: none
 
     .moonEvent, .sunEvent
         @extend .eventCalendarBlock
-        @media only screen and (max-width: 768px)
+        @media only screen and (max-width: variables.$mobileMaxWidth)
             display: none
 
         .sunIcon

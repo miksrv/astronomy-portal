@@ -1,3 +1,5 @@
+@use '../../styles/variables' as variables
+
 .objectContainer
     margin-bottom: 10px
     width: 100%
@@ -5,7 +7,7 @@
     flex-wrap: wrap
     justify-content: space-between
 
-    @media only screen and (max-width: 768px)
+    @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-direction: column
 
     .parameters
@@ -20,7 +22,7 @@
     .filterList
         margin-left: 30px
 
-        @media only screen and (max-width: 768px)
+        @media only screen and (max-width: variables.$mobileMaxWidth)
             margin-top: 10px
             margin-left: 0
 
@@ -29,6 +31,6 @@
         object-fit: cover
         min-width: 350px
 
-        @media only screen and (max-width: 768px)
+        @media only screen and (max-width: variables.$mobileMaxWidth)
             margin-top: 10px
             margin-left: 0

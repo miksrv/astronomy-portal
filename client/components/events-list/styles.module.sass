@@ -1,4 +1,4 @@
-@import ../../styles/variables
+@use '../../styles/variables' as variables
 
 .eventsList
     display: flex
@@ -15,7 +15,7 @@
     flex-basis: calc(33.3333% - 7px)
     padding: 5px !important
 
-    @media only screen and (max-width: $mobileMaxWidth)
+    @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-basis: 100%
         max-width: 100%
 

@@ -1,3 +1,4 @@
+@use 'variables' as variables
 @import theme.css
 
 *, ::before, ::after
@@ -68,7 +69,7 @@ body
         flex-basis: 50%
         width: 50%
 
-    @media only screen and (max-width: 768px)
+    @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-wrap: wrap
 
         > div
@@ -120,6 +121,6 @@ body
         -webkit-background-clip: text
         -webkit-text-fill-color: transparent
 
-        @media only screen and (max-width: 768px)
+        @media only screen and (max-width: variables.$mobileMaxWidth)
             font-size: 60px !important
             line-height: 60px

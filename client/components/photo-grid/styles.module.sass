@@ -1,3 +1,5 @@
+@use '../../styles/variables' as variables
+
 .photoGrid
     display: flex
     flex-wrap: wrap
@@ -15,7 +17,7 @@
         height: 200px
         position: relative
 
-        @media only screen and (max-width: 768px)
+        @media only screen and (max-width: variables.$mobileMaxWidth)
             flex-basis: 100%
 
         .image

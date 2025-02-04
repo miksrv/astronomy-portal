@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.0.5
+
+### Patch Changes
+
+-   Updated node version
+-   Fixed CSS import rules
+-   Improved robots.txt file
+
 ## 4.0.4
 
 ### Patch Changes
