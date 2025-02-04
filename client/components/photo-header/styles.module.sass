@@ -1,8 +1,10 @@
+@use '../../styles/variables' as variables
+
 .photoContainer
     display: flex
     margin-bottom: 10px
 
-    @media only screen and (max-width: 768px)
+    @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-direction: column
 
     .imageSection
@@ -22,7 +24,7 @@
         .image
             object-fit: cover
 
-        @media only screen and (max-width: 768px)
+        @media only screen and (max-width: variables.$mobileMaxWidth)
             flex-basis: 100%
             width: 100%
 
@@ -32,7 +34,7 @@
         flex-basis: 30%
         width: 30%
 
-        @media only screen and (max-width: 768px)
+        @media only screen and (max-width: variables.$mobileMaxWidth)
             flex-basis: 100%
             width: 100%
 
@@ -53,5 +55,5 @@
         .starMapSection
             margin-bottom: 10px
 
-            @media only screen and (max-width: 768px)
+            @media only screen and (max-width: variables.$mobileMaxWidth)
                 margin-top: 10px
