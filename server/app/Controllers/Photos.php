@@ -19,7 +19,6 @@ use CodeIgniter\API\ResponseTrait;
 use Config\Services;
 use Exception;
 
-// TODO: Раскоментировать проверку прав доступа
 // TODO: Добавить проверку на существование categories, objects, equipment и filters при создании и редактировании
 class Photos extends ResourceController
 {
@@ -235,6 +234,10 @@ class Photos extends ResourceController
 
     protected function save($id = null)
     {
+        if ($this->session?->user?->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
         // Get the uploaded file and post data
         $input = $this->request->getJSON(true);
 
@@ -342,6 +345,5 @@ class Photos extends ResourceController
             log_message('error', $e->getMessage());
             return $this->failServerError('Could not save photo data');
         }
-
     }
 }

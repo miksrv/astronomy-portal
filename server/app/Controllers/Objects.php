@@ -16,7 +16,6 @@ use Exception;
 // TODO: Добавить локали для всех мотодов в этом классе
 // TODO: $objectsModel вынести в $this->model, в конструктор класса
 // TODO: Исправить |is_unique[objects.catalog_name,catalog_name,{id}] для метода update
-// TODO: Раскомментировать проверку прав доступа
 class Objects extends ResourceController
 {
     use ResponseTrait;
@@ -104,6 +103,10 @@ class Objects extends ResourceController
      */
     public function create(): ResponseInterface
     {
+        if ($this->session?->user?->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
         $input = $this->request->getJSON(true);
         $rules = [
             'name'  => 'required|min_length[3]|max_length[40]|is_unique[objects.catalog_name]',
@@ -138,6 +141,10 @@ class Objects extends ResourceController
      */
     public function update($id = null): ResponseInterface
     {
+        if ($this->session?->user?->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
         $input = $this->request->getJSON(true);
         $rules = [
             'name'  => 'required|min_length[3]|max_length[40]', // |is_unique[objects.catalog_name,catalog_name,{id}]
@@ -202,9 +209,9 @@ class Objects extends ResourceController
      */
     public function delete($id = null): ResponseInterface
     {
-        // if ($this->session?->user?->role !== 'admin') {
-        //     return $this->failValidationErrors('Ошибка прав доступа');
-        // }
+        if ($this->session?->user?->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
 
         try {
             $objectsModel = new ObjectsModel();
