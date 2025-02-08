@@ -96,6 +96,10 @@ $routes->group('events', static function ($routes) {
     $routes->get('/', 'Events::list');
     $routes->get('upcoming', 'Events::upcoming');
     $routes->get('(:any)', 'Events::show/$1');
+
+    $routes->post('/', 'Events::create');
+    $routes->patch('(:any)', 'Events::update/$1');
+
     $routes->post('booking', 'Events::booking');
     $routes->post('cancel', 'Events::cancel');
     $routes->post('upload/(:alphanum)', 'Events::upload/$1');

@@ -120,7 +120,7 @@ class PhotoUploadLibrary {
         // Создаем экземпляр сервиса обработки изображений
         $image = Services::image('gd');
 
-        // Маленькое изображение 80x18 (сначала уменьшаем, потом обрезаем)
+        // Маленькое изображение 160x36 (сначала уменьшаем, потом обрезаем)
         $smallFileName = $fileName . '_small.' . $fileExtension;
         $smallImagePath = $uploadPath . '/' . $smallFileName;
         $image->withFile($filePath)
@@ -128,15 +128,15 @@ class PhotoUploadLibrary {
               ->save($smallImagePath);
         $previewFiles['small'] = $smallFileName;
 
-        // Среднее изображение 355x200 (сначала уменьшаем, потом обрезаем)
+        // Среднее изображение 500x400 (сначала уменьшаем, потом обрезаем)
         $mediumFileName = $fileName . '_medium.' . $fileExtension;
         $mediumImagePath = $uploadPath . '/' . $mediumFileName;
         $image->withFile($filePath)
-              ->fit(500, 400, 'center') // Уменьшаем до 355x200, сохраняя пропорции
+              ->fit(500, 400, 'center') // Уменьшаем до 500x400, сохраняя пропорции
               ->save($mediumImagePath);
         $previewFiles['medium'] = $mediumFileName;
 
-        // Большое изображение 2048x1024 (сначала уменьшаем, потом обрезаем)
+        // Большое изображение 4096x3423 (сначала уменьшаем, потом обрезаем)
         $largeFileName = $fileName . '_large.' . $fileExtension;
         $largeImagePath = $uploadPath . '/' . $largeFileName;
         $image->withFile($filePath)

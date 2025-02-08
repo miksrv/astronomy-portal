@@ -85,7 +85,6 @@ defined('UPLOAD_PHOTOS') || define('UPLOAD_PHOTOS', FCPATH . 'astrophotos/');
 defined('UPLOAD_POST') || define('UPLOAD_POST', FCPATH . 'posts/');
 defined('UPLOAD_TEMP') || define('UPLOAD_TEMP', FCPATH . 'temp/');
 defined('UPLOAD_STAR_MAPS') || define('UPLOAD_STAR_MAPS', FCPATH . 'starmaps/');
-defined('UPLOAD_FITS') || define('UPLOAD_FITS', FCPATH . 'fits/');
 defined('UPLOAD_USERS') || define('UPLOAD_USERS', FCPATH . 'users/');
 defined('UPLOAD_EVENTS') || define('UPLOAD_EVENTS', FCPATH . 'stargazing/');
 
