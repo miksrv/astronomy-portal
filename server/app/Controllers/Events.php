@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Entities\EventEntity;
 use App\Entities\EventPhoto;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
@@ -10,6 +11,7 @@ use App\Models\EventsUsersModel;
 use App\Models\UsersModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
+use CodeIgniter\I18n\Time;
 use CodeIgniter\Files\File;
 use Config\Services;
 
@@ -160,6 +162,87 @@ class Events extends ResourceController
 
             return $this->failServerError(lang('General.serverError'));
         }
+    }
+
+    public function create(): ResponseInterface {
+        if ($this->session->user->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
+        $input = $this->request->getPost();
+        $file  = $this->request->getFile('upload');
+
+        $rules = [
+            'title'             => 'required|string|max_length[250]',
+            'tickets'           => 'required|integer|greater_than[0]|less_than[5000]',
+            'date'              => 'required|string|max_length[50]',
+            'registrationStart' => 'required|string|max_length[50]',
+            'registrationEnd'   => 'required|string|max_length[50]',
+            'googleMap'         => 'required|string|max_length[100]',
+            'yandexMap'         => 'required|string|max_length[100]',
+        ];
+
+        $this->validator = Services::Validation()->setRules($rules);
+
+        if (!$file || !$file->isValid()) {
+            return $this->failValidationErrors('File upload failed or invalid file');
+        }
+
+        // Check input data validation rules
+        if (!$this->validator->run($input)) {
+            return $this->failValidationErrors($this->validator->getErrors());
+        }
+
+        try {
+            $eventId = uniqid();
+
+            if ($file) {
+                $image = Services::image('gd');
+
+                $directoryPath = UPLOAD_EVENTS . $eventId;
+                mkdir($directoryPath, 0755, true);
+
+                $fileName = 'cover';
+                $fileExtension = $file->getExtension();
+                $fileFullName  = $fileName . '.' . $fileExtension;
+
+                $file->move($directoryPath, $fileFullName);
+
+                // Создаем превью 500x400 (сначала уменьшаем, потом обрезаем)
+                $mediumFileName = $fileName . '_preview.' . $fileExtension;
+                $image->withFile($directoryPath . '/' . $fileFullName)
+                      ->fit(500, 400, 'center') // Уменьшаем до 500x400, сохраняя пропорции
+                      ->save($directoryPath . '/' . $mediumFileName);
+            }
+
+            $event = new EventEntity();
+            $event->id = $eventId;
+            $event->title_ru    = $input['title'];
+            $event->max_tickets = $input['tickets'];
+            $event->googleMap   = $input['googleMap'];
+            $event->yandexMap   = $input['yandexMap'];
+
+            // Преобразуем дату события в UTC
+            $eventDate = Time::parse($input['date'], 'Asia/Yekaterinburg');
+            $event->date = $eventDate->setTimezone('UTC')->toDateTimeString();
+
+            // Преобразуем дату начала регистрации в UTC
+            $registrationStartDate = Time::parse($input['registrationStart'], 'Asia/Yekaterinburg');
+            $event->registration_start = $registrationStartDate->setTimezone('UTC')->toDateTimeString();
+
+            // Преобразуем дату окончания регистрации в UTC
+            $registrationEndDate = Time::parse($input['registrationEnd'], 'Asia/Yekaterinburg');
+            $event->registration_end = $registrationEndDate->setTimezone('UTC')->toDateTimeString();
+
+            $this->model->save($event);
+
+            return $this->respondCreated($event);
+        } catch (\Exception $e) {
+            log_message('error', $e->getMessage());
+            return $this->failServerError('Could not save photo data');
+        }
+
+        return $this->respond();
     }
 
     /**
@@ -333,22 +416,6 @@ class Events extends ResourceController
         ]);
 
         return $this->respond(['message' => 'Вы отменили бронирование на это мероприятие']);
-    }
-
-    public function create(): ResponseInterface {
-        if ($this->session->user->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
-        }
-
-        return $this->respond();
-    }
-
-    public function update($id = null): ResponseInterface {
-        if ($this->session->user->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
-        }
-
-        return $this->respond();
     }
 
     /**
