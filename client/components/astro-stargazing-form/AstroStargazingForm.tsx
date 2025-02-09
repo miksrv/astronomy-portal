@@ -159,7 +159,7 @@ const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({
             </div>
 
             <div className={styles.imageSection}>
-                {!!initialData?.cover && (
+                {!!initialData?.coverFileName && (
                     <Image
                         className={styles.image}
                         src={createLargePhotoUrl(initialData as ApiModel.Photo)}
@@ -170,7 +170,7 @@ const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({
             </div>
             <div style={{ marginTop: 15 }}>
                 <label>
-                    {initialData?.cover
+                    {initialData?.coverFileName
                         ? 'Заменить обложку:'
                         : 'Загрузить обложку:'}
                 </label>

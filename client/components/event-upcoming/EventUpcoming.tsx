@@ -1,4 +1,5 @@
 import { API, ApiModel, useAppSelector } from '@/api'
+import { hosts } from '@/api/constants'
 import { formatUTCDate, getTimeFromSec } from '@/functions/helpers'
 import dayjs from 'dayjs'
 import Image from 'next/image'
@@ -78,7 +79,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                 <div className={styles.imageContainer}>
                     <Image
                         className={'stargazingImage'}
-                        src={`${process.env.NEXT_PUBLIC_API_HOST}${data?.cover}`}
+                        src={`${hosts.stargazing}${data?.id}/${data?.coverFileName}.${data?.coverFileExt}`}
                         alt={`Астровыезд: ${data?.title}`}
                         width={1024}
                         height={768}

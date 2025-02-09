@@ -211,10 +211,10 @@ class Events extends ResourceController
 
                 $file->move($directoryPath, $fileFullName);
 
-                // Создаем превью 500x400 (сначала уменьшаем, потом обрезаем)
+                // Создаем превью 585 (сначала уменьшаем, потом обрезаем)
                 $mediumFileName = $fileName . '_preview.' . $fileExtension;
                 $image->withFile($directoryPath . '/' . $fileFullName)
-                      ->fit(500, 400, 'center') // Уменьшаем до 500x400, сохраняя пропорции
+                      ->fit(585, 400, 'center') // Уменьшаем до 585x400, сохраняя пропорции
                       ->save($directoryPath . '/' . $mediumFileName);
 
                 $event->coverFileName  = $fileName;
