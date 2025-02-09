@@ -21,7 +21,8 @@ class EventsModel extends ApplicationBaseModel
         'title_ru',
         'content_en',
         'content_ru',
-        'file_image',
+        'cover_file_name',
+        'cover_file_ext',
         'max_tickets',
         'yandex_map_link',
         'google_map_link',
@@ -89,7 +90,7 @@ class EventsModel extends ApplicationBaseModel
 
         $datetime = new Time('now');
 
-        $eventsQuery = $this->select('id, title_en, title_ru, date, file_image' . (
+        $eventsQuery = $this->select('id, title_en, title_ru, date, cover_file_name, cover_file_ext' . (
             $eventId !== null ? ', content_en, content_ru, max_tickets, date, registration_start, registration_end' : '')
         );
 

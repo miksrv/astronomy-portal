@@ -12,8 +12,9 @@ import { Message } from 'simple-react-ui-kit'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
-import AstroPhotoForm from '@/components/astro-photo-form'
-import { AstroPhotoFormType } from '@/components/astro-photo-form/AstroPhotoForm'
+import AstroPhotoForm, {
+    AstroPhotoFormType
+} from '@/components/astro-photo-form'
 
 type PhotoFormPageProps = {}
 

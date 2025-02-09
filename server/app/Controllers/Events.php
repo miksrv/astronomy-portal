@@ -69,10 +69,6 @@ class Events extends ResourceController
             $eventData->max_tickets = 0;
         }
 
-        if ($eventData->cover) {
-            $eventData->cover = '/stargazing/' . $eventData->cover;
-        }
-
         if (!$eventData->registered) {
             unset($eventData->yandexMap, $eventData->googleMap);
         }
@@ -126,6 +122,7 @@ class Events extends ResourceController
      */
     public function show($id = null): ResponseInterface
     {
+        // TODO Если событие архивное - не нужно присылать ссылку на карты, даты начала и окончания регистрации
         try {
             $locale = $this->request->getLocale();
 
@@ -195,6 +192,12 @@ class Events extends ResourceController
 
         try {
             $eventId = uniqid();
+            $event   = new EventEntity();
+            $event->id = $eventId;
+            $event->title_ru    = $input['title'];
+            $event->max_tickets = $input['tickets'];
+            $event->googleMap   = $input['googleMap'];
+            $event->yandexMap   = $input['yandexMap'];
 
             if ($file) {
                 $image = Services::image('gd');
@@ -213,14 +216,10 @@ class Events extends ResourceController
                 $image->withFile($directoryPath . '/' . $fileFullName)
                       ->fit(500, 400, 'center') // Уменьшаем до 500x400, сохраняя пропорции
                       ->save($directoryPath . '/' . $mediumFileName);
-            }
 
-            $event = new EventEntity();
-            $event->id = $eventId;
-            $event->title_ru    = $input['title'];
-            $event->max_tickets = $input['tickets'];
-            $event->googleMap   = $input['googleMap'];
-            $event->yandexMap   = $input['yandexMap'];
+                $event->coverFileName  = $fileName;
+                $event->coverFileExt   = $fileExtension;
+            }
 
             // Преобразуем дату события в UTC
             $eventDate = Time::parse($input['date'], 'Asia/Yekaterinburg');

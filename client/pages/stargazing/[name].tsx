@@ -79,9 +79,9 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                 openGraph={{
                     images: [
                         {
-                            height: 743,
-                            url: `${hosts.stargazing}${event?.id}.jpg`,
-                            width: 1280
+                            height: 400,
+                            url: `${hosts.stargazing}${event?.id}/${event?.coverFileName}_preview.${event?.coverFileExt}`,
+                            width: 500
                         }
                     ],
                     siteName: t('look-at-the-stars'),
@@ -107,7 +107,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                         height: 'auto',
                         width: '100%'
                     }}
-                    src={`${hosts.stargazing}${event?.id}.jpg`}
+                    src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
                     alt={title}
                     width={1024}
                     height={768}

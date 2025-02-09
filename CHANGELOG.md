@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.0.6
+
+### Patch Changes
+
+-   Implemented API Events new methods
+-   Added API Photos and Objects rights checks
+-   Added new API Routes, improved comments, removed unused constant
+-   Implemented UI stargazing event form
+-   Added UI API
+-   Implemented UI AstroStargazingForm
+-   Changed API DB Migrations for Events
+-   Improved UI events list styles
+
 ## 4.0.5
 
 ### Patch Changes

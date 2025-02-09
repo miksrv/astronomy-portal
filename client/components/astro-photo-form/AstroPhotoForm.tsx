@@ -288,6 +288,7 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
                 <input
                     onChange={handleImageUpload}
                     type={'file'}
+                    disabled={disabled}
                     accept={'image/png, image/gif, image/jpeg'}
                 />
             </div>
