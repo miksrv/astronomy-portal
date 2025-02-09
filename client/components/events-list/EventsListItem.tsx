@@ -1,4 +1,5 @@
-import { ApiModel, HOST_IMG } from '@/api'
+import { ApiModel } from '@/api'
+import { hosts } from '@/api/constants'
 import { formatDate } from '@/functions/helpers'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -18,14 +19,14 @@ const EventsListItem: React.FC<EventsListItemProps> = ({ event }) => (
                 href={`/stargazing/${event.id}`}
                 title={`Астровыезд - ${event.title}`}
             >
-                {event.cover && (
+                {event.coverFileName && (
                     <Image
                         className={styles.photo}
                         alt={`Астровыезд - ${event.title}`}
                         quality={70}
                         height={240}
                         width={370}
-                        src={`${HOST_IMG}stargazing/${event.cover}`}
+                        src={`${hosts.stargazing}${event.id}/${event.coverFileName}_preview.${event.coverFileExt}`}
                     />
                 )}
             </Link>

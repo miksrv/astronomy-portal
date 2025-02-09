@@ -4,7 +4,8 @@ export type Event = {
     id: string
     title: string
     content?: string
-    cover?: string
+    coverFileName?: string
+    coverFileExt?: string
     date?: DateTime
     registered?: boolean
     canceled?: boolean

@@ -1,4 +1,4 @@
-import { API, ApiModel, SITE_LINK } from '@/api'
+import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -6,9 +6,10 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import Gallery from 'react-photo-gallery'
-import { Container, Icon } from 'simple-react-ui-kit'
+import { Button, Container, Icon } from 'simple-react-ui-kit'
 
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
@@ -36,8 +37,11 @@ const galleryStargazing: any[] = [
 // TODO Вместо галерии постоянных изображений тут, использовать загруженные фото астровыездов из API
 const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
     const { t, i18n } = useTranslation()
+    const router = useRouter()
 
     const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+
+    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
@@ -49,6 +53,10 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
 
     const handleHideLightbox = () => {
         setShowLightbox(false)
+    }
+
+    const handleCreate = () => {
+        router.push('/stargazing/form')
     }
 
     return (
@@ -73,7 +81,17 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
             <AppToolbar
                 title={t('stargazing')}
                 currentPage={t('stargazing')}
-            />
+            >
+                {userRole === 'admin' && (
+                    <Button
+                        icon={'PlusCircle'}
+                        mode={'secondary'}
+                        size={'medium'}
+                        label={t('add')}
+                        onClick={handleCreate}
+                    />
+                )}
+            </AppToolbar>
 
             {/*TODO*/}
             {/*<EventUpcoming />*/}
@@ -169,7 +187,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
             store.dispatch(setLocale(locale))
 
             const { data } = await store.dispatch(
-                API.endpoints?.eventsGetList.initiate()
+                API.endpoints?.eventGetList.initiate()
             )
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))

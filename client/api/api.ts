@@ -3,6 +3,8 @@ import type { Action, PayloadAction } from '@reduxjs/toolkit'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { HYDRATE } from 'next-redux-wrapper'
 
+import { AstroStargazingFormType } from '@/components/astro-stargazing-form'
+
 import { RootState } from './store'
 
 type Maybe<T> = T | void
@@ -140,22 +142,49 @@ export const API = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-        eventsCancelRegistrationPost: builder.mutation<
-            ApiType.Events.ResRegistration | ApiType.ResError,
-            Pick<ApiType.Events.ReqRegistration, 'eventId'>
-        >({
-            invalidatesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
-            query: (formState) => ({
-                body: formState,
-                method: 'POST',
-                url: 'events/cancel'
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-        eventsGetList: builder.query<ApiType.Events.ResList, void>({
+        eventGetList: builder.query<ApiType.Events.ResList, void>({
             providesTags: () => [{ id: 'LIST', type: 'Events' }],
             query: () => 'events'
         }),
+
+        eventCreatePost: builder.mutation<
+            ApiType.Events.ResItem | ApiType.ResError,
+            FormData
+        >({
+            invalidatesTags: () => [{ type: 'Events' }, { type: 'Statistic' }],
+            query: (formState) => ({
+                body: formState,
+                method: 'POST',
+                url: 'events'
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        eventCoverUploadPost: builder.mutation<
+            ApiType.Events.ResItem | ApiType.ResError,
+            FormData
+        >({
+            query: (formData) => ({
+                body: formData,
+                method: 'POST',
+                url: `events/${formData.get('id')}/upload`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        eventPatch: builder.mutation<
+            ApiType.Events.ResItem | ApiType.ResError,
+            AstroStargazingFormType
+        >({
+            invalidatesTags: (result, error, { id }) => [
+                { id, type: 'Events' }
+            ],
+            query: ({ id, ...formState }) => ({
+                body: formState,
+                method: 'PATCH',
+                url: `events/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+
         eventsRegistrationPost: builder.mutation<
             ApiType.Events.ResRegistration | ApiType.ResError,
             ApiType.Events.ReqRegistration
@@ -165,6 +194,18 @@ export const API = createApi({
                 body: formState,
                 method: 'POST',
                 url: 'events/booking'
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        eventsCancelRegistrationPost: builder.mutation<
+            ApiType.Events.ResRegistration | ApiType.ResError,
+            Pick<ApiType.Events.ReqRegistration, 'eventId'>
+        >({
+            invalidatesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
+            query: (formState) => ({
+                body: formState,
+                method: 'POST',
+                url: 'events/cancel'
             }),
             transformErrorResponse: (response) => response.data
         }),

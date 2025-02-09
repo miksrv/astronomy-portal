@@ -21,7 +21,8 @@ class EventsModel extends ApplicationBaseModel
         'title_ru',
         'content_en',
         'content_ru',
-        'file_image',
+        'cover_file_name',
+        'cover_file_ext',
         'max_tickets',
         'yandex_map_link',
         'google_map_link',
@@ -43,8 +44,8 @@ class EventsModel extends ApplicationBaseModel
     protected $skipValidation       = true;
     protected $cleanValidationRules = true;
 
-    protected $allowCallbacks = true;
-    protected $beforeInsert   = ['generateId'];
+    protected $allowCallbacks = false;
+    protected $beforeInsert   = [];
     protected $afterInsert    = [];
     protected $beforeUpdate   = [];
     protected $afterUpdate    = [];
@@ -74,13 +75,13 @@ class EventsModel extends ApplicationBaseModel
     /**
      * Retrieves a list of past events or a specific event with localized titles and contents.
      *
-     * This method fetches either all past events up to the current date or, if an event ID is provided, 
-     * details for that specific event, including additional fields. Events are returned in descending 
+     * This method fetches either all past events up to the current date or, if an event ID is provided,
+     * details for that specific event, including additional fields. Events are returned in descending
      * order by date, with localized titles and contents based on the provided locale.
      *
      * @param string $locale The locale for localization of event titles and contents (default is 'ru').
      * @param int|null $eventId Optional. If provided, retrieves details for the specific event by ID.
-     * 
+     *
      * @return array|null Returns an array of events with localized fields, or an empty array if no events are found.
      */
     public function getPastEventsList(string $locale = 'ru', $eventId = null): ?array
@@ -89,7 +90,7 @@ class EventsModel extends ApplicationBaseModel
 
         $datetime = new Time('now');
 
-        $eventsQuery = $this->select('id, title_en, title_ru, date, file_image' . (
+        $eventsQuery = $this->select('id, title_en, title_ru, date, cover_file_name, cover_file_ext' . (
             $eventId !== null ? ', content_en, content_ru, max_tickets, date, registration_start, registration_end' : '')
         );
 

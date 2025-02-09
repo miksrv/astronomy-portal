@@ -12,7 +12,8 @@ class EventEntity extends Entity
         'title_ru'           => null,
         'content_en'         => null,
         'content_ru'         => null,
-        'file_image'         => null,
+        'cover_file_name'    => null,
+        'cover_file_ext'     => null,
         'max_tickets'        => null,
         'yandex_map_link'    => null,
         'google_map_link'    => null,
@@ -28,9 +29,10 @@ class EventEntity extends Entity
         // 'registrationStart' => 'registration_start',
         // 'registrationEnd'   => 'registration_end',
         // 'availableTickets'  => 'max_tickets',
-        'cover'     => 'file_image',
-        'yandexMap' => 'yandex_map_link',
-        'googleMap' => 'google_map_link',
+        'yandexMap'     => 'yandex_map_link',
+        'googleMap'     => 'google_map_link',
+        'coverFileName' => 'cover_file_name',
+        'coverFileExt'  => 'cover_file_ext',
     ];
 
     protected $dates   = [
