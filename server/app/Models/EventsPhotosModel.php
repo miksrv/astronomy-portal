@@ -17,12 +17,13 @@ class EventsPhotosModel extends ApplicationBaseModel
     protected $allowedFields    = [
         'event_id',
         'user_id',
-        'title',
-        'filename',
-        'extension',
-        'filesize',
-        'width',
-        'height',
+        'title_ru',
+        'title_en',
+        'file_name',
+        'file_ext',
+        'file_size',
+        'image_width',
+        'image_height',
     ];
 
     protected bool $allowEmptyInserts = false;
