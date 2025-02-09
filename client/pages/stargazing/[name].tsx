@@ -122,7 +122,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                 <h2
                     className={'subTitle'}
                     style={{ marginTop: 0 }}
-                >{`Фотографии с астровыезда - ${event?.title}`}</h2>
+                >{`${event?.title} - ${t('photos-from-stargazing')}`}</h2>
 
                 {user?.role === 'admin' && (
                     <Button
@@ -138,10 +138,11 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
 
                 <Gallery
                     photos={
-                        localPhotos?.map((photo) => ({
+                        localPhotos?.map((photo, index) => ({
                             height: photo.height,
                             src: `${hosts.stargazing}${eventId}/${photo.name}_preview.${photo?.ext}`,
-                            width: photo.width
+                            width: photo.width,
+                            alt: `${event?.title} (${t('photo')} ${index + 1})`
                         })) || []
                     }
                     columns={4}
@@ -167,7 +168,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                     height: photo.height,
                     src: `${hosts.stargazing}${eventId}/${photo.name}.${photo?.ext}`,
                     width: photo.width,
-                    title: `${event?.title} - Photo ${index}`
+                    title: `${event?.title} (${t('photo')} ${index + 1})`
                 }))}
                 photoIndex={photoIndex}
                 showLightbox={showLightbox}

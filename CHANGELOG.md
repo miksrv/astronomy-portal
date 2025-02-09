@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.0.7
+
+### Patch Changes
+
+-   Fixed bug in UI menu scroll
+-   Added new fields for API EventsPhotosModel
+-   Added new locales for UI
+-   Improved UI SEO stargazing photos alt and title
+-   Fixed API Controller for upload Events photos
+
 ## 4.0.6
 
 ### Patch Changes

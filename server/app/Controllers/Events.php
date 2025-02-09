@@ -473,25 +473,26 @@ class Events extends ResourceController
             ->fit(PHOTO_PREVIEW_WIDTH, PHOTO_PREVIEW_HEIGHT)
             ->save($eventDir . $name . '_preview.' . $ext);
 
-        $eventPhotosModel = new EventPhotosModel();
+        $eventPhotosModel = new EventsPhotosModel();
 
         $photo = new EventPhoto();
         $photo->event_id  = $eventData->id;
         $photo->user_id   = $this->session->user?->id;
-        $photo->title     = $eventData->title;
-        $photo->filename  = $name;
-        $photo->extension = $ext;
-        $photo->filesize  = $file->getSize();
-        $photo->width     = $width;
-        $photo->height    = $height;
+        $photo->title_ru  = $eventData->title_ru;
+        $photo->title_en  = $eventData->title_en;
+        $photo->file_name = $name;
+        $photo->file_ext  = $ext;
+        $photo->file_size = $file->getSize();
+        $photo->image_width  = $width;
+        $photo->image_height = $height;
 
         $eventPhotosModel->insert($photo);
         return $this->respondCreated((object) [
-            'full'    => 'stargazing/' . $id . '/' . $name . '.' . $ext,
-            'preview' => 'stargazing/' . $id . '/' . $name . '_preview.' . $ext,
-            'width'   => $photo->width,
-            'height'  => $photo->height,
-            'title'   => $photo->title,
+            'name'    => $name,
+            'ext'     => $ext,
+            'width'   => $photo->image_width,
+            'height'  => $photo->image_height,
+            'title'   => $photo->title_ru,
             'eventId' => $photo->event_id
         ]);
     }
