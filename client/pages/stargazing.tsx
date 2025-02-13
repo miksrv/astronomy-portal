@@ -1,6 +1,7 @@
 import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
+import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/tools/eventPhotos'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -18,24 +19,13 @@ import AppToolbar from '@/components/app-toolbar'
 import EventsList from '@/components/events-list'
 import PhotoLightbox from '@/components/photo-lightbox'
 
-import photoStargazing4 from '@/public/photos/stargazing-4.jpeg'
-import photoStargazing7 from '@/public/photos/stargazing-7.jpeg'
-import photoStargazing9 from '@/public/photos/stargazing-9.jpeg'
-import photoStargazing10 from '@/public/photos/stargazing-10.jpeg'
-
 interface StargazingPageProps {
     events: ApiModel.Event[]
+    photos: ApiModel.EventPhoto[]
 }
 
-const galleryStargazing: any[] = [
-    photoStargazing4,
-    photoStargazing7,
-    photoStargazing9,
-    photoStargazing10
-]
-
 // TODO Вместо галерии постоянных изображений тут, использовать загруженные фото астровыездов из API
-const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
+const StargazingPage: NextPage<StargazingPageProps> = ({ events, photos }) => {
     const { t, i18n } = useTranslation()
     const router = useRouter()
 
@@ -146,7 +136,14 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                 </ul>
 
                 <Gallery
-                    photos={galleryStargazing}
+                    photos={
+                        photos?.map((photo, index) => ({
+                            height: photo.height,
+                            src: createPreviewPhotoUrl(photo),
+                            width: photo.width,
+                            alt: `${photo?.title} (${t('photo')} ${index + 1})`
+                        })) || []
+                    }
                     columns={4}
                     direction={'row'}
                     targetRowHeight={200}
@@ -156,12 +153,16 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events }) => {
                 />
 
                 <PhotoLightbox
-                    photos={galleryStargazing.map((image) => ({
-                        src: image.src,
-                        width: image.width,
-                        height: image.height,
-                        title: ''
-                    }))}
+                    photos={
+                        photos?.map((photo, index) => ({
+                            height: photo.height,
+                            src: createFullPhotoUrl(photo),
+                            width: photo.width,
+                            title: `${photo?.title} (${t('photo')} ${
+                                index + 1
+                            })`
+                        })) || []
+                    }
                     photoIndex={photoIndex}
                     showLightbox={showLightbox}
                     onCloseLightBox={handleHideLightbox}
@@ -186,8 +187,15 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             store.dispatch(setLocale(locale))
 
-            const { data } = await store.dispatch(
+            const { data: eventsData } = await store.dispatch(
                 API.endpoints?.eventGetList.initiate()
+            )
+
+            const { data: photosData } = await store.dispatch(
+                API.endpoints?.eventGetPhotoList.initiate({
+                    limit: 4,
+                    order: 'rand'
+                })
             )
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
@@ -195,7 +203,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
             return {
                 props: {
                     ...translations,
-                    events: data?.items || []
+                    events: eventsData?.items || [],
+                    photos: photosData?.items || []
                 }
             }
         }

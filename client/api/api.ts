@@ -1,4 +1,9 @@
 import { ApiModel, ApiType } from '@/api'
+import {
+    RequestPhotoList,
+    ResponsePhoto,
+    ResponsePhotoList
+} from '@/api/types/events'
 import type { Action, PayloadAction } from '@reduxjs/toolkit'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { HYDRATE } from 'next-redux-wrapper'
@@ -124,12 +129,18 @@ export const API = createApi({
             providesTags: (result, error, id) => [{ id, type: 'Events' }],
             query: (id) => `events/${id}`
         }),
+        eventGetPhotoList: builder.query<
+            ApiType.Events.ResponsePhotoList,
+            ApiType.Events.RequestPhotoList
+        >({
+            query: (params) => `events/photos${encodeQueryData(params)}`
+        }),
         eventGetUpcoming: builder.query<ApiType.Events.ResItem, void>({
             providesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
             query: () => 'events/upcoming'
         }),
         eventPhotoUploadPost: builder.mutation<
-            ApiType.Events.ResUploadPhoto,
+            ApiType.Events.ResponsePhoto,
             ApiType.Events.ReqUploadPhoto
         >({
             invalidatesTags: (res, err, arg) => [

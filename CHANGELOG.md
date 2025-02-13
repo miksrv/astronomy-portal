@@ -4,6 +4,22 @@
 
 ### Patch Changes
 
+-   Improved Production CI/CD for API
+-   Refactoring and optimization of API Controllers
+-   Implemented new Method `getPhotoList` for EventsPhotosModel
+-   Added new UI API request `eventGetPhotoList`
+-   Added `eventId` and `title` for UI EventPhoto model
+-   Added new UI API Types - `RequestPhotoList` and `ResponsePhotoList`
+-   Implemented dynamic random photos from API for UI stargazing list page
+-   Implemented footer nav for stargazing page
+-   Added new UI helper `createPhotoUrl`
+-   Added new API Router - `/events/photos`
+-   Added `datamap` for API `EventPhotoEntity`
+
+## 4.0.7
+
+### Patch Changes
+
 -   Fixed bug in UI menu scroll
 -   Added new fields for API EventsPhotosModel
 -   Added new locales for UI
