@@ -14,13 +14,12 @@ import Link from 'next/link'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
 import Gallery from 'react-photo-gallery'
-import { Button, Container, Icon, IconTypes } from 'simple-react-ui-kit'
+import { Button, Container, Icon } from 'simple-react-ui-kit'
 
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import EventPhotoUploader from '@/components/event-photo-uploader/EventPhotoUploader'
-import styles from '@/components/events-list/styles.module.sass'
 import PhotoLightbox from '@/components/photo-lightbox'
 
 interface StargazingItemPageProps {
