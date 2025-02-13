@@ -42,10 +42,10 @@ class Photos extends ResourceController
     {
         helper('filters');
 
-        try {
-            $locale = $this->request->getLocale();
-            $object = $this->request->getGet('object');
+        $locale = $this->request->getLocale();
+        $object = $this->request->getGet('object');
 
+        try {
             // Fetch data from models
             $photosModel  = new PhotosModel();
             $filtersModel = new PhotosFiltersModel();

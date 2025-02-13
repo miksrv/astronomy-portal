@@ -18,8 +18,10 @@ export type Event = {
 }
 
 export type EventPhoto = {
+    eventId: string
     name: string
     ext: string
     width: number
     height: number
+    title?: string
 }

@@ -16,6 +16,21 @@ define('LIGHT_SWITCH_COOLDOWN', 60 * 5);
 define('LIGHT_SWITCH_OFF_INTERVAL', 60);
 define('LIGHT_SWITCH_NAME', 'LED Flat панель');
 
+/**
+ * Class Relay
+ *
+ * This class handles relay operations including listing relay states, setting relay states,
+ * and managing the light relay in the observatory.
+ *
+ * @package App\Controllers
+ *
+ * @method ResponseInterface list() Returns a list of relays with their states and user light relay permissions.
+ * @method ResponseInterface set() Sets the state of a relay by ID.
+ * @method ResponseInterface light() Turns on the relay connected to the observatory light if allowed.
+ * @method bool _userCanTurnLight(array $relayStates) Checks if the user can turn on the light relay.
+ * @method int _userTurnLightCooldown() Returns the cooldown time remaining before the user can turn on the light relay again.
+ * @method void _checkUserLightAndTurn(array $relayStates) Checks and manages the state of the light relay based on user actions and cooldown.
+ */
 class Relay extends ResourceController
 {
     use ResponseTrait;

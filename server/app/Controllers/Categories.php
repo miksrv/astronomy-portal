@@ -11,6 +11,12 @@ use CodeIgniter\API\ResponseTrait;
 use Config\Services;
 use Exception;
 
+/**
+ * Class Categories
+ * @package App\Controllers
+ *
+ * @method ResponseInterface list() Retrieves a list of categories
+ */
 class Categories extends ResourceController
 {
     use ResponseTrait;

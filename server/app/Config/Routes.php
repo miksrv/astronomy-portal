@@ -95,6 +95,7 @@ $routes->group('photos', static function ($routes) {
 $routes->group('events', static function ($routes) {
     $routes->get('/', 'Events::list');
     $routes->get('upcoming', 'Events::upcoming');
+    $routes->get('photos', 'Events::photos');
     $routes->get('(:any)', 'Events::show/$1');
 
     $routes->post('/', 'Events::create');

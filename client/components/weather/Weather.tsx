@@ -83,6 +83,8 @@ const Weather: React.FC = () => {
                                 ? '℃'
                                 : key === 'precipitation'
                                 ? 'мм'
+                                : key === 'humidity'
+                                ? '%'
                                 : 'м\\с'}
                         </span>
                     </div>

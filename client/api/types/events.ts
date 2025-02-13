@@ -6,7 +6,18 @@ export interface ResList {
 
 export interface ResItem extends ApiModel.Event {}
 
-export interface ResUploadPhoto extends ApiModel.EventPhoto {}
+export interface ResponsePhoto extends ApiModel.EventPhoto {}
+
+export interface RequestPhotoList {
+    eventId?: string
+    limit?: number
+    order?: 'date' | 'rand'
+}
+
+export interface ResponsePhotoList {
+    count?: number
+    items?: ApiModel.EventPhoto[]
+}
 
 export interface ReqUploadPhoto {
     formData?: FormData

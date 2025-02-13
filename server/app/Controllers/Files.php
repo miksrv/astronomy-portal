@@ -10,6 +10,17 @@ use CodeIgniter\API\ResponseTrait;
 use Config\Services;
 use Exception;
 
+/**
+ * Class Files
+ *
+ * This controller handles file operations such as showing, updating, and uploading images.
+ *
+ * @package App\Controllers
+ *
+ * @method ResponseInterface show($id = null) Retrieves and returns files associated with a specific object.
+ * @method ResponseInterface updates() Updates file information based on provided JSON input.
+ * @method ResponseInterface image() Handles image file uploads and generates thumbnails.
+ */
 class Files extends ResourceController
 {
     use ResponseTrait;
