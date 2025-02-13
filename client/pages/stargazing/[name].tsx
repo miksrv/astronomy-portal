@@ -2,32 +2,37 @@ import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
-import { sliceText } from '@/functions/helpers'
+import { formatDate, sliceText } from '@/functions/helpers'
+import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/tools/eventPhotos'
 import { removeMarkdown } from '@/tools/strings'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import Image from 'next/image'
-import React, { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
 import Gallery from 'react-photo-gallery'
-import { Button, Container } from 'simple-react-ui-kit'
+import { Button, Container, Icon, IconTypes } from 'simple-react-ui-kit'
 
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import EventPhotoUploader from '@/components/event-photo-uploader/EventPhotoUploader'
+import styles from '@/components/events-list/styles.module.sass'
 import PhotoLightbox from '@/components/photo-lightbox'
 
 interface StargazingItemPageProps {
     eventId: string
     event: ApiModel.Event | null
+    eventsList: ApiModel.Event[] | null
 }
 
 const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
     eventId,
-    event
+    event,
+    eventsList
 }) => {
     const { t, i18n } = useTranslation()
 
@@ -43,6 +48,30 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
     const [photoIndex, setPhotoIndex] = useState<number>()
 
     const title = `${t('stargazing')} - ${event?.title}`
+
+    const adjacentEvents = useMemo(() => {
+        const sortedEvents = [...(eventsList || [])].sort((a, b) => {
+            const dateA = a?.date?.date ? new Date(a.date.date).getTime() : 0
+            const dateB = b?.date?.date ? new Date(b.date.date).getTime() : 0
+            return dateA - dateB
+        })
+
+        const currentIndex = sortedEvents?.findIndex(({ id }) => id === eventId)
+
+        if (!currentIndex || currentIndex === -1) {
+            return { previousEvent: undefined, nextEvent: undefined }
+        }
+
+        const previousEvent =
+            !!sortedEvents?.length && currentIndex < sortedEvents?.length - 1
+                ? sortedEvents?.[currentIndex + 1]
+                : null
+
+        const nextEvent =
+            currentIndex > 0 ? sortedEvents?.[currentIndex - 1] : null
+
+        return { previousEvent, nextEvent }
+    }, [eventsList, eventId])
 
     const handleCloseLightbox = () => {
         setShowLightbox(false)
@@ -140,9 +169,9 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                     photos={
                         localPhotos?.map((photo, index) => ({
                             height: photo.height,
-                            src: `${hosts.stargazing}${eventId}/${photo.name}_preview.${photo?.ext}`,
+                            src: createPreviewPhotoUrl(photo),
                             width: photo.width,
-                            alt: `${event?.title} (${t('photo')} ${index + 1})`
+                            alt: `${photo?.title} (${t('photo')} ${index + 1})`
                         })) || []
                     }
                     columns={4}
@@ -166,14 +195,52 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
             <PhotoLightbox
                 photos={localPhotos?.map((photo, index) => ({
                     height: photo.height,
-                    src: `${hosts.stargazing}${eventId}/${photo.name}.${photo?.ext}`,
+                    src: createFullPhotoUrl(photo),
                     width: photo.width,
-                    title: `${event?.title} (${t('photo')} ${index + 1})`
+                    title: `${photo.title} (${t('photo')} ${index + 1})`
                 }))}
                 photoIndex={photoIndex}
                 showLightbox={showLightbox}
                 onCloseLightBox={handleCloseLightbox}
             />
+
+            <section className={'footerLinks'}>
+                {adjacentEvents?.previousEvent && (
+                    <Link
+                        href={`/stargazing/${adjacentEvents?.previousEvent?.id}`}
+                        title={adjacentEvents?.previousEvent?.title}
+                    >
+                        <Icon name={'KeyboardLeft'} />
+                        <div className={'linkName'}>
+                            <div>{adjacentEvents?.previousEvent?.title}</div>
+                            <div className={'date'}>
+                                {formatDate(
+                                    adjacentEvents?.previousEvent?.date?.date,
+                                    'D MMMM YYYY'
+                                )}
+                            </div>
+                        </div>
+                    </Link>
+                )}
+
+                {adjacentEvents?.nextEvent && (
+                    <Link
+                        href={`/stargazing/${adjacentEvents?.nextEvent?.id}`}
+                        title={adjacentEvents?.nextEvent?.title}
+                    >
+                        <div className={'linkName'}>
+                            <div>{adjacentEvents?.nextEvent?.title}</div>
+                            <div className={'date'}>
+                                {formatDate(
+                                    adjacentEvents?.nextEvent?.date?.date,
+                                    'D MMMM YYYY'
+                                )}
+                            </div>
+                        </div>
+                        <Icon name={'KeyboardRight'} />
+                    </Link>
+                )}
+            </section>
 
             <AppFooter />
         </AppLayout>
@@ -195,6 +262,10 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             store.dispatch(setLocale(locale))
 
+            const { data: eventsData } = await store.dispatch(
+                API.endpoints?.eventGetList.initiate()
+            )
+
             const { data, isError } = await store.dispatch(
                 API.endpoints?.eventGetItem.initiate(eventId)
             )
@@ -209,7 +280,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 props: {
                     ...translations,
                     event: data || null,
-                    eventId: eventId
+                    eventId: eventId,
+                    eventsList: eventsData?.items || []
                 }
             }
         }
