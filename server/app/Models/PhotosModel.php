@@ -87,8 +87,6 @@ class PhotosModel extends ApplicationBaseModel
      */
     protected function fetchPhotos(string $locale = 'ru', ?string $photo_id = null, ?string $object = null): array
     {
-        helper('locale');
-
         // Base query
         $photosQuery = $this->select('*');
 

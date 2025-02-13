@@ -11,6 +11,7 @@ use CodeIgniter\API\ResponseTrait;
 use Config\Services;
 use Exception;
 
+/** DEPRECATED **/
 class Author extends ResourceController
 {
     use ResponseTrait;
@@ -50,7 +51,7 @@ class Author extends ResourceController
 
         return $this->respond(['items' => $dataAuthors]);
     }
-    
+
     /**
      * Create new author
      * @param null $id

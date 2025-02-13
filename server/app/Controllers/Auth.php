@@ -22,6 +22,21 @@ define('AUTH_TYPE_GOOGLE', 'google');
 define('AUTH_TYPE_YANDEX', 'yandex');
 define('AUTH_TYPE_VK', 'vk');
 
+/**
+ * Class Auth
+ * Handles user authentication via various services (Google, Yandex, VK).
+ *
+ * @package App\Controllers
+ *
+ * @method ResponseInterface me() Updates the session and returns the authentication response.
+ * @method ResponseInterface google() Authenticates the user via Google.
+ * @method ResponseInterface yandex() Authenticates the user via Yandex.
+ * @method ResponseInterface vk() Authenticates the user via VK.
+ * @method bool validateRequest($input, array $rules, array $messages = []) Validates the request input.
+ * @method mixed getRequestInput(IncomingRequest $request) Retrieves the input from the request.
+ * @method ResponseInterface _serviceAuth(string $authType, object | null $serviceProfile) Handles the service authentication.
+ * @method ResponseInterface responseAuth() Returns the authentication response.
+ */
 class Auth extends ResourceController
 {
     private SessionLibrary $session;

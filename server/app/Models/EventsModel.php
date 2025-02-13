@@ -118,7 +118,7 @@ class EventsModel extends ApplicationBaseModel
             // Remove unnecessary fields
             unset(
                 $event->title_en, $event->title_ru,
-                $event->content_en, $event->content_ru,
+                $event->content_en, $event->content_ru
             );
         }
 

@@ -7,6 +7,12 @@ use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 
+/**
+ * Class Camera
+ * @package App\Controllers
+ *
+ * @method ResponseInterface show($id = null) Camera image by id
+ */
 class Camera extends ResourceController
 {
     use ResponseTrait;

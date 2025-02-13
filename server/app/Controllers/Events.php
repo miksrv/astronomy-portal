@@ -22,6 +22,19 @@ use Longman\TelegramBot\Telegram;
 use ReflectionException;
 use Exception;
 
+/**
+ * Class Events
+ * @package App\Controllers
+ *
+ * @method ResponseInterface upcoming() Retrieves the upcoming event details.
+ * @method ResponseInterface list() Retrieves a list of past events with localized details.
+ * @method ResponseInterface show(int|null $id) Retrieves detailed information for a specific past event by its ID with localized content.
+ * @method ResponseInterface create() Creates a new event with the provided details.
+ * @method ResponseInterface booking() Books a user for an event.
+ * @method ResponseInterface cancel() Cancels a user's booking for an event.
+ * @method ResponseInterface upload(int|null $id) Uploads a photo for a specific event by its ID.
+ * @method ResponseInterface delete(int|null $id) Deletes an event by its ID.
+ */
 class Events extends ResourceController
 {
     private SessionLibrary $session;
@@ -89,11 +102,45 @@ class Events extends ResourceController
      */
     public function list(): ResponseInterface
     {
-        try {
-            $locale = $this->request->getLocale();
+        $locale = $this->request->getLocale();
 
+        try {
             // Fetch data from models
             $result = $this->model->getPastEventsList($locale);
+
+            // Return the response with count and items
+            return $this->respond([
+                'count' => count($result),
+                'items' => $result
+            ]);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * Retrieves a list of event photos with localized details and returns them in a structured response.
+     *
+     * This method fetches the list of event photos using the specified locale, event, limit, and order,
+     * which are obtained from the request object. The response includes the count of photos and an array of photo items.
+     * If an error occurs, a server error response is returned and the exception is logged.
+     *
+     * @return ResponseInterface Returns a JSON response with the count and items or an error message on failure.
+     */
+    public function photos(): ResponseInterface
+    {
+        $locale = $this->request->getLocale();
+        $limit  = $this->request->getGet('limit', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $order  = $this->request->getGet('order', FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+        $event  = $this->request->getGet('eventId', FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+
+        try {
+            $eventPhotosModel = new EventsPhotosModel();
+
+            // Fetch data from models
+            $result = $eventPhotosModel->getPhotoList($locale, $event, $limit, $order);
 
             // Return the response with count and items
             return $this->respond([
@@ -122,10 +169,10 @@ class Events extends ResourceController
      */
     public function show($id = null): ResponseInterface
     {
+        $locale = $this->request->getLocale();
+
         // TODO Если событие архивное - не нужно присылать ссылку на карты, даты начала и окончания регистрации
         try {
-            $locale = $this->request->getLocale();
-
             // Fetch data from models
             $result = $this->model->getPastEventsList($locale, $id);
 
@@ -134,24 +181,10 @@ class Events extends ResourceController
             }
 
             $eventPhotosModel = new EventsPhotosModel();
-            $eventPhotosData  = $eventPhotosModel->where(['event_id' => $id])->findAll();
+            $eventPhotosData  = $eventPhotosModel->getPhotoList($locale, $id);
 
             $result = $result[0];
-
-            if ($eventPhotosData) {
-                $photos = [];
-
-                foreach ($eventPhotosData as $eventPhoto) {
-                    $photos[] = [
-                        'name'   => $eventPhoto->file_name,
-                        'ext'    => $eventPhoto->file_ext,
-                        'width'  => $eventPhoto->image_width,
-                        'height' => $eventPhoto->image_height
-                    ];
-                }
-
-                $result->photos = $photos;
-            }
+            $result->photos = $eventPhotosData;
 
             return $this->respond($result);
         } catch (Exception $e) {
