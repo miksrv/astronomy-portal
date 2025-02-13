@@ -55,11 +55,9 @@ jobs:
             open ${{ secrets.FTP_HOSTNAME }};
             set ftp:ssl-allow no;
             put -O / .htaccess;
-            rm -r app;
-            rm -r vendor;
-            mirror --parallel=100 -R app;
-            mirror --parallel=100 -R vendor;
-            mirror --parallel=100 -R public;
-            mirror --parallel=100 -R writable;
+            mirror --parallel=20 -R app;
+            mirror --parallel=20 -R vendor;
+            mirror --parallel=20 -R public;
+            mirror --parallel=20 -R writable;
             bye"
         working-directory: server
