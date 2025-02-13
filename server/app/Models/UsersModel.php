@@ -54,8 +54,10 @@ class UsersModel extends ApplicationBaseModel {
     protected $afterDelete    = [];
 
     /**
-     * @param string $emailAddress
-     * @return UserEntity|array|null
+     * Finds a user by their email address.
+     *
+     * @param string $emailAddress The email address to search for.
+     * @return UserEntity|array|null The user entity or an array of user data, or null if not found.
      */
     public function findUserByEmailAddress(string $emailAddress): UserEntity | array | null
     {
