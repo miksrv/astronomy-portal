@@ -19,8 +19,11 @@
         "prettier:fix": "prettier --write ."
     },
     "dependencies": {
+        "astronomy-engine": "^2.1.19",
         "cookies-next": "^5.1.0",
         "dayjs": "^1.11.13",
+        "echarts": "^5.6.0",
+        "echarts-for-react": "^3.0.2",
         "embla-carousel-auto-scroll": "^8.5.2",
         "embla-carousel-react": "^8.5.2",
         "i18next": "^23.16.8",
