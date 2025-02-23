@@ -71,12 +71,13 @@ class Photos extends ResourceController
     }
 
     /**
-     * Photo item by name and date (optional).
+     * Retrieves a photo item by name and date (optional).
      * If there are more than 2 photos with the same object (name) and no date is used,
      * this function will return the newest photo.
-     * @param null $id
-     * @param null $date
-     * @return ResponseInterface
+     *
+     * @param null $id The ID of the photo.
+     * @param null $date The date of the photo.
+     * @return ResponseInterface Returns a response containing the photo item.
      */
     public function show($id = null, $date = null): ResponseInterface
     {
@@ -106,10 +107,11 @@ class Photos extends ResourceController
     }
 
     /**
-     * Download photo as file
-     * @param $id
-     * @param $date
-     * @return ResponseInterface
+     * Downloads a photo as a file.
+     *
+     * @param $id The ID of the photo.
+     * @param $date The date of the photo.
+     * @return ResponseInterface Returns a response to download the photo file.
      */
     public function download($id = null, $date = null): ResponseInterface
     {
@@ -135,9 +137,10 @@ class Photos extends ResourceController
     }
 
     /**
-     * Create new photo item.
-     * First, use the photo upload function, which returns the data of the uploaded image.
-     * @return ResponseInterface
+     * Creates a new photo item.
+     * First, uses the photo upload function, which returns the data of the uploaded image.
+     *
+     * @return ResponseInterface Returns a response indicating the creation status.
      */
     public function create(): ResponseInterface
     {
@@ -145,11 +148,12 @@ class Photos extends ResourceController
     }
 
     /**
-     * Update exist photo item
-     * TODO: Если при сохранении фотографии меняется список объектов или дата -
-     * нужно переименовать директорию и файлы или запретить изменение этого при редактировании
-     * @param null $id
-     * @return ResponseInterface
+     * Updates an existing photo item.
+     * If the list of objects or the date changes when saving the photo,
+     * the directory and files need to be renamed or the change should be prohibited during editing.
+     *
+     * @param null $id The ID of the photo.
+     * @return ResponseInterface Returns a response indicating the update status.
      */
     public function update($id = null): ResponseInterface
     {
@@ -157,9 +161,11 @@ class Photos extends ResourceController
     }
 
     /**
-     * Uploads a new photo, create a thumbnail and return the data of the uploaded photo.
-     * TODO: Если расширение старого файла отличается от расширения нового - старая фотография не удаляется
-     * @return ResponseInterface
+     * Uploads a new photo, creates a thumbnail, and returns the data of the uploaded photo.
+     * If the extension of the old file differs from the extension of the new one, the old photo is not deleted.
+     *
+     * @param null $id The ID of the photo.
+     * @return ResponseInterface Returns a response indicating the upload status.
      */
     public function upload($id = null): ResponseInterface
     {
@@ -205,9 +211,10 @@ class Photos extends ResourceController
     }
 
     /**
-     * Soft delete photo item
-     * @param null $id
-     * @return ResponseInterface
+     * Soft deletes a photo item.
+     *
+     * @param null $id The ID of the photo.
+     * @return ResponseInterface Returns a response indicating the deletion status.
      */
     public function delete($id = null): ResponseInterface
     {
@@ -232,6 +239,12 @@ class Photos extends ResourceController
         }
     }
 
+    /**
+     * Saves a photo item. This method is used for both creating and updating photo items.
+     *
+     * @param null $id The ID of the photo.
+     * @return ResponseInterface Returns a response indicating the save status.
+     */
     protected function save($id = null)
     {
         if ($this->session?->user?->role !== 'admin') {

@@ -18,6 +18,7 @@ import ObjectDescription from '@/components/object-description'
 import ObjectFilesTable from '@/components/object-files-table'
 import ObjectHeader from '@/components/object-header'
 import ObjectPhotoTable from '@/components/object-photos-table'
+import VisibilityChart from '@/components/visibility-chart'
 
 interface ObjectItemPageProps {
     objectName: string
@@ -129,6 +130,8 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
             {!!photosList?.length && (
                 <ObjectPhotoTable photosList={photosList} />
             )}
+
+            <VisibilityChart object={objectData} />
 
             <ObjectFilesTable
                 filesList={objectFilesData?.items}

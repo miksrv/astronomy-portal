@@ -76,6 +76,10 @@
     "moon": "Moon",
     "no-fits-files": "No saved FITS files for this object",
     "telegram-subscription": "To not miss announcements - subscribe to the Telegram channel",
+    "visibility-chart": {
+        "title": "Visibility chart of {{name}} during the day",
+        "description": "The height diagram of {{name}} above the horizon during the current day for the observatory observation point in Orenburg ({{lat}}, {{lon}}). The chart shows when the object is above the horizon and at what maximum height in degrees it rises. The data is relevant for the observation date: {{date}}."
+    },
     "equipment": {
         "mount": "Mount",
         "scope": "Telescope",

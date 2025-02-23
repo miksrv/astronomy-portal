@@ -9,16 +9,23 @@ use CodeIgniter\RESTful\ResourceController;
 use ReflectionException;
 use Exception;
 
+/**
+ * Class System
+ *
+ * This controller handles the recalculation of FITS filter statistics for each object.
+ *
+ * @package App\Controllers
+ */
 class System extends ResourceController
 {
-	/**
-	 * Recalculates the FITS filter statistics for each object.
-	 *
-	 * It aggregates data from the files and updates the corresponding filters
-	 * in the database if there are changes in frame count, exposure time, or file size.
-	 *
-	 * @return void
-	 */
+    /**
+     * Recalculates the FITS filter statistics for each object.
+     *
+     * It aggregates data from the files and updates the corresponding filters
+     * in the database if there are changes in frame count, exposure time, or file size.
+     *
+     * @return void
+     */
 	public function recalculateFitsFilters(): void
 	{
 		helper('filters');
