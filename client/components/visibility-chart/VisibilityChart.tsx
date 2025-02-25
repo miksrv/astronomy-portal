@@ -2,12 +2,13 @@ import * as Astronomy from 'astronomy-engine'
 import { ApiModel } from '@/api'
 import { formatDate } from '@/tools/dates'
 import { formatObjectName } from '@/tools/strings'
+import { AstroTime, Observer } from 'astronomy-engine'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import ReactECharts from 'echarts-for-react'
 import { useTranslation } from 'next-i18next'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Container } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
@@ -44,6 +45,8 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
     const borderColor = '#444546' // --input-border-color
     const textSecondaryColor = '#76787a' // --text-color-secondary
 
+    const objectName = object?.title || formatObjectName(object?.name)
+
     useEffect(() => {
         if (!object?.ra || !object?.dec) {
             return
@@ -51,11 +54,8 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
 
         const observer = new Astronomy.Observer(lat, lon, 0)
 
-        const startOfDay = new Date(date)
-        startOfDay.setHours(0, 0, 0, 0)
-
-        const endOfDay = new Date(startOfDay)
-        endOfDay.setDate(endOfDay.getDate() + 1)
+        const startOfDay = dayjs(date).startOf('day').toDate()
+        const endOfDay = dayjs(date).endOf('day').toDate()
 
         const startTime = Astronomy.MakeTime(startOfDay)
         const endTime = Astronomy.MakeTime(endOfDay)
@@ -64,107 +64,39 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
         const interval = 15 * 60
         const intervalInDays = interval / 86400
 
-        const sunEvents = {
-            rise: Astronomy.SearchRiseSet(
-                Astronomy.Body.Sun,
-                observer,
-                1, // Восход
-                Astronomy.MakeTime(startOfDay),
-                1
-            ),
-            set: Astronomy.SearchRiseSet(
-                Astronomy.Body.Sun,
-                observer,
-                -1, // Закат
-                Astronomy.MakeTime(startOfDay),
-                1
-            ),
-            civilDawn: Astronomy.SearchAltitude(
-                Astronomy.Body.Sun,
-                observer,
-                1, // Восход
-                Astronomy.MakeTime(startOfDay),
-                1,
-                -6 // Высота
-            ),
-            nauticalDawn: Astronomy.SearchAltitude(
-                Astronomy.Body.Sun,
-                observer,
-                1,
-                Astronomy.MakeTime(startOfDay),
-                1,
-                -12
-            ),
-            astroDawn: Astronomy.SearchAltitude(
-                Astronomy.Body.Sun,
-                observer,
-                1,
-                Astronomy.MakeTime(startOfDay),
-                1,
-                -18
-            ),
-            astroDusk: Astronomy.SearchAltitude(
-                Astronomy.Body.Sun,
-                observer,
-                -1, // Закат
-                Astronomy.MakeTime(startOfDay),
-                1,
-                -18
-            ),
-            nauticalDusk: Astronomy.SearchAltitude(
-                Astronomy.Body.Sun,
-                observer,
-                -1,
-                Astronomy.MakeTime(startOfDay),
-                1,
-                -12
-            ),
-            civilDusk: Astronomy.SearchAltitude(
-                Astronomy.Body.Sun,
-                observer,
-                -1,
-                Astronomy.MakeTime(startOfDay),
-                1,
-                -6
-            )
-        }
-
+        const sunEvents = makeSunEvents(observer, startTime)
         const twilightPhases = [
             {
-                name: 'Астрономическая ночь',
-                start: sunEvents.astroDusk,
-                end: sunEvents.astroDawn,
-                color: 'rgba(0, 0, 0, 0.6)'
+                // День
+                start: startOfDay,
+                end: endOfDay,
+                color: 'rgba(255, 255, 255, .1)'
             },
             {
-                name: 'Навигационные сумерки',
-                start: sunEvents.nauticalDusk,
-                end: sunEvents.nauticalDawn,
-                color: 'rgba(20, 20, 60, 0.5)'
+                // Гражданские сумерки
+                start: sunEvents.civilDusk?.date,
+                end: sunEvents.civilDawn?.date,
+                color: 'rgba(98, 98, 145, .4)'
             },
             {
-                name: 'Гражданские сумерки',
-                start: sunEvents.civilDusk,
-                end: sunEvents.civilDawn,
-                color: 'rgba(50, 50, 100, 0.4)'
+                // Навигационные сумерки
+                start: sunEvents.nauticalDusk?.date,
+                end: sunEvents.nauticalDawn?.date,
+                color: 'rgba(20, 20, 60, .3)'
             },
             {
-                name: 'День',
-                start: sunEvents.rise,
-                end: sunEvents.set,
-                color: 'rgba(255, 255, 255, 0.2)'
+                // Астрономическая ночь
+                start: sunEvents.astroDusk?.date,
+                end: sunEvents.astroDawn?.date,
+                color: 'rgba(0, 0, 0, .3)'
             }
         ].map((phase) => [
             {
-                xAxis: dayjs(phase?.start?.date)
-                    .tz('Asia/Yekaterinburg')
-                    .toISOString(),
+                xAxis: dayjs(phase?.start).toISOString(),
                 itemStyle: { color: phase.color }
             },
             {
-                xAxis: dayjs(phase?.end?.date)
-                    .tz('Asia/Yekaterinburg')
-                    .toISOString(),
+                xAxis: dayjs(phase?.end).toISOString(),
                 itemStyle: { color: phase.color }
             }
         ])
@@ -185,7 +117,7 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
             )
 
             data.push([
-                dayjs(time.date).tz('Asia/Yekaterinburg').toISOString(),
+                dayjs(time.date.toUTCString()).format('YYYY-MM-DDTHH:mm:ss'),
                 hor.altitude.toFixed(2)
             ])
         }
@@ -194,107 +126,136 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
         setLoading(false)
     }, [object?.ra, object?.dec])
 
-    const options = {
-        grid: {
-            left: 10,
-            right: 10,
-            top: 10,
-            bottom: 10,
-            containLabel: true,
-            borderColor: borderColor
-        },
-        loading,
-        tooltip: {
-            trigger: 'axis',
-            backgroundColor,
-            borderColor,
-            formatter: (params: any) => {
-                const tooltipContent: string[] = []
+    const now = dayjs().utc().format('YYYY-MM-DDTHH:mm:ssZ')
+    const closestPoint = (chartData || []).reduce(
+        (prev, curr) =>
+            Math.abs(dayjs(curr[0]).diff(now)) <
+            Math.abs(dayjs(prev[0]).diff(now))
+                ? curr
+                : prev,
+        chartData[0] || []
+    )
 
-                if (params.length > 0) {
-                    const header = `<div class="${
-                        styles.chartTooltipTitle
-                    }">${formatDate(params[0].axisValueLabel)}</div>`
-                    tooltipContent.push(header)
-                }
-
-                params.forEach((item: any) => {
-                    const colorSquare = `<span class="${styles.icon}" style="background-color: ${item.color};"></span>`
-                    const seriesValue = `<span class="${styles.value}">${
-                        item.value?.[1] ?? '---'
-                    }</span>`
-                    const seriesName = `<span class="${styles.label}">${item.seriesName}<span>${seriesValue}°</span></span>`
-
-                    const row = `<div class="${styles.chartTooltipItem}">${colorSquare} ${seriesName}</div>`
-                    tooltipContent.push(row)
-                })
-
-                // Return the merged contents of the tooltip
-                return tooltipContent.join('')
-            }
-        },
-        xAxis: {
-            type: 'time',
-            axisTick: {
-                show: true
+    const options = useMemo(
+        () => ({
+            // useUTC: true,
+            grid: {
+                left: 10,
+                right: 10,
+                top: 10,
+                bottom: 10,
+                containLabel: true,
+                borderColor: borderColor
             },
-            axisLine: {
-                show: true,
-                lineStyle: {
-                    color: borderColor
-                }
-            },
-            splitLine: {
-                show: true,
-                lineStyle: {
-                    width: 1,
-                    color: borderColor
-                }
-            }
-        },
-        yAxis: {
-            type: 'value',
-            name: 'Высота (°)',
-            min: 0,
-            max: 90,
-            interval: 10,
-            axisLine: {
-                show: true,
-                lineStyle: {
-                    color: borderColor // Y axis color
+            loading,
+            tooltip: {
+                trigger: 'axis',
+                backgroundColor,
+                borderColor,
+                formatter: (params: any) => {
+                    const tooltipContent: string[] = []
+
+                    if (params.length > 0) {
+                        const header = `<div class="${
+                            styles.chartTooltipTitle
+                        }">${formatDate(params[0].axisValueLabel)}</div>`
+                        tooltipContent.push(header)
+                    }
+
+                    params.forEach((item: any) => {
+                        const colorSquare = `<span class="${styles.icon}" style="background-color: ${item.color};"></span>`
+                        const seriesValue = `<span class="${styles.value}">${
+                            item.value?.[1] ?? '---'
+                        }</span>`
+                        const seriesName = `<span class="${styles.label}">${item.seriesName}<span>${seriesValue}°</span></span>`
+
+                        const row = `<div class="${styles.chartTooltipItem}">${colorSquare} ${seriesName}</div>`
+                        tooltipContent.push(row)
+                    })
+
+                    return tooltipContent.join('')
                 }
             },
-            axisLabel: {
-                show: true,
-                formatter: '{value}°',
-                color: textSecondaryColor, // Color of Y axis labels
-                fontSize: '11px'
+            xAxis: {
+                type: 'time',
+                axisTick: {
+                    show: true
+                },
+                axisLabel: {
+                    show: true,
+                    color: textSecondaryColor, // Color of Y axis labels
+                    fontSize: '11px'
+                },
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: borderColor
+                    }
+                },
+                splitLine: {
+                    show: true,
+                    lineStyle: {
+                        width: 1,
+                        color: borderColor
+                    }
+                }
             },
-            splitLine: {
-                show: true,
-                lineStyle: {
-                    width: 1,
-                    color: borderColor // Grid line color
+            yAxis: {
+                type: 'value',
+                name: `${t('height')} (°)`,
+                min: 0,
+                max: 90,
+                interval: 10,
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: borderColor // Y axis color
+                    }
+                },
+                axisLabel: {
+                    show: true,
+                    formatter: '{value}°',
+                    color: textSecondaryColor, // Color of Y axis labels
+                    fontSize: '11px'
+                },
+                splitLine: {
+                    show: true,
+                    lineStyle: {
+                        width: 1,
+                        color: borderColor // Grid line color
+                    }
                 }
-            }
-        },
-        series: [
-            {
-                name: 'Высота',
-                type: 'line',
-                data: chartData,
-                showSymbol: false,
-                smooth: false,
-                connectNulls: true,
-                markArea: {
-                    silent: true,
-                    data: markAreas
+            },
+            series: [
+                {
+                    name: t('height'),
+                    type: 'line',
+                    data: chartData,
+                    showSymbol: false,
+                    smooth: false,
+                    connectNulls: true,
+                    markArea: {
+                        silent: true,
+                        data: markAreas
+                    },
+                    markPoint: {
+                        symbol: 'circle',
+                        symbolSize: 10,
+                        itemStyle: {
+                            color: 'red'
+                        },
+                        data: [
+                            {
+                                xAxis: closestPoint[0],
+                                yAxis: closestPoint[1]
+                            }
+                        ]
+                    }
                 }
-            }
-        ]
-    }
-
-    const objectName = object?.title || formatObjectName(object?.name)
+            ]
+        }),
+        [chartData, markAreas]
+    )
 
     return (
         <Container className={styles.container}>
@@ -315,6 +276,28 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
             />
         </Container>
     )
+}
+
+/**
+ * Calculates various sun events (rise, set, and twilight phases) for a given observer and time.
+ *
+ * @param {Observer} observer - The observer's location.
+ * @param {AstroTime} time - The time at which to calculate the sun events.
+ * @returns {Object} An object containing the times of various sun events.
+ */
+const makeSunEvents = (observer: Observer, time: AstroTime) => {
+    const sun = Astronomy.Body.Sun
+
+    return {
+        rise: Astronomy.SearchRiseSet(sun, observer, 1, time, 1),
+        set: Astronomy.SearchRiseSet(sun, observer, -1, time, 1),
+        civilDawn: Astronomy.SearchAltitude(sun, observer, 1, time, 1, -6),
+        nauticalDawn: Astronomy.SearchAltitude(sun, observer, 1, time, 1, -12),
+        astroDawn: Astronomy.SearchAltitude(sun, observer, 1, time, 1, -18),
+        astroDusk: Astronomy.SearchAltitude(sun, observer, -1, time, 1, -18),
+        nauticalDusk: Astronomy.SearchAltitude(sun, observer, -1, time, 1, -12),
+        civilDusk: Astronomy.SearchAltitude(sun, observer, -1, time, 1, -6)
+    }
 }
 
 export default VisibilityChart
