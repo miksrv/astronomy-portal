@@ -57,7 +57,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
 
         const currentIndex = sortedEvents?.findIndex(({ id }) => id === eventId)
 
-        if (!currentIndex || currentIndex === -1) {
+        if (currentIndex === -1) {
             return { previousEvent: undefined, nextEvent: undefined }
         }
 
