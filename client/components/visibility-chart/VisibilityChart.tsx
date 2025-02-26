@@ -44,7 +44,7 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
     const borderColor = '#444546' // --input-border-color
     const textSecondaryColor = '#76787a' // --text-color-secondary
 
-    const date = dayjs().utc().startOf('day')
+    const date = dayjs().tz('Asia/Yekaterinburg').startOf('day')
 
     const objectName = object?.title || formatObjectName(object?.name)
 
@@ -112,24 +112,23 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
         const data: ChartDataType[] = Array.from(
             { length: Math.ceil((endTime.ut - startTime.ut) / intervalInDays) },
             (_, i) => {
-                const time = Astronomy.MakeTime(
+                const chartTime = Astronomy.MakeTime(
                     startTime.ut + i * intervalInDays
                 )
 
+                const astroTime = Astronomy.MakeTime(
+                    startTime.ut + i * intervalInDays - dayjs().utcOffset()
+                )
+
                 const hor = Astronomy.Horizon(
-                    time,
+                    astroTime,
                     observer,
                     object?.ra || 0,
                     object?.dec || 0,
                     'normal'
                 )
 
-                return [
-                    dayjs(time.date.toUTCString()).format(
-                        'YYYY-MM-DDTHH:mm:ssZ'
-                    ),
-                    hor.altitude.toFixed(2)
-                ]
+                return [chartTime.date.toISOString(), hor.altitude.toFixed(2)]
             }
         )
 
