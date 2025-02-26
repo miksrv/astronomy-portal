@@ -39,11 +39,12 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
     const [chartData, setChartData] = useState<ChartDataType>([])
     const [markAreas, setMarkAreas] = useState<MarkAreaType>([])
     const [loading, setLoading] = useState<boolean>(true)
-    const date = new Date()
 
     const backgroundColor = '#2c2d2e' // --container-background-color
     const borderColor = '#444546' // --input-border-color
     const textSecondaryColor = '#76787a' // --text-color-secondary
+
+    const date = dayjs().utc().startOf('day')
 
     const objectName = object?.title || formatObjectName(object?.name)
 
@@ -54,14 +55,13 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
 
         const observer = new Astronomy.Observer(lat, lon, 0)
 
-        const startOfDay = dayjs(date).startOf('day').toDate()
-        const endOfDay = dayjs(date).endOf('day').toDate()
+        const startOfDay = dayjs(date).add(-12, 'hour').toDate()
+        const endOfDay = dayjs(date).add(12, 'hour').toDate()
 
         const startTime = Astronomy.MakeTime(startOfDay)
         const endTime = Astronomy.MakeTime(endOfDay)
 
-        const data: ChartDataType[] = []
-        const interval = 15 * 60
+        const interval = 5 * 60
         const intervalInDays = interval / 86400
 
         const sunEvents = makeSunEvents(observer, startTime)
@@ -89,6 +89,12 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
                 start: sunEvents.astroDusk?.date,
                 end: sunEvents.astroDawn?.date,
                 color: 'rgba(0, 0, 0, .3)'
+            },
+            {
+                // Текущая область времени
+                start: dayjs().subtract(interval, 'second').toDate(),
+                end: dayjs().toDate(),
+                color: 'rgba(255, 0, 0, .3)'
             }
         ].map((phase) => [
             {
@@ -103,42 +109,36 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
 
         setMarkAreas(twilightPhases)
 
-        for (
-            let time = startTime;
-            time.ut < endTime.ut;
-            time = Astronomy.MakeTime(time.ut + intervalInDays)
-        ) {
-            const hor = Astronomy.Horizon(
-                time,
-                observer,
-                object?.ra,
-                object?.dec,
-                'normal'
-            )
+        const data: ChartDataType[] = Array.from(
+            { length: Math.ceil((endTime.ut - startTime.ut) / intervalInDays) },
+            (_, i) => {
+                const time = Astronomy.MakeTime(
+                    startTime.ut + i * intervalInDays
+                )
 
-            data.push([
-                dayjs(time.date.toUTCString()).format('YYYY-MM-DDTHH:mm:ss'),
-                hor.altitude.toFixed(2)
-            ])
-        }
+                const hor = Astronomy.Horizon(
+                    time,
+                    observer,
+                    object?.ra || 0,
+                    object?.dec || 0,
+                    'normal'
+                )
+
+                return [
+                    dayjs(time.date.toUTCString()).format(
+                        'YYYY-MM-DDTHH:mm:ssZ'
+                    ),
+                    hor.altitude.toFixed(2)
+                ]
+            }
+        )
 
         setChartData(data)
         setLoading(false)
     }, [object?.ra, object?.dec])
 
-    const now = dayjs().utc().format('YYYY-MM-DDTHH:mm:ssZ')
-    const closestPoint = (chartData || []).reduce(
-        (prev, curr) =>
-            Math.abs(dayjs(curr[0]).diff(now)) <
-            Math.abs(dayjs(prev[0]).diff(now))
-                ? curr
-                : prev,
-        chartData[0] || []
-    )
-
     const options = useMemo(
         () => ({
-            // useUTC: true,
             grid: {
                 left: 10,
                 right: 10,
@@ -156,9 +156,25 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
                     const tooltipContent: string[] = []
 
                     if (params.length > 0) {
-                        const header = `<div class="${
-                            styles.chartTooltipTitle
-                        }">${formatDate(params[0].axisValueLabel)}</div>`
+                        const header =
+                            `<div class="${
+                                styles.chartTooltipTitle
+                            }">Local: ${formatDate(
+                                params[0].axisValueLabel
+                            )}</div>` +
+                            `<div class="${
+                                styles.chartTooltipTitle
+                            }">UTC: ${formatDate(
+                                dayjs(params[0].axisValueLabel).utc()
+                            )}</div>` +
+                            `<div class="${
+                                styles.chartTooltipTitle
+                            }">Observatory: ${formatDate(
+                                dayjs(params[0].axisValueLabel)
+                                    .utc()
+                                    .tz('Asia/Yekaterinburg')
+                            )}</div>`
+
                         tooltipContent.push(header)
                     }
 
@@ -183,7 +199,7 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
                 },
                 axisLabel: {
                     show: true,
-                    color: textSecondaryColor, // Color of Y axis labels
+                    color: textSecondaryColor,
                     fontSize: '11px'
                 },
                 axisLine: {
@@ -209,20 +225,20 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
                 axisLine: {
                     show: true,
                     lineStyle: {
-                        color: borderColor // Y axis color
+                        color: borderColor
                     }
                 },
                 axisLabel: {
                     show: true,
                     formatter: '{value}°',
-                    color: textSecondaryColor, // Color of Y axis labels
+                    color: textSecondaryColor,
                     fontSize: '11px'
                 },
                 splitLine: {
                     show: true,
                     lineStyle: {
                         width: 1,
-                        color: borderColor // Grid line color
+                        color: borderColor
                     }
                 }
             },
@@ -237,19 +253,6 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
                     markArea: {
                         silent: true,
                         data: markAreas
-                    },
-                    markPoint: {
-                        symbol: 'circle',
-                        symbolSize: 10,
-                        itemStyle: {
-                            color: 'red'
-                        },
-                        data: [
-                            {
-                                xAxis: closestPoint[0],
-                                yAxis: closestPoint[1]
-                            }
-                        ]
                     }
                 }
             ]
