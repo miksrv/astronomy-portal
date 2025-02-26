@@ -1,27 +1,36 @@
 /**
- * Converts decimal degrees to a string in either hours, minutes, and seconds (HMS) format
- * or degrees, minutes, and seconds (DMS) format.
+ * Formats the given right ascension (RA) value into a string.
  *
- * @param {number} degrees - The decimal degrees to convert.
- * @param {boolean} [isRA=false] - If true, converts to HMS format (used for Right Ascension).
- *                                 If false, converts to DMS format (used for Declination).
- * @returns {string} The formatted string in HMS or DMS format.
+ * @param {number} [ra] - The right ascension value in degrees.
+ * @returns {string} The formatted right ascension as a string in the format "hh h mm m ss.ss s".
  */
-export const decimalToHMS = (
-    degrees?: number,
-    isRA: boolean = false
-): string => {
-    if (!degrees) {
+export const formatRA = (ra?: number): string => {
+    if (!ra) {
         return ''
     }
 
-    const absDeg = Math.abs(degrees)
-    const hoursOrDeg = isRA ? absDeg / 15 : Math.floor(absDeg)
-    const minutes = Math.floor((hoursOrDeg - Math.floor(hoursOrDeg)) * 60)
-    const seconds = ((hoursOrDeg - Math.floor(hoursOrDeg)) * 60 - minutes) * 60
+    const hours = Math.floor(ra / 15)
+    const minutes = Math.floor((ra / 15 - hours) * 60)
+    const seconds = ((ra / 15 - hours) * 60 - minutes) * 60
 
-    const sign = degrees < 0 ? '-' : ''
-    return isRA
-        ? `${Math.floor(hoursOrDeg)}h ${minutes}m ${seconds.toFixed(2)}s`
-        : `${sign}${Math.floor(hoursOrDeg)}° ${minutes}′ ${seconds.toFixed(2)}″`
+    return `${hours}h ${minutes}m ${seconds.toFixed(2)}s`
+}
+
+/**
+ * Formats the given declination (DEC) value into a string.
+ *
+ * @param {number} [dec] - The declination value in degrees.
+ * @returns {string} The formatted declination as a string in the format "+/-dd° mm′ ss.ss″".
+ */
+export const formatDEC = (dec?: number): string => {
+    if (!dec) {
+        return ''
+    }
+
+    const sign = dec < 0 ? '-' : '+'
+    const absDec = Math.abs(dec)
+    const degrees = Math.floor(absDec)
+    const minutes = Math.floor((absDec - degrees) * 60)
+    const seconds = ((absDec - degrees) * 60 - minutes) * 60
+    return `${sign}${degrees}° ${minutes}′ ${seconds.toFixed(2)}″`
 }

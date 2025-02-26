@@ -48,7 +48,6 @@
     "read-more": "Подробнее",
     "name-in-the-directory": "Название в каталоге",
     "category": "Категория",
-    "coordinates": "Координаты",
     "total-exposure": "Общее накопление",
     "number-of-frames": "Количество кадров",
     "photo-size": "Размер фотографии",
@@ -74,6 +73,8 @@
     "height": "Высота",
     "azimuth": "Азимут",
     "moon": "Луна",
+    "right-ascension": "Прямое восхождение",
+    "declination": "Склонение",
     "no-fits-files": "Нет сохраненных FITS файлов для этого объекта",
     "telegram-subscription": "Чтобы не пропустить анонсы - подпишитесь на Telegram канал",
     "visibility-chart": {

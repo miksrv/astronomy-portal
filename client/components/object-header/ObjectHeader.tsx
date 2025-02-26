@@ -1,5 +1,6 @@
 import { ApiModel } from '@/api'
 import { getTimeFromSec } from '@/functions/helpers'
+import { formatDEC, formatRA } from '@/tools/coordinates'
 import { humanizeFileSize } from '@/tools/strings'
 import { useTranslation } from 'next-i18next'
 import Link from 'next/link'
@@ -45,10 +46,21 @@ const ObjectHeader: React.FC<ObjectHeaderProps> = ({
                     </div>
                 )}
 
-                <div className={styles.item}>
-                    <span className={styles.key}>{t('coordinates')}:</span>
-                    {'RA: ' + props.ra + ', DEC: ' + props.dec}
-                </div>
+                {props?.ra && (
+                    <div className={styles.item}>
+                        <span className={styles.key}>
+                            {t('right-ascension')}:
+                        </span>
+                        {formatRA(props.ra)}
+                    </div>
+                )}
+
+                {props?.dec && (
+                    <div className={styles.item}>
+                        <span className={styles.key}>{t('declination')}:</span>
+                        {formatDEC(props.dec)}
+                    </div>
+                )}
 
                 {props.statistic?.exposure && (
                     <div className={styles.item}>

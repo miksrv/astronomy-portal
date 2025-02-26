@@ -48,7 +48,6 @@
     "read-more": "Read more",
     "name-in-the-directory": "Name in the directory",
     "category": "Category",
-    "coordinates": "Coordinates",
     "total-exposure": "Total Exposure",
     "number-of-frames": "Number of Frames",
     "photo-size": "Photo size",
@@ -74,6 +73,8 @@
     "height": "Height",
     "azimuth": "Azimuth",
     "moon": "Moon",
+    "right-ascension": "Right Ascension",
+    "declination": "Declination",
     "no-fits-files": "No saved FITS files for this object",
     "telegram-subscription": "To not miss announcements - subscribe to the Telegram channel",
     "visibility-chart": {

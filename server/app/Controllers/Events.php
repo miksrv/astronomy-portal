@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Entities\EventEntity;
-use App\Entities\EventPhoto;
+use App\Entities\EventPhotoEntity;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
 use App\Models\EventsPhotosModel;
@@ -508,7 +508,7 @@ class Events extends ResourceController
 
         $eventPhotosModel = new EventsPhotosModel();
 
-        $photo = new EventPhoto();
+        $photo = new EventPhotoEntity();
         $photo->event_id  = $eventData->id;
         $photo->user_id   = $this->session->user?->id;
         $photo->title_ru  = $eventData->title_ru;
