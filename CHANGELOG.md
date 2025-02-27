@@ -1,5 +1,24 @@
 # Changelog
 
+## 4.0.8
+
+### Patch Changes
+
+-   Added blockquote UI styles
+-   Added description for UI main page
+-   Implemented UI transform RA/DEC coordinates functions
+-   Fixed API Events Controller (EventPhotoEntity)
+-   Fixed UI stargazing item page footer navigation (for last item)
+-   Added UI Coordinates tool
+-   Added PHPDoc for some controllers
+-   Improved API Deploy GitHub Action
+-   Added new UI locales
+-   Implemented new UI component - VisibilityChart
+-   Added new UI libraries: astronomy-engine, echarts, echarts-for-react
+-   Updated UI Libraries
+-   Updated API UsersModel.php
+-   Fixed API CI/CD
+
 ## 4.0.7
 
 ### Patch Changes

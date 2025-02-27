@@ -44,7 +44,7 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
     const borderColor = '#444546' // --input-border-color
     const textSecondaryColor = '#76787a' // --text-color-secondary
 
-    const date = dayjs().tz('Asia/Yekaterinburg').startOf('day')
+    const date = dayjs()
 
     const objectName = object?.title || formatObjectName(object?.name)
 
