@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.0.8
+## 4.0.9
 
 ### Patch Changes
 
@@ -19,7 +19,7 @@
 -   Updated API UsersModel.php
 -   Fixed API CI/CD
 
-## 4.0.7
+## 4.0.8
 
 ### Patch Changes
 
