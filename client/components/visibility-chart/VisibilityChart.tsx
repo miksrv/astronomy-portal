@@ -116,12 +116,8 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
                     startTime.ut + i * intervalInDays
                 )
 
-                const astroTime = Astronomy.MakeTime(
-                    startTime.ut + i * intervalInDays - dayjs().utcOffset()
-                )
-
                 const hor = Astronomy.Horizon(
-                    astroTime,
+                    chartTime,
                     observer,
                     object?.ra || 0,
                     object?.dec || 0,

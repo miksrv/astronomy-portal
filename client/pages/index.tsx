@@ -89,7 +89,7 @@ const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
         <AppLayout fullWidth={true}>
             <NextSeo
                 title={t('look-at-the-stars')}
-                description={''}
+                description={t('look-at-the-stars-description')}
                 canonical={canonicalUrl}
                 openGraph={{
                     siteName: t('look-at-the-stars'),
