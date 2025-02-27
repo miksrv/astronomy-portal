@@ -1,0 +1,44 @@
+@use '../../styles/variables'
+
+.container
+    padding: 2px !important
+    margin-bottom: 10px
+
+    .title
+        margin: 10px 10px 5px
+
+    .description
+        margin: 0 10px 10px
+
+.chartTooltipTitle
+    font-family: (--font-family), sans-serif
+    font-size: 12px
+    color: var(--text-color-primary)
+    margin-bottom: 10px
+    margin-top: -5px
+    min-width: 100px
+
+    &:first-letter
+        text-transform: uppercase
+
+.chartTooltipItem
+    margin-top: 0
+
+    &:last-of-type
+        margin-bottom: -5px
+
+    .icon
+        float: left
+        display: inline-block
+        margin-right: 5px
+        margin-top: 7px
+        border-radius: 2px
+        width: 6px
+        height: 6px
+
+    .label
+        font-size: 12px
+        display: flex
+        justify-content: space-between
+        align-items: center
+        color: var(--text-color-secondary)

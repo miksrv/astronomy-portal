@@ -12,6 +12,7 @@
     "members": "Members",
     "near_space": "Near Space",
     "photos-from-stargazing": "Photos from the stargazing",
+    "look-at-the-stars-description": "Look at the stars - a unique project in the Orenburg region: telescope observations outside the city, sidewalk astronomy, an observatory in the Orenburg region, and astrophotography",
     "stargazings-section-description": "We organize regular trips under the open sky to observe stars and planets through powerful telescopes.",
     "astrophoto-section-description": "A collection of space photos taken at our observatory, revealing the beauty of distant galaxies, nebulae, and star clusters.",
     "observatory-section-description": "Discover the universe from our stationary observation point, equipped with advanced telescopes.",
@@ -48,7 +49,6 @@
     "read-more": "Read more",
     "name-in-the-directory": "Name in the directory",
     "category": "Category",
-    "coordinates": "Coordinates",
     "total-exposure": "Total Exposure",
     "number-of-frames": "Number of Frames",
     "photo-size": "Photo size",
@@ -74,8 +74,14 @@
     "height": "Height",
     "azimuth": "Azimuth",
     "moon": "Moon",
+    "right-ascension": "Right Ascension",
+    "declination": "Declination",
     "no-fits-files": "No saved FITS files for this object",
     "telegram-subscription": "To not miss announcements - subscribe to the Telegram channel",
+    "visibility-chart": {
+        "title": "Visibility chart of {{name}} during the day",
+        "description": "The height diagram of {{name}} above the horizon during the current day for the observatory observation point in Orenburg ({{lat}}, {{lon}}). The chart shows when the object is above the horizon and at what maximum height in degrees it rises. The data is relevant for the observation date: {{date}}."
+    },
     "equipment": {
         "mount": "Mount",
         "scope": "Telescope",

@@ -8,6 +8,13 @@ use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
 use Exception;
 
+/**
+ * Class Equipment
+ *
+ * This controller handles the retrieval of observatory equipment data.
+ *
+ * @package App\Controllers
+ */
 class Equipment extends ResourceController
 {
     use ResponseTrait;
