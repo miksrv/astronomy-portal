@@ -6,7 +6,7 @@ import { AstroTime, Observer } from 'astronomy-engine'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
-import ReactECharts from 'echarts-for-react'
+import ReactECharts, { EChartsOption } from 'echarts-for-react'
 import { useTranslation } from 'next-i18next'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Container } from 'simple-react-ui-kit'
@@ -132,7 +132,7 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
         setLoading(false)
     }, [object?.ra, object?.dec])
 
-    const options = useMemo(
+    const options: EChartsOption = useMemo(
         () => ({
             grid: {
                 left: 10,
