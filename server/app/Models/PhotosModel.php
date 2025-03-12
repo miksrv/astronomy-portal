@@ -83,9 +83,17 @@ class PhotosModel extends ApplicationBaseModel
      * @param string $locale The locale used for selecting the language ('ru' or 'en').
      * @param string|null $photo_id Optional ID to filter a specific photo.
      * @param string|null $object Optional object to filter photos by.
+     * @param int|null $limit Optional limit for the number of photos to retrieve. Default is null.
+     * @param string|null $order Optional order for retrieving photos ('rand' for random, 'date' for date order). Default is null.
      * @return array An array of photos with associated categories and objects.
      */
-    protected function fetchPhotos(string $locale = 'ru', ?string $photo_id = null, ?string $object = null): array
+    protected function fetchPhotos(
+        string $locale = 'ru',
+        ?string $photo_id = null,
+        ?string $object = null,
+        ?int $limit = null,
+        ?string $order = null
+    ): array
     {
         // Base query
         $photosQuery = $this->select('*');
@@ -121,6 +129,14 @@ class PhotosModel extends ApplicationBaseModel
 
             $photosIds = array_map(fn($photo) => $photo->photo_id, $photosObjects);
             $photosQuery->whereIn('id', $photosIds);
+        }
+
+        if (is_numeric($limit) && $limit > 0) {
+            $photosQuery->limit($limit);
+        }
+
+        if ($order !== null && in_array($order, ['rand', 'date'])) {
+            $photosQuery->orderBy($order === 'rand' ? 'RAND()' : 'created_at');
         }
 
         $photosList = $photosQuery->findAll();
@@ -161,24 +177,38 @@ class PhotosModel extends ApplicationBaseModel
     /**
      * Retrieves a list of photos with optional filtering by photo ID.
      *
-     * @param string $locale   The locale used for selecting the language ('ru' or 'en'). Default is 'ru'.
+     * @param string $locale The locale used for selecting the language ('ru' or 'en'). Default is 'ru'.
      * @param string|null $photo_id Optional photo ID to filter a specific photo. Default is null.
+     * @param int|null $limit Optional limit for the number of photos to retrieve. Default is null.
+     * @param string|null $order Optional order for retrieving photos ('rand' for random, 'date' for date order). Default is null.
      * @return array An array of photos with their localized titles and associated categories.
      */
-    public function getPhotos(string $locale = 'ru', ?string $photo_id = null): array
+    public function getPhotosList(
+        string $locale = 'ru',
+        ?string $photo_id = null,
+        ?int $limit = null,
+        ?string $order = null
+    ): array
     {
-        return $this->fetchPhotos($locale, $photo_id);
+        return $this->fetchPhotos($locale, $photo_id, null, $limit, $order);
     }
 
     /**
      * Retrieves a list of photos filtered by a specific object.
      *
-     * @param string $object   The object to filter photos by.
-     * @param string $locale   The locale used for selecting the language ('ru' or 'en'). Default is 'ru'.
+     * @param string $object The object to filter photos by.
+     * @param string $locale The locale used for selecting the language ('ru' or 'en'). Default is 'ru'.
+     * @param int|null $limit Optional limit for the number of photos to retrieve. Default is null.
+     * @param string|null $order Optional order for retrieving photos ('rand' for random, 'date' for date order). Default is null.
      * @return array An array of photos filtered by the specified object, with their localized titles and associated categories.
      */
-    public function getPhotosByObjects(string $object, string $locale = 'ru'): array
+    public function getPhotosListByObjects(
+        string $object,
+        string $locale = 'ru',
+        ?int $limit = null,
+        ?string $order = null
+    ): array
     {
-        return $this->fetchPhotos($locale, null, $object);
+        return $this->fetchPhotos($locale, null, $object, $limit, $order);
     }
 }

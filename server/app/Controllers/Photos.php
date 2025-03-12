@@ -43,17 +43,19 @@ class Photos extends ResourceController
         helper('filters');
 
         $locale = $this->request->getLocale();
-        $object = $this->request->getGet('object');
+        $limit  = $this->request->getGet('limit', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $order  = $this->request->getGet('order', FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+        $object = $this->request->getGet('object', FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
 
         try {
             // Fetch data from models
             $photosModel  = new PhotosModel();
             $filtersModel = new PhotosFiltersModel();
 
-            $filtersData  = $filtersModel->findAll();
-            $photosData   = $object
-                ? $photosModel->getPhotosByObjects($object, $locale)
-                : $photosModel->getPhotos($locale);
+            $filtersData = $filtersModel->findAll();
+            $photosData  = $object
+                ? $photosModel->getPhotosListByObjects($object, $locale, $limit, $order)
+                : $photosModel->getPhotosList($locale, null, $limit, $order);
 
             // Prepare photos with filters and statistics
             $result = preparePhotoDataWithFilters($photosData, $filtersData);
@@ -88,7 +90,7 @@ class Photos extends ResourceController
 
             $photosModel  = new PhotosModel();
             $filtersModel = new PhotosFiltersModel();
-            $photosData   = $photosModel->getPhotos($locale, $id);
+            $photosData   = $photosModel->getPhotosList($locale, $id);
             $filtersData  = $filtersModel->where('photo_id', $id)->findAll();
 
             // Prepare photos with filters and statistics
