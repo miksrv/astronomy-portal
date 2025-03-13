@@ -2,7 +2,7 @@ import { useTranslation } from 'next-i18next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
-import { cn } from 'simple-react-ui-kit'
+import { Icon, cn } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
@@ -66,7 +66,7 @@ export const Menu: React.FC<MenuProps> = ({
             subMenuItems: [
                 {
                     link: '/observatory/overview',
-                    text: 'Астрономическая обсерватория в Оренбурге'
+                    text: t('observatory-orenburg')
                 }
             ]
         },
@@ -79,7 +79,7 @@ export const Menu: React.FC<MenuProps> = ({
             text: t('about')
         },
         {
-            link: 'https://t.me/nearspace',
+            link: 'https://t.me/look_at_stars',
             text: t('telegram')
         }
     ]
@@ -120,6 +120,21 @@ export const Menu: React.FC<MenuProps> = ({
                             target={item.external ? '_blank' : undefined}
                         >
                             {item.text}
+                            {item.subMenuItems && !sidebarMenu ? (
+                                dropdownOpen === i ? (
+                                    <Icon
+                                        name={'KeyboardUp'}
+                                        className={styles.arrow}
+                                    />
+                                ) : (
+                                    <Icon
+                                        name={'KeyboardDown'}
+                                        className={styles.arrow}
+                                    />
+                                )
+                            ) : (
+                                ''
+                            )}
                         </Link>
                         {item.subMenuItems &&
                             (dropdownOpen === i || sidebarMenu) && (
