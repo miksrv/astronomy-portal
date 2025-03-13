@@ -179,7 +179,7 @@ const StargazingHowToPage: NextPage<StargazingHowToPageProps> = () => {
                     </Link>
                     {t('stargazing-howto-page.telegram')}
                     <Link
-                        href={'https://t.me/nearspace'}
+                        href={'https://t.me/look_at_stars'}
                         style={{ marginLeft: '5px' }}
                         title={t('telegram')}
                         rel={'noindex nofollow'}

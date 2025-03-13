@@ -5,6 +5,7 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
+import Link from 'next/link'
 import React from 'react'
 
 import AppFooter from '@/components/app-footer'
@@ -48,6 +49,19 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = () => {
                 title={t('observatory')}
                 currentPage={t('observatory')}
             />
+
+            <div>
+                <p>
+                    {t('observatory-page.intro')}{' '}
+                    <Link
+                        href={'/observatory/overview'}
+                        title={t('observatory-orenburg')}
+                    >
+                        {t('observatory-orenburg')}
+                    </Link>
+                    {'.'}
+                </p>
+            </div>
 
             <div className={'observatoryGrid'}>
                 <div>

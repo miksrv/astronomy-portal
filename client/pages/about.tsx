@@ -175,7 +175,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
             </Container>
 
             <Link
-                href={'https://t.me/nearspace'}
+                href={'https://t.me/look_at_stars'}
                 className={'telegram-message'}
                 title={t('telegram')}
                 rel={'noindex nofollow'}

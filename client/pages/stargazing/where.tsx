@@ -84,7 +84,7 @@ const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
                     {t('stargazing-where-page.announcement-1')}
                     <Link
                         style={{ margin: '0 5px' }}
-                        href={'https://t.me/nearspace'}
+                        href={'https://t.me/look_at_stars'}
                         title={t('telegram')}
                         rel={'noindex nofollow'}
                         target={'_blank'}

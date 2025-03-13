@@ -5,9 +5,10 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
+import Link from 'next/link'
 import React, { useState } from 'react'
 import Gallery from 'react-photo-gallery'
-import { Container } from 'simple-react-ui-kit'
+import { Button, Container } from 'simple-react-ui-kit'
 
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
@@ -75,8 +76,8 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({
     return (
         <AppLayout>
             <NextSeo
-                title={t('observatory')}
-                description={t('description-observatory')}
+                title={t('observatory-orenburg')}
+                description={t('observatory-overview-page.intro')}
                 canonical={`${canonicalUrl}observatory/overview`}
                 openGraph={{
                     images: [
@@ -91,8 +92,8 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({
                 }}
             />
             <AppToolbar
-                title={'Общая информация'}
-                currentPage={'Общая информация'}
+                title={t('observatory-orenburg')}
+                currentPage={t('observatory-orenburg')}
                 links={[
                     {
                         link: '/observatory',
@@ -101,31 +102,13 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({
                 ]}
             />
 
-            <p>
-                Самодельная астрономическая обсерватория расположена в пригороде
-                Оренбурга, всего в 15 км от города. Благодаря своему удалению от
-                городской застройки, обсерватория находится в зоне с уровнем
-                светового загрязнения 5 класса по шкале Бортля, что делает её
-                идеальным местом в пригорде для наблюдений за ночным небом.
-            </p>
+            <p>{t('observatory-overview-page.intro')}</p>
 
             <Container style={{ marginBottom: '10px' }}>
                 <p style={{ marginTop: 0 }}>
-                    Основное направление деятельности обсерватории -
-                    фотографирование объектов глубокого космоса (deep-sky),
-                    таких как туманности, галактики и звёздные скопления.
-                    Оборудование и технологии, используемые в обсерватории,
-                    позволяют получать высококачественные изображения, которые
-                    могут использоваться как для научных исследований, так и для
-                    образовательных целей.
+                    {t('observatory-overview-page.description-1')}
                 </p>
-
-                <p>
-                    Обсерватория функционирует в полуавтоматическом режиме, что
-                    позволяет управлять ею удалённо из любой точки мира через
-                    Интернет. Это делает её доступной для астрономов-любителей,
-                    исследователей и энтузиастов со всего мира.
-                </p>
+                <p>{t('observatory-overview-page.description-2')}</p>
 
                 <Gallery
                     photos={galleryObservatory}
@@ -136,82 +119,29 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({
                         handlePhotoClick(photos.index)
                     }}
                 />
+
+                <p>{t('observatory-overview-page.description-3')}</p>
+                <p style={{ marginBottom: 0 }}>
+                    {t('observatory-overview-page.description-4')}
+                </p>
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>Оборудование обсерватории</h2>
-                <p>
-                    Используемые инструменты и технологии обеспечивают высокую
-                    точность наблюдений и профессиональное качество снимков. Вот
-                    основное оборудование, которое используется в работе:
-                </p>
+                <h2 style={{ marginTop: 0 }}>
+                    {t('observatory-overview-page.equipment-title')}
+                </h2>
+                <p>{t('observatory-overview-page.equipment-description')}</p>
                 <ul>
-                    <li>
-                        <h3>Монтировка: Sky-Watcher EQ6</h3>
-                        <div>
-                            Надёжная и точная монтировка, обеспечивающая
-                            стабильность телескопа даже при длительных
-                            экспозициях.
-                        </div>
-                    </li>
-                    <li>
-                        <h3>Телескоп: Sky-Watcher BK2001P</h3>
-                        <div>
-                            Рефлекторный телескоп с апертурой 200 мм, идеально
-                            подходящий для наблюдений за объектами глубокого
-                            космоса.
-                        </div>
-                    </li>
-                    <li>
-                        <h3>Основная камера: ASI ZWO 6200MM Pro</h3>
-                        <div>
-                            Высокочувствительная астрономическая камера с
-                            разрешением 24 МП, способная захватывать мельчайшие
-                            детали далёких объектов.
-                        </div>
-                    </li>
-                    <li>
-                        <h3>Гид-камера: QHY QHY5</h3>
-                        <div>
-                            Камера для точного наведения и слежения за
-                            объектами.
-                        </div>
-                    </li>
-                    <li>
-                        <h3>
-                            Гид-телескоп: SV106 Guide Scope 50mm (Helical
-                            Focuser)
-                        </h3>
-                        <div>Компактный телескоп для автонаведения.</div>
-                    </li>
-                    <li>
-                        <h3>Фокусер: ZWO EAF</h3>
-                        <div>
-                            Электронный фокусер, обеспечивающий точную настройку
-                            фокусировки.
-                        </div>
-                    </li>
-                    <li>
-                        <h3>Колесо фильтров: ZWO EFW 8x31mm</h3>
-                        <div>
-                            Универсальное колесо фильтров для работы с
-                            различными спектральными диапазонами.
-                        </div>
-                    </li>
-                    <li>
-                        <h3>Фильтры: ZWO L, R, G, B, Ha, OIII, SII (1.25")</h3>
-                        <div>
-                            Набор фильтров для получения цветных изображений и
-                            съёмки в узких спектрах.
-                        </div>
-                    </li>
-                    <li>
-                        <h3>Корректор комы: BAADER MPCC</h3>
-                        <div>
-                            Устраняет оптические искажения, обеспечивая чёткость
-                            изображения.
-                        </div>
-                    </li>
+                    {(
+                        t('observatory-overview-page.equipment-list', {
+                            returnObjects: true
+                        }) as any[]
+                    ).map((item: any, index: number) => (
+                        <li key={index}>
+                            <h3>{item.title}</h3>
+                            <div>{item.description}</div>
+                        </li>
+                    ))}
                 </ul>
                 <Gallery
                     photos={galleryEquipment}
@@ -225,52 +155,43 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>Принцип работы</h2>
+                <h2 style={{ marginTop: 0 }}>
+                    {t('observatory-overview-page.operating-principle-title')}
+                </h2>
                 <p>
-                    Управление обсерваторией осуществляется через сервер на базе
-                    Lenovo M710Q TINY (Pentium G4400T, 8GB RAM, 128GB SSD +
-                    512GB HDD) с операционной системой Linux Ubuntu Server
-                    22.04. За контроль и координацию всех процессов отвечает
-                    INDI — универсальный инструмент для управления
-                    астрономическим оборудованием.
+                    {t(
+                        'observatory-overview-page.operating-principle-description-1'
+                    )}
                 </p>
                 <p>
-                    Для удалённого доступа используется SSH для безопасного
-                    подключения к серверу, VNC для графического интерфейса,
-                    VirtualBox для работы с виртуальными машинами. Это позволяет
-                    управлять обсерваторией из любой точки мира, не требуя
-                    физического присутствия.
+                    {t(
+                        'observatory-overview-page.operating-principle-description-2'
+                    )}
                 </p>
                 <p>
-                    Обсерватория функционирует в полуавтоматическом режиме.
-                    Возможны два способа работы:
+                    {t(
+                        'observatory-overview-page.operating-principle-description-3'
+                    )}
                 </p>
                 <ul>
-                    <li>
-                        <h3>Ручной режим:</h3>
-                        <div>
-                            Пользователь может напрямую подключиться к системе
-                            через INDI для управления телескопом и камерой. Этот
-                            режим идеально подходит для любителей, которые хотят
-                            самостоятельно настроить оборудование.
-                        </div>
-                    </li>
-                    <li>
-                        <h3>Автоматический режим:</h3>
-                        <div>
-                            В этом режиме создаются задания в планировщике INDI,
-                            после чего система автономно выполняет их. Решение о
-                            начале съёмки принимается на основе данных от
-                            метеостанции, которая контролирует погодные условия.
-                        </div>
-                    </li>
+                    {(
+                        t(
+                            'observatory-overview-page.operating-principle-list',
+                            {
+                                returnObjects: true
+                            }
+                        ) as any[]
+                    ).map((item: any, index: number) => (
+                        <li key={index}>
+                            <h3>{item.title}</h3>
+                            <div>{item.description}</div>
+                        </li>
+                    ))}
                 </ul>
                 <p>
-                    Решение о начале съёмки принимается на основе данных от
-                    метеостанции. Крыша обсерватории выполнена по технологии
-                    Roll-off Roof (откатная) и управляется моторизированным
-                    контроллером, подключённым к серверу. Управление крышей
-                    возможно как в автоматическом, так и в ручном режиме.
+                    {t(
+                        'observatory-overview-page.operating-principle-description-4'
+                    )}
                 </p>
                 <Gallery
                     photos={galleryControl}
@@ -284,35 +205,42 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>Фотографии и данные</h2>
+                <h2 style={{ marginTop: 0 }}>
+                    {t('observatory-overview-page.photos-and-data-title')}
+                </h2>
                 <p>
-                    На специальном разделе нашего сайта представлены фотографии
-                    снятых объектов глубокого космоса. Для каждого объекта
-                    доступны подробные параметры и характеристики, такие как
-                    расстояние до объекта, его размер, спектральные данные и
-                    многое другое. Эти материалы могут быть полезны как для
-                    начинающих астрономов, так и для профессионалов.
+                    {t('observatory-overview-page.photos-and-data-part-1')}{' '}
+                    <Link
+                        href={'/photos'}
+                        title={t('astrophoto')}
+                    >
+                        {t(
+                            'observatory-overview-page.photos-and-data-part-photos'
+                        )}
+                    </Link>{' '}
+                    {t('observatory-overview-page.photos-and-data-part-2')}{' '}
+                    <Link
+                        href={'/objects'}
+                        title={t('objects')}
+                    >
+                        {t(
+                            'observatory-overview-page.photos-and-data-part-objects'
+                        )}
+                    </Link>{' '}
+                    {t('observatory-overview-page.photos-and-data-part-3')}
                 </p>
 
                 <ObjectPhotoTable photosList={photosList} />
-            </Container>
 
-            <Container style={{ marginBottom: '10px' }}>
-                <p>
-                    Обсерватория открыта для сотрудничества с
-                    астрономами-любителями, исследователями и образовательными
-                    учреждениями. Мы рады предоставить доступ к нашим данным для
-                    научных и образовательных целей. Если вы хотите стать частью
-                    нашего сообщества или использовать наши ресурсы для своих
-                    проектов, свяжитесь с нами через форму обратной связи.
-                </p>
-                <p>
-                    Наша обсерватория — это уникальное сочетание современных
-                    технологий и энтузиазма астрономов-любителей. Мы стремимся
-                    сделать астрономию доступной для всех, кто интересуется
-                    загадками Вселенной. Присоединяйтесь к нам, чтобы вместе
-                    исследовать бескрайние просторы космоса!
-                </p>
+                <Button
+                    style={{ width: '100%' }}
+                    size={'medium'}
+                    mode={'secondary'}
+                    link={'/photos'}
+                    title={t('astrophoto')}
+                >
+                    {t('observatory-overview-page.photos-and-data-all-photos')}
+                </Button>
             </Container>
 
             <PhotoLightbox
