@@ -19,7 +19,7 @@ export interface PostRequest {
 export interface Request {
     object?: string
     limit?: number
-    order?: 'random' | keyof ApiModel.Photo
+    order?: 'rand' | keyof ApiModel.Photo
 }
 
 export interface PostUploadRequest {

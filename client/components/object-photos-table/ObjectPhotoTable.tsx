@@ -7,11 +7,16 @@ import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useMemo } from 'react'
-import { ColumnProps, Container, Table } from 'simple-react-ui-kit'
+import {
+    ColumnProps,
+    Container,
+    ContainerProps,
+    Table
+} from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
-interface ObjectPhotoTableProps {
+interface ObjectPhotoTableProps extends ContainerProps {
     photosList?: ApiModel.Photo[]
     currentPhotoId?: string
 }
@@ -33,32 +38,10 @@ export type FlattenedPhoto = {
     nFilterExposure?: number
 }
 
-export const flattenPhotos = (
-    photosList?: ApiModel.Photo[]
-): FlattenedPhoto[] =>
-    photosList?.map(
-        (photo) =>
-            ({
-                id: photo.id,
-                photo: createSmallPhotoUrl(photo),
-                objects: photo.objects,
-                date: photo.date,
-                frames: photo.statistic?.frames || 0,
-                exposure: photo.statistic?.exposure || 0,
-                lFilterExposure: photo.filters?.L?.exposure || 0,
-                rFilterExposure: photo.filters?.R?.exposure || 0,
-                gFilterExposure: photo.filters?.G?.exposure || 0,
-                bFilterExposure: photo.filters?.B?.exposure || 0,
-                hFilterExposure: photo.filters?.H?.exposure || 0,
-                oFilterExposure: photo.filters?.O?.exposure || 0,
-                sFilterExposure: photo.filters?.S?.exposure || 0,
-                nFilterExposure: photo.filters?.N?.exposure || 0
-            } as FlattenedPhoto)
-    ) || []
-
 const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({
     photosList,
-    currentPhotoId
+    currentPhotoId,
+    ...props
 }) => {
     const { t } = useTranslation()
 
@@ -220,7 +203,10 @@ const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({
     )
 
     return (
-        <Container className={styles.tableContainer}>
+        <Container
+            className={styles.tableContainer}
+            {...props}
+        >
             <Table<FlattenedPhoto>
                 className={styles.photosListTable}
                 columns={tableColumns}
@@ -231,5 +217,28 @@ const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({
         </Container>
     )
 }
+
+export const flattenPhotos = (
+    photosList?: ApiModel.Photo[]
+): FlattenedPhoto[] =>
+    photosList?.map(
+        (photo) =>
+            ({
+                id: photo.id,
+                photo: createSmallPhotoUrl(photo),
+                objects: photo.objects,
+                date: photo.date,
+                frames: photo.statistic?.frames || 0,
+                exposure: photo.statistic?.exposure || 0,
+                lFilterExposure: photo.filters?.L?.exposure || 0,
+                rFilterExposure: photo.filters?.R?.exposure || 0,
+                gFilterExposure: photo.filters?.G?.exposure || 0,
+                bFilterExposure: photo.filters?.B?.exposure || 0,
+                hFilterExposure: photo.filters?.H?.exposure || 0,
+                oFilterExposure: photo.filters?.O?.exposure || 0,
+                sFilterExposure: photo.filters?.S?.exposure || 0,
+                nFilterExposure: photo.filters?.N?.exposure || 0
+            } as FlattenedPhoto)
+    ) || []
 
 export default ObjectPhotoTable

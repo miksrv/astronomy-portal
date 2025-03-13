@@ -1,4 +1,5 @@
 import { ApiModel } from '@/api'
+import { hosts } from '@/api/constants'
 import { getTimeFromSec } from '@/functions/helpers'
 import { formatDate } from '@/tools/dates'
 import { createLargePhotoUrl, createMediumPhotoUrl } from '@/tools/photos'
@@ -103,13 +104,6 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                     {props.statistic?.frames ?? '---'}
                 </div>
 
-                {props.imageHeight && props.imageWidth && (
-                    <div className={styles.item}>
-                        <span className={styles.key}>{t('photo-size')}:</span>
-                        {`${props.imageWidth}x${props.imageHeight}px`}
-                    </div>
-                )}
-
                 <div className={styles.item}>
                     <span className={styles.key}>{t('file-size')}:</span>
                     {props.fileSize ? humanizeFileSize(props.fileSize) : '---'}
@@ -154,6 +148,17 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                         ))}
                     </div>
                 )}
+
+                <Link
+                    className={styles.fullPhotoButton}
+                    href={`${hosts.photo}${props.dirName}/${props.fileName}.${props?.fileExt}`}
+                    title={t('open-full-size', { photoName: photoTitle })}
+                    target={'_blank'}
+                >
+                    {t('full-size', {
+                        size: humanizeFileSize(props?.fileSize || 0)
+                    })}
+                </Link>
             </div>
 
             <PhotoLightbox

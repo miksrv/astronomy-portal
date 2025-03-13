@@ -3,7 +3,7 @@ import { createMediumPhotoUrl, createPhotoTitle } from '@/tools/photos'
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useMemo } from 'react'
+import React from 'react'
 import { cn } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
@@ -16,11 +16,6 @@ const MainSectionStargazing: React.FC<MainSectionStargazingProps> = ({
     photos
 }) => {
     const { t } = useTranslation()
-
-    const randomPhotos = useMemo(
-        () => [...(photos || [])]?.sort(() => 0.5 - Math.random())?.slice(0, 3),
-        [photos]
-    )
 
     return (
         <section className={styles.section}>
@@ -37,7 +32,7 @@ const MainSectionStargazing: React.FC<MainSectionStargazingProps> = ({
                     'animate animate-slide-up'
                 )}
             >
-                {randomPhotos?.map((photo) => (
+                {photos?.map((photo) => (
                     <Link
                         key={photo.id}
                         href={`/photos/${photo.id}`}
