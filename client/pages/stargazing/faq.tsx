@@ -47,7 +47,7 @@ const StargazingFAQPage: NextPage<StargazingFAQPageProps> = () => {
                 <p style={{ marginTop: 0 }}>
                     {t('stargazing-faq-page.intro')}
                     <Link
-                        href={'https://t.me/nearspace'}
+                        href={'https://t.me/look_at_stars'}
                         style={{ marginLeft: '5px' }}
                         title={t('telegram')}
                         rel={'noindex nofollow'}

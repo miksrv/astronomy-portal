@@ -78,7 +78,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
                     sidebarOpen ? styles.opened : styles.closed
                 )}
             >
-                <Menu onClick={handleCloseOverlay} />
+                <Menu
+                    sidebarMenu={true}
+                    onClick={handleCloseOverlay}
+                />
             </aside>
 
             <main

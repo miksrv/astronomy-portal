@@ -87,7 +87,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events, photos }) => {
             {/*<EventUpcoming />*/}
 
             <Link
-                href={'https://t.me/nearspace'}
+                href={'https://t.me/look_at_stars'}
                 className={'telegram-message'}
                 title={t('telegram')}
                 rel={'noindex nofollow'}

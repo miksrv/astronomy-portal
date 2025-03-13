@@ -47,6 +47,9 @@ const CelestialPage: NextPage<CelestialPageProps> = () => {
                 currentPage={t('star-map')}
             />
 
+            <p>{t('starmap-page.description-1')}</p>
+            <p>{t('starmap-page.description-2')}</p>
+
             <Container style={{ padding: '5px' }}>
                 <StarMap objects={data?.items} />
             </Container>

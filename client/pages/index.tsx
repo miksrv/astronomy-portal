@@ -112,7 +112,10 @@ export const getServerSideProps = wrapper.getServerSideProps(
             store.dispatch(setLocale(locale))
 
             const { data: photos } = await store.dispatch(
-                API.endpoints?.photosGetList.initiate()
+                API.endpoints?.photosGetList.initiate({
+                    limit: 3,
+                    order: 'rand'
+                })
             )
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))

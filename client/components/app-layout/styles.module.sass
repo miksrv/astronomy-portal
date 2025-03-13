@@ -58,6 +58,7 @@
 
     li
         margin-bottom: 5px
+        position: relative
 
     a
         padding: 6px 12px
@@ -75,3 +76,37 @@
         &:hover, &.active
             background-color: var(--body-background)
             color: var(--color-orange)
+
+        .arrow
+            height: 16px
+            width: 16px
+            fill: var(--text-color-primary)
+            margin-left: 5px
+
+    .dropdownMenu
+        position: absolute
+        top: 100%
+        left: 0
+        z-index: 1
+        background-color: var(--container-background-color)
+        border-radius: var(--border-radius)
+        box-shadow: var(--container-shadow)
+        padding: 6px 12px
+        list-style: none
+        margin: 0
+        width: max-content
+
+    &.sidebarMenu
+        .dropdownMenu
+            position: initial
+            width: 100%
+            background-color: transparent
+            box-shadow: none
+            padding: 5px 0 0 27px
+            list-style: disc
+
+            a
+                text-overflow: ellipsis
+                overflow: hidden
+                display: block
+                width: 100%

@@ -66,6 +66,12 @@ const galleryStargazing = [
     photoStargazing8
 ]
 
+const allPhotos = [
+    ...galleryAboutMe,
+    ...galleryStargazing,
+    ...galleryObservatory
+]
+
 const contributors1: string[] = [
     'Марина Станиславовна С.',
     'Игнат Евгеньевич П. (Хорошим людям, делающим хорошие дела)',
@@ -110,12 +116,6 @@ const AboutPage: NextPage<AboutPageProps> = () => {
 
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
-
-    const allPhotos = [
-        ...galleryAboutMe,
-        ...galleryStargazing,
-        ...galleryObservatory
-    ]
 
     const handlePhotoClick = (index: number) => {
         setPhotoIndex(index)
@@ -175,7 +175,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
             </Container>
 
             <Link
-                href={'https://t.me/nearspace'}
+                href={'https://t.me/look_at_stars'}
                 className={'telegram-message'}
                 title={t('telegram')}
                 rel={'noindex nofollow'}
@@ -242,6 +242,13 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 </h2>
                 <p style={{ marginTop: 0 }}>
                     {t('about-page.observatory-intro')}
+                    <Link
+                        href={'/objects'}
+                        title={t('about-page.observatory-intro-link')}
+                    >
+                        {t('about-page.observatory-intro-link')}
+                    </Link>
+                    {'.'}
                 </p>
                 <Gallery
                     photos={galleryObservatory}

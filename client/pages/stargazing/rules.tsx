@@ -104,7 +104,7 @@ const StargazingRulesPage: NextPage<StargazingRulesPageProps> = () => {
                     {t('stargazing-rules-page.join-description')}
                     <Link
                         style={{ margin: '0 5px' }}
-                        href={'https://t.me/nearspace'}
+                        href={'https://t.me/look_at_stars'}
                         title={t('telegram')}
                         rel={'noindex nofollow'}
                         target={'_blank'}

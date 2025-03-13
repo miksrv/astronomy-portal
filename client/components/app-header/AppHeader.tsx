@@ -10,7 +10,7 @@ import { Button, Icon, Popout, cn } from 'simple-react-ui-kit'
 import { Menu } from '@/components/app-layout'
 import LanguageSwitcher from '@/components/language-switcher'
 
-import logo from '@/public/images/logo-w.svg'
+import logo from '@/public/images/logo.png'
 import defaultAvatar from '@/public/images/no-avatar.png'
 
 import styles from './styles.module.sass'

@@ -1,5 +1,24 @@
 # Changelog
 
+## 4.0.10
+
+### Patch Changes
+
+-   Improved UI locales
+-   Improved UI starmap, styles and components
+-   Improved dropdown UI menu
+-   Improved UI pages
+-   Changed telegram links
+-   Replaced favicon and logo
+-   Added new link for UI about page (to observatory overview)
+-   Added observatory overview UI page
+-   Disabled API Debugbar
+-   Added new observatory photos
+-   Fixed UI styles for H1 and H2 titles
+-   Implemented UI Dropdown Menu
+-   Updated UI VisibilityChart
+-   Updated UI Libraries
+
 ## 4.0.9
 
 ### Patch Changes
