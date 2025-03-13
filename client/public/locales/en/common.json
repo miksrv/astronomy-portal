@@ -7,6 +7,7 @@
     "about": "About",
     "telegram": "Telegram",
     "observatory": "Observatory",
+    "observatory-orenburg": "Observatory in Orenburg",
     "stargazing": "Stargazing",
     "stargazings": "Stargazings",
     "members": "Members",
@@ -51,11 +52,12 @@
     "category": "Category",
     "total-exposure": "Total Exposure",
     "number-of-frames": "Number of Frames",
-    "photo-size": "Photo size",
     "file-size": "File size",
     "data-size": "Data Size",
     "objects-in-photo": "Objects in the photo",
     "link-to-FITS-files": "Link to FITS files",
+    "open-full-size": "{{photoName}} - Open in full size",
+    "full-size": "Full size {{size}}",
     "safely": "Safely",
     "critical": "Critical",
     "dangerous": "Dangerous",
@@ -229,6 +231,82 @@
         "want-to-see-description-1": "To observe faint objects, such as the Orion Nebula, Andromeda, meteor showers, and star clusters, you need to go away from city lights. In places like the Orenburg steppe or other remote areas, the night sky is stunningly beautiful.",
         "want-to-see-description-2": "We regularly organize field astronomical events where you can enjoy the full range of cosmic objects. Follow the announcements on our \"Astro Trips\" page or in the Telegram channel to join one of these observations.",
         "want-to-see-description-3": "Let the stars become closer!"
+    },
+    "starmap-page": {
+        "description-1": "The star map is an interactive window into the Universe, where images of galaxies, nebulae, comets, supernovae, and other astronomical objects are collected. These images are taken with an amateur telescope, which makes them especially valuable: they show the beauties of space that are accessible even outside professional observatories.",
+        "description-2": "The map allows you to study the night sky in detail, track the movement of celestial bodies, and find interesting objects for observation. Thanks to high-quality astrophotography and systematic catalog updates, every visitor can see the cosmos as seen by astronomy enthusiasts around the world."
+    },
+    "observatory-page": {
+        "intro": "Observation of the Universe begins here - in real-time you can see the current weather conditions, camera feeds, equipment status, and shooting schedule. The observatory operates in semi-automatic mode, allowing remote deep-sky object shooting. An intelligent control system analyzes weather conditions and automatically decides when to start work. Learn more about the equipment and operating principles on a separate page:"
+    },
+    "observatory-overview-page": {
+        "intro": "The homemade astronomical observatory is located in the suburbs of Orenburg, just 15 km from the city. Due to its distance from urban development, the observatory is in a zone with a Bortle scale light pollution level of 5, making it a good place in the suburbs for night sky observations.",
+        "description-1": "The main activity of the observatory is photographing deep-sky objects such as nebulae, galaxies, and star clusters. The equipment and technologies used in the observatory allow for high-quality images that can be used for both scientific research and educational purposes.",
+        "description-2": "The observatory operates in semi-automatic mode, allowing remote control from anywhere in the world via the Internet. This makes it accessible to amateur astronomers, researchers, and enthusiasts worldwide.",
+        "description-3": "The observatory is open for collaboration with amateur astronomers, researchers, and educational institutions. We are happy to provide access to our data for scientific and educational purposes. If you want to become part of our community or use our resources for your projects, contact us through the feedback form.",
+        "description-4": "The Orenburg observatory is a unique combination of modern technology and the enthusiasm of amateur astronomers. We strive to make astronomy accessible to everyone interested in the mysteries of the Universe. Join us to explore the vast expanses of space together!",
+        "equipment-title": "Observatory Equipment",
+        "equipment-description": "The tools and technologies used ensure high observation accuracy and professional image quality. Here is the main equipment used in the work:",
+        "equipment-list": [
+            {
+                "title": "Mount: Sky-Watcher EQ6",
+                "description": "Reliable and accurate mount, ensuring telescope stability even during long exposures."
+            },
+            {
+                "title": "Telescope: Sky-Watcher BK2001P",
+                "description": "Reflector telescope with a 200 mm aperture, ideal for observing deep space objects."
+            },
+            {
+                "title": "Main Camera: ASI ZWO 6200MM Pro",
+                "description": "Highly sensitive astronomical camera with a resolution of 24 MP, capable of capturing the smallest details of distant objects."
+            },
+            {
+                "title": "Guide Camera: QHY QHY5",
+                "description": "Camera for precise targeting and tracking of objects."
+            },
+            {
+                "title": "Guide Scope: SV106 Guide Scope 50mm (Helical Focuser)",
+                "description": "Compact telescope for guiding during long exposure shots."
+            },
+            {
+                "title": "Focuser: ZWO EAF",
+                "description": "Electronic focuser, ensuring precise focus adjustment."
+            },
+            {
+                "title": "Filter Wheel: ZWO EFW 8x31mm",
+                "description": "Universal filter wheel for working with various spectral ranges."
+            },
+            {
+                "title": "Filters: ZWO L, R, G, B, Ha, OIII, SII (1.25\")",
+                "description": "Set of filters for obtaining color images and shooting in narrow spectra."
+            },
+            {
+                "title": "Coma Corrector: Baader 2\" Mark III MPCC",
+                "description": "Eliminates optical distortions, ensuring image clarity."
+            }
+        ],
+        "operating-principle-title": "Operating principle",
+        "operating-principle-description-1": "The observatory is controlled via a server based on a Lenovo M710Q TINY nettop (Pentium G4400T, 8GB RAM, 128GB SSD + 512GB HDD) with the Linux Ubuntu Server 22.04 operating system. INDI, a universal tool for managing astronomical equipment, is responsible for monitoring and coordinating all processes.",
+        "operating-principle-description-2": "For remote access, SSH is used for a secure connection to the server, VNC for the graphical interface, and VirtualBox for working with virtual machines. This allows you to control the observatory from anywhere in the world, without requiring physical presence.",
+        "operating-principle-description-3": "The observatory operates in a semi-automatic mode. There are two possible modes of operation:",
+        "operating-principle-description-4": "The decision to start shooting is made based on data from the weather station. The observatory roof is made using Roll-off Roof technology and is controlled by a motorized controller connected to the server. The roof can be controlled both automatically and manually.",
+        "operating-principle-list": [
+            {
+                "title": "Manual mode:",
+                "description": "The user can directly connect to the system via INDI to control the telescope and camera. This mode is ideal for amateurs who want to set up and have full control over the equipment themselves."
+            },
+            {
+                "title": "Automatic mode:",
+                "description": "In this mode, tasks are created in the INDI scheduler, after which the system executes them autonomously. The decision to start shooting is made based on data from a weather station that monitors weather conditions."
+            }
+        ],
+        "photos-and-data-title": "Photos and data",
+        "photos-and-data-part-1": "A special section of the site presents",
+        "photos-and-data-part-2": "shot",
+        "photos-and-data-part-3": "deep space. For each object, detailed parameters and characteristics are available, such as the distance to the object, its size, spectral data and much more. These materials can be useful for both novice astronomers and professionals.",
+        "photos-and-data-part-photos": "photos",
+        "photos-and-data-part-objects": "objects",
+        "photos-and-data-all-photos": "All astronomical photos"
     },
     "about-page": {
         "description": "Learn more about the \"Look at the Stars\" project, our team, and the homemade astronomical observatory. Join us and discover the beauty of space!",
