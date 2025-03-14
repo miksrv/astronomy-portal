@@ -80,19 +80,19 @@ const StargazingHowToPage: NextPage<StargazingHowToPageProps> = () => {
                 <p style={{ margin: 0 }}>
                     {t('stargazing-howto-page.unique_event')}
                 </p>
-                <h3 style={{ marginBottom: 0 }}>
+                <h3 style={{ marginTop: 10 }}>
                     {t('stargazing-howto-page.event_announcement')}
                 </h3>
                 <p style={{ margin: 0 }}>
                     {t('stargazing-howto-page.event_announcement_text')}
                 </p>
-                <h3 style={{ marginBottom: 0 }}>
+                <h3 style={{ marginTop: 10 }}>
                     {t('stargazing-howto-page.registration')}
                 </h3>
                 <p style={{ margin: 0 }}>
                     {t('stargazing-howto-page.registration_text')}
                 </p>
-                <h3 style={{ marginBottom: 0 }}>
+                <h3 style={{ marginTop: 10 }}>
                     {t('stargazing-howto-page.location')}
                 </h3>
                 <p style={{ marginTop: 0 }}>
@@ -114,31 +114,25 @@ const StargazingHowToPage: NextPage<StargazingHowToPageProps> = () => {
                 </h2>
                 <ul style={{ listStyle: 'decimal', marginBottom: 0 }}>
                     <li style={{ marginBottom: '10px' }}>
-                        <h3 style={{ margin: 0 }}>
-                            {t('stargazing-howto-page.arrival')}
-                        </h3>
+                        <h3>{t('stargazing-howto-page.arrival')}</h3>
                         <p style={{ margin: 0 }}>
                             {t('stargazing-howto-page.arrival_text')}
                         </p>
                     </li>
                     <li style={{ marginBottom: '10px' }}>
-                        <h3 style={{ margin: 0 }}>
-                            {t('stargazing-howto-page.lecture')}
-                        </h3>
+                        <h3>{t('stargazing-howto-page.lecture')}</h3>
                         <p style={{ margin: 0 }}>
                             {t('stargazing-howto-page.lecture_text')}
                         </p>
                     </li>
                     <li style={{ marginBottom: '10px' }}>
-                        <h3 style={{ margin: 0 }}>
-                            {t('stargazing-howto-page.orientation')}
-                        </h3>
+                        <h3>{t('stargazing-howto-page.orientation')}</h3>
                         <p style={{ margin: 0 }}>
                             {t('stargazing-howto-page.orientation_text')}
                         </p>
                     </li>
                     <li>
-                        <h3 style={{ margin: 0 }}>
+                        <h3>
                             {t('stargazing-howto-page.telescope_observation')}
                         </h3>
                         <p style={{ margin: 0 }}>
@@ -150,19 +144,19 @@ const StargazingHowToPage: NextPage<StargazingHowToPageProps> = () => {
                 </ul>
             </Container>
             <Container style={{ marginBottom: '10px' }}>
-                <h3 style={{ margin: 0 }}>
+                <h3 style={{ marginTop: 10 }}>
                     {t('stargazing-howto-page.event_duration')}
                 </h3>
                 <p style={{ margin: 0 }}>
                     {t('stargazing-howto-page.event_duration_text')}
                 </p>
-                <h3 style={{ marginBottom: 0 }}>
+                <h3 style={{ marginTop: 10 }}>
                     {t('stargazing-howto-page.recommendations')}
                 </h3>
                 <p style={{ margin: 0 }}>
                     {t('stargazing-howto-page.recommendations_text')}
                 </p>
-                <h3 style={{ marginBottom: 0 }}>
+                <h3 style={{ marginTop: 10 }}>
                     {t('stargazing-howto-page.thematic_evenings')}
                 </h3>
                 <p style={{ marginTop: 0 }}>
