@@ -63,7 +63,7 @@ const StargazingFAQPage: NextPage<StargazingFAQPageProps> = () => {
                     }) as any[]
                 ).map((item: any, index: number) => (
                     <div key={index}>
-                        <h3 style={{ marginBottom: 0 }}>{item.question}</h3>
+                        <h3 style={{ marginTop: 10 }}>{item.question}</h3>
                         <p style={{ margin: 0 }}>{item.answer}</p>
                     </div>
                 ))}

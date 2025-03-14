@@ -181,7 +181,7 @@ class Events extends ResourceController
             }
 
             $eventPhotosModel = new EventsPhotosModel();
-            $eventPhotosData  = $eventPhotosModel->getPhotoList($locale, $id);
+            $eventPhotosData  = $eventPhotosModel->getPhotoList($locale, $id, 0);
 
             $result = $result[0];
             $result->photos = $eventPhotosData;

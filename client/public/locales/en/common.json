@@ -11,7 +11,7 @@
     "stargazing": "Stargazing",
     "stargazings": "Stargazings",
     "members": "Members",
-    "near_space": "Near Space",
+    "near_space": "Look At The Stars",
     "photos-from-stargazing": "Photos from the stargazing",
     "look-at-the-stars-description": "Look at the stars - a unique project in the Orenburg region: telescope observations outside the city, sidewalk astronomy, an observatory in the Orenburg region, and astrophotography",
     "stargazings-section-description": "We organize regular trips under the open sky to observe stars and planets through powerful telescopes.",
@@ -146,10 +146,10 @@
         "subscribe": "Subscribe"
     },
     "stargazing-howto-page": {
-        "description": "Learn how stargazing trips in Orenburg are conducted: registration, space lectures, telescope observations, and star navigation training. Subscribe to the Telegram channel \"Near Space\" and join unique astronomical events under the starry sky!",
+        "description": "Learn how stargazing trips in Orenburg are conducted: registration, space lectures, telescope observations, and star navigation training. Subscribe to the Telegram channel \"Look At The Stars\" and join unique astronomical events under the starry sky!",
         "unique_event": "Each stargazing trip is unique, but we follow a general scenario to make the event interesting and convenient for all participants.",
         "event_announcement": "Event Announcement",
-        "event_announcement_text": "Stargazing trips in Orenburg are held in favorable weather conditions, so the exact date becomes known only 2-3 days before the event. We announce upcoming trips in advance on our Telegram channel \"Near Space\", where we publish announcements and important updates. Subscribing to the channel is mandatory to not miss a new stargazing trip.",
+        "event_announcement_text": "Stargazing trips in Orenburg are held in favorable weather conditions, so the exact date becomes known only 2-3 days before the event. We announce upcoming trips in advance on our Telegram channel \"Look At The Stars\", where we publish announcements and important updates. Subscribing to the channel is mandatory to not miss a new stargazing trip.",
         "registration": "Stargazing Trip Registration",
         "registration_text": "Pre-registration through our website is required to participate. It is free and takes only one minute. Please note: beware of scammers, if someone asks for payment for participation - it is a scam! We welcome donations, but participation always remains free.",
         "location": "Event Location",
