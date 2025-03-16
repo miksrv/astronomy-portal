@@ -57,7 +57,7 @@
     "objects-in-photo": "Объекты на фото",
     "link-to-FITS-files": "Ссылка на FITS файлы",
     "open-full-size": "{{photoName}} - Открыть в полном размере",
-    "full-size": "Полный размер {{size}}",
+    "full-size": "Открыть полный размер ({{size}})",
     "safely": "Безопасно",
     "critical": "Критическое",
     "dangerous": "Опасно",
