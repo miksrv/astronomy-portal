@@ -57,7 +57,7 @@
     "objects-in-photo": "Objects in the photo",
     "link-to-FITS-files": "Link to FITS files",
     "open-full-size": "{{photoName}} - Open in full size",
-    "full-size": "Full size {{size}}",
+    "full-size": "Open full size ({{size}})",
     "safely": "Safely",
     "critical": "Critical",
     "dangerous": "Dangerous",
