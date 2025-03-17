@@ -1,6 +1,6 @@
 import { ApiModel } from '@/api'
-import { getTimeFromSec } from '@/functions/helpers'
 import { formatDEC, formatRA } from '@/tools/coordinates'
+import { getTimeFromSec } from '@/tools/helpers'
 import { humanizeFileSize } from '@/tools/strings'
 import { useTranslation } from 'next-i18next'
 import Link from 'next/link'

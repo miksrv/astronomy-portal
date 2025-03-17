@@ -1,7 +1,7 @@
 import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
-import { getTimeFromSec } from '@/functions/helpers'
 import { formatDate } from '@/tools/dates'
+import { getTimeFromSec } from '@/tools/helpers'
 import { createLargePhotoUrl, createMediumPhotoUrl } from '@/tools/photos'
 import { formatObjectName, humanizeFileSize } from '@/tools/strings'
 import { useTranslation } from 'next-i18next'

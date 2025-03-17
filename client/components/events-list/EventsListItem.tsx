@@ -1,6 +1,6 @@
 import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
-import { formatDate } from '@/functions/helpers'
+import { formatDate } from '@/tools/helpers'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'

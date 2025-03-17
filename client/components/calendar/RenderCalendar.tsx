@@ -1,5 +1,5 @@
 import { Weather } from '@/api/apiMeteo'
-import { formatDate } from '@/functions/helpers'
+import { formatDate } from '@/tools/helpers'
 import dayjs, { Dayjs } from 'dayjs'
 import Image from 'next/image'
 import React from 'react'

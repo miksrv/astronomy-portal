@@ -1,5 +1,5 @@
 import { ApiModel } from '@/api'
-import { getTimeFromSec } from '@/functions/helpers'
+import { getTimeFromSec } from '@/tools/helpers'
 import { createMediumPhotoUrl, createPhotoTitle } from '@/tools/photos'
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'

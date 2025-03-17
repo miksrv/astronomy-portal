@@ -1,6 +1,6 @@
 import { ApiModel } from '@/api'
-import { formatSecondsToExposure } from '@/functions/helpers'
 import { getFilterColor } from '@/tools/colors'
+import { formatSecondsToExposure } from '@/tools/helpers'
 import { createSmallPhotoUrl } from '@/tools/photos'
 import { formatObjectName } from '@/tools/strings'
 import { useTranslation } from 'next-i18next'
