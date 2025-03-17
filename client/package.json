@@ -10,7 +10,6 @@
         "build": "next build",
         "export": "next export",
         "start": "next start",
-        "lint": "next lint",
         "test:watch": "jest --testNamePattern AuthorTable --watch",
         "test": "jest",
         "eslint:check": "eslint -c .eslintrc --ext .js,.jsx,.ts,.tsx .",

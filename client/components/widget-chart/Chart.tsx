@@ -76,7 +76,6 @@ const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) => {
 
                 //Format the header - let's assume it's a date (xAxis)
                 if (params.length > 0) {
-                    // const header = `<div class="${styles.chartTooltipTitle}">${formatDate(params[0].axisValueLabel, t('date-chart-tooltip'))}</div>`
                     const header = `<div class="${styles.chartTooltipTitle}">${params[0].axisValueLabel}</div>`
                     tooltipContent.push(header)
                 }
