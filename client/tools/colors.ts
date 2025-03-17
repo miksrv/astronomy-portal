@@ -65,6 +65,49 @@ export const getFilterColorType = (
     }
 }
 
+export const getSensorColorType = (
+    sensor?: keyof ApiModel.Weather
+): keyof typeof colors => {
+    switch (sensor) {
+        case 'temperature':
+            return 'red'
+        case 'feelsLike':
+            return 'orange'
+        case 'pressure':
+            return 'purple'
+        case 'humidity':
+            return 'cyan'
+        case 'dewPoint':
+            return 'lightblue'
+        case 'visibility':
+            return 'air'
+        case 'uvIndex':
+            return 'violet'
+        case 'solEnergy':
+            return 'yellow'
+        case 'solRadiation':
+            return 'lime'
+        case 'clouds':
+            return 'navy'
+        case 'precipitation':
+            return 'blue'
+        case 'windSpeed':
+            return 'green'
+        case 'windGust':
+            return 'teal'
+        case 'windDeg':
+            return 'olive'
+        default:
+            return 'grey'
+    }
+}
+
+export const getSensorColor = (sensor?: keyof ApiModel.Weather): string[] => {
+    const sensorColor = getSensorColorType(sensor)
+
+    return colors[sensorColor]
+}
+
 export const getFilterColor = (
     filter?: ApiModel.FilterTypes
 ): string | undefined => {
