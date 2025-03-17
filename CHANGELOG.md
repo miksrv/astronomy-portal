@@ -1,5 +1,21 @@
 # Changelog
 
+## 4.0.11
+
+### Patch Changes
+
+-   Improved UI text locales
+-   Fixed UI stargazing pages margins between elements
+-   Fixed API stargazing photos count
+-   Updated locales
+-   Updated UI tools functions and helpers
+-   Added and improved UI locales
+-   Implemented new UI WidgetChart Component
+-   Refactoring styles, components and functions
+-   Improved and refactoring UI API models
+-   Implemented new UI page, added new menu item
+-   Optimized NextJS configuration
+
 ## 4.0.10
 
 ### Patch Changes
