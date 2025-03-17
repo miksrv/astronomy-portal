@@ -1,5 +1,5 @@
 import { API, ApiType, useAppSelector } from '@/api'
-import { declOfNum } from '@/functions/helpers'
+import { declOfNum } from '@/tools/helpers'
 import React, { useEffect, useState } from 'react'
 import { Button, Container, Message, Spinner, cn } from 'simple-react-ui-kit'
 

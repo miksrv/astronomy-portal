@@ -8,6 +8,7 @@
     "telegram": "Telegram",
     "observatory": "Observatory",
     "observatory-orenburg": "Observatory in Orenburg",
+    "observatory-orenburg-weather": "Weather at the Orenburg Observatory",
     "stargazing": "Stargazing",
     "stargazings": "Stargazings",
     "members": "Members",
@@ -26,6 +27,7 @@
     "description-photos-list-page": "A collection of astrophotographs of galaxies, star clusters, nebulae, planets and other celestial objects captured by an amateur observatory. Browse and filter images by category and parameters to see unique images of the Universe with details for each filter and exposure.",
     "description-photo-page": "{{photoTitle}} — photo of an astronomical object taken at the homemade observatory, equipment used: {{equipment}}.",
     "description-observatory": "A homemade amateur astronomical observatory with remote access from anywhere in the world via the Internet. Observatory operation statistics, number of shots and accumulated data. Telescope operation calendar.",
+    "description-observatory-weather": "Current weather charts from the amateur observatory's weather station in the suburbs of Orenburg. Temperature, humidity, cloudiness, and wind speed in real-time.",
     "main-page": "Main Page",
     "search-by-name": "Search by name",
     "search-by-object": "Search by object",
@@ -68,7 +70,10 @@
     "windSpeed": "Wind Speed",
     "windGust": "Gusts of wind",
     "precipitation": "Precipitation",
+    "feelsLike": "Feels like",
+    "dewPoint": "Dew Point",
     "weather-conditions": "Weather Conditions",
+    "meters-per-second": "m/s",
     "updated": "Updated",
     "sun": "Sun",
     "dawn": "Dawn",
@@ -308,6 +313,9 @@
         "photos-and-data-part-objects": "objects",
         "photos-and-data-all-photos": "All astronomical photos"
     },
+    "observatory-weather-page": {
+        "intro": "Monitor real-time weather conditions from the weather station installed at the homemade astronomical observatory in the suburbs of Orenburg. The charts display temperature, humidity, cloudiness, and wind speed. For full access to data and observation history, visit the weather station website:"
+    },
     "about-page": {
         "description": "Learn more about the \"Look at the Stars\" project, our team, and the homemade astronomical observatory. Join us and discover the beauty of space!",
         "my-name": "My name is",
@@ -365,5 +373,8 @@
         "oxygen": "OIII",
         "sulfur": "SII",
         "unknown": "Unknown"
-    }
+    },
+    "date-full-format": "D MMMM YYYY, h:mm a",
+    "date-chart-tooltip": "dddd, DD MMM YYYY, h:mm a",
+    "date-chart-label": "D MMM YYYY, h:mm a"
 }

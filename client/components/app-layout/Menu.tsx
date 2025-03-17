@@ -67,6 +67,10 @@ export const Menu: React.FC<MenuProps> = ({
                 {
                     link: '/observatory/overview',
                     text: t('observatory-orenburg')
+                },
+                {
+                    link: '/observatory/weather',
+                    text: t('observatory-orenburg-weather')
                 }
             ]
         },

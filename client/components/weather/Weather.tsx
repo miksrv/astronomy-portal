@@ -1,6 +1,7 @@
-import { APIMeteo, Weather as WeatherType } from '@/api/apiMeteo'
-import { formatDateUTC, minutesAgo } from '@/functions/helpers'
+import { APIMeteo, ApiModel } from '@/api'
+import { formatDateUTC, minutesAgo } from '@/tools/helpers'
 import { useTranslation } from 'next-i18next'
+import Link from 'next/link'
 import React from 'react'
 import { Container, cn } from 'simple-react-ui-kit'
 
@@ -51,12 +52,25 @@ const Weather: React.FC = () => {
 
     return (
         <Container className={styles.weather}>
-            <h4 className={styles.blockTitle}>
-                {t('weather-conditions')}:{' '}
-                <span className={cn(styles.weatherState, styles[weatherState])}>
-                    {weatherCondition}
-                </span>
-            </h4>
+            <div className={styles.toolbar}>
+                <h4 className={styles.title}>
+                    {t('weather-conditions')}:{' '}
+                    <span
+                        className={cn(
+                            styles.weatherState,
+                            styles[weatherState]
+                        )}
+                    >
+                        {weatherCondition}
+                    </span>
+                </h4>
+                <Link
+                    href={'/observatory/weather'}
+                    title={t('observatory-orenburg-weather')}
+                >
+                    {t('read-more')}
+                </Link>
+            </div>
             <div className={styles.update}>
                 {t('updated')}:{' '}
                 <strong>
@@ -78,7 +92,7 @@ const Weather: React.FC = () => {
                         />
                         {t(key)}:{' '}
                         <span className={styles.val}>
-                            {data?.[key as keyof WeatherType] ?? '?'}{' '}
+                            {data?.[key as keyof ApiModel.Weather] ?? '?'}{' '}
                             {key === 'temperature'
                                 ? '℃'
                                 : key === 'precipitation'

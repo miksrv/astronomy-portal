@@ -1,5 +1,5 @@
-import { formatDate } from '@/functions/helpers'
 import packageInfo from '@/package.json'
+import { formatDate } from '@/tools/helpers'
 import Image from 'next/image'
 import React, { forwardRef } from 'react'
 

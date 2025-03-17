@@ -1,5 +1,5 @@
-import { Weather } from '@/api/apiMeteo'
-import { formatDate } from '@/functions/helpers'
+import { ApiModel } from '@/api'
+import { formatDate } from '@/tools/helpers'
 import dayjs, { Dayjs } from 'dayjs'
 import Image from 'next/image'
 import React from 'react'
@@ -17,7 +17,7 @@ const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
 
 interface RenderCalendarProps {
     calendarDate: Date | Dayjs
-    eventsWeather?: Weather[]
+    eventsWeather?: ApiModel.Weather[]
     eventsTelescope?: any[] // ApiModel.Statistic.Telescope[]
 }
 

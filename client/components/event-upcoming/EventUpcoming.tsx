@@ -1,6 +1,6 @@
 import { API, ApiModel, useAppSelector } from '@/api'
 import { hosts } from '@/api/constants'
-import { formatUTCDate, getTimeFromSec } from '@/functions/helpers'
+import { formatUTCDate, getTimeFromSec } from '@/tools/helpers'
 import dayjs from 'dayjs'
 import Image from 'next/image'
 import React from 'react'

@@ -1,5 +1,5 @@
-import { APIMeteo } from '@/api/apiMeteo'
-import { dateAddMonth, dateExtractMonth, formatDate } from '@/functions/helpers'
+import { APIMeteo } from '@/api'
+import { dateAddMonth, dateExtractMonth, formatDate } from '@/tools/helpers'
 import dayjs from 'dayjs'
 import React, { useState } from 'react'
 import { Button, Container } from 'simple-react-ui-kit'

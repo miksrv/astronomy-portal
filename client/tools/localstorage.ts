@@ -1,4 +1,4 @@
-import { isValidJSON } from '@/functions/helpers'
+import { isValidJSON } from '@/tools/helpers'
 
 import { LOCAL_STORAGE, LOCAL_STORAGE_KEY } from './constants'
 

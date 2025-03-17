@@ -1,4 +1,4 @@
-import { formatDate } from '@/functions/helpers'
+import { formatDate } from '@/tools/helpers'
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
