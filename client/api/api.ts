@@ -380,14 +380,6 @@ export const API = createApi({
             Maybe<ApiType.Statistic.ReqTelescope>
         >({
             query: (params) => `statistic/telescope${encodeQueryData(params)}`
-        }),
-
-        /* Weather Controller */
-        weatherGetStatistic: builder.query<
-            ApiType.Weather.ResStatistic,
-            Maybe<ApiType.Weather.ReqStatistic>
-        >({
-            query: (params) => `weather/statistic${encodeQueryData(params)}`
         })
     }),
     extractRehydrationInfo(action, { reducerPath }): any {
@@ -409,6 +401,3 @@ export const API = createApi({
         'Relay'
     ]
 })
-
-// Export hooks for usage in functional components
-export const { useAuthorPatchMutation, useAuthorPostMutation } = API

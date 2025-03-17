@@ -35,7 +35,8 @@ const nextConfig = {
         '/scripts/d3.geo.projection.min.js',
         '/scripts/celestial.min.js',
         '@/components/celestial-map',
-        'recharts'
+        'echarts-for-react',
+        'echarts'
     ],
 
     webpack(config) {
