@@ -84,6 +84,9 @@
     "right-ascension": "Right Ascension",
     "declination": "Declination",
     "no-fits-files": "No saved FITS files for this object",
+    "image-from-observatory-camera": "Image from the observatory camera",
+    "camera-not-available": "Camera not available",
+    "camera-image-not-available": "Camera image not available",
     "telegram-subscription": "To not miss announcements - subscribe to the Telegram channel",
     "visibility-chart": {
         "title": "Visibility chart of {{name}} during the day",

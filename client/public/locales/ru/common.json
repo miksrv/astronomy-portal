@@ -84,6 +84,9 @@
     "right-ascension": "Прямое восхождение",
     "declination": "Склонение",
     "no-fits-files": "Нет сохраненных FITS файлов для этого объекта",
+    "image-from-observatory-camera": "Изображение с камеры обсерватории",
+    "camera-not-available": "Камера не доступна",
+    "camera-image-not-available": "Изображение камеры недоступно",
     "telegram-subscription": "Чтобы не пропустить анонсы - подпишитесь на Telegram канал",
     "visibility-chart": {
         "title": "График видимости {{name}} в течение суток",
