@@ -1,3 +1,4 @@
+import { useTranslation } from 'next-i18next'
 import React, { useEffect, useState } from 'react'
 import { Container, Message, Spinner } from 'simple-react-ui-kit'
 
@@ -13,6 +14,8 @@ interface CameraProps {
 const DEFAULT_INTERVAL = 5000
 
 const Camera: React.FC<CameraProps> = ({ cameraURL, interval }) => {
+    const { t } = useTranslation()
+
     const refreshInterval = interval ? interval * 1000 : DEFAULT_INTERVAL
 
     const [cameraSrc, setCameraSrc] = useState<string>(cameraURL || '')
@@ -56,20 +59,19 @@ const Camera: React.FC<CameraProps> = ({ cameraURL, interval }) => {
                         onClick={() => setLightbox(true)}
                     >
                         <Spinner />
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             className={styles.photoImage}
                             src={cameraSrc}
-                            alt='Изображение с камеры обсерватории'
+                            alt={t('image-from-observatory-camera')}
                         />
                     </button>
                 </>
             ) : (
                 <Message
-                    type='error'
-                    title='Камера не доступна'
+                    type={'error'}
+                    title={t('camera-not-available')}
                 >
-                    Изображение камеры не доступно
+                    {t('camera-image-not-available')}
                 </Message>
             )}
         </Container>
