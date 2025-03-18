@@ -2,13 +2,13 @@ import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
 import { formatDate } from '@/tools/dates'
 import { getTimeFromSec } from '@/tools/helpers'
-import { createLargePhotoUrl, createMediumPhotoUrl } from '@/tools/photos'
+import { createLargePhotoUrl } from '@/tools/photos'
 import { formatObjectName, humanizeFileSize } from '@/tools/strings'
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useMemo, useState } from 'react'
-import { Container } from 'simple-react-ui-kit'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Container, Skeleton } from 'simple-react-ui-kit'
 
 import FilterList from '@/components/filter-list'
 import PhotoLightbox from '@/components/photo-lightbox'
@@ -33,6 +33,8 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
 }) => {
     const { t } = useTranslation()
 
+    const [loading, setLoading] = useState<boolean>(false)
+    const [imageSource, setImageSource] = useState<string>('')
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
 
     const objectsData = useMemo(
@@ -52,6 +54,18 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
         [equipmentsList, props.equipments]
     )
 
+    useEffect(() => {
+        if (props?.fileName) {
+            setLoading(true)
+            const newImage = new window.Image()
+            newImage.src = createLargePhotoUrl(props as ApiModel.Photo)
+            newImage.onload = () => {
+                setImageSource(newImage.src)
+                setLoading(false)
+            }
+        }
+    }, [props?.fileName])
+
     return (
         <Container className={styles.photoContainer}>
             <div className={styles.imageSection}>
@@ -60,16 +74,16 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                     tabIndex={0}
                     onClick={() => setShowLightbox(true)}
                 >
-                    <Image
-                        className={styles.image}
-                        src={createLargePhotoUrl(props as ApiModel.Photo)}
-                        fill={true}
-                        placeholder={'blur'}
-                        blurDataURL={createMediumPhotoUrl(
-                            props as ApiModel.Photo
-                        )}
-                        alt={photoTitle || ''}
-                    />
+                    {!loading ? (
+                        <Image
+                            className={styles.image}
+                            alt={photoTitle || ''}
+                            src={imageSource}
+                            fill={true}
+                        />
+                    ) : (
+                        <Skeleton style={{ width: '100%', height: '100%' }} />
+                    )}
                 </button>
             </div>
             <div className={styles.parametersSection}>
