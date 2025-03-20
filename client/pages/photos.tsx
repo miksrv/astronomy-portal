@@ -85,7 +85,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
                 query: { ...router.query, category }
             })
         } else {
-            const { category, ...rest } = router.query
+            const { ...rest } = router.query
             router.push({
                 pathname: router.pathname,
                 query: rest
