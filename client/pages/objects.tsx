@@ -17,12 +17,14 @@ import AppToolbar from '@/components/app-toolbar'
 import ObjectTable from '@/components/objects-table'
 
 interface ObjectsPageProps {
+    category: string
     categoriesList: ApiModel.Category[]
     objectsList: ApiModel.Object[]
     photosList: ApiModel.Photo[]
 }
 
 const ObjectsPage: NextPage<ObjectsPageProps> = ({
+    category,
     categoriesList,
     objectsList,
     photosList
@@ -75,6 +77,34 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
         [objectsList, categoryFilter, searchFilter]
     )
 
+    const currentCategory = useMemo(
+        () =>
+            filteredCategoriesList?.find(({ id }) => id === categoryFilter)
+                ?.title || '',
+        [filteredCategoriesList, categoryFilter]
+    )
+
+    const title =
+        t('list-astronomical-objects') +
+        (categoryFilter ? `: ${currentCategory}` : '')
+
+    const handleChangeCategoryFilter = (category: number | undefined) => {
+        if (category !== undefined) {
+            router.push({
+                pathname: router.pathname,
+                query: { ...router.query, category }
+            })
+        } else {
+            const { category, ...rest } = router.query
+            router.push({
+                pathname: router.pathname,
+                query: rest
+            })
+        }
+
+        setCategoryFilter(category)
+    }
+
     useEffect(() => {
         const updateHeights = () => {
             if (toolbarRef.current) {
@@ -93,10 +123,14 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
         }
     }, [])
 
+    useEffect(() => {
+        setCategoryFilter(category ? parseInt(category) : undefined)
+    }, [category])
+
     return (
         <AppLayout>
             <NextSeo
-                title={t('list-astronomical-objects')}
+                title={title}
                 description={t('description-object-list-page')}
                 canonical={`${canonicalUrl}objects`}
                 openGraph={{
@@ -114,8 +148,22 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
 
             <AppToolbar
                 ref={toolbarRef}
-                title={t('list-astronomical-objects')}
-                currentPage={t('list-astronomical-objects')}
+                title={title}
+                currentPage={
+                    categoryFilter
+                        ? currentCategory
+                        : t('list-astronomical-objects')
+                }
+                links={
+                    categoryFilter
+                        ? [
+                              {
+                                  link: '/objects',
+                                  text: t('list-astronomical-objects')
+                              }
+                          ]
+                        : undefined
+                }
             >
                 <Input
                     placeholder={t('search-by-name')}
@@ -128,7 +176,9 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
                     clearable={true}
                     value={categoryFilter}
                     placeholder={t('filter-by-category')}
-                    onSelect={(category) => setCategoryFilter(category?.key)}
+                    onSelect={(category) =>
+                        handleChangeCategoryFilter(category?.key)
+                    }
                     options={filteredCategoriesList?.map((category) => ({
                         key: category.id,
                         value: category.title
@@ -163,6 +213,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
             context
         ): Promise<GetServerSidePropsResult<ObjectsPageProps>> => {
             const locale = context.locale ?? 'en'
+            const category = (context.query.category as string) || ''
             const translations = await serverSideTranslations(locale)
 
             store.dispatch(setLocale(locale))
@@ -184,6 +235,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
             return {
                 props: {
                     ...translations,
+                    category,
                     categoriesList: categories?.items || [],
                     objectsList: objects?.items || [],
                     photosList: photos?.items || []

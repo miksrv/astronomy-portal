@@ -42,7 +42,18 @@ const ObjectHeader: React.FC<ObjectHeaderProps> = ({
                 {!!categoriesData?.length && (
                     <div className={styles.item}>
                         <span className={styles.key}>{t('category')}:</span>
-                        {categoriesData.map(({ title }) => title).join(', ')}
+                        {categoriesData?.map(({ title, id }, i) => (
+                            <>
+                                <Link
+                                    key={`category_${id}`}
+                                    href={`/objects?category=${id}`}
+                                    title={`${t('astrophoto')}: {title}`}
+                                >
+                                    {title}
+                                </Link>
+                                {i < categoriesData.length - 1 && ', '}
+                            </>
+                        ))}
                     </div>
                 )}
 
