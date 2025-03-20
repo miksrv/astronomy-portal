@@ -8,7 +8,7 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/router'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Button, Dropdown, Input } from 'simple-react-ui-kit'
 
 import AppFooter from '@/components/app-footer'
@@ -17,11 +17,13 @@ import AppToolbar from '@/components/app-toolbar'
 import PhotoGrid from '@/components/photo-grid'
 
 interface PhotosPageProps {
+    category: string
     photosList: ApiModel.Photo[]
     categoriesList: ApiModel.Category[]
 }
 
 const PhotosPage: NextPage<PhotosPageProps> = ({
+    category,
     photosList,
     categoriesList
 }) => {
@@ -34,10 +36,6 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
 
     const [searchFilter, setSearchFilter] = useState<string>()
     const [categoryFilter, setCategoryFilter] = useState<number | undefined>()
-
-    const handleCreate = () => {
-        router.push('/photos/form')
-    }
 
     const filteredCategoriesList = useMemo(
         () =>
@@ -72,10 +70,45 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
         [photosList, categoryFilter, searchFilter]
     )
 
+    const currentCategory = useMemo(
+        () =>
+            filteredCategoriesList?.find(({ id }) => id === categoryFilter)
+                ?.title || '',
+        [filteredCategoriesList, categoryFilter]
+    )
+
+    const title =
+        t('astrophoto') + (categoryFilter ? `: ${currentCategory}` : '')
+
+    const handleChangeCategoryFilter = (category: number | undefined) => {
+        if (category !== undefined) {
+            router.push({
+                pathname: router.pathname,
+                query: { ...router.query, category }
+            })
+        } else {
+            const { category, ...rest } = router.query
+            router.push({
+                pathname: router.pathname,
+                query: rest
+            })
+        }
+
+        setCategoryFilter(category)
+    }
+
+    const handleCreate = () => {
+        router.push('/photos/form')
+    }
+
+    useEffect(() => {
+        setCategoryFilter(category ? parseInt(category) : undefined)
+    }, [category])
+
     return (
         <AppLayout>
             <NextSeo
-                title={t('astrophoto')}
+                title={title}
                 description={t('description-photos-list-page')}
                 canonical={`${canonicalUrl}photos`}
                 openGraph={{
@@ -92,8 +125,18 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
             />
 
             <AppToolbar
-                title={t('astrophoto')}
-                currentPage={t('astrophoto')}
+                title={title}
+                currentPage={categoryFilter ? currentCategory : t('astrophoto')}
+                links={
+                    categoryFilter
+                        ? [
+                              {
+                                  link: '/photos',
+                                  text: t('astrophoto')
+                              }
+                          ]
+                        : undefined
+                }
             >
                 <Input
                     placeholder={t('search-by-object')}
@@ -106,7 +149,9 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
                     size={'medium'}
                     value={categoryFilter}
                     placeholder={t('filter-by-category')}
-                    onSelect={(category) => setCategoryFilter(category?.key)}
+                    onSelect={(category) =>
+                        handleChangeCategoryFilter(category?.key)
+                    }
                     options={filteredCategoriesList?.map((category) => ({
                         key: category.id,
                         value: category.title
@@ -135,6 +180,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<PhotosPageProps>> => {
             const locale = context.locale ?? 'en'
+            const category = (context.query.category as string) || ''
             const translations = await serverSideTranslations(locale)
 
             store.dispatch(setLocale(locale))
@@ -152,6 +198,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
             return {
                 props: {
                     ...translations,
+                    category,
                     photosList: photos?.items || [],
                     categoriesList: categories?.items || []
                 }
