@@ -2,7 +2,7 @@ import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
 import { formatDate } from '@/tools/dates'
 import { getTimeFromSec } from '@/tools/helpers'
-import { createLargePhotoUrl } from '@/tools/photos'
+import { createLargePhotoUrl, createMediumPhotoUrl } from '@/tools/photos'
 import { formatObjectName, humanizeFileSize } from '@/tools/strings'
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
@@ -70,9 +70,14 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
         <Container className={styles.photoContainer}>
             <div className={styles.imageSection}>
                 <button
-                    className={styles.lightboxTrigger}
                     tabIndex={0}
+                    className={styles.lightboxTrigger}
                     onClick={() => setShowLightbox(true)}
+                    style={{
+                        backgroundImage: `url(${createMediumPhotoUrl(
+                            props as ApiModel.Photo
+                        )})`
+                    }}
                 >
                     {!loading ? (
                         <Image
