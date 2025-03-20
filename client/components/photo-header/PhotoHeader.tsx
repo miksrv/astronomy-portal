@@ -2,7 +2,7 @@ import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
 import { formatDate } from '@/tools/dates'
 import { getTimeFromSec } from '@/tools/helpers'
-import { createLargePhotoUrl } from '@/tools/photos'
+import { createLargePhotoUrl, createMediumPhotoUrl } from '@/tools/photos'
 import { formatObjectName, humanizeFileSize } from '@/tools/strings'
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
@@ -70,9 +70,14 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
         <Container className={styles.photoContainer}>
             <div className={styles.imageSection}>
                 <button
-                    className={styles.lightboxTrigger}
                     tabIndex={0}
+                    className={styles.lightboxTrigger}
                     onClick={() => setShowLightbox(true)}
+                    style={{
+                        backgroundImage: `url(${createMediumPhotoUrl(
+                            props as ApiModel.Photo
+                        )})`
+                    }}
                 >
                     {!loading ? (
                         <Image
@@ -96,9 +101,22 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
 
                 <div className={styles.item}>
                     <span className={styles.key}>{t('category')}:</span>
-                    {!categoriesData?.length
-                        ? '---'
-                        : categoriesData?.map(({ title }) => title).join(', ')}
+                    <div>
+                        {!categoriesData?.length
+                            ? '---'
+                            : categoriesData?.map(({ title, id }, i) => (
+                                  <>
+                                      <Link
+                                          key={`category_${id}`}
+                                          href={`/photos?category=${id}`}
+                                          title={`${t('astrophoto')}: {title}`}
+                                      >
+                                          {title}
+                                      </Link>
+                                      {i < categoriesData.length - 1 && ', '}
+                                  </>
+                              ))}
+                    </div>
                 </div>
 
                 <div className={styles.item}>

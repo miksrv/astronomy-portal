@@ -1,5 +1,21 @@
 # Changelog
 
+## 4.0.12
+
+### Patch Changes
+
+-   Updated UI Libraries
+-   Fixed UI css issues for mobile devices
+-   Improved UI Camera component
+-   Added loader for UI Photo Header Component (photo page)
+-   Improved UI locales
+-   Added medium photo for loading photo page screen
+-   Fixed photos and objects toolbar styles
+-   Implemented category URL for photos page
+-   Photo page categories created as links
+-   Implemented objects categories page
+-   Improved UI photos and objects meta description
+
 ## 4.0.11
 
 ### Patch Changes
