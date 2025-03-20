@@ -101,9 +101,22 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
 
                 <div className={styles.item}>
                     <span className={styles.key}>{t('category')}:</span>
-                    {!categoriesData?.length
-                        ? '---'
-                        : categoriesData?.map(({ title }) => title).join(', ')}
+                    <div>
+                        {!categoriesData?.length
+                            ? '---'
+                            : categoriesData?.map(({ title, id }, i) => (
+                                  <>
+                                      <Link
+                                          key={`category_${id}`}
+                                          href={`/photos?category=${id}`}
+                                          title={`${t('astrophoto')}: {title}`}
+                                      >
+                                          {title}
+                                      </Link>
+                                      {i < categoriesData.length - 1 && ', '}
+                                  </>
+                              ))}
+                    </div>
                 </div>
 
                 <div className={styles.item}>

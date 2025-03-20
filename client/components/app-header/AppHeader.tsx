@@ -108,7 +108,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) => {
                                 <li>
                                     <Link
                                         href={'/'}
-                                        title={''}
+                                        title={t('logout')}
                                         onClick={(event) => {
                                             event.preventDefault()
                                             handleLogout()
