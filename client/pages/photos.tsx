@@ -71,14 +71,12 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
     )
 
     const currentCategory = useMemo(
-        () =>
-            filteredCategoriesList?.find(({ id }) => id === categoryFilter)
-                ?.title || '',
+        () => filteredCategoriesList?.find(({ id }) => id === categoryFilter),
         [filteredCategoriesList, categoryFilter]
     )
 
     const title =
-        t('astrophoto') + (categoryFilter ? `: ${currentCategory}` : '')
+        t('astrophoto') + (categoryFilter ? `: ${currentCategory?.title}` : '')
 
     const handleChangeCategoryFilter = (category: number | undefined) => {
         if (category !== undefined) {
@@ -109,7 +107,9 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
         <AppLayout>
             <NextSeo
                 title={title}
-                description={t('description-photos-list-page')}
+                description={`${t('description-photos-list-page')} ${
+                    currentCategory?.description
+                }`}
                 canonical={`${canonicalUrl}photos`}
                 openGraph={{
                     images: [
@@ -126,7 +126,9 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
 
             <AppToolbar
                 title={title}
-                currentPage={categoryFilter ? currentCategory : t('astrophoto')}
+                currentPage={
+                    categoryFilter ? currentCategory?.title : t('astrophoto')
+                }
                 links={
                     categoryFilter
                         ? [

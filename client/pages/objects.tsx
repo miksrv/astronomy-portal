@@ -78,15 +78,13 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
     )
 
     const currentCategory = useMemo(
-        () =>
-            filteredCategoriesList?.find(({ id }) => id === categoryFilter)
-                ?.title || '',
+        () => filteredCategoriesList?.find(({ id }) => id === categoryFilter),
         [filteredCategoriesList, categoryFilter]
     )
 
     const title =
         t('list-astronomical-objects') +
-        (categoryFilter ? `: ${currentCategory}` : '')
+        (categoryFilter ? `: ${currentCategory?.title}` : '')
 
     const handleChangeCategoryFilter = (category: number | undefined) => {
         if (category !== undefined) {
@@ -131,7 +129,9 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
         <AppLayout>
             <NextSeo
                 title={title}
-                description={t('description-object-list-page')}
+                description={`${t('description-object-list-page')} ${
+                    currentCategory?.description
+                }`}
                 canonical={`${canonicalUrl}objects`}
                 openGraph={{
                     images: [
@@ -151,7 +151,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
                 title={title}
                 currentPage={
                     categoryFilter
-                        ? currentCategory
+                        ? currentCategory?.title
                         : t('list-astronomical-objects')
                 }
                 links={
