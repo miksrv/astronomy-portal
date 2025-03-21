@@ -104,15 +104,18 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
             setAddedFilters(transformedFilters)
             setFormData({
                 ...initialData,
-                filters: transformedFilters.reduce((acc, filter) => {
-                    acc[filter] = {
-                        ...initialData?.filters?.[filter],
-                        exposure: initialData?.filters?.[filter]?.exposure
-                            ? initialData.filters[filter].exposure / 60
-                            : 0
-                    }
-                    return acc
-                }, {} as Record<ApiModel.FilterTypes, any>)
+                filters: transformedFilters.reduce(
+                    (acc, filter) => {
+                        acc[filter] = {
+                            ...initialData?.filters?.[filter],
+                            exposure: initialData?.filters?.[filter]?.exposure
+                                ? initialData.filters[filter].exposure / 60
+                                : 0
+                        }
+                        return acc
+                    },
+                    {} as Record<ApiModel.FilterTypes, any>
+                )
             })
         }
     }, [initialData])
@@ -121,6 +124,7 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
         <Container>
             <MultiSelect<number>
                 required={true}
+                closeOnSelect={true}
                 disabled={disabled}
                 className={styles.formElement}
                 label={'Категория'}
@@ -142,6 +146,7 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
 
             <MultiSelect<string>
                 required={true}
+                closeOnSelect={true}
                 disabled={disabled}
                 className={styles.formElement}
                 label={'Объекты на фотографии'}
