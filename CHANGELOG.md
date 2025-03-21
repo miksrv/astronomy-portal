@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.0.13
+
+### Patch Changes
+
+-   Updated UI Libraries
+-   Migrate to React 19
+-   Replaced React Gallery library
+-   Implemented new UI PhotoGallery Component
+-   Replaced old react gallery album component on the all pages
+-   Added new property `closeOnSelect` for UI `MultiSelect` component
+
 ## 4.0.12
 
 ### Patch Changes
