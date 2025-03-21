@@ -9,7 +9,6 @@ import { NextSeo } from 'next-seo'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
-import Gallery from 'react-photo-gallery'
 import { Button, Container, Icon } from 'simple-react-ui-kit'
 
 import AppFooter from '@/components/app-footer'
@@ -17,6 +16,7 @@ import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 // import EventUpcoming from '@/components/event-upcoming'
 import EventsList from '@/components/events-list'
+import PhotoGallery from '@/components/photo-gallery'
 import PhotoLightbox from '@/components/photo-lightbox'
 
 interface StargazingPageProps {
@@ -24,7 +24,6 @@ interface StargazingPageProps {
     photos: ApiModel.EventPhoto[]
 }
 
-// TODO Вместо галерии постоянных изображений тут, использовать загруженные фото астровыездов из API
 const StargazingPage: NextPage<StargazingPageProps> = ({ events, photos }) => {
     const { t, i18n } = useTranslation()
     const router = useRouter()
@@ -135,7 +134,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events, photos }) => {
                     </li>
                 </ul>
 
-                <Gallery
+                <PhotoGallery
                     photos={
                         photos?.map((photo, index) => ({
                             height: photo.height,
@@ -144,11 +143,8 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events, photos }) => {
                             alt: `${photo?.title} (${t('photo')} ${index + 1})`
                         })) || []
                     }
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
 

@@ -7,12 +7,12 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import Link from 'next/link'
 import React, { useState } from 'react'
-import Gallery from 'react-photo-gallery'
 import { Container } from 'simple-react-ui-kit'
 
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
+import PhotoGallery from '@/components/photo-gallery'
 import PhotoLightbox from '@/components/photo-lightbox'
 
 import photoSidewalk1 from '@/public/photos/sidewalk-asrtronomy-1.jpeg'
@@ -93,13 +93,10 @@ const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
                     </Link>
                     {t('stargazing-where-page.announcement-2')}
                 </p>
-                <Gallery
+                <PhotoGallery
                     photos={gallerySidewalk}
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(gallerySidewalk.length + photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
             </Container>
