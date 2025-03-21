@@ -7,12 +7,12 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import Link from 'next/link'
 import React, { useState } from 'react'
-import Gallery from 'react-photo-gallery'
 import { Container, Icon } from 'simple-react-ui-kit'
 
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
+import PhotoGallery from '@/components/photo-gallery'
 import PhotoLightbox from '@/components/photo-lightbox'
 import Team from '@/components/project-team'
 
@@ -163,13 +163,11 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     </Link>
                     {t('about-page.intro')}
                 </p>
-                <Gallery
+
+                <PhotoGallery
                     photos={galleryAboutMe}
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
             </Container>
@@ -219,15 +217,10 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     {'.'}
                 </p>
                 <p>{t('about-page.project-locations')}</p>
-                <Gallery
+                <PhotoGallery
                     photos={galleryStargazing}
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(
-                            galleryObservatory.length + photos.index
-                        )
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
                 <p>{t('about-page.project-lectures')}</p>
@@ -250,13 +243,10 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     </Link>
                     {'.'}
                 </p>
-                <Gallery
+                <PhotoGallery
                     photos={galleryObservatory}
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
                 <p>

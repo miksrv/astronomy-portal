@@ -13,13 +13,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
-import Gallery from 'react-photo-gallery'
 import { Button, Container, Icon } from 'simple-react-ui-kit'
 
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import EventPhotoUploader from '@/components/event-photo-uploader/EventPhotoUploader'
+import PhotoGallery from '@/components/photo-gallery'
 import PhotoLightbox from '@/components/photo-lightbox'
 
 interface StargazingItemPageProps {
@@ -39,7 +39,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
 
     const user = useAppSelector((state) => state.auth.user)
 
-    const inputFileRef = useRef<HTMLInputElement>()
+    const inputFileRef = useRef<HTMLInputElement>(undefined)
 
     const [localPhotos, setLocalPhotos] = useState<ApiModel.EventPhoto[]>([])
     const [uploadingPhotos, setUploadingPhotos] = useState<string[]>()
@@ -164,7 +164,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                     </Button>
                 )}
 
-                <Gallery
+                <PhotoGallery
                     photos={
                         localPhotos?.map((photo, index) => ({
                             height: photo.height,
@@ -173,11 +173,8 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                             alt: `${photo?.title} (${t('photo')} ${index + 1})`
                         })) || []
                     }
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
 

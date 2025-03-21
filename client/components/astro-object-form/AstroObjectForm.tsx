@@ -134,6 +134,7 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
         <Container>
             <MultiSelect<number>
                 required={true}
+                closeOnSelect={true}
                 disabled={disabled}
                 className={styles.formElement}
                 label={'Категория'}

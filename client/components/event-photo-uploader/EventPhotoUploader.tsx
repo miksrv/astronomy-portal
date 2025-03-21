@@ -1,12 +1,12 @@
 import { ApiModel } from '@/api'
 import { API } from '@/api/api'
-import React, { LegacyRef, MutableRefObject, useEffect, useState } from 'react'
+import React, { Ref, useEffect, useState } from 'react'
 
 interface PhotoUploaderProps {
     eventId?: string
     onSelectFiles?: (uploadingPhotosData?: string[]) => void
     onUploadPhoto?: (photo: ApiModel.EventPhoto) => void
-    fileInputRef?: MutableRefObject<HTMLInputElement | undefined>
+    fileInputRef?: React.RefObject<HTMLInputElement | undefined>
 }
 
 const EventPhotoUploader: React.FC<PhotoUploaderProps> = ({
@@ -85,7 +85,7 @@ const EventPhotoUploader: React.FC<PhotoUploaderProps> = ({
     return (
         <input
             multiple={true}
-            ref={fileInputRef as LegacyRef<HTMLInputElement> | undefined}
+            ref={fileInputRef as Ref<HTMLInputElement> | undefined}
             style={{ display: 'none' }}
             type={'file'}
             accept={'image/png, image/gif, image/jpeg'}

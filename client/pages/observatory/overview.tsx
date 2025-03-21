@@ -7,13 +7,13 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 import Link from 'next/link'
 import React, { useState } from 'react'
-import Gallery from 'react-photo-gallery'
 import { Button, Container } from 'simple-react-ui-kit'
 
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import ObjectPhotoTable from '@/components/object-photos-table'
+import PhotoGallery from '@/components/photo-gallery'
 import PhotoLightbox from '@/components/photo-lightbox'
 
 import photoObservatory1 from '@/public/photos/observatory-1.jpeg'
@@ -110,13 +110,10 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({
                 </p>
                 <p>{t('observatory-overview-page.description-2')}</p>
 
-                <Gallery
+                <PhotoGallery
                     photos={galleryObservatory}
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
 
@@ -143,13 +140,10 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({
                         </li>
                     ))}
                 </ul>
-                <Gallery
+                <PhotoGallery
                     photos={galleryEquipment}
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
             </Container>
@@ -193,13 +187,10 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({
                         'observatory-overview-page.operating-principle-description-4'
                     )}
                 </p>
-                <Gallery
+                <PhotoGallery
                     photos={galleryControl}
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
             </Container>
