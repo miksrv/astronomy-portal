@@ -1,20 +1,20 @@
-import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import { formatObjectName } from '@/tools/strings'
+import React, { useEffect, useMemo, useState } from 'react'
 import uniq from 'lodash-es/uniq'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { useRouter } from 'next/router'
-import React, { useEffect, useMemo, useState } from 'react'
 import { Button, Dropdown, Input } from 'simple-react-ui-kit'
 
+import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import PhotoGrid from '@/components/photo-grid'
+import { formatObjectName } from '@/tools/strings'
 
 interface PhotosPageProps {
     category: string
@@ -22,11 +22,7 @@ interface PhotosPageProps {
     categoriesList: ApiModel.Category[]
 }
 
-const PhotosPage: NextPage<PhotosPageProps> = ({
-    category,
-    photosList,
-    categoriesList
-}) => {
+const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categoriesList }) => {
     const { t, i18n } = useTranslation()
     const router = useRouter()
 
@@ -39,20 +35,14 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
 
     const filteredCategoriesList = useMemo(
         () =>
-            categoriesList?.filter(({ id }) =>
-                uniq(
-                    photosList?.flatMap(({ categories }) => categories)
-                )?.includes(id)
-            ),
+            categoriesList?.filter(({ id }) => uniq(photosList?.flatMap(({ categories }) => categories))?.includes(id)),
         [categoriesList, photosList]
     )
 
     const filteredPhotosList = useMemo(
         () =>
             photosList
-                ?.filter(({ categories }) =>
-                    categoryFilter ? categories?.includes(categoryFilter) : true
-                )
+                ?.filter(({ categories }) => (categoryFilter ? categories?.includes(categoryFilter) : true))
                 ?.filter(({ objects }) =>
                     searchFilter
                         ? objects
@@ -62,11 +52,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
                               .includes(searchFilter.toLowerCase())
                         : true
                 )
-                ?.sort(
-                    (a, b) =>
-                        new Date(b?.date || '').getTime() -
-                        new Date(a?.date || '').getTime()
-                ),
+                ?.sort((a, b) => new Date(b?.date || '').getTime() - new Date(a?.date || '').getTime()),
         [photosList, categoryFilter, searchFilter]
     )
 
@@ -75,8 +61,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
         [filteredCategoriesList, categoryFilter]
     )
 
-    const title =
-        t('astrophoto') + (categoryFilter ? `: ${currentCategory?.title}` : '')
+    const title = t('astrophoto') + (categoryFilter ? `: ${currentCategory?.title}` : '')
 
     const handleChangeCategoryFilter = (category: number | undefined) => {
         if (category !== undefined) {
@@ -107,9 +92,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
         <AppLayout>
             <NextSeo
                 title={title}
-                description={`${t('description-photos-list-page')} ${
-                    currentCategory?.description
-                }`}
+                description={`${t('description-photos-list-page')} ${currentCategory?.description}`}
                 canonical={`${canonicalUrl}photos`}
                 openGraph={{
                     images: [
@@ -126,9 +109,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
 
             <AppToolbar
                 title={title}
-                currentPage={
-                    categoryFilter ? currentCategory?.title : t('astrophoto')
-                }
+                currentPage={categoryFilter ? currentCategory?.title : t('astrophoto')}
                 links={
                     categoryFilter
                         ? [
@@ -151,9 +132,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({
                     size={'medium'}
                     value={categoryFilter}
                     placeholder={t('filter-by-category')}
-                    onSelect={(category) =>
-                        handleChangeCategoryFilter(category?.key)
-                    }
+                    onSelect={(category) => handleChangeCategoryFilter(category?.key)}
                     options={filteredCategoriesList?.map((category) => ({
                         key: category.id,
                         value: category.title
@@ -187,13 +166,9 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             store.dispatch(setLocale(locale))
 
-            const { data: photos } = await store.dispatch(
-                API.endpoints?.photosGetList.initiate()
-            )
+            const { data: photos } = await store.dispatch(API.endpoints?.photosGetList.initiate())
 
-            const { data: categories } = await store.dispatch(
-                API.endpoints?.categoriesGetList.initiate()
-            )
+            const { data: categories } = await store.dispatch(API.endpoints?.categoriesGetList.initiate())
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 

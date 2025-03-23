@@ -1,16 +1,15 @@
-import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/tools/eventPhotos'
+import React, { useState } from 'react'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
-import React, { useState } from 'react'
 import { Button, Container, Icon } from 'simple-react-ui-kit'
 
+import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
@@ -18,6 +17,7 @@ import AppToolbar from '@/components/app-toolbar'
 import EventsList from '@/components/events-list'
 import PhotoGallery from '@/components/photo-gallery'
 import PhotoLightbox from '@/components/photo-lightbox'
+import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/tools/eventPhotos'
 
 interface StargazingPageProps {
     events: ApiModel.Event[]
@@ -154,9 +154,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events, photos }) => {
                             height: photo.height,
                             src: createFullPhotoUrl(photo),
                             width: photo.width,
-                            title: `${photo?.title} (${t('photo')} ${
-                                index + 1
-                            })`
+                            title: `${photo?.title} (${t('photo')} ${index + 1})`
                         })) || []
                     }
                     photoIndex={photoIndex}
@@ -175,17 +173,13 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events, photos }) => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (
-            context
-        ): Promise<GetServerSidePropsResult<StargazingPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<StargazingPageProps>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 
             store.dispatch(setLocale(locale))
 
-            const { data: eventsData } = await store.dispatch(
-                API.endpoints?.eventGetList.initiate()
-            )
+            const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
 
             const { data: photosData } = await store.dispatch(
                 API.endpoints?.eventGetPhotoList.initiate({

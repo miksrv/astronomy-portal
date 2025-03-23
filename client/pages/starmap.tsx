@@ -1,19 +1,19 @@
-import { API, SITE_LINK } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
+import React from 'react'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import React from 'react'
 import { Container } from 'simple-react-ui-kit'
 
+import { API, SITE_LINK } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import StarMap from '@/components/star-map'
 
-type CelestialPageProps = {}
+type CelestialPageProps = object
 
 // TODO: При добавить URL параметр названия объекта для центрирования карты на нем
 const CelestialPage: NextPage<CelestialPageProps> = () => {
@@ -61,9 +61,7 @@ const CelestialPage: NextPage<CelestialPageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (
-            context
-        ): Promise<GetServerSidePropsResult<CelestialPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<CelestialPageProps>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 

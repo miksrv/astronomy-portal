@@ -1,15 +1,14 @@
-import { API, ApiModel, HOST_IMG, SITE_LINK, useAppSelector } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import { removeMarkdown, sliceText } from '@/tools/strings'
+import React, { useMemo } from 'react'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { useRouter } from 'next/router'
-import React, { useMemo } from 'react'
 import { Button } from 'simple-react-ui-kit'
 
+import { API, ApiModel, HOST_IMG, SITE_LINK, useAppSelector } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
@@ -19,6 +18,7 @@ import ObjectFilesTable from '@/components/object-files-table'
 import ObjectHeader from '@/components/object-header'
 import ObjectPhotoTable from '@/components/object-photos-table'
 import VisibilityChart from '@/components/visibility-chart'
+import { removeMarkdown, sliceText } from '@/tools/strings'
 
 interface ObjectItemPageProps {
     objectName: string
@@ -42,15 +42,11 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
-    const { data: objectFilesData, isLoading: objectFilesLoading } =
-        API.useFilesGetListQuery(objectName, {
-            skip: !objectName
-        })
+    const { data: objectFilesData, isLoading: objectFilesLoading } = API.useFilesGetListQuery(objectName, {
+        skip: !objectName
+    })
 
-    const allObjectsNames = useMemo(
-        () => objectsList?.map(({ name }) => name),
-        [objectsList]
-    )
+    const allObjectsNames = useMemo(() => objectsList?.map(({ name }) => name), [objectsList])
 
     const handleEdit = () => {
         if (objectName) {
@@ -66,18 +62,13 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
         <AppLayout>
             <NextSeo
                 title={objectData?.title || objectName}
-                description={sliceText(
-                    removeMarkdown(objectData?.description),
-                    160
-                )}
+                description={sliceText(removeMarkdown(objectData?.description), 160)}
                 canonical={`${canonicalUrl}objects/${objectName}`}
                 openGraph={{
                     images: [
                         {
                             height: 244,
-                            url: objectData?.image
-                                ? `${HOST_IMG}${objectData?.image}`
-                                : 'images/no-photo.png',
+                            url: objectData?.image ? `${HOST_IMG}${objectData?.image}` : 'images/no-photo.png',
                             width: 487
                         }
                     ],
@@ -123,13 +114,9 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 categoriesList={categoriesList}
             />
 
-            {!!objectData?.description?.length && (
-                <ObjectDescription text={objectData?.description} />
-            )}
+            {!!objectData?.description?.length && <ObjectDescription text={objectData?.description} />}
 
-            {!!photosList?.length && (
-                <ObjectPhotoTable photosList={photosList} />
-            )}
+            {!!photosList?.length && <ObjectPhotoTable photosList={photosList} />}
 
             <VisibilityChart object={objectData} />
 
@@ -152,9 +139,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (
-            context
-        ): Promise<GetServerSidePropsResult<ObjectItemPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<ObjectItemPageProps>> => {
             const locale = context.locale ?? 'en'
             const objectName = context.params?.name
             const translations = await serverSideTranslations(locale)
@@ -173,13 +158,9 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 return { notFound: true }
             }
 
-            const { data: objectsList } = await store.dispatch(
-                API.endpoints?.objectsGetList.initiate()
-            )
+            const { data: objectsList } = await store.dispatch(API.endpoints?.objectsGetList.initiate())
 
-            const { data: categoriesData } = await store.dispatch(
-                API.endpoints?.categoriesGetList.initiate()
-            )
+            const { data: categoriesData } = await store.dispatch(API.endpoints?.categoriesGetList.initiate())
 
             const { data: photosData } = await store.dispatch(
                 API.endpoints?.photosGetList.initiate({

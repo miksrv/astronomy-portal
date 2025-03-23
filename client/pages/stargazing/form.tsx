@@ -1,22 +1,20 @@
-import { API, useAppSelector } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
+import React, { useEffect } from 'react'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { useRouter } from 'next/router'
-import React, { useEffect } from 'react'
 import { Message } from 'simple-react-ui-kit'
 
+import { API, useAppSelector } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
-import AstroStargazingForm, {
-    AstroStargazingFormType
-} from '@/components/astro-stargazing-form'
+import AstroStargazingForm, { AstroStargazingFormType } from '@/components/astro-stargazing-form'
 
-type StargazingFormPageProps = {}
+type StargazingFormPageProps = object
 
 const StargazingFormPage: NextPage<StargazingFormPageProps> = () => {
     const router = useRouter()
@@ -34,14 +32,8 @@ const StargazingFormPage: NextPage<StargazingFormPageProps> = () => {
         skip: !id
     })
 
-    const [
-        createEvent,
-        {
-            error: createError,
-            isLoading: createLoading,
-            isSuccess: createSuccess
-        }
-    ] = API.useEventCreatePostMutation()
+    const [createEvent, { error: createError, isLoading: createLoading, isSuccess: createSuccess }] =
+        API.useEventCreatePostMutation()
 
     const handleSubmit = (data?: AstroStargazingFormType) => {
         if (!data) {
@@ -67,9 +59,7 @@ const StargazingFormPage: NextPage<StargazingFormPageProps> = () => {
         router.back()
     }
 
-    const currentPageTitle = eventData?.id
-        ? 'Редактирование астровыезда'
-        : 'Добавление астровыезда'
+    const currentPageTitle = eventData?.id ? 'Редактирование астровыезда' : 'Добавление астровыезда'
 
     useEffect(() => {
         if (userRole !== 'admin') {
@@ -124,9 +114,7 @@ const StargazingFormPage: NextPage<StargazingFormPageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (
-            context
-        ): Promise<GetServerSidePropsResult<StargazingFormPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<StargazingFormPageProps>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 

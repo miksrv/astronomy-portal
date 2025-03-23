@@ -1,21 +1,21 @@
-import { API, useAppSelector } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import { formatObjectName } from '@/tools/strings'
+import React, { useEffect } from 'react'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { useRouter } from 'next/router'
-import React, { useEffect } from 'react'
 
+import { API, useAppSelector } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import AstroObjectForm from '@/components/astro-object-form'
 import { AstroPhotoFormType } from '@/components/astro-photo-form/AstroPhotoForm'
+import { formatObjectName } from '@/tools/strings'
 
-type ObjectFormPageProps = {}
+type ObjectFormPageProps = object
 
 // TODO: Добавить обработку ошибки, когда пытаемся отредактировать объект, которого нет
 // TODO: Добавить индикатор загрузки когда загружаем редактируемый объет
@@ -120,9 +120,7 @@ const ObjectFormPage: NextPage<ObjectFormPageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (
-            context
-        ): Promise<GetServerSidePropsResult<ObjectFormPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<ObjectFormPageProps>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 

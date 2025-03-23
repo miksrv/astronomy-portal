@@ -1,20 +1,20 @@
-import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import { formatObjectName } from '@/tools/strings'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import uniq from 'lodash-es/uniq'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { useRouter } from 'next/router'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Dropdown, Input } from 'simple-react-ui-kit'
 
+import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import ObjectTable from '@/components/objects-table'
+import { formatObjectName } from '@/tools/strings'
 
 interface ObjectsPageProps {
     category: string
@@ -23,12 +23,7 @@ interface ObjectsPageProps {
     photosList: ApiModel.Photo[]
 }
 
-const ObjectsPage: NextPage<ObjectsPageProps> = ({
-    category,
-    categoriesList,
-    objectsList,
-    photosList
-}) => {
+const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, objectsList, photosList }) => {
     const { t, i18n } = useTranslation()
     const router = useRouter()
 
@@ -51,9 +46,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
     const filteredCategoriesList = useMemo(
         () =>
             categoriesList?.filter(({ id }) =>
-                uniq(
-                    objectsList?.flatMap(({ categories }) => categories)
-                )?.includes(id)
+                uniq(objectsList?.flatMap(({ categories }) => categories))?.includes(id)
             ),
         [categoriesList, objectsList]
     )
@@ -61,17 +54,11 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
     const filteredObjectsList = useMemo(
         () =>
             objectsList
-                ?.filter(({ categories }) =>
-                    categoryFilter ? categories?.includes(categoryFilter) : true
-                )
+                ?.filter(({ categories }) => (categoryFilter ? categories?.includes(categoryFilter) : true))
                 ?.filter(({ name, title }) =>
                     searchFilter
-                        ? formatObjectName(name)
-                              ?.toLowerCase()
-                              .includes(searchFilter.toLowerCase()) ||
-                          title
-                              ?.toLowerCase()
-                              .includes(searchFilter.toLowerCase())
+                        ? formatObjectName(name)?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+                          title?.toLowerCase().includes(searchFilter.toLowerCase())
                         : true
                 ),
         [objectsList, categoryFilter, searchFilter]
@@ -82,9 +69,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
         [filteredCategoriesList, categoryFilter]
     )
 
-    const title =
-        t('list-astronomical-objects') +
-        (categoryFilter ? `: ${currentCategory?.title}` : '')
+    const title = t('list-astronomical-objects') + (categoryFilter ? `: ${currentCategory?.title}` : '')
 
     const handleChangeCategoryFilter = (category: number | undefined) => {
         if (category !== undefined) {
@@ -129,9 +114,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
         <AppLayout>
             <NextSeo
                 title={title}
-                description={`${t('description-object-list-page')} ${
-                    currentCategory?.description
-                }`}
+                description={`${t('description-object-list-page')} ${currentCategory?.description}`}
                 canonical={`${canonicalUrl}objects`}
                 openGraph={{
                     images: [
@@ -149,11 +132,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
             <AppToolbar
                 ref={toolbarRef}
                 title={title}
-                currentPage={
-                    categoryFilter
-                        ? currentCategory?.title
-                        : t('list-astronomical-objects')
-                }
+                currentPage={categoryFilter ? currentCategory?.title : t('list-astronomical-objects')}
                 links={
                     categoryFilter
                         ? [
@@ -176,9 +155,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
                     clearable={true}
                     value={categoryFilter}
                     placeholder={t('filter-by-category')}
-                    onSelect={(category) =>
-                        handleChangeCategoryFilter(category?.key)
-                    }
+                    onSelect={(category) => handleChangeCategoryFilter(category?.key)}
                     options={filteredCategoriesList?.map((category) => ({
                         key: category.id,
                         value: category.title
@@ -209,26 +186,18 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (
-            context
-        ): Promise<GetServerSidePropsResult<ObjectsPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<ObjectsPageProps>> => {
             const locale = context.locale ?? 'en'
             const category = (context.query.category as string) || ''
             const translations = await serverSideTranslations(locale)
 
             store.dispatch(setLocale(locale))
 
-            const { data: photos } = await store.dispatch(
-                API.endpoints?.photosGetList.initiate()
-            )
+            const { data: photos } = await store.dispatch(API.endpoints?.photosGetList.initiate())
 
-            const { data: objects } = await store.dispatch(
-                API.endpoints?.objectsGetList.initiate()
-            )
+            const { data: objects } = await store.dispatch(API.endpoints?.objectsGetList.initiate())
 
-            const { data: categories } = await store.dispatch(
-                API.endpoints?.categoriesGetList.initiate()
-            )
+            const { data: categories } = await store.dispatch(API.endpoints?.categoriesGetList.initiate())
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
