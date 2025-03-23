@@ -56,10 +56,7 @@ const Dialog: React.FC<DialogProps> = ({
     }
 
     const handleClickOutside = (event: MouseEvent) => {
-        if (
-            dialogRef.current &&
-            !dialogRef.current.contains(event.target as Node)
-        ) {
+        if (dialogRef.current && !dialogRef.current.contains(event.target as Node)) {
             onCloseDialog?.()
         }
     }

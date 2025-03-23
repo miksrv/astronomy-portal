@@ -7,12 +7,7 @@ interface CounterProps {
     style?: React.CSSProperties
 }
 
-const Counter: React.FC<CounterProps> = ({
-    end,
-    duration = 2000,
-    className,
-    style
-}) => {
+const Counter: React.FC<CounterProps> = ({ end, duration = 2000, className, style }) => {
     const [count, setCount] = useState(0)
     const [hasStarted, setHasStarted] = useState(false)
     const elementRef = useRef<HTMLSpanElement>(null)
@@ -20,7 +15,7 @@ const Counter: React.FC<CounterProps> = ({
 
     useEffect(() => {
         const step = (timestamp: number) => {
-            if (!startTime.current) startTime.current = timestamp
+            if (!startTime.current) {startTime.current = timestamp}
             const elapsed = timestamp - startTime.current
 
             const progress = Math.min(elapsed / duration, 1)

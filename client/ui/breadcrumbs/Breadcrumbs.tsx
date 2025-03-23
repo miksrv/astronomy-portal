@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import React from 'react'
+import Link from 'next/link'
 import { cn } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
@@ -16,12 +16,7 @@ export interface BreadcrumbsProps {
     links?: BreadcrumbLink[]
 }
 
-const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
-    homePageTitle,
-    links,
-    className,
-    currentPage
-}) => (
+const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ homePageTitle, links, className, currentPage }) => (
     <ul
         aria-label={'breadcrumb'}
         className={cn(className, styles.breadcrumbs)}
