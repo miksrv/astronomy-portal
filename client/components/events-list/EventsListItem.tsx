@@ -1,12 +1,13 @@
-import { ApiModel } from '@/api'
-import { hosts } from '@/api/constants'
-import { formatDate } from '@/tools/helpers'
+import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
 import { Container } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
+
+import { ApiModel } from '@/api'
+import { hosts } from '@/api/constants'
+import { formatDate } from '@/tools/helpers'
 
 interface EventsListItemProps {
     event: ApiModel.Event
@@ -42,9 +43,7 @@ const EventsListItem: React.FC<EventsListItemProps> = ({ event }) => (
                 </Link>
             </h3>
 
-            <div className={styles.date}>
-                {formatDate(event?.date?.date, 'D MMMM YYYY')}
-            </div>
+            <div className={styles.date}>{formatDate(event?.date?.date, 'D MMMM YYYY')}</div>
         </div>
     </Container>
 )

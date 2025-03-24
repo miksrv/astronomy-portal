@@ -1,31 +1,27 @@
+import React, { useMemo } from 'react'
+import Link from 'next/link'
+import { useTranslation } from 'next-i18next'
+import { Container } from 'simple-react-ui-kit'
+
+import styles from './styles.module.sass'
+
 import { ApiModel } from '@/api'
+import FilterList from '@/components/filter-list'
+import StarMap from '@/components/star-map'
 import { formatDEC, formatRA } from '@/tools/coordinates'
 import { getTimeFromSec } from '@/tools/helpers'
 import { humanizeFileSize } from '@/tools/strings'
-import { useTranslation } from 'next-i18next'
-import Link from 'next/link'
-import React, { useMemo } from 'react'
-import { Container } from 'simple-react-ui-kit'
-
-import FilterList from '@/components/filter-list'
-import StarMap from '@/components/star-map'
-
-import styles from './styles.module.sass'
 
 interface ObjectHeaderProps extends Partial<ApiModel.Object> {
     categoriesList?: ApiModel.Category[]
     loading?: boolean
 }
 
-const ObjectHeader: React.FC<ObjectHeaderProps> = ({
-    categoriesList,
-    ...props
-}) => {
+const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...props }) => {
     const { t } = useTranslation()
 
     const categoriesData = useMemo(
-        () =>
-            categoriesList?.filter(({ id }) => props.categories?.includes(id)),
+        () => categoriesList?.filter(({ id }) => props.categories?.includes(id)),
         [categoriesList, props.categories]
     )
 
@@ -33,9 +29,7 @@ const ObjectHeader: React.FC<ObjectHeaderProps> = ({
         <Container className={styles.objectContainer}>
             <div className={styles.parameters}>
                 <div className={styles.item}>
-                    <span className={styles.key}>
-                        {t('name-in-the-directory')}:
-                    </span>
+                    <span className={styles.key}>{t('name-in-the-directory')}:</span>
                     {props.name}
                 </div>
 
@@ -59,9 +53,7 @@ const ObjectHeader: React.FC<ObjectHeaderProps> = ({
 
                 {props?.ra && (
                     <div className={styles.item}>
-                        <span className={styles.key}>
-                            {t('right-ascension')}:
-                        </span>
+                        <span className={styles.key}>{t('right-ascension')}:</span>
                         {formatRA(props.ra)}
                     </div>
                 )}
@@ -75,18 +67,14 @@ const ObjectHeader: React.FC<ObjectHeaderProps> = ({
 
                 {props.statistic?.exposure && (
                     <div className={styles.item}>
-                        <span className={styles.key}>
-                            {t('total-exposure')}:
-                        </span>
+                        <span className={styles.key}>{t('total-exposure')}:</span>
                         {getTimeFromSec(props.statistic.exposure, true)}
                     </div>
                 )}
 
                 {props.statistic?.frames && (
                     <div className={styles.item}>
-                        <span className={styles.key}>
-                            {t('number-of-frames')}:
-                        </span>
+                        <span className={styles.key}>{t('number-of-frames')}:</span>
                         {props.statistic.frames}
                     </div>
                 )}
@@ -100,9 +88,7 @@ const ObjectHeader: React.FC<ObjectHeaderProps> = ({
 
                 {props?.fitsCloudLink && (
                     <div className={styles.item}>
-                        <span className={styles.key}>
-                            {t('link-to-FITS-files')}:
-                        </span>
+                        <span className={styles.key}>{t('link-to-FITS-files')}:</span>
                         <Link
                             href={props?.fitsCloudLink}
                             target={'_blank'}

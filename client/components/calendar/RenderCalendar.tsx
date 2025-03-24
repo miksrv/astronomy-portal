@@ -1,16 +1,15 @@
-import { ApiModel } from '@/api'
-import { formatDate } from '@/tools/helpers'
+import React from 'react'
 import dayjs, { Dayjs } from 'dayjs'
 import Image from 'next/image'
-import React from 'react'
-import { Icon, cn } from 'simple-react-ui-kit'
+import { cn,Icon } from 'simple-react-ui-kit'
 import SunCalc from 'suncalc'
 
-import MoonPhaseIcon from '@/components/moon-phase-icon'
-
-import SunIcon from '@/public/images/sun.png'
-
 import styles from './styles.module.sass'
+
+import { ApiModel } from '@/api'
+import MoonPhaseIcon from '@/components/moon-phase-icon'
+import SunIcon from '@/public/images/sun.png'
+import { formatDate } from '@/tools/helpers'
 
 const LAT = process.env.NEXT_PUBLIC_LAT ?? 51.7
 const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
@@ -25,21 +24,19 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
     const { calendarDate, eventsWeather, eventsTelescope } = props
 
     const daysInMonth: number = dayjs(calendarDate).daysInMonth()
-    const firstDayOfMonth: number = parseInt(
-        dayjs(calendarDate).startOf('month').format('d')
-    )
+    const firstDayOfMonth: number = parseInt(dayjs(calendarDate).startOf('month').format('d'))
     const isCurrentMonth = dayjs(calendarDate).isSame(new Date(), 'month')
 
     const getWeatherClass = (cond: number | undefined) => {
-        if (typeof cond === 'undefined' || cond === null) return ''
+        if (typeof cond === 'undefined' || cond === null) {return ''}
 
-        if (cond <= 35) return styles.green
-        else if (cond >= 36 && cond <= 65) return styles.orange
+        if (cond <= 35) {return styles.green}
+        else if (cond >= 36 && cond <= 65) {return styles.orange}
 
         return styles.red
     }
 
-    let blanks = []
+    const blanks = []
     for (let i = 1; i < (firstDayOfMonth === 0 ? 7 : firstDayOfMonth); i++) {
         blanks.push(
             <td
@@ -49,20 +46,17 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
         )
     }
 
-    let daysMonth = []
+    const daysMonth = []
     for (let d = 1; d <= daysInMonth; d++) {
         const currentDayDate = dayjs(calendarDate)
             .startOf('month')
             .add(d - 1, 'days')
 
-        const currentDay: boolean =
-            isCurrentMonth && d === parseInt(formatDate(calendarDate, 'DD')!)
+        const currentDay: boolean = isCurrentMonth && d === parseInt(formatDate(calendarDate, 'DD')!)
         const moonTimes = SunCalc.getMoonTimes(currentDayDate, LAT, LON)
         const sunTimes = SunCalc.getTimes(currentDayDate, LAT, LON)
 
-        const itemWeatherEvent = eventsWeather
-            ?.filter((item) => currentDayDate.isSame(item.date, 'day'))
-            ?.pop()
+        const itemWeatherEvent = eventsWeather?.filter((item) => currentDayDate.isSame(item.date, 'day'))?.pop()
 
         const itemAstroEvents = eventsTelescope?.find(({ telescope_date }) =>
             currentDayDate.isSame(telescope_date, 'day')
@@ -71,16 +65,10 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
         daysMonth.push(
             <td
                 key={`day${d}`}
-                className={cn(
-                    styles.calendarDay,
-                    currentDay ? styles.currentDay : undefined
-                )}
+                className={cn(styles.calendarDay, currentDay ? styles.currentDay : undefined)}
             >
                 <div
-                    className={cn(
-                        styles.dayNumber,
-                        getWeatherClass(itemWeatherEvent?.clouds)
-                    )}
+                    className={cn(styles.dayNumber, getWeatherClass(itemWeatherEvent?.clouds))}
                     // role='button'
                     // tabIndex={0}
                     // onKeyUp={() => {}}
@@ -94,17 +82,9 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
                 <div className={styles.moonEvent}>
                     <MoonPhaseIcon date={currentDayDate.toDate()} />
 
-                    {moonTimes.rise && (
-                        <span className={styles.rise}>
-                            {formatDate(moonTimes.rise, 'H:mm')}
-                        </span>
-                    )}
+                    {moonTimes.rise && <span className={styles.rise}>{formatDate(moonTimes.rise, 'H:mm')}</span>}
 
-                    {moonTimes.set && (
-                        <span className={styles.set}>
-                            {formatDate(moonTimes.set, 'H:mm')}
-                        </span>
-                    )}
+                    {moonTimes.set && <span className={styles.set}>{formatDate(moonTimes.set, 'H:mm')}</span>}
                 </div>
 
                 <div className={styles.sunEvent}>
@@ -115,17 +95,9 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
                         width={16}
                         height={16}
                     />
-                    {sunTimes.dawn && (
-                        <span className={styles.rise}>
-                            {formatDate(sunTimes.dawn, 'H:mm')}
-                        </span>
-                    )}
+                    {sunTimes.dawn && <span className={styles.rise}>{formatDate(sunTimes.dawn, 'H:mm')}</span>}
 
-                    {sunTimes.dusk && (
-                        <span className={styles.set}>
-                            {formatDate(sunTimes.dusk, 'H:mm')}
-                        </span>
-                    )}
+                    {sunTimes.dusk && <span className={styles.set}>{formatDate(sunTimes.dusk, 'H:mm')}</span>}
                 </div>
                 {itemWeatherEvent && (
                     <div className={styles.weatherEvent}>
@@ -171,8 +143,8 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
         )
     }
 
-    let totalSlots = [...blanks, ...daysMonth]
-    let rows: any = []
+    const totalSlots = [...blanks, ...daysMonth]
+    const rows: any = []
     let cells: any = []
 
     totalSlots.forEach((row, i) => {
@@ -189,7 +161,7 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
     })
 
     return rows.map((d: any, key: number) => {
-        if (!d.length) return null
+        if (!d.length) {return null}
 
         if (d.length < 7) {
             for (let i = d.length; i < 7; i++) {

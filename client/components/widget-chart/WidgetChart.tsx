@@ -1,9 +1,10 @@
-import { ApiModel } from '@/api'
 import React from 'react'
-import { Skeleton, cn } from 'simple-react-ui-kit'
+import { cn,Skeleton } from 'simple-react-ui-kit'
 
 import Chart from './Chart'
 import styles from './styles.module.sass'
+
+import { ApiModel } from '@/api'
 
 export type ChartTypes = 'temperature' | 'clouds'
 
@@ -17,13 +18,7 @@ interface WidgetProps {
 
 const CHART_HEIGHT = '260px'
 
-const WidgetChart: React.FC<WidgetProps> = ({
-    loading,
-    fullWidth,
-    data,
-    type,
-    dateFormat
-}) => (
+const WidgetChart: React.FC<WidgetProps> = ({ loading, fullWidth, data, type, dateFormat }) => (
     <div className={cn(styles.widget, fullWidth && styles.fullWidth)}>
         {loading ? (
             <Skeleton style={{ width: '100%', height: CHART_HEIGHT }} />

@@ -1,29 +1,25 @@
-import { API, ApiModel, useAppSelector } from '@/api'
-import { hosts } from '@/api/constants'
-import { formatUTCDate, getTimeFromSec } from '@/tools/helpers'
-import dayjs from 'dayjs'
-import Image from 'next/image'
 import React from 'react'
 import Markdown from 'react-markdown'
+import dayjs from 'dayjs'
+import Image from 'next/image'
 import { Button, Container, Spinner } from 'simple-react-ui-kit'
-
-import EventBookingForm from '@/components/event-booking-form'
-import LoginForm from '@/components/login-form'
 
 import styles from './styles.module.sass'
 
-interface EventBookingFormProps {}
+import { API, ApiModel, useAppSelector } from '@/api'
+import { hosts } from '@/api/constants'
+import EventBookingForm from '@/components/event-booking-form'
+import LoginForm from '@/components/login-form'
+import { formatUTCDate, getTimeFromSec } from '@/tools/helpers'
+
+type EventBookingFormProps = object
 
 const EventUpcoming: React.FC<EventBookingFormProps> = () => {
     const user = useAppSelector((state) => state.auth.user)
 
     // const [confirmation, showConfirmation] = useState<boolean>(false)
 
-    const {
-        data,
-        isFetching,
-        isLoading: upcomingLoading
-    } = API.useEventGetUpcomingQuery()
+    const { data, isFetching, isLoading: upcomingLoading } = API.useEventGetUpcomingQuery()
     // const [{ isLoading }] = API.useEventsCancelRegistrationPostMutation() // cancelRegistration
 
     // const handleCancelRegistration = () => {
@@ -38,16 +34,12 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
         }
 
         // Дата регистрации еще не наступила
-        if (
-            dayjs.utc(event?.registrationStart?.date).local().diff(dayjs()) >= 0
-        ) {
+        if (dayjs.utc(event?.registrationStart?.date).local().diff(dayjs()) >= 0) {
             return false
         }
 
         // Дата регистрации уже закончилась
-        if (
-            dayjs.utc(event?.registrationEnd?.date).local().diff(dayjs()) <= 0
-        ) {
+        if (dayjs.utc(event?.registrationEnd?.date).local().diff(dayjs()) <= 0) {
             return false
         }
 
@@ -87,17 +79,9 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                 </div>
                 <div className={styles.stargazing}>
                     <h2 className={styles.title}>{data?.title}</h2>
-                    <div className={styles.date}>
-                        {formatUTCDate(
-                            data?.date?.date,
-                            'D MMMM, YYYY г., H:mm'
-                        )}
-                    </div>
+                    <div className={styles.date}>{formatUTCDate(data?.date?.date, 'D MMMM, YYYY г., H:mm')}</div>
 
-                    {dayjs
-                        .utc(data?.registrationEnd?.date)
-                        .local()
-                        .diff(dayjs()) > 0 &&
+                    {dayjs.utc(data?.registrationEnd?.date).local().diff(dayjs()) > 0 &&
                         data?.availableTickets === 0 &&
                         !data?.registered && (
                             <div
@@ -107,17 +91,11 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                                 className={styles.bookingLogin}
                             >
                                 <h3>К сожалению, места закончились</h3>
-                                <p>
-                                    Пожалуйста, дождитесь нашего следующего
-                                    мероприятия!
-                                </p>
+                                <p>Пожалуйста, дождитесь нашего следующего мероприятия!</p>
                             </div>
                         )}
 
-                    {dayjs
-                        .utc(data?.registrationStart?.date)
-                        .local()
-                        .diff(dayjs()) >= 0 && (
+                    {dayjs.utc(data?.registrationStart?.date).local().diff(dayjs()) >= 0 && (
                         <div className={styles.bookingLogin}>
                             <br />
                             <h3
@@ -130,25 +108,18 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                             </h3>
                             <h3>
                                 {getTimeFromSec(
-                                    dayjs
-                                        .utc(data?.registrationStart?.date)
-                                        .local()
-                                        .diff(dayjs(), 'second'),
+                                    dayjs.utc(data?.registrationStart?.date).local().diff(dayjs(), 'second'),
                                     true
                                 )}
                             </h3>
                             <p>
-                                После начала регистрации появится форма,
-                                заполнив которую, вы сможете принять участие в
+                                После начала регистрации появится форма, заполнив которую, вы сможете принять участие в
                                 нашем мероприятии!
                             </p>
                         </div>
                     )}
 
-                    {dayjs
-                        .utc(data?.registrationEnd?.date)
-                        .local()
-                        .diff(dayjs()) <= 0 && (
+                    {dayjs.utc(data?.registrationEnd?.date).local().diff(dayjs()) <= 0 && (
                         <div
                             style={{
                                 marginTop: '40px'
@@ -178,18 +149,12 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                         <div>
                             {!user?.id && (
                                 <div className={styles.bookingLogin}>
-                                    <h3>
-                                        {
-                                            'Для бронирования войдите под своей учетной записью'
-                                        }
-                                    </h3>
+                                    <h3>{'Для бронирования войдите под своей учетной записью'}</h3>
                                     <LoginForm />
                                 </div>
                             )}
 
-                            {user?.id && !data?.registered && (
-                                <EventBookingForm eventId={data?.id} />
-                            )}
+                            {user?.id && !data?.registered && <EventBookingForm eventId={data?.id} />}
                         </div>
                     ) : !data?.registered ? (
                         <div>
@@ -200,10 +165,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                                         width: '80%'
                                     }}
                                 >
-                                    <p>
-                                        Войдите под своей учетной записью, чтобы
-                                        не пропустить следующее мероприятие
-                                    </p>
+                                    <p>Войдите под своей учетной записью, чтобы не пропустить следующее мероприятие</p>
                                     <LoginForm />
                                 </div>
                             )}
@@ -216,24 +178,15 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                         <div className={styles.registered}>
                             <h3>Вы зарегистрированы на мероприятие</h3>
                             <p>
-                                Приезжайте{' '}
-                                <b>
-                                    {formatUTCDate(
-                                        data?.date?.date,
-                                        'D MMMM YYYY г.'
-                                    )}
-                                </b>{' '}
-                                к{' '}
-                                <b>{formatUTCDate(data?.date?.date, 'H:mm')}</b>{' '}
-                                часам
+                                Приезжайте <b>{formatUTCDate(data?.date?.date, 'D MMMM YYYY г.')}</b> к{' '}
+                                <b>{formatUTCDate(data?.date?.date, 'H:mm')}</b> часам
                                 <br />
-                                на место проведения мероприятия: Оренбургский
-                                район, г. Горюн (40 км от центра Оренбурга)
+                                на место проведения мероприятия: Оренбургский район, г. Горюн (40 км от центра
+                                Оренбурга)
                             </p>
                             <p>
                                 <strong style={{ color: 'red' }}>
-                                    Используйте ссылки ниже, чтобы найти точное
-                                    местоположение проведения мероприятия:
+                                    Используйте ссылки ниже, чтобы найти точное местоположение проведения мероприятия:
                                 </strong>
                             </p>
                             <div className={styles.mapLinks}>
@@ -261,23 +214,12 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                                 </a>
                             </div>
 
-                            {!(
-                                dayjs
-                                    .utc(data?.registrationEnd?.date)
-                                    .local()
-                                    .diff(dayjs()) <= 0
-                            ) &&
-                                !(
-                                    dayjs
-                                        .utc(data?.date?.date)
-                                        .local()
-                                        .diff(dayjs()) <= 0
-                                ) && (
+                            {!(dayjs.utc(data?.registrationEnd?.date).local().diff(dayjs()) <= 0) &&
+                                !(dayjs.utc(data?.date?.date).local().diff(dayjs()) <= 0) && (
                                     <div className={styles.cancelRegistration}>
                                         <p style={{ fontWeight: '100' }}>
-                                            Если вы не сможете поехать на
-                                            мероприятие - отмените бронирование,
-                                            ваши места будут доступны другим
+                                            Если вы не сможете поехать на мероприятие - отмените бронирование, ваши
+                                            места будут доступны другим
                                         </p>
                                         <Button
                                             // fluid={true}
@@ -307,10 +249,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                                 <br />
                                 на это мероприятие
                             </h3>
-                            <p>
-                                Если вы хотите приехать на астровыезд -
-                                пожалуйста, дождитесь следующего
-                            </p>
+                            <p>Если вы хотите приехать на астровыезд - пожалуйста, дождитесь следующего</p>
                         </div>
                     )}
                 </div>
@@ -356,9 +295,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
     ) : (
         <Container>
             <div style={{ margin: '20px', textAlign: 'center' }}>
-                {isFetching
-                    ? 'Пожалуйста, подождите...'
-                    : 'Нет предстоящих астровыездов'}
+                {isFetching ? 'Пожалуйста, подождите...' : 'Нет предстоящих астровыездов'}
             </div>
         </Container>
     )

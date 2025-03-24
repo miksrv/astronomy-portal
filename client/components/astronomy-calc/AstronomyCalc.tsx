@@ -1,13 +1,13 @@
-import { formatDate } from '@/tools/helpers'
-import { useTranslation } from 'next-i18next'
-import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
+import Image from 'next/image'
+import { useTranslation } from 'next-i18next'
 import { Container } from 'simple-react-ui-kit'
 import SunCalc from 'suncalc'
 
-import MoonPhaseIcon from '@/components/moon-phase-icon'
-
 import styles from './styles.module.sass'
+
+import MoonPhaseIcon from '@/components/moon-phase-icon'
+import { formatDate } from '@/tools/helpers'
 
 const LAT = process.env.NEXT_PUBLIC_LAT ?? 51.7
 const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
@@ -94,8 +94,7 @@ const AstronomyCalc: React.FC = () => {
 
             <div className={styles.container}>
                 <strong>
-                    <MoonPhaseIcon date={currentDate.toDateString()} />{' '}
-                    {t('moon')}
+                    <MoonPhaseIcon date={currentDate.toDateString()} /> {t('moon')}
                 </strong>
                 <div className={styles.parameters}>
                     <div className={styles.key}>

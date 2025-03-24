@@ -1,8 +1,9 @@
-import { ApiModel } from '@/api'
 import React from 'react'
 
 import EventsListItem from './EventsListItem'
 import styles from './styles.module.sass'
+
+import { ApiModel } from '@/api'
 
 interface EventsListProps {
     events?: ApiModel.Event[]

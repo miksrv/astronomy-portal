@@ -1,7 +1,8 @@
-import Carousel from '@/ui/carousel'
-import { useTranslation } from 'next-i18next'
-import Image, { StaticImageData } from 'next/image'
 import React from 'react'
+import Image, { StaticImageData } from 'next/image'
+import { useTranslation } from 'next-i18next'
+
+import styles from './styles.module.sass'
 
 import photoIgor from '@/public/photos/team-Igor.jpg'
 import photoMisha from '@/public/photos/team-Misha.jpg'
@@ -10,8 +11,7 @@ import photoSergey from '@/public/photos/team-Sergey.jpg'
 import photoTanya from '@/public/photos/team-Tanya.jpg'
 import photoVladimir from '@/public/photos/team-Vladimir.jpg'
 import photoZhenya from '@/public/photos/team-Zhenya.jpg'
-
-import styles from './styles.module.sass'
+import Carousel from '@/ui/carousel'
 
 type TeamMemberType = {
     name?: string
@@ -66,8 +66,8 @@ const Team: React.FC = () => {
                     >
                         <Image
                             className={styles.photo}
-                            src={item.photo?.src!}
-                            alt={item?.name ?? ''}
+                            src={item.photo?.src || ''}
+                            alt={item?.name || ''}
                             width={item.photo?.width}
                             height={item.photo?.height}
                         />

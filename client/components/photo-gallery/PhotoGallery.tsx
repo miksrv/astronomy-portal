@@ -1,7 +1,8 @@
-import { RowsPhotoAlbum } from 'react-photo-album'
-import 'react-photo-album/rows.css'
 import React from 'react'
+import { RowsPhotoAlbum } from 'react-photo-album'
 import { RowsPhotoAlbumProps } from 'react-photo-album/dist/types'
+
+import 'react-photo-album/rows.css'
 
 interface PhotoGalleryProps extends RowsPhotoAlbumProps {}
 

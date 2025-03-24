@@ -1,15 +1,15 @@
-import { useAppDispatch, useAppSelector } from '@/api'
-import { closeAuthDialog } from '@/api/applicationSlice'
-import Dialog from '@/ui/dialog/Dialog'
-import NextNProgress from 'nextjs-progressbar'
 import React, { useEffect, useState } from 'react'
+import NextNProgress from 'nextjs-progressbar'
 import { cn } from 'simple-react-ui-kit'
-
-import AppHeader from '@/components/app-header'
-import LoginForm from '@/components/login-form'
 
 import { Menu } from './Menu'
 import styles from './styles.module.sass'
+
+import { useAppDispatch, useAppSelector } from '@/api'
+import { closeAuthDialog } from '@/api/applicationSlice'
+import AppHeader from '@/components/app-header'
+import LoginForm from '@/components/login-form'
+import Dialog from '@/ui/dialog/Dialog'
 
 interface AppLayoutProps {
     fullWidth?: boolean
@@ -59,9 +59,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
                 tabIndex={0}
                 className={cn(
                     styles.overlay,
-                    application.showOverlay || sidebarOpen
-                        ? styles.displayed
-                        : styles.hidden
+                    application.showOverlay || sidebarOpen ? styles.displayed : styles.hidden
                 )}
                 onKeyDown={handleCloseOverlay}
                 onClick={handleCloseOverlay}
@@ -72,26 +70,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
                 onMenuClick={handleOpenSideBar}
             />
 
-            <aside
-                className={cn(
-                    styles.sidebar,
-                    sidebarOpen ? styles.opened : styles.closed
-                )}
-            >
+            <aside className={cn(styles.sidebar, sidebarOpen ? styles.opened : styles.closed)}>
                 <Menu
                     sidebarMenu={true}
                     onClick={handleCloseOverlay}
                 />
             </aside>
 
-            <main
-                className={cn(
-                    styles.mainContainer,
-                    fullWidth && styles.fullWidth
-                )}
-            >
-                {children}
-            </main>
+            <main className={cn(styles.mainContainer, fullWidth && styles.fullWidth)}>{children}</main>
 
             <Dialog
                 open={application.showAuthDialog}

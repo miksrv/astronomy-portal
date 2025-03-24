@@ -1,15 +1,16 @@
+import React, { useEffect, useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useTranslation } from 'next-i18next'
+import { ColumnProps, Container, Table } from 'simple-react-ui-kit'
+
+import styles from './styles.module.sass'
+
 import { ApiModel } from '@/api'
 import { getFilterColor } from '@/tools/colors'
 import { formatSecondsToExposure } from '@/tools/helpers'
 import { createSmallPhotoUrl } from '@/tools/photos'
 import { formatObjectName } from '@/tools/strings'
-import { useTranslation } from 'next-i18next'
-import Image from 'next/image'
-import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
-import { ColumnProps, Container, Table } from 'simple-react-ui-kit'
-
-import styles from './styles.module.sass'
 
 interface ObjectsTableProps {
     objectsList?: ApiModel.Object[]
@@ -35,18 +36,11 @@ export type FlattenedObject = {
     sFilterExposure?: number
 }
 
-export const flattenObjects = (
-    objectsList?: ApiModel.Object[],
-    photosList?: ApiModel.Photo[]
-): FlattenedObject[] =>
+export const flattenObjects = (objectsList?: ApiModel.Object[], photosList?: ApiModel.Photo[]): FlattenedObject[] =>
     objectsList?.map((obj) => {
         const photos = photosList
             ?.filter((photo) => photo.objects?.includes(obj.name))
-            ?.sort((a, b) =>
-                a.date && b.date
-                    ? new Date(b?.date).getTime() - new Date(a?.date).getTime()
-                    : 0
-            )
+            ?.sort((a, b) => (a.date && b.date ? new Date(b?.date).getTime() - new Date(a?.date).getTime() : 0))
 
         return {
             name: obj.name,
@@ -67,11 +61,7 @@ export const flattenObjects = (
         } as FlattenedObject
     }) || []
 
-const ObjectsTable: React.FC<ObjectsTableProps> = ({
-    objectsList,
-    photosList,
-    combinedHeight
-}) => {
+const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosList, combinedHeight }) => {
     const { t } = useTranslation()
 
     const [tableHeight, setTableHeight] = useState<number | null>()
@@ -122,8 +112,7 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({
         {
             accessor: 'exposure',
             className: styles.cellCenter,
-            formatter: (data) =>
-                data ? formatSecondsToExposure(data as number) : '',
+            formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
             header: t('exposure'),
             isSortable: true
         },
@@ -131,8 +120,7 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({
             accessor: 'lFilterExposure',
             background: (data) => (data ? getFilterColor('L') : undefined),
             className: styles.cellCenter,
-            formatter: (data) =>
-                data ? formatSecondsToExposure(data as number) : '',
+            formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
             header: 'L',
             isSortable: true
         },
@@ -140,8 +128,7 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({
             accessor: 'rFilterExposure',
             background: (data) => (data ? getFilterColor('R') : undefined),
             className: styles.cellCenter,
-            formatter: (data) =>
-                data ? formatSecondsToExposure(data as number) : '',
+            formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
             header: 'R',
             isSortable: true
         },
@@ -149,8 +136,7 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({
             accessor: 'gFilterExposure',
             background: (data) => (data ? getFilterColor('G') : undefined),
             className: styles.cellCenter,
-            formatter: (data) =>
-                data ? formatSecondsToExposure(data as number) : '',
+            formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
             header: 'G',
             isSortable: true
         },
@@ -158,8 +144,7 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({
             accessor: 'bFilterExposure',
             background: (data) => (data ? getFilterColor('B') : undefined),
             className: styles.cellCenter,
-            formatter: (data) =>
-                data ? formatSecondsToExposure(data as number) : '',
+            formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
             header: 'B',
             isSortable: true
         },
@@ -167,8 +152,7 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({
             accessor: 'hFilterExposure',
             background: (data) => (data ? getFilterColor('H') : undefined),
             className: styles.cellCenter,
-            formatter: (data) =>
-                data ? formatSecondsToExposure(data as number) : '',
+            formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
             header: 'H',
             isSortable: true
         },
@@ -176,8 +160,7 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({
             accessor: 'oFilterExposure',
             background: (data) => (data ? getFilterColor('O') : undefined),
             className: styles.cellCenter,
-            formatter: (data) =>
-                data ? formatSecondsToExposure(data as number) : '',
+            formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
             header: 'O',
             isSortable: true
         },
@@ -185,8 +168,7 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({
             accessor: 'sFilterExposure',
             background: (data) => (data ? getFilterColor('S') : undefined),
             className: styles.cellCenter,
-            formatter: (data) =>
-                data ? formatSecondsToExposure(data as number) : '',
+            formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
             header: 'S',
             isSortable: true
         }

@@ -1,8 +1,8 @@
-import { useTranslation } from 'next-i18next'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { useState } from 'react'
-import { Icon, cn } from 'simple-react-ui-kit'
+import { useTranslation } from 'next-i18next'
+import { cn,Icon } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
@@ -19,11 +19,7 @@ interface MenuProps {
     onClick?: () => void
 }
 
-export const Menu: React.FC<MenuProps> = ({
-    className,
-    sidebarMenu,
-    onClick
-}) => {
+export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) => {
     const router = useRouter()
     const { t } = useTranslation()
 
@@ -97,13 +93,7 @@ export const Menu: React.FC<MenuProps> = ({
     }
 
     return (
-        <menu
-            className={cn(
-                className,
-                styles.menu,
-                sidebarMenu && styles.sidebarMenu
-            )}
-        >
+        <menu className={cn(className, styles.menu, sidebarMenu && styles.sidebarMenu)}>
             {menuItems
                 .filter(({ link }) => !!link)
                 .map((item, i) => (
@@ -113,11 +103,7 @@ export const Menu: React.FC<MenuProps> = ({
                         onMouseLeave={handleMouseLeave}
                     >
                         <Link
-                            className={
-                                router.asPath === item.link
-                                    ? styles.active
-                                    : undefined
-                            }
+                            className={router.asPath === item.link ? styles.active : undefined}
                             href={item.link}
                             title={item.text}
                             onClick={() => onClick?.()}
@@ -140,33 +126,23 @@ export const Menu: React.FC<MenuProps> = ({
                                 ''
                             )}
                         </Link>
-                        {item.subMenuItems &&
-                            (dropdownOpen === i || sidebarMenu) && (
-                                <ul className={styles.dropdownMenu}>
-                                    {item.subMenuItems.map((subItem, j) => (
-                                        <li key={`submenu${j}`}>
-                                            <Link
-                                                className={
-                                                    router.asPath ===
-                                                    subItem.link
-                                                        ? styles.active
-                                                        : undefined
-                                                }
-                                                href={subItem.link}
-                                                title={subItem.text}
-                                                onClick={() => onClick?.()}
-                                                target={
-                                                    subItem.external
-                                                        ? '_blank'
-                                                        : undefined
-                                                }
-                                            >
-                                                {subItem.text}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
+                        {item.subMenuItems && (dropdownOpen === i || sidebarMenu) && (
+                            <ul className={styles.dropdownMenu}>
+                                {item.subMenuItems.map((subItem, j) => (
+                                    <li key={`submenu${j}`}>
+                                        <Link
+                                            className={router.asPath === subItem.link ? styles.active : undefined}
+                                            href={subItem.link}
+                                            title={subItem.text}
+                                            onClick={() => onClick?.()}
+                                            target={subItem.external ? '_blank' : undefined}
+                                        >
+                                            {subItem.text}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </li>
                 ))}
         </menu>

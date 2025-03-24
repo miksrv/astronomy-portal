@@ -1,18 +1,13 @@
+import React, { useEffect, useState } from 'react'
+import Image from 'next/image'
+import { Button, Container, Dropdown, Input, MultiSelect } from 'simple-react-ui-kit'
+
+import styles from './styles.module.sass'
+
 import { API, ApiModel } from '@/api'
 import { getFilterColor } from '@/tools/colors'
 import { createLargePhotoUrl } from '@/tools/photos'
 import { formatObjectName } from '@/tools/strings'
-import Image from 'next/image'
-import React, { useEffect, useState } from 'react'
-import {
-    Button,
-    Container,
-    Dropdown,
-    Input,
-    MultiSelect
-} from 'simple-react-ui-kit'
-
-import styles from './styles.module.sass'
 
 export type AstroPhotoFormType = Partial<ApiModel.Photo> & {
     upload?: File
@@ -32,28 +27,20 @@ interface AstroPhotoFormProps {
     onCancel?: () => void
 }
 
-const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
-    disabled,
-    initialData,
-    onSubmit,
-    onCancel
-}) => {
+const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initialData, onSubmit, onCancel }) => {
     const [selectedFilter, setSelectedFilter] = useState<ApiModel.FilterTypes>()
     const [addedFilters, setAddedFilters] = useState<ApiModel.FilterTypes[]>([])
     const [formData, setFormData] = useState<AstroPhotoFormType>({})
 
-    const { data: objectsListData, isLoading: objectsListLoading } =
-        API.useObjectsGetListQuery()
+    const { data: objectsListData, isLoading: objectsListLoading } = API.useObjectsGetListQuery()
 
-    const { data: categoriesListData, isLoading: categoriesListLoading } =
-        API.useCategoriesGetListQuery()
+    const { data: categoriesListData, isLoading: categoriesListLoading } = API.useCategoriesGetListQuery()
 
-    const { data: equipmentListData, isLoading: equipmentListLoading } =
-        API.useEquipmentsGetListQuery()
+    const { data: equipmentListData, isLoading: equipmentListLoading } = API.useEquipmentsGetListQuery()
 
-    const availableFilters: ApiModel.FilterTypes[] = Object.values(
-        ApiModel.filters
-    ).filter((filter) => !addedFilters.includes(filter))
+    const availableFilters: ApiModel.FilterTypes[] = Object.values(ApiModel.filters).filter(
+        (filter) => !addedFilters.includes(filter)
+    )
 
     const handleAddFilter = () => {
         if (selectedFilter) {
@@ -63,9 +50,7 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
     }
 
     const handleRemoveFilter = (filter: ApiModel.FilterTypes) => {
-        setAddedFilters((prevFilters) =>
-            prevFilters.filter((f) => f !== filter)
-        )
+        setAddedFilters((prevFilters) => prevFilters.filter((f) => f !== filter))
         handleFilterChange(filter, 'frames', '')
         handleFilterChange(filter, 'exposure', '')
     }
@@ -187,11 +172,7 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
                 }
             />
 
-            <EquipmentPresets
-                onSelect={(equipments) =>
-                    setFormData({ ...formData, equipments })
-                }
-            />
+            <EquipmentPresets onSelect={(equipments) => setFormData({ ...formData, equipments })} />
 
             <Input
                 required={true}
@@ -200,9 +181,7 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
                 type={'date'}
                 label={'Дата обработки'}
                 value={formData.date}
-                onChange={(e) =>
-                    setFormData({ ...formData, date: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
             />
 
             <div className={styles.addFilter}>
@@ -241,13 +220,7 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
                             type='number'
                             placeholder='Количество кадров'
                             value={formData?.filters?.[filter]?.frames || ''}
-                            onChange={(e) =>
-                                handleFilterChange(
-                                    filter,
-                                    'frames',
-                                    e.target.value
-                                )
-                            }
+                            onChange={(e) => handleFilterChange(filter, 'frames', e.target.value)}
                         />
 
                         <Input
@@ -255,13 +228,7 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
                             type={'number'}
                             placeholder={'Выдержка (минут)'}
                             value={formData?.filters?.[filter]?.exposure || ''}
-                            onChange={(e) =>
-                                handleFilterChange(
-                                    filter,
-                                    'exposure',
-                                    e.target.value
-                                )
-                            }
+                            onChange={(e) => handleFilterChange(filter, 'exposure', e.target.value)}
                         />
 
                         <Button
@@ -285,11 +252,7 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({
                 )}
             </div>
             <div style={{ marginTop: 15 }}>
-                <label>
-                    {initialData?.fileName
-                        ? 'Заменить фотографию:'
-                        : 'Загрузить фотографию:'}
-                </label>
+                <label>{initialData?.fileName ? 'Заменить фотографию:' : 'Загрузить фотографию:'}</label>
                 <input
                     onChange={handleImageUpload}
                     type={'file'}

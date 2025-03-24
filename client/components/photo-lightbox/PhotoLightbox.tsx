@@ -2,8 +2,9 @@
 import React from 'react'
 import Lightbox, { Slide } from 'yet-another-react-lightbox'
 import Captions from 'yet-another-react-lightbox/plugins/captions'
-import 'yet-another-react-lightbox/plugins/captions.css'
 import Zoom from 'yet-another-react-lightbox/plugins/zoom'
+
+import 'yet-another-react-lightbox/plugins/captions.css'
 import 'yet-another-react-lightbox/styles.css'
 
 import ImageSlide from './ImageSlide'
@@ -23,12 +24,7 @@ interface PhotoLightboxProps {
     onChangeIndex?: (index: number) => void
 }
 
-const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
-    photos,
-    photoIndex = 0,
-    showLightbox,
-    onCloseLightBox
-}) => {
+const PhotoLightbox: React.FC<PhotoLightboxProps> = ({ photos, photoIndex = 0, showLightbox, onCloseLightBox }) => {
     // const makeImageLink = (link?: string) =>
     //     link?.includes('http://') || link?.includes('https://')
     //         ? link
@@ -57,7 +53,7 @@ const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
                         // ],
                         title: photo.title || '',
                         width: photo?.width
-                    } as Slide)
+                    }) as Slide
             )}
         />
     )

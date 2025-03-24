@@ -1,11 +1,12 @@
-import { APIMeteo } from '@/api'
-import { dateAddMonth, dateExtractMonth, formatDate } from '@/tools/helpers'
-import dayjs from 'dayjs'
 import React, { useState } from 'react'
+import dayjs from 'dayjs'
 import { Button, Container } from 'simple-react-ui-kit'
 
 import RenderCalendar from './RenderCalendar'
 import styles from './styles.module.sass'
+
+import { APIMeteo } from '@/api'
+import { dateAddMonth, dateExtractMonth, formatDate } from '@/tools/helpers'
 
 interface CalendarProps {
     eventsTelescope?: any[] // ApiModel.Statistic.Telescope[]
@@ -19,8 +20,7 @@ const Calendar: React.FC<CalendarProps> = ({ eventsTelescope }) => {
         end_date: dayjs(calendarDate).isSame(dayjs(), 'month')
             ? dayjs().format('YYYY-MM-DD')
             : dayjs(calendarDate).endOf('month').format('YYYY-MM-DD'),
-        start_date:
-            dayjs(calendarDate).startOf('month').format('YYYY-MM-DD') ?? ''
+        start_date: dayjs(calendarDate).startOf('month').format('YYYY-MM-DD') ?? ''
     })
 
     return (
@@ -29,19 +29,13 @@ const Calendar: React.FC<CalendarProps> = ({ eventsTelescope }) => {
                 <Button
                     mode={'secondary'}
                     icon={'KeyboardLeft'}
-                    onClick={() =>
-                        setCalendarDate(dateExtractMonth(calendarDate, 1))
-                    }
+                    onClick={() => setCalendarDate(dateExtractMonth(calendarDate, 1))}
                 />
-                <span className={styles.currentMonth}>
-                    {formatDate(calendarDate, 'MMMM YYYY')}
-                </span>
+                <span className={styles.currentMonth}>{formatDate(calendarDate, 'MMMM YYYY')}</span>
                 <Button
                     mode={'secondary'}
                     icon={'KeyboardRight'}
-                    onClick={() =>
-                        setCalendarDate(dateAddMonth(calendarDate, 1))
-                    }
+                    onClick={() => setCalendarDate(dateAddMonth(calendarDate, 1))}
                 />
             </div>
             <div className={styles.grid}>

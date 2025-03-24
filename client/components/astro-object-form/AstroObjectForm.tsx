@@ -1,14 +1,12 @@
-import { API, ApiModel } from '@/api'
 import React, { useEffect, useState } from 'react'
 import { Button, Container, Input, MultiSelect } from 'simple-react-ui-kit'
 
-import StarMap from '@/components/star-map'
-
 import styles from './styles.module.sass'
 
-export type AstroObjectFormType = Partial<
-    Omit<ApiModel.Object, 'updated' | 'statistic' | 'filters'>
-> & {
+import { API, ApiModel } from '@/api'
+import StarMap from '@/components/star-map'
+
+export type AstroObjectFormType = Partial<Omit<ApiModel.Object, 'updated' | 'statistic' | 'filters'>> & {
     image?: string
 }
 
@@ -20,20 +18,14 @@ interface AstroObjectFormProps {
 }
 
 // TODO: При window resize нужно перестраивать карту под новое разрешение
-const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
-    disabled,
-    initialData,
-    onSubmit,
-    onCancel
-}) => {
+const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, initialData, onSubmit, onCancel }) => {
     // const dispatch = useAppDispatch()
     // const application = useAppSelector((state) => state.application)
     // const value = application.editableItemCatalog
 
     const [formData, setFormData] = useState<AstroObjectFormType>({})
 
-    const { data: categoriesListData, isLoading: categoriesListLoading } =
-        API.useCategoriesGetListQuery()
+    const { data: categoriesListData, isLoading: categoriesListLoading } = API.useCategoriesGetListQuery()
 
     // const { data: categoriesData } = API.useCategoryGetListQuery()
     // const { data: catalogData, isFetching } = API.useCatalogGetItemQuery(
@@ -116,10 +108,7 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
     // }, [catalogData])
 
     const handleSubmit = () => {
-        const canvasImage = document
-            ?.getElementById('celestial-map')
-            ?.getElementsByTagName('canvas')?.[0]
-            ?.toDataURL()
+        const canvasImage = document?.getElementById('celestial-map')?.getElementsByTagName('canvas')?.[0]?.toDataURL()
 
         onSubmit?.({ ...formData, image: canvasImage })
     }
@@ -162,9 +151,7 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                         className={styles.formElement}
                         label={'Имя объекта в каталогах'}
                         value={formData?.name}
-                        onChange={(e) =>
-                            setFormData({ ...formData, name: e.target.value })
-                        }
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     />
 
                     <Input
@@ -173,9 +160,7 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                         className={styles.formElement}
                         label={'Название объекта'}
                         value={formData?.title}
-                        onChange={(e) =>
-                            setFormData({ ...formData, title: e.target.value })
-                        }
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     />
 
                     <Input

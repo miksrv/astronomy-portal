@@ -1,20 +1,19 @@
-import { ApiModel } from '@/api'
-import { createMediumPhotoUrl, createPhotoTitle } from '@/tools/photos'
-import { useTranslation } from 'next-i18next'
+import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
+import { useTranslation } from 'next-i18next'
 import { cn } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
+
+import { ApiModel } from '@/api'
+import { createMediumPhotoUrl, createPhotoTitle } from '@/tools/photos'
 
 interface MainSectionStargazingProps {
     photos?: ApiModel.Photo[]
 }
 
-const MainSectionStargazing: React.FC<MainSectionStargazingProps> = ({
-    photos
-}) => {
+const MainSectionStargazing: React.FC<MainSectionStargazingProps> = ({ photos }) => {
     const { t } = useTranslation()
 
     return (
@@ -25,13 +24,7 @@ const MainSectionStargazing: React.FC<MainSectionStargazingProps> = ({
                     backgroundImage: 'url(/images/astrophoto.jpeg)'
                 }}
             />
-            <div
-                className={cn(
-                    styles.centralContainer,
-                    styles.photosContainer,
-                    'animate animate-slide-up'
-                )}
-            >
+            <div className={cn(styles.centralContainer, styles.photosContainer, 'animate animate-slide-up')}>
                 {photos?.map((photo) => (
                     <Link
                         key={photo.id}
@@ -50,9 +43,7 @@ const MainSectionStargazing: React.FC<MainSectionStargazingProps> = ({
 
             <div className={styles.bottomContainer}>
                 <h2 className={'animate'}>{t('astrophoto')}</h2>
-                <p className={'animate'}>
-                    {t('astrophoto-section-description')}
-                </p>
+                <p className={'animate'}>{t('astrophoto-section-description')}</p>
                 <Link
                     href={'/photos'}
                     title={t('astrophoto')}
