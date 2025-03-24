@@ -12,8 +12,8 @@
         "start": "next start",
         "test:watch": "jest --testNamePattern AuthorTable --watch",
         "test": "jest",
-        "eslint:check": "eslint -c .eslintrc --ext .js,.jsx,.ts,.tsx .",
-        "eslint:fix": "npm run eslint:check -- --fix",
+        "eslint:check": "eslint",
+        "eslint:fix": "eslint --fix",
         "prettier:check": "prettier --check .",
         "prettier:fix": "prettier --write ."
     },
@@ -44,6 +44,7 @@
         "yet-another-react-lightbox": "^3.21.8"
     },
     "devDependencies": {
+        "@eslint/compat": "^1.2.7",
         "@reduxjs/toolkit": "^2.6.1",
         "@testing-library/jest-dom": "^6.6.3",
         "@testing-library/react": "^16.2.0",
@@ -57,8 +58,10 @@
         "eslint": "^9.22.0",
         "eslint-config-next": "^15.2.3",
         "eslint-config-prettier": "^10.1.1",
+        "eslint-plugin-eslint-comments": "^3.2.0",
         "eslint-plugin-jest": "^28.11.0",
         "eslint-plugin-prettier": "^5.2.3",
+        "eslint-plugin-simple-import-sort": "^12.1.1",
         "eslint-plugin-sort-keys": "^2.3.5",
         "eslint-plugin-testing-library": "^7.1.1",
         "identity-obj-proxy": "^3.0.0",
@@ -69,6 +72,7 @@
         "ts-jest": "^29.2.6",
         "ts-node": "^10.9.2",
         "typescript": "5.8.2",
+        "typescript-eslint": "^8.27.0",
         "whatwg-fetch": "^3.6.20"
     },
     "packageManager": "yarn@4.5.0"

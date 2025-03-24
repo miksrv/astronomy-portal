@@ -1,17 +1,17 @@
-import { ApiModel, ApiType } from '@/api'
-import type { Action, PayloadAction } from '@reduxjs/toolkit'
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { HYDRATE } from 'next-redux-wrapper'
 
-import { AstroStargazingFormType } from '@/components/astro-stargazing-form'
-
 import { RootState } from './store'
+
+import { ApiModel, ApiType } from '@/api'
+import { AstroStargazingFormType } from '@/components/astro-stargazing-form'
+import type { Action, PayloadAction } from '@reduxjs/toolkit'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 type Maybe<T> = T | void
 
 export const encodeQueryData = (data: any): string => {
     const ret = []
-    for (let d in data) {
+    for (const d in data) {
         if (d && data[d]) {
             ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(data[d]))
         }
@@ -20,13 +20,11 @@ export const encodeQueryData = (data: any): string => {
     return ret.length ? '?' + ret.join('&') : ''
 }
 
-const isHydrateAction = (action: Action): action is PayloadAction<RootState> =>
-    action.type === HYDRATE
+const isHydrateAction = (action: Action): action is PayloadAction<RootState> => action.type === HYDRATE
 
 export const SITE_LINK = process.env.NEXT_PUBLIC_SITE_LINK
 
-export const HOST_API =
-    process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:8080/'
+export const HOST_API = process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:8080/'
 
 export const HOST_IMG = process.env.NEXT_PUBLIC_IMG_HOST || HOST_API
 
@@ -54,18 +52,11 @@ export const API = createApi({
         authGetMe: builder.mutation<ApiType.Auth.ResLogin, void>({
             query: () => 'auth/me'
         }),
-        authLoginService: builder.mutation<
-            ApiType.Auth.ResAuthService,
-            ApiType.Auth.ReqAuthService
-        >({
-            query: ({ service, ...params }) =>
-                `auth/${service}${params?.code ? encodeQueryData(params) : ''}`,
+        authLoginService: builder.mutation<ApiType.Auth.ResAuthService, ApiType.Auth.ReqAuthService>({
+            query: ({ service, ...params }) => `auth/${service}${params?.code ? encodeQueryData(params) : ''}`,
             transformErrorResponse: (response) => response.data
         }),
-        authPostLogin: builder.mutation<
-            ApiType.Auth.ResLogin,
-            ApiType.Auth.ReqLogin
-        >({
+        authPostLogin: builder.mutation<ApiType.Auth.ResLogin, ApiType.Auth.ReqLogin>({
             query: (credentials) => ({
                 body: credentials,
                 method: 'POST',
@@ -100,10 +91,7 @@ export const API = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-        authorPost: builder.mutation<
-            ApiType.Author.ResSet | ApiType.ResError,
-            Partial<ApiType.Author.ReqSet>
-        >({
+        authorPost: builder.mutation<ApiType.Author.ResSet | ApiType.ResError, Partial<ApiType.Author.ReqSet>>({
             invalidatesTags: () => [{ type: 'Author' }],
             query: ({ ...formState }) => ({
                 body: formState,
@@ -124,23 +112,15 @@ export const API = createApi({
             providesTags: (result, error, id) => [{ id, type: 'Events' }],
             query: (id) => `events/${id}`
         }),
-        eventGetPhotoList: builder.query<
-            ApiType.Events.ResponsePhotoList,
-            ApiType.Events.RequestPhotoList
-        >({
+        eventGetPhotoList: builder.query<ApiType.Events.ResponsePhotoList, ApiType.Events.RequestPhotoList>({
             query: (params) => `events/photos${encodeQueryData(params)}`
         }),
         eventGetUpcoming: builder.query<ApiType.Events.ResItem, void>({
             providesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
             query: () => 'events/upcoming'
         }),
-        eventPhotoUploadPost: builder.mutation<
-            ApiType.Events.ResponsePhoto,
-            ApiType.Events.ReqUploadPhoto
-        >({
-            invalidatesTags: (res, err, arg) => [
-                { id: arg.eventId, type: 'Events' }
-            ],
+        eventPhotoUploadPost: builder.mutation<ApiType.Events.ResponsePhoto, ApiType.Events.ReqUploadPhoto>({
+            invalidatesTags: (res, err, arg) => [{ id: arg.eventId, type: 'Events' }],
             query: (data) => ({
                 body: data.formData,
                 method: 'POST',
@@ -153,10 +133,7 @@ export const API = createApi({
             query: () => 'events'
         }),
 
-        eventCreatePost: builder.mutation<
-            ApiType.Events.ResItem | ApiType.ResError,
-            FormData
-        >({
+        eventCreatePost: builder.mutation<ApiType.Events.ResItem | ApiType.ResError, FormData>({
             invalidatesTags: () => [{ type: 'Events' }, { type: 'Statistic' }],
             query: (formState) => ({
                 body: formState,
@@ -165,10 +142,7 @@ export const API = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-        eventCoverUploadPost: builder.mutation<
-            ApiType.Events.ResItem | ApiType.ResError,
-            FormData
-        >({
+        eventCoverUploadPost: builder.mutation<ApiType.Events.ResItem | ApiType.ResError, FormData>({
             query: (formData) => ({
                 body: formData,
                 method: 'POST',
@@ -176,13 +150,8 @@ export const API = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-        eventPatch: builder.mutation<
-            ApiType.Events.ResItem | ApiType.ResError,
-            AstroStargazingFormType
-        >({
-            invalidatesTags: (result, error, { id }) => [
-                { id, type: 'Events' }
-            ],
+        eventPatch: builder.mutation<ApiType.Events.ResItem | ApiType.ResError, AstroStargazingFormType>({
+            invalidatesTags: (result, error, { id }) => [{ id, type: 'Events' }],
             query: ({ id, ...formState }) => ({
                 body: formState,
                 method: 'PATCH',
@@ -225,13 +194,8 @@ export const API = createApi({
             providesTags: (res, err, id) => [{ id, type: 'Objects' }],
             query: (id) => `objects/${id}`
         }),
-        objectsPatch: builder.mutation<
-            ApiType.Objects.Response | ApiType.ResError,
-            Partial<ApiType.Objects.Request>
-        >({
-            invalidatesTags: (result, error, { name }) => [
-                { id: name, type: 'Events' }
-            ],
+        objectsPatch: builder.mutation<ApiType.Objects.Response | ApiType.ResError, Partial<ApiType.Objects.Request>>({
+            invalidatesTags: (result, error, { name }) => [{ id: name, type: 'Events' }],
             query: (formState) => ({
                 body: formState,
                 method: 'PATCH',
@@ -239,10 +203,7 @@ export const API = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-        objectsPost: builder.mutation<
-            ApiType.Objects.Response | ApiType.ResError,
-            Partial<ApiType.Objects.Request>
-        >({
+        objectsPost: builder.mutation<ApiType.Objects.Response | ApiType.ResError, Partial<ApiType.Objects.Request>>({
             invalidatesTags: () => [{ type: 'Objects' }],
             query: ({ ...formState }) => ({
                 body: formState,
@@ -277,22 +238,13 @@ export const API = createApi({
             providesTags: (res, err, id) => [{ id, type: 'Photos' }],
             query: (id) => `photos/${id}`
         }),
-        photosGetList: builder.query<
-            ApiType.Photos.Response,
-            Maybe<ApiType.Photos.Request>
-        >({
+        photosGetList: builder.query<ApiType.Photos.Response, Maybe<ApiType.Photos.Request>>({
             providesTags: () => [{ id: 'LIST', type: 'Photos' }],
             query: (params) => `photos${encodeQueryData(params)}`,
             transformErrorResponse: (response) => response.data
         }),
-        photosPost: builder.mutation<
-            ApiType.Photos.PostResponse | ApiType.ResError,
-            ApiType.Photos.PostRequest
-        >({
-            invalidatesTags: (result, error, { id }) => [
-                { id, type: 'Photos' },
-                { type: 'Statistic' }
-            ],
+        photosPost: builder.mutation<ApiType.Photos.PostResponse | ApiType.ResError, ApiType.Photos.PostRequest>({
+            invalidatesTags: (result, error, { id }) => [{ id, type: 'Photos' }, { type: 'Statistic' }],
             query: (formState) => ({
                 body: formState,
                 method: 'POST',
@@ -300,10 +252,7 @@ export const API = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-        photosPostUpload: builder.mutation<
-            ApiType.Photos.PostResponse | ApiType.ResError,
-            FormData
-        >({
+        photosPostUpload: builder.mutation<ApiType.Photos.PostResponse | ApiType.ResError, FormData>({
             query: (formData) => ({
                 body: formData,
                 method: 'POST',
@@ -311,13 +260,8 @@ export const API = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-        photoPatch: builder.mutation<
-            ApiType.Photos.PostResponse | ApiType.ResError,
-            ApiType.Photos.PostRequest
-        >({
-            invalidatesTags: (result, error, { id }) => [
-                { id, type: 'Photos' }
-            ],
+        photoPatch: builder.mutation<ApiType.Photos.PostResponse | ApiType.ResError, ApiType.Photos.PostRequest>({
+            invalidatesTags: (result, error, { id }) => [{ id, type: 'Photos' }],
             query: ({ id, ...formState }) => ({
                 body: formState,
                 method: 'PATCH',
@@ -343,10 +287,7 @@ export const API = createApi({
             providesTags: () => [{ id: 'LIST', type: 'Relay' }],
             query: () => 'relay/list'
         }),
-        relayPutStatus: builder.mutation<
-            ApiType.Relay.ResRelaySet,
-            ApiType.Relay.ReqRelaySet
-        >({
+        relayPutStatus: builder.mutation<ApiType.Relay.ResRelaySet, ApiType.Relay.ReqRelaySet>({
             invalidatesTags: [{ id: 'LIST', type: 'Relay' }],
             query: (data) => ({
                 body: data,
@@ -375,10 +316,7 @@ export const API = createApi({
         //     providesTags: () => ['Statistic'],
         //     query: () => 'statistic/photos'
         // }),
-        statisticGetTelescope: builder.query<
-            ApiType.Statistic.ResTelescope,
-            Maybe<ApiType.Statistic.ReqTelescope>
-        >({
+        statisticGetTelescope: builder.query<ApiType.Statistic.ResTelescope, Maybe<ApiType.Statistic.ReqTelescope>>({
             query: (params) => `statistic/telescope${encodeQueryData(params)}`
         })
     }),
