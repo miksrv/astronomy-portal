@@ -1,9 +1,9 @@
-import * as LocalStorage from '@/tools/localstorage'
+import i18Config from '../next-i18next.config'
+
 import { ApiType } from '@/api'
 import { LOCAL_STORAGE } from '@/tools/constants'
-import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-
-import i18Config from '../next-i18next.config'
+import * as LocalStorage from '@/tools/localstorage'
+import { createSlice,PayloadAction } from '@reduxjs/toolkit'
 
 interface ApplicationSliceProps {
     showOverlay?: boolean
@@ -13,8 +13,7 @@ interface ApplicationSliceProps {
 
 export const getStorageLocale = (): string | undefined =>
     typeof window !== 'undefined'
-        ? LocalStorage.getItem(LOCAL_STORAGE.LOCALE as any) ??
-          i18Config.i18n.defaultLocale
+        ? (LocalStorage.getItem(LOCAL_STORAGE.LOCALE as any) ?? i18Config.i18n.defaultLocale)
         : i18Config.i18n.defaultLocale
 
 const initialState: ApplicationSliceProps = {
@@ -27,10 +26,7 @@ const applicationSlice = createSlice({
     initialState,
     name: 'application',
     reducers: {
-        setLocale: (
-            state,
-            { payload }: PayloadAction<ApiType.Locale | string>
-        ) => {
+        setLocale: (state, { payload }: PayloadAction<ApiType.Locale | string>) => {
             state.locale = payload
         },
         closeAuthDialog: (state) => {
@@ -44,7 +40,6 @@ const applicationSlice = createSlice({
     }
 })
 
-export const { setLocale, closeAuthDialog, openAuthDialog } =
-    applicationSlice.actions
+export const { setLocale, closeAuthDialog, openAuthDialog } = applicationSlice.actions
 
 export default applicationSlice.reducer

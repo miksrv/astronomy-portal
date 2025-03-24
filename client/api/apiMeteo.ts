@@ -10,10 +10,7 @@ export const APIMeteo = createApi({
         getCurrent: builder.query<ApiModel.Weather, void>({
             query: () => 'current'
         }),
-        getHistory: builder.query<
-            ApiType.Weather.ResponseHistory,
-            ApiType.Weather.RequestHistory
-        >({
+        getHistory: builder.query<ApiType.Weather.ResponseHistory, ApiType.Weather.RequestHistory>({
             query: (params) => `history${encodeQueryData(params)}`
         })
     }),

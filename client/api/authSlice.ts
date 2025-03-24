@@ -1,6 +1,6 @@
-import * as LocalStorage from '@/tools/localstorage'
 import { ApiModel, ApiType } from '@/api'
-import { PayloadAction, createSlice } from '@reduxjs/toolkit'
+import * as LocalStorage from '@/tools/localstorage'
+import { createSlice,PayloadAction } from '@reduxjs/toolkit'
 
 type InitialStateProps = {
     isAuth?: boolean
@@ -11,7 +11,7 @@ type InitialStateProps = {
 
 export const getStorageToken = (): string | undefined =>
     typeof window !== 'undefined' && LocalStorage.getItem('AUTH_TOKEN')
-        ? LocalStorage.getItem('AUTH_TOKEN') ?? ''
+        ? (LocalStorage.getItem('AUTH_TOKEN') ?? '')
         : ''
 
 const authSlice = createSlice({
