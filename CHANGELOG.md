@@ -10,6 +10,8 @@
 -   Implemented new UI PhotoGallery Component
 -   Replaced old react gallery album component on the all pages
 -   Added new property `closeOnSelect` for UI `MultiSelect` component
+-   Updated ESLint and Prettier config
+-   Fixed all UI code-style
 
 ## 4.0.12
 
