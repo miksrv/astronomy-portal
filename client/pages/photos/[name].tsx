@@ -162,7 +162,9 @@ const normalizeAndFilterObjects = (data?: ApiModel.Photo[]): ApiModel.Photo[] =>
     )
 
     const uniqueMap = splitData?.reduce<Record<string, ApiModel.Photo>>((acc, item) => {
-        if (!item) {return acc} // Ensure item is not undefined
+        if (!item) {
+            return acc
+        } // Ensure item is not undefined
 
         const key = item.objects?.[0] as string
 

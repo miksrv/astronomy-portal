@@ -3,7 +3,7 @@ import i18Config from '../next-i18next.config'
 import { ApiType } from '@/api'
 import { LOCAL_STORAGE } from '@/tools/constants'
 import * as LocalStorage from '@/tools/localstorage'
-import { createSlice,PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface ApplicationSliceProps {
     showOverlay?: boolean

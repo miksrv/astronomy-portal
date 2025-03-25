@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
-import { Button, cn,Icon, Popout } from 'simple-react-ui-kit'
+import { Button, cn, Icon, Popout } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 

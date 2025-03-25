@@ -22,7 +22,9 @@ const Camera: React.FC<CameraProps> = ({ cameraURL, interval }) => {
     const [lightbox, setLightbox] = useState<boolean>(false)
 
     useEffect(() => {
-        if (!cameraURL) {return}
+        if (!cameraURL) {
+            return
+        }
 
         const updateImage = () => {
             setCameraSrc(`${cameraURL}?r=${Date.now()}`)

@@ -1,7 +1,7 @@
 import React from 'react'
 import dayjs, { Dayjs } from 'dayjs'
 import Image from 'next/image'
-import { cn,Icon } from 'simple-react-ui-kit'
+import { cn, Icon } from 'simple-react-ui-kit'
 import SunCalc from 'suncalc'
 
 import styles from './styles.module.sass'
@@ -28,10 +28,15 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
     const isCurrentMonth = dayjs(calendarDate).isSame(new Date(), 'month')
 
     const getWeatherClass = (cond: number | undefined) => {
-        if (typeof cond === 'undefined' || cond === null) {return ''}
+        if (typeof cond === 'undefined' || cond == null) {
+            return ''
+        }
 
-        if (cond <= 35) {return styles.green}
-        else if (cond >= 36 && cond <= 65) {return styles.orange}
+        if (cond <= 35) {
+            return styles.green
+        } else if (cond >= 36 && cond <= 65) {
+            return styles.orange
+        }
 
         return styles.red
     }
@@ -42,7 +47,7 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
             <td
                 key={`empty${i}`}
                 className={cn(styles.calendarDay, styles.empty)}
-            ></td>
+            />
         )
     }
 
@@ -101,7 +106,7 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
                 </div>
                 {itemWeatherEvent && (
                     <div className={styles.weatherEvent}>
-                        {itemWeatherEvent.clouds !== null && (
+                        {itemWeatherEvent.clouds != null && (
                             <span>
                                 <Icon
                                     name={'Cloud'}
@@ -161,7 +166,9 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
     })
 
     return rows.map((d: any, key: number) => {
-        if (!d.length) {return null}
+        if (!d.length) {
+            return null
+        }
 
         if (d.length < 7) {
             for (let i = d.length; i < 7; i++) {

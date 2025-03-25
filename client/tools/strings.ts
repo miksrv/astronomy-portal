@@ -15,7 +15,9 @@ export const formatObjectName = (objectName?: string): string => {
  * @returns {string} The sliced text with an ellipsis if it was truncated.
  */
 export const sliceText = (text?: string, length: number = 350): string => {
-    if (!text?.length) {return ''}
+    if (!text?.length) {
+        return ''
+    }
 
     const cleanedText = text.replace(/(\r\n|\n|\r)/gm, '')
     const sliced = cleanedText.slice(0, length)
@@ -29,7 +31,9 @@ export const sliceText = (text?: string, length: number = 350): string => {
  */
 export const humanizeFileSize = (bytes: number): string => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
-    if (bytes === 0) {return '0 Byte'}
+    if (bytes === 0) {
+        return '0 Byte'
+    }
     const i = Math.floor(Math.log(bytes) / Math.log(1024))
     return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i]
 }
@@ -40,7 +44,9 @@ export const humanizeFileSize = (bytes: number): string => {
  * @returns {string} The text without Markdown formatting.
  */
 export const removeMarkdown = (text?: string): string => {
-    if (!text?.length) {return ''}
+    if (!text?.length) {
+        return ''
+    }
 
     // Remove headers (#, ##, ###, etc.)
     let result = text.replace(/^#+\s+/gm, '')

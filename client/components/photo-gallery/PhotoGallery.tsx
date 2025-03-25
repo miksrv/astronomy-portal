@@ -4,7 +4,7 @@ import { RowsPhotoAlbumProps } from 'react-photo-album/dist/types'
 
 import 'react-photo-album/rows.css'
 
-interface PhotoGalleryProps extends RowsPhotoAlbumProps {}
+type PhotoGalleryProps = RowsPhotoAlbumProps
 
 const PhotoGallery: React.FC<PhotoGalleryProps> = ({ ...props }) => (
     <RowsPhotoAlbum

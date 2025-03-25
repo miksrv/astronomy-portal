@@ -28,7 +28,9 @@ export const declOfNum = (number: number, words: string[]) =>
  * @returns {string}
  */
 export const getTimeFromSec = (sec: number, full: boolean = false): string => {
-    if (sec <= 0) {return '0'}
+    if (sec <= 0) {
+        return '0'
+    }
 
     const h = (sec / 3600) ^ 0
     const m = ((sec - h * 3600) / 60) ^ 0
@@ -48,7 +50,9 @@ export const getTimeFromSec = (sec: number, full: boolean = false): string => {
 export const formatSecondsToExposure = (sec: number | string, full: boolean = false): string => {
     const seconds = Number(sec)
 
-    if (seconds <= 0) {return '0'}
+    if (seconds <= 0) {
+        return '0'
+    }
 
     const h = (seconds / 3600) ^ 0
     const m = ((seconds - h * 3600) / 60) ^ 0

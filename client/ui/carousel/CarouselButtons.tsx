@@ -1,6 +1,6 @@
 import React, { PropsWithChildren, useCallback, useEffect, useState } from 'react'
 import { EmblaCarouselType } from 'embla-carousel'
-import { cn,Icon } from 'simple-react-ui-kit'
+import { cn, Icon } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 

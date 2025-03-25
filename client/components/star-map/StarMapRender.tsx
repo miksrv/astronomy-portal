@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'next-i18next'
 
-import { customConfig, defaultConfig,FONT } from './config'
+import { customConfig, defaultConfig, FONT } from './config'
 import { StarMapObject, StarMapProps } from './StarMap'
 import styles from './styles.module.sass'
 
@@ -70,7 +70,7 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom }) => {
             .each((point: { geometry: { coordinates: any }; properties: { name: any } }) => {
                 if (Celestial.clip(point.geometry.coordinates)) {
                     const pointCoords = Celestial.mapProjection(point.geometry.coordinates)
-                        const pointRadius = 5
+                    const pointRadius = 5
 
                     Celestial.setStyle(stylePoint)
                     Celestial.context.beginPath()

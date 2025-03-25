@@ -1,6 +1,6 @@
 import { ApiModel } from '@/api'
 
-export interface PostResponse extends ApiModel.Photo {}
+export type PostResponse = ApiModel.Photo
 
 export interface Response {
     count?: number

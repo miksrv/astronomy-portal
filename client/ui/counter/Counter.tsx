@@ -15,7 +15,9 @@ const Counter: React.FC<CounterProps> = ({ end, duration = 2000, className, styl
 
     useEffect(() => {
         const step = (timestamp: number) => {
-            if (!startTime.current) {startTime.current = timestamp}
+            if (!startTime.current) {
+                startTime.current = timestamp
+            }
             const elapsed = timestamp - startTime.current
 
             const progress = Math.min(elapsed / duration, 1)

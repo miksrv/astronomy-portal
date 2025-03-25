@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
-import { cn,Container } from 'simple-react-ui-kit'
+import { cn, Container } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
@@ -15,11 +15,19 @@ const Weather: React.FC = () => {
     const { data, isLoading } = APIMeteo.useGetCurrentQuery()
 
     const getRange = (value?: number, min: number = 0, max: number = 10): string => {
-        if (value === undefined) {return ''}
+        if (value === undefined) {
+            return ''
+        }
         const calcVal = value * (1 + WEATHER_THRESHOLD / 100)
-        if (value === 0) {return 'good'}
-        if (value > max || value < min) {return 'danger'}
-        if (calcVal > max || calcVal < min) {return 'warning'}
+        if (value === 0) {
+            return 'good'
+        }
+        if (value > max || value < min) {
+            return 'danger'
+        }
+        if (calcVal > max || calcVal < min) {
+            return 'warning'
+        }
         return 'good'
     }
 

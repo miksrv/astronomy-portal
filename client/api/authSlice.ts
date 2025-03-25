@@ -1,6 +1,6 @@
 import { ApiModel, ApiType } from '@/api'
 import * as LocalStorage from '@/tools/localstorage'
-import { createSlice,PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 type InitialStateProps = {
     isAuth?: boolean

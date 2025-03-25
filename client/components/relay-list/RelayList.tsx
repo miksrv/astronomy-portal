@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, cn,Container, Message, Spinner } from 'simple-react-ui-kit'
+import { Button, cn, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 

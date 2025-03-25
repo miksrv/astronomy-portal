@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import '@testing-library/jest-dom'
 
 import { API } from '@/api/api'
-import { reducer,RootState } from '@/api/store'
+import { reducer, RootState } from '@/api/store'
 import { configureStore } from '@reduxjs/toolkit'
 import { render } from '@testing-library/react'
 
@@ -14,7 +14,7 @@ type WrapperProps = {
 
 jest.mock('next/image', () => ({
     __esModule: true,
-     
+
     default: (props: any) => <img {...props} />
 }))
 
