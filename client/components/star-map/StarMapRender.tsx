@@ -1,10 +1,11 @@
-import { formatObjectName } from '@/tools/strings'
-import { useTranslation } from 'next-i18next'
 import React, { useEffect, useMemo, useRef } from 'react'
+import { useTranslation } from 'next-i18next'
 
+import { customConfig, defaultConfig, FONT } from './config'
 import { StarMapObject, StarMapProps } from './StarMap'
-import { FONT, customConfig, defaultConfig } from './config'
 import styles from './styles.module.sass'
+
+import { formatObjectName } from '@/tools/strings'
 
 type geoJSONType = {
     type: 'FeatureCollection'
@@ -52,7 +53,7 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom }) => {
             return null
         }
 
-        let skyPoint = Celestial.getData(objectsJSON, defaultConfig.transform)
+        const skyPoint = Celestial.getData(objectsJSON, defaultConfig.transform)
 
         Celestial.container
             .selectAll('.sky-points')
@@ -66,38 +67,25 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom }) => {
     const handleRedraw = () => {
         Celestial.container
             .selectAll('.sky-points')
-            .each(
-                (point: {
-                    geometry: { coordinates: any }
-                    properties: { name: any }
-                }) => {
-                    if (Celestial.clip(point.geometry.coordinates)) {
-                        let pointCoords = Celestial.mapProjection(
-                                point.geometry.coordinates
-                            ),
-                            pointRadius = 5
+            .each((point: { geometry: { coordinates: any }; properties: { name: any } }) => {
+                if (Celestial.clip(point.geometry.coordinates)) {
+                    const pointCoords = Celestial.mapProjection(point.geometry.coordinates)
+                    const pointRadius = 5
 
-                        Celestial.setStyle(stylePoint)
-                        Celestial.context.beginPath()
-                        Celestial.context.arc(
-                            pointCoords[0],
-                            pointCoords[1],
-                            pointRadius,
-                            0,
-                            2 * Math.PI
-                        )
-                        Celestial.context.closePath()
-                        Celestial.context.stroke()
-                        Celestial.context.fill()
-                        Celestial.setTextStyle(styleText)
-                        Celestial.context.fillText(
-                            point.properties.name,
-                            pointCoords[0] + pointRadius - 1,
-                            pointCoords[1] - pointRadius + 1
-                        )
-                    }
+                    Celestial.setStyle(stylePoint)
+                    Celestial.context.beginPath()
+                    Celestial.context.arc(pointCoords[0], pointCoords[1], pointRadius, 0, 2 * Math.PI)
+                    Celestial.context.closePath()
+                    Celestial.context.stroke()
+                    Celestial.context.fill()
+                    Celestial.setTextStyle(styleText)
+                    Celestial.context.fillText(
+                        point.properties.name,
+                        pointCoords[0] + pointRadius - 1,
+                        pointCoords[1] - pointRadius + 1
+                    )
                 }
-            )
+            })
     }
 
     useEffect(() => {
@@ -129,11 +117,7 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom }) => {
 
             if (objects?.length === 1) {
                 customConfig.follow = [objects[0].ra || 0, objects[0].dec || 0]
-                customConfig.center = [
-                    objects[0].ra || 0,
-                    objects[0].dec || 0,
-                    1
-                ]
+                customConfig.center = [objects[0].ra || 0, objects[0].dec || 0, 1]
             }
 
             Celestial.display(customConfig)
@@ -149,9 +133,7 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom }) => {
     )
 }
 
-const createObjectsJSON = (
-    objects?: StarMapObject[]
-): geoJSONType | undefined => {
+const createObjectsJSON = (objects?: StarMapObject[]): geoJSONType | undefined => {
     if (!objects?.length) {
         return undefined
     }

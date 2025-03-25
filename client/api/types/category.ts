@@ -1,6 +1,6 @@
 import { ApiModel } from '@/api'
 
-export interface Request {}
+export type Request = object
 
 export interface Response {
     count?: number

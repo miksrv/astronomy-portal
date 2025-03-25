@@ -1,9 +1,10 @@
-import { API, ApiType, useAppSelector } from '@/api'
-import { declOfNum } from '@/tools/helpers'
 import React, { useEffect, useState } from 'react'
-import { Button, Container, Message, Spinner, cn } from 'simple-react-ui-kit'
+import { Button, cn, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
+
+import { API, ApiType, useAppSelector } from '@/api'
+import { declOfNum } from '@/tools/helpers'
 
 interface RelayListItemProps {
     id: number
@@ -14,22 +15,10 @@ interface RelayListItemProps {
     handleClick?: (relay: ApiType.Relay.ReqRelaySet) => void
 }
 
-export const RelayListItem: React.FC<RelayListItemProps> = ({
-    id,
-    name,
-    state,
-    loading,
-    isAdmin,
-    handleClick
-}) => (
+export const RelayListItem: React.FC<RelayListItemProps> = ({ id, name, state, loading, isAdmin, handleClick }) => (
     <div className={styles.item}>
         <div className={styles.name}>
-            <span
-                className={cn(
-                    styles.ledIndicator,
-                    state ? styles.on : styles.off
-                )}
-            />
+            <span className={cn(styles.ledIndicator, state ? styles.on : styles.off)} />
             {name}
         </div>
         <Button
@@ -53,17 +42,11 @@ export const RelayList: React.FC = () => {
     const [relayLoading, setRelayLoading] = React.useState<number>()
     const [countdownTimer, setCountdownTimer] = useState<number>(0)
 
-    const {
-        data: relayList,
-        isLoading,
-        isError
-    } = API.useRelayGetStateQuery(null, { pollingInterval: 15 * 1000 })
+    const { data: relayList, isLoading, isError } = API.useRelayGetStateQuery(null, { pollingInterval: 15 * 1000 })
 
-    const [setRelayStatus, { isLoading: loaderSet, data: relaySet }] =
-        API.useRelayPutStatusMutation()
+    const [setRelayStatus, { isLoading: loaderSet, data: relaySet }] = API.useRelayPutStatusMutation()
 
-    const [setLightOn, { isLoading: lightLoading }] =
-        API.useRelayGetLightMutation()
+    const [setLightOn, { isLoading: lightLoading }] = API.useRelayGetLightMutation()
 
     const user = useAppSelector((state) => state.auth.user)
 
@@ -98,11 +81,7 @@ export const RelayList: React.FC = () => {
                 </div>
             )}
 
-            {isError && (
-                <Message type={'error'}>
-                    {'Ошибка при получении списка реле'}
-                </Message>
-            )}
+            {isError && <Message type={'error'}>{'Ошибка при получении списка реле'}</Message>}
 
             <>
                 {relayList?.items.map((item) => (
@@ -110,15 +89,10 @@ export const RelayList: React.FC = () => {
                         key={item.id}
                         id={item.id}
                         name={item.name}
-                        state={
-                            item.state === 1 ||
-                            (relaySet?.state === 1 && relaySet?.id === item.id)
-                        }
+                        state={item.state === 1 || (relaySet?.state === 1 && relaySet?.id === item.id)}
                         loading={loaderSet && relayLoading === item.id}
                         isAdmin={user?.role === 'admin'}
-                        handleClick={async (relay) =>
-                            await handleSetRelay(relay)
-                        }
+                        handleClick={async (relay) => await handleSetRelay(relay)}
                     />
                 ))}
 
@@ -128,9 +102,7 @@ export const RelayList: React.FC = () => {
                             <span
                                 className={cn(
                                     styles.ledIndicator,
-                                    relayList?.items?.[1]?.state
-                                        ? styles.on
-                                        : styles.off
+                                    relayList?.items?.[1]?.state ? styles.on : styles.off
                                 )}
                             />
                             {'ОСВЕЩЕНИЕ'}
@@ -138,33 +110,19 @@ export const RelayList: React.FC = () => {
                         <div className={styles.description}>
                             {countdownTimer > 0 ? (
                                 <>
-                                    {'Доступно через'} <b>{countdownTimer}</b>{' '}
-                                    {'сек'}
+                                    {'Доступно через'} <b>{countdownTimer}</b> {'сек'}
                                 </>
                             ) : (
                                 <>
-                                    {'Включили'}{' '}
-                                    <b>{relayList?.light.counter}</b>{' '}
-                                    {declOfNum(relayList?.light.counter || 0, [
-                                        'раз',
-                                        'раза',
-                                        'раз'
-                                    ])}
+                                    {'Включили'} <b>{relayList?.light.counter}</b>{' '}
+                                    {declOfNum(relayList?.light.counter || 0, ['раз', 'раза', 'раз'])}
                                 </>
                             )}
                         </div>
                         <Button
                             size={'small'}
-                            loading={
-                                (isLoading && relayLoading === 1) ||
-                                lightLoading
-                            }
-                            className={cn(
-                                styles.switchButton,
-                                relayList?.items?.[1]?.state
-                                    ? styles.on
-                                    : styles.off
-                            )}
+                            loading={(isLoading && relayLoading === 1) || lightLoading}
+                            className={cn(styles.switchButton, relayList?.items?.[1]?.state ? styles.on : styles.off)}
                             disabled={
                                 loaderSet ||
                                 lightLoading ||

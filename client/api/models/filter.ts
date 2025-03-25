@@ -25,12 +25,4 @@ export type ListItems = {
     clear?: Item
 }
 
-export const List: Type[] = [
-    Type.luminance,
-    Type.red,
-    Type.green,
-    Type.blue,
-    Type.hydrogen,
-    Type.oxygen,
-    Type.sulfur
-]
+export const List: Type[] = [Type.luminance, Type.red, Type.green, Type.blue, Type.hydrogen, Type.oxygen, Type.sulfur]

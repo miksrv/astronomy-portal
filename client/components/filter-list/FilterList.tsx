@@ -1,9 +1,10 @@
-import { ApiModel } from '@/api'
-import { getFilterColor } from '@/tools/colors'
-import { useTranslation } from 'next-i18next'
 import React from 'react'
+import { useTranslation } from 'next-i18next'
 
 import styles from './styles.module.sass'
+
+import { ApiModel } from '@/api'
+import { getFilterColor } from '@/tools/colors'
 
 interface FilterListProps {
     filters?: ApiModel.Filters
@@ -22,17 +23,13 @@ const FilterList: React.FC<FilterListProps> = ({ filters }) => {
                         <span
                             className={styles.filterItem}
                             style={{
-                                backgroundColor: getFilterColor(
-                                    name as ApiModel.FilterTypes
-                                )
+                                backgroundColor: getFilterColor(name as ApiModel.FilterTypes)
                             }}
                         >
                             {name}
                         </span>
                         {t('plurals.minutes', {
-                            count: statistic.exposure
-                                ? Math.round(statistic.exposure / 60)
-                                : 0
+                            count: statistic.exposure ? Math.round(statistic.exposure / 60) : 0
                         })}{' '}
                         {`(${t('plurals.frames', {
                             count: statistic.frames

@@ -1,19 +1,19 @@
-import { SITE_LINK } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
+import React from 'react'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import Link from 'next/link'
-import React from 'react'
 import { Container } from 'simple-react-ui-kit'
 
+import { SITE_LINK } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 
-type StargazingRulesPageProps = {}
+type StargazingRulesPageProps = object
 
 const StargazingRulesPage: NextPage<StargazingRulesPageProps> = () => {
     const { t, i18n } = useTranslation()
@@ -44,14 +44,10 @@ const StargazingRulesPage: NextPage<StargazingRulesPageProps> = () => {
             />
 
             <Container style={{ marginBottom: '10px' }}>
-                <p style={{ margin: 0 }}>
-                    {t('stargazing-rules-page.welcome')}
-                </p>
+                <p style={{ margin: 0 }}>{t('stargazing-rules-page.welcome')}</p>
             </Container>
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('stargazing-rules-page.prohibited-title')}
-                </h2>
+                <h2 style={{ marginTop: 0 }}>{t('stargazing-rules-page.prohibited-title')}</h2>
                 <ul style={{ listStyle: 'decimal', marginBottom: 0 }}>
                     {(
                         t('stargazing-rules-page.prohibited-items', {
@@ -69,9 +65,7 @@ const StargazingRulesPage: NextPage<StargazingRulesPageProps> = () => {
                 </ul>
             </Container>
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('stargazing-rules-page.recommendations-title')}
-                </h2>
+                <h2 style={{ marginTop: 0 }}>{t('stargazing-rules-page.recommendations-title')}</h2>
                 <ul style={{ marginBottom: 0 }}>
                     {(
                         t('stargazing-rules-page.recommendations-items', {
@@ -89,17 +83,11 @@ const StargazingRulesPage: NextPage<StargazingRulesPageProps> = () => {
                 </ul>
             </Container>
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('stargazing-rules-page.importance-title')}
-                </h2>
-                <p style={{ margin: 0 }}>
-                    {t('stargazing-rules-page.importance-description')}
-                </p>
+                <h2 style={{ marginTop: 0 }}>{t('stargazing-rules-page.importance-title')}</h2>
+                <p style={{ margin: 0 }}>{t('stargazing-rules-page.importance-description')}</p>
             </Container>
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('stargazing-rules-page.join-title')}
-                </h2>
+                <h2 style={{ marginTop: 0 }}>{t('stargazing-rules-page.join-title')}</h2>
                 <p style={{ margin: 0 }}>
                     {t('stargazing-rules-page.join-description')}
                     <Link
@@ -122,9 +110,7 @@ const StargazingRulesPage: NextPage<StargazingRulesPageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (
-            context
-        ): Promise<GetServerSidePropsResult<StargazingRulesPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<StargazingRulesPageProps>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 

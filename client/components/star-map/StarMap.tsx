@@ -1,6 +1,7 @@
-import { ApiModel } from '@/api'
-import dynamic from 'next/dynamic'
 import React from 'react'
+import dynamic from 'next/dynamic'
+
+import { ApiModel } from '@/api'
 
 const StarMapRender = dynamic(() => import('./StarMapRender'), {
     ssr: false
@@ -15,8 +16,6 @@ export interface StarMapProps {
     zoom?: number
 }
 
-const StarMap: React.FC<StarMapProps> = ({ ...props }) => (
-    <StarMapRender {...props} />
-)
+const StarMap: React.FC<StarMapProps> = ({ ...props }) => <StarMapRender {...props} />
 
 export default StarMap

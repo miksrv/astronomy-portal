@@ -1,16 +1,14 @@
-import { ApiModel } from '@/api'
-import { createLargePhotoUrl } from '@/tools/photos'
-import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { Button, Container, Input } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
+import { ApiModel } from '@/api'
+import { createLargePhotoUrl } from '@/tools/photos'
+
 export type AstroStargazingFormType = Partial<
-    Omit<
-        ApiModel.Event,
-        'date' | 'availableTickets' | 'registrationStart' | 'registrationEnd'
-    >
+    Omit<ApiModel.Event, 'date' | 'availableTickets' | 'registrationStart' | 'registrationEnd'>
 > & {
     date?: string
     registrationStart?: string
@@ -26,12 +24,7 @@ interface AstroStargazingFormProps {
     onCancel?: () => void
 }
 
-const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({
-    disabled,
-    initialData,
-    onSubmit,
-    onCancel
-}) => {
+const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({ disabled, initialData, onSubmit, onCancel }) => {
     const [formData, setFormData] = useState<AstroStargazingFormType>({})
 
     const handleImageUpload = (e: any) => {
@@ -63,9 +56,7 @@ const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({
                 type={'input'}
                 label={'Заголовок'}
                 value={formData.title}
-                onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             />
 
             <div className={styles.sections}>
@@ -91,9 +82,7 @@ const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({
                     type={'datetime-local'}
                     label={'Дата проведения (по Оренбургскому времени)'}
                     value={formData.date}
-                    onChange={(e) =>
-                        setFormData({ ...formData, date: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 />
             </div>
 
@@ -152,9 +141,7 @@ const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({
                     type={'input'}
                     label={'Ссылка на карту Yandex'}
                     value={formData.yandexMap}
-                    onChange={(e) =>
-                        setFormData({ ...formData, yandexMap: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, yandexMap: e.target.value })}
                 />
             </div>
 
@@ -169,11 +156,7 @@ const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({
                 )}
             </div>
             <div style={{ marginTop: 15 }}>
-                <label>
-                    {initialData?.coverFileName
-                        ? 'Заменить обложку:'
-                        : 'Загрузить обложку:'}
-                </label>
+                <label>{initialData?.coverFileName ? 'Заменить обложку:' : 'Загрузить обложку:'}</label>
                 <input
                     disabled={disabled}
                     onChange={handleImageUpload}

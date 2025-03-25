@@ -1,6 +1,6 @@
+import React from 'react'
 import { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
-import React from 'react'
 
 const Error404Page: NextPage = () => (
     <main>

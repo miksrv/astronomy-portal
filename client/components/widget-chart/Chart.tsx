@@ -1,15 +1,15 @@
-import { ApiModel } from '@/api'
-import { getSensorColor } from '@/tools/colors'
-import { formatDateFromUTC } from '@/tools/dates'
-import { round } from '@/tools/helpers'
+import React, { useMemo } from 'react'
 import { EChartsOption } from 'echarts'
 import ReactECharts from 'echarts-for-react'
 import { useTranslation } from 'next-i18next'
-import React, { useMemo } from 'react'
-
-import { ChartTypes } from '@/components/widget-chart/WidgetChart'
 
 import styles from './styles.module.sass'
+
+import { ApiModel } from '@/api'
+import { ChartTypes } from '@/components/widget-chart/WidgetChart'
+import { getSensorColor } from '@/tools/colors'
+import { formatDateFromUTC } from '@/tools/dates'
+import { round } from '@/tools/helpers'
 
 interface ChartProps {
     type: ChartTypes
@@ -58,10 +58,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) => {
                 label: {
                     formatter: function (params) {
                         if (params?.axisDimension === 'x') {
-                            return formatDateFromUTC(
-                                params?.value as number,
-                                t('date-chart-label')
-                            )
+                            return formatDateFromUTC(params?.value as number, t('date-chart-label'))
                         }
 
                         return round(Number(params?.value), 2)?.toString() ?? ''
@@ -83,9 +80,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) => {
                 // Loop through each element in params to display the values (yAxis)
                 params.forEach((item: any) => {
                     const colorSquare = `<span class="${styles.icon}" style="background-color: ${item.color};"></span>`
-                    const seriesValue = `<span class="${styles.value}">${
-                        item.value?.[1] ?? '---'
-                    }</span>`
+                    const seriesValue = `<span class="${styles.value}">${item.value?.[1] ?? '---'}</span>`
                     const seriesName = `<span class="${styles.label}">${item.seriesName}${seriesValue}</span>`
 
                     const row = `<div class="${styles.chartTooltipItem}">${colorSquare} ${seriesName}</div>`
@@ -103,8 +98,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) => {
                 hideOverlap: true,
                 color: textSecondaryColor, // Color of X-axis labels
                 fontSize: '11px',
-                formatter: (value: number) =>
-                    formatDateFromUTC(value, dateFormat ?? t('date-only-hour'))
+                formatter: (value: number) => formatDateFromUTC(value, dateFormat ?? t('date-only-hour'))
             },
             axisTick: {
                 show: true
@@ -159,12 +153,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) => {
         ]
     }
 
-    const getChartLineConfig = (
-        source: keyof ApiModel.Weather,
-        name?: string,
-        axis?: number,
-        area?: boolean
-    ) => ({
+    const getChartLineConfig = (source: keyof ApiModel.Weather, name?: string, axis?: number, area?: boolean) => ({
         ...(baseConfig.series as any)[0],
         data: data?.map(({ date, [source]: sensorData }) => [date, sensorData]),
         name: name ?? '',

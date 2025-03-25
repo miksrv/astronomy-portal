@@ -1,10 +1,11 @@
-import Counter from '@/ui/counter'
-import { useTranslation } from 'next-i18next'
-import Link from 'next/link'
 import React from 'react'
+import Link from 'next/link'
+import { useTranslation } from 'next-i18next'
 import { cn } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
+
+import Counter from '@/ui/counter'
 
 const YEARS = 10
 const STARGAZING = 42
@@ -19,12 +20,7 @@ const MainSectionStargazing: React.FC = () => {
                 className={styles.background}
                 style={{ backgroundImage: 'url(/photos/stargazing-4.jpeg)' }}
             />
-            <div
-                className={cn(
-                    styles.centralContainer,
-                    'animate animate-slide-up'
-                )}
-            >
+            <div className={cn(styles.centralContainer, 'animate animate-slide-up')}>
                 <div className={styles.item}>
                     <Counter
                         end={YEARS}
@@ -50,9 +46,7 @@ const MainSectionStargazing: React.FC = () => {
 
             <div className={styles.bottomContainer}>
                 <h2 className={'animate'}>{t('stargazing')}</h2>
-                <p className={'animate'}>
-                    {t('stargazings-section-description')}
-                </p>
+                <p className={'animate'}>{t('stargazings-section-description')}</p>
                 <Link
                     href={'/stargazing'}
                     title={t('stargazing')}

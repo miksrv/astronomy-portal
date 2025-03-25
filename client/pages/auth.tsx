@@ -1,20 +1,21 @@
-import * as LocalStorage from '@/tools/localstorage'
+import React, { useEffect, useState } from 'react'
+import { GetServerSidePropsResult, NextPage } from 'next'
+import { useRouter } from 'next/dist/client/router'
+import { useSearchParams } from 'next/navigation'
+import { useTranslation } from 'next-i18next'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { NextSeo } from 'next-seo'
+import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
+
 import { API, ApiType } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { login } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector, wrapper } from '@/api/store'
 import { LOCAL_STORAGE } from '@/tools/constants'
 import useLocalStorage from '@/tools/hooks/useLocalStorage'
-import { GetServerSidePropsResult, NextPage } from 'next'
-import { useTranslation } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
-import { useRouter } from 'next/dist/client/router'
-import { useSearchParams } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
-import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
+import * as LocalStorage from '@/tools/localstorage'
 
-interface AuthPageProps {}
+type AuthPageProps = object
 
 const AuthPage: NextPage<AuthPageProps> = () => {
     const { t, i18n } = useTranslation()
@@ -32,8 +33,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
 
     const isAuth = useAppSelector((state) => state.auth.isAuth)
 
-    const [serviceLogin, { data, error, isLoading, isError, isSuccess }] =
-        API.useAuthLoginServiceMutation()
+    const [serviceLogin, { data, error, isLoading, isError, isSuccess }] = API.useAuthLoginServiceMutation()
 
     useEffect(() => {
         if (isAuth && !data) {
@@ -86,9 +86,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
             <div className={'centerPageContainer'}>
                 <div className={'wrapper'}>
                     <Container>
-                        <h1 className={'header'}>
-                            {t('authorization-on-site')}
-                        </h1>
+                        <h1 className={'header'}>{t('authorization-on-site')}</h1>
                         {error && (
                             <Message
                                 type={'error'}

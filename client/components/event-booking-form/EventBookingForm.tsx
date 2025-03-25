@@ -1,6 +1,7 @@
-import { API, ApiType, useAppSelector } from '@/api'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Input, Message } from 'simple-react-ui-kit'
+
+import { API, ApiType, useAppSelector } from '@/api'
 
 interface EventBookingFormProps {
     eventId?: string
@@ -26,19 +27,15 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
         phone: user?.phone || ''
     })
 
-    const [bookEvent, { isLoading, isSuccess, error }] =
-        API.useEventsRegistrationPostMutation()
+    const [bookEvent, { isLoading, isSuccess, error }] = API.useEventsRegistrationPostMutation()
 
     const findError = (field: keyof ApiType.Events.ReqRegistration) =>
         (error as ApiType.ResError)?.messages?.[field] || undefined
 
-    const handleChange = ({
-        target: { name, value }
-    }: React.ChangeEvent<HTMLInputElement>) =>
+    const handleChange = ({ target: { name, value } }: React.ChangeEvent<HTMLInputElement>) =>
         setFormState((prev) => ({ ...prev, [name]: value }))
 
-    const handleKeyDown = (e: { key: string }) =>
-        e.key === 'Enter' && handleSubmit()
+    const handleKeyDown = (e: { key: string }) => e.key === 'Enter' && handleSubmit()
 
     const handleSubmit = useCallback(() => {
         if (!eventId) {
@@ -50,9 +47,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
         bookEvent({
             adults: Number(formState.adults || 1),
             children: Number(formState.children || 1),
-            childrenAges: formState.childrenAges?.length
-                ? formState.childrenAges
-                : undefined,
+            childrenAges: formState.childrenAges?.length ? formState.childrenAges : undefined,
             eventId: eventId,
             name: formState.name,
             phone: formState.phone?.length ? formState.phone : undefined
@@ -67,10 +62,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
         ) {
             setFormState({
                 ...formState,
-                childrenAges: formState.childrenAges.slice(
-                    0,
-                    Number(formState.children)
-                )
+                childrenAges: formState.childrenAges.slice(0, Number(formState.children))
             })
         }
     }, [formState?.children])
@@ -200,8 +192,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
             {/*        )*/}
             {/*    )}*/}
             <p>
-                * Максимум <b>5</b> взрослых и <b>5</b> детей на одну
-                регистрацию.
+                * Максимум <b>5</b> взрослых и <b>5</b> детей на одну регистрацию.
             </p>
 
             <Button
@@ -209,12 +200,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
                 // size={'tiny'}
                 color={'green'}
                 onClick={handleSubmit}
-                disabled={
-                    isLoading ||
-                    isSuccess ||
-                    Number(formState?.children) !==
-                        formState?.childrenAges?.length
-                }
+                disabled={isLoading || isSuccess || Number(formState?.children) !== formState?.childrenAges?.length}
                 loading={isLoading}
             >
                 {'Забронировать'}

@@ -1,20 +1,20 @@
+import React, { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useTranslation } from 'next-i18next'
+import { Container, Skeleton } from 'simple-react-ui-kit'
+
+import styles from './styles.module.sass'
+
 import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
+import FilterList from '@/components/filter-list'
+import PhotoLightbox from '@/components/photo-lightbox'
+import StarMap from '@/components/star-map'
 import { formatDate } from '@/tools/dates'
 import { getTimeFromSec } from '@/tools/helpers'
 import { createLargePhotoUrl, createMediumPhotoUrl } from '@/tools/photos'
 import { formatObjectName, humanizeFileSize } from '@/tools/strings'
-import { useTranslation } from 'next-i18next'
-import Image from 'next/image'
-import Link from 'next/link'
-import React, { useEffect, useMemo, useState } from 'react'
-import { Container, Skeleton } from 'simple-react-ui-kit'
-
-import FilterList from '@/components/filter-list'
-import PhotoLightbox from '@/components/photo-lightbox'
-import StarMap from '@/components/star-map'
-
-import styles from './styles.module.sass'
 
 interface ObjectHeaderProps extends Partial<ApiModel.Photo> {
     photoTitle?: string
@@ -43,14 +43,12 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
     )
 
     const categoriesData = useMemo(
-        () =>
-            categoriesList?.filter(({ id }) => props.categories?.includes(id)),
+        () => categoriesList?.filter(({ id }) => props.categories?.includes(id)),
         [categoriesList, props.categories]
     )
 
     const equipmentsData = useMemo(
-        () =>
-            equipmentsList?.filter(({ id }) => props.equipments?.includes(id)),
+        () => equipmentsList?.filter(({ id }) => props.equipments?.includes(id)),
         [equipmentsList, props.equipments]
     )
 
@@ -74,9 +72,7 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                     className={styles.lightboxTrigger}
                     onClick={() => setShowLightbox(true)}
                     style={{
-                        backgroundImage: `url(${createMediumPhotoUrl(
-                            props as ApiModel.Photo
-                        )})`
+                        backgroundImage: `url(${createMediumPhotoUrl(props as ApiModel.Photo)})`
                     }}
                 >
                     {!loading ? (
@@ -126,9 +122,7 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
 
                 <div className={styles.item}>
                     <span className={styles.key}>{t('total-exposure')}:</span>
-                    {props.statistic?.exposure
-                        ? getTimeFromSec(props.statistic.exposure, true)
-                        : '---'}
+                    {props.statistic?.exposure ? getTimeFromSec(props.statistic.exposure, true) : '---'}
                 </div>
 
                 <div className={styles.item}>
@@ -143,9 +137,7 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
 
                 {objectsData?.length && (
                     <div className={styles.item}>
-                        <span className={styles.key}>
-                            {t('objects-in-photo')}:
-                        </span>
+                        <span className={styles.key}>{t('objects-in-photo')}:</span>
                         {objectsData.map(({ name, title }) => (
                             <Link
                                 key={name}
@@ -172,9 +164,7 @@ const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                                 key={item.id}
                                 className={styles.item}
                             >
-                                <span className={styles.key}>
-                                    {t(`equipment.${item.type}`)}
-                                </span>
+                                <span className={styles.key}>{t(`equipment.${item.type}`)}</span>
                                 {item.brand} {item.model}
                             </div>
                         ))}

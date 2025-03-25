@@ -1,21 +1,23 @@
-import * as LocalStorage from '@/tools/localstorage'
-import { wrapper } from '@/api/store'
-import '@/styles/globals.sass'
-import '@/styles/theme.css'
-import { LOCAL_STORAGE } from '@/tools/constants'
+import React, { useEffect } from 'react'
+import { Provider } from 'react-redux'
 import dayjs from 'dayjs'
-import 'dayjs/locale/ru'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import utc from 'dayjs/plugin/utc'
-import { appWithTranslation, useTranslation } from 'next-i18next'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Script from 'next/script'
-import React, { useEffect } from 'react'
-import { Provider } from 'react-redux'
+import { appWithTranslation, useTranslation } from 'next-i18next'
+
+import '@/styles/globals.sass'
+import '@/styles/theme.css'
+import 'dayjs/locale/ru'
 
 import i18Config from '../next-i18next.config'
+
+import { wrapper } from '@/api/store'
+import { LOCAL_STORAGE } from '@/tools/constants'
+import * as LocalStorage from '@/tools/localstorage'
 
 const locale = LocalStorage.getItem(LOCAL_STORAGE.LOCALE as any)
 
@@ -25,11 +27,7 @@ const App = ({ Component, pageProps }: AppProps) => {
     const { store } = wrapper.useWrappedStore(pageProps)
 
     useEffect(() => {
-        if (
-            i18n.language !== locale &&
-            i18Config.i18n.locales.includes(locale) &&
-            router.pathname !== '/404'
-        ) {
+        if (i18n.language !== locale && i18Config.i18n.locales.includes(locale) && router.pathname !== '/404') {
             router.replace(router.asPath, router.asPath, { locale })
         }
     }, [])
@@ -60,9 +58,7 @@ const App = ({ Component, pageProps }: AppProps) => {
                 />
                 <meta
                     name={'viewport'}
-                    content={
-                        'width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no'
-                    }
+                    content={'width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no'}
                 />
                 <meta
                     name={'apple-mobile-web-app-status-bar-style'}

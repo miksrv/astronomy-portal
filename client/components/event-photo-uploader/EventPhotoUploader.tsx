@@ -1,30 +1,22 @@
+import React, { Ref, useEffect, useState } from 'react'
+
 import { ApiModel } from '@/api'
 import { API } from '@/api/api'
-import React, { LegacyRef, MutableRefObject, useEffect, useState } from 'react'
 
 interface PhotoUploaderProps {
     eventId?: string
     onSelectFiles?: (uploadingPhotosData?: string[]) => void
     onUploadPhoto?: (photo: ApiModel.EventPhoto) => void
-    fileInputRef?: MutableRefObject<HTMLInputElement | undefined>
+    fileInputRef?: React.RefObject<HTMLInputElement | undefined>
 }
 
-const EventPhotoUploader: React.FC<PhotoUploaderProps> = ({
-    eventId,
-    onSelectFiles,
-    onUploadPhoto,
-    fileInputRef
-}) => {
+const EventPhotoUploader: React.FC<PhotoUploaderProps> = ({ eventId, onSelectFiles, onUploadPhoto, fileInputRef }) => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([])
 
-    const [
-        handleUploadPhoto,
-        { data: uploadedPhoto, isLoading: uploadLoading, isError: uploadError }
-    ] = API.useEventPhotoUploadPostMutation()
+    const [handleUploadPhoto, { data: uploadedPhoto, isLoading: uploadLoading, isError: uploadError }] =
+        API.useEventPhotoUploadPostMutation()
 
-    const handleSelectedFilesUpload = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
+    const handleSelectedFilesUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files
 
         if (files?.length && eventId && !uploadLoading) {
@@ -77,15 +69,13 @@ const EventPhotoUploader: React.FC<PhotoUploaderProps> = ({
     }, [eventId])
 
     useEffect(() => {
-        onSelectFiles?.(
-            selectedFiles?.map((file) => URL.createObjectURL(file)).reverse()
-        )
+        onSelectFiles?.(selectedFiles?.map((file) => URL.createObjectURL(file)).reverse())
     }, [selectedFiles])
 
     return (
         <input
             multiple={true}
-            ref={fileInputRef as LegacyRef<HTMLInputElement> | undefined}
+            ref={fileInputRef as Ref<HTMLInputElement> | undefined}
             style={{ display: 'none' }}
             type={'file'}
             accept={'image/png, image/gif, image/jpeg'}

@@ -1,17 +1,18 @@
+import React, { useEffect, useMemo, useState } from 'react'
 import * as Astronomy from 'astronomy-engine'
-import { ApiModel } from '@/api'
-import { formatDate } from '@/tools/dates'
-import { formatObjectName } from '@/tools/strings'
 import { AstroTime, Observer } from 'astronomy-engine'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import ReactECharts, { EChartsOption } from 'echarts-for-react'
 import { useTranslation } from 'next-i18next'
-import React, { useEffect, useMemo, useState } from 'react'
 import { Container } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
+
+import { ApiModel } from '@/api'
+import { formatDate } from '@/tools/dates'
+import { formatObjectName } from '@/tools/strings'
 
 const LAT = parseFloat(process.env.NEXT_PUBLIC_LAT ?? '51.7')
 const LON = parseFloat(process.env.NEXT_PUBLIC_LON ?? '55.2')
@@ -29,11 +30,7 @@ type ChartDataType = any
 
 type MarkAreaType = any
 
-const VisibilityChart: React.FC<VisibilityChartProps> = ({
-    object,
-    lat = LAT,
-    lon = LON
-}) => {
+const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = LAT, lon = LON }) => {
     const { t } = useTranslation()
 
     const [chartData, setChartData] = useState<ChartDataType>([])
@@ -112,17 +109,9 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
         const data: ChartDataType[] = Array.from(
             { length: Math.ceil((endTime.ut - startTime.ut) / intervalInDays) },
             (_, i) => {
-                const chartTime = Astronomy.MakeTime(
-                    startTime.ut + i * intervalInDays
-                )
+                const chartTime = Astronomy.MakeTime(startTime.ut + i * intervalInDays)
 
-                const hor = Astronomy.Horizon(
-                    chartTime,
-                    observer,
-                    object?.ra || 0,
-                    object?.dec || 0,
-                    'normal'
-                )
+                const hor = Astronomy.Horizon(chartTime, observer, object?.ra || 0, object?.dec || 0, 'normal')
 
                 return [chartTime.date.toISOString(), hor.altitude.toFixed(2)]
             }
@@ -152,22 +141,14 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
 
                     if (params.length > 0) {
                         const header =
-                            `<div class="${
-                                styles.chartTooltipTitle
-                            }">Local: ${formatDate(
+                            `<div class="${styles.chartTooltipTitle}">Local: ${formatDate(
                                 params[0].axisValueLabel
                             )}</div>` +
-                            `<div class="${
-                                styles.chartTooltipTitle
-                            }">UTC: ${formatDate(
+                            `<div class="${styles.chartTooltipTitle}">UTC: ${formatDate(
                                 dayjs(params[0].axisValueLabel).utc()
                             )}</div>` +
-                            `<div class="${
-                                styles.chartTooltipTitle
-                            }">Observatory: ${formatDate(
-                                dayjs(params[0].axisValueLabel)
-                                    .utc()
-                                    .tz('Asia/Yekaterinburg')
+                            `<div class="${styles.chartTooltipTitle}">Observatory: ${formatDate(
+                                dayjs(params[0].axisValueLabel).utc().tz('Asia/Yekaterinburg')
                             )}</div>`
 
                         tooltipContent.push(header)
@@ -175,9 +156,7 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
 
                     params.forEach((item: any) => {
                         const colorSquare = `<span class="${styles.icon}" style="background-color: ${item.color};"></span>`
-                        const seriesValue = `<span class="${styles.value}">${
-                            item.value?.[1] ?? '---'
-                        }</span>`
+                        const seriesValue = `<span class="${styles.value}">${item.value?.[1] ?? '---'}</span>`
                         const seriesName = `<span class="${styles.label}">${item.seriesName}<span>${seriesValue}°</span></span>`
 
                         const row = `<div class="${styles.chartTooltipItem}">${colorSquare} ${seriesName}</div>`
@@ -257,9 +236,7 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({
 
     return (
         <Container className={styles.container}>
-            <h3 className={styles.title}>
-                {t('visibility-chart.title', { name: objectName })}
-            </h3>
+            <h3 className={styles.title}>{t('visibility-chart.title', { name: objectName })}</h3>
             <div className={styles.description}>
                 {t('visibility-chart.description', {
                     name: objectName,

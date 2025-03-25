@@ -1,19 +1,18 @@
+import React, { useEffect } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useTranslation } from 'next-i18next'
+import { Button, cn, Icon, Popout } from 'simple-react-ui-kit'
+
+import styles from './styles.module.sass'
+
 import { API, HOST_IMG, useAppDispatch, useAppSelector } from '@/api'
 import { openAuthDialog } from '@/api/applicationSlice'
 import { login, logout } from '@/api/authSlice'
-import { useTranslation } from 'next-i18next'
-import Image from 'next/image'
-import Link from 'next/link'
-import React, { useEffect } from 'react'
-import { Button, Icon, Popout, cn } from 'simple-react-ui-kit'
-
 import { Menu } from '@/components/app-layout'
 import LanguageSwitcher from '@/components/language-switcher'
-
 import logo from '@/public/images/logo.png'
 import defaultAvatar from '@/public/images/no-avatar.png'
-
-import styles from './styles.module.sass'
 
 interface AppHeaderProps {
     fullWidth?: boolean

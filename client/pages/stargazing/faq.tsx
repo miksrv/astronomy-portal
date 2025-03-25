@@ -1,19 +1,19 @@
-import { SITE_LINK } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
+import React from 'react'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import Link from 'next/link'
-import React from 'react'
 import { Container } from 'simple-react-ui-kit'
 
+import { SITE_LINK } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 
-type StargazingFAQPageProps = {}
+type StargazingFAQPageProps = object
 
 const StargazingFAQPage: NextPage<StargazingFAQPageProps> = () => {
     const { t, i18n } = useTranslation()
@@ -76,9 +76,7 @@ const StargazingFAQPage: NextPage<StargazingFAQPageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (
-            context
-        ): Promise<GetServerSidePropsResult<StargazingFAQPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<StargazingFAQPageProps>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 

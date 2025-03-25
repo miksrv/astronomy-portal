@@ -1,21 +1,20 @@
-import { SITE_LINK } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
+import React, { useState } from 'react'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import Link from 'next/link'
-import React, { useState } from 'react'
-import Gallery from 'react-photo-gallery'
 import { Container, Icon } from 'simple-react-ui-kit'
 
+import { SITE_LINK } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
+import PhotoGallery from '@/components/photo-gallery'
 import PhotoLightbox from '@/components/photo-lightbox'
 import Team from '@/components/project-team'
-
 import photoAboutMe1 from '@/public/photos/about-me-1.jpeg'
 import photoAboutMe2 from '@/public/photos/about-me-2.jpeg'
 import photoAboutMe3 from '@/public/photos/about-me-3.jpeg'
@@ -37,12 +36,7 @@ import photoStargazing6 from '@/public/photos/stargazing-6.jpeg'
 import photoStargazing7 from '@/public/photos/stargazing-7.jpeg'
 import photoStargazing8 from '@/public/photos/stargazing-8.jpeg'
 
-const galleryAboutMe = [
-    photoAboutMe1,
-    photoAboutMe2,
-    photoAboutMe3,
-    photoAboutMe4
-]
+const galleryAboutMe = [photoAboutMe1, photoAboutMe2, photoAboutMe3, photoAboutMe4]
 
 const galleryObservatory = [
     photoObservatory3,
@@ -66,11 +60,7 @@ const galleryStargazing = [
     photoStargazing8
 ]
 
-const allPhotos = [
-    ...galleryAboutMe,
-    ...galleryStargazing,
-    ...galleryObservatory
-]
+const allPhotos = [...galleryAboutMe, ...galleryStargazing, ...galleryObservatory]
 
 const contributors1: string[] = [
     'Марина Станиславовна С.',
@@ -107,7 +97,7 @@ const contributors2: string[] = [
     'Владимир Уваров (Сетевой коммутатор D-Link)'
 ]
 
-type AboutPageProps = {}
+type AboutPageProps = object
 
 const AboutPage: NextPage<AboutPageProps> = () => {
     const { t, i18n } = useTranslation()
@@ -163,13 +153,11 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     </Link>
                     {t('about-page.intro')}
                 </p>
-                <Gallery
+
+                <PhotoGallery
                     photos={galleryAboutMe}
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
             </Container>
@@ -186,19 +174,13 @@ const AboutPage: NextPage<AboutPageProps> = () => {
 
             <Container style={{ marginBottom: '10px' }}>
                 <h2 style={{ marginTop: 0 }}>{t('about-page.team-title')}</h2>
-                <p style={{ marginTop: 0 }}>
-                    {t('about-page.team-description')}
-                </p>
+                <p style={{ marginTop: 0 }}>{t('about-page.team-description')}</p>
                 <Team />
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('about-page.project-title')}
-                </h2>
-                <p style={{ marginTop: 0 }}>
-                    {t('about-page.project-description')}
-                </p>
+                <h2 style={{ marginTop: 0 }}>{t('about-page.project-title')}</h2>
+                <p style={{ marginTop: 0 }}>{t('about-page.project-description')}</p>
                 <p>
                     {t('about-page.project-goal')}
                     <Link
@@ -219,27 +201,18 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     {'.'}
                 </p>
                 <p>{t('about-page.project-locations')}</p>
-                <Gallery
+                <PhotoGallery
                     photos={galleryStargazing}
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(
-                            galleryObservatory.length + photos.index
-                        )
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
                 <p>{t('about-page.project-lectures')}</p>
-                <p style={{ marginBottom: 0 }}>
-                    {t('about-page.project-sidewalk-astronomy')}
-                </p>
+                <p style={{ marginBottom: 0 }}>{t('about-page.project-sidewalk-astronomy')}</p>
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('about-page.observatory-title')}
-                </h2>
+                <h2 style={{ marginTop: 0 }}>{t('about-page.observatory-title')}</h2>
                 <p style={{ marginTop: 0 }}>
                     {t('about-page.observatory-intro')}
                     <Link
@@ -250,13 +223,10 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     </Link>
                     {'.'}
                 </p>
-                <Gallery
+                <PhotoGallery
                     photos={galleryObservatory}
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
                 <p>
@@ -281,17 +251,11 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     </Link>
                     {t('about-page.observatory-photos-2')}
                 </p>
-                <p style={{ marginBottom: 0 }}>
-                    {t('about-page.observatory-conclusion')}
-                </p>
+                <p style={{ marginBottom: 0 }}>{t('about-page.observatory-conclusion')}</p>
             </Container>
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('about-page.your-help-title')}
-                </h2>
-                <p style={{ marginTop: 0 }}>
-                    {t('about-page.your-help-intro')}
-                </p>
+                <h2 style={{ marginTop: 0 }}>{t('about-page.your-help-title')}</h2>
+                <p style={{ marginTop: 0 }}>{t('about-page.your-help-intro')}</p>
                 <p>{t('about-page.your-help-description')}</p>
                 <h3>{t('about-page.your-help-financial-support')}</h3>
                 <ul>
@@ -305,9 +269,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                         <li key={name}>{name}</li>
                     ))}
                 </ul>
-                <p style={{ margin: 0 }}>
-                    {t('about-page.your-help-conclusion')}
-                </p>
+                <p style={{ margin: 0 }}>{t('about-page.your-help-conclusion')}</p>
             </Container>
 
             <PhotoLightbox

@@ -1,11 +1,11 @@
-import packageInfo from '@/package.json'
-import { formatDate } from '@/tools/helpers'
-import Image from 'next/image'
 import React, { forwardRef } from 'react'
-
-import { update } from '@/update'
+import Image from 'next/image'
 
 import styles from './styles.module.sass'
+
+import packageInfo from '@/package.json'
+import { formatDate } from '@/tools/helpers'
+import { update } from '@/update'
 
 const AppFooter = forwardRef<HTMLDivElement>((props, ref) => (
     <footer

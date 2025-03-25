@@ -6,6 +6,6 @@ export interface ResList {
 }
 
 /* Set */
-export interface ResSet extends ApiModel.Author {}
+export type ResSet = ApiModel.Author
 
-export interface ReqSet extends ApiModel.Author {}
+export type ReqSet = ApiModel.Author

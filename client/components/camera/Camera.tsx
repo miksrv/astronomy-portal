@@ -1,10 +1,10 @@
-import { useTranslation } from 'next-i18next'
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'next-i18next'
 import { Container, Message, Spinner } from 'simple-react-ui-kit'
 
-import PhotoLightbox from '@/components/photo-lightbox'
-
 import styles from './styles.module.sass'
+
+import PhotoLightbox from '@/components/photo-lightbox'
 
 interface CameraProps {
     cameraURL?: string
@@ -22,7 +22,9 @@ const Camera: React.FC<CameraProps> = ({ cameraURL, interval }) => {
     const [lightbox, setLightbox] = useState<boolean>(false)
 
     useEffect(() => {
-        if (!cameraURL) return
+        if (!cameraURL) {
+            return
+        }
 
         const updateImage = () => {
             setCameraSrc(`${cameraURL}?r=${Date.now()}`)

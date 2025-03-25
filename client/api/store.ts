@@ -1,11 +1,12 @@
-import { APIMeteo } from '@/api/apiMeteo'
-import { configureStore } from '@reduxjs/toolkit'
-import { createWrapper } from 'next-redux-wrapper'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
+import { createWrapper } from 'next-redux-wrapper'
 
 import { API } from './api'
 import applicationSlice from './applicationSlice'
 import authSlice from './authSlice'
+
+import { APIMeteo } from '@/api/apiMeteo'
+import { configureStore } from '@reduxjs/toolkit'
 
 export const reducer = {
     application: applicationSlice,

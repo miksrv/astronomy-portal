@@ -1,13 +1,14 @@
-import { ApiModel } from '@/api'
-import { getTimeFromSec } from '@/tools/helpers'
-import { createMediumPhotoUrl, createPhotoTitle } from '@/tools/photos'
-import { useTranslation } from 'next-i18next'
+import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
+import { useTranslation } from 'next-i18next'
 import { Container } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
+
+import { ApiModel } from '@/api'
+import { getTimeFromSec } from '@/tools/helpers'
+import { createMediumPhotoUrl, createPhotoTitle } from '@/tools/photos'
 
 interface PhotoGridProps {
     photosList?: ApiModel.Photo[]
@@ -35,11 +36,7 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ photosList }) => {
                         <h4>{createPhotoTitle(photo, t)}</h4>
                         <div className={styles.info}>
                             <div>
-                                {t('exposure')}:{' '}
-                                {getTimeFromSec(
-                                    photo?.statistic?.exposure || 0,
-                                    true
-                                )}
+                                {t('exposure')}: {getTimeFromSec(photo?.statistic?.exposure || 0, true)}
                             </div>
                             <div>
                                 {t('frames')}: {photo?.statistic?.frames || 0}

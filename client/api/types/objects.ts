@@ -1,6 +1,6 @@
 import { ApiModel } from '@/api'
 
-export interface Request extends ApiModel.Object {}
+export type Request = ApiModel.Object
 
 export interface Response {
     count?: number

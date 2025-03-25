@@ -40,9 +40,7 @@ export const colors = {
     yellow: ['#ffeb3b', '#fff176'] // Yellow
 }
 
-export const getFilterColorType = (
-    filter?: ApiModel.FilterTypes
-): keyof typeof colors | undefined => {
+export const getFilterColorType = (filter?: ApiModel.FilterTypes): keyof typeof colors | undefined => {
     switch (filter) {
         case 'L':
             return 'grey'
@@ -65,9 +63,7 @@ export const getFilterColorType = (
     }
 }
 
-export const getSensorColorType = (
-    sensor?: keyof ApiModel.Weather
-): keyof typeof colors => {
+export const getSensorColorType = (sensor?: keyof ApiModel.Weather): keyof typeof colors => {
     switch (sensor) {
         case 'temperature':
             return 'red'
@@ -108,9 +104,7 @@ export const getSensorColor = (sensor?: keyof ApiModel.Weather): string[] => {
     return colors[sensorColor]
 }
 
-export const getFilterColor = (
-    filter?: ApiModel.FilterTypes
-): string | undefined => {
+export const getFilterColor = (filter?: ApiModel.FilterTypes): string | undefined => {
     const filterColor = getFilterColorType(filter)
 
     if (filterColor) {

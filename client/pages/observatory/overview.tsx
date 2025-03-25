@@ -1,21 +1,20 @@
-import { API, ApiModel, SITE_LINK } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
+import React, { useState } from 'react'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import Link from 'next/link'
-import React, { useState } from 'react'
-import Gallery from 'react-photo-gallery'
 import { Button, Container } from 'simple-react-ui-kit'
 
+import { API, ApiModel, SITE_LINK } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import ObjectPhotoTable from '@/components/object-photos-table'
+import PhotoGallery from '@/components/photo-gallery'
 import PhotoLightbox from '@/components/photo-lightbox'
-
 import photoObservatory1 from '@/public/photos/observatory-1.jpeg'
 import photoObservatory2 from '@/public/photos/observatory-2.jpeg'
 import photoObservatory3 from '@/public/photos/observatory-3.jpeg'
@@ -28,35 +27,19 @@ import photoObservatory10 from '@/public/photos/observatory-10.jpeg'
 import photoObservatory11 from '@/public/photos/observatory-11.jpeg'
 import photoObservatory12 from '@/public/photos/observatory-12.jpeg'
 
-const galleryObservatory = [
-    photoObservatory3,
-    photoObservatory7,
-    photoObservatory5,
-    photoObservatory6
-]
+const galleryObservatory = [photoObservatory3, photoObservatory7, photoObservatory5, photoObservatory6]
 
-const galleryEquipment = [
-    photoObservatory9,
-    photoObservatory10,
-    photoObservatory11,
-    photoObservatory12
-]
+const galleryEquipment = [photoObservatory9, photoObservatory10, photoObservatory11, photoObservatory12]
 
 const galleryControl = [photoObservatory1, photoObservatory2, photoObservatory4]
 
-const allPhotos = [
-    ...galleryObservatory,
-    ...galleryEquipment,
-    ...galleryControl
-]
+const allPhotos = [...galleryObservatory, ...galleryEquipment, ...galleryControl]
 
 interface ObservatoryOverviewPageProps {
     photosList: ApiModel.Photo[]
 }
 
-const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({
-    photosList
-}) => {
+const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photosList }) => {
     const { t, i18n } = useTranslation()
 
     const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
@@ -105,31 +88,22 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({
             <p>{t('observatory-overview-page.intro')}</p>
 
             <Container style={{ marginBottom: '10px' }}>
-                <p style={{ marginTop: 0 }}>
-                    {t('observatory-overview-page.description-1')}
-                </p>
+                <p style={{ marginTop: 0 }}>{t('observatory-overview-page.description-1')}</p>
                 <p>{t('observatory-overview-page.description-2')}</p>
 
-                <Gallery
+                <PhotoGallery
                     photos={galleryObservatory}
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
 
                 <p>{t('observatory-overview-page.description-3')}</p>
-                <p style={{ marginBottom: 0 }}>
-                    {t('observatory-overview-page.description-4')}
-                </p>
+                <p style={{ marginBottom: 0 }}>{t('observatory-overview-page.description-4')}</p>
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('observatory-overview-page.equipment-title')}
-                </h2>
+                <h2 style={{ marginTop: 0 }}>{t('observatory-overview-page.equipment-title')}</h2>
                 <p>{t('observatory-overview-page.equipment-description')}</p>
                 <ul>
                     {(
@@ -143,44 +117,24 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({
                         </li>
                     ))}
                 </ul>
-                <Gallery
+                <PhotoGallery
                     photos={galleryEquipment}
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('observatory-overview-page.operating-principle-title')}
-                </h2>
-                <p>
-                    {t(
-                        'observatory-overview-page.operating-principle-description-1'
-                    )}
-                </p>
-                <p>
-                    {t(
-                        'observatory-overview-page.operating-principle-description-2'
-                    )}
-                </p>
-                <p>
-                    {t(
-                        'observatory-overview-page.operating-principle-description-3'
-                    )}
-                </p>
+                <h2 style={{ marginTop: 0 }}>{t('observatory-overview-page.operating-principle-title')}</h2>
+                <p>{t('observatory-overview-page.operating-principle-description-1')}</p>
+                <p>{t('observatory-overview-page.operating-principle-description-2')}</p>
+                <p>{t('observatory-overview-page.operating-principle-description-3')}</p>
                 <ul>
                     {(
-                        t(
-                            'observatory-overview-page.operating-principle-list',
-                            {
-                                returnObjects: true
-                            }
-                        ) as any[]
+                        t('observatory-overview-page.operating-principle-list', {
+                            returnObjects: true
+                        }) as any[]
                     ).map((item: any, index: number) => (
                         <li key={index}>
                             <h3>{item.title}</h3>
@@ -188,44 +142,31 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({
                         </li>
                     ))}
                 </ul>
-                <p>
-                    {t(
-                        'observatory-overview-page.operating-principle-description-4'
-                    )}
-                </p>
-                <Gallery
+                <p>{t('observatory-overview-page.operating-principle-description-4')}</p>
+                <PhotoGallery
                     photos={galleryControl}
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('observatory-overview-page.photos-and-data-title')}
-                </h2>
+                <h2 style={{ marginTop: 0 }}>{t('observatory-overview-page.photos-and-data-title')}</h2>
                 <p>
                     {t('observatory-overview-page.photos-and-data-part-1')}{' '}
                     <Link
                         href={'/photos'}
                         title={t('astrophoto')}
                     >
-                        {t(
-                            'observatory-overview-page.photos-and-data-part-photos'
-                        )}
+                        {t('observatory-overview-page.photos-and-data-part-photos')}
                     </Link>{' '}
                     {t('observatory-overview-page.photos-and-data-part-2')}{' '}
                     <Link
                         href={'/objects'}
                         title={t('objects')}
                     >
-                        {t(
-                            'observatory-overview-page.photos-and-data-part-objects'
-                        )}
+                        {t('observatory-overview-page.photos-and-data-part-objects')}
                     </Link>{' '}
                     {t('observatory-overview-page.photos-and-data-part-3')}
                 </p>
@@ -263,9 +204,7 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (
-            context
-        ): Promise<GetServerSidePropsResult<ObservatoryOverviewPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<ObservatoryOverviewPageProps>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 

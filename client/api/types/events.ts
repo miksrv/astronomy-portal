@@ -4,9 +4,9 @@ export interface ResList {
     items?: ApiModel.Event[]
 }
 
-export interface ResItem extends ApiModel.Event {}
+export type ResItem = ApiModel.Event
 
-export interface ResponsePhoto extends ApiModel.EventPhoto {}
+export type ResponsePhoto = ApiModel.EventPhoto
 
 export interface RequestPhotoList {
     eventId?: string

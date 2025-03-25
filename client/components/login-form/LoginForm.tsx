@@ -1,19 +1,19 @@
 'use client'
 
-import { API, ApiType } from '@/api'
-import { LOCAL_STORAGE } from '@/tools/constants'
-import useLocalStorage from '@/tools/hooks/useLocalStorage'
-import { useTranslation } from 'next-i18next'
+import React, { useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import React, { useEffect } from 'react'
+import { useTranslation } from 'next-i18next'
 import { Button } from 'simple-react-ui-kit'
 
+import styles from './styles.module.sass'
+
+import { API, ApiType } from '@/api'
 import googleLogo from '@/public/images/google-logo.png'
 import vkLogo from '@/public/images/vk-logo.png'
 import yandexLogo from '@/public/images/yandex-logo.png'
-
-import styles from './styles.module.sass'
+import { LOCAL_STORAGE } from '@/tools/constants'
+import useLocalStorage from '@/tools/hooks/useLocalStorage'
 
 const LoginForm: React.FC = () => {
     const { t } = useTranslation()
@@ -34,9 +34,7 @@ const LoginForm: React.FC = () => {
         }
     ] = API.useAuthLoginServiceMutation()
 
-    const handleLoginServiceButton = (
-        service: ApiType.Auth.AuthServiceType
-    ) => {
+    const handleLoginServiceButton = (service: ApiType.Auth.AuthServiceType) => {
         setReturnPath(router.asPath)
         authLoginService({ service })
     }

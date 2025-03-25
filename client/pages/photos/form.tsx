@@ -1,22 +1,20 @@
-import { API, ApiModel, useAppSelector } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
+import React, { useEffect, useState } from 'react'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { useRouter } from 'next/router'
-import React, { useEffect, useState } from 'react'
 import { Message } from 'simple-react-ui-kit'
 
+import { API, ApiModel, useAppSelector } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
-import AstroPhotoForm, {
-    AstroPhotoFormType
-} from '@/components/astro-photo-form'
+import AstroPhotoForm, { AstroPhotoFormType } from '@/components/astro-photo-form'
 
-type PhotoFormPageProps = {}
+type PhotoFormPageProps = object
 
 // TODO: Добавить проерку на редактирование фото - сохранять только если есть изменения
 const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
@@ -38,15 +36,8 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
         skip: !id
     })
 
-    const [
-        createPhoto,
-        {
-            data: createdData,
-            error: createError,
-            isLoading: createLoading,
-            isSuccess: createSuccess
-        }
-    ] = API.usePhotosPostMutation()
+    const [createPhoto, { data: createdData, error: createError, isLoading: createLoading, isSuccess: createSuccess }] =
+        API.usePhotosPostMutation()
 
     const [
         updatePhoto,
@@ -89,9 +80,7 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
         router.back()
     }
 
-    const currentPageTitle = photoData?.id
-        ? 'Редактирование фотографии'
-        : 'Добавление фотографии'
+    const currentPageTitle = photoData?.id ? 'Редактирование фотографии' : 'Добавление фотографии'
 
     useEffect(() => {
         if (userRole !== 'admin') {
@@ -140,32 +129,19 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
                 ]}
             />
 
-            {(createError ||
-                updateError ||
-                createSuccess ||
-                updateSuccess ||
-                uploadSuccess) && (
+            {(createError || updateError || createSuccess || updateSuccess || uploadSuccess) && (
                 <Message
                     style={{ marginBottom: '10px' }}
                     type={createError || updateError ? 'error' : 'success'}
                 >
-                    {(createError || updateError) && (
-                        <div>{'Ошибка сохранения'}</div>
-                    )}
-                    {(createSuccess || updateSuccess) && (
-                        <div>{'Фотография сохранена'}</div>
-                    )}
+                    {(createError || updateError) && <div>{'Ошибка сохранения'}</div>}
+                    {(createSuccess || updateSuccess) && <div>{'Фотография сохранена'}</div>}
                     {uploadSuccess && <div>{'Фотография загружена'}</div>}
                 </Message>
             )}
 
             <AstroPhotoForm
-                disabled={
-                    photoLoading ||
-                    createLoading ||
-                    updateLoading ||
-                    uploadLoading
-                }
+                disabled={photoLoading || createLoading || updateLoading || uploadLoading}
                 initialData={photoData}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
@@ -178,9 +154,7 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (
-            context
-        ): Promise<GetServerSidePropsResult<PhotoFormPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<PhotoFormPageProps>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 

@@ -1,14 +1,14 @@
+import React, { useMemo } from 'react'
+import { useTranslation } from 'next-i18next'
+import { ColumnProps, Container, Table } from 'simple-react-ui-kit'
+
+import styles from './styles.module.sass'
+
 import { ApiModel } from '@/api'
+import MoonPhaseIcon from '@/components/moon-phase-icon'
 import { getFilterColor } from '@/tools/colors'
 import { formatDate } from '@/tools/helpers'
 import { getMoonIllumination } from '@/tools/moon'
-import { useTranslation } from 'next-i18next'
-import React, { useMemo } from 'react'
-import { ColumnProps, Container, Table } from 'simple-react-ui-kit'
-
-import MoonPhaseIcon from '@/components/moon-phase-icon'
-
-import styles from './styles.module.sass'
 
 export type FlattenedFile = Omit<ApiModel.File, 'date'> & {
     date?: string
@@ -20,10 +20,7 @@ interface ObjectFilesTableProps {
     loading?: boolean
 }
 
-const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({
-    filesList,
-    loading
-}) => {
+const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({ filesList, loading }) => {
     const { t } = useTranslation()
 
     const flattenedFilesList: FlattenedFile[] = useMemo(
@@ -33,10 +30,8 @@ const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({
                     ({
                         ...file,
                         date: file.date?.date,
-                        moon: file.date?.date
-                            ? getMoonIllumination(new Date(file.date?.date))
-                            : undefined
-                    } as FlattenedFile)
+                        moon: file.date?.date ? getMoonIllumination(new Date(file.date?.date)) : undefined
+                    }) as FlattenedFile
             ) || [],
         [filesList]
     )
@@ -88,8 +83,7 @@ const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({
         },
         {
             accessor: 'filter',
-            background: (data) =>
-                data ? getFilterColor(data as ApiModel.FilterTypes) : undefined,
+            background: (data) => (data ? getFilterColor(data as ApiModel.FilterTypes) : undefined),
             className: styles.cellCenter,
             header: t('filter'),
             isSortable: true

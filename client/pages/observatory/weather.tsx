@@ -1,19 +1,19 @@
-import { APIMeteo } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import { getDateTimeFormat } from '@/tools/dates'
+import React, { useMemo } from 'react'
 import dayjs from 'dayjs'
 import type { GetServerSidePropsResult, NextPage } from 'next'
+import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import Link from 'next/link'
-import React, { useMemo } from 'react'
 import { Container } from 'simple-react-ui-kit'
 
+import { APIMeteo } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import WidgetChart from '@/components/widget-chart'
+import { getDateTimeFormat } from '@/tools/dates'
 
 type HistoryPageProps = object
 
@@ -23,11 +23,10 @@ const HistoryPage: NextPage<HistoryPageProps> = () => {
     const startDate = dayjs().startOf('days').format('YYYY-MM-DD')
     const endDate = dayjs().startOf('days').add(1, 'day').format('YYYY-MM-DD')
 
-    const { data: history, isLoading: historyLoading } =
-        APIMeteo.useGetHistoryQuery({
-            start_date: startDate,
-            end_date: endDate
-        })
+    const { data: history, isLoading: historyLoading } = APIMeteo.useGetHistoryQuery({
+        start_date: startDate,
+        end_date: endDate
+    })
 
     const dateFormat = useMemo(
         () => getDateTimeFormat(startDate, endDate, i18n.language === 'en'),
@@ -94,9 +93,7 @@ const HistoryPage: NextPage<HistoryPageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (
-            context
-        ): Promise<GetServerSidePropsResult<HistoryPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<HistoryPageProps>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 

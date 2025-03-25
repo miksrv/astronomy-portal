@@ -1,26 +1,26 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import Markdown from 'react-markdown'
+import { GetServerSidePropsResult, NextPage } from 'next'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useTranslation } from 'next-i18next'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { NextSeo } from 'next-seo'
+import { Button, Container, Icon } from 'simple-react-ui-kit'
+
 import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
-import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/tools/eventPhotos'
-import { formatDate, sliceText } from '@/tools/helpers'
-import { removeMarkdown } from '@/tools/strings'
-import { GetServerSidePropsResult, NextPage } from 'next'
-import { useTranslation } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
-import Image from 'next/image'
-import Link from 'next/link'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import Markdown from 'react-markdown'
-import Gallery from 'react-photo-gallery'
-import { Button, Container, Icon } from 'simple-react-ui-kit'
-
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 import EventPhotoUploader from '@/components/event-photo-uploader/EventPhotoUploader'
+import PhotoGallery from '@/components/photo-gallery'
 import PhotoLightbox from '@/components/photo-lightbox'
+import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/tools/eventPhotos'
+import { formatDate, sliceText } from '@/tools/helpers'
+import { removeMarkdown } from '@/tools/strings'
 
 interface StargazingItemPageProps {
     eventId: string
@@ -28,18 +28,14 @@ interface StargazingItemPageProps {
     eventsList: ApiModel.Event[] | null
 }
 
-const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
-    eventId,
-    event,
-    eventsList
-}) => {
+const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event, eventsList }) => {
     const { t, i18n } = useTranslation()
 
     const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
 
     const user = useAppSelector((state) => state.auth.user)
 
-    const inputFileRef = useRef<HTMLInputElement>()
+    const inputFileRef = useRef<HTMLInputElement>(undefined)
 
     const [localPhotos, setLocalPhotos] = useState<ApiModel.EventPhoto[]>([])
     const [uploadingPhotos, setUploadingPhotos] = useState<string[]>()
@@ -62,12 +58,9 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
         }
 
         const previousEvent =
-            !!sortedEvents?.length && currentIndex < sortedEvents?.length - 1
-                ? sortedEvents?.[currentIndex + 1]
-                : null
+            !!sortedEvents?.length && currentIndex < sortedEvents?.length - 1 ? sortedEvents?.[currentIndex + 1] : null
 
-        const nextEvent =
-            currentIndex > 0 ? sortedEvents?.[currentIndex - 1] : null
+        const nextEvent = currentIndex > 0 ? sortedEvents?.[currentIndex - 1] : null
 
         return { previousEvent, nextEvent }
     }, [eventsList, eventId])
@@ -99,10 +92,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
         <AppLayout>
             <NextSeo
                 title={title}
-                description={sliceText(
-                    removeMarkdown(event?.content || ''),
-                    300
-                )}
+                description={sliceText(removeMarkdown(event?.content || ''), 300)}
                 canonical={`${canonicalUrl}stargazing/${event?.id}`}
                 openGraph={{
                     images: [
@@ -158,13 +148,11 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                         disabled={!!uploadingPhotos?.length}
                         style={{ marginBottom: 20 }}
                     >
-                        {!uploadingPhotos?.length
-                            ? 'Загрузить фотографии'
-                            : `Загрузка ${uploadingPhotos?.length} фото`}
+                        {!uploadingPhotos?.length ? 'Загрузить фотографии' : `Загрузка ${uploadingPhotos?.length} фото`}
                     </Button>
                 )}
 
-                <Gallery
+                <PhotoGallery
                     photos={
                         localPhotos?.map((photo, index) => ({
                             height: photo.height,
@@ -173,11 +161,8 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                             alt: `${photo?.title} (${t('photo')} ${index + 1})`
                         })) || []
                     }
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
 
@@ -213,10 +198,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                         <div className={'linkName'}>
                             <div>{adjacentEvents?.previousEvent?.title}</div>
                             <div className={'date'}>
-                                {formatDate(
-                                    adjacentEvents?.previousEvent?.date?.date,
-                                    'D MMMM YYYY'
-                                )}
+                                {formatDate(adjacentEvents?.previousEvent?.date?.date, 'D MMMM YYYY')}
                             </div>
                         </div>
                     </Link>
@@ -230,10 +212,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
                         <div className={'linkName'}>
                             <div>{adjacentEvents?.nextEvent?.title}</div>
                             <div className={'date'}>
-                                {formatDate(
-                                    adjacentEvents?.nextEvent?.date?.date,
-                                    'D MMMM YYYY'
-                                )}
+                                {formatDate(adjacentEvents?.nextEvent?.date?.date, 'D MMMM YYYY')}
                             </div>
                         </div>
                         <Icon name={'KeyboardRight'} />
@@ -248,9 +227,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (
-            context
-        ): Promise<GetServerSidePropsResult<StargazingItemPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<StargazingItemPageProps>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
             const eventId = context.params?.name
@@ -261,13 +238,9 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             store.dispatch(setLocale(locale))
 
-            const { data: eventsData } = await store.dispatch(
-                API.endpoints?.eventGetList.initiate()
-            )
+            const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
 
-            const { data, isError } = await store.dispatch(
-                API.endpoints?.eventGetItem.initiate(eventId)
-            )
+            const { data, isError } = await store.dispatch(API.endpoints?.eventGetItem.initiate(eventId))
 
             if (isError) {
                 return { notFound: true }

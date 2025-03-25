@@ -1,33 +1,27 @@
-import { SITE_LINK } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
+import React, { useState } from 'react'
 import { GetServerSidePropsResult, NextPage } from 'next'
+import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import Link from 'next/link'
-import React, { useState } from 'react'
-import Gallery from 'react-photo-gallery'
 import { Container } from 'simple-react-ui-kit'
 
+import { SITE_LINK } from '@/api'
+import { setLocale } from '@/api/applicationSlice'
+import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
+import PhotoGallery from '@/components/photo-gallery'
 import PhotoLightbox from '@/components/photo-lightbox'
-
 import photoSidewalk1 from '@/public/photos/sidewalk-asrtronomy-1.jpeg'
 import photoSidewalk2 from '@/public/photos/sidewalk-asrtronomy-2.jpeg'
 import photoSidewalk3 from '@/public/photos/sidewalk-asrtronomy-3.jpeg'
 import photoSidewalk4 from '@/public/photos/sidewalk-asrtronomy-4.jpeg'
 
-const gallerySidewalk = [
-    photoSidewalk1,
-    photoSidewalk2,
-    photoSidewalk3,
-    photoSidewalk4
-]
+const gallerySidewalk = [photoSidewalk1, photoSidewalk2, photoSidewalk3, photoSidewalk4]
 
-type StargazingWherePageProps = {}
+type StargazingWherePageProps = object
 
 const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
     const { t, i18n } = useTranslation()
@@ -77,9 +71,7 @@ const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
             />
 
             <Container style={{ marginBottom: '10px' }}>
-                <p style={{ marginTop: 0 }}>
-                    {t('stargazing-where-page.intro')}
-                </p>
+                <p style={{ marginTop: 0 }}>{t('stargazing-where-page.intro')}</p>
                 <p>
                     {t('stargazing-where-page.announcement-1')}
                     <Link
@@ -93,21 +85,16 @@ const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
                     </Link>
                     {t('stargazing-where-page.announcement-2')}
                 </p>
-                <Gallery
+                <PhotoGallery
                     photos={gallerySidewalk}
-                    columns={4}
-                    direction={'row'}
-                    targetRowHeight={200}
-                    onClick={(event, photos) => {
-                        handlePhotoClick(gallerySidewalk.length + photos.index)
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
                     }}
                 />
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('stargazing-where-page.what-you-can-see-title')}
-                </h2>
+                <h2 style={{ marginTop: 0 }}>{t('stargazing-where-page.what-you-can-see-title')}</h2>
                 <p>{t('stargazing-where-page.what-you-can-see-description')}</p>
                 <ul>
                     <li>{t('stargazing-where-page.what-you-can-see-1')}</li>
@@ -115,20 +102,14 @@ const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
                     <li>{t('stargazing-where-page.what-you-can-see-3')}</li>
                     <li>{t('stargazing-where-page.what-you-can-see-4')}</li>
                 </ul>
-                <p style={{ marginBottom: 0 }}>
-                    {t('stargazing-where-page.what-you-can-see-conclusion')}
-                </p>
+                <p style={{ marginBottom: 0 }}>{t('stargazing-where-page.what-you-can-see-conclusion')}</p>
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('stargazing-where-page.want-to-see-more')}
-                </h2>
+                <h2 style={{ marginTop: 0 }}>{t('stargazing-where-page.want-to-see-more')}</h2>
                 <p>{t('stargazing-where-page.want-to-see-description-1')}</p>
                 <p>{t('stargazing-where-page.want-to-see-description-2')}</p>
-                <p style={{ marginBottom: 0 }}>
-                    {t('stargazing-where-page.want-to-see-description-3')}
-                </p>
+                <p style={{ marginBottom: 0 }}>{t('stargazing-where-page.want-to-see-description-3')}</p>
             </Container>
 
             <PhotoLightbox
@@ -151,9 +132,7 @@ const StargazingWherePage: NextPage<StargazingWherePageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (
-            context
-        ): Promise<GetServerSidePropsResult<StargazingWherePageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<StargazingWherePageProps>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 

@@ -202,18 +202,7 @@ export const defaultConfig = {
             ves: { fill: '#cccccc', letter: 'Ma', symbol: '\u26b6' }
         },
         // List of all objects to show
-        which: [
-            'sol',
-            'mer',
-            'ven',
-            'ter',
-            'lun',
-            'mar',
-            'jup',
-            'sat',
-            'ura',
-            'nep'
-        ]
+        which: ['sol', 'mer', 'ven', 'ter', 'lun', 'mar', 'jup', 'sat', 'ura', 'nep']
         // or desig = 3-letter designation
     },
     // height is determined by projection

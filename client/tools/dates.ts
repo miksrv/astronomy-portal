@@ -7,16 +7,10 @@ dayjs.extend(timezone)
 
 export const TIME_ZONE = 'Asia/Yekaterinburg'
 
-export const formatDate = (
-    date?: string | Date | Dayjs,
-    format?: string
-): string | undefined =>
+export const formatDate = (date?: string | Date | Dayjs, format?: string): string | undefined =>
     date ? dayjs(date).format(format ?? 'DD.MM.YYYY, HH:mm') : undefined
 
-export const formatDateFromUTC = (
-    utc?: number,
-    format: string = 'D MMMM YYYY, HH:mm'
-): string =>
+export const formatDateFromUTC = (utc?: number, format: string = 'D MMMM YYYY, HH:mm'): string =>
     utc
         ? dayjs
               .unix(utc / 1000)
@@ -31,11 +25,7 @@ export const formatDateFromUTC = (
  * @param endDate
  * @param enLocale
  */
-export const getDateTimeFormat = (
-    startDate?: string,
-    endDate?: string,
-    enLocale?: boolean
-): string => {
+export const getDateTimeFormat = (startDate?: string, endDate?: string, enLocale?: boolean): string => {
     const start = dayjs(startDate)
     const end = dayjs(endDate)
 

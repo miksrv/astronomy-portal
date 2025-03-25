@@ -1,20 +1,16 @@
+import React, { useMemo } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useTranslation } from 'next-i18next'
+import { ColumnProps, Container, ContainerProps, Table } from 'simple-react-ui-kit'
+
+import styles from './styles.module.sass'
+
 import { ApiModel } from '@/api'
 import { getFilterColor } from '@/tools/colors'
 import { formatDate } from '@/tools/dates'
 import { formatSecondsToExposure } from '@/tools/helpers'
 import { createPhotoTitle, createSmallPhotoUrl } from '@/tools/photos'
-import { useTranslation } from 'next-i18next'
-import Image from 'next/image'
-import Link from 'next/link'
-import React, { useMemo } from 'react'
-import {
-    ColumnProps,
-    Container,
-    ContainerProps,
-    Table
-} from 'simple-react-ui-kit'
-
-import styles from './styles.module.sass'
 
 interface ObjectPhotoTableProps extends ContainerProps {
     photosList?: ApiModel.Photo[]
@@ -38,17 +34,10 @@ export type FlattenedPhoto = {
     nFilterExposure?: number
 }
 
-const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({
-    photosList,
-    currentPhotoId,
-    ...props
-}) => {
+const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, currentPhotoId, ...props }) => {
     const { t } = useTranslation()
 
-    const flattenedPhotos = useMemo(
-        () => flattenPhotos(photosList),
-        [photosList]
-    )
+    const flattenedPhotos = useMemo(() => flattenPhotos(photosList), [photosList])
 
     const tableColumns: ColumnProps<FlattenedPhoto>[] = useMemo(
         () => [
@@ -59,15 +48,8 @@ const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({
                     data ? (
                         <Link
                             href={`/photos/${row[i].id}`}
-                            title={createPhotoTitle(
-                                row[i] as ApiModel.Photo,
-                                t
-                            )}
-                            className={
-                                currentPhotoId === row[i].id
-                                    ? styles.active
-                                    : ''
-                            }
+                            title={createPhotoTitle(row[i] as ApiModel.Photo, t)}
+                            className={currentPhotoId === row[i].id ? styles.active : ''}
                         >
                             <Image
                                 src={data as string}
@@ -97,104 +79,79 @@ const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({
             {
                 accessor: 'exposure',
                 className: styles.cellCenter,
-                formatter: (data) =>
-                    data ? formatSecondsToExposure(data as number) : '',
+                formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
                 header: t('exposure'),
                 isSortable: true
             },
             {
                 accessor: 'lFilterExposure',
-                hidden: !flattenedPhotos?.filter(
-                    ({ lFilterExposure }) => !!lFilterExposure
-                )?.length,
+                hidden: !flattenedPhotos?.filter(({ lFilterExposure }) => !!lFilterExposure)?.length,
                 background: (data) => (data ? getFilterColor('L') : undefined),
                 className: styles.cellCenter,
-                formatter: (data) =>
-                    data ? formatSecondsToExposure(data as number) : '',
+                formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
                 header: 'L',
                 isSortable: true
             },
             {
                 accessor: 'rFilterExposure',
-                hidden: !flattenedPhotos?.filter(
-                    ({ rFilterExposure }) => !!rFilterExposure
-                )?.length,
+                hidden: !flattenedPhotos?.filter(({ rFilterExposure }) => !!rFilterExposure)?.length,
                 background: (data) => (data ? getFilterColor('R') : undefined),
                 className: styles.cellCenter,
-                formatter: (data) =>
-                    data ? formatSecondsToExposure(data as number) : '',
+                formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
                 header: 'R',
                 isSortable: true
             },
             {
                 accessor: 'gFilterExposure',
-                hidden: !flattenedPhotos?.filter(
-                    ({ gFilterExposure }) => !!gFilterExposure
-                )?.length,
+                hidden: !flattenedPhotos?.filter(({ gFilterExposure }) => !!gFilterExposure)?.length,
                 background: (data) => (data ? getFilterColor('G') : undefined),
                 className: styles.cellCenter,
-                formatter: (data) =>
-                    data ? formatSecondsToExposure(data as number) : '',
+                formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
                 header: 'G',
                 isSortable: true
             },
             {
                 accessor: 'bFilterExposure',
-                hidden: !flattenedPhotos?.filter(
-                    ({ bFilterExposure }) => !!bFilterExposure
-                )?.length,
+                hidden: !flattenedPhotos?.filter(({ bFilterExposure }) => !!bFilterExposure)?.length,
                 background: (data) => (data ? getFilterColor('B') : undefined),
                 className: styles.cellCenter,
-                formatter: (data) =>
-                    data ? formatSecondsToExposure(data as number) : '',
+                formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
                 header: 'B',
                 isSortable: true
             },
             {
                 accessor: 'hFilterExposure',
-                hidden: !flattenedPhotos?.filter(
-                    ({ hFilterExposure }) => !!hFilterExposure
-                )?.length,
+                hidden: !flattenedPhotos?.filter(({ hFilterExposure }) => !!hFilterExposure)?.length,
                 background: (data) => (data ? getFilterColor('H') : undefined),
                 className: styles.cellCenter,
-                formatter: (data) =>
-                    data ? formatSecondsToExposure(data as number) : '',
+                formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
                 header: 'H',
                 isSortable: true
             },
             {
                 accessor: 'oFilterExposure',
-                hidden: !flattenedPhotos?.filter(
-                    ({ oFilterExposure }) => !!oFilterExposure
-                )?.length,
+                hidden: !flattenedPhotos?.filter(({ oFilterExposure }) => !!oFilterExposure)?.length,
                 background: (data) => (data ? getFilterColor('O') : undefined),
                 className: styles.cellCenter,
-                formatter: (data) =>
-                    data ? formatSecondsToExposure(data as number) : '',
+                formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
                 header: 'O',
                 isSortable: true
             },
             {
                 accessor: 'sFilterExposure',
-                hidden: !flattenedPhotos?.filter(
-                    ({ sFilterExposure }) => !!sFilterExposure
-                )?.length,
+                hidden: !flattenedPhotos?.filter(({ sFilterExposure }) => !!sFilterExposure)?.length,
                 background: (data) => (data ? getFilterColor('S') : undefined),
                 className: styles.cellCenter,
-                formatter: (data) =>
-                    data ? formatSecondsToExposure(data as number) : '',
+                formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
                 header: 'S',
                 isSortable: true
             },
             {
                 accessor: 'nFilterExposure',
-                hidden: !flattenedPhotos?.filter(
-                    ({ nFilterExposure }) => !!nFilterExposure
-                )?.length,
+                hidden: !flattenedPhotos?.filter(({ nFilterExposure }) => !!nFilterExposure)?.length,
                 background: (data) => (data ? getFilterColor('N') : undefined),
                 className: styles.cellCenter,
-                formatter: (data) =>
-                    data ? formatSecondsToExposure(data as number) : '',
+                formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
                 header: 'N',
                 isSortable: true
             }
@@ -218,9 +175,7 @@ const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({
     )
 }
 
-export const flattenPhotos = (
-    photosList?: ApiModel.Photo[]
-): FlattenedPhoto[] =>
+export const flattenPhotos = (photosList?: ApiModel.Photo[]): FlattenedPhoto[] =>
     photosList?.map(
         (photo) =>
             ({
@@ -238,7 +193,7 @@ export const flattenPhotos = (
                 oFilterExposure: photo.filters?.O?.exposure || 0,
                 sFilterExposure: photo.filters?.S?.exposure || 0,
                 nFilterExposure: photo.filters?.N?.exposure || 0
-            } as FlattenedPhoto)
+            }) as FlattenedPhoto
     ) || []
 
 export default ObjectPhotoTable
