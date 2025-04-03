@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
+import {useTranslation} from 'next-i18next'
 import { Button, cn, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
 import { API, ApiType, useAppSelector } from '@/api'
-import { declOfNum } from '@/tools/helpers'
 
 interface RelayListItemProps {
     id: number
@@ -39,6 +39,8 @@ export const RelayListItem: React.FC<RelayListItemProps> = ({ id, name, state, l
  * изменять это состояние в массиве, чтобы каждый раз не перезапрашивать список реле с состояниями
  */
 export const RelayList: React.FC = () => {
+    const { t } = useTranslation()
+
     const [relayLoading, setRelayLoading] = React.useState<number>()
     const [countdownTimer, setCountdownTimer] = useState<number>(0)
 
@@ -105,17 +107,17 @@ export const RelayList: React.FC = () => {
                                     relayList?.items?.[1]?.state ? styles.on : styles.off
                                 )}
                             />
-                            {'ОСВЕЩЕНИЕ'}
+                            {t('lightning')}
                         </div>
                         <div className={styles.description}>
                             {countdownTimer > 0 ? (
                                 <>
-                                    {'Доступно через'} <b>{countdownTimer}</b> {'сек'}
+                                    {t('available-in')} <b>{countdownTimer}</b> {t('sec')}
                                 </>
                             ) : (
                                 <>
-                                    {'Включили'} <b>{relayList?.light.counter}</b>{' '}
-                                    {declOfNum(relayList?.light.counter || 0, ['раз', 'раза', 'раз'])}
+                                    {t('turned-on')}{' '}
+                                    {t('plurals.times', {count: relayList?.light.counter})}
                                 </>
                             )}
                         </div>
