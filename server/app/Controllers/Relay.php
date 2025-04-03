@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Libraries\RelayLibrary;
+use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
 use App\Models\ObservatorySettingsModel;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -43,6 +44,8 @@ class Relay extends ResourceController
 
     public function __construct()
     {
+        new LocaleLibrary();
+
         $this->settingsModel = new ObservatorySettingsModel();
         $this->relayLibrary  = new RelayLibrary();
         $this->session       = new SessionLibrary();
@@ -56,7 +59,9 @@ class Relay extends ResourceController
     public function list(): ResponseInterface
     {
         try {
-            $relayStatuses = $this->relayLibrary->getList();
+            $locale = $this->request->getLocale();
+
+            $relayStatuses = $this->relayLibrary->getList($locale);
             $turnedCounter = (int) $this->settingsModel->find('light_turned_counter')->value;
 
             $this->_checkUserLightAndTurn($relayStatuses);
@@ -127,8 +132,10 @@ class Relay extends ResourceController
      */
     public function light(): ResponseInterface
     {
+        $locale = $this->request->getLocale();
+
         // For reliability, to know exactly the ID of the relay that turns on the light
-        $lightRelayIndex  = $this->relayLibrary->getIndexByName(LIGHT_SWITCH_NAME);
+        $lightRelayIndex  = $this->relayLibrary->getIndexByName($locale, LIGHT_SWITCH_NAME);
         $userCanTurnLight = $this->_userCanTurnLight($this->relayLibrary->getList());
 
         if (!$lightRelayIndex || !$userCanTurnLight) {

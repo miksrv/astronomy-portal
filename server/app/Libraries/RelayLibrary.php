@@ -1,11 +1,13 @@
-<?php namespace App\Libraries;
+<?php
+
+namespace App\Libraries;
 
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
 class RelayLibrary {
 
-    protected array $relayList = [
+    protected array $relayListRU = [
         'Блок питания 12В'      => 6,
         'LED Flat панель'       => 7,
         'Монтировка (EQ6 Pro)'  => 0,
@@ -14,11 +16,22 @@ class RelayLibrary {
         'Контроллер грелок'     => 3,
     ];
 
+    protected array $relayListEN = [
+        'Power Supply 12V'      => 6,
+        'LED Flat Panel'        => 7,
+        'Mount (EQ6 Pro)'       => 0,
+        'Camera (ZWO ASI 6200)' => 1,
+        'Focuser ZWO EAF'       => 2,
+        'Heater Controller'     => 3,
+    ];
+
     /**
-     * Returns a list of relays with their states
-     * @return array
+     * Returns a list of relays with their states.
+     *
+     * @param string $locale The locale to use for relay names ('ru' or 'en'). Default is 'ru'.
+     * @return array An array of relays with their IDs, names, and states.
      */
-    public function getList(): array {
+    public function getList(string $locale = 'ru'): array {
         $client   = Services::curlrequest();
         $response = $client->get(getenv('app.observatory.controller') . 'pstat.xml');
 
@@ -26,10 +39,11 @@ class RelayLibrary {
         $jsonObject  = json_encode($xmlDocument);
         $arrayStates = json_decode($jsonObject,TRUE);
         $arrayKeys   = array_keys($arrayStates);
+        $relayList   = $locale === 'ru' ? $this->relayListRU : $this->relayListEN;
 
         $result = [];
 
-        foreach ($this->relayList as $key => $item) {
+        foreach ($relayList as $key => $item) {
             $result[] = [
                 'id'    => $item,
                 'name'  => $key,
@@ -57,10 +71,16 @@ class RelayLibrary {
 
     /**
      * Find and return relay index by name
-     * @param string $relayName
-     * @return int
+     * @param string $locale The locale to use for relay names ('ru' or 'en')
+     * @param string $relayName The name of the relay
+     * @return int The index of the relay
      */
-    public function getIndexByName(string $relayName): int {
+    public function getIndexByName(
+        string $locale = 'ru',
+        string $relayName
+    ): int {
+        $relayList = $locale === 'ru' ? $this->relayListRU : $this->relayListEN;
+
         return $this->relayList[$relayName];
     }
 }
