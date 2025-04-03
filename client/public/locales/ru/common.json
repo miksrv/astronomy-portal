@@ -49,6 +49,7 @@
     "edit": "Редактировать",
     "from": "от",
     "years": "Лет",
+    "sec": "сек",
     "read-more": "Подробнее",
     "name-in-the-directory": "Название в каталоге",
     "category": "Категория",
@@ -88,6 +89,9 @@
     "camera-not-available": "Камера не доступна",
     "camera-image-not-available": "Изображение камеры недоступно",
     "telegram-subscription": "Чтобы не пропустить анонсы - подпишитесь на Telegram канал",
+    "lightning": "ОСВЕЩЕНИЕ",
+    "available-in": "Доступно через",
+    "turned-on": "Включили",
     "visibility-chart": {
         "title": "График видимости {{name}} в течение суток",
         "description": "Диаграмма высоты {{name}} над горизонтом в течение текущих суток для точки наблюдения обсерватории в Оренбурге ({{lat}}, {{lon}}). График показывает, когда объект находится выше горизонта и на какой максимальной высоте в градусах он поднимается. Данные актуальны на дату наблюдения: {{date}}."
@@ -365,7 +369,10 @@
         "minutes_many": "{{count}} минут",
         "frames_one": "{{count}} кадр",
         "frames_few": "{{count}} кадра",
-        "frames_many": "{{count}} кадров"
+        "frames_many": "{{count}} кадров",
+        "times_one": "{{count}} раз",
+        "times_few": "{{count}} раза",
+        "times_many": "{{count}} раз"
     },
     "filters": {
         "luminance": "L",

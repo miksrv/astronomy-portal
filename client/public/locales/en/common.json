@@ -49,6 +49,7 @@
     "edit": "Edit",
     "from": "from",
     "years": "Years",
+    "sec": "sec",
     "read-more": "Read more",
     "name-in-the-directory": "Name in the directory",
     "category": "Category",
@@ -88,6 +89,9 @@
     "camera-not-available": "Camera not available",
     "camera-image-not-available": "Camera image not available",
     "telegram-subscription": "To not miss announcements - subscribe to the Telegram channel",
+    "lightning": "LIGHT",
+    "available-in": "Available in",
+    "turned-on": "Turned on",
     "visibility-chart": {
         "title": "Visibility chart of {{name}} during the day",
         "description": "The height diagram of {{name}} above the horizon during the current day for the observatory observation point in Orenburg ({{lat}}, {{lon}}). The chart shows when the object is above the horizon and at what maximum height in degrees it rises. The data is relevant for the observation date: {{date}}."
@@ -361,11 +365,11 @@
     },
     "plurals": {
         "minutes_one": "{{count}} minute",
-        "minutes_few": "{{count}} minutes",
-        "minutes_many": "{{count}} minutes",
+        "minutes_other": "{{count}} minutes",
         "frames_one": "{{count}} frame",
-        "frames_few": "{{count}} frames",
-        "frames_many": "{{count}} frames"
+        "frames_other": "{{count}} frames",
+        "times_one": "{{count}} time",
+        "times_other": "{{count}} times"
     },
     "filters": {
         "luminance": "L",
