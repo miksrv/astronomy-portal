@@ -86,7 +86,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) => {
                         />
                     )}
 
-                    {authSlice.isAuth && (
+                    {authSlice?.isAuth && (
                         <Popout
                             mode={'outline'}
                             action={
