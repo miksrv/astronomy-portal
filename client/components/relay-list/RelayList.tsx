@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import {useTranslation} from 'next-i18next'
+import { useTranslation } from 'next-i18next'
 import { Button, cn, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
@@ -116,8 +116,7 @@ export const RelayList: React.FC = () => {
                                 </>
                             ) : (
                                 <>
-                                    {t('turned-on')}{' '}
-                                    {t('plurals.times', {count: relayList?.light.counter})}
+                                    {t('turned-on')} {t('plurals.times', { count: relayList?.light.counter })}
                                 </>
                             )}
                         </div>

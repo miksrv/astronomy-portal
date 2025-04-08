@@ -1,405 +1,166 @@
-Amateur astronomical observatory portal
-===============
+<a id="top"></a>
+
+A web application for a DIY amateur observatory with support for remote monitoring, equipment management, weather data, and an astrophoto archive. Developed using PHP, MySQL, Next.js, React, Redux RTK, SASS, and TypeScript. Please give the project a star :)
+
+<!-- PROJECT TITLE -->
+<div align="center">
+  <img src="https://miksoft.pro/_next/static/media/observatory.b0a65576.jpg" alt="Homemade Observatory Web Application" width="150" height="150">
+  <h3>Homemade Observatory Web Application</h3>
+  <a href="CHANGELOG.md" target="_blank">Changelog</a>
+  ·
+  <a href="https://astro.miksoft.pro" target="_blank">Demo</a>
+  ·
+  <a href="#contact">Contact</a>
+</div>
+
+<br />
+
+<!-- PROJECT BADGES -->
+<div align="center">
+
+[![Contributors][contributors-badge]][contributors-url]
+[![Forks][forks-badge]][forks-url]
+[![Stargazers][stars-badge]][stars-url]
+[![Issues][issues-badge]][issues-url]
+[![MIT License][license-badge]][license-url]
+
 [![UI Checks](https://github.com/miksrv/astronomy-portal/actions/workflows/ui-checks.yml/badge.svg)](https://github.com/miksrv/astronomy-portal/actions/workflows/ui-checks.yml)
 [![UI Deploy](https://github.com/miksrv/astronomy-portal/actions/workflows/ui-deploy.yml/badge.svg)](https://github.com/miksrv/astronomy-portal/actions/workflows/ui-deploy.yml)
 [![API Deploy](https://github.com/miksrv/astronomy-portal/actions/workflows/api-deploy.yml/badge.svg)](https://github.com/miksrv/astronomy-portal/actions/workflows/api-deploy.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=miksrv_astronomy-portal&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=miksrv_astronomy-portal)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=miksrv_astronomy-portal&metric=coverage)](https://sonarcloud.io/summary/new_code?id=miksrv_astronomy-portal)
 
-This astronomical portal is a self-made automatic remote astronomical observatory with a convenient interface for managing and monitoring its operation. The portal provides an opportunity to view data received by the telescope and processed photographs. The server part ensures the stable operation of the portal and the receipt of data from the observatory controller, as well as the loading of FITS frames. The Arduino controller has firmware that allows you to manage the power of devices, collect information from temperature and humidity sensors, as well as other telemetry parameters that are transmitted to this portal.
+</div>
 
-🌐 http://astro.miksoft.pro
+---
 
-## Table of contents
-1. [Online Service](#Online-Service)
-2. [Observatory](#Observatory)
-3. [Controller components ](#Controller-components)
-4. [API methods](#API-methods)
-5. [Project structure](#Project-structure)
-6. [How to start](#How-to-start)
+<!-- TABLE OF CONTENTS -->
+### Table of Contents
 
----------------------
-### Online Service Website
-The site is made on a microservice architecture; there is a separate client application (site) and a server that processes data from the observatory, uploads it to the database and allows visualization on the site. Thus, all data that has ever been received by the observatory is stored on the site. You can see what objects were photographed, at what time, what filters were used, what the moon phase was, the weather and much more.
+- [About of Project](#about-of-project)
+    - [Key Features](#key-features)
+    - [Built With](#built-with)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
-#### Main Page
-General statistics of the observatory, random processed photos and an event calendar displaying the total weather for the night, sunrise and sunset, and footage for the night.
+<!-- ABOUT OF PROJECT -->
+## About of Project
 
-![ain Page](./client/public/screenshots/main.jpg)
+Amateur Astronomy Observatory Portal is a DIY platform for managing and monitoring a remote observatory. I wrote this app for my home observatory. The web app consists of several user screens, including displaying telemetry from the observatory, a weather station, storing processed astronomy photos, storing information about the captured frames. The app also features an interactive sky map, a deep sky image archive, and a live dashboard with weather and equipment statistics, the portal combines automation with practical astrophotography. Whether you are tracking celestial events or analyzing FITS footage, this project demonstrates the convergence of technology and astronomy.
 
-#### Blog Page
-Materials from the telegram channel are automatically duplicated here for ease of reading.
+<!-- KEY FEATURES -->
+### Key Features:
+- **Built with React and Next.js**: A fast and scalable web application for managing astronomical data.
+- **Microservice Architecture**: Separates frontend and backend for efficient data processing and visualization.
+- **Interactive Celestial Map**: Explore observed objects and their imaging history.
+- **Real-Time Observatory Dashboard**: Monitor telescope status, weather conditions, and sensor data live.
+- **Automated Data Processing**: FITS file management and astrophotography archive with detailed metadata.
+- **Integrated Blog and Events**: Syncs with a Telegram channel for astronomy news and expedition reports.
+- **Remote Observatory Control**: Manage equipment power and receive telemetry via an Arduino-based controller.
 
-![Blog Page](./client/public/screenshots/blog.jpg)
+<p align="right">
+  (<a href="#top">Back to top</a>)
+</p>
 
-#### Celestial Map Page
-Interactive map of objects photographed by the observatory.
+### Built With
 
-![Celestial Map Page](./client/public/screenshots/celestial.jpg)
+The Homemade Observatory Web Application project leverages a wide range of technologies across various layers of the system:
 
-#### Astronomy Photos Page
-This section stores all processed photos. Photo processing is done manually and takes time. On the page of each photo there is detailed information about the photo, parameters and, of course, the ability to download it in full resolution.
+- [![PHP][php-badge]][php-url] Server-side scripting language for the backend API.
+- [![MySQL][mysql-badge]][mysql-url] Database system for storing weather data.
+- [![JavaScript][js-badge]][js-url] Core languages used in frontend development.
+- [![TypeScript][ts-badge]][ts-url] TypeScript extends JavaScript by adding types to the language.
+- [![NextJS][nextjs-badge]][nextjs-url] React-based frontend framework for building the user interface.
+- [![Redux][redux-badge]][redux-url] State management for the frontend, providing predictable and centralized state.
+- [![NodeJS][nodejs-badge]][nodejs-url] JavaScript runtime used for frontend development and package management.
+- [![Sass][sass-badge]][sass-url] Styling the user interface.
+- [![GitHub Actions][githubactions-badge]][githubactions-url] Continuous integration and deployment pipeline for automating tests and deployment processes.
+- [![SonarCloud][sonarcloud-badge]][sonarcloud-url] Code quality and security analysis.
 
-![Astronomy Photos Page](./client/public/screenshots/photos.jpg)
+<p align="right">
+  (<a href="#top">Back to top</a>)
+</p>
 
-#### Astronomy Objects Page
-A list of all objects that the observatory records. The table shows the total number of frames captured, shutter speed in general and for each filter. When you go to the page of each object, you will see deviation graphs, a table of frames and a list of processed photographs of the object.
+<!-- CONTRIBUTING -->
+## Contributing
 
-![Astronomy Objects Page](./client/public/screenshots/objects.jpg)
+Contributions are what make the open-source community an incredible environment for learning, inspiration, and innovation. Your contributions are highly valued and greatly appreciated, whether it’s reporting bugs, suggesting improvements, or creating new features.
 
-#### Observatory Dashboard Page
-All information in real time from the telescope equipment - online cameras, power status of devices, current weather data and graphs of sensors inside the observatory.
+**To contribute:**
 
-![Observatory Dashboard Page](./client/public/screenshots/dashboard.jpg)
+1. Fork the project by clicking the "Fork" button at the top of this page.
+2. Clone your fork locally:
+   ```bash
+   git clone https://github.com/miksrv/astronomy-portal.git
+   ```
+3. Create a new feature branch:
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
+4. Make your changes, then commit them:
+   ```bash
+   git commit -m "Add AmazingFeature"
+   ```
+5. Push your changes to your forked repository:
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
+6. Open a pull request from your feature branch to the main repository.
 
-### Observatory 
+We encourage contributions of all kinds, whether big or small. Your efforts help improve the project for everyone!
 
-This is an amateur and completely homemade astronomical observatory project. The goal of the project is to teach the skills of building objects offline, writing drivers in C++, scripts in Python to automate the process of equipment operation. In addition, obtaining good astrophotography of deep-sky objects, observing comets, asteroids and searching for supernovae and variable stars. 
+<p align="right">
+  (<a href="#top">Back to top</a>)
+</p>
 
-![Homemade astronomical observatory](./client/public/photos/observatory-3.jpeg)
+## License
 
-The observatory controller is based on Ardunio (AVR) and connects to the observatory network. The controller is controlled by means of HTTP requests, which send commands to switch the state of the relay and other elements of the power load. The controller's WEB client sends statistics to a remote server ([API](https://github.com/miksrv/api-backend)) at a specified time interval. The web interface in this repository displays statistics from the backend server and sends commands to the observatory controller through it. 
+<!-- LICENSE -->
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
-![The observatory controller](./client/public/photos/observatory-2.jpeg)
+<p align="right">
+  (<a href="#top">Back to top</a>)
+</p>
 
-## Controller components 
-- Arduino Mega 2560
-- INA219 I2C sensor
-- Relay shield 16 channel
-- DHT22
-- DS18B20
+## Contact
 
-## API methods
-The response format is JSON, the response structure is always the same, only payload will change in different APIs
+Misha - [miksoft.pro](https://miksoft.pro)
 
-```json
-{
-  "status": true,
-  "payload": []
-}
-```
+<p align="right">
+  (<a href="#top">Back to top</a>)
+</p>
 
-<details>
-    <summary>Statistic: Frames, photos, exposure and data volume</summary>
+<!-- MARKDOWN VARIABLES (LINKS, IMAGES) -->
+[contributors-badge]: https://img.shields.io/github/contributors/miksrv/astronomy-portal.svg?style=for-the-badge
+[contributors-url]: https://github.com/miksrv/astronomy-portal/graphs/contributors
+[forks-badge]: https://img.shields.io/github/forks/miksrv/astronomy-portal.svg?style=for-the-badge
+[forks-url]: https://github.com/miksrv/astronomy-portal/network/members
+[stars-badge]: https://img.shields.io/github/stars/miksrv/astronomy-portal.svg?style=for-the-badge
+[stars-url]: https://github.com/miksrv/astronomy-portal/stargazers
+[issues-badge]: https://img.shields.io/github/issues/miksrv/astronomy-portal.svg?style=for-the-badge
+[issues-url]: https://github.com/miksrv/astronomy-portal/issues
+[license-badge]: https://img.shields.io/github/license/miksrv/astronomy-portal.svg?style=for-the-badge
+[license-url]: https://github.com/miksrv/astronomy-portal/blob/master/LICENSE.txt
 
-  ``/api/get/statistic/summary``
-  ```json
-    {
-      "photos": 63,
-      "objects": 89,
-      "frames": 5987,
-      "exposure": 1785611,
-      "filesize": 196289
-    }
-  ```
-</details>
-
-<details>
-    <summary>Statistic: List days in a month (ex: 2022-05) when the observatory worked (stat)</summary>
-
-  ``/api/get/statistic/month?date=${string}``
-  ```json
-    [
-      {
-        "date": "2022-05-06",
-        "exposure": 4500,
-        "frames": 15,
-        "objects": [
-          "M_51"
-        ]
-      },
-      {
-        "date": "2022-05-07",
-        "exposure": 13800,
-        "frames": 46,
-        "objects": [
-          "M_51"
-        ]
-      }
-    ]
-  ```
-</details>
-
-<details>
-    <summary>Catalog: List of directory objects</summary>
-
-  ``/api/get/catalog/list``
-  ```json
-    [
-      {
-        "name": "V1405_Cas",
-        "title": "Новая Кассиопеи (V1405 Cas)",
-        "text": "Вспышка классической новой звезды, представляющая собой взрыв на поверхности белого карлика.",
-        "category": "Сверхновые",
-        "ra": 351.147,
-        "dec": 61.1585
-      }
-    ]
-  ```
-</details>
-
-<details>
-    <summary>Catalog: Item directory object by name</summary>
-
-  ``/api/get/catalog/item?object=${string}``
-  ```json
-    {
-      "name": "V1405_Cas",
-      "title": "Новая Кассиопеи (V1405 Cas)",
-      "text": "Вспышка классической новой звезды, представляющая собой взрыв на поверхности белого карлика.",
-      "category": "Сверхновые",
-      "ra": 351.147,
-      "dec": 61.1585
-    }
-  ```
-</details>
-
-<details>
-    <summary>Photo: List of all photos (without photo params)</summary>
-
-  ``/api/get/photo/list``
-  ```json
-  [
-      {
-        "object": "NGC_896",
-        "date": "2022-02-09",
-        "file": "NGC_896-710m-2022.02.09",
-        "ext": "jpg",
-        "author": {
-          "name": "Author name",
-          "link": ""
-        }
-      }
-  ]
-  ```
-</details>
-
-<details>
-    <summary>Photo: list of all photos of one object (by obj name)</summary>
-
-  ``/api/get/photo/list?object=${string}``
-  ```json
-  [
-      {
-        "object": "M_33",
-        "date": "2020-12-25",
-        "file": "M33-630m-2020.12.25",
-        "ext": "jpg",
-        "author": {
-          "name": "Author name",
-          "link": ""
-        },
-        "parameters": {
-          "date": "2020-08-26 23:10:55",
-          "exposure": 45367,
-          "frames": 214,
-          "filesizes": 7016,
-          "filters": {
-            "Luminance": {
-              "exposure": 13203,
-              "frames": 45
-            },
-            "Red": {
-              "exposure": 11138,
-              "frames": 75
-            },
-            "Green": {
-              "exposure": 8722,
-              "frames": 51
-            },
-            "Blue": {
-              "exposure": 7500,
-              "frames": 25
-            },
-            "Ha": {
-              "exposure": 4804,
-              "frames": 18
-            },
-            "OIII": {
-              "exposure": 0,
-              "frames": 0
-            },
-            "SII": {
-              "exposure": 0,
-              "frames": 0
-            }
-          }
-        }
-      }
-  ]
-  ```
-</details>
-
-<details>
-    <summary>Object: list of all captured objects</summary>
-
-  ``/api/get/object/list``
-  ```json
-    [
-      {
-        "name": "NGC_925",
-        "date": "2021-10-10 00:51:07",
-        "exposure": 51300,
-        "frames": 171,
-        "Luminance": 12900,
-        "Red": 14700,
-        "Green": 13500,
-        "Blue": 10200,
-        "Ha": 0,
-        "OIII": 0,
-        "SII": 0
-      }
-    ]
-  ```
-</details>
-
-<details>
-    <summary>Object: list of only the names of all captured objects</summary>
-
-  ``/api/get/object/names``
-  ```json
-    [
-      "Vesta_A807_FA",
-      "V1405_Cas",
-      "UGC_6930",
-      "Sh2_132",
-      "Sh2_109",
-      "Sh2_103",
-      "Sh2-168"
-    ]
-  ```
-</details>
-
-<details>
-    <summary>Object: Get the params of the captured object (by name)</summary>
-
-  ``/api/get/object/item?object=${string}``
-  ```json
-    {
-      "date": "2020-08-26 23:10:55",
-      "exposure": 45367,
-      "frames": 214,
-      "filesizes": 7016,
-      "filters": {
-        "Luminance": {
-          "exposure": 13203,
-          "frames": 45
-        },
-        "Red": {
-          "exposure": 11138,
-          "frames": 75
-        },
-        "Green": {
-          "exposure": 8722,
-          "frames": 51
-        },
-        "Blue": {
-          "exposure": 7500,
-          "frames": 25
-        },
-        "Ha": {
-          "exposure": 4804,
-          "frames": 18
-        },
-        "OIII": {
-          "exposure": 0,
-          "frames": 0
-        },
-        "SII": {
-          "exposure": 0,
-          "frames": 0
-        }
-      }
-    }
-  ```
-</details>
-
-<details>
-  <summary>File: List of all object files (by name)</summary>
-
-  ``/api/get/file/list?object=${string}``
-  ```json
-    [
-      {
-        "id": "fe03bc1c2cfd97de1f97edbdd57e3acb",
-        "name": "M33_Light_Red_300_secs_2020-08-27T03-45-00_010.fits",
-        "date": "2020-08-26 22:39:59",
-        "filter": "Red",
-        "exposure": 300,
-        "temp": -10,
-        "offset": 10,
-        "gain": 120,
-        "dec": 30.5457,
-        "ra": 23.4641
-      }
-    ]
-  ```
-</details>
-
-----------------------
-## Project structure
-
-This project consists of 3 main sections: 
-
-1. [ **firmware** ] Firmware for Arduino microcontroller (AVR), observatory controller control unit.
-2. [ **server** ] Backend server. 
-3. [ **client** ] Observatory control interface. Written in ReactJS + Redux (use Node and NPM). To debug an application on a local server, you must first install the required dependencies:
-  * `yarn install` Installing dependencies.
-
-## How to start
-The portal requires hosting with PHP and MySQL support.
-1. In the root directory on the hosting, create a folder `api`. Upload files to it from the `backend` repository directory.
-2. Install dependencies for PHP (**CodeIgniter v4** framework), to do this, run the command in the `api` root directory (where the backend was loaded and where the `composer.json` file is located):
-```bash
-php composer.phar install
-```
-If the hosting does not support composer, then this can be done on the local computer, and after installation, upload all files to the server, to the `api` directory.
-3. Create a database, upload the MySQL dump there from the `MySQL_dump_DD.MM.YYY.sql` file, which is in the root of the backend repository. Don't forget to delete the dump from the hosting!
-4. In the hosting `api` root directory, rename the `env` file to `.env`. Then edit it and configure the database connection and other parameters:
-
-Observatory location data (for calculating the Moon and Sun):
-```
-app.appTimezone = Asia/Yekaterinburg
-app.timezone  = 5
-app.latitude  = 51.7727
-app.longitude = 55.0988
-```
-The URL of the Arduino controller (relay control) and a link to a static image from the observatory's camera (the section will be described later).
-```
-app.observatory.controller = http://observatory.local/
-app.observatory.webcam_1 = http://observatory.local:8010/webcamphoto/image.jpg
-app.observatory.webcam_2 = http://observatory.local:8020/webcamphoto/image.jpg
-```
-For the news section, integration with the social network VK is used. For it to work, you need to generate an application key, a token.
-```
-app.vkapi.token   =
-app.vkapi.domain  =
-app.vkapi.version = 5.145
-```
-Login and password for authorization on the portal (keep it secret) and session lifetime in seconds:
-```
-app.user_username = login
-app.user_password = password
-app.user_session_time = 120
-```
-Set up a MySQL database connection:
-```
-database.default.hostname = localhost
-database.default.database = your_DB
-database.default.username = your_USER
-database.default.password = your_PASSWORD
-database.default.DBDriver = MySQLi
-```
-5. Installation and configuration of the Portal API is now complete. Now you need to configure and install the interface. On your local computer, in the frontend directory of the repository, rename the `env` file to `.env`. Edit it:
-```
-NEXT_PUBLIC_API_HOST = 'https://YOUR_API_HOST/api/'
-NEXT_PUBLIC_LAT = 51.7
-NEXT_PUBLIC_LON = 55.2
-```
-The `NEXT_PUBLIC_API_HOST` parameter is responsible for determining the URL to the backend server API. If, following the instructions above, you placed the source code in the `api` directory on the server, then the value of this parameter will be: `https://your_domain.com/api/`. For example, you can use my API to test your portal.
-6. Now we need to copy the interface. To do this, you must have **nodeJS** installed. In the `frontend` directory run the following commands (after exiting the previous one)
-```bash
-yarn install
-yarn export
-```
-7. After the last command completes, a ready-made portal will be created in the `frontend/build directory`. All files can be packed and uploaded to the root directory (the `api` directory should already be there) of your site. Happy use :)
+<!-- Other ready-made icons can be seen for example here: https://github.com/inttter/md-badges -->
+[js-badge]: https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=000
+[js-url]: https://www.javascript.com/
+[ts-badge]: https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff
+[ts-url]: https://www.typescriptlang.org/
+[nextjs-badge]: https://img.shields.io/badge/Next.js-black?logo=next.js&logoColor=white
+[nextjs-url]: https://nextjs.org/
+[nodejs-badge]: https://img.shields.io/badge/Node.js-6DA55F?logo=node.js&logoColor=white
+[nodejs-url]: https://nodejs.org/
+[redux-badge]: https://img.shields.io/badge/Redux-764ABC?logo=redux&logoColor=fff
+[redux-url]: https://redux.js.org/
+[sass-badge]: https://img.shields.io/badge/Sass-C69?logo=sass&logoColor=fff
+[sass-url]: https://sass-lang.com/
+[php-badge]: https://img.shields.io/badge/php-%23777BB4.svg?&logo=php&logoColor=white
+[php-url]: https://www.php.net/
+[mysql-badge]: https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=fff
+[mysql-url]: https://www.mysql.com/
+[sonarcloud-badge]: https://img.shields.io/badge/SonarCloud-F3702A?logo=sonarcloud&logoColor=fff
+[sonarcloud-url]: https://sonarcloud.io/
+[githubactions-badge]: https://img.shields.io/badge/GitHub_Actions-2088FF?logo=github-actions&logoColor=white
+[githubactions-url]: https://docs.github.com/en/actions
