@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.0.14
+
+### Patch Changes
+
+-  Updated Yarn version
+-  Updated UI libraries, added readme for package.json
+-  Updated UI locales
+-  Removed OLD screenshots
+-  Added API Relay Controller and Library locales
+-  Improved UI Relay List (added locales)
+-  Fixed UI photos and objects error with router navigation
+-  Updated README.md
+
 ## 4.0.13
 
 ### Patch Changes
