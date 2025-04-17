@@ -69,6 +69,10 @@ const App = ({ Component, pageProps }: AppProps) => {
                     content={'#1b1b1b'}
                     media={'(prefers-color-scheme: dark)'}
                 />
+                <meta
+                    name={'apple-mobile-web-app-status-bar-style'}
+                    content={'black-translucent'}
+                />
                 <link
                     rel={'apple-touch-icon'}
                     sizes={'180x180'}
