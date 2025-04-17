@@ -107,3 +107,9 @@ $routes->group('events', static function ($routes) {
     $routes->options('/', static function () {});
     $routes->options('(:any)', static function () {});
 });
+
+/** Sitemap Controller **/
+$routes->group('sitemap', static function ($routes) {
+    $routes->get('/', 'Sitemap::index');
+    $routes->options('/', static function () {});
+});
