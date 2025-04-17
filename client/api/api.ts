@@ -297,6 +297,11 @@ export const API = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
+        /* Sitemap Controller */
+        sitemapGetList: builder.query<ApiType.SiteMap.Response, void>({
+            query: () => 'sitemap'
+        }),
+
         /* Statistic Controller */
         // statisticGet: builder.query<ApiType.Statistic.ResGeneral, void>({
         //     providesTags: () => ['Statistic'],

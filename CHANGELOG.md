@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.0.16
+
+### Patch Changes
+
+-  Implemented new API Controller - `Sitemap`
+-  Added new API Routes - `/sitemap`
+-  Added new UI type and model sitemap
+-  Created UI page `/sitemap.xml`
+-  Added robot.txt file for UI
+
 ## 4.0.15
 
 ### Patch Changes
