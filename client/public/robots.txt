@@ -8,5 +8,5 @@ Disallow: /en/auth
 # Specify the main mirror of the site
 Host: https://astro.miksoft.pro
 
-# Sitemap for accelerated indexing
-# Sitemap: https://astro.miksoft.pro/sitemap.xml
+# Sitemap for faster indexing
+Sitemap: https://astro.miksoft.pro/sitemap
