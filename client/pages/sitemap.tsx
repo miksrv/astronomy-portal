@@ -11,7 +11,7 @@ type SitemapDynamicPage = {
 
 type SiteMapProps = object
 
-const SitemapXml: NextPage<SiteMapProps> = () => <></>
+const Sitemap: NextPage<SiteMapProps> = () => <></>
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
@@ -94,4 +94,4 @@ export const getServerSideProps = wrapper.getServerSideProps(
         }
 )
 
-export default SitemapXml
+export default Sitemap
