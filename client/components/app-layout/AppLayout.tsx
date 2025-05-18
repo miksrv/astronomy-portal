@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import NextNProgress from 'nextjs-progressbar'
-import { cn } from 'simple-react-ui-kit'
+import { cn, Dialog } from 'simple-react-ui-kit'
 
 import { Menu } from './Menu'
 import styles from './styles.module.sass'
@@ -9,7 +9,6 @@ import { useAppDispatch, useAppSelector } from '@/api'
 import { closeAuthDialog } from '@/api/applicationSlice'
 import AppHeader from '@/components/app-header'
 import LoginForm from '@/components/login-form'
-import Dialog from '@/ui/dialog/Dialog'
 
 interface AppLayoutProps {
     fullWidth?: boolean
@@ -84,7 +83,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
                 onCloseDialog={handleCloseAuthDialog}
                 maxWidth={'400px'}
             >
-                <LoginForm />
+                <LoginForm
+                    onError={(error) => {
+                        if (error?.status === 403) {
+                            handleCloseAuthDialog()
+                        }
+                    }}
+                />
             </Dialog>
         </div>
     )
