@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 4.0.18
+
+### Patch Changes
+
+-  Upgraded UI Libraries
+-  Fixed button size on the UI forms
+
 ## 4.0.17
 
 ### Patch Changes

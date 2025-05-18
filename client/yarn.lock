@@ -2491,7 +2491,7 @@ __metadata:
     next: "npm:15.3.2"
     next-i18next: "npm:^15.4.2"
     next-redux-wrapper: "npm:^8.1.0"
-    next-seo: "npm:^6.6.0"
+    next-seo: "npm:^6.7.1"
     nextjs-progressbar: "npm:^0.0.16"
     prettier: "npm:^3.5.3"
     react: "npm:19.1.0"
@@ -2502,7 +2502,7 @@ __metadata:
     react-redux: "npm:^9.2.0"
     sass: "npm:^1.89.0"
     sharp: "npm:^0.34.1"
-    simple-react-ui-kit: "npm:^1.5.1"
+    simple-react-ui-kit: "npm:^1.5.2"
     suncalc: "npm:^1.9.0"
     ts-jest: "npm:^29.3.4"
     ts-node: "npm:^10.9.2"
@@ -6687,14 +6687,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"next-seo@npm:^6.6.0":
-  version: 6.6.0
-  resolution: "next-seo@npm:6.6.0"
+"next-seo@npm:^6.7.1":
+  version: 6.7.1
+  resolution: "next-seo@npm:6.7.1"
   peerDependencies:
     next: ^8.1.1-canary.54 || >=9.0.0
     react: ">=16.0.0"
     react-dom: ">=16.0.0"
-  checksum: 10c0/60eff5b6fdd83306d26968dfc23b5df502bf014b771b0910bf6cfec944de6f262d7d872ae3155717a31a1dd51ae48db007ce4c0f78f8b435deff37bdc63beb76
+  checksum: 10c0/d7d36d5e2ed16f74c01dc160293c97d73adf955304183fb067d394f83c5cd19adc7fcbb4df6721aacfebc51f4a88ff2777831189c06449c4e31ded92983d81b7
   languageName: node
   linkType: hard
 
@@ -7948,14 +7948,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-react-ui-kit@npm:^1.5.1":
-  version: 1.5.1
-  resolution: "simple-react-ui-kit@npm:1.5.1"
+"simple-react-ui-kit@npm:^1.5.2":
+  version: 1.5.2
+  resolution: "simple-react-ui-kit@npm:1.5.2"
   dependencies:
     lodash-es: "npm:^4.17.21"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
-  checksum: 10c0/e8556a778528b14c60a642c4956feb7aa79a0d4496625c4995511a3b79cf16ff095023c2ac283ed377220ee668e2f53924c684807d59f042b2e04d05f8fb7ce8
+  checksum: 10c0/a4a3dd99f61fbd94d27a90b3ec092239c1b5218fc4e1b03d2ce7b28757f4409a1a26b466ad64297b1819d83865e8ef8c8d2edbe7b99d75c4fb9e32023a590561
   languageName: node
   linkType: hard
 

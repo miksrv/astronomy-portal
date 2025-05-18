@@ -75,7 +75,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events, photos }) => {
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}
-                        size={'medium'}
+                        size={'large'}
                         label={t('add')}
                         onClick={handleCreate}
                     />

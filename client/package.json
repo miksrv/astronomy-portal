@@ -1,7 +1,7 @@
 {
     "name": "astronomy-portal",
     "description": "This project is intended for remote control of an amateur astronomical observatory. With the help of the WEB interface, you can control the power supply of the observatory devices, monitor the voltage, power current, as well as temperature and humidity in several places.",
-    "version": "4.0.17",
+    "version": "4.0.18",
     "engines": {
         "node": ">=20.11.0"
     },
@@ -30,7 +30,7 @@
         "next": "15.3.2",
         "next-i18next": "^15.4.2",
         "next-redux-wrapper": "^8.1.0",
-        "next-seo": "^6.6.0",
+        "next-seo": "^6.7.1",
         "nextjs-progressbar": "^0.0.16",
         "react": "19.1.0",
         "react-dom": "19.1.0",
@@ -39,7 +39,7 @@
         "react-photo-album": "^3.1.0",
         "react-redux": "^9.2.0",
         "sharp": "^0.34.1",
-        "simple-react-ui-kit": "^1.5.1",
+        "simple-react-ui-kit": "^1.5.2",
         "suncalc": "^1.9.0",
         "yet-another-react-lightbox": "^3.23.1"
     },

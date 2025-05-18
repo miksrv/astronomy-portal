@@ -88,8 +88,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) => {
 
                     {authSlice?.isAuth && (
                         <Popout
-                            mode={'outline'}
-                            action={
+                            trigger={
                                 <Image
                                     alt={''}
                                     className={styles.avatarImage}
