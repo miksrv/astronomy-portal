@@ -39,8 +39,8 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
     const toolbarRef = useRef<HTMLDivElement>(null)
     const footerRef = useRef<HTMLDivElement>(null)
 
-    const handleCreate = () => {
-        router.push('/objects/form')
+    const handleCreate = async () => {
+        await router.push('/objects/form')
     }
 
     const filteredCategoriesList = useMemo(
@@ -71,14 +71,14 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
 
     const title = t('list-astronomical-objects') + (categoryFilter ? `: ${currentCategory?.title}` : '')
 
-    const handleChangeCategoryFilter = (category: number | undefined) => {
+    const handleChangeCategoryFilter = async (category: number | undefined) => {
         if (category !== undefined) {
-            router.push({
+            await router.push({
                 pathname: router.pathname,
                 query: { ...router.query, category }
             })
         } else {
-            router.push({
+            await router.push({
                 pathname: router.pathname,
                 query: undefined
             })
@@ -144,13 +144,15 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                 }
             >
                 <Input
+                    size={'large'}
                     placeholder={t('search-by-name')}
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
                 />
 
                 <Dropdown<number>
-                    size={'medium'}
+                    size={'large'}
+                    mode={'secondary'}
                     clearable={true}
                     value={categoryFilter}
                     placeholder={t('filter-by-category')}
@@ -165,7 +167,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}
-                        size={'medium'}
+                        size={'large'}
                         label={t('add')}
                         onClick={handleCreate}
                     />

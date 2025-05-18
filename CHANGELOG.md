@@ -1,4 +1,13 @@
-# Changelog
+# CHANGELOG
+
+## 4.0.17
+
+### Patch Changes
+
+-  Upgraded UI Libraries
+-  Fixed UI styles and CSS Variables
+-  Fixed pages router promises
+-  Improved components UI styles
 
 ## 4.0.16
 

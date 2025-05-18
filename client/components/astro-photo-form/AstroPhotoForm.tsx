@@ -178,6 +178,7 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initialData, 
                 required={true}
                 disabled={disabled}
                 className={styles.formElement}
+                size={'large'}
                 type={'date'}
                 label={'Дата обработки'}
                 value={formData.date}
@@ -186,9 +187,10 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initialData, 
 
             <div className={styles.addFilter}>
                 <Dropdown<ApiModel.FilterTypes>
-                    size={'medium'}
+                    size={'large'}
                     label={'Параметры съемки'}
                     placeholder={'Добавить фильтр'}
+                    mode={'secondary'}
                     value={selectedFilter}
                     className={styles.filtersDropdown}
                     onSelect={(value) => setSelectedFilter(value?.key)}
@@ -200,7 +202,7 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initialData, 
 
                 <Button
                     icon={'PlusCircle'}
-                    size={'medium'}
+                    size={'large'}
                     disabled={!selectedFilter}
                     onClick={handleAddFilter}
                 />
@@ -233,7 +235,7 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initialData, 
 
                         <Button
                             icon={'Close'}
-                            size={'medium'}
+                            size={'large'}
                             mode={'outline'}
                             onClick={() => handleRemoveFilter(filter)}
                         />

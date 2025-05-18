@@ -44,8 +44,8 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events, photos }) => {
         setShowLightbox(false)
     }
 
-    const handleCreate = () => {
-        router.push('/stargazing/form')
+    const handleCreate = async () => {
+        await router.push('/stargazing/form')
     }
 
     return (
