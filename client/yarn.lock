@@ -525,15 +525,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/compat@npm:^1.2.8":
-  version: 1.2.8
-  resolution: "@eslint/compat@npm:1.2.8"
+"@eslint/compat@npm:^1.2.9":
+  version: 1.2.9
+  resolution: "@eslint/compat@npm:1.2.9"
   peerDependencies:
     eslint: ^9.10.0
   peerDependenciesMeta:
     eslint:
       optional: true
-  checksum: 10c0/1e004c6917220ff1731fdc562ada9ddcbcecc6f3ba2e4b0433fb6d8eddf2a443e009f1f9796b78128b78a0a588c723b78021319055ac6e5dda55c0ace346496b
+  checksum: 10c0/e912058f1e3847a1eec654c0c040467b676bd48171e915c730c7215f57cf5f4db8508c4a431ccb470f4a000d94559b41c4fe8de3d71f23eb8ae7acf4959e1c06
   languageName: node
   linkType: hard
 
@@ -2455,7 +2455,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "astronomy-portal@workspace:."
   dependencies:
-    "@eslint/compat": "npm:^1.2.8"
+    "@eslint/compat": "npm:^1.2.9"
     "@reduxjs/toolkit": "npm:^2.6.1"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
@@ -2502,7 +2502,7 @@ __metadata:
     react-redux: "npm:^9.2.0"
     sass: "npm:^1.89.0"
     sharp: "npm:^0.34.1"
-    simple-react-ui-kit: "npm:^1.5.0"
+    simple-react-ui-kit: "npm:^1.5.1"
     suncalc: "npm:^1.9.0"
     ts-jest: "npm:^29.3.4"
     ts-node: "npm:^10.9.2"
@@ -7948,14 +7948,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-react-ui-kit@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "simple-react-ui-kit@npm:1.5.0"
+"simple-react-ui-kit@npm:^1.5.1":
+  version: 1.5.1
+  resolution: "simple-react-ui-kit@npm:1.5.1"
   dependencies:
     lodash-es: "npm:^4.17.21"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
-  checksum: 10c0/8f4ee0cecb39a05e20df4d855bff2dd44c11108685fd542fd7a226310c80a6ab56cdc4d650919d3438184d0659b711d6f3f41fa07fbc6e88f6fac12697ba81e4
+  checksum: 10c0/e8556a778528b14c60a642c4956feb7aa79a0d4496625c4995511a3b79cf16ff095023c2ac283ed377220ee668e2f53924c684807d59f042b2e04d05f8fb7ce8
   languageName: node
   linkType: hard
 
