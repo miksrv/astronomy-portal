@@ -1,12 +1,5 @@
 # CHANGELOG
 
-## 4.0.18
-
-### Patch Changes
-
--  Upgraded UI Libraries
--  Fixed button size on the UI forms
-
 ## 4.0.17
 
 ### Patch Changes
@@ -15,6 +8,11 @@
 -  Fixed UI styles and CSS Variables
 -  Fixed pages router promises
 -  Improved components UI styles
+-  Fixed button size on the UI forms
+-  Removed internal UI Dialog component
+-  Fixed API Locales for Objects and Auth Controllers
+-  Replaced UI Auth Dialog to Simple UI React Kit Library
+-  Improved errors handling for AuthForm
 
 ## 4.0.16
 
