@@ -37,7 +37,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
 
     useEffect(() => {
         if (isAuth && !data) {
-            router.push('/')
+            void router.push('/')
         }
     })
 
@@ -51,9 +51,9 @@ const AuthPage: NextPage<AuthPageProps> = () => {
 
                 LocalStorage.removeItem(LOCAL_STORAGE.RETURN_PATH as any)
 
-                router.push(returnLink)
+                void router.push(returnLink)
             } else {
-                router.push('/')
+                void router.push('/')
             }
         }
     }, [data])
@@ -71,7 +71,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
         }
 
         if ((!code || !service) && !sendRequest) {
-            router.push('/')
+            void router.push('/')
         }
     }, [sendRequest])
 

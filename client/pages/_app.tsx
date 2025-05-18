@@ -28,7 +28,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 
     useEffect(() => {
         if (i18n.language !== locale && i18Config.i18n.locales.includes(locale) && router.pathname !== '/404') {
-            router.replace(router.asPath, router.asPath, { locale })
+            void router.replace(router.asPath, router.asPath, { locale })
         }
     }, [])
 

@@ -59,14 +59,14 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
         [equipmentsList, photoData?.equipments]
     )
 
-    const handleEdit = () => {
+    const handleEdit = async () => {
         if (photoId) {
-            router.push(`/photos/form/?id=${photoId}`)
+            await router.push(`/photos/form/?id=${photoId}`)
         }
     }
 
-    const handleCreate = () => {
-        router.push('/photos/form')
+    const handleCreate = async () => {
+        await router.push('/photos/form')
     }
 
     return (
@@ -106,7 +106,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                         <Button
                             icon={'Pencil'}
                             mode={'secondary'}
-                            size={'medium'}
+                            size={'large'}
                             label={t('edit')}
                             disabled={!photoId}
                             onClick={handleEdit}
@@ -115,7 +115,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                         <Button
                             icon={'PlusCircle'}
                             mode={'secondary'}
-                            size={'medium'}
+                            size={'large'}
                             label={t('add')}
                             onClick={handleCreate}
                         />

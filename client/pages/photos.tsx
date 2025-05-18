@@ -63,14 +63,14 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
 
     const title = t('astrophoto') + (categoryFilter ? `: ${currentCategory?.title}` : '')
 
-    const handleChangeCategoryFilter = (category: number | undefined) => {
+    const handleChangeCategoryFilter = async (category: number | undefined) => {
         if (category !== undefined) {
-            router.push({
+            await router.push({
                 pathname: router.pathname,
                 query: { ...router.query, category }
             })
         } else {
-            router.push({
+            await router.push({
                 pathname: router.pathname,
                 query: undefined
             })
@@ -79,8 +79,8 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
         setCategoryFilter(category)
     }
 
-    const handleCreate = () => {
-        router.push('/photos/form')
+    const handleCreate = async () => {
+        await router.push('/photos/form')
     }
 
     useEffect(() => {
@@ -121,6 +121,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
                 }
             >
                 <Input
+                    size={'large'}
                     placeholder={t('search-by-object')}
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
@@ -128,7 +129,8 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
 
                 <Dropdown<number>
                     clearable={true}
-                    size={'medium'}
+                    size={'large'}
+                    mode={'secondary'}
                     value={categoryFilter}
                     placeholder={t('filter-by-category')}
                     onSelect={(category) => handleChangeCategoryFilter(category?.key)}
@@ -142,7 +144,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}
-                        size={'medium'}
+                        size={'large'}
                         label={t('add')}
                         onClick={handleCreate}
                     />

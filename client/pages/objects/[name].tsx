@@ -48,14 +48,14 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 
     const allObjectsNames = useMemo(() => objectsList?.map(({ name }) => name), [objectsList])
 
-    const handleEdit = () => {
+    const handleEdit = async () => {
         if (objectName) {
-            router.push(`/objects/form/?id=${objectName}`)
+            await router.push(`/objects/form/?id=${objectName}`)
         }
     }
 
-    const handleCreate = () => {
-        router.push('/objects/form')
+    const handleCreate = async () => {
+        await router.push('/objects/form')
     }
 
     return (
@@ -93,7 +93,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                             icon={'Pencil'}
                             mode={'secondary'}
                             label={t('edit')}
-                            size={'medium'}
+                            size={'large'}
                             disabled={!objectName}
                             onClick={handleEdit}
                         />
@@ -101,7 +101,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                         <Button
                             icon={'PlusCircle'}
                             mode={'secondary'}
-                            size={'medium'}
+                            size={'large'}
                             label={t('add')}
                             onClick={handleCreate}
                         />
