@@ -97,7 +97,7 @@ class Auth extends ResourceController
     public function yandex(): ResponseInterface
     {
         if ($this->session->isAuth) {
-            return $this->failForbidden('Вы уже авторизованы');
+            return $this->failForbidden(lang('Auth.alreadyAuthorized'));
         }
 
         $serviceClient = new YandexClient(
