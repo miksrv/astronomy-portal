@@ -30,7 +30,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
     const [bookEvent, { isLoading, isSuccess, error }] = API.useEventsRegistrationPostMutation()
 
     const findError = (field: keyof ApiType.Events.ReqRegistration) =>
-        (error as ApiType.ResError)?.messages?.[field] || undefined
+        (error as ApiType.ResError)?.messages?.[field as never] || undefined
 
     const handleChange = ({ target: { name, value } }: React.ChangeEvent<HTMLInputElement>) =>
         setFormState((prev) => ({ ...prev, [name]: value }))

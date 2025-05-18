@@ -1,8 +1,8 @@
 :root {
     /* Element Heights for `size` props */
     --size-small: 24px;
-    --size-medium: 28px;
-    --size-large: 32px;
+    --size-medium: 32px;
+    --size-large: 38px;
 
     /* Primary Colors */
     --color-contrast: #ffffff;

@@ -146,7 +146,7 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, initialData
             <div className={styles.sections}>
                 <div className={styles.inputSection}>
                     <Input
-                        size={'large'}
+                        size={'medium'}
                         required={true}
                         disabled={disabled}
                         className={styles.formElement}
@@ -156,7 +156,7 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, initialData
                     />
 
                     <Input
-                        size={'large'}
+                        size={'medium'}
                         required={true}
                         disabled={disabled}
                         className={styles.formElement}
@@ -166,7 +166,7 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, initialData
                     />
 
                     <Input
-                        size={'large'}
+                        size={'medium'}
                         required={true}
                         disabled={disabled}
                         className={styles.formElement}
@@ -181,7 +181,7 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, initialData
                     />
 
                     <Input
-                        size={'large'}
+                        size={'medium'}
                         required={true}
                         disabled={disabled}
                         className={styles.formElement}
@@ -197,7 +197,7 @@ const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, initialData
                     />
 
                     <Input
-                        size={'large'}
+                        size={'medium'}
                         required={true}
                         disabled={disabled}
                         className={styles.formElement}
