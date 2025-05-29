@@ -15,7 +15,7 @@ use Exception;
 // The time during which the user cannot turn on the light from the moment it was last turned on
 define('LIGHT_SWITCH_COOLDOWN', 60 * 5);
 define('LIGHT_SWITCH_OFF_INTERVAL', 60);
-define('LIGHT_SWITCH_NAME', 'LED Flat панель');
+define('LIGHT_SWITCH_NAME', 'LED Flat Panel');
 
 /**
  * Class Relay
@@ -135,7 +135,7 @@ class Relay extends ResourceController
         $locale = $this->request->getLocale();
 
         // For reliability, to know exactly the ID of the relay that turns on the light
-        $lightRelayIndex  = $this->relayLibrary->getIndexByName($locale, LIGHT_SWITCH_NAME);
+        $lightRelayIndex  = $this->relayLibrary->getLightRelayIndex();
         $userCanTurnLight = $this->_userCanTurnLight($this->relayLibrary->getList());
 
         if (!$lightRelayIndex || !$userCanTurnLight) {
@@ -220,7 +220,7 @@ class Relay extends ResourceController
      */
     protected function _checkUserLightAndTurn(array $relayStates): void
     {
-        $searchIndex = array_search(LIGHT_SWITCH_NAME, array_column($relayStates, 'name'));
+        $searchIndex = array_search($this->relayLibrary->getLightRelayIndex(), array_column($relayStates, 'id'));
         $turnedUser  = (bool) $this->settingsModel->find('light_turned_by_user')->value;
 
         // If we received the value that the relay was turned on by the user, but the relay is now turned on,

@@ -5,24 +5,30 @@ namespace App\Libraries;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
-class RelayLibrary {
+const RELAY_POWER_SUPPLY_12V     = 6;
+const RELAY_LED_FLAT_PANEL       = 7;
+const RELAY_MOUNT_EQ6_PRO        = 0;
+const RELAY_CAMERA_ZWO_ASI_6200  = 1;
+const RELAY_FOCUSER_ZWO_EAF      = 2;
+const RELAY_HEATER_CONTROLLER    = 3;
 
+class RelayLibrary {
     protected array $relayListRU = [
-        'Блок питания 12В'      => 6,
-        'LED Flat панель'       => 7,
-        'Монтировка (EQ6 Pro)'  => 0,
-        'Камера (ZWO ASI 6200)' => 1,
-        'Фокусер ZWO EAF'       => 2,
-        'Контроллер грелок'     => 3,
+        'Блок питания 12В'      => RELAY_POWER_SUPPLY_12V,
+        'LED Flat панель'       => RELAY_LED_FLAT_PANEL,
+        'Монтировка (EQ6 Pro)'  => RELAY_MOUNT_EQ6_PRO,
+        'Камера (ZWO ASI 6200)' => RELAY_CAMERA_ZWO_ASI_6200,
+        'Фокусер ZWO EAF'       => RELAY_FOCUSER_ZWO_EAF,
+        'Контроллер грелок'     => RELAY_HEATER_CONTROLLER,
     ];
 
     protected array $relayListEN = [
-        'Power Supply 12V'      => 6,
-        'LED Flat Panel'        => 7,
-        'Mount (EQ6 Pro)'       => 0,
-        'Camera (ZWO ASI 6200)' => 1,
-        'Focuser ZWO EAF'       => 2,
-        'Heater Controller'     => 3,
+        'Power Supply 12V'      => RELAY_POWER_SUPPLY_12V,
+        'LED Flat Panel'        => RELAY_LED_FLAT_PANEL,
+        'Mount (EQ6 Pro)'       => RELAY_MOUNT_EQ6_PRO,
+        'Camera (ZWO ASI 6200)' => RELAY_CAMERA_ZWO_ASI_6200,
+        'Focuser ZWO EAF'       => RELAY_FOCUSER_ZWO_EAF,
+        'Heater Controller'     => RELAY_HEATER_CONTROLLER,
     ];
 
     /**
@@ -70,17 +76,10 @@ class RelayLibrary {
     }
 
     /**
-     * Find and return relay index by name
-     * @param string $locale The locale to use for relay names ('ru' or 'en')
-     * @param string $relayName The name of the relay
+     * Find and return relay index
      * @return int The index of the relay
      */
-    public function getIndexByName(
-        string $locale = 'ru',
-        string $relayName
-    ): int {
-        $relayList = $locale === 'ru' ? $this->relayListRU : $this->relayListEN;
-
-        return $this->relayList[$relayName];
+    public function getLightRelayIndex(): int {
+        return RELAY_LED_FLAT_PANEL;
     }
 }
