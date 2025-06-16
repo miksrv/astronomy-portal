@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 4.0.18
+
+### Patch Changes
+
+-  Upgraded UI Libraries
+-  Improved UI Server Side Rendering (SSR)
+
 ## 4.0.17
 
 ### Patch Changes
