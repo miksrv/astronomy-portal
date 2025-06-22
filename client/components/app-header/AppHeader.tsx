@@ -24,7 +24,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) => {
     const dispatch = useAppDispatch()
     const authSlice = useAppSelector((state) => state.auth)
 
-    const [authGetMe, { data: meData, error }] = API.useAuthGetMeMutation()
+    const [authGetMe, { data: meData, error, isLoading }] = API.useAuthGetMeMutation()
 
     const handleLoginClick = () => {
         dispatch(openAuthDialog())
@@ -43,7 +43,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) => {
     }, [meData, error])
 
     useEffect(() => {
-        if (authSlice.token) {
+        if (!authSlice?.isAuth && authSlice?.token?.length) {
             authGetMe()
         }
     }, [])
@@ -82,7 +82,8 @@ const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) => {
                             mode={'secondary'}
                             className={styles.loginButton}
                             onClick={handleLoginClick}
-                            label={t('sign-in')}
+                            loading={isLoading}
+                            label={!isLoading ? t('sign-in') : ''}
                         />
                     )}
 
