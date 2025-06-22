@@ -1,10 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Button, Input, Message } from 'simple-react-ui-kit'
+import { Button, Dropdown, Input, Message } from 'simple-react-ui-kit'
+
+import styles from './styles.module.sass'
 
 import { API, ApiType, useAppSelector } from '@/api'
 
 interface EventBookingFormProps {
     eventId?: string
+    onSuccessSubmit?: () => void
 }
 
 type EventBookingFormState = {
@@ -15,10 +18,10 @@ type EventBookingFormState = {
     childrenAges?: number[]
 }
 
-const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
+const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onSuccessSubmit }) => {
     const user = useAppSelector((state) => state.auth.user)
 
-    // const [submitted, setSubmitted] = useState<boolean>(false)
+    const [submitted, setSubmitted] = useState<boolean>(false)
     const [formState, setFormState] = useState<EventBookingFormState>({
         adults: '1',
         children: '0',
@@ -27,7 +30,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
         phone: user?.phone || ''
     })
 
-    const [bookEvent, { isLoading, isSuccess, error }] = API.useEventsRegistrationPostMutation()
+    const [bookEvent, { isLoading, isSuccess, isError, error }] = API.useEventsRegistrationPostMutation()
 
     const findError = (field: keyof ApiType.Events.ReqRegistration) =>
         (error as ApiType.ResError)?.messages?.[field as never] || undefined
@@ -42,7 +45,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
             return
         }
 
-        // setSubmitted(true)
+        setSubmitted(true)
 
         bookEvent({
             adults: Number(formState.adults || 1),
@@ -67,31 +70,35 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
         }
     }, [formState?.children])
 
+    useEffect(() => {
+        if (isSuccess && submitted) {
+            onSuccessSubmit?.()
+        }
+    }, [isSuccess])
+
     return (
-        <div
-        // className={styles.form}
-        // onSubmit={handleSubmit}
-        // inverted={true}
-        // loading={isLoading}
-        // success={isSuccess && submitted}
-        // error={isError && submitted}
-        // size={'small'}
-        >
-            <Message
-                type={'error'}
-                title={'Ошибка'}
-            >
-                {(error as any)?.messages?.error ||
-                    'При регистрации были допущены ошибки, проверьте правильность заполнения полей'}
-            </Message>
-            <Message
-                type={'success'}
-                title={'Успешно!'}
-            >
-                {'Вы зарегистрировались на мероприятие'}
-            </Message>
+        <div className={styles.form}>
+            {isError && (
+                <Message
+                    type={'error'}
+                    title={'Ошибка'}
+                >
+                    {(error as any)?.messages?.error ||
+                        'При регистрации были допущены ошибки, проверьте правильность заполнения полей'}
+                </Message>
+            )}
+
+            {isSuccess && (
+                <Message
+                    type={'success'}
+                    title={'Успешно!'}
+                >
+                    {'Вы зарегистрировались на мероприятие'}
+                </Message>
+            )}
+
             <Input
-                // fluid
+                className={styles.field}
                 required={true}
                 label={'Укажите ваше имя'}
                 name={'name'}
@@ -103,7 +110,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
             />
 
             <Input
-                // fluid
+                className={styles.field}
                 label={'Укажите ваш номер телефона'}
                 name={'phone'}
                 placeholder={'Укажите ваш номер телефона'}
@@ -113,92 +120,76 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId }) => {
                 onKeyDown={handleKeyDown}
             />
 
-            <div style={{ marginBottom: '15px' }}>
-                <div>
-                    {/*<Form.Field*/}
-                    {/*    label={'Количество взрослых'}*/}
-                    {/*    required={true}*/}
-                    {/*    error={findError('adults')}*/}
-                    {/*    style={{ marginBottom: '5px' }}*/}
-                    {/*/>*/}
-                    {/*<Input*/}
-                    {/*    minValue={1}*/}
-                    {/*    maxValue={5}*/}
-                    {/*    value={formState.adults || ''}*/}
-                    {/*    onChange={(value: string) => {*/}
-                    {/*        setFormState({*/}
-                    {/*            ...formState,*/}
-                    {/*            adults: value*/}
-                    {/*        })*/}
-                    {/*    }}*/}
-                    {/*    onKeyDown={handleKeyDown}*/}
-                    {/*/>*/}
-                </div>
-                <div>
-                    {/*<Form.Field*/}
-                    {/*    label={'Количество детей'}*/}
-                    {/*    required={true}*/}
-                    {/*    error={findError('children')}*/}
-                    {/*    style={{ marginBottom: '5px' }}*/}
-                    {/*/>*/}
-                    {/*<Input*/}
-                    {/*    minValue={0}*/}
-                    {/*    maxValue={5}*/}
-                    {/*    value={formState.children || ''}*/}
-                    {/*    onChange={(value: string) => {*/}
-                    {/*        setFormState({*/}
-                    {/*            ...formState,*/}
-                    {/*            children: value*/}
-                    {/*        })*/}
-                    {/*    }}*/}
-                    {/*    onKeyDown={handleKeyDown}*/}
-                    {/*/>*/}
-                </div>
+            <div className={styles.countPeopleContainer}>
+                <Dropdown<string>
+                    className={styles.countPeopleField}
+                    mode={'secondary'}
+                    label={'Взрослых'}
+                    options={[...Array(5)].map((_, value) => ({
+                        key: String(value),
+                        value: String(value + 1)
+                    }))}
+                    value={String(formState.adults) || ''}
+                    onSelect={(option) => {
+                        setFormState({
+                            ...formState,
+                            adults: option?.value
+                        })
+                    }}
+                />
+
+                <Dropdown<string>
+                    className={styles.countPeopleField}
+                    mode={'secondary'}
+                    label={'Детей'}
+                    options={[...Array(6)].map((_, value) => ({
+                        key: String(value),
+                        value: String(value)
+                    }))}
+                    value={String(formState.children) || ''}
+                    onSelect={(option) => {
+                        setFormState({
+                            ...formState,
+                            children: option?.value
+                        })
+                    }}
+                />
             </div>
-            {/*{formState.children &&*/}
-            {/*    Number(formState.children) > 0 &&*/}
-            {/*    Array.from(*/}
-            {/*        { length: Number(formState.children) },*/}
-            {/*        (_, index) => (*/}
-            {/*            <div*/}
-            {/*                className={styles.childrenAges}*/}
-            {/*                key={index}*/}
-            {/*            >*/}
-            {/*                <label>Возраст ребенка {index + 1}</label>*/}
-            {/*                <Dropdown*/}
-            {/*                    placeholder='Выберите возраст'*/}
-            {/*                    fluid*/}
-            {/*                    selection*/}
-            {/*                    options={[...Array(13)].map((_, age) => ({*/}
-            {/*                        key: age + 5,*/}
-            {/*                        text: `${age + 5} лет`,*/}
-            {/*                        value: age + 5*/}
-            {/*                    }))}*/}
-            {/*                    value={formState?.childrenAges?.[index] || ''}*/}
-            {/*                    onChange={(e, { value }) => {*/}
-            {/*                        const newAges = [*/}
-            {/*                            ...(formState?.childrenAges ?? [])*/}
-            {/*                        ]*/}
 
-            {/*                        newAges[index] = Number(value)*/}
+            {formState.children &&
+                Number(formState.children) > 0 &&
+                Array.from({ length: Number(formState.children) }, (_, index) => (
+                    <div
+                        key={index}
+                        className={styles.childrenAges}
+                    >
+                        <label>
+                            {'Возраст ребенка'} {index + 1}
+                        </label>
+                        <Dropdown<string>
+                            mode={'secondary'}
+                            placeholder={'Выберите возраст'}
+                            options={[...Array(13)].map((_, age) => ({
+                                key: String(age + 5),
+                                value: `${age + 5} лет`
+                            }))}
+                            value={String(formState?.childrenAges?.[index]) || ''}
+                            onSelect={(option) => {
+                                const newAges = [...(formState?.childrenAges ?? [])]
 
-            {/*                        setFormState({*/}
-            {/*                            ...formState,*/}
-            {/*                            childrenAges: newAges*/}
-            {/*                        })*/}
-            {/*                    }}*/}
-            {/*                />*/}
-            {/*            </div>*/}
-            {/*        )*/}
-            {/*    )}*/}
-            <p>
-                * Максимум <b>5</b> взрослых и <b>5</b> детей на одну регистрацию.
-            </p>
+                                newAges[index] = Number(option?.key)
+
+                                setFormState({
+                                    ...formState,
+                                    childrenAges: newAges
+                                })
+                            }}
+                        />
+                    </div>
+                ))}
 
             <Button
-                // fluid={true}
-                // size={'tiny'}
-                color={'green'}
+                className={styles.submitButton}
                 onClick={handleSubmit}
                 disabled={isLoading || isSuccess || Number(formState?.children) !== formState?.childrenAges?.length}
                 loading={isLoading}
