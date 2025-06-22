@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { getCookie } from 'cookies-next'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -9,22 +10,24 @@ import { Button, Container, Icon } from 'simple-react-ui-kit'
 
 import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
+import { setSSRToken } from '@/api/authSlice'
 import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
-// import EventUpcoming from '@/components/event-upcoming'
+import EventUpcoming from '@/components/event-upcoming'
 import EventsList from '@/components/events-list'
 import PhotoGallery from '@/components/photo-gallery'
 import PhotoLightbox from '@/components/photo-lightbox'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/tools/eventPhotos'
 
 interface StargazingPageProps {
+    upcomingData: ApiModel.Event | null
     events: ApiModel.Event[]
     photos: ApiModel.EventPhoto[]
 }
 
-const StargazingPage: NextPage<StargazingPageProps> = ({ events, photos }) => {
+const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, photos }) => {
     const { t, i18n } = useTranslation()
     const router = useRouter()
 
@@ -82,8 +85,10 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ events, photos }) => {
                 )}
             </AppToolbar>
 
-            {/*TODO*/}
-            {/*<EventUpcoming />*/}
+            <EventUpcoming
+                style={{ marginBottom: 10 }}
+                event={upcomingData || undefined}
+            />
 
             <Link
                 href={'https://t.me/look_at_stars'}
@@ -179,7 +184,14 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             store.dispatch(setLocale(locale))
 
+            const token = await getCookie('token', { req: context.req, res: context.res })
+
+            if (token) {
+                store.dispatch(setSSRToken(token))
+            }
+
             const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
+            const { data: upcomingData } = await store.dispatch(API.endpoints?.eventGetUpcoming.initiate())
 
             const { data: photosData } = await store.dispatch(
                 API.endpoints?.eventGetPhotoList.initiate({
@@ -193,6 +205,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
             return {
                 props: {
                     ...translations,
+                    upcomingData: upcomingData || null,
                     events: eventsData?.items || [],
                     photos: photosData?.items || []
                 }

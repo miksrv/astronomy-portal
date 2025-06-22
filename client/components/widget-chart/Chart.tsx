@@ -8,7 +8,7 @@ import styles from './styles.module.sass'
 import { ApiModel } from '@/api'
 import { ChartTypes } from '@/components/widget-chart/WidgetChart'
 import { getSensorColor } from '@/tools/colors'
-import { formatDateFromUTC } from '@/tools/dates'
+import { formatDateFromUnixUTC } from '@/tools/dates'
 import { round } from '@/tools/helpers'
 
 interface ChartProps {
@@ -58,7 +58,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) => {
                 label: {
                     formatter: function (params) {
                         if (params?.axisDimension === 'x') {
-                            return formatDateFromUTC(params?.value as number, t('date-chart-label'))
+                            return formatDateFromUnixUTC(params?.value as number, t('date-chart-label'))
                         }
 
                         return round(Number(params?.value), 2)?.toString() ?? ''
@@ -98,7 +98,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) => {
                 hideOverlap: true,
                 color: textSecondaryColor, // Color of X-axis labels
                 fontSize: '11px',
-                formatter: (value: number) => formatDateFromUTC(value, dateFormat ?? t('date-only-hour'))
+                formatter: (value: number) => formatDateFromUnixUTC(value, dateFormat ?? t('date-only-hour'))
             },
             axisTick: {
                 show: true

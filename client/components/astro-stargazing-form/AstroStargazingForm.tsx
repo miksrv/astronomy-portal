@@ -50,6 +50,7 @@ const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({ disabled, ini
     return (
         <Container>
             <Input
+                size={'large'}
                 required={true}
                 disabled={disabled}
                 className={styles.formElement}
@@ -61,6 +62,7 @@ const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({ disabled, ini
 
             <div className={styles.sections}>
                 <Input
+                    size={'large'}
                     required={true}
                     disabled={disabled}
                     className={styles.formElement}
@@ -76,6 +78,7 @@ const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({ disabled, ini
                 />
 
                 <Input
+                    size={'large'}
                     required={true}
                     disabled={disabled}
                     className={styles.formElement}
@@ -88,6 +91,7 @@ const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({ disabled, ini
 
             <div className={styles.sections}>
                 <Input
+                    size={'large'}
                     required={true}
                     disabled={disabled}
                     className={styles.formElement}
@@ -103,6 +107,7 @@ const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({ disabled, ini
                 />
 
                 <Input
+                    size={'large'}
                     required={true}
                     disabled={disabled}
                     className={styles.formElement}
@@ -120,6 +125,7 @@ const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({ disabled, ini
 
             <div className={styles.sections}>
                 <Input
+                    size={'large'}
                     required={true}
                     disabled={disabled}
                     className={styles.formElement}
@@ -135,6 +141,7 @@ const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({ disabled, ini
                 />
 
                 <Input
+                    size={'large'}
                     required={true}
                     disabled={disabled}
                     className={styles.formElement}
@@ -144,6 +151,15 @@ const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({ disabled, ini
                     onChange={(e) => setFormData({ ...formData, yandexMap: e.target.value })}
                 />
             </div>
+
+            <textarea
+                disabled={disabled}
+                className={styles.formElement}
+                placeholder={'Описание'}
+                value={formData.content}
+                style={{ width: '100%' }}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+            />
 
             <div className={styles.imageSection}>
                 {!!initialData?.coverFileName && (
