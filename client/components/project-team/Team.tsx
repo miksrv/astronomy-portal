@@ -1,8 +1,7 @@
 import React from 'react'
+
 import Image, { StaticImageData } from 'next/image'
 import { useTranslation } from 'next-i18next'
-
-import styles from './styles.module.sass'
 
 import photoIgor from '@/public/photos/team-Igor.jpg'
 import photoMisha from '@/public/photos/team-Misha.jpg'
@@ -12,6 +11,8 @@ import photoTanya from '@/public/photos/team-Tanya.jpg'
 import photoVladimir from '@/public/photos/team-Vladimir.jpg'
 import photoZhenya from '@/public/photos/team-Zhenya.jpg'
 import Carousel from '@/ui/carousel'
+
+import styles from './styles.module.sass'
 
 type TeamMemberType = {
     name?: string

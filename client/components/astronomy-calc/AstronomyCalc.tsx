@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import Image from 'next/image'
-import { useTranslation } from 'next-i18next'
 import { Container } from 'simple-react-ui-kit'
 import SunCalc from 'suncalc'
 
-import styles from './styles.module.sass'
+import Image from 'next/image'
+import { useTranslation } from 'next-i18next'
 
 import MoonPhaseIcon from '@/components/moon-phase-icon'
 import { formatDate } from '@/tools/helpers'
+
+import styles from './styles.module.sass'
 
 const LAT = process.env.NEXT_PUBLIC_LAT ?? 51.7
 const LON = process.env.NEXT_PUBLIC_LON ?? 55.2

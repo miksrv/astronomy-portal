@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { useTranslation } from 'next-i18next'
 import { Button, cn, Container, Message, Spinner } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
+import { useTranslation } from 'next-i18next'
 
 import { API, ApiType, useAppSelector } from '@/api'
+
+import styles from './styles.module.sass'
 
 interface RelayListItemProps {
     id: number
@@ -132,9 +133,9 @@ export const RelayList: React.FC = () => {
                                 countdownTimer > 0 ||
                                 relayList?.items?.[1]?.state === 1
                             }
-                            onClick={() => {
+                            onClick={async () => {
                                 if (countdownTimer === 0) {
-                                    setLightOn()
+                                    await setLightOn()
                                 }
                             }}
                         >

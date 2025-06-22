@@ -1,15 +1,16 @@
 import React from 'react'
 import dayjs, { Dayjs } from 'dayjs'
-import Image from 'next/image'
 import { cn, Icon } from 'simple-react-ui-kit'
 import SunCalc from 'suncalc'
 
-import styles from './styles.module.sass'
+import Image from 'next/image'
 
 import { ApiModel } from '@/api'
 import MoonPhaseIcon from '@/components/moon-phase-icon'
 import SunIcon from '@/public/images/sun.png'
 import { formatDate } from '@/tools/helpers'
+
+import styles from './styles.module.sass'
 
 const LAT = process.env.NEXT_PUBLIC_LAT ?? 51.7
 const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
@@ -17,6 +18,7 @@ const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
 interface RenderCalendarProps {
     calendarDate: Date | Dayjs
     eventsWeather?: ApiModel.Weather[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     eventsTelescope?: any[] // ApiModel.Statistic.Telescope[]
 }
 
@@ -149,8 +151,8 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
     }
 
     const totalSlots = [...blanks, ...daysMonth]
-    const rows: any = []
-    let cells: any = []
+    const rows: React.ReactNode[] = []
+    let cells: React.ReactNode[] = []
 
     totalSlots.forEach((row, i) => {
         if (i % 7 !== 0) {
@@ -165,6 +167,7 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
         }
     })
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return rows.map((d: any, key: number) => {
         if (!d.length) {
             return null
@@ -174,7 +177,7 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
             for (let i = d.length; i < 7; i++) {
                 d.push(
                     <td
-                        key={`last${i}`}
+                        key={`last${i as number}`}
                         className={cn(styles.calendarDay, styles.empty)}
                     ></td>
                 )

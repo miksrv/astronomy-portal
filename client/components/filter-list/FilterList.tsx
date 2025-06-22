@@ -1,10 +1,11 @@
 import React from 'react'
-import { useTranslation } from 'next-i18next'
 
-import styles from './styles.module.sass'
+import { useTranslation } from 'next-i18next'
 
 import { ApiModel } from '@/api'
 import { getFilterColor } from '@/tools/colors'
+
+import styles from './styles.module.sass'
 
 interface FilterListProps {
     filters?: ApiModel.Filters

@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import NextNProgress from 'nextjs-progressbar'
 import { cn, Dialog } from 'simple-react-ui-kit'
 
-import { Menu } from './Menu'
-import styles from './styles.module.sass'
+import NextNProgress from 'nextjs-progressbar'
 
 import { useAppDispatch, useAppSelector } from '@/api'
 import { closeAuthDialog } from '@/api/applicationSlice'
 import AppHeader from '@/components/app-header'
 import LoginForm from '@/components/login-form'
+
+import { Menu } from './Menu'
+
+import styles from './styles.module.sass'
 
 interface AppLayoutProps {
     fullWidth?: boolean
@@ -18,7 +20,7 @@ interface AppLayoutProps {
 const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
     const dispatch = useAppDispatch()
 
-    const application = useAppSelector((store) => store.application)
+    const { showOverlay, showAuthDialog } = useAppSelector((store) => store.application)
 
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
 
@@ -35,7 +37,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
     }
 
     useEffect(() => {
-        if (application.showOverlay || sidebarOpen) {
+        if (showOverlay || sidebarOpen) {
             document.body.style.overflow = 'hidden'
         } else {
             document.body.style.overflow = 'auto'
@@ -44,7 +46,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
         return () => {
             document.body.style.overflow = 'auto'
         }
-    }, [application.showOverlay, sidebarOpen])
+    }, [showOverlay, sidebarOpen])
 
     return (
         <div className={styles.appLayout}>
@@ -56,10 +58,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
             <div
                 role={'button'}
                 tabIndex={0}
-                className={cn(
-                    styles.overlay,
-                    application.showOverlay || sidebarOpen ? styles.displayed : styles.hidden
-                )}
+                className={cn(styles.overlay, showOverlay || sidebarOpen ? styles.displayed : styles.hidden)}
                 onKeyDown={handleCloseOverlay}
                 onClick={handleCloseOverlay}
             />
@@ -79,7 +78,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children }) => {
             <main className={cn(styles.mainContainer, fullWidth && styles.fullWidth)}>{children}</main>
 
             <Dialog
-                open={application.showAuthDialog}
+                open={showAuthDialog}
                 onCloseDialog={handleCloseAuthDialog}
                 maxWidth={'400px'}
             >

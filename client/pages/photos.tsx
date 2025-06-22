@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import uniq from 'lodash-es/uniq'
+import { Button, Dropdown, Input } from 'simple-react-ui-kit'
+
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { Button, Dropdown, Input } from 'simple-react-ui-kit'
 
 import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'

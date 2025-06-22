@@ -1,6 +1,7 @@
 import React from 'react'
-import Link from 'next/link'
 import { cn } from 'simple-react-ui-kit'
+
+import Link from 'next/link'
 
 import styles from './styles.module.sass'
 

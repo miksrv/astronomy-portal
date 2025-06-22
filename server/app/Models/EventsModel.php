@@ -61,15 +61,30 @@ class EventsModel extends ApplicationBaseModel
      * It queries the database for events with a date greater than or equal to the current
      * timestamp and orders the results in descending order by date to fetch the soonest event.
      *
+     * @param string $locale The locale for localization of event titles and contents (default is 'ru').
      * @return EventEntity|null The upcoming event entity if found; otherwise, null.
      */
-    public function getUpcomingEvent(): ?EventEntity
+    public function getUpcomingEvent(string $locale = 'ru'): ?EventEntity
     {
+        helper('locale');
+
         $datetime = new Time('now');
-        return $this
+
+        $event = $this
             ->where('date >=', $datetime->format('Y-m-d H:m:s'))
             ->orderBy('date', 'DESC')
             ->first();
+
+        $event->title = getLocalizedString($locale, $event->title_en, $event->title_ru);
+        $event->content = getLocalizedString($locale, $event->content_en, $event->content_ru);
+
+        // Remove unnecessary fields
+        unset(
+            $event->title_en, $event->title_ru,
+            $event->content_en, $event->content_ru
+        );
+
+        return $event;
     }
 
     /**

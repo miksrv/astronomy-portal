@@ -1,14 +1,15 @@
 import React, { useMemo } from 'react'
-import { useTranslation } from 'next-i18next'
 import { ColumnProps, Container, Table } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
+import { useTranslation } from 'next-i18next'
 
 import { ApiModel } from '@/api'
 import MoonPhaseIcon from '@/components/moon-phase-icon'
 import { getFilterColor } from '@/tools/colors'
 import { formatDate } from '@/tools/helpers'
 import { getMoonIllumination } from '@/tools/moon'
+
+import styles from './styles.module.sass'
 
 export type FlattenedFile = Omit<ApiModel.File, 'date'> & {
     date?: string
@@ -36,7 +37,7 @@ const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({ filesList, loading 
         [filesList]
     )
 
-    const tableColumns: ColumnProps<FlattenedFile>[] = [
+    const tableColumns: Array<ColumnProps<FlattenedFile>> = [
         {
             accessor: 'date',
             formatter: (date) => (date ? formatDate(date as string) : ''),

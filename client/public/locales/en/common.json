@@ -33,6 +33,7 @@
     "search-by-object": "Search by object",
     "authorization-on-site": "Authorization",
     "sign-in": "Sign in",
+    "logout": "Logout",
     "gain": "Gain",
     "offset": "Offset",
     "date": "Date",
@@ -370,6 +371,20 @@
         "frames_other": "{{count}} frames",
         "times_one": "{{count}} time",
         "times_other": "{{count}} times"
+    },
+    "time": {
+        "day_1": "day",
+        "day_2": "days",
+        "day_5": "days",
+        "hour_1": "hour",
+        "hour_2": "hours",
+        "hour_5": "hours",
+        "minute_1": "minute",
+        "minute_2": "minutes",
+        "minute_5": "minutes",
+        "second_1": "second",
+        "second_2": "seconds",
+        "second_5": "seconds"
     },
     "filters": {
         "luminance": "L",

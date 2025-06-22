@@ -1,14 +1,15 @@
 import React from 'react'
+import { Container } from 'simple-react-ui-kit'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
-import { Container } from 'simple-react-ui-kit'
-
-import styles from './styles.module.sass'
 
 import { ApiModel } from '@/api'
 import { getTimeFromSec } from '@/tools/helpers'
 import { createMediumPhotoUrl, createPhotoTitle } from '@/tools/photos'
+
+import styles from './styles.module.sass'
 
 interface PhotoGridProps {
     photosList?: ApiModel.Photo[]

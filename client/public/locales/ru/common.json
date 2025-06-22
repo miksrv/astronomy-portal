@@ -33,6 +33,7 @@
     "search-by-object": "Поиск по объекту",
     "authorization-on-site": "Авторизация на сайте",
     "sign-in": "Войти",
+    "logout": "Выйти",
     "gain": "Усиление",
     "offset": "Смещение",
     "date": "Дата",
@@ -373,6 +374,20 @@
         "times_one": "{{count}} раз",
         "times_few": "{{count}} раза",
         "times_many": "{{count}} раз"
+    },
+    "time": {
+        "day_1": "день",
+        "day_2": "дня",
+        "day_5": "дней",
+        "hour_1": "час",
+        "hour_2": "часа",
+        "hour_5": "часов",
+        "minute_1": "минута",
+        "minute_2": "минуты",
+        "minute_5": "минут",
+        "second_1": "секунда",
+        "second_2": "секунды",
+        "second_5": "секунд"
     },
     "filters": {
         "luminance": "L",

@@ -1,16 +1,17 @@
 import React, { useMemo } from 'react'
+import { ColumnProps, Container, ContainerProps, Table } from 'simple-react-ui-kit'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
-import { ColumnProps, Container, ContainerProps, Table } from 'simple-react-ui-kit'
-
-import styles from './styles.module.sass'
 
 import { ApiModel } from '@/api'
 import { getFilterColor } from '@/tools/colors'
 import { formatDate } from '@/tools/dates'
 import { formatSecondsToExposure } from '@/tools/helpers'
 import { createPhotoTitle, createSmallPhotoUrl } from '@/tools/photos'
+
+import styles from './styles.module.sass'
 
 interface ObjectPhotoTableProps extends ContainerProps {
     photosList?: ApiModel.Photo[]
@@ -39,7 +40,7 @@ const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, current
 
     const flattenedPhotos = useMemo(() => flattenPhotos(photosList), [photosList])
 
-    const tableColumns: ColumnProps<FlattenedPhoto>[] = useMemo(
+    const tableColumns: Array<ColumnProps<FlattenedPhoto>> = useMemo(
         () => [
             {
                 accessor: 'photo',

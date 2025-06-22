@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Container, Input, MultiSelect } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
-
 import { API, ApiModel } from '@/api'
 import StarMap from '@/components/star-map'
+
+import styles from './styles.module.sass'
 
 export type AstroObjectFormType = Partial<Omit<ApiModel.Object, 'updated' | 'statistic' | 'filters'>> & {
     image?: string

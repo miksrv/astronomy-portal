@@ -1,13 +1,14 @@
 import React from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
 import { Container } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
+import Image from 'next/image'
+import Link from 'next/link'
 
 import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
 import { formatDate } from '@/tools/helpers'
+
+import styles from './styles.module.sass'
 
 interface EventsListItemProps {
     event: ApiModel.Event

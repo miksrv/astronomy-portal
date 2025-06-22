@@ -1,9 +1,10 @@
 import React from 'react'
+import { Container } from 'simple-react-ui-kit'
+
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { Container } from 'simple-react-ui-kit'
 
 import { API, SITE_LINK } from '@/api'
 import { setLocale } from '@/api/applicationSlice'

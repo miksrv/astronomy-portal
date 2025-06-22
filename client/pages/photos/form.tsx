@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
+import { Message } from 'simple-react-ui-kit'
+
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { Message } from 'simple-react-ui-kit'
 
 import { API, ApiModel, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
@@ -59,7 +60,7 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
         }
     ] = API.usePhotosPostUploadMutation()
 
-    const handleSubmit = (data?: AstroPhotoFormType) => {
+    const handleSubmit = async (data?: AstroPhotoFormType) => {
         if (!data) {
             return
         }
@@ -70,9 +71,9 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
         setFormFile(data?.upload)
 
         if (updatedFormData?.id) {
-            updatePhoto(updatedFormData)
+            await updatePhoto(updatedFormData)
         } else {
-            createPhoto(updatedFormData)
+            await createPhoto(updatedFormData)
         }
     }
 
@@ -84,7 +85,7 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
 
     useEffect(() => {
         if (userRole !== 'admin') {
-            router.push('/photos')
+            void router.push('/photos')
         }
     }, [userRole])
 
@@ -102,7 +103,7 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
             const formDataObject = new FormData()
             formDataObject.append('id', formData?.id || photoData?.id || '')
             formDataObject.append('file', formFile)
-            uploadPhoto(formDataObject)
+            void uploadPhoto(formDataObject)
         }
     }, [formData?.id, photoData?.id, formFile])
 

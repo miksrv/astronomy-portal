@@ -1,10 +1,11 @@
 import React from 'react'
+import { Container } from 'simple-react-ui-kit'
+
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { Container } from 'simple-react-ui-kit'
 
 import { SITE_LINK } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
@@ -12,6 +13,11 @@ import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
+
+type FAQItem = {
+    question: string
+    answer: string
+}
 
 type StargazingFAQPageProps = object
 
@@ -60,8 +66,8 @@ const StargazingFAQPage: NextPage<StargazingFAQPageProps> = () => {
                 {(
                     t('stargazing-faq-page.questions', {
                         returnObjects: true
-                    }) as any[]
-                ).map((item: any, index: number) => (
+                    }) as FAQItem[]
+                ).map((item: FAQItem, index: number) => (
                     <div key={index}>
                         <h3 style={{ marginTop: 10 }}>{item.question}</h3>
                         <p style={{ margin: 0 }}>{item.answer}</p>

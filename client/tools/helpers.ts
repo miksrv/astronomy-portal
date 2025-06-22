@@ -15,11 +15,11 @@ export const sliceText = (text: string, length: number = 350): string => {
 /**
  * Returns the correct word for plural
  * Example: declOfNum(5, ['кадр', 'кадра', 'кадров']) = '5 кадров'
- * @param number
- * @param words
+ * @param n
+ * @param forms
  */
-export const declOfNum = (number: number, words: string[]) =>
-    words[number % 100 > 4 && number % 100 < 20 ? 2 : [2, 0, 1, 1, 1, 2][number % 10 < 5 ? number % 10 : 5]]
+export const declOfNum = (n: number, forms: [string, string, string]): string =>
+    forms[n % 10 === 1 && n % 100 !== 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2]
 
 /**
  * Returns the formatted time elapsed since the beginning of the event

@@ -1,14 +1,15 @@
 import { HYDRATE } from 'next-redux-wrapper'
-
-import { RootState } from './store'
-
-import { ApiModel, ApiType } from '@/api'
-import { AstroStargazingFormType } from '@/components/astro-stargazing-form'
 import type { Action, PayloadAction } from '@reduxjs/toolkit'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
+import { ApiModel, ApiType } from '@/api'
+import { AstroStargazingFormType } from '@/components/astro-stargazing-form'
+
+import { RootState } from './store'
+
 type Maybe<T> = T | void
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const encodeQueryData = (data: any): string => {
     const ret = []
     for (const d in data) {
@@ -146,7 +147,7 @@ export const API = createApi({
             query: (formData) => ({
                 body: formData,
                 method: 'POST',
-                url: `events/${formData.get('id')}/upload`
+                url: `events/${formData.get('id') as string}/upload`
             }),
             transformErrorResponse: (response) => response.data
         }),
@@ -256,7 +257,7 @@ export const API = createApi({
             query: (formData) => ({
                 body: formData,
                 method: 'POST',
-                url: `photos/${formData.get('id')}/upload`
+                url: `photos/${formData.get('id') as string}/upload`
             }),
             transformErrorResponse: (response) => response.data
         }),
@@ -325,9 +326,10 @@ export const API = createApi({
             query: (params) => `statistic/telescope${encodeQueryData(params)}`
         })
     }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     extractRehydrationInfo(action, { reducerPath }): any {
         if (isHydrateAction(action)) {
-            return action.payload[reducerPath]
+            return action?.payload?.[reducerPath]
         }
     },
     reducerPath: 'api',

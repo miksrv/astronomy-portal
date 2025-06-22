@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
@@ -85,7 +86,8 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = () => {
                 />
             </div>
 
-            <Calendar eventsTelescope={data?.items} />
+            {/*eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
+            <Calendar eventsTelescope={data?.items as any[]} />
 
             <AppFooter />
         </AppLayout>

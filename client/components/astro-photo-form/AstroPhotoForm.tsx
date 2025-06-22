@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import Image from 'next/image'
 import { Button, Container, Dropdown, Input, MultiSelect } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
+import Image from 'next/image'
 
 import { API, ApiModel } from '@/api'
 import { getFilterColor } from '@/tools/colors'
 import { createLargePhotoUrl } from '@/tools/photos'
 import { formatObjectName } from '@/tools/strings'
+
+import styles from './styles.module.sass'
 
 export type AstroPhotoFormType = Partial<ApiModel.Photo> & {
     upload?: File
@@ -72,8 +73,8 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initialData, 
         })
     }
 
-    const handleImageUpload = (e: any) => {
-        setFormData({ ...formData, upload: e.target.files[0] })
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, upload: e?.target?.files?.[0] })
     }
 
     const handleSubmit = () => {
@@ -99,6 +100,7 @@ const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initialData, 
                         }
                         return acc
                     },
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     {} as Record<ApiModel.FilterTypes, any>
                 )
             })
