@@ -22,12 +22,20 @@ type RootReducerState = ReturnType<typeof combinedReducer>
 const rootReducer: (state: RootReducerState | undefined, action: AnyAction) => RootReducerState = (state, action) => {
     if (action.type === HYDRATE) {
         return {
-            ...state,
+            ...state, // old client state
+
+            // application can be hydrated
             application:
                 action.payload.application ??
                 state?.application ??
                 combinedReducer(undefined, { type: '' }).application,
-            auth: action.payload.auth ?? state?.auth ?? combinedReducer(undefined, { type: '' }).auth,
+
+            // DO NOT touch auth if there is nothing in payload
+            auth:
+                action.payload.auth?.token || action.payload.auth?.isAuth
+                    ? action.payload.auth
+                    : (state?.auth ?? combinedReducer(undefined, { type: '' }).auth),
+
             [API.reducerPath]: {
                 ...state?.[API.reducerPath],
                 ...action.payload[API.reducerPath]
