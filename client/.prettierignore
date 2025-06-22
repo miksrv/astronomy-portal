@@ -1,14 +1,11 @@
+.next
 .vscode
 .github
 .yarn
-*.topojson
-*.json
 *.css
-*.js
 README.md
 eslint.config.mjs
-rollup.config.js
 site.webmanifest
 node_modules
-dist
+out
 coverage

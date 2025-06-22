@@ -2,7 +2,7 @@ import globals from 'globals'
 import pluginJs from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import importPlugin from 'eslint-plugin-import'
-// import nextPlugin from '@next/eslint-plugin-next'
+import nextPlugin from '@next/eslint-plugin-next'
 // import nextCoreWebVitals from '@next/core-web-vitals';
 import jestPlugin from 'eslint-plugin-jest'
 import { fixupConfigRules } from '@eslint/compat'
@@ -19,7 +19,7 @@ export default [
             ['eslint-comments']: eslintCommentsPlugin,
             ['import']: importPlugin,
             ['jest']: jestPlugin,
-            // ['next']: nextPlugin,
+            ['next']: nextPlugin,
             // ['jsx-a11y']: jsxA11yPlugin,
             // ['react-hooks']: reactHooksPlugin,
             // ['react']: reactPlugin,
@@ -34,41 +34,23 @@ export default [
             '**/.yarn/**',
             '**/eslint.config.mjs',
             '**/eslint.config.js',
-            '**/eslint.config.cjs',
-            '**/declarations.d.ts',
+            '**/jest.config.ts',
             '**/node_modules/**',
-            '**/build/**',
             '**/dist/**',
             '**/fixtures/**',
             '**/coverage/**',
             '**/__snapshots__/**',
             '**/.docusaurus/**',
-
-            // WebPack
-            // '**/webpack.config.js',
-
-            // RollUp
-            // '**/rollup.config.js',
-
+            '**/build/**',
             // PM2 Server
             '**/ecosystem.config.js',
-
             // NextJS
             '**/next-i18next.config.js',
             '**/next.config.js',
             '**/.next/**',
-            '**/public/**',
+            '**/out/**',
             '**/next-env.d.ts',
-            '**/middleware.ts',
-
-            // Storybook
-            '**/.storybook/main.js',
-            '**/.storybook/preview.js',
-            '**/storybook-static/',
-
-            // Jest
-            '**/jest.config.ts',
-            '**/jest.setup.ts'
+            '**/middleware.ts'
         ]
     },
 
@@ -93,14 +75,14 @@ export default [
                     // in the rare case that we do - just need to manually restart their IDE.
                     glob: 'Infinity'
                 },
-                project: ['eslint.tsconfig.json'],
+                project: ['tsconfig.json'],
                 warnOnUnsupportedTypeScriptVersion: false
             }
         },
 
         settings: {
             react: {
-                version: 'detect'
+                version: 'detect',
             }
         },
 
@@ -209,12 +191,12 @@ export default [
             // eslint-plugin-eslint-comment
             //
             // require a eslint-enable comment for every eslint-disable comment
-            // 'eslint-comments/disable-enable-pair': [
-            //     'error',
-            //     {
-            //         allowWholeFile: true
-            //     }
-            // ],
+            'eslint-comments/disable-enable-pair': [
+                'error',
+                {
+                    allowWholeFile: true
+                }
+            ],
             // disallow a eslint-enable comment for multiple eslint-disable comments
             'eslint-comments/no-aggregating-enable': 'error',
             // disallow duplicate eslint-disable comments
@@ -243,30 +225,30 @@ export default [
             // react
             //
             'react/prop-types': 'off',
-            'react/jsx-max-props-per-line': [1, { when: 'always' }],
+            'react/jsx-max-props-per-line': [1, { 'when': 'always' }],
 
             //
             // next
             //
-            // 'next/google-font-display': 'warn',
-            // 'next/google-font-preconnect': 'warn',
-            // 'next/next-script-for-ga': 'warn',
-            // 'next/no-async-client-component': 'warn',
-            // 'next/no-before-interactive-script-outside-document': 'warn',
-            // 'next/no-css-tags': 'warn',
-            // 'next/no-head-element': 'warn',
-            // 'next/no-html-link-for-pages': 'warn',
+            'next/google-font-display': 'warn',
+            'next/google-font-preconnect': 'warn',
+            'next/next-script-for-ga': 'warn',
+            'next/no-async-client-component': 'warn',
+            'next/no-before-interactive-script-outside-document': 'warn',
+            'next/no-css-tags': 'warn',
+            'next/no-head-element': 'warn',
+            'next/no-html-link-for-pages': 'warn',
             // 'next/no-img-element': 'warn',
-            // 'next/no-styled-jsx-in-document': 'warn',
-            // 'next/no-sync-scripts': 'warn',
-            // 'next/no-title-in-document-head': 'warn',
-            // 'next/no-typos': 'warn',
-            // 'next/no-unwanted-polyfillio': 'warn',
-            // 'next/inline-script-id': 'error',
-            // 'next/no-assign-module-variable': 'error',
-            // 'next/no-document-import-in-page': 'error',
-            // 'next/no-head-import-in-document': 'error',
-            // 'next/no-script-component-in-head': 'error',
+            'next/no-styled-jsx-in-document': 'warn',
+            'next/no-sync-scripts': 'warn',
+            'next/no-title-in-document-head': 'warn',
+            'next/no-typos': 'warn',
+            'next/no-unwanted-polyfillio': 'warn',
+            'next/inline-script-id': 'error',
+            'next/no-assign-module-variable': 'error',
+            'next/no-document-import-in-page': 'error',
+            'next/no-head-import-in-document': 'error',
+            'next/no-script-component-in-head': 'error',
 
             //
             // eslint-plugin-import
@@ -297,7 +279,7 @@ export default [
             // Forbid a module from importing itself
             'import/no-self-import': 'error',
             // Require modules with a single export to use a default export
-            'import/prefer-default-export': 'off' // we want everything to be named
+            'import/prefer-default-export': 'off', // we want everything to be named
         }
     },
 
@@ -330,12 +312,12 @@ export default [
                         // Other relative imports. Put same-folder imports and `.` last.
                         ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
                         // Style imports.
-                        ['^.+\\.?(css,sass)$']
+                        ['^.+\\.?(css,sass)$'],
                         // SASS modules
-                    ]
-                }
-            ]
-        }
+                    ],
+                },
+            ],
+        },
     },
 
     //
