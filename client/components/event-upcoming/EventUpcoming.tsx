@@ -1,8 +1,8 @@
-import React from 'react'
-import Markdown from 'react-markdown'
+import React, {useEffect, useMemo, useState} from 'react'
 import dayjs from 'dayjs'
 import Image from 'next/image'
-import { Button, Container, Spinner } from 'simple-react-ui-kit'
+import {useTranslation} from 'next-i18next'
+import {Button, Container, ContainerProps, Dialog, Icon} from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
@@ -10,162 +10,170 @@ import { API, ApiModel, useAppSelector } from '@/api'
 import { hosts } from '@/api/constants'
 import EventBookingForm from '@/components/event-booking-form'
 import LoginForm from '@/components/login-form'
-import { formatUTCDate, getTimeFromSec } from '@/tools/helpers'
+import {formatUTCDate, getLocalizedTimeFromSec, getSecondsUntilUTCDate} from '@/tools/dates'
+// TODO: Remove from all components
+// import { getTimeFromSec } from '@/tools/helpers'
 
-type EventBookingFormProps = object
+interface EventBookingFormProps extends ContainerProps {
+    event?: ApiModel.Event
+}
 
-const EventUpcoming: React.FC<EventBookingFormProps> = () => {
+const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => {
+    const { t } = useTranslation()
+
     const user = useAppSelector((state) => state.auth.user)
 
-    // const [confirmation, showConfirmation] = useState<boolean>(false)
+    const [registered, setRegistered] = useState<boolean>(false)
+    const [canceled, setCanceled] = useState<boolean>(false)
+    const [confirmation, showConfirmation] = useState<boolean>(false)
 
-    const { data, isFetching, isLoading: upcomingLoading } = API.useEventGetUpcomingQuery()
-    // const [{ isLoading }] = API.useEventsCancelRegistrationPostMutation() // cancelRegistration
+    // const { data, isFetching, isLoading: upcomingLoading } = API.useEventGetUpcomingQuery()
+    const [cancelRegistration, { isLoading }] = API.useEventsCancelRegistrationPostMutation()
 
-    // const handleCancelRegistration = () => {
-    //     cancelRegistration({ eventId: data?.id || '' })
-    //     showConfirmation(false)
-    // }
+    const handleCancelRegistration = () => {
+        cancelRegistration({ eventId: event?.id || '' })
+        showConfirmation(false)
+        setCanceled(true)
+    }
 
-    const checkAvailabilityRegistration = (event?: ApiModel.Event) => {
+    const secondsUntilRegistrationStart = getSecondsUntilUTCDate(event?.registrationStart?.date) || 0
+    const secondsUntilRegistrationEnd = getSecondsUntilUTCDate(event?.registrationEnd?.date) || 0
+
+    const registrationAvailable = useMemo(() => {
         // Закончились слоты для регистрации
         if (event?.availableTickets === 0) {
             return false
         }
 
         // Дата регистрации еще не наступила
-        if (dayjs.utc(event?.registrationStart?.date).local().diff(dayjs()) >= 0) {
+        if (secondsUntilRegistrationStart >= 0) {
             return false
         }
 
         // Дата регистрации уже закончилась
-        if (dayjs.utc(event?.registrationEnd?.date).local().diff(dayjs()) <= 0) {
+        if (secondsUntilRegistrationEnd <= 0) {
             return false
         }
 
         // Дата мероприятия уже наступило
-        if (dayjs.utc(event?.date?.date).local().diff(dayjs()) <= 0) {
+        if ((getSecondsUntilUTCDate(event?.date?.date) || 0) <= 0) {
             return false
         }
 
         return true
-    }
+    }, [event, secondsUntilRegistrationStart, secondsUntilRegistrationEnd])
 
-    return data?.id ? (
-        <Container>
-            {upcomingLoading && (
-                <div
-                    className={'box'}
-                    style={{
-                        height: 200,
-                        marginBottom: '15px',
-                        marginTop: '15px',
-                        width: '100%'
-                    }}
-                >
-                    <Spinner />
-                </div>
-            )}
+    useEffect(() => {
+        setRegistered(event?.registered || false)
+        setCanceled(event?.canceled || false)
+    }, [event?.registered, event?.canceled])
 
+    return event?.id ? (
+        <Container {...props}>
             <div className={styles.upcomingEvent}>
                 <div className={styles.imageContainer}>
                     <Image
-                        className={'stargazingImage'}
-                        src={`${hosts.stargazing}${data?.id}/${data?.coverFileName}.${data?.coverFileExt}`}
-                        alt={`Астровыезд: ${data?.title}`}
+                        className={styles.blur}
+                        src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
+                        alt={''}
+                        fill={true}
+                    />
+
+                    <Image
+                        className={styles.image}
+                        src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
+                        alt={`Астровыезд: ${event?.title}`}
                         width={1024}
                         height={768}
                     />
                 </div>
+
                 <div className={styles.stargazing}>
-                    <h2 className={styles.title}>{data?.title}</h2>
-                    <div className={styles.date}>{formatUTCDate(data?.date?.date, 'D MMMM, YYYY г., H:mm')}</div>
+                    <h2 className={styles.title}>{event?.title}</h2>
 
-                    {dayjs.utc(data?.registrationEnd?.date).local().diff(dayjs()) > 0 &&
-                        data?.availableTickets === 0 &&
-                        !data?.registered && (
-                            <div
-                                style={{
-                                    marginTop: '40px'
-                                }}
-                                className={styles.bookingLogin}
-                            >
-                                <h3>К сожалению, места закончились</h3>
-                                <p>Пожалуйста, дождитесь нашего следующего мероприятия!</p>
-                            </div>
-                        )}
+                    <div className={styles.infoSection}>
+                        <Icon
+                            name={'Bell'}
+                            className={styles.icon}
+                        />
+                        {formatUTCDate(event?.date?.date, 'D MMMM, YYYY')}
+                    </div>
 
-                    {dayjs.utc(data?.registrationStart?.date).local().diff(dayjs()) >= 0 && (
-                        <div className={styles.bookingLogin}>
-                            <br />
-                            <h3
-                                style={{
-                                    marginBottom: 0,
-                                    marginTop: '50px'
-                                }}
-                            >
-                                До начала регистрации осталось
-                            </h3>
-                            <h3>
-                                {getTimeFromSec(
-                                    dayjs.utc(data?.registrationStart?.date).local().diff(dayjs(), 'second'),
-                                    true
-                                )}
-                            </h3>
+                    <div className={styles.infoSection}>
+                        <Icon
+                            name={'Time'}
+                            className={styles.icon}
+                        />
+                        {formatUTCDate(event?.date?.date, 'H:mm')}
+                    </div>
+
+                    <div className={styles.infoSection}>
+                        <Icon
+                            name={'Point'}
+                            className={styles.icon}
+                        />
+                        {'Оренбургский район (40 км от города)'}
+                    </div>
+
+                    <div className={styles.infoSectionNotification}>
+                        <div>{'Указано местное Оренбургское время (UTC+5)'}</div>
+                        <div>{'Точное место проведения мероприятия будет доступно после регистрации'}</div>
+                    </div>
+
+                    {/* If registration has already started AND there are no more places AND the user is not registered */}
+                    {secondsUntilRegistrationStart < 0 && event?.availableTickets === 0 && !registered && (
+                        <div className={styles.infoBlock}>
+                            <h3>К сожалению, все места закончились</h3>
                             <p>
-                                После начала регистрации появится форма, заполнив которую, вы сможете принять участие в
-                                нашем мероприятии!
+                                Дополнительные места могут появиться, если кто-то отменит свою регистриацию. Или просто
+                                дождитесь следующего мероприятия
                             </p>
                         </div>
                     )}
 
-                    {dayjs.utc(data?.registrationEnd?.date).local().diff(dayjs()) <= 0 && (
-                        <div
-                            style={{
-                                marginTop: '40px'
-                            }}
-                            className={styles.bookingLogin}
-                        >
-                            <h3>Регистрация на мероприятие завершена</h3>
+                    {/* If registration has not started yet */}
+                    {secondsUntilRegistrationStart >= 0 && secondsUntilRegistrationEnd > 0 && (
+                        <div className={styles.bookingLogin}>
+                            <h3>{'Регистрация на астровыезд откроется через'}{' '}{getLocalizedTimeFromSec(secondsUntilRegistrationStart, true, t)}</h3>
                         </div>
                     )}
 
-                    {/*<div>*/}
-                    {/*    До конца регистрации дней:{' '}*/}
-                    {/*    {dayjs*/}
-                    {/*        .utc(data?.registrationEnd?.date)*/}
-                    {/*        .local()*/}
-                    {/*        .diff(dayjs(), 'day')}*/}
-                    {/*</div>*/}
+                    {/* If registration has ended */}
+                    {secondsUntilRegistrationEnd <= 0 && (
+                        <div className={styles.bookingLogin}>
+                            <h3>Регистрация на астровыезд завершена</h3>
+                            <p>Пожалуйста дождитесь нашего следующего астровыезда, что бы его не пропустить - подпишитесь на Telegram канал</p>
+                        </div>
+                    )}
 
-                    {/*{dayjs*/}
-                    {/*    .utc(data?.date?.date)*/}
-                    {/*    .local()*/}
-                    {/*    .diff(dayjs()) <= 0 && (*/}
-                    {/*    <div>Дата мероприятия уже наступило</div>*/}
-                    {/*)}*/}
-
-                    {checkAvailabilityRegistration(data) ? (
+                    {/* If registration is available */}
+                    {registrationAvailable ? (
                         <div>
                             {!user?.id && (
                                 <div className={styles.bookingLogin}>
-                                    <h3>{'Для бронирования войдите под своей учетной записью'}</h3>
+                                    <h3>{'Для регистрации на астровыезд войдите под своей учетной записью'}</h3>
                                     <LoginForm />
                                 </div>
                             )}
 
-                            {user?.id && !data?.registered && <EventBookingForm eventId={data?.id} />}
+                            {user?.id && !registered &&
+                                <EventBookingForm
+                                    eventId={event?.id}
+                                    onSuccessSubmit={() => {
+                                        setRegistered(true)
+                                    }}
+                                />
+                            }
                         </div>
-                    ) : !data?.registered ? (
+                    ) : !registered ? (
                         <div>
                             {!user?.id && (
                                 <div
                                     style={{
-                                        margin: '10px auto',
+                                        margin: '0 auto',
                                         width: '80%'
                                     }}
                                 >
-                                    <p>Войдите под своей учетной записью, чтобы не пропустить следующее мероприятие</p>
                                     <LoginForm />
                                 </div>
                             )}
@@ -174,61 +182,49 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                         ''
                     )}
 
-                    {user?.id && data?.registered && !data?.canceled && (
+                    {/* If user is registered and event is not canceled */}
+                    {user?.id && registered && !canceled && secondsUntilRegistrationStart <= 0 && (
                         <div className={styles.registered}>
-                            <h3>Вы зарегистрированы на мероприятие</h3>
-                            <p>
-                                Приезжайте <b>{formatUTCDate(data?.date?.date, 'D MMMM YYYY г.')}</b> к{' '}
-                                <b>{formatUTCDate(data?.date?.date, 'H:mm')}</b> часам
-                                <br />
+                            <h3>{'Вы зарегистрированы'}</h3>
+
+                            <div>
+                                Приезжайте <b>{formatUTCDate(event?.date?.date, 'D MMMM YYYY г.')}</b> к{' '}
+                                <b>{formatUTCDate(event?.date?.date, 'H:mm')}</b> часам
                                 на место проведения мероприятия: Оренбургский район, г. Горюн (40 км от центра
-                                Оренбурга)
-                            </p>
-                            <p>
-                                <strong style={{ color: 'red' }}>
-                                    Используйте ссылки ниже, чтобы найти точное местоположение проведения мероприятия:
-                                </strong>
-                            </p>
+                                Оренбурга), откройте карту ниже:
+                            </div>
+
                             <div className={styles.mapLinks}>
                                 <a
-                                    style={{
-                                        fontSize: '16px'
-                                    }}
-                                    href={data?.yandexMap}
+                                    href={event?.yandexMap}
                                     title={'Ссылка на Яндекс Картах'}
-                                    target='_blank'
-                                    rel='noreferrer'
+                                    target={'_blank'}
+                                    rel={'noreferrer'}
                                 >
                                     Яндекс Карты
                                 </a>
                                 <a
-                                    style={{
-                                        fontSize: '16px'
-                                    }}
-                                    href={data?.googleMap}
+                                    href={event?.googleMap}
                                     title={'Ссылка на Google Картах'}
-                                    target='_blank'
-                                    rel='noreferrer'
+                                    target={'_blank'}
+                                    rel={'noreferrer'}
                                 >
                                     Google Карты
                                 </a>
                             </div>
 
-                            {!(dayjs.utc(data?.registrationEnd?.date).local().diff(dayjs()) <= 0) &&
-                                !(dayjs.utc(data?.date?.date).local().diff(dayjs()) <= 0) && (
+                            {!(dayjs.utc(event?.registrationEnd?.date).local().diff(dayjs()) <= 0) &&
+                                !(dayjs.utc(event?.date?.date).local().diff(dayjs()) <= 0) && (
                                     <div className={styles.cancelRegistration}>
-                                        <p style={{ fontWeight: '100' }}>
-                                            Если вы не сможете поехать на мероприятие - отмените бронирование, ваши
-                                            места будут доступны другим
+                                        <p>
+                                            Если вы не сможете приехать на мероприятие, пожалуйста, отмените свое бронирование, чтобы другие участники смогли воспользоваться освободившимися местами.
                                         </p>
                                         <Button
-                                            // fluid={true}
-                                            color={'red'}
-                                            // loading={isLoading}
-                                            // disabled={isLoading}
-                                            // onClick={() =>
-                                            //     showConfirmation(true)
-                                            // }
+                                            className={styles.cancelRegistrationButton}
+                                            mode={'secondary'}
+                                            loading={isLoading}
+                                            disabled={isLoading}
+                                            onClick={() => showConfirmation(true)}
                                         >
                                             {'Отменить бронирование'}
                                         </Button>
@@ -237,7 +233,8 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                         </div>
                     )}
 
-                    {user?.id && data?.registered && data?.canceled && (
+                    {/* If user is registered and registration is canceled */}
+                    {user?.id && registered && canceled && (
                         <div
                             style={{
                                 marginTop: '40px'
@@ -253,6 +250,42 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                         </div>
                     )}
                 </div>
+
+                <Dialog
+                    title={'Подтвердите отмену бронирования'}
+                    open={confirmation}
+                    onCloseDialog={() => showConfirmation(false)}
+                >
+                    <div className={styles.confirmContent}>
+                        <p>
+                            Если вы отмените свое бронирование на этот
+                            астровыезд, то освободившимися местами смогут
+                            воспользоваться другие участники, которые хотят
+                            поехать на астровыезд.
+                        </p>
+                        <p>
+                            Если вы подтвердите отмену, то вы не сможете
+                            повторно зарегистрироваться на этот астровыезд,
+                            только на последующие.
+                        </p>
+                    </div>
+                    <div className={styles.confirmationFooter}>
+                        <Button
+                            mode={'secondary'}
+                            onClick={() => showConfirmation(false)}
+                        >
+                            {'Отмена'}
+                        </Button>
+
+                        <Button
+                            variant={'negative'}
+                            mode={'primary'}
+                            onClick={handleCancelRegistration}
+                        >
+                            {'Подтверждаю'}
+                        </Button>
+                    </div>
+                </Dialog>
 
                 {/*<Confirm*/}
                 {/*    open={confirmation}*/}
@@ -288,17 +321,11 @@ const EventUpcoming: React.FC<EventBookingFormProps> = () => {
                 {/*/>*/}
             </div>
 
-            <div className={styles.content}>
-                <Markdown>{data?.content}</Markdown>
-            </div>
+            {/*<div className={styles.content}>*/}
+            {/*    <Markdown>{event?.content}</Markdown>*/}
+            {/*</div>*/}
         </Container>
-    ) : (
-        <Container>
-            <div style={{ margin: '20px', textAlign: 'center' }}>
-                {isFetching ? 'Пожалуйста, подождите...' : 'Нет предстоящих астровыездов'}
-            </div>
-        </Container>
-    )
+    ) :  null
 }
 
 export default EventUpcoming

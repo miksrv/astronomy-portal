@@ -6,8 +6,20 @@
 
     .imageContainer
         width: 60%
+        position: relative
 
-        img
+        .blur
+            top: 0
+            left: 0
+            filter: blur(10px)
+            position: absolute
+            width: 100%
+            height: 100%
+            object-fit: cover
+
+        .image
+            position: relative
+            z-index: 1
             width: 100%
             height: 100%
             object-fit: contain
@@ -16,8 +28,8 @@
             width: 100%
 
     .stargazing
-        padding-left: 30px
-        text-align: center
+        padding-left: 15px
+        text-align: left
         width: 40%
 
         @media only screen and (max-width: variables.$mobileMaxWidth)
@@ -25,45 +37,91 @@
             padding-left: 0
 
         .title
-            font-size: 22px !important
-            margin-bottom: 5px !important
+            margin-top: 0
+            margin-bottom: 10px
+            font-size: 30px !important
+            font-weight: 300
+            text-transform: uppercase
+            line-height: normal
 
-        .date
-            font-size: 16px
-            font-weight: 200
-
-        .registered
-            margin-top: 20px
-            margin-bottom: 20px
-
-            h3
-                font-size: 20px !important
-                color: var(--color-green)
-
-        .mapLinks
+        .infoSection
             display: flex
             align-items: center
-            justify-content: center
+            gap: 8px
+            font-weight: 200
+            font-size: 16px
+            margin-bottom: 5px
 
-            a
-                display: block
-                margin: 0 10px
+        .infoSectionNotification
+            margin-top: 15px
+            font-size: var(--font-size-small)
+            color: var(--text-color-secondary)
+
+        .icon
+            fill: var(--text-color-secondary)
+            width: 18px
+            height: 18px
+
+        .infoBlock
+            margin: 25px 0
+
+            h3
+                font-size: 20px
+                font-weight: 500
+                color: var(--color-red)
+
+            p
+                font-size: 13px
+                margin: 0
+
+        .registered
+            margin-top: 15px
+
+            h3
+                font-size: 23px
+                font-weight: 300
+                margin-bottom: 10px
+                line-height: normal
+                color: var(--color-green)
+                text-align: center
+
+            .mapLinks
+                display: flex
+                align-items: center
+                justify-content: center
+                gap: 10%
+                margin-top: 15px
+
+                a
+                    display: block
+                    font-size: 20px
 
         .bookingLogin
             max-width: 400px
             margin: 20px auto 0
+            text-align: center
 
             h3
                 font-size: 20px !important
                 color: var(--color-red)
 
         .cancelRegistration
-            max-width: 400px
-            margin: 40px auto 0
+            margin: 20px auto 0
+
+            p
+                font-size: var(--font-size-small)
+                font-weight: 100
+
+            .cancelRegistrationButton
+                width: 100%
 
 .content
     margin-top: 10px
 
 .confirmContent
-    color: #000
     margin: 10px 20px
+
+.confirmationFooter
+    display: flex
+    gap: 10px
+    justify-content: right
