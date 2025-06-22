@@ -151,8 +151,8 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
     }
 
     const totalSlots = [...blanks, ...daysMonth]
-    const rows = []
-    let cells = []
+    const rows: React.ReactNode[] = []
+    let cells: React.ReactNode[] = []
 
     totalSlots.forEach((row, i) => {
         if (i % 7 !== 0) {
@@ -167,7 +167,8 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
         }
     })
 
-    return rows.map((d: React.ReactNode[], key: number) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return rows.map((d: any, key: number) => {
         if (!d.length) {
             return null
         }
