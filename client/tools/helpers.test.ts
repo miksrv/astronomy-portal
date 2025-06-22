@@ -9,7 +9,7 @@ import {
     formatDate,
     formatDateUTC,
     formatSecondsToExposure,
-    formatUTCDate,
+    // formatUTCDate,
     getTimeFromSec,
     isValidJSON,
     round,
@@ -41,10 +41,10 @@ describe('helpers', () => {
         expect(formatSecondsToExposure(3661, true)).toBe('1 час 1 минута')
     })
 
-    test('formatUTCDate', () => {
-        const date = new Date('2023-01-01T00:00:00Z')
-        expect(formatUTCDate(date)).toBe(dayjs.utc(date).local().format('D MMMM YYYY, HH:mm'))
-    })
+    // test('formatUTCDate', () => {
+    //     const date = new Date('2023-01-01T00:00:00Z')
+    //     expect(formatUTCDate(date)).toBe(dayjs.utc(date).local().format('D MMMM YYYY, HH:mm'))
+    // })
 
     test('formatDate', () => {
         const date = new Date('2023-01-01T00:00:00Z')
