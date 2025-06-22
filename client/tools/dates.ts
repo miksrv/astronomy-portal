@@ -4,7 +4,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 
-import {declOfNum} from '@/tools/helpers'
+import { declOfNum } from '@/tools/helpers'
 
 dayjs.extend(utc)
 dayjs.extend(duration)
@@ -40,11 +40,7 @@ export const formatDateFromUnixUTC = (timestamp?: number, format: string = DEFAU
 export const getSecondsUntilUTCDate = (date?: string | Date): number | undefined =>
     date ? dayjs.utc(date).tz(TIME_ZONE).diff(dayjs(), 'second') : undefined
 
-export const getLocalizedTimeFromSec = (
-    sec: number,
-    full: boolean = false,
-    t: (key: string) => string
-): string => {
+export const getLocalizedTimeFromSec = (sec: number, full: boolean = false, t: (key: string) => string): string => {
     if (sec <= 0) {
         return '0'
     }
@@ -66,18 +62,26 @@ export const getLocalizedTimeFromSec = (
         const minutes = d.minutes()
         const seconds = d.seconds()
 
-        if (days) {parts.push(`${days} ${declOfNum(days, locale.day)}`)}
-        if (hours) {parts.push(`${hours} ${declOfNum(hours, locale.hour)}`)}
-        if (minutes) {parts.push(`${minutes} ${declOfNum(minutes, locale.minute)}`)}
-        if (seconds && parts.length === 0) {parts.push(`${seconds} ${declOfNum(seconds, locale.second)}`)}
+        if (days) {
+            parts.push(`${days} ${declOfNum(days, locale.day)}`)
+        }
+        if (hours) {
+            parts.push(`${hours} ${declOfNum(hours, locale.hour)}`)
+        }
+        if (minutes) {
+            parts.push(`${minutes} ${declOfNum(minutes, locale.minute)}`)
+        }
+        if (seconds && parts.length === 0) {
+            parts.push(`${seconds} ${declOfNum(seconds, locale.second)}`)
+        }
 
         return parts.join(' ')
     }
-        const h = String(d.hours()).padStart(2, '0')
-        const m = String(d.minutes()).padStart(2, '0')
-        const s = String(d.seconds()).padStart(2, '0')
+    const h = String(d.hours()).padStart(2, '0')
+    const m = String(d.minutes()).padStart(2, '0')
+    const s = String(d.seconds()).padStart(2, '0')
 
-        return `${h}:${m}:${s}`
+    return `${h}:${m}:${s}`
 }
 
 /**

@@ -9,3 +9,6 @@ site.webmanifest
 node_modules
 out
 coverage
+*.json
+*.topojson
+*.js

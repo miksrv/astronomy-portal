@@ -50,7 +50,13 @@ export default [
             '**/.next/**',
             '**/out/**',
             '**/next-env.d.ts',
-            '**/middleware.ts'
+            '**/middleware.ts',
+            // JS Files
+            '**/d3.min.js',
+            '**/celestial.min.js',
+            '**/d3.geo.projection.min.js',
+            // ESLint Configs
+            '**/eslint.config.cjs'
         ]
     },
 
@@ -234,7 +240,7 @@ export default [
             'next/google-font-preconnect': 'warn',
             'next/next-script-for-ga': 'warn',
             'next/no-async-client-component': 'warn',
-            'next/no-before-interactive-script-outside-document': 'warn',
+            // 'next/no-before-interactive-script-outside-document': 'warn',
             'next/no-css-tags': 'warn',
             'next/no-head-element': 'warn',
             'next/no-html-link-for-pages': 'warn',

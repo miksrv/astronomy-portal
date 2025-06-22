@@ -19,13 +19,7 @@ export const sliceText = (text: string, length: number = 350): string => {
  * @param forms
  */
 export const declOfNum = (n: number, forms: [string, string, string]): string =>
-    forms[
-        n % 10 === 1 && n % 100 !== 11
-            ? 0
-            : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)
-                ? 1
-                : 2
-        ]
+    forms[n % 10 === 1 && n % 100 !== 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2]
 
 /**
  * Returns the formatted time elapsed since the beginning of the event

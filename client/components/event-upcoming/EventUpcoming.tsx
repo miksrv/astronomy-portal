@@ -1,8 +1,8 @@
-import React, {useEffect, useMemo, useState} from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
 import Image from 'next/image'
-import {useTranslation} from 'next-i18next'
-import {Button, Container, ContainerProps, Dialog, Icon} from 'simple-react-ui-kit'
+import { useTranslation } from 'next-i18next'
+import { Button, Container, ContainerProps, Dialog, Icon } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
@@ -10,7 +10,7 @@ import { API, ApiModel, useAppSelector } from '@/api'
 import { hosts } from '@/api/constants'
 import EventBookingForm from '@/components/event-booking-form'
 import LoginForm from '@/components/login-form'
-import {formatUTCDate, getLocalizedTimeFromSec, getSecondsUntilUTCDate} from '@/tools/dates'
+import { formatUTCDate, getLocalizedTimeFromSec, getSecondsUntilUTCDate } from '@/tools/dates'
 // TODO: Remove from all components
 // import { getTimeFromSec } from '@/tools/helpers'
 
@@ -134,7 +134,10 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                     {/* If registration has not started yet */}
                     {secondsUntilRegistrationStart >= 0 && secondsUntilRegistrationEnd > 0 && (
                         <div className={styles.bookingLogin}>
-                            <h3>{'Регистрация на астровыезд откроется через'}{' '}{getLocalizedTimeFromSec(secondsUntilRegistrationStart, true, t)}</h3>
+                            <h3>
+                                {'Регистрация на астровыезд откроется через'}{' '}
+                                {getLocalizedTimeFromSec(secondsUntilRegistrationStart, true, t)}
+                            </h3>
                         </div>
                     )}
 
@@ -142,7 +145,10 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                     {secondsUntilRegistrationEnd <= 0 && (
                         <div className={styles.bookingLogin}>
                             <h3>Регистрация на астровыезд завершена</h3>
-                            <p>Пожалуйста дождитесь нашего следующего астровыезда, что бы его не пропустить - подпишитесь на Telegram канал</p>
+                            <p>
+                                Пожалуйста дождитесь нашего следующего астровыезда, что бы его не пропустить -
+                                подпишитесь на Telegram канал
+                            </p>
                         </div>
                     )}
 
@@ -156,14 +162,14 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                                 </div>
                             )}
 
-                            {user?.id && !registered &&
+                            {user?.id && !registered && (
                                 <EventBookingForm
                                     eventId={event?.id}
                                     onSuccessSubmit={() => {
                                         setRegistered(true)
                                     }}
                                 />
-                            }
+                            )}
                         </div>
                     ) : !registered ? (
                         <div>
@@ -189,9 +195,8 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
 
                             <div>
                                 Приезжайте <b>{formatUTCDate(event?.date?.date, 'D MMMM YYYY г.')}</b> к{' '}
-                                <b>{formatUTCDate(event?.date?.date, 'H:mm')}</b> часам
-                                на место проведения мероприятия: Оренбургский район, г. Горюн (40 км от центра
-                                Оренбурга), откройте карту ниже:
+                                <b>{formatUTCDate(event?.date?.date, 'H:mm')}</b> часам на место проведения мероприятия:
+                                Оренбургский район, г. Горюн (40 км от центра Оренбурга), откройте карту ниже:
                             </div>
 
                             <div className={styles.mapLinks}>
@@ -217,7 +222,9 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                                 !(dayjs.utc(event?.date?.date).local().diff(dayjs()) <= 0) && (
                                     <div className={styles.cancelRegistration}>
                                         <p>
-                                            Если вы не сможете приехать на мероприятие, пожалуйста, отмените свое бронирование, чтобы другие участники смогли воспользоваться освободившимися местами.
+                                            Если вы не сможете приехать на мероприятие, пожалуйста, отмените свое
+                                            бронирование, чтобы другие участники смогли воспользоваться освободившимися
+                                            местами.
                                         </p>
                                         <Button
                                             className={styles.cancelRegistrationButton}
@@ -258,14 +265,11 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                 >
                     <div className={styles.confirmContent}>
                         <p>
-                            Если вы отмените свое бронирование на этот
-                            астровыезд, то освободившимися местами смогут
-                            воспользоваться другие участники, которые хотят
-                            поехать на астровыезд.
+                            Если вы отмените свое бронирование на этот астровыезд, то освободившимися местами смогут
+                            воспользоваться другие участники, которые хотят поехать на астровыезд.
                         </p>
                         <p>
-                            Если вы подтвердите отмену, то вы не сможете
-                            повторно зарегистрироваться на этот астровыезд,
+                            Если вы подтвердите отмену, то вы не сможете повторно зарегистрироваться на этот астровыезд,
                             только на последующие.
                         </p>
                     </div>
@@ -325,7 +329,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
             {/*    <Markdown>{event?.content}</Markdown>*/}
             {/*</div>*/}
         </Container>
-    ) :  null
+    ) : null
 }
 
 export default EventUpcoming
