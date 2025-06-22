@@ -3,23 +3,25 @@ import { Provider } from 'react-redux'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import utc from 'dayjs/plugin/utc'
+
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Script from 'next/script'
 import { appWithTranslation, useTranslation } from 'next-i18next'
 
-import '@/styles/globals.sass'
-import '@/styles/theme.css'
-import 'dayjs/locale/ru'
-
-import i18Config from '../next-i18next.config'
-
 import { wrapper } from '@/api/store'
 import { LOCAL_STORAGE } from '@/tools/constants'
 import * as LocalStorage from '@/tools/localstorage'
 
-const locale = LocalStorage.getItem(LOCAL_STORAGE.LOCALE as any)
+import i18Config from '../next-i18next.config'
+
+import 'dayjs/locale/ru'
+
+import '@/styles/theme.css'
+import '@/styles/globals.sass'
+
+const locale = LocalStorage.getItem(LOCAL_STORAGE.LOCALE as 'LOCALE')
 
 const App = ({ Component, pageProps }: AppProps) => {
     const router = useRouter()

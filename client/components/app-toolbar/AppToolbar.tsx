@@ -1,11 +1,12 @@
 import React, { forwardRef } from 'react'
+
 import { useTranslation } from 'next-i18next'
+
+import Breadcrumbs, { BreadcrumbLink, BreadcrumbsProps } from '@/ui/breadcrumbs'
 
 import '@/api/applicationSlice'
 
 import styles from './styles.module.sass'
-
-import Breadcrumbs, { BreadcrumbLink, BreadcrumbsProps } from '@/ui/breadcrumbs'
 
 interface AppToolbarProps extends Pick<BreadcrumbsProps, 'currentPage' | 'links'> {
     title?: string

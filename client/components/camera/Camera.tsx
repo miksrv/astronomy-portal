@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { useTranslation } from 'next-i18next'
 import { Container, Message, Spinner } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
+import { useTranslation } from 'next-i18next'
 
 import PhotoLightbox from '@/components/photo-lightbox'
+
+import styles from './styles.module.sass'
 
 interface CameraProps {
     cameraURL?: string
@@ -61,6 +62,7 @@ const Camera: React.FC<CameraProps> = ({ cameraURL, interval }) => {
                         onClick={() => setLightbox(true)}
                     >
                         <Spinner />
+                        {/* eslint-disable-next-line next/no-img-element */}
                         <img
                             className={styles.photoImage}
                             src={cameraSrc}

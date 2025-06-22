@@ -1,9 +1,8 @@
 import React, { useMemo } from 'react'
-import Link from 'next/link'
-import { useTranslation } from 'next-i18next'
 import { Container } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
+import Link from 'next/link'
+import { useTranslation } from 'next-i18next'
 
 import { ApiModel } from '@/api'
 import FilterList from '@/components/filter-list'
@@ -11,6 +10,8 @@ import StarMap from '@/components/star-map'
 import { formatDEC, formatRA } from '@/tools/coordinates'
 import { getTimeFromSec } from '@/tools/helpers'
 import { humanizeFileSize } from '@/tools/strings'
+
+import styles from './styles.module.sass'
 
 interface ObjectHeaderProps extends Partial<ApiModel.Object> {
     categoriesList?: ApiModel.Category[]

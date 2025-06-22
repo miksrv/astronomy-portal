@@ -1,12 +1,13 @@
 import React from 'react'
+import { Container } from 'simple-react-ui-kit'
+
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { Container } from 'simple-react-ui-kit'
 
-import { SITE_LINK } from '@/api'
+import { ApiModel, SITE_LINK } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
@@ -52,8 +53,8 @@ const StargazingRulesPage: NextPage<StargazingRulesPageProps> = () => {
                     {(
                         t('stargazing-rules-page.prohibited-items', {
                             returnObjects: true
-                        }) as any[]
-                    ).map((item: any, index: number) => (
+                        }) as ApiModel.Object[]
+                    ).map((item, index: number) => (
                         <li
                             key={index}
                             style={{ marginBottom: '10px' }}
@@ -70,8 +71,8 @@ const StargazingRulesPage: NextPage<StargazingRulesPageProps> = () => {
                     {(
                         t('stargazing-rules-page.recommendations-items', {
                             returnObjects: true
-                        }) as any[]
-                    ).map((item: any, index: number) => (
+                        }) as ApiModel.Object[]
+                    ).map((item, index: number) => (
                         <li
                             key={index}
                             style={{ marginBottom: '10px' }}

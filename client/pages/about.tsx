@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
+import { Container, Icon } from 'simple-react-ui-kit'
+
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { Container, Icon } from 'simple-react-ui-kit'
 
 import { SITE_LINK } from '@/api'
 import { setLocale } from '@/api/applicationSlice'

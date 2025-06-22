@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
+import { Button, Container } from 'simple-react-ui-kit'
+
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { Button, Container } from 'simple-react-ui-kit'
 
 import { API, ApiModel, SITE_LINK } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
@@ -109,8 +110,8 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                     {(
                         t('observatory-overview-page.equipment-list', {
                             returnObjects: true
-                        }) as any[]
-                    ).map((item: any, index: number) => (
+                        }) as ApiModel.Object[]
+                    ).map((item, index: number) => (
                         <li key={index}>
                             <h3>{item.title}</h3>
                             <div>{item.description}</div>
@@ -134,8 +135,8 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                     {(
                         t('observatory-overview-page.operating-principle-list', {
                             returnObjects: true
-                        }) as any[]
-                    ).map((item: any, index: number) => (
+                        }) as ApiModel.Object[]
+                    ).map((item, index: number) => (
                         <li key={index}>
                             <h3>{item.title}</h3>
                             <div>{item.description}</div>

@@ -1,19 +1,20 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
-import Image from 'next/image'
-import { useTranslation } from 'next-i18next'
 import { Button, Container, ContainerProps, Dialog, Icon } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
+import Image from 'next/image'
+import { useTranslation } from 'next-i18next'
 
 import { API, ApiModel, useAppSelector } from '@/api'
 import { hosts } from '@/api/constants'
 import EventBookingForm from '@/components/event-booking-form'
 import LoginForm from '@/components/login-form'
 import { formatUTCDate, getLocalizedTimeFromSec, getSecondsUntilUTCDate } from '@/tools/dates'
+
+import styles from './styles.module.sass'
+
 // TODO: Remove from all components
 // import { getTimeFromSec } from '@/tools/helpers'
-
 interface EventBookingFormProps extends ContainerProps {
     event?: ApiModel.Event
 }
@@ -30,8 +31,8 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
     // const { data, isFetching, isLoading: upcomingLoading } = API.useEventGetUpcomingQuery()
     const [cancelRegistration, { isLoading }] = API.useEventsCancelRegistrationPostMutation()
 
-    const handleCancelRegistration = () => {
-        cancelRegistration({ eventId: event?.id || '' })
+    const handleCancelRegistration = async () => {
+        await cancelRegistration({ eventId: event?.id || '' })
         showConfirmation(false)
         setCanceled(true)
     }

@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { Container, Skeleton } from 'simple-react-ui-kit'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
-import { Container, Skeleton } from 'simple-react-ui-kit'
-
-import styles from './styles.module.sass'
 
 import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
@@ -15,6 +14,8 @@ import { formatDate } from '@/tools/dates'
 import { getTimeFromSec } from '@/tools/helpers'
 import { createLargePhotoUrl, createMediumPhotoUrl } from '@/tools/photos'
 import { formatObjectName, humanizeFileSize } from '@/tools/strings'
+
+import styles from './styles.module.sass'
 
 interface ObjectHeaderProps extends Partial<ApiModel.Photo> {
     photoTitle?: string

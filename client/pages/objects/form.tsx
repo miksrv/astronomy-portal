@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
@@ -57,15 +58,15 @@ const ObjectFormPage: NextPage<ObjectFormPageProps> = () => {
         }
     ] = API.useObjectsPatchMutation()
 
-    const handleSubmit = (formData?: AstroPhotoFormType) => {
+    const handleSubmit = async (formData?: AstroPhotoFormType) => {
         if (!formData) {
             return
         }
 
         if (id) {
-            updateObject(formData)
+            await updateObject(formData)
         } else {
-            createObject(formData)
+            await createObject(formData)
         }
     }
 
@@ -79,7 +80,7 @@ const ObjectFormPage: NextPage<ObjectFormPageProps> = () => {
 
     useEffect(() => {
         if (userRole !== 'admin') {
-            router.push('/objects')
+            void router.push('/objects')
         }
     }, [userRole])
 

@@ -6,6 +6,20 @@
 
 -  Upgraded UI Libraries
 -  Improved UI Server Side Rendering (SSR)
+-  Updated i18next and SASS libraries
+-  Fixed API Relay switch on
+-  Updated Next.js, Sharp and Next SEO libraries
+-  Improved UI Server Side Rendering
+-  Created API functions for Booking Events
+-  Fixed API filters for Photos controller
+-  Improved UI dates functions
+-  Fixed `logout` UI locales, added plurals locales for time
+-  Refactoring UI EventBookingForm
+-  Refactoring UI EventUpcoming Component
+-  Improved UI AppHeader Components
+-  UI Fixed Errors and Bugs
+-  Refactoring UI Code-Style
+-  Updated UI ESLint and Prettier config
 
 ## 4.0.17
 

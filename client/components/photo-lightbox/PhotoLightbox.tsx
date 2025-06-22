@@ -4,10 +4,10 @@ import Lightbox, { Slide } from 'yet-another-react-lightbox'
 import Captions from 'yet-another-react-lightbox/plugins/captions'
 import Zoom from 'yet-another-react-lightbox/plugins/zoom'
 
+import ImageSlide from './ImageSlide'
+
 import 'yet-another-react-lightbox/plugins/captions.css'
 import 'yet-another-react-lightbox/styles.css'
-
-import ImageSlide from './ImageSlide'
 
 type Photo = {
     height: number
@@ -36,6 +36,7 @@ const PhotoLightbox: React.FC<PhotoLightboxProps> = ({ photos, photoIndex = 0, s
             index={photoIndex}
             plugins={[Captions, Zoom]}
             close={onCloseLightBox}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             render={{ slide: ImageSlide as any }}
             slides={photos?.map(
                 (photo) =>

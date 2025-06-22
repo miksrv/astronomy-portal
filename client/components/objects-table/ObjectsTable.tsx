@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react'
+import { ColumnProps, Container, Table } from 'simple-react-ui-kit'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
-import { ColumnProps, Container, Table } from 'simple-react-ui-kit'
-
-import styles from './styles.module.sass'
 
 import { ApiModel } from '@/api'
 import { getFilterColor } from '@/tools/colors'
 import { formatSecondsToExposure } from '@/tools/helpers'
 import { createSmallPhotoUrl } from '@/tools/photos'
 import { formatObjectName } from '@/tools/strings'
+
+import styles from './styles.module.sass'
 
 interface ObjectsTableProps {
     objectsList?: ApiModel.Object[]
@@ -66,12 +67,12 @@ const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosList, co
 
     const [tableHeight, setTableHeight] = useState<number | null>()
 
-    const tableColumns: ColumnProps<FlattenedObject>[] = [
+    const tableColumns: Array<ColumnProps<FlattenedObject>> = [
         {
             accessor: 'name',
             formatter: (data, row, i) => (
                 <Link
-                    href={`/objects/${data}`}
+                    href={`/objects/${data as string}`}
                     title={`${row[i].title}`}
                     className={styles.objectLink}
                 >

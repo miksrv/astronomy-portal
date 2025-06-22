@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import Image from 'next/image'
 import { Button, Container, Input } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
+import Image from 'next/image'
 
 import { ApiModel } from '@/api'
 import { createLargePhotoUrl } from '@/tools/photos'
+
+import styles from './styles.module.sass'
 
 export type AstroStargazingFormType = Partial<
     Omit<ApiModel.Event, 'date' | 'availableTickets' | 'registrationStart' | 'registrationEnd'>
@@ -27,8 +28,8 @@ interface AstroStargazingFormProps {
 const AstroStargazingForm: React.FC<AstroStargazingFormProps> = ({ disabled, initialData, onSubmit, onCancel }) => {
     const [formData, setFormData] = useState<AstroStargazingFormType>({})
 
-    const handleImageUpload = (e: any) => {
-        setFormData({ ...formData, upload: e.target.files[0] })
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, upload: e?.target?.files?.[0] })
     }
 
     const handleSubmit = () => {

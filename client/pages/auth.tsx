@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
+import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
+
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/dist/client/router'
 import { useSearchParams } from 'next/navigation'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import { API, ApiType } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
@@ -49,7 +50,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
             if (returnPath) {
                 const returnLink = returnPath
 
-                LocalStorage.removeItem(LOCAL_STORAGE.RETURN_PATH as any)
+                LocalStorage.removeItem(LOCAL_STORAGE.RETURN_PATH as 'RETURN_PATH')
 
                 void router.push(returnLink)
             } else {
@@ -62,7 +63,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
         setSendRequest(true)
 
         if (sendRequest && !!code?.length && !!service?.length) {
-            serviceLogin({
+            void serviceLogin({
                 code,
                 service: service as ApiType.Auth.AuthServiceType,
                 state: searchParams.get('state') ?? undefined,

@@ -57,7 +57,7 @@ const EventPhotoUploader: React.FC<PhotoUploaderProps> = ({ eventId, onSelectFil
 
             formData.append('photo', selectedFiles[0])
 
-            handleUploadPhoto({
+            void handleUploadPhoto({
                 eventId: eventId,
                 formData
             })

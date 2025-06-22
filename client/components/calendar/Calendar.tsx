@@ -2,13 +2,15 @@ import React, { useState } from 'react'
 import dayjs from 'dayjs'
 import { Button, Container } from 'simple-react-ui-kit'
 
-import RenderCalendar from './RenderCalendar'
-import styles from './styles.module.sass'
-
 import { APIMeteo } from '@/api'
 import { dateAddMonth, dateExtractMonth, formatDate } from '@/tools/helpers'
 
+import RenderCalendar from './RenderCalendar'
+
+import styles from './styles.module.sass'
+
 interface CalendarProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     eventsTelescope?: any[] // ApiModel.Statistic.Telescope[]
 }
 

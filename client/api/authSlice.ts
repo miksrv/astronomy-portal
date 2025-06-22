@@ -1,11 +1,13 @@
 import { deleteCookie, setCookie } from 'cookies-next'
 
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+
 import { ApiModel, ApiType } from '@/api'
 import * as LocalStorage from '@/tools/localstorage'
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 type InitialStateProps = {
     isAuth?: boolean
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     error?: any
     token?: string
     user?: ApiModel.User
@@ -32,10 +34,10 @@ const authSlice = createSlice({
 
             if (payload?.auth && !!payload?.token) {
                 LocalStorage.setItem('AUTH_TOKEN', payload.token)
-                setCookie('token', payload.token)
+                void setCookie('token', payload.token)
             } else {
                 LocalStorage.removeItem('AUTH_TOKEN')
-                deleteCookie('token')
+                void deleteCookie('token')
             }
         },
         logout: (state) => {
@@ -44,7 +46,7 @@ const authSlice = createSlice({
             state.isAuth = false
 
             LocalStorage.removeItem('AUTH_TOKEN')
-            deleteCookie('token')
+            void deleteCookie('token')
         }
     }
 })

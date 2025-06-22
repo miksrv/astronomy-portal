@@ -1,15 +1,17 @@
 import React, { useEffect, useMemo, useRef } from 'react'
-import { useTranslation } from 'next-i18next'
 
-import { customConfig, defaultConfig, FONT } from './config'
-import { StarMapObject, StarMapProps } from './StarMap'
-import styles from './styles.module.sass'
+import { useTranslation } from 'next-i18next'
 
 import { formatObjectName } from '@/tools/strings'
 
+import { customConfig, defaultConfig, FONT } from './config'
+import { StarMapObject, StarMapProps } from './StarMap'
+
+import styles from './styles.module.sass'
+
 type geoJSONType = {
     type: 'FeatureCollection'
-    features: {
+    features: Array<{
         type: 'Feature'
         id: string
         properties: {
@@ -21,7 +23,7 @@ type geoJSONType = {
             type: string
             coordinates: [number, number]
         }
-    }[]
+    }>
 }
 
 const stylePoint = {
@@ -47,7 +49,7 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom }) => {
 
     const objectsJSON = useMemo(() => createObjectsJSON(objects), [objects])
 
-    const handleCallback = (error: any) => {
+    const handleCallback = (error: unknown) => {
         if (error) {
             console.warn(error)
             return null
@@ -67,7 +69,7 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom }) => {
     const handleRedraw = () => {
         Celestial.container
             .selectAll('.sky-points')
-            .each((point: { geometry: { coordinates: any }; properties: { name: any } }) => {
+            .each((point: { geometry: { coordinates: string }; properties: { name: string } }) => {
                 if (Celestial.clip(point.geometry.coordinates)) {
                     const pointCoords = Celestial.mapProjection(point.geometry.coordinates)
                     const pointRadius = 5

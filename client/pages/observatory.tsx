@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'

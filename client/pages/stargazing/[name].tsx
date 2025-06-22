@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
+import { Button, Container, Icon } from 'simple-react-ui-kit'
+
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { Button, Container, Icon } from 'simple-react-ui-kit'
 
 import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'

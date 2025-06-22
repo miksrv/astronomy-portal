@@ -1,12 +1,13 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
+
 import { createWrapper, HYDRATE } from 'next-redux-wrapper'
+import { AnyAction, combineReducers, configureStore } from '@reduxjs/toolkit'
+
+import { APIMeteo } from '@/api/apiMeteo'
 
 import { API } from './api'
 import applicationSlice from './applicationSlice'
 import authSlice from './authSlice'
-
-import { APIMeteo } from '@/api/apiMeteo'
-import { AnyAction, combineReducers, configureStore } from '@reduxjs/toolkit'
 
 // 1. Combine all reducers
 const combinedReducer = combineReducers({

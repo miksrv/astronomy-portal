@@ -1,9 +1,9 @@
 import React from 'react'
 import { cn } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
-
 import { getMoonPhase } from '@/tools/moon'
+
+import styles from './styles.module.sass'
 
 const phases: { [key: string]: string } = {
     /* 🌒 */ '0': '2',

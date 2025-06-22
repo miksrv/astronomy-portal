@@ -1,11 +1,12 @@
 import React from 'react'
-import Link from 'next/link'
-import { useTranslation } from 'next-i18next'
 import { cn } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
+import Link from 'next/link'
+import { useTranslation } from 'next-i18next'
 
 import Counter from '@/ui/counter'
+
+import styles from './styles.module.sass'
 
 const YEARS = 10
 const STARGAZING = 42

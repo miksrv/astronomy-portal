@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+
 import type { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'

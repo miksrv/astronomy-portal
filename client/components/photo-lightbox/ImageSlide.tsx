@@ -1,6 +1,7 @@
 import React from 'react'
-import Image, { ImageProps } from 'next/image'
 import { isImageFitCover, isImageSlide, Slide, useLightboxProps, useLightboxState } from 'yet-another-react-lightbox'
+
+import Image, { ImageProps } from 'next/image'
 
 interface ImageSlideProps {
     slide: ImageProps

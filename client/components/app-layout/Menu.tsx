@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
+import { cn, Icon } from 'simple-react-ui-kit'
+
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
-import { cn, Icon } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 

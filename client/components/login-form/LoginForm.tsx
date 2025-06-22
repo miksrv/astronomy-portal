@@ -1,12 +1,11 @@
 'use client'
 
 import React, { useEffect } from 'react'
+import { Button, Message } from 'simple-react-ui-kit'
+
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
-import { Button, Message } from 'simple-react-ui-kit'
-
-import styles from './styles.module.sass'
 
 import { API, ApiType } from '@/api'
 import googleLogo from '@/public/images/google-logo.png'
@@ -14,6 +13,8 @@ import vkLogo from '@/public/images/vk-logo.png'
 import yandexLogo from '@/public/images/yandex-logo.png'
 import { LOCAL_STORAGE } from '@/tools/constants'
 import useLocalStorage from '@/tools/hooks/useLocalStorage'
+
+import styles from './styles.module.sass'
 
 interface LoginFormProps {
     onError?: (error?: ApiType.ResError) => void
@@ -28,9 +29,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
 
     const [authLoginService, { data: serviceData, error, isLoading, isError }] = API.useAuthLoginServiceMutation()
 
-    const handleLoginServiceButton = (service: ApiType.Auth.AuthServiceType) => {
+    const handleLoginServiceButton = async (service: ApiType.Auth.AuthServiceType) => {
         setReturnPath(router.asPath)
-        authLoginService({ service })
+        await authLoginService({ service })
     }
 
     useEffect(() => {

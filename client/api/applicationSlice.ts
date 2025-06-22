@@ -1,9 +1,10 @@
-import i18Config from '../next-i18next.config'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 import { ApiType } from '@/api'
 import { LOCAL_STORAGE } from '@/tools/constants'
 import * as LocalStorage from '@/tools/localstorage'
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+
+import i18Config from '../next-i18next.config'
 
 interface ApplicationSliceProps {
     showOverlay?: boolean
@@ -13,7 +14,7 @@ interface ApplicationSliceProps {
 
 export const getStorageLocale = (): string | undefined =>
     typeof window !== 'undefined'
-        ? (LocalStorage.getItem(LOCAL_STORAGE.LOCALE as any) ?? i18Config.i18n.defaultLocale)
+        ? (LocalStorage.getItem(LOCAL_STORAGE.LOCALE as 'LOCALE') ?? i18Config.i18n.defaultLocale)
         : i18Config.i18n.defaultLocale
 
 const initialState: ApplicationSliceProps = {

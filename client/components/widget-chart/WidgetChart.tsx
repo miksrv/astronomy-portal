@@ -1,10 +1,11 @@
 import React from 'react'
 import { cn, Skeleton } from 'simple-react-ui-kit'
 
-import Chart from './Chart'
-import styles from './styles.module.sass'
-
 import { ApiModel } from '@/api'
+
+import Chart from './Chart'
+
+import styles from './styles.module.sass'
 
 export type ChartTypes = 'temperature' | 'clouds'
 

@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react'
+import { Message } from 'simple-react-ui-kit'
+
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
-import { Message } from 'simple-react-ui-kit'
 
 import { API, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
@@ -35,7 +36,7 @@ const StargazingFormPage: NextPage<StargazingFormPageProps> = () => {
     const [createEvent, { error: createError, isLoading: createLoading, isSuccess: createSuccess }] =
         API.useEventCreatePostMutation()
 
-    const handleSubmit = (data?: AstroStargazingFormType) => {
+    const handleSubmit = async (data?: AstroStargazingFormType) => {
         if (!data) {
             return
         }
@@ -52,7 +53,7 @@ const StargazingFormPage: NextPage<StargazingFormPageProps> = () => {
             }
         })
 
-        createEvent(formDataObject)
+        await createEvent(formDataObject)
     }
 
     const handleCancel = () => {
@@ -63,7 +64,7 @@ const StargazingFormPage: NextPage<StargazingFormPageProps> = () => {
 
     useEffect(() => {
         if (userRole !== 'admin') {
-            router.push('/stargazing')
+            void router.push('/stargazing')
         }
     }, [userRole])
 

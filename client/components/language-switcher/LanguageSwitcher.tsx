@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react'
 import { setCookie } from 'cookies-next'
+
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
-
-import styles from './styles.module.sass'
 
 import { ApiType, useAppDispatch } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { LOCAL_STORAGE } from '@/tools/constants'
 import useLocalStorage from '@/tools/hooks/useLocalStorage'
+
+import styles from './styles.module.sass'
 
 const LanguageSwitcher: React.FC = () => {
     const { i18n } = useTranslation()
@@ -25,7 +26,7 @@ const LanguageSwitcher: React.FC = () => {
             return
         }
 
-        setCookie('NEXT_LOCALE', locale)
+        await setCookie('NEXT_LOCALE', locale)
         setStorageLocale(locale)
 
         dispatch(setLocale(locale))

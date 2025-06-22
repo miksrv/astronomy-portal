@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import NextNProgress from 'nextjs-progressbar'
 import { cn, Dialog } from 'simple-react-ui-kit'
 
-import { Menu } from './Menu'
-import styles from './styles.module.sass'
+import NextNProgress from 'nextjs-progressbar'
 
 import { useAppDispatch, useAppSelector } from '@/api'
 import { closeAuthDialog } from '@/api/applicationSlice'
 import AppHeader from '@/components/app-header'
 import LoginForm from '@/components/login-form'
+
+import { Menu } from './Menu'
+
+import styles from './styles.module.sass'
 
 interface AppLayoutProps {
     fullWidth?: boolean

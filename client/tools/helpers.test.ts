@@ -58,12 +58,12 @@ describe('helpers', () => {
 
     test('dateExtractMonth', () => {
         const date = new Date('2023-01-01T00:00:00Z')
-        expect(dateExtractMonth(date, 1)).toEqual(dayjs(date).subtract(1, 'month').toDate())
+        expect(dateExtractMonth(date, 1)).toStrictEqual(dayjs(date).subtract(1, 'month').toDate())
     })
 
     test('dateAddMonth', () => {
         const date = new Date('2023-01-01T00:00:00Z')
-        expect(dateAddMonth(date, 1)).toEqual(dayjs(date).add(1, 'month').toDate())
+        expect(dateAddMonth(date, 1)).toStrictEqual(dayjs(date).add(1, 'month').toDate())
     })
 
     test('isValidJSON', () => {

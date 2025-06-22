@@ -1,15 +1,16 @@
 import React, { useMemo } from 'react'
 import { EChartsOption } from 'echarts'
 import ReactECharts from 'echarts-for-react'
-import { useTranslation } from 'next-i18next'
 
-import styles from './styles.module.sass'
+import { useTranslation } from 'next-i18next'
 
 import { ApiModel } from '@/api'
 import { ChartTypes } from '@/components/widget-chart/WidgetChart'
 import { getSensorColor } from '@/tools/colors'
 import { formatDateFromUnixUTC } from '@/tools/dates'
 import { round } from '@/tools/helpers'
+
+import styles from './styles.module.sass'
 
 interface ChartProps {
     type: ChartTypes
@@ -67,20 +68,26 @@ const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) => {
             },
             backgroundColor,
             borderColor,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             formatter: (params: any) => {
                 // An array of strings that will be concatenated and returned as the contents of the tooltip
                 const tooltipContent: string[] = []
 
                 //Format the header - let's assume it's a date (xAxis)
                 if (params.length > 0) {
+                    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                     const header = `<div class="${styles.chartTooltipTitle}">${params[0].axisValueLabel}</div>`
                     tooltipContent.push(header)
                 }
 
                 // Loop through each element in params to display the values (yAxis)
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 params.forEach((item: any) => {
+                    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                     const colorSquare = `<span class="${styles.icon}" style="background-color: ${item.color};"></span>`
+                    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                     const seriesValue = `<span class="${styles.value}">${item.value?.[1] ?? '---'}</span>`
+                    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                     const seriesName = `<span class="${styles.label}">${item.seriesName}${seriesValue}</span>`
 
                     const row = `<div class="${styles.chartTooltipItem}">${colorSquare} ${seriesName}</div>`
@@ -154,6 +161,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) => {
     }
 
     const getChartLineConfig = (source: keyof ApiModel.Weather, name?: string, axis?: number, area?: boolean) => ({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...(baseConfig.series as any)[0],
         data: data?.map(({ date, [source]: sensorData }) => [date, sensorData]),
         name: name ?? '',
@@ -182,6 +190,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) => {
                         {
                             ...baseConfig.yAxis,
                             axisLabel: {
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 ...(baseConfig.yAxis as any).axisLabel,
                                 formatter: '{value}°C'
                             }
@@ -201,6 +210,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) => {
                         {
                             ...baseConfig.yAxis,
                             axisLabel: {
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 ...(baseConfig.yAxis as any).axisLabel,
                                 formatter: '{value}%'
                             }
@@ -208,6 +218,7 @@ const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) => {
                         {
                             ...baseConfig.yAxis,
                             axisLabel: {
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 ...(baseConfig.yAxis as any).axisLabel,
                                 formatter: `{value}${t('meters-per-second')}`
                             }

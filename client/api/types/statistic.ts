@@ -1,7 +1,7 @@
 /* Telescope */
 export interface ResTelescope {
     count: number
-    items: any // ApiModel.Statistic.Telescope[]
+    items: unknown // ApiModel.Statistic.Telescope[]
 }
 
 export interface ReqTelescope {

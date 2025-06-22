@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Dropdown, Input, Message } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
-
 import { API, ApiType, useAppSelector } from '@/api'
+
+import styles from './styles.module.sass'
 
 interface EventBookingFormProps {
     eventId?: string
@@ -40,14 +40,14 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onSuccessS
 
     const handleKeyDown = (e: { key: string }) => e.key === 'Enter' && handleSubmit()
 
-    const handleSubmit = useCallback(() => {
+    const handleSubmit = useCallback(async () => {
         if (!eventId) {
             return
         }
 
         setSubmitted(true)
 
-        bookEvent({
+        await bookEvent({
             adults: Number(formState.adults || 1),
             children: Number(formState.children || 1),
             childrenAges: formState.childrenAges?.length ? formState.childrenAges : undefined,
@@ -83,6 +83,7 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onSuccessS
                     type={'error'}
                     title={'Ошибка'}
                 >
+                    {/*eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
                     {(error as any)?.messages?.error ||
                         'При регистрации были допущены ошибки, проверьте правильность заполнения полей'}
                 </Message>

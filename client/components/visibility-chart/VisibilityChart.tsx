@@ -5,14 +5,15 @@ import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import ReactECharts, { EChartsOption } from 'echarts-for-react'
-import { useTranslation } from 'next-i18next'
 import { Container } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
+import { useTranslation } from 'next-i18next'
 
 import { ApiModel } from '@/api'
 import { formatDate } from '@/tools/dates'
 import { formatObjectName } from '@/tools/strings'
+
+import styles from './styles.module.sass'
 
 const LAT = parseFloat(process.env.NEXT_PUBLIC_LAT ?? '51.7')
 const LON = parseFloat(process.env.NEXT_PUBLIC_LON ?? '55.2')
@@ -26,8 +27,10 @@ interface VisibilityChartProps {
     lon?: number
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ChartDataType = any
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type MarkAreaType = any
 
 const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = LAT, lon = LON }) => {
@@ -136,6 +139,7 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = LAT, lo
                 trigger: 'axis',
                 backgroundColor,
                 borderColor,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 formatter: (params: any) => {
                     const tooltipContent: string[] = []
 
@@ -154,9 +158,13 @@ const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = LAT, lo
                         tooltipContent.push(header)
                     }
 
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     params.forEach((item: any) => {
+                        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                         const colorSquare = `<span class="${styles.icon}" style="background-color: ${item.color};"></span>`
+                        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                         const seriesValue = `<span class="${styles.value}">${item.value?.[1] ?? '---'}</span>`
+                        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                         const seriesName = `<span class="${styles.label}">${item.seriesName}<span>${seriesValue}°</span></span>`
 
                         const row = `<div class="${styles.chartTooltipItem}">${colorSquare} ${seriesName}</div>`

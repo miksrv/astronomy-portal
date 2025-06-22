@@ -1,10 +1,11 @@
 import React from 'react'
-import Link from 'next/link'
 import { Container } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
+import Link from 'next/link'
 
 import { formatObjectName } from '@/tools/strings'
+
+import styles from './styles.module.sass'
 
 type PhotoObject = {
     object?: string

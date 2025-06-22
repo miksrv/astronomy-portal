@@ -1,12 +1,13 @@
 import React from 'react'
-import Link from 'next/link'
-import { useTranslation } from 'next-i18next'
 import { cn, Container } from 'simple-react-ui-kit'
 
-import styles from './styles.module.sass'
+import Link from 'next/link'
+import { useTranslation } from 'next-i18next'
 
 import { APIMeteo, ApiModel } from '@/api'
 import { formatDateUTC, minutesAgo } from '@/tools/helpers'
+
+import styles from './styles.module.sass'
 
 const WEATHER_THRESHOLD = 25
 

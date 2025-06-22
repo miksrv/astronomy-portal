@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { ClassAttributes } from 'react'
 
 // import { Provider } from 'react-redux'
+// eslint-disable-next-line import/no-extraneous-dependencies
 import '@testing-library/jest-dom'
 
 // import { API } from '@/api/api'
@@ -15,7 +16,8 @@ import '@testing-library/jest-dom'
 jest.mock('next/image', () => ({
     __esModule: true,
 
-    default: (props: any) => <img {...props} />
+    // eslint-disable-next-line next/no-img-element
+    default: (props: ClassAttributes<HTMLImageElement>) => <img {...props} />
 }))
 
 // export const testStore = (state: Partial<RootState>) => {
