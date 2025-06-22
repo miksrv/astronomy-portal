@@ -86,7 +86,8 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = () => {
                 />
             </div>
 
-            <Calendar eventsTelescope={data?.items} />
+            {/*eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
+            <Calendar eventsTelescope={data?.items as any[]} />
 
             <AppFooter />
         </AppLayout>
