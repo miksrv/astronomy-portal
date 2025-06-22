@@ -26,9 +26,9 @@ class EventEntity extends Entity
     ];
 
     protected $datamap = [
-        // 'registrationStart' => 'registration_start',
-        // 'registrationEnd'   => 'registration_end',
-        // 'availableTickets'  => 'max_tickets',
+        'registrationStart' => 'registration_start',
+        'registrationEnd'   => 'registration_end',
+        'availableTickets'  => 'max_tickets',
         'yandexMap'     => 'yandex_map_link',
         'googleMap'     => 'google_map_link',
         'coverFileName' => 'cover_file_name',

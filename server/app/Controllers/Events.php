@@ -51,7 +51,8 @@ class Events extends ResourceController
 
     public function upcoming(): ResponseInterface
     {
-        $eventData = $this->model->getUpcomingEvent();
+        $locale    = $this->request->getLocale();
+        $eventData = $this->model->getUpcomingEvent($locale);
 
         if (empty($eventData)) {
             return $this->respond('');
@@ -133,8 +134,8 @@ class Events extends ResourceController
     {
         $locale = $this->request->getLocale();
         $limit  = $this->request->getGet('limit', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-        $order  = $this->request->getGet('order', FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
-        $event  = $this->request->getGet('eventId', FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+        $order  = $this->request->getGet('order', FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+        $event  = $this->request->getGet('eventId', FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
 
         try {
             $eventPhotosModel = new EventsPhotosModel();
@@ -228,6 +229,9 @@ class Events extends ResourceController
             $event   = new EventEntity();
             $event->id = $eventId;
             $event->title_ru    = $input['title'];
+            $event->title_en    = $input['title'];
+            $event->content_ru  = $input['content'];
+            $event->content_en  = $input['content'];
             $event->max_tickets = $input['tickets'];
             $event->googleMap   = $input['googleMap'];
             $event->yandexMap   = $input['yandexMap'];
@@ -310,7 +314,7 @@ class Events extends ResourceController
             $this->failValidationErrors(['error' => 'Такого мероприятия не существует']);
         }
 
-        $eventUsersModel = new EventUsersModel();
+        $eventUsersModel = new EventsUsersModel();
 
         // Check that user not already registered at this event
         if ($eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->withDeleted()->first()) {
@@ -356,13 +360,13 @@ class Events extends ResourceController
         Request::sendMessage([
             'chat_id'    => getenv('app.telegramChatID'),
             'parse_mode' => 'HTML',
-            'text'       => "<b>Astro:</b> 🙋Регистрация на астровыезд\n" .
-                "<b>{$event->title}</b>\n" .
-                "🔹Имя: <i>{$input['name']}</i>\n" .
-                "🔹Взрослых: <b>{$input['adults']}</b>, детей: {$input['children']}\n" .
-                "🔹Осталось слотов: <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b>\n" .
-                (count($childrenAges) > 0 ? "🔹Возраст детей: <b>" . implode(', ', $childrenAges) . "</b>\n" : "") .
-                "🔹Зарегистрировано: <b>" . ($totalMembers + (int) $input['adults'] + (int) $input['children']) . "</b>"
+            'text'       => "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n\n" .
+                "<b>{$event->title_ru}</b>\n" .
+                "🔹<i>{$input['name']}</i>\n" .
+                "🔹(<b>{$input['adults']}</b>) взрослых, ({$input['children']}) детей\n" .
+                (count($childrenAges) > 0 ? "🔹Возраст детей <b>" . implode(', ', $childrenAges) . "</b> (лет)\n" : "") .
+                "🔹Доступно мест <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b> из <b>{$event->max_tickets}</b>\n" .
+                "🔹Всего участников: <b>" . ($totalMembers + (int) $input['adults'] + (int) $input['children']) . "</b>"
         ]);
 
         $userModel  = new UsersModel();
@@ -410,7 +414,7 @@ class Events extends ResourceController
             $this->failValidationErrors(['error' => 'Такого мероприятия не существует']);
         }
 
-        $eventUsersModel  = new EventUsersModel();
+        $eventUsersModel  = new EventsUsersModel();
         $userRegistration = $eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->first();
 
         // Check that user not already registered at this event
@@ -440,9 +444,9 @@ class Events extends ResourceController
         Request::sendMessage([
             'chat_id'    => getenv('app.telegramChatID'),
             'parse_mode' => 'HTML',
-            'text'       => "<b>Astro:</b> ❌ Отмена бронирования\n" .
-                "<b>{$event->title}</b>\n" .
-                "🔹Имя: <i>{$this->session->user->name}</i>\n" .
+            'text'       => "<b>❌ ОТМЕНА БРОНИРОВАНИЯ\n\n" .
+                "<b>{$event->title_ru}</b>\n" .
+                "🔹<i>{$this->session->user->name}</i>" .
                 "🔹Взрослых: <b>{$userRegistration->adults}</b>, детей: {$userRegistration->children}\n" .
                 "🔹Осталось слотов: <b>" . ($event->max_tickets - (abs($currentTickets->adults - (int) $userRegistration->adults))) . "</b>\n"
         ]);
