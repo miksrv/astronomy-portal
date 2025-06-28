@@ -81,5 +81,5 @@
         "typescript-eslint": "^8.34.1",
         "whatwg-fetch": "^3.6.20"
     },
-    "packageManager": "yarn@4.8.1"
+    "packageManager": "yarn@4.9.2"
 }
