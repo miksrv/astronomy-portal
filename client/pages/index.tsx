@@ -24,10 +24,6 @@ const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
 
     useEffect(() => {
         const sections = document.querySelectorAll('section')
-        const options = {
-            root: null,
-            threshold: 0.4
-        }
 
         const setSectionHeight = () => {
             const windowHeight = window.innerHeight
@@ -40,24 +36,7 @@ const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
         setSectionHeight()
         window.addEventListener('resize', setSectionHeight)
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    const target = entry.target as HTMLElement
-                    window.scrollTo({
-                        behavior: 'smooth',
-                        top: target.offsetTop - headerHeight
-                    })
-                }
-            })
-        }, options)
-
-        sections.forEach((section) => {
-            observer.observe(section)
-        })
-
         return () => {
-            observer.disconnect()
             window.removeEventListener('resize', setSectionHeight)
         }
     }, [])
