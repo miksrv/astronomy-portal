@@ -28,7 +28,6 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
     const [canceled, setCanceled] = useState<boolean>(false)
     const [confirmation, showConfirmation] = useState<boolean>(false)
 
-    // const { data, isFetching, isLoading: upcomingLoading } = API.useEventGetUpcomingQuery()
     const [cancelRegistration, { isLoading }] = API.useEventsCancelRegistrationPostMutation()
 
     const handleCancelRegistration = async () => {
@@ -285,6 +284,8 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                         <Button
                             variant={'negative'}
                             mode={'primary'}
+                            loading={isLoading}
+                            disabled={isLoading}
                             onClick={handleCancelRegistration}
                         >
                             {'Подтверждаю'}
