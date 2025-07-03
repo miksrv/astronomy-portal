@@ -201,7 +201,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
 
                             <div className={styles.mapLinks}>
                                 <a
-                                    href={event?.yandexMap}
+                                    href={event?.yandexMap ?? 'https://yandex.com/maps/-/CDvPzZkD'}
                                     title={'Ссылка на Яндекс Картах'}
                                     target={'_blank'}
                                     rel={'noreferrer'}
@@ -209,7 +209,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                                     Яндекс Карты
                                 </a>
                                 <a
-                                    href={event?.googleMap}
+                                    href={event?.googleMap ?? 'https://maps.app.goo.gl/MWEcbhNK6wj2eeEPA'}
                                     title={'Ссылка на Google Картах'}
                                     target={'_blank'}
                                     rel={'noreferrer'}
