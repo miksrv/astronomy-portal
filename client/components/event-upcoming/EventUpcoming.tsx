@@ -25,7 +25,6 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
     const user = useAppSelector((state) => state.auth.user)
 
     const [registered, setRegistered] = useState<boolean>(false)
-    const [canceled, setCanceled] = useState<boolean>(false)
     const [confirmation, showConfirmation] = useState<boolean>(false)
 
     const [cancelRegistration, { isLoading }] = API.useEventsCancelRegistrationPostMutation()
@@ -33,7 +32,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
     const handleCancelRegistration = async () => {
         await cancelRegistration({ eventId: event?.id || '' })
         showConfirmation(false)
-        setCanceled(true)
+        setRegistered(false)
     }
 
     const secondsUntilRegistrationStart = getSecondsUntilUTCDate(event?.registrationStart?.date) || 0
@@ -65,8 +64,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
 
     useEffect(() => {
         setRegistered(event?.registered || false)
-        setCanceled(event?.canceled || false)
-    }, [event?.registered, event?.canceled])
+    }, [event?.registered])
 
     return event?.id ? (
         <Container {...props}>
@@ -188,8 +186,8 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                         ''
                     )}
 
-                    {/* If user is registered and event is not canceled */}
-                    {user?.id && registered && !canceled && secondsUntilRegistrationStart <= 0 && (
+                    {/* If user is registered */}
+                    {user?.id && registered && secondsUntilRegistrationStart <= 0 && (
                         <div className={styles.registered}>
                             <h3>{'Вы зарегистрированы'}</h3>
 
@@ -240,22 +238,22 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                         </div>
                     )}
 
-                    {/* If user is registered and registration is canceled */}
-                    {user?.id && registered && canceled && (
-                        <div
-                            style={{
-                                marginTop: '40px'
-                            }}
-                            className={styles.bookingLogin}
-                        >
-                            <h3>
-                                Вы отменили свое бронирование
-                                <br />
-                                на это мероприятие
-                            </h3>
-                            <p>Если вы хотите приехать на астровыезд - пожалуйста, дождитесь следующего</p>
-                        </div>
-                    )}
+                    {/* If user is registered */}
+                    {/*{user?.id && registered && (*/}
+                    {/*    <div*/}
+                    {/*        style={{*/}
+                    {/*            marginTop: '40px'*/}
+                    {/*        }}*/}
+                    {/*        className={styles.bookingLogin}*/}
+                    {/*    >*/}
+                    {/*        <h3>*/}
+                    {/*            Вы отменили свое бронирование*/}
+                    {/*            <br />*/}
+                    {/*            на это мероприятие*/}
+                    {/*        </h3>*/}
+                    {/*        <p>Если вы хотите приехать на астровыезд - пожалуйста, дождитесь следующего</p>*/}
+                    {/*    </div>*/}
+                    {/*)}*/}
                 </div>
 
                 <Dialog
@@ -265,13 +263,10 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                 >
                     <div className={styles.confirmContent}>
                         <p>
-                            Если вы отмените свое бронирование на этот астровыезд, то освободившимися местами смогут
-                            воспользоваться другие участники, которые хотят поехать на астровыезд.
+                            Если вы отмените своё бронирование на этот астровыезд, то освободившимися местами смогут
+                            воспользоваться другие участники, которые хотят поехать.
                         </p>
-                        <p>
-                            Если вы подтвердите отмену, то вы не сможете повторно зарегистрироваться на этот астровыезд,
-                            только на последующие.
-                        </p>
+                        <p>Вы сможете повторно зарегистрироваться на этот астровыезд, если места ещё будут свободны.</p>
                     </div>
                     <div className={styles.confirmationFooter}>
                         <Button
