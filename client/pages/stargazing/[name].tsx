@@ -18,6 +18,7 @@ import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
+import EventItemData from '@/components/event-item-data'
 import EventPhotoUploader from '@/components/event-photo-uploader/EventPhotoUploader'
 import PhotoGallery from '@/components/photo-gallery'
 import PhotoLightbox from '@/components/photo-lightbox'
@@ -124,23 +125,11 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 ]}
             />
 
-            <Container style={{ marginBottom: '10px' }}>
-                <Image
-                    style={{
-                        objectFit: 'cover',
-                        height: 'auto',
-                        width: '100%'
-                    }}
-                    src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
-                    alt={title}
-                    width={1024}
-                    height={768}
-                />
-
-                <br />
-
-                <Markdown>{event?.content}</Markdown>
-            </Container>
+            <EventItemData
+                style={{ marginBottom: '10px' }}
+                title={title}
+                event={event || undefined}
+            />
 
             <Container style={{ marginBottom: '10px' }}>
                 <h2

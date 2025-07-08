@@ -9,6 +9,11 @@ export type Event = {
     coverFileName?: string
     coverFileExt?: string
     date?: DateTime
+    members?: {
+        total: number
+        adults: number
+        children: number
+    }
     registered?: boolean
     canceled?: boolean
     yandexMap?: string
