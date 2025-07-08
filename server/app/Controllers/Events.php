@@ -109,6 +109,26 @@ class Events extends ResourceController
             // Fetch data from models
             $result = $this->model->getPastEventsList($locale);
 
+            $eventUsersModel = new EventsUsersModel();
+            $usersData = $eventUsersModel->getUsersCountGroupedByEventId();
+
+            // Convert $usersData to an associative array for fast lookup by event_id
+            $usersDataByEventId = [];
+            foreach ($usersData as $item) {
+                $usersDataByEventId[$item->event_id] = $item;
+            }
+
+            foreach ($result as $event) {
+                if (isset($usersDataByEventId[$event->id])) {
+                    $item = $usersDataByEventId[$event->id];
+                    $event->members = (object) [
+                        'total'    => $item->total_adults + $item->total_children,
+                        'adults'   => $item->total_adults ?? 0,
+                        'children' => $item->total_children ?? 0
+                    ];
+                }
+            }
+
             // Return the response with count and items
             return $this->respond([
                 'count' => count($result),

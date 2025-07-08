@@ -30,17 +30,17 @@ const EventItemData: React.FC<EventItemDataProps> = ({ title, event, ...props })
         />
 
         <div className={styles.toolbar}>
+            <div>
+                <Icon name={'Time'} />
+                {formatDate(event?.date?.date, 'D MMMM YYYY')}
+            </div>
+
             {!!event?.members?.total && event?.members?.total > 0 && (
                 <div>
                     <Icon name={'Users'} />
                     {event?.members?.total}
                 </div>
             )}
-
-            <div>
-                <Icon name={'Time'} />
-                {formatDate(event?.date?.date, 'D MMMM YYYY')}
-            </div>
         </div>
 
         <Markdown>{event?.content}</Markdown>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Container } from 'simple-react-ui-kit'
+import { Container, Icon } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -44,7 +44,17 @@ const EventsListItem: React.FC<EventsListItemProps> = ({ event }) => (
                 </Link>
             </h3>
 
-            <div className={styles.date}>{formatDate(event?.date?.date, 'D MMMM YYYY')}</div>
+            <div className={styles.toolbar}>
+                <div>
+                    <Icon name={'Time'} />
+                    {formatDate(event?.date?.date, 'D MMMM YYYY')}
+                </div>
+
+                <div>
+                    <Icon name={'Users'} />
+                    {event?.members?.total || event?.availableTickets}
+                </div>
+            </div>
         </div>
     </Container>
 )

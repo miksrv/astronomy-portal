@@ -47,6 +47,7 @@ class EventEntity extends Entity
     protected $casts   = [
         'date'               => 'datetime',
         'registration_start' => 'datetime',
-        'registration_end'   => 'datetime'
+        'registration_end'   => 'datetime',
+        'max_tickets'        => 'int',
     ];
 }

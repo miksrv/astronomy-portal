@@ -105,8 +105,8 @@ class EventsModel extends ApplicationBaseModel
 
         $datetime = (new Time('now'))->addHours(5);
 
-        $eventsQuery = $this->select('id, title_en, title_ru, date, cover_file_name, cover_file_ext' . (
-            $eventId !== null ? ', content_en, content_ru, max_tickets, date, registration_start, registration_end' : '')
+        $eventsQuery = $this->select('id, title_en, title_ru, date, cover_file_name, cover_file_ext, max_tickets' . (
+            $eventId !== null ? ', content_en, content_ru, date, registration_start, registration_end' : '')
         );
 
         // Apply filter if a specific event is requested

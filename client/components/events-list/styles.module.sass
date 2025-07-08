@@ -12,7 +12,7 @@
     background: var(--container-background)
     overflow: hidden
     flex-basis: calc(33.3333% - 7px)
-    padding: 5px !important
+    padding: 0px !important
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-basis: 100%
@@ -51,7 +51,7 @@
             font-size: 0
 
     .bottomPanel
-        padding-top: 5px
+        padding: 5px 10px
 
         .title
             white-space: pre
@@ -70,6 +70,18 @@
                 overflow: hidden
                 text-overflow: ellipsis
 
-        .date
-            color: var(--text-color-secondary)
-            font-size: var(--font-size-small)
+        .toolbar
+            display: flex
+            align-items: center
+            gap: 16px
+
+            div
+                display: flex
+                align-items: center
+                gap: 4px
+                color: var(--text-color-secondary)
+
+            svg
+                width: 16px
+                height: 16px
+                fill: var(--text-color-primary)
