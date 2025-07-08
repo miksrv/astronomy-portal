@@ -17,7 +17,6 @@ class EventsUsersModel extends ApplicationBaseModel {
         'event_id',
         'user_id',
         'adults',
-        'adults',
         'children',
         'children_ages'
     ];
@@ -44,4 +43,16 @@ class EventsUsersModel extends ApplicationBaseModel {
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    public function getUsersByEventId(string $eventId): ?array {
+        $eventUsersQuery = $this->select('
+                events_users.adults, events_users.children, events_users.children_ages,
+                events_users.created_at,users.name, users.avatar, users.auth_type')
+            ->join('users', 'users.id = events_users.user_id', 'left')
+            ->where('event_id', $eventId)
+            ->orderBy('created_at', 'ASC')
+            ->findAll();
+
+        return $eventUsersQuery ?: [];
+    }
 }

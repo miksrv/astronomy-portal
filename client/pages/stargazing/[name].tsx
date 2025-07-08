@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
+import { getCookie } from 'cookies-next'
 import { Button, Container, Icon } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -11,6 +12,7 @@ import { NextSeo } from 'next-seo'
 
 import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
+import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
@@ -239,6 +241,12 @@ export const getServerSideProps = wrapper.getServerSideProps(
             }
 
             store.dispatch(setLocale(locale))
+
+            const token = await getCookie('token', { req: context.req, res: context.res })
+
+            if (token) {
+                store.dispatch(setSSRToken(token))
+            }
 
             const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
 

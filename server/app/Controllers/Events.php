@@ -189,8 +189,41 @@ class Events extends ResourceController
         }
     }
 
+    /**
+     * Returns the list of users registered for a specific event.
+     *
+     * @param int|null $id The event ID.
+     * @return ResponseInterface JSON response with the list of users or a server error on failure.
+     */
+    public function members($id = null): ResponseInterface
+    {
+        if ($this->session?->user?->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
+        try {
+            $eventUsersModel = new EventsUsersModel();
+            $users = $eventUsersModel->getUsersByEventId($id);
+
+            return $this->respond($users);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * Creates a new event with the provided details.
+     *
+     * Validates user permissions and input data, processes the uploaded cover image,
+     * converts event and registration dates to UTC, and saves the event.
+     * Returns the created event data or an error response on failure.
+     *
+     * @return ResponseInterface JSON response with the created event or error message.
+     */
     public function create(): ResponseInterface {
-        if ($this->session->user->role !== 'admin') {
+        if ($this->session?->user?->role !== 'admin') {
             return $this->failValidationErrors('Ошибка прав доступа');
         }
 
@@ -455,7 +488,7 @@ class Events extends ResourceController
      * @throws ReflectionException
      */
     public function upload($id = null): ResponseInterface {
-        if (!$this->session->isAuth || $this->session->user->role !== 'admin') {
+        if (!$this->session->isAuth || $this->session?->user?->role !== 'admin') {
             return $this->failValidationErrors('Ошибка прав доступа');
         }
 
@@ -518,6 +551,7 @@ class Events extends ResourceController
         $photo->image_height = $height;
 
         $eventPhotosModel->insert($photo);
+
         return $this->respondCreated((object) [
             'name'    => $name,
             'ext'     => $ext,
@@ -529,7 +563,7 @@ class Events extends ResourceController
     }
 
     public function delete($id = null): ResponseInterface {
-        if ($this->session->user->role !== 'admin') {
+        if ($this->session?->user?->role !== 'admin') {
             return $this->failValidationErrors('Ошибка прав доступа');
         }
 
