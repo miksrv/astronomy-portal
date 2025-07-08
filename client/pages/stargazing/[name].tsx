@@ -39,6 +39,8 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 
     const user = useAppSelector((state) => state.auth.user)
 
+    // const { data: usersList } = API.useEventGetUsersListQuery(eventId, { skip: !eventId })
+
     const inputFileRef = useRef<HTMLInputElement>(undefined)
 
     const [localPhotos, setLocalPhotos] = useState<ApiModel.EventPhoto[]>([])

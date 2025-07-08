@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { getCookie } from 'cookies-next'
 import { Button, Container, Icon } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -11,7 +10,6 @@ import { NextSeo } from 'next-seo'
 
 import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
-import { setSSRToken } from '@/api/authSlice'
 import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
@@ -184,12 +182,6 @@ export const getServerSideProps = wrapper.getServerSideProps(
             const translations = await serverSideTranslations(locale)
 
             store.dispatch(setLocale(locale))
-
-            const token = await getCookie('token', { req: context.req, res: context.res })
-
-            if (token) {
-                store.dispatch(setSSRToken(token))
-            }
 
             const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
             const { data: upcomingData } = await store.dispatch(API.endpoints?.eventGetUpcoming.initiate())

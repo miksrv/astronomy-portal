@@ -181,6 +181,17 @@ class Events extends ResourceController
                 return $this->failNotFound();
             }
 
+            $eventUsersModel = new EventsUsersModel();
+            $usersCount = $eventUsersModel->getUsersCountByEventId($id);
+
+            if ($usersCount->total_adults || $usersCount->total_children) {
+                $result[0]->members = (object) [
+                    'total'    => $usersCount->total_adults + $usersCount->total_children,
+                    'adults'   => $usersCount->total_adults ?? 0,
+                    'children' => $usersCount->total_children ?? 0
+                ];
+            }
+
             return $this->respond($result[0]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);

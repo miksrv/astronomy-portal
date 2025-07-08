@@ -55,4 +55,20 @@ class EventsUsersModel extends ApplicationBaseModel {
 
         return $eventUsersQuery ?: [];
     }
+
+    /**
+     * Retrieves the count of users (adults and children) for a specific event.
+     *
+     * @param string $eventId The ID of the event.
+     * @return array{total_adults: int|string|null, total_children: int|string|null}[]|null
+     */
+    public function getUsersCountByEventId(string $eventId): ?object {
+        $eventUsersQuery = $this->select('
+                SUM(events_users.adults) as total_adults,
+                SUM(JSON_LENGTH(events_users.children)) as total_children')
+            ->where('event_id', $eventId)
+            ->findAll();
+
+        return $eventUsersQuery[0] ?: null;
+    }
 }

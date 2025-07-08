@@ -3,6 +3,7 @@ import type { Action, PayloadAction } from '@reduxjs/toolkit'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { ApiModel, ApiType } from '@/api'
+import { ResponseUsersList } from '@/api/types/events'
 import { AstroStargazingFormType } from '@/components/astro-stargazing-form'
 
 import { RootState } from './store'
@@ -115,6 +116,9 @@ export const API = createApi({
         }),
         eventGetPhotoList: builder.query<ApiType.Events.ResponsePhotoList, ApiType.Events.RequestPhotoList>({
             query: (params) => `events/photos${encodeQueryData(params)}`
+        }),
+        eventGetUsersList: builder.query<ApiType.Events.ResponseUsersList, string>({
+            query: (id) => `events/members/${id}`
         }),
         eventGetUpcoming: builder.query<ApiType.Events.ResItem, void>({
             providesTags: () => [{ id: 'UPCOMING', type: 'Events' }],

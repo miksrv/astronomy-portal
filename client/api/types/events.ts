@@ -8,6 +8,7 @@ export type ResItem = ApiModel.Event
 
 export type ResponsePhoto = ApiModel.EventPhoto
 
+/* Photo List */
 export interface RequestPhotoList {
     eventId?: string
     limit?: number
@@ -37,4 +38,10 @@ export interface ReqRegistration {
 export interface ResRegistration {
     result: boolean
     message?: string
+}
+
+/* Users List */
+export interface ResponseUsersList {
+    count?: number
+    items?: ApiModel.EventUser[]
 }
