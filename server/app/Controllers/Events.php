@@ -360,7 +360,7 @@ class Events extends ResourceController
         Request::sendMessage([
             'chat_id'    => getenv('app.telegramChatID'),
             'parse_mode' => 'HTML',
-            'text'       => "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n\n" .
+            'text'       => "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n" .
                 "<b>{$event->title_ru}</b>\n" .
                 "🔹<i>{$input['name']}</i>\n" .
                 "🔹(<b>{$input['adults']}</b>) взрослых, ({$input['children']}) детей\n" .
@@ -437,14 +437,14 @@ class Events extends ResourceController
             ->where('event_id', $input['eventId'])
             ->first();
 
-        $eventUsersModel->delete($userRegistration->id);
+        $eventUsersModel->delete($userRegistration->id, true);
 
         new Telegram(getenv('app.telegramBotKey'), '');
 
         Request::sendMessage([
             'chat_id'    => getenv('app.telegramChatID'),
             'parse_mode' => 'HTML',
-            'text'       => "<b>❌ ОТМЕНА БРОНИРОВАНИЯ</b>\n\n" .
+            'text'       => "<b>❌ ОТМЕНА БРОНИРОВАНИЯ</b>\n" .
                 "<b>{$event->title_ru}</b>\n" .
                 "🔹<i>{$this->session->user->name}</i>\n" .
                 "🔹Взрослых: <b>{$userRegistration->adults}</b>, детей: {$userRegistration->children}\n" .
