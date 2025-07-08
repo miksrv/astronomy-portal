@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import Markdown from 'react-markdown'
+import { getCookie } from 'cookies-next'
 import { Button, Container, Icon } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -11,11 +10,13 @@ import { NextSeo } from 'next-seo'
 
 import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
+import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
 import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
+import EventItemData from '@/components/event-item-data'
 import EventPhotoUploader from '@/components/event-photo-uploader/EventPhotoUploader'
 import PhotoGallery from '@/components/photo-gallery'
 import PhotoLightbox from '@/components/photo-lightbox'
@@ -26,15 +27,18 @@ import { removeMarkdown } from '@/tools/strings'
 interface StargazingItemPageProps {
     eventId: string
     event: ApiModel.Event | null
+    photos: ApiModel.EventPhoto[] | null
     eventsList: ApiModel.Event[] | null
 }
 
-const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event, eventsList }) => {
+const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event, photos, eventsList }) => {
     const { t, i18n } = useTranslation()
 
     const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
 
     const user = useAppSelector((state) => state.auth.user)
+
+    // const { data: usersList } = API.useEventGetUsersListQuery(eventId, { skip: !eventId })
 
     const inputFileRef = useRef<HTMLInputElement>(undefined)
 
@@ -86,8 +90,8 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     }
 
     useEffect(() => {
-        setLocalPhotos(event?.photos ?? [])
-    }, [event?.photos])
+        setLocalPhotos(photos ?? [])
+    }, [photos])
 
     return (
         <AppLayout>
@@ -119,23 +123,11 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 ]}
             />
 
-            <Container style={{ marginBottom: '10px' }}>
-                <Image
-                    style={{
-                        objectFit: 'cover',
-                        height: 'auto',
-                        width: '100%'
-                    }}
-                    src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
-                    alt={title}
-                    width={1024}
-                    height={768}
-                />
-
-                <br />
-
-                <Markdown>{event?.content}</Markdown>
-            </Container>
+            <EventItemData
+                style={{ marginBottom: '10px' }}
+                title={title}
+                event={event || undefined}
+            />
 
             <Container style={{ marginBottom: '10px' }}>
                 <h2
@@ -239,9 +231,21 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             store.dispatch(setLocale(locale))
 
+            const token = await getCookie('token', { req: context.req, res: context.res })
+
+            if (token) {
+                store.dispatch(setSSRToken(token))
+            }
+
             const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
 
-            const { data, isError } = await store.dispatch(API.endpoints?.eventGetItem.initiate(eventId))
+            const { data: eventData, isError } = await store.dispatch(API.endpoints?.eventGetItem.initiate(eventId))
+
+            const { data: eventPhotos } = await store.dispatch(
+                API.endpoints?.eventGetPhotoList.initiate({
+                    eventId
+                })
+            )
 
             if (isError) {
                 return { notFound: true }
@@ -252,7 +256,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
             return {
                 props: {
                     ...translations,
-                    event: data || null,
+                    event: eventData || null,
+                    photos: eventPhotos?.items || [],
                     eventId: eventId,
                     eventsList: eventsData?.items || []
                 }

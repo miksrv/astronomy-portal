@@ -109,6 +109,26 @@ class Events extends ResourceController
             // Fetch data from models
             $result = $this->model->getPastEventsList($locale);
 
+            $eventUsersModel = new EventsUsersModel();
+            $usersData = $eventUsersModel->getUsersCountGroupedByEventId();
+
+            // Convert $usersData to an associative array for fast lookup by event_id
+            $usersDataByEventId = [];
+            foreach ($usersData as $item) {
+                $usersDataByEventId[$item->event_id] = $item;
+            }
+
+            foreach ($result as $event) {
+                if (isset($usersDataByEventId[$event->id])) {
+                    $item = $usersDataByEventId[$event->id];
+                    $event->members = (object) [
+                        'total'    => $item->total_adults + $item->total_children,
+                        'adults'   => $item->total_adults ?? 0,
+                        'children' => $item->total_children ?? 0
+                    ];
+                }
+            }
+
             // Return the response with count and items
             return $this->respond([
                 'count' => count($result),
@@ -181,13 +201,18 @@ class Events extends ResourceController
                 return $this->failNotFound();
             }
 
-            $eventPhotosModel = new EventsPhotosModel();
-            $eventPhotosData  = $eventPhotosModel->getPhotoList($locale, $id, 0);
+            $eventUsersModel = new EventsUsersModel();
+            $usersCount = $eventUsersModel->getUsersCountByEventId($id);
 
-            $result = $result[0];
-            $result->photos = $eventPhotosData;
+            if ($usersCount->total_adults || $usersCount->total_children) {
+                $result[0]->members = (object) [
+                    'total'    => $usersCount->total_adults + $usersCount->total_children,
+                    'adults'   => $usersCount->total_adults ?? 0,
+                    'children' => $usersCount->total_children ?? 0
+                ];
+            }
 
-            return $this->respond($result);
+            return $this->respond($result[0]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
@@ -195,8 +220,41 @@ class Events extends ResourceController
         }
     }
 
+    /**
+     * Returns the list of users registered for a specific event.
+     *
+     * @param int|null $id The event ID.
+     * @return ResponseInterface JSON response with the list of users or a server error on failure.
+     */
+    public function members($id = null): ResponseInterface
+    {
+        if ($this->session?->user?->role !== 'admin') {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
+        try {
+            $eventUsersModel = new EventsUsersModel();
+            $users = $eventUsersModel->getUsersByEventId($id);
+
+            return $this->respond($users);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * Creates a new event with the provided details.
+     *
+     * Validates user permissions and input data, processes the uploaded cover image,
+     * converts event and registration dates to UTC, and saves the event.
+     * Returns the created event data or an error response on failure.
+     *
+     * @return ResponseInterface JSON response with the created event or error message.
+     */
     public function create(): ResponseInterface {
-        if ($this->session->user->role !== 'admin') {
+        if ($this->session?->user?->role !== 'admin') {
             return $this->failValidationErrors('Ошибка прав доступа');
         }
 
@@ -360,7 +418,7 @@ class Events extends ResourceController
         Request::sendMessage([
             'chat_id'    => getenv('app.telegramChatID'),
             'parse_mode' => 'HTML',
-            'text'       => "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n\n" .
+            'text'       => "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n" .
                 "<b>{$event->title_ru}</b>\n" .
                 "🔹<i>{$input['name']}</i>\n" .
                 "🔹(<b>{$input['adults']}</b>) взрослых, ({$input['children']}) детей\n" .
@@ -437,14 +495,14 @@ class Events extends ResourceController
             ->where('event_id', $input['eventId'])
             ->first();
 
-        $eventUsersModel->delete($userRegistration->id);
+        $eventUsersModel->delete($userRegistration->id, true);
 
         new Telegram(getenv('app.telegramBotKey'), '');
 
         Request::sendMessage([
             'chat_id'    => getenv('app.telegramChatID'),
             'parse_mode' => 'HTML',
-            'text'       => "<b>❌ ОТМЕНА БРОНИРОВАНИЯ</b>\n\n" .
+            'text'       => "<b>❌ ОТМЕНА БРОНИРОВАНИЯ</b>\n" .
                 "<b>{$event->title_ru}</b>\n" .
                 "🔹<i>{$this->session->user->name}</i>\n" .
                 "🔹Взрослых: <b>{$userRegistration->adults}</b>, детей: {$userRegistration->children}\n" .
@@ -461,7 +519,7 @@ class Events extends ResourceController
      * @throws ReflectionException
      */
     public function upload($id = null): ResponseInterface {
-        if (!$this->session->isAuth || $this->session->user->role !== 'admin') {
+        if (!$this->session->isAuth || $this->session?->user?->role !== 'admin') {
             return $this->failValidationErrors('Ошибка прав доступа');
         }
 
@@ -524,6 +582,7 @@ class Events extends ResourceController
         $photo->image_height = $height;
 
         $eventPhotosModel->insert($photo);
+
         return $this->respondCreated((object) [
             'name'    => $name,
             'ext'     => $ext,
@@ -535,7 +594,7 @@ class Events extends ResourceController
     }
 
     public function delete($id = null): ResponseInterface {
-        if ($this->session->user->role !== 'admin') {
+        if ($this->session?->user?->role !== 'admin') {
             return $this->failValidationErrors('Ошибка прав доступа');
         }
 
