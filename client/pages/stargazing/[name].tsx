@@ -1,10 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import Markdown from 'react-markdown'
 import { getCookie } from 'cookies-next'
 import { Button, Container, Icon } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
