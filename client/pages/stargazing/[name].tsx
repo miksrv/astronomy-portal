@@ -26,10 +26,11 @@ import { removeMarkdown } from '@/tools/strings'
 interface StargazingItemPageProps {
     eventId: string
     event: ApiModel.Event | null
+    photos: ApiModel.EventPhoto[] | null
     eventsList: ApiModel.Event[] | null
 }
 
-const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event, eventsList }) => {
+const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event, photos, eventsList }) => {
     const { t, i18n } = useTranslation()
 
     const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
@@ -86,8 +87,8 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     }
 
     useEffect(() => {
-        setLocalPhotos(event?.photos ?? [])
-    }, [event?.photos])
+        setLocalPhotos(photos ?? [])
+    }, [photos])
 
     return (
         <AppLayout>
@@ -241,7 +242,13 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
 
-            const { data, isError } = await store.dispatch(API.endpoints?.eventGetItem.initiate(eventId))
+            const { data: eventData, isError } = await store.dispatch(API.endpoints?.eventGetItem.initiate(eventId))
+
+            const { data: eventPhotos } = await store.dispatch(
+                API.endpoints?.eventGetPhotoList.initiate({
+                    eventId
+                })
+            )
 
             if (isError) {
                 return { notFound: true }
@@ -252,7 +259,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
             return {
                 props: {
                     ...translations,
-                    event: data || null,
+                    event: eventData || null,
+                    photos: eventPhotos?.items || [],
                     eventId: eventId,
                     eventsList: eventsData?.items || []
                 }

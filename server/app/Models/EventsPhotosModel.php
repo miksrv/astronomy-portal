@@ -92,6 +92,7 @@ class EventsPhotosModel extends ApplicationBaseModel
             return [];
         }
 
+        // Localize titles based on the specified locale
         foreach ($photosList as $photo) {
             $photo->title = getLocalizedString($locale, $photo->title_en, $photo->title_ru);
 

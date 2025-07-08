@@ -181,13 +181,7 @@ class Events extends ResourceController
                 return $this->failNotFound();
             }
 
-            $eventPhotosModel = new EventsPhotosModel();
-            $eventPhotosData  = $eventPhotosModel->getPhotoList($locale, $id, 0);
-
-            $result = $result[0];
-            $result->photos = $eventPhotosData;
-
-            return $this->respond($result);
+            return $this->respond($result[0]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
