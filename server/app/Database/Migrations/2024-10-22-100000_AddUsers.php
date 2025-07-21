@@ -41,7 +41,7 @@ class AddUser extends Migration
                 'null' => true
             ],
             'role' => [
-                'type'    => 'ENUM("user", "moderator", "admin")',
+                'type'    => 'ENUM("user", "security", "moderator", "admin")',
                 'null'    => false,
                 'default' => 'user'
             ],
