@@ -3,8 +3,15 @@ export type User = {
     name: string
     email: string
     phone?: string
-    role?: 'user' | 'moderator' | 'admin'
+    role?: UserRole
     avatar?: string
     updated?: string
     created?: string
+}
+
+export enum UserRole {
+    USER = 'user',
+    SECURITY = 'security',
+    MODERATOR = 'moderator',
+    ADMIN = 'admin'
 }

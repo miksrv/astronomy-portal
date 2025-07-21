@@ -14,6 +14,7 @@ export type Event = {
         adults: number
         children: number
     }
+    bookedId?: string
     registered?: boolean
     canceled?: boolean
     yandexMap?: string
