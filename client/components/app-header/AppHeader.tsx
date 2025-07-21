@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 
-import { API, HOST_IMG, useAppDispatch, useAppSelector } from '@/api'
+import { API, ApiModel, HOST_IMG, useAppDispatch, useAppSelector } from '@/api'
 import { openAuthDialog } from '@/api/applicationSlice'
 import { login, logout } from '@/api/authSlice'
 import { Menu } from '@/components/app-layout'
@@ -26,6 +26,21 @@ const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) => {
     const authSlice = useAppSelector((state) => state.auth)
 
     const [authGetMe, { data: meData, error, isLoading }] = API.useAuthGetMeMutation()
+
+    const adminLinks = [
+        {
+            href: '/photos/form',
+            label: t('add-photo')
+        },
+        {
+            href: '/objects/form',
+            label: t('add-object')
+        },
+        {
+            href: '/stargazing/form',
+            label: t('add-stargazing')
+        }
+    ]
 
     const handleLoginClick = () => {
         dispatch(openAuthDialog())
@@ -105,6 +120,18 @@ const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) => {
                             }
                         >
                             <ul className={styles.contextListMenu}>
+                                {authSlice?.user?.role === ApiModel.UserRole.ADMIN &&
+                                    adminLinks.map((item) => (
+                                        <li key={item.href}>
+                                            <Link
+                                                href={item.href}
+                                                title={item.label}
+                                            >
+                                                {item.label}
+                                            </Link>
+                                        </li>
+                                    ))}
+
                                 <li>
                                     <Link
                                         href={'/'}
