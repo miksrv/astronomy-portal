@@ -82,7 +82,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     const handleUploadPhotoClick = (event: React.MouseEvent | undefined) => {
         event?.preventDefault()
 
-        if (user?.role !== 'admin') {
+        if (user?.role !== ApiModel.UserRole.ADMIN) {
             return
         }
 
@@ -135,7 +135,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                     style={{ marginTop: 0 }}
                 >{`${event?.title} - ${t('photos-from-stargazing')}`}</h2>
 
-                {user?.role === 'admin' && (
+                {user?.role === ApiModel.UserRole.ADMIN && (
                     <Button
                         onClick={handleUploadPhotoClick}
                         disabled={!!uploadingPhotos?.length}

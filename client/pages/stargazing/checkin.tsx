@@ -3,116 +3,178 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { getCookie } from 'cookies-next'
 import { Html5Qrcode } from 'html5-qrcode'
-import { Container } from 'simple-react-ui-kit'
+import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { NextSeo } from 'next-seo'
 
-import { API, useAppSelector } from '@/api'
+import { API, ApiModel, ApiType, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { setSSRToken } from '@/api/authSlice'
 import { wrapper } from '@/api/store'
 import AppLayout from '@/components/app-layout'
 import AppToolbar from '@/components/app-toolbar'
 
+enum ScannerStatusEnum {
+    IDLE = 'idle',
+    SUCCESS = 'success',
+    ERROR = 'error',
+    DUPLICATE = 'duplicate'
+}
+
 type CheckinPageProps = object
 
 const CheckinPage: NextPage<CheckinPageProps> = () => {
-    const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'duplicate'>('idle')
-    const [message, setMessage] = useState('')
-    const [participant, setParticipant] = useState<{ name: string; count: number } | null>(null)
+    const router = useRouter()
+
+    const [status, setStatus] = useState<ScannerStatusEnum>(ScannerStatusEnum.IDLE)
+    const [participant, setParticipant] = useState<ApiType.Events.ResCheckin>()
+    const [message, setMessage] = useState<string>('')
+    const [scanning, setScanning] = useState<boolean>(true)
+
     const scannerRef = useRef<Html5Qrcode | null>(null)
-    const divId = 'qr-reader'
+
+    const [checkin, { data, error, isError, isSuccess }] = API.useEventGetCheckinMutation()
+
+    const startScanner = async () => {
+        const scanner = new Html5Qrcode('qr-reader')
+        scannerRef.current = scanner
+
+        const cameras = await Html5Qrcode.getCameras()
+
+        if (!cameras || !cameras.length) {
+            setStatus(ScannerStatusEnum.ERROR)
+            setMessage('Камеры не найдены')
+        }
+
+        await scanner.start(cameras[0].id, { fps: 10, qrbox: 250 }, handleScan, () => {})
+    }
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
-    const [checkin, { data: checkinData, error: checkinError }] = API.useEventGetCheckinMutation()
-
-    const initScanner = async (
-        scanner: Html5Qrcode,
-        onSuccess: (decodedText: string) => void,
-        onError: (err: string) => void
-    ) => {
-        const cameras = await Html5Qrcode.getCameras()
-
-        if (cameras && cameras.length) {
-            await scanner.start(cameras[0].id, { fps: 10, qrbox: 250 }, onSuccess, onError)
-        } else {
-            throw new Error('Камеры не найдены')
+    const stopScanner = async () => {
+        if (scannerRef.current) {
+            await scannerRef.current.stop()
+            scannerRef.current.clear()
+            scannerRef.current = null
         }
     }
 
-    useEffect(() => {
-        const scanner = new Html5Qrcode(divId)
-        scannerRef.current = scanner
+    const handleScan = async (decodedText: string) => {
+        await stopScanner()
+        const code = decodedText.trim()
 
-        const handleScan = async (decodedText: string) => {
-            scanner.pause()
-            const code = decodedText.trim()
+        if (code.length !== 13) {
+            setStatus(ScannerStatusEnum.ERROR)
+            setMessage('Некорректный QR-код')
+            setParticipant(undefined)
+            setScanning(false)
 
-            if (code.length !== 13) {
-                setStatus('error')
-                setMessage('Некорректный QR-код')
-                return
-            }
-
-            try {
-                await checkin(code)
-
-                // if (result.status === 'ok') {
-                //     setStatus('success')
-                //     setParticipant({ name: result.name, count: result.count })
-                //     setMessage('Участник найден')
-                // } else if (result.status === 'duplicate') {
-                //     setStatus('duplicate')
-                //     setParticipant({ name: result.name, count: result.count })
-                //     setMessage('Уже отмечен ранее')
-                // } else {
-                //     setStatus('error')
-                //     setMessage('Не найден в списке')
-                // }
-            } catch (err: any) {
-                setStatus('error')
-                setMessage(err?.data?.message || 'Ошибка при запросе')
-            }
+            return
         }
 
-        initScanner(scanner, handleScan, () => {}).catch((err) => {
-            setStatus('error')
-            setMessage(err.message)
-        })
+        await checkin(code)
+        setScanning(false)
+    }
+
+    const handleContinue = async () => {
+        setStatus(ScannerStatusEnum.IDLE)
+        setMessage('')
+        setParticipant(undefined)
+        setScanning(true)
+        await startScanner()
+    }
+
+    useEffect(() => {
+        if (scanning) {
+            startScanner().catch((err) => {
+                setStatus(ScannerStatusEnum.ERROR)
+                setMessage(err.message)
+                setScanning(false)
+            })
+        }
 
         return () => {
-            scanner.stop().catch(() => {})
+            void stopScanner()
         }
-    }, [checkin])
+    }, [scanning])
 
-    console.log('checkinData', checkinData)
+    useEffect(() => {
+        if (isError) {
+            setStatus(ScannerStatusEnum.ERROR)
+            setMessage((error as ApiType.ResError)?.messages?.error as string)
+        }
+
+        if (isSuccess) {
+            setStatus(data?.checkin?.date ? ScannerStatusEnum.DUPLICATE : ScannerStatusEnum.SUCCESS)
+            setMessage('Участник зарегистрирован')
+            setParticipant(data)
+        }
+    }, [data, error])
+
+    useEffect(() => {
+        if (userRole === ApiModel.UserRole.USER) {
+            void router.push('/stargazing')
+        }
+    }, [userRole])
 
     return (
         <AppLayout>
+            <NextSeo title={'Проверка участников'} />
+
             <AppToolbar
                 title={'Проверка участников'}
                 currentPage={'Проверка участников'}
+                links={[
+                    {
+                        link: '/stargazing',
+                        text: 'Астровыезды'
+                    }
+                ]}
             />
-            <Container>
-                <div
-                    id={divId}
-                    className='mx-auto'
-                ></div>
 
-                {status !== 'idle' && (
+            <Container>
+                {scanning && (
                     <div
-                        className={`mt-4 p-4 rounded text-white font-bold
-          ${status === 'success' ? 'bg-green-500' : status === 'duplicate' ? 'bg-yellow-500' : 'bg-red-500'}`}
+                        id={'qr-reader'}
+                        className={'qrCodeScanner'}
                     >
-                        <p>{message}</p>
-                        {participant && (
-                            <p>
-                                {participant.name} ({participant.count} чел.)
-                            </p>
-                        )}
+                        <Spinner />
                     </div>
+                )}
+
+                {!scanning && (
+                    <Message
+                        type={
+                            status === ScannerStatusEnum.SUCCESS
+                                ? 'success'
+                                : status === ScannerStatusEnum.DUPLICATE
+                                  ? 'warning'
+                                  : 'error'
+                        }
+                        title={message}
+                    >
+                        {status !== ScannerStatusEnum.ERROR && (
+                            <div style={{ margin: '20px 0' }}>
+                                {status === ScannerStatusEnum.DUPLICATE && (
+                                    <div>
+                                        <strong>Этот QR код уже был проверен ранее!</strong>
+                                    </div>
+                                )}
+                                Взрослых: {participant?.members?.adults || 0}, детей:{' '}
+                                {participant?.members?.children || 0} чел.
+                            </div>
+                        )}
+                        <Button
+                            style={{ width: '100%' }}
+                            mode={'secondary'}
+                            onClick={handleContinue}
+                        >
+                            {'Продолжить сканирование'}
+                        </Button>
+                    </Message>
                 )}
             </Container>
         </AppLayout>
