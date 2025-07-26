@@ -15,7 +15,8 @@
         "eslint:check": "eslint",
         "eslint:fix": "eslint --fix",
         "prettier:check": "prettier --check .",
-        "prettier:fix": "prettier --write ."
+        "prettier:fix": "prettier --write .",
+        "locales:build": "i18next-scanner --config i18next-scanner.config.cjs"
     },
     "dependencies": {
         "@reduxjs/toolkit": "^2.8.2",
@@ -72,6 +73,7 @@
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-simple-import-sort": "^12.1.1",
+        "i18next-scanner": "^4.6.0",
         "identity-obj-proxy": "^3.0.0",
         "jest": "^30.0.4",
         "jest-environment-jsdom": "^30.0.4",
