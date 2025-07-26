@@ -27,6 +27,7 @@ use Exception;
  * @package App\Controllers
  *
  * @method ResponseInterface upcoming() Retrieves the upcoming event details.
+ * @method ResponseInterface checkin($id = null) Checks in a user for an event by its ID.
  * @method ResponseInterface list() Retrieves a list of past events with localized details.
  * @method ResponseInterface show(int|null $id) Retrieves detailed information for a specific past event by its ID with localized content.
  * @method ResponseInterface create() Creates a new event with the provided details.
@@ -60,7 +61,7 @@ class Events extends ResourceController
 
         $eventUsersModel = new EventsUsersModel();
         $bookedEvents    = $this->session->isAuth && $this->session->user->id
-            ? $eventUsersModel->where(['event_id' => $eventData->id, 'user_id' => $this->session->user->id])->withDeleted()->first()
+            ? $eventUsersModel->where(['event_id' => $eventData->id, 'user_id' => $this->session->user->id])->first()
             : false;
 
         $currentTickets = $eventUsersModel
@@ -74,7 +75,14 @@ class Events extends ResourceController
 
         if ($bookedEvents) {
             $eventData->registered = true;
+            $eventData->bookedId   = $bookedEvents->id;
             $eventData->canceled   = !empty($bookedEvents->deleted_at);
+            $eventData->members    = [
+                'adults'   => $bookedEvents->adults ?? 0,
+                'children' => $bookedEvents->children ?? 0
+            ];
+        } else {
+            unset($eventData->location);
         }
 
         $eventData->max_tickets = $eventData->max_tickets - $currentTickets;
@@ -90,6 +98,60 @@ class Events extends ResourceController
         unset($eventData->created_at, $eventData->updated_at, $eventData->deleted_at);
 
         return $this->respond($eventData);
+    }
+
+    /**
+     * Checks in a user for an event by its ID.
+     *
+     * Validates user permissions, retrieves the event data, checks if the user has booked the event,
+     * and updates the check-in status if applicable. Returns a response with check-in status and member details.
+     *
+     * Response Format:
+     * - checkin: datetime
+     * - members: {
+     *     adults: int
+     *     children: int
+     * }
+     *
+     * @param int|null $id The ID of the booked event.
+     * @return ResponseInterface JSON response with check-in status and member details or an error message.
+     */
+    public function checkin($id = null): ResponseInterface
+    {
+        $response  = [];
+        $locale    = $this->request->getLocale();
+        $eventData = $this->model->getUpcomingEvent($locale);
+
+        if (!in_array($this->session->user->role, ['admin', 'moderator', 'security'])) {
+            return $this->failValidationErrors('Ошибка прав доступа');
+        }
+
+        if (empty($id) || empty($eventData)) {
+            return $this->failValidationErrors('Нет предстоящих мероприятий');
+        }
+
+        $eventUsersModel  = new EventsUsersModel();
+        $bookedEventsData = $eventUsersModel->where(['id' => $id])->first();
+
+        if (empty($bookedEventsData)) {
+            return $this->failValidationErrors('QR код не верный');
+        }
+
+        if (empty($bookedEventsData->checkin_at)) {
+            $eventUsersModel->update($id, [
+                'checkin_at'         => new Time('now'),
+                'checkin_by_user_id' => $this->session->user->id
+            ]);
+        } else {
+            $response['checkin'] = $bookedEventsData->checkin_at;
+        }
+
+        $response['members'] = [
+            'adults'   => $bookedEventsData->adults ?? 0,
+            'children' => $bookedEventsData->children ?? 0
+        ];
+
+        return $this->respond($response);
     }
 
     /**
@@ -375,7 +437,8 @@ class Events extends ResourceController
         $eventUsersModel = new EventsUsersModel();
 
         // Check that user not already registered at this event
-        if ($eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->withDeleted()->first()) {
+        // withDeleted()
+        if ($eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->first()) {
             return $this->failValidationErrors(['error' => 'Вы уже зарегистрировались на это мероприятие']);
         }
 
@@ -419,7 +482,7 @@ class Events extends ResourceController
             'chat_id'    => getenv('app.telegramChatID'),
             'parse_mode' => 'HTML',
             'text'       => "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n" .
-                "<b>{$event->title_ru}</b>\n" .
+                "<b>{$event->title_ru}</b>" .
                 "🔹<i>{$input['name']}</i>\n" .
                 "🔹(<b>{$input['adults']}</b>) взрослых, ({$input['children']}) детей\n" .
                 (count($childrenAges) > 0 ? "🔹Возраст детей <b>" . implode(', ', $childrenAges) . "</b> (лет)\n" : "") .
@@ -495,7 +558,7 @@ class Events extends ResourceController
             ->where('event_id', $input['eventId'])
             ->first();
 
-        $eventUsersModel->delete($userRegistration->id, true);
+        $eventUsersModel->delete($userRegistration->id);
 
         new Telegram(getenv('app.telegramBotKey'), '');
 
@@ -503,7 +566,7 @@ class Events extends ResourceController
             'chat_id'    => getenv('app.telegramChatID'),
             'parse_mode' => 'HTML',
             'text'       => "<b>❌ ОТМЕНА БРОНИРОВАНИЯ</b>\n" .
-                "<b>{$event->title_ru}</b>\n" .
+                "<b>{$event->title_ru}</b>" .
                 "🔹<i>{$this->session->user->name}</i>\n" .
                 "🔹Взрослых: <b>{$userRegistration->adults}</b>, детей: {$userRegistration->children}\n" .
                 "🔹Осталось слотов: <b>" . ($event->max_tickets - (abs($currentTickets->adults - (int) $userRegistration->adults))) . "</b>\n"
