@@ -102,7 +102,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                     }
                 ]}
             >
-                {userRole === 'admin' && (
+                {userRole === ApiModel.UserRole.ADMIN && (
                     <>
                         <Button
                             icon={'Pencil'}

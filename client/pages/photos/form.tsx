@@ -84,7 +84,7 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
     const currentPageTitle = photoData?.id ? 'Редактирование фотографии' : 'Добавление фотографии'
 
     useEffect(() => {
-        if (userRole !== 'admin') {
+        if (userRole !== ApiModel.UserRole.ADMIN) {
             void router.push('/photos')
         }
     }, [userRole])

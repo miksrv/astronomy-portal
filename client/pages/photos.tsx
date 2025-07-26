@@ -141,7 +141,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
                     }))}
                 />
 
-                {userRole === 'admin' && (
+                {userRole === ApiModel.UserRole.ADMIN && (
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}
