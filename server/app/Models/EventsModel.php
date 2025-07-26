@@ -19,6 +19,8 @@ class EventsModel extends ApplicationBaseModel
     protected $allowedFields    = [
         'title_en',
         'title_ru',
+        'location_en',
+        'location_ru',
         'content_en',
         'content_ru',
         'cover_file_name',
@@ -75,12 +77,14 @@ class EventsModel extends ApplicationBaseModel
             ->orderBy('date', 'DESC')
             ->first();
 
-        $event->title = getLocalizedString($locale, $event->title_en, $event->title_ru);
-        $event->content = getLocalizedString($locale, $event->content_en, $event->content_ru);
+        $event->title    = getLocalizedString($locale, $event->title_en, $event->title_ru);
+        $event->location = getLocalizedString($locale, $event->location_en, $event->location_ru);
+        $event->content  = getLocalizedString($locale, $event->content_en, $event->content_ru);
 
         // Remove unnecessary fields
         unset(
             $event->title_en, $event->title_ru,
+            $event->location_en, $event->location_ru,
             $event->content_en, $event->content_ru
         );
 
