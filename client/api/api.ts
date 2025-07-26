@@ -3,6 +3,7 @@ import type { Action, PayloadAction } from '@reduxjs/toolkit'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { ApiModel, ApiType } from '@/api'
+import { ResCheckin } from '@/api/types/events'
 import { AstroStargazingFormType } from '@/components/astro-stargazing-form'
 
 import { RootState } from './store'
@@ -119,8 +120,9 @@ export const API = createApi({
         eventGetUsersList: builder.query<ApiType.Events.ResponseUsersList, string>({
             query: (id) => `events/members/${id}`
         }),
-        eventGetCheckin: builder.mutation<ApiType.Events.ResItem, string>({
-            query: (id) => `events/checkin/${id}`
+        eventGetCheckin: builder.mutation<ApiType.Events.ResCheckin, string>({
+            query: (id) => `events/checkin/${id}`,
+            transformErrorResponse: (response) => response.data
         }),
         eventGetUpcoming: builder.query<ApiType.Events.ResItem, void>({
             providesTags: () => [{ id: 'UPCOMING', type: 'Events' }],

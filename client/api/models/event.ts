@@ -5,6 +5,7 @@ import { User } from './user'
 export type Event = {
     id: string
     title: string
+    location?: string
     content?: string
     coverFileName?: string
     coverFileExt?: string

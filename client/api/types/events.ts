@@ -1,4 +1,4 @@
-import { ApiModel } from '@/api'
+import { ApiModel, ApiType } from '@/api'
 
 export interface ResList {
     items?: ApiModel.Event[]
@@ -7,6 +7,10 @@ export interface ResList {
 export type ResItem = ApiModel.Event
 
 export type ResponsePhoto = ApiModel.EventPhoto
+
+export type ResCheckin = Pick<ApiModel.Event, 'members'> & {
+    checkin?: ApiType.DateTime
+}
 
 /* Photo List */
 export interface RequestPhotoList {
