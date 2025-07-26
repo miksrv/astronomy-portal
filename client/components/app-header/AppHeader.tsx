@@ -132,6 +132,22 @@ const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) => {
                                         </li>
                                     ))}
 
+                                {authSlice?.user?.role &&
+                                    [
+                                        ApiModel.UserRole.ADMIN,
+                                        ApiModel.UserRole.MODERATOR,
+                                        ApiModel.UserRole.SECURITY
+                                    ].includes(authSlice?.user?.role) && (
+                                        <li>
+                                            <Link
+                                                href={'/stargazing/checkin'}
+                                                title={'Проверка QR-кодов'}
+                                            >
+                                                {'Проверка QR-кодов'}
+                                            </Link>
+                                        </li>
+                                    )}
+
                                 <li>
                                     <Link
                                         href={'/'}
