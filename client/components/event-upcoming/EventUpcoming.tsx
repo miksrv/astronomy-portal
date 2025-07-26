@@ -54,7 +54,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
             return false
         }
 
-        // Дата мероприятия уже наступило
+        // Дата мероприятия уже наступила
         if ((getSecondsUntilUTCDate(event?.date?.date) || 0) <= 0) {
             return false
         }
@@ -80,7 +80,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                     <Image
                         className={styles.image}
                         src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
-                        alt={`Астровыезд: ${event?.title}`}
+                        alt={`${t('stargazing')}: ${event?.title}`}
                         width={1024}
                         height={768}
                     />
@@ -88,6 +88,8 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
 
                 <div className={styles.stargazing}>
                     <h2 className={styles.title}>{event?.title}</h2>
+
+                    {registered && <h3 className={styles.registeredTitle}>{'Вы зарегистрированы'}</h3>}
 
                     <div className={styles.infoSection}>
                         <Icon
@@ -102,29 +104,96 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                             name={'Time'}
                             className={styles.icon}
                         />
-                        {formatUTCDate(event?.date?.date, 'H:mm')}
+                        {formatUTCDate(event?.date?.date, 'H:mm')}{' '}
+                        <span
+                            className={styles.notifyText}
+                            style={{ marginTop: 3 }}
+                        >
+                            {'(Оренбургское время, UTC+5)'}
+                        </span>
                     </div>
+
+                    {registered && (
+                        <div className={styles.infoSection}>
+                            <Icon
+                                name={'Tag'}
+                                className={styles.icon}
+                            />
+                            <div>
+                                <a
+                                    href={'/stargazing/entry/'}
+                                    title={'Открыть страницу с QR-кодом'}
+                                    target={'_blank'}
+                                    rel={'noreferrer'}
+                                >
+                                    {'Открыть страницу с QR-кодом'}
+                                </a>
+                                <div className={styles.notifyText}>
+                                    {'Покажите этот QR-код при входе на мероприятие'}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {registered && (
+                        <div className={styles.infoSection}>
+                            <Icon
+                                name={'Users'}
+                                className={styles.icon}
+                            />
+                            {'Взрослых:'} <b>{event?.members?.adults}</b>
+                            {', детей:'} <b>{event?.members?.children}</b>
+                        </div>
+                    )}
 
                     <div className={styles.infoSection}>
                         <Icon
                             name={'Point'}
                             className={styles.icon}
                         />
-                        {'Оренбургский район (40 км от города)'}
-                    </div>
-
-                    <div className={styles.infoSectionNotification}>
-                        <div>{'Указано местное Оренбургское время (UTC+5)'}</div>
-                        <div>{'Точное место проведения мероприятия будет доступно после регистрации'}</div>
+                        <div>
+                            {registered && event?.location
+                                ? event.location
+                                : 'Оренбургский район (~40 км от Оренбурга)'}
+                            {registered ? (
+                                <ul className={styles.mapLinks}>
+                                    <li>
+                                        <a
+                                            href={event?.yandexMap}
+                                            title={'Ссылка на Яндекс Картах'}
+                                            target={'_blank'}
+                                            rel={'noreferrer'}
+                                        >
+                                            {'Яндекс Карты'}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            href={event?.googleMap}
+                                            title={'Ссылка на Google Картах'}
+                                            target={'_blank'}
+                                            rel={'noreferrer'}
+                                        >
+                                            {'Google Карты'}
+                                        </a>
+                                    </li>
+                                </ul>
+                            ) : (
+                                <div className={styles.notifyText}>
+                                    {'Точное место проведения мероприятия будет доступно после регистрации'}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* If registration has already started AND there are no more places AND the user is not registered */}
                     {secondsUntilRegistrationStart < 0 && event?.availableTickets === 0 && !registered && (
                         <div className={styles.infoBlock}>
-                            <h3>К сожалению, все места закончились</h3>
+                            <h3>{'К сожалению, все места закончились'}</h3>
                             <p>
-                                Дополнительные места могут появиться, если кто-то отменит свою регистриацию. Или просто
-                                дождитесь следующего мероприятия
+                                {
+                                    'Дополнительные места могут появиться, если кто-то отменит свою регистриацию. Или просто дождитесь следующего мероприятия.'
+                                }
                             </p>
                         </div>
                     )}
@@ -142,17 +211,18 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                     {/* If registration has ended */}
                     {secondsUntilRegistrationEnd <= 0 && (
                         <div className={styles.bookingLogin}>
-                            <h3>Регистрация на астровыезд завершена</h3>
+                            <h3>{'Регистрация на астровыезд завершена'}</h3>
                             <p>
-                                Пожалуйста дождитесь нашего следующего астровыезда, что бы его не пропустить -
-                                подпишитесь на Telegram канал
+                                {
+                                    'Пожалуйста дождитесь нашего следующего астровыезда, что бы его не пропустить - подпишитесь на Telegram канал'
+                                }
                             </p>
                         </div>
                     )}
 
                     {/* If registration is available */}
                     {registrationAvailable ? (
-                        <div>
+                        <>
                             {!user?.id && (
                                 <div className={styles.bookingLogin}>
                                     <h3>{'Для регистрации на астровыезд войдите под своей учетной записью'}</h3>
@@ -168,9 +238,9 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                                     }}
                                 />
                             )}
-                        </div>
+                        </>
                     ) : !registered ? (
-                        <div>
+                        <>
                             {!user?.id && (
                                 <div
                                     style={{
@@ -181,62 +251,32 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                                     <LoginForm />
                                 </div>
                             )}
-                        </div>
+                        </>
                     ) : (
                         ''
                     )}
 
                     {/* If user is registered */}
-                    {user?.id && registered && secondsUntilRegistrationStart <= 0 && (
-                        <div className={styles.registered}>
-                            <h3>{'Вы зарегистрированы'}</h3>
-
-                            <div>
-                                Приезжайте <b>{formatUTCDate(event?.date?.date, 'D MMMM YYYY г.')}</b> к{' '}
-                                <b>{formatUTCDate(event?.date?.date, 'H:mm')}</b> часам на место проведения мероприятия:
-                                Оренбургский район, г. Горюн (40 км от центра Оренбурга), откройте карту ниже:
-                            </div>
-
-                            <div className={styles.mapLinks}>
-                                <a
-                                    href={event?.yandexMap ?? 'https://yandex.com/maps/-/CDvPzZkD'}
-                                    title={'Ссылка на Яндекс Картах'}
-                                    target={'_blank'}
-                                    rel={'noreferrer'}
+                    {registered &&
+                        !(dayjs.utc(event?.registrationEnd?.date).local().diff(dayjs()) <= 0) &&
+                        !(dayjs.utc(event?.date?.date).local().diff(dayjs()) <= 0) && (
+                            <div className={styles.cancelRegistration}>
+                                <p className={styles.notifyText}>
+                                    {
+                                        'Если вы не сможете приехать, пожалуйста, отмените регистрацию - это поможет другим занять ваше место.'
+                                    }
+                                </p>
+                                <Button
+                                    className={styles.cancelRegistrationButton}
+                                    mode={'secondary'}
+                                    loading={isLoading}
+                                    disabled={isLoading}
+                                    onClick={() => showConfirmation(true)}
                                 >
-                                    Яндекс Карты
-                                </a>
-                                <a
-                                    href={event?.googleMap ?? 'https://maps.app.goo.gl/MWEcbhNK6wj2eeEPA'}
-                                    title={'Ссылка на Google Картах'}
-                                    target={'_blank'}
-                                    rel={'noreferrer'}
-                                >
-                                    Google Карты
-                                </a>
+                                    {'Отменить бронирование'}
+                                </Button>
                             </div>
-
-                            {!(dayjs.utc(event?.registrationEnd?.date).local().diff(dayjs()) <= 0) &&
-                                !(dayjs.utc(event?.date?.date).local().diff(dayjs()) <= 0) && (
-                                    <div className={styles.cancelRegistration}>
-                                        <p>
-                                            Если вы не сможете приехать на мероприятие, пожалуйста, отмените свое
-                                            бронирование, чтобы другие участники смогли воспользоваться освободившимися
-                                            местами.
-                                        </p>
-                                        <Button
-                                            className={styles.cancelRegistrationButton}
-                                            mode={'secondary'}
-                                            loading={isLoading}
-                                            disabled={isLoading}
-                                            onClick={() => showConfirmation(true)}
-                                        >
-                                            {'Отменить бронирование'}
-                                        </Button>
-                                    </div>
-                                )}
-                        </div>
-                    )}
+                        )}
 
                     {/* If user is registered */}
                     {/*{user?.id && registered && (*/}
