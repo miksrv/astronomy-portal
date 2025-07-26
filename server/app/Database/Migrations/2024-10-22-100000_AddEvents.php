@@ -25,6 +25,16 @@ class CreateEventsTable extends Migration
                 'constraint' => 150,
                 'null'       => true
             ],
+            'location_en' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 150,
+                'null'       => true
+            ],
+            'location_ru' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 150,
+                'null'       => true
+            ],
             'content_en' => [
                 'type' => 'TEXT',
                 'null' => true
