@@ -88,7 +88,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                     }
                 ]}
             >
-                {userRole === 'admin' && (
+                {userRole === ApiModel.UserRole.ADMIN && (
                     <>
                         <Button
                             icon={'Pencil'}

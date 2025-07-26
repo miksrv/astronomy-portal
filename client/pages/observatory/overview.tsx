@@ -175,7 +175,6 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                 <ObjectPhotoTable photosList={photosList} />
 
                 <Button
-                    style={{ width: '100%' }}
                     size={'medium'}
                     mode={'secondary'}
                     link={'/photos'}
