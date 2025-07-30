@@ -44,6 +44,9 @@
             text-transform: uppercase
             line-height: normal
 
+            @media only screen and (max-width: variables.$mobileMaxWidth)
+                margin-top: 15px
+
         .registeredTitle
             font-size: 23px
             font-weight: 300
@@ -65,6 +68,7 @@
 
             .icon
                 fill: var(--text-color-secondary)
+                min-width: 18px
                 width: 18px
                 height: 18px
                 margin-top: 3px

@@ -36,7 +36,7 @@ const EntryPage: NextPage<EntryPageProps> = ({ upcomingData }) => {
                 <strong>Дата и время:</strong> {formatUTCDate(upcomingData?.date?.date, 'D MMMM, YYYY, H:mm')}
             </p>
             <p>
-                <strong>Участники:</strong> Взрослых - {upcomingData?.members?.adults}, детей -{' '}
+                <strong>Участники:</strong> Взрослых {upcomingData?.members?.adults}, детей{' '}
                 {upcomingData?.members?.children}
             </p>
             <p>

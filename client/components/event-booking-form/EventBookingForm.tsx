@@ -127,14 +127,14 @@ const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onSuccessS
                     mode={'secondary'}
                     label={'Взрослых'}
                     options={[...Array(5)].map((_, value) => ({
-                        key: String(value),
+                        key: String(value + 1),
                         value: String(value + 1)
                     }))}
-                    value={String(formState.adults) || ''}
+                    value={formState.adults || ''}
                     onSelect={(option) => {
                         setFormState({
                             ...formState,
-                            adults: option?.value
+                            adults: option?.value || ''
                         })
                     }}
                 />

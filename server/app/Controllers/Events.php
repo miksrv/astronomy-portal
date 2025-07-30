@@ -482,7 +482,7 @@ class Events extends ResourceController
             'chat_id'    => getenv('app.telegramChatID'),
             'parse_mode' => 'HTML',
             'text'       => "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n" .
-                "<b>{$event->title_ru}</b>" .
+                "<b>{$event->title_ru}</b>\n" .
                 "🔹<i>{$input['name']}</i>\n" .
                 "🔹(<b>{$input['adults']}</b>) взрослых, ({$input['children']}) детей\n" .
                 (count($childrenAges) > 0 ? "🔹Возраст детей <b>" . implode(', ', $childrenAges) . "</b> (лет)\n" : "") .
@@ -566,7 +566,7 @@ class Events extends ResourceController
             'chat_id'    => getenv('app.telegramChatID'),
             'parse_mode' => 'HTML',
             'text'       => "<b>❌ ОТМЕНА БРОНИРОВАНИЯ</b>\n" .
-                "<b>{$event->title_ru}</b>" .
+                "<b>{$event->title_ru}</b>\n" .
                 "🔹<i>{$this->session->user->name}</i>\n" .
                 "🔹Взрослых: <b>{$userRegistration->adults}</b>, детей: {$userRegistration->children}\n" .
                 "🔹Осталось слотов: <b>" . ($event->max_tickets - (abs($currentTickets->adults - (int) $userRegistration->adults))) . "</b>\n"

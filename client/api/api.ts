@@ -3,7 +3,6 @@ import type { Action, PayloadAction } from '@reduxjs/toolkit'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { ApiModel, ApiType } from '@/api'
-import { ResCheckin } from '@/api/types/events'
 import { AstroStargazingFormType } from '@/components/astro-stargazing-form'
 
 import { RootState } from './store'

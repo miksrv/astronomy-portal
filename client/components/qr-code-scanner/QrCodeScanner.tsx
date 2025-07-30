@@ -24,8 +24,8 @@ const QrCodeScanner = () => {
                 },
                 (decodedText) => {
                     setScannedResult(decodedText)
-                    scannerRef.current?.stop().then(() => {
-                        console.log('Scanning stopped.')
+                    void scannerRef.current?.stop().then(() => {
+                        console.warn('Scanning stopped.')
                     })
                 },
                 (errorMessage) => {

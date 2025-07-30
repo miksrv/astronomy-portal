@@ -135,14 +135,13 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                         </div>
                     )}
 
-                    {registered && (
+                    {registered && !!event?.members?.adults && (
                         <div className={styles.infoSection}>
                             <Icon
                                 name={'Users'}
                                 className={styles.icon}
                             />
-                            {'Взрослых:'} <b>{event?.members?.adults}</b>
-                            {', детей:'} <b>{event?.members?.children}</b>
+                            {`Взрослых: ${event.members.adults}, детей: ${event?.members?.children || 0}`}
                         </div>
                     )}
 
@@ -323,7 +322,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                             disabled={isLoading}
                             onClick={handleCancelRegistration}
                         >
-                            {'Подтверждаю'}
+                            {'Отменить бронирование'}
                         </Button>
                     </div>
                 </Dialog>
