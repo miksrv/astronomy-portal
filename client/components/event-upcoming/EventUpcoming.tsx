@@ -234,6 +234,7 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                                     eventId={event?.id}
                                     onSuccessSubmit={() => {
                                         setRegistered(true)
+                                        window.location.reload()
                                     }}
                                 />
                             )}
