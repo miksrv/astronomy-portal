@@ -7,7 +7,7 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
-import { API, useAppSelector } from '@/api'
+import { API, ApiModel, useAppSelector } from '@/api'
 import { setLocale } from '@/api/applicationSlice'
 import { wrapper } from '@/api/store'
 import AppFooter from '@/components/app-footer'
@@ -63,7 +63,7 @@ const StargazingFormPage: NextPage<StargazingFormPageProps> = () => {
     const currentPageTitle = eventData?.id ? 'Редактирование астровыезда' : 'Добавление астровыезда'
 
     useEffect(() => {
-        if (userRole !== 'admin') {
+        if (userRole !== ApiModel.UserRole.ADMIN) {
             void router.push('/stargazing')
         }
     }, [userRole])

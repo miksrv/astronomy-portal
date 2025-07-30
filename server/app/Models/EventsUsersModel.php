@@ -18,7 +18,9 @@ class EventsUsersModel extends ApplicationBaseModel {
         'user_id',
         'adults',
         'children',
-        'children_ages'
+        'children_ages',
+        'checkin_by_user_id',
+        'checkin_at'
     ];
 
     protected bool $allowEmptyInserts = false;

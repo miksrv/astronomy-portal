@@ -98,6 +98,7 @@ $routes->group('events', static function ($routes) {
     $routes->get('photos', 'Events::photos');
     $routes->get('(:alphanum)', 'Events::show/$1');
     $routes->get('members/(:alphanum)', 'Events::members/$1');
+    $routes->get('checkin/(:alphanum)', 'Events::checkin/$1');
 
     $routes->post('/', 'Events::create');
     $routes->patch('(:alphanum)', 'Events::update/$1');

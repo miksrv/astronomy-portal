@@ -5,6 +5,7 @@ import { User } from './user'
 export type Event = {
     id: string
     title: string
+    location?: string
     content?: string
     coverFileName?: string
     coverFileExt?: string
@@ -14,6 +15,7 @@ export type Event = {
         adults: number
         children: number
     }
+    bookedId?: string
     registered?: boolean
     canceled?: boolean
     yandexMap?: string

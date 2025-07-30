@@ -119,6 +119,10 @@ export const API = createApi({
         eventGetUsersList: builder.query<ApiType.Events.ResponseUsersList, string>({
             query: (id) => `events/members/${id}`
         }),
+        eventGetCheckin: builder.mutation<ApiType.Events.ResCheckin, string>({
+            query: (id) => `events/checkin/${id}`,
+            transformErrorResponse: (response) => response.data
+        }),
         eventGetUpcoming: builder.query<ApiType.Events.ResItem, void>({
             providesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
             query: () => 'events/upcoming'

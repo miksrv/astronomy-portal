@@ -164,7 +164,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                     }))}
                 />
 
-                {userRole === 'admin' && (
+                {userRole === ApiModel.UserRole.ADMIN && (
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}

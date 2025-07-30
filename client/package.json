@@ -15,7 +15,8 @@
         "eslint:check": "eslint",
         "eslint:fix": "eslint --fix",
         "prettier:check": "prettier --check .",
-        "prettier:fix": "prettier --write ."
+        "prettier:fix": "prettier --write .",
+        "locales:build": "i18next-scanner --config i18next-scanner.config.cjs"
     },
     "dependencies": {
         "@reduxjs/toolkit": "^2.8.2",
@@ -27,6 +28,7 @@
         "embla-carousel": "^8.6.0",
         "embla-carousel-auto-scroll": "^8.6.0",
         "embla-carousel-react": "^8.6.0",
+        "html5-qrcode": "^2.3.8",
         "i18next": "^25.3.2",
         "lodash": "^4.17.21",
         "lodash-es": "^4.17.21",
@@ -40,6 +42,7 @@
         "react-i18next": "^15.6.0",
         "react-markdown": "^10.1.0",
         "react-photo-album": "^3.1.0",
+        "react-qr-code": "^2.0.18",
         "react-redux": "^9.2.0",
         "sharp": "^0.34.3",
         "simple-react-ui-kit": "^1.5.7",
@@ -70,6 +73,7 @@
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-simple-import-sort": "^12.1.1",
+        "i18next-scanner": "^4.6.0",
         "identity-obj-proxy": "^3.0.0",
         "jest": "^30.0.4",
         "jest-environment-jsdom": "^30.0.4",

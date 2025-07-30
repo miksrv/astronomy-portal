@@ -41,6 +41,7 @@ class CreateEventUsersTable extends Migration
                 'type' => 'TEXT',
                 'null' => true,
             ],
+            'checkin_at DATETIME default null',
             'created_at DATETIME default current_timestamp',
             'updated_at DATETIME default current_timestamp',
             'deleted_at' => [

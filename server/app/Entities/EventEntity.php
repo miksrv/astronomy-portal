@@ -10,6 +10,8 @@ class EventEntity extends Entity
         'id'                 => null,
         'title_en'           => null,
         'title_ru'           => null,
+        'location_en'        => null,
+        'location_ru'        => null,
         'content_en'         => null,
         'content_ru'         => null,
         'cover_file_name'    => null,
