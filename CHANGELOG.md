@@ -1,5 +1,52 @@
 # CHANGELOG
 
+## 4.1.0
+
+### Minor Changes
+
+- Updated yarn version from `4.8.1` to `4.9.2`
+- Removed animate from main page
+- Updated UI Libraries
+- Fixed UI and API event cancel handlers
+- Update EventUpcoming.tsx
+- Changed UI event registration
+- Fixed API EventsModel and Events
+- Separate API endpoints for get Event Data and Event Photo List
+- Added API calculating members for each events
+- Added new API endpoint for Events - `/events/members/{id}`
+- Implemented `EventItemData` UI Component
+- Implemented users count in the Events list
+- Fixed ESLinter and Prettier
+- Upgraded UI Libraries
+- Added new UI locales
+- Added new UI libraries for generate QR code
+- Implemented new UI page - `entry`
+- Implemented new UI page - `checkin`
+- Added UI styles for print mode
+- Improved API DB migrations
+- Implemented `QrCodeScanner` UI Component
+- Added User Menu Dropdown
+- Added new UI API endpoint - `eventGetCheckin`
+- Added `location` for API Events Entity
+- Added `checkin_at` and `checkin_by_user_id` for API EventUserEntity
+- Updated API Migrations
+- Implemented API GET `/events/checkin` endpoint
+- Added `i18next-scanner` for UI
+- Implemented `ApiModel.UserRole` enum for UI
+- Added API query `eventGetCheckin` for UI
+- Fixed UI objects page user right checks
+- Updated UI AppHeader and RelayList Components
+- Improved EventUpcoming UI component for new events
+- Updated UI photos page right checks
+- Updated UI styles, fixed API `locale_helper` function
+- Finalize Events
+- Update EventUpcoming.tsx
+- Fixed EventsModel
+- Fixed API upload event images function
+- Optimized dimensions for upload event images
+- Implemented new UI component - ShowMore
+- Improved UI styles
+
 ## 4.0.18
 
 ### Patch Changes
