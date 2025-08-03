@@ -6,7 +6,7 @@ import Image from 'next/image'
 
 import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
-import { ShowMore } from '@/components/show-more/ShowMore'
+import ShowMore from '@/components/show-more'
 import { formatDate } from '@/tools/helpers'
 
 import styles from './styles.module.sass'

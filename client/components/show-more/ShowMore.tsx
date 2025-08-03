@@ -24,3 +24,5 @@ export const ShowMore: React.FC<ShowMoreProps> = ({ children }) => {
         </div>
     )
 }
+
+export default ShowMore
