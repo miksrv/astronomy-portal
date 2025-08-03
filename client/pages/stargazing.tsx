@@ -105,7 +105,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
                 <p style={{ marginTop: 0 }}>{t('stargazing-page.intro')}</p>
                 <p>{t('stargazing-page.description')}</p>
 
-                <ul>
+                <ul style={{ marginBottom: '20px' }}>
                     <li>
                         <Link
                             href={'/stargazing/rules'}
