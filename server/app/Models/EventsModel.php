@@ -77,6 +77,10 @@ class EventsModel extends ApplicationBaseModel
             ->orderBy('date', 'DESC')
             ->first();
 
+        if ($event === null) {
+            return null;
+        }
+
         $event->title    = getLocalizedString($locale, $event->title_en, $event->title_ru);
         $event->location = getLocalizedString($locale, $event->location_en, $event->location_ru);
         $event->content  = getLocalizedString($locale, $event->content_en, $event->content_ru);

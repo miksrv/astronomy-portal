@@ -88,10 +88,10 @@ defined('UPLOAD_STAR_MAPS') || define('UPLOAD_STAR_MAPS', FCPATH . 'starmaps/');
 defined('UPLOAD_USERS') || define('UPLOAD_USERS', FCPATH . 'users/');
 defined('UPLOAD_EVENTS') || define('UPLOAD_EVENTS', FCPATH . 'stargazing/');
 
-defined('PHOTO_MAX_WIDTH') || define('PHOTO_MAX_WIDTH', 4048);
-defined('PHOTO_MAX_HEIGHT') || define('PHOTO_MAX_HEIGHT', 3036);
-defined('PHOTO_PREVIEW_WIDTH') || define('PHOTO_PREVIEW_WIDTH', 700);
-defined('PHOTO_PREVIEW_HEIGHT') || define('PHOTO_PREVIEW_HEIGHT', 500);
+defined('PHOTO_MAX_WIDTH') || define('PHOTO_MAX_WIDTH', 1920); // 4048
+defined('PHOTO_MAX_HEIGHT') || define('PHOTO_MAX_HEIGHT', 1440); // 3036
+defined('PHOTO_PREVIEW_WIDTH') || define('PHOTO_PREVIEW_WIDTH', 442); // 700
+defined('PHOTO_PREVIEW_HEIGHT') || define('PHOTO_PREVIEW_HEIGHT', 282); // 500
 
 defined('AVATAR_WIDTH') || define('AVATAR_WIDTH', 400);
 defined('AVATAR_HEIGHT') || define('AVATAR_HEIGHT', 400);
