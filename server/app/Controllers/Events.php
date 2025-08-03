@@ -581,19 +581,20 @@ class Events extends ResourceController
      * @return ResponseInterface
      * @throws ReflectionException
      */
-    public function upload($id = null): ResponseInterface {
+    public function upload($id = null): ResponseInterface
+    {
         if (!$this->session->isAuth || $this->session?->user?->role !== 'admin') {
             return $this->failValidationErrors('Ошибка прав доступа');
         }
 
-        if (!$photo = $this->request->getFile('photo')) {
-            return $this->failValidationErrors('No photo for upload');
+        $photo = $this->request->getFile('photo');
+        if (!$photo || !$photo->isValid()) {
+            return $this->failValidationErrors('Фотография не загружена или повреждена');
         }
 
         $eventData = $this->model->find($id);
-
         if (!$eventData || !$eventData->id) {
-            return $this->failValidationErrors('There is no event with this ID');
+            return $this->failValidationErrors('Событие не найдено');
         }
 
         if ($photo->hasMoved()) {
@@ -608,51 +609,48 @@ class Events extends ResourceController
         $name = pathinfo($file, PATHINFO_FILENAME);
         $ext  = $file->getExtension();
 
+        $imageService = Services::image('gd');
+        $imageService->withFile($file->getRealPath())->reorient(true)->save(); // перезаписываем с ориентацией
+
         list($width, $height) = getimagesize($file->getRealPath());
 
-        // Calculating Aspect Ratio
-        $orientation = $width > $height ? 'h' : 'v';
-        $width       = $orientation === 'h' ? $width : $height;
-        $height      = $orientation === 'h' ? $height : $width;
-
-        // If the uploaded image dimensions exceed the maximum
+        // Масштабирование большого изображения, если превышает лимит
         if ($width > PHOTO_MAX_WIDTH || $height > PHOTO_MAX_HEIGHT) {
-            $image = Services::image('gd');
-            $image->withFile($file->getRealPath())
-                ->fit(PHOTO_MAX_WIDTH, PHOTO_MAX_HEIGHT)
-                ->reorient(true)
+            $imageService->withFile($file->getRealPath())
+                ->resize(PHOTO_MAX_WIDTH, PHOTO_MAX_HEIGHT, true)
                 ->save($eventDir . $name . '.' . $ext);
 
             list($width, $height) = getimagesize($file->getRealPath());
         }
 
-        $image = Services::image('gd'); // imagick
-        $image->withFile($file->getRealPath())
-            ->fit(PHOTO_PREVIEW_WIDTH, PHOTO_PREVIEW_HEIGHT)
+        // Масштабирование превь изображения
+        $imageService->withFile($file->getRealPath())
+            ->reorient(true)
+            ->resize(PHOTO_PREVIEW_WIDTH, PHOTO_PREVIEW_HEIGHT, true)
             ->save($eventDir . $name . '_preview.' . $ext);
 
-        $eventPhotosModel = new EventsPhotosModel();
+        // Сохраняем в базу
+        $photoEntity = new EventPhotoEntity([
+            'event_id'     => $eventData->id,
+            'user_id'      => $this->session->user?->id,
+            'title_ru'     => $eventData->title_ru,
+            'title_en'     => $eventData->title_en,
+            'file_name'    => $name,
+            'file_ext'     => $ext,
+            'file_size'    => $file->getSize(),
+            'image_width'  => $width,
+            'image_height' => $height,
+        ]);
 
-        $photo = new EventPhotoEntity();
-        $photo->event_id  = $eventData->id;
-        $photo->user_id   = $this->session->user?->id;
-        $photo->title_ru  = $eventData->title_ru;
-        $photo->title_en  = $eventData->title_en;
-        $photo->file_name = $name;
-        $photo->file_ext  = $ext;
-        $photo->file_size = $file->getSize();
-        $photo->image_width  = $width;
-        $photo->image_height = $height;
+        (new EventsPhotosModel())->insert($photoEntity);
 
-        $eventPhotosModel->insert($photo);
-
-        return $this->respondCreated((object) [
+        return $this->respondCreated((object)[
             'name'    => $name,
             'ext'     => $ext,
-            'width'   => $photo->image_width,
-            'height'  => $photo->image_height,
-            'title'   => $photo->title_ru,
-            'eventId' => $photo->event_id
+            'width'   => $width,
+            'height'  => $height,
+            'title'   => $photoEntity->title_ru,
+            'eventId' => $photoEntity->event_id,
         ]);
     }
 
