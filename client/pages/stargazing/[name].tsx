@@ -132,14 +132,15 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
             <Container style={{ marginBottom: '10px' }}>
                 <h2
                     className={'subTitle'}
-                    style={{ marginTop: 0 }}
+                    style={{ marginTop: 0, textTransform: 'uppercase' }}
                 >{`${event?.title} - ${t('photos-from-stargazing')}`}</h2>
 
                 {user?.role === ApiModel.UserRole.ADMIN && (
                     <Button
-                        onClick={handleUploadPhotoClick}
                         disabled={!!uploadingPhotos?.length}
-                        style={{ marginBottom: 20 }}
+                        style={{ marginBottom: 20, width: '100%' }}
+                        mode={'secondary'}
+                        onClick={handleUploadPhotoClick}
                     >
                         {!uploadingPhotos?.length ? 'Загрузить фотографии' : `Загрузка ${uploadingPhotos?.length} фото`}
                     </Button>
