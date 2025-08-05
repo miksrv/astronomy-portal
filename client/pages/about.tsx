@@ -16,6 +16,7 @@ import AppToolbar from '@/components/app-toolbar'
 import PhotoGallery from '@/components/photo-gallery'
 import PhotoLightbox from '@/components/photo-lightbox'
 import Team from '@/components/project-team'
+import donators from '@/public/data/list_donators.json'
 import photoAboutMe1 from '@/public/photos/about-me-1.jpeg'
 import photoAboutMe2 from '@/public/photos/about-me-2.jpeg'
 import photoAboutMe3 from '@/public/photos/about-me-3.jpeg'
@@ -63,31 +64,6 @@ const galleryStargazing = [
 
 const allPhotos = [...galleryAboutMe, ...galleryStargazing, ...galleryObservatory]
 
-const contributors1: string[] = [
-    'Марина Станиславовна С.',
-    'Игнат Евгеньевич П. (Хорошим людям, делающим хорошие дела)',
-    'Алексей Валерьевич К. (Пусть у вас все получится!)',
-    'Татьяна Анатольевна А.',
-    'Андрей Юрьевич Ч.',
-    'Дарья Викторовна К.',
-    'Константин Константинович Ш.',
-    'Аноним* (500 руб.)',
-    'Виктория Е.(Спасибо за то что вы делаете!)',
-    'Марина Николаевна М.',
-    'Михаил Алексеевич К.',
-    'Михаил Владимирович Х.',
-    'Елена Михайловна Ш. (К звездам)',
-    'Леонид Викторович Д. (На OpenScope)',
-    'Сергей К. (На обсерваторию)',
-    'Антон Владимирович К. (На оборудование)',
-    'Николай Ж. (Пока останутся два дурака и кусочек сцены, театр не погибнет. Желаю удачи!)',
-    'Вячеслав Владимирович В. (На обсерваторию)',
-    'Александр Анатольевич А.',
-    'Аноним* (Зачисление 500 руб. "OSB")',
-    'Ольга Сергеевна Е. (На Мечту! и любовь к звездам)',
-    'Инесса Николаевна К.'
-]
-
 const contributors2: string[] = [
     'Селищев Дмитрий (Arduino, AVR)',
     'Андреев Валентин (Arduino, AVR)',
@@ -97,6 +73,11 @@ const contributors2: string[] = [
     'Ильин Сергей',
     'Владимир Уваров (Сетевой коммутатор D-Link)'
 ]
+
+type DonaterType = {
+    name: string
+    tooltip?: string
+}
 
 type AboutPageProps = object
 
@@ -254,15 +235,45 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 </p>
                 <p style={{ marginBottom: 0 }}>{t('about-page.observatory-conclusion')}</p>
             </Container>
-            <Container style={{ marginBottom: '10px' }}>
+            <Container
+                id={'your-help'}
+                style={{ marginBottom: '10px' }}
+            >
                 <h2 style={{ marginTop: 0 }}>{t('about-page.your-help-title')}</h2>
                 <p style={{ marginTop: 0 }}>{t('about-page.your-help-intro')}</p>
                 <p>{t('about-page.your-help-description')}</p>
                 <h3>{t('about-page.your-help-financial-support')}</h3>
-                <ul>
-                    {contributors1.map((name) => (
-                        <li key={name}>{name}</li>
-                    ))}
+                <ul
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        height: '400px',
+                        overflow: 'auto'
+                    }}
+                >
+                    {donators
+                        .slice()
+                        .sort((a: DonaterType, b: DonaterType) => a.name.localeCompare(b.name))
+                        .map((item: DonaterType, i) => (
+                            <li
+                                key={`donater-${item?.name}-${i}`}
+                                style={{ width: '100%' }}
+                            >
+                                <span>{item.name}</span>
+                                {item.tooltip && (
+                                    <span
+                                        style={{
+                                            fontSize: '12px',
+                                            color: '#888',
+                                            marginLeft: '5px'
+                                        }}
+                                    >
+                                        ({item.tooltip})
+                                    </span>
+                                )}
+                            </li>
+                        ))}
                 </ul>
                 <h3>{t('about-page.your-help-technical-support')}</h3>
                 <ul>
