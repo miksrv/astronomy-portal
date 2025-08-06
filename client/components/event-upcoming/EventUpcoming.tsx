@@ -122,11 +122,11 @@ const EventUpcoming: React.FC<EventBookingFormProps> = ({ event, ...props }) => 
                             <div>
                                 <a
                                     href={'/stargazing/entry/'}
-                                    title={'Открыть страницу с QR-кодом'}
+                                    title={'Скачать QR-код для входа на мероприятие'}
                                     target={'_blank'}
                                     rel={'noreferrer'}
                                 >
-                                    {'Открыть страницу с QR-кодом'}
+                                    {'Скачать QR-код для входа на мероприятие'}
                                 </a>
                                 <div className={styles.notifyText}>
                                     {'Покажите этот QR-код при входе на мероприятие'}
