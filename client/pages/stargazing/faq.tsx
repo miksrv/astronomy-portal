@@ -3,7 +3,7 @@ import { Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
-import { useTranslation } from 'next-i18next'
+import { Trans, useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
@@ -63,17 +63,47 @@ const StargazingFAQPage: NextPage<StargazingFAQPageProps> = () => {
                     </Link>
                     {'.'}
                 </p>
-                {(
-                    t('stargazing-faq-page.questions', {
-                        returnObjects: true
-                    }) as FAQItem[]
-                ).map((item: FAQItem, index: number) => (
-                    <div key={index}>
-                        <h3 style={{ marginTop: 20, fontSize: '18px' }}>❓{item.question}</h3>
-                        <p style={{ margin: 0 }}>{item.answer}</p>
-                    </div>
-                ))}
             </Container>
+            {(
+                t('stargazing-faq-page.questions', {
+                    returnObjects: true
+                }) as FAQItem[]
+            ).map((item: FAQItem, index: number) => (
+                <div key={index}>
+                    <h3 style={{ marginTop: 20, marginBottom: 5, fontSize: '18px' }}>❓{item.question}</h3>
+                    <Container style={{ marginBottom: '10px' }}>
+                        <Trans
+                            i18nKey={`stargazing-faq-page.questions.${index}.answer`}
+                            components={{
+                                link1: (
+                                    <a
+                                        href='https://t.me/stargazing_oren'
+                                        rel='nofollow noopener'
+                                        target={'_blank'}
+                                        title='Астро.Попутчики'
+                                    />
+                                ),
+                                link2: (
+                                    <a
+                                        href='https://t.me/all_astronomers'
+                                        rel='nofollow noopener'
+                                        target={'_blank'}
+                                        title='Астро.Чат'
+                                    />
+                                ),
+                                link3: (
+                                    <a
+                                        href='https://pay.cloudtips.ru/p/6818d70d'
+                                        rel='nofollow noopener'
+                                        target={'_blank'}
+                                        title='ДОНАТЫ'
+                                    />
+                                )
+                            }}
+                        />
+                    </Container>
+                </div>
+            ))}
 
             <AppFooter />
         </AppLayout>
