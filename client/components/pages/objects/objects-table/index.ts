@@ -1,0 +1,1 @@
+export { ObjectsTable } from './ObjectsTable'
