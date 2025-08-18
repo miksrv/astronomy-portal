@@ -1,0 +1,112 @@
+@use '../../../styles/variables' as variables
+
+.appLayout
+    min-height: calc(100% - var(--header-height))
+    width: 100%
+
+    .mainContainer
+        max-width: var(--width-max)
+        margin: calc(var(--header-height) + var(--container-margin-top)) auto 0
+        padding: 0 10px
+
+        &.fullWidth
+            max-width: 100%
+            padding: 0
+            margin-top: var(--header-height)
+
+    .overlay
+        position: fixed
+        top: 0
+        left: 0
+        min-height: 100vh
+        height: 100%
+        width: 100%
+        z-index: 500
+        background: var(--overlay-background)
+        transition: opacity 167ms ease-out
+
+        &.hidden
+            opacity: 0
+            visibility: hidden
+            //animation: animation-fadeOut .32s ease
+
+        &.displayed
+            opacity: 1
+            visibility: visible
+            //animation: animation-fadeIn .32s ease
+
+    .sidebar
+        position: fixed
+        background-color: var(--container-background-color)
+        width: variables.$sideBarWidth
+        height: 100vh
+        z-index: 600
+        top: 0
+        left: -(variables.$sideBarWidth)
+        transition: left 167ms ease-out
+
+        &.opened
+            left: 0
+
+        &.closed
+            left: -(variables.$sideBarWidth)
+
+.menu
+    list-style: none
+    padding: 8px
+    margin: 0
+
+    li
+        margin-bottom: 5px
+        position: relative
+
+    a
+        padding: 6px 12px
+        width: 100%
+        display: flex
+        min-height: 32px
+        align-items: center
+        border-radius: var(--border-radius)
+        color: var(--text-color-primary)
+        text-decoration: none
+        font-weight: 200
+        transition: background-color .15s ease-out,opacity .15s ease-out
+        white-space: nowrap
+
+        &:hover, &.active
+            background-color: var(--body-background)
+            color: var(--color-orange)
+
+        .arrow
+            height: 16px
+            width: 16px
+            fill: var(--text-color-primary)
+            margin-left: 5px
+
+    .dropdownMenu
+        position: absolute
+        top: 100%
+        left: 0
+        z-index: 1
+        background-color: var(--container-background-color)
+        border-radius: var(--border-radius)
+        box-shadow: var(--container-shadow)
+        padding: 6px 12px
+        list-style: none
+        margin: 0
+        width: max-content
+
+    &.sidebarMenu
+        .dropdownMenu
+            position: initial
+            width: 100%
+            background-color: transparent
+            box-shadow: none
+            padding: 5px 0 0 27px
+            list-style: disc
+
+            a
+                text-overflow: ellipsis
+                overflow: hidden
+                display: block
+                width: 100%
