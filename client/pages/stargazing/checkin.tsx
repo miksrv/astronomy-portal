@@ -10,12 +10,9 @@ import { useRouter } from 'next/router'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
-import { API, ApiModel, ApiType, useAppSelector } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
+import { API, ApiModel, ApiType, setLocale, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
-import { wrapper } from '@/api/store'
-import AppLayout from '@/components/app-layout'
-import AppToolbar from '@/components/app-toolbar'
+import { AppLayout, AppToolbar } from '@/components/common'
 
 enum ScannerStatusEnum {
     IDLE = 'idle',

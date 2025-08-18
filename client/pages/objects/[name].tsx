@@ -7,19 +7,10 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
-import { API, ApiModel, HOST_IMG, SITE_LINK, useAppSelector } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import AppFooter from '@/components/app-footer'
-import AppLayout from '@/components/app-layout'
-import AppToolbar from '@/components/app-toolbar'
-import ObjectsCloud from '@/components/object-cloud'
-import ObjectDescription from '@/components/object-description'
-import ObjectFilesTable from '@/components/object-files-table'
-import ObjectHeader from '@/components/object-header'
-import ObjectPhotoTable from '@/components/object-photos-table'
-import VisibilityChart from '@/components/visibility-chart'
-import { removeMarkdown, sliceText } from '@/tools/strings'
+import { API, ApiModel, HOST_IMG, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
+import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable, VisibilityChart } from '@/components/common'
+import { ObjectDescription, ObjectFilesTable, ObjectHeader, ObjectsCloud } from '@/components/pages/objects'
+import { removeMarkdown, sliceText } from '@/utils/strings'
 
 interface ObjectItemPageProps {
     objectName: string

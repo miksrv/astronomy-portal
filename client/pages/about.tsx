@@ -7,15 +7,9 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
-import { SITE_LINK } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import AppFooter from '@/components/app-footer'
-import AppLayout from '@/components/app-layout'
-import AppToolbar from '@/components/app-toolbar'
-import PhotoGallery from '@/components/photo-gallery'
-import PhotoLightbox from '@/components/photo-lightbox'
-import Team from '@/components/project-team'
+import { setLocale, SITE_LINK, wrapper } from '@/api'
+import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
+import { ProjectTeam } from '@/components/pages/about'
 import donators from '@/public/data/list_donators.json'
 import photoAboutMe1 from '@/public/photos/about-me-1.jpeg'
 import photoAboutMe2 from '@/public/photos/about-me-2.jpeg'
@@ -157,7 +151,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
             <Container style={{ marginBottom: '10px' }}>
                 <h2 style={{ marginTop: 0 }}>{t('about-page.team-title')}</h2>
                 <p style={{ marginTop: 0 }}>{t('about-page.team-description')}</p>
-                <Team />
+                <ProjectTeam />
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>

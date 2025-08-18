@@ -7,13 +7,9 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
-import { API, ApiModel, useAppSelector } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import AppFooter from '@/components/app-footer'
-import AppLayout from '@/components/app-layout'
-import AppToolbar from '@/components/app-toolbar'
-import AstroStargazingForm, { AstroStargazingFormType } from '@/components/astro-stargazing-form'
+import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
+import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { EventForm, EventFormType } from '@/components/pages/stargazing'
 
 type StargazingFormPageProps = object
 
@@ -36,7 +32,7 @@ const StargazingFormPage: NextPage<StargazingFormPageProps> = () => {
     const [createEvent, { error: createError, isLoading: createLoading, isSuccess: createSuccess }] =
         API.useEventCreatePostMutation()
 
-    const handleSubmit = async (data?: AstroStargazingFormType) => {
+    const handleSubmit = async (data?: EventFormType) => {
         if (!data) {
             return
         }
@@ -101,7 +97,7 @@ const StargazingFormPage: NextPage<StargazingFormPageProps> = () => {
                 </Message>
             )}
 
-            <AstroStargazingForm
+            <EventForm
                 disabled={eventLoading || createLoading || createSuccess}
                 initialData={eventData}
                 onSubmit={handleSubmit}

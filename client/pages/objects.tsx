@@ -8,14 +8,10 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
-import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import AppFooter from '@/components/app-footer'
-import AppLayout from '@/components/app-layout'
-import AppToolbar from '@/components/app-toolbar'
-import ObjectTable from '@/components/objects-table'
-import { formatObjectName } from '@/tools/strings'
+import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
+import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { ObjectsTable } from '@/components/pages/objects'
+import { formatObjectName } from '@/utils/strings'
 
 interface ObjectsPageProps {
     category: string
@@ -175,7 +171,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                 )}
             </AppToolbar>
 
-            <ObjectTable
+            <ObjectsTable
                 objectsList={filteredObjectsList}
                 photosList={photosList}
                 combinedHeight={toolbarHeight + footerHeight + 95}
