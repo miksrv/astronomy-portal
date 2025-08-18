@@ -5,8 +5,12 @@
  * @returns {string} The formatted right ascension as a string in the format "hh h mm m ss.ss s".
  */
 export const formatRA = (ra?: number): string => {
-    if (!ra) {
+    if (typeof ra !== 'number' || isNaN(ra) || typeof ra === 'undefined') {
         return ''
+    }
+
+    if (ra === 0) {
+        return '0h 0m 0.00s'
     }
 
     const hours = Math.floor(ra / 15)
@@ -23,8 +27,12 @@ export const formatRA = (ra?: number): string => {
  * @returns {string} The formatted declination as a string in the format "+/-dd° mm′ ss.ss″".
  */
 export const formatDEC = (dec?: number): string => {
-    if (!dec) {
+    if (typeof dec !== 'number' || isNaN(dec) || typeof dec === 'undefined') {
         return ''
+    }
+
+    if (dec === 0) {
+        return '+0° 0′ 0.00″'
     }
 
     const sign = dec < 0 ? '-' : '+'
