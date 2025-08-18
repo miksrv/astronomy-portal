@@ -1,0 +1,1 @@
+export { PhotoHeader } from './PhotoHeader'
