@@ -8,13 +8,10 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
-import { APIMeteo } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import AppLayout from '@/components/app-layout'
-import AppToolbar from '@/components/app-toolbar'
-import WidgetChart from '@/components/widget-chart'
-import { getDateTimeFormat } from '@/tools/dates'
+import { APIMeteo, setLocale, wrapper } from '@/api'
+import { AppLayout, AppToolbar } from '@/components/common'
+import { WidgetChart } from '@/components/pages/observatory'
+import { getDateTimeFormat } from '@/utils/dates'
 
 type HistoryPageProps = object
 

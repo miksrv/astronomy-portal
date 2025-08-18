@@ -10,9 +10,9 @@ import { useRouter } from 'next/router'
 import Script from 'next/script'
 import { appWithTranslation, useTranslation } from 'next-i18next'
 
-import { wrapper } from '@/api/store'
-import { LOCAL_STORAGE } from '@/tools/constants'
-import * as LocalStorage from '@/tools/localstorage'
+import { wrapper } from '@/api'
+import { LOCAL_STORAGE } from '@/utils/constants'
+import * as LocalStorage from '@/utils/localstorage'
 
 import i18Config from '../next-i18next.config'
 

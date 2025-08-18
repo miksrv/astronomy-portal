@@ -7,13 +7,9 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
-import { API, ApiModel, useAppSelector } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import AppFooter from '@/components/app-footer'
-import AppLayout from '@/components/app-layout'
-import AppToolbar from '@/components/app-toolbar'
-import AstroPhotoForm, { AstroPhotoFormType } from '@/components/astro-photo-form'
+import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
+import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { AstroPhotoForm, AstroPhotoFormType } from '@/components/pages/photos'
 
 type PhotoFormPageProps = object
 

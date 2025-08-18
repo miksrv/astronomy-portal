@@ -3,7 +3,7 @@ import type { Action, PayloadAction } from '@reduxjs/toolkit'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { ApiModel, ApiType } from '@/api'
-import { AstroStargazingFormType } from '@/components/astro-stargazing-form'
+import { EventFormType } from '@/components/pages/stargazing'
 
 import { RootState } from './store'
 
@@ -158,7 +158,7 @@ export const API = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
-        eventPatch: builder.mutation<ApiType.Events.ResItem | ApiType.ResError, AstroStargazingFormType>({
+        eventPatch: builder.mutation<ApiType.Events.ResItem | ApiType.ResError, EventFormType>({
             invalidatesTags: (result, error, { id }) => [{ id, type: 'Events' }],
             query: ({ id, ...formState }) => ({
                 body: formState,

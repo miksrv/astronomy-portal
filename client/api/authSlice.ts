@@ -3,7 +3,7 @@ import { deleteCookie, setCookie } from 'cookies-next'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 import { ApiModel, ApiType } from '@/api'
-import * as LocalStorage from '@/tools/localstorage'
+import * as LocalStorage from '@/utils/localstorage'
 
 type InitialStateProps = {
     isAuth?: boolean

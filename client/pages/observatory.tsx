@@ -6,17 +6,9 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
-import { API, SITE_LINK } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import AppFooter from '@/components/app-footer'
-import AppLayout from '@/components/app-layout'
-import AppToolbar from '@/components/app-toolbar'
-import AstronomyCalc from '@/components/astronomy-calc'
-import Calendar from '@/components/calendar'
-import Camera from '@/components/camera'
-import RelayList from '@/components/relay-list'
-import Weather from '@/components/weather'
+import { API, setLocale, SITE_LINK, wrapper } from '@/api'
+import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { AstronomyCalc, Calendar, Camera, RelayList, Weather } from '@/components/pages/observatory'
 
 type ObservatoryPageProps = object
 

@@ -5,11 +5,9 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
-import { API, ApiModel, SITE_LINK } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import AppLayout from '@/components/app-layout'
-import MainSection from '@/components/main-sections'
+import { API, ApiModel, setLocale, SITE_LINK, wrapper } from '@/api'
+import { AppLayout } from '@/components/common'
+import { MainSection } from '@/components/pages/index'
 
 interface HomePageProps {
     photosList: ApiModel.Photo[]

@@ -1,0 +1,1 @@
+export { MoonPhaseIcon } from './MoonPhaseIcon'

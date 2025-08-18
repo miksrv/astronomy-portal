@@ -8,13 +8,12 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
-import { API, ApiType } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
+import { API, ApiType, setLocale } from '@/api'
 import { login } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector, wrapper } from '@/api/store'
-import { LOCAL_STORAGE } from '@/tools/constants'
-import useLocalStorage from '@/tools/hooks/useLocalStorage'
-import * as LocalStorage from '@/tools/localstorage'
+import useLocalStorage from '@/hooks/useLocalStorage'
+import { LOCAL_STORAGE } from '@/utils/constants'
+import * as LocalStorage from '@/utils/localstorage'
 
 type AuthPageProps = object
 

@@ -9,18 +9,11 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
-import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
+import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
-import { wrapper } from '@/api/store'
-import AppFooter from '@/components/app-footer'
-import AppLayout from '@/components/app-layout'
-import AppToolbar from '@/components/app-toolbar'
-import EventUpcoming from '@/components/event-upcoming'
-import EventsList from '@/components/events-list'
-import PhotoGallery from '@/components/photo-gallery'
-import PhotoLightbox from '@/components/photo-lightbox'
-import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/tools/eventPhotos'
+import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
+import { EventsList, EventUpcoming } from '@/components/pages/stargazing'
+import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
 
 interface StargazingPageProps {
     upcomingData: ApiModel.Event | null

@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 4.1.1
+
+### Patch Changes
+
+- Updated UI Dependencies
+- Refactoring UI architecture
+- Added UI tests for `cooridates` utils
+
 ## 4.1.0
 
 ### Minor Changes

@@ -1,0 +1,146 @@
+@use '../../../../styles/variables' as variables
+
+.upcomingEvent
+    display: flex
+    flex-wrap: wrap
+
+    .imageContainer
+        width: 60%
+        position: relative
+
+        .blur
+            top: 0
+            left: 0
+            filter: blur(10px)
+            position: absolute
+            width: 100%
+            height: 100%
+            object-fit: cover
+
+        .image
+            position: relative
+            z-index: 1
+            width: 100%
+            height: 100%
+            object-fit: contain
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            width: 100%
+
+    .stargazing
+        padding-left: 15px
+        text-align: left
+        width: 40%
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            width: 100%
+            padding-left: 0
+
+        .title
+            margin-top: 0
+            margin-bottom: 10px
+            font-size: 30px !important
+            font-weight: 300
+            text-transform: uppercase
+            line-height: normal
+
+            @media only screen and (max-width: variables.$mobileMaxWidth)
+                margin-top: 15px
+
+        .registeredTitle
+            font-size: 23px
+            font-weight: 300
+            margin-bottom: 10px
+            line-height: normal
+            color: var(--color-green)
+
+        .notifyText
+            font-size: var(--font-size-small)
+            font-weight: 100
+
+        .infoSection
+            display: flex
+            align-items: flex-start
+            gap: 8px
+            font-weight: 200
+            font-size: 16px
+            margin-bottom: 5px
+
+            .icon
+                fill: var(--text-color-secondary)
+                min-width: 18px
+                width: 18px
+                height: 18px
+                margin-top: 3px
+
+            .mapLinks
+                margin: 5px 0 0 15px
+                padding: 0
+
+        .infoSectionNotification
+            margin-top: 15px
+            font-size: var(--font-size-small)
+            color: var(--text-color-secondary)
+
+        .infoBlock
+            margin: 25px 0
+
+            h3
+                font-size: 20px
+                font-weight: 500
+                color: var(--color-red)
+
+            p
+                font-size: 13px
+                margin: 0
+
+        //.registered
+        //    margin-top: 15px
+        //
+        //    h3
+        //        font-size: 23px
+        //        font-weight: 300
+        //        margin-bottom: 10px
+        //        line-height: normal
+        //        color: var(--color-green)
+        //
+        //    .mapLinks
+        //        display: flex
+        //        align-items: center
+        //        justify-content: center
+        //        gap: 10%
+        //        margin-top: 15px
+        //
+        //        a
+        //            display: block
+        //            font-size: 20px
+        //
+        //    .qrcode
+        //        margin-top: 20px
+        //        text-align: center
+
+        .bookingLogin
+            max-width: 400px
+            margin: 20px auto 0
+            text-align: center
+
+            h3
+                font-size: 20px !important
+                color: var(--color-red)
+
+        .cancelRegistration
+            margin: 20px auto 0
+
+            .cancelRegistrationButton
+                width: 100%
+
+.content
+    margin-top: 10px
+
+.confirmContent
+    margin: 10px 20px
+
+.confirmationFooter
+    display: flex
+    gap: 10px
+    justify-content: right

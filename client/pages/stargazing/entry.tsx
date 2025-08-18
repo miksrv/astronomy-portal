@@ -7,11 +7,9 @@ import { getCookie } from 'cookies-next'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
-import { API, ApiModel } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
+import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
-import { wrapper } from '@/api/store'
-import { formatUTCDate } from '@/tools/dates'
+import { formatUTCDate } from '@/utils/dates'
 
 import styles from '@/styles/print.module.sass'
 

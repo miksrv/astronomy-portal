@@ -7,16 +7,10 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
-import { API, ApiModel, SITE_LINK, useAppSelector } from '@/api'
-import { setLocale } from '@/api/applicationSlice'
-import { wrapper } from '@/api/store'
-import AppFooter from '@/components/app-footer'
-import AppLayout from '@/components/app-layout'
-import AppToolbar from '@/components/app-toolbar'
-import ObjectPhotoTable from '@/components/object-photos-table'
-import PhotoCloud from '@/components/photo-cloud'
-import PhotoHeader from '@/components/photo-header'
-import { createLargePhotoUrl, createPhotoTitle } from '@/tools/photos'
+import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
+import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable } from '@/components/common'
+import { PhotoCloud, PhotoHeader } from '@/components/pages/photos'
+import { createLargePhotoUrl, createPhotoTitle } from '@/utils/photos'
 
 interface PhotoItemPageProps {
     photoId: string
