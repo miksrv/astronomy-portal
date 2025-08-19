@@ -24,6 +24,7 @@ export type Event = {
     registrationStart?: DateTime
     registrationEnd?: DateTime
     availableTickets?: number
+    views?: number
 }
 
 export type EventPhoto = {
