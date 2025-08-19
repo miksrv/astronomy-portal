@@ -36,12 +36,15 @@ export const EventItemData: React.FC<EventItemDataProps> = ({ title, event, ...p
                 {formatDate(event?.date?.date, 'D MMMM YYYY')}
             </div>
 
-            {!!event?.members?.total && event?.members?.total > 0 && (
-                <div>
-                    <Icon name={'Users'} />
-                    {event?.members?.total}
-                </div>
-            )}
+            <div>
+                <Icon name={'Eye'} />
+                {event?.views}
+            </div>
+
+            <div>
+                <Icon name={'Users'} />
+                {event?.members?.total || event?.availableTickets}
+            </div>
         </div>
 
         <ShowMore>

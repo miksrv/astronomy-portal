@@ -274,6 +274,9 @@ class Events extends ResourceController
                 ];
             }
 
+            // Incrementing view counter
+            $this->model->incrementViews($id);
+
             return $this->respond($result[0]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);

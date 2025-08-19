@@ -28,6 +28,7 @@ class EventsModel extends ApplicationBaseModel
         'max_tickets',
         'yandex_map_link',
         'google_map_link',
+        'views',
         'date',
         'registration_start',
         'registration_end'
@@ -113,7 +114,7 @@ class EventsModel extends ApplicationBaseModel
 
         $datetime = (new Time('now'))->addHours(5);
 
-        $eventsQuery = $this->select('id, title_en, title_ru, date, cover_file_name, cover_file_ext, max_tickets' . (
+        $eventsQuery = $this->select('id, title_en, title_ru, date, cover_file_name, cover_file_ext, max_tickets, views' . (
             $eventId !== null ? ', content_en, content_ru, date, registration_start, registration_end' : '')
         );
 
@@ -146,5 +147,21 @@ class EventsModel extends ApplicationBaseModel
         }
 
         return $events;
+    }
+
+    /**
+     * Increments the view count for a specific event.
+     *
+     * This method updates the 'views' field of the event with the specified ID by incrementing it by 1.
+     *
+     * @param string $eventId The ID of the event for which to increment the view count.
+     * @return bool Returns true if the update was successful, false otherwise.
+     */
+    public function incrementViews(string $eventId): bool
+    {
+        return $this->builder()
+            ->set('views', 'views + 1', false)
+            ->where('id', $eventId)
+            ->update([], null, false);
     }
 }

@@ -51,6 +51,11 @@ export const EventsListItem: React.FC<EventsListItemProps> = ({ event }) => (
                 </div>
 
                 <div>
+                    <Icon name={'Eye'} />
+                    {event?.views}
+                </div>
+
+                <div>
                     <Icon name={'Users'} />
                     {event?.members?.total || event?.availableTickets}
                 </div>

@@ -20,6 +20,7 @@ class EventEntity extends Entity
         'yandex_map_link'    => null,
         'google_map_link'    => null,
         'date'               => null,
+        'views'              => null,
         'registration_start' => null,
         'registration_end'   => null,
         'created_at'         => null,
@@ -51,5 +52,6 @@ class EventEntity extends Entity
         'registration_start' => 'datetime',
         'registration_end'   => 'datetime',
         'max_tickets'        => 'int',
+        'views'              => 'int'
     ];
 }

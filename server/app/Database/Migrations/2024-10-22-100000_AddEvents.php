@@ -58,6 +58,12 @@ class CreateEventsTable extends Migration
                 'constraint' => 5,
                 'unsigned'   => true
             ],
+            'views' => [
+                'type'       => 'MEDIUMINT',
+                'constraint' => 10,
+                'null'       => false,
+                'default'    => 0
+            ],
             'yandex_map_link' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 70,
