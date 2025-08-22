@@ -24,31 +24,31 @@ export const ProjectTeam: React.FC = () => {
 
     const teamList: TeamMemberType[] = [
         {
-            name: t('about-page.team-members.mike'),
+            name: t('components.pages.about.project-team.mikhail', { defaultValue: 'Михаил Топчило' }),
             photo: photoMisha
         },
         {
-            name: t('about-page.team-members.tanya'),
+            name: t('components.pages.about.project-team.tatiana', { defaultValue: 'Татьяна Гавриш' }),
             photo: photoTanya
         },
         {
-            name: t('about-page.team-members.igor'),
+            name: t('components.pages.about.project-team.igor', { defaultValue: 'Игорь Комиссарчик' }),
             photo: photoIgor
         },
         {
-            name: t('about-page.team-members.sergey'),
+            name: t('components.pages.about.project-team.sergey', { defaultValue: 'Сергей Медведев' }),
             photo: photoSergey
         },
         {
-            name: t('about-page.team-members.eugene'),
+            name: t('components.pages.about.project-team.eugene', { defaultValue: 'Евгений Зимин' }),
             photo: photoZhenya
         },
         {
-            name: t('about-page.team-members.vladimir'),
+            name: t('components.pages.about.project-team.vladimir', { defaultValue: 'Владимир Иванович' }),
             photo: photoVladimir
         },
         {
-            name: t('about-page.team-members.nikolay'),
+            name: t('components.pages.about.project-team.nikolay', { defaultValue: 'Николай Черепанов' }),
             photo: photoNikolay
         }
     ]
