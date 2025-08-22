@@ -7,32 +7,6 @@ import { API, ApiModel, ApiType, useAppSelector } from '@/api'
 
 import styles from './styles.module.sass'
 
-interface RelayListItemProps {
-    id: number
-    name: string
-    state: boolean
-    loading: boolean
-    isAdmin?: boolean
-    handleClick?: (relay: ApiType.Relay.ReqRelaySet) => void
-}
-
-export const RelayListItem: React.FC<RelayListItemProps> = ({ id, name, state, loading, isAdmin, handleClick }) => (
-    <div className={styles.item}>
-        <div className={styles.name}>
-            <span className={cn(styles.ledIndicator, state ? styles.on : styles.off)} />
-            {name}
-        </div>
-        <Button
-            loading={loading}
-            className={cn(styles.switchButton, state ? styles.on : styles.off)}
-            disabled={loading || !isAdmin}
-            onClick={() => handleClick?.({ id, state: state ? 0 : 1 })}
-        >
-            {!loading ? (state ? 'on' : 'off') : ''}
-        </Button>
-    </div>
-)
-
 /**
  * TODO useState
  *
@@ -84,7 +58,13 @@ export const RelayList: React.FC = () => {
                 </div>
             )}
 
-            {isError && <Message type={'error'}>{'Ошибка при получении списка реле'}</Message>}
+            {isError && (
+                <Message type={'error'}>
+                    {t('components.pages.observatory.relay-list.error', {
+                        defaultValue: 'Ошибка при получении списка реле'
+                    })}
+                </Message>
+            )}
 
             <>
                 {relayList?.items.map((item) => (
@@ -108,16 +88,26 @@ export const RelayList: React.FC = () => {
                                     relayList?.items?.[1]?.state ? styles.on : styles.off
                                 )}
                             />
-                            {t('lightning')}
+                            {t('components.pages.observatory.relay-list.lightning', { defaultValue: 'Освещение' })}
                         </div>
                         <div className={styles.description}>
                             {countdownTimer > 0 ? (
                                 <>
-                                    {t('available-in')} <b>{countdownTimer}</b> {t('sec')}
+                                    {t('components.pages.observatory.relay-list.available-in', {
+                                        defaultValue: 'Доступно через'
+                                    })}{' '}
+                                    <b>{countdownTimer}</b>{' '}
+                                    {t('components.pages.observatory.relay-list.sec', { defaultValue: 'секунд' })}
                                 </>
                             ) : (
                                 <>
-                                    {t('turned-on')} {t('plurals.times', { count: relayList?.light.counter })}
+                                    {t('components.pages.observatory.relay-list.turned-on', {
+                                        defaultValue: 'Включили'
+                                    })}{' '}
+                                    {t('components.pages.observatory.relay-list.times', {
+                                        defaultValue: '{{count}} раз',
+                                        count: relayList?.light.counter
+                                    })}
                                 </>
                             )}
                         </div>
@@ -151,3 +141,29 @@ export const RelayList: React.FC = () => {
         </Container>
     )
 }
+
+interface RelayListItemProps {
+    id: number
+    name: string
+    state: boolean
+    loading: boolean
+    isAdmin?: boolean
+    handleClick?: (relay: ApiType.Relay.ReqRelaySet) => void
+}
+
+export const RelayListItem: React.FC<RelayListItemProps> = ({ id, name, state, loading, isAdmin, handleClick }) => (
+    <div className={styles.item}>
+        <div className={styles.name}>
+            <span className={cn(styles.ledIndicator, state ? styles.on : styles.off)} />
+            {name}
+        </div>
+        <Button
+            loading={loading}
+            className={cn(styles.switchButton, state ? styles.on : styles.off)}
+            disabled={loading || !isAdmin}
+            onClick={() => handleClick?.({ id, state: state ? 0 : 1 })}
+        >
+            {!loading ? (state ? 'on' : 'off') : ''}
+        </Button>
+    </div>
+)
