@@ -19,49 +19,6 @@ interface ObjectsTableProps {
     combinedHeight?: number
 }
 
-type FlattenedObject = {
-    name: string
-    title: string
-    photo?: string
-    photoId?: string
-    categories?: ApiModel.Category[]
-    updated?: string
-    frames?: number
-    exposure?: number
-    lFilterExposure?: number
-    rFilterExposure?: number
-    gFilterExposure?: number
-    bFilterExposure?: number
-    hFilterExposure?: number
-    oFilterExposure?: number
-    sFilterExposure?: number
-}
-
-const flattenObjects = (objectsList?: ApiModel.Object[], photosList?: ApiModel.Photo[]): FlattenedObject[] =>
-    objectsList?.map((obj) => {
-        const photos = photosList
-            ?.filter((photo) => photo.objects?.includes(obj.name))
-            ?.sort((a, b) => (a.date && b.date ? new Date(b?.date).getTime() - new Date(a?.date).getTime() : 0))
-
-        return {
-            name: obj.name,
-            title: obj.title,
-            photo: createSmallPhotoUrl(photos?.[0]),
-            photoId: photos?.[0]?.id,
-            categories: obj.categories,
-            updated: obj.updated?.date,
-            frames: obj.statistic?.frames || 0,
-            exposure: obj.statistic?.exposure || 0,
-            lFilterExposure: obj.filters?.L?.exposure || 0,
-            rFilterExposure: obj.filters?.R?.exposure || 0,
-            gFilterExposure: obj.filters?.G?.exposure || 0,
-            bFilterExposure: obj.filters?.B?.exposure || 0,
-            hFilterExposure: obj.filters?.H?.exposure || 0,
-            oFilterExposure: obj.filters?.O?.exposure || 0,
-            sFilterExposure: obj.filters?.S?.exposure || 0
-        } as FlattenedObject
-    }) || []
-
 export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosList, combinedHeight }) => {
     const { t } = useTranslation()
 
@@ -79,18 +36,20 @@ export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosL
                     {formatObjectName(data as string)}
                 </Link>
             ),
-            header: t('object'),
+            header: t('components.pages.objects.objects-table.object', { defaultValue: 'Объект' }),
             isSortable: true
         },
         {
             accessor: 'photo',
             className: styles.cellPhoto,
             formatter: (data, row, i) =>
-                data ? (
+                data && (
                     <Link
                         key={row[i].photoId}
                         href={`/photos/${row[i].photoId}`}
-                        title={'Фотография объекта'}
+                        title={t('components.pages.objects.objects-table.view-photo', {
+                            defaultValue: 'Просмотр фото'
+                        })}
                     >
                         <Image
                             src={data as string}
@@ -99,22 +58,22 @@ export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosL
                             alt={''}
                         />
                     </Link>
-                ) : undefined,
-            header: t('photo'),
+                ),
+            header: t('components.pages.objects.objects-table.photo', { defaultValue: 'Фото' }),
             isSortable: true
         },
         {
             accessor: 'frames',
             className: styles.cellCenter,
             formatter: (data) => (data as number) || '',
-            header: t('frames'),
+            header: t('components.pages.objects.objects-table.frames', { defaultValue: 'Кадры' }),
             isSortable: true
         },
         {
             accessor: 'exposure',
             className: styles.cellCenter,
             formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
-            header: t('exposure'),
+            header: t('components.pages.objects.objects-table.exposure', { defaultValue: 'Выдержка' }),
             isSortable: true
         },
         {
@@ -209,3 +168,46 @@ export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosL
         </Container>
     )
 }
+
+type FlattenedObject = {
+    name: string
+    title: string
+    photo?: string
+    photoId?: string
+    categories?: ApiModel.Category[]
+    updated?: string
+    frames?: number
+    exposure?: number
+    lFilterExposure?: number
+    rFilterExposure?: number
+    gFilterExposure?: number
+    bFilterExposure?: number
+    hFilterExposure?: number
+    oFilterExposure?: number
+    sFilterExposure?: number
+}
+
+const flattenObjects = (objectsList?: ApiModel.Object[], photosList?: ApiModel.Photo[]): FlattenedObject[] =>
+    objectsList?.map((obj) => {
+        const photos = photosList
+            ?.filter((photo) => photo.objects?.includes(obj.name))
+            ?.sort((a, b) => (a.date && b.date ? new Date(b?.date).getTime() - new Date(a?.date).getTime() : 0))
+
+        return {
+            name: obj.name,
+            title: obj.title,
+            photo: createSmallPhotoUrl(photos?.[0]),
+            photoId: photos?.[0]?.id,
+            categories: obj.categories,
+            updated: obj.updated?.date,
+            frames: obj.statistic?.frames || 0,
+            exposure: obj.statistic?.exposure || 0,
+            lFilterExposure: obj.filters?.L?.exposure || 0,
+            rFilterExposure: obj.filters?.R?.exposure || 0,
+            gFilterExposure: obj.filters?.G?.exposure || 0,
+            bFilterExposure: obj.filters?.B?.exposure || 0,
+            hFilterExposure: obj.filters?.H?.exposure || 0,
+            oFilterExposure: obj.filters?.O?.exposure || 0,
+            sFilterExposure: obj.filters?.S?.exposure || 0
+        } as FlattenedObject
+    }) || []
