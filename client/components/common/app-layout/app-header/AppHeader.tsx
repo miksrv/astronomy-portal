@@ -31,15 +31,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
     const adminLinks = [
         {
             href: '/photos/form',
-            label: t('add-photo')
+            label: t('components.common.app-layout.app-header.add-photo', { defaultValue: 'Добавить фото' })
         },
         {
             href: '/objects/form',
-            label: t('add-object')
+            label: t('components.common.app-layout.app-header.add-object', { defaultValue: 'Добавить объект' })
         },
         {
             href: '/stargazing/form',
-            label: t('add-stargazing')
+            label: t('components.common.app-layout.app-header.add-stargazing', { defaultValue: 'Добавить мероприятие' })
         }
     ]
 
@@ -70,7 +70,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
             <div className={cn(fullWidth && styles.fullWidth, styles.wrapper)}>
                 <Link
                     href={'/'}
-                    title={t('main-page')}
+                    title={t('components.common.app-layout.app-header.to-main-page', { defaultValue: 'На главную' })}
                     className={styles.logoLink}
                 >
                     <Image
@@ -100,7 +100,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
                             className={styles.loginButton}
                             onClick={handleLoginClick}
                             loading={isLoading}
-                            label={!isLoading ? t('sign-in') : ''}
+                            label={
+                                !isLoading
+                                    ? t('components.common.app-layout.app-header.sign-in', { defaultValue: 'Войти' })
+                                    : ''
+                            }
                         />
                     )}
 
@@ -142,9 +146,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
                                         <li>
                                             <Link
                                                 href={'/stargazing/checkin'}
-                                                title={'Проверка QR-кодов'}
+                                                title={t('components.common.app-layout.app-header.qrcode-check', {
+                                                    defaultValue: 'Проверка QR-кодов'
+                                                })}
                                             >
-                                                {'Проверка QR-кодов'}
+                                                {t('components.common.app-layout.app-header.qrcode-check', {
+                                                    defaultValue: 'Проверка QR-кодов'
+                                                })}
                                             </Link>
                                         </li>
                                     )}
@@ -152,14 +160,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
                                 <li>
                                     <Link
                                         href={'/'}
-                                        title={t('logout')}
+                                        title={t('components.common.app-layout.app-header.logout', {
+                                            defaultValue: 'Выйти'
+                                        })}
                                         onClick={(event) => {
                                             event.preventDefault()
                                             handleLogout()
                                         }}
                                     >
                                         <Icon name={'Exit'} />
-                                        {t('logout')}
+                                        {t('components.common.app-layout.app-header.logout', { defaultValue: 'Выйти' })}
                                     </Link>
                                 </li>
                             </ul>
