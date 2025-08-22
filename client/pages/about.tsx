@@ -5,9 +5,8 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
 
-import { setLocale, SITE_LINK, wrapper } from '@/api'
+import { setLocale, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
 import { ProjectTeam } from '@/components/pages/about'
 import donators from '@/public/data/list_donators.json'
@@ -76,12 +75,12 @@ type DonaterType = {
 type AboutPageProps = object
 
 const AboutPage: NextPage<AboutPageProps> = () => {
-    const { t, i18n } = useTranslation()
-
-    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+    const { t } = useTranslation()
 
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
+
+    const title = t('pages.about.title', { defaultValue: 'О проекте' })
 
     const handlePhotoClick = (index: number) => {
         setPhotoIndex(index)
@@ -93,41 +92,43 @@ const AboutPage: NextPage<AboutPageProps> = () => {
     }
 
     return (
-        <AppLayout>
-            <NextSeo
-                title={t('about')}
-                description={t('about-page.description')}
-                canonical={`${canonicalUrl}about`}
-                openGraph={{
-                    images: [
-                        {
-                            height: 853,
-                            url: '/photos/stargazing-2.jpeg',
-                            width: 1280
-                        }
-                    ],
-                    siteName: t('look-at-the-stars'),
-                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
-                }}
-            />
-
+        <AppLayout
+            canonical={'about'}
+            title={title}
+            description={t('pages.about.description', {
+                defaultValue:
+                    'Узнайте больше о проекте «Смотри на звезды», нашей команде и самодельной астрономической обсерватории. Присоединяйтесь к нам и откройте для себя красоту космоса!'
+            })}
+            openGraph={{
+                images: [
+                    {
+                        height: 853,
+                        url: '/photos/stargazing-2.jpeg',
+                        width: 1280
+                    }
+                ]
+            }}
+        >
             <AppToolbar
-                title={t('about')}
-                currentPage={t('about')}
+                title={title}
+                currentPage={title}
             />
 
             <Container style={{ marginBottom: '10px' }}>
                 <p style={{ marginTop: 0 }}>
-                    {t('about-page.my-name')}
+                    {t('pages.about.my-name', { defaultValue: 'Меня зовут' })}
                     <Link
                         href={'https://miksoft.pro'}
                         style={{ marginLeft: '5px' }}
-                        title={t('about-page.misha')}
+                        title={t('pages.about.misha', { defaultValue: 'Миша' })}
                         target={'_blank'}
                     >
-                        {t('about-page.misha')}
+                        {t('pages.about.misha', { defaultValue: 'Миша' })}
                     </Link>
-                    {t('about-page.intro')}
+                    {t('pages.about.intro', {
+                        defaultValue:
+                            ', и этот сайт — моя попытка рассказать вам о своём хобби, собрать воедино всю информацию и запечатлеть достижения, сделанные на пути к изучению космоса. Астрономия для меня — это не просто увлечение, а целый мир, который изменил мою жизнь. Благодаря ей я нашел невероятных друзей, узнал много нового и осознал, насколько велики и загадочны просторы Вселенной. Этот проект — наш совместный вклад в популяризацию и развитие астрономии. Мы искренне верим, что благодаря нашим усилиям космос станет ближе и доступнее каждому.'
+                    })}
                 </p>
 
                 <PhotoGallery
@@ -141,61 +142,109 @@ const AboutPage: NextPage<AboutPageProps> = () => {
             <Link
                 href={'https://t.me/look_at_stars'}
                 className={'telegram-message'}
-                title={t('telegram')}
+                title={t('telegram', { defaultValue: 'Телеграмм' })}
                 rel={'noindex nofollow'}
                 target={'_blank'}
             >
-                <Icon name={'Telegram'} /> {t('about-page.telegram-channel')}
+                <Icon name={'Telegram'} />{' '}
+                {t('pages.about.telegram-channel', {
+                    defaultValue: 'Подпишитесь на авторский Telegram канал этого проекта'
+                })}
             </Link>
 
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>{t('about-page.team-title')}</h2>
-                <p style={{ marginTop: 0 }}>{t('about-page.team-description')}</p>
+                <h2 style={{ marginTop: 0 }}>{t('pages.about.team-title', { defaultValue: 'Наша команда' })}</h2>
+                <p style={{ marginTop: 0 }}>
+                    {t('pages.about.team-description', {
+                        defaultValue:
+                            'Мы работаем в самых разных сферах, но всех нас объединяет одно — любовь к звёздам и ночному небу. С 2016 года мы популяризируем астрономию, организовываем астровыезды в Оренбургской области и вечера тротуарной астрономии в Оренбурге. Вместе мы смотрим на звёзды, делимся знаниями и вдохновляем других.'
+                    })}
+                </p>
                 <ProjectTeam />
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>{t('about-page.project-title')}</h2>
-                <p style={{ marginTop: 0 }}>{t('about-page.project-description')}</p>
+                <h2 style={{ marginTop: 0 }}>
+                    {t('pages.about.project-title', { defaultValue: 'Астрономический проект «Смотри на звёзды»' })}
+                </h2>
+                <p style={{ marginTop: 0 }}>
+                    {t('pages.about.project-description', {
+                        defaultValue:
+                            'В 2016 году в Оренбургской области мы запустили проект «Смотри на звёзды», чтобы сделать астрономию доступной для всех. С тех пор каждый сезон мы устраиваем бесплатные лекции под открытым небом, организуем поездки за город с телескопами и проводим неформальные вечера тротуарной астрономии.'
+                    })}
+                </p>
                 <p>
-                    {t('about-page.project-goal')}
+                    {t('pages.about.project-goal', {
+                        defaultValue:
+                            'Главная цель проекта — показать величие и красоту Вселенной, вдохновить людей на изучение космоса. Мы охватываем не только Оренбургскую область, но и соседние регионы, выезжая в места, где ночное небо особенно яркое. Узнать больше о наших текущих и прошедших мероприятиях можно на странице'
+                    })}
                     <Link
                         href={'/stargazing'}
                         style={{ marginLeft: '5px' }}
-                        title={t('stargazing')}
+                        title={t('menu.stargazing', { defaultValue: 'Астровыезды' })}
                     >
-                        {t('stargazing')}
+                        {t('menu.stargazing', { defaultValue: 'Астровыезды' })}
                     </Link>
-                    {t('about-page.project-sidewalk')}
+                    {t('pages.about.project-sidewalk', {
+                        defaultValue: ', а для тех, кто хочет увидеть звёзды в черте города, мы подготовили раздел'
+                    })}
                     <Link
                         href={'/stargazing/where'}
                         style={{ marginLeft: '5px' }}
-                        title={t('about-page.project-sidewalk-link')}
+                        title={t('pages.about.project-sidewalk-link', {
+                            defaultValue: 'Где в Оренбурге посмотреть в телескоп'
+                        })}
                     >
-                        {t('about-page.project-sidewalk-link')}
+                        {t('pages.about.project-sidewalk-link', {
+                            defaultValue: 'Где в Оренбурге посмотреть в телескоп'
+                        })}
                     </Link>
                     {'.'}
                 </p>
-                <p>{t('about-page.project-locations')}</p>
+                <p>
+                    {t('pages.about.project-locations', {
+                        defaultValue:
+                            'Наши мероприятия проходят не только в городах и поселках Оренбургской области, но и в соседних регионах. Мы организуем выездные экскурсии в удаленные места, где минимальное световое загрязнение позволяет наслаждаться звёздным небом в полной мере. Наша команда астрономов-любителей и волонтёров делится своими знаниями и опытом, чтобы каждый мог открыть для себя красоту и тайны Вселенной.'
+                    })}
+                </p>
                 <PhotoGallery
                     photos={galleryStargazing}
                     onClick={({ index }) => {
                         handlePhotoClick(index)
                     }}
                 />
-                <p>{t('about-page.project-lectures')}</p>
-                <p style={{ marginBottom: 0 }}>{t('about-page.project-sidewalk-astronomy')}</p>
+                <p>
+                    {t('pages.about.project-lectures', {
+                        defaultValue:
+                            'Одной из важнейших составляющих проекта являются лекции, которые проводят опытные астрономы-любители. Мы рассказываем о научных открытиях, истории астрономии и её современных достижениях. Лекции проходят в лёгком формате, где сложные вещи объясняются простым и понятным языком. Это помогает слушателям не только расширить кругозор, но и вдохновляет на самостоятельное изучение астрономии.'
+                    })}
+                </p>
+                <p style={{ marginBottom: 0 }}>
+                    {t('pages.about.project-sidewalk-astronomy', {
+                        defaultValue:
+                            'Особое внимание мы уделяем вечерам тротуарной астрономии. Эти встречи под открытым небом проходят в самых доступных местах города. На таких мероприятиях любой желающий может подойти, посмотреть в телескоп и узнать больше о том, что скрывает звёздное небо.'
+                    })}
+                </p>
             </Container>
 
             <Container style={{ marginBottom: '10px' }}>
-                <h2 style={{ marginTop: 0 }}>{t('about-page.observatory-title')}</h2>
+                <h2 style={{ marginTop: 0 }}>
+                    {t('pages.about.observatory-title', { defaultValue: 'Самодельная астрономическая обсерватория' })}
+                </h2>
                 <p style={{ marginTop: 0 }}>
-                    {t('about-page.observatory-intro')}
+                    {t('pages.about.observatory-intro', {
+                        defaultValue:
+                            'Этот проект — один из самых значимых этапов моей жизни. Наша самодельная астрономическая обсерватория — уникальное явление для Оренбургской области. Она работает автономно и позволяет получать снимки объектов дальнего космоса, делая астрономию доступной для всех. Более подробно о работе и оборудовании обсерватории можно узнать в разделе - '
+                    })}
                     <Link
                         href={'/objects'}
-                        title={t('about-page.observatory-intro-link')}
+                        title={t('pages.about.observatory-intro-link', {
+                            defaultValue: 'астрономическая обсерватория в Оренбурге'
+                        })}
                     >
-                        {t('about-page.observatory-intro-link')}
+                        {t('pages.about.observatory-intro-link', {
+                            defaultValue: 'астрономическая обсерватория в Оренбурге'
+                        })}
                     </Link>
                     {'.'}
                 </p>
@@ -206,37 +255,64 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     }}
                 />
                 <p>
-                    {t('about-page.observatory-work-1')}
+                    {t('pages.about.observatory-work-1', {
+                        defaultValue:
+                            'Обсерватория открыта для всех желающих. Каждый может воспользоваться её возможностями, чтобы получить изображения космических объектов. Более того, на сайте доступен раздел'
+                    })}
                     <Link
                         href={'/objects'}
                         style={{ marginLeft: '5px' }}
-                        title={t('objects')}
+                        title={t('objects', { defaultValue: 'Объекты' })}
                     >
-                        {t('objects')}
+                        {t('objects', { defaultValue: 'Объекты' })}
                     </Link>
-                    {t('about-page.observatory-work-2')}
+                    {t('pages.about.observatory-work-2', {
+                        defaultValue:
+                            ', где вы найдёте архив FITS-файлов. Эти данные можно использовать для обучения, поиска астероидов, создания астрофотографий и других научных или творческих целей.'
+                    })}
                 </p>
                 <p>
-                    {t('about-page.observatory-photos-1')}
+                    {t('pages.about.observatory-photos-1', {
+                        defaultValue:
+                            'Скоро мы запустим бесплатный сервис управления телескопом, чтобы ещё больше людей могли приобщиться к красоте ночного неба. Не забудьте заглянуть в раздел'
+                    })}
                     <Link
                         href={'/photos'}
                         style={{ marginLeft: '5px' }}
-                        title={t('astrophoto')}
+                        title={t('pages.about.astrophoto', { defaultValue: 'Астрофото' })}
                     >
-                        {t('astrophoto')}
+                        {t('pages.about.astrophoto', { defaultValue: 'Астрофото' })}
                     </Link>
-                    {t('about-page.observatory-photos-2')}
+                    {t('pages.about.observatory-photos-2', {
+                        defaultValue:
+                            ', где собраны снимки, полученные с помощью обсерватории и на наших астровыездах. Эти фотографии обработаны мной и моими друзьями и являются отражением нашей страсти к космосу.'
+                    })}
                 </p>
-                <p style={{ marginBottom: 0 }}>{t('about-page.observatory-conclusion')}</p>
+                <p style={{ marginBottom: 0 }}>
+                    {t('pages.about.observatory-conclusion', {
+                        defaultValue:
+                            'Этот проект — наш вклад в популяризацию астрономии. Мы искренне надеемся, что он вдохновит и вас открыть для себя Вселенную!'
+                    })}
+                </p>
             </Container>
             <Container
                 id={'your-help'}
                 style={{ marginBottom: '10px' }}
             >
-                <h2 style={{ marginTop: 0 }}>{t('about-page.your-help-title')}</h2>
-                <p style={{ marginTop: 0 }}>{t('about-page.your-help-intro')}</p>
-                <p>{t('about-page.your-help-description')}</p>
-                <h3>{t('about-page.your-help-financial-support')}</h3>
+                <h2 style={{ marginTop: 0 }}>{t('pages.about.your-help-title', { defaultValue: 'Ваша помощь' })}</h2>
+                <p style={{ marginTop: 0 }}>
+                    {t('pages.about.your-help-intro', {
+                        defaultValue:
+                            'Развитие проекта «Смотри на звёзды» во многом стало возможным благодаря поддержке программы социальных инвестиций «Родные города» компании «Газпром нефть» и содействию команды информационного агентства «Оренбург Медиа».'
+                    })}
+                </p>
+                <p>
+                    {t('pages.about.your-help-description', {
+                        defaultValue:
+                            'Наш проект самодельной обсерватории также нашёл отклик у множества неравнодушных участников. У нас масштабные планы по развитию этого направления, и ваша поддержка играет ключевую роль. Мы благодарны каждому, кто помогает советами, консультациями и рекомендациями. Если мы кого-то случайно не упомянули в списке благодарностей, напишите нам — это очень важно.'
+                    })}
+                </p>
+                <h3>{t('pages.about.your-help-financial-support', { defaultValue: 'Финансовая поддержка' })}</h3>
                 <ul
                     style={{
                         display: 'flex',
@@ -269,13 +345,21 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                             </li>
                         ))}
                 </ul>
-                <h3>{t('about-page.your-help-technical-support')}</h3>
+                <h3>
+                    {t('pages.about.your-help-technical-support', {
+                        defaultValue: 'Техническая и программная поддержка'
+                    })}
+                </h3>
                 <ul>
                     {contributors2.map((name) => (
                         <li key={name}>{name}</li>
                     ))}
                 </ul>
-                <p style={{ margin: 0 }}>{t('about-page.your-help-conclusion')}</p>
+                <p style={{ margin: 0 }}>
+                    {t('pages.about.your-help-conclusion', {
+                        defaultValue: 'Благодаря вашей помощи космос действительно становится ближе!'
+                    })}
+                </p>
             </Container>
 
             <PhotoLightbox
