@@ -4,24 +4,21 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
 
 import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { AstroObjectForm, AstroObjectFormType } from '@/components/pages/objects'
 import { formatObjectName } from '@/utils/strings'
 
-type ObjectFormPageProps = object
-
 // TODO: Добавить обработку ошибки, когда пытаемся отредактировать объект, которого нет
 // TODO: Добавить индикатор загрузки когда загружаем редактируемый объет
 // TODO: Для handleCancel добавить проверку на изменения в форме
 // TODO: Добавить Message компонент для обработки выполнения действий
-const ObjectFormPage: NextPage<ObjectFormPageProps> = () => {
+const ObjectFormPage: NextPage<object> = () => {
     const router = useRouter()
 
     const { id } = router.query
-    const { t, i18n } = useTranslation()
+    const { t } = useTranslation()
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
@@ -80,24 +77,18 @@ const ObjectFormPage: NextPage<ObjectFormPageProps> = () => {
     }, [userRole])
 
     return (
-        <AppLayout>
-            <NextSeo
-                title={currentPageTitle}
-                description={''}
-                noindex={true}
-                nofollow={true}
-                openGraph={{
-                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
-                }}
-            />
-
+        <AppLayout
+            title={currentPageTitle}
+            noindex={true}
+            nofollow={true}
+        >
             <AppToolbar
                 title={currentPageTitle}
                 currentPage={currentPageTitle}
                 links={[
                     {
                         link: '/objects',
-                        text: t('objects')
+                        text: t('menu.objects', { defaultValue: 'Объекты' })
                     }
                 ]}
             />
@@ -116,7 +107,7 @@ const ObjectFormPage: NextPage<ObjectFormPageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (context): Promise<GetServerSidePropsResult<ObjectFormPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<object>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 
