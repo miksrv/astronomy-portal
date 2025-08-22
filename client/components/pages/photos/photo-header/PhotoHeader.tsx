@@ -95,7 +95,9 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                 </div>
 
                 <div className={styles.item}>
-                    <span className={styles.key}>{t('category')}:</span>
+                    <span className={styles.key}>
+                        {t('components.pages.photos.photo-header.category', { defaultValue: 'Категория' })}:
+                    </span>
                     <div>
                         {!categoriesData?.length
                             ? '---'
@@ -104,7 +106,7 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                                       <Link
                                           key={`category_${id}`}
                                           href={`/photos?category=${id}`}
-                                          title={`${t('astrophoto')}: {title}`}
+                                          title={`${t('components.pages.photos.photo-header.astrophoto', { defaultValue: 'Астрофото' })}: {title}`}
                                       >
                                           {title}
                                       </Link>
@@ -115,28 +117,44 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                 </div>
 
                 <div className={styles.item}>
-                    <span className={styles.key}>{t('date')}:</span>
+                    <span className={styles.key}>
+                        {t('components.pages.photos.photo-header.date', { defaultValue: 'Дата ' })}:
+                    </span>
                     {props.date ? formatDate(props.date, 'DD MMM YYYY') : '---'}
                 </div>
 
                 <div className={styles.item}>
-                    <span className={styles.key}>{t('total-exposure')}:</span>
+                    <span className={styles.key}>
+                        {t('components.pages.photos.photo-header.total-exposure', { defaultValue: 'Общая выдержка' })}:
+                    </span>
                     {props.statistic?.exposure ? getTimeFromSec(props.statistic.exposure, true) : '---'}
                 </div>
 
                 <div className={styles.item}>
-                    <span className={styles.key}>{t('number-of-frames')}:</span>
+                    <span className={styles.key}>
+                        {t('components.pages.photos.photo-header.number-of-frames', {
+                            defaultValue: 'Количество кадров'
+                        })}
+                        :
+                    </span>
                     {props.statistic?.frames ?? '---'}
                 </div>
 
                 <div className={styles.item}>
-                    <span className={styles.key}>{t('file-size')}:</span>
+                    <span className={styles.key}>
+                        {t('components.pages.photos.photo-header.file-size', { defaultValue: 'Размер файла' })}:
+                    </span>
                     {props.fileSize ? humanizeFileSize(props.fileSize) : '---'}
                 </div>
 
                 {objectsData?.length && (
                     <div className={styles.item}>
-                        <span className={styles.key}>{t('objects-in-photo')}:</span>
+                        <span className={styles.key}>
+                            {t('components.pages.photos.photo-header.objects-on-photo', {
+                                defaultValue: 'Объекты на фото'
+                            })}
+                            :
+                        </span>
                         {objectsData.map(({ name, title }) => (
                             <Link
                                 key={name}
@@ -173,10 +191,14 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                 <Link
                     className={styles.fullPhotoButton}
                     href={`${hosts.photo}${props.dirName}/${props.fileName}.${props?.fileExt}`}
-                    title={t('open-full-size', { photoName: photoTitle })}
+                    title={t('components.pages.photos.photo-header.open-full-size', {
+                        defaultValue: '{{photoName}} - Открыть в полном размере',
+                        photoName: photoTitle
+                    })}
                     target={'_blank'}
                 >
-                    {t('full-size', {
+                    {t('components.pages.photos.photo-header.full-size', {
+                        defaultValue: 'Открыть полный размер ({{size}})',
                         size: humanizeFileSize(props?.fileSize || 0)
                     })}
                 </Link>
