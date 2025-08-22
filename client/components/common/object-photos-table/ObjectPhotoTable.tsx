@@ -18,23 +18,6 @@ interface ObjectPhotoTableProps extends ContainerProps {
     currentPhotoId?: string
 }
 
-type FlattenedPhoto = {
-    id?: string
-    photo?: string
-    objects?: string[]
-    date?: string
-    frames?: number
-    exposure?: number
-    lFilterExposure?: number
-    rFilterExposure?: number
-    gFilterExposure?: number
-    bFilterExposure?: number
-    hFilterExposure?: number
-    oFilterExposure?: number
-    sFilterExposure?: number
-    nFilterExposure?: number
-}
-
 export const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, currentPhotoId, ...props }) => {
     const { t } = useTranslation()
 
@@ -46,7 +29,7 @@ export const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, 
                 accessor: 'photo',
                 className: styles.cellPhoto,
                 formatter: (data, row, i) =>
-                    data ? (
+                    data && (
                         <Link
                             href={`/photos/${row[i].id}`}
                             title={createPhotoTitle(row[i] as ApiModel.Photo, t)}
@@ -59,29 +42,29 @@ export const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, 
                                 alt={''}
                             />
                         </Link>
-                    ) : undefined,
-                header: t('photo'),
+                    ),
+                header: t('components.common.object-photos-table.photo', { defaultValue: 'Фотография' }),
                 isSortable: true
             },
             {
                 accessor: 'date',
                 className: styles.cellCenter,
                 formatter: (data) => formatDate(data as string, 'DD MMM YYYY'),
-                header: t('date'),
+                header: t('components.common.object-photos-table.date', { defaultValue: 'Дата' }),
                 isSortable: true
             },
             {
                 accessor: 'frames',
                 className: styles.cellCenter,
                 formatter: (data) => (data as number) || '',
-                header: t('frames'),
+                header: t('components.common.object-photos-table.frames', { defaultValue: 'Кадры' }),
                 isSortable: true
             },
             {
                 accessor: 'exposure',
                 className: styles.cellCenter,
                 formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
-                header: t('exposure'),
+                header: t('components.common.object-photos-table.exposure', { defaultValue: 'Выдержка' }),
                 isSortable: true
             },
             {
@@ -174,6 +157,23 @@ export const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, 
             />
         </Container>
     )
+}
+
+type FlattenedPhoto = {
+    id?: string
+    photo?: string
+    objects?: string[]
+    date?: string
+    frames?: number
+    exposure?: number
+    lFilterExposure?: number
+    rFilterExposure?: number
+    gFilterExposure?: number
+    bFilterExposure?: number
+    hFilterExposure?: number
+    oFilterExposure?: number
+    sFilterExposure?: number
+    nFilterExposure?: number
 }
 
 const flattenPhotos = (photosList?: ApiModel.Photo[]): FlattenedPhoto[] =>

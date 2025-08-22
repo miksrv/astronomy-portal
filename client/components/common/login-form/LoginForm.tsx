@@ -48,7 +48,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
 
     return (
         <div className={styles.loginForm}>
-            <p>{t('auth-description')}</p>
+            <p>
+                {t('components.common.login-form.auth-description', {
+                    defaultValue: 'Для авторизации на сайте используйте один из сервисов ниже'
+                })}
+            </p>
 
             {isError && <Message type={'error'}>{(error as ApiType.ResError)?.messages?.error || ''}</Message>}
 

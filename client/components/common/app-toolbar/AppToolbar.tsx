@@ -29,7 +29,7 @@ export const AppToolbar = forwardRef<HTMLDivElement, AppToolbarProps>(
                         <Breadcrumbs
                             links={links}
                             currentPage={currentPage}
-                            homePageTitle={t('look-at-the-stars')}
+                            homePageTitle={t('common.look-at-the-stars', { defaultValue: 'Смотри на звёзды' })}
                         />
                     )}
                 </div>
