@@ -5,19 +5,16 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
 
 import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { EventForm, EventFormType } from '@/components/pages/stargazing'
 
-type StargazingFormPageProps = object
-
-const StargazingFormPage: NextPage<StargazingFormPageProps> = () => {
+const StargazingFormPage: NextPage<object> = () => {
     const router = useRouter()
 
     const { id } = router.query
-    const { t, i18n } = useTranslation()
+    const { t } = useTranslation()
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
@@ -65,24 +62,18 @@ const StargazingFormPage: NextPage<StargazingFormPageProps> = () => {
     }, [userRole])
 
     return (
-        <AppLayout>
-            <NextSeo
-                title={currentPageTitle}
-                description={''}
-                noindex={true}
-                nofollow={true}
-                openGraph={{
-                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
-                }}
-            />
-
+        <AppLayout
+            title={currentPageTitle}
+            noindex={true}
+            nofollow={true}
+        >
             <AppToolbar
                 title={currentPageTitle}
                 currentPage={currentPageTitle}
                 links={[
                     {
                         link: '/stargazing',
-                        text: t('stargazing')
+                        text: t('menu.stargazing', { defaultValue: 'Астровыезды' })
                     }
                 ]}
             />
@@ -111,7 +102,7 @@ const StargazingFormPage: NextPage<StargazingFormPageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (context): Promise<GetServerSidePropsResult<StargazingFormPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<object>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 

@@ -5,9 +5,8 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { Trans, useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
 
-import { setLocale, SITE_LINK, wrapper } from '@/api'
+import { setLocale, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 
 type FAQItem = {
@@ -15,53 +14,49 @@ type FAQItem = {
     answer: string
 }
 
-type StargazingFAQPageProps = object
-
-const StargazingFAQPage: NextPage<StargazingFAQPageProps> = () => {
-    const { t, i18n } = useTranslation()
-
-    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+const StargazingFAQPage: NextPage<object> = () => {
+    const { t } = useTranslation()
 
     return (
-        <AppLayout>
-            <NextSeo
-                title={t('stargazing-faq')}
-                description={t('stargazing-faq-page.description')}
-                canonical={`${canonicalUrl}stargazing/faq`}
-                openGraph={{
-                    siteName: t('look-at-the-stars'),
-                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
-                }}
-            />
-
+        <AppLayout
+            canonical={'stargazing/faq'}
+            title={t('pages.stargazing-faq.title', { defaultValue: 'Часто задаваемые вопросы' })}
+            description={t('pages.stargazing-faq.description', {
+                defaultValue:
+                    'Узнайте ответы на частые вопросы об астровыездах: регистрация, что взять с собой, стоимость, длительность и как добраться. Готовьтесь к ночи под звездами с комфортом!'
+            })}
+        >
             <AppToolbar
-                title={t('stargazing-faq')}
-                currentPage={t('stargazing-faq')}
+                title={t('stargazing-faq', { defaultValue: 'Часто задаваемые вопросы' })}
+                currentPage={t('stargazing-faq', { defaultValue: 'Часто задаваемые вопросы' })}
                 links={[
                     {
                         link: '/stargazing',
-                        text: t('stargazing')
+                        text: t('menu.stargazing', { defaultValue: 'Астровыезды' })
                     }
                 ]}
             />
 
             <Container style={{ marginBottom: '10px' }}>
                 <p style={{ marginTop: 0 }}>
-                    {t('stargazing-faq-page.intro')}
+                    {t('pages.stargazing-faq.description', {
+                        defaultValue:
+                            'Узнайте ответы на частые вопросы об астровыездах: регистрация, что взять с собой, стоимость, длительность и как добраться. Готовьтесь к ночи под звездами с комфортом!'
+                    })}
                     <Link
                         href={'https://t.me/look_at_stars'}
                         style={{ marginLeft: '5px' }}
-                        title={t('telegram')}
+                        title={t('telegram', { defaultValue: 'Телеграм' })}
                         rel={'noindex nofollow'}
                         target={'_blank'}
                     >
-                        {t('near_space')}
+                        {t('common.look-at-the-stars', { defaultValue: 'Смотри на звёзды' })}
                     </Link>
                     {'.'}
                 </p>
             </Container>
             {(
-                t('stargazing-faq-page.questions', {
+                t('pages.stargazing-faq.questions', {
                     returnObjects: true
                 }) as FAQItem[]
             ).map((item: FAQItem, index: number) => (
@@ -69,7 +64,7 @@ const StargazingFAQPage: NextPage<StargazingFAQPageProps> = () => {
                     <h3 style={{ marginTop: 20, marginBottom: 5, fontSize: '18px' }}>❓{item.question}</h3>
                     <Container style={{ marginBottom: '10px' }}>
                         <Trans
-                            i18nKey={`stargazing-faq-page.questions.${index}.answer`}
+                            i18nKey={`pages.stargazing-faq.questions.${index}.answer`}
                             components={{
                                 link1: (
                                     <a
@@ -108,7 +103,7 @@ const StargazingFAQPage: NextPage<StargazingFAQPageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (context): Promise<GetServerSidePropsResult<StargazingFAQPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<object>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 

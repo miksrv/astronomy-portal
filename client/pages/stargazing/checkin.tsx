@@ -8,7 +8,6 @@ import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
 
 import { API, ApiModel, ApiType, setLocale, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
@@ -21,9 +20,7 @@ enum ScannerStatusEnum {
     DUPLICATE = 'duplicate'
 }
 
-type CheckinPageProps = object
-
-const CheckinPage: NextPage<CheckinPageProps> = () => {
+const CheckinPage: NextPage<object> = () => {
     const router = useRouter()
 
     const [status, setStatus] = useState<ScannerStatusEnum>(ScannerStatusEnum.IDLE)
@@ -118,9 +115,11 @@ const CheckinPage: NextPage<CheckinPageProps> = () => {
     }, [userRole])
 
     return (
-        <AppLayout>
-            <NextSeo title={'Проверка участников'} />
-
+        <AppLayout
+            title={'Проверка участников'}
+            nofollow={true}
+            noindex={true}
+        >
             <AppToolbar
                 title={'Проверка участников'}
                 currentPage={'Проверка участников'}
@@ -180,7 +179,7 @@ const CheckinPage: NextPage<CheckinPageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (context): Promise<GetServerSidePropsResult<CheckinPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<object>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
             const token = await getCookie('token', { req: context.req, res: context.res })
