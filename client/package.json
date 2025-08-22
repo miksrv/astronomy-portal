@@ -8,6 +8,7 @@
     "scripts": {
         "dev": "next dev",
         "build": "next build",
+        "build:locales": "i18next-scanner",
         "export": "next export",
         "start": "next start",
         "test:watch": "jest --testNamePattern AuthorTable --watch",
