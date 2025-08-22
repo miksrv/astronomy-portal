@@ -6,9 +6,8 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
 
-import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { PhotoGrid } from '@/components/pages/photos'
 import { formatObjectName } from '@/utils/strings'
@@ -20,10 +19,8 @@ interface PhotosPageProps {
 }
 
 const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categoriesList }) => {
-    const { t, i18n } = useTranslation()
+    const { t } = useTranslation()
     const router = useRouter()
-
-    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
@@ -58,7 +55,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
         [filteredCategoriesList, categoryFilter]
     )
 
-    const title = t('astrophoto') + (categoryFilter ? `: ${currentCategory?.title}` : '')
+    const title = t('pages.photos.title', { defaultValue: 'Астрофото' })
 
     const handleChangeCategoryFilter = async (category: number | undefined) => {
         if (category !== undefined) {
@@ -85,33 +82,29 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
     }, [category])
 
     return (
-        <AppLayout>
-            <NextSeo
-                title={title}
-                description={`${t('description-photos-list-page')} ${currentCategory?.description}`}
-                canonical={`${canonicalUrl}photos`}
-                openGraph={{
-                    images: [
-                        {
-                            height: 755,
-                            url: '/screenshots/photos.jpg',
-                            width: 1280
-                        }
-                    ],
-                    siteName: t('look-at-the-stars'),
-                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
-                }}
-            />
-
+        <AppLayout
+            canonical={'photos'}
+            title={`${title}${categoryFilter ? `: ${currentCategory?.title}` : ''}`}
+            description={`${t('pages.photos.description', { defaultValue: 'Коллекция астрофотографий галактик, звездных скоплений, туманностей, планет и других космических объектов, запечатленных любительской обсерваторией. Найдите и отфильтруйте изображения по категориям и параметрам, чтобы увидеть уникальные снимки Вселенной с деталями по каждому фильтру и выдержке.' })} ${currentCategory?.description}`}
+            openGraph={{
+                images: [
+                    {
+                        height: 755,
+                        url: '/screenshots/photos.jpg',
+                        width: 1280
+                    }
+                ]
+            }}
+        >
             <AppToolbar
-                title={title}
-                currentPage={categoryFilter ? currentCategory?.title : t('astrophoto')}
+                title={`${title}${categoryFilter ? `: ${currentCategory?.title}` : ''}`}
+                currentPage={categoryFilter ? currentCategory?.title : title}
                 links={
                     categoryFilter
                         ? [
                               {
                                   link: '/photos',
-                                  text: t('astrophoto')
+                                  text: title
                               }
                           ]
                         : undefined
@@ -119,7 +112,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
             >
                 <Input
                     size={'large'}
-                    placeholder={t('search-by-object')}
+                    placeholder={t('pages.photos.search-by-object', { defaultValue: 'Поиск по объекту' })}
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
                 />
@@ -129,7 +122,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
                     size={'large'}
                     mode={'secondary'}
                     value={categoryFilter}
-                    placeholder={t('filter-by-category')}
+                    placeholder={t('pages.photos.filter-by-category', { defaultValue: 'Фильтр по категории' })}
                     onSelect={(category) => handleChangeCategoryFilter(category?.key)}
                     options={filteredCategoriesList?.map((category) => ({
                         key: category.id,
@@ -142,7 +135,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
                         icon={'PlusCircle'}
                         mode={'secondary'}
                         size={'large'}
-                        label={t('add')}
+                        label={t('pages.photos.create_button', { defaultValue: 'Создать' })}
                         onClick={handleCreate}
                     />
                 )}
