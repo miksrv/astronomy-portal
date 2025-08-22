@@ -43,14 +43,21 @@ export const MainSectionAstrophotos: React.FC<MainSectionAstrophotosProps> = ({ 
             </div>
 
             <div className={styles.bottomContainer}>
-                <h2 className={'animate'}>{t('astrophoto')}</h2>
-                <p className={'animate'}>{t('astrophoto-section-description')}</p>
+                <h2 className={'animate'}>
+                    {t('components.pages.index.main-sections.astrophoto', { defaultValue: 'Астрофото' })}
+                </h2>
+                <p className={'animate'}>
+                    {t('components.pages.index.main-sections.astrophoto-description', {
+                        defaultValue:
+                            'Коллекция снимков космоса, сделанных на нашей обсерватории, раскрывающая красоту далеких галактик, туманностей и звездных скоплений.'
+                    })}
+                </p>
                 <Link
                     href={'/photos'}
-                    title={t('astrophoto')}
+                    title={t('components.pages.index.main-sections.astrophoto', { defaultValue: 'Астрофото' })}
                     className={'animate'}
                 >
-                    {t('read-more')}
+                    {t('components.pages.index.main-sections.read-more', { defaultValue: 'Подробнее' })}
                 </Link>
             </div>
         </section>
