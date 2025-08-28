@@ -48,8 +48,11 @@ export default defineConfig([
             // PM2 Server
             '**/ecosystem.config.js',
 
-            // NextJS
+            // i18n
+            '**/i18next-scanner.config.js',
             '**/next-i18next.config.js',
+
+            // NextJS
             '**/next.config.js',
             '**/.next/**',
             '**/next-env.d.ts',
