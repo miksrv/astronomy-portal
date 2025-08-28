@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
-import { ApiModel, setLocale, wrapper } from '@/api'
+import { setLocale, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 
 const StargazingRulesPage: NextPage<object> = () => {

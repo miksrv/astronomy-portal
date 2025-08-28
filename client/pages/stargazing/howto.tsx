@@ -18,6 +18,8 @@ const photosGallery = [photoStargazing1, photoStargazing2, photoStargazing3, pho
 const StargazingHowToPage: NextPage<object> = () => {
     const { t } = useTranslation()
 
+    const title = t('pages.stargazing-howto.title', { defaultValue: 'Как проходят астровыезды' })
+
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
 
@@ -33,7 +35,7 @@ const StargazingHowToPage: NextPage<object> = () => {
     return (
         <AppLayout
             canonical={'stargazing/howto'}
-            title={t('pages.stargazing-howto.title', { defaultValue: 'Как проходят астровыезды' })}
+            title={title}
             description={t('pages.stargazing-howto.description', {
                 defaultValue:
                     'Узнайте, как проходят астровыезды в Оренбурге: регистрация, лекции о космосе, наблюдения в телескопы и обучение ориентации по звездному небу. Подписывайтесь на Telegram-канал «Смотри на звезды» и присоединяйтесь к уникальным астрономическим мероприятиям под звездным небом!'
@@ -49,12 +51,12 @@ const StargazingHowToPage: NextPage<object> = () => {
             }}
         >
             <AppToolbar
-                title={t('stargazing-howto', { defaultValue: 'Как проходят астровыезды' })}
-                currentPage={t('stargazing-howto', { defaultValue: 'Как проходят астровыезды' })}
+                title={title}
+                currentPage={title}
                 links={[
                     {
                         link: '/stargazing',
-                        text: t('stargazing', { defaultValue: 'Астровыезды' })
+                        text: t('menu.stargazing', { defaultValue: 'Астровыезды' })
                     }
                 ]}
             />
@@ -183,10 +185,10 @@ const StargazingHowToPage: NextPage<object> = () => {
                     })}
                     <Link
                         href={'/stargazing/faq'}
-                        title={t('stargazing-faq', { defaultValue: 'Часто задаваемые вопросы' })}
+                        title={t('menu.stargazing-faq', { defaultValue: 'Часто задаваемые вопросы' })}
                         style={{ margin: '0 5px' }}
                     >
-                        {t('stargazing-faq')}
+                        {t('menu.stargazing-faq')}
                     </Link>
                     {t('pages.stargazing-howto.telegram', { defaultValue: 'или пишите в нашем Telegram-канале' })}
                     <Link

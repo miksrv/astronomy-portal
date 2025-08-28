@@ -17,18 +17,20 @@ type FAQItem = {
 const StargazingFAQPage: NextPage<object> = () => {
     const { t } = useTranslation()
 
+    const title = t('pages.stargazing-faq.title', { defaultValue: 'Часто задаваемые вопросы' })
+
     return (
         <AppLayout
             canonical={'stargazing/faq'}
-            title={t('pages.stargazing-faq.title', { defaultValue: 'Часто задаваемые вопросы' })}
+            title={title}
             description={t('pages.stargazing-faq.description', {
                 defaultValue:
                     'Узнайте ответы на частые вопросы об астровыездах: регистрация, что взять с собой, стоимость, длительность и как добраться. Готовьтесь к ночи под звездами с комфортом!'
             })}
         >
             <AppToolbar
-                title={t('stargazing-faq', { defaultValue: 'Часто задаваемые вопросы' })}
-                currentPage={t('stargazing-faq', { defaultValue: 'Часто задаваемые вопросы' })}
+                title={title}
+                currentPage={title}
                 links={[
                     {
                         link: '/stargazing',

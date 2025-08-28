@@ -18,6 +18,8 @@ const gallerySidewalk = [photoSidewalk1, photoSidewalk2, photoSidewalk3, photoSi
 const StargazingWherePage: NextPage<object> = () => {
     const { t } = useTranslation()
 
+    const title = t('pages.stargazing-where.title', { defaultValue: 'Где посмотреть в телескоп в Оренбурге' })
+
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
 
@@ -33,7 +35,7 @@ const StargazingWherePage: NextPage<object> = () => {
     return (
         <AppLayout
             canonical={'stargazing/where'}
-            title={t('pages.stargazing-where.title', { defaultValue: 'Где посмотреть в телескоп в Оренбурге' })}
+            title={title}
             description={t('pages.stargazing-where.description', {
                 defaultValue:
                     'Узнайте, где в Оренбурге можно посмотреть в телескоп. Тротуарная астрономия: бесплатные наблюдения Луны, планет и звезд на улицах города. Хотите увидеть больше — отправляйтесь на выезд за город для наблюдения туманностей и галактик!'
@@ -49,10 +51,8 @@ const StargazingWherePage: NextPage<object> = () => {
             }}
         >
             <AppToolbar
-                title={t('pages.stargazing-where.title', { defaultValue: 'Где посмотреть в телескоп в Оренбурге' })}
-                currentPage={t('pages.stargazing-where.title', {
-                    defaultValue: 'Где посмотреть в телескоп в Оренбурге'
-                })}
+                title={title}
+                currentPage={title}
                 links={[
                     {
                         link: '/stargazing',
@@ -70,7 +70,7 @@ const StargazingWherePage: NextPage<object> = () => {
                     <Link
                         style={{ margin: '0 5px' }}
                         href={'https://t.me/look_at_stars'}
-                        title={t('telegram', { defaultValue: 'Телеграмм' })}
+                        title={t('common.telegram', { defaultValue: 'Телеграмм' })}
                         rel={'noindex nofollow'}
                         target={'_blank'}
                     >

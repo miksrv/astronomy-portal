@@ -7,7 +7,7 @@ module.exports = {
     output: "./public/locales",
 
     options: {
-        debug: false,
+        debug: true,
         removeUnusedKeys: true,
         sort: true,
         lngs: ["ru", "en"],
