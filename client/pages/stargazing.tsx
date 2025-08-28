@@ -97,7 +97,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
             <Link
                 href={'https://t.me/look_at_stars'}
                 className={'telegram-message'}
-                title={t('pages.stargazing.telegram', { defaultValue: 'Телеграмм' })}
+                title={t('pages.stargazing.telegram', { defaultValue: 'Телеграм' })}
                 rel={'noindex nofollow'}
                 target={'_blank'}
             >

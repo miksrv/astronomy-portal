@@ -3,7 +3,7 @@ import { Button, Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
-import { Trans, useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
 import { API, ApiModel, setLocale, wrapper } from '@/api'
@@ -227,28 +227,26 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                     {t('pages.observatory.photos-and-data-title', { defaultValue: 'Фотографии и данные' })}
                 </h2>
                 <p>
-                    <Trans
-                        i18nKey='pages.observatory.photos-and-data'
-                        defaultValue='На специальном разделе сайта представлены <photosLink>фотографии</photosLink> снятых <objectsLink>объектов</objectsLink> глубокого космоса. Для каждого объекта доступны подробные параметры и характеристики, такие как расстояние до объекта, его размер, спектральные данные и многое другое. Эти материалы могут быть полезны как для начинающих астрономов, так и для профессионалов.'
-                        components={{
-                            photosLink: (
-                                <Link
-                                    href='/photos'
-                                    title={t('astrophoto')}
-                                >
-                                    {t('pages.observatory.photos-and-data-part-photos')}
-                                </Link>
-                            ),
-                            objectsLink: (
-                                <Link
-                                    href='/objects'
-                                    title={t('objects')}
-                                >
-                                    {t('pages.observatory.photos-and-data-part-objects')}
-                                </Link>
-                            )
-                        }}
-                    />
+                    {t('pages.observatory.photos-and-data', {
+                        defaultValue:
+                            'На специальном разделе сайта представлены <photosLink>фотографии</photosLink> снятых <objectsLink>объектов</objectsLink> глубокого космоса. Для каждого объекта доступны подробные параметры и характеристики, такие как расстояние до объекта, его размер, спектральные данные и многое другое. Эти материалы могут быть полезны как для начинающих астрономов, так и для профессионалов.',
+                        photosLink: (
+                            <Link
+                                href='/photos'
+                                title={t('astrophoto')}
+                            >
+                                {t('pages.observatory.photos-and-data-part-photos')}
+                            </Link>
+                        ),
+                        objectsLink: (
+                            <Link
+                                href='/objects'
+                                title={t('objects')}
+                            >
+                                {t('pages.observatory.photos-and-data-part-objects')}
+                            </Link>
+                        )
+                    })}
                 </p>
 
                 <ObjectPhotoTable photosList={photosList} />

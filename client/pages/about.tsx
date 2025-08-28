@@ -142,7 +142,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
             <Link
                 href={'https://t.me/look_at_stars'}
                 className={'telegram-message'}
-                title={t('telegram', { defaultValue: 'Телеграмм' })}
+                title={t('common.telegram', { defaultValue: 'Телеграм' })}
                 rel={'noindex nofollow'}
                 target={'_blank'}
             >

@@ -70,7 +70,7 @@ const StargazingWherePage: NextPage<object> = () => {
                     <Link
                         style={{ margin: '0 5px' }}
                         href={'https://t.me/look_at_stars'}
-                        title={t('common.telegram', { defaultValue: 'Телеграмм' })}
+                        title={t('common.telegram', { defaultValue: 'Телеграм' })}
                         rel={'noindex nofollow'}
                         target={'_blank'}
                     >

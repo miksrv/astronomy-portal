@@ -194,7 +194,7 @@ const StargazingHowToPage: NextPage<object> = () => {
                     <Link
                         href={'https://t.me/look_at_stars'}
                         style={{ marginLeft: '5px' }}
-                        title={t('telegram', { defaultValue: 'Телеграмм' })}
+                        title={t('common.telegram', { defaultValue: 'Телеграм' })}
                         rel={'noindex nofollow'}
                         target={'_blank'}
                     >
