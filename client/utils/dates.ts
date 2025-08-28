@@ -52,19 +52,19 @@ export const getLocalizedTimeFromSec = (
         const seconds = d.seconds()
 
         if (days) {
-            parts.push(t('common.time.day', { count: days, defaultValue: `${days} день` }))
+            parts.push(t('common.day', { count: days, defaultValue: '{{count}} день' }))
         }
 
         if (hours) {
-            parts.push(t('common.time.hour', { count: hours, defaultValue: `${hours} час` }))
+            parts.push(t('common.hour', { count: hours, defaultValue: '{{count}} час' }))
         }
 
         if (minutes) {
-            parts.push(t('common.time.minute', { count: minutes, defaultValue: `${minutes} минута` }))
+            parts.push(t('common.minute', { count: minutes, defaultValue: '{{count}} минута' }))
         }
 
         if (seconds && parts.length === 0) {
-            parts.push(t('common.time.second', { count: seconds, defaultValue: `${seconds} секунда` }))
+            parts.push(t('common.second', { count: seconds, defaultValue: '{{count}} секунда' }))
         }
 
         return parts.join(' ')

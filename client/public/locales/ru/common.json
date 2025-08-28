@@ -1,17 +1,15 @@
 {
     "common": {
         "add": "Добавить",
+        "day": "{{count}} день",
         "edit": "Редактировать",
         "frames": "{{count}} кадров",
+        "hour": "{{count}} час",
         "look-at-the-stars": "Смотри на звёзды",
+        "minute": "{{count}} минута",
         "minutes": "{{count}} минут",
-        "telegram": "Телеграм",
-        "time": {
-            "day": " день",
-            "hour": " час",
-            "minute": " минута",
-            "second": " секунда"
-        }
+        "second": "{{count}} секунда",
+        "telegram": "Телеграм"
     },
     "components": {
         "common": {

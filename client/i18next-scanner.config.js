@@ -7,6 +7,8 @@ module.exports = {
     output: "./public/locales",
 
     options: {
+        plural: true,
+        pluralSeparator: '_',
         debug: true,
         removeUnusedKeys: true,
         sort: true,
@@ -15,7 +17,9 @@ module.exports = {
         defaultNs: "common",
         resource: {
             loadPath: "{{lng}}/{{ns}}.json",
-            savePath: "{{lng}}/{{ns}}.json"
+            savePath: "{{lng}}/{{ns}}.json",
+            jsonIndent: 4,
+            lineEnding: '\n'
         },
         interpolation: {
             prefix: "{{",
