@@ -4,19 +4,10 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 
-import { declOfNum } from '@/utils/helpers'
-
 dayjs.extend(utc)
 dayjs.extend(duration)
 dayjs.extend(relativeTime)
 dayjs.extend(timezone)
-
-type TimeUnitsLocale = {
-    day: [string, string, string]
-    hour: [string, string, string]
-    minute: [string, string, string]
-    second: [string, string, string]
-}
 
 export const TIME_ZONE = 'Asia/Yekaterinburg'
 export const DEFAULT_SHORT_DATE_FORMAT = 'DD.MM.YYYY, HH:mm'
@@ -39,17 +30,15 @@ export const formatDateFromUnixUTC = (timestamp?: number, format: string = DEFAU
 
 export const getSecondsUntilUTCDate = (date?: string | Date): number | undefined =>
     date ? dayjs.utc(date).tz(TIME_ZONE).diff(dayjs(), 'second') : undefined
+dayjs.extend(duration)
 
-export const getLocalizedTimeFromSec = (sec: number, full: boolean = false, t: (key: string) => string): string => {
+export const getLocalizedTimeFromSec = (
+    sec: number,
+    full: boolean = false,
+    t: (key: string, options?: { count?: number; defaultValue?: string }) => string
+): string => {
     if (sec <= 0) {
         return '0'
-    }
-
-    const locale: TimeUnitsLocale = {
-        day: [t('time.day_1'), t('time.day_2'), t('time.day_5')],
-        hour: [t('time.hour_1'), t('time.hour_2'), t('time.hour_5')],
-        minute: [t('time.minute_1'), t('time.minute_2'), t('time.minute_5')],
-        second: [t('time.second_1'), t('time.second_2'), t('time.second_5')]
     }
 
     const d = dayjs.duration(sec * 1000)
@@ -63,20 +52,24 @@ export const getLocalizedTimeFromSec = (sec: number, full: boolean = false, t: (
         const seconds = d.seconds()
 
         if (days) {
-            parts.push(`${days} ${declOfNum(days, locale.day)}`)
+            parts.push(t('common.time.day', { count: days, defaultValue: `${days} день` }))
         }
+
         if (hours) {
-            parts.push(`${hours} ${declOfNum(hours, locale.hour)}`)
+            parts.push(t('common.time.hour', { count: hours, defaultValue: `${hours} час` }))
         }
+
         if (minutes) {
-            parts.push(`${minutes} ${declOfNum(minutes, locale.minute)}`)
+            parts.push(t('common.time.minute', { count: minutes, defaultValue: `${minutes} минута` }))
         }
+
         if (seconds && parts.length === 0) {
-            parts.push(`${seconds} ${declOfNum(seconds, locale.second)}`)
+            parts.push(t('common.time.second', { count: seconds, defaultValue: `${seconds} секунда` }))
         }
 
         return parts.join(' ')
     }
+
     const h = String(d.hours()).padStart(2, '0')
     const m = String(d.minutes()).padStart(2, '0')
     const s = String(d.seconds()).padStart(2, '0')

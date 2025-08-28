@@ -14,8 +14,8 @@ module.exports = {
         defaultLng: "ru",
         defaultNs: "common",
         resource: {
-            loadPath: "public/locales/{{lng}}/{{ns}}.json",
-            savePath: "public/locales/{{lng}}/{{ns}}.json"
+            loadPath: "{{lng}}/{{ns}}.json",
+            savePath: "{{lng}}/{{ns}}.json"
         },
         interpolation: {
             prefix: "{{",

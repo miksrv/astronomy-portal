@@ -233,7 +233,7 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                         photosLink: (
                             <Link
                                 href='/photos'
-                                title={t('astrophoto')}
+                                title={t('menu.astrophoto')}
                             >
                                 {t('pages.observatory.photos-and-data-part-photos')}
                             </Link>

@@ -1,405 +1,519 @@
 {
-    "look-at-the-stars": "Look at the stars",
-    "star-map": "Star Map",
-    "astrophoto": "Astrophoto",
-    "photo": "Photo",
-    "objects": "Objects",
-    "about": "About",
-    "telegram": "Telegram",
-    "observatory": "Observatory",
-    "observatory-orenburg": "Observatory in Orenburg",
-    "observatory-orenburg-weather": "Weather at the Orenburg Observatory",
-    "stargazing": "Stargazing",
-    "stargazings": "Stargazings",
-    "members": "Members",
-    "near_space": "Look At The Stars",
-    "photos-from-stargazing": "Photos from the stargazing",
-    "look-at-the-stars-description": "Look at the stars - a unique project in the Orenburg region: telescope observations outside the city, sidewalk astronomy, an observatory in the Orenburg region, and astrophotography",
-    "stargazings-section-description": "We organize regular trips under the open sky to observe stars and planets through powerful telescopes.",
-    "astrophoto-section-description": "A collection of space photos taken at our observatory, revealing the beauty of distant galaxies, nebulae, and star clusters.",
-    "observatory-section-description": "Discover the universe from our stationary observation point, equipped with advanced telescopes.",
-    "auth-description": "To log in to the site, use one of the services below",
-    "location-on-the-astronomical-map": "Location on the astronomical map",
-    "list-astronomical-objects": "List of astronomical objects",
-    "description-stargazing": "Stargazing in Orenburg is an exciting trip out of town, where telescopes open up cosmic horizons. Evenings of scientific discoveries, lectures, and live communication with like-minded people. Learn the rules of conduct and prepare for stargazing.",
-    "description-star-map": "A map of the starry sky with galaxies, nebulae, comets, supernovae and other space objects, taken with an amateur telescope",
-    "description-object-list-page": "Catalog of astronomical objects photographed by the observatory: galaxies, nebulae, asteroids and comets. The table with objects includes information on the total exposure, availability of processed photos and data for each filter: Luminance, Red, Green, Blue, Ha, OIII, SII. Find out more about each object and the details of the observations conducted by the observatory.",
-    "description-photos-list-page": "A collection of astrophotographs of galaxies, star clusters, nebulae, planets and other celestial objects captured by an amateur observatory. Browse and filter images by category and parameters to see unique images of the Universe with details for each filter and exposure.",
-    "description-photo-page": "{{photoTitle}} — photo of an astronomical object taken at the homemade observatory, equipment used: {{equipment}}.",
-    "description-observatory": "A homemade amateur astronomical observatory with remote access from anywhere in the world via the Internet. Observatory operation statistics, number of shots and accumulated data. Telescope operation calendar.",
-    "description-observatory-weather": "Current weather charts from the amateur observatory's weather station in the suburbs of Orenburg. Temperature, humidity, cloudiness, and wind speed in real-time.",
-    "main-page": "Main Page",
-    "search-by-name": "Search by name",
-    "search-by-object": "Search by object",
-    "authorization-on-site": "Authorization",
-    "sign-in": "Sign in",
-    "logout": "Logout",
-    "gain": "Gain",
-    "offset": "Offset",
-    "date": "Date",
-    "filter": "Filter",
-    "object": "Object",
-    "object-count": "Objects",
-    "frames": "Frames",
-    "exposure": "Exposure",
-    "moon-phase": "Moon Phase",
-    "filter-by-category": "Filter by category",
-    "ccd-temperature": "CCD Temperature",
-    "download": "Download",
-    "add": "Add",
-    "edit": "Edit",
-    "from": "from",
-    "years": "Years",
-    "sec": "sec",
-    "add-photo": "Add Photo",
-    "add-object": "Add Object",
-    "add-stargazing": "Add Stargazing",
-    "read-more": "Read more",
-    "name-in-the-directory": "Name in the directory",
-    "category": "Category",
-    "total-exposure": "Total Exposure",
-    "number-of-frames": "Number of Frames",
-    "file-size": "File size",
-    "data-size": "Data Size",
-    "objects-in-photo": "Objects in the photo",
-    "link-to-FITS-files": "Link to FITS files",
-    "open-full-size": "{{photoName}} - Open in full size",
-    "full-size": "Open full size ({{size}})",
-    "safely": "Safely",
-    "critical": "Critical",
-    "dangerous": "Dangerous",
-    "loading": "Loading",
-    "temperature": "Temperature",
-    "humidity": "Humidity",
-    "clouds": "Cloudiness",
-    "windSpeed": "Wind Speed",
-    "windGust": "Gusts of wind",
-    "precipitation": "Precipitation",
-    "feelsLike": "Feels like",
-    "dewPoint": "Dew Point",
-    "weather-conditions": "Weather Conditions",
-    "meters-per-second": "m/s",
-    "updated": "Updated",
-    "sun": "Sun",
-    "dawn": "Dawn",
-    "sunset": "Sunset",
-    "height": "Height",
-    "azimuth": "Azimuth",
-    "moon": "Moon",
-    "right-ascension": "Right Ascension",
-    "declination": "Declination",
-    "no-fits-files": "No saved FITS files for this object",
-    "image-from-observatory-camera": "Image from the observatory camera",
-    "camera-not-available": "Camera not available",
-    "camera-image-not-available": "Camera image not available",
-    "telegram-subscription": "To not miss announcements - subscribe to the Telegram channel",
-    "lightning": "LIGHT",
-    "available-in": "Available in",
-    "turned-on": "Turned on",
-    "visibility-chart": {
-        "title": "Visibility chart of {{name}} during the day",
-        "description": "The height diagram of {{name}} above the horizon during the current day for the observatory observation point in Orenburg ({{lat}}, {{lon}}). The chart shows when the object is above the horizon and at what maximum height in degrees it rises. The data is relevant for the observation date: {{date}}."
-    },
-    "equipment": {
-        "mount": "Mount",
-        "scope": "Telescope",
-        "camera": "Camera",
-        "guiding_camera": "Guiding Camera",
-        "guiding_scope": "Guiding Scope",
-        "focuser": "Focuser",
-        "filter_wheel": "Filter Wheel",
-        "filter": "Filters"
-    },
-    "stargazing-rules": "Stargazing Rules",
-    "stargazing-howto": "How Stargazing Works",
-    "stargazing-where": "Where to Look Through a Telescope in Orenburg",
-    "stargazing-faq": "Frequently Asked Questions",
-    "stargazing-page": {
-        "intro": "Stargazing in Orenburg is an opportunity to touch the mysteries of the Universe by observing the starry sky in complete darkness. We invite you to exciting trips out of town, where telescopes open cosmic horizons right in the fields of Orenburg.",
-        "description": "Each stargazing trip is an evening of scientific discoveries, inspiring lectures, and live communication with like-minded people. You will learn how our events are held, get acquainted with the basic rules of behavior at stargazing trips, and be able to prepare in advance for observing the stars."
-    },
-    "stargazing-rules-page": {
-        "description": "Learn the rules of behavior at stargazing trips in Orenburg: what not to do when observing stars and planets through a telescope. Follow the recommendations to make the stargazing trip safe and comfortable for all participants.",
-        "welcome": "Welcome to the stargazing trips in Orenburg organized by the \"Look at the Stars\" project! To make the joint observation of the starry sky and planets comfortable and safe for all participants, it is important to follow a few simple rules. These recommendations help maintain the atmosphere of night observation and ensure that everyone can enjoy the view of stars and planets through a telescope.",
-        "prohibited-title": "What Not to Do at Stargazing Trips:",
-        "prohibited-items": [
-            {
-                "title": "Use Bright Light Sources",
-                "description": "Flashlights, phone screens, and any bright light devices disrupt the eyes' adaptation to darkness, reducing the visibility of the starry sky. Use only red flashlights or special light filters for devices."
-            },
-            {
-                "title": "Light Fires and Use Open Flames",
-                "description": "Stargazing trips are held in fields and open areas where there is a high risk of fires. Lighting fires is strictly prohibited."
-            },
-            {
-                "title": "Consume Alcohol and Smoke",
-                "description": "Alcoholic beverages, cigarettes, electronic cigarettes, vapes, and hookahs are prohibited. This is not only a matter of fire safety but also respect for other participants who value a clear night sky and fresh air."
-            },
-            {
-                "title": "Make Noise and Disturb Other Participants",
-                "description": "Loud music, shouting, or other sudden noises can distract and interfere with concentration when observing through a telescope. Respect the silence and the mood of those around you."
-            }
-        ],
-        "recommendations-title": "Recommendations for Stargazing Trip Participants:",
-        "recommendations-items": [
-            {
-                "title": "Protect Nature",
-                "description": "Take all your trash with you after the observations. We strive to leave the stargazing sites as clean as they were before our arrival."
-            },
-            {
-                "title": "Follow Safety Rules",
-                "description": "Move carefully to avoid damaging equipment and harming yourself."
-            },
-            {
-                "title": "Respect Other Participants",
-                "description": "Everyone came to the stargazing trip to enjoy the beauty of space. Respectful behavior towards each other creates a friendly and comfortable atmosphere."
-            }
-        ],
-        "importance-title": "Why Is It Important to Follow the Rules?",
-        "importance-description": "Following these recommendations helps make stargazing in Orenburg as comfortable as possible for everyone. We create an atmosphere where each participant can see amazing celestial phenomena, study planets through a telescope, and have an unforgettable experience.",
-        "join-title": "Join Our Stargazing Trips!",
-        "join-description": "Want to learn more about our events organized in Orenburg?",
-        "subscribe": "Subscribe"
-    },
-    "stargazing-howto-page": {
-        "description": "Learn how stargazing trips in Orenburg are conducted: registration, space lectures, telescope observations, and star navigation training. Subscribe to the Telegram channel \"Look At The Stars\" and join unique astronomical events under the starry sky!",
-        "unique_event": "Each stargazing trip is unique, but we follow a general scenario to make the event interesting and convenient for all participants.",
-        "event_announcement": "Event Announcement",
-        "event_announcement_text": "Stargazing trips in Orenburg are held in favorable weather conditions, so the exact date becomes known only 2-3 days before the event. We announce upcoming trips in advance on our Telegram channel \"Look At The Stars\", where we publish announcements and important updates. Subscribing to the channel is mandatory to not miss a new stargazing trip.",
-        "registration": "Stargazing Trip Registration",
-        "registration_text": "Pre-registration through our website is required to participate. It is free and takes only one minute. Please note: beware of scammers, if someone asks for payment for participation - it is a scam! We welcome donations, but participation always remains free.",
-        "location": "Event Location",
-        "location_text": "Stargazing trips are held out of town, away from city lights, usually 40 km from Orenburg. The exact location will be revealed after registration. You need to get to the field on your own, so check the route in advance. The last section of the road is a dirt road about 300 meters long.",
-        "event_plan": "Stargazing Trip Plan",
-        "arrival": "Arrival at the Location",
-        "arrival_text": "Arrive 15-20 minutes before the start to take a comfortable place on the astronomical field. Bring camping chairs or mats for comfortable seating.",
-        "lecture": "Astro Lecture",
-        "lecture_text": "As soon as dusk falls, our astro lecture begins. We show videos and photos on a big screen, talking about space in an accessible and interesting way. Lecture topics vary: from \"Perseid Meteor Shower\" to \"What Black Holes Hide\". Lectures are designed for participants from 8 years old and last about an hour.",
-        "orientation": "Star Navigation",
-        "orientation_text": "After the lecture, we teach you to find the main stars and constellations, showing them in the sky. This part lasts about 20 minutes.",
-        "telescope_observation": "Telescope Observation",
-        "telescope_observation_text": "Several telescopes are set up on the astronomical site, each focused on specific cosmic objects. You can look through the telescopes, ask questions, and communicate with astronomers.",
-        "event_duration": "Event Duration",
-        "event_duration_text": "The entire stargazing trip takes from 2 to 4 hours. You can leave the site at any time, but many stay until the end, enjoying the views of the starry sky.",
-        "recommendations": "Mandatory Recommendations",
-        "recommendations_text": "Please read the \"Stargazing Trip Rules\" section to make the event comfortable and safe for everyone.",
-        "thematic_evenings": "Thematic Evenings",
-        "thematic_evenings_text": "Sometimes we conduct sidewalk astronomy right in the city. Read more about such events in the \"Where to Look Through a Telescope in Orenburg\" section.",
-        "faq": "Didn't find the answer to your question? Check the",
-        "telegram": "or write in our Telegram channel"
-    },
-    "stargazing-faq-page": {
-        "description": "Find answers to frequently asked questions about stargazing trips: registration, what to bring, cost, duration, and how to get there. Prepare for a night under the stars with comfort!",
-        "intro": "On this page, you will find answers to the most frequently asked questions that participants of our stargazing trips ask. We have tried to gather all the important information here to make your participation in the event as comfortable and pleasant as possible. If you did not find the answer to your question, you can always ask it in our Telegram channel",
-        "questions": [
-            {
-                "question": "Can I come without registration?",
-                "answer": "No, you can't. Registration is mandatory as it allows us to plan the event, notify participants of possible changes, and ensure comfort for everyone."
-            },
-            {
-                "question": "What should I bring?",
-                "answer": "We recommend bringing: mats or chairs for comfortable observation, warm clothes (it can be cool at night in the open air), insect repellent, camping flashlights (preferably with red light to avoid disturbing observations), a thermos with tea or coffee, snacks (sandwiches, dried fruits, etc.), a camera or smartphone if you want to try to capture the stars."
-            },
-            {
-                "question": "Can I get to the stargazing trip location by public transport?",
-                "answer": "Unfortunately, no. The event location is far from public transport routes. You can get there by your own car or join other participants if they are willing to take you with them. We recommend arranging this in advance through our Telegram channel."
-            },
-            {
-                "question": "How much does the event cost?",
-                "answer": "Our stargazing trips are free! However, if you want to support us, you can buy merchandise on-site or make a small donation. Your help allows us to organize more events."
-            },
-            {
-                "question": "How long does the stargazing trip last?",
-                "answer": "Usually, the stargazing trip lasts 2-3 hours, but you can leave the event at any time. We try not to prolong it to ensure everyone's comfort."
-            },
-            {
-                "question": "What if it's cloudy or rainy?",
-                "answer": "If the weather forecast is unfavorable (clouds or precipitation), the event may be canceled or rescheduled. We always notify participants of such changes through our Telegram channel, so be sure to follow the updates."
-            },
-            {
-                "question": "Do I need to bring my own telescope?",
-                "answer": "No, bringing a telescope is not necessary. We always have several telescopes for general use. If you have your own instrument, you can bring it, and our experts will help you set it up and use it."
-            },
-            {
-                "question": "Is the event suitable for children?",
-                "answer": "Yes, stargazing trips are suitable for children, but they must be supervised by adults. We strive to make our events interesting and educational for all ages."
-            },
-            {
-                "question": "Can I take photos?",
-                "answer": "Of course! You can take photos, but please follow the etiquette rules to avoid disturbing other participants. Do not use bright flashes or lights as this can spoil the night observation."
-            }
-        ]
-    },
-    "stargazing-where-page": {
-        "description": "Find out where you can look through a telescope in Orenburg. Sidewalk astronomy: free observations of the Moon, planets, and stars on the streets of the city. Want to see more? Go out of town to observe nebulae and galaxies!",
-        "intro": "Sidewalk astronomy is a unique format that brings space closer. In spring, summer, and autumn, we set up telescopes right on the sidewalks and squares of Orenburg so that anyone can come and look at the stars, planets, and the Moon for free. This is a great opportunity for city residents to get acquainted with astronomy in a relaxed and friendly atmosphere.",
-        "announcement-1": "We almost always publish announcements of sidewalk astronomy evenings in our",
-        "telegram-channel": "Telegram channel",
-        "announcement-2": ", but sometimes our telescopes can be found on the streets of the city without warning. One of the project’s inspirers, astro lecturer Vladimir Ivanovich, often shares his knowledge, showing interesting astronomical objects to everyone. Just look for the telescope, and you will definitely get an unforgettable tour of the starry sky!",
-        "what-you-can-see-title": "What can you see through a telescope from the city?",
-        "what-you-can-see-description": "In conditions of urban light pollution, the brightest objects remain visible. For example, you can see:",
-        "what-you-can-see-1": "Craters and mountains on the Moon, especially impressive in the phases of the first and last quarter;",
-        "what-you-can-see-2": "The rings of Saturn, which invariably cause delight;",
-        "what-you-can-see-3": "Bright stars and double stars, such as Albireo;",
-        "what-you-can-see-4": "Planet parades, if they occur at the right time of the year.",
-        "what-you-can-see-conclusion": "However, city lighting limits our capabilities. Nebulae, galaxies, meteor showers, and even large star clusters often remain hidden from view.",
-        "want-to-see-more": "Want to see more? Go out of town!",
-        "want-to-see-description-1": "To observe faint objects, such as the Orion Nebula, Andromeda, meteor showers, and star clusters, you need to go away from city lights. In places like the Orenburg steppe or other remote areas, the night sky is stunningly beautiful.",
-        "want-to-see-description-2": "We regularly organize field astronomical events where you can enjoy the full range of cosmic objects. Follow the announcements on our \"Astro Trips\" page or in the Telegram channel to join one of these observations.",
-        "want-to-see-description-3": "Let the stars become closer!"
-    },
-    "starmap-page": {
-        "description-1": "The star map is an interactive window into the Universe, where images of galaxies, nebulae, comets, supernovae, and other astronomical objects are collected. These images are taken with an amateur telescope, which makes them especially valuable: they show the beauties of space that are accessible even outside professional observatories.",
-        "description-2": "The map allows you to study the night sky in detail, track the movement of celestial bodies, and find interesting objects for observation. Thanks to high-quality astrophotography and systematic catalog updates, every visitor can see the cosmos as seen by astronomy enthusiasts around the world."
-    },
-    "observatory-page": {
-        "intro": "Observation of the Universe begins here - in real-time you can see the current weather conditions, camera feeds, equipment status, and shooting schedule. The observatory operates in semi-automatic mode, allowing remote deep-sky object shooting. An intelligent control system analyzes weather conditions and automatically decides when to start work. Learn more about the equipment and operating principles on a separate page:"
-    },
-    "observatory-overview-page": {
-        "intro": "The homemade astronomical observatory is located in the suburbs of Orenburg, just 15 km from the city. Due to its distance from urban development, the observatory is in a zone with a Bortle scale light pollution level of 5, making it a good place in the suburbs for night sky observations.",
-        "description-1": "The main activity of the observatory is photographing deep-sky objects such as nebulae, galaxies, and star clusters. The equipment and technologies used in the observatory allow for high-quality images that can be used for both scientific research and educational purposes.",
-        "description-2": "The observatory operates in semi-automatic mode, allowing remote control from anywhere in the world via the Internet. This makes it accessible to amateur astronomers, researchers, and enthusiasts worldwide.",
-        "description-3": "The observatory is open for collaboration with amateur astronomers, researchers, and educational institutions. We are happy to provide access to our data for scientific and educational purposes. If you want to become part of our community or use our resources for your projects, contact us through the feedback form.",
-        "description-4": "The Orenburg observatory is a unique combination of modern technology and the enthusiasm of amateur astronomers. We strive to make astronomy accessible to everyone interested in the mysteries of the Universe. Join us to explore the vast expanses of space together!",
-        "equipment-title": "Observatory Equipment",
-        "equipment-description": "The tools and technologies used ensure high observation accuracy and professional image quality. Here is the main equipment used in the work:",
-        "equipment-list": [
-            {
-                "title": "Mount: Sky-Watcher EQ6",
-                "description": "Reliable and accurate mount, ensuring telescope stability even during long exposures."
-            },
-            {
-                "title": "Telescope: Sky-Watcher BK2001P",
-                "description": "Reflector telescope with a 200 mm aperture, ideal for observing deep space objects."
-            },
-            {
-                "title": "Main Camera: ASI ZWO 6200MM Pro",
-                "description": "Highly sensitive astronomical camera with a resolution of 24 MP, capable of capturing the smallest details of distant objects."
-            },
-            {
-                "title": "Guide Camera: QHY QHY5",
-                "description": "Camera for precise targeting and tracking of objects."
-            },
-            {
-                "title": "Guide Scope: SV106 Guide Scope 50mm (Helical Focuser)",
-                "description": "Compact telescope for guiding during long exposure shots."
-            },
-            {
-                "title": "Focuser: ZWO EAF",
-                "description": "Electronic focuser, ensuring precise focus adjustment."
-            },
-            {
-                "title": "Filter Wheel: ZWO EFW 8x31mm",
-                "description": "Universal filter wheel for working with various spectral ranges."
-            },
-            {
-                "title": "Filters: ZWO L, R, G, B, Ha, OIII, SII (1.25\")",
-                "description": "Set of filters for obtaining color images and shooting in narrow spectra."
-            },
-            {
-                "title": "Coma Corrector: Baader 2\" Mark III MPCC",
-                "description": "Eliminates optical distortions, ensuring image clarity."
-            }
-        ],
-        "operating-principle-title": "Operating principle",
-        "operating-principle-description-1": "The observatory is controlled via a server based on a Lenovo M710Q TINY nettop (Pentium G4400T, 8GB RAM, 128GB SSD + 512GB HDD) with the Linux Ubuntu Server 22.04 operating system. INDI, a universal tool for managing astronomical equipment, is responsible for monitoring and coordinating all processes.",
-        "operating-principle-description-2": "For remote access, SSH is used for a secure connection to the server, VNC for the graphical interface, and VirtualBox for working with virtual machines. This allows you to control the observatory from anywhere in the world, without requiring physical presence.",
-        "operating-principle-description-3": "The observatory operates in a semi-automatic mode. There are two possible modes of operation:",
-        "operating-principle-description-4": "The decision to start shooting is made based on data from the weather station. The observatory roof is made using Roll-off Roof technology and is controlled by a motorized controller connected to the server. The roof can be controlled both automatically and manually.",
-        "operating-principle-list": [
-            {
-                "title": "Manual mode:",
-                "description": "The user can directly connect to the system via INDI to control the telescope and camera. This mode is ideal for amateurs who want to set up and have full control over the equipment themselves."
-            },
-            {
-                "title": "Automatic mode:",
-                "description": "In this mode, tasks are created in the INDI scheduler, after which the system executes them autonomously. The decision to start shooting is made based on data from a weather station that monitors weather conditions."
-            }
-        ],
-        "photos-and-data-title": "Photos and data",
-        "photos-and-data-part-1": "A special section of the site presents",
-        "photos-and-data-part-2": "shot",
-        "photos-and-data-part-3": "deep space. For each object, detailed parameters and characteristics are available, such as the distance to the object, its size, spectral data and much more. These materials can be useful for both novice astronomers and professionals.",
-        "photos-and-data-part-photos": "photos",
-        "photos-and-data-part-objects": "objects",
-        "photos-and-data-all-photos": "All astronomical photos"
-    },
-    "observatory-weather-page": {
-        "intro": "Monitor real-time weather conditions from the weather station installed at the homemade astronomical observatory in the suburbs of Orenburg. The charts display temperature, humidity, cloudiness, and wind speed. For full access to data and observation history, visit the weather station website:"
-    },
-    "about-page": {
-        "description": "Learn more about the \"Look at the Stars\" project, our team, and the homemade astronomical observatory. Join us and discover the beauty of space!",
-        "my-name": "My name is",
-        "misha": "Misha",
-        "intro": ", and this site is my attempt to tell you about my hobby, gather all the information together, and capture the achievements made on the way to studying space. Astronomy for me is not just a hobby, but a whole world that has changed my life. Thanks to it, I found incredible friends, learned a lot of new things, and realized how vast and mysterious the expanses of the Universe are. This project is our joint contribution to the popularization and development of astronomy. We sincerely believe that thanks to our efforts, space will become closer and more accessible to everyone.",
-        "telegram-channel": "Subscribe to the author's Telegram channel of this project",
-        "team-title": "Our Team",
-        "team-description": "We work in various fields, but we are all united by one thing - the love for stars and the night sky. Since 2016, we have been popularizing astronomy, organizing astro trips in the Orenburg region, and sidewalk astronomy evenings in Orenburg. Together we look at the stars, share knowledge, and inspire others.",
-        "team-members": {
-            "mike": "Mikhail Topchilo",
-            "tanya": "Tatyana Gavrish",
-            "igor": "Igor Komissarchik",
-            "sergey": "Sergey Medvedev",
-            "eugene": "Evgeny Zimin",
-            "vladimir": "Vladimir Ivanovich",
-            "nikolay": "Nikolay Cherepanov"
-        },
-        "project-title": "Astronomical Project \"Look at the Stars\"",
-        "project-description": "In 2016, we launched the \"Look at the Stars\" project in the Orenburg region to make astronomy accessible to everyone. Since then, every season we have been holding free open-air lectures, organizing trips out of town with telescopes, and conducting informal sidewalk astronomy evenings.",
-        "project-goal": "The main goal of the project is to show the greatness and beauty of the Universe, to inspire people to study space. We cover not only the Orenburg region but also neighboring regions, traveling to places where the night sky is especially bright. You can learn more about our current and past events on the page",
-        "project-sidewalk": ", and for those who want to see the stars within the city, we have prepared a section",
-        "project-sidewalk-link": "Where to Look Through a Telescope in Orenburg",
-        "project-locations": "Our events are held not only in the cities and towns of the Orenburg region but also in neighboring regions. We organize field trips to remote places where minimal light pollution allows you to fully enjoy the starry sky. Our team of amateur astronomers and volunteers shares their knowledge and experience so that everyone can discover the beauty and mysteries of the Universe.",
-        "project-lectures": "One of the most important components of the project is the lectures given by experienced amateur astronomers. We talk about scientific discoveries, the history of astronomy, and its modern achievements. The lectures are held in an easy format, where complex things are explained in simple and understandable language. This helps listeners not only to broaden their horizons but also inspires them to study astronomy independently.",
-        "project-sidewalk-astronomy": "We pay special attention to sidewalk astronomy evenings. These open-air meetings are held in the most accessible places in the city. At such events, anyone can come, look through a telescope, and learn more about what the starry sky hides.",
-        "observatory-title": "Homemade Astronomical Observatory",
-        "observatory-intro": "This project is one of the most significant stages of my life. Our homemade astronomical observatory is a unique phenomenon for the Orenburg region. It operates autonomously and allows us to capture images of deep space objects, making astronomy accessible to everyone. You can learn more about the observatory's work and equipment in the section - ",
-        "observatory-intro-link": "astronomical observatory in Orenburg",
-        "observatory-work-1": "The observatory is open to everyone. Anyone can use its capabilities to get images of cosmic objects. Moreover, there is a section on the website",
-        "observatory-work-2": ", where you will find an archive of FITS files. This data can be used for training, asteroid search, astrophotography creation, and other scientific or creative purposes.",
-        "observatory-photos-1": "Soon we will launch a free telescope control service so that even more people can join the beauty of the night sky. Don't forget to check out the section",
-        "observatory-photos-2": ", where photos taken with the observatory and during our astro trips are collected. These photos were processed by me and my friends and reflect our passion for space.",
-        "observatory-conclusion": "This project is our contribution to the popularization of astronomy. We sincerely hope that it will inspire you to discover the Universe!",
-        "your-help-title": "Your Help",
-        "your-help-intro": "The development of the \"Look at the Stars\" project has largely become possible thanks to the support of the \"Native Cities\" social investment program of Gazprom Neft and the assistance of the Orenburg Media information agency team.",
-        "your-help-description": "Our homemade observatory project has also found a response from many caring participants. We have large-scale plans for the development of this direction, and your support plays a key role. We are grateful to everyone who helps with advice, consultations, and recommendations. If we accidentally did not mention someone in the list of thanks, write to us - it is very important.",
-        "your-help-financial-support": "Financial Support",
-        "your-help-technical-support": "Technical and Software Support",
-        "your-help-conclusion": "Thanks to your help, space really becomes closer!"
-    },
-    "plurals": {
-        "minutes_one": "{{count}} minute",
-        "minutes_other": "{{count}} minutes",
-        "frames_one": "{{count}} frame",
-        "frames_other": "{{count}} frames",
-        "times_one": "{{count}} time",
-        "times_other": "{{count}} times"
-    },
+  "common": {
+    "add": "Добавить",
+    "edit": "Редактировать",
+    "frames": "{{count}} кадров",
+    "look-at-the-stars": "Смотри на звёзды",
+    "minutes": "{{count}} минут",
+    "telegram": "Телеграм",
     "time": {
-        "day_1": "day",
-        "day_2": "days",
-        "day_5": "days",
-        "hour_1": "hour",
-        "hour_2": "hours",
-        "hour_5": "hours",
-        "minute_1": "minute",
-        "minute_2": "minutes",
-        "minute_5": "minutes",
-        "second_1": "second",
-        "second_2": "seconds",
-        "second_5": "seconds"
+      "day": " день",
+      "hour": " час",
+      "minute": " минута",
+      "second": " секунда"
+    }
+  },
+  "components": {
+    "common": {
+      "app-layout": {
+        "app-header": {
+          "add-object": "Добавить объект",
+          "add-photo": "Добавить фото",
+          "add-stargazing": "Добавить мероприятие",
+          "logout": "Выйти",
+          "qrcode-check": "Проверка QR-кодов",
+          "sign-in": "Войти",
+          "to-main-page": "На главную"
+        }
+      },
+      "login-form": {
+        "auth-description": "Для авторизации на сайте используйте один из сервисов ниже"
+      },
+      "object-photos-table": {
+        "date": "Дата",
+        "exposure": "Выдержка",
+        "frames": "Кадры",
+        "photo": "Фотография"
+      },
+      "visibility-chart": {
+        "description": "Диаграмма высоты {{name}} над горизонтом в течение текущих суток для точки наблюдения обсерватории в Оренбурге ({{lat}}, {{lon}}). График показывает, когда объект находится выше горизонта и на какой максимальной высоте в градусах он поднимается. Данные актуальны на дату наблюдения: {{date}}.",
+        "height": "Высота",
+        "title": "График видимости {{name}} в течение суток"
+      }
     },
-    "filters": {
-        "luminance": "L",
-        "red": "R",
-        "green": "G",
-        "blue": "B",
-        "hydrogen": "Ha",
-        "oxygen": "OIII",
-        "sulfur": "SII",
-        "unknown": "Unknown"
+    "pages": {
+      "about": {
+        "project-team": {
+          "eugene": "Евгений Зимин",
+          "igor": "Игорь Комиссарчик",
+          "mikhail": "Михаил Топчило",
+          "nikolay": "Николай Черепанов",
+          "sergey": "Сергей Медведев",
+          "tatiana": "Татьяна Гавриш",
+          "vladimir": "Владимир Иванович"
+        }
+      },
+      "index": {
+        "main-sections": {
+          "astrophoto": "Астрофото",
+          "astrophoto-description": "Коллекция снимков космоса, сделанных на нашей обсерватории, раскрывающая красоту далеких галактик, туманностей и звездных скоплений.",
+          "exposure": "Общая выдержка",
+          "frames": "Кадров",
+          "object-count": "Объектов",
+          "observatory": "Обсерватория",
+          "observatory-description": "Откройте для себя вселенную с нашего стационарного наблюдательного пункта, оборудованного передовыми телескопами.",
+          "read-more": "Подробнее",
+          "stargazing": "Астровыезды",
+          "stargazing-count": "Астровыездов",
+          "stargazing-description": "Организуем регулярные поездки под открытое небо, чтобы наблюдать за звездами и планетами через мощные телескопы.",
+          "stargazing-members": "Участников",
+          "years": "лет"
+        }
+      },
+      "objects": {
+        "object-files-table": {
+          "ccd-temperature": "Температура ПЗС",
+          "date": "Дата",
+          "exposure": "Экспозиция",
+          "filter": "Фильтр",
+          "gain": "Усиление",
+          "moon-phase": "Фаза Луны",
+          "no-fits-files": "Нет FITS файлов",
+          "offset": "Смещение"
+        },
+        "object-header": {
+          "astrophoto": "Астрофото",
+          "category": "Категория",
+          "data-size": "Размер данных",
+          "declination": "Склонение",
+          "download": "Скачать",
+          "link-to-fits-files": "Ссылка на FITS файлы",
+          "name-in-the-directory": "Название в каталоге",
+          "number-of-frames": "Количество кадров",
+          "right-ascension": "Прямое восхождение",
+          "total-exposure": "Общее накопление"
+        },
+        "objects-table": {
+          "exposure": "Выдержка",
+          "frames": "Кадры",
+          "object": "Объект",
+          "photo": "Фото",
+          "view-photo": "Просмотр фото"
+        }
+      },
+      "observatory": {
+        "astronomy-calc": {
+          "azimuth": "Азимут",
+          "dawn": "Восход",
+          "height": "Высота",
+          "moon": "Луна",
+          "sun": "Солнце",
+          "sunset": "Закат"
+        },
+        "camera": {
+          "camera-image-not-available": "Изображение с камеры недоступно",
+          "camera-not-available": "Камера недоступна",
+          "image-from-observatory-camera": "Изображение с камеры обсерватории"
+        },
+        "relay-list": {
+          "available-in": "Доступно через",
+          "error": "Ошибка при получении списка реле",
+          "lightning": "Освещение",
+          "sec": "секунд",
+          "times": "{{count}} раз",
+          "turned-on": "Включили"
+        },
+        "weather": {
+          "critical": "Критическое",
+          "dangerous": "Опасное",
+          "loading": "Погода загружается...",
+          "observatory-in-orenburg-weather": "Погода в Обсерватории Оренбурга",
+          "read-more": "Подробнее",
+          "safely": "Безопасно",
+          "unit-humidity": "%",
+          "unit-precipitation": "мм",
+          "unit-temperature": "℃",
+          "unit-wind": "м\\с",
+          "updated": "Обновлено",
+          "weather-conditions": "Состояние погоды"
+        },
+        "widget-chart": {
+          "chart-label_date-format": "D MMM YYYY, HH:mm",
+          "clouds": "Облачность",
+          "dew-point": "Точка росы",
+          "feels-like": "Ощущается как",
+          "meters-per-second": "м/с",
+          "only-hour_date-format": "HH:mm",
+          "temperature": "Температура",
+          "wind-speed": "Скорость ветра"
+        }
+      },
+      "photos": {
+        "photo-grid": {
+          "exposure": "Выдержка",
+          "frames": "Кадров"
+        },
+        "photo-header": {
+          "astrophoto": "Астрофото",
+          "category": "Категория",
+          "date": "Дата ",
+          "file-size": "Размер файла",
+          "full-size": "Открыть полный размер ({{size}})",
+          "number-of-frames": "Количество кадров",
+          "objects-on-photo": "Объекты на фото",
+          "open-full-size": "{{photoName}} - Открыть в полном размере",
+          "total-exposure": "Общая выдержка"
+        }
+      },
+      "stargazing": {
+        "event-upcoming": {
+          "stargazing": "Астровыезды",
+          "you-are-registered": "Вы зарегистрированы"
+        }
+      }
     },
-    "date-full-format": "D MMMM YYYY, h:mm a",
-    "date-chart-tooltip": "dddd, DD MMM YYYY, h:mm a",
-    "date-chart-label": "D MMM YYYY, h:mm a"
+    "ui": {
+      "show-more": {
+        "show-less": "Показать меньше",
+        "show-more": "Показать больше"
+      }
+    }
+  },
+  "menu": {
+    "about": "О проекте",
+    "astrophoto": "Астрофото",
+    "objects": "Объекты",
+    "observatory": "Обсерватория",
+    "observatory-orenburg": "Обсерватория в Оренбурге",
+    "observatory-orenburg-weather": "Погода в Обсерватории Оренбурга",
+    "star-map": "Звёздная карта",
+    "stargazing": "Астровыезды",
+    "stargazing-faq": "Часто задаваемые вопросы",
+    "stargazing-howto": "Как проходят астровыезды",
+    "stargazing-rules": "Правила поведения на астровыездах",
+    "stargazing-where": "Где посмотреть в телескоп в Оренбурге",
+    "telegram": "Телеграм"
+  },
+  "objects": "Объекты",
+  "pages": {
+    "about": {
+      "astrophoto": "Астрофото",
+      "description": "Узнайте больше о проекте «Смотри на звезды», нашей команде и самодельной астрономической обсерватории. Присоединяйтесь к нам и откройте для себя красоту космоса!",
+      "intro": ", и этот сайт — моя попытка рассказать вам о своём хобби, собрать воедино всю информацию и запечатлеть достижения, сделанные на пути к изучению космоса. Астрономия для меня — это не просто увлечение, а целый мир, который изменил мою жизнь. Благодаря ей я нашел невероятных друзей, узнал много нового и осознал, насколько велики и загадочны просторы Вселенной. Этот проект — наш совместный вклад в популяризацию и развитие астрономии. Мы искренне верим, что благодаря нашим усилиям космос станет ближе и доступнее каждому.",
+      "misha": "Миша",
+      "my-name": "Меня зовут",
+      "observatory-conclusion": "Этот проект — наш вклад в популяризацию астрономии. Мы искренне надеемся, что он вдохновит и вас открыть для себя Вселенную!",
+      "observatory-intro": "Этот проект — один из самых значимых этапов моей жизни. Наша самодельная астрономическая обсерватория — уникальное явление для Оренбургской области. Она работает автономно и позволяет получать снимки объектов дальнего космоса, делая астрономию доступной для всех. Более подробно о работе и оборудовании обсерватории можно узнать в разделе - ",
+      "observatory-intro-link": "астрономическая обсерватория в Оренбурге",
+      "observatory-photos-1": "Скоро мы запустим бесплатный сервис управления телескопом, чтобы ещё больше людей могли приобщиться к красоте ночного неба. Не забудьте заглянуть в раздел",
+      "observatory-photos-2": ", где собраны снимки, полученные с помощью обсерватории и на наших астровыездах. Эти фотографии обработаны мной и моими друзьями и являются отражением нашей страсти к космосу.",
+      "observatory-title": "Самодельная астрономическая обсерватория",
+      "observatory-work-1": "Обсерватория открыта для всех желающих. Каждый может воспользоваться её возможностями, чтобы получить изображения космических объектов. Более того, на сайте доступен раздел",
+      "observatory-work-2": ", где вы найдёте архив FITS-файлов. Эти данные можно использовать для обучения, поиска астероидов, создания астрофотографий и других научных или творческих целей.",
+      "project-description": "В 2016 году в Оренбургской области мы запустили проект «Смотри на звёзды», чтобы сделать астрономию доступной для всех. С тех пор каждый сезон мы устраиваем бесплатные лекции под открытым небом, организуем поездки за город с телескопами и проводим неформальные вечера тротуарной астрономии.",
+      "project-goal": "Главная цель проекта — показать величие и красоту Вселенной, вдохновить людей на изучение космоса. Мы охватываем не только Оренбургскую область, но и соседние регионы, выезжая в места, где ночное небо особенно яркое. Узнать больше о наших текущих и прошедших мероприятиях можно на странице",
+      "project-lectures": "Одной из важнейших составляющих проекта являются лекции, которые проводят опытные астрономы-любители. Мы рассказываем о научных открытиях, истории астрономии и её современных достижениях. Лекции проходят в лёгком формате, где сложные вещи объясняются простым и понятным языком. Это помогает слушателям не только расширить кругозор, но и вдохновляет на самостоятельное изучение астрономии.",
+      "project-locations": "Наши мероприятия проходят не только в городах и поселках Оренбургской области, но и в соседних регионах. Мы организуем выездные экскурсии в удаленные места, где минимальное световое загрязнение позволяет наслаждаться звёздным небом в полной мере. Наша команда астрономов-любителей и волонтёров делится своими знаниями и опытом, чтобы каждый мог открыть для себя красоту и тайны Вселенной.",
+      "project-sidewalk": ", а для тех, кто хочет увидеть звёзды в черте города, мы подготовили раздел",
+      "project-sidewalk-astronomy": "Особое внимание мы уделяем вечерам тротуарной астрономии. Эти встречи под открытым небом проходят в самых доступных местах города. На таких мероприятиях любой желающий может подойти, посмотреть в телескоп и узнать больше о том, что скрывает звёздное небо.",
+      "project-sidewalk-link": "Где в Оренбурге посмотреть в телескоп",
+      "project-title": "Астрономический проект «Смотри на звёзды»",
+      "team-description": "Мы работаем в самых разных сферах, но всех нас объединяет одно — любовь к звёздам и ночному небу. С 2016 года мы популяризируем астрономию, организовываем астровыезды в Оренбургской области и вечера тротуарной астрономии в Оренбурге. Вместе мы смотрим на звёзды, делимся знаниями и вдохновляем других.",
+      "team-title": "Наша команда",
+      "telegram-channel": "Подпишитесь на авторский Telegram канал этого проекта",
+      "title": "О проекте",
+      "your-help-conclusion": "Благодаря вашей помощи космос действительно становится ближе!",
+      "your-help-description": "Наш проект самодельной обсерватории также нашёл отклик у множества неравнодушных участников. У нас масштабные планы по развитию этого направления, и ваша поддержка играет ключевую роль. Мы благодарны каждому, кто помогает советами, консультациями и рекомендациями. Если мы кого-то случайно не упомянули в списке благодарностей, напишите нам — это очень важно.",
+      "your-help-financial-support": "Финансовая поддержка",
+      "your-help-intro": "Развитие проекта «Смотри на звёзды» во многом стало возможным благодаря поддержке программы социальных инвестиций «Родные города» компании «Газпром нефть» и содействию команды информационного агентства «Оренбург Медиа».",
+      "your-help-technical-support": "Техническая и программная поддержка",
+      "your-help-title": "Ваша помощь"
+    },
+    "auth": {
+      "go-to-home-page": "Перейти на главную страницу",
+      "notification_error": "Ошибка",
+      "title": "Авторизация на сайте"
+    },
+    "index": {
+      "description": "Смотри на звезды - уникальный проект в Оренбургской области: наблюдения в телескопы за городом, тротуарная астрономия, обсерватория в Оренбургской области и астрофотографии",
+      "title": "Проект \"Смотри на звёзды\""
+    },
+    "objects": {
+      "create_button": "Создать объект",
+      "description": "Каталог астрономических объектов, отснятых обсерваторией: галактики, туманности, астероиды и кометы. Таблица с объектами включает информацию о суммарной выдержке, наличии обработанных фото и данных по каждому фильтру: Luminance, Red, Green, Blue, Ha, OIII, SII. Узнайте больше о каждом объекте и деталях наблюдения, проведенных обсерваторией.",
+      "filter-by-category": "Фильтр по категории",
+      "search-by-name": "Поиск по названию",
+      "title": "Список астрономических объектов"
+    },
+    "observatory": {
+      "astrophoto": "Астрофото",
+      "description": "Самодельная любительская астрономическая обсерватория с удаленным доступом из любой точки мира через интернет. Статистика работы обсерватории, количество отснятых кадров и накопленных данных. Календарь работы телескопа.",
+      "description-1": "Основное направление деятельности обсерватории - фотографирование объектов глубокого космоса (deep-sky), таких как туманности, галактики и звёздные скопления. Оборудование и технологии, используемые в обсерватории, позволяют получать высококачественные изображения, которые могут использоваться как для научных исследований, так и для образовательных целей.",
+      "description-2": "Обсерватория функционирует в полуавтоматическом режиме, что позволяет управлять ею удалённо из любой точки мира через Интернет. Это делает её доступной для астрономов-любителей, исследователей и энтузиастов со всего мира.",
+      "description-3": "Обсерватория открыта для сотрудничества с астрономами-любителями, исследователями и образовательными учреждениями. Мы рады предоставить доступ к нашим данным для научных и образовательных целей. Если вы хотите стать частью нашего сообщества или использовать наши ресурсы для своих проектов, свяжитесь с нами через форму обратной связи.",
+      "description-4": "Оренбургская обсерватория - это уникальное сочетание современных технологий и энтузиазма астрономов-любителей. Мы стремимся сделать астрономию доступной для всех, кто интересуется загадками Вселенной. Присоединяйтесь к нам, чтобы вместе исследовать бескрайние просторы космоса!",
+      "equipment-description": "Используемые инструменты и технологии обеспечивают высокую точность наблюдений и профессиональное качество снимков. Вот основное оборудование, которое используется в работе:",
+      "equipment-list": {
+        "coma-corrector": {
+          "description": "Устраняет оптические искажения, обеспечивая чёткость изображения.",
+          "title": "Корректор комы: Baader 2\" Mark III MPCC"
+        },
+        "filter-wheel": {
+          "description": "Универсальное колесо фильтров для работы с различными спектральными диапазонами.",
+          "title": "Колесо фильтров: ZWO EFW 8x31mm"
+        },
+        "filters": {
+          "description": "Набор фильтров для получения цветных изображений и съёмки в узких спектрах.",
+          "title": "Фильтры: ZWO L, R, G, B, Ha, OIII, SII (1.25\")"
+        },
+        "focuser": {
+          "description": "Электронный фокусер, обеспечивающий точную настройку фокусировки.",
+          "title": "Фокусер: ZWO EAF"
+        },
+        "guide-camera": {
+          "description": "Камера для точного наведения и слежения за объектами.",
+          "title": "Гид-камера: QHY QHY5"
+        },
+        "guide-scope": {
+          "description": "Компактный телескоп для гидирования при съемках с длинными выдержками.",
+          "title": "Гид-телескоп: SV106 Guide Scope 50mm (Helical Focuser)"
+        },
+        "main-camera": {
+          "description": "Высокочувствительная астрономическая камера с разрешением 24 МП, способная захватывать мельчайшие детали далёких объектов.",
+          "title": "Основная камера: ASI ZWO 6200MM Pro"
+        },
+        "mount": {
+          "description": "Надёжная и точная монтировка, обеспечивающая стабильность телескопа даже при длительных экспозициях.",
+          "title": "Монтировка: Sky-Watcher EQ6"
+        },
+        "telescope": {
+          "description": "Рефлекторный телескоп с апертурой 200 мм, идеально подходящий для наблюдений за объектами глубокого космоса.",
+          "title": "Телескоп: Sky-Watcher BK2001P"
+        }
+      },
+      "equipment-title": "Оборудование обсерватории",
+      "observatory-in-orenburg_link": "Обсерватория в Оренбурге",
+      "photos-and-data": "pages.observatory.photos-and-data",
+      "photos-and-data-all-photos": "Все астрономические фотографии",
+      "photos-and-data-part-objects": "pages.observatory.photos-and-data-part-objects",
+      "photos-and-data-part-photos": "pages.observatory.photos-and-data-part-photos",
+      "photos-and-data-title": "Фотографии и данные",
+      "text": "Наблюдение за Вселенной начинается здесь - в режиме реального времени вы можете увидеть текущие погодные условия, трансляцию с камер, статус оборудования и расписание съёмки. Обсерватория работает в полуавтоматическом режиме, позволяя вести съёмку deep-sky объектов удалённо. Здесь реализована система интеллектуального управления, анализирующая погодные условия и автоматически принимающая решение о начале работы. Подробнее об оборудовании и принципе работы можно узнать на отдельной странице:",
+      "title": "Обсерватория"
+    },
+    "observatory-weather": {
+      "description": "Актуальные графики погоды с метеостанции любительской обсерватории в пригороде Оренбурга. Температура, влажность, облачность и скорость ветра в реальном времени.",
+      "title": "Погода в Обсерватории Оренбурга"
+    },
+    "photo": {
+      "description": "{{photoTitle}} - фотография астрономического объекта сделана на самодельной обсерватории, используемое оборудование: {{equipment}}."
+    },
+    "photos": {
+      "create_button": "Создать",
+      "description": "Коллекция астрофотографий галактик, звездных скоплений, туманностей, планет и других космических объектов, запечатленных любительской обсерваторией. Найдите и отфильтруйте изображения по категориям и параметрам, чтобы увидеть уникальные снимки Вселенной с деталями по каждому фильтру и выдержке.",
+      "filter-by-category": "Фильтр по категории",
+      "search-by-object": "Поиск по объекту",
+      "title": "Астрофото"
+    },
+    "star-map": {
+      "description": "Карта звездного неба с галактиками, туманностями, кометами, сверхновыми и другими космическими объектами, снятых любительским телескопом",
+      "text-part-1": "Звездная карта - это интерактивное окно во Вселенную, где собраны снимки галактик, туманностей, комет, сверхновых и других астрономических объектов. Эти изображения получены с помощью любительского телескопа, что делает их особенно ценными: они демонстрируют, какие красоты космоса доступны даже вне профессиональных обсерваторий.",
+      "text-part-2": "Карта позволяет изучать ночное небо в деталях, прослеживать движение небесных тел и находить интересные объекты для наблюдений. Благодаря качественной астросъёмке и систематическому пополнению каталога, каждый посетитель может увидеть космос таким, каким его видят энтузиасты астрономии по всему миру.",
+      "title": "Карта звёздного неба"
+    },
+    "stargazing": {
+      "create-stargazing_button": "Добавить астровыезд",
+      "description": "Астровыезд в Оренбурге — увлекательные поездки за город, где телескопы открывают космические горизонты. Вечера научных открытий, лекций и живого общения с единомышленниками. Узнайте правила поведения и подготовьтесь к наблюдению за звёздами.",
+      "faq_link": "Часто задаваемые вопросы",
+      "howto_link": "Как проходят астровыезды",
+      "photo": "Фото",
+      "photo_alt": "Фото ({{number}}) с астровыезда - {{name}} ",
+      "photo_title": "Астровыезд: {{name}} - Фото ({{number}})",
+      "photos-from-stargazing": "Фотографии с астровыезда",
+      "rules_link": "Правила поведения на астровыездах",
+      "telegram": "Телеграм",
+      "telegram-subscription": "Чтобы не пропустить анонсы - подпишитесь на Telegram канал",
+      "text-part-1": "Астровыезд в Оренбурге — это возможность прикоснуться к тайнам Вселенной, наблюдая звёздное небо в полной темноте. Мы приглашаем вас в увлекательные поездки за город, где телескопы открывают космические горизонты прямо в полях Оренбуржья.",
+      "text-part-2": "Каждый астровыезд — это вечер научных открытий, вдохновляющих лекций и живого общения с единомышленниками. Вы узнаете, как проходят наши мероприятия, познакомитесь с основными правилами поведения на астровыездах и сможете заранее подготовиться к наблюдению за звёздами.",
+      "title": "Астровыезды",
+      "where_link": "Где посмотреть в телескоп в Оренбурге"
+    },
+    "stargazing-faq": {
+      "description": "Узнайте ответы на частые вопросы об астровыездах: регистрация, что взять с собой, стоимость, длительность и как добраться. Готовьтесь к ночи под звездами с комфортом!",
+      "questions": {
+        "cancel": {
+          "answer": "Просто отмените бронирование по прежней ссылке. На сайте появятся свободные слоты и люди смогут зарегистрироваться.",
+          "question": "❓Я зарегистрировался и не могу поехать. Что делать?"
+        },
+        "duration": {
+          "answer": "В среднем официальная программа от начала лекции - до наблюдений в телескопы длится 2 часа. Но для вас они пролетят незаметно, гарантируем. А дальше вы сами выбираете – оставаться ли смотреть на небо с телескопами, или возвращаться домой. примерное время окончания: 00:30.",
+          "question": "❓Сколько длится астровыезд?"
+        },
+        "feedback": {
+          "answer": "Во всех социальных сетях наша группа называется \"Смотри на звёзды\". Мы ценим обратную связь и всегда читаем ваши отзывы. Спасибо вам за них!",
+          "question": "❓Где написать про вас отзыв?"
+        },
+        "kids": {
+          "answer": "Можно и нужно! Очень рады, когда подрастающее поколение интересуется наукой! Но есть рекомендованный возраст – от 6 лет. Поверьте нашему опыту.",
+          "question": "❓Можно ли детям?"
+        },
+        "late-registration": {
+          "answer": "Нет, увы. Наши правила едины для всех. Мы не зря ввели систему регистраций и следим за въездом на астроплощадку.",
+          "question": "❓Регистрация закончилась и я не успел (а). Можно я приеду? Пожалуйста!"
+        },
+        "merch": {
+          "answer": "На астрополяну везем худи, футболки, автонаклейки, открытки и стикерпаки. Хотите поддержать проект - купите наш мерч!",
+          "question": "❓Как и где купить ваш мерч?"
+        },
+        "more-people": {
+          "answer": "Нет, нельзя. Наши правила едины для всех. По QR-коду на площадку проезжает то количество людей, которое вы зарегистрировали. Никак иначе.",
+          "question": "❓Я зарегистрировал 1\\2\\3\\4\\5 человек, а можно ли взять больше?"
+        },
+        "no-car": {
+          "answer": "Мы не организуем транспорт и не занимаемся перевозками. Наша задача – организовать крутое мероприятие, а ваша – на него приехать. Но для вашего удобства мы создали чат",
+          "answer2": ". Добавляйтесь, знакомьтесь и находите компанию. Там все классные, контактные, обязательные. Хотите общение на космические темы? Добавляйтесь в тематический",
+          "answer3": "!",
+          "chat": "Астро.Чат",
+          "poputchiki": "Астро.Попутчики",
+          "question": "❓У меня нет машины, что делать?"
+        },
+        "photo": {
+          "answer": "Конечно! Вы можете делать фотографии, но просьба соблюдать правила этикета, чтобы не мешать другим участникам. Не используйте яркие вспышки или фонари, так как это может испортить ночное наблюдение.",
+          "question": "❓Можно ли фотографировать?"
+        },
+        "price": {
+          "answer": "Все наши астровыезды бесплатны. Проект растет и развивается и мы всегда рады поддержке от слушателей и подписчиков. Для этого есть",
+          "answer2": ". Хотите нас поддержать – мы будем вам признательны!",
+          "donates": "ДОНАТЫ",
+          "question": "❓Сколько стоит?"
+        },
+        "public-transport": {
+          "answer": "К сожалению, нет. Место проведения находится вдали от маршрутов общественного транспорта. Вы можете добраться туда на собственном автомобиле или присоединиться к другим участникам, если они готовы взять вас с собой. Мы рекомендуем договориться об этом заранее через наш Telegram-канал.",
+          "question": "❓Можно ли добраться до места проведения астровыезда на общественном транспорте?"
+        },
+        "qr": {
+          "answer": "QR-код – это ваш входной билет на наше мероприятие. Его будут проверять на въезде. Просим приготовить заранее, чтобы не создавать пробок на месте. Если у вас нет QR-кода – мы вынуждены вам отказать. QR-код – это наш способ регулировать количество участников астровыезда на площадке. Наш природный ланшафт, да и физические возможности команды имеют границы. Просим уважать это и отнестись с пониманием.",
+          "question": "❓Зачем нужен QR-код?"
+        },
+        "registration": {
+          "answer": "Нет, нельзя. Регистрация обязательна, так как она позволяет нам планировать мероприятие, уведомлять участников о возможных изменениях и обеспечивать комфорт для всех.",
+          "question": "❓Можно ли приехать без регистрации?"
+        },
+        "start-time": {
+          "answer": "В каждом анонсе астровыезда есть конкретное время начала. В этот раз это 21.30. Сбор гостей на площадке объявлен с 20.00 до 21.00. Это означает, что мы просим вас приехать к нам заранее – послушать музыку, сфотографироваться с Луной и в подсолнухах, посмотреть на закаты, надышаться степью. И что важно, припарковать автомобиль и не создавать пробок. Мы очень это ценим!",
+          "question": "❓Во сколько начало?"
+        },
+        "support": {
+          "answer": "У нас есть",
+          "answer2": ". Мы постоянно докупаем оборудование, обновляем технические возможности, создаем мерч и всякие активности. Ваша поддержка - это ❤︎❤︎❤︎",
+          "donates": "ДОНАТЫ",
+          "question": "❓Вы мне нравитесь! Как вас поддержать?"
+        },
+        "telescopes": {
+          "answer": "Нет, приносить телескоп не обязательно. У нас всегда есть несколько телескопов для общего пользования. Если у вас есть свой инструмент, вы можете взять его, и наши эксперты помогут вам с настройкой и использованием.",
+          "question": "❓Нужно ли приносить собственный телескоп?"
+        },
+        "weather": {
+          "answer": "Если прогноз погоды неблагоприятный (облака или осадки), мероприятие может быть отменено или перенесено. Мы всегда предупреждаем участников о таких изменениях через наш Telegram-канал, поэтому обязательно следите за обновлениями.",
+          "question": "❓Что делать, если будет облачно или дождь?"
+        },
+        "what-to-bring": {
+          "answer": "Для комфортного пребывания на астроплощадке обязательно иметь с собой теплую одежду (мы в степи, ночью там ветер и холодно), туристический коврик, походные стулья, пледы. Рекомендуем также - термосы с чаем/кофе и бутерброды. Советуем взять репеллент от насекомых. Кальяны, шашлыки, алкоголь, сигареты – под запретом! А еще у нас самая чистая площадка. После астровыезда не находим ни одного фантика и бумажки и очень благодарим вас за это!",
+          "question": "❓Что брать с собой?"
+        },
+        "where": {
+          "answer": "Наши астровыезды всегда проходят за городом. Обычно в пределах 40-70 км. Мы уезжаем от засветки и городских огней, чтобы увидеть звёзды. Точная локация доступна вам после регистрации. Если вдруг вы потеряли место локации - вернитесь на страницу регистрации снова по той же ссылке. Там есть геолокация - Яндекс.Карта и Google.Карта.",
+          "question": "❓Как узнать, где проходит?"
+        }
+      },
+      "title": "Часто задаваемые вопросы"
+    },
+    "stargazing-howto": {
+      "arrival": "Прибытие на место",
+      "arrival_text": "Приезжайте за 15–20 минут до начала, чтобы занять удобное место на астрономической поляне. Возьмите с собой походные стулья или коврики для комфортного размещения.",
+      "description": "Узнайте, как проходят астровыезды в Оренбурге: регистрация, лекции о космосе, наблюдения в телескопы и обучение ориентации по звездному небу. Подписывайтесь на Telegram-канал «Смотри на звезды» и присоединяйтесь к уникальным астрономическим мероприятиям под звездным небом!",
+      "event_announcement": "Анонс мероприятия",
+      "event_announcement_text": "Астровыезды в Оренбурге проводятся при благоприятной погоде, поэтому точная дата становится известна лишь за 2-3 дня до события. Мы заранее объявляем о готовящихся выездах в нашем Telegram-канале «Смотри на звезды», где публикуем анонсы и важные обновления. Подписка на канал обязательна, чтобы не пропустить новый астровыезд.",
+      "event_duration": "Продолжительность мероприятия",
+      "event_duration_text": "Весь астровыезд занимает от 2 до 4 часов. Вы можете покинуть площадку в любое время, но многие остаются до последнего, наслаждаясь видами звездного неба.",
+      "event_plan": "План проведения астровыезда",
+      "faq": "Не нашли ответа на свой вопрос? Загляните в раздел",
+      "lecture": "Астролекция",
+      "lecture_text": "Как только наступают сумерки, начинается наша астролекция. На большом экране мы показываем видео и фото, рассказывая о космосе доступным и интересным языком. Темы лекций варьируются: от «Метеоритный поток Персеиды» до «Что скрывают Черные дыры». Лекции рассчитаны на участников от 8 лет и длятся около часа.",
+      "location": "Место проведения",
+      "location_text": "Астровыезды проводятся за городом, вдали от городской засветки, обычно в 40 км от Оренбурга. Точное место проведения откроется после регистрации. Добираться до поляны нужно самостоятельно, поэтому заранее уточняйте маршрут. Последний участок пути — грунтовая дорога длиной около 300 метров.",
+      "orientation": "Ориентация по звездному небу",
+      "orientation_text": "После лекции мы учим вас находить основные звезды и созвездия, показывая их на небе. Эта часть длится около 20 минут.",
+      "recommendations": "Обязательные рекомендации",
+      "recommendations_text": "Пожалуйста, ознакомьтесь с разделом «Правила поведения на астровыездах», чтобы мероприятие прошло комфортно и безопасно для всех.",
+      "registration": "Регистрация на астровыезд",
+      "registration_text": "Для участия требуется предварительная регистрация через наш сайт. Это бесплатно, процесс занимает всего одну минуту. Обратите внимание: остерегайтесь мошенников, если кто-то просит оплату за участие — это обман! Мы приветствуем донаты, но участие всегда остается бесплатным.",
+      "telegram": "или пишите в нашем Telegram-канале",
+      "telescope_observation": "Наблюдение в телескопы",
+      "telescope_observation_text": "На астрономической площадке установлено несколько телескопов, каждый из которых настроен на определенные космические объекты. Вы сможете смотреть в телескопы, задавать вопросы и общаться с астрономами.",
+      "thematic_evenings": "Тематические вечера",
+      "thematic_evenings_text": "Иногда мы проводим тротуарную астрономию прямо в городе. Подробности о таких мероприятиях читайте в разделе «Где посмотреть в телескоп в Оренбурге».",
+      "title": "Как проходят астровыезды",
+      "unique_event": "Каждый астровыезд уникален, но мы придерживаемся общего сценария, чтобы сделать мероприятие интересным и удобным для всех участников."
+    },
+    "stargazing-rules": {
+      "description": "Узнайте правила поведения на астровыездах в Оренбурге: что нельзя делать при наблюдении звезд и планет в телескоп. Соблюдайте рекомендации, чтобы сделать астровыезд безопасным и комфортным для всех участников.",
+      "importance-description": "Соблюдение этих рекомендаций помогает сделать наблюдение звездного неба в Оренбурге максимально комфортным для всех. Мы создаем атмосферу, где каждый участник может увидеть удивительные небесные явления, изучить планеты через телескоп и получить незабываемый опыт.",
+      "importance-title": "Почему важно соблюдать правила?",
+      "join-description": "Хотите узнать больше о наших мероприятиях, организованных в Оренбурге?",
+      "join-title": "Присоединяйтесь к нашим астровыездам!",
+      "prohibited-items-1": {
+        "description": "Фонарики, экраны телефонов и любые яркие световые приборы нарушают адаптацию глаз к темноте, что снижает видимость звездного неба. Используйте только красные фонари или специальные светофильтры для устройств.",
+        "title": "Использовать яркие источники света"
+      },
+      "prohibited-items-2": {
+        "description": "Астровыезды проводятся в полях и открытых местах, где высокая вероятность пожаров. Разведение костров строго запрещено.",
+        "title": "Разжигать костры и использовать открытый огонь"
+      },
+      "prohibited-items-3": {
+        "description": "Алкогольные напитки, сигареты, электронные сигареты, вейпы и кальяны запрещены. Это не только вопрос пожарной безопасности, но и уважение к другим участникам, для которых важно чистое ночное небо и свежий воздух.",
+        "title": "Употреблять алкоголь и курить"
+      },
+      "prohibited-items-4": {
+        "description": "Громкая музыка, крики или другие резкие звуки могут отвлекать и мешать концентрации при наблюдении в телескоп. Уважайте тишину и настрой окружающих.",
+        "title": "Шуметь и мешать другим участникам"
+      },
+      "prohibited-title": "Что нельзя делать на астровыездах",
+      "recommendations-items-1": {
+        "description": "Заберите с собой весь мусор после окончания наблюдений. Мы стараемся оставить места астровыездов такими же чистыми, какими они были до нашего приезда.",
+        "title": "Берегите природу"
+      },
+      "recommendations-items-2": {
+        "description": "Передвигайтесь аккуратно, чтобы избежать повреждений оборудования и не навредить себе.",
+        "title": "Соблюдайте правила техники безопасности"
+      },
+      "recommendations-items-3": {
+        "description": "Каждый пришел на астровыезд, чтобы насладиться красотой космоса. Уважительное отношение друг к другу делает атмосферу дружелюбной и комфортной.",
+        "title": "Уважайте других участников"
+      },
+      "recommendations-title": "Рекомендации для участников астровыездов",
+      "subscribe": "Подписывайтесь",
+      "title": "Правила поведения на астровыездах",
+      "welcome": "Добро пожаловать на астровыезды в Оренбурге, организованные проектом «Смотри на звезды»! Чтобы совместное наблюдение звездного неба и планет прошло комфортно и безопасно для всех участников, важно соблюдать несколько простых правил. Эти рекомендации помогают сохранить атмосферу ночного наблюдения и гарантируют, что каждый сможет насладиться видом звезд и планет в телескоп."
+    },
+    "stargazing-where": {
+      "announcement-1": "Анонсы вечеров тротуарной астрономии мы почти всегда публикуем в нашем",
+      "announcement-2": ", но иногда наши телескопы можно встретить на улицах города и без предупреждения. Один из вдохновителей проекта, астролектор Владимир Иванович, нередко делится своими знаниями, показывая всем желающим интересные астрономические объекты. Просто ищите телескоп — и вы точно попадете на незабываемую экскурсию по звездному небу!",
+      "description": "Узнайте, где в Оренбурге можно посмотреть в телескоп. Тротуарная астрономия: бесплатные наблюдения Луны, планет и звезд на улицах города. Хотите увидеть больше — отправляйтесь на выезд за город для наблюдения туманностей и галактик!",
+      "intro": "pages.stargazing-where.intro",
+      "telegram-channel": "телеграм-канале",
+      "title": "Где посмотреть в телескоп в Оренбурге",
+      "want-to-see-description-1": "Для наблюдения слабосветящихся объектов, таких как туманности Ориона, Андромеды, метеорные потоки и звездные скопления, необходимо отправиться подальше от городских огней. В таких местах, как Оренбургская степь или другие удаленные районы, ночное небо поражает своей красотой.",
+      "want-to-see-description-2": "Мы регулярно организуем выездные астрономические мероприятия, где можно насладиться полной палитрой космических объектов. Следите за анонсами на нашей странице «Астровыезды» или в Telegram-канале, чтобы присоединиться к одному из таких наблюдений.",
+      "want-to-see-description-3": "Пусть звезды станут ближе!",
+      "want-to-see-more": "Хотите увидеть больше? Выезжайте за город!",
+      "what-you-can-see-1": "Кратеры и горы на Луне, особенно впечатляющие в фазах первой и последней четверти;",
+      "what-you-can-see-2": "Кольца Сатурна, которые неизменно вызывают восторг;",
+      "what-you-can-see-3": "Яркие звезды и двойные звезды, такие как Альбирео;",
+      "what-you-can-see-4": "Парады планет, если они происходят в подходящее время года.",
+      "what-you-can-see-conclusion": "Однако городское освещение ограничивает наши возможности. Туманности, галактики, метеорные потоки и даже крупные звездные скопления часто остаются скрытыми от взгляда.",
+      "what-you-can-see-description": "В условиях городского светового загрязнения наиболее яркие объекты остаются видимыми. Например, вы сможете рассмотреть:",
+      "what-you-can-see-title": "Что можно увидеть в телескоп из города?"
+    }
+  }
 }
