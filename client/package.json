@@ -8,7 +8,6 @@
     "scripts": {
         "dev": "next dev",
         "build": "next build",
-        "build:locales": "i18next-scanner",
         "export": "next export",
         "start": "next start",
         "test:watch": "jest --testNamePattern AuthorTable --watch",
@@ -17,7 +16,7 @@
         "eslint:fix": "eslint --fix",
         "prettier:check": "prettier --check .",
         "prettier:fix": "prettier --write .",
-        "locales:build": "i18next-scanner --config i18next-scanner.config.cjs"
+        "locales:build": "i18next-scanner --config i18next-scanner.config.js"
     },
     "dependencies": {
         "@reduxjs/toolkit": "^2.8.2",
