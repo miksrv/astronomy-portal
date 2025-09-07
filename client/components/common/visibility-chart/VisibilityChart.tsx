@@ -200,7 +200,7 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = 
             },
             yAxis: {
                 type: 'value',
-                name: `${t('height')} (°)`,
+                name: `${t('components.common.visibility-chart.height', { defaultValue: 'Высота' })} (°)`,
                 min: 0,
                 max: 90,
                 interval: 10,
@@ -226,7 +226,7 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = 
             },
             series: [
                 {
-                    name: t('height'),
+                    name: t('components.common.visibility-chart.height', { defaultValue: 'Высота' }),
                     type: 'line',
                     data: chartData,
                     showSymbol: false,
@@ -244,9 +244,16 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = 
 
     return (
         <Container className={styles.container}>
-            <h3 className={styles.title}>{t('visibility-chart.title', { name: objectName })}</h3>
+            <h3 className={styles.title}>
+                {t('components.common.visibility-chart.title', {
+                    defaultValue: 'График видимости {{name}} в течение суток',
+                    name: objectName
+                })}
+            </h3>
             <div className={styles.description}>
-                {t('visibility-chart.description', {
+                {t('components.common.visibility-chart.description', {
+                    defaultValue:
+                        'Диаграмма высоты {{name}} над горизонтом в течение текущих суток для точки наблюдения обсерватории в Оренбурге ({{lat}}, {{lon}}). График показывает, когда объект находится выше горизонта и на какой максимальной высоте в градусах он поднимается. Данные актуальны на дату наблюдения: {{date}}.',
                     name: objectName,
                     date: formatDate(date, 'dddd, D MMMM YYYY'),
                     lat,

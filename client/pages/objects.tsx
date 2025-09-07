@@ -6,9 +6,8 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
 
-import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { ObjectsTable } from '@/components/pages/objects'
 import { formatObjectName } from '@/utils/strings'
@@ -21,10 +20,8 @@ interface ObjectsPageProps {
 }
 
 const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, objectsList, photosList }) => {
-    const { t, i18n } = useTranslation()
+    const { t } = useTranslation()
     const router = useRouter()
-
-    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
@@ -66,7 +63,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
         [filteredCategoriesList, categoryFilter]
     )
 
-    const title = t('list-astronomical-objects') + (categoryFilter ? `: ${currentCategory?.title}` : '')
+    const title = t('pages.objects.title', { defaultValue: 'Список астрономических объектов' })
 
     const handleChangeCategoryFilter = async (category: number | undefined) => {
         if (category !== undefined) {
@@ -107,34 +104,30 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
     }, [category])
 
     return (
-        <AppLayout>
-            <NextSeo
-                title={title}
-                description={`${t('description-object-list-page')} ${currentCategory?.description}`}
-                canonical={`${canonicalUrl}objects`}
-                openGraph={{
-                    images: [
-                        {
-                            height: 773,
-                            url: '/screenshots/objects.jpg',
-                            width: 1280
-                        }
-                    ],
-                    siteName: t('look-at-the-stars'),
-                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
-                }}
-            />
-
+        <AppLayout
+            canonical={'objects'}
+            title={`${title}${categoryFilter ? `: ${currentCategory?.title}` : ''}`}
+            description={`${t('pages.objects.description', { defaultValue: 'Каталог астрономических объектов, отснятых обсерваторией: галактики, туманности, астероиды и кометы. Таблица с объектами включает информацию о суммарной выдержке, наличии обработанных фото и данных по каждому фильтру: Luminance, Red, Green, Blue, Ha, OIII, SII. Узнайте больше о каждом объекте и деталях наблюдения, проведенных обсерваторией.' })} ${currentCategory?.description}`}
+            openGraph={{
+                images: [
+                    {
+                        height: 773,
+                        url: '/screenshots/objects.jpg',
+                        width: 1280
+                    }
+                ]
+            }}
+        >
             <AppToolbar
                 ref={toolbarRef}
-                title={title}
-                currentPage={categoryFilter ? currentCategory?.title : t('list-astronomical-objects')}
+                title={`${title}${categoryFilter ? `: ${currentCategory?.title}` : ''}`}
+                currentPage={categoryFilter ? currentCategory?.title : title}
                 links={
                     categoryFilter
                         ? [
                               {
                                   link: '/objects',
-                                  text: t('list-astronomical-objects')
+                                  text: title
                               }
                           ]
                         : undefined
@@ -142,7 +135,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
             >
                 <Input
                     size={'large'}
-                    placeholder={t('search-by-name')}
+                    placeholder={t('pages.objects.search-by-name', { defaultValue: 'Поиск по названию' })}
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
                 />
@@ -152,7 +145,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                     mode={'secondary'}
                     clearable={true}
                     value={categoryFilter}
-                    placeholder={t('filter-by-category')}
+                    placeholder={t('pages.objects.filter-by-category', { defaultValue: 'Фильтр по категории' })}
                     onSelect={(category) => handleChangeCategoryFilter(category?.key)}
                     options={filteredCategoriesList?.map((category) => ({
                         key: category.id,
@@ -165,7 +158,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                         icon={'PlusCircle'}
                         mode={'secondary'}
                         size={'large'}
-                        label={t('add')}
+                        label={t('pages.objects.create_button', { defaultValue: 'Создать объект' })}
                         onClick={handleCreate}
                     />
                 )}

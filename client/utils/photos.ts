@@ -20,6 +20,6 @@ export const createMediumPhotoUrl = (photo?: ApiModel.Photo): string => createPh
 export const createLargePhotoUrl = (photo?: ApiModel.Photo): string => createPhotoUrl(photo, 'large')
 
 export const createPhotoTitle = (photo?: ApiModel.Photo, t?: TFunction) =>
-    `${t?.('photo')} ${photo?.objects
+    `${t?.('photo', { defaultValue: 'Фото' })} ${photo?.objects
         ?.map((name) => formatObjectName(name))
-        ?.join(', ')} ${t?.('from')} ${formatDate(photo?.date, 'DD.MM.YYYY')}`
+        ?.join(', ')} ${t?.('from', 'от')} ${formatDate(photo?.date, 'DD.MM.YYYY')}`

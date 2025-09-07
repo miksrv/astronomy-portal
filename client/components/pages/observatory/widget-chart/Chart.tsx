@@ -60,7 +60,12 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
                 label: {
                     formatter: function (params) {
                         if (params?.axisDimension === 'x') {
-                            return formatDateFromUnixUTC(params?.value as number, t('date-chart-label'))
+                            return formatDateFromUnixUTC(
+                                params?.value as number,
+                                t('components.pages.observatory.widget-chart.chart-label_date-format', {
+                                    defaultValue: 'D MMM YYYY, HH:mm'
+                                })
+                            )
                         }
 
                         return round(Number(params?.value), 2)?.toString() ?? ''
@@ -106,7 +111,14 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
                 hideOverlap: true,
                 color: textSecondaryColor, // Color of X-axis labels
                 fontSize: '11px',
-                formatter: (value: number) => formatDateFromUnixUTC(value, dateFormat ?? t('date-only-hour'))
+                formatter: (value: number) =>
+                    formatDateFromUnixUTC(
+                        value,
+                        dateFormat ??
+                            t('components.pages.observatory.widget-chart.only-hour_date-format', {
+                                defaultValue: 'HH:mm'
+                            })
+                    )
             },
             axisTick: {
                 show: true
@@ -198,9 +210,18 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
                         }
                     ],
                     series: [
-                        getChartLineConfig('temperature', t('temperature')),
-                        getChartLineConfig('feelsLike', t('feelsLike')),
-                        getChartLineConfig('dewPoint', t('dewPoint'))
+                        getChartLineConfig(
+                            'temperature',
+                            t('components.pages.observatory.widget-chart.temperature', { defaultValue: 'Температура' })
+                        ),
+                        getChartLineConfig(
+                            'feelsLike',
+                            t('components.pages.observatory.widget-chart.feels-like', { defaultValue: 'Ощущается как' })
+                        ),
+                        getChartLineConfig(
+                            'dewPoint',
+                            t('components.pages.observatory.widget-chart.dew-point', { defaultValue: 'Точка росы' })
+                        )
                     ]
                 }
 
@@ -221,13 +242,24 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
                             axisLabel: {
                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 ...(baseConfig.yAxis as any).axisLabel,
-                                formatter: `{value}${t('meters-per-second')}`
+                                formatter: `{value}${t('components.pages.observatory.widget-chart.meters-per-second', { defaultValue: 'м/с' })}`
                             }
                         }
                     ],
                     series: [
-                        getChartLineConfig('clouds', t('clouds'), 0, true),
-                        getChartLineConfig('windSpeed', t('windSpeed'), 1)
+                        getChartLineConfig(
+                            'clouds',
+                            t('components.pages.observatory.widget-chart.clouds', { defaultValue: 'Облачность' }),
+                            0,
+                            true
+                        ),
+                        getChartLineConfig(
+                            'windSpeed',
+                            t('components.pages.observatory.widget-chart.wind-speed', {
+                                defaultValue: 'Скорость ветра'
+                            }),
+                            1
+                        )
                     ]
                 }
         }

@@ -4,53 +4,55 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
 
-import { API, setLocale, SITE_LINK, wrapper } from '@/api'
+import { API, setLocale, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { AstronomyCalc, Calendar, Camera, RelayList, Weather } from '@/components/pages/observatory'
 
-type ObservatoryPageProps = object
-
-const ObservatoryPage: NextPage<ObservatoryPageProps> = () => {
-    const { t, i18n } = useTranslation()
+const ObservatoryPage: NextPage<object> = () => {
+    const { t } = useTranslation()
 
     const { data } = API.useStatisticGetTelescopeQuery()
 
-    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+    const title = t('pages.observatory.title', { defaultValue: 'Обсерватория' })
+    const observatoryLink = t('pages.observatory.observatory-in-orenburg_link', {
+        defaultValue: 'Обсерватория в Оренбурге'
+    })
 
     return (
-        <AppLayout>
-            <NextSeo
-                title={t('observatory')}
-                description={t('description-observatory')}
-                canonical={`${canonicalUrl}observatory`}
-                openGraph={{
-                    images: [
-                        {
-                            height: 854,
-                            url: '/screenshots/observatory.jpg',
-                            width: 1280
-                        }
-                    ],
-                    siteName: t('look-at-the-stars'),
-                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
-                }}
-            />
-
+        <AppLayout
+            canonical={'observatory'}
+            title={title}
+            description={t('pages.observatory.description', {
+                defaultValue:
+                    'Самодельная любительская астрономическая обсерватория с удаленным доступом из любой точки мира через интернет. Статистика работы обсерватории, количество отснятых кадров и накопленных данных. Календарь работы телескопа.'
+            })}
+            openGraph={{
+                images: [
+                    {
+                        height: 854,
+                        url: '/screenshots/observatory.jpg',
+                        width: 1280
+                    }
+                ]
+            }}
+        >
             <AppToolbar
-                title={t('observatory')}
-                currentPage={t('observatory')}
+                title={title}
+                currentPage={title}
             />
 
             <div>
                 <p>
-                    {t('observatory-page.intro')}{' '}
+                    {t('pages.observatory.text', {
+                        defaultValue:
+                            'Наблюдение за Вселенной начинается здесь - в режиме реального времени вы можете увидеть текущие погодные условия, трансляцию с камер, статус оборудования и расписание съёмки. Обсерватория работает в полуавтоматическом режиме, позволяя вести съёмку deep-sky объектов удалённо. Здесь реализована система интеллектуального управления, анализирующая погодные условия и автоматически принимающая решение о начале работы. Подробнее об оборудовании и принципе работы можно узнать на отдельной странице:'
+                    })}{' '}
                     <Link
                         href={'/observatory/overview'}
-                        title={t('observatory-orenburg')}
+                        title={observatoryLink}
                     >
-                        {t('observatory-orenburg')}
+                        {observatoryLink}
                     </Link>
                     {'.'}
                 </p>
@@ -88,7 +90,7 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (context): Promise<GetServerSidePropsResult<ObservatoryPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<object>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 

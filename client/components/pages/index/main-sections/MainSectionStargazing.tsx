@@ -27,33 +27,44 @@ export const MainSectionStargazing: React.FC = () => {
                         end={YEARS}
                         className={styles.counter}
                     />
-                    <div>{t('years')}</div>
+                    <div>{t('components.pages.index.main-sections.years', { defaultValue: 'лет' })}</div>
                 </div>
                 <div className={styles.item}>
                     <Counter
                         end={STARGAZING}
                         className={styles.counter}
                     />
-                    <div>{t('stargazings')}</div>
+                    <div>
+                        {t('components.pages.index.main-sections.stargazing-count', { defaultValue: 'Астровыездов' })}
+                    </div>
                 </div>
                 <div className={styles.item}>
                     <Counter
                         end={PEOPLES}
                         className={styles.counter}
                     />
-                    <div>{t('members')}</div>
+                    <div>
+                        {t('components.pages.index.main-sections.stargazing-members', { defaultValue: 'Участников' })}
+                    </div>
                 </div>
             </div>
 
             <div className={styles.bottomContainer}>
-                <h2 className={'animate'}>{t('stargazing')}</h2>
-                <p className={'animate'}>{t('stargazings-section-description')}</p>
+                <h2 className={'animate'}>
+                    {t('components.pages.index.main-sections.stargazing', { defaultValue: 'Астровыезды' })}
+                </h2>
+                <p className={'animate'}>
+                    {t('components.pages.index.main-sections.stargazing-description', {
+                        defaultValue:
+                            'Организуем регулярные поездки под открытое небо, чтобы наблюдать за звездами и планетами через мощные телескопы.'
+                    })}
+                </p>
                 <Link
                     href={'/stargazing'}
-                    title={t('stargazing')}
+                    title={t('components.pages.index.main-sections.stargazing', { defaultValue: 'Астровыезды' })}
                     className={'animate'}
                 >
-                    {t('read-more')}
+                    {t('components.pages.index.main-sections.read-more', { defaultValue: 'Подробнее' })}
                 </Link>
             </div>
         </section>

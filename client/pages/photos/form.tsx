@@ -5,20 +5,17 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
 
 import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { AstroPhotoForm, AstroPhotoFormType } from '@/components/pages/photos'
 
-type PhotoFormPageProps = object
-
 // TODO: Добавить проерку на редактирование фото - сохранять только если есть изменения
-const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
+const PhotoFormPage: NextPage<object> = () => {
     const router = useRouter()
 
     const { id } = router.query
-    const { t, i18n } = useTranslation()
+    const { t } = useTranslation()
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
@@ -104,24 +101,18 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
     }, [formData?.id, photoData?.id, formFile])
 
     return (
-        <AppLayout>
-            <NextSeo
-                title={currentPageTitle}
-                description={''}
-                noindex={true}
-                nofollow={true}
-                openGraph={{
-                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
-                }}
-            />
-
+        <AppLayout
+            title={currentPageTitle}
+            noindex={true}
+            nofollow={true}
+        >
             <AppToolbar
                 title={currentPageTitle}
                 currentPage={currentPageTitle}
                 links={[
                     {
                         link: '/photos',
-                        text: t('astrophoto')
+                        text: t('menu.astrophoto', { defaultValue: 'Астрофото' })
                     }
                 ]}
             />
@@ -151,7 +142,7 @@ const PhotoFormPage: NextPage<PhotoFormPageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (context): Promise<GetServerSidePropsResult<PhotoFormPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<object>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 

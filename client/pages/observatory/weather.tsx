@@ -6,20 +6,18 @@ import type { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
 
 import { APIMeteo, setLocale, wrapper } from '@/api'
 import { AppLayout, AppToolbar } from '@/components/common'
 import { WidgetChart } from '@/components/pages/observatory'
 import { getDateTimeFormat } from '@/utils/dates'
 
-type HistoryPageProps = object
-
-const HistoryPage: NextPage<HistoryPageProps> = () => {
+const HistoryPage: NextPage<object> = () => {
     const { i18n, t } = useTranslation()
 
     const startDate = dayjs().startOf('days').format('YYYY-MM-DD')
     const endDate = dayjs().startOf('days').add(1, 'day').format('YYYY-MM-DD')
+    const title = t('pages.observatory-weather.title', { defaultValue: 'Погода в Обсерватории Оренбурга' })
 
     const { data: history, isLoading: historyLoading } = APIMeteo.useGetHistoryQuery({
         start_date: startDate,
@@ -32,34 +30,34 @@ const HistoryPage: NextPage<HistoryPageProps> = () => {
     )
 
     return (
-        <AppLayout>
-            <NextSeo
-                title={t('observatory-orenburg-weather')}
-                description={t('description-observatory-weather')}
-                canonical={`${process.env.NEXT_PUBLIC_SITE_LINK}/observatory/weather`}
-                openGraph={{
-                    siteName: t('look-at-the-stars'),
-                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
-                }}
-            />
-
+        <AppLayout
+            canonical={'observatory/weather'}
+            title={title}
+            description={t('pages.observatory-weather.description', {
+                defaultValue:
+                    'Актуальные графики погоды с метеостанции любительской обсерватории в пригороде Оренбурга. Температура, влажность, облачность и скорость ветра в реальном времени.'
+            })}
+        >
             <AppToolbar
-                title={t('observatory-orenburg-weather')}
-                currentPage={t('observatory-orenburg-weather')}
+                title={title}
+                currentPage={title}
                 links={[
                     {
                         link: '/observatory',
-                        text: t('observatory')
+                        text: t('menu.observatory', { defaultValue: 'Обсерватория' })
                     }
                 ]}
             />
 
             <p>
-                {t('observatory-weather-page.intro')}{' '}
+                {t('pages.observatory-weather.description', {
+                    defaultValue:
+                        'Следите за погодными условиями в режиме реального времени с метеостанции, установленной на самодельной астрономической обсерватории в пригороде Оренбурга. Графики отображают температуру, влажность, облачность и скорость ветра. Для полного доступа к данным и истории наблюдений переходите на сайт метеостанции:'
+                })}{' '}
                 <Link
                     href={'https://meteo.miksoft.pro/'}
                     target={'_blank'}
-                    title={t('observatory-orenburg-weather')}
+                    title={title}
                 >
                     {'meteo.miksoft.pro'}
                 </Link>
@@ -91,7 +89,7 @@ const HistoryPage: NextPage<HistoryPageProps> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (context): Promise<GetServerSidePropsResult<HistoryPageProps>> => {
+        async (context): Promise<GetServerSidePropsResult<object>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 

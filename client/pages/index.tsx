@@ -3,9 +3,8 @@ import React, { useEffect } from 'react'
 import type { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
 
-import { API, ApiModel, setLocale, SITE_LINK, wrapper } from '@/api'
+import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { AppLayout } from '@/components/common'
 import { MainSection } from '@/components/pages/index'
 
@@ -16,9 +15,7 @@ interface HomePageProps {
 const headerHeight = 50
 
 const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
-    const { t, i18n } = useTranslation()
-
-    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+    const { t } = useTranslation()
 
     useEffect(() => {
         const sections = document.querySelectorAll('section')
@@ -64,16 +61,14 @@ const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
     }, [])
 
     return (
-        <AppLayout fullWidth={true}>
-            <NextSeo
-                title={t('look-at-the-stars')}
-                description={t('look-at-the-stars-description')}
-                canonical={canonicalUrl}
-                openGraph={{
-                    siteName: t('look-at-the-stars'),
-                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
-                }}
-            />
+        <AppLayout
+            fullWidth={true}
+            title={t('pages.index.title', { defaultValue: 'Проект "Смотри на звёзды"' })}
+            description={t('pages.index.description', {
+                defaultValue:
+                    'Смотри на звезды - уникальный проект в Оренбургской области: наблюдения в телескопы за городом, тротуарная астрономия, обсерватория в Оренбургской области и астрофотографии'
+            })}
+        >
             <MainSection.Astrophotos photos={photosList} />
             <MainSection.Stargazing />
             <MainSection.Observatory />

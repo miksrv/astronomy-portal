@@ -42,31 +42,49 @@ export const Weather: React.FC = () => {
         windGust: getRange(data?.windGust, 0, 8)
     }
 
-    const weatherState = Object.values(weatherRanges).every((range) => range === 'good')
-        ? 'good'
-        : Object.values(weatherRanges).some((range) => range === 'danger')
-          ? 'danger'
-          : 'warning'
+    const weatherState = React.useMemo(() => {
+        if (Object.values(weatherRanges).every((range) => range === 'good')) {
+            return 'good'
+        }
+        if (Object.values(weatherRanges).some((range) => range === 'danger')) {
+            return 'danger'
+        }
+        return 'warning'
+    }, [weatherRanges])
 
-    const weatherCondition =
-        weatherState === 'good' ? t('safely') : weatherState === 'danger' ? t('critical') : t('dangerous')
+    const weatherCondition = React.useMemo(() => {
+        if (weatherState === 'good') {
+            return t('components.pages.observatory.weather.safely', { defaultValue: 'Безопасно' })
+        }
+        if (weatherState === 'danger') {
+            return t('components.pages.observatory.weather.critical', { defaultValue: 'Критическое' })
+        }
+        return t('components.pages.observatory.weather.dangerous', { defaultValue: 'Опасное' })
+    }, [weatherState, t])
 
     return (
         <Container className={styles.weather}>
             <div className={styles.toolbar}>
                 <h4 className={styles.title}>
-                    {t('weather-conditions')}:{' '}
-                    <span className={cn(styles.weatherState, styles[weatherState])}>{weatherCondition}</span>
+                    {t('components.pages.observatory.weather.weather-conditions', { defaultValue: 'Состояние погоды' })}
+                    : <span className={cn(styles.weatherState, styles[weatherState])}>{weatherCondition}</span>
                 </h4>
                 <Link
                     href={'/observatory/weather'}
-                    title={t('observatory-orenburg-weather')}
+                    title={t('components.pages.observatory.weather.observatory-in-orenburg-weather', {
+                        defaultValue: 'Погода в Обсерватории Оренбурга'
+                    })}
                 >
-                    {t('read-more')}
+                    {t('components.pages.observatory.weather.read-more', { defaultValue: 'Подробнее' })}
                 </Link>
             </div>
             <div className={styles.update}>
-                {t('updated')}: <strong>{!isLoading ? formatUTCDate(data?.date) : t('loading')}</strong>
+                {t('components.pages.observatory.weather.updated', { defaultValue: 'Обновлено' })}:{' '}
+                <strong>
+                    {!isLoading
+                        ? formatUTCDate(data?.date)
+                        : t('components.pages.observatory.weather.loading', { defaultValue: 'Погода загружается...' })}
+                </strong>
                 {data?.date && `(${minutesAgo(data.date)})`}
             </div>
             <div className={styles.grid}>
@@ -80,12 +98,12 @@ export const Weather: React.FC = () => {
                         <span className={styles.val}>
                             {data?.[key as keyof ApiModel.Weather] ?? '?'}{' '}
                             {key === 'temperature'
-                                ? '℃'
+                                ? t('components.pages.observatory.weather.unit-temperature', { defaultValue: '℃' })
                                 : key === 'precipitation'
-                                  ? 'мм'
+                                  ? t('components.pages.observatory.weather.unit-precipitation', { defaultValue: 'мм' })
                                   : key === 'humidity'
-                                    ? '%'
-                                    : 'м\\с'}
+                                    ? t('components.pages.observatory.weather.unit-humidity', { defaultValue: '%' })
+                                    : t('components.pages.observatory.weather.unit-wind', { defaultValue: 'м\\с' })}
                         </span>
                     </div>
                 ))}

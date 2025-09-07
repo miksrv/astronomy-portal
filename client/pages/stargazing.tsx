@@ -7,9 +7,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
 
-import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
 import { EventsList, EventUpcoming } from '@/components/pages/stargazing'
@@ -22,12 +21,24 @@ interface StargazingPageProps {
 }
 
 const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, photos }) => {
-    const { t, i18n } = useTranslation()
+    const { t } = useTranslation()
     const router = useRouter()
 
-    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
-
     const userRole = useAppSelector((state) => state.auth?.user?.role)
+
+    const title = t('pages.stargazing.title', { defaultValue: 'Астровыезды' })
+    const rulesLink = t('pages.stargazing.rules_link', {
+        defaultValue: 'Правила поведения на астровыездах'
+    })
+    const howtoLink = t('pages.stargazing.howto_link', {
+        defaultValue: 'Как проходят астровыезды'
+    })
+    const whereLink = t('pages.stargazing.where_link', {
+        defaultValue: 'Где посмотреть в телескоп в Оренбурге'
+    })
+    const faqLink = t('pages.stargazing.faq_link', {
+        defaultValue: 'Часто задаваемые вопросы'
+    })
 
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
@@ -46,34 +57,33 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
     }
 
     return (
-        <AppLayout>
-            <NextSeo
-                title={t('stargazing')}
-                description={t('description-stargazing')}
-                canonical={`${canonicalUrl}stargazing`}
-                openGraph={{
-                    images: [
-                        {
-                            height: 853,
-                            url: '/photos/stargazing-1.jpeg',
-                            width: 1280
-                        }
-                    ],
-                    siteName: t('look-at-the-stars'),
-                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
-                }}
-            />
-
+        <AppLayout
+            canonical={'stargazing'}
+            title={title}
+            description={t('pages.stargazing.description', {
+                defaultValue:
+                    'Астровыезд в Оренбурге — увлекательные поездки за город, где телескопы открывают космические горизонты. Вечера научных открытий, лекций и живого общения с единомышленниками. Узнайте правила поведения и подготовьтесь к наблюдению за звёздами.'
+            })}
+            openGraph={{
+                images: [
+                    {
+                        height: 853,
+                        url: '/photos/stargazing-1.jpeg',
+                        width: 1280
+                    }
+                ]
+            }}
+        >
             <AppToolbar
-                title={t('stargazing')}
-                currentPage={t('stargazing')}
+                title={title}
+                currentPage={title}
             >
                 {userRole === ApiModel.UserRole.ADMIN && (
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}
                         size={'large'}
-                        label={t('add')}
+                        label={t('pages.stargazing.create-stargazing_button', { defaultValue: 'Добавить астровыезд' })}
                         onClick={handleCreate}
                     />
                 )}
@@ -87,48 +97,61 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
             <Link
                 href={'https://t.me/look_at_stars'}
                 className={'telegram-message'}
-                title={t('telegram')}
+                title={t('pages.stargazing.telegram', { defaultValue: 'Телеграм' })}
                 rel={'noindex nofollow'}
                 target={'_blank'}
             >
-                <Icon name={'Telegram'} /> {t('telegram-subscription')}
+                <Icon name={'Telegram'} />{' '}
+                {t('pages.stargazing.telegram-subscription', {
+                    defaultValue: 'Чтобы не пропустить анонсы - подпишитесь на Telegram канал'
+                })}
             </Link>
 
             <Container>
-                <p style={{ marginTop: 0 }}>{t('stargazing-page.intro')}</p>
-                <p>{t('stargazing-page.description')}</p>
+                <p style={{ marginTop: 0 }}>
+                    {t('pages.stargazing.text-part-1', {
+                        defaultValue:
+                            'Астровыезд в Оренбурге — это возможность прикоснуться к тайнам Вселенной, наблюдая звёздное небо в полной темноте. Мы приглашаем вас в увлекательные поездки за город, где телескопы открывают космические горизонты прямо в полях Оренбуржья.'
+                    })}
+                </p>
+                <p>
+                    {t('pages.stargazing.text-part-2', {
+                        defaultValue:
+                            'Каждый астровыезд — это вечер научных открытий, вдохновляющих лекций и живого общения с единомышленниками. Вы узнаете, как проходят наши мероприятия, познакомитесь с основными правилами поведения на астровыездах и сможете заранее подготовиться к наблюдению за звёздами.'
+                    })}
+                </p>
 
                 <ul style={{ marginBottom: '20px' }}>
                     <li>
                         <Link
                             href={'/stargazing/rules'}
-                            title={t('stargazing-rules')}
+                            title={rulesLink}
                         >
-                            {t('stargazing-rules')}
+                            {rulesLink}
                         </Link>
                     </li>
                     <li>
                         <Link
                             href={'/stargazing/howto'}
-                            title={t('stargazing-howto')}
+                            title={howtoLink}
                         >
-                            {t('stargazing-howto')}
+                            {howtoLink}
                         </Link>
                     </li>
                     <li>
                         <Link
                             href={'/stargazing/where'}
-                            title={t('stargazing-where')}
+                            title={whereLink}
                         >
-                            {t('stargazing-where')}
+                            {whereLink}
                         </Link>
                     </li>
                     <li>
                         <Link
                             href={'/stargazing/faq'}
-                            title={t('stargazing-faq')}
+                            title={faqLink}
                         >
-                            {t('stargazing-faq')}
+                            {faqLink}
                         </Link>
                     </li>
                 </ul>
@@ -139,7 +162,11 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
                             height: photo.height,
                             src: createPreviewPhotoUrl(photo),
                             width: photo.width,
-                            alt: `${photo?.title} (${t('photo')} ${index + 1})`
+                            alt: t('pages.stargazing.photo_alt', {
+                                defaultValue: 'Фото ({{number}}) с астровыезда - {{name}} ',
+                                number: index + 1,
+                                name: photo?.title
+                            })
                         })) || []
                     }
                     onClick={({ index }) => {
@@ -153,7 +180,11 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
                             height: photo.height,
                             src: createFullPhotoUrl(photo),
                             width: photo.width,
-                            title: `${photo?.title} (${t('photo')} ${index + 1})`
+                            title: t('pages.stargazing.photo_title', {
+                                defaultValue: 'Астровыезд: {{name}} - Фото ({{number}})',
+                                number: index + 1,
+                                name: photo?.title
+                            })
                         })) || []
                     }
                     photoIndex={photoIndex}

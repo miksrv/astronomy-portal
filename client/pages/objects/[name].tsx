@@ -5,9 +5,8 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
 
-import { API, ApiModel, HOST_IMG, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, HOST_IMG, setLocale, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable, VisibilityChart } from '@/components/common'
 import { ObjectDescription, ObjectFilesTable, ObjectHeader, ObjectsCloud } from '@/components/pages/objects'
 import { removeMarkdown, sliceText } from '@/utils/strings'
@@ -27,10 +26,8 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
     categoriesList,
     photosList
 }) => {
-    const { t, i18n } = useTranslation()
+    const { t } = useTranslation()
     const router = useRouter()
-
-    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
@@ -51,31 +48,27 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
     }
 
     return (
-        <AppLayout>
-            <NextSeo
-                title={objectData?.title || objectName}
-                description={sliceText(removeMarkdown(objectData?.description), 160)}
-                canonical={`${canonicalUrl}objects/${objectName}`}
-                openGraph={{
-                    images: [
-                        {
-                            height: 244,
-                            url: objectData?.image ? `${HOST_IMG}${objectData?.image}` : 'images/no-photo.png',
-                            width: 487
-                        }
-                    ],
-                    siteName: t('look-at-the-stars'),
-                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
-                }}
-            />
-
+        <AppLayout
+            canonical={`objects/${objectName}`}
+            title={objectData?.title || objectName}
+            description={sliceText(removeMarkdown(objectData?.description), 160)}
+            openGraph={{
+                images: [
+                    {
+                        height: 244,
+                        url: objectData?.image ? `${HOST_IMG}${objectData?.image}` : 'images/no-photo.png',
+                        width: 487
+                    }
+                ]
+            }}
+        >
             <AppToolbar
                 title={objectData?.title || objectName}
                 currentPage={objectData?.title || objectName}
                 links={[
                     {
                         link: '/objects',
-                        text: t('objects')
+                        text: t('menu.objects', { defaultValue: 'Объекты' })
                     }
                 ]}
             >
@@ -84,7 +77,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                         <Button
                             icon={'Pencil'}
                             mode={'secondary'}
-                            label={t('edit')}
+                            label={t('common.edit', { defaultValue: 'Редактировать' })}
                             size={'large'}
                             disabled={!objectName}
                             onClick={handleEdit}
@@ -94,7 +87,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                             icon={'PlusCircle'}
                             mode={'secondary'}
                             size={'large'}
-                            label={t('add')}
+                            label={t('common.add', { defaultValue: 'Добавить' })}
                             onClick={handleCreate}
                         />
                     </>

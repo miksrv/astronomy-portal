@@ -29,19 +29,26 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
         <Container className={styles.objectContainer}>
             <div className={styles.parameters}>
                 <div className={styles.item}>
-                    <span className={styles.key}>{t('name-in-the-directory')}:</span>
+                    <span className={styles.key}>
+                        {t('components.pages.objects.object-header.name-in-the-directory', {
+                            defaultValue: 'Название в каталоге'
+                        })}
+                        :
+                    </span>
                     {props.name}
                 </div>
 
                 {!!categoriesData?.length && (
                     <div className={styles.item}>
-                        <span className={styles.key}>{t('category')}:</span>
+                        <span className={styles.key}>
+                            {t('components.pages.objects.object-header.category', { defaultValue: 'Категория' })}:
+                        </span>
                         {categoriesData?.map(({ title, id }, i) => (
                             <>
                                 <Link
                                     key={`category_${id}`}
                                     href={`/objects?category=${id}`}
-                                    title={`${t('astrophoto')}: {title}`}
+                                    title={`${t('components.pages.objects.object-header.astrophoto', { defaultValue: 'Астрофото' })}: {title}`}
                                 >
                                     {title}
                                 </Link>
@@ -53,48 +60,69 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
 
                 {props?.ra && (
                     <div className={styles.item}>
-                        <span className={styles.key}>{t('right-ascension')}:</span>
+                        <span className={styles.key}>
+                            {t('components.pages.objects.object-header.right-ascension', {
+                                defaultValue: 'Прямое восхождение'
+                            })}
+                            :
+                        </span>
                         {formatRA(props.ra)}
                     </div>
                 )}
 
                 {props?.dec && (
                     <div className={styles.item}>
-                        <span className={styles.key}>{t('declination')}:</span>
+                        <span className={styles.key}>
+                            {t('components.pages.objects.object-header.declination', { defaultValue: 'Склонение' })}:
+                        </span>
                         {formatDEC(props.dec)}
                     </div>
                 )}
 
                 {props.statistic?.exposure && (
                     <div className={styles.item}>
-                        <span className={styles.key}>{t('total-exposure')}:</span>
+                        <span className={styles.key}>
+                            {t('components.pages.objects.object-header.total-exposure', 'Общее накопление')}:
+                        </span>
                         {getTimeFromSec(props.statistic.exposure, true)}
                     </div>
                 )}
 
                 {props.statistic?.frames && (
                     <div className={styles.item}>
-                        <span className={styles.key}>{t('number-of-frames')}:</span>
+                        <span className={styles.key}>
+                            {t('components.pages.objects.object-header.number-of-frames', {
+                                defaultValue: 'Количество кадров'
+                            })}
+                            :
+                        </span>
                         {props.statistic.frames}
                     </div>
                 )}
 
                 {!!props.statistic?.fileSize && (
                     <div className={styles.item}>
-                        <span className={styles.key}>{t('data-size')}:</span>
+                        <span className={styles.key}>
+                            {t('components.pages.objects.object-header.data-size', { defaultValue: 'Размер данных' })}:
+                        </span>
                         {humanizeFileSize(props.statistic.fileSize)}
                     </div>
                 )}
 
                 {props?.fitsCloudLink && (
                     <div className={styles.item}>
-                        <span className={styles.key}>{t('link-to-FITS-files')}:</span>
+                        <span className={styles.key}>
+                            {t('components.pages.objects.object-header.link-to-fits-files', {
+                                defaultValue: 'Ссылка на FITS файлы'
+                            })}
+                            :
+                        </span>
                         <Link
                             href={props?.fitsCloudLink}
                             target={'_blank'}
                             title={''}
                         >
-                            {t('download')}
+                            {t('components.pages.objects.object-header.download', { defaultValue: 'Скачать' })}
                         </Link>
                     </div>
                 )}

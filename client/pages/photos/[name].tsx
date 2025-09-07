@@ -5,9 +5,8 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { NextSeo } from 'next-seo'
 
-import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable } from '@/components/common'
 import { PhotoCloud, PhotoHeader } from '@/components/pages/photos'
 import { createLargePhotoUrl, createPhotoTitle } from '@/utils/photos'
@@ -29,10 +28,8 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
     categoriesList,
     equipmentsList
 }) => {
-    const { t, i18n } = useTranslation()
+    const { t } = useTranslation()
     const router = useRouter()
-
-    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
 
     const photoTitle = createPhotoTitle(photoData, t)
 
@@ -65,34 +62,32 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
     }
 
     return (
-        <AppLayout>
-            <NextSeo
-                title={photoTitle}
-                description={t('description-photo-page', {
-                    photoTitle,
-                    equipment: equipmentsDataDescription
-                })}
-                canonical={`${canonicalUrl}photos/${photoId}`}
-                openGraph={{
-                    images: [
-                        {
-                            height: 752,
-                            url: createLargePhotoUrl(photoData),
-                            width: 1000
-                        }
-                    ],
-                    siteName: t('look-at-the-stars'),
-                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
-                }}
-            />
-
+        <AppLayout
+            canonical={`photos/${photoId}`}
+            title={photoTitle}
+            description={t('pages.photo.description', {
+                defaultValue:
+                    '{{photoTitle}} - фотография астрономического объекта сделана на самодельной обсерватории, используемое оборудование: {{equipment}}.',
+                photoTitle,
+                equipment: equipmentsDataDescription
+            })}
+            openGraph={{
+                images: [
+                    {
+                        height: 752,
+                        url: createLargePhotoUrl(photoData),
+                        width: 1000
+                    }
+                ]
+            }}
+        >
             <AppToolbar
                 title={photoTitle}
                 currentPage={photoTitle}
                 links={[
                     {
                         link: '/photos',
-                        text: t('astrophoto')
+                        text: t('menu.astrophoto', { defaultValue: 'Астрофото' })
                     }
                 ]}
             >
@@ -102,7 +97,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                             icon={'Pencil'}
                             mode={'secondary'}
                             size={'large'}
-                            label={t('edit')}
+                            label={t('common.edit', { defaultValue: 'Редактировать' })}
                             disabled={!photoId}
                             onClick={handleEdit}
                         />
@@ -111,7 +106,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                             icon={'PlusCircle'}
                             mode={'secondary'}
                             size={'large'}
-                            label={t('add')}
+                            label={t('common.add', { defaultValue: 'Добавить' })}
                             onClick={handleCreate}
                         />
                     </>
