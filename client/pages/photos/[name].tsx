@@ -65,12 +65,11 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
         <AppLayout
             canonical={`photos/${photoId}`}
             title={photoTitle}
-            description={t('pages.photo.description', {
-                defaultValue:
-                    '{{photoTitle}} - фотография астрономического объекта сделана на самодельной обсерватории, используемое оборудование: {{equipment}}.',
-                photoTitle,
-                equipment: equipmentsDataDescription
-            })}
+            description={t(
+                'pages.photo.description',
+                '{{photoTitle}} - фотография астрономического объекта сделана на самодельной обсерватории, используемое оборудование: {{equipment}}.',
+                { photoTitle, equipment: equipmentsDataDescription }
+            )}
             openGraph={{
                 images: [
                     {
@@ -87,7 +86,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                 links={[
                     {
                         link: '/photos',
-                        text: t('menu.astrophoto', { defaultValue: 'Астрофото' })
+                        text: t('menu.astrophoto', 'Астрофото')
                     }
                 ]}
             >
@@ -97,7 +96,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                             icon={'Pencil'}
                             mode={'secondary'}
                             size={'large'}
-                            label={t('common.edit', { defaultValue: 'Редактировать' })}
+                            label={t('common.edit', 'Редактировать')}
                             disabled={!photoId}
                             onClick={handleEdit}
                         />
@@ -106,7 +105,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                             icon={'PlusCircle'}
                             mode={'secondary'}
                             size={'large'}
-                            label={t('common.add', { defaultValue: 'Добавить' })}
+                            label={t('common.add', 'Добавить')}
                             onClick={handleCreate}
                         />
                     </>

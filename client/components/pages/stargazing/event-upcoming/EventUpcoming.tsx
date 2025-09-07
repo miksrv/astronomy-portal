@@ -81,7 +81,7 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event, ...props })
                     <Image
                         className={styles.image}
                         src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
-                        alt={`${t('components.pages.stargazing.event-upcoming.stargazing', { defaultValue: 'Астровыезды' })}: ${event?.title}`}
+                        alt={`${t('components.pages.stargazing.event-upcoming.stargazing', 'Астровыезды')}: ${event?.title}`}
                         width={1024}
                         height={768}
                     />
@@ -92,9 +92,7 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event, ...props })
 
                     {registered && (
                         <h3 className={styles.registeredTitle}>
-                            {t('components.pages.stargazing.event-upcoming.you-are-registered', {
-                                defaultValue: 'Вы зарегистрированы'
-                            })}
+                            {t('components.pages.stargazing.event-upcoming.you-are-registered', 'Вы зарегистрированы')}
                         </h3>
                     )}
 

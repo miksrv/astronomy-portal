@@ -24,31 +24,31 @@ export const ProjectTeam: React.FC = () => {
 
     const teamList: TeamMemberType[] = [
         {
-            name: t('components.pages.about.project-team.mikhail', { defaultValue: 'Михаил Топчило' }),
+            name: t('components.pages.about.project-team.mikhail', 'Михаил Топчило'),
             photo: photoMisha
         },
         {
-            name: t('components.pages.about.project-team.tatiana', { defaultValue: 'Татьяна Гавриш' }),
+            name: t('components.pages.about.project-team.tatiana', 'Татьяна Гавриш'),
             photo: photoTanya
         },
         {
-            name: t('components.pages.about.project-team.igor', { defaultValue: 'Игорь Комиссарчик' }),
+            name: t('components.pages.about.project-team.igor', 'Игорь Комиссарчик'),
             photo: photoIgor
         },
         {
-            name: t('components.pages.about.project-team.sergey', { defaultValue: 'Сергей Медведев' }),
+            name: t('components.pages.about.project-team.sergey', 'Сергей Медведев'),
             photo: photoSergey
         },
         {
-            name: t('components.pages.about.project-team.eugene', { defaultValue: 'Евгений Зимин' }),
+            name: t('components.pages.about.project-team.eugene', 'Евгений Зимин'),
             photo: photoZhenya
         },
         {
-            name: t('components.pages.about.project-team.vladimir', { defaultValue: 'Владимир Иванович' }),
+            name: t('components.pages.about.project-team.vladimir', 'Владимир Иванович'),
             photo: photoVladimir
         },
         {
-            name: t('components.pages.about.project-team.nikolay', { defaultValue: 'Николай Черепанов' }),
+            name: t('components.pages.about.project-team.nikolay', 'Николай Черепанов'),
             photo: photoNikolay
         }
     ]

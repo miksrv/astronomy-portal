@@ -17,7 +17,7 @@ const HistoryPage: NextPage<object> = () => {
 
     const startDate = dayjs().startOf('days').format('YYYY-MM-DD')
     const endDate = dayjs().startOf('days').add(1, 'day').format('YYYY-MM-DD')
-    const title = t('pages.observatory-weather.title', { defaultValue: 'Погода в Обсерватории Оренбурга' })
+    const title = t('pages.observatory-weather.title', 'Погода в Обсерватории Оренбурга')
 
     const { data: history, isLoading: historyLoading } = APIMeteo.useGetHistoryQuery({
         start_date: startDate,
@@ -44,7 +44,7 @@ const HistoryPage: NextPage<object> = () => {
                 links={[
                     {
                         link: '/observatory',
-                        text: t('menu.observatory', { defaultValue: 'Обсерватория' })
+                        text: t('menu.observatory', 'Обсерватория')
                     }
                 ]}
             />

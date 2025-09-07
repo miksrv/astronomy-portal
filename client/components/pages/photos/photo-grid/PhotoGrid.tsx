@@ -37,11 +37,11 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({ photosList }) => {
                         <h4>{createPhotoTitle(photo, t)}</h4>
                         <div className={styles.info}>
                             <div>
-                                {t('components.pages.photos.photo-grid.exposure', { defaultValue: 'Выдержка' })}:{' '}
+                                {t('components.pages.photos.photo-grid.exposure', 'Выдержка')}:{' '}
                                 {getTimeFromSec(photo?.statistic?.exposure || 0, true)}
                             </div>
                             <div>
-                                {t('components.pages.photos.photo-grid.frames', { defaultValue: 'Кадров' })}:{' '}
+                                {t('components.pages.photos.photo-grid.frames', 'Кадров')}:{' '}
                                 {photo?.statistic?.frames || 0}
                             </div>
                         </div>

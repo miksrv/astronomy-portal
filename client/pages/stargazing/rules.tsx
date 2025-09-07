@@ -12,7 +12,7 @@ import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 const StargazingRulesPage: NextPage<object> = () => {
     const { t } = useTranslation()
 
-    const title = t('pages.stargazing-rules.title', { defaultValue: 'Правила поведения на астровыездах' })
+    const title = t('pages.stargazing-rules.title', 'Правила поведения на астровыездах')
 
     return (
         <AppLayout
@@ -29,133 +29,121 @@ const StargazingRulesPage: NextPage<object> = () => {
                 links={[
                     {
                         link: '/stargazing',
-                        text: t('menu.stargazing', { defaultValue: 'Астровыезды' })
+                        text: t('menu.stargazing', 'Астровыезды')
                     }
                 ]}
             />
 
             <Container style={{ marginBottom: '10px' }}>
                 <p style={{ margin: 0 }}>
-                    {t('pages.stargazing-rules.welcome', {
-                        defaultValue:
-                            'Добро пожаловать на астровыезды в Оренбурге, организованные проектом «Смотри на звезды»! Чтобы совместное наблюдение звездного неба и планет прошло комфортно и безопасно для всех участников, важно соблюдать несколько простых правил. Эти рекомендации помогают сохранить атмосферу ночного наблюдения и гарантируют, что каждый сможет насладиться видом звезд и планет в телескоп.'
-                    })}
+                    {t(
+                        'pages.stargazing-rules.welcome',
+                        'Добро пожаловать на астровыезды в Оренбурге, организованные проектом «Смотри на звезды»! Чтобы совместное наблюдение звездного неба и планет прошло комфортно и безопасно для всех участников, важно соблюдать несколько простых правил. Эти рекомендации помогают сохранить атмосферу ночного наблюдения и гарантируют, что каждый сможет насладиться видом звезд и планет в телескоп.'
+                    )}
                 </p>
             </Container>
             <Container style={{ marginBottom: '10px' }}>
                 <h2 style={{ marginTop: 0 }}>
-                    {t('pages.stargazing-rules.prohibited-title', {
-                        defaultValue: 'Что нельзя делать на астровыездах'
-                    })}
+                    {t('pages.stargazing-rules.prohibited-title', 'Что нельзя делать на астровыездах')}
                     {':'}
                 </h2>
                 <ul style={{ listStyle: 'decimal', marginBottom: 0 }}>
                     <li style={{ marginBottom: '10px' }}>
                         <h3 style={{ margin: 0 }}>
-                            {t('pages.stargazing-rules.prohibited-items-1.title', {
-                                defaultValue: 'Использовать яркие источники света'
-                            })}
+                            {t('pages.stargazing-rules.prohibited-items-1.title', 'Использовать яркие источники света')}
                         </h3>
                         <p style={{ margin: 0 }}>
-                            {t('pages.stargazing-rules.prohibited-items-1.description', {
-                                defaultValue:
-                                    'Фонарики, экраны телефонов и любые яркие световые приборы нарушают адаптацию глаз к темноте, что снижает видимость звездного неба. Используйте только красные фонари или специальные светофильтры для устройств.'
-                            })}
+                            {t(
+                                'pages.stargazing-rules.prohibited-items-1.description',
+                                'Фонарики, экраны телефонов и любые яркие световые приборы нарушают адаптацию глаз к темноте, что снижает видимость звездного неба. Используйте только красные фонари или специальные светофильтры для устройств.'
+                            )}
                         </p>
                     </li>
                     <li style={{ marginBottom: '10px' }}>
                         <h3 style={{ margin: 0 }}>
-                            {t('pages.stargazing-rules.prohibited-items-2.title', {
-                                defaultValue: 'Разжигать костры и использовать открытый огонь'
-                            })}
+                            {t(
+                                'pages.stargazing-rules.prohibited-items-2.title',
+                                'Разжигать костры и использовать открытый огонь'
+                            )}
                         </h3>
                         <p style={{ margin: 0 }}>
-                            {t('pages.stargazing-rules.prohibited-items-2.description', {
-                                defaultValue:
-                                    'Астровыезды проводятся в полях и открытых местах, где высокая вероятность пожаров. Разведение костров строго запрещено.'
-                            })}
+                            {t(
+                                'pages.stargazing-rules.prohibited-items-2.description',
+                                'Астровыезды проводятся в полях и открытых местах, где высокая вероятность пожаров. Разведение костров строго запрещено.'
+                            )}
                         </p>
                     </li>
                     <li style={{ marginBottom: '10px' }}>
                         <h3 style={{ margin: 0 }}>
-                            {t('pages.stargazing-rules.prohibited-items-3.title', {
-                                defaultValue: 'Употреблять алкоголь и курить'
-                            })}
+                            {t('pages.stargazing-rules.prohibited-items-3.title', 'Употреблять алкоголь и курить')}
                         </h3>
                         <p style={{ margin: 0 }}>
-                            {t('pages.stargazing-rules.prohibited-items-3.description', {
-                                defaultValue:
-                                    'Алкогольные напитки, сигареты, электронные сигареты, вейпы и кальяны запрещены. Это не только вопрос пожарной безопасности, но и уважение к другим участникам, для которых важно чистое ночное небо и свежий воздух.'
-                            })}
+                            {t(
+                                'pages.stargazing-rules.prohibited-items-3.description',
+                                'Алкогольные напитки, сигареты, электронные сигареты, вейпы и кальяны запрещены. Это не только вопрос пожарной безопасности, но и уважение к другим участникам, для которых важно чистое ночное небо и свежий воздух.'
+                            )}
                         </p>
                     </li>
                     <li style={{ marginBottom: '10px' }}>
                         <h3 style={{ margin: 0 }}>
-                            {t('pages.stargazing-rules.prohibited-items-4.title', {
-                                defaultValue: 'Шуметь и мешать другим участникам'
-                            })}
+                            {t('pages.stargazing-rules.prohibited-items-4.title', 'Шуметь и мешать другим участникам')}
                         </h3>
                         <p style={{ margin: 0 }}>
-                            {t('pages.stargazing-rules.prohibited-items-4.description', {
-                                defaultValue:
-                                    'Громкая музыка, крики или другие резкие звуки могут отвлекать и мешать концентрации при наблюдении в телескоп. Уважайте тишину и настрой окружающих.'
-                            })}
+                            {t(
+                                'pages.stargazing-rules.prohibited-items-4.description',
+                                'Громкая музыка, крики или другие резкие звуки могут отвлекать и мешать концентрации при наблюдении в телескоп. Уважайте тишину и настрой окружающих.'
+                            )}
                         </p>
                     </li>
                 </ul>
             </Container>
             <Container style={{ marginBottom: '10px' }}>
                 <h2 style={{ marginTop: 0 }}>
-                    {t('pages.stargazing-rules.recommendations-title', {
-                        defaultValue: 'Рекомендации для участников астровыездов'
-                    })}
+                    {t('pages.stargazing-rules.recommendations-title', 'Рекомендации для участников астровыездов')}
                     {':'}
                 </h2>
                 <ul style={{ marginBottom: 0 }}>
                     <li style={{ marginBottom: '10px' }}>
                         <h3 style={{ margin: 0 }}>
-                            {t('pages.stargazing-rules.recommendations-items-1.title', {
-                                defaultValue: 'Берегите природу'
-                            })}
+                            {t('pages.stargazing-rules.recommendations-items-1.title', 'Берегите природу')}
                         </h3>
                         <p style={{ margin: 0 }}>
-                            {t('pages.stargazing-rules.recommendations-items-1.description', {
-                                defaultValue:
-                                    'Заберите с собой весь мусор после окончания наблюдений. Мы стараемся оставить места астровыездов такими же чистыми, какими они были до нашего приезда.'
-                            })}
+                            {t(
+                                'pages.stargazing-rules.recommendations-items-1.description',
+                                'Заберите с собой весь мусор после окончания наблюдений. Мы стараемся оставить места астровыездов такими же чистыми, какими они были до нашего приезда.'
+                            )}
                         </p>
                     </li>
                     <li style={{ marginBottom: '10px' }}>
                         <h3 style={{ margin: 0 }}>
-                            {t('pages.stargazing-rules.recommendations-items-2.title', {
-                                defaultValue: 'Соблюдайте правила техники безопасности'
-                            })}
+                            {t(
+                                'pages.stargazing-rules.recommendations-items-2.title',
+                                'Соблюдайте правила техники безопасности'
+                            )}
                         </h3>
                         <p style={{ margin: 0 }}>
-                            {t('pages.stargazing-rules.recommendations-items-2.description', {
-                                defaultValue:
-                                    'Передвигайтесь аккуратно, чтобы избежать повреждений оборудования и не навредить себе.'
-                            })}
+                            {t(
+                                'pages.stargazing-rules.recommendations-items-2.description',
+                                'Передвигайтесь аккуратно, чтобы избежать повреждений оборудования и не навредить себе.'
+                            )}
                         </p>
                     </li>
                     <li style={{ marginBottom: '10px' }}>
                         <h3 style={{ margin: 0 }}>
-                            {t('pages.stargazing-rules.recommendations-items-3.title', {
-                                defaultValue: 'Уважайте других участников'
-                            })}
+                            {t('pages.stargazing-rules.recommendations-items-3.title', 'Уважайте других участников')}
                         </h3>
                         <p style={{ margin: 0 }}>
-                            {t('pages.stargazing-rules.recommendations-items-3.description', {
-                                defaultValue:
-                                    'Каждый пришел на астровыезд, чтобы насладиться красотой космоса. Уважительное отношение друг к другу делает атмосферу дружелюбной и комфортной.'
-                            })}
+                            {t(
+                                'pages.stargazing-rules.recommendations-items-3.description',
+                                'Каждый пришел на астровыезд, чтобы насладиться красотой космоса. Уважительное отношение друг к другу делает атмосферу дружелюбной и комфортной.'
+                            )}
                         </p>
                     </li>
                 </ul>
             </Container>
             <Container style={{ marginBottom: '10px' }}>
                 <h2 style={{ marginTop: 0 }}>
-                    {t('pages.stargazing-rules.importance-title', { defaultValue: 'Почему важно соблюдать правила?' })}
+                    {t('pages.stargazing-rules.importance-title', 'Почему важно соблюдать правила?')}
                 </h2>
                 <p style={{ margin: 0 }}>
                     {t('pages.stargazing-rules.importance-description', {
@@ -166,22 +154,22 @@ const StargazingRulesPage: NextPage<object> = () => {
             </Container>
             <Container style={{ marginBottom: '10px' }}>
                 <h2 style={{ marginTop: 0 }}>
-                    {t('pages.stargazing-rules.join-title', { defaultValue: 'Присоединяйтесь к нашим астровыездам!' })}
+                    {t('pages.stargazing-rules.join-title', 'Присоединяйтесь к нашим астровыездам!')}
                 </h2>
                 <p style={{ margin: 0 }}>
-                    {t('pages.stargazing-rules.join-description', {
-                        defaultValue: 'Хотите узнать больше о наших мероприятиях, организованных в Оренбурге?'
-                    })}
+                    {t(
+                        'pages.stargazing-rules.join-description',
+                        'Хотите узнать больше о наших мероприятиях, организованных в Оренбурге?'
+                    )}
                     <Link
                         style={{ margin: '0 5px' }}
                         href={'https://t.me/look_at_stars'}
-                        title={t('common.telegram', { defaultValue: 'Телеграм' })}
+                        title={t('common.telegram', 'Телеграм')}
                         rel={'noindex nofollow'}
                         target={'_blank'}
                     >
-                        {t('pages.stargazing-rules.subscribe', { defaultValue: 'Подписывайтесь' })}
+                        {t('pages.stargazing-rules.subscribe', 'Подписывайтесь')}
                     </Link>
-                    {t('pages.stargazing-rules.join-description')}
                 </p>
             </Container>
 

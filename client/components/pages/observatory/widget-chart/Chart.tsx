@@ -62,9 +62,10 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
                         if (params?.axisDimension === 'x') {
                             return formatDateFromUnixUTC(
                                 params?.value as number,
-                                t('components.pages.observatory.widget-chart.chart-label_date-format', {
-                                    defaultValue: 'D MMM YYYY, HH:mm'
-                                })
+                                t(
+                                    'components.pages.observatory.widget-chart.chart-label_date-format',
+                                    'D MMM YYYY, HH:mm'
+                                )
                             )
                         }
 
@@ -114,10 +115,7 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
                 formatter: (value: number) =>
                     formatDateFromUnixUTC(
                         value,
-                        dateFormat ??
-                            t('components.pages.observatory.widget-chart.only-hour_date-format', {
-                                defaultValue: 'HH:mm'
-                            })
+                        dateFormat ?? t('components.pages.observatory.widget-chart.only-hour_date-format', 'HH:mm')
                     )
             },
             axisTick: {
@@ -212,15 +210,15 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
                     series: [
                         getChartLineConfig(
                             'temperature',
-                            t('components.pages.observatory.widget-chart.temperature', { defaultValue: 'Температура' })
+                            t('components.pages.observatory.widget-chart.temperature', 'Температура')
                         ),
                         getChartLineConfig(
                             'feelsLike',
-                            t('components.pages.observatory.widget-chart.feels-like', { defaultValue: 'Ощущается как' })
+                            t('components.pages.observatory.widget-chart.feels-like', 'Ощущается как')
                         ),
                         getChartLineConfig(
                             'dewPoint',
-                            t('components.pages.observatory.widget-chart.dew-point', { defaultValue: 'Точка росы' })
+                            t('components.pages.observatory.widget-chart.dew-point', 'Точка росы')
                         )
                     ]
                 }
@@ -242,22 +240,20 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
                             axisLabel: {
                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 ...(baseConfig.yAxis as any).axisLabel,
-                                formatter: `{value}${t('components.pages.observatory.widget-chart.meters-per-second', { defaultValue: 'м/с' })}`
+                                formatter: `{value}${t('components.pages.observatory.widget-chart.meters-per-second', 'м/с')}`
                             }
                         }
                     ],
                     series: [
                         getChartLineConfig(
                             'clouds',
-                            t('components.pages.observatory.widget-chart.clouds', { defaultValue: 'Облачность' }),
+                            t('components.pages.observatory.widget-chart.clouds', 'Облачность'),
                             0,
                             true
                         ),
                         getChartLineConfig(
                             'windSpeed',
-                            t('components.pages.observatory.widget-chart.wind-speed', {
-                                defaultValue: 'Скорость ветра'
-                            }),
+                            t('components.pages.observatory.widget-chart.wind-speed', 'Скорость ветра'),
                             1
                         )
                     ]

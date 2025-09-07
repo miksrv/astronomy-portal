@@ -60,9 +60,7 @@ export const RelayList: React.FC = () => {
 
             {isError && (
                 <Message type={'error'}>
-                    {t('components.pages.observatory.relay-list.error', {
-                        defaultValue: 'Ошибка при получении списка реле'
-                    })}
+                    {t('components.pages.observatory.relay-list.error', 'Ошибка при получении списка реле')}
                 </Message>
             )}
 
@@ -88,24 +86,18 @@ export const RelayList: React.FC = () => {
                                     relayList?.items?.[1]?.state ? styles.on : styles.off
                                 )}
                             />
-                            {t('components.pages.observatory.relay-list.lightning', { defaultValue: 'Освещение' })}
+                            {t('components.pages.observatory.relay-list.lightning', 'Освещение')}
                         </div>
                         <div className={styles.description}>
                             {countdownTimer > 0 ? (
                                 <>
-                                    {t('components.pages.observatory.relay-list.available-in', {
-                                        defaultValue: 'Доступно через'
-                                    })}{' '}
-                                    <b>{countdownTimer}</b>{' '}
-                                    {t('components.pages.observatory.relay-list.sec', { defaultValue: 'секунд' })}
+                                    {t('components.pages.observatory.relay-list.available-in', 'Доступно через')}{' '}
+                                    <b>{countdownTimer}</b> {t('components.pages.observatory.relay-list.sec', 'секунд')}
                                 </>
                             ) : (
                                 <>
-                                    {t('components.pages.observatory.relay-list.turned-on', {
-                                        defaultValue: 'Включили'
-                                    })}{' '}
-                                    {t('components.pages.observatory.relay-list.times', {
-                                        defaultValue: '{{count}} раз',
+                                    {t('components.pages.observatory.relay-list.turned-on', 'Включили')}{' '}
+                                    {t('components.pages.observatory.relay-list.times', '{{count}} раз', {
                                         count: relayList?.light.counter
                                     })}
                                 </>

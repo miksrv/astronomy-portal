@@ -14,7 +14,7 @@ const CelestialPage: NextPage<object> = () => {
 
     const { data } = API.useObjectsGetListQuery()
 
-    const title = t('pages.star-map.title', { defaultValue: 'Карта звёздного неба' })
+    const title = t('pages.star-map.title', 'Карта звёздного неба')
 
     return (
         <AppLayout

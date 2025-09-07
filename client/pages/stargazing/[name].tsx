@@ -37,7 +37,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>()
 
-    const title = `${t('menu.stargazing', { defaultValue: 'Астровыезды' })} - ${event?.title}`
+    const title = `${t('menu.stargazing', 'Астровыезды')} - ${event?.title}`
 
     const adjacentEvents = useMemo(() => {
         const sortedEvents = [...(eventsList || [])].sort((a, b) => {
@@ -104,7 +104,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 links={[
                     {
                         link: '/stargazing',
-                        text: t('menu.stargazing', { defaultValue: 'Астровыезды' })
+                        text: t('menu.stargazing', 'Астровыезды')
                     }
                 ]}
             />
@@ -119,7 +119,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 <h2
                     className={'subTitle'}
                     style={{ marginTop: 0, textTransform: 'uppercase' }}
-                >{`${event?.title} - ${t('pages.stargazing.photos-from-stargazing', { defaultValue: 'Фотографии с астровыезда' })}`}</h2>
+                >{`${event?.title} - ${t('pages.stargazing.photos-from-stargazing', 'Фотографии с астровыезда')}`}</h2>
 
                 {user?.role === ApiModel.UserRole.ADMIN && (
                     <Button
@@ -138,7 +138,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                             height: photo.height,
                             src: createPreviewPhotoUrl(photo),
                             width: photo.width,
-                            alt: `${photo?.title} (${t('pages.stargazing.photo', { defaultValue: 'Фото' })} ${index + 1})`
+                            alt: `${photo?.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
                         })) || []
                     }
                     onClick={({ index }) => {
@@ -161,7 +161,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                     height: photo.height,
                     src: createFullPhotoUrl(photo),
                     width: photo.width,
-                    title: `${photo.title} (${t('pages.stargazing.photo', { defaultValue: 'Фото' })} ${index + 1})`
+                    title: `${photo.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
                 }))}
                 photoIndex={photoIndex}
                 showLightbox={showLightbox}

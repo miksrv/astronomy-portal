@@ -63,7 +63,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
         [filteredCategoriesList, categoryFilter]
     )
 
-    const title = t('pages.objects.title', { defaultValue: 'Список астрономических объектов' })
+    const title = t('pages.objects.title', 'Список астрономических объектов')
 
     const handleChangeCategoryFilter = async (category: number | undefined) => {
         if (category !== undefined) {
@@ -107,7 +107,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
         <AppLayout
             canonical={'objects'}
             title={`${title}${categoryFilter ? `: ${currentCategory?.title}` : ''}`}
-            description={`${t('pages.objects.description', { defaultValue: 'Каталог астрономических объектов, отснятых обсерваторией: галактики, туманности, астероиды и кометы. Таблица с объектами включает информацию о суммарной выдержке, наличии обработанных фото и данных по каждому фильтру: Luminance, Red, Green, Blue, Ha, OIII, SII. Узнайте больше о каждом объекте и деталях наблюдения, проведенных обсерваторией.' })} ${currentCategory?.description}`}
+            description={`${t('pages.objects.description', 'Каталог астрономических объектов, отснятых обсерваторией: галактики, туманности, астероиды и кометы. Таблица с объектами включает информацию о суммарной выдержке, наличии обработанных фото и данных по каждому фильтру: Luminance, Red, Green, Blue, Ha, OIII, SII. Узнайте больше о каждом объекте и деталях наблюдения, проведенных обсерваторией.')} ${currentCategory?.description}`}
             openGraph={{
                 images: [
                     {
@@ -135,7 +135,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
             >
                 <Input
                     size={'large'}
-                    placeholder={t('pages.objects.search-by-name', { defaultValue: 'Поиск по названию' })}
+                    placeholder={t('pages.objects.search-by-name', 'Поиск по названию')}
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
                 />
@@ -145,7 +145,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                     mode={'secondary'}
                     clearable={true}
                     value={categoryFilter}
-                    placeholder={t('pages.objects.filter-by-category', { defaultValue: 'Фильтр по категории' })}
+                    placeholder={t('pages.objects.filter-by-category', 'Фильтр по категории')}
                     onSelect={(category) => handleChangeCategoryFilter(category?.key)}
                     options={filteredCategoriesList?.map((category) => ({
                         key: category.id,
@@ -158,7 +158,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                         icon={'PlusCircle'}
                         mode={'secondary'}
                         size={'large'}
-                        label={t('pages.objects.create_button', { defaultValue: 'Создать объект' })}
+                        label={t('pages.objects.create_button', 'Создать объект')}
                         onClick={handleCreate}
                     />
                 )}

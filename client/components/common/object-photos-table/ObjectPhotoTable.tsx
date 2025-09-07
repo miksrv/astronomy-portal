@@ -43,28 +43,28 @@ export const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, 
                             />
                         </Link>
                     ),
-                header: t('components.common.object-photos-table.photo', { defaultValue: 'Фотография' }),
+                header: t('components.common.object-photos-table.photo', 'Фотография'),
                 isSortable: true
             },
             {
                 accessor: 'date',
                 className: styles.cellCenter,
                 formatter: (data) => formatDate(data as string, 'DD MMM YYYY'),
-                header: t('components.common.object-photos-table.date', { defaultValue: 'Дата' }),
+                header: t('components.common.object-photos-table.date', 'Дата'),
                 isSortable: true
             },
             {
                 accessor: 'frames',
                 className: styles.cellCenter,
                 formatter: (data) => (data as number) || '',
-                header: t('components.common.object-photos-table.frames', { defaultValue: 'Кадры' }),
+                header: t('components.common.object-photos-table.frames', 'Кадры'),
                 isSortable: true
             },
             {
                 accessor: 'exposure',
                 className: styles.cellCenter,
                 formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
-                header: t('components.common.object-photos-table.exposure', { defaultValue: 'Выдержка' }),
+                header: t('components.common.object-photos-table.exposure', 'Выдержка'),
                 isSortable: true
             },
             {

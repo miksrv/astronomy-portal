@@ -29,59 +29,59 @@ export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) =
     const menuItems: MenuItemType[] = [
         {
             link: '/photos',
-            text: t('menu.astrophoto', { defaultValue: 'Астрофото' })
+            text: t('menu.astrophoto', 'Астрофото')
         },
         {
             link: '/objects',
-            text: t('menu.objects', { defaultValue: 'Объекты' })
+            text: t('menu.objects', 'Объекты')
         },
         {
             link: '/stargazing',
-            text: t('menu.stargazing', { defaultValue: 'Астровыезды' }),
+            text: t('menu.stargazing', 'Астровыезды'),
             subMenuItems: [
                 {
                     link: '/stargazing/rules',
-                    text: t('menu.stargazing-rules', { defaultValue: 'Правила поведения на астровыездах' })
+                    text: t('menu.stargazing-rules', 'Правила поведения на астровыездах')
                 },
                 {
                     link: '/stargazing/howto',
-                    text: t('menu.stargazing-howto', { defaultValue: 'Как проходят астровыезды' })
+                    text: t('menu.stargazing-howto', 'Как проходят астровыезды')
                 },
                 {
                     link: '/stargazing/where',
-                    text: t('menu.stargazing-where', { defaultValue: 'Где посмотреть в телескоп в Оренбурге' })
+                    text: t('menu.stargazing-where', 'Где посмотреть в телескоп в Оренбурге')
                 },
                 {
                     link: '/stargazing/faq',
-                    text: t('menu.stargazing-faq', { defaultValue: 'Часто задаваемые вопросы' })
+                    text: t('menu.stargazing-faq', 'Часто задаваемые вопросы')
                 }
             ]
         },
         {
             link: '/observatory',
-            text: t('menu.observatory', { defaultValue: 'Обсерватория' }),
+            text: t('menu.observatory', 'Обсерватория'),
             subMenuItems: [
                 {
                     link: '/observatory/overview',
-                    text: t('menu.observatory-orenburg', { defaultValue: 'Обсерватория в Оренбурге' })
+                    text: t('menu.observatory-orenburg', 'Обсерватория в Оренбурге')
                 },
                 {
                     link: '/observatory/weather',
-                    text: t('menu.observatory-orenburg-weather', { defaultValue: 'Погода в Обсерватории Оренбурга' })
+                    text: t('menu.observatory-orenburg-weather', 'Погода в Обсерватории Оренбурга')
                 }
             ]
         },
         {
             link: '/starmap',
-            text: t('menu.star-map', { defaultValue: 'Звёздная карта' })
+            text: t('menu.star-map', 'Звёздная карта')
         },
         {
             link: '/about',
-            text: t('menu.about', { defaultValue: 'О проекте' })
+            text: t('menu.about', 'О проекте')
         },
         {
             link: 'https://t.me/look_at_stars',
-            text: t('menu.telegram', { defaultValue: 'Телеграм' })
+            text: t('menu.telegram', 'Телеграм')
         }
     ]
 

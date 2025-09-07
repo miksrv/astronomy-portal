@@ -66,22 +66,22 @@ export const Camera: React.FC<CameraProps> = ({ cameraURL, interval }) => {
                         <img
                             className={styles.photoImage}
                             src={cameraSrc}
-                            alt={t('components.pages.observatory.camera.image-from-observatory-camera', {
-                                defaultValue: 'Изображение с камеры обсерватории'
-                            })}
+                            alt={t(
+                                'components.pages.observatory.camera.image-from-observatory-camera',
+                                'Изображение с камеры обсерватории'
+                            )}
                         />
                     </button>
                 </>
             ) : (
                 <Message
                     type={'error'}
-                    title={t('components.pages.observatory.camera.camera-not-available', {
-                        defaultValue: 'Камера недоступна'
-                    })}
+                    title={t('components.pages.observatory.camera.camera-not-available', 'Камера недоступна')}
                 >
-                    {t('components.pages.observatory.camera.camera-image-not-available', {
-                        defaultValue: 'Изображение с камеры недоступно'
-                    })}
+                    {t(
+                        'components.pages.observatory.camera.camera-image-not-available',
+                        'Изображение с камеры недоступно'
+                    )}
                 </Message>
             )}
         </Container>
