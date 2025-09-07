@@ -106,10 +106,10 @@ const StargazingHowToPage: NextPage<object> = () => {
                     <li style={{ marginBottom: '10px' }}>
                         <h3>{t('pages.stargazing-howto.arrival', 'Прибытие на место')}</h3>
                         <p style={{ margin: 0 }}>
-                            {t('pages.stargazing-howto.arrival_text', {
-                                defaultValue:
-                                    'Приезжайте за 15–20 минут до начала, чтобы занять удобное место на астрономической поляне. Возьмите с собой походные стулья или коврики для комфортного размещения.'
-                            })}
+                            {t(
+                                'pages.stargazing-howto.arrival_text',
+                                'Приезжайте за 15–20 минут до начала, чтобы занять удобное место на астрономической поляне. Возьмите с собой походные стулья или коврики для комфортного размещения.'
+                            )}
                         </p>
                     </li>
                     <li style={{ marginBottom: '10px' }}>
@@ -146,10 +146,10 @@ const StargazingHowToPage: NextPage<object> = () => {
                     {t('pages.stargazing-howto.event_duration', 'Продолжительность мероприятия')}
                 </h3>
                 <p style={{ margin: 0 }}>
-                    {t('pages.stargazing-howto.event_duration_text', {
-                        defaultValue:
-                            'Весь астровыезд занимает от 2 до 4 часов. Вы можете покинуть площадку в любое время, но многие остаются до последнего, наслаждаясь видами звездного неба.'
-                    })}
+                    {t(
+                        'pages.stargazing-howto.event_duration_text',
+                        'Весь астровыезд занимает от 2 до 4 часов. Вы можете покинуть площадку в любое время, но многие остаются до последнего, наслаждаясь видами звездного неба.'
+                    )}
                 </p>
                 <h3 style={{ marginTop: 10 }}>
                     {t('pages.stargazing-howto.recommendations', 'Обязательные рекомендации')}
