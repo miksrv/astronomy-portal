@@ -164,6 +164,9 @@ export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosL
                 verticalBorder={true}
                 data={flattenObjects(objectsList, photosList)}
                 defaultSort={{ direction: 'asc', key: 'name' }}
+                noDataCaption={t('components.pages.objects.objects-table.no-objects', {
+                    defaultValue: 'Нет объектов'
+                })}
             />
         </Container>
     )

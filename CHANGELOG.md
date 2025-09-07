@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 4.1.2
+
+### Patch Changes
+
+- Refactoring UI structure
+- Improved UI Locales
+- Updated UI Dependencies
+
 ## 4.1.1
 
 ### Patch Changes
