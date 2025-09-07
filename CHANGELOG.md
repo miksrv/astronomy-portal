@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 4.1.3
+
+### Patch Changes
+
+- Fixed UI Locale for photo equipment
+- Fixed styles for UI photo equipment list
+
 ## 4.1.2
 
 ### Patch Changes

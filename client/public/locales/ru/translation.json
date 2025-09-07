@@ -214,6 +214,16 @@
         "about": "О проекте",
         "telegram": "Телеграм"
     },
+    "equipment": {
+        "mount": "Монтировка",
+        "scope": "Телескоп",
+        "camera": "Камера",
+        "guiding_camera": "Гид-камера",
+        "guiding_scope": "Гид-телескоп",
+        "focuser": "Фокусер",
+        "filter_wheel": "Колесо фильтров",
+        "filter": "Фильтр"
+    },
     "pages": {
         "about": {
             "title": "О проекте",
