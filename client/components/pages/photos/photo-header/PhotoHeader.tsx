@@ -122,22 +122,20 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                     <span className={styles.key}>
                         {t('components.pages.photos.photo-header.category', 'Категория')}:
                     </span>
-                    <div>
-                        {!categoriesData?.length
-                            ? '---'
-                            : categoriesData?.map(({ title, id }, i) => (
-                                  <>
-                                      <Link
-                                          key={`category_${id}`}
-                                          href={`/photos?category=${id}`}
-                                          title={`${t('components.pages.photos.photo-header.astrophoto', 'Астрофото')}: {title}`}
-                                      >
-                                          {title}
-                                      </Link>
-                                      {i < categoriesData.length - 1 && ', '}
-                                  </>
-                              ))}
-                    </div>
+                    {!categoriesData?.length
+                        ? '---'
+                        : categoriesData?.map(({ title, id }, i) => (
+                              <>
+                                  <Link
+                                      key={`category_${id}`}
+                                      href={`/photos?category=${id}`}
+                                      title={`${t('components.pages.photos.photo-header.astrophoto', 'Астрофото')}: {title}`}
+                                  >
+                                      {title}
+                                  </Link>
+                                  {i < categoriesData.length - 1 && ', '}
+                              </>
+                          ))}
                 </div>
 
                 <div className={styles.item}>
