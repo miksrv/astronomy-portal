@@ -241,9 +241,11 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                         objectsLink: (
                             <Link
                                 href='/objects'
-                                title={t('objects')}
+                                title={t('pages.observatory.photos-and-data-part-objects', {
+                                    defaultValue: 'объектов'
+                                })}
                             >
-                                {t('pages.observatory.photos-and-data-part-objects')}
+                                {t('pages.observatory.photos-and-data-part-objects', { defaultValue: 'объектов' })}
                             </Link>
                         )
                     })}

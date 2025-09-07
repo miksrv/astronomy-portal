@@ -255,16 +255,16 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     }}
                 />
                 <p>
-                    {t('pages.about.observatory-work-1', {
+                    {t('pages.about.observatory-work-1.text', {
                         defaultValue:
                             'Обсерватория открыта для всех желающих. Каждый может воспользоваться её возможностями, чтобы получить изображения космических объектов. Более того, на сайте доступен раздел'
                     })}
                     <Link
                         href={'/objects'}
                         style={{ marginLeft: '5px' }}
-                        title={t('objects', { defaultValue: 'Объекты' })}
+                        title={t('pages.about.observatory-work-1.objects', { defaultValue: 'Объекты' })}
                     >
-                        {t('objects', { defaultValue: 'Объекты' })}
+                        {t('pages.about.observatory-work-1.objects', { defaultValue: 'Объекты' })}
                     </Link>
                     {t('pages.about.observatory-work-2', {
                         defaultValue:
