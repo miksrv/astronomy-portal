@@ -53,11 +53,11 @@ export const AstronomyCalc: React.FC = () => {
                         width={16}
                         height={16}
                     />
-                    {t('components.pages.observatory.astronomy-calc.sun', { defaultValue: 'Солнце' })}
+                    {t('components.pages.observatory.astronomy-calc.sun', 'Солнце')}
                 </strong>
                 <div className={styles.parameters}>
                     <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.dawn', { defaultValue: 'Восход' })}
+                        {t('components.pages.observatory.astronomy-calc.dawn', 'Восход')}
                         {':'}
                         <span className={styles.val}>
                             {'↑'}
@@ -65,7 +65,7 @@ export const AstronomyCalc: React.FC = () => {
                         </span>
                     </div>
                     <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.sunset', { defaultValue: 'Закат' })}
+                        {t('components.pages.observatory.astronomy-calc.sunset', 'Закат')}
                         {':'}
                         <span className={styles.val}>
                             {'↓'}
@@ -75,7 +75,7 @@ export const AstronomyCalc: React.FC = () => {
                 </div>
                 <div className={styles.parameters}>
                     <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.height', { defaultValue: 'Высота' })}
+                        {t('components.pages.observatory.astronomy-calc.height', 'Высота')}
                         {':'}
                         <span className={styles.val}>
                             {sunAltitude}
@@ -83,7 +83,7 @@ export const AstronomyCalc: React.FC = () => {
                         </span>
                     </div>
                     <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.azimuth', { defaultValue: 'Азимут' })}
+                        {t('components.pages.observatory.astronomy-calc.azimuth', 'Азимут')}
                         {':'}
                         <span className={styles.val}>
                             {sunAzimuth}
@@ -96,11 +96,11 @@ export const AstronomyCalc: React.FC = () => {
             <div className={styles.container}>
                 <strong>
                     <MoonPhaseIcon date={currentDate.toDateString()} />{' '}
-                    {t('components.pages.observatory.astronomy-calc.moon', { defaultValue: 'Луна' })}
+                    {t('components.pages.observatory.astronomy-calc.moon', 'Луна')}
                 </strong>
                 <div className={styles.parameters}>
                     <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.dawn', { defaultValue: 'Восход' })}
+                        {t('components.pages.observatory.astronomy-calc.dawn', 'Восход')}
                         {':'}
                         <span className={styles.val}>
                             {'↑'}
@@ -108,7 +108,7 @@ export const AstronomyCalc: React.FC = () => {
                         </span>
                     </div>
                     <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.sunset', { defaultValue: 'Закат' })}
+                        {t('components.pages.observatory.astronomy-calc.sunset', 'Закат')}
                         {':'}
                         <span className={styles.val}>
                             {'↓'}
@@ -118,7 +118,7 @@ export const AstronomyCalc: React.FC = () => {
                 </div>
                 <div className={styles.parameters}>
                     <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.height', { defaultValue: 'Высота' })}
+                        {t('components.pages.observatory.astronomy-calc.height', 'Высота')}
                         {':'}
                         <span className={styles.val}>
                             {moonAltitude}
@@ -126,7 +126,7 @@ export const AstronomyCalc: React.FC = () => {
                         </span>
                     </div>
                     <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.azimuth', { defaultValue: 'Азимут' })}
+                        {t('components.pages.observatory.astronomy-calc.azimuth', 'Азимут')}
                         {':'}
                         <span className={styles.val}>
                             {moonAzimuth}

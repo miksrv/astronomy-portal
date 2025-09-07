@@ -63,11 +63,11 @@ const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
     return (
         <AppLayout
             fullWidth={true}
-            title={t('pages.index.title', { defaultValue: 'Проект "Смотри на звёзды"' })}
-            description={t('pages.index.description', {
-                defaultValue:
-                    'Смотри на звезды - уникальный проект в Оренбургской области: наблюдения в телескопы за городом, тротуарная астрономия, обсерватория в Оренбургской области и астрофотографии'
-            })}
+            title={t('pages.index.title', 'Проект "Смотри на звёзды"')}
+            description={t(
+                'pages.index.description',
+                'Смотри на звезды - уникальный проект в Оренбургской области: наблюдения в телескопы за городом, тротуарная астрономия, обсерватория в Оренбургской области и астрофотографии'
+            )}
         >
             <MainSection.Astrophotos photos={photosList} />
             <MainSection.Stargazing />

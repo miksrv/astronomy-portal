@@ -17,7 +17,7 @@ const HistoryPage: NextPage<object> = () => {
 
     const startDate = dayjs().startOf('days').format('YYYY-MM-DD')
     const endDate = dayjs().startOf('days').add(1, 'day').format('YYYY-MM-DD')
-    const title = t('pages.observatory-weather.title', { defaultValue: 'Погода в Обсерватории Оренбурга' })
+    const title = t('pages.observatory-weather.title', 'Погода в Обсерватории Оренбурга')
 
     const { data: history, isLoading: historyLoading } = APIMeteo.useGetHistoryQuery({
         start_date: startDate,
@@ -33,10 +33,10 @@ const HistoryPage: NextPage<object> = () => {
         <AppLayout
             canonical={'observatory/weather'}
             title={title}
-            description={t('pages.observatory-weather.description', {
-                defaultValue:
-                    'Актуальные графики погоды с метеостанции любительской обсерватории в пригороде Оренбурга. Температура, влажность, облачность и скорость ветра в реальном времени.'
-            })}
+            description={t(
+                'pages.observatory-weather.description',
+                'Актуальные графики погоды с метеостанции любительской обсерватории в пригороде Оренбурга. Температура, влажность, облачность и скорость ветра в реальном времени.'
+            )}
         >
             <AppToolbar
                 title={title}
@@ -44,16 +44,16 @@ const HistoryPage: NextPage<object> = () => {
                 links={[
                     {
                         link: '/observatory',
-                        text: t('menu.observatory', { defaultValue: 'Обсерватория' })
+                        text: t('menu.observatory', 'Обсерватория')
                     }
                 ]}
             />
 
             <p>
-                {t('pages.observatory-weather.description', {
-                    defaultValue:
-                        'Следите за погодными условиями в режиме реального времени с метеостанции, установленной на самодельной астрономической обсерватории в пригороде Оренбурга. Графики отображают температуру, влажность, облачность и скорость ветра. Для полного доступа к данным и истории наблюдений переходите на сайт метеостанции:'
-                })}{' '}
+                {t(
+                    'pages.observatory-weather.description',
+                    'Следите за погодными условиями в режиме реального времени с метеостанции, установленной на самодельной астрономической обсерватории в пригороде Оренбурга. Графики отображают температуру, влажность, облачность и скорость ветра. Для полного доступа к данным и истории наблюдений переходите на сайт метеостанции:'
+                )}{' '}
                 <Link
                     href={'https://meteo.miksoft.pro/'}
                     target={'_blank'}

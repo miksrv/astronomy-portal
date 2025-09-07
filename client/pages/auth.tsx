@@ -81,16 +81,16 @@ const AuthPage: NextPage<AuthPageProps> = () => {
                 nofollow={true}
                 noindex={true}
                 canonical={`${i18n.language === 'en' ? 'en/' : ''}auth`}
-                title={t('pages.auth.title', { defaultValue: 'Авторизация на сайте' })}
+                title={t('pages.auth.title', 'Авторизация на сайте')}
             />
             <div className={'centerPageContainer'}>
                 <div className={'wrapper'}>
                     <Container>
-                        <h1 className={'header'}>{t('pages.auth.title', { defaultValue: 'Авторизация на сайте' })}</h1>
+                        <h1 className={'header'}>{t('pages.auth.title', 'Авторизация на сайте')}</h1>
                         {error && (
                             <Message
                                 type={'error'}
-                                title={t('pages.auth.notification_error', { defaultValue: 'Ошибка' })}
+                                title={t('pages.auth.notification_error', 'Ошибка')}
                             >
                                 {error as string}
                             </Message>
@@ -106,7 +106,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
                                 size={'medium'}
                                 mode={'primary'}
                             >
-                                {t('pages.auth.go-to-home-page', { defaultValue: 'Перейти на главную страницу' })}
+                                {t('pages.auth.go-to-home-page', 'Перейти на главную страницу')}
                             </Button>
                         )}
                     </Container>

@@ -41,7 +41,7 @@ export const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({ filesList, l
         {
             accessor: 'date',
             formatter: (date) => (date ? formatDate(date as string) : ''),
-            header: t('components.pages.objects.object-files-table.date', { defaultValue: 'Дата' }),
+            header: t('components.pages.objects.object-files-table.date', 'Дата'),
             isSortable: true
         },
         {
@@ -53,42 +53,40 @@ export const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({ filesList, l
                     {'%'}
                 </>
             ),
-            header: t('components.pages.objects.object-files-table.moon-phase', { defaultValue: 'Фаза Луны' }),
+            header: t('components.pages.objects.object-files-table.moon-phase', 'Фаза Луны'),
             isSortable: true
         },
         {
             accessor: 'exposure',
             className: styles.cellCenter,
             formatter: (data) => (data as number) || '',
-            header: t('components.pages.objects.object-files-table.exposure', { defaultValue: 'Экспозиция' }),
+            header: t('components.pages.objects.object-files-table.exposure', 'Экспозиция'),
             isSortable: true
         },
         {
             accessor: 'ccdTemp',
             className: styles.cellCenter,
             formatter: (data) => `${data}°C`,
-            header: t('components.pages.objects.object-files-table.ccd-temperature', {
-                defaultValue: 'Температура ПЗС'
-            }),
+            header: t('components.pages.objects.object-files-table.ccd-temperature', 'Температура ПЗС'),
             isSortable: true
         },
         {
             accessor: 'gain',
             className: styles.cellCenter,
-            header: t('components.pages.objects.object-files-table.gain', { defaultValue: 'Усиление' }),
+            header: t('components.pages.objects.object-files-table.gain', 'Усиление'),
             isSortable: true
         },
         {
             accessor: 'offset',
             className: styles.cellCenter,
-            header: t('components.pages.objects.object-files-table.offset', { defaultValue: 'Смещение' }),
+            header: t('components.pages.objects.object-files-table.offset', 'Смещение'),
             isSortable: true
         },
         {
             accessor: 'filter',
             background: (data) => (data ? getFilterColor(data as ApiModel.FilterTypes) : undefined),
             className: styles.cellCenter,
-            header: t('components.pages.objects.object-files-table.filter', { defaultValue: 'Фильтр' }),
+            header: t('components.pages.objects.object-files-table.filter', 'Фильтр'),
             isSortable: true
         }
     ]
@@ -102,9 +100,7 @@ export const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({ filesList, l
                 stickyHeader={true}
                 loading={loading}
                 data={flattenedFilesList}
-                noDataCaption={t('components.pages.objects.object-files-table.no-fits-files', {
-                    defaultValue: 'Нет FITS файлов'
-                })}
+                noDataCaption={t('components.pages.objects.object-files-table.no-fits-files', 'Нет FITS файлов')}
                 defaultSort={{ direction: 'desc', key: 'date' }}
                 maxHeight={280}
             />

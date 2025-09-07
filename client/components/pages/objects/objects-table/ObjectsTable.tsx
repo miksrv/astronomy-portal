@@ -36,7 +36,7 @@ export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosL
                     {formatObjectName(data as string)}
                 </Link>
             ),
-            header: t('components.pages.objects.objects-table.object', { defaultValue: 'Объект' }),
+            header: t('components.pages.objects.objects-table.object', 'Объект'),
             isSortable: true
         },
         {
@@ -47,9 +47,7 @@ export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosL
                     <Link
                         key={row[i].photoId}
                         href={`/photos/${row[i].photoId}`}
-                        title={t('components.pages.objects.objects-table.view-photo', {
-                            defaultValue: 'Просмотр фото'
-                        })}
+                        title={t('components.pages.objects.objects-table.view-photo', 'Просмотр фото')}
                     >
                         <Image
                             src={data as string}
@@ -59,21 +57,21 @@ export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosL
                         />
                     </Link>
                 ),
-            header: t('components.pages.objects.objects-table.photo', { defaultValue: 'Фото' }),
+            header: t('components.pages.objects.objects-table.photo', 'Фото'),
             isSortable: true
         },
         {
             accessor: 'frames',
             className: styles.cellCenter,
             formatter: (data) => (data as number) || '',
-            header: t('components.pages.objects.objects-table.frames', { defaultValue: 'Кадры' }),
+            header: t('components.pages.objects.objects-table.frames', 'Кадры'),
             isSortable: true
         },
         {
             accessor: 'exposure',
             className: styles.cellCenter,
             formatter: (data) => (data ? formatSecondsToExposure(data as number) : ''),
-            header: t('components.pages.objects.objects-table.exposure', { defaultValue: 'Выдержка' }),
+            header: t('components.pages.objects.objects-table.exposure', 'Выдержка'),
             isSortable: true
         },
         {
@@ -164,6 +162,7 @@ export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosL
                 verticalBorder={true}
                 data={flattenObjects(objectsList, photosList)}
                 defaultSort={{ direction: 'asc', key: 'name' }}
+                noDataCaption={t('components.pages.objects.objects-table.no-objects', 'Нет объектов')}
             />
         </Container>
     )

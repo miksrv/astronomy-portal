@@ -3,6 +3,7 @@ import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
+import { TFunction } from 'i18next'
 
 dayjs.extend(utc)
 dayjs.extend(duration)
@@ -32,11 +33,7 @@ export const getSecondsUntilUTCDate = (date?: string | Date): number | undefined
     date ? dayjs.utc(date).tz(TIME_ZONE).diff(dayjs(), 'second') : undefined
 dayjs.extend(duration)
 
-export const getLocalizedTimeFromSec = (
-    sec: number,
-    full: boolean = false,
-    t: (key: string, options?: { count?: number; defaultValue?: string }) => string
-): string => {
+export const getLocalizedTimeFromSec = (sec: number, full: boolean = false, t: TFunction): string => {
     if (sec <= 0) {
         return '0'
     }
@@ -52,19 +49,19 @@ export const getLocalizedTimeFromSec = (
         const seconds = d.seconds()
 
         if (days) {
-            parts.push(t('common.day', { count: days, defaultValue: '{{count}} день' }))
+            parts.push(t('common.day', '{{count}} день', { count: days }))
         }
 
         if (hours) {
-            parts.push(t('common.hour', { count: hours, defaultValue: '{{count}} час' }))
+            parts.push(t('common.hour', '{{count}} час', { count: hours }))
         }
 
         if (minutes) {
-            parts.push(t('common.minute', { count: minutes, defaultValue: '{{count}} минута' }))
+            parts.push(t('common.minute', '{{count}} минута', { count: minutes }))
         }
 
         if (seconds && parts.length === 0) {
-            parts.push(t('common.second', { count: seconds, defaultValue: '{{count}} секунда' }))
+            parts.push(t('common.second', '{{count}} секунда', { count: seconds }))
         }
 
         return parts.join(' ')

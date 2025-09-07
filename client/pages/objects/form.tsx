@@ -88,7 +88,7 @@ const ObjectFormPage: NextPage<object> = () => {
                 links={[
                     {
                         link: '/objects',
-                        text: t('menu.objects', { defaultValue: 'Объекты' })
+                        text: t('menu.objects', 'Объекты')
                     }
                 ]}
             />

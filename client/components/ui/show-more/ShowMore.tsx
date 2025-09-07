@@ -23,8 +23,8 @@ export const ShowMore: React.FC<ShowMoreProps> = ({ children }) => {
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 {isExpanded
-                    ? t('components.ui.show-more.show-less', { defaultValue: 'Показать меньше' })
-                    : t('components.ui.show-more.show-more', { defaultValue: 'Показать больше' })}
+                    ? t('components.ui.show-more.show-less', 'Показать меньше')
+                    : t('components.ui.show-more.show-more', 'Показать больше')}
             </Button>
         </div>
     )

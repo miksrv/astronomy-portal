@@ -112,7 +112,7 @@ const PhotoFormPage: NextPage<object> = () => {
                 links={[
                     {
                         link: '/photos',
-                        text: t('menu.astrophoto', { defaultValue: 'Астрофото' })
+                        text: t('menu.astrophoto', 'Астрофото')
                     }
                 ]}
             />

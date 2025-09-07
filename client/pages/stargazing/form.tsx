@@ -73,7 +73,7 @@ const StargazingFormPage: NextPage<object> = () => {
                 links={[
                     {
                         link: '/stargazing',
-                        text: t('menu.stargazing', { defaultValue: 'Астровыезды' })
+                        text: t('menu.stargazing', 'Астровыезды')
                     }
                 ]}
             />

@@ -30,10 +30,8 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
             <div className={styles.parameters}>
                 <div className={styles.item}>
                     <span className={styles.key}>
-                        {t('components.pages.objects.object-header.name-in-the-directory', {
-                            defaultValue: 'Название в каталоге'
-                        })}
-                        :
+                        {t('components.pages.objects.object-header.name-in-the-directory', 'Название в каталоге')}
+                        {':'}
                     </span>
                     {props.name}
                 </div>
@@ -41,14 +39,14 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
                 {!!categoriesData?.length && (
                     <div className={styles.item}>
                         <span className={styles.key}>
-                            {t('components.pages.objects.object-header.category', { defaultValue: 'Категория' })}:
+                            {t('components.pages.objects.object-header.category', 'Категория')}:
                         </span>
                         {categoriesData?.map(({ title, id }, i) => (
                             <>
                                 <Link
                                     key={`category_${id}`}
                                     href={`/objects?category=${id}`}
-                                    title={`${t('components.pages.objects.object-header.astrophoto', { defaultValue: 'Астрофото' })}: {title}`}
+                                    title={`${t('components.pages.objects.object-header.astrophoto', 'Астрофото')}: {title}`}
                                 >
                                     {title}
                                 </Link>
@@ -61,10 +59,7 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
                 {props?.ra && (
                     <div className={styles.item}>
                         <span className={styles.key}>
-                            {t('components.pages.objects.object-header.right-ascension', {
-                                defaultValue: 'Прямое восхождение'
-                            })}
-                            :
+                            {t('components.pages.objects.object-header.right-ascension', 'Прямое восхождение')}:
                         </span>
                         {formatRA(props.ra)}
                     </div>
@@ -73,7 +68,7 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
                 {props?.dec && (
                     <div className={styles.item}>
                         <span className={styles.key}>
-                            {t('components.pages.objects.object-header.declination', { defaultValue: 'Склонение' })}:
+                            {t('components.pages.objects.object-header.declination', 'Склонение')}:
                         </span>
                         {formatDEC(props.dec)}
                     </div>
@@ -91,10 +86,7 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
                 {props.statistic?.frames && (
                     <div className={styles.item}>
                         <span className={styles.key}>
-                            {t('components.pages.objects.object-header.number-of-frames', {
-                                defaultValue: 'Количество кадров'
-                            })}
-                            :
+                            {t('components.pages.objects.object-header.number-of-frames', 'Количество кадров')}:
                         </span>
                         {props.statistic.frames}
                     </div>
@@ -103,7 +95,7 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
                 {!!props.statistic?.fileSize && (
                     <div className={styles.item}>
                         <span className={styles.key}>
-                            {t('components.pages.objects.object-header.data-size', { defaultValue: 'Размер данных' })}:
+                            {t('components.pages.objects.object-header.data-size', 'Размер данных')}:
                         </span>
                         {humanizeFileSize(props.statistic.fileSize)}
                     </div>
@@ -112,17 +104,14 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
                 {props?.fitsCloudLink && (
                     <div className={styles.item}>
                         <span className={styles.key}>
-                            {t('components.pages.objects.object-header.link-to-fits-files', {
-                                defaultValue: 'Ссылка на FITS файлы'
-                            })}
-                            :
+                            {t('components.pages.objects.object-header.link-to-fits-files', 'Ссылка на FITS файлы')}:
                         </span>
                         <Link
                             href={props?.fitsCloudLink}
                             target={'_blank'}
                             title={''}
                         >
-                            {t('components.pages.objects.object-header.download', { defaultValue: 'Скачать' })}
+                            {t('components.pages.objects.object-header.download', 'Скачать')}
                         </Link>
                     </div>
                 )}

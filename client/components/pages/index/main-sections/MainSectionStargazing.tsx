@@ -27,44 +27,38 @@ export const MainSectionStargazing: React.FC = () => {
                         end={YEARS}
                         className={styles.counter}
                     />
-                    <div>{t('components.pages.index.main-sections.years', { defaultValue: 'лет' })}</div>
+                    <div>{t('components.pages.index.main-sections.years', 'лет')}</div>
                 </div>
                 <div className={styles.item}>
                     <Counter
                         end={STARGAZING}
                         className={styles.counter}
                     />
-                    <div>
-                        {t('components.pages.index.main-sections.stargazing-count', { defaultValue: 'Астровыездов' })}
-                    </div>
+                    <div>{t('components.pages.index.main-sections.stargazing-count', 'Астровыездов')}</div>
                 </div>
                 <div className={styles.item}>
                     <Counter
                         end={PEOPLES}
                         className={styles.counter}
                     />
-                    <div>
-                        {t('components.pages.index.main-sections.stargazing-members', { defaultValue: 'Участников' })}
-                    </div>
+                    <div>{t('components.pages.index.main-sections.stargazing-members', 'Участников')}</div>
                 </div>
             </div>
 
             <div className={styles.bottomContainer}>
-                <h2 className={'animate'}>
-                    {t('components.pages.index.main-sections.stargazing', { defaultValue: 'Астровыезды' })}
-                </h2>
+                <h2 className={'animate'}>{t('components.pages.index.main-sections.stargazing', 'Астровыезды')}</h2>
                 <p className={'animate'}>
-                    {t('components.pages.index.main-sections.stargazing-description', {
-                        defaultValue:
-                            'Организуем регулярные поездки под открытое небо, чтобы наблюдать за звездами и планетами через мощные телескопы.'
-                    })}
+                    {t(
+                        'components.pages.index.main-sections.stargazing-description',
+                        'Организуем регулярные поездки под открытое небо, чтобы наблюдать за звездами и планетами через мощные телескопы.'
+                    )}
                 </p>
                 <Link
                     href={'/stargazing'}
-                    title={t('components.pages.index.main-sections.stargazing', { defaultValue: 'Астровыезды' })}
+                    title={t('components.pages.index.main-sections.stargazing', 'Астровыезды')}
                     className={'animate'}
                 >
-                    {t('components.pages.index.main-sections.read-more', { defaultValue: 'Подробнее' })}
+                    {t('components.pages.index.main-sections.read-more', 'Подробнее')}
                 </Link>
             </div>
         </section>

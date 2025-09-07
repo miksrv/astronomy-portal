@@ -62,7 +62,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children, ...pr
                 canonical={props?.canonical ? `${canonicalUrl}${props.canonical}` : undefined}
                 openGraph={{
                     images: props?.openGraph?.images,
-                    siteName: t('common.look-at-the-stars', { defaultValue: 'Смотри на звёзды' }),
+                    siteName: t('common.look-at-the-stars', 'Смотри на звёзды'),
                     locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                 }}
             />

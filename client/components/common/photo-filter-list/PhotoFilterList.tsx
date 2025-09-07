@@ -29,12 +29,10 @@ export const PhotoFilterList: React.FC<PhotoFilterListProps> = ({ filters }) => 
                         >
                             {name}
                         </span>
-                        {t('common.minutes', {
-                            defaultValue: '{{count}} минут',
+                        {t('common.minutes', '{{count}} минут', {
                             count: statistic.exposure ? Math.round(statistic.exposure / 60) : 0
                         })}{' '}
-                        {`(${t('common.frames', {
-                            defaultValue: '{{count}} кадров',
+                        {`(${t('common.frames', '{{count}} кадров', {
                             count: statistic.frames
                         })})`}
                     </li>

@@ -27,40 +27,38 @@ export const MainSectionObservatory: React.FC = () => {
                         end={FRAMES}
                         className={styles.counter}
                     />
-                    <div>{t('components.pages.index.main-sections.frames', { defaultValue: 'Кадров' })}</div>
+                    <div>{t('components.pages.index.main-sections.frames', 'Кадров')}</div>
                 </div>
                 <div className={styles.item}>
                     <Counter
                         end={EXPOSURE}
                         className={styles.counter}
                     />
-                    <div>{t('components.pages.index.main-sections.exposure', { defaultValue: 'Общая выдержка' })}</div>
+                    <div>{t('components.pages.index.main-sections.exposure', 'Общая выдержка')}</div>
                 </div>
                 <div className={styles.item}>
                     <Counter
                         end={OBJECTS}
                         className={styles.counter}
                     />
-                    <div>{t('components.pages.index.main-sections.object-count', { defaultValue: 'Объектов' })}</div>
+                    <div>{t('components.pages.index.main-sections.object-count', 'Объектов')}</div>
                 </div>
             </div>
 
             <div className={styles.bottomContainer}>
-                <h2 className={'animate'}>
-                    {t('components.pages.index.main-sections.observatory', { defaultValue: 'Обсерватория' })}
-                </h2>
+                <h2 className={'animate'}>{t('components.pages.index.main-sections.observatory', 'Обсерватория')}</h2>
                 <p className={'animate'}>
-                    {t('components.pages.index.main-sections.observatory-description', {
-                        defaultValue:
-                            'Откройте для себя вселенную с нашего стационарного наблюдательного пункта, оборудованного передовыми телескопами.'
-                    })}
+                    {t(
+                        'components.pages.index.main-sections.observatory-description',
+                        'Откройте для себя вселенную с нашего стационарного наблюдательного пункта, оборудованного передовыми телескопами.'
+                    )}
                 </p>
                 <Link
                     href={'/observatory'}
-                    title={t('components.pages.index.main-sections.observatory', { defaultValue: 'Обсерватория' })}
+                    title={t('components.pages.index.main-sections.observatory', 'Обсерватория')}
                     className={'animate'}
                 >
-                    {t('components.pages.index.main-sections.read-more', { defaultValue: 'Подробнее' })}
+                    {t('components.pages.index.main-sections.read-more', 'Подробнее')}
                 </Link>
             </div>
         </section>

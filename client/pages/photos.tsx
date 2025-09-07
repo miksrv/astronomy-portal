@@ -55,7 +55,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
         [filteredCategoriesList, categoryFilter]
     )
 
-    const title = t('pages.photos.title', { defaultValue: 'Астрофото' })
+    const title = t('pages.photos.title', 'Астрофото')
 
     const handleChangeCategoryFilter = async (category: number | undefined) => {
         if (category !== undefined) {
@@ -85,7 +85,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
         <AppLayout
             canonical={'photos'}
             title={`${title}${categoryFilter ? `: ${currentCategory?.title}` : ''}`}
-            description={`${t('pages.photos.description', { defaultValue: 'Коллекция астрофотографий галактик, звездных скоплений, туманностей, планет и других космических объектов, запечатленных любительской обсерваторией. Найдите и отфильтруйте изображения по категориям и параметрам, чтобы увидеть уникальные снимки Вселенной с деталями по каждому фильтру и выдержке.' })} ${currentCategory?.description}`}
+            description={`${t('pages.photos.description', 'Коллекция астрофотографий галактик, звездных скоплений, туманностей, планет и других космических объектов, запечатленных любительской обсерваторией. Найдите и отфильтруйте изображения по категориям и параметрам, чтобы увидеть уникальные снимки Вселенной с деталями по каждому фильтру и выдержке.')} ${currentCategory?.description}`}
             openGraph={{
                 images: [
                     {
@@ -112,7 +112,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
             >
                 <Input
                     size={'large'}
-                    placeholder={t('pages.photos.search-by-object', { defaultValue: 'Поиск по объекту' })}
+                    placeholder={t('pages.photos.search-by-object', 'Поиск по объекту')}
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
                 />
@@ -122,7 +122,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
                     size={'large'}
                     mode={'secondary'}
                     value={categoryFilter}
-                    placeholder={t('pages.photos.filter-by-category', { defaultValue: 'Фильтр по категории' })}
+                    placeholder={t('pages.photos.filter-by-category', 'Фильтр по категории')}
                     onSelect={(category) => handleChangeCategoryFilter(category?.key)}
                     options={filteredCategoriesList?.map((category) => ({
                         key: category.id,
@@ -135,7 +135,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
                         icon={'PlusCircle'}
                         mode={'secondary'}
                         size={'large'}
-                        label={t('pages.photos.create_button', { defaultValue: 'Создать' })}
+                        label={t('pages.photos.create_button', 'Создать')}
                         onClick={handleCreate}
                     />
                 )}

@@ -68,7 +68,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 links={[
                     {
                         link: '/objects',
-                        text: t('menu.objects', { defaultValue: 'Объекты' })
+                        text: t('menu.objects', 'Объекты')
                     }
                 ]}
             >
@@ -77,7 +77,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                         <Button
                             icon={'Pencil'}
                             mode={'secondary'}
-                            label={t('common.edit', { defaultValue: 'Редактировать' })}
+                            label={t('common.edit', 'Редактировать')}
                             size={'large'}
                             disabled={!objectName}
                             onClick={handleEdit}
@@ -87,7 +87,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                             icon={'PlusCircle'}
                             mode={'secondary'}
                             size={'large'}
-                            label={t('common.add', { defaultValue: 'Добавить' })}
+                            label={t('common.add', 'Добавить')}
                             onClick={handleCreate}
                         />
                     </>
