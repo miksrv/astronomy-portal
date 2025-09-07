@@ -52,10 +52,12 @@ module.exports = {
                 if (!fileErrorChecks[lng]) {
                     fileErrorChecks[lng] = {}
                 }
+
                 namespaces.forEach((ns) => {
                     if (fileErrorChecks[lng][ns]) {
                         return
                     }
+
                     const resPath = this.parser.formatResourceLoadPath(lng, ns)
 
                     try {
@@ -78,6 +80,7 @@ module.exports = {
                                 }
                                 return acc
                             }, {})
+
                             if (duplicates.length) {
                                 throw new Error(
                                     `There are duplicated keys - ${duplicates.concat('')} in ${resPath}`
