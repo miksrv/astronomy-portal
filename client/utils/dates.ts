@@ -3,6 +3,7 @@ import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
+import { TFunction } from 'i18next'
 
 dayjs.extend(utc)
 dayjs.extend(duration)
@@ -32,11 +33,7 @@ export const getSecondsUntilUTCDate = (date?: string | Date): number | undefined
     date ? dayjs.utc(date).tz(TIME_ZONE).diff(dayjs(), 'second') : undefined
 dayjs.extend(duration)
 
-export const getLocalizedTimeFromSec = (
-    sec: number,
-    full: boolean = false,
-    t: (key: string, options?: { count?: number; defaultValue?: string }) => string
-): string => {
+export const getLocalizedTimeFromSec = (sec: number, full: boolean = false, t: TFunction): string => {
     if (sec <= 0) {
         return '0'
     }
