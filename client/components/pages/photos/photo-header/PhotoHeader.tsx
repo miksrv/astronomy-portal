@@ -51,6 +51,30 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
         [equipmentsList, props.equipments]
     )
 
+    const getEquipmentTypeMap = (type?: ApiModel.EquipmentType): string => {
+        switch (type) {
+            case ApiModel.EquipmentType.Mount:
+                return t('equipment.mount', 'Монтировка')
+            case ApiModel.EquipmentType.Scope:
+                return t('equipment.scope', 'Телескоп')
+            case ApiModel.EquipmentType.Camera:
+                return t('equipment.camera', 'Камера')
+            case ApiModel.EquipmentType.GuidingCamera:
+                return t('equipment.guiding_camera', 'Гидирующая камера')
+            case ApiModel.EquipmentType.GuidingScope:
+                return t('equipment.guiding_scope', 'Гидирующий телескоп')
+            case ApiModel.EquipmentType.Focuser:
+                return t('equipment.focuser', 'Фокусер')
+            case ApiModel.EquipmentType.FilterWheel:
+                return t('equipment.filter_wheel', 'Колесо фильтров')
+            case ApiModel.EquipmentType.Filter:
+                return t('equipment.filter', 'Фильтр')
+            case undefined: {
+                throw new Error('Not implemented yet: undefined case')
+            }
+        }
+    }
+
     useEffect(() => {
         if (props?.fileName) {
             setLoading(true)
@@ -175,7 +199,10 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                                 key={item.id}
                                 className={styles.item}
                             >
-                                <span className={styles.key}>{t(`equipment.${item.type}`)}</span>
+                                <span className={styles.key}>
+                                    {getEquipmentTypeMap(item.type)}
+                                    {':'}
+                                </span>
                                 {item.brand} {item.model}
                             </div>
                         ))}

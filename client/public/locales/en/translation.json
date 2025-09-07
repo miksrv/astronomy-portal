@@ -200,6 +200,16 @@
         "about": "About",
         "telegram": "Telegram"
     },
+    "equipment": {
+        "mount": "Mount",
+        "scope": "Telescope",
+        "camera": "Camera",
+        "guiding_camera": "Guiding camera",
+        "guiding_scope": "Guiding telescope",
+        "focuser": "Focuser",
+        "filter_wheel": "Filter wheel",
+        "filter": "Filter"
+    },
     "pages": {
         "about": {
             "title": "About the project",
