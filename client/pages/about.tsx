@@ -57,16 +57,6 @@ const galleryStargazing = [
 
 const allPhotos = [...galleryAboutMe, ...galleryStargazing, ...galleryObservatory]
 
-const contributors2: string[] = [
-    'Селищев Дмитрий (Arduino, AVR)',
-    'Андреев Валентин (Arduino, AVR)',
-    'Плаксин Иван (IP Camera)',
-    'Тонких Антон (Java backend)',
-    'Сергеев Вадим',
-    'Ильин Сергей',
-    'Владимир Уваров (Сетевой коммутатор D-Link)'
-]
-
 type DonaterType = {
     name: string
     tooltip?: string
@@ -303,7 +293,6 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                         'Наш проект самодельной обсерватории также нашёл отклик у множества неравнодушных участников. У нас масштабные планы по развитию этого направления, и ваша поддержка играет ключевую роль. Мы благодарны каждому, кто помогает советами, консультациями и рекомендациями. Если мы кого-то случайно не упомянули в списке благодарностей, напишите нам — это очень важно.'
                     )}
                 </p>
-                <h3>{t('pages.about.your-help-financial-support', 'Финансовая поддержка')}</h3>
                 <ul
                     style={{
                         display: 'flex',
@@ -335,12 +324,6 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                                 )}
                             </li>
                         ))}
-                </ul>
-                <h3>{t('pages.about.your-help-technical-support', 'Техническая и программная поддержка')}</h3>
-                <ul>
-                    {contributors2.map((name) => (
-                        <li key={name}>{name}</li>
-                    ))}
                 </ul>
                 <p style={{ margin: 0 }}>
                     {t(
