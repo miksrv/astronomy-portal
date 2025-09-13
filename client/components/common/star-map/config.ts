@@ -206,7 +206,11 @@ export const defaultConfig = {
         // or desig = 3-letter designation
     },
     // height is determined by projection
-    projection: 'aitoff', // Map projection used: see below
+    // Mercator — классическая цилиндрическая проекция, хорошо масштабируется по высоте.
+    // Equirectangular — простая прямоугольная проекция, легко растягивается на всю высоту.
+    // Cylindrical Equal Area — также хорошо подходит для заполнения пространства.
+    projection: 'mercator', // Map projection used: see below
+    // projection: 'aitoff', // Map projection used: see below
     projectionRatio: null, // Optional override for default projection ratio
     stars: {
         colors: true, // Show stars in spectral colors, if not use default color

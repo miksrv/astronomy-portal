@@ -526,9 +526,7 @@
         },
         "star-map": {
             "title": "Star map",
-            "description": "Star map with galaxies, nebulae, comets, supernovae, and other space objects photographed with an amateur telescope",
-            "text-part-1": "The star map is an interactive window into the universe, featuring images of galaxies, nebulae, comets, supernovae, and other astronomical objects. These images were taken with an amateur telescope, making them especially valuable: they show what beauties of space are available even outside professional observatories.",
-            "text-part-2": "The map allows you to study the night sky in detail, track the movement of celestial bodies, and find interesting objects for observation. Thanks to high-quality astrophotography and regular catalog updates, every visitor can see space as astronomy enthusiasts around the world do."
+            "description": "Star map with galaxies, nebulae, comets, supernovae, and other space objects photographed with an amateur telescope"
         }
     }
 }

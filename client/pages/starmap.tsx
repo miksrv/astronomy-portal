@@ -1,12 +1,11 @@
 import React from 'react'
-import { Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
 import { API, setLocale, wrapper } from '@/api'
-import { AppFooter, AppLayout, AppToolbar, StarMap } from '@/components/common'
+import { AppLayout, StarMap } from '@/components/common'
 
 // TODO: При добавить URL параметр названия объекта для центрирования карты на нем
 const CelestialPage: NextPage<object> = () => {
@@ -18,6 +17,7 @@ const CelestialPage: NextPage<object> = () => {
 
     return (
         <AppLayout
+            fullWidth={true}
             canonical={'starmap'}
             title={title}
             description={t(
@@ -34,29 +34,9 @@ const CelestialPage: NextPage<object> = () => {
                 ]
             }}
         >
-            <AppToolbar
-                title={title}
-                currentPage={title}
-            />
-
-            <p>
-                {t(
-                    'pages.star-map.text-part-1',
-                    'Звездная карта - это интерактивное окно во Вселенную, где собраны снимки галактик, туманностей, комет, сверхновых и других астрономических объектов. Эти изображения получены с помощью любительского телескопа, что делает их особенно ценными: они демонстрируют, какие красоты космоса доступны даже вне профессиональных обсерваторий.'
-                )}
-            </p>
-            <p>
-                {t(
-                    'pages.star-map.text-part-2',
-                    'Карта позволяет изучать ночное небо в деталях, прослеживать движение небесных тел и находить интересные объекты для наблюдений. Благодаря качественной астросъёмке и систематическому пополнению каталога, каждый посетитель может увидеть космос таким, каким его видят энтузиасты астрономии по всему миру.'
-                )}
-            </p>
-
-            <Container style={{ padding: '5px' }}>
+            <div style={{ height: 'calc(100vh - 50px)', overflow: 'hidden' }}>
                 <StarMap objects={data?.items} />
-            </Container>
-
-            <AppFooter />
+            </div>
         </AppLayout>
     )
 }
