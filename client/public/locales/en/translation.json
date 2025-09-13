@@ -219,7 +219,7 @@
             "intro": ", and this site is my attempt to tell you about my hobby, bring together all the information, and capture the achievements made on the way to exploring space. Astronomy for me is not just a passion, but a whole world that changed my life. Thanks to it, I found incredible friends, learned a lot, and realized how vast and mysterious the universe is. This project is our joint contribution to the popularization and development of astronomy. We sincerely believe that thanks to our efforts, space will become closer and more accessible to everyone.",
             "telegram-channel": "Subscribe to the author's Telegram channel of this project",
             "team-title": "Our team",
-            "team-description": "We work in various fields, but we are all united by one thing — love for the stars and the night sky. Since 2016, we have been popularizing astronomy, organizing stargazing trips in the Orenburg region and sidewalk astronomy evenings in Orenburg. Together we look at the stars, share knowledge, and inspire others.",
+            "team-description": "We work in various fields, but we are all united by one thing - love for the stars and the night sky. Since 2016, we have been popularizing astronomy, organizing stargazing trips in the Orenburg region and sidewalk astronomy evenings in Orenburg. Together we look at the stars, share knowledge, and inspire others.",
             "project-title": "Astronomical project \"Look at the Stars\"",
             "project-description": "In 2016, we launched the \"Look at the Stars\" project in the Orenburg region to make astronomy accessible to everyone. Since then, every season we hold free lectures under the open sky, organize trips out of town with telescopes, and host informal sidewalk astronomy evenings.",
             "project-goal": "The main goal of the project is to show the greatness and beauty of the universe, to inspire people to study space. We cover not only the Orenburg region but also neighboring regions, traveling to places where the night sky is especially bright. Learn more about our current and past events on the page",
@@ -242,7 +242,7 @@
             "observatory-conclusion": "This project is our contribution to the popularization of astronomy. We sincerely hope it will inspire you to discover the universe!",
             "your-help-title": "Your help",
             "your-help-intro": "The development of the \"Look at the Stars\" project has largely become possible thanks to the support of the \"Native Cities\" social investment program of Gazprom Neft and the assistance of the Orenburg Media information agency team.",
-            "your-help-description": "Our homemade observatory project has also found a response among many caring participants. We have ambitious plans for the development of this direction, and your support plays a key role. We are grateful to everyone who helps with advice, consultations, and recommendations. If we accidentally missed someone in the list of thanks, write to us — it is very important.",
+            "your-help-description": "Our homemade observatory project has also found a response among many caring participants. We have ambitious plans for the development of this direction, and your support plays a key role. We are grateful to everyone who helps with advice, consultations, and recommendations. If we accidentally missed someone in the list of thanks, write to us - it is very important.",
             "your-help-conclusion": "Thanks to your help, space really becomes closer!"
         },
         "auth": {
@@ -337,7 +337,7 @@
             "howto_link": "How stargazing works",
             "where_link": "Where to look through a telescope in Orenburg",
             "faq_link": "Frequently asked questions",
-            "description": "Stargazing in Orenburg — exciting trips out of town where telescopes open cosmic horizons. Evenings of scientific discoveries, lectures, and live communication with like-minded people. Learn the rules and prepare for star observation.",
+            "description": "Stargazing in Orenburg - exciting trips out of town where telescopes open cosmic horizons. Evenings of scientific discoveries, lectures, and live communication with like-minded people. Learn the rules and prepare for star observation.",
             "create-stargazing_button": "Add stargazing event",
             "telegram": "Telegram",
             "telegram-subscription": "To not miss announcements, subscribe to the Telegram channel",
@@ -381,7 +381,7 @@
                 },
                 "start-time": {
                     "question": "❓What time does it start?",
-                    "answer": "Each stargazing announcement has a specific start time. This time it's 21:30. Gathering on site is from 20:00 to 21:00. Please arrive early — listen to music, take photos with the Moon and sunflowers, watch sunsets, breathe the steppe air. And importantly, park your car and avoid traffic jams. We appreciate it!"
+                    "answer": "Each stargazing announcement has a specific start time. This time it's 21:30. Gathering on site is from 20:00 to 21:00. Please arrive early - listen to music, take photos with the Moon and sunflowers, watch sunsets, breathe the steppe air. And importantly, park your car and avoid traffic jams. We appreciate it!"
                 },
                 "price": {
                     "question": "❓How much does it cost?",
@@ -391,7 +391,7 @@
                 },
                 "duration": {
                     "question": "❓How long does stargazing last?",
-                    "answer": "The official program from the start of the lecture to telescope observations lasts about 2 hours. But time flies by, guaranteed. After that, you choose — stay and watch the sky or go home. Approximate end time: 00:30."
+                    "answer": "The official program from the start of the lecture to telescope observations lasts about 2 hours. But time flies by, guaranteed. After that, you choose - stay and watch the sky or go home. Approximate end time: 00:30."
                 },
                 "weather": {
                     "question": "❓What if it's cloudy or rainy?",
@@ -411,7 +411,7 @@
                 },
                 "merch": {
                     "question": "❓How and where to buy your merch?",
-                    "answer": "We bring hoodies, t-shirts, car stickers, postcards, and sticker packs to the site. Want to support the project — buy our merch!"
+                    "answer": "We bring hoodies, t-shirts, car stickers, postcards, and sticker packs to the site. Want to support the project - buy our merch!"
                 },
                 "cancel": {
                     "question": "❓I registered but can't come. What should I do?",
@@ -444,7 +444,7 @@
             "event_announcement": "Event announcement",
             "event_announcement_text": "Stargazing events in Orenburg are held in good weather, so the exact date is known only 2-3 days before. We announce upcoming trips in our Telegram channel \"Look at the Stars\", where we post announcements and important updates. Subscription is required so you don't miss a new stargazing event.",
             "registration": "Stargazing registration",
-            "registration_text": "To participate, you need to register in advance on our website. It's free and takes just a minute. Beware of scammers — if someone asks for payment, it's a scam! We welcome donations, but participation is always free.",
+            "registration_text": "To participate, you need to register in advance on our website. It's free and takes just a minute. Beware of scammers - if someone asks for payment, it's a scam! We welcome donations, but participation is always free.",
             "location": "Location",
             "location_text": "Stargazing events are held out of town, away from city lights, usually 40 km from Orenburg. The exact location is revealed after registration. Get there on your own, so check the route in advance. The last section is a dirt road about 300 meters long.",
             "event_plan": "Stargazing event plan",
@@ -507,11 +507,11 @@
         },
         "stargazing-where": {
             "title": "Where to look through a telescope in Orenburg",
-            "description": "Find out where in Orenburg you can look through a telescope. Sidewalk astronomy: free observations of the Moon, planets, and stars on city streets. Want to see more — go out of town for nebulae and galaxies!",
+            "description": "Find out where in Orenburg you can look through a telescope. Sidewalk astronomy: free observations of the Moon, planets, and stars on city streets. Want to see more - go out of town for nebulae and galaxies!",
             "intro": "Sidewalk astronomy is a unique format that brings space closer. In spring, summer, and autumn, we set up telescopes right on the sidewalks and squares of Orenburg so anyone can look at stars, planets, and the Moon for free. It's a great opportunity for city residents to get to know astronomy in a relaxed and friendly atmosphere.",
             "announcement-1": "We almost always post announcements of sidewalk astronomy evenings in our",
             "telegram-channel": "Telegram channel",
-            "announcement-2": ", but sometimes you can find our telescopes on the streets without warning. One of the project inspirers, astronomy lecturer Vladimir Ivanovich, often shares his knowledge, showing interesting objects to everyone. Just look for the telescope — and you'll get an unforgettable tour of the starry sky!",
+            "announcement-2": ", but sometimes you can find our telescopes on the streets without warning. One of the project inspirers, astronomy lecturer Vladimir Ivanovich, often shares his knowledge, showing interesting objects to everyone. Just look for the telescope - and you'll get an unforgettable tour of the starry sky!",
             "what-you-can-see-title": "What can you see through a telescope in the city?",
             "what-you-can-see-description": "With city light pollution, the brightest objects remain visible. For example, you can see:",
             "what-you-can-see-1": "Craters and mountains on the Moon, especially impressive in the first and last quarters;",
