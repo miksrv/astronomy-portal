@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 4.1.4
+
+### Patch Changes
+
+- Updated PhotoHeader UI Component
+- Upgraded UI Dependencies
+- Fixed UI Locales
+- Refactoring StarMap page
+- Refactoring donaters list in the about page
+
 ## 4.1.3
 
 ### Patch Changes
