@@ -6,16 +6,16 @@ import { useTranslation } from 'next-i18next'
 import styles from './styles.module.sass'
 
 interface ShowMoreProps {
-    children?: React.ReactNode
+    content?: React.ReactNode
 }
 
-export const ShowMore: React.FC<ShowMoreProps> = ({ children }) => {
+export const ShowMore: React.FC<ShowMoreProps> = ({ content }) => {
     const { t } = useTranslation()
     const [isExpanded, setIsExpanded] = useState(false)
 
     return (
-        <div className={styles.showMore}>
-            <div className={cn(styles.content, isExpanded && styles.expanded)}>{children}</div>
+        <div className={cn(styles.showMore, isExpanded && styles.expanded)}>
+            <div className={styles.content}>{content}</div>
             <Button
                 className={styles.showMoreButton}
                 mode={'secondary'}
