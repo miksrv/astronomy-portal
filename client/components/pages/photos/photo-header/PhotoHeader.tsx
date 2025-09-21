@@ -111,12 +111,17 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                 </button>
             </div>
             <div className={styles.parametersSection}>
-                <div className={styles.starMapSection}>
-                    <StarMap
-                        zoom={5}
-                        objects={objectsData}
-                    />
-                </div>
+                <StarMap
+                    zoom={7}
+                    config={{
+                        projection: 'aitoff',
+                        mw: { show: false },
+                        planets: { show: false },
+                        stars: { limit: 3, propername: false }
+                    }}
+                    objects={objectsData}
+                    className={styles.starMapSection}
+                />
 
                 <div className={styles.item}>
                     <span className={styles.key}>
