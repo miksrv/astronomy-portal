@@ -123,18 +123,23 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
                 </div>
             )}
 
-            <div className={styles.starMap}>
-                <StarMap
-                    zoom={5}
-                    objects={[
-                        {
-                            name: props.name || '',
-                            ra: props.ra,
-                            dec: props.dec
-                        }
-                    ]}
-                />
-            </div>
+            <StarMap
+                zoom={7}
+                className={styles.starMap}
+                config={{
+                    projection: 'aitoff',
+                    mw: { show: false },
+                    planets: { show: false },
+                    stars: { limit: 3, propername: false }
+                }}
+                objects={[
+                    {
+                        name: props.name || '',
+                        ra: props.ra,
+                        dec: props.dec
+                    }
+                ]}
+            />
         </Container>
     )
 }

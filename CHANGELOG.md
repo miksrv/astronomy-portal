@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 4.1.5
+
+### Patch Changes
+
+- Update EventItemData UI Component
+- Added new Interactive mode for StarMap
+- Improved ObjectDescription and ImageSlide UI Components
+- Added new props for PhotoHeader UI Component
+- Improved UI ShowMore Component
+- Upgraded UI Dependencies
+
 ## 4.1.4
 
 ### Patch Changes

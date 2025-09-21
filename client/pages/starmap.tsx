@@ -35,7 +35,10 @@ const CelestialPage: NextPage<object> = () => {
             }}
         >
             <div style={{ height: 'calc(100vh - 50px)', overflow: 'hidden' }}>
-                <StarMap objects={data?.items} />
+                <StarMap
+                    objects={data?.items}
+                    interactive={true}
+                />
             </div>
         </AppLayout>
     )
