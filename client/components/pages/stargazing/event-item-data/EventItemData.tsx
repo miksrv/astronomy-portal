@@ -47,8 +47,6 @@ export const EventItemData: React.FC<EventItemDataProps> = ({ title, event, ...p
             </div>
         </div>
 
-        <ShowMore>
-            <Markdown>{event?.content}</Markdown>
-        </ShowMore>
+        <ShowMore content={<Markdown>{event?.content}</Markdown>} />
     </Container>
 )
