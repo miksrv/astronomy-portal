@@ -41,8 +41,8 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, offset, rect }) =
     return (
         <div style={{ height, position: 'relative', width }}>
             <Image
-                fill
-                alt=''
+                fill={true}
+                alt={''}
                 src={slide.src}
                 loading='eager'
                 draggable={false}
