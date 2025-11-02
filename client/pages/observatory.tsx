@@ -7,12 +7,12 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
 import { API, setLocale, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
-import { AstronomyCalc, Calendar, Camera, RelayList, Weather } from '@/components/pages/observatory'
+import { AstronomyCalc, Calendar, Camera, RelayList, TelescopeWorkdays, Weather } from '@/components/pages/observatory'
 
 const ObservatoryPage: NextPage<object> = () => {
     const { t } = useTranslation()
 
-    const { data } = API.useStatisticGetTelescopeQuery()
+    const { data, isLoading } = API.useStatisticGetTelescopeQuery()
 
     const title = t('pages.observatory.title', 'Обсерватория')
     const observatoryLink = t('pages.observatory.observatory-in-orenburg_link', 'Обсерватория в Оренбурге')
@@ -77,6 +77,12 @@ const ObservatoryPage: NextPage<object> = () => {
                     interval={30}
                 />
             </div>
+
+            <TelescopeWorkdays
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                eventsTelescope={data?.items as any[]}
+                loading={isLoading}
+            />
 
             {/*eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
             <Calendar eventsTelescope={data?.items as any[]} />
