@@ -38,7 +38,7 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onS
     const handleChange = ({ target: { name, value } }: React.ChangeEvent<HTMLInputElement>) =>
         setFormState((prev) => ({ ...prev, [name]: value }))
 
-    const handleKeyDown = (e: { key: string }) => e.key === 'Enter' && handleSubmit()
+    const handleKeyDown = (e: { key: string }) => e.key === 'Enter' && void handleSubmit()
 
     const handleSubmit = useCallback(async () => {
         if (!eventId) {
