@@ -1,32 +1,30 @@
-.section
-    margin-bottom: 15px
+.tableContainer
+    max-height: 190px
+    overflow-y: auto
+    margin-bottom: 10px
+    padding: 1px !important
 
-    .tableContainer
-        max-height: 190px
-        overflow-y: auto
+    .loader
+        height: 200px
 
-        .loader
-            height: 200px
+.date
+    font-weight: 400
 
-    .date
-        font-weight: 400
+    span
+        float: none
+        display: inline-block
+        vertical-align: middle
+        margin-top: -4px
 
-        span
-            float: none
-            display: inline-block
-            vertical-align: middle
-            margin-top: -4px
+.link
+    background: var(--modal-background)
+    border-radius: var(--border-radius)
+    border: 1px solid #757575
+    padding: 2px  4px
+    margin-right: 5px
 
-    .link
-        //background: $input-BackgroundColor
-        //border-radius: $borderRadius
-        border: 1px solid #757575
-        //color: $text-main
-        padding: 2px  4px
-        margin-right: 5px
+    &:hover, &:active, &:focus
+        background: var(--dropdown-background-color-hover)
 
-        &:hover, &:active, &:focus
-            //background: $input-focus-BorderColor
-
-        &:last-of-type
-            margin-right: 0
+    &:last-of-type
+        margin-right: 0
