@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 4.1.6
+
+### Patch Changes
+
+- Updated UI Dependencies
+- Implemented TelescopeWorkdays UI Table
+
 ## 4.1.5
 
 ### Patch Changes
