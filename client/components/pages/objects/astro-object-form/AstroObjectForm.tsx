@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Container, Input, MultiSelect } from 'simple-react-ui-kit'
+import { Button, Container, Input, Select } from 'simple-react-ui-kit'
 
 import { API, ApiModel } from '@/api'
 import { StarMap } from '@/components/common'
@@ -121,30 +121,31 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, init
 
     return (
         <Container>
-            <MultiSelect<number>
-                required={true}
-                closeOnSelect={true}
-                disabled={disabled}
-                className={styles.formElement}
-                label={'Категория'}
-                notFoundCaption={'Ничего не найдено'}
-                placeholder={'Выберите одну или несколько категорий'}
-                loading={categoriesListLoading}
-                value={formData?.categories}
-                options={categoriesListData?.items?.map((item) => ({
-                    key: item.id,
-                    value: item.title
-                }))}
-                onSelect={(values) =>
-                    setFormData({
-                        ...formData,
-                        categories: values?.map(({ key }) => key)
-                    })
-                }
-            />
-
             <div className={styles.sections}>
                 <div className={styles.inputSection}>
+                    <Select<number>
+                        multiple={true}
+                        required={true}
+                        closeOnSelect={true}
+                        disabled={disabled}
+                        className={styles.formElement}
+                        label={'Категория'}
+                        notFoundCaption={'Ничего не найдено'}
+                        placeholder={'Выберите одну или несколько категорий'}
+                        loading={categoriesListLoading}
+                        value={formData?.categories}
+                        options={categoriesListData?.items?.map((item) => ({
+                            key: item.id,
+                            value: item.title
+                        }))}
+                        onSelect={(values) =>
+                            setFormData({
+                                ...formData,
+                                categories: values?.map(({ key }) => key)
+                            })
+                        }
+                    />
+
                     <Input
                         size={'medium'}
                         required={true}

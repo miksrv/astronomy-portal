@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import uniq from 'lodash-es/uniq'
-import { Button, Dropdown, Input } from 'simple-react-ui-kit'
+import { Button, Input, Select } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
@@ -111,19 +111,16 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
                 }
             >
                 <Input
-                    size={'large'}
                     placeholder={t('pages.photos.search-by-object', 'Поиск по объекту')}
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
                 />
 
-                <Dropdown<number>
+                <Select<number>
                     clearable={true}
-                    size={'large'}
-                    mode={'secondary'}
                     value={categoryFilter}
                     placeholder={t('pages.photos.filter-by-category', 'Фильтр по категории')}
-                    onSelect={(category) => handleChangeCategoryFilter(category?.key)}
+                    onSelect={(category) => handleChangeCategoryFilter(category?.[0]?.key)}
                     options={filteredCategoriesList?.map((category) => ({
                         key: category.id,
                         value: category.title
@@ -134,7 +131,6 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}
-                        size={'large'}
                         label={t('pages.photos.create_button', 'Создать')}
                         onClick={handleCreate}
                     />
