@@ -74,7 +74,6 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}
-                        size={'large'}
                         label={t('pages.stargazing.create-stargazing_button', 'Добавить астровыезд')}
                         onClick={handleCreate}
                     />

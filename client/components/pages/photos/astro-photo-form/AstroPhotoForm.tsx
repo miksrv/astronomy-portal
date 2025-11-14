@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Container, Dropdown, Input, MultiSelect } from 'simple-react-ui-kit'
+import { Button, Container, Input, Select } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 
@@ -109,7 +109,8 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
 
     return (
         <Container>
-            <MultiSelect<number>
+            <Select<number>
+                multiple={true}
                 required={true}
                 closeOnSelect={true}
                 disabled={disabled}
@@ -131,7 +132,8 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                 }
             />
 
-            <MultiSelect<string>
+            <Select<string>
+                multiple={true}
                 required={true}
                 closeOnSelect={true}
                 disabled={disabled}
@@ -153,7 +155,8 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                 }
             />
 
-            <MultiSelect<number>
+            <Select<number>
+                multiple={true}
                 required={true}
                 disabled={disabled}
                 className={styles.formElement}
@@ -188,14 +191,12 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
             />
 
             <div className={styles.addFilter}>
-                <Dropdown<ApiModel.FilterTypes>
-                    size={'medium'}
+                <Select<ApiModel.FilterTypes>
                     label={'Параметры съемки'}
                     placeholder={'Добавить фильтр'}
-                    mode={'secondary'}
                     value={selectedFilter}
                     className={styles.filtersDropdown}
-                    onSelect={(value) => setSelectedFilter(value?.key)}
+                    onSelect={(value) => setSelectedFilter(value?.[0]?.key)}
                     options={availableFilters?.map((filter) => ({
                         key: filter,
                         value: filter
@@ -237,7 +238,6 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
 
                         <Button
                             icon={'Close'}
-                            size={'medium'}
                             mode={'outline'}
                             onClick={() => handleRemoveFilter(filter)}
                         />

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Button, Dropdown, Input, Message } from 'simple-react-ui-kit'
+import { Button, Input, Message, Select } from 'simple-react-ui-kit'
 
 import { API, ApiType, useAppSelector } from '@/api'
 
@@ -122,9 +122,8 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onS
             />
 
             <div className={styles.countPeopleContainer}>
-                <Dropdown<string>
+                <Select<string>
                     className={styles.countPeopleField}
-                    mode={'secondary'}
                     label={'Взрослых'}
                     options={[...Array(5)].map((_, value) => ({
                         key: String(value + 1),
@@ -134,14 +133,13 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onS
                     onSelect={(option) => {
                         setFormState({
                             ...formState,
-                            adults: option?.value || ''
+                            adults: option?.[0]?.value || ''
                         })
                     }}
                 />
 
-                <Dropdown<string>
+                <Select<string>
                     className={styles.countPeopleField}
-                    mode={'secondary'}
                     label={'Детей'}
                     options={[...Array(6)].map((_, value) => ({
                         key: String(value),
@@ -151,7 +149,7 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onS
                     onSelect={(option) => {
                         setFormState({
                             ...formState,
-                            children: option?.value
+                            children: option?.[0]?.value
                         })
                     }}
                 />
@@ -167,8 +165,7 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onS
                         <label>
                             {'Возраст ребенка'} {index + 1}
                         </label>
-                        <Dropdown<string>
-                            mode={'secondary'}
+                        <Select<string>
                             placeholder={'Выберите возраст'}
                             options={[...Array(13)].map((_, age) => ({
                                 key: String(age + 5),
@@ -178,7 +175,7 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onS
                             onSelect={(option) => {
                                 const newAges = [...(formState?.childrenAges ?? [])]
 
-                                newAges[index] = Number(option?.key)
+                                newAges[index] = Number(option?.[0]?.key)
 
                                 setFormState({
                                     ...formState,

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import uniq from 'lodash-es/uniq'
-import { Button, Dropdown, Input } from 'simple-react-ui-kit'
+import { Button, Input, Select } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
@@ -134,19 +134,16 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                 }
             >
                 <Input
-                    size={'large'}
                     placeholder={t('pages.objects.search-by-name', 'Поиск по названию')}
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
                 />
 
-                <Dropdown<number>
-                    size={'large'}
-                    mode={'secondary'}
+                <Select<number>
                     clearable={true}
                     value={categoryFilter}
                     placeholder={t('pages.objects.filter-by-category', 'Фильтр по категории')}
-                    onSelect={(category) => handleChangeCategoryFilter(category?.key)}
+                    onSelect={(category) => handleChangeCategoryFilter(category?.[0]?.key)}
                     options={filteredCategoriesList?.map((category) => ({
                         key: category.id,
                         value: category.title
@@ -157,7 +154,6 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}
-                        size={'large'}
                         label={t('pages.objects.create_button', 'Создать объект')}
                         onClick={handleCreate}
                     />
