@@ -4,7 +4,7 @@ A web application for a DIY amateur observatory with support for remote monitori
 
 <!-- PROJECT TITLE -->
 <div align="center">
-  <img src="https://miksoft.pro/_next/static/media/observatory.b0a65576.jpg" alt="Homemade Observatory Web Application" width="150" height="150">
+  <img src="https://miksoft.pro/images/observatory.webp" alt="Homemade Observatory Web Application" width="150" height="150">
   <h3>Homemade Observatory Web Application</h3>
   <a href="CHANGELOG.md" target="_blank">Changelog</a>
   ·
