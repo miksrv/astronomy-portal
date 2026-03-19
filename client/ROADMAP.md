@@ -106,39 +106,6 @@ The page title and all body text are hardcoded Russian strings with no `useTrans
 
 ---
 
-## Testing
-
-### TEST-01 — Add tests for `utils/helpers.ts` and deduplicate with `utils/dates.ts`
-
-`getTimeFromSec` and `formatSecondsToExposure` are identical functions (`utils/helpers.ts` lines 18–58). Consolidate into one and add unit tests covering boundary values (0 seconds, sub-minute, exact hour, values > 1 hour).
-
-### TEST-02 — Add tests for `utils/dates.ts`
-
-`getLocalizedTimeFromSec`, `getSecondsUntilUTCDate`, and `formatDateFromUnixUTC` are used in the event countdown and registration flow. Add unit tests, particularly for timezone edge cases and negative/zero values.
-
-### TEST-03 — Add tests for `utils/strings.ts`
-
-`removeMarkdown`, `sliceText`, and `humanizeFileSize` are used to generate SEO meta descriptions and file labels. Add unit tests for empty input, markdown edge cases, and size boundary values.
-
-### TEST-04 — Add tests for `utils/colors.ts` (and verify the `undefined` throw — see BUG-04)
-
-`getFilterColorType` and `getSensorColorType` currently throw on `undefined`. Once BUG-04 is fixed, add tests covering all known enum values plus the `undefined` fallback.
-
-### TEST-05 — Add tests for `utils/photos.ts` and `utils/moon.ts`
-
-`createPhotoTitle`, `createSmallPhotoUrl`, `getMoonPhase`, and `getMoonIllumination` have zero coverage. URL construction helpers are particularly fragile when model shapes change.
-
-### TEST-06 — Add tests for the event registration and cancellation flow
-
-The `EventUpcoming` + `EventBookingForm` flow (register, cancel, error handling) is the most critical user interaction in the app and is entirely untested.
-
-### TEST-07 — Fix `jest.config.ts` referencing non-existent `tsconfig.node.json`
-
-**File:** `jest.config.ts` (line 17)
-`ts-jest` is configured to use `tsconfig.node.json`, which does not exist. Change to `tsconfig.json` or create a dedicated `tsconfig.jest.json`. Until this is fixed the test configuration is unreliable.
-
----
-
 ## Code Quality
 
 ### CODE-01 — Remove ~80 lines of commented-out JSX in `EventUpcoming.tsx`

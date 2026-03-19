@@ -15,26 +15,6 @@ export const declOfNum = (n: number, forms: [string, string, string]): string =>
  * @param full {boolean}
  * @returns {string}
  */
-export const getTimeFromSec = (sec: number, full: boolean = false): string => {
-    if (sec <= 0) {
-        return '0'
-    }
-
-    const h = (sec / 3600) ^ 0
-    const m = ((sec - h * 3600) / 60) ^ 0
-
-    if (full) {
-        let text = ''
-
-        text += h ? h + ' ' + declOfNum(h, ['час', 'часа', 'часов']) + ' ' : ''
-        text += m ? m + ' ' + declOfNum(m, ['минута', 'минуты', 'минут']) : ''
-
-        return text
-    }
-
-    return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m)
-}
-
 export const formatSecondsToExposure = (sec: number | string, full: boolean = false): string => {
     const seconds = Number(sec)
 
@@ -56,6 +36,8 @@ export const formatSecondsToExposure = (sec: number | string, full: boolean = fa
 
     return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m)
 }
+
+export const getTimeFromSec = (sec: number, full: boolean = false): string => formatSecondsToExposure(sec, full)
 
 export const minutesAgo = (date?: string | Date, withoutSuffix?: boolean): string =>
     date ? dayjs.utc(date).fromNow(withoutSuffix) : ''
