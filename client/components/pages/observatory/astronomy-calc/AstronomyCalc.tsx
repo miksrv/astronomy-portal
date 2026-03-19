@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Container } from 'simple-react-ui-kit'
 import SunCalc from 'suncalc'
 
@@ -16,7 +16,8 @@ const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
 export const AstronomyCalc: React.FC = () => {
     const { t } = useTranslation()
 
-    const currentDate = new Date()
+    const currentDateRef = useRef(new Date())
+    const currentDate = currentDateRef.current
     const moonTimes = SunCalc.getMoonTimes(currentDate, LAT, LON)
     const sunTimes = SunCalc.getTimes(currentDate, LAT, LON)
 
@@ -26,8 +27,10 @@ export const AstronomyCalc: React.FC = () => {
     const [moonAzimuth, setMoonAzimuth] = useState<string>('00')
 
     const tick = () => {
-        const sunPosition = SunCalc.getPosition(currentDate, LAT, LON)
-        const moonPosition = SunCalc.getMoonPosition(currentDate, LAT, LON)
+        currentDateRef.current = new Date()
+        const now = currentDateRef.current
+        const sunPosition = SunCalc.getPosition(now, LAT, LON)
+        const moonPosition = SunCalc.getMoonPosition(now, LAT, LON)
 
         setSunAltitude(((sunPosition.altitude * 180) / Math.PI).toFixed(0))
         setSunAzimuth(((sunPosition.azimuth * 180) / Math.PI).toFixed(0))
@@ -40,7 +43,7 @@ export const AstronomyCalc: React.FC = () => {
         const timer = setInterval(() => tick(), 1000)
 
         return () => clearInterval(timer)
-    })
+    }, [])
 
     return (
         <Container className={styles.astronomyCalc}>

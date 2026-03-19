@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react'
 import { Provider } from 'react-redux'
 import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import utc from 'dayjs/plugin/utc'
 
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
@@ -35,8 +33,6 @@ const App = ({ Component, pageProps }: AppProps) => {
     }, [])
 
     dayjs.locale(i18n.language ?? i18Config.i18n.defaultLocale)
-    dayjs.extend(utc)
-    dayjs.extend(relativeTime)
 
     return (
         <>
@@ -70,10 +66,6 @@ const App = ({ Component, pageProps }: AppProps) => {
                     name={'theme-color'}
                     content={'#1b1b1b'}
                     media={'(prefers-color-scheme: dark)'}
-                />
-                <meta
-                    name={'apple-mobile-web-app-status-bar-style'}
-                    content={'black-translucent'}
                 />
                 <link
                     rel={'apple-touch-icon'}

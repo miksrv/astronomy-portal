@@ -13,7 +13,7 @@ type Maybe<T> = T | void
 export const encodeQueryData = (data: any): string => {
     const ret = []
     for (const d in data) {
-        if (d && data[d]) {
+        if (Object.hasOwn(data, d) && data[d] != null) {
             ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(data[d]))
         }
     }

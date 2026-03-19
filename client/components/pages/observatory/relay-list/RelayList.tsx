@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Button, cn, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next'
@@ -18,6 +18,7 @@ export const RelayList: React.FC = () => {
 
     const [relayLoading, setRelayLoading] = React.useState<number>()
     const [countdownTimer, setCountdownTimer] = useState<number>(0)
+    const countdownTimerRef = useRef<number>(0)
 
     const { data: relayList, isLoading, isError } = API.useRelayGetStateQuery(null, { pollingInterval: 15 * 1000 })
 
@@ -33,13 +34,15 @@ export const RelayList: React.FC = () => {
     }
 
     const tick = () => {
-        if (countdownTimer > 0) {
-            setCountdownTimer(countdownTimer - 1)
+        if (countdownTimerRef.current > 0) {
+            countdownTimerRef.current -= 1
+            setCountdownTimer(countdownTimerRef.current)
         }
     }
 
     useEffect(() => {
         if (relayList?.light?.cooldown) {
+            countdownTimerRef.current = relayList.light.cooldown
             setCountdownTimer(relayList.light.cooldown)
         }
     }, [relayList])
@@ -48,7 +51,7 @@ export const RelayList: React.FC = () => {
         const timer = setInterval(() => tick(), 1000)
 
         return () => clearInterval(timer)
-    })
+    }, [])
 
     return (
         <Container className={styles.relayListContainer}>

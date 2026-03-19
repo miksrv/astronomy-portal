@@ -45,7 +45,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 })) || []
 
             const eventsPages: SitemapDynamicPage[] =
-                data?.objects?.map((item) => ({
+                data?.events?.map((item) => ({
                     link: `stargazing/${item.id}`,
                     update: new Date(item.updated?.date || new Date()).toISOString()
                 })) || []

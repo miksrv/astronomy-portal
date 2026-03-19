@@ -69,9 +69,9 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                 return t('equipment.filter_wheel', 'Колесо фильтров')
             case ApiModel.EquipmentType.Filter:
                 return t('equipment.filter', 'Фильтр')
-            case undefined: {
-                throw new Error('Not implemented yet: undefined case')
-            }
+            case undefined:
+            default:
+                return ''
         }
     }
 
@@ -130,16 +130,15 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                     {!categoriesData?.length
                         ? '---'
                         : categoriesData?.map(({ title, id }, i) => (
-                              <>
+                              <React.Fragment key={`category_${id}`}>
                                   <Link
-                                      key={`category_${id}`}
                                       href={`/photos?category=${id}`}
-                                      title={`${t('components.pages.photos.photo-header.astrophoto', 'Астрофото')}: {title}`}
+                                      title={`${t('components.pages.photos.photo-header.astrophoto', 'Астрофото')}: ${title}`}
                                   >
                                       {title}
                                   </Link>
                                   {i < categoriesData.length - 1 && ', '}
-                              </>
+                              </React.Fragment>
                           ))}
                 </div>
 

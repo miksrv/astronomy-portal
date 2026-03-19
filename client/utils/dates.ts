@@ -31,7 +31,6 @@ export const formatDateFromUnixUTC = (timestamp?: number, format: string = DEFAU
 
 export const getSecondsUntilUTCDate = (date?: string | Date): number | undefined =>
     date ? dayjs.utc(date).tz(TIME_ZONE).diff(dayjs(), 'second') : undefined
-dayjs.extend(duration)
 
 export const getLocalizedTimeFromSec = (sec: number, full: boolean = false, t: TFunction): string => {
     if (sec <= 0) {

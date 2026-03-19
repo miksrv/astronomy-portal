@@ -58,9 +58,7 @@ export const getFilterColorType = (filter?: ApiModel.FilterTypes): keyof typeof 
             return 'magenta'
         case 'N':
             return 'air'
-        case undefined: {
-            throw new Error('Not implemented yet: undefined case')
-        }
+        case undefined:
         default:
             return undefined
     }
@@ -96,12 +94,8 @@ export const getSensorColorType = (sensor?: keyof ApiModel.Weather): keyof typeo
             return 'teal'
         case 'windDeg':
             return 'olive'
-        case undefined: {
-            throw new Error('Not implemented yet: undefined case')
-        }
-        case 'date': {
-            throw new Error('Not implemented yet: "date" case')
-        }
+        case undefined:
+        case 'date':
         default:
             return 'grey'
     }
