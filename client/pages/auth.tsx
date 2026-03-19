@@ -59,9 +59,14 @@ const AuthPage: NextPage<AuthPageProps> = () => {
     }, [data])
 
     useEffect(() => {
-        setSendRequest(true)
+        if (!code || !service) {
+            void router.push('/')
 
-        if (sendRequest && !!code?.length && !!service?.length) {
+            return
+        }
+
+        if (!sendRequest) {
+            setSendRequest(true)
             void serviceLogin({
                 code,
                 service: service as ApiType.Auth.AuthServiceType,
@@ -69,11 +74,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
                 device_id: searchParams.get('device_id') ?? undefined
             })
         }
-
-        if ((!code || !service) && !sendRequest) {
-            void router.push('/')
-        }
-    }, [sendRequest])
+    }, [])
 
     return (
         <>

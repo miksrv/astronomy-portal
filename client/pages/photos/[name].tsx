@@ -37,7 +37,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
 
     const filteredPhotosList = useMemo(
         () => photosList?.filter((photo) => photo.objects?.some((object) => photoData?.objects?.includes(object))),
-        [photosList]
+        [photosList, photoData?.objects]
     )
 
     const normalizeAndFilterPhotos = useMemo(() => normalizeAndFilterObjects(photosList), [photosList])

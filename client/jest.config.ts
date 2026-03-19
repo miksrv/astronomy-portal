@@ -15,7 +15,7 @@ const config: Config.InitialOptions = {
     coverageProvider: 'v8',
     globals: {
         'ts-jest': {
-            tsconfig: 'tsconfig.node.json'
+            tsconfig: 'tsconfig.json'
         }
     },
     moduleNameMapper: {

@@ -31,9 +31,13 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event, ...props })
     const [cancelRegistration, { isLoading }] = API.useEventsCancelRegistrationPostMutation()
 
     const handleCancelRegistration = async () => {
-        await cancelRegistration({ eventId: event?.id || '' })
-        showConfirmation(false)
-        setRegistered(false)
+        try {
+            await cancelRegistration({ eventId: event?.id || '' }).unwrap()
+            showConfirmation(false)
+            setRegistered(false)
+        } catch {
+            showConfirmation(false)
+        }
     }
 
     const secondsUntilRegistrationStart = getSecondsUntilUTCDate(event?.registrationStart?.date) || 0

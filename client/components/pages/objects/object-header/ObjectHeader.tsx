@@ -42,16 +42,15 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
                             {t('components.pages.objects.object-header.category', 'Категория')}:
                         </span>
                         {categoriesData?.map(({ title, id }, i) => (
-                            <>
+                            <React.Fragment key={`category_${id}`}>
                                 <Link
-                                    key={`category_${id}`}
                                     href={`/objects?category=${id}`}
-                                    title={`${t('components.pages.objects.object-header.astrophoto', 'Астрофото')}: {title}`}
+                                    title={`${t('components.pages.objects.object-header.astrophoto', 'Астрофото')}: ${title}`}
                                 >
                                     {title}
                                 </Link>
                                 {i < categoriesData.length - 1 && ', '}
-                            </>
+                            </React.Fragment>
                         ))}
                     </div>
                 )}
