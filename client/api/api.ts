@@ -9,12 +9,21 @@ import { RootState } from './store'
 
 type Maybe<T> = T | void
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const encodeQueryData = (data: any): string => {
+type QueryParamValue = string | number | boolean | undefined | null
+
+// Accepts objects whose property values are primitive query-string–compatible types.
+// We cast to Record internally to iterate since TypeScript does not allow iterating
+// over interfaces without an index signature in a generic constraint.
+export const encodeQueryData = (data: object | void | undefined): string => {
+    if (!data) {
+        return ''
+    }
+
+    const record = data as Record<string, QueryParamValue>
     const ret = []
-    for (const d in data) {
-        if (Object.hasOwn(data, d) && data[d] != null) {
-            ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(data[d]))
+    for (const d in record) {
+        if (Object.hasOwn(record, d) && record[d] != null) {
+            ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(record[d] as string | number | boolean))
         }
     }
 
@@ -50,7 +59,7 @@ export const API = createApi({
     }),
     endpoints: (builder) => ({
         /* Auth Controller */
-        authGetMe: builder.mutation<ApiType.Auth.ResLogin, void>({
+        authGetMe: builder.query<ApiType.Auth.ResLogin, void>({
             query: () => 'auth/me'
         }),
         authLoginService: builder.mutation<ApiType.Auth.ResAuthService, ApiType.Auth.ReqAuthService>({
@@ -114,9 +123,11 @@ export const API = createApi({
             query: (id) => `events/${id}`
         }),
         eventGetPhotoList: builder.query<ApiType.Events.ResponsePhotoList, ApiType.Events.RequestPhotoList>({
+            providesTags: (result, error, arg) => [{ id: arg.eventId ?? 'LIST', type: 'EventPhotos' }],
             query: (params) => `events/photos${encodeQueryData(params)}`
         }),
         eventGetUsersList: builder.query<ApiType.Events.ResponseUsersList, string>({
+            providesTags: (result, error, arg) => [{ id: arg, type: 'EventUsers' }],
             query: (id) => `events/members/${id}`
         }),
         eventGetCheckin: builder.mutation<ApiType.Events.ResCheckin, string>({
@@ -128,7 +139,10 @@ export const API = createApi({
             query: () => 'events/upcoming'
         }),
         eventPhotoUploadPost: builder.mutation<ApiType.Events.ResponsePhoto, ApiType.Events.ReqUploadPhoto>({
-            invalidatesTags: (res, err, arg) => [{ id: arg.eventId, type: 'Events' }],
+            invalidatesTags: (res, err, arg) => [
+                { id: arg.eventId, type: 'Events' },
+                { id: arg.eventId, type: 'EventPhotos' }
+            ],
             query: (data) => ({
                 body: data.formData,
                 method: 'POST',
@@ -203,7 +217,10 @@ export const API = createApi({
             query: (id) => `objects/${id}`
         }),
         objectsPatch: builder.mutation<ApiType.Objects.Response | ApiType.ResError, Partial<ApiType.Objects.Request>>({
-            invalidatesTags: (result, error, { name }) => [{ id: name, type: 'Events' }],
+            invalidatesTags: (result, error, { name }) => [
+                { id: name, type: 'Objects' },
+                { id: 'LIST', type: 'Objects' }
+            ],
             query: (formState) => ({
                 body: formState,
                 method: 'PATCH',
@@ -330,9 +347,13 @@ export const API = createApi({
         //     query: () => 'statistic/photos'
         // }),
         statisticGetTelescope: builder.query<ApiType.Statistic.ResTelescope, Maybe<ApiType.Statistic.ReqTelescope>>({
+            providesTags: () => ['Statistic'],
             query: (params) => `statistic/telescope${encodeQueryData(params)}`
         })
     }),
+    // RTK Query requires the return type of extractRehydrationInfo to match its
+    // internal CombinedState shape, which is too complex to express without `any`.
+    // Using `unknown` here causes a type mismatch; `any` is the idiomatic RTK pattern.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     extractRehydrationInfo(action, { reducerPath }): any {
         if (isHydrateAction(action)) {
@@ -346,6 +367,8 @@ export const API = createApi({
         'Objects',
         'Catalog',
         'Events',
+        'EventPhotos',
+        'EventUsers',
         'Photos',
         'Statistic',
         'Category',
