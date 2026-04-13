@@ -5,6 +5,7 @@ import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
+import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
 import { API, ApiModel, ApiType, setLocale, useAppSelector, wrapper } from '@/api'
@@ -19,6 +20,7 @@ enum ScannerStatusEnum {
 }
 
 const CheckinPage: NextPage<object> = () => {
+    const { t } = useTranslation()
     const router = useRouter()
 
     const [status, setStatus] = useState<ScannerStatusEnum>(ScannerStatusEnum.IDLE)
@@ -38,7 +40,7 @@ const CheckinPage: NextPage<object> = () => {
 
         if (!cameras || !cameras.length) {
             setStatus(ScannerStatusEnum.ERROR)
-            setMessage('Камеры не найдены')
+            setMessage(t('pages.checkin.no-cameras', 'Камеры не найдены'))
         }
 
         await scanner.start(cameras[0].id, { fps: 10, qrbox: 250 }, handleScan, () => {})
@@ -60,7 +62,7 @@ const CheckinPage: NextPage<object> = () => {
 
         if (code.length !== 13) {
             setStatus(ScannerStatusEnum.ERROR)
-            setMessage('Некорректный QR-код')
+            setMessage(t('pages.checkin.invalid-qr', 'Некорректный QR-код'))
             setParticipant(undefined)
             setScanning(false)
 
@@ -106,7 +108,7 @@ const CheckinPage: NextPage<object> = () => {
 
         if (isSuccess) {
             setStatus(data?.checkin?.date ? ScannerStatusEnum.DUPLICATE : ScannerStatusEnum.SUCCESS)
-            setMessage('Участник зарегистрирован')
+            setMessage(t('pages.checkin.participant-registered', 'Участник зарегистрирован'))
             setParticipant(data)
         }
     }, [data, error])
@@ -119,17 +121,17 @@ const CheckinPage: NextPage<object> = () => {
 
     return (
         <AppLayout
-            title={'Проверка участников'}
+            title={t('pages.checkin.title', 'Проверка участников')}
             nofollow={true}
             noindex={true}
         >
             <AppToolbar
-                title={'Проверка участников'}
-                currentPage={'Проверка участников'}
+                title={t('pages.checkin.title', 'Проверка участников')}
+                currentPage={t('pages.checkin.title', 'Проверка участников')}
                 links={[
                     {
                         link: '/stargazing',
-                        text: 'Астровыезды'
+                        text: t('menu.stargazing', 'Астровыезды')
                     }
                 ]}
             />
@@ -159,11 +161,15 @@ const CheckinPage: NextPage<object> = () => {
                             <div style={{ margin: '20px 0' }}>
                                 {status === ScannerStatusEnum.DUPLICATE && (
                                     <div>
-                                        <strong>Этот QR код уже был проверен ранее!</strong>
+                                        <strong>
+                                            {t('pages.checkin.duplicate-qr', 'Этот QR код уже был проверен ранее!')}
+                                        </strong>
                                     </div>
                                 )}
-                                Взрослых: {participant?.members?.adults || 0}, детей:{' '}
-                                {participant?.members?.children || 0} чел.
+                                {t('pages.checkin.members-count', 'Взрослых: {{adults}}, детей: {{children}} чел.', {
+                                    adults: participant?.members?.adults || 0,
+                                    children: participant?.members?.children || 0
+                                })}
                             </div>
                         )}
                         <Button
@@ -171,7 +177,7 @@ const CheckinPage: NextPage<object> = () => {
                             mode={'secondary'}
                             onClick={handleContinue}
                         >
-                            {'Продолжить сканирование'}
+                            {t('pages.checkin.continue-scanning', 'Продолжить сканирование')}
                         </Button>
                     </Message>
                 )}

@@ -9,7 +9,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable } from '@/components/common'
 import { PhotoCloud, PhotoHeader } from '@/components/pages/photos'
-import { createLargePhotoUrl, createPhotoTitle } from '@/utils/photos'
+import { createLargePhotoUrl, createPhotoTitle, normalizeAndFilterObjects } from '@/utils/photos'
 
 interface PhotoItemPageProps {
     photoId: string
@@ -140,42 +140,6 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
             <AppFooter />
         </AppLayout>
     )
-}
-
-const normalizeAndFilterObjects = (data?: ApiModel.Photo[]): ApiModel.Photo[] => {
-    const splitData = data?.flatMap((item) =>
-        item?.objects?.map((obj) => ({
-            ...item,
-            objects: [obj]
-        }))
-    )
-
-    const uniqueMap = splitData?.reduce<Record<string, ApiModel.Photo>>((acc, item) => {
-        if (!item) {
-            return acc
-        } // Ensure item is not undefined
-
-        const key = item.objects?.[0] as string
-
-        if (acc[key]) {
-            const existingDate = new Date(acc[key]?.date ?? '')
-            const currentDate = new Date(item.date ?? '')
-
-            if (currentDate > existingDate) {
-                if (acc) {
-                    acc[key] = item
-                }
-            }
-        } else {
-            if (acc) {
-                acc[key] = item
-            }
-        }
-
-        return acc
-    }, {})
-
-    return Object.values(uniqueMap ?? {})
 }
 
 export const getServerSideProps = wrapper.getServerSideProps(

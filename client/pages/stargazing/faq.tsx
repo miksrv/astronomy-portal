@@ -1,7 +1,7 @@
 import React from 'react'
 import { Container } from 'simple-react-ui-kit'
 
-import { GetStaticPropsResult, NextPage } from 'next'
+import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -276,9 +276,9 @@ const StargazingFAQPage: NextPage<object> = () => {
     )
 }
 
-export const getServerSideProps = wrapper.getServerSideProps(
+export const getStaticProps = wrapper.getStaticProps(
     (store) =>
-        async (context): Promise<GetServerSidePropsResult<object>> => {
+        async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<object>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 
@@ -287,7 +287,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
             return {
                 props: {
                     ...translations
-                }
+                },
+                revalidate: 86400
             }
         }
 )

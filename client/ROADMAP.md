@@ -117,16 +117,6 @@ Comprehensive security, performance, React/Next.js usage, Redux RTK, TypeScript,
 
 ---
 
-## [CQ-02] 80+ lines of commented-out code
-
-- **Category:** Code Quality
-- **Priority:** Medium
-- **File:** `components/pages/photos/astro-photo-form/AstroPhotoForm.tsx` (lines 24–108), `components/pages/stargazing/event-upcoming/EventUpcoming.tsx` (lines 290–377)
-- **Description:** Large blocks of commented-out code remain in production files. This clutters the codebase and confuses future developers about intent.
-- **Recommendation:** Delete all commented-out code. Git history preserves it if needed.
-
----
-
 ## [CQ-03] Unresolved TODO comments describing known product bugs
 
 - **Category:** Code Quality
@@ -134,26 +124,6 @@ Comprehensive security, performance, React/Next.js usage, Redux RTK, TypeScript,
 - **File:** `components/common/star-map/StarMapRender.tsx`, `components/pages/observatory/relay-list/RelayList.tsx`, `components/pages/stargazing/event-photo-uploader/EventPhotoUploader.tsx`
 - **Description:** Multiple TODO comments document known bugs (StarMap resize bug, relay local state issue, upload error notification) without being tracked anywhere.
 - **Recommendation:** Convert each TODO to a tracked issue in the project issue tracker and remove the inline comments.
-
----
-
-## [CQ-04] Donator list sorted on every render in `about.tsx`
-
-- **Category:** Code Quality
-- **Priority:** Low
-- **File:** `pages/about.tsx` (lines 306–307)
-- **Description:** The donator list is sorted inline during render on every call, causing unnecessary computation on each re-render.
-- **Recommendation:** Wrap in `useMemo` or pre-sort the JSON data file.
-
----
-
-## [CQ-05] `normalizeAndFilterObjects` helper buried in a page file
-
-- **Category:** Code Quality
-- **Priority:** Low
-- **File:** `pages/photos/[name].tsx` (lines 145–179)
-- **Description:** A reusable data-normalization utility is defined inside a page component file, making it untestable and inaccessible for reuse.
-- **Recommendation:** Move to `utils/photos.ts` and add a unit test.
 
 ---
 
@@ -197,36 +167,6 @@ Comprehensive security, performance, React/Next.js usage, Redux RTK, TypeScript,
 
 ---
 
-## [CQ-10] `AppLayout` selects the entire `application` slice causing unnecessary re-renders
-
-- **Category:** Code Quality
-- **Priority:** Medium
-- **File:** `components/common/app-layout/AppLayout.tsx`
-- **Description:** `AppLayout` selects the entire `application` slice state object. Any change to any field in that slice (e.g., `catalogFilters`) triggers a re-render of the layout, including all children.
-- **Recommendation:** Select only the specific fields needed: `showOverlay` and `showAuthDialog` individually using separate `useSelector` calls.
-
----
-
-## [CQ-11] `secondsUntil*` computed at render scope without a timer update
-
-- **Category:** Code Quality
-- **Priority:** Low
-- **File:** `components/pages/stargazing/event-upcoming/EventUpcoming.tsx`
-- **Description:** Countdown values are computed once at render time and never updated because there is no timer driving re-renders.
-- **Recommendation:** Drive countdown values via a `setInterval`-based state update or compute inside a `useMemo` with a timer dependency.
-
----
-
-## [CQ-12] ~30 hardcoded Russian strings in user-facing pages
-
-- **Category:** Code Quality
-- **Priority:** Low
-- **File:** `pages/stargazing/checkin.tsx`, `pages/stargazing/entry.tsx`, `components/pages/stargazing/event-upcoming/EventUpcoming.tsx`
-- **Description:** Approximately 30 user-facing strings are hardcoded in Russian, bypassing the i18n system and making the application impossible to localize.
-- **Recommendation:** Replace all hardcoded Russian strings with `t('key')` calls and add entries to the translation files.
-
----
-
 ## [CQ-13] `PhotoHeader` uses manual `window.Image` preloader instead of `next/image`
 
 - **Category:** Code Quality
@@ -244,16 +184,6 @@ Comprehensive security, performance, React/Next.js usage, Redux RTK, TypeScript,
 - **File:** `api/api.ts`
 - **Description:** The relay light toggle endpoint is named `relayGetLight` (implying a read operation) but is actually a mutation that changes server state.
 - **Recommendation:** Rename to `relayTriggerLight` to accurately reflect its state-changing nature.
-
----
-
-## [CQ-15] Fully static pages use `getServerSideProps` instead of `getStaticProps`
-
-- **Category:** Code Quality
-- **Priority:** Medium
-- **File:** `pages/about.tsx`, `pages/stargazing/rules.tsx`, `pages/stargazing/faq.tsx`, `pages/stargazing/howto.tsx`, `pages/stargazing/where.tsx`
-- **Description:** Pages with no dynamic data use `getServerSideProps`, which runs a server-side function on every request. This adds unnecessary server load and prevents these pages from being statically generated and cached at the CDN.
-- **Recommendation:** Change to `getStaticProps` (with `revalidate` if content changes infrequently) so these pages are pre-rendered and served from the CDN.
 
 ---
 

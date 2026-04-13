@@ -1,5 +1,5 @@
 import React from 'react'
-import { Container, Message } from 'simple-react-ui-kit'
+import { Container } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
