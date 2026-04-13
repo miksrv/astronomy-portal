@@ -68,6 +68,9 @@ class UsersModel extends ApplicationBaseModel {
     }
 
     /**
+     * Updates the user's activity timestamp.
+     * Debounced: skips the update if activity was recorded less than 5 minutes ago.
+     *
      * @param string $userId
      * @return void
      * @throws ReflectionException
@@ -75,12 +78,12 @@ class UsersModel extends ApplicationBaseModel {
      */
     public function updateUserActivity(string $userId): void
     {
-        $userData = $this->select('updated_at')->find($userId);
+        $user = $this->select('activity_at')->find($userId);
 
-        $user = new UserEntity();
-        $user->updated_at  = $userData->updated_at;
-        $user->activity_at = Time::now();
+        if ($user && $user->activity_at && (time() - strtotime((string) $user->activity_at)) < 300) {
+            return; // Skip update — activity was updated less than 5 minutes ago
+        }
 
-        $this->update($userId, $user);
+        $this->update($userId, ['activity_at' => Time::now()]);
     }
 }

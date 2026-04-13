@@ -74,7 +74,7 @@ class EventsModel extends ApplicationBaseModel
         $datetime = (new Time('now'))->subHours(5);
 
         $event = $this
-            ->where('date >=', $datetime->format('Y-m-d H:m:s'))
+            ->where('date >=', $datetime->format('Y-m-d H:i:s'))
             ->orderBy('date', 'DESC')
             ->first();
 
