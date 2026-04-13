@@ -6,8 +6,7 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
-/** System Controller **/
-$routes->get('system/recalculate/fits', 'System::recalculateFitsFilters');
+// System Controller HTTP endpoint removed — use CLI: php spark fits:recalculate
 
 /** Camera Controller **/
 $routes->get('camera/(:num)', 'Camera::show/$1');
