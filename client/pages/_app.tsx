@@ -19,18 +19,26 @@ import 'dayjs/locale/ru'
 import '@/styles/theme.css'
 import '@/styles/globals.sass'
 
-const locale = LocalStorage.getItem(LOCAL_STORAGE.LOCALE as 'LOCALE')
-
 const App = ({ Component, pageProps }: AppProps) => {
     const router = useRouter()
     const { i18n } = useTranslation()
     const { store } = wrapper.useWrappedStore(pageProps)
 
     useEffect(() => {
-        if (i18n.language !== locale && i18Config.i18n.locales.includes(locale) && router.pathname !== '/404') {
-            void router.replace(router.asPath, router.asPath, { locale })
+        // Read the persisted locale preference on the client only.
+        // LocalStorage.getItem returns '' on the server, so this effect
+        // is intentionally client-only and safe to call on every language change.
+        const storedLocale = LocalStorage.getItem(LOCAL_STORAGE.LOCALE as 'LOCALE')
+
+        if (
+            storedLocale &&
+            i18n.language !== storedLocale &&
+            i18Config.i18n.locales.includes(storedLocale) &&
+            router.pathname !== '/404'
+        ) {
+            void router.replace(router.asPath, router.asPath, { locale: storedLocale })
         }
-    }, [])
+    }, [i18n.language, router])
 
     dayjs.locale(i18n.language ?? i18Config.i18n.defaultLocale)
 
@@ -110,4 +118,8 @@ const App = ({ Component, pageProps }: AppProps) => {
     )
 }
 
-export default appWithTranslation(App)
+// Pass i18Config as the second argument so appWithTranslation has a config
+// fallback for pages that do not call serverSideTranslations (e.g. /404).
+// Without this, those pages render without an I18nextProvider and
+// react-i18next emits a "NO_I18NEXT_INSTANCE" warning during build.
+export default appWithTranslation(App, i18Config)

@@ -12,8 +12,6 @@ interface HomePageProps {
     photosList: ApiModel.Photo[]
 }
 
-const headerHeight = 50
-
 const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
     const { t } = useTranslation()
 
@@ -21,8 +19,13 @@ const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
         const sections = document.querySelectorAll('section')
 
         const setSectionHeight = () => {
+            // Read header height from the CSS custom property defined in theme.css
+            const headerHeightPx =
+                parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height'), 10) || 50
+
             const windowHeight = window.innerHeight
-            const sectionHeight = windowHeight - headerHeight
+            const sectionHeight = windowHeight - headerHeightPx
+
             sections.forEach((section) => {
                 ;(section as HTMLElement).style.height = `${sectionHeight}px`
             })

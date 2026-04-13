@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
@@ -14,6 +14,9 @@ const CelestialPage: NextPage<object> = () => {
     const { data } = API.useObjectsGetListQuery()
 
     const title = t('pages.star-map.title', 'Карта звёздного неба')
+
+    // Memoize objects array to avoid triggering StarMapRender rebuild on unrelated re-renders
+    const starMapObjects = useMemo(() => data?.items, [data?.items])
 
     return (
         <AppLayout
@@ -34,9 +37,9 @@ const CelestialPage: NextPage<object> = () => {
                 ]
             }}
         >
-            <div style={{ height: 'calc(100vh - 50px)', overflow: 'hidden' }}>
+            <div style={{ height: 'calc(100vh - var(--header-height))', overflow: 'hidden' }}>
                 <StarMap
-                    objects={data?.items}
+                    objects={starMapObjects}
                     interactive={true}
                 />
             </div>

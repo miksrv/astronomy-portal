@@ -199,7 +199,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             const { data: objectsData } = await store.dispatch(API.endpoints?.objectsGetList.initiate())
 
-            const { data: photosData } = await store.dispatch(API.endpoints?.photosGetList.initiate())
+            // Fetch a bounded set of photos for related-photo display (cover images only)
+            const { data: photosData } = await store.dispatch(API.endpoints?.photosGetList.initiate({ limit: 20 }))
 
             const { data: categoriesData } = await store.dispatch(API.endpoints?.categoriesGetList.initiate())
 

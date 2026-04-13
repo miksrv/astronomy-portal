@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useEffect } from 'react'
 import QRCode from 'react-qr-code'
 import { getCookie } from 'cookies-next'

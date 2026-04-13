@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useEffect, useRef, useState } from 'react'
 import { getCookie } from 'cookies-next'
 import { Html5Qrcode } from 'html5-qrcode'
@@ -82,15 +80,20 @@ const CheckinPage: NextPage<object> = () => {
     }
 
     useEffect(() => {
+        let cancelled = false
+
         if (scanning) {
-            startScanner().catch((err) => {
-                setStatus(ScannerStatusEnum.ERROR)
-                setMessage(err.message)
-                setScanning(false)
+            startScanner().catch((err: Error) => {
+                if (!cancelled) {
+                    setStatus(ScannerStatusEnum.ERROR)
+                    setMessage(err.message)
+                    setScanning(false)
+                }
             })
         }
 
         return () => {
+            cancelled = true
             void stopScanner()
         }
     }, [scanning])

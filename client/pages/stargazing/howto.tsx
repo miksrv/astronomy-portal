@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Container } from 'simple-react-ui-kit'
 
-import { GetServerSidePropsResult, NextPage } from 'next'
+import { GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'

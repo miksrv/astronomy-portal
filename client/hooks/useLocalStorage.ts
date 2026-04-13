@@ -9,11 +9,20 @@ export const useLocalStorage = <S>(
     useDebugValue(state)
 
     useEffect(() => {
+        if (typeof window === 'undefined') {
+            return
+        }
+
         const item = localStorage.getItem(key)
+
         setState(item ? parse(item) : null)
-    }, [])
+    }, [key])
 
     useEffect(() => {
+        if (typeof window === 'undefined') {
+            return
+        }
+
         if (state) {
             localStorage.setItem(key, JSON.stringify(state))
         }

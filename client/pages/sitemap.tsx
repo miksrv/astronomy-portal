@@ -34,19 +34,19 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             const photosPages: SitemapDynamicPage[] =
                 data?.photos?.map((item) => ({
-                    link: `photos/${item.id}`,
+                    link: `photos/${String(item.id)}`,
                     update: new Date(item.updated?.date || new Date()).toISOString()
                 })) || []
 
             const objectsPages: SitemapDynamicPage[] =
                 data?.objects?.map((item) => ({
-                    link: `objects/${item.id}`,
+                    link: `objects/${String(item.id)}`,
                     update: new Date(item.updated?.date || new Date()).toISOString()
                 })) || []
 
             const eventsPages: SitemapDynamicPage[] =
                 data?.events?.map((item) => ({
-                    link: `stargazing/${item.id}`,
+                    link: `stargazing/${String(item.id)}`,
                     update: new Date(item.updated?.date || new Date()).toISOString()
                 })) || []
 
