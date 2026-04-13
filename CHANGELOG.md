@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 4.2.0
+
+### Minor Changes
+
+- Enforced server-side authentication on all admin-only pages (`/photos/form`, `/objects/form`, `/stargazing/form`, `/stargazing/checkin`) — eliminated flash of protected content
+- Moved analytics scripts to `next/script` with `afterInteractive` strategy — replaced `dangerouslySetInnerHTML` injection
+- Converted fully static pages (`/about`, `/stargazing/rules`, `/stargazing/faq`, `/stargazing/howto`, `/stargazing/where`) from SSR to SSG with ISR revalidation
+- Added VK OAuth session logging and robustness improvements
+- Added auth checks, input sanitization, and API response caching across API controllers
+- Improved API types, caching tags, and query helper utilities
+- Added new API root endpoint and CLI command for recalculating FITS filters
+- Updated CORS configuration, routing rules, and filter logic in the API
+- Replaced hardcoded Russian strings in stargazing pages with i18n translation keys
+- Added 404 page translations for English and Russian locales
+- Improved i18n locale coverage and fixed missing translation keys across the UI
+- Implemented test suite for ROADMAP code quality tasks
+- Resolved multiple code quality issues from audit: removed commented-out code, moved `normalizeAndFilterObjects` to `utils/photos.ts`, added timer-driven countdown in `EventUpcoming`, fixed `useLocalStorage` key dependency
+- Updated `robots.txt` to exclude admin and utility routes from indexing
+- Improved UI hydration and server-side rendering stability
+- Changed UI Dropdown component to Select across forms
+- Upgraded UI Dependencies
+
 ## 4.1.6
 
 ### Patch Changes
