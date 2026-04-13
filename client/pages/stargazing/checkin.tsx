@@ -4,11 +4,10 @@ import { Html5Qrcode } from 'html5-qrcode'
 import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
-import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
-import { API, ApiModel, ApiType, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, ApiType, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppLayout, AppToolbar } from '@/components/common'
 
@@ -21,7 +20,6 @@ enum ScannerStatusEnum {
 
 const CheckinPage: NextPage<object> = () => {
     const { t } = useTranslation()
-    const router = useRouter()
 
     const [status, setStatus] = useState<ScannerStatusEnum>(ScannerStatusEnum.IDLE)
     const [participant, setParticipant] = useState<ApiType.Events.ResCheckin>()
@@ -45,8 +43,6 @@ const CheckinPage: NextPage<object> = () => {
 
         await scanner.start(cameras[0].id, { fps: 10, qrbox: 250 }, handleScan, () => {})
     }
-
-    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     const stopScanner = async () => {
         if (scannerRef.current) {
@@ -112,12 +108,6 @@ const CheckinPage: NextPage<object> = () => {
             setParticipant(data)
         }
     }, [data, error])
-
-    useEffect(() => {
-        if (userRole === ApiModel.UserRole.USER) {
-            void router.push('/stargazing')
-        }
-    }, [userRole])
 
     return (
         <AppLayout
@@ -198,10 +188,16 @@ export const getServerSideProps = wrapper.getServerSideProps(
             if (token) {
                 store.dispatch(setSSRToken(token))
             } else {
-                return { notFound: true }
+                return { redirect: { destination: '/stargazing', permanent: false } }
             }
 
+            const { data: authData } = await store.dispatch(API.endpoints.authGetMe.initiate())
+
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+
+            if (authData?.user?.role === ApiModel.UserRole.USER || !authData?.user?.role) {
+                return { redirect: { destination: '/stargazing', permanent: false } }
+            }
 
             return {
                 props: {

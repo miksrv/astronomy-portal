@@ -1,9 +1,15 @@
 User-agent: *
 Allow: /
 
-# Prohibit indexing of authorization pages
+# Admin and utility pages — not for public indexing
+Disallow: /photos/form
+Disallow: /objects/form
+Disallow: /stargazing/form
+Disallow: /stargazing/checkin
+Disallow: /stargazing/entry
 Disallow: /auth
 Disallow: /en/auth
+Disallow: /api/
 
 # Specify the main mirror of the site
 Host: https://astro.miksoft.pro
