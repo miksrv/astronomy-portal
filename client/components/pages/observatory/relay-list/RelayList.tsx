@@ -3,7 +3,7 @@ import { Button, cn, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next'
 
-import { API, ApiModel, ApiType, useAppSelector } from '@/api'
+import { API, ApiModel, ApiType, useAppDispatch, useAppSelector } from '@/api'
 
 import styles from './styles.module.sass'
 
@@ -19,8 +19,26 @@ export const RelayList: React.FC = () => {
     const [relayLoading, setRelayLoading] = React.useState<number>()
     const [countdownTimer, setCountdownTimer] = useState<number>(0)
     const countdownTimerRef = useRef<number>(0)
+    // Pause polling when the tab is not visible to avoid wasted network requests
+    const [pollingInterval, setPollingInterval] = useState<number>(
+        typeof document !== 'undefined' && document.visibilityState === 'hidden' ? 0 : 15 * 1000
+    )
 
-    const { data: relayList, isLoading, isError } = API.useRelayGetStateQuery(null, { pollingInterval: 15 * 1000 })
+    const { data: relayList, isLoading, isError } = API.useRelayGetStateQuery(null, { pollingInterval })
+
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            setPollingInterval(document.visibilityState === 'hidden' ? 0 : 15 * 1000)
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange)
+        }
+    }, [])
+
+    const dispatch = useAppDispatch()
 
     const [setRelayStatus, { isLoading: loaderSet, data: relaySet }] = API.useRelayPutStatusMutation()
 
@@ -30,7 +48,26 @@ export const RelayList: React.FC = () => {
 
     const handleSetRelay = async (relay: ApiType.Relay.ReqRelaySet) => {
         setRelayLoading(relay.id)
-        await setRelayStatus(relay)
+
+        // Optimistically update the relay state before the server confirms
+        const patchResult = dispatch(
+            API.util.updateQueryData('relayGetState', null, (draft) => {
+                if (draft?.items) {
+                    const item = draft.items.find((r) => r.id === relay.id)
+
+                    if (item) {
+                        item.state = relay.state
+                    }
+                }
+            })
+        )
+
+        try {
+            await setRelayStatus(relay)
+        } catch {
+            // Revert optimistic update if the request fails
+            patchResult.undo()
+        }
     }
 
     const tick = () => {

@@ -1,4 +1,4 @@
-import React, { Ref, useEffect, useState } from 'react'
+import React, { Ref, useEffect, useRef, useState } from 'react'
 
 import { ApiModel } from '@/api'
 import { API } from '@/api/api'
@@ -17,6 +17,8 @@ export const EventPhotoUploader: React.FC<PhotoUploaderProps> = ({
     fileInputRef
 }) => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+    // Track object URLs so we can revoke them to prevent memory leaks
+    const objectUrlsRef = useRef<string[]>([])
 
     const [handleUploadPhoto, { data: uploadedPhoto, isLoading: uploadLoading, isError: uploadError }] =
         API.useEventPhotoUploadPostMutation()
@@ -74,7 +76,19 @@ export const EventPhotoUploader: React.FC<PhotoUploaderProps> = ({
     }, [eventId])
 
     useEffect(() => {
-        onSelectFiles?.(selectedFiles?.map((file) => URL.createObjectURL(file)).reverse())
+        // Revoke previously created object URLs before creating new ones
+        objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url))
+
+        const urls = selectedFiles.map((file) => URL.createObjectURL(file)).reverse()
+
+        objectUrlsRef.current = urls
+        onSelectFiles?.(urls)
+
+        return () => {
+            // Revoke on cleanup (unmount or next effect run)
+            objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url))
+            objectUrlsRef.current = []
+        }
     }, [selectedFiles])
 
     return (

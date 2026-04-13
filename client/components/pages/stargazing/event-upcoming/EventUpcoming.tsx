@@ -243,7 +243,6 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event, ...props })
                                     eventId={event?.id}
                                     onSuccessSubmit={() => {
                                         setRegistered(true)
-                                        window.location.reload()
                                     }}
                                 />
                             )}

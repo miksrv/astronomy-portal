@@ -33,7 +33,7 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onS
     const [bookEvent, { isLoading, isSuccess, isError, error }] = API.useEventsRegistrationPostMutation()
 
     const findError = (field: keyof ApiType.Events.ReqRegistration) =>
-        (error as ApiType.ResError)?.messages?.[field as never] || undefined
+        ((error as ApiType.ResError)?.messages?.[field as never] as string | undefined) || undefined
 
     const handleChange = ({ target: { name, value } }: React.ChangeEvent<HTMLInputElement>) =>
         setFormState((prev) => ({ ...prev, [name]: value }))
@@ -83,8 +83,7 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onS
                     type={'error'}
                     title={'Ошибка'}
                 >
-                    {/*eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
-                    {(error as any)?.messages?.error ||
+                    {(error as ApiType.ResError)?.messages?.error ||
                         'При регистрации были допущены ошибки, проверьте правильность заполнения полей'}
                 </Message>
             )}

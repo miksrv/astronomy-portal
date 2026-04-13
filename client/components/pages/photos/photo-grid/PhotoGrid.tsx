@@ -1,5 +1,5 @@
 import React from 'react'
-import { Container } from 'simple-react-ui-kit'
+import { Container, Message } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -20,6 +20,12 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({ photosList }) => {
 
     return (
         <Container className={styles.photoGrid}>
+            {photosList && !photosList.length && (
+                <div className={'notFoundContainer'}>
+                    {t('components.pages.photos.photo-grid.no-results', 'По вашему запросу ничего не найдено')}
+                </div>
+            )}
+
             {photosList?.map((photo) => (
                 <Link
                     key={photo.id}
