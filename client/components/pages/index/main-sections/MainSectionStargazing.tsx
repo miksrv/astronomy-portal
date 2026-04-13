@@ -8,7 +8,7 @@ import { Counter } from '@/components/ui'
 
 import styles from './styles.module.sass'
 
-const YEARS = 10
+const YEARS = 11
 const STARGAZING = 42
 const PEOPLES = 54100
 

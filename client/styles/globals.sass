@@ -10,6 +10,31 @@ html, body
 html
     -moz-osx-font-smoothing: grayscale
     -webkit-text-size-adjust: 100%
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent
+    scrollbar-width: thin
+
+    // Webkit scrollbar styles (Chrome, Safari, Edge)
+    ::-webkit-scrollbar
+        width: 8px
+        height: 8px
+
+    ::-webkit-scrollbar-track
+        background: transparent
+
+    ::-webkit-scrollbar-thumb
+        background-color: rgba(255, 255, 255, 0.15)
+        border-radius: 4px
+        border: 2px solid transparent
+        background-clip: content-box
+
+        &:hover
+            background-color: rgba(255, 255, 255, 0.25)
+
+        &:active
+            background-color: rgba(255, 255, 255, 0.35)
+
+    ::-webkit-scrollbar-corner
+        background: transparent
 
 h2
     font-size: 16px
