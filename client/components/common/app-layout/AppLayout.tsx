@@ -25,7 +25,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children, ...pr
     const { t, i18n } = useTranslation()
     const dispatch = useAppDispatch()
 
-    const { showOverlay, showAuthDialog } = useAppSelector((store) => store.application)
+    const showOverlay = useAppSelector((store) => store.application.showOverlay)
+    const showAuthDialog = useAppSelector((store) => store.application.showAuthDialog)
 
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
 

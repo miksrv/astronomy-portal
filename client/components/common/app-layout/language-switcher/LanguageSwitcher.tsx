@@ -36,7 +36,7 @@ export const LanguageSwitcher: React.FC = () => {
 
     useEffect(() => {
         dispatch(setLocale(currentLanguage as ApiType.Locale))
-    }, [])
+    }, [currentLanguage, dispatch])
 
     return (
         <div className={styles.languageSwitcher}>

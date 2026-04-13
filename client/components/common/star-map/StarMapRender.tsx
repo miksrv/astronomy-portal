@@ -66,6 +66,8 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
     const getPhotoData = API.usePhotosGetListQuery({ object: popup?.object, limit: 1 }, { skip: !popup?.object })
 
     const ref = useRef<HTMLDivElement>(null)
+    // Track previous objects by serialized coordinates to skip redundant redraws
+    const prevObjectsKeyRef = useRef<string>('')
 
     const objectsJSON = useMemo(() => createObjectsJSON(objects), [objects])
 
@@ -129,6 +131,15 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
 
     useEffect(() => {
         if (objects?.length) {
+            // Skip full rebuild if coordinate data has not changed
+            const objectsKey = objects.map((o) => `${o.name}:${o.ra}:${o.dec}`).join('|')
+
+            if (objectsKey === prevObjectsKeyRef.current) {
+                return
+            }
+
+            prevObjectsKeyRef.current = objectsKey
+
             Celestial.clear()
             Celestial.add(
                 {
