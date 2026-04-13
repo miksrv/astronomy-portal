@@ -44,7 +44,7 @@ class Relay extends ResourceController
 
     public function __construct()
     {
-        new LocaleLibrary();
+        LocaleLibrary::init();
 
         $this->settingsModel = new ObservatorySettingsModel();
         $this->relayLibrary  = new RelayLibrary();
@@ -93,11 +93,15 @@ class Relay extends ResourceController
         $inputJSON = $this->request->getJSON();
 
         if (empty($inputJSON)) {
-            $this->failValidationErrors('Invalid request format');
+            return $this->failValidationErrors('Invalid request format');
+        }
+
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized('Ошибка прав доступа');
         }
 
         if ($this->session->user->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
+            return $this->failForbidden('Ошибка прав доступа');
         }
 
         $index = $inputJSON->id ?? null;

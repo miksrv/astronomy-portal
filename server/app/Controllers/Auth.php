@@ -230,26 +230,40 @@ class Auth extends ResourceController
             $newUserId = $userModel->getInsertID();
 
             // If a Google user has an avatar, copy it
-            if ($serviceProfile->avatar) {
+            $avatarUrl = $serviceProfile->avatar ?? '';
+            $allowedHosts = [
+                'lh3.googleusercontent.com',
+                'lh4.googleusercontent.com',
+                'lh5.googleusercontent.com',
+                'lh6.googleusercontent.com',
+                'sun1.userapi.com', 'sun2.userapi.com', 'sun3.userapi.com',
+                'avatars.mds.yandex.net',
+            ];
+            $parsedUrl = parse_url($avatarUrl);
+
+            if (!empty($avatarUrl) && isset($parsedUrl['host']) && in_array($parsedUrl['host'], $allowedHosts, true) && ($parsedUrl['scheme'] ?? '') === 'https') {
                 $avatarDirectory = UPLOAD_USERS . '/' . $newUserId . '/';
                 $avatar = $newUserId . '.jpg';
 
                 if (!is_dir($avatarDirectory)) {
-                    mkdir($avatarDirectory,0777, TRUE);
+                    mkdir($avatarDirectory, 0777, true);
                 }
 
-                file_put_contents($avatarDirectory . $avatar, file_get_contents($serviceProfile->avatar));
+                $avatarContent = @file_get_contents($avatarUrl);
+                if ($avatarContent !== false && getimagesizefromstring($avatarContent) !== false) {
+                    file_put_contents($avatarDirectory . $avatar, $avatarContent);
 
-                $file = new File($avatarDirectory . $avatar);
-                $name = pathinfo($file, PATHINFO_FILENAME);
-                $ext  = $file->getExtension();
+                    $file = new File($avatarDirectory . $avatar);
+                    $name = pathinfo($file, PATHINFO_FILENAME);
+                    $ext  = $file->getExtension();
 
-                $image = Services::image('gd'); // imagick
-                $image->withFile($file->getRealPath())
-                    ->fit(AVATAR_WIDTH, AVATAR_HEIGHT)
-                    ->save($avatarDirectory  . $name . '_medium.' . $ext);
+                    $image = Services::image('gd'); // imagick
+                    $image->withFile($file->getRealPath())
+                        ->fit(AVATAR_WIDTH, AVATAR_HEIGHT)
+                        ->save($avatarDirectory . $name . '_medium.' . $ext);
 
-                $userModel->update($newUserId, ['avatar' => $avatar]);
+                    $userModel->update($newUserId, ['avatar' => $avatar]);
+                }
             }
 
             $userData     = $createUser;

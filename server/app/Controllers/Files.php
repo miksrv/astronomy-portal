@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Models\ObjectModel;
 use App\Models\ObjectFitsFilesModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
@@ -71,9 +70,16 @@ class Files extends ResourceController
             return $this->fail('No RA or DEC coordinates');
         }
 
+        $maxLength = ['COMMENT' => 500, 'OBSERVER' => 100, 'INSTRUME' => 100, 'TELESCOP' => 100];
+        foreach ($maxLength as $field => $max) {
+            if (isset($input->$field) && strlen((string) $input->$field) > $max) {
+                $input->$field = substr((string) $input->$field, 0, $max);
+            }
+        }
+
         try {
-            $objectsModel = new ObjectModel();
-            $modelFiles   = new ObjectFitsFileModel();
+            $objectsModel = new \App\Models\ObjectsModel();
+            $modelFiles   = new \App\Models\ObjectFitsFilesModel();
             $fileId       = md5($input->FILE_NAME);
             $fileObject   = str_replace(' ', '_', $input->OBJECT);
 

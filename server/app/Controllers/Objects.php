@@ -24,7 +24,7 @@ class Objects extends ResourceController
 
     public function __construct()
     {
-        new LocaleLibrary();
+        LocaleLibrary::init();
 
         $this->session = new SessionLibrary();
     }
@@ -39,22 +39,34 @@ class Objects extends ResourceController
         helper('filters');
 
         try {
-            $locale = $this->request->getLocale();
+            $locale   = $this->request->getLocale();
+            $cache    = \Config\Services::cache();
+            $cacheKey = 'objects_list_' . $locale;
+            $cached   = $cache->get($cacheKey);
+
+            if ($cached !== null) {
+                return $this->respond($cached);
+            }
 
             // Fetch data from models
             $objectsModel = new ObjectsModel();
             $filtersModel = new ObjectFitsFiltersModel();
             $objectsData  = $objectsModel->getObjectsWithCategories($locale);
-            $filtersData  = $filtersModel->findAll();
+            $objectNames  = array_column($objectsData, 'name');
+            $filtersData  = empty($objectNames) ? [] : $filtersModel->whereIn('object_name', $objectNames)->findAll();
 
             // Prepare objects with filters and statistics
             $result = prepareObjectDataWithFilters($objectsData, $filtersData);
 
-            // Return the response with count and items
-            return $this->respond([
+            $response = [
                 'count' => count($result),
-                'items' => $result
-            ]);
+                'items' => $result,
+            ];
+
+            $cache->save($cacheKey, $response, 300);
+
+            // Return the response with count and items
+            return $this->respond($response);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
@@ -103,13 +115,17 @@ class Objects extends ResourceController
      */
     public function create(): ResponseInterface
     {
-        if ($this->session?->user?->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
         }
 
         $input = $this->request->getJSON(true);
         $rules = [
-            'name'  => 'required|min_length[3]|max_length[40]|is_unique[objects.catalog_name]',
+            'name'  => 'required|min_length[3]|max_length[40]',
             'image' => 'string',
         ];
 
@@ -117,12 +133,17 @@ class Objects extends ResourceController
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
-        // if ($this->session?->user?->role !== 'admin') {
-        //     return $this->failValidationErrors('Ошибка прав доступа');
-        // }
+        // Map 'name' input field to 'catalog_name' DB column
+        $input['catalog_name'] = $input['name'] ?? '';
+        unset($input['name']);
+
+        // Check uniqueness after mapping
+        $objectsModel = new ObjectsModel();
+        if ($objectsModel->where('catalog_name', $input['catalog_name'])->withDeleted()->first()) {
+            return $this->failValidationErrors(['name' => 'This Object Name already exists.']);
+        }
 
         try {
-            $objectsModel = new ObjectsModel();
             $objectsModel->insert($input);
 
             return $this->respondCreated($input);
@@ -141,8 +162,12 @@ class Objects extends ResourceController
      */
     public function update($id = null): ResponseInterface
     {
-        if ($this->session?->user?->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
         }
 
         $input = $this->request->getJSON(true);
@@ -156,10 +181,6 @@ class Objects extends ResourceController
         if (!$this->validator->run($input)) {
             return $this->failValidationErrors($this->validator->getErrors());
         }
-
-        // if ($this->session?->user?->role !== 'admin') {
-        //     return $this->failValidationErrors('Ошибка прав доступа');
-        // }
 
         // Validate the decoded fields (ensure arrays)
         if ((!empty($input) && !is_array($input['categories'])) || (!empty($input['equipment']) && !is_array($input['equipment']))) {
@@ -176,6 +197,10 @@ class Objects extends ResourceController
             $objectsModel = new ObjectsModel();
             $objectsData  = $objectsModel->where('catalog_name', $id)->first();
 
+            if (!$objectsData) {
+                return $this->failNotFound(lang('App.objectNotFound'));
+            }
+
             // Сохраняем категории
             if (!empty($input['categories'])) {
                 $objectCategoryModel = new ObjectCategoryModel();
@@ -189,12 +214,8 @@ class Objects extends ResourceController
                 }
             }
 
-            if ($objectsData) {
-                $objectsModel->update($id, $input);
-                return $this->respondUpdated($input);
-            }
-
-            return $this->failNotFound('Объект не найден');
+            $objectsModel->update($id, $input);
+            return $this->respondUpdated($input);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
             return $this->failServerError('Внутренняя ошибка сервера');
@@ -209,8 +230,12 @@ class Objects extends ResourceController
      */
     public function delete($id = null): ResponseInterface
     {
-        if ($this->session?->user?->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
         }
 
         try {

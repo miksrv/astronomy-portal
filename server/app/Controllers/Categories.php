@@ -25,7 +25,7 @@ class Categories extends ResourceController
 
     public function __construct()
     {
-        new LocaleLibrary();
+        LocaleLibrary::init();
 
         $this->session = new SessionLibrary();
     }
@@ -38,17 +38,28 @@ class Categories extends ResourceController
     public function list(): ResponseInterface
     {
         try {
-            $locale = $this->request->getLocale();
+            $locale   = $this->request->getLocale();
+            $cache    = \Config\Services::cache();
+            $cacheKey = 'categories_list_' . $locale;
+            $cached   = $cache->get($cacheKey);
+
+            if ($cached !== null) {
+                return $this->respond($cached);
+            }
 
             // Fetch data from models
             $categoriesModel = new CategoryModel();
             $categoriesData  = $categoriesModel->getCategories($locale);
 
-            // Return the response with count and items
-            return $this->respond([
+            $response = [
                 'count' => count($categoriesData),
-                'items' => $categoriesData
-            ]);
+                'items' => $categoriesData,
+            ];
+
+            $cache->save($cacheKey, $response, 300);
+
+            // Return the response with count and items
+            return $this->respond($response);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
