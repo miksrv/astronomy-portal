@@ -8,6 +8,11 @@ class LocaleLibrary
 {
     public function __construct()
     {
+        self::init();
+    }
+
+    public static function init(): void
+    {
         $config  = config('App');
         $request = Services::request();
         $header  = $request->header('Locale');

@@ -12,7 +12,7 @@ if (!function_exists('getLocalizedString')) {
     function getLocalizedString(string $locale, ?string $titleEn, ?string $titleRu): string
     {
         return $locale === 'ru'
-            ? (!empty($titleRu) ? $titleRu : $titleEn || '')
-            : (!empty($titleEn) ? $titleEn : $titleRu || '');
+            ? (!empty($titleRu) ? $titleRu : $titleEn ?? '')
+            : (!empty($titleEn) ? $titleEn : $titleRu ?? '');
     }
 }

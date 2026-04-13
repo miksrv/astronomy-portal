@@ -49,7 +49,7 @@ class VkClient
         $this->redirectUri = $redirectUri;
         $this->theme       = $theme === 'light' ? 'light' : 'dark';
 
-        $this->codeVerifier = rtrim(strtr(base64_encode('mySecretCode'), "+/", "-_"), "=");
+        $this->codeVerifier = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
     }
 
 
