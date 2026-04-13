@@ -245,6 +245,12 @@
             "your-help-description": "Our homemade observatory project has also found a response among many caring participants. We have ambitious plans for the development of this direction, and your support plays a key role. We are grateful to everyone who helps with advice, consultations, and recommendations. If we accidentally missed someone in the list of thanks, write to us - it is very important.",
             "your-help-conclusion": "Thanks to your help, space really becomes closer!"
         },
+        "404": {
+            "title": "Error 404 - Page not found",
+            "heading": "Houston, we have a problem",
+            "subheading": "Page not found",
+            "description": "The page you are looking for may have been removed,\nrenamed, or is temporarily unavailable."
+        },
         "auth": {
             "title": "Site authorization",
             "notification_error": "Error",
