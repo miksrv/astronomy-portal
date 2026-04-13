@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, cn, Icon, Popout } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
@@ -26,7 +26,20 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
     const dispatch = useAppDispatch()
     const authSlice = useAppSelector((state) => state.auth)
 
-    const [authGetMe, { data: meData, error, isLoading }] = API.useAuthGetMeMutation()
+    // Track client-side mount to avoid hydration mismatches.
+    // The auth query may immediately set isLoading=true on the client (when a
+    // token exists in localStorage) before React finishes hydration, causing the
+    // Button's className to differ from the SSR-rendered HTML.
+    // We suppress that difference by treating isLoading as false until mounted.
+    const [mounted, setMounted] = useState(false)
+
+    const {
+        data: meData,
+        error,
+        isLoading
+    } = API.useAuthGetMeQuery(undefined, {
+        skip: !authSlice?.token?.length || authSlice?.isAuth
+    })
 
     const adminLinks = [
         {
@@ -52,18 +65,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
     }
 
     useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    useEffect(() => {
         if (meData?.auth === true) {
             dispatch(login(meData))
         } else if (meData?.auth === false) {
             dispatch(logout())
         }
     }, [meData, error])
-
-    useEffect(() => {
-        if (!authSlice?.isAuth && authSlice?.token?.length) {
-            void authGetMe()
-        }
-    }, [])
 
     return (
         <header className={styles.appHeader}>
@@ -99,8 +110,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
                             mode={'secondary'}
                             className={styles.loginButton}
                             onClick={handleLoginClick}
-                            loading={isLoading}
-                            label={!isLoading ? t('components.common.app-layout.app-header.sign-in', 'Войти') : ''}
+                            loading={mounted && isLoading}
+                            label={
+                                !(mounted && isLoading)
+                                    ? t('components.common.app-layout.app-header.sign-in', 'Войти')
+                                    : ''
+                            }
                         />
                     )}
 

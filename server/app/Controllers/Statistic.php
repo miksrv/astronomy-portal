@@ -92,14 +92,15 @@ class Statistic extends ResourceController
 
         $filesModel = new ObjectFitsFilesModel();
         $filesData  = $filesModel
-            ->select('date_obs, exptime, object')
+            ->select("DATE(DATE_ADD(date_obs, INTERVAL 5 HOUR)) as obs_date, object, SUM(exptime) as total_exptime, COUNT(*) as frames_count")
             ->where($where)
+            ->groupBy('DATE(DATE_ADD(date_obs, INTERVAL 5 HOUR)), object')
             ->findAll();
 
         $daysStatistic = [];
 
         foreach ($filesData as $file) {
-            $currentDay = date('Y-m-d', strtotime($file->date_obs . ' +5 hours'));
+            $currentDay = $file->obs_date;
 
             if (!isset($daysStatistic[$currentDay])) {
                 $daysStatistic[$currentDay] = (object) [
@@ -110,8 +111,8 @@ class Statistic extends ResourceController
                 ];
             }
 
-            $daysStatistic[$currentDay]->total_exposure += $file->exptime;
-            $daysStatistic[$currentDay]->frames_count   += 1;
+            $daysStatistic[$currentDay]->total_exposure += (float) $file->total_exptime;
+            $daysStatistic[$currentDay]->frames_count   += (int) $file->frames_count;
 
             if (!in_array($file->object, $daysStatistic[$currentDay]->catalog_items)) {
                 $daysStatistic[$currentDay]->catalog_items[] = $file->object;

@@ -6,8 +6,14 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
-/** System Controller **/
-$routes->get('system/recalculate/fits', 'System::recalculateFitsFilters');
+/** Root - API info endpoint **/
+$routes->get('/', static function () {
+    return response()->setJSON([
+        'name'    => 'Observatory API',
+        'version' => '1.0.0',
+        'status'  => 'ok'
+    ]);
+});
 
 /** Camera Controller **/
 $routes->get('camera/(:num)', 'Camera::show/$1');

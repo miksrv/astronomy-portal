@@ -1,15 +1,13 @@
-'use client'
-
 import React, { useEffect, useRef, useState } from 'react'
 import { getCookie } from 'cookies-next'
 import { Html5Qrcode } from 'html5-qrcode'
 import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
-import { useRouter } from 'next/router'
+import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
-import { API, ApiModel, ApiType, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, ApiType, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppLayout, AppToolbar } from '@/components/common'
 
@@ -21,7 +19,7 @@ enum ScannerStatusEnum {
 }
 
 const CheckinPage: NextPage<object> = () => {
-    const router = useRouter()
+    const { t } = useTranslation()
 
     const [status, setStatus] = useState<ScannerStatusEnum>(ScannerStatusEnum.IDLE)
     const [participant, setParticipant] = useState<ApiType.Events.ResCheckin>()
@@ -40,13 +38,11 @@ const CheckinPage: NextPage<object> = () => {
 
         if (!cameras || !cameras.length) {
             setStatus(ScannerStatusEnum.ERROR)
-            setMessage('Камеры не найдены')
+            setMessage(t('pages.checkin.no-cameras', 'Камеры не найдены'))
         }
 
         await scanner.start(cameras[0].id, { fps: 10, qrbox: 250 }, handleScan, () => {})
     }
-
-    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     const stopScanner = async () => {
         if (scannerRef.current) {
@@ -62,7 +58,7 @@ const CheckinPage: NextPage<object> = () => {
 
         if (code.length !== 13) {
             setStatus(ScannerStatusEnum.ERROR)
-            setMessage('Некорректный QR-код')
+            setMessage(t('pages.checkin.invalid-qr', 'Некорректный QR-код'))
             setParticipant(undefined)
             setScanning(false)
 
@@ -82,15 +78,20 @@ const CheckinPage: NextPage<object> = () => {
     }
 
     useEffect(() => {
+        let cancelled = false
+
         if (scanning) {
-            startScanner().catch((err) => {
-                setStatus(ScannerStatusEnum.ERROR)
-                setMessage(err.message)
-                setScanning(false)
+            startScanner().catch((err: Error) => {
+                if (!cancelled) {
+                    setStatus(ScannerStatusEnum.ERROR)
+                    setMessage(err.message)
+                    setScanning(false)
+                }
             })
         }
 
         return () => {
+            cancelled = true
             void stopScanner()
         }
     }, [scanning])
@@ -103,30 +104,24 @@ const CheckinPage: NextPage<object> = () => {
 
         if (isSuccess) {
             setStatus(data?.checkin?.date ? ScannerStatusEnum.DUPLICATE : ScannerStatusEnum.SUCCESS)
-            setMessage('Участник зарегистрирован')
+            setMessage(t('pages.checkin.participant-registered', 'Участник зарегистрирован'))
             setParticipant(data)
         }
     }, [data, error])
 
-    useEffect(() => {
-        if (userRole === ApiModel.UserRole.USER) {
-            void router.push('/stargazing')
-        }
-    }, [userRole])
-
     return (
         <AppLayout
-            title={'Проверка участников'}
+            title={t('pages.checkin.title', 'Проверка участников')}
             nofollow={true}
             noindex={true}
         >
             <AppToolbar
-                title={'Проверка участников'}
-                currentPage={'Проверка участников'}
+                title={t('pages.checkin.title', 'Проверка участников')}
+                currentPage={t('pages.checkin.title', 'Проверка участников')}
                 links={[
                     {
                         link: '/stargazing',
-                        text: 'Астровыезды'
+                        text: t('menu.stargazing', 'Астровыезды')
                     }
                 ]}
             />
@@ -156,11 +151,15 @@ const CheckinPage: NextPage<object> = () => {
                             <div style={{ margin: '20px 0' }}>
                                 {status === ScannerStatusEnum.DUPLICATE && (
                                     <div>
-                                        <strong>Этот QR код уже был проверен ранее!</strong>
+                                        <strong>
+                                            {t('pages.checkin.duplicate-qr', 'Этот QR код уже был проверен ранее!')}
+                                        </strong>
                                     </div>
                                 )}
-                                Взрослых: {participant?.members?.adults || 0}, детей:{' '}
-                                {participant?.members?.children || 0} чел.
+                                {t('pages.checkin.members-count', 'Взрослых: {{adults}}, детей: {{children}} чел.', {
+                                    adults: participant?.members?.adults || 0,
+                                    children: participant?.members?.children || 0
+                                })}
                             </div>
                         )}
                         <Button
@@ -168,7 +167,7 @@ const CheckinPage: NextPage<object> = () => {
                             mode={'secondary'}
                             onClick={handleContinue}
                         >
-                            {'Продолжить сканирование'}
+                            {t('pages.checkin.continue-scanning', 'Продолжить сканирование')}
                         </Button>
                     </Message>
                 )}
@@ -189,10 +188,16 @@ export const getServerSideProps = wrapper.getServerSideProps(
             if (token) {
                 store.dispatch(setSSRToken(token))
             } else {
-                return { notFound: true }
+                return { redirect: { destination: '/stargazing', permanent: false } }
             }
 
+            const { data: authData } = await store.dispatch(API.endpoints.authGetMe.initiate())
+
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+
+            if (authData?.user?.role === ApiModel.UserRole.USER || !authData?.user?.role) {
+                return { redirect: { destination: '/stargazing', permanent: false } }
+            }
 
             return {
                 props: {

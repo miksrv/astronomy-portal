@@ -1,10 +1,9 @@
-'use client'
-
 import React, { useEffect } from 'react'
 import QRCode from 'react-qr-code'
 import { getCookie } from 'cookies-next'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
 import { API, ApiModel, setLocale, wrapper } from '@/api'
@@ -18,6 +17,8 @@ interface EntryPageProps {
 }
 
 const EntryPage: NextPage<EntryPageProps> = ({ upcomingData }) => {
+    const { t } = useTranslation()
+
     useEffect(() => {
         document.body.classList.add(styles.printBody)
 
@@ -28,17 +29,18 @@ const EntryPage: NextPage<EntryPageProps> = ({ upcomingData }) => {
 
     return (
         <div className={styles.center}>
-            <h1>{'Это ваш билет на мероприятие'}</h1>
+            <h1>{t('pages.entry.ticket-title', 'Это ваш билет на мероприятие')}</h1>
             <h2>{upcomingData?.title}</h2>
             <p>
-                <strong>Дата и время:</strong> {formatUTCDate(upcomingData?.date?.date, 'D MMMM, YYYY, H:mm')}
+                <strong>{t('pages.entry.date-time', 'Дата и время')}:</strong>{' '}
+                {formatUTCDate(upcomingData?.date?.date, 'D MMMM, YYYY, H:mm')}
             </p>
             <p>
-                <strong>Участники:</strong> Взрослых {upcomingData?.members?.adults}, детей{' '}
-                {upcomingData?.members?.children}
+                <strong>{t('pages.entry.participants', 'Участники')}:</strong> {t('pages.entry.adults', 'Взрослых')}{' '}
+                {upcomingData?.members?.adults}, {t('pages.entry.children', 'детей')} {upcomingData?.members?.children}
             </p>
             <p>
-                <i>{'Покажите этот QR-код на входе'}</i>
+                <i>{t('pages.entry.show-qr', 'Покажите этот QR-код на входе')}</i>
             </p>
             <div className={styles.qrcode}>
                 <QRCode
@@ -50,7 +52,7 @@ const EntryPage: NextPage<EntryPageProps> = ({ upcomingData }) => {
                 className={styles.printButton}
                 onClick={() => window.print()}
             >
-                {'Распечатать билет '}
+                {t('pages.entry.print-ticket', 'Распечатать билет')}
             </button>
         </div>
     )

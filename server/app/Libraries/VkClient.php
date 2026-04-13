@@ -49,7 +49,7 @@ class VkClient
         $this->redirectUri = $redirectUri;
         $this->theme       = $theme === 'light' ? 'light' : 'dark';
 
-        $this->codeVerifier = rtrim(strtr(base64_encode('mySecretCode'), "+/", "-_"), "=");
+        $this->codeVerifier = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
     }
 
 
@@ -85,6 +85,11 @@ class VkClient
      */
     public function authUser($code, $state, $device): ?object {
         if (!$code || !$device || $state !== $this->secretState) {
+            log_message('error', '[VkClient] authUser validation failed: code={code}, device={device}, state_match={match}', [
+                'code'   => !empty($code) ? 'present' : 'EMPTY',
+                'device' => !empty($device) ? 'present' : 'EMPTY',
+                'match'  => $state === $this->secretState ? 'yes' : "no (got '{$state}', expected '{$this->secretState}')",
+            ]);
             return null;
         }
 
@@ -106,16 +111,28 @@ class VkClient
                 ->setBody(http_build_query($params))
                 ->post('https://id.vk.com/oauth2/auth');
 
-            if ($response->getStatusCode() !== 200) {
+            $statusCode = $response->getStatusCode();
+            $body       = $response->getBody();
+
+            if ($statusCode !== 200) {
+                log_message('error', '[VkClient] Token exchange failed with status {status}', ['status' => $statusCode]);
                 return null;
             }
 
-            $response = json_decode($response->getBody());
+            $decoded = json_decode($body);
 
-            $this->access_token = $response->access_token;
+            if (empty($decoded->access_token)) {
+                log_message('error', '[VkClient] Token exchange response missing access_token, keys: {keys}', [
+                    'keys' => implode(', ', array_keys((array) $decoded)),
+                ]);
+                return null;
+            }
+
+            $this->access_token = $decoded->access_token;
 
             return $this->_fetchUserInfo();
         } catch (\Throwable $e) {
+            log_message('error', '[VkClient] Exception during token exchange: {message}', ['message' => $e->getMessage()]);
             log_message('error', '{exception}', ['exception' => $e]);
             return null;
         }
@@ -127,10 +144,9 @@ class VkClient
      */
     private function _fetchUserInfo(): ?object {
         if (!$this->access_token) {
+            log_message('error', '[VkClient] _fetchUserInfo called without access_token');
             return null;
         }
-
-        // TODO: https://dev.vk.com/ru/method/users.get
 
         $params  = [
             'access_token' => $this->access_token,
@@ -143,11 +159,24 @@ class VkClient
                 ->setBody(http_build_query($params))
                 ->post('https://id.vk.com/oauth2/user_info');
 
-            if ($response->getStatusCode() !== 200) {
+            $statusCode = $response->getStatusCode();
+            $body       = $response->getBody();
+
+            if ($statusCode !== 200) {
+                log_message('error', '[VkClient] User info request failed with status {status}', ['status' => $statusCode]);
                 return null;
             }
 
-            $data    = json_decode($response->getBody())->user;
+            $decoded = json_decode($body);
+
+            if (empty($decoded->user)) {
+                log_message('error', '[VkClient] User info response missing "user" key, keys: {keys}', [
+                    'keys' => implode(', ', array_keys((array) $decoded)),
+                ]);
+                return null;
+            }
+
+            $data    = $decoded->user;
             $profile = $this->_fetchUserProfile($data->user_id);
 
             $userData->id    = $data->user_id ?? null;
@@ -166,6 +195,7 @@ class VkClient
 
             return $userData;
         } catch (\Throwable $e) {
+            log_message('error', '[VkClient] Exception during user info fetch: {message}', ['message' => $e->getMessage()]);
             log_message('error', '{exception}', ['exception' => $e]);
             return null;
         }
@@ -179,6 +209,7 @@ class VkClient
      */
     private function _fetchUserProfile(int $userId): ?object {
         if (!$this->access_token) {
+            log_message('error', '[VkClient] _fetchUserProfile called without access_token');
             return null;
         }
 
@@ -194,14 +225,24 @@ class VkClient
                 ->setBody(http_build_query($params))
                 ->post('https://api.vk.com/method/users.get');
 
-            if ($response->getStatusCode() !== 200) {
+            $statusCode = $response->getStatusCode();
+            $body       = $response->getBody();
+
+            if ($statusCode !== 200) {
+                log_message('error', '[VkClient] User profile request failed with status {status}', ['status' => $statusCode]);
                 return null;
             }
 
-            $result = json_decode($response->getBody());
+            $result = json_decode($body);
+
+            if (empty($result->response[0])) {
+                log_message('warning', '[VkClient] User profile response has no data in response[0]');
+                return null;
+            }
 
             return $result->response[0];
         } catch (\Throwable $e) {
+            log_message('error', '[VkClient] Exception during profile fetch: {message}', ['message' => $e->getMessage()]);
             log_message('error', '{exception}', ['exception' => $e]);
             return null;
         }

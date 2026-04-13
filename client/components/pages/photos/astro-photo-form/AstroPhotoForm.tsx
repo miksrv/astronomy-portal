@@ -100,8 +100,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                         }
                         return acc
                     },
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    {} as Record<ApiModel.FilterTypes, any>
+                    {} as Record<ApiModel.FilterTypes, ApiModel.Statistic>
                 )
             })
         }
@@ -167,7 +166,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                 value={formData.equipments}
                 options={equipmentListData?.items?.map((item) => ({
                     key: item.id,
-                    value: `${item.brand} ${item.model}`
+                    value: [item.brand, item.model].filter(Boolean).join(' ')
                 }))}
                 onSelect={(values) =>
                     setFormData({

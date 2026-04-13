@@ -28,7 +28,7 @@ class Photos extends ResourceController
 
     public function __construct()
     {
-        new LocaleLibrary();
+        LocaleLibrary::init();
 
         $this->session = new SessionLibrary();
     }
@@ -52,18 +52,20 @@ class Photos extends ResourceController
             $photosModel  = new PhotosModel();
             $filtersModel = new PhotosFiltersModel();
 
-            $filtersData = $filtersModel->findAll();
             $photosData  = $object
                 ? $photosModel->getPhotosListByObjects($object, $locale, $limit, $order)
                 : $photosModel->getPhotosList($locale, null, $limit, $order);
+
+            $photoIds    = array_column($photosData, 'id');
+            $filtersData = empty($photoIds) ? [] : $filtersModel->whereIn('photo_id', $photoIds)->findAll();
 
             // Prepare photos with filters and statistics
             $result = preparePhotoDataWithFilters($photosData, $filtersData);
 
             // Return the response with count and items
             return $this->respond([
-                'count' => count($photosData),
-                'items' => $photosData
+                'count' => count($result),
+                'items' => $result,
             ]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
@@ -124,9 +126,13 @@ class Photos extends ResourceController
                 ->where(['object' => $id, 'date' => $date])
                 ->first();
 
-            $photoLink  = UPLOAD_PHOTOS .  $photoData->image_name . '.' . $photoData->image_ext;
+            if (!$photoData) {
+                return $this->failNotFound(lang('App.photoNotFound'));
+            }
 
-            if ($photoData && file_exists($photoLink)) {
+            $photoLink = UPLOAD_PHOTOS . $photoData->image_name . '.' . $photoData->image_ext;
+
+            if (file_exists($photoLink)) {
                 return $this->response->download($photoLink, null);
             }
 
@@ -177,6 +183,11 @@ class Photos extends ResourceController
             return $this->failValidationErrors('File upload failed or invalid file');
         }
 
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!in_array($fileUpload->getMimeType(), $allowedMimes, true)) {
+            return $this->failValidationErrors('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
+        }
+
         $photoUploadLibrary = new PhotoUploadLibrary();
         $photosObjectModel  = new PhotosObjectModel();
         $photosModel  = new PhotosModel();
@@ -203,6 +214,7 @@ class Photos extends ResourceController
             );
 
             $photo->fill($uploadResult);
+            $photo->id = $id;
             $photosModel->update($id, $photo);
 
             return $this->respondCreated($photo);
@@ -220,8 +232,12 @@ class Photos extends ResourceController
      */
     public function delete($id = null): ResponseInterface
     {
-        if ($this->session?->user?->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
         }
 
         try {
@@ -249,8 +265,12 @@ class Photos extends ResourceController
      */
     protected function save($id = null)
     {
-        if ($this->session?->user?->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
         }
 
         // Get the uploaded file and post data
@@ -355,7 +375,8 @@ class Photos extends ResourceController
                 }
             }
 
-            return $this->respondCreated($photo);
+            $isUpdate = !empty($id);
+            return $isUpdate ? $this->respondUpdated($photo) : $this->respondCreated($photo);
         } catch (\Exception $e) {
             log_message('error', $e->getMessage());
             return $this->failServerError('Could not save photo data');

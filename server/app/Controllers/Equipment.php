@@ -27,16 +27,27 @@ class Equipment extends ResourceController
     public function list(): ResponseInterface
     {
         try {
+            $cache    = \Config\Services::cache();
+            $cacheKey = 'equipment_list';
+            $cached   = $cache->get($cacheKey);
+
+            if ($cached !== null) {
+                return $this->respond($cached);
+            }
 
             // Fetch data from models
             $equipmentModel = new ObservatoryEquipmentModel();
             $equipmentData  = $equipmentModel->findAll();
 
-            // Return the response with count and items
-            return $this->respond([
+            $response = [
                 'count' => count($equipmentData),
-                'items' => $equipmentData
-            ]);
+                'items' => $equipmentData,
+            ];
+
+            $cache->save($cacheKey, $response, 300);
+
+            // Return the response with count and items
+            return $this->respond($response);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 

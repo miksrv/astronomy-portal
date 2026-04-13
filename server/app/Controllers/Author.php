@@ -39,14 +39,16 @@ class Author extends ResourceController
             return $this->respond(['items' => $dataAuthors]);
         }
 
-        foreach ($dataPhotos as $photo) {
-            $key = array_search($photo->author_id, array_column($dataAuthors, 'id'));
+        $authorsById = array_column($dataAuthors, null, 'id');
 
-            if ($key === false) {
+        foreach ($dataPhotos as $photo) {
+            $author = $authorsById[$photo->author_id] ?? null;
+
+            if ($author === null) {
                 continue;
             }
 
-            $dataAuthors[$key]->photo_count = $dataAuthors[$key]->photo_count ? $dataAuthors[$key]->photo_count + 1 : 1;
+            $author->photo_count = $author->photo_count ? $author->photo_count + 1 : 1;
         }
 
         return $this->respond(['items' => $dataAuthors]);
@@ -59,6 +61,14 @@ class Author extends ResourceController
      */
     public function create($id = null): ResponseInterface
     {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized('Ошибка прав доступа');
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden('Ошибка прав доступа');
+        }
+
         $input = $this->request->getJSON(true);
         $rules = [
             'name' => 'required|min_length[3]|max_length[100]',
@@ -66,10 +76,6 @@ class Author extends ResourceController
 
         if (!$this->validate($rules)) {
             return $this->failValidationErrors($this->validator->getErrors());
-        }
-
-        if ($this->session->user->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
         }
 
         try {
@@ -91,6 +97,14 @@ class Author extends ResourceController
      */
     public function update($id = null): ResponseInterface
     {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized('Ошибка прав доступа');
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden('Ошибка прав доступа');
+        }
+
         $input = $this->request->getJSON(true);
         $rules = [
             'name' => 'required|min_length[3]|max_length[100]'
@@ -100,10 +114,6 @@ class Author extends ResourceController
 
         if (!$this->validator->run($input)) {
             return $this->failValidationErrors($this->validator->getErrors());
-        }
-
-        if ($this->session->user->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
         }
 
         try {
@@ -130,8 +140,12 @@ class Author extends ResourceController
      */
     public function delete($id = null): ResponseInterface
     {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized('Ошибка прав доступа');
+        }
+
         if ($this->session->user->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
+            return $this->failForbidden('Ошибка прав доступа');
         }
 
         try {

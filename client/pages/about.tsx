@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Container, Icon } from 'simple-react-ui-kit'
 
-import { GetServerSidePropsResult, NextPage } from 'next'
+import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -71,6 +71,11 @@ const AboutPage: NextPage<AboutPageProps> = () => {
     const [photoIndex, setPhotoIndex] = useState<number>(0)
 
     const title = t('pages.about.title', 'О проекте')
+
+    const sortedDonators = useMemo(
+        () => (donators as DonaterType[]).slice().sort((a, b) => a.name.localeCompare(b.name)),
+        []
+    )
 
     const handlePhotoClick = (index: number) => {
         setPhotoIndex(index)
@@ -302,28 +307,25 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                         overflow: 'auto'
                     }}
                 >
-                    {donators
-                        .slice()
-                        .sort((a: DonaterType, b: DonaterType) => a.name.localeCompare(b.name))
-                        .map((item: DonaterType, i) => (
-                            <li
-                                key={`donater-${item?.name}-${i}`}
-                                style={{ width: '100%' }}
-                            >
-                                <span>{item.name}</span>
-                                {item.tooltip && (
-                                    <span
-                                        style={{
-                                            fontSize: '12px',
-                                            color: '#888',
-                                            marginLeft: '5px'
-                                        }}
-                                    >
-                                        ({item.tooltip})
-                                    </span>
-                                )}
-                            </li>
-                        ))}
+                    {sortedDonators.map((item, i) => (
+                        <li
+                            key={`donater-${item?.name}-${i}`}
+                            style={{ width: '100%' }}
+                        >
+                            <span>{item.name}</span>
+                            {item.tooltip && (
+                                <span
+                                    style={{
+                                        fontSize: '12px',
+                                        color: '#888',
+                                        marginLeft: '5px'
+                                    }}
+                                >
+                                    ({item.tooltip})
+                                </span>
+                            )}
+                        </li>
+                    ))}
                 </ul>
                 <p style={{ margin: 0 }}>
                     {t(
@@ -351,9 +353,9 @@ const AboutPage: NextPage<AboutPageProps> = () => {
     )
 }
 
-export const getServerSideProps = wrapper.getServerSideProps(
+export const getStaticProps = wrapper.getStaticProps(
     (store) =>
-        async (context): Promise<GetServerSidePropsResult<AboutPageProps>> => {
+        async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<AboutPageProps>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
 
@@ -362,7 +364,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
             return {
                 props: {
                     ...translations
-                }
+                },
+                revalidate: 86400
             }
         }
 )

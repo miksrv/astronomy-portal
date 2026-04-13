@@ -39,7 +39,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
         if (isAuth && !data) {
             void router.push('/')
         }
-    }, [])
+    }, [isAuth, data, router])
 
     useEffect(() => {
         if (data?.auth === true && !isProcessing) {
@@ -47,7 +47,11 @@ const AuthPage: NextPage<AuthPageProps> = () => {
             dispatch(login(data))
 
             if (returnPath) {
-                const returnLink = returnPath
+                // Validate returnPath: must be relative (starts with '/' and no '://')
+                const isValidPath =
+                    typeof returnPath === 'string' && returnPath.startsWith('/') && !returnPath.includes('://')
+
+                const returnLink = isValidPath ? returnPath : '/'
 
                 LocalStorage.removeItem(LOCAL_STORAGE.RETURN_PATH as 'RETURN_PATH')
 
@@ -56,7 +60,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
                 void router.push('/')
             }
         }
-    }, [data])
+    }, [data, isProcessing, returnPath, dispatch, router])
 
     useEffect(() => {
         if (!code || !service) {
@@ -74,7 +78,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
                 device_id: searchParams.get('device_id') ?? undefined
             })
         }
-    }, [])
+    }, [code, service, sendRequest, serviceLogin, searchParams, router])
 
     return (
         <>

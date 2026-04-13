@@ -51,7 +51,6 @@ class Auth extends ResourceController
      */
     public function me(): ResponseInterface
     {
-        $this->session->update();
         return $this->responseAuth();
     }
 
@@ -143,7 +142,13 @@ class Auth extends ResourceController
         $state  = $this->request->getGet('state', FILTER_SANITIZE_SPECIAL_CHARS);
         $device = $this->request->getGet('device_id', FILTER_SANITIZE_SPECIAL_CHARS);
 
-        // If there is no authorization code, then the user has not yet logged in to Yandex.
+        log_message('info', '[Auth:VK] Incoming callback params: code={code}, state={state}, device_id={device}', [
+            'code'   => !empty($code) ? mb_substr($code, 0, 16) . '...' : 'EMPTY',
+            'state'  => $state ?? 'EMPTY',
+            'device' => $device ?? 'EMPTY',
+        ]);
+
+        // If there is no authorization code, then the user has not yet logged in to VK.
         if (!$code) {
             return $this->respond([
                 'auth'     => false,
@@ -196,7 +201,22 @@ class Auth extends ResourceController
      */
     protected function _serviceAuth(string $authType, object | null $serviceProfile): ResponseInterface
     {
-        if (empty($serviceProfile) || empty($serviceProfile->email)) {
+        log_message('info', '[Auth] Service auth attempt via {type}', ['type' => $authType]);
+
+        if (empty($serviceProfile)) {
+            log_message('error', '[Auth] Service {type} returned empty profile (null)', ['type' => $authType]);
+            return $this->failValidationErrors(lang('Auth.authServiceEmptyData'));
+        }
+
+        log_message('info', '[Auth] Service {type} profile received: id={id}, name={name}, email={email}', [
+            'type'  => $authType,
+            'id'    => $serviceProfile->id ?? 'N/A',
+            'name'  => $serviceProfile->name ?? 'N/A',
+            'email' => $serviceProfile->email ?? 'N/A',
+        ]);
+
+        if (empty($serviceProfile->email)) {
+            log_message('error', '[Auth] Service {type} profile has no email address', ['type' => $authType]);
             return $this->failValidationErrors(lang('Auth.authServiceEmptyData'));
         }
 
@@ -206,6 +226,10 @@ class Auth extends ResourceController
 
         // If there is no user with this email, then register a new user
         if (empty($userData)) {
+            log_message('info', '[Auth] No existing user found for {email}, creating new account via {type}', [
+                'email' => $serviceProfile->email,
+                'type'  => $authType,
+            ]);
             $createUser = new UserEntity();
             $createUser->name      = $serviceProfile->name;
             $createUser->email     = $serviceProfile->email;
@@ -230,26 +254,40 @@ class Auth extends ResourceController
             $newUserId = $userModel->getInsertID();
 
             // If a Google user has an avatar, copy it
-            if ($serviceProfile->avatar) {
+            $avatarUrl = $serviceProfile->avatar ?? '';
+            $allowedHosts = [
+                'lh3.googleusercontent.com',
+                'lh4.googleusercontent.com',
+                'lh5.googleusercontent.com',
+                'lh6.googleusercontent.com',
+                'sun1.userapi.com', 'sun2.userapi.com', 'sun3.userapi.com',
+                'avatars.mds.yandex.net',
+            ];
+            $parsedUrl = parse_url($avatarUrl);
+
+            if (!empty($avatarUrl) && isset($parsedUrl['host']) && in_array($parsedUrl['host'], $allowedHosts, true) && ($parsedUrl['scheme'] ?? '') === 'https') {
                 $avatarDirectory = UPLOAD_USERS . '/' . $newUserId . '/';
                 $avatar = $newUserId . '.jpg';
 
                 if (!is_dir($avatarDirectory)) {
-                    mkdir($avatarDirectory,0777, TRUE);
+                    mkdir($avatarDirectory, 0777, true);
                 }
 
-                file_put_contents($avatarDirectory . $avatar, file_get_contents($serviceProfile->avatar));
+                $avatarContent = @file_get_contents($avatarUrl);
+                if ($avatarContent !== false && getimagesizefromstring($avatarContent) !== false) {
+                    file_put_contents($avatarDirectory . $avatar, $avatarContent);
 
-                $file = new File($avatarDirectory . $avatar);
-                $name = pathinfo($file, PATHINFO_FILENAME);
-                $ext  = $file->getExtension();
+                    $file = new File($avatarDirectory . $avatar);
+                    $name = pathinfo($file, PATHINFO_FILENAME);
+                    $ext  = $file->getExtension();
 
-                $image = Services::image('gd'); // imagick
-                $image->withFile($file->getRealPath())
-                    ->fit(AVATAR_WIDTH, AVATAR_HEIGHT)
-                    ->save($avatarDirectory  . $name . '_medium.' . $ext);
+                    $image = Services::image('gd'); // imagick
+                    $image->withFile($file->getRealPath())
+                        ->fit(AVATAR_WIDTH, AVATAR_HEIGHT)
+                        ->save($avatarDirectory . $name . '_medium.' . $ext);
 
-                $userModel->update($newUserId, ['avatar' => $avatar]);
+                    $userModel->update($newUserId, ['avatar' => $avatar]);
+                }
             }
 
             $userData     = $createUser;
@@ -260,10 +298,19 @@ class Auth extends ResourceController
         // either recover the password or log in through Google or another system.
         // But if the authorization type is already specified, you should authorize only this way.
         if ($userData->auth_type !== null && $userData->auth_type !== $authType) {
+            log_message('error', '[Auth] Auth type mismatch for user {id}: expected={expected}, got={got}', [
+                'id'       => $userData->id ?? 'N/A',
+                'expected' => $userData->auth_type,
+                'got'      => $authType,
+            ]);
             return $this->failValidationErrors(lang('Auth.authWrongService'));
         }
 
         if (empty($userData->service_id) && !empty($serviceProfile->id)) {
+            log_message('info', '[Auth] Updating service_id for user {id} via {type}', [
+                'id'   => $userData->id,
+                'type' => $authType,
+            ]);
             $updateData = ['service_id' => $serviceProfile->id];
 
             if (!empty($serviceProfile->sex)) {
@@ -283,6 +330,11 @@ class Auth extends ResourceController
         }
 
         $this->session->authorization($userData);
+
+        log_message('info', '[Auth] Successfully authorized user {id} via {type}', [
+            'id'   => $userData->id,
+            'type' => $authType,
+        ]);
 
         return $this->responseAuth();
     }

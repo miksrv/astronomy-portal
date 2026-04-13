@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { getCookie } from 'cookies-next'
 import { Message } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -6,7 +7,8 @@ import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
-import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, setLocale, wrapper } from '@/api'
+import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { AstroPhotoForm, AstroPhotoFormType } from '@/components/pages/photos'
 
@@ -16,8 +18,6 @@ const PhotoFormPage: NextPage<object> = () => {
 
     const { id } = router.query
     const { t } = useTranslation()
-
-    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     const [formData, setFormData] = useState<AstroPhotoFormType>()
     const [formFile, setFormFile] = useState<File>()
@@ -75,12 +75,6 @@ const PhotoFormPage: NextPage<object> = () => {
     }
 
     const currentPageTitle = photoData?.id ? 'Редактирование фотографии' : 'Добавление фотографии'
-
-    useEffect(() => {
-        if (userRole !== ApiModel.UserRole.ADMIN) {
-            void router.push('/photos')
-        }
-    }, [userRole])
 
     useEffect(() => {
         if ((createdData as ApiModel.Photo)?.id) {
@@ -145,8 +139,23 @@ export const getServerSideProps = wrapper.getServerSideProps(
         async (context): Promise<GetServerSidePropsResult<object>> => {
             const locale = context.locale ?? 'en'
             const translations = await serverSideTranslations(locale)
+            const token = await getCookie('token', { req: context.req, res: context.res })
 
             store.dispatch(setLocale(locale))
+
+            if (token) {
+                store.dispatch(setSSRToken(token))
+            } else {
+                return { redirect: { destination: '/photos', permanent: false } }
+            }
+
+            const { data: authData } = await store.dispatch(API.endpoints.authGetMe.initiate())
+
+            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+
+            if (authData?.user?.role !== ApiModel.UserRole.ADMIN) {
+                return { redirect: { destination: '/photos', permanent: false } }
+            }
 
             return {
                 props: {

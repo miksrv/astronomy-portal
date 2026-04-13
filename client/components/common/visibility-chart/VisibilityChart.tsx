@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import * as Astronomy from 'astronomy-engine'
 import { AstroTime, Observer } from 'astronomy-engine'
 import dayjs from 'dayjs'
@@ -36,10 +36,6 @@ type MarkAreaType = any
 export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = LAT, lon = LON }) => {
     const { t } = useTranslation()
 
-    const [chartData, setChartData] = useState<ChartDataType>([])
-    const [markAreas, setMarkAreas] = useState<MarkAreaType>([])
-    const [loading, setLoading] = useState<boolean>(true)
-
     const backgroundColor = '#2c2d2e' // --container-background-color
     const borderColor = '#444546' // --input-border-color
     const textSecondaryColor = '#76787a' // --text-color-secondary
@@ -48,15 +44,21 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = 
 
     const objectName = object?.title || formatObjectName(object?.name)
 
-    useEffect(() => {
+    // Memoize the 288-sample computation so it only runs when coordinates or date change
+    const { chartData, markAreas, loading } = useMemo<{
+        chartData: ChartDataType[]
+        markAreas: MarkAreaType[]
+        loading: boolean
+    }>(() => {
         if (!object?.ra || !object?.dec) {
-            return
+            return { chartData: [], loading: true, markAreas: [] }
         }
 
+        const now = dayjs()
         const observer = new Astronomy.Observer(lat, lon, 0)
 
-        const startOfDay = dayjs(date).add(-12, 'hour').toDate()
-        const endOfDay = dayjs(date).add(12, 'hour').toDate()
+        const startOfDay = now.add(-12, 'hour').toDate()
+        const endOfDay = now.add(12, 'hour').toDate()
 
         const startTime = Astronomy.MakeTime(startOfDay)
         const endTime = Astronomy.MakeTime(endOfDay)
@@ -107,22 +109,21 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = 
             }
         ])
 
-        setMarkAreas(twilightPhases)
+        const raHours = (object?.ra || 0) / 15
+        const decDeg = object?.dec || 0
 
         const data: ChartDataType[] = Array.from(
             { length: Math.ceil((endTime.ut - startTime.ut) / intervalInDays) },
             (_, i) => {
                 const chartTime = Astronomy.MakeTime(startTime.ut + i * intervalInDays)
-
-                const hor = Astronomy.Horizon(chartTime, observer, object?.ra || 0, object?.dec || 0, 'normal')
+                const hor = Astronomy.Horizon(chartTime, observer, raHours, decDeg, 'normal')
 
                 return [chartTime.date.toISOString(), hor.altitude.toFixed(2)]
             }
         )
 
-        setChartData(data)
-        setLoading(false)
-    }, [object?.ra, object?.dec])
+        return { chartData: data, loading: false, markAreas: twilightPhases }
+    }, [object?.ra, object?.dec, lat, lon])
 
     const options: EChartsOption = useMemo(
         () => ({
@@ -239,7 +240,7 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = 
                 }
             ]
         }),
-        [chartData, markAreas]
+        [chartData, markAreas, loading, t]
     )
 
     return (

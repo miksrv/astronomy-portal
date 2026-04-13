@@ -180,7 +180,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             store.dispatch(setLocale(locale))
 
-            const { data: photos } = await store.dispatch(API.endpoints?.photosGetList.initiate())
+            // Fetch a bounded set of photos — used only for object cover image thumbnails
+            const { data: photos } = await store.dispatch(API.endpoints?.photosGetList.initiate({ limit: 20 }))
 
             const { data: objects } = await store.dispatch(API.endpoints?.objectsGetList.initiate())
 

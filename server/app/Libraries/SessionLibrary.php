@@ -26,6 +26,7 @@ class SessionLibrary
 
         if ($this->user) {
             $this->isAuth = true;
+            $this->update();
         }
     }
 

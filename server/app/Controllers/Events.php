@@ -44,7 +44,7 @@ class Events extends ResourceController
 
     public function __construct()
     {
-        new LocaleLibrary();
+        LocaleLibrary::init();
 
         $this->session = new SessionLibrary();
         $this->model   = new \App\Models\EventsModel();
@@ -72,6 +72,8 @@ class Events extends ResourceController
 
         // $currentTickets = $currentTickets->adults + $currentTickets->children;
         $currentTickets = (int) $currentTickets->adults;
+
+        $eventData->registered = false;
 
         if ($bookedEvents) {
             $eventData->registered = true;
@@ -122,8 +124,12 @@ class Events extends ResourceController
         $locale    = $this->request->getLocale();
         $eventData = $this->model->getUpcomingEvent($locale);
 
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
         if (!in_array($this->session->user->role, ['admin', 'moderator', 'security'])) {
-            return $this->failValidationErrors('Ошибка прав доступа');
+            return $this->failForbidden(lang('App.accessDenied'));
         }
 
         if (empty($id) || empty($eventData)) {
@@ -293,8 +299,12 @@ class Events extends ResourceController
      */
     public function members($id = null): ResponseInterface
     {
-        if ($this->session?->user?->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
         }
 
         try {
@@ -319,8 +329,12 @@ class Events extends ResourceController
      * @return ResponseInterface JSON response with the created event or error message.
      */
     public function create(): ResponseInterface {
-        if ($this->session?->user?->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
         }
 
         $input = $this->request->getPost();
@@ -340,6 +354,11 @@ class Events extends ResourceController
 
         if (!$file || !$file->isValid()) {
             return $this->failValidationErrors('File upload failed or invalid file');
+        }
+
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!in_array($file->getMimeType(), $allowedMimes, true)) {
+            return $this->failValidationErrors('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
         }
 
         // Check input data validation rules
@@ -400,8 +419,6 @@ class Events extends ResourceController
             log_message('error', $e->getMessage());
             return $this->failServerError('Could not save photo data');
         }
-
-        return $this->respond();
     }
 
     /**
@@ -434,7 +451,7 @@ class Events extends ResourceController
         $event = $this->model->find($input['eventId']);
         // Check that event with ID is exists
         if (!$event) {
-            $this->failValidationErrors(['error' => 'Такого мероприятия не существует']);
+            return $this->failValidationErrors(['error' => 'Такого мероприятия не существует']);
         }
 
         $eventUsersModel = new EventsUsersModel();
@@ -479,14 +496,17 @@ class Events extends ResourceController
             'children_ages' => json_encode($childrenAges),
         ]);
 
+        $safeName      = htmlspecialchars($input['name'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $safeEventTitle = htmlspecialchars($event->title_ru ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
         new Telegram(getenv('app.telegramBotKey'), '');
 
         Request::sendMessage([
             'chat_id'    => getenv('app.telegramChatID'),
             'parse_mode' => 'HTML',
             'text'       => "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n" .
-                "<b>{$event->title_ru}</b>\n" .
-                "🔹<i>{$input['name']}</i>\n" .
+                "<b>{$safeEventTitle}</b>\n" .
+                "🔹<i>{$safeName}</i>\n" .
                 "🔹(<b>{$input['adults']}</b>) взрослых, ({$input['children']}) детей\n" .
                 (count($childrenAges) > 0 ? "🔹Возраст детей <b>" . implode(', ', $childrenAges) . "</b> (лет)\n" : "") .
                 "🔹Доступно мест <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b> из <b>{$event->max_tickets}</b>\n" .
@@ -535,7 +555,7 @@ class Events extends ResourceController
         $event = $this->model->find($input['eventId']);
         // Check that event with ID is exists
         if (!$event) {
-            $this->failValidationErrors(['error' => 'Такого мероприятия не существует']);
+            return $this->failValidationErrors(['error' => 'Такого мероприятия не существует']);
         }
 
         $eventUsersModel  = new EventsUsersModel();
@@ -563,14 +583,17 @@ class Events extends ResourceController
 
         $eventUsersModel->delete($userRegistration->id);
 
+        $safeCancelName  = htmlspecialchars($this->session->user->name ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $safeCancelTitle = htmlspecialchars($event->title_ru ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
         new Telegram(getenv('app.telegramBotKey'), '');
 
         Request::sendMessage([
             'chat_id'    => getenv('app.telegramChatID'),
             'parse_mode' => 'HTML',
             'text'       => "<b>❌ ОТМЕНА БРОНИРОВАНИЯ</b>\n" .
-                "<b>{$event->title_ru}</b>\n" .
-                "🔹<i>{$this->session->user->name}</i>\n" .
+                "<b>{$safeCancelTitle}</b>\n" .
+                "🔹<i>{$safeCancelName}</i>\n" .
                 "🔹Взрослых: <b>{$userRegistration->adults}</b>, детей: {$userRegistration->children}\n" .
                 "🔹Осталось слотов: <b>" . ($event->max_tickets - (abs($currentTickets->adults - (int) $userRegistration->adults))) . "</b>\n"
         ]);
@@ -586,13 +609,22 @@ class Events extends ResourceController
      */
     public function upload($id = null): ResponseInterface
     {
-        if (!$this->session->isAuth || $this->session?->user?->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
         }
 
         $photo = $this->request->getFile('photo');
         if (!$photo || !$photo->isValid()) {
             return $this->failValidationErrors('Фотография не загружена или повреждена');
+        }
+
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!in_array($photo->getMimeType(), $allowedMimes, true)) {
+            return $this->failValidationErrors('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
         }
 
         $eventData = $this->model->find($id);
@@ -658,8 +690,12 @@ class Events extends ResourceController
     }
 
     public function delete($id = null): ResponseInterface {
-        if ($this->session?->user?->role !== 'admin') {
-            return $this->failValidationErrors('Ошибка прав доступа');
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
         }
 
         return $this->respond();

@@ -15,8 +15,6 @@ class UserEntity extends Entity
         'auth_type'  => 'native',
         'role'       => 'user',
         'locale'     => 'ru',
-        'locale'     => 'ru',
-        'avatar'     => null,
     ];
 
     protected $dates = [

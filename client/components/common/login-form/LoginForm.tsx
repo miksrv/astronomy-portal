@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useEffect } from 'react'
 import { Button, Message } from 'simple-react-ui-kit'
 
@@ -34,9 +32,26 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
         await authLoginService({ service })
     }
 
+    // Whitelist of trusted OAuth provider origins
+    const OAUTH_ALLOWED_ORIGINS = [
+        'https://accounts.google.com',
+        'https://oauth.yandex.com',
+        'https://oauth.yandex.ru',
+        'https://oauth.vk.com',
+        'https://id.vk.com'
+    ]
+
     useEffect(() => {
         if (serviceData?.redirect && typeof window !== 'undefined') {
-            window.location.href = serviceData.redirect
+            try {
+                const url = new URL(serviceData.redirect)
+
+                if (OAUTH_ALLOWED_ORIGINS.includes(url.origin)) {
+                    window.location.href = serviceData.redirect
+                }
+            } catch {
+                // Invalid URL — do not redirect
+            }
         }
     }, [serviceData?.redirect])
 
@@ -44,7 +59,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
         if (error) {
             onError?.(error as ApiType.ResError)
         }
-    }, [error])
+    }, [error, onError])
 
     return (
         <div className={styles.loginForm}>

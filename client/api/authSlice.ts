@@ -1,14 +1,13 @@
 import { deleteCookie, setCookie } from 'cookies-next'
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction, SerializedError } from '@reduxjs/toolkit'
 
 import { ApiModel, ApiType } from '@/api'
 import * as LocalStorage from '@/utils/localstorage'
 
 type InitialStateProps = {
     isAuth?: boolean
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    error?: any
+    error?: SerializedError | null
     token?: string
     user?: ApiModel.User
 }

@@ -31,9 +31,14 @@ class Services extends BaseService
      */
 
      /**
-      * @return array|false|string
+      * @return string
+      * @throws \RuntimeException if the JWT secret is not configured
       */
-    public static function getSecretKey(): bool|array|string {
-        return getenv('auth.token.secret');
+    public static function getSecretKey(): string {
+        $secret = getenv('auth.token.secret');
+        if (empty($secret)) {
+            throw new \RuntimeException('auth.token.secret environment variable is not set. The application cannot start without a JWT signing key.');
+        }
+        return $secret;
     }
 }

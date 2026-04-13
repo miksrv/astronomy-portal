@@ -67,7 +67,7 @@ class EventsUsersModel extends ApplicationBaseModel {
     public function getUsersCountByEventId(string $eventId): ?object {
         $eventUsersQuery = $this->select('
                 SUM(events_users.adults) as total_adults,
-                SUM(JSON_LENGTH(events_users.children)) as total_children')
+                SUM(events_users.children) as total_children')
             ->where('event_id', $eventId)
             ->findAll();
 
@@ -83,7 +83,7 @@ class EventsUsersModel extends ApplicationBaseModel {
         return $this->select('
                 event_id,
                 SUM(events_users.adults) as total_adults,
-                SUM(JSON_LENGTH(events_users.children)) as total_children')
+                SUM(events_users.children) as total_children')
             ->groupBy('event_id')
             ->findAll();
     }

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Container } from 'simple-react-ui-kit'
 import SunCalc from 'suncalc'
 
@@ -13,37 +13,48 @@ import styles from './styles.module.sass'
 const LAT = process.env.NEXT_PUBLIC_LAT ?? 51.7
 const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
 
+type AstroData = {
+    sunAltitude: string
+    sunAzimuth: string
+    moonAltitude: string
+    moonAzimuth: string
+    sunTimes: ReturnType<typeof SunCalc.getTimes>
+    moonTimes: ReturnType<typeof SunCalc.getMoonTimes>
+    currentDate: Date
+}
+
+const computeAstroData = (): AstroData => {
+    const now = new Date()
+    const sunPosition = SunCalc.getPosition(now, LAT, LON)
+    const moonPosition = SunCalc.getMoonPosition(now, LAT, LON)
+
+    return {
+        currentDate: now,
+        moonAltitude: ((moonPosition.altitude * 180) / Math.PI).toFixed(0),
+        moonAzimuth: ((moonPosition.azimuth * 180) / Math.PI).toFixed(0),
+        moonTimes: SunCalc.getMoonTimes(now, LAT, LON),
+        sunAltitude: ((sunPosition.altitude * 180) / Math.PI).toFixed(0),
+        sunAzimuth: ((sunPosition.azimuth * 180) / Math.PI).toFixed(0),
+        sunTimes: SunCalc.getTimes(now, LAT, LON)
+    }
+}
+
 export const AstronomyCalc: React.FC = () => {
     const { t } = useTranslation()
 
-    const currentDateRef = useRef(new Date())
-    const currentDate = currentDateRef.current
-    const moonTimes = SunCalc.getMoonTimes(currentDate, LAT, LON)
-    const sunTimes = SunCalc.getTimes(currentDate, LAT, LON)
-
-    const [sunAltitude, setSunAltitude] = useState<string>('00')
-    const [sunAzimuth, setSunAzimuth] = useState<string>('00')
-    const [moonAltitude, setMoonAltitude] = useState<string>('00')
-    const [moonAzimuth, setMoonAzimuth] = useState<string>('00')
-
-    const tick = () => {
-        currentDateRef.current = new Date()
-        const now = currentDateRef.current
-        const sunPosition = SunCalc.getPosition(now, LAT, LON)
-        const moonPosition = SunCalc.getMoonPosition(now, LAT, LON)
-
-        setSunAltitude(((sunPosition.altitude * 180) / Math.PI).toFixed(0))
-        setSunAzimuth(((sunPosition.azimuth * 180) / Math.PI).toFixed(0))
-
-        setMoonAltitude(((moonPosition.altitude * 180) / Math.PI).toFixed(0))
-        setMoonAzimuth(((moonPosition.azimuth * 180) / Math.PI).toFixed(0))
-    }
+    // Consolidated state to avoid 4 separate re-renders on each tick
+    const [astroData, setAstroData] = useState<AstroData>(computeAstroData)
 
     useEffect(() => {
-        const timer = setInterval(() => tick(), 1000)
+        const timer = setInterval(() => {
+            // Recompute all values inside the tick so they are always fresh
+            setAstroData(computeAstroData())
+        }, 1000)
 
         return () => clearInterval(timer)
     }, [])
+
+    const { sunAltitude, sunAzimuth, moonAltitude, moonAzimuth, sunTimes, moonTimes, currentDate } = astroData
 
     return (
         <Container className={styles.astronomyCalc}>

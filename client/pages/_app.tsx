@@ -19,18 +19,26 @@ import 'dayjs/locale/ru'
 import '@/styles/theme.css'
 import '@/styles/globals.sass'
 
-const locale = LocalStorage.getItem(LOCAL_STORAGE.LOCALE as 'LOCALE')
-
 const App = ({ Component, pageProps }: AppProps) => {
     const router = useRouter()
     const { i18n } = useTranslation()
     const { store } = wrapper.useWrappedStore(pageProps)
 
     useEffect(() => {
-        if (i18n.language !== locale && i18Config.i18n.locales.includes(locale) && router.pathname !== '/404') {
-            void router.replace(router.asPath, router.asPath, { locale })
+        // Read the persisted locale preference on the client only.
+        // LocalStorage.getItem returns '' on the server, so this effect
+        // is intentionally client-only and safe to call on every language change.
+        const storedLocale = LocalStorage.getItem(LOCAL_STORAGE.LOCALE as 'LOCALE')
+
+        if (
+            storedLocale &&
+            i18n.language !== storedLocale &&
+            i18Config.i18n.locales.includes(storedLocale) &&
+            router.pathname !== '/404'
+        ) {
+            void router.replace(router.asPath, router.asPath, { locale: storedLocale })
         }
-    }, [])
+    }, [i18n.language, router])
 
     dayjs.locale(i18n.language ?? i18Config.i18n.defaultLocale)
 
@@ -100,14 +108,45 @@ const App = ({ Component, pageProps }: AppProps) => {
             </Provider>
 
             {process.env.NODE_ENV === 'production' && (
-                <div
-                    dangerouslySetInnerHTML={{
-                        __html: '<!-- Yandex.Metrika counter --> <script type="text/javascript" > (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)}; m[i].l=1*new Date(); for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }} k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)}) (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym"); ym(93471741, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true }); </script> <noscript><div><img src="https://mc.yandex.ru/watch/93471741" style="position:absolute; left:-9999px;" alt="" /></div></noscript> <!-- /Yandex.Metrika counter --><!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-BGBKSHELMF"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag("js", new Date());gtag("config", "G-BGBKSHELMF");</script>'
-                    }}
-                />
+                <>
+                    {/* Yandex.Metrika counter */}
+                    <Script
+                        id={'yandex-metrika'}
+                        strategy={'afterInteractive'}
+                    >
+                        {`
+                            (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+                            m[i].l=1*new Date();
+                            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+                            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+                            (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+                            ym(93471741, "init", {
+                                clickmap:true,
+                                referrer: document.referrer,
+                                url: location.href,
+                                accurateTrackBounce:true,
+                                trackLinks:true
+                            });
+                        `}
+                    </Script>
+                    <noscript>
+                        <div>
+                            <img
+                                src={'https://mc.yandex.ru/watch/93471741'}
+                                style={{ position: 'absolute', left: '-9999px' }}
+                                alt={''}
+                            />
+                        </div>
+                    </noscript>
+                </>
             )}
         </>
     )
 }
 
-export default appWithTranslation(App)
+// Pass i18Config as the second argument so appWithTranslation has a config
+// fallback for pages that do not call serverSideTranslations (e.g. /404).
+// Without this, those pages render without an I18nextProvider and
+// react-i18next emits a "NO_I18NEXT_INSTANCE" warning during build.
+export default appWithTranslation(App, i18Config)
