@@ -1,5 +1,4 @@
 export * as Auth from './auth'
-export * as Author from './author'
 export * as Category from './category'
 export * as Equipment from './equipment'
 export * as Events from './events'

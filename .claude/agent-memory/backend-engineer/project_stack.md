@@ -43,6 +43,12 @@ CodeIgniter 4.6 REST API backend, PHP 8.2, MySQL/MariaDB. Located at `server/`.
 
 **Newsletter system (FEAT-1, 2026-04-13):** Tables `mailings`, `mailing_emails`, `mailing_unsubscribes`. JSON column `users.settings` added. Cron command at `php spark system:send-email`. Unsubscribe gate: `users.settings.subscribe_newsletter === false` excludes users. NULL or missing key = subscribed.
 
+**TelegramLibrary:** `server/app/Libraries/TelegramLibrary.php` — thin wrapper around `longman/telegram-bot`. Use `(new TelegramLibrary())->sendMessage($html)` instead of inline `new Telegram(...)` / `Request::sendMessage(...)` in controllers. Reads `app.telegramBotKey` and `app.telegramChatID` env vars.
+
+**Model inheritance rule:** All models must extend `ApplicationBaseModel`, not `CodeIgniter\Model` directly. `ApplicationBaseModel` provides `generateId` (beforeInsert) and `prepareOutput` (afterFind / hiddenFields).
+
+**EventsModel ID:** `allowCallbacks = true` but `beforeInsert = []` — ID is assigned manually in controller via `$event->id = uniqid()` before `model->save()`. This is intentional because the event upload directory must be created using the ID before the DB insert. Do NOT add `generateId` to EventsModel.
+
 **Why:** This is a personal astronomy observatory portal with event booking, astrophoto gallery, FITS file metadata ingestion, and live relay/camera control.
 
 **How to apply:** When suggesting changes, assume MySQL, CodeIgniter conventions (model callbacks, entity datamaps), and that the front-end expects camelCase-to-snake_case entity datamap translations.

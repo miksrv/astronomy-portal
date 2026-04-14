@@ -75,42 +75,6 @@ export const API = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
-        /* Author Controller */
-        authorDelete: builder.mutation<void, number>({
-            invalidatesTags: () => [{ type: 'Author' }],
-            query: (id) => ({
-                method: 'DELETE',
-                url: `author/${id}`
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-        authorGetList: builder.query<ApiType.Author.ResList, void>({
-            keepUnusedDataFor: 3600,
-            providesTags: () => [{ id: 'LIST', type: 'Author' }],
-            query: () => 'author'
-        }),
-        authorPatch: builder.mutation<
-            ApiType.Author.ResSet | ApiType.ResError,
-            Partial<ApiType.Author.ReqSet> & Pick<ApiType.Author.ReqSet, 'id'>
-        >({
-            invalidatesTags: () => [{ type: 'Author' }],
-            query: ({ id, ...formState }) => ({
-                body: formState,
-                method: 'PATCH',
-                url: `author/${id}`
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-        authorPost: builder.mutation<ApiType.Author.ResSet | ApiType.ResError, Partial<ApiType.Author.ReqSet>>({
-            invalidatesTags: () => [{ type: 'Author' }],
-            query: ({ ...formState }) => ({
-                body: formState,
-                method: 'POST',
-                url: 'author'
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-
         /* Categories Controller */
         categoriesGetList: builder.query<ApiType.Category.Response, void>({
             providesTags: () => [{ id: 'LIST', type: 'Category' }],
@@ -434,7 +398,6 @@ export const API = createApi({
         'Photos',
         'Statistic',
         'Category',
-        'Author',
         'Relay',
         'Mailings'
     ]

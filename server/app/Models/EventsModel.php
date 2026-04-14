@@ -17,6 +17,7 @@ class EventsModel extends ApplicationBaseModel
     protected $useAutoIncrement = false;
 
     protected $allowedFields    = [
+        'id',
         'title_en',
         'title_ru',
         'location_en',
@@ -47,7 +48,7 @@ class EventsModel extends ApplicationBaseModel
     protected $skipValidation       = true;
     protected $cleanValidationRules = true;
 
-    protected $allowCallbacks = false;
+    protected $allowCallbacks = true;
     protected $beforeInsert   = [];
     protected $afterInsert    = [];
     protected $beforeUpdate   = [];

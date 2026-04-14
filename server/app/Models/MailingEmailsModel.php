@@ -26,6 +26,17 @@ class MailingEmailsModel extends ApplicationBaseModel
     protected $beforeInsert = ['generateId'];
 
     /**
+     * Count emails for a given mailing filtered by status.
+     */
+    public function countByMailingAndStatus(string $mailingId, string $status): int
+    {
+        return $this
+            ->where('mailing_id', $mailingId)
+            ->where('status', $status)
+            ->countAllResults();
+    }
+
+    /**
      * Return next batch of queued emails ordered by created_at ASC.
      */
     public function getQueuedBatch(int $limit = 50): array

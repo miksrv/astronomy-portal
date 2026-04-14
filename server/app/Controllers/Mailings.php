@@ -405,21 +405,8 @@ class Mailings extends ResourceController
         }
 
         try {
-            $db = \Config\Database::connect();
-
-            // Select eligible users: non-empty email AND (settings IS NULL OR subscribe_newsletter != false)
-            $users = $db->table('users')
-                ->select('id, email, locale')
-                ->where('email IS NOT NULL')
-                ->where("email != ''")
-                ->where('deleted_at IS NULL')
-                ->groupStart()
-                    ->where('settings IS NULL')
-                    ->orWhere("JSON_EXTRACT(settings, '$.subscribe_newsletter') IS NULL")
-                    ->orWhere("JSON_EXTRACT(settings, '$.subscribe_newsletter') != 0")
-                ->groupEnd()
-                ->get()
-                ->getResultArray();
+            $usersModel = new UsersModel();
+            $users      = $usersModel->getNewsletterSubscribers();
 
             $mailingEmailsModel = new MailingEmailsModel();
             $insertBatch        = [];

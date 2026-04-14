@@ -8,7 +8,6 @@ use App\Models\CategoryModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
-use Config\Services;
 use Exception;
 
 /**

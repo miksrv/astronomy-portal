@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Entities\MailingEntity;
+use App\Models\MailingEmailsModel;
 
 class MailingsModel extends ApplicationBaseModel
 {
@@ -33,17 +34,10 @@ class MailingsModel extends ApplicationBaseModel
      */
     public function updateCounts(string $mailingId): void
     {
-        $db = \Config\Database::connect();
+        $mailingEmailsModel = new MailingEmailsModel();
 
-        $sentCount = $db->table('mailing_emails')
-            ->where('mailing_id', $mailingId)
-            ->where('status', 'sent')
-            ->countAllResults();
-
-        $errorCount = $db->table('mailing_emails')
-            ->where('mailing_id', $mailingId)
-            ->where('status', 'error')
-            ->countAllResults();
+        $sentCount  = $mailingEmailsModel->countByMailingAndStatus($mailingId, 'sent');
+        $errorCount = $mailingEmailsModel->countByMailingAndStatus($mailingId, 'error');
 
         $this->update($mailingId, [
             'sent_count'  => $sentCount,
