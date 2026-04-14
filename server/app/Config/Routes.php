@@ -108,6 +108,8 @@ $routes->group('events', static function ($routes) {
 
     $routes->post('/', 'Events::create');
     $routes->patch('(:alphanum)', 'Events::update/$1');
+    $routes->delete('(:alphanum)', 'Events::delete/$1');
+    $routes->post('(:alphanum)/cover', 'Events::cover/$1');
 
     $routes->post('booking', 'Events::booking');
     $routes->post('cancel', 'Events::cancel');

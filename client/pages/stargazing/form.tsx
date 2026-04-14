@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { getCookie } from 'cookies-next'
-import { Message } from 'simple-react-ui-kit'
+import { Button, Dialog, Message } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
@@ -15,8 +15,11 @@ import { EventForm, EventFormType } from '@/components/pages/stargazing'
 const StargazingFormPage: NextPage<object> = () => {
     const router = useRouter()
 
-    const { id } = router.query
+    const { id: rawId } = router.query
+    const id = typeof rawId === 'string' ? rawId : undefined
     const { t } = useTranslation()
+
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
     const {
         data: eventData,
@@ -29,31 +32,76 @@ const StargazingFormPage: NextPage<object> = () => {
     const [createEvent, { error: createError, isLoading: createLoading, isSuccess: createSuccess }] =
         API.useEventCreatePostMutation()
 
+    const [patchEvent, { error: patchError, isLoading: patchLoading, isSuccess: patchSuccess }] =
+        API.useEventPatchMutation()
+
+    const [updateCover, { isLoading: coverLoading }] = API.useEventUpdateCoverMutation()
+
+    const [deleteEvent, { isLoading: deleteLoading }] = API.useEventDeleteMutation()
+
+    const isEditMode = !!id
+
     const handleSubmit = async (data?: EventFormType) => {
         if (!data) {
             return
         }
 
-        const formDataObject = new FormData()
-
-        Object.entries(data || {}).forEach(([key, value]) => {
-            if (key !== 'upload') {
-                formDataObject.append(key, value as string)
+        if (isEditMode && id) {
+            // Upload new cover first if a file was selected
+            if (data.upload instanceof File) {
+                const coverFormData = new FormData()
+                coverFormData.append('upload', data.upload)
+                await updateCover({ id, formData: coverFormData })
             }
 
-            if (key === 'upload' && value instanceof File) {
-                formDataObject.append('upload', value)
-            }
-        })
+            // Patch remaining fields (without the upload File)
+            const { upload: _upload, ...restData } = data
+            const result = await patchEvent({ ...restData, id })
 
-        await createEvent(formDataObject)
+            if (!('error' in result)) {
+                await router.push(`/stargazing/${id}`)
+            }
+        } else {
+            const formDataObject = new FormData()
+
+            Object.entries(data || {}).forEach(([key, value]) => {
+                if (key !== 'upload') {
+                    formDataObject.append(key, value as string)
+                }
+
+                if (key === 'upload' && value instanceof File) {
+                    formDataObject.append('upload', value)
+                }
+            })
+
+            const result = await createEvent(formDataObject)
+
+            if (!('error' in result) && 'data' in result && result.data && 'id' in result.data) {
+                await router.push(`/stargazing/${result.data.id}`)
+            }
+        }
     }
 
     const handleCancel = () => {
         router.back()
     }
 
-    const currentPageTitle = eventData?.id ? 'Редактирование астровыезда' : 'Добавление астровыезда'
+    const handleDeleteConfirm = async () => {
+        if (!id) {
+            return
+        }
+
+        setShowDeleteDialog(false)
+        await deleteEvent(id)
+        await router.push('/stargazing')
+    }
+
+    const isLoading = eventLoading || createLoading || patchLoading || coverLoading || deleteLoading
+    const isSuccess = createSuccess || patchSuccess
+
+    const currentPageTitle = isEditMode
+        ? t('pages.stargazing.edit-event', 'Редактирование астровыезда')
+        : t('pages.stargazing.add-event', 'Добавление астровыезда')
 
     return (
         <AppLayout
@@ -70,24 +118,61 @@ const StargazingFormPage: NextPage<object> = () => {
                         text: t('menu.stargazing', 'Астровыезды')
                     }
                 ]}
-            />
+            >
+                {isEditMode && (
+                    <Button
+                        icon={'ReportError'}
+                        mode={'secondary'}
+                        size={'large'}
+                        label={t('common.archive', 'Архивировать')}
+                        disabled={isLoading}
+                        onClick={() => setShowDeleteDialog(true)}
+                    />
+                )}
+            </AppToolbar>
 
-            {(createError || createSuccess) && (
+            {(createError || patchError || isSuccess) && (
                 <Message
                     style={{ marginBottom: '10px' }}
-                    type={createError ? 'error' : 'success'}
+                    type={createError || patchError ? 'error' : 'success'}
                 >
-                    {createError && <div>{'Ошибка сохранения'}</div>}
-                    {createSuccess && <div>{'Астровыезд сохранен'}</div>}
+                    {(createError || patchError) && <div>{t('pages.stargazing.save-error', 'Ошибка сохранения')}</div>}
+                    {isSuccess && <div>{t('pages.stargazing.save-success', 'Астровыезд сохранен')}</div>}
                 </Message>
             )}
 
             <EventForm
-                disabled={eventLoading || createLoading || createSuccess}
+                disabled={isLoading || isSuccess}
                 initialData={eventData}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
             />
+
+            <Dialog
+                open={showDeleteDialog}
+                title={t('pages.stargazing.archive-confirm-title', 'Архивировать мероприятие?')}
+                onCloseDialog={() => setShowDeleteDialog(false)}
+            >
+                <p>
+                    {t(
+                        'pages.stargazing.archive-confirm-body',
+                        'Вы уверены? Мероприятие будет скрыто от пользователей.'
+                    )}
+                </p>
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '16px' }}>
+                    <Button
+                        mode={'secondary'}
+                        label={t('common.cancel', 'Отмена')}
+                        onClick={() => setShowDeleteDialog(false)}
+                    />
+                    <Button
+                        mode={'primary'}
+                        variant={'negative'}
+                        label={t('common.confirm', 'Подтвердить')}
+                        onClick={handleDeleteConfirm}
+                    />
+                </div>
+            </Dialog>
 
             <AppFooter />
         </AppLayout>

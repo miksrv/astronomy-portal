@@ -145,6 +145,29 @@ export const API = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
+        eventDelete: builder.mutation<void, string>({
+            invalidatesTags: (result, error, id) => [
+                { id, type: 'Events' },
+                { id: 'LIST', type: 'Events' }
+            ],
+            query: (id) => ({
+                method: 'DELETE',
+                url: `events/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        eventUpdateCover: builder.mutation<
+            { coverFileName: string; coverFileExt: string },
+            { id: string; formData: FormData }
+        >({
+            invalidatesTags: (result, error, { id }) => [{ id, type: 'Events' }],
+            query: ({ id, formData }) => ({
+                body: formData,
+                method: 'POST',
+                url: `events/${id}/cover`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
 
         eventsRegistrationPost: builder.mutation<
             ApiType.Events.ResRegistration | ApiType.ResError,

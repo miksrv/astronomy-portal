@@ -679,6 +679,77 @@ class Events extends ResourceController
         ]);
     }
 
+    /**
+     * Replaces the cover image for an existing event.
+     *
+     * Accepts a multipart file upload under the 'upload' key, validates the MIME type,
+     * saves it as cover.<ext> and generates a 585x400 preview as cover_preview.<ext>
+     * inside the event's upload directory. Updates the DB record with the new file info.
+     *
+     * @param string|null $id The event ID.
+     * @return ResponseInterface
+     */
+    public function cover($id = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
+        }
+
+        $event = $this->model->find($id);
+
+        if (!$event) {
+            return $this->failNotFound();
+        }
+
+        $file = $this->request->getFile('upload');
+
+        if (!$file || !$file->isValid()) {
+            return $this->failValidationErrors('File upload failed or invalid file');
+        }
+
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!in_array($file->getMimeType(), $allowedMimes, true)) {
+            return $this->failValidationErrors('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
+        }
+
+        try {
+            $directoryPath = UPLOAD_EVENTS . $event->id;
+
+            if (!is_dir($directoryPath)) {
+                mkdir($directoryPath, 0755, true);
+            }
+
+            $ext          = $file->getExtension();
+            $fileName     = 'cover';
+            $fileFullName = $fileName . '.' . $ext;
+            $previewName  = $fileName . '_preview.' . $ext;
+
+            $file->move($directoryPath, $fileFullName, true);
+
+            Services::image('gd')
+                ->withFile($directoryPath . '/' . $fileFullName)
+                ->fit(585, 400, 'center')
+                ->save($directoryPath . '/' . $previewName);
+
+            $this->model->update($id, [
+                'cover_file_name' => $fileName,
+                'cover_file_ext'  => $ext,
+            ]);
+
+            return $this->respondUpdated([
+                'coverFileName' => $fileName,
+                'coverFileExt'  => $ext,
+            ]);
+        } catch (Exception $e) {
+            log_message('error', $e->getMessage());
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
     public function delete($id = null): ResponseInterface {
         if (!$this->session->isAuth) {
             return $this->failUnauthorized(lang('App.accessDenied'));
@@ -688,7 +759,15 @@ class Events extends ResourceController
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
-        return $this->respond();
+        $eventData = $this->model->find($id);
+
+        if (!$eventData) {
+            return $this->failNotFound();
+        }
+
+        $this->model->delete($id);
+
+        return $this->respondDeleted($eventData);
     }
 
     /**
@@ -716,9 +795,15 @@ class Events extends ResourceController
         $input = $this->request->getJSON(true);
 
         $rules = [
-            'title'   => 'if_exist|string|max_length[250]',
-            'content' => 'if_exist|string',
-            'tickets' => 'if_exist|integer|greater_than[0]|less_than[5000]',
+            'title'             => 'if_exist|string|max_length[250]',
+            'content'           => 'if_exist|string',
+            'tickets'           => 'if_exist|integer|greater_than[0]|less_than[5000]',
+            'date'              => 'if_exist|string|max_length[50]',
+            'registrationStart' => 'if_exist|string|max_length[50]',
+            'registrationEnd'   => 'if_exist|string|max_length[50]',
+            'googleMap'         => 'if_exist|string|max_length[100]',
+            'yandexMap'         => 'if_exist|string|max_length[100]',
+            'location'          => 'if_exist|string|max_length[250]',
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -742,6 +827,37 @@ class Events extends ResourceController
 
             if (isset($input['tickets'])) {
                 $updateData['max_tickets'] = $input['tickets'];
+            }
+
+            if (isset($input['date'])) {
+                $updateData['date'] = Time::parse($input['date'], 'Asia/Yekaterinburg')
+                    ->setTimezone('UTC')
+                    ->toDateTimeString();
+            }
+
+            if (isset($input['registrationStart'])) {
+                $updateData['registration_start'] = Time::parse($input['registrationStart'], 'Asia/Yekaterinburg')
+                    ->setTimezone('UTC')
+                    ->toDateTimeString();
+            }
+
+            if (isset($input['registrationEnd'])) {
+                $updateData['registration_end'] = Time::parse($input['registrationEnd'], 'Asia/Yekaterinburg')
+                    ->setTimezone('UTC')
+                    ->toDateTimeString();
+            }
+
+            if (isset($input['googleMap'])) {
+                $updateData['google_map_link'] = $input['googleMap'];
+            }
+
+            if (isset($input['yandexMap'])) {
+                $updateData['yandex_map_link'] = $input['yandexMap'];
+            }
+
+            if (isset($input['location'])) {
+                $updateData['location_ru'] = $input['location'];
+                $updateData['location_en'] = $input['location'];
             }
 
             if (!empty($updateData)) {
