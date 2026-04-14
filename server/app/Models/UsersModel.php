@@ -24,6 +24,7 @@ class UsersModel extends ApplicationBaseModel {
         'auth_type',
         'role',
         'locale',
+        'settings',
         'sex',
         'birthday',
         'service_id',
