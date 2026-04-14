@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Container, Input } from 'simple-react-ui-kit'
+import { Button, Container, Input, TextArea } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 
@@ -153,10 +153,12 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
                 />
             </div>
 
-            <textarea
+            <TextArea
+                size={'large'}
                 disabled={disabled}
                 className={styles.formElement}
-                placeholder={'Описание'}
+                label={'Описание'}
+                autoResize={true}
                 value={formData.content}
                 style={{ width: '100%' }}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}

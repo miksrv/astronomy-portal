@@ -349,6 +349,68 @@ export const API = createApi({
         statisticGetTelescope: builder.query<ApiType.Statistic.ResTelescope, Maybe<ApiType.Statistic.ReqTelescope>>({
             providesTags: () => ['Statistic'],
             query: (params) => `statistic/telescope${encodeQueryData(params)}`
+        }),
+
+        /* Mailings Controller */
+        mailingGetList: builder.query<{ items: ApiModel.MailingListItem[]; count: number }, void>({
+            providesTags: () => [{ id: 'LIST', type: 'Mailings' }],
+            query: () => 'mailings'
+        }),
+        mailingGetItem: builder.query<ApiModel.Mailing, string>({
+            providesTags: (res, err, id) => [{ id, type: 'Mailings' }],
+            query: (id) => `mailings/${id}`
+        }),
+        mailingCreate: builder.mutation<ApiModel.Mailing, ApiModel.CreateMailingRequest>({
+            invalidatesTags: () => [{ type: 'Mailings' }],
+            query: (body) => ({
+                body,
+                method: 'POST',
+                url: 'mailings'
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        mailingUpdate: builder.mutation<ApiModel.Mailing, ApiModel.UpdateMailingRequest & { id: string }>({
+            invalidatesTags: (res, err, { id }) => [{ type: 'Mailings' }, { id, type: 'Mailings' }],
+            query: ({ id, ...body }) => ({
+                body,
+                method: 'PATCH',
+                url: `mailings/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        mailingDelete: builder.mutation<void, string>({
+            invalidatesTags: () => [{ type: 'Mailings' }],
+            query: (id) => ({
+                method: 'DELETE',
+                url: `mailings/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        mailingUploadImage: builder.mutation<{ image: string }, { id: string; formData: FormData }>({
+            query: ({ id, formData }) => ({
+                body: formData,
+                method: 'POST',
+                url: `mailings/${id}/upload`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        mailingTestSend: builder.mutation<{ success: boolean }, string>({
+            query: (id) => ({
+                method: 'POST',
+                url: `mailings/${id}/test`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        mailingLaunch: builder.mutation<{ queued: number }, string>({
+            invalidatesTags: (res, err, id) => [{ type: 'Mailings' }, { id, type: 'Mailings' }],
+            query: (id) => ({
+                method: 'POST',
+                url: `mailings/${id}/send`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        mailingUnsubscribe: builder.query<{ success: boolean; message: string }, string>({
+            query: (mail) => `mailings/unsubscribe?mail=${encodeURIComponent(mail)}`
         })
     }),
     // RTK Query requires the return type of extractRehydrationInfo to match its
@@ -373,6 +435,7 @@ export const API = createApi({
         'Statistic',
         'Category',
         'Author',
-        'Relay'
+        'Relay',
+        'Mailings'
     ]
 })
