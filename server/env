@@ -172,3 +172,20 @@ auth.vk.redirect = ''
 #--------------------------------------------------------------------
 
 # curlrequest.shareOptions = true
+
+#--------------------------------------------------------------------
+# APP SITE URL
+#--------------------------------------------------------------------
+
+# app.siteUrl = 'https://your-site.example.com'
+
+#--------------------------------------------------------------------
+# SMTP
+#--------------------------------------------------------------------
+
+# smtp.port = 465
+# smtp.mail = 'no-reply@your-domain.com'
+# smtp.host = 'smtp.your-provider.com'
+# smtp.user = 'no-reply@your-domain.com'
+# smtp.pass = 'YOUR_SMTP_PASSWORD'
+# smtp.senderName = 'Astro Observatory'

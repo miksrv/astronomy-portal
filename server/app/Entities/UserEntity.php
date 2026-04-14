@@ -15,6 +15,7 @@ class UserEntity extends Entity
         'auth_type'  => 'native',
         'role'       => 'user',
         'locale'     => 'ru',
+        'settings'   => null,
     ];
 
     protected $dates = [
@@ -33,6 +34,7 @@ class UserEntity extends Entity
         'auth_type'   => 'string',
         'role'        => 'string',
         'locale'      => 'string',
+        'settings'    => 'json-array',
         'sex'         => 'string',
         'birthday'    => 'string',
         'service_id'  => 'string',
