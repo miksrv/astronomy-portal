@@ -15,6 +15,7 @@ class UserEntity extends Entity
         'auth_type'  => 'native',
         'role'       => 'user',
         'locale'     => 'ru',
+        'settings'   => null,
     ];
 
     protected $dates = [
@@ -28,17 +29,18 @@ class UserEntity extends Entity
         'id'          => 'string',
         'name'        => 'string',
         'email'       => 'string',
-        'phone'       => 'string',
-        'avatar'      => 'string',
-        'auth_type'   => 'string',
+        'phone'       => '?string',
+        'avatar'      => '?string',
+        'auth_type'   => '?string',
         'role'        => 'string',
         'locale'      => 'string',
-        'sex'         => 'string',
-        'birthday'    => 'string',
-        'service_id'  => 'string',
-        'activity_at' => 'datetime',
-        'created'     => 'datetime',
-        'activity'    => 'datetime',
-        'updated'     => 'datetime',
+        'settings'    => 'json-array',
+        'sex'         => '?string',
+        'birthday'    => '?string',
+        'service_id'  => '?string',
+        'activity_at' => '?datetime',
+        'created_at'  => 'datetime',
+        'updated_at'  => 'datetime',
+        'deleted_at'  => '?datetime',
     ];
 }

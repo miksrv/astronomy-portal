@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 4.3.0
+
+### Minor Changes
+
+- Added full email newsletter system (FEAT-1): campaign management (create, edit, delete, launch), per-recipient email queue with cron-driven delivery respecting hourly (500) and daily (2000) SMTP rate limits, test send to admin, image attachment support, and branded HTML email template
+- Added unsubscribe flow: public `/unsubscribe` page, `GET /mailings/unsubscribe` API endpoint, audit log in `mailing_unsubscribes`, and `subscribe_newsletter` flag in `users.settings` JSON column
+- Added mailing admin UI: list page with status badges, create/edit form with image upload, campaign stats page with auto-refresh polling, and admin-only navigation link in the app header
+- Added four database migrations: `mailings`, `mailing_emails`, `mailing_unsubscribes` tables and `settings` JSON column on `users`
+- Added event editing support: edit button on the event detail page, PATCH handler extended to cover all fields (dates, map links, location), dedicated cover image replacement endpoint (`POST /events/:id/cover`), and soft delete (archive) with confirmation dialog
+- Removed deprecated `Author` controller, model types, and all related RTK Query endpoints from the frontend
+- Refactored backend: moved direct `$db` queries from controllers into model methods, extracted Telegram notification logic into `TelegramLibrary`, fixed `Entity` casts (`?datetime` for nullable fields, integer casts for numeric columns), and aligned all models to extend `ApplicationBaseModel`
+- Reorganised Next.js pages: moved top-level `photos.tsx`, `objects.tsx`, `observatory.tsx`, and `stargazing.tsx` into their respective subdirectories as `index.tsx` to follow directory-based routing conventions
+- Updated `robots.txt` to disallow indexing of mailing admin routes
+
 ## 4.2.0
 
 ### Minor Changes

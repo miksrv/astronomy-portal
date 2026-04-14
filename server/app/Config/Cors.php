@@ -36,8 +36,7 @@ class Cors extends BaseConfig
          */
         'allowedOrigins' => [
             'http://localhost:3000',
-            'https://miksoft.pro',
-            'https://www.miksoft.pro',
+            'https://astro.miksoft.pro',
         ],
 
         /**

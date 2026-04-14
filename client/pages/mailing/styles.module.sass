@@ -1,0 +1,148 @@
+.pageHeader
+    display: flex
+    align-items: center
+    justify-content: space-between
+    margin-bottom: 16px
+
+.pageTitle
+    margin: 0
+
+
+.subjectCell
+    max-width: 200px
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.dateCell
+    white-space: nowrap
+
+.actionsCell
+    display: flex
+    gap: 6px
+    align-items: center
+    justify-content: flex-end
+
+
+.statusDraft
+    background-color: #e5e7eb !important
+    color: #374151
+
+.statusSending
+    background: #dbeafe !important
+    color: #1d4ed8
+
+.statusCompleted
+    background: #dcfce7 !important
+    color: #166534
+
+.statusPaused
+    background: #ffedd5 !important
+    color: #9a3412
+
+// Form page styles
+.formContainer
+    margin-bottom: 10px
+
+.formGroup
+    margin-bottom: 16px
+
+
+.imagePreview
+    margin-top: 8px
+
+    img
+        max-width: 300px
+        max-height: 200px
+        border-radius: 6px
+        border: 1px solid #e5e7eb
+
+.formActions
+    display: flex
+    gap: 10px
+    flex-wrap: wrap
+    margin-top: 8px
+
+// Stats page styles
+.statsContainer
+    margin-bottom: 10px
+
+.statsHeader
+    margin-bottom: 20px
+
+.statsGrid
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr))
+    gap: 16px
+    margin-bottom: 20px
+
+.statCard
+    display: flex
+    flex-direction: column
+    align-items: center
+    padding: 16px
+    border-radius: 8px
+    background: #f9fafb
+    border: 1px solid #e5e7eb
+
+.statValue
+    font-size: 28px
+    font-weight: 700
+    line-height: 1
+
+.statLabel
+    font-size: 12px
+    color: #6b7280
+    margin-top: 4px
+    text-align: center
+
+.statTotal
+    color: #374151
+
+.statSent
+    color: #166534
+
+.statErrors
+    color: #991b1b
+
+.statRemaining
+    color: #6b7280
+
+.progressBar
+    width: 100%
+    height: 10px
+    background: #e5e7eb
+    border-radius: 5px
+    overflow: hidden
+    margin-bottom: 20px
+    display: flex
+
+.progressSent
+    background: #22c55e
+    height: 100%
+    transition: width 0.3s ease
+
+.progressErrors
+    background: #ef4444
+    height: 100%
+    transition: width 0.3s ease
+
+.metaGrid
+    display: grid
+    grid-template-columns: auto 1fr
+    gap: 8px 16px
+    font-size: 14px
+
+    dt
+        font-weight: 500
+        color: #374151
+
+    dd
+        color: #6b7280
+        margin: 0
+
+// Modal styles
+.modalActions
+    display: flex
+    gap: 10px
+    justify-content: flex-end

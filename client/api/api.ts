@@ -75,42 +75,6 @@ export const API = createApi({
             transformErrorResponse: (response) => response.data
         }),
 
-        /* Author Controller */
-        authorDelete: builder.mutation<void, number>({
-            invalidatesTags: () => [{ type: 'Author' }],
-            query: (id) => ({
-                method: 'DELETE',
-                url: `author/${id}`
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-        authorGetList: builder.query<ApiType.Author.ResList, void>({
-            keepUnusedDataFor: 3600,
-            providesTags: () => [{ id: 'LIST', type: 'Author' }],
-            query: () => 'author'
-        }),
-        authorPatch: builder.mutation<
-            ApiType.Author.ResSet | ApiType.ResError,
-            Partial<ApiType.Author.ReqSet> & Pick<ApiType.Author.ReqSet, 'id'>
-        >({
-            invalidatesTags: () => [{ type: 'Author' }],
-            query: ({ id, ...formState }) => ({
-                body: formState,
-                method: 'PATCH',
-                url: `author/${id}`
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-        authorPost: builder.mutation<ApiType.Author.ResSet | ApiType.ResError, Partial<ApiType.Author.ReqSet>>({
-            invalidatesTags: () => [{ type: 'Author' }],
-            query: ({ ...formState }) => ({
-                body: formState,
-                method: 'POST',
-                url: 'author'
-            }),
-            transformErrorResponse: (response) => response.data
-        }),
-
         /* Categories Controller */
         categoriesGetList: builder.query<ApiType.Category.Response, void>({
             providesTags: () => [{ id: 'LIST', type: 'Category' }],
@@ -178,6 +142,29 @@ export const API = createApi({
                 body: formState,
                 method: 'PATCH',
                 url: `events/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        eventDelete: builder.mutation<void, string>({
+            invalidatesTags: (result, error, id) => [
+                { id, type: 'Events' },
+                { id: 'LIST', type: 'Events' }
+            ],
+            query: (id) => ({
+                method: 'DELETE',
+                url: `events/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        eventUpdateCover: builder.mutation<
+            { coverFileName: string; coverFileExt: string },
+            { id: string; formData: FormData }
+        >({
+            invalidatesTags: (result, error, { id }) => [{ id, type: 'Events' }],
+            query: ({ id, formData }) => ({
+                body: formData,
+                method: 'POST',
+                url: `events/${id}/cover`
             }),
             transformErrorResponse: (response) => response.data
         }),
@@ -349,6 +336,68 @@ export const API = createApi({
         statisticGetTelescope: builder.query<ApiType.Statistic.ResTelescope, Maybe<ApiType.Statistic.ReqTelescope>>({
             providesTags: () => ['Statistic'],
             query: (params) => `statistic/telescope${encodeQueryData(params)}`
+        }),
+
+        /* Mailings Controller */
+        mailingGetList: builder.query<{ items: ApiModel.MailingListItem[]; count: number }, void>({
+            providesTags: () => [{ id: 'LIST', type: 'Mailings' }],
+            query: () => 'mailings'
+        }),
+        mailingGetItem: builder.query<ApiModel.Mailing, string>({
+            providesTags: (res, err, id) => [{ id, type: 'Mailings' }],
+            query: (id) => `mailings/${id}`
+        }),
+        mailingCreate: builder.mutation<ApiModel.Mailing, ApiModel.CreateMailingRequest>({
+            invalidatesTags: () => [{ type: 'Mailings' }],
+            query: (body) => ({
+                body,
+                method: 'POST',
+                url: 'mailings'
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        mailingUpdate: builder.mutation<ApiModel.Mailing, ApiModel.UpdateMailingRequest & { id: string }>({
+            invalidatesTags: (res, err, { id }) => [{ type: 'Mailings' }, { id, type: 'Mailings' }],
+            query: ({ id, ...body }) => ({
+                body,
+                method: 'PATCH',
+                url: `mailings/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        mailingDelete: builder.mutation<void, string>({
+            invalidatesTags: () => [{ type: 'Mailings' }],
+            query: (id) => ({
+                method: 'DELETE',
+                url: `mailings/${id}`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        mailingUploadImage: builder.mutation<{ image: string }, { id: string; formData: FormData }>({
+            query: ({ id, formData }) => ({
+                body: formData,
+                method: 'POST',
+                url: `mailings/${id}/upload`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        mailingTestSend: builder.mutation<{ success: boolean }, string>({
+            query: (id) => ({
+                method: 'POST',
+                url: `mailings/${id}/test`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        mailingLaunch: builder.mutation<{ queued: number }, string>({
+            invalidatesTags: (res, err, id) => [{ type: 'Mailings' }, { id, type: 'Mailings' }],
+            query: (id) => ({
+                method: 'POST',
+                url: `mailings/${id}/send`
+            }),
+            transformErrorResponse: (response) => response.data
+        }),
+        mailingUnsubscribe: builder.query<{ success: boolean; message: string }, string>({
+            query: (mail) => `mailings/unsubscribe?mail=${encodeURIComponent(mail)}`
         })
     }),
     // RTK Query requires the return type of extractRehydrationInfo to match its
@@ -372,7 +421,7 @@ export const API = createApi({
         'Photos',
         'Statistic',
         'Category',
-        'Author',
-        'Relay'
+        'Relay',
+        'Mailings'
     ]
 })

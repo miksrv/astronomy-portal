@@ -9,6 +9,8 @@ Disallow: /stargazing/checkin
 Disallow: /stargazing/entry
 Disallow: /auth
 Disallow: /en/auth
+Disallow: /mailing
+Disallow: /mailing/form
 Disallow: /api/
 
 # Specify the main mirror of the site

@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
 use App\Entities\ObjectFitsFileEntity;
 
-class ObjectFitsFilesModel extends Model
+class ObjectFitsFilesModel extends ApplicationBaseModel
 {
     protected $table      = 'objects_fits_files';
     protected $primaryKey = 'id';

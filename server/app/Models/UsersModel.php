@@ -24,6 +24,7 @@ class UsersModel extends ApplicationBaseModel {
         'auth_type',
         'role',
         'locale',
+        'settings',
         'sex',
         'birthday',
         'service_id',
@@ -65,6 +66,28 @@ class UsersModel extends ApplicationBaseModel {
             ->select('id, name, avatar, email, auth_type, role, locale')
             ->where('email', $emailAddress)
             ->first();
+    }
+
+    /**
+     * Retrieves all users eligible to receive newsletter emails.
+     * Eligible: non-empty email, not deleted, and subscribe_newsletter is not explicitly false.
+     *
+     * @return array Array of objects with id, email, locale fields.
+     */
+    public function getNewsletterSubscribers(): array
+    {
+        return $this->db->table($this->table)
+            ->select('id, email, locale')
+            ->where('email IS NOT NULL')
+            ->where("email != ''")
+            ->where('deleted_at IS NULL')
+            ->groupStart()
+                ->where('settings IS NULL')
+                ->orWhere("JSON_EXTRACT(settings, '$.subscribe_newsletter') IS NULL")
+                ->orWhere("JSON_EXTRACT(settings, '$.subscribe_newsletter') != 0")
+            ->groupEnd()
+            ->get()
+            ->getResultArray();
     }
 
     /**

@@ -7,7 +7,7 @@ use App\Entities\EventUserEntity;
 class EventsUsersModel extends ApplicationBaseModel {
     protected $table      = 'events_users';
     protected $primaryKey = 'id';
-    protected $returnType = \App\Entities\EventUserEntity::class;
+    protected $returnType = EventUserEntity::class;
 
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;

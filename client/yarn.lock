@@ -3274,12 +3274,12 @@ __metadata:
     react-dom: "npm:19.2.5"
     react-i18next: "npm:^16.6.6"
     react-markdown: "npm:^10.1.0"
-    react-photo-album: "npm:^3.5.1"
+    react-photo-album: "npm:^3.6.0"
     react-qr-code: "npm:^2.0.18"
     react-redux: "npm:^9.2.0"
     sass: "npm:^1.99.0"
     sharp: "npm:^0.34.5"
-    simple-react-ui-kit: "npm:^1.7.12"
+    simple-react-ui-kit: "npm:^1.8.0"
     suncalc: "npm:^1.9.0"
     ts-jest: "npm:^29.4.9"
     ts-node: "npm:^10.9.2"
@@ -6864,13 +6864,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash-es@npm:^4.17.23":
-  version: 4.17.23
-  resolution: "lodash-es@npm:4.17.23"
-  checksum: 10c0/3150fb6660c14c7a6b5f23bd11597d884b140c0e862a17fdb415aaa5ef7741523182904a6b7929f04e5f60a11edb5a79499eb448734381c99ffb3c4734beeddd
-  languageName: node
-  linkType: hard
-
 "lodash-es@npm:^4.18.1":
   version: 4.18.1
   resolution: "lodash-es@npm:4.18.1"
@@ -8264,7 +8257,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:19.2.5, react-dom@npm:^19.2.4":
+"react-dom@npm:19.2.5, react-dom@npm:^19.2.5":
   version: 19.2.5
   resolution: "react-dom@npm:19.2.5"
   dependencies:
@@ -8340,16 +8333,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-photo-album@npm:^3.5.1":
-  version: 3.5.1
-  resolution: "react-photo-album@npm:3.5.1"
+"react-photo-album@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "react-photo-album@npm:3.6.0"
   peerDependencies:
     "@types/react": ^18 || ^19
     react: ^18 || ^19
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/4c1c21dec7e4fe542f6746a265de60cbdf064bc5e0adb805f7b6c8720d17c2cd70b801b838349ec3cc05a4ede4abbc3f6292b4e011a7e0ced77b6f4307534bac
+  checksum: 10c0/eeb5cc49b4a657e7c87bfaa694df967897d633da8b4f368bedd383617c1ffdbd0b51a1350b28fe5b9407d2066099c4d3ac23715662050b794dba984c3dface40
   languageName: node
   linkType: hard
 
@@ -8384,7 +8377,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:19.2.5, react@npm:^19.2.4":
+"react@npm:19.2.5, react@npm:^19.2.5":
   version: 19.2.5
   resolution: "react@npm:19.2.5"
   checksum: 10c0/4b5f231dbef92886f602533c9ce3bde04d99f0e71dfb5d794c43e02726efaad0421c08688f75fc98a6d6e1dc017372e1af7abbfecdc86a79968f461675931a7a
@@ -9015,15 +9008,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-react-ui-kit@npm:^1.7.12":
-  version: 1.7.12
-  resolution: "simple-react-ui-kit@npm:1.7.12"
+"simple-react-ui-kit@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "simple-react-ui-kit@npm:1.8.0"
   dependencies:
     dayjs: "npm:^1.11.20"
-    lodash-es: "npm:^4.17.23"
-    react: "npm:^19.2.4"
-    react-dom: "npm:^19.2.4"
-  checksum: 10c0/a90ad36fbca83b6f7ca84d74534759d2758575fc6de41895405c0b1d350ea9216a0ebfaa1deea75a58c89575fc49402d2dd73af52bda21d234301f093989804d
+    lodash-es: "npm:^4.18.1"
+    react: "npm:^19.2.5"
+    react-dom: "npm:^19.2.5"
+  checksum: 10c0/09a824d93d23caa17736ada2bd21337bbf58e0e87ebb28b6d2feb9467c69d45891351f86bdb8d1f87db993883770adeef1cfa920cad66cba7eac8e33553ae8a1
   languageName: node
   linkType: hard
 

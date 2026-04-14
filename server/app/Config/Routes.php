@@ -108,10 +108,27 @@ $routes->group('events', static function ($routes) {
 
     $routes->post('/', 'Events::create');
     $routes->patch('(:alphanum)', 'Events::update/$1');
+    $routes->delete('(:alphanum)', 'Events::delete/$1');
+    $routes->post('(:alphanum)/cover', 'Events::cover/$1');
 
     $routes->post('booking', 'Events::booking');
     $routes->post('cancel', 'Events::cancel');
     $routes->post('upload/(:alphanum)', 'Events::upload/$1');
+    $routes->options('/', static function () {});
+    $routes->options('(:any)', static function () {});
+});
+
+/** Mailings Controller **/
+$routes->group('mailings', static function ($routes) {
+    $routes->get('/', 'Mailings::list');
+    $routes->post('/', 'Mailings::create');
+    $routes->get('unsubscribe', 'Mailings::unsubscribe');  // public — before (:alphanum)
+    $routes->get('(:alphanum)', 'Mailings::show/$1');
+    $routes->patch('(:alphanum)', 'Mailings::update/$1');
+    $routes->delete('(:alphanum)', 'Mailings::delete/$1');
+    $routes->post('(:alphanum)/upload', 'Mailings::upload/$1');
+    $routes->post('(:alphanum)/test', 'Mailings::test/$1');
+    $routes->post('(:alphanum)/send', 'Mailings::send/$1');
     $routes->options('/', static function () {});
     $routes->options('(:any)', static function () {});
 });

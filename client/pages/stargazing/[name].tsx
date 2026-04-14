@@ -4,6 +4,7 @@ import { Button, Container, Icon } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
@@ -25,8 +26,10 @@ interface StargazingItemPageProps {
 
 const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event, photos, eventsList }) => {
     const { t } = useTranslation()
+    const router = useRouter()
 
     const user = useAppSelector((state) => state.auth.user)
+    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     // const { data: usersList } = API.useEventGetUsersListQuery(eventId, { skip: !eventId })
 
@@ -107,7 +110,18 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                         text: t('menu.stargazing', 'Астровыезды')
                     }
                 ]}
-            />
+            >
+                {userRole === ApiModel.UserRole.ADMIN && (
+                    <Button
+                        icon={'Pencil'}
+                        mode={'secondary'}
+                        size={'large'}
+                        label={t('common.edit', 'Редактировать')}
+                        disabled={!eventId}
+                        onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
+                    />
+                )}
+            </AppToolbar>
 
             <EventItemData
                 style={{ marginBottom: '10px' }}

@@ -6,6 +6,7 @@ use App\Entities\EventEntity;
 use App\Entities\EventPhotoEntity;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
+use App\Libraries\TelegramLibrary;
 use App\Models\EventsPhotosModel;
 use App\Models\EventsUsersModel;
 use App\Models\UsersModel;
@@ -16,8 +17,6 @@ use CodeIgniter\Files\File;
 use Config\Services;
 
 use Longman\TelegramBot\Exception\TelegramException;
-use Longman\TelegramBot\Request;
-use Longman\TelegramBot\Telegram;
 
 use ReflectionException;
 use Exception;
@@ -367,9 +366,8 @@ class Events extends ResourceController
         }
 
         try {
-            $eventId = uniqid();
-            $event   = new EventEntity();
-            $event->id = $eventId;
+            $event = new EventEntity();
+            $event->id          = uniqid();
             $event->title_ru    = $input['title'];
             $event->title_en    = $input['title'];
             $event->content_ru  = $input['content'];
@@ -381,7 +379,7 @@ class Events extends ResourceController
             if ($file) {
                 $image = Services::image('gd');
 
-                $directoryPath = UPLOAD_EVENTS . $eventId;
+                $directoryPath = UPLOAD_EVENTS . $event->id;
                 mkdir($directoryPath, 0755, true);
 
                 $fileName = 'cover';
@@ -496,22 +494,18 @@ class Events extends ResourceController
             'children_ages' => json_encode($childrenAges),
         ]);
 
-        $safeName      = htmlspecialchars($input['name'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $safeName       = htmlspecialchars($input['name'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $safeEventTitle = htmlspecialchars($event->title_ru ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        new Telegram(getenv('app.telegramBotKey'), '');
+        $message = "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n" .
+            "<b>{$safeEventTitle}</b>\n" .
+            "🔹<i>{$safeName}</i>\n" .
+            "🔹(<b>{$input['adults']}</b>) взрослых, ({$input['children']}) детей\n" .
+            (count($childrenAges) > 0 ? "🔹Возраст детей <b>" . implode(', ', $childrenAges) . "</b> (лет)\n" : "") .
+            "🔹Доступно мест <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b> из <b>{$event->max_tickets}</b>\n" .
+            "🔹Всего участников: <b>" . ($totalMembers + (int) $input['adults'] + (int) $input['children']) . "</b>";
 
-        Request::sendMessage([
-            'chat_id'    => getenv('app.telegramChatID'),
-            'parse_mode' => 'HTML',
-            'text'       => "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n" .
-                "<b>{$safeEventTitle}</b>\n" .
-                "🔹<i>{$safeName}</i>\n" .
-                "🔹(<b>{$input['adults']}</b>) взрослых, ({$input['children']}) детей\n" .
-                (count($childrenAges) > 0 ? "🔹Возраст детей <b>" . implode(', ', $childrenAges) . "</b> (лет)\n" : "") .
-                "🔹Доступно мест <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b> из <b>{$event->max_tickets}</b>\n" .
-                "🔹Всего участников: <b>" . ($totalMembers + (int) $input['adults'] + (int) $input['children']) . "</b>"
-        ]);
+        (new TelegramLibrary())->sendMessage($message);
 
         $userModel  = new UsersModel();
         $updateData = [];
@@ -586,17 +580,13 @@ class Events extends ResourceController
         $safeCancelName  = htmlspecialchars($this->session->user->name ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $safeCancelTitle = htmlspecialchars($event->title_ru ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        new Telegram(getenv('app.telegramBotKey'), '');
+        $cancelMessage = "<b>❌ ОТМЕНА БРОНИРОВАНИЯ</b>\n" .
+            "<b>{$safeCancelTitle}</b>\n" .
+            "🔹<i>{$safeCancelName}</i>\n" .
+            "🔹Взрослых: <b>{$userRegistration->adults}</b>, детей: {$userRegistration->children}\n" .
+            "🔹Осталось слотов: <b>" . ($event->max_tickets - (abs($currentTickets->adults - (int) $userRegistration->adults))) . "</b>\n";
 
-        Request::sendMessage([
-            'chat_id'    => getenv('app.telegramChatID'),
-            'parse_mode' => 'HTML',
-            'text'       => "<b>❌ ОТМЕНА БРОНИРОВАНИЯ</b>\n" .
-                "<b>{$safeCancelTitle}</b>\n" .
-                "🔹<i>{$safeCancelName}</i>\n" .
-                "🔹Взрослых: <b>{$userRegistration->adults}</b>, детей: {$userRegistration->children}\n" .
-                "🔹Осталось слотов: <b>" . ($event->max_tickets - (abs($currentTickets->adults - (int) $userRegistration->adults))) . "</b>\n"
-        ]);
+        (new TelegramLibrary())->sendMessage($cancelMessage);
 
         return $this->respond(['message' => 'Вы отменили бронирование на это мероприятие']);
     }
@@ -689,6 +679,77 @@ class Events extends ResourceController
         ]);
     }
 
+    /**
+     * Replaces the cover image for an existing event.
+     *
+     * Accepts a multipart file upload under the 'upload' key, validates the MIME type,
+     * saves it as cover.<ext> and generates a 585x400 preview as cover_preview.<ext>
+     * inside the event's upload directory. Updates the DB record with the new file info.
+     *
+     * @param string|null $id The event ID.
+     * @return ResponseInterface
+     */
+    public function cover($id = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
+        }
+
+        $event = $this->model->find($id);
+
+        if (!$event) {
+            return $this->failNotFound();
+        }
+
+        $file = $this->request->getFile('upload');
+
+        if (!$file || !$file->isValid()) {
+            return $this->failValidationErrors('File upload failed or invalid file');
+        }
+
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!in_array($file->getMimeType(), $allowedMimes, true)) {
+            return $this->failValidationErrors('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
+        }
+
+        try {
+            $directoryPath = UPLOAD_EVENTS . $event->id;
+
+            if (!is_dir($directoryPath)) {
+                mkdir($directoryPath, 0755, true);
+            }
+
+            $ext          = $file->getExtension();
+            $fileName     = 'cover';
+            $fileFullName = $fileName . '.' . $ext;
+            $previewName  = $fileName . '_preview.' . $ext;
+
+            $file->move($directoryPath, $fileFullName, true);
+
+            Services::image('gd')
+                ->withFile($directoryPath . '/' . $fileFullName)
+                ->fit(585, 400, 'center')
+                ->save($directoryPath . '/' . $previewName);
+
+            $this->model->update($id, [
+                'cover_file_name' => $fileName,
+                'cover_file_ext'  => $ext,
+            ]);
+
+            return $this->respondUpdated([
+                'coverFileName' => $fileName,
+                'coverFileExt'  => $ext,
+            ]);
+        } catch (Exception $e) {
+            log_message('error', $e->getMessage());
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
     public function delete($id = null): ResponseInterface {
         if (!$this->session->isAuth) {
             return $this->failUnauthorized(lang('App.accessDenied'));
@@ -698,6 +759,115 @@ class Events extends ResourceController
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
-        return $this->respond();
+        $eventData = $this->model->find($id);
+
+        if (!$eventData) {
+            return $this->failNotFound();
+        }
+
+        $this->model->delete($id);
+
+        return $this->respondDeleted($eventData);
+    }
+
+    /**
+     * Update an existing event.
+     *
+     * @param string|null $id The event ID.
+     * @return ResponseInterface
+     */
+    public function update($id = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
+        }
+
+        $eventData = $this->model->find($id);
+
+        if (!$eventData) {
+            return $this->failNotFound();
+        }
+
+        $input = $this->request->getJSON(true);
+
+        $rules = [
+            'title'             => 'if_exist|string|max_length[250]',
+            'content'           => 'if_exist|string',
+            'tickets'           => 'if_exist|integer|greater_than[0]|less_than[5000]',
+            'date'              => 'if_exist|string|max_length[50]',
+            'registrationStart' => 'if_exist|string|max_length[50]',
+            'registrationEnd'   => 'if_exist|string|max_length[50]',
+            'googleMap'         => 'if_exist|string|max_length[100]',
+            'yandexMap'         => 'if_exist|string|max_length[100]',
+            'location'          => 'if_exist|string|max_length[250]',
+        ];
+
+        $this->validator = Services::Validation()->setRules($rules);
+
+        if (!$this->validator->run($input)) {
+            return $this->failValidationErrors($this->validator->getErrors());
+        }
+
+        try {
+            $updateData = [];
+
+            if (isset($input['title'])) {
+                $updateData['title_ru'] = $input['title'];
+                $updateData['title_en'] = $input['title'];
+            }
+
+            if (isset($input['content'])) {
+                $updateData['content_ru'] = $input['content'];
+                $updateData['content_en'] = $input['content'];
+            }
+
+            if (isset($input['tickets'])) {
+                $updateData['max_tickets'] = $input['tickets'];
+            }
+
+            if (isset($input['date'])) {
+                $updateData['date'] = Time::parse($input['date'], 'Asia/Yekaterinburg')
+                    ->setTimezone('UTC')
+                    ->toDateTimeString();
+            }
+
+            if (isset($input['registrationStart'])) {
+                $updateData['registration_start'] = Time::parse($input['registrationStart'], 'Asia/Yekaterinburg')
+                    ->setTimezone('UTC')
+                    ->toDateTimeString();
+            }
+
+            if (isset($input['registrationEnd'])) {
+                $updateData['registration_end'] = Time::parse($input['registrationEnd'], 'Asia/Yekaterinburg')
+                    ->setTimezone('UTC')
+                    ->toDateTimeString();
+            }
+
+            if (isset($input['googleMap'])) {
+                $updateData['google_map_link'] = $input['googleMap'];
+            }
+
+            if (isset($input['yandexMap'])) {
+                $updateData['yandex_map_link'] = $input['yandexMap'];
+            }
+
+            if (isset($input['location'])) {
+                $updateData['location_ru'] = $input['location'];
+                $updateData['location_en'] = $input['location'];
+            }
+
+            if (!empty($updateData)) {
+                $this->model->update($id, $updateData);
+            }
+
+            return $this->respondUpdated($this->model->find($id));
+        } catch (Exception $e) {
+            log_message('error', $e->getMessage());
+            return $this->failServerError(lang('General.serverError'));
+        }
     }
 }

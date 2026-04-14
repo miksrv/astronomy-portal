@@ -40,7 +40,15 @@ const App = ({ Component, pageProps }: AppProps) => {
         }
     }, [i18n.language, router])
 
-    dayjs.locale(i18n.language ?? i18Config.i18n.defaultLocale)
+    // dayjs.locale() mutates a global singleton and must not be called during
+    // the render phase — doing so can trigger "Cannot update a component while
+    // rendering a different component" when next-redux-wrapper dispatches HYDRATE
+    // synchronously and RTK Query subscribers (e.g. AppHeader) receive a state
+    // update mid-render. Moving it into useEffect defers the mutation until after
+    // the render is committed.
+    useEffect(() => {
+        dayjs.locale(i18n.language ?? i18Config.i18n.defaultLocale)
+    }, [i18n.language])
 
     return (
         <>

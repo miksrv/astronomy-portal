@@ -3,7 +3,6 @@
 namespace App\Controllers;
 
 use App\Libraries\LocaleLibrary;
-use App\Libraries\PhotosLibrary;
 use App\Libraries\SessionLibrary;
 use App\Libraries\PhotoUploadLibrary;
 use App\Models\CatalogModel;
@@ -12,11 +11,9 @@ use App\Models\PhotosCategoryModel;
 use App\Models\PhotosObjectModel;
 use App\Models\PhotosEquipmentsModel;
 use App\Models\PhotosFiltersModel;
-use CodeIgniter\Files\File;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
-use Config\Services;
 use Exception;
 
 // TODO: Добавить проверку на существование categories, objects, equipment и filters при создании и редактировании

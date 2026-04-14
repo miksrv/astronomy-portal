@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Container, Input } from 'simple-react-ui-kit'
+import { Button, Container, Input, TextArea } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 
 import { ApiModel } from '@/api'
-import { createLargePhotoUrl } from '@/utils/photos'
+import { hosts } from '@/api/constants'
 
 import styles from './styles.module.sass'
 
@@ -153,20 +153,22 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
                 />
             </div>
 
-            <textarea
+            <TextArea
+                size={'large'}
                 disabled={disabled}
                 className={styles.formElement}
-                placeholder={'Описание'}
+                label={'Описание'}
+                autoResize={true}
                 value={formData.content}
                 style={{ width: '100%' }}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
             />
 
             <div className={styles.imageSection}>
-                {!!initialData?.coverFileName && (
+                {!!initialData?.coverFileName && !!initialData?.coverFileExt && (
                     <Image
                         className={styles.image}
-                        src={createLargePhotoUrl(initialData as ApiModel.Photo)}
+                        src={`${hosts.stargazing}${initialData.id}/cover.${initialData.coverFileExt}`}
                         fill={true}
                         alt={''}
                     />

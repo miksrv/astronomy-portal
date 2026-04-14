@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
 use App\Entities\ObjectEntity;
 
-class ObjectsModel extends Model
+class ObjectsModel extends ApplicationBaseModel
 {
     protected $table      = 'objects';
     protected $primaryKey = 'catalog_name';

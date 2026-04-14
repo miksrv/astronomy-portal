@@ -53,6 +53,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
         {
             href: '/stargazing/form',
             label: t('components.common.app-layout.app-header.add-stargazing', 'Добавить мероприятие')
+        },
+        {
+            href: '/mailing',
+            label: t('components.common.app-layout.app-header.mailings', 'Email рассылки')
         }
     ]
 

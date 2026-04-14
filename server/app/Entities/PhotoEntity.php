@@ -18,7 +18,7 @@ class PhotoEntity extends Entity
         'image_height'   => 'integer',
         'created_at'     => 'datetime',
         'updated_at'     => 'datetime',
-        'deleted_at'     => 'datetime'
+        'deleted_at'     => '?datetime'
     ];
 
     protected $datamap = [
