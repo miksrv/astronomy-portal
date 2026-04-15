@@ -11,6 +11,19 @@ final class AuthHelperTest extends CIUnitTestCase
     {
         parent::setUp();
         helper('auth');
+
+        // Set test JWT secret and token TTL for generateAuthToken() tests
+        putenv('auth.token.secret=test-secret-key-for-unit-tests');
+        putenv('auth.token.live=3600');
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        // Clean up environment variables
+        putenv('auth.token.secret');
+        putenv('auth.token.live');
     }
 
     // --- hashUserPassword() tests ---
