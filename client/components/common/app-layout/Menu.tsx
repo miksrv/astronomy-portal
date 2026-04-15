@@ -127,6 +127,7 @@ export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) =
                                 ''
                             )}
                         </Link>
+
                         {item.subMenuItems && (dropdownOpen === i || sidebarMenu) && (
                             <ul className={styles.dropdownMenu}>
                                 {item.subMenuItems.map((subItem, j) => (

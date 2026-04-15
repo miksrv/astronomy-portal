@@ -43,19 +43,19 @@ class CreatePhotosTable extends Migration
             'file_size' => [
                 'type'       => 'INT',
                 'constraint' => 11,
-                'null'       => false
+                'null'       => false,
                 'default'    => 0
             ],
             'image_width' => [
                 'type'       => 'SMALLINT',
                 'constraint' => 5,
-                'null'       => false
+                'null'       => false,
                 'default'    => 0
             ],
             'image_height' => [
                 'type'       => 'SMALLINT',
                 'constraint' => 5,
-                'null'       => false
+                'null'       => false,
                 'default'    => 0
             ],
             'created_at DATETIME default current_timestamp',

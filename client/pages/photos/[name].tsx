@@ -2,7 +2,6 @@ import React, { useMemo } from 'react'
 import { Button } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
-import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
@@ -29,7 +28,6 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
     equipmentsList
 }) => {
     const { t } = useTranslation()
-    const router = useRouter()
 
     const photoTitle = createPhotoTitle(photoData, t)
 
@@ -50,16 +48,6 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                 ?.join('; '),
         [equipmentsList, photoData?.equipments]
     )
-
-    const handleEdit = async () => {
-        if (photoId) {
-            await router.push(`/photos/form/?id=${photoId}`)
-        }
-    }
-
-    const handleCreate = async () => {
-        await router.push('/photos/form')
-    }
 
     return (
         <AppLayout
@@ -98,7 +86,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                             size={'large'}
                             label={t('common.edit', 'Редактировать')}
                             disabled={!photoId}
-                            onClick={handleEdit}
+                            link={`/photos/form/?id=${photoId}`}
                         />
 
                         <Button
@@ -106,7 +94,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                             mode={'secondary'}
                             size={'large'}
                             label={t('common.add', 'Добавить')}
-                            onClick={handleCreate}
+                            link={'/photos/form'}
                         />
                     </>
                 )}
@@ -164,7 +152,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
             const { data: objectsData } = await store.dispatch(API.endpoints?.objectsGetList.initiate())
 
             // Fetch a bounded set of photos for related-photo display (cover images only)
-            const { data: photosData } = await store.dispatch(API.endpoints?.photosGetList.initiate({ limit: 20 }))
+            const { data: photosData } = await store.dispatch(API.endpoints?.photosGetList.initiate())
 
             const { data: categoriesData } = await store.dispatch(API.endpoints?.categoriesGetList.initiate())
 

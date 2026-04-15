@@ -186,7 +186,7 @@ class Mailings extends ResourceController
         }
 
         if ($mailing->status !== MailingEntity::STATUS_DRAFT) {
-            return $this->failForbidden('Only draft campaigns can be edited');
+            return $this->failForbidden(lang('Mailings.onlyDraftEditable'));
         }
 
         $input = $this->request->getJSON(true);
@@ -247,10 +247,23 @@ class Mailings extends ResourceController
         }
 
         if ($mailing->status !== MailingEntity::STATUS_DRAFT) {
-            return $this->failForbidden('Only draft campaigns can be deleted');
+            return $this->failForbidden(lang('Mailings.onlyDraftDeletable'));
         }
 
         try {
+            // Remove attachments directory if it exists
+            $attachDir = FCPATH . 'attachments/' . $id;
+
+            if (is_dir($attachDir)) {
+                foreach (glob($attachDir . '/*') as $file) {
+                    if (is_file($file)) {
+                        unlink($file);
+                    }
+                }
+
+                rmdir($attachDir);
+            }
+
             $this->model->delete($id);
 
             return $this->respondDeleted(['id' => $id]);
@@ -284,17 +297,17 @@ class Mailings extends ResourceController
         $file = $this->request->getFile('image') ?? $this->request->getFile('upload');
 
         if (!$file || !$file->isValid()) {
-            return $this->failValidationErrors('No valid image file provided');
+            return $this->failValidationErrors(lang('General.fileUploadFailed'));
         }
 
         $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
         if (!in_array($file->getMimeType(), $allowedMimes, true)) {
-            return $this->failValidationErrors('Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed.');
+            return $this->failValidationErrors(lang('General.invalidFileType'));
         }
 
         try {
-            $uploadDir = FCPATH . 'mailings/' . $id . '/';
+            $uploadDir = FCPATH . 'attachments/' . $id . '/';
 
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
@@ -303,12 +316,12 @@ class Mailings extends ResourceController
             $newName = $file->getRandomName();
             $file->move($uploadDir, $newName, true);
 
-            $imagePath = 'mailings/' . $id . '/' . $newName;
+            $imagePath = 'attachments/' . $id . '/' . $newName;
 
             $this->model->update($id, ['image' => $imagePath]);
 
             return $this->respond([
-                'image' => '/files/' . $imagePath,
+                'image' => '/' . $imagePath,
             ]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
@@ -338,23 +351,19 @@ class Mailings extends ResourceController
         }
 
         if (empty($this->session->user->email)) {
-            return $this->failValidationErrors('Admin account has no email address');
+            return $this->failValidationErrors(lang('Mailings.noAdminEmail'));
         }
 
         try {
-            $locale       = $this->session->user->locale ?? 'ru';
-            $siteUrl      = rtrim(getenv('app.siteUrl') ?: getenv('app.baseURL'), '/');
-            $imagePath    = null;
+            $locale  = $this->session->user->locale ?? 'ru';
+            $siteUrl = rtrim(getenv('app.siteUrl'), '/');
+            $apiUrl  = rtrim(getenv('app.baseURL'), '/');
+
+            $imageUrl = null;
 
             if (!empty($mailing->image)) {
-                $fullPath = FCPATH . $mailing->image;
-
-                if (file_exists($fullPath)) {
-                    $imagePath = $fullPath;
-                }
+                $imageUrl = $apiUrl . '/' . $mailing->image;
             }
-
-            $imageUrl = !empty($mailing->image) ? 'cid:COVER_IMAGE_CID' : null;
 
             $body = view('email_newsletter', [
                 'subject'        => $mailing->subject,
@@ -365,18 +374,17 @@ class Mailings extends ResourceController
             ]);
 
             $emailLibrary = new EmailLibrary();
-            $emailLibrary->sendWithAttachment(
+            $emailLibrary->send(
                 $this->session->user->email,
                 '[TEST] ' . $mailing->subject,
-                $body,
-                $imagePath
+                $body
             );
 
             return $this->respond(['success' => true]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError('Test email failed: ' . $e->getMessage());
+            return $this->failServerError(lang('Mailings.testEmailFailed'));
         }
     }
 
@@ -401,7 +409,7 @@ class Mailings extends ResourceController
         }
 
         if ($mailing->status !== MailingEntity::STATUS_DRAFT) {
-            return $this->failForbidden('Only draft campaigns can be launched');
+            return $this->failForbidden(lang('Mailings.onlyDraftLaunchable'));
         }
 
         try {
@@ -459,7 +467,7 @@ class Mailings extends ResourceController
         $mailId = $this->request->getGet('mail', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
         if (empty($mailId)) {
-            return $this->failValidationErrors('Missing required parameter: mail');
+            return $this->failValidationErrors(lang('Mailings.missingMailParam'));
         }
 
         try {
@@ -467,7 +475,7 @@ class Mailings extends ResourceController
             $mailingEmail       = $mailingEmailsModel->find($mailId);
 
             if (!$mailingEmail) {
-                return $this->failNotFound('Unsubscribe link not found or already used');
+                return $this->failNotFound(lang('Mailings.unsubscribeLinkNotFound'));
             }
 
             $usersModel = new UsersModel();
@@ -494,7 +502,7 @@ class Mailings extends ResourceController
 
             return $this->respond([
                 'success' => true,
-                'message' => 'You have been unsubscribed.',
+                'message' => lang('Mailings.unsubscribeSuccess'),
             ]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);

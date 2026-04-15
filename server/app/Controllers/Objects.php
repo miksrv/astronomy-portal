@@ -125,8 +125,13 @@ class Objects extends ResourceController
 
         $input = $this->request->getJSON(true);
         $rules = [
-            'name'  => 'required|min_length[3]|max_length[40]',
-            'image' => 'string',
+            'name'          => 'required|min_length[3]|max_length[40]',
+            'image'         => 'if_exist|permit_empty|string',
+            'title'         => 'if_exist|permit_empty|string|max_length[255]',
+            'description'   => 'if_exist|permit_empty|string',
+            'ra'            => 'if_exist|permit_empty|decimal',
+            'dec'           => 'if_exist|permit_empty|decimal',
+            'fitsCloudLink' => 'if_exist|permit_empty|string|max_length[500]',
         ];
 
         if (!$this->validate($rules)) {
@@ -137,14 +142,40 @@ class Objects extends ResourceController
         $input['catalog_name'] = $input['name'] ?? '';
         unset($input['name']);
 
+        // Map frontend field names to DB column names
+        if (isset($input['title'])) {
+            $input['title_ru'] = $input['title'];
+            $input['title_en'] = $input['title'];
+            unset($input['title']);
+        }
+        if (isset($input['description'])) {
+            $input['description_ru'] = $input['description'];
+            $input['description_en'] = $input['description'];
+            unset($input['description']);
+        }
+        if (isset($input['fitsCloudLink'])) {
+            $input['fits_cloud_link'] = $input['fitsCloudLink'];
+            unset($input['fitsCloudLink']);
+        }
+
+        // Save the catalog image
+        if (!empty($input['image'])) {
+            $input['image_file'] = $this->_saveCatalogImage($input['catalog_name'], $input['image']);
+        }
+        unset($input['image']);
+
         // Check uniqueness after mapping
         $objectsModel = new ObjectsModel();
         if ($objectsModel->where('catalog_name', $input['catalog_name'])->withDeleted()->first()) {
-            return $this->failValidationErrors(['name' => 'This Object Name already exists.']);
+            return $this->failValidationErrors(['name' => lang('Objects.nameAlreadyExists')]);
         }
 
         try {
             $objectsModel->insert($input);
+
+            \Config\Services::cache()->deleteMatching('objects_list_*');
+
+            $input['name'] = $input['catalog_name'];
 
             return $this->respondCreated($input);
         } catch (Exception $e) {
@@ -172,8 +203,13 @@ class Objects extends ResourceController
 
         $input = $this->request->getJSON(true);
         $rules = [
-            'name'  => 'required|min_length[3]|max_length[40]', // |is_unique[objects.catalog_name,catalog_name,{id}]
-            'image' => 'string',
+            'name'          => 'required|min_length[3]|max_length[40]', // |is_unique[objects.catalog_name,catalog_name,{id}]
+            'image'         => 'if_exist|permit_empty|string',
+            'title'         => 'if_exist|permit_empty|string|max_length[255]',
+            'description'   => 'if_exist|permit_empty|string',
+            'ra'            => 'if_exist|permit_empty|decimal',
+            'dec'           => 'if_exist|permit_empty|decimal',
+            'fitsCloudLink' => 'if_exist|permit_empty|string|max_length[500]',
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -184,7 +220,23 @@ class Objects extends ResourceController
 
         // Validate the decoded fields (ensure arrays)
         if ((!empty($input) && !is_array($input['categories'])) || (!empty($input['equipment']) && !is_array($input['equipment']))) {
-            return $this->failValidationErrors('Invalid format for categories, objects, equipment, or filters');
+            return $this->failValidationErrors(lang('General.invalidDataFormat'));
+        }
+
+        // Map frontend field names to DB column names
+        if (isset($input['title'])) {
+            $input['title_ru'] = $input['title'];
+            $input['title_en'] = $input['title'];
+            unset($input['title']);
+        }
+        if (isset($input['description'])) {
+            $input['description_ru'] = $input['description'];
+            $input['description_en'] = $input['description'];
+            unset($input['description']);
+        }
+        if (isset($input['fitsCloudLink'])) {
+            $input['fits_cloud_link'] = $input['fitsCloudLink'];
+            unset($input['fitsCloudLink']);
         }
 
         // Save the catalog image
@@ -215,10 +267,13 @@ class Objects extends ResourceController
             }
 
             $objectsModel->update($id, $input);
+
+            \Config\Services::cache()->deleteMatching('objects_list_*');
+
             return $this->respondUpdated($input);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
-            return $this->failServerError('Внутренняя ошибка сервера');
+            return $this->failServerError(lang('General.serverError'));
         }
     }
 

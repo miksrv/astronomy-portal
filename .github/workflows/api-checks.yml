@@ -1,0 +1,53 @@
+name: API Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'server/**/*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-checks:
+    if: github.event.pull_request.draft == false
+    name: Tests & Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, curl, dom, sqlite3
+          coverage: xdebug
+          ini-values: memory_limit=256M
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        working-directory: server
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('server/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --no-progress --prefer-dist
+        working-directory: server
+
+      - name: Create coverage output directory
+        run: mkdir -p build/logs
+        working-directory: server
+
+      - name: PHP Unit Tests
+        run: php vendor/bin/phpunit
+        working-directory: server

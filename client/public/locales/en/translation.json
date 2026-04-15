@@ -113,6 +113,14 @@
                     "times_other": "{{count}} times"
                 },
                 "weather": {
+                    "label-temperature": "Temperature",
+                    "label-humidity": "Humidity",
+                    "label-clouds": "Clouds",
+                    "label-wind-speed": "Wind Speed",
+                    "label-precipitation": "Precipitation",
+                    "label-wind-gust": "Wind Gust",
+                    "unit-wind": "m/s",
+                    "unit-precipitation": "mm",
                     "safely": "Safe",
                     "critical": "Critical",
                     "dangerous": "Dangerous",
@@ -120,9 +128,7 @@
                     "observatory-in-orenburg-weather": "Orenburg Observatory Weather",
                     "read-more": "Read More",
                     "updated": "Updated",
-                    "loading": "Loading weather...",
-                    "unit-precipitation": "mm",
-                    "unit-wind": "m/s"
+                    "loading": "Loading weather..."
                 },
                 "widget-chart": {
                     "chart-label_date-format": "D MMM YYYY, HH:mm",
@@ -197,8 +203,12 @@
         "frames_one": "{{count}} frame",
         "frames_other": "{{count}} frames",
         "telegram": "Telegram",
+        "delete": "Delete",
         "edit": "Edit",
         "add": "Add",
+        "archive": "Archive",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
         "go-to-home-page": "Go to Homepage",
         "day_one": "{{count}} day",
         "day_other": "{{count}} days",
@@ -302,12 +312,12 @@
             "launch": "Launch Campaign",
             "launch-confirm": "Are you sure? Emails will be sent to all subscribers.",
             "cancel": "Cancel",
-            "no-items": "No mailings yet",
             "col-subject": "Subject",
             "col-status": "Status",
             "col-date": "Date",
-            "col-actions": "Actions",
-            "view-stats": "Statistics"
+            "no-items": "No mailings yet",
+            "delete-confirm-title": "",
+            "delete-confirm-text": ""
         },
         "objects": {
             "title": "Astronomical Objects Catalog",
@@ -376,6 +386,9 @@
             "title": "Orenburg Observatory Weather",
             "description": "Up-to-date weather charts from the weather station of an amateur observatory near Orenburg. Temperature, humidity, cloud cover, and wind speed in real time."
         },
+        "photo": {
+            "description": "{{photoTitle}} — a photograph of an astronomical object taken at a DIY observatory, equipment used: {{equipment}}."
+        },
         "photos": {
             "title": "Astrophoto",
             "description": "A collection of astrophotographs of galaxies, star clusters, nebulae, planets, and other space objects captured by an amateur observatory. Find and filter images by categories and parameters to see unique shots of the Universe with details for each filter and exposure.",
@@ -383,10 +396,15 @@
             "filter-by-category": "Filter by category",
             "create_button": "Create"
         },
-        "photo": {
-            "description": "{{photoTitle}} — a photograph of an astronomical object taken at a DIY observatory, equipment used: {{equipment}}."
-        },
         "stargazing": {
+            "photos-from-stargazing": "Photos from the Star Party",
+            "photo": "Photo",
+            "edit-event": "",
+            "add-event": "",
+            "save-error": "",
+            "save-success": "",
+            "archive-confirm-title": "",
+            "archive-confirm-body": "",
             "title": "Star Parties",
             "rules_link": "Star Party Rules",
             "howto_link": "How Star Parties Work",
@@ -399,9 +417,7 @@
             "text-part-1": "A star party in Orenburg is a chance to touch the mysteries of the Universe while observing the starry sky in complete darkness. We invite you on exciting trips outside the city where telescopes open cosmic horizons right in the fields of the Orenburg region.",
             "text-part-2": "Each star party is an evening of scientific discoveries, inspiring lectures, and lively interaction with like-minded people. You will learn how our events work, get acquainted with the basic rules of behavior, and be able to prepare in advance for stargazing.",
             "photo_alt": "Photo ({{number}}) from the star party — {{name}} ",
-            "photo_title": "Star Party: {{name}} — Photo ({{number}})",
-            "photos-from-stargazing": "Photos from the Star Party",
-            "photo": "Photo"
+            "photo_title": "Star Party: {{name}} — Photo ({{number}})"
         },
         "checkin": {
             "no-cameras": "No cameras found",

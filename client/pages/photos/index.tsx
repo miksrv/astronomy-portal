@@ -73,10 +73,6 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
         setCategoryFilter(category)
     }
 
-    const handleCreate = async () => {
-        await router.push('/photos/form')
-    }
-
     useEffect(() => {
         setCategoryFilter(category ? parseInt(category) : undefined)
     }, [category])
@@ -132,7 +128,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
                         icon={'PlusCircle'}
                         mode={'secondary'}
                         label={t('pages.photos.create_button', 'Создать')}
-                        onClick={handleCreate}
+                        link={'/photos/form'}
                     />
                 )}
             </AppToolbar>

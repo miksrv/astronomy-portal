@@ -33,10 +33,6 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
     const toolbarRef = useRef<HTMLDivElement>(null)
     const footerRef = useRef<HTMLDivElement>(null)
 
-    const handleCreate = async () => {
-        await router.push('/objects/form')
-    }
-
     const filteredCategoriesList = useMemo(
         () =>
             categoriesList?.filter(({ id }) =>
@@ -155,7 +151,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                         icon={'PlusCircle'}
                         mode={'secondary'}
                         label={t('pages.objects.create_button', 'Создать объект')}
-                        onClick={handleCreate}
+                        link={'/objects/form'}
                     />
                 )}
             </AppToolbar>
@@ -181,7 +177,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
             store.dispatch(setLocale(locale))
 
             // Fetch a bounded set of photos — used only for object cover image thumbnails
-            const { data: photos } = await store.dispatch(API.endpoints?.photosGetList.initiate({ limit: 20 }))
+            const { data: photos } = await store.dispatch(API.endpoints?.photosGetList.initiate())
 
             const { data: objects } = await store.dispatch(API.endpoints?.objectsGetList.initiate())
 

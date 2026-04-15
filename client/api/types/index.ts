@@ -15,9 +15,7 @@ export type Locale = 'en' | 'ru'
 export interface ResError {
     status?: number
     code?: number
-    messages: {
-        error?: string
-    }
+    messages: Record<string, string>
 }
 
 export type DateTime = {

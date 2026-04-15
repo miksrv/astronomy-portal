@@ -44,7 +44,7 @@ jobs:
         working-directory: client
         run: yarn install
 
-      - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
+      - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
         name: Configure Client
         run: |
           echo "NEXT_PUBLIC_API_HOST = '${{ secrets.NEXT_PUBLIC_API_HOST }}'
@@ -52,9 +52,41 @@ jobs:
           NEXT_PUBLIC_LON = 55.2" > .env
         working-directory: client
 
-      - name: UI Unit Tests
-        run: yarn test
+      - name: UI Unit Tests with Coverage
+        run: yarn test --coverage
         working-directory: client
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, curl, dom, sqlite3
+          coverage: xdebug
+          ini-values: memory_limit=256M
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        working-directory: server
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('server/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install PHP dependencies
+        run: composer install --no-progress --prefer-dist
+        working-directory: server
+
+      - name: Create PHP coverage directory
+        run: mkdir -p build/logs
+        working-directory: server
+
+      - name: PHP Unit Tests with Coverage
+        run: php vendor/bin/phpunit
+        working-directory: server
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master

@@ -177,12 +177,12 @@ class Photos extends ResourceController
         $fileUpload = $this->request->getFile('file');
 
         if (!$fileUpload || !$fileUpload->isValid()) {
-            return $this->failValidationErrors('File upload failed or invalid file');
+            return $this->failValidationErrors(lang('General.fileUploadFailed'));
         }
 
         $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         if (!in_array($fileUpload->getMimeType(), $allowedMimes, true)) {
-            return $this->failValidationErrors('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
+            return $this->failValidationErrors(lang('General.invalidFileType'));
         }
 
         $photoUploadLibrary = new PhotoUploadLibrary();
@@ -192,7 +192,7 @@ class Photos extends ResourceController
         $photoObjects = $photosObjectModel->where('photo_id', $id)->findAll();
 
         if (!$photoData || !$photoObjects) {
-            return $this->failValidationErrors('Invalid photo ID');
+            return $this->failValidationErrors(lang('Photos.invalidPhotoId'));
         }
 
         $photo = new \App\Entities\PhotoEntity();
@@ -217,7 +217,7 @@ class Photos extends ResourceController
             return $this->respondCreated($photo);
         } catch (\Exception $e) {
             log_message('error', $e->getMessage());
-            return $this->failServerError('Could not save photo data');
+            return $this->failServerError(lang('General.couldNotSaveData'));
         }
     }
 
@@ -296,7 +296,7 @@ class Photos extends ResourceController
         // Validate the decoded fields (ensure arrays)
         if (!is_array($input['categories']) || !is_array($input['objects']) ||
             !is_array($input['equipments']) || !is_array($input['filters'])) {
-            return $this->failValidationErrors('Invalid format for categories, objects, equipment, or filters');
+            return $this->failValidationErrors(lang('General.invalidDataFormat'));
         }
 
         // Insert into database
@@ -376,7 +376,7 @@ class Photos extends ResourceController
             return $isUpdate ? $this->respondUpdated($photo) : $this->respondCreated($photo);
         } catch (\Exception $e) {
             log_message('error', $e->getMessage());
-            return $this->failServerError('Could not save photo data');
+            return $this->failServerError(lang('General.couldNotSaveData'));
         }
     }
 }

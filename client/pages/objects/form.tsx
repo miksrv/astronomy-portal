@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { getCookie } from 'cookies-next'
+import { Message } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
@@ -15,12 +16,13 @@ import { formatObjectName } from '@/utils/strings'
 // TODO: Добавить обработку ошибки, когда пытаемся отредактировать объект, которого нет
 // TODO: Добавить индикатор загрузки когда загружаем редактируемый объет
 // TODO: Для handleCancel добавить проверку на изменения в форме
-// TODO: Добавить Message компонент для обработки выполнения действий
 const ObjectFormPage: NextPage<object> = () => {
     const router = useRouter()
 
     const { id } = router.query
     const { t } = useTranslation()
+
+    const [createdName, setCreatedName] = useState<string>()
 
     const {
         data: objectData,
@@ -30,25 +32,11 @@ const ObjectFormPage: NextPage<object> = () => {
         skip: !id
     })
 
-    const [
-        createObject,
-        {
-            // data: createdData,
-            // error: createError,
-            // isSuccess: createSuccess,
-            isLoading: createLoading
-        }
-    ] = API.useObjectsPostMutation()
+    const [createObject, { error: createError, isLoading: createLoading, isSuccess: createSuccess }] =
+        API.useObjectsPostMutation()
 
-    const [
-        updateObject,
-        {
-            // data: updatedData,
-            // error: updateError,
-            // isSuccess: updateSuccess,
-            isLoading: updateLoading
-        }
-    ] = API.useObjectsPatchMutation()
+    const [updateObject, { error: updateError, isLoading: updateLoading, isSuccess: updateSuccess }] =
+        API.useObjectsPatchMutation()
 
     const handleSubmit = async (formData?: AstroObjectFormType) => {
         if (!formData) {
@@ -58,6 +46,7 @@ const ObjectFormPage: NextPage<object> = () => {
         if (id) {
             await updateObject(formData)
         } else {
+            setCreatedName(formData.name)
             await createObject(formData)
         }
     }
@@ -65,6 +54,12 @@ const ObjectFormPage: NextPage<object> = () => {
     const handleCancel = () => {
         router.back()
     }
+
+    useEffect(() => {
+        if (createSuccess && createdName) {
+            void router.push(`/objects/${createdName}`)
+        }
+    }, [createSuccess, createdName])
 
     const currentPageTitle = objectData?.name
         ? `Редактирование ${formatObjectName(objectData.name)}`
@@ -86,6 +81,16 @@ const ObjectFormPage: NextPage<object> = () => {
                     }
                 ]}
             />
+
+            {(createError || updateError || updateSuccess) && (
+                <Message
+                    style={{ marginBottom: '10px' }}
+                    type={createError || updateError ? 'error' : 'success'}
+                >
+                    {(createError || updateError) && <div>{'Ошибка сохранения'}</div>}
+                    {updateSuccess && <div>{'Данные сохранены'}</div>}
+                </Message>
+            )}
 
             <AstroObjectForm
                 disabled={objectLoading || createLoading || updateLoading}
