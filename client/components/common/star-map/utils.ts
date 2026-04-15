@@ -1,8 +1,15 @@
 import { formatObjectName } from '@/utils/strings'
 
-import { POINT_RADIUS, POPUP_HEIGHT, POPUP_OFFSET, POPUP_WIDTH } from './constants'
+import {
+    DEFAULT_STARMAP_SETTINGS,
+    POINT_RADIUS,
+    POPUP_HEIGHT,
+    POPUP_OFFSET,
+    POPUP_WIDTH,
+    STARMAP_STORAGE_KEY
+} from './constants'
 import { StarMapObject } from './StarMap'
-import { GeoJSON, HitResult } from './types'
+import { GeoJSON, HitResult, StarMapSettings } from './types'
 
 /**
  * Clamp popup position so it stays within the container bounds.
@@ -87,5 +94,36 @@ export const createObjectsJSON = (objects?: StarMapObject[]): GeoJSON | undefine
                 name: formatObjectName(item.name)
             }
         }))
+    }
+}
+
+/** Load star map settings from localStorage, falling back to defaults. */
+export const loadStarMapSettings = (): StarMapSettings => {
+    if (typeof window === 'undefined') {
+        return DEFAULT_STARMAP_SETTINGS
+    }
+
+    try {
+        const raw = localStorage.getItem(STARMAP_STORAGE_KEY)
+        if (raw) {
+            return { ...DEFAULT_STARMAP_SETTINGS, ...JSON.parse(raw) }
+        }
+    } catch {
+        // Ignore corrupted data
+    }
+
+    return DEFAULT_STARMAP_SETTINGS
+}
+
+/** Persist star map settings to localStorage. */
+export const saveStarMapSettings = (settings: StarMapSettings): void => {
+    if (typeof window === 'undefined') {
+        return
+    }
+
+    try {
+        localStorage.setItem(STARMAP_STORAGE_KEY, JSON.stringify(settings))
+    } catch {
+        // Ignore quota errors
     }
 }

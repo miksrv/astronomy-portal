@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react'
-import { cn, Container, Skeleton } from 'simple-react-ui-kit'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Button, cn, Container, Skeleton } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -9,20 +9,41 @@ import { API } from '@/api'
 import { createMediumPhotoUrl } from '@/utils/photos'
 
 import { customConfig, defaultConfig } from './config'
-import { POINT_RADIUS, POPUP_HEIGHT, POPUP_WIDTH, stylePoint, styleText } from './constants'
+import {
+    DEFAULT_STARMAP_SETTINGS,
+    MOBILE_MAX_WIDTH,
+    POINT_RADIUS,
+    POPUP_HEIGHT,
+    POPUP_WIDTH,
+    stylePoint,
+    styleText
+} from './constants'
 import { StarMapProps } from './StarMap'
-import { PendingPopup, PopupState, SkyPoint } from './types'
-import { clampPopupPosition, createObjectsJSON, findHitPoint } from './utils'
+import StarMapSettingsForm from './StarMapSettingsForm'
+import { PendingPopup, PopupState, SkyPoint, StarMapSettings } from './types'
+import { clampPopupPosition, createObjectsJSON, findHitPoint, loadStarMapSettings, saveStarMapSettings } from './utils'
 
 import styles from './styles.module.sass'
 
-const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, className, config }) => {
+const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, className, config, showSettings }) => {
     const { i18n } = useTranslation()
 
-    const [popup, setPopup] = React.useState<PopupState>({
+    const [popup, setPopup] = useState<PopupState>({
         visible: false,
         x: 0,
         y: 0
+    })
+
+    // Settings state — only loaded from localStorage when showSettings is enabled
+    const [settings, setSettings] = useState<StarMapSettings>(() =>
+        showSettings ? loadStarMapSettings() : DEFAULT_STARMAP_SETTINGS
+    )
+    const [settingsOpen, setSettingsOpen] = useState<boolean>(() => {
+        if (!showSettings) {
+            return false
+        }
+        // On desktop — open by default; on mobile — closed
+        return typeof window !== 'undefined' && window.innerWidth > MOBILE_MAX_WIDTH
     })
 
     const getPhotoData = API.usePhotosGetListQuery({ object: popup?.object, limit: 1 }, { skip: !popup?.object })
@@ -31,11 +52,13 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
     const hideTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined)
     const showPopupTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined)
     const rafRef = useRef<number>(0)
-    // Timestamp until which the addCallback redraw handler won't hide the popup
-    // (used during intentional rotation animation)
     const suppressHideUntilRef = useRef<number>(0)
-    // Pending popup data to show after rotation completes
     const pendingPopupRef = useRef<PendingPopup | null>(null)
+    // Center is stored in a ref (not state) so that drag/zoom never triggers a full Celestial rebuild.
+    // It is only read once on initial mount to restore the saved position.
+    const centerRef = useRef<[number, number, number]>(
+        showSettings ? loadStarMapSettings().center : DEFAULT_STARMAP_SETTINGS.center
+    )
 
     const objectsJSON = useMemo(() => createObjectsJSON(objects), [objects])
 
@@ -43,10 +66,6 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
         setPopup((prev) => ({ ...prev, visible: false }))
     }, [])
 
-    /**
-     * After Celestial.rotate() completes and redraws, recalculate the point's screen
-     * position (now centered) and show the popup next to it.
-     */
     const showPendingPopup = useCallback(() => {
         const pending = pendingPopupRef.current
         if (!pending) {
@@ -55,7 +74,6 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
 
         pendingPopupRef.current = null
 
-        // Get the new screen coordinates of the point after rotation
         const screenCoords = Celestial.mapProjection([pending.ra, pending.dec])
         if (!screenCoords) {
             return
@@ -72,6 +90,17 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
             name: pending.name,
             object: pending.object
         })
+    }, [])
+
+    const handleSettingsChange = useCallback((newSettings: StarMapSettings) => {
+        // Persist the current map center alongside the settings change
+        const currentCenter = Celestial.rotate?.() as [number, number, number] | undefined
+        if (currentCenter) {
+            centerRef.current = currentCenter
+            newSettings = { ...newSettings, center: currentCenter }
+        }
+        setSettings(newSettings)
+        saveStarMapSettings(newSettings)
     }, [])
 
     const handleCallback = (error: unknown) => {
@@ -112,16 +141,10 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
         })
     }
 
-    // Initialised flag to avoid double-init on strict mode / hot reload
     const initializedRef = useRef<boolean>(false)
 
     // Single combined effect: initialise Celestial and (re-)display with objects.
-    // Merging what was previously two separate useEffects eliminates the race
-    // condition where Celestial.display() was called twice on the first render
-    // (once from the mount effect with possibly zero width, and once from the
-    // objects effect), leading to wrong dimensions on SSR-hydrated page loads.
     useEffect(() => {
-        // Build a local config copy so we never mutate the shared module-level object
         const localConfig = {
             ...customConfig,
             ...config,
@@ -129,28 +152,54 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
             lang: i18n?.language || customConfig.lang
         }
 
-        // Measure container width; on first paint it may still be zero,
-        // so we fall back to waiting a frame for layout to settle.
+        // Apply user settings when the settings panel is enabled
+        if (showSettings) {
+            localConfig.stars = {
+                ...defaultConfig.stars,
+                ...localConfig.stars,
+                show: settings.starsShow,
+                limit: settings.starsLimit
+            }
+            localConfig.dsos = { ...defaultConfig.dsos, show: settings.dsosShow }
+            localConfig.constellations = {
+                ...customConfig.constellations,
+                names: settings.constellationNames,
+                lines: settings.constellationLines,
+                bounds: settings.constellationBounds
+            }
+            ;(localConfig as Record<string, unknown>).lines = {
+                graticule: { ...customConfig.lines.graticule, show: settings.graticule },
+                equatorial: { ...defaultConfig.lines.equatorial, show: settings.equatorial },
+                ecliptic: { ...defaultConfig.lines.ecliptic, show: settings.ecliptic },
+                galactic: { ...defaultConfig.lines.galactic, show: settings.galactic },
+                supergalactic: defaultConfig.lines.supergalactic
+            }
+            localConfig.mw = { ...defaultConfig.mw, show: settings.milkyWay }
+            localConfig.planets = { ...defaultConfig.planets, show: settings.planetsShow }
+            localConfig.center = centerRef.current
+            localConfig.follow = [centerRef.current[0], centerRef.current[1]]
+        }
+
         const initCelestial = () => {
             if (ref.current) {
                 localConfig.width = ref.current.offsetWidth
             }
 
-            // If width is still 0 the container hasn't been laid out yet — skip
             if (localConfig.width <= 0 && ref.current) {
                 return false
             }
 
-            if (objects?.length) {
-                if (objects.length === 1) {
-                    localConfig.follow = [objects[0].ra || 0, objects[0].dec || 0]
-                    localConfig.center = [objects[0].ra || 0, objects[0].dec || 0, 1]
-                }
+            // For non-settings mode (object detail pages), center on the single object
+            if (!showSettings && objects?.length === 1) {
+                localConfig.follow = [objects[0].ra || 0, objects[0].dec || 0]
+                localConfig.center = [objects[0].ra || 0, objects[0].dec || 0, 1]
             }
 
             Celestial.clear()
 
-            if (objects?.length) {
+            const shouldShowObjects = objects?.length && (!showSettings || settings.customObjectsShow)
+
+            if (shouldShowObjects) {
                 Celestial.add(
                     {
                         callback: handleCallback,
@@ -166,7 +215,6 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
             if (!initializedRef.current) {
                 initializedRef.current = true
                 Celestial.addCallback(() => {
-                    // During intentional rotation animation, suppress popup hiding
                     if (Date.now() < suppressHideUntilRef.current) {
                         return
                     }
@@ -179,10 +227,7 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
             return true
         }
 
-        // First attempt — if the container already has dimensions, init immediately
         if (!initCelestial()) {
-            // Container not laid out yet (typical on SSR hydration first paint).
-            // Wait for the next animation frame when the browser has computed layout.
             const frameId = requestAnimationFrame(() => {
                 initCelestial()
             })
@@ -198,7 +243,38 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
             clearTimeout(hideTimeoutRef.current)
             clearTimeout(showPopupTimeoutRef.current)
         }
-    }, [objects, zoom, i18n?.language])
+    }, [objects, zoom, i18n?.language, settings])
+
+    // Periodically save center position to localStorage when user drags/zooms the map.
+    // Uses a ref (not state) to avoid triggering Celestial rebuilds.
+    useEffect(() => {
+        if (!showSettings) {
+            return
+        }
+
+        const saveCenterToStorage = () => {
+            const currentCenter = Celestial.rotate()
+            if (!currentCenter) {
+                return
+            }
+
+            const center = currentCenter as [number, number, number]
+            const prev = centerRef.current
+
+            if (prev[0] === center[0] && prev[1] === center[1] && prev[2] === center[2]) {
+                return
+            }
+
+            centerRef.current = center
+            saveStarMapSettings({ ...settings, center })
+        }
+
+        const intervalId = setInterval(saveCenterToStorage, 3000)
+
+        return () => {
+            clearInterval(intervalId)
+        }
+    }, [showSettings, settings])
 
     // Canvas mouse/click interaction
     useEffect(() => {
@@ -212,7 +288,6 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
                 return
             }
 
-            // Throttle via requestAnimationFrame to avoid expensive hit-tests on every pixel
             cancelAnimationFrame(rafRef.current)
             rafRef.current = requestAnimationFrame(() => {
                 const rect = canvas.getBoundingClientRect()
@@ -238,10 +313,8 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
             if (hit) {
                 const [ra, dec] = hit.point.geometry.coordinates
 
-                // Hide popup immediately before rotating
                 hidePopup()
 
-                // Store pending popup data — will be shown after rotation completes
                 pendingPopupRef.current = {
                     name: hit.point.properties.name,
                     object: hit.point.id,
@@ -249,23 +322,16 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
                     dec: Number(dec)
                 }
 
-                // Suppress addCallback hide BEFORE calling rotate(), because rotate()
-                // triggers a synchronous redraw when the object is already centered (duration=0).
                 suppressHideUntilRef.current = Date.now() + 60_000
 
-                // Rotate the map to center on the clicked object.
-                // Celestial.rotate() returns the animation duration in ms (0 if already centered).
                 const duration: number = Celestial.rotate({ center: [ra, dec, 0] }) || 0
 
-                // Now refine the suppress window to the actual animation duration + buffer
                 const buffer = 300
                 suppressHideUntilRef.current = Date.now() + duration + buffer
 
-                // Show popup after the rotation animation finishes
                 clearTimeout(showPopupTimeoutRef.current)
                 showPopupTimeoutRef.current = setTimeout(showPendingPopup, duration + 100)
             } else {
-                // Click on empty area — close popup
                 hidePopup()
             }
         }
@@ -301,6 +367,22 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
             id={'celestial-map'}
             className={cn(styles.starMap, className)}
         >
+            {showSettings && (
+                <Button
+                    icon={'Settings'}
+                    mode={'secondary'}
+                    className={cn(styles.settingsButton, settingsOpen && styles.settingsButtonActive)}
+                    onClick={() => setSettingsOpen((prev) => !prev)}
+                />
+            )}
+
+            {showSettings && settingsOpen && (
+                <StarMapSettingsForm
+                    settings={settings}
+                    onChange={handleSettingsChange}
+                />
+            )}
+
             <Container
                 className={cn(styles.popup, popup.visible && styles.popupVisible)}
                 style={{

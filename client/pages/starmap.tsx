@@ -41,6 +41,7 @@ const CelestialPage: NextPage<object> = () => {
                 <StarMap
                     objects={starMapObjects}
                     interactive={true}
+                    showSettings={true}
                 />
             </div>
         </AppLayout>

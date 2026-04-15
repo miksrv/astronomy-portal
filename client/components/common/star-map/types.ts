@@ -45,3 +45,20 @@ export type HitResult = {
         properties: { name: string }
     }
 }
+
+export type StarMapSettings = {
+    starsShow: boolean
+    starsLimit: number
+    dsosShow: boolean
+    customObjectsShow: boolean
+    constellationNames: boolean
+    constellationLines: boolean
+    constellationBounds: boolean
+    graticule: boolean
+    equatorial: boolean
+    ecliptic: boolean
+    galactic: boolean
+    milkyWay: boolean
+    planetsShow: boolean
+    center: [number, number, number]
+}
