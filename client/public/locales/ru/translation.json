@@ -22,6 +22,28 @@
                 "frames": "Кадры",
                 "exposure": "Выдержка"
             },
+            "star-map": {
+                "settings": {
+                    "title": "Настройки карты",
+                    "stars": "Звёзды",
+                    "show-stars": "Показать звёзды",
+                    "star-magnitude": "Макс. звёздная величина",
+                    "objects": "Объекты",
+                    "show-dso": "Deep Sky Objects",
+                    "show-custom-objects": "Мои объекты",
+                    "constellations": "Созвездия",
+                    "constellation-names": "Названия",
+                    "constellation-lines": "Линии",
+                    "constellation-bounds": "Границы",
+                    "grid-and-lines": "Сетка и линии",
+                    "graticule": "Координатная сетка",
+                    "equator": "Экватор",
+                    "ecliptic": "Эклиптика",
+                    "galactic-plane": "Галактическая плоскость",
+                    "milky-way": "Млечный Путь",
+                    "planets": "Планеты, Солнце, Луна"
+                }
+            },
             "visibility-chart": {
                 "height": "Высота",
                 "title": "График видимости {{name}} в течение суток",

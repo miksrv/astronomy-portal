@@ -22,6 +22,28 @@
                 "frames": "Frames",
                 "exposure": "Exposure"
             },
+            "star-map": {
+                "settings": {
+                    "title": "Map Settings",
+                    "stars": "Stars",
+                    "show-stars": "Show Stars",
+                    "star-magnitude": "Max. Magnitude",
+                    "objects": "Objects",
+                    "show-dso": "Deep Sky Objects",
+                    "show-custom-objects": "My Objects",
+                    "constellations": "Constellations",
+                    "constellation-names": "Names",
+                    "constellation-lines": "Lines",
+                    "constellation-bounds": "Boundaries",
+                    "grid-and-lines": "Grid & Lines",
+                    "graticule": "Coordinate Grid",
+                    "equator": "Equator",
+                    "ecliptic": "Ecliptic",
+                    "galactic-plane": "Galactic Plane",
+                    "milky-way": "Milky Way",
+                    "planets": "Planets, Sun, Moon"
+                }
+            },
             "visibility-chart": {
                 "height": "Altitude",
                 "title": "Visibility chart of {{name}} throughout the day",

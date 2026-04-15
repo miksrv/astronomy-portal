@@ -21,6 +21,8 @@ export interface StarMapProps {
     objects?: StarMapObject[]
     goto?: [number, number]
     zoom?: number
+    /** Show the settings toggle button and panel (only used on the starmap page) */
+    showSettings?: boolean
 }
 
 export const StarMap: React.FC<StarMapProps> = ({ ...props }) => <StarMapRender {...props} />
