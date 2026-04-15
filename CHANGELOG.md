@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 4.3.1
+
+### Patch Changes
+
+- Added `getErrorMessage` utility (`client/utils/errors.ts`) with unit tests to extract human-readable messages from API errors; updated `ResError.messages` type to `Record<string, string>`
+- Added `TextArea` for object description field in `AstroObjectForm`; refactored `Weather` component to use typed `WeatherKey`/`WeatherParam`, centralized label and unit maps, and a `weatherParams` array for cleaner rendering
+- Replaced imperative `router.push` calls with Button `link` props across objects, photos, and stargazing pages; added success/error message feedback with auto-redirect after object creation
+- Added missing weather and UI translation keys to EN/RU locale files
+- Added visual divider before the logout item in `AppHeader` for non-user roles
+- Refactored Events, Mailings, Objects, and Photos controllers: replaced hard-coded strings with `lang()` keys, standardized error responses, added `try/catch` logging, and split `siteUrl`/`apiUrl` env vars
+- Changed mailing image handling: switched from inline attachments to public API image URLs, renamed storage path to `attachments/`, clean up attachments dir on mailing deletion
+- Added server-side language files (EN/RU) for Events, Mailings, Objects, Photos, and General modules
+- Added unit and feature tests: Entities (`Event`, `EventUser`, `Mailing`, `User`), Helpers (`auth`, `filters`, `locale`), `ApplicationBaseModel`, and `AuthGuard`; updated PHPUnit config to v11.5 with in-memory SQLite test DB
+- Added `api-checks.yml` GitHub Actions workflow to run PHP unit tests on pull requests; extended SonarCloud pipeline with PHP coverage reporting
+- Fixed comma syntax errors in `AddPhotos` migration
+
 ## 4.3.0
 
 ### Minor Changes
