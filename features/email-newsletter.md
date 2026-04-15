@@ -295,7 +295,7 @@ All endpoints require `ADMIN` role — check JWT token using the same `Auth` hel
 
 **`POST /mailings/(:alphanum)/upload`** — upload image attachment
 - Accepts multipart file upload
-- Stores image in `uploads/mailings/<id>/`
+- Stores image in `uploads/attachments/<id>/`
 - Updates `mailings.image` with relative path
 - Returns `{ image: '/files/mailings/<id>/filename.jpg' }`
 

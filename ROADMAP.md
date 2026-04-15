@@ -10,7 +10,8 @@ Each feature is described in detail in the `features/` directory.
 
 | ID     | Title                          | Status    | Spec                                          |
 |--------|--------------------------------|-----------|-----------------------------------------------|
-| FEAT-1 | Email Newsletter System        | Completed   | [features/email-newsletter.md](features/email-newsletter.md) |
+| FEAT-1 | Email Newsletter System        | Completed | [features/email-newsletter.md](features/email-newsletter.md) |
+| FEAT-2 | Admin Users List               | Planned   | [features/admin-users-list.md](features/admin-users-list.md) |
 
 ---
 
