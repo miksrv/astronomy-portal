@@ -2,7 +2,6 @@ import React, { useMemo } from 'react'
 import { Button } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
-import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
@@ -27,7 +26,6 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
     photosList
 }) => {
     const { t } = useTranslation()
-    const router = useRouter()
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
@@ -36,16 +34,6 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
     })
 
     const allObjectsNames = useMemo(() => objectsList?.map(({ name }) => name), [objectsList])
-
-    const handleEdit = async () => {
-        if (objectName) {
-            await router.push(`/objects/form/?id=${objectName}`)
-        }
-    }
-
-    const handleCreate = async () => {
-        await router.push('/objects/form')
-    }
 
     return (
         <AppLayout
@@ -80,7 +68,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                             label={t('common.edit', 'Редактировать')}
                             size={'large'}
                             disabled={!objectName}
-                            onClick={handleEdit}
+                            link={`/objects/form/?id=${objectName}`}
                         />
 
                         <Button
@@ -88,7 +76,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                             mode={'secondary'}
                             size={'large'}
                             label={t('common.add', 'Добавить')}
-                            onClick={handleCreate}
+                            link={'/objects/form'}
                         />
                     </>
                 )}

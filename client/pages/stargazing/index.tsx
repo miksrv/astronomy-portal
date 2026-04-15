@@ -4,7 +4,6 @@ import { Button, Container, Icon } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
@@ -22,7 +21,6 @@ interface StargazingPageProps {
 
 const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, photos }) => {
     const { t } = useTranslation()
-    const router = useRouter()
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
@@ -42,10 +40,6 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
 
     const handleHideLightbox = () => {
         setShowLightbox(false)
-    }
-
-    const handleCreate = async () => {
-        await router.push('/stargazing/form')
     }
 
     return (
@@ -75,7 +69,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
                         icon={'PlusCircle'}
                         mode={'secondary'}
                         label={t('pages.stargazing.create-stargazing_button', 'Добавить астровыезд')}
-                        onClick={handleCreate}
+                        link={'/stargazing/form'}
                     />
                 )}
             </AppToolbar>
