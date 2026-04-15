@@ -79,34 +79,6 @@
             width: 0;
         }
 
-        /* HEADER */
-        .header {
-            background-color: transparent;
-            border-radius: 8px 8px 0 0;
-            padding: 32px 24px 24px;
-            text-align: center;
-        }
-
-        .header-star {
-            color: #3b82f6;
-            font-size: 24px;
-            letter-spacing: 12px;
-            margin-bottom: 12px;
-        }
-
-        .header-title {
-            color: #24292f;
-            font-size: 26px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            margin: 0 0 6px;
-        }
-
-        .header-subtitle {
-            color: #656d76;
-            font-size: 13px;
-            margin: 0;
-        }
 
         /* MAIN CONTENT */
         .main {
@@ -193,11 +165,6 @@
             text-decoration: underline;
         }
 
-        .footer-divider {
-            border: none;
-            border-top: 1px solid #e1e4e8;
-            margin: 12px 0;
-        }
 
         /* EMAIL CLIENT FIXES */
         @media all {
@@ -246,9 +213,6 @@
             .container {
                 padding: 8px 0 0 !important;
                 width: 100% !important;
-            }
-            .header {
-                border-radius: 0 !important;
             }
             .footer {
                 border-radius: 0 !important;
