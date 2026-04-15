@@ -174,7 +174,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
                                         </li>
                                     )}
 
-                                <li>
+                                <li
+                                    className={cn(
+                                        authSlice?.user?.role !== ApiModel.UserRole.USER && styles.dividerItem
+                                    )}
+                                >
                                     <Link
                                         href={'/'}
                                         title={t('components.common.app-layout.app-header.logout', 'Выйти')}
