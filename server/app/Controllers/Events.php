@@ -51,54 +51,60 @@ class Events extends ResourceController
 
     public function upcoming(): ResponseInterface
     {
-        $locale    = $this->request->getLocale();
-        $eventData = $this->model->getUpcomingEvent($locale);
+        try {
+            $locale    = $this->request->getLocale();
+            $eventData = $this->model->getUpcomingEvent($locale);
 
-        if (empty($eventData)) {
-            return $this->respond('');
+            if (empty($eventData)) {
+                return $this->respond('');
+            }
+
+            $eventUsersModel = new EventsUsersModel();
+            $bookedEvents    = $this->session->isAuth && $this->session->user->id
+                ? $eventUsersModel->where(['event_id' => $eventData->id, 'user_id' => $this->session->user->id])->first()
+                : false;
+
+            $currentTickets = $eventUsersModel
+                ->selectSum('adults')
+                // ->selectSum('children')
+                ->where('event_id', $eventData->id)
+                ->first();
+
+            // $currentTickets = $currentTickets->adults + $currentTickets->children;
+            $currentTickets = (int) $currentTickets->adults;
+
+            $eventData->registered = false;
+
+            if ($bookedEvents) {
+                $eventData->registered = true;
+                $eventData->bookedId   = $bookedEvents->id;
+                $eventData->canceled   = !empty($bookedEvents->deleted_at);
+                $eventData->members    = [
+                    'adults'   => $bookedEvents->adults ?? 0,
+                    'children' => $bookedEvents->children ?? 0
+                ];
+            } else {
+                unset($eventData->location);
+            }
+
+            $eventData->max_tickets = $eventData->max_tickets - $currentTickets;
+
+            if ($eventData->max_tickets < 0) {
+                $eventData->max_tickets = 0;
+            }
+
+            if (!$eventData->registered) {
+                unset($eventData->yandexMap, $eventData->googleMap);
+            }
+
+            unset($eventData->created_at, $eventData->updated_at, $eventData->deleted_at);
+
+            return $this->respond($eventData);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
         }
-
-        $eventUsersModel = new EventsUsersModel();
-        $bookedEvents    = $this->session->isAuth && $this->session->user->id
-            ? $eventUsersModel->where(['event_id' => $eventData->id, 'user_id' => $this->session->user->id])->first()
-            : false;
-
-        $currentTickets = $eventUsersModel
-            ->selectSum('adults')
-            // ->selectSum('children')
-            ->where('event_id', $eventData->id)
-            ->first();
-
-        // $currentTickets = $currentTickets->adults + $currentTickets->children;
-        $currentTickets = (int) $currentTickets->adults;
-
-        $eventData->registered = false;
-
-        if ($bookedEvents) {
-            $eventData->registered = true;
-            $eventData->bookedId   = $bookedEvents->id;
-            $eventData->canceled   = !empty($bookedEvents->deleted_at);
-            $eventData->members    = [
-                'adults'   => $bookedEvents->adults ?? 0,
-                'children' => $bookedEvents->children ?? 0
-            ];
-        } else {
-            unset($eventData->location);
-        }
-
-        $eventData->max_tickets = $eventData->max_tickets - $currentTickets;
-
-        if ($eventData->max_tickets < 0) {
-            $eventData->max_tickets = 0;
-        }
-
-        if (!$eventData->registered) {
-            unset($eventData->yandexMap, $eventData->googleMap);
-        }
-
-        unset($eventData->created_at, $eventData->updated_at, $eventData->deleted_at);
-
-        return $this->respond($eventData);
     }
 
     /**
@@ -119,10 +125,6 @@ class Events extends ResourceController
      */
     public function checkin($id = null): ResponseInterface
     {
-        $response  = [];
-        $locale    = $this->request->getLocale();
-        $eventData = $this->model->getUpcomingEvent($locale);
-
         if (!$this->session->isAuth) {
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
@@ -131,32 +133,42 @@ class Events extends ResourceController
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
-        if (empty($id) || empty($eventData)) {
-            return $this->failValidationErrors('Нет предстоящих мероприятий');
+        try {
+            $response  = [];
+            $locale    = $this->request->getLocale();
+            $eventData = $this->model->getUpcomingEvent($locale);
+
+            if (empty($id) || empty($eventData)) {
+                return $this->failValidationErrors(lang('Events.noUpcomingEvents'));
+            }
+
+            $eventUsersModel  = new EventsUsersModel();
+            $bookedEventsData = $eventUsersModel->where(['id' => $id])->first();
+
+            if (empty($bookedEventsData)) {
+                return $this->failValidationErrors(lang('Events.invalidQrCode'));
+            }
+
+            if (empty($bookedEventsData->checkin_at)) {
+                $eventUsersModel->update($id, [
+                    'checkin_at'         => new Time('now'),
+                    'checkin_by_user_id' => $this->session->user->id
+                ]);
+            } else {
+                $response['checkin'] = $bookedEventsData->checkin_at;
+            }
+
+            $response['members'] = [
+                'adults'   => $bookedEventsData->adults ?? 0,
+                'children' => $bookedEventsData->children ?? 0
+            ];
+
+            return $this->respond($response);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
         }
-
-        $eventUsersModel  = new EventsUsersModel();
-        $bookedEventsData = $eventUsersModel->where(['id' => $id])->first();
-
-        if (empty($bookedEventsData)) {
-            return $this->failValidationErrors('QR код не верный');
-        }
-
-        if (empty($bookedEventsData->checkin_at)) {
-            $eventUsersModel->update($id, [
-                'checkin_at'         => new Time('now'),
-                'checkin_by_user_id' => $this->session->user->id
-            ]);
-        } else {
-            $response['checkin'] = $bookedEventsData->checkin_at;
-        }
-
-        $response['members'] = [
-            'adults'   => $bookedEventsData->adults ?? 0,
-            'children' => $bookedEventsData->children ?? 0
-        ];
-
-        return $this->respond($response);
     }
 
     /**
@@ -352,12 +364,12 @@ class Events extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$file || !$file->isValid()) {
-            return $this->failValidationErrors('File upload failed or invalid file');
+            return $this->failValidationErrors(lang('General.fileUploadFailed'));
         }
 
         $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         if (!in_array($file->getMimeType(), $allowedMimes, true)) {
-            return $this->failValidationErrors('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
+            return $this->failValidationErrors(lang('General.invalidFileType'));
         }
 
         // Check input data validation rules
@@ -415,15 +427,10 @@ class Events extends ResourceController
             return $this->respondCreated($event);
         } catch (\Exception $e) {
             log_message('error', $e->getMessage());
-            return $this->failServerError('Could not save photo data');
+            return $this->failServerError(lang('General.couldNotSaveData'));
         }
     }
 
-    /**
-     * @throws ReflectionException
-     * @throws TelegramException
-     * @throws Exception
-     */
     public function booking(): ResponseInterface {
         // Check that user is auth
         if (!$this->session->isAuth) {
@@ -446,90 +453,91 @@ class Events extends ResourceController
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
-        $event = $this->model->find($input['eventId']);
-        // Check that event with ID is exists
-        if (!$event) {
-            return $this->failValidationErrors(['error' => 'Такого мероприятия не существует']);
+        try {
+            $event = $this->model->find($input['eventId']);
+            // Check that event with ID is exists
+            if (!$event) {
+                return $this->failValidationErrors(['error' => lang('Events.notExists')]);
+            }
+
+            $eventUsersModel = new EventsUsersModel();
+
+            // Check that user not already registered at this event
+            // withDeleted()
+            if ($eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->first()) {
+                return $this->failValidationErrors(['error' => lang('Events.alreadyRegistered')]);
+            }
+
+            // Check registration start and end dates
+            $currentTime   = new Time('now');
+            $timeDiffStart = $currentTime->difference($event->registration_start);
+            $timeDiffEnd   = $currentTime->difference($event->registration_end);
+
+            if ($timeDiffStart->getSeconds() >= 0 || $timeDiffEnd->getSeconds() <= 0) {
+                return $this->failValidationErrors(['error' => lang('Events.registrationClosed')]);
+            }
+
+            // Check available tickets
+            $currentTickets = $eventUsersModel
+                ->selectSum('adults')
+                ->selectSum('children')
+                ->where('event_id', $input['eventId'])
+                ->first();
+
+            // $currentTickets = $currentTickets->adults + $currentTickets->children;
+            $totalMembers   = (int) $currentTickets->adults + (int) $currentTickets->children;
+            $currentTickets = (int) $currentTickets->adults;
+
+            if ($currentTickets >= (int) $event->max_tickets) {
+                return $this->failValidationErrors(['error' => lang('Events.noTicketsAvailable')]);
+            }
+
+            $childrenAges = $input['childrenAges'] ?? [];
+            $eventUsersModel->insert([
+                'event_id' => $input['eventId'],
+                'user_id'  => $this->session->user->id,
+                'adults'   => $input['adults'],
+                'children' => $input['children'],
+
+                'children_ages' => json_encode($childrenAges),
+            ]);
+
+            $safeName       = htmlspecialchars($input['name'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $safeEventTitle = htmlspecialchars($event->title_ru ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+            $message = "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n" .
+                "<b>{$safeEventTitle}</b>\n" .
+                "🔹<i>{$safeName}</i>\n" .
+                "🔹(<b>{$input['adults']}</b>) взрослых, ({$input['children']}) детей\n" .
+                (count($childrenAges) > 0 ? "🔹Возраст детей <b>" . implode(', ', $childrenAges) . "</b> (лет)\n" : "") .
+                "🔹Доступно мест <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b> из <b>{$event->max_tickets}</b>\n" .
+                "🔹Всего участников: <b>" . ($totalMembers + (int) $input['adults'] + (int) $input['children']) . "</b>";
+
+            (new TelegramLibrary())->sendMessage($message);
+
+            $userModel  = new UsersModel();
+            $updateData = [];
+
+            if (!empty($input['name'])) {
+                $updateData['name'] = $input['name'];
+            }
+
+            if (!empty($input['phone'])) {
+                $updateData['phone'] = $input['phone'];
+            }
+
+            if (!empty($updateData)) {
+                $userModel->update($this->session->user->id, $updateData);
+            }
+
+            return $this->respond(['message' => lang('Events.bookingSuccess')]);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
         }
-
-        $eventUsersModel = new EventsUsersModel();
-
-        // Check that user not already registered at this event
-        // withDeleted()
-        if ($eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->first()) {
-            return $this->failValidationErrors(['error' => 'Вы уже зарегистрировались на это мероприятие']);
-        }
-
-        // Check registration start and end dates
-        $currentTime   = new Time('now');
-        $timeDiffStart = $currentTime->difference($event->registration_start);
-        $timeDiffEnd   = $currentTime->difference($event->registration_end);
-
-        if ($timeDiffStart->getSeconds() >= 0 || $timeDiffEnd->getSeconds() <= 0) {
-            return $this->failValidationErrors(['error' => 'Регистрация на мероприятие уже знакончилась или еще не начиналась']);
-        }
-
-        // Check available tickets
-        $currentTickets = $eventUsersModel
-            ->selectSum('adults')
-            ->selectSum('children')
-            ->where('event_id', $input['eventId'])
-            ->first();
-
-        // $currentTickets = $currentTickets->adults + $currentTickets->children;
-        $totalMembers   = (int) $currentTickets->adults + (int) $currentTickets->children;
-        $currentTickets = (int) $currentTickets->adults;
-
-        if ($currentTickets >= (int) $event->max_tickets) {
-            return $this->failValidationErrors(['error' => 'Регистрация на мероприятие уже закончилась из-за того, что все места уже забронированы']);
-        }
-
-        $childrenAges = $input['childrenAges'] ?? [];
-        $eventUsersModel->insert([
-            'event_id' => $input['eventId'],
-            'user_id'  => $this->session->user->id,
-            'adults'   => $input['adults'],
-            'children' => $input['children'],
-
-            'children_ages' => json_encode($childrenAges),
-        ]);
-
-        $safeName       = htmlspecialchars($input['name'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $safeEventTitle = htmlspecialchars($event->title_ru ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-        $message = "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n" .
-            "<b>{$safeEventTitle}</b>\n" .
-            "🔹<i>{$safeName}</i>\n" .
-            "🔹(<b>{$input['adults']}</b>) взрослых, ({$input['children']}) детей\n" .
-            (count($childrenAges) > 0 ? "🔹Возраст детей <b>" . implode(', ', $childrenAges) . "</b> (лет)\n" : "") .
-            "🔹Доступно мест <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b> из <b>{$event->max_tickets}</b>\n" .
-            "🔹Всего участников: <b>" . ($totalMembers + (int) $input['adults'] + (int) $input['children']) . "</b>";
-
-        (new TelegramLibrary())->sendMessage($message);
-
-        $userModel  = new UsersModel();
-        $updateData = [];
-
-        if (!empty($input['name'])) {
-            $updateData['name'] = $input['name'];
-        }
-
-        if (!empty($input['phone'])) {
-            $updateData['phone'] = $input['phone'];
-        }
-
-        if (!empty($updateData)) {
-            $userModel->update($this->session->user->id, $updateData);
-        }
-
-        return $this->respond(['message' => 'Вы успешно зарегистрировались на мероприятие']);
     }
 
-    /**
-     * @throws ReflectionException
-     * @throws TelegramException
-     * @throws Exception
-     */
     public function cancel(): ResponseInterface {
         // Check that user is auth
         if (!$this->session->isAuth) {
@@ -546,49 +554,55 @@ class Events extends ResourceController
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
-        $event = $this->model->find($input['eventId']);
-        // Check that event with ID is exists
-        if (!$event) {
-            return $this->failValidationErrors(['error' => 'Такого мероприятия не существует']);
+        try {
+            $event = $this->model->find($input['eventId']);
+            // Check that event with ID is exists
+            if (!$event) {
+                return $this->failValidationErrors(['error' => lang('Events.notExists')]);
+            }
+
+            $eventUsersModel  = new EventsUsersModel();
+            $userRegistration = $eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->first();
+
+            // Check that user not already registered at this event
+            if (empty($userRegistration)) {
+                return $this->failValidationErrors(['error' => lang('Events.notRegistered')]);
+            }
+
+            // Check registration start and end dates
+            $currentTime   = new Time('now');
+            $timeDiffStart = $currentTime->difference($event->registration_start);
+            $timeDiffEnd   = $currentTime->difference($event->registration_end);
+
+            if ($timeDiffStart->getSeconds() >= 0 || $timeDiffEnd->getSeconds() <= 0) {
+                return $this->failValidationErrors(['error' => lang('Events.registrationClosed')]);
+            }
+
+            // Check available tickets
+            $currentTickets = $eventUsersModel
+                ->selectSum('adults')
+                ->where('event_id', $input['eventId'])
+                ->first();
+
+            $eventUsersModel->delete($userRegistration->id);
+
+            $safeCancelName  = htmlspecialchars($this->session->user->name ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $safeCancelTitle = htmlspecialchars($event->title_ru ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+            $cancelMessage = "<b>❌ ОТМЕНА БРОНИРОВАНИЯ</b>\n" .
+                "<b>{$safeCancelTitle}</b>\n" .
+                "🔹<i>{$safeCancelName}</i>\n" .
+                "🔹Взрослых: <b>{$userRegistration->adults}</b>, детей: {$userRegistration->children}\n" .
+                "🔹Осталось слотов: <b>" . ($event->max_tickets - (abs($currentTickets->adults - (int) $userRegistration->adults))) . "</b>\n";
+
+            (new TelegramLibrary())->sendMessage($cancelMessage);
+
+            return $this->respond(['message' => lang('Events.cancelSuccess')]);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
         }
-
-        $eventUsersModel  = new EventsUsersModel();
-        $userRegistration = $eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->first();
-
-        // Check that user not already registered at this event
-        if (empty($userRegistration)) {
-            return $this->failValidationErrors(['error' => 'Вы еще не регистрировались на это мероприятие']);
-        }
-
-        // Check registration start and end dates
-        $currentTime   = new Time('now');
-        $timeDiffStart = $currentTime->difference($event->registration_start);
-        $timeDiffEnd   = $currentTime->difference($event->registration_end);
-
-        if ($timeDiffStart->getSeconds() >= 0 || $timeDiffEnd->getSeconds() <= 0) {
-            return $this->failValidationErrors(['error' => 'Регистрация на мероприятие уже знакончилась или еще не начиналась']);
-        }
-
-        // Check available tickets
-        $currentTickets = $eventUsersModel
-            ->selectSum('adults')
-            ->where('event_id', $input['eventId'])
-            ->first();
-
-        $eventUsersModel->delete($userRegistration->id);
-
-        $safeCancelName  = htmlspecialchars($this->session->user->name ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $safeCancelTitle = htmlspecialchars($event->title_ru ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-        $cancelMessage = "<b>❌ ОТМЕНА БРОНИРОВАНИЯ</b>\n" .
-            "<b>{$safeCancelTitle}</b>\n" .
-            "🔹<i>{$safeCancelName}</i>\n" .
-            "🔹Взрослых: <b>{$userRegistration->adults}</b>, детей: {$userRegistration->children}\n" .
-            "🔹Осталось слотов: <b>" . ($event->max_tickets - (abs($currentTickets->adults - (int) $userRegistration->adults))) . "</b>\n";
-
-        (new TelegramLibrary())->sendMessage($cancelMessage);
-
-        return $this->respond(['message' => 'Вы отменили бронирование на это мероприятие']);
     }
 
     /**
@@ -609,17 +623,17 @@ class Events extends ResourceController
 
         $photo = $this->request->getFile('photo');
         if (!$photo || !$photo->isValid()) {
-            return $this->failValidationErrors('Фотография не загружена или повреждена');
+            return $this->failValidationErrors(lang('General.fileUploadFailed'));
         }
 
         $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         if (!in_array($photo->getMimeType(), $allowedMimes, true)) {
-            return $this->failValidationErrors('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
+            return $this->failValidationErrors(lang('General.invalidFileType'));
         }
 
         $eventData = $this->model->find($id);
         if (!$eventData || !$eventData->id) {
-            return $this->failValidationErrors('Событие не найдено');
+            return $this->failValidationErrors(lang('Events.notFound'));
         }
 
         if ($photo->hasMoved()) {
@@ -708,12 +722,12 @@ class Events extends ResourceController
         $file = $this->request->getFile('upload');
 
         if (!$file || !$file->isValid()) {
-            return $this->failValidationErrors('File upload failed or invalid file');
+            return $this->failValidationErrors(lang('General.fileUploadFailed'));
         }
 
         $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         if (!in_array($file->getMimeType(), $allowedMimes, true)) {
-            return $this->failValidationErrors('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
+            return $this->failValidationErrors(lang('General.invalidFileType'));
         }
 
         try {
@@ -759,15 +773,21 @@ class Events extends ResourceController
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
-        $eventData = $this->model->find($id);
+        try {
+            $eventData = $this->model->find($id);
 
-        if (!$eventData) {
-            return $this->failNotFound();
+            if (!$eventData) {
+                return $this->failNotFound();
+            }
+
+            $this->model->delete($id);
+
+            return $this->respondDeleted($eventData);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
         }
-
-        $this->model->delete($id);
-
-        return $this->respondDeleted($eventData);
     }
 
     /**

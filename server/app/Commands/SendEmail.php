@@ -64,7 +64,8 @@ class SendEmail extends BaseCommand
             return;
         }
 
-        $siteUrl      = rtrim(getenv('app.siteUrl') ?: getenv('app.baseURL'), '/');
+        $siteUrl      = rtrim(getenv('app.siteUrl'), '/');
+        $apiUrl       = rtrim(getenv('app.baseURL'), '/');
         $emailLibrary = new EmailLibrary();
 
         // Track statistics and affected campaign IDs
@@ -90,17 +91,11 @@ class SendEmail extends BaseCommand
             // Build unsubscribe URL pointing to the frontend
             $unsubscribeUrl = $siteUrl . '/unsubscribe?mail=' . $item->id;
 
-            // Resolve inline image path (absolute filesystem path for attachment)
-            $imagePath = null;
-            $imageUrl  = null;
+            // Build public URL for the image hosted on the API server
+            $imageUrl = null;
 
             if (!empty($mailing->image)) {
-                $fullPath = FCPATH . $mailing->image;
-
-                if (file_exists($fullPath)) {
-                    $imagePath = $fullPath;
-                    $imageUrl  = 'cid:COVER_IMAGE_CID';
-                }
+                $imageUrl = $apiUrl . '/' . $mailing->image;
             }
 
             // Render the email HTML template
@@ -113,11 +108,10 @@ class SendEmail extends BaseCommand
             ]);
 
             try {
-                $emailLibrary->sendWithAttachment(
+                $emailLibrary->send(
                     $item->email,
                     $mailing->subject,
-                    $body,
-                    $imagePath
+                    $body
                 );
 
                 $mailingEmailsModel->update($item->id, [
