@@ -12,6 +12,13 @@ import styles from './styles.module.sass'
 
 const WEATHER_THRESHOLD = 25
 
+type WeatherKey = 'temperature' | 'humidity' | 'clouds' | 'windSpeed' | 'precipitation' | 'windGust'
+
+type WeatherParam = {
+    key: WeatherKey
+    range: string
+}
+
 export const Weather: React.FC = () => {
     const { t } = useTranslation()
     const { data, isLoading } = APIMeteo.useGetCurrentQuery()
@@ -33,24 +40,43 @@ export const Weather: React.FC = () => {
         return 'good'
     }
 
-    const weatherRanges = {
-        temperature: getRange(data?.temperature, -24, 24),
-        humidity: getRange(data?.humidity, 0, 90),
-        clouds: getRange(data?.clouds, 0, 50),
-        windSpeed: getRange(data?.windSpeed, 0, 10),
-        precipitation: getRange(data?.precipitation, 0.1, 0.1),
-        windGust: getRange(data?.windGust, 0, 8)
+    const weatherLabels: Record<WeatherKey, string> = {
+        temperature: t('components.pages.observatory.weather.label-temperature', 'Температура'),
+        humidity: t('components.pages.observatory.weather.label-humidity', 'Влажность'),
+        clouds: t('components.pages.observatory.weather.label-clouds', 'Облачность'),
+        windSpeed: t('components.pages.observatory.weather.label-wind-speed', 'Скорость ветра'),
+        precipitation: t('components.pages.observatory.weather.label-precipitation', 'Осадки'),
+        windGust: t('components.pages.observatory.weather.label-wind-gust', 'Порывы ветра')
     }
 
+    const weatherUnits: Record<WeatherKey, string> = {
+        temperature: '℃',
+        humidity: '%',
+        clouds: '%',
+        windSpeed: t('components.pages.observatory.weather.unit-wind', 'м\\с'),
+        precipitation: t('components.pages.observatory.weather.unit-precipitation', 'мм'),
+        windGust: t('components.pages.observatory.weather.unit-wind', 'м\\с')
+    }
+
+    const weatherParams: WeatherParam[] = [
+        { key: 'temperature', range: getRange(data?.temperature, -24, 24) },
+        { key: 'humidity', range: getRange(data?.humidity, 0, 90) },
+        { key: 'clouds', range: getRange(data?.clouds, 0, 50) },
+        { key: 'windSpeed', range: getRange(data?.windSpeed, 0, 10) },
+        { key: 'precipitation', range: getRange(data?.precipitation, 0.1, 0.1) },
+        { key: 'windGust', range: getRange(data?.windGust, 0, 8) }
+    ]
+
     const weatherState = React.useMemo(() => {
-        if (Object.values(weatherRanges).every((range) => range === 'good')) {
+        const ranges = weatherParams.map((param) => param.range)
+        if (ranges.every((range) => range === 'good')) {
             return 'good'
         }
-        if (Object.values(weatherRanges).some((range) => range === 'danger')) {
+        if (ranges.some((range) => range === 'danger')) {
             return 'danger'
         }
         return 'warning'
-    }, [weatherRanges])
+    }, [weatherParams])
 
     const weatherCondition = React.useMemo(() => {
         if (weatherState === 'good') {
@@ -89,22 +115,15 @@ export const Weather: React.FC = () => {
                 {data?.date && `(${minutesAgo(data.date)})`}
             </div>
             <div className={styles.grid}>
-                {Object.entries(weatherRanges).map(([key, range]) => (
+                {weatherParams.map(({ key, range }) => (
                     <div
                         key={key}
                         className={styles.key}
                     >
                         <span className={cn(styles.weatherCondition, styles[range])} />
-                        {t(key)}:{' '}
+                        {weatherLabels[key]}:{' '}
                         <span className={styles.val}>
-                            {data?.[key as keyof ApiModel.Weather] ?? '?'}{' '}
-                            {key === 'temperature'
-                                ? '℃'
-                                : key === 'precipitation'
-                                  ? t('components.pages.observatory.weather.unit-precipitation', 'мм')
-                                  : key === 'humidity'
-                                    ? '%'
-                                    : t('components.pages.observatory.weather.unit-wind', 'м\\с')}
+                            {data?.[key as keyof ApiModel.Weather] ?? '?'} {weatherUnits[key]}
                         </span>
                     </div>
                 ))}

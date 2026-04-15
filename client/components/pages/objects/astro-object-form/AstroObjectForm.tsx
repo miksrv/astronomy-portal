@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Container, Input, Select } from 'simple-react-ui-kit'
+import { Button, Container, Input, Select, TextArea } from 'simple-react-ui-kit'
 
 import { API, ApiModel } from '@/api'
 import { StarMap } from '@/components/common'
@@ -19,93 +19,9 @@ interface AstroObjectFormProps {
 
 // TODO: При window resize нужно перестраивать карту под новое разрешение
 export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, initialData, onSubmit, onCancel }) => {
-    // const dispatch = useAppDispatch()
-    // const application = useAppSelector((state) => state.application)
-    // const value = application.editableItemCatalog
-
     const [formData, setFormData] = useState<AstroObjectFormType>({})
 
     const { data: categoriesListData, isLoading: categoriesListLoading } = API.useCategoriesGetListQuery()
-
-    // const { data: categoriesData } = API.useCategoryGetListQuery()
-    // const { data: catalogData, isFetching } = API.useCatalogGetItemQuery(
-    //     value?.name || '',
-    //     {
-    //         skip: !value?.name
-    //     }
-    // )
-    //
-    // const [
-    //     updateItem,
-    //     {
-    //         isLoading: updateLoading,
-    //         isSuccess: updateSuccess,
-    //         isError: updateError,
-    //         error: updateErrorList
-    //     }
-    // ] = API.useCatalogPatchMutation()
-    //
-    // const [
-    //     createItem,
-    //     {
-    //         isLoading: createLoading,
-    //         isSuccess: createSuccess,
-    //         isError: createError,
-    //         error: createErrorList
-    //     }
-    // ] = API.useCatalogPostMutation()
-    //
-    // const [submitted, setSubmitted] = useState<boolean>(false)
-    // const [formState, setFormState] = useState<ApiType.Catalog.ReqSet>(
-    //     mapFormProps(value)
-    // )
-    //
-    // const handleChange = ({
-    //     target: { name, value }
-    // }: React.ChangeEvent<HTMLInputElement>) =>
-    //     setFormState((prev) => ({ ...prev, [name]: value }))
-    //
-    // const handleKeyDown = (e: { key: string; target: HTMLInputElement }) => {
-    //     if (e.target.tagName !== 'TEXTAREA' && e.key === 'Enter') {
-    //         handleSubmit()
-    //     }
-    // }
-    //
-    // const findError = (field: keyof ApiType.Catalog.ReqSet) =>
-    //     (
-    //         (createErrorList as ApiType.ResError) ||
-    //         (updateErrorList as ApiType.ResError)
-    //     )?.messages?.[field] || undefined
-    //
-    // const handleClose = () => {
-    //     setFormState(mapFormProps(undefined))
-    //     setSubmitted(false)
-    //     dispatch(openFormCatalog(false))
-    // }
-    //
-    // const isFormDirty = useMemo(
-    //     () => isEqual(mapFormProps(catalogData), formState),
-    //     [catalogData, formState]
-    // )
-    //
-    // const handleSubmit = useCallback(() => {
-    //     const canvasImage = document
-    //         ?.getElementById('celestial-map')
-    //         ?.getElementsByTagName('canvas')?.[0]
-    //         ?.toDataURL()
-    //
-    //     setSubmitted(true)
-    //
-    //     if (!value?.name) {
-    //         createItem({ ...formState, image: canvasImage })
-    //     } else {
-    //         updateItem({ ...formState, image: canvasImage })
-    //     }
-    // }, [formState, createItem, updateItem, value?.name])
-    //
-    // useEffect(() => {
-    //     setFormState(mapFormProps(catalogData))
-    // }, [catalogData])
 
     const handleSubmit = () => {
         const canvasImage = document?.getElementById('celestial-map')?.getElementsByTagName('canvas')?.[0]?.toDataURL()
@@ -168,7 +84,6 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, init
 
                     <Input
                         size={'medium'}
-                        required={true}
                         disabled={disabled}
                         className={styles.formElement}
                         label={'Ссылка на FITS файлы'}
@@ -214,7 +129,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, init
                     />
                 </div>
                 <StarMap
-                    // className={styles.mapSection}
+                    className={styles.mapSection}
                     zoom={7}
                     objects={
                         formData?.ra && formData?.dec
@@ -229,6 +144,15 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, init
                     }
                 />
             </div>
+
+            <TextArea
+                disabled={disabled}
+                className={styles.formElement}
+                label={'Описание объекта'}
+                value={formData?.description}
+                autoResize={true}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
 
             <div className={styles.footer}>
                 <Button
