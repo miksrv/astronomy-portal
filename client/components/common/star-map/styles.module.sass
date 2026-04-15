@@ -24,6 +24,26 @@
     :global(#celestial-zoomout)
         top: 40px
 
+    .popup
+        position: absolute
+        z-index: 10
+        padding: 5px
+        width: 200px
+        height: 180px
+        box-shadow: inset 0 0 0 0.5px #363738
+        opacity: 0
+        visibility: hidden
+        transform: scale(0.95)
+        transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s
+        pointer-events: none
+        overflow: hidden
+
+    .popupVisible
+        opacity: 1
+        visibility: visible
+        transform: scale(1)
+        pointer-events: auto
+
     .popout
         position: absolute
         left: 0
