@@ -133,6 +133,14 @@ $routes->group('mailings', static function ($routes) {
     $routes->options('(:any)', static function () {});
 });
 
+/** Members Controller **/
+$routes->group('members', static function ($routes) {
+    $routes->get('/', 'Members::list');
+    $routes->get('(:alphanum)/events', 'Members::events/$1');
+    $routes->options('/', static function () {});
+    $routes->options('(:any)', static function () {});
+});
+
 /** Sitemap Controller **/
 $routes->group('sitemap', static function ($routes) {
     $routes->get('/', 'Sitemap::index');
