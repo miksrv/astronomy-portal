@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { ColumnProps, Container, ContainerProps, Table } from 'simple-react-ui-kit'
+import { Container, ContainerProps, Table, TableColumnProps } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -23,7 +23,7 @@ export const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, 
 
     const flattenedPhotos = useMemo(() => flattenPhotos(photosList), [photosList])
 
-    const tableColumns: Array<ColumnProps<FlattenedPhoto>> = useMemo(
+    const tableColumns: Array<TableColumnProps<FlattenedPhoto>> = useMemo(
         () => [
             {
                 accessor: 'photo',
@@ -149,6 +149,7 @@ export const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, 
             {...props}
         >
             <Table<FlattenedPhoto>
+                size={'small'}
                 className={styles.photosListTable}
                 columns={tableColumns}
                 verticalBorder={true}

@@ -8,7 +8,7 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
 import { APIMeteo, setLocale, wrapper } from '@/api'
-import { AppLayout, AppToolbar } from '@/components/common'
+import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { WidgetChart } from '@/components/pages/observatory'
 import { getDateTimeFormat } from '@/utils/dates'
 
@@ -49,7 +49,7 @@ const HistoryPage: NextPage<object> = () => {
                 ]}
             />
 
-            <p>
+            <div>
                 {t(
                     'pages.observatory-weather.description',
                     'Следите за погодными условиями в режиме реального времени с метеостанции, установленной на самодельной астрономической обсерватории в пригороде Оренбурга. Графики отображают температуру, влажность, облачность и скорость ветра. Для полного доступа к данным и истории наблюдений переходите на сайт метеостанции:'
@@ -62,9 +62,9 @@ const HistoryPage: NextPage<object> = () => {
                     {'meteo.miksoft.pro'}
                 </Link>
                 {'.'}
-            </p>
+            </div>
 
-            <Container style={{ marginBottom: '10px' }}>
+            <Container>
                 <WidgetChart
                     fullWidth={true}
                     type={'temperature'}
@@ -74,7 +74,7 @@ const HistoryPage: NextPage<object> = () => {
                 />
             </Container>
 
-            <Container style={{ marginBottom: '10px' }}>
+            <Container>
                 <WidgetChart
                     fullWidth={true}
                     type={'clouds'}
@@ -83,6 +83,8 @@ const HistoryPage: NextPage<object> = () => {
                     dateFormat={dateFormat}
                 />
             </Container>
+
+            <AppFooter />
         </AppLayout>
     )
 }

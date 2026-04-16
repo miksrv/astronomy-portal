@@ -61,14 +61,15 @@ const StargazingWherePage: NextPage<object> = () => {
                 ]}
             />
 
-            <Container style={{ marginBottom: '10px' }}>
+            <div>
+                {t(
+                    'pages.stargazing-where.intro',
+                    'Тротуарная астрономия - это уникальный формат, благодаря которому космос становится ближе. Весной, летом и осенью мы выставляем телескопы прямо на тротуарах и площадях Оренбурга, чтобы любой желающий мог подойти и бесплатно взглянуть на звезды, планеты и Луну. Это отличная возможность для жителей города познакомиться с астрономией в непринужденной и дружественной атмосфере.'
+                )}
+            </div>
+
+            <Container>
                 <p style={{ marginTop: 0 }}>
-                    {t(
-                        'pages.stargazing-where.intro',
-                        'Тротуарная астрономия - это уникальный формат, благодаря которому космос становится ближе. Весной, летом и осенью мы выставляем телескопы прямо на тротуарах и площадях Оренбурга, чтобы любой желающий мог подойти и бесплатно взглянуть на звезды, планеты и Луну. Это отличная возможность для жителей города познакомиться с астрономией в непринужденной и дружественной атмосфере.'
-                    )}
-                </p>
-                <p>
                     {t(
                         'pages.stargazing-where.announcement-1',
                         'Анонсы вечеров тротуарной астрономии мы почти всегда публикуем в нашем'
@@ -95,7 +96,7 @@ const StargazingWherePage: NextPage<object> = () => {
                 />
             </Container>
 
-            <Container style={{ marginBottom: '10px' }}>
+            <Container>
                 <h2 style={{ marginTop: 0 }}>
                     {t('pages.stargazing-where.what-you-can-see-title', 'Что можно увидеть в телескоп из города?')}
                 </h2>
@@ -139,7 +140,7 @@ const StargazingWherePage: NextPage<object> = () => {
                 </p>
             </Container>
 
-            <Container style={{ marginBottom: '10px' }}>
+            <Container>
                 <h2 style={{ marginTop: 0 }}>
                     {t('pages.stargazing-where.want-to-see-more', 'Хотите увидеть больше? Выезжайте за город!')}
                 </h2>

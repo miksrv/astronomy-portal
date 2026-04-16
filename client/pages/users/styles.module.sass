@@ -1,0 +1,70 @@
+@use '../../styles/variables' as variables
+
+.filtersRow
+    display: flex
+    align-items: center
+    gap: 10px
+    flex-wrap: wrap
+
+    .loader
+        width: 18px
+        height: 18px
+
+    .selectFilter
+        min-width: 200px
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            width: 100%
+
+.searchInput
+    flex: 1
+    min-width: 200px
+
+.userCell
+    display: flex
+    align-items: center
+    gap: 8px
+
+.eventsCountButton
+    background: none
+    border: none
+    padding: 0
+    cursor: pointer
+    color: var(--link-color)
+    font-size: inherit
+    text-decoration: underline
+
+    &:hover
+        color: var(--link-color-hover)
+
+    &:active
+        color: var(--link-color-active)
+
+// Badge color overrides for role and auth type
+.badgeAdmin
+    background: #ff4444 !important
+    color: #fff !important
+
+.badgeModerator
+    background: #ff8c00 !important
+    color: #fff !important
+
+.badgeSecurity
+    background: #0070f3 !important
+    color: #fff !important
+
+.badgeDefault
+    background: #ccc !important
+    color: #333 !important
+
+.badgeGoogle
+    background: #db4437 !important
+    color: #fff !important
+
+.badgeYandex
+    background: #fc3f1d !important
+    color: #fff !important
+
+.badgeVk
+    background: #0077ff !important
+    color: #fff !important

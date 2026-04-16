@@ -8,8 +8,8 @@ import { useTranslation } from 'next-i18next'
 import { API, ApiModel, HOST_IMG, useAppDispatch, useAppSelector } from '@/api'
 import { openAuthDialog } from '@/api/applicationSlice'
 import { login, logout } from '@/api/authSlice'
+import { UserAvatar } from '@/components/ui/user-avatar'
 import logo from '@/public/images/logo.png'
-import defaultAvatar from '@/public/images/no-avatar.png'
 
 import { LanguageSwitcher } from '../language-switcher'
 import { Menu } from '../Menu'
@@ -57,6 +57,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
         {
             href: '/mailing',
             label: t('components.common.app-layout.app-header.mailings', 'Email рассылки')
+        },
+        {
+            href: '/users',
+            label: t('menu.users', 'Пользователи')
         }
     ]
 
@@ -126,16 +130,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
                     {authSlice?.isAuth && (
                         <Popout
                             trigger={
-                                <Image
-                                    alt={''}
-                                    className={styles.avatarImage}
+                                <UserAvatar
+                                    size={'medium'}
                                     src={
-                                        authSlice?.user
+                                        authSlice?.user?.avatar
                                             ? `${HOST_IMG}/users/${authSlice?.user.id}/${authSlice?.user.avatar}`
-                                            : defaultAvatar.src
+                                            : undefined
                                     }
-                                    width={32}
-                                    height={32}
+                                    name={authSlice?.user?.name}
+                                    className={styles.avatarImage}
                                 />
                             }
                         >

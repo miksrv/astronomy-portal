@@ -50,6 +50,9 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({ photosList }) => {
                                 {t('components.pages.photos.photo-grid.frames', 'Кадров')}:{' '}
                                 {photo?.statistic?.frames || 0}
                             </div>
+                            <div>
+                                {t('components.pages.photos.photo-grid.views', 'Просмотров')}: {photo?.views || 0}
+                            </div>
                         </div>
                     </div>
                 </Link>

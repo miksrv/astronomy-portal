@@ -126,10 +126,7 @@ const MailingFormPage: NextPage<object> = () => {
                 links={[{ link: '/mailing', text: t('pages.mailing.title', 'Рассылки') }]}
             />
 
-            <Container
-                className={styles.formContainer}
-                style={{ marginBottom: '10px' }}
-            >
+            <Container className={styles.formContainer}>
                 {(saveError || createSuccess || updateSuccess) && (
                     <Message
                         style={{ marginBottom: '10px' }}

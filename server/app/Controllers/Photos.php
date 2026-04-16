@@ -96,6 +96,8 @@ class Photos extends ResourceController
             $result = preparePhotoDataWithFilters($photosData, $filtersData);
 
             if ($photosData) {
+                $photosModel->incrementViews($id);
+
                 return $this->respond($result[0]);
             }
 

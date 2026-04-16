@@ -1,0 +1,24 @@
+@use '../../styles/variables' as variables
+
+.observatoryGrid
+    display: flex
+    justify-content: space-between
+    gap: 10px
+    flex-wrap: nowrap
+
+    > div
+        flex-basis: 50%
+        width: 50%
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-wrap: wrap
+
+        > div
+            flex-basis: 100%
+            width: 100%
+
+.allPhotosButtonContainer
+    a
+        display: block
+        margin-top: 10px
+        width: 100%

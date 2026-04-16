@@ -109,7 +109,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 currentPage={title}
             />
 
-            <Container style={{ marginBottom: '10px' }}>
+            <Container>
                 <p style={{ marginTop: 0 }}>
                     {t('pages.about.my-name', 'Меня зовут')}
                     <Link
@@ -145,7 +145,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 {t('pages.about.telegram-channel', 'Подпишитесь на авторский Telegram канал этого проекта')}
             </Link>
 
-            <Container style={{ marginBottom: '10px' }}>
+            <Container>
                 <h2 style={{ marginTop: 0 }}>{t('pages.about.team-title', 'Наша команда')}</h2>
                 <p style={{ marginTop: 0 }}>
                     {t(
@@ -156,7 +156,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 <ProjectTeam />
             </Container>
 
-            <Container style={{ marginBottom: '10px' }}>
+            <Container>
                 <h2 style={{ marginTop: 0 }}>
                     {t('pages.about.project-title', 'Астрономический проект «Смотри на звёзды»')}
                 </h2>
@@ -217,7 +217,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 </p>
             </Container>
 
-            <Container style={{ marginBottom: '10px' }}>
+            <Container>
                 <h2 style={{ marginTop: 0 }}>
                     {t('pages.about.observatory-title', 'Самодельная астрономическая обсерватория')}
                 </h2>
@@ -281,10 +281,8 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     )}
                 </p>
             </Container>
-            <Container
-                id={'your-help'}
-                style={{ marginBottom: '10px' }}
-            >
+
+            <Container id={'your-help'}>
                 <h2 style={{ marginTop: 0 }}>{t('pages.about.your-help-title', 'Ваша помощь')}</h2>
                 <p style={{ marginTop: 0 }}>
                     {t(

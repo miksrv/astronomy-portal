@@ -34,24 +34,23 @@ const StargazingFAQPage: NextPage<object> = () => {
                 ]}
             />
 
-            <Container style={{ marginBottom: '10px' }}>
-                <p style={{ marginTop: 0 }}>
-                    {t(
-                        'pages.stargazing-faq.description',
-                        'Узнайте ответы на частые вопросы об астровыездах: регистрация, что взять с собой, стоимость, длительность и как добраться. Готовьтесь к ночи под звездами с комфортом!'
-                    )}
-                    <Link
-                        href={'https://t.me/look_at_stars'}
-                        style={{ marginLeft: '5px' }}
-                        title={t('common.telegram', 'Телеграм')}
-                        rel={'noindex nofollow'}
-                        target={'_blank'}
-                    >
-                        {t('common.look-at-the-stars', 'Смотри на звёзды')}
-                    </Link>
-                    {'.'}
-                </p>
-            </Container>
+            <div>
+                {t(
+                    'pages.stargazing-faq.description',
+                    'Узнайте ответы на частые вопросы об астровыездах: регистрация, что взять с собой, стоимость, длительность и как добраться. Готовьтесь к ночи под звездами с комфортом!'
+                )}
+                <Link
+                    href={'https://t.me/look_at_stars'}
+                    style={{ marginLeft: '5px' }}
+                    title={t('common.telegram', 'Телеграм')}
+                    rel={'noindex nofollow'}
+                    target={'_blank'}
+                >
+                    {t('common.look-at-the-stars', 'Смотри на звёзды')}
+                </Link>
+                {'.'}
+            </div>
+
             {[
                 {
                     question: t('pages.stargazing-faq.questions.where.question', '❓Как узнать, где проходит?'),
@@ -266,8 +265,8 @@ const StargazingFAQPage: NextPage<object> = () => {
                 }
             ].map((item, idx) => (
                 <div key={idx}>
-                    <h3 style={{ marginTop: 20, marginBottom: 5, fontSize: '18px' }}>{item.question}</h3>
-                    <Container style={{ marginBottom: '10px' }}>{item.answer}</Container>
+                    <h3 style={{ marginBottom: 5, fontSize: '18px' }}>{item.question}</h3>
+                    <Container>{item.answer}</Container>
                 </div>
             ))}
 

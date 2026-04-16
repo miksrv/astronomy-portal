@@ -17,6 +17,8 @@ import { formatDate } from '@/utils/dates'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
 import { removeMarkdown, sliceText } from '@/utils/strings'
 
+import styles from './styles.module.sass'
+
 interface StargazingItemPageProps {
     eventId: string
     event: ApiModel.Event | null
@@ -30,8 +32,6 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 
     const user = useAppSelector((state) => state.auth.user)
     const userRole = useAppSelector((state) => state.auth?.user?.role)
-
-    // const { data: usersList } = API.useEventGetUsersListQuery(eventId, { skip: !eventId })
 
     const inputFileRef = useRef<HTMLInputElement>(undefined)
 
@@ -124,12 +124,11 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
             </AppToolbar>
 
             <EventItemData
-                style={{ marginBottom: '10px' }}
                 title={title}
                 event={event || undefined}
             />
 
-            <Container style={{ marginBottom: '10px' }}>
+            <Container>
                 <h2
                     className={'subTitle'}
                     style={{ marginTop: 0, textTransform: 'uppercase' }}
@@ -182,16 +181,16 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 onCloseLightBox={handleCloseLightbox}
             />
 
-            <section className={'footerLinks'}>
+            <section className={styles.footerLinks}>
                 {adjacentEvents?.previousEvent && (
                     <Link
                         href={`/stargazing/${adjacentEvents?.previousEvent?.id}`}
                         title={adjacentEvents?.previousEvent?.title}
                     >
                         <Icon name={'KeyboardLeft'} />
-                        <div className={'linkName'}>
+                        <div className={styles.linkName}>
                             <div>{adjacentEvents?.previousEvent?.title}</div>
-                            <div className={'date'}>
+                            <div className={styles.date}>
                                 {formatDate(adjacentEvents?.previousEvent?.date?.date, 'D MMMM YYYY')}
                             </div>
                         </div>
@@ -203,9 +202,9 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                         href={`/stargazing/${adjacentEvents?.nextEvent?.id}`}
                         title={adjacentEvents?.nextEvent?.title}
                     >
-                        <div className={'linkName'}>
+                        <div className={styles.linkName}>
                             <div>{adjacentEvents?.nextEvent?.title}</div>
-                            <div className={'date'}>
+                            <div className={styles.date}>
                                 {formatDate(adjacentEvents?.nextEvent?.date?.date, 'D MMMM YYYY')}
                             </div>
                         </div>

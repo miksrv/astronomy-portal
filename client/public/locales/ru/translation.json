@@ -169,7 +169,8 @@
                 "photo-grid": {
                     "no-results": "По вашему запросу ничего не найдено",
                     "exposure": "Выдержка",
-                    "frames": "Кадров"
+                    "frames": "Кадров",
+                    "views": "Просмотров"
                 },
                 "photo-header": {
                     "category": "Категория",
@@ -220,6 +221,22 @@
             }
         }
     },
+    "menu": {
+        "users": "Пользователи",
+        "astrophoto": "Астрофото",
+        "objects": "Объекты",
+        "stargazing": "Астровыезды",
+        "stargazing-rules": "Правила поведения на астровыездах",
+        "stargazing-howto": "Как проходят астровыезды",
+        "stargazing-where": "Где посмотреть в телескоп в Оренбурге",
+        "stargazing-faq": "Часто задаваемые вопросы",
+        "observatory": "Обсерватория",
+        "observatory-orenburg": "Обсерватория в Оренбурге",
+        "observatory-orenburg-weather": "Погода в Обсерватории Оренбурга",
+        "star-map": "Звёздная карта",
+        "about": "О проекте",
+        "telegram": "Телеграм"
+    },
     "common": {
         "look-at-the-stars": "Смотри на звёзды",
         "minutes_one": "{{count}} минут",
@@ -256,21 +273,6 @@
         "second_other": "{{count}} секунда",
         "photo": "Фото",
         "from": "от"
-    },
-    "menu": {
-        "astrophoto": "Астрофото",
-        "objects": "Объекты",
-        "stargazing": "Астровыезды",
-        "stargazing-rules": "Правила поведения на астровыездах",
-        "stargazing-howto": "Как проходят астровыезды",
-        "stargazing-where": "Где посмотреть в телескоп в Оренбурге",
-        "stargazing-faq": "Часто задаваемые вопросы",
-        "observatory": "Обсерватория",
-        "observatory-orenburg": "Обсерватория в Оренбурге",
-        "observatory-orenburg-weather": "Погода в Обсерватории Оренбурга",
-        "star-map": "Звёздная карта",
-        "about": "О проекте",
-        "telegram": "Телеграм"
     },
     "pages": {
         "404": {
@@ -664,10 +666,45 @@
         "mount": "Монтировка",
         "scope": "Телескоп",
         "camera": "Камера",
-        "guiding_camera": "Гидирующая камера",
-        "guiding_scope": "Гидирующий телескоп",
+        "guiding_camera": "Гид-камера",
+        "guiding_scope": "Гид-телескоп",
         "focuser": "Фокусер",
         "filter_wheel": "Колесо фильтров",
         "filter": "Фильтр"
+    },
+    "users": {
+        "eventsColumnEvent": "Мероприятие",
+        "eventsColumnDate": "Дата",
+        "eventsColumnAdults": "Взрослых",
+        "eventsColumnChildren": "Детей",
+        "eventsColumnCheckin": "Отметка",
+        "eventsDialogTitle": "Мероприятия пользователя",
+        "eventsEmpty": "Пользователь не посещал мероприятий",
+        "pageTitle": "Пользователи",
+        "filterAll": "Все",
+        "roleAdmin": "Администратор",
+        "roleModerator": "Модератор",
+        "roleSecurity": "Охрана",
+        "roleUser": "Пользователь",
+        "authGoogle": "Google",
+        "authYandex": "Yandex",
+        "authVk": "ВКонтакте",
+        "authNative": "Нативный",
+        "columnUser": "Пользователь",
+        "columnRole": "Роль",
+        "columnService": "Сервис",
+        "columnAge": "Пол / Возраст",
+        "columnEvents": "Мероприятий",
+        "columnActivity": "Активность",
+        "columnRegistered": "Регистрация",
+        "search": "Поиск по имени",
+        "filterRole": "Роль",
+        "filterAuthType": "Сервис входа",
+        "noUsers": "Нет пользователей",
+        "pageOf": "",
+        "totalCount": "Всего: {{count}}",
+        "paginationPage": "Страница",
+        "paginationNext": "Следующая",
+        "paginationPrev": "Предыдущая"
     }
 }

@@ -21,6 +21,7 @@ class PhotosModel extends ApplicationBaseModel
         'file_size',
         'image_width',
         'image_height',
+        'views',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -210,5 +211,19 @@ class PhotosModel extends ApplicationBaseModel
     ): array
     {
         return $this->fetchPhotos($locale, null, $object, $limit, $order);
+    }
+
+    /**
+     * Increments the view count for a specific photo.
+     *
+     * @param string $photoId The ID of the photo for which to increment the view count.
+     * @return bool Returns true if the update was successful, false otherwise.
+     */
+    public function incrementViews(string $photoId): bool
+    {
+        return $this->builder()
+            ->set('views', 'views + 1', false)
+            ->where('id', $photoId)
+            ->update([], null, false);
     }
 }

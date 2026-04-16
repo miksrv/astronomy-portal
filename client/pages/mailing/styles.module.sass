@@ -1,12 +1,5 @@
-.pageHeader
-    display: flex
-    align-items: center
-    justify-content: space-between
-    margin-bottom: 16px
-
-.pageTitle
-    margin: 0
-
+.tableContainer
+    padding: 2px !important
 
 .subjectCell
     max-width: 200px
@@ -23,20 +16,39 @@
     align-items: center
     justify-content: flex-end
 
-
 .statusDraft
+    display: inline-block
+    padding: 2px 10px
+    border-radius: 12px
+    font-size: 13px
+    font-weight: 500
     background-color: #e5e7eb !important
     color: #374151
 
 .statusSending
+    display: inline-block
+    padding: 2px 10px
+    border-radius: 12px
+    font-size: 13px
+    font-weight: 500
     background: #dbeafe !important
     color: #1d4ed8
 
 .statusCompleted
+    display: inline-block
+    padding: 2px 10px
+    border-radius: 12px
+    font-size: 13px
+    font-weight: 500
     background: #dcfce7 !important
     color: #166534
 
 .statusPaused
+    display: inline-block
+    padding: 2px 10px
+    border-radius: 12px
+    font-size: 13px
+    font-weight: 500
     background: #ffedd5 !important
     color: #9a3412
 
@@ -130,16 +142,20 @@
 .metaGrid
     display: grid
     grid-template-columns: auto 1fr
-    gap: 8px 16px
+    gap: 4px 16px
     font-size: 14px
+    margin: 0
+    padding: 0
 
     dt
+        color: #6b7280
         font-weight: 500
-        color: #374151
+        padding: 6px 0
 
     dd
-        color: #6b7280
         margin: 0
+        padding: 6px 0
+        font-weight: 400
 
 // Modal styles
 .modalActions

@@ -8,6 +8,7 @@ export * as Photos from './photos'
 export * as Relay from './relay'
 export * as SiteMap from './sitemap'
 export * as Statistic from './statistic'
+export * as Users from './users'
 export * as Weather from './weather'
 
 export type Locale = 'en' | 'ru'

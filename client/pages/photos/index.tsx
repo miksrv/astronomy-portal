@@ -107,8 +107,9 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
                 }
             >
                 <Input
-                    placeholder={t('pages.photos.search-by-object', 'Поиск по объекту')}
+                    clearable={true}
                     value={searchFilter}
+                    placeholder={t('pages.photos.search-by-object', 'Поиск по объекту')}
                     onChange={(e) => setSearchFilter(e.target.value)}
                 />
 

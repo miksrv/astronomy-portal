@@ -167,7 +167,8 @@
                 "photo-grid": {
                     "no-results": "No results found for your query",
                     "exposure": "Exposure",
-                    "frames": "Frames"
+                    "frames": "Frames",
+                    "views": "Views"
                 },
                 "photo-header": {
                     "category": "Category",
@@ -218,6 +219,22 @@
             }
         }
     },
+    "menu": {
+        "users": "Users",
+        "astrophoto": "Astrophoto",
+        "objects": "Objects",
+        "stargazing": "Star Parties",
+        "stargazing-rules": "Star Party Rules",
+        "stargazing-howto": "How Star Parties Work",
+        "stargazing-where": "Where to Look Through a Telescope in Orenburg",
+        "stargazing-faq": "Frequently Asked Questions",
+        "observatory": "Observatory",
+        "observatory-orenburg": "Observatory in Orenburg",
+        "observatory-orenburg-weather": "Orenburg Observatory Weather",
+        "star-map": "Star Map",
+        "about": "About",
+        "telegram": "Telegram"
+    },
     "common": {
         "look-at-the-stars": "Look at the Stars",
         "minutes_one": "{{count}} minute",
@@ -242,21 +259,6 @@
         "second_other": "{{count}} seconds",
         "photo": "Photo",
         "from": "from"
-    },
-    "menu": {
-        "astrophoto": "Astrophoto",
-        "objects": "Objects",
-        "stargazing": "Star Parties",
-        "stargazing-rules": "Star Party Rules",
-        "stargazing-howto": "How Star Parties Work",
-        "stargazing-where": "Where to Look Through a Telescope in Orenburg",
-        "stargazing-faq": "Frequently Asked Questions",
-        "observatory": "Observatory",
-        "observatory-orenburg": "Observatory in Orenburg",
-        "observatory-orenburg-weather": "Orenburg Observatory Weather",
-        "star-map": "Star Map",
-        "about": "About",
-        "telegram": "Telegram"
     },
     "pages": {
         "404": {
@@ -655,5 +657,40 @@
         "focuser": "Focuser",
         "filter_wheel": "Filter Wheel",
         "filter": "Filter"
+    },
+    "users": {
+        "eventsColumnEvent": "Event",
+        "eventsColumnDate": "Date",
+        "eventsColumnAdults": "Adults",
+        "eventsColumnChildren": "Children",
+        "eventsColumnCheckin": "Check-in",
+        "eventsDialogTitle": "User Events",
+        "eventsEmpty": "User has not attended any events",
+        "pageTitle": "Users",
+        "filterAll": "All",
+        "roleAdmin": "Administrator",
+        "roleModerator": "Moderator",
+        "roleSecurity": "Security",
+        "roleUser": "User",
+        "authGoogle": "Google",
+        "authYandex": "Yandex",
+        "authVk": "VKontakte",
+        "authNative": "Native",
+        "columnUser": "User",
+        "columnRole": "Role",
+        "columnService": "Service",
+        "columnAge": "Sex / Age",
+        "columnEvents": "Events",
+        "columnActivity": "Activity",
+        "columnRegistered": "Registered",
+        "search": "Search by name",
+        "filterRole": "Role",
+        "filterAuthType": "Auth service",
+        "noUsers": "No users",
+        "pageOf": "Page {{page}} of {{total}}",
+        "totalCount": "Total: {{count}}",
+        "paginationPage": "Page",
+        "paginationNext": "Next",
+        "paginationPrev": "Previous"
     }
 }

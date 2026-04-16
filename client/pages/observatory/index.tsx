@@ -9,6 +9,8 @@ import { API, setLocale, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { AstronomyCalc, Calendar, Camera, RelayList, TelescopeWorkdays, Weather } from '@/components/pages/observatory'
 
+import styles from './styles.module.sass'
+
 const ObservatoryPage: NextPage<object> = () => {
     const { t } = useTranslation()
 
@@ -41,22 +43,20 @@ const ObservatoryPage: NextPage<object> = () => {
             />
 
             <div>
-                <p>
-                    {t(
-                        'pages.observatory.text',
-                        'Наблюдение за Вселенной начинается здесь - в режиме реального времени вы можете увидеть текущие погодные условия, трансляцию с камер, статус оборудования и расписание съёмки. Обсерватория работает в полуавтоматическом режиме, позволяя вести съёмку deep-sky объектов удалённо. Здесь реализована система интеллектуального управления, анализирующая погодные условия и автоматически принимающая решение о начале работы. Подробнее об оборудовании и принципе работы можно узнать на отдельной странице:'
-                    )}{' '}
-                    <Link
-                        href={'/observatory/overview'}
-                        title={observatoryLink}
-                    >
-                        {observatoryLink}
-                    </Link>
-                    {'.'}
-                </p>
+                {t(
+                    'pages.observatory.text',
+                    'Наблюдение за Вселенной начинается здесь - в режиме реального времени вы можете увидеть текущие погодные условия, трансляцию с камер, статус оборудования и расписание съёмки. Обсерватория работает в полуавтоматическом режиме, позволяя вести съёмку deep-sky объектов удалённо. Здесь реализована система интеллектуального управления, анализирующая погодные условия и автоматически принимающая решение о начале работы. Подробнее об оборудовании и принципе работы можно узнать на отдельной странице:'
+                )}{' '}
+                <Link
+                    href={'/observatory/overview'}
+                    title={observatoryLink}
+                >
+                    {observatoryLink}
+                </Link>
+                {'.'}
             </div>
 
-            <div className={'observatoryGrid'}>
+            <div className={styles.observatoryGrid}>
                 <div>
                     <Weather />
                     <AstronomyCalc />
@@ -66,7 +66,7 @@ const ObservatoryPage: NextPage<object> = () => {
                 </div>
             </div>
 
-            <div className={'observatoryGrid'}>
+            <div className={styles.observatoryGrid}>
                 <Camera
                     cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/2`}
                     interval={4}

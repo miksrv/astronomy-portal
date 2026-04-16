@@ -130,8 +130,9 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                 }
             >
                 <Input
-                    placeholder={t('pages.objects.search-by-name', 'Поиск по названию')}
+                    clearable={true}
                     value={searchFilter}
+                    placeholder={t('pages.objects.search-by-name', 'Поиск по названию')}
                     onChange={(e) => setSearchFilter(e.target.value)}
                 />
 

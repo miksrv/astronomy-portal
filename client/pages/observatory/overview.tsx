@@ -3,7 +3,7 @@ import { Button, Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
-import { useTranslation } from 'next-i18next'
+import { Trans, useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
 import { API, ApiModel, setLocale, wrapper } from '@/api'
@@ -19,6 +19,8 @@ import photoObservatory9 from '@/public/photos/observatory-9.jpeg'
 import photoObservatory10 from '@/public/photos/observatory-10.jpeg'
 import photoObservatory11 from '@/public/photos/observatory-11.jpeg'
 import photoObservatory12 from '@/public/photos/observatory-12.jpeg'
+
+import styles from './styles.module.sass'
 
 const galleryObservatory = [photoObservatory3, photoObservatory7, photoObservatory5, photoObservatory6]
 
@@ -151,14 +153,14 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                 ]}
             />
 
-            <p>
+            <div>
                 {t(
                     'pages.observatory.description',
                     'Самодельная астрономическая обсерватория расположена в пригороде Оренбурга, всего в 15 км от города. Благодаря своему удалению от городской застройки, обсерватория находится в зоне с уровнем светового загрязнения 5 класса по шкале Бортля, что делает её не плохим местом в пригорде для наблюдений за ночным небом.'
                 )}
-            </p>
+            </div>
 
-            <Container style={{ marginBottom: '10px' }}>
+            <Container>
                 <p style={{ marginTop: 0 }}>
                     {t(
                         'pages.observatory.description-1',
@@ -193,7 +195,7 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                 </p>
             </Container>
 
-            <Container style={{ marginBottom: '10px' }}>
+            <Container>
                 <h2 style={{ marginTop: 0 }}>{t('pages.observatory.equipment-title', 'Оборудование обсерватории')}</h2>
                 <p>
                     {t(
@@ -217,43 +219,44 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                 />
             </Container>
 
-            <Container style={{ marginBottom: '10px' }}>
+            <Container>
                 <h2 style={{ marginTop: 0 }}>{t('pages.observatory.photos-and-data-title', 'Фотографии и данные')}</h2>
                 <p>
-                    {t(
-                        'pages.observatory.photos-and-data',
-                        'На специальном разделе сайта представлены <photosLink>фотографии</photosLink> снятых <objectsLink>объектов</objectsLink> глубокого космоса. Для каждого объекта доступны подробные параметры и характеристики, такие как расстояние до объекта, его размер, спектральные данные и многое другое. Эти материалы могут быть полезны как для начинающих астрономов, так и для профессионалов.',
-                        {
+                    <Trans
+                        i18nKey={'pages.observatory.photos-and-data'}
+                        defaults={
+                            'На специальном разделе сайта представлены <photosLink>фотографии</photosLink> снятых <objectsLink>объектов</objectsLink> глубокого космоса. Для каждого объекта доступны подробные параметры и характеристики, такие как расстояние до объекта, его размер, спектральные данные и многое другое. Эти материалы могут быть полезны как для начинающих астрономов, так и для профессионалов.'
+                        }
+                        components={{
                             photosLink: (
                                 <Link
                                     href='/photos'
                                     title={t('menu.astrophoto', 'Астрофото')}
-                                >
-                                    {t('pages.observatory.photos-and-data-part-photos', 'фотографии')}
-                                </Link>
+                                />
                             ),
                             objectsLink: (
                                 <Link
                                     href='/objects'
                                     title={t('pages.observatory.photos-and-data-part-objects', 'объектов')}
-                                >
-                                    {t('pages.observatory.photos-and-data-part-objects', 'объектов')}
-                                </Link>
+                                />
                             )
-                        }
-                    )}
+                        }}
+                    />
                 </p>
 
                 <ObjectPhotoTable photosList={photosList} />
 
-                <Button
-                    size={'medium'}
-                    mode={'secondary'}
-                    link={'/photos'}
-                    title={t('pages.observatory.astrophoto', 'Астрофото')}
-                >
-                    {t('pages.observatory.photos-and-data-all-photos', 'Все астрономические фотографии')}
-                </Button>
+                <div className={styles.allPhotosButtonContainer}>
+                    <Button
+                        size={'medium'}
+                        mode={'secondary'}
+                        link={'/photos'}
+                        stretched={true}
+                        title={t('pages.observatory.astrophoto', 'Астрофото')}
+                    >
+                        {t('pages.observatory.photos-and-data-all-photos', 'Все астрономические фотографии')}
+                    </Button>
+                </div>
             </Container>
 
             <PhotoLightbox

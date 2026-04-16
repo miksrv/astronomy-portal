@@ -60,9 +60,9 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
             case ApiModel.EquipmentType.Camera:
                 return t('equipment.camera', 'Камера')
             case ApiModel.EquipmentType.GuidingCamera:
-                return t('equipment.guiding_camera', 'Гидирующая камера')
+                return t('equipment.guiding_camera', 'Гид-камера')
             case ApiModel.EquipmentType.GuidingScope:
-                return t('equipment.guiding_scope', 'Гидирующий телескоп')
+                return t('equipment.guiding_scope', 'Гид-телескоп')
             case ApiModel.EquipmentType.Focuser:
                 return t('equipment.focuser', 'Фокусер')
             case ApiModel.EquipmentType.FilterWheel:

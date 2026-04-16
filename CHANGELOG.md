@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 4.4.0
+
+### Minor Changes
+
+- Added admin Users page (`/users`): paginated, searchable, and sortable list of all registered users with role and auth-type filters, per-column sorting, and a dialog showing each user's event registrations history
+- Added `Members` backend controller with two endpoints — `GET /members` (paginated user list) and `GET /members/:id/events` (user events) — both restricted to the admin role
+- Added `UsersModel::getUsersList()` with LEFT JOIN on `events_users` and `events` to count active event registrations per user; fixed `eventsCount` sort broken by two bugs: CI4 query builder wrapping the alias in backticks and orphaned bookings from soft-deleted events inflating the count; added stable secondary sort by `u.id`
+- Added shared `UserAvatar` UI component with three display modes: image with `onError` fallback, two-letter initials on colored background, and default avatar image; supports `small` (28 px) and `medium` (32 px) sizes; replaced inline `<Image>` avatar usage in `AppHeader` and the Users table
+- Added reusable `Pagination` UI component with page-range generation utility (`client/utils/pagination.ts`)
+- Added photo view counter: migration adds `views INT UNSIGNED NOT NULL DEFAULT 0` to the `photos` table; `PhotosModel::incrementViews()` increments on each `GET /photos/:id` request; view count is displayed in `PhotoGrid` after the frames field
+- Added interactive star map settings panel: configurable display options (stars, constellations, Milky Way, graticule, etc.) with persistence via localStorage; added star map types, constants, popup styles, and hit-testing utilities
+- Updated `robots.txt` to disallow indexing of the `/users` admin route
+- Extended theme CSS with size CSS custom properties (`--size-control-*`, `--size-badge-*`, `--size-table-*`) for consistent UI kit component sizing
+- Refactor StarMapRender: popup, init & interactions
+- Add star-map types and constants; add popup styles
+- Add star-map utils for popup and hits
+- Add StarMap settings UI and defaults
+- Add star map settings panel and persistence
+- Add star-map settings translations
+
 ## 4.3.1
 
 ### Patch Changes
