@@ -1,0 +1,37 @@
+.pagination
+    display: flex
+    justify-content: center
+    margin: 10px 0
+
+    .item
+        display: inline-flex
+        align-items: center
+        justify-content: center
+        color: var(--text-color-secondary)
+        text-align: center
+        border-radius: var(--border-radius)
+        text-decoration: none
+        width: 32px
+        height: 32px
+        padding: 0 6px
+        margin: 0 3px
+        border: 1px solid rgba(0, 0, 0, 0.12)
+        background: var(--input-background-color)
+        cursor: pointer
+        font-size: 14px
+        transition: color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
+
+        svg
+            fill: var(--text-color-secondary)
+
+        &:hover
+            color: var(--text-color-primary)
+            background-color: rgba(0, 16, 61, 0.04)
+
+            svg
+                fill: var(--text-color-primary)
+
+        &.active, &:active
+            color: var(--text-color-primary)
+            background-color: rgba(0, 16, 61, 0.08)
+            font-weight: 500
