@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { ColumnProps, Container, Table } from 'simple-react-ui-kit'
+import { Container, Table, TableColumnProps } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next'
 
@@ -37,7 +37,7 @@ export const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({ filesList, l
         [filesList]
     )
 
-    const tableColumns: Array<ColumnProps<FlattenedFile>> = [
+    const tableColumns: Array<TableColumnProps<FlattenedFile>> = [
         {
             accessor: 'date',
             formatter: (date) => (date ? formatDate(date as string) : ''),
@@ -94,6 +94,7 @@ export const ObjectFilesTable: React.FC<ObjectFilesTableProps> = ({ filesList, l
     return (
         <Container className={styles.tableContainer}>
             <Table<FlattenedFile>
+                size={'small'}
                 className={styles.filesListTable}
                 columns={tableColumns}
                 verticalBorder={true}

@@ -1,5 +1,5 @@
 import React from 'react'
-import { ColumnProps, Container, Skeleton, Table } from 'simple-react-ui-kit'
+import { Container, Table, TableColumnProps } from 'simple-react-ui-kit'
 
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
@@ -25,7 +25,7 @@ interface TelescopeWorkdaysProps {
 export const TelescopeWorkdays: React.FC<TelescopeWorkdaysProps> = ({ loading, eventsTelescope }) => {
     const { t } = useTranslation()
 
-    const columns: Array<ColumnProps<TelescopeEvent>> = [
+    const columns: Array<TableColumnProps<TelescopeEvent>> = [
         {
             accessor: 'telescope_date',
             header: t('components.common.object-photos-table.date', 'Дата'),
@@ -70,14 +70,10 @@ export const TelescopeWorkdays: React.FC<TelescopeWorkdaysProps> = ({ loading, e
 
     return (
         <Container className={styles.tableContainer}>
-            {loading && (
-                <div className={styles.loader}>
-                    <Skeleton />
-                </div>
-            )}
-
             <Table<TelescopeEvent>
+                size={'small'}
                 columns={columns}
+                loading={loading}
                 data={eventsTelescope || []}
                 className={styles.objectsListTable}
                 stickyHeader={true}

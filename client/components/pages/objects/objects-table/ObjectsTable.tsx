@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ColumnProps, Container, Table } from 'simple-react-ui-kit'
+import { Container, Table, TableColumnProps } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -24,7 +24,7 @@ export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosL
 
     const [tableHeight, setTableHeight] = useState<number | null>()
 
-    const tableColumns: Array<ColumnProps<FlattenedObject>> = [
+    const tableColumns: Array<TableColumnProps<FlattenedObject>> = [
         {
             accessor: 'name',
             formatter: (data, row, i) => (
@@ -156,6 +156,7 @@ export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosL
         <Container className={styles.tableContainer}>
             <Table<FlattenedObject>
                 className={styles.objectsListTable}
+                size={'small'}
                 columns={tableColumns}
                 maxHeight={tableHeight}
                 stickyHeader={true}
