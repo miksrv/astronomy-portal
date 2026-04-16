@@ -11,6 +11,7 @@ Disallow: /auth
 Disallow: /en/auth
 Disallow: /mailing
 Disallow: /mailing/form
+Disallow: /users
 Disallow: /api/
 
 # Specify the main mirror of the site

@@ -1,8 +1,25 @@
 :root {
     /* Element Heights for `size` props */
-    --size-small: 24px;
-    --size-medium: 32px;
+    --size-small: 32px;
+    --size-medium: 38px;
     --size-large: 38px;
+
+    /* Optional per-group size overrides (fallback to --size-* if not set) */
+    /* --size-control-small / --size-control-medium / --size-control-large  → input, select, button, textarea */
+    /* --size-badge-small   / --size-badge-medium   / --size-badge-large    → badge */
+    /* --size-table-small   / --size-table-medium   / --size-table-large    → table rows */
+    /* Form controls: Input, Select, Button, TextArea */
+    --size-control-small: 26px;
+    --size-control-medium: 32px;
+    --size-control-large: 36px;
+    /* Badge */
+    --size-badge-small: 20px;
+    --size-badge-medium: 24px;
+    --size-badge-large: 28px;
+    /* Table row heights */
+    --size-table-small: 32px;
+    --size-table-medium: 38px;
+    --size-table-large: 38px;
 
     /* Primary Colors */
     --color-contrast: #ffffff;
