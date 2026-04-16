@@ -15,4 +15,5 @@ export type Photo = {
     updated?: ApiType.DateTime
     statistic?: ApiModel.Statistic
     filters?: ApiModel.Filters
+    views?: number
 }

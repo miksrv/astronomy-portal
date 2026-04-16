@@ -398,6 +398,16 @@ export const API = createApi({
         }),
         mailingUnsubscribe: builder.query<{ success: boolean; message: string }, string>({
             query: (mail) => `mailings/unsubscribe?mail=${encodeURIComponent(mail)}`
+        }),
+
+        /* Members Controller */
+        usersGetList: builder.query<ApiType.Users.UsersListResponse, ApiType.Users.UsersListRequest>({
+            providesTags: () => [{ id: 'LIST', type: 'Users' }],
+            query: (params) => `members${encodeQueryData(params)}`
+        }),
+        usersGetEvents: builder.query<ApiType.Users.UserEventsResponse, string>({
+            providesTags: (res, err, id) => [{ id, type: 'Users' }],
+            query: (id) => `members/${id}/events`
         })
     }),
     // RTK Query requires the return type of extractRehydrationInfo to match its
@@ -422,6 +432,7 @@ export const API = createApi({
         'Statistic',
         'Category',
         'Relay',
-        'Mailings'
+        'Mailings',
+        'Users'
     ]
 })

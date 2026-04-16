@@ -15,3 +15,29 @@ export enum UserRole {
     MODERATOR = 'moderator',
     ADMIN = 'admin'
 }
+
+export type UserAuthType = 'google' | 'yandex' | 'vk' | 'native'
+
+export interface AdminUserItem {
+    id: string
+    name: string
+    avatar?: string
+    role: UserRole
+    authType: UserAuthType
+    locale: string
+    sex?: 'm' | 'f'
+    age?: number
+    activityAt?: string
+    createdAt: string
+    eventsCount: number
+}
+
+export interface AdminUserEvent {
+    id: string
+    title: string
+    date: string
+    adults: number
+    children: number
+    checkinAt?: string
+    registeredAt: string
+}
