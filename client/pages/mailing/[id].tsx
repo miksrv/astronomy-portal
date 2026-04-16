@@ -60,27 +60,34 @@ const MailingStatsPage: NextPage<object> = () => {
                 links={[{ link: '/mailing', text: t('pages.mailing.title', 'Рассылки') }]}
             />
 
-            <Container
-                className={styles.statsContainer}
-                style={{ marginBottom: '10px' }}
-            >
+            <Container className={styles.statsContainer}>
                 {isLoading && <p>{'...'}</p>}
 
                 {!isLoading && data && (
                     <>
                         <div className={styles.statsHeader}>
                             <dl className={styles.metaGrid}>
-                                <dt>{'Subject'}</dt>
+                                <dt>{t('pages.mailing.detail-subject', 'Тема')}</dt>
                                 <dd>{data.subject}</dd>
-                                <dt>{'Status'}</dt>
-                                <dd>{statusLabel(data.status)}</dd>
+                                <dt>{t('pages.mailing.detail-status', 'Статус')}</dt>
+                                <dd>
+                                    <span
+                                        className={
+                                            styles[
+                                                `status${data.status.charAt(0).toUpperCase()}${data.status.slice(1)}`
+                                            ]
+                                        }
+                                    >
+                                        {statusLabel(data.status)}
+                                    </span>
+                                </dd>
                                 {data.sentAt && (
                                     <>
-                                        <dt>{'Sent at'}</dt>
+                                        <dt>{t('pages.mailing.detail-sent-at', 'Дата отправки')}</dt>
                                         <dd>{new Date(data.sentAt.date).toLocaleString()}</dd>
                                     </>
                                 )}
-                                <dt>{'Created at'}</dt>
+                                <dt>{t('pages.mailing.detail-created-at', 'Дата создания')}</dt>
                                 <dd>{new Date(data.createdAt.date).toLocaleString()}</dd>
                             </dl>
                         </div>
@@ -132,7 +139,9 @@ const MailingStatsPage: NextPage<object> = () => {
                                         <span className={`${styles.statValue} ${styles.statRemaining}`}>
                                             {remaining}
                                         </span>
-                                        <span className={styles.statLabel}>{'Remaining'}</span>
+                                        <span className={styles.statLabel}>
+                                            {t('pages.mailing.stats-remaining', 'Осталось')}
+                                        </span>
                                     </div>
                                 </div>
                             </>

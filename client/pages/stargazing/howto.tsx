@@ -61,14 +61,15 @@ const StargazingHowToPage: NextPage<object> = () => {
                 ]}
             />
 
-            <Container style={{ marginBottom: '10px' }}>
-                <p style={{ margin: 0 }}>
-                    {t(
-                        'pages.stargazing-howto.unique_event',
-                        'Каждый астровыезд уникален, но мы придерживаемся общего сценария, чтобы сделать мероприятие интересным и удобным для всех участников.'
-                    )}
-                </p>
-                <h3 style={{ marginTop: 10 }}>{t('pages.stargazing-howto.event_announcement', 'Анонс мероприятия')}</h3>
+            <div>
+                {t(
+                    'pages.stargazing-howto.unique_event',
+                    'Каждый астровыезд уникален, но мы придерживаемся общего сценария, чтобы сделать мероприятие интересным и удобным для всех участников.'
+                )}
+            </div>
+
+            <Container>
+                <h3>{t('pages.stargazing-howto.event_announcement', 'Анонс мероприятия')}</h3>
                 <p style={{ margin: 0 }}>
                     {t(
                         'pages.stargazing-howto.event_announcement_text',
@@ -98,7 +99,8 @@ const StargazingHowToPage: NextPage<object> = () => {
                     }}
                 />
             </Container>
-            <Container style={{ marginBottom: '10px' }}>
+
+            <Container>
                 <h2 style={{ marginTop: 0 }}>
                     {t('pages.stargazing-howto.event_plan', 'План проведения астровыезда')}
                 </h2>
@@ -141,7 +143,8 @@ const StargazingHowToPage: NextPage<object> = () => {
                     </li>
                 </ul>
             </Container>
-            <Container style={{ marginBottom: '10px' }}>
+
+            <Container>
                 <h3 style={{ marginTop: 10 }}>
                     {t('pages.stargazing-howto.event_duration', 'Продолжительность мероприятия')}
                 </h3>

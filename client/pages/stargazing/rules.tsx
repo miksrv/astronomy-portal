@@ -34,15 +34,14 @@ const StargazingRulesPage: NextPage<object> = () => {
                 ]}
             />
 
-            <Container style={{ marginBottom: '10px' }}>
-                <p style={{ margin: 0 }}>
-                    {t(
-                        'pages.stargazing-rules.welcome',
-                        'Добро пожаловать на астровыезды в Оренбурге, организованные проектом «Смотри на звезды»! Чтобы совместное наблюдение звездного неба и планет прошло комфортно и безопасно для всех участников, важно соблюдать несколько простых правил. Эти рекомендации помогают сохранить атмосферу ночного наблюдения и гарантируют, что каждый сможет насладиться видом звезд и планет в телескоп.'
-                    )}
-                </p>
-            </Container>
-            <Container style={{ marginBottom: '10px' }}>
+            <div>
+                {t(
+                    'pages.stargazing-rules.welcome',
+                    'Добро пожаловать на астровыезды в Оренбурге, организованные проектом «Смотри на звезды»! Чтобы совместное наблюдение звездного неба и планет прошло комфортно и безопасно для всех участников, важно соблюдать несколько простых правил. Эти рекомендации помогают сохранить атмосферу ночного наблюдения и гарантируют, что каждый сможет насладиться видом звезд и планет в телескоп.'
+                )}
+            </div>
+
+            <Container>
                 <h2 style={{ marginTop: 0 }}>
                     {t('pages.stargazing-rules.prohibited-title', 'Что нельзя делать на астровыездах')}
                     {':'}
@@ -97,7 +96,8 @@ const StargazingRulesPage: NextPage<object> = () => {
                     </li>
                 </ul>
             </Container>
-            <Container style={{ marginBottom: '10px' }}>
+
+            <Container>
                 <h2 style={{ marginTop: 0 }}>
                     {t('pages.stargazing-rules.recommendations-title', 'Рекомендации для участников астровыездов')}
                     {':'}
@@ -141,7 +141,8 @@ const StargazingRulesPage: NextPage<object> = () => {
                     </li>
                 </ul>
             </Container>
-            <Container style={{ marginBottom: '10px' }}>
+
+            <Container>
                 <h2 style={{ marginTop: 0 }}>
                     {t('pages.stargazing-rules.importance-title', 'Почему важно соблюдать правила?')}
                 </h2>
@@ -152,7 +153,8 @@ const StargazingRulesPage: NextPage<object> = () => {
                     )}
                 </p>
             </Container>
-            <Container style={{ marginBottom: '10px' }}>
+
+            <Container>
                 <h2 style={{ marginTop: 0 }}>
                     {t('pages.stargazing-rules.join-title', 'Присоединяйтесь к нашим астровыездам!')}
                 </h2>

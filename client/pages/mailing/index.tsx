@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { getCookie } from 'cookies-next'
-import { Badge, Button, ColumnProps, Container, Dialog, Table } from 'simple-react-ui-kit'
+import { Badge, Button, Container, Dialog, Table, TableColumnProps } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
@@ -10,6 +10,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { formatDate } from '@/utils/dates'
 
 import styles from './styles.module.sass'
 
@@ -51,7 +52,7 @@ const MailingListPage: NextPage<object> = () => {
         setConfirmDeleteId(undefined)
     }
 
-    const tableColumns: Array<ColumnProps<ApiModel.MailingListItem>> = [
+    const tableColumns: Array<TableColumnProps<ApiModel.MailingListItem>> = [
         {
             accessor: 'subject',
             className: styles.subjectCell,
@@ -93,8 +94,8 @@ const MailingListPage: NextPage<object> = () => {
                 const item = row[i]
 
                 return item.sentAt
-                    ? new Date(item.sentAt.date).toLocaleDateString()
-                    : new Date(item.createdAt.date).toLocaleDateString()
+                    ? formatDate(item.sentAt.date, 'DD.MM.YYYY, HH:mm')
+                    : formatDate(item.createdAt.date, 'DD.MM.YYYY, HH:mm')
             },
             isSortable: true
         },
@@ -151,8 +152,9 @@ const MailingListPage: NextPage<object> = () => {
                 />
             </AppToolbar>
 
-            <Container style={{ marginBottom: '10px' }}>
+            <Container className={styles.tableContainer}>
                 <Table<ApiModel.MailingListItem>
+                    size={'small'}
                     columns={tableColumns}
                     data={data?.items || []}
                     loading={isLoading}
