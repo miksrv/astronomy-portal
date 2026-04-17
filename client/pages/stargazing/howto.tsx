@@ -100,11 +100,10 @@ const StargazingHowToPage: NextPage<object> = () => {
                 />
             </Container>
 
+            <h2>{t('pages.stargazing-howto.event_plan', 'План проведения астровыезда')}</h2>
+
             <Container>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('pages.stargazing-howto.event_plan', 'План проведения астровыезда')}
-                </h2>
-                <ul style={{ listStyle: 'decimal', marginBottom: 0 }}>
+                <ul style={{ listStyle: 'decimal', margin: 0, padding: '0 20px' }}>
                     <li style={{ marginBottom: '10px' }}>
                         <h3>{t('pages.stargazing-howto.arrival', 'Прибытие на место')}</h3>
                         <p style={{ margin: 0 }}>
@@ -145,9 +144,7 @@ const StargazingHowToPage: NextPage<object> = () => {
             </Container>
 
             <Container>
-                <h3 style={{ marginTop: 10 }}>
-                    {t('pages.stargazing-howto.event_duration', 'Продолжительность мероприятия')}
-                </h3>
+                <h3>{t('pages.stargazing-howto.event_duration', 'Продолжительность мероприятия')}</h3>
                 <p style={{ margin: 0 }}>
                     {t(
                         'pages.stargazing-howto.event_duration_text',

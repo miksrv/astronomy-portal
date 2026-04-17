@@ -41,12 +41,13 @@ const StargazingRulesPage: NextPage<object> = () => {
                 )}
             </div>
 
+            <h2>
+                {t('pages.stargazing-rules.prohibited-title', 'Что нельзя делать на астровыездах')}
+                {':'}
+            </h2>
+
             <Container>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('pages.stargazing-rules.prohibited-title', 'Что нельзя делать на астровыездах')}
-                    {':'}
-                </h2>
-                <ul style={{ listStyle: 'decimal', marginBottom: 0 }}>
+                <ul style={{ listStyle: 'decimal', margin: 0, padding: '0 20px' }}>
                     <li style={{ marginBottom: '10px' }}>
                         <h3 style={{ margin: 0 }}>
                             {t('pages.stargazing-rules.prohibited-items-1.title', 'Использовать яркие источники света')}
@@ -97,12 +98,13 @@ const StargazingRulesPage: NextPage<object> = () => {
                 </ul>
             </Container>
 
+            <h2>
+                {t('pages.stargazing-rules.recommendations-title', 'Рекомендации для участников астровыездов')}
+                {':'}
+            </h2>
+
             <Container>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('pages.stargazing-rules.recommendations-title', 'Рекомендации для участников астровыездов')}
-                    {':'}
-                </h2>
-                <ul style={{ marginBottom: 0 }}>
+                <ul style={{ listStyle: 'decimal', margin: 0, padding: '0 20px' }}>
                     <li style={{ marginBottom: '10px' }}>
                         <h3 style={{ margin: 0 }}>
                             {t('pages.stargazing-rules.recommendations-items-1.title', 'Берегите природу')}
@@ -142,37 +144,31 @@ const StargazingRulesPage: NextPage<object> = () => {
                 </ul>
             </Container>
 
-            <Container>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('pages.stargazing-rules.importance-title', 'Почему важно соблюдать правила?')}
-                </h2>
-                <p style={{ margin: 0 }}>
-                    {t(
-                        'pages.stargazing-rules.importance-description',
-                        'Соблюдение этих рекомендаций помогает сделать наблюдение звездного неба в Оренбурге максимально комфортным для всех. Мы создаем атмосферу, где каждый участник может увидеть удивительные небесные явления, изучить планеты через телескоп и получить незабываемый опыт.'
-                    )}
-                </p>
-            </Container>
+            <h2>{t('pages.stargazing-rules.importance-title', 'Почему важно соблюдать правила?')}</h2>
 
             <Container>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('pages.stargazing-rules.join-title', 'Присоединяйтесь к нашим астровыездам!')}
-                </h2>
-                <p style={{ margin: 0 }}>
-                    {t(
-                        'pages.stargazing-rules.join-description',
-                        'Хотите узнать больше о наших мероприятиях, организованных в Оренбурге?'
-                    )}
-                    <Link
-                        style={{ margin: '0 5px' }}
-                        href={'https://t.me/look_at_stars'}
-                        title={t('common.telegram', 'Телеграм')}
-                        rel={'noindex nofollow'}
-                        target={'_blank'}
-                    >
-                        {t('pages.stargazing-rules.subscribe', 'Подписывайтесь')}
-                    </Link>
-                </p>
+                {t(
+                    'pages.stargazing-rules.importance-description',
+                    'Соблюдение этих рекомендаций помогает сделать наблюдение звездного неба в Оренбурге максимально комфортным для всех. Мы создаем атмосферу, где каждый участник может увидеть удивительные небесные явления, изучить планеты через телескоп и получить незабываемый опыт.'
+                )}
+            </Container>
+
+            <h2>{t('pages.stargazing-rules.join-title', 'Присоединяйтесь к нашим астровыездам!')}</h2>
+
+            <Container>
+                {t(
+                    'pages.stargazing-rules.join-description',
+                    'Хотите узнать больше о наших мероприятиях, организованных в Оренбурге?'
+                )}
+                <Link
+                    style={{ margin: '0 5px' }}
+                    href={'https://t.me/look_at_stars'}
+                    title={t('common.telegram', 'Телеграм')}
+                    rel={'noindex nofollow'}
+                    target={'_blank'}
+                >
+                    {t('pages.stargazing-rules.subscribe', 'Подписывайтесь')}
+                </Link>
             </Container>
 
             <AppFooter />

@@ -12,7 +12,7 @@ import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
-import { EventItemData, EventPhotoUploader } from '@/components/pages/stargazing'
+import { EventItemData, EventPhotoUploader, EventReviews } from '@/components/pages/stargazing'
 import { formatDate } from '@/utils/dates'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
 import { removeMarkdown, sliceText } from '@/utils/strings'
@@ -39,6 +39,9 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     const [uploadingPhotos, setUploadingPhotos] = useState<string[]>()
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>()
+    const [isPhotosExpanded, setIsPhotosExpanded] = useState(false)
+
+    const PHOTOS_PREVIEW_LIMIT = 12
 
     const title = `${t('menu.stargazing', 'Астровыезды')} - ${event?.title}`
 
@@ -112,14 +115,26 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 ]}
             >
                 {userRole === ApiModel.UserRole.ADMIN && (
-                    <Button
-                        icon={'Pencil'}
-                        mode={'secondary'}
-                        size={'large'}
-                        label={t('common.edit', 'Редактировать')}
-                        disabled={!eventId}
-                        onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
-                    />
+                    <>
+                        <Button
+                            disabled={!!uploadingPhotos?.length}
+                            icon={'Download'}
+                            mode={'secondary'}
+                            onClick={handleUploadPhotoClick}
+                        >
+                            {!uploadingPhotos?.length
+                                ? 'Загрузить фотографии'
+                                : `Загрузка ${uploadingPhotos?.length} фото`}
+                        </Button>
+
+                        <Button
+                            icon={'Pencil'}
+                            mode={'secondary'}
+                            label={t('common.edit', 'Редактировать')}
+                            disabled={!eventId}
+                            onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
+                        />
+                    </>
                 )}
             </AppToolbar>
 
@@ -128,36 +143,47 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 event={event || undefined}
             />
 
+            <h2>{`${event?.title} - ${t('pages.stargazing.photos-from-stargazing', 'Фотографии с астровыезда')}`}</h2>
+
             <Container>
-                <h2
-                    className={'subTitle'}
-                    style={{ marginTop: 0, textTransform: 'uppercase' }}
-                >{`${event?.title} - ${t('pages.stargazing.photos-from-stargazing', 'Фотографии с астровыезда')}`}</h2>
+                {localPhotos?.length > 0 ? (
+                    <>
+                        <PhotoGallery
+                            photos={(isPhotosExpanded ? localPhotos : localPhotos.slice(0, PHOTOS_PREVIEW_LIMIT)).map(
+                                (photo, index) => ({
+                                    height: photo.height,
+                                    src: createPreviewPhotoUrl(photo),
+                                    width: photo.width,
+                                    alt: `${photo?.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
+                                })
+                            )}
+                            onClick={({ index }) => {
+                                handlePhotoClick(index)
+                            }}
+                        />
 
-                {user?.role === ApiModel.UserRole.ADMIN && (
-                    <Button
-                        disabled={!!uploadingPhotos?.length}
-                        style={{ marginBottom: 20, width: '100%' }}
-                        mode={'secondary'}
-                        onClick={handleUploadPhotoClick}
-                    >
-                        {!uploadingPhotos?.length ? 'Загрузить фотографии' : `Загрузка ${uploadingPhotos?.length} фото`}
-                    </Button>
+                        {localPhotos.length > PHOTOS_PREVIEW_LIMIT && (
+                            <Button
+                                mode={'secondary'}
+                                className={styles.showMorePhotos}
+                                onClick={() => setIsPhotosExpanded(!isPhotosExpanded)}
+                            >
+                                {isPhotosExpanded
+                                    ? t('pages.stargazing.photos-show-less', 'Показать меньше фотографий')
+                                    : t('pages.stargazing.photos-show-all', 'Показать все {{count}} фотографий', {
+                                          count: localPhotos.length
+                                      })}
+                            </Button>
+                        )}
+                    </>
+                ) : (
+                    <p className={styles.noPhotos}>
+                        {t(
+                            'pages.stargazing.no-photos',
+                            'Фотографии с этого события ещё не загружены. Загляните позже!'
+                        )}
+                    </p>
                 )}
-
-                <PhotoGallery
-                    photos={
-                        localPhotos?.map((photo, index) => ({
-                            height: photo.height,
-                            src: createPreviewPhotoUrl(photo),
-                            width: photo.width,
-                            alt: `${photo?.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
-                        })) || []
-                    }
-                    onClick={({ index }) => {
-                        handlePhotoClick(index)
-                    }}
-                />
 
                 <EventPhotoUploader
                     eventId={eventId}
@@ -180,6 +206,10 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 showLightbox={showLightbox}
                 onCloseLightBox={handleCloseLightbox}
             />
+
+            <h2>{t('pages.stargazing.reviews', 'Отзывы')}</h2>
+
+            <EventReviews eventId={eventId} />
 
             <section className={styles.footerLinks}>
                 {adjacentEvents?.previousEvent && (
