@@ -35,6 +35,8 @@ $routes->group('auth', static function ($routes) {
     $routes->get('vk', 'Auth::vk');
     //$routes->post('register', 'Auth::register');
     //$routes->post('login', 'Auth::login');
+    $routes->patch('profile', 'Auth::updateProfile');
+    $routes->options('profile', static function () {});
     $routes->options('(:any)', static function () {});
 });
 
@@ -85,7 +87,9 @@ $routes->group('fits', static function ($routes) {
 /** Photos Controller **/
 $routes->group('photos', static function ($routes) {
     $routes->get('/', 'Photos::list');
+    // $routes->get('download/(:any)/(:any)', 'Photos::download/$1/$2');
     $routes->get('(:any)', 'Photos::show/$1');
+    // $routes->get('photos/(:any)/(:any)', 'Photos::show/$1/$2');
     $routes->post('/', 'Photos::create');
     $routes->post('(:any)/upload', 'Photos::upload/$1');
     $routes->patch('(:any)', 'Photos::update/$1');
@@ -99,6 +103,7 @@ $routes->group('photos', static function ($routes) {
 $routes->group('events', static function ($routes) {
     $routes->get('/', 'Events::list');
     $routes->get('upcoming', 'Events::upcoming');
+    $routes->get('upcoming/registered', 'Events::upcomingRegistered');
     $routes->get('photos', 'Events::photos');
     $routes->get('(:alphanum)', 'Events::show/$1');
     $routes->get('members/(:alphanum)', 'Events::members/$1');

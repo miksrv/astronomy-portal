@@ -43,6 +43,27 @@ class Comments extends ResourceController
      */
     public function index(): ResponseInterface
     {
+        $userId = $this->request->getGet('userId', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+
+        if (!empty($userId)) {
+            if (!$this->session->isAuth) {
+                return $this->failUnauthorized(lang('App.accessDenied'));
+            }
+
+            try {
+                $items = $this->model->getByUser($userId);
+
+                return $this->respond([
+                    'count' => count($items),
+                    'items' => $items,
+                ]);
+            } catch (Exception $e) {
+                log_message('error', '{exception}', ['exception' => $e]);
+
+                return $this->failServerError(lang('General.serverError'));
+            }
+        }
+
         $entityType = $this->request->getGet('entityType', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $entityId   = $this->request->getGet('entityId', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $limit      = $this->request->getGet('limit', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 100]]);
@@ -66,10 +87,10 @@ class Comments extends ResourceController
             ];
 
             if ($this->session->isAuth && $entityType === 'event') {
-                $userId = $this->session->user->id;
+                $sessionUserId = $this->session->user->id;
 
-                $response['canReview']   = $this->model->canReviewEvent($userId, $entityId);
-                $response['hasReviewed'] = $this->model->hasReviewed($userId, 'event', $entityId);
+                $response['canReview']   = $this->model->canReviewEvent($sessionUserId, $entityId);
+                $response['hasReviewed'] = $this->model->hasReviewed($sessionUserId, 'event', $entityId);
             }
 
             return $this->respond($response);

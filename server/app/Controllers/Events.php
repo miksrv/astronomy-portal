@@ -16,7 +16,7 @@ use CodeIgniter\I18n\Time;
 use CodeIgniter\Files\File;
 use Config\Services;
 
-use Longman\TelegramBot\Exception\TelegramException;
+//use Longman\TelegramBot\Exception\TelegramException;
 
 use ReflectionException;
 use Exception;
@@ -105,6 +105,41 @@ class Events extends ResourceController
 
             return $this->failServerError(lang('General.serverError'));
         }
+    }
+
+    /**
+     * Returns the next upcoming event the authenticated user is registered for.
+     */
+    public function upcomingRegistered(): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized('Unauthorized');
+        }
+
+        $eventUsersModel = new EventsUsersModel();
+        $row = $eventUsersModel->getUpcomingRegisteredEvent($this->session->user->id);
+
+        $item = null;
+
+        if ($row) {
+            $item = [
+                'id'             => $row->id,
+                'titleRu'        => $row->title_ru,
+                'titleEn'        => $row->title_en,
+                'date'           => $row->date,
+                'coverFileName'  => $row->cover_file_name,
+                'coverFileExt'   => $row->cover_file_ext,
+                'locationRu'     => $row->location_ru,
+                'locationEn'     => $row->location_en,
+                'yandexMapLink'  => $row->yandex_map_link,
+                'googleMapLink'  => $row->google_map_link,
+                'adults'         => (int) $row->adults,
+                'children'       => (int) $row->children,
+                'checkinAt'      => $row->checkin_at,
+            ];
+        }
+
+        return $this->respond(['item' => $item]);
     }
 
     /**
@@ -485,7 +520,7 @@ class Events extends ResourceController
                 ->first();
 
             // $currentTickets = $currentTickets->adults + $currentTickets->children;
-            $totalMembers   = (int) $currentTickets->adults + (int) $currentTickets->children;
+//            $totalMembers   = (int) $currentTickets->adults + (int) $currentTickets->children;
             $currentTickets = (int) $currentTickets->adults;
 
             if ($currentTickets >= (int) $event->max_tickets) {
@@ -502,18 +537,17 @@ class Events extends ResourceController
                 'children_ages' => json_encode($childrenAges),
             ]);
 
-            $safeName       = htmlspecialchars($input['name'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            $safeEventTitle = htmlspecialchars($event->title_ru ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-            $message = "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n" .
-                "<b>{$safeEventTitle}</b>\n" .
-                "🔹<i>{$safeName}</i>\n" .
-                "🔹(<b>{$input['adults']}</b>) взрослых, ({$input['children']}) детей\n" .
-                (count($childrenAges) > 0 ? "🔹Возраст детей <b>" . implode(', ', $childrenAges) . "</b> (лет)\n" : "") .
-                "🔹Доступно мест <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b> из <b>{$event->max_tickets}</b>\n" .
-                "🔹Всего участников: <b>" . ($totalMembers + (int) $input['adults'] + (int) $input['children']) . "</b>";
-
-            (new TelegramLibrary())->sendMessage($message);
+//            $safeName       = htmlspecialchars($input['name'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+//            $safeEventTitle = htmlspecialchars($event->title_ru ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+//            $message = "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n" .
+//                "<b>{$safeEventTitle}</b>\n" .
+//                "🔹<i>{$safeName}</i>\n" .
+//                "🔹(<b>{$input['adults']}</b>) взрослых, ({$input['children']}) детей\n" .
+//                (count($childrenAges) > 0 ? "🔹Возраст детей <b>" . implode(', ', $childrenAges) . "</b> (лет)\n" : "") .
+//                "🔹Доступно мест <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b> из <b>{$event->max_tickets}</b>\n" .
+//                "🔹Всего участников: <b>" . ($totalMembers + (int) $input['adults'] + (int) $input['children']) . "</b>";
+//
+//            (new TelegramLibrary())->sendMessage($message);
 
             $userModel  = new UsersModel();
             $updateData = [];
@@ -579,23 +613,23 @@ class Events extends ResourceController
             }
 
             // Check available tickets
-            $currentTickets = $eventUsersModel
-                ->selectSum('adults')
-                ->where('event_id', $input['eventId'])
-                ->first();
+//            $currentTickets = $eventUsersModel
+//                ->selectSum('adults')
+//                ->where('event_id', $input['eventId'])
+//                ->first();
 
             $eventUsersModel->delete($userRegistration->id);
 
-            $safeCancelName  = htmlspecialchars($this->session->user->name ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            $safeCancelTitle = htmlspecialchars($event->title_ru ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+//            $safeCancelName  = htmlspecialchars($this->session->user->name ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+//            $safeCancelTitle = htmlspecialchars($event->title_ru ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-            $cancelMessage = "<b>❌ ОТМЕНА БРОНИРОВАНИЯ</b>\n" .
-                "<b>{$safeCancelTitle}</b>\n" .
-                "🔹<i>{$safeCancelName}</i>\n" .
-                "🔹Взрослых: <b>{$userRegistration->adults}</b>, детей: {$userRegistration->children}\n" .
-                "🔹Осталось слотов: <b>" . ($event->max_tickets - (abs($currentTickets->adults - (int) $userRegistration->adults))) . "</b>\n";
-
-            (new TelegramLibrary())->sendMessage($cancelMessage);
+//            $cancelMessage = "<b>❌ ОТМЕНА БРОНИРОВАНИЯ</b>\n" .
+//                "<b>{$safeCancelTitle}</b>\n" .
+//                "🔹<i>{$safeCancelName}</i>\n" .
+//                "🔹Взрослых: <b>{$userRegistration->adults}</b>, детей: {$userRegistration->children}\n" .
+//                "🔹Осталось слотов: <b>" . ($event->max_tickets - (abs($currentTickets->adults - (int) $userRegistration->adults))) . "</b>\n";
+//
+//            (new TelegramLibrary())->sendMessage($cancelMessage);
 
             return $this->respond(['message' => lang('Events.cancelSuccess')]);
         } catch (Exception $e) {

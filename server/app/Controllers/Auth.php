@@ -162,7 +162,6 @@ class Auth extends ResourceController
         );
     }
 
-
     /**
      * @param $input
      * @param array $rules
@@ -201,19 +200,10 @@ class Auth extends ResourceController
      */
     protected function _serviceAuth(string $authType, object | null $serviceProfile): ResponseInterface
     {
-        log_message('info', '[Auth] Service auth attempt via {type}', ['type' => $authType]);
-
         if (empty($serviceProfile)) {
             log_message('error', '[Auth] Service {type} returned empty profile (null)', ['type' => $authType]);
             return $this->failValidationErrors(lang('Auth.authServiceEmptyData'));
         }
-
-        log_message('info', '[Auth] Service {type} profile received: id={id}, name={name}, email={email}', [
-            'type'  => $authType,
-            'id'    => $serviceProfile->id ?? 'N/A',
-            'name'  => $serviceProfile->name ?? 'N/A',
-            'email' => $serviceProfile->email ?? 'N/A',
-        ]);
 
         if (empty($serviceProfile->email)) {
             log_message('error', '[Auth] Service {type} profile has no email address', ['type' => $authType]);
@@ -226,10 +216,6 @@ class Auth extends ResourceController
 
         // If there is no user with this email, then register a new user
         if (empty($userData)) {
-            log_message('info', '[Auth] No existing user found for {email}, creating new account via {type}', [
-                'email' => $serviceProfile->email,
-                'type'  => $authType,
-            ]);
             $createUser = new UserEntity();
             $createUser->name      = $serviceProfile->name;
             $createUser->email     = $serviceProfile->email;
@@ -341,6 +327,44 @@ class Auth extends ResourceController
 
     /**
      * @return ResponseInterface
+     * @throws ReflectionException
+     */
+    public function updateProfile(): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized('Unauthorized');
+        }
+
+        $input = $this->request->getJSON(true);
+
+        $rules = [
+            'name'  => 'required|min_length[2]|max_length[100]',
+            'phone' => 'permit_empty|max_length[20]',
+        ];
+
+        if (!$this->validateRequest($input, $rules)) {
+            return $this->failValidationErrors($this->validator->getErrors());
+        }
+
+        $userModel = new UsersModel();
+
+        $updateData = ['name' => $input['name']];
+
+        if (array_key_exists('phone', $input)) {
+            $updateData['phone'] = $input['phone'];
+        }
+
+        $updated = $userModel->update($this->session->user->id, $updateData);
+
+        if (!$updated) {
+            return $this->fail(lang('App.profileUpdateFailed'));
+        }
+
+        return $this->respondUpdated();
+    }
+
+    /**
+     * @return ResponseInterface
      */
     protected function responseAuth(): ResponseInterface
     {
@@ -350,7 +374,7 @@ class Auth extends ResourceController
             $response->user  = $this->session->user;
             $response->token = generateAuthToken($this->session->user->email);
 
-            unset($response->user->email, $response->user->auth_type);
+            unset($response->user->auth_type);
 
             if ($response->user->role === 'user') {
                 unset($response->user->role);
