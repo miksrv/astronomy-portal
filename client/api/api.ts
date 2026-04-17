@@ -93,6 +93,11 @@ export const API = createApi({
             }),
             transformErrorResponse: (response) => response.data
         }),
+        authUpdateProfile: builder.mutation<ApiType.Auth.ResUpdateProfile, ApiType.Auth.ReqUpdateProfile>({
+            invalidatesTags: ['Auth'],
+            query: (body) => ({ body, method: 'PATCH', url: 'auth/profile' }),
+            transformErrorResponse: (response) => response.data
+        }),
 
         /* Categories Controller */
         categoriesGetList: builder.query<ApiType.Category.Response, void>({
@@ -120,6 +125,10 @@ export const API = createApi({
         eventGetUpcoming: builder.query<ApiType.Events.ResItem, void>({
             providesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
             query: () => 'events/upcoming'
+        }),
+        eventGetUpcomingRegistered: builder.query<ApiType.Auth.ResUpcomingEvent, void>({
+            providesTags: [{ id: 'UPCOMING_PROFILE', type: 'Events' }],
+            query: () => 'events/upcoming/registered'
         }),
         eventPhotoUploadPost: builder.mutation<ApiType.Events.ResponsePhoto, ApiType.Events.ReqUploadPhoto>({
             invalidatesTags: (res, err, arg) => [
@@ -334,24 +343,6 @@ export const API = createApi({
         }),
 
         /* Statistic Controller */
-        // statisticGet: builder.query<ApiType.Statistic.ResGeneral, void>({
-        //     providesTags: () => ['Statistic'],
-        //     query: () => 'statistic'
-        // }),
-        // statisticGetCatalogItems: builder.query<
-        //     ApiType.Statistic.ResCatalogNames,
-        //     void
-        // >({
-        //     providesTags: () => ['Statistic'],
-        //     query: () => 'statistic/catalog'
-        // }),
-        // statisticGetPhotosItems: builder.query<
-        //     ApiType.Statistic.ResPhotoNames,
-        //     void
-        // >({
-        //     providesTags: () => ['Statistic'],
-        //     query: () => 'statistic/photos'
-        // }),
         statisticGetTelescope: builder.query<ApiType.Statistic.ResTelescope, Maybe<ApiType.Statistic.ReqTelescope>>({
             providesTags: () => ['Statistic'],
             query: (params) => `statistic/telescope${encodeQueryData(params)}`
@@ -440,6 +431,7 @@ export const API = createApi({
     },
     reducerPath: 'api',
     tagTypes: [
+        'Auth',
         'Comments',
         'Equipment',
         'Files',

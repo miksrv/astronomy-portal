@@ -201,7 +201,7 @@ type MyComponentProps = { ... }
 
 ### i18n
 
-- Default fallback text in `t('key', 'fallback')` must be **English**.
+- Default fallback text in `t('key', 'fallback')` must be **Russian**.
 - Every new key must be added to **both** locale files:
     - `client/public/locales/en/translation.json` — English text
     - `client/public/locales/ru/translation.json` — proper Russian translation (never copy English)

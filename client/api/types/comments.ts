@@ -1,8 +1,9 @@
 import { ApiModel } from '@/api'
 
 export interface ReqList {
-    entityType: string
-    entityId: string
+    entityType?: string
+    entityId?: string
+    userId?: string
 }
 
 export interface ResList {

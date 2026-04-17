@@ -1,6 +1,6 @@
 # FEAT-24 — Reviews & Comments System
 
-**Status:** Partially Complete — FE-7 blocked on FEAT-23  
+**Status:** Complete  
 **Priority:** High  
 **Affects:** Backend (CodeIgniter 4) + Frontend (Next.js)  
 **Parallel implementation:** Backend and Frontend can work in parallel once the API contract is agreed.
@@ -311,7 +311,7 @@ Add between `EventsList` and `AppFooter` on the stargazing index page.
 Fetches 5 random event reviews. Shows them in a horizontal scroll or grid (2–3 columns).  
 Title: "Отзывы участников".
 
-### FE-7 — "My Reviews" in profile (FEAT-23 integration) ⏳ BLOCKED — depends on FEAT-23 (User Personal Cabinet)
+### FE-7 — "My Reviews" in profile (FEAT-23 integration) ✅ DONE
 
 Replace the placeholder in the profile page with:
 - List of user's reviews (using `commentsGetList` filtered by userId — requires backend to support `userId` filter, add it)

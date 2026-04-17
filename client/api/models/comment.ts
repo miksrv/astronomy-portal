@@ -3,6 +3,8 @@ export type Comment = {
     content: string
     rating?: number
     createdAt: string
+    entityType?: string
+    entityId?: string
     author: {
         id: string
         name: string

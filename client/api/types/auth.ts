@@ -28,3 +28,16 @@ export interface ResAuthService {
     auth?: boolean
     user?: ApiModel.User
 }
+
+export interface ReqUpdateProfile {
+    name: string
+    phone?: string
+}
+
+export interface ResUpdateProfile {
+    user: ApiModel.User
+}
+
+export interface ResUpcomingEvent {
+    item: ApiModel.Event | null
+}

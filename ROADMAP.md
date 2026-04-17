@@ -27,8 +27,8 @@ Each feature is described in detail in the `features/` directory.
 | FEAT-20 | Calendar Invite (.ics) Download    | Planned   | [features/stargazing-calendar-invite.md](features/stargazing-calendar-invite.md) |
 | FEAT-22 | Stargazing Index Page Redesign     | Planned   | [features/stargazing-index-redesign.md](features/stargazing-index-redesign.md) |
 | **Core UX** ||||
-| FEAT-23 | User Personal Cabinet              | Planned   | [features/user-profile.md](features/user-profile.md)         |
-| FEAT-24 | Reviews & Comments System          | Partially Complete — "My Reviews" profile section (FE-7) blocked on FEAT-23 | [features/reviews-comments.md](features/reviews-comments.md) |
+| FEAT-23 | User Personal Cabinet              | Completed | [features/user-profile.md](features/user-profile.md)         |
+| FEAT-24 | Reviews & Comments System          | Completed | [features/reviews-comments.md](features/reviews-comments.md) |
 | FEAT-25 | Admin / Moderator Dashboard        | Planned   | [features/admin-dashboard.md](features/admin-dashboard.md)   |
 
 ---
