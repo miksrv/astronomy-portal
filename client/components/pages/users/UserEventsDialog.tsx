@@ -65,9 +65,10 @@ const UserEventsDialog: React.FC<UserEventsDialogProps> = ({ userId, userName, o
         >
             {!isFetching && error && <Message type={'error'}>{getErrorMessage(error)}</Message>}
 
-            {!isFetching && !error && (
+            {!error && (
                 <Table<ApiModel.AdminUserEvent>
                     size={'small'}
+                    loading={isFetching}
                     columns={tableColumns}
                     data={data?.items || []}
                     noDataCaption={t('users.eventsEmpty', 'Пользователь не посещал мероприятий')}

@@ -1,5 +1,8 @@
 export { EventForm, type EventFormType } from './event-form'
 export { EventItemData } from './event-item-data'
 export { EventPhotoUploader } from './event-photo-uploader'
+export { EventReviews } from './event-reviews/EventReviews'
 export { EventUpcoming } from './event-upcoming'
 export { EventsList } from './events-list'
+export { type InfoCardItem, InfoCards } from './info-cards'
+export { ReviewsWidget } from './reviews-widget/ReviewsWidget'
