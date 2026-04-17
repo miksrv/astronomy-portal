@@ -91,7 +91,7 @@ Key common components added in recent features:
 
 **Coding conventions (frontend):**
 - Component props must use `interface`, not `type` alias
-- Default text in `t('key', 'fallback')` must always be **English**
+- Default text in `t('key', 'fallback')` must always be **Russian**
 - Every new i18n key must be added to **both** `client/public/locales/en/translation.json` and `client/public/locales/ru/translation.json` with proper translations — never copy English text into the RU file
 
 ### Backend (`server/`)

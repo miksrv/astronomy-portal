@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## 4.5.0
+
+### Minor Changes
+
+- Added reviews and comments system for stargazing events: database migration (`comments` table with soft deletes and star ratings), `CommentsModel` with author privacy (truncated names), `Comments` controller with CRUD endpoints (`GET /comments`, `GET /comments/random`, `POST /comments`, `DELETE /comments/:id`), authentication checks, and server-side language files (EN/RU)
+- Added reusable `ReviewCard` component (avatar, star rating, text, date, delete button) and `ReviewForm` component (star selector, text area, inline API validation errors)
+- Added `EventReviews` section on the stargazing event detail page displaying user reviews with the ability to submit and delete reviews
+- Added `ReviewsWidget` carousel on the stargazing index page showing random reviews fetched from the API
+- Added `InfoCards` component for the stargazing index page with key event information displayed as styled cards
+- Added user profile page (`/profile`): `ProfileCard` with large avatar and user info, `UpcomingEventCard` showing the nearest registered event with countdown, `EventHistorySection` with past event registrations, and `MyReviewsSection` listing the user's reviews
+- Added backend profile API endpoints in `Auth` controller for retrieving and updating the authenticated user's profile, and fetching upcoming registered events
+- Added `EventsUsersModel` with method to retrieve upcoming event for a user; extended `Event` and `EventUser` entities with `phone` and `comment` fields
+- Added `comment` model and RTK Query API types (`comments.ts`, `auth.ts`), new API endpoints for comments and profile operations, and auth cookie configuration
+- Redesigned stargazing index page layout: restructured event list, added info cards section and reviews widget carousel
+- Redesigned stargazing event detail page: expanded photo gallery, integrated reviews section, refined `EventUpcoming` component layout
+- Extended `UserAvatar` component with `large` size mode (for profile page); added h2 heading style with decorative divider in global styles
+- Extended JWT token lifetime in server configuration
+- Added foreign key constraint on `comments` table referencing users
+- Added EN/RU translation keys for reviews, profile, and updated stargazing pages
+- Redesigned stargazing rules and howto pages with improved layout and styling
+- Added feature specification documents for upcoming features: admin dashboard, calendar invites, event reminders, i18n booking form, QR email confirmation, waitlist, and user profile
+- Added detailed `CLAUDE.md` documentation files for client and server subsystems
+
 ## 4.4.0
 
 ### Minor Changes
