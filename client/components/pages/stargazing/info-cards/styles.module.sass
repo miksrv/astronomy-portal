@@ -1,0 +1,39 @@
+@use '../../../../styles/variables' as variables
+
+.grid
+    display: grid
+    grid-template-columns: repeat(2, 1fr)
+    gap: 10px
+
+    @media (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: 1fr
+
+.card
+    display: flex
+    align-items: center
+    gap: 12px
+    padding: 14px 16px
+    border-radius: var(--border-radius)
+    background: var(--input-background-color)
+    text-decoration: none
+    color: var(--text-color-primary)
+    transition: background .2s
+
+    &:hover
+        background: var(--input-border-color)
+
+.icon
+    width: 24px
+    height: 24px
+    fill: var(--link-color)
+    flex-shrink: 0
+
+.cardTitle
+    font-weight: 600
+    font-size: 14px
+    margin-bottom: 2px
+
+.cardDesc
+    font-size: 12px
+    opacity: .7
+
