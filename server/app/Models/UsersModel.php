@@ -63,7 +63,7 @@ class UsersModel extends ApplicationBaseModel {
     public function findUserByEmailAddress(string $emailAddress): UserEntity | array | null
     {
         return $this
-            ->select('id, name, avatar, email, auth_type, role, locale')
+            ->select('id, name, phone, avatar, email, auth_type, role, locale')
             ->where('email', $emailAddress)
             ->first();
     }

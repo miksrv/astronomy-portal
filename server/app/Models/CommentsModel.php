@@ -93,7 +93,7 @@ class CommentsModel extends ApplicationBaseModel
         return $this->formatRows($rows);
     }
 
-    private function formatRows(array $rows): array
+    private function formatRows(array $rows, bool $keepEntity = false): array
     {
         foreach ($rows as &$row) {
             $row['createdAt'] = $row['created_at'] ?? null;
@@ -102,6 +102,12 @@ class CommentsModel extends ApplicationBaseModel
                 'name'   => $this->truncateAuthorName((string) ($row['author_name'] ?? '')),
                 'avatar' => $row['avatar'] ?? null,
             ];
+
+            if ($keepEntity) {
+                $row['entityType'] = $row['entity_type'] ?? null;
+                $row['entityId']   = $row['entity_id'] ?? null;
+            }
+
             unset($row['created_at'], $row['author_name'], $row['avatar'], $row['user_id'],
                   $row['entity_type'], $row['entity_id'], $row['status']);
         }
@@ -118,13 +124,16 @@ class CommentsModel extends ApplicationBaseModel
      */
     public function getByUser(string $userId): array
     {
-        return $this->db->table('comments c')
-            ->select('c.id, c.entity_type, c.entity_id, c.content, c.rating, c.status, c.created_at')
+        $rows = $this->db->table('comments c')
+            ->select('c.id, c.user_id, c.entity_type, c.entity_id, c.content, c.rating, c.status, c.created_at, u.avatar, u.name AS author_name')
+            ->join('users u', 'u.id = c.user_id', 'left')
             ->where('c.user_id', $userId)
             ->where('c.deleted_at IS NULL')
             ->orderBy('c.created_at', 'DESC')
             ->get()
             ->getResultArray();
+
+        return $this->formatRows($rows, true);
     }
 
     /**
