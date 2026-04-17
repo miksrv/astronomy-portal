@@ -115,7 +115,7 @@ const UsersPage: NextPage<object> = () => {
             const filtersH = filtersRef.current?.offsetHeight || 0
             const paginationH = paginationRef.current?.offsetHeight || 0
             // 20 for margins between containers (10px * 2)
-            setTableHeight(containerHeight - toolbarH - footerH - filtersH - paginationH - 115)
+            setTableHeight(containerHeight - toolbarH - footerH - filtersH - paginationH - 125)
         }
 
         calculateTableHeight()

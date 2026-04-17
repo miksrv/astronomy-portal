@@ -145,8 +145,9 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 {t('pages.about.telegram-channel', 'Подпишитесь на авторский Telegram канал этого проекта')}
             </Link>
 
+            <h2>{t('pages.about.team-title', 'Наша команда')}</h2>
+
             <Container>
-                <h2 style={{ marginTop: 0 }}>{t('pages.about.team-title', 'Наша команда')}</h2>
                 <p style={{ marginTop: 0 }}>
                     {t(
                         'pages.about.team-description',
@@ -156,10 +157,9 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 <ProjectTeam />
             </Container>
 
+            <h2>{t('pages.about.project-title', 'Астрономический проект «Смотри на звёзды»')}</h2>
+
             <Container>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('pages.about.project-title', 'Астрономический проект «Смотри на звёзды»')}
-                </h2>
                 <p style={{ marginTop: 0 }}>
                     {t(
                         'pages.about.project-description',
@@ -217,10 +217,9 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 </p>
             </Container>
 
+            <h2>{t('pages.about.observatory-title', 'Самодельная астрономическая обсерватория')}</h2>
+
             <Container>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('pages.about.observatory-title', 'Самодельная астрономическая обсерватория')}
-                </h2>
                 <p style={{ marginTop: 0 }}>
                     {t(
                         'pages.about.observatory-intro',
@@ -282,8 +281,9 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 </p>
             </Container>
 
+            <h2>{t('pages.about.your-help-title', 'Ваша помощь')}</h2>
+
             <Container id={'your-help'}>
-                <h2 style={{ marginTop: 0 }}>{t('pages.about.your-help-title', 'Ваша помощь')}</h2>
                 <p style={{ marginTop: 0 }}>
                     {t(
                         'pages.about.your-help-intro',

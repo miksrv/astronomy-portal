@@ -66,7 +66,6 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                             icon={'Pencil'}
                             mode={'secondary'}
                             label={t('common.edit', 'Редактировать')}
-                            size={'large'}
                             disabled={!objectName}
                             link={`/objects/form/?id=${objectName}`}
                         />
@@ -74,7 +73,6 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                         <Button
                             icon={'PlusCircle'}
                             mode={'secondary'}
-                            size={'large'}
                             label={t('common.add', 'Добавить')}
                             link={'/objects/form'}
                         />
