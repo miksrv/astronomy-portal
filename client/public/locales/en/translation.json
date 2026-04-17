@@ -22,17 +22,6 @@
                 "frames": "Frames",
                 "exposure": "Exposure"
             },
-            "review-card": {
-                "delete": "Delete"
-            },
-            "review-form": {
-                "error": "Failed to submit review. Please try again.",
-                "rating-label": "Rating",
-                "placeholder": "Share your experience...",
-                "success": "Review published!",
-                "submit": "Submit Review",
-                "not-eligible": "You can leave a review after attending the event"
-            },
             "star-map": {
                 "settings": {
                     "title": "Map Settings",
@@ -59,15 +48,6 @@
                 "height": "Altitude",
                 "title": "Visibility chart of {{name}} throughout the day",
                 "description": "Altitude chart of {{name}} above the horizon throughout the current day for the observatory observation point in Orenburg ({{lat}}, {{lon}}). The chart shows when the object is above the horizon and the maximum altitude in degrees it reaches. Data is current as of the observation date: {{date}}."
-            },
-            "reviews-section": {
-                "title": "Reviews",
-                "average_one": "{{rating}} ({{count}} review)",
-                "average_other": "{{rating}} ({{count}} reviews)",
-                "empty": "No reviews yet. Be the first!"
-            },
-            "reviews-widget": {
-                "title": "Participant Reviews"
             }
         },
         "pages": {
@@ -204,8 +184,6 @@
             },
             "stargazing": {
                 "event-upcoming": {
-                    "no-upcoming": "No upcoming star parties",
-                    "no-upcoming-hint": "As soon as we plan the next star party, a registration form will appear here. Subscribe to our Telegram channel so you don't miss the announcement!",
                     "stargazing": "Star Parties",
                     "you-are-registered": "You are registered",
                     "timezone": "(Orenburg time, UTC+5)",
@@ -223,9 +201,9 @@
                     "no-tickets-hint": "Additional spots may open if someone cancels their registration. Or simply wait for the next event.",
                     "registration-opens-in": "Registration opens in",
                     "registration-closed": "Registration is closed",
-                    "registration-closed-hint": "Please wait for our next star party - to not miss it, subscribe to the Telegram channel",
+                    "registration-closed-hint": "Please wait for our next star party — to not miss it, subscribe to the Telegram channel",
                     "login-to-register": "Sign in to register for the star party",
-                    "cancel-hint": "If you cannot make it, please cancel your registration - this will help others take your spot.",
+                    "cancel-hint": "If you cannot make it, please cancel your registration — this will help others take your spot.",
                     "cancel-booking": "Cancel Booking",
                     "confirm-cancel-title": "Confirm booking cancellation",
                     "confirm-cancel-text-1": "If you cancel your booking for this star party, the freed spots can be used by other participants who want to attend.",
@@ -243,6 +221,7 @@
     },
     "menu": {
         "users": "Users",
+        "profile": "Personal Cabinet",
         "astrophoto": "Astrophoto",
         "objects": "Objects",
         "stargazing": "Star Parties",
@@ -263,7 +242,6 @@
         "minutes_other": "{{count}} minutes",
         "frames_one": "{{count}} frame",
         "frames_other": "{{count}} frames",
-        "loading": "Loading...",
         "telegram": "Telegram",
         "delete": "Delete",
         "edit": "Edit",
@@ -302,7 +280,7 @@
             "intro": ", and this site is my attempt to share my hobby with you, to bring together all the information and capture the achievements made on the path to exploring the cosmos. Astronomy for me is not just a hobby, but an entire world that has changed my life. Through it I have found incredible friends, learned much that is new, and realized how vast and mysterious the expanses of the Universe are. This project is our shared contribution to the popularization and development of astronomy. We sincerely believe that through our efforts the cosmos will become closer and more accessible to everyone.",
             "telegram-channel": "Subscribe to the author's Telegram channel for this project",
             "team-title": "Our Team",
-            "team-description": "We work in very different fields, but we are all united by one thing - a love of stars and the night sky. Since 2016 we have been popularizing astronomy, organizing star parties in the Orenburg region, and holding sidewalk astronomy evenings in Orenburg. Together we look at the stars, share knowledge, and inspire others.",
+            "team-description": "We work in very different fields, but we are all united by one thing — a love of stars and the night sky. Since 2016 we have been popularizing astronomy, organizing star parties in the Orenburg region, and holding sidewalk astronomy evenings in Orenburg. Together we look at the stars, share knowledge, and inspire others.",
             "project-title": "Astronomical Project «Look at the Stars»",
             "project-description": "In 2016 in the Orenburg region we launched the Look at the Stars project to make astronomy accessible to everyone. Since then, every season we hold free lectures under the open sky, organize trips outside the city with telescopes, and run informal sidewalk astronomy evenings.",
             "project-goal": "The main goal of the project is to show the greatness and beauty of the Universe, to inspire people to study the cosmos. We cover not only the Orenburg region but also neighboring regions, traveling to places where the night sky is especially bright. You can learn more about our current and past events on the page",
@@ -312,7 +290,7 @@
             "project-lectures": "One of the most important components of the project are lectures delivered by experienced amateur astronomers. We talk about scientific discoveries, the history of astronomy, and its modern achievements. Lectures are held in a light format where complex things are explained in simple and clear language. This helps listeners not only broaden their horizons but also inspires independent study of astronomy.",
             "project-sidewalk-astronomy": "We pay special attention to sidewalk astronomy evenings. These open-air gatherings take place in the most accessible locations in the city. At such events anyone can come up, look through a telescope, and learn more about what the starry sky holds.",
             "observatory-title": "DIY Astronomical Observatory",
-            "observatory-intro": "This project is one of the most significant stages of my life. Our DIY astronomical observatory is a unique phenomenon for the Orenburg region. It operates autonomously and allows obtaining images of deep-space objects, making astronomy accessible to all. More details about the operation and equipment of the observatory can be found in the section - ",
+            "observatory-intro": "This project is one of the most significant stages of my life. Our DIY astronomical observatory is a unique phenomenon for the Orenburg region. It operates autonomously and allows obtaining images of deep-space objects, making astronomy accessible to all. More details about the operation and equipment of the observatory can be found in the section — ",
             "observatory-intro-link": "astronomical observatory in Orenburg",
             "observatory-work-2": ", where you will find an archive of FITS files. These data can be used for training, asteroid searching, creating astrophotographs, and other scientific or creative purposes.",
             "observatory-photos-1": "Soon we will launch a free telescope control service so that even more people can appreciate the beauty of the night sky. Don't forget to visit the section",
@@ -321,7 +299,7 @@
             "observatory-conclusion": "This project is our contribution to the popularization of astronomy. We sincerely hope it will inspire you to discover the Universe!",
             "your-help-title": "Your Support",
             "your-help-intro": "The development of the Look at the Stars project has been made possible in large part by the support of the Rodnye Goroda social investment program of Gazprom Neft and the assistance of the Orenburg Media news agency team.",
-            "your-help-description": "Our DIY observatory project has also resonated with many engaged participants. We have ambitious plans for developing this direction, and your support plays a key role. We are grateful to everyone who helps with advice, consultations, and recommendations. If we accidentally missed anyone on the acknowledgements list, please write to us - it is very important.",
+            "your-help-description": "Our DIY observatory project has also resonated with many engaged participants. We have ambitious plans for developing this direction, and your support plays a key role. We are grateful to everyone who helps with advice, consultations, and recommendations. If we accidentally missed anyone on the acknowledgements list, please write to us — it is very important.",
             "your-help-conclusion": "Thanks to your help, the cosmos truly comes closer!"
         },
         "auth": {
@@ -331,7 +309,7 @@
         },
         "index": {
             "title": "Look at the Stars Project",
-            "description": "Look at the Stars - a unique project in the Orenburg region: telescope observations outside the city, sidewalk astronomy, an observatory in the Orenburg region, and astrophotography"
+            "description": "Look at the Stars — a unique project in the Orenburg region: telescope observations outside the city, sidewalk astronomy, an observatory in the Orenburg region, and astrophotography"
         },
         "mailing": {
             "title": "Mailings",
@@ -339,14 +317,9 @@
             "status-draft": "Draft",
             "status-paused": "Paused",
             "status-sending": "Sending",
-            "detail-subject": "Subject",
-            "detail-status": "Status",
-            "detail-sent-at": "Sent at",
-            "detail-created-at": "Created at",
             "stats-total": "Total",
             "stats-sent": "Sent",
             "stats-errors": "Errors",
-            "stats-remaining": "Remaining",
             "edit-campaign": "Edit Campaign",
             "create": "New Campaign",
             "save-error": "Save Error",
@@ -368,8 +341,8 @@
             "col-status": "Status",
             "col-date": "Date",
             "no-items": "No mailings yet",
-            "delete-confirm-title": "Delete draft?",
-            "delete-confirm-text": "This action cannot be undone. The draft will be permanently deleted."
+            "delete-confirm-title": "",
+            "delete-confirm-text": ""
         },
         "objects": {
             "title": "Astronomical Objects Catalog",
@@ -382,8 +355,7 @@
             "title": "Observatory",
             "observatory-in-orenburg_link": "Observatory in Orenburg",
             "description": "A DIY amateur astronomical observatory with remote access from anywhere in the world via the internet. Observatory operation statistics, number of captured frames, and accumulated data. Telescope operation calendar.",
-            "text": "Observation of the Universe starts here - in real time you can see current weather conditions, camera feeds, equipment status, and the shooting schedule. The observatory operates in semi-automatic mode, allowing remote deep-sky imaging. An intelligent control system analyzes weather conditions and automatically decides when to begin operations. More details about the equipment and operating principles can be found on a dedicated page:",
-            "photos-and-data": "A dedicated section of the site presents <photosLink>photos</photosLink> of captured <objectsLink>deep-sky objects</objectsLink>. Detailed parameters and characteristics are available for each object, such as distance, size, spectral data, and much more. These materials can be useful for both beginner astronomers and professionals.",
+            "text": "Observation of the Universe starts here — in real time you can see current weather conditions, camera feeds, equipment status, and the shooting schedule. The observatory operates in semi-automatic mode, allowing remote deep-sky imaging. An intelligent control system analyzes weather conditions and automatically decides when to begin operations. More details about the equipment and operating principles can be found on a dedicated page:",
             "equipment-list": {
                 "mount": {
                     "title": "Mount: Sky-Watcher EQ6",
@@ -429,6 +401,8 @@
             "equipment-title": "Observatory Equipment",
             "equipment-description": "The tools and technologies used ensure high observation accuracy and professional image quality. Here is the main equipment used in operation:",
             "photos-and-data-title": "Photos and Data",
+            "photos-and-data": "A dedicated section of the site presents <photosLink>photos</photosLink> of captured <objectsLink>deep-sky objects</objectsLink>. Detailed parameters and characteristics are available for each object, such as distance, size, spectral data, and much more. These materials can be useful for both beginner astronomers and professionals.",
+            "photos-and-data-part-photos": "photos",
             "photos-and-data-part-objects": "objects",
             "astrophoto": "Astrophoto",
             "photos-and-data-all-photos": "All astronomical photos"
@@ -438,7 +412,7 @@
             "description": "Up-to-date weather charts from the weather station of an amateur observatory near Orenburg. Temperature, humidity, cloud cover, and wind speed in real time."
         },
         "photo": {
-            "description": "{{photoTitle}} - a photograph of an astronomical object taken at a DIY observatory, equipment used: {{equipment}}."
+            "description": "{{photoTitle}} — a photograph of an astronomical object taken at a DIY observatory, equipment used: {{equipment}}."
         },
         "photos": {
             "title": "Astrophoto",
@@ -450,32 +424,25 @@
         "stargazing": {
             "photos-from-stargazing": "Photos from the Star Party",
             "photo": "Photo",
-            "no-photos": "Photos from this star party have not been uploaded yet. Check back later - they will appear soon!",
-            "photos-show-all": "Show all {{count}} photos",
-            "photos-show-less": "Show fewer photos",
-            "edit-event": "Edit Star Party",
-            "add-event": "Add Star Party",
-            "save-error": "Save error",
-            "save-success": "Star party saved",
-            "archive-confirm-title": "Archive event?",
-            "archive-confirm-body": "Are you sure? The event will be hidden from users.",
+            "edit-event": "",
+            "add-event": "",
+            "save-error": "",
+            "save-success": "",
+            "archive-confirm-title": "",
+            "archive-confirm-body": "",
             "title": "Star Parties",
             "rules_link": "Star Party Rules",
-            "rules_card_desc": "What not to do and how to respect other participants",
             "howto_link": "How Star Parties Work",
-            "howto_card_desc": "Evening program, telescopes, and lectures",
             "where_link": "Where to Look Through a Telescope in Orenburg",
-            "where_card_desc": "Event location in the Orenburg district",
             "faq_link": "Frequently Asked Questions",
-            "faq_card_desc": "Answers to common participant questions",
-            "description": "Star parties in Orenburg - exciting trips outside the city where telescopes open cosmic horizons. Evenings of scientific discovery, lectures, and lively discussion with like-minded people. Learn the rules and prepare for stargazing.",
+            "description": "Star parties in Orenburg — exciting trips outside the city where telescopes open cosmic horizons. Evenings of scientific discovery, lectures, and lively discussion with like-minded people. Learn the rules and prepare for stargazing.",
             "create-stargazing_button": "Add Star Party",
-            "text": "Imagine: a night sky free of city lights, thousands of stars overhead, and Saturn's rings through a telescope eyepiece. Our star parties are more than just observations - they are evenings that change the way you see the world. Join us to witness the Universe with your own eyes!",
             "telegram": "Telegram",
             "telegram-subscription": "Subscribe to the Telegram channel to stay up to date",
-            "photo_alt": "Photo ({{number}}) from the star party - {{name}} ",
-            "events-archive": "Star Party Archive",
-            "photo_title": "Star Party: {{name}} - Photo ({{number}})"
+            "text-part-1": "A star party in Orenburg is a chance to touch the mysteries of the Universe while observing the starry sky in complete darkness. We invite you on exciting trips outside the city where telescopes open cosmic horizons right in the fields of the Orenburg region.",
+            "text-part-2": "Each star party is an evening of scientific discoveries, inspiring lectures, and lively interaction with like-minded people. You will learn how our events work, get acquainted with the basic rules of behavior, and be able to prepare in advance for stargazing.",
+            "photo_alt": "Photo ({{number}}) from the star party — {{name}} ",
+            "photo_title": "Star Party: {{name}} — Photo ({{number}})"
         },
         "checkin": {
             "no-cameras": "No cameras found",
@@ -501,7 +468,7 @@
             "questions": {
                 "where": {
                     "question": "❓How do I find out where it takes place?",
-                    "answer": "Our star parties always take place outside the city, usually within 40–70 km. We travel away from light pollution and city lights to see the stars. The exact location is available to you after registration. If you lose the location - return to the registration page via the same link. It has the geolocation - Yandex Maps and Google Maps."
+                    "answer": "Our star parties always take place outside the city, usually within 40–70 km. We travel away from light pollution and city lights to see the stars. The exact location is available to you after registration. If you lose the location — return to the registration page via the same link. It has the geolocation — Yandex Maps and Google Maps."
                 },
                 "registration": {
                     "question": "❓Can I come without registering?",
@@ -513,10 +480,10 @@
                 },
                 "what-to-bring": {
                     "question": "❓What should I bring?",
-                    "answer": "For a comfortable stay at the star party site, you must have warm clothes (we are in the steppe, it is windy and cold at night), a tourist mat, folding chairs, and blankets. We also recommend thermoses with tea/coffee and sandwiches. We advise bringing insect repellent. Hookahs, barbecues, alcohol, and cigarettes are prohibited! We also have the cleanest site - after a star party we don't find a single piece of litter and we greatly thank you for that!"
+                    "answer": "For a comfortable stay at the star party site, you must have warm clothes (we are in the steppe, it is windy and cold at night), a tourist mat, folding chairs, and blankets. We also recommend thermoses with tea/coffee and sandwiches. We advise bringing insect repellent. Hookahs, barbecues, alcohol, and cigarettes are prohibited! We also have the cleanest site — after a star party we don't find a single piece of litter and we greatly thank you for that!"
                 },
                 "no-car": {
-                    "question": "❓I don't have a car - what should I do?",
+                    "question": "❓I don't have a car — what should I do?",
                     "answer": "We do not organize transport or handle transportation. Our job is to organize a great event; yours is to get there. But for your convenience we created the chat",
                     "poputchiki": "Astro.Companions",
                     "answer2": ". Join, meet people, and find company. Everyone there is great, sociable, and reliable. Want to chat about space topics? Join the thematic",
@@ -528,17 +495,17 @@
                 },
                 "start-time": {
                     "question": "❓What time does it start?",
-                    "answer": "Each star party announcement includes a specific start time. This time it is 21:30. Guests are invited to arrive at the site from 20:00 to 21:00. This means we ask you to arrive early - to listen to music, take photos with the Moon and in the sunflowers, watch the sunsets, and breathe in the steppe air. And importantly, to park your car and avoid congestion. We really appreciate that!"
+                    "answer": "Each star party announcement includes a specific start time. This time it is 21:30. Guests are invited to arrive at the site from 20:00 to 21:00. This means we ask you to arrive early — to listen to music, take photos with the Moon and in the sunflowers, watch the sunsets, and breathe in the steppe air. And importantly, to park your car and avoid congestion. We really appreciate that!"
                 },
                 "price": {
                     "question": "❓How much does it cost?",
                     "answer": "All our star parties are free. The project grows and develops and we are always grateful for support from our audience and subscribers. For this there are",
                     "donates": "DONATIONS",
-                    "answer2": ". Want to support us - we will be grateful!"
+                    "answer2": ". Want to support us — we will be grateful!"
                 },
                 "duration": {
                     "question": "❓How long does a star party last?",
-                    "answer": "On average the official program from the start of the lecture to telescope observations lasts 2 hours. But for you they will fly by unnoticed, we guarantee. After that you choose - stay to watch the sky with telescopes, or head home. Approximate end time: 00:30."
+                    "answer": "On average the official program from the start of the lecture to telescope observations lasts 2 hours. But for you they will fly by unnoticed, we guarantee. After that you choose — stay to watch the sky with telescopes, or head home. Approximate end time: 00:30."
                 },
                 "weather": {
                     "question": "❓What if it is cloudy or raining?",
@@ -558,14 +525,14 @@
                 },
                 "merch": {
                     "question": "❓How and where can I buy your merch?",
-                    "answer": "We bring hoodies, t-shirts, car stickers, postcards, and sticker packs to the star party. Want to support the project - buy our merch!"
+                    "answer": "We bring hoodies, t-shirts, car stickers, postcards, and sticker packs to the star party. Want to support the project — buy our merch!"
                 },
                 "cancel": {
                     "question": "❓I registered but can't make it. What should I do?",
                     "answer": "Simply cancel your booking via the same link. Free slots will appear on the site and people will be able to register."
                 },
                 "more-people": {
-                    "question": "❓I registered 1/2/3/4/5 people - can I bring more?",
+                    "question": "❓I registered 1/2/3/4/5 people — can I bring more?",
                     "answer": "No, you cannot. Our rules are the same for everyone. Only the number of people you registered will be admitted with your QR code. No exceptions."
                 },
                 "late-registration": {
@@ -591,7 +558,7 @@
             "event_announcement": "Event Announcement",
             "event_announcement_text": "Star parties in Orenburg are held in favorable weather, so the exact date is only announced 2–3 days before the event. We announce upcoming outings in our Look at the Stars Telegram channel in advance, where we publish announcements and important updates. Subscribing to the channel is essential so you don't miss a new star party.",
             "registration": "Registration",
-            "registration_text": "Participation requires pre-registration through our website. It is free and takes only one minute. Note: beware of scammers - if someone asks for payment to participate, it is a scam! We welcome donations, but participation is always free.",
+            "registration_text": "Participation requires pre-registration through our website. It is free and takes only one minute. Note: beware of scammers — if someone asks for payment to participate, it is a scam! We welcome donations, but participation is always free.",
             "location": "Venue",
             "location_text": "Star parties take place outside the city, away from urban light pollution, usually 40 km from Orenburg. The exact venue will be revealed after registration. You need to get to the site independently, so plan your route in advance. The last stretch of the route is a dirt road about 300 meters long.",
             "event_plan": "Star Party Plan",
@@ -654,11 +621,11 @@
         },
         "stargazing-where": {
             "title": "Where to Look Through a Telescope in Orenburg",
-            "description": "Find out where you can look through a telescope in Orenburg. Sidewalk astronomy: free observations of the Moon, planets, and stars on city streets. Want to see more - head out of the city to observe nebulae and galaxies!",
+            "description": "Find out where you can look through a telescope in Orenburg. Sidewalk astronomy: free observations of the Moon, planets, and stars on city streets. Want to see more — head out of the city to observe nebulae and galaxies!",
             "intro": "Sidewalk astronomy is a unique format thanks to which the cosmos comes closer. In spring, summer, and autumn we set up telescopes right on the sidewalks and squares of Orenburg so that anyone can come up and take a free look at the stars, planets, and the Moon. It is an excellent opportunity for city residents to get acquainted with astronomy in a relaxed and friendly atmosphere.",
             "announcement-1": "We almost always publish announcements of sidewalk astronomy evenings in our",
             "telegram-channel": "Telegram channel",
-            "announcement-2": ", but sometimes our telescopes can be found on city streets without any prior notice. One of the project's inspirers, astro-lecturer Vladimir Ivanovich, often shares his knowledge, showing everyone interested fascinating astronomical objects. Just look for the telescope - and you will definitely end up on an unforgettable tour of the night sky!",
+            "announcement-2": ", but sometimes our telescopes can be found on city streets without any prior notice. One of the project's inspirers, astro-lecturer Vladimir Ivanovich, often shares his knowledge, showing everyone interested fascinating astronomical objects. Just look for the telescope — and you will definitely end up on an unforgettable tour of the night sky!",
             "what-you-can-see-title": "What can you see through a telescope from the city?",
             "what-you-can-see-description": "Under conditions of urban light pollution, the brightest objects remain visible. For example, you can observe:",
             "what-you-can-see-1": "Craters and mountains on the Moon, especially impressive in the first and last quarter phases;",
@@ -680,6 +647,27 @@
             "description": "You will no longer receive email notifications about new events.",
             "success": "You have been successfully unsubscribed.",
             "error": "Could not unsubscribe. The link may have already been used or has expired."
+        },
+        "profile": {
+            "title": "Personal Cabinet",
+            "profile-title": "Profile",
+            "field-name": "Name",
+            "field-email": "Email",
+            "field-phone": "Phone",
+            "avatar-note": "Avatar is linked to the authorization service",
+            "email-note": "Email cannot be changed",
+            "save": "Save",
+            "save-error": "Failed to save profile",
+            "save-success": "Profile saved",
+            "upcoming-event-title": "Upcoming Event",
+            "no-upcoming-event": "You have no upcoming events",
+            "history-title": "Event History",
+            "history-empty": "You have not attended any events yet",
+            "history-checkin": "Checked in",
+            "reviews-title": "My Reviews",
+            "reviews-coming-soon": "Your reviews will appear here soon",
+            "reviews-empty": "You have not reviewed any events yet",
+            "reviews-view-event": "View event"
         }
     },
     "equipment": {
@@ -693,8 +681,8 @@
         "filter": "Filter"
     },
     "users": {
-        "eventsColumnDate": "Date",
         "eventsColumnEvent": "Event",
+        "eventsColumnDate": "Date",
         "eventsColumnAdults": "Adults",
         "eventsColumnChildren": "Children",
         "eventsColumnCheckin": "Check-in",
@@ -717,12 +705,12 @@
         "columnEvents": "Events",
         "columnActivity": "Activity",
         "columnRegistered": "Registered",
-        "totalCount_one": "{{count}} user",
-        "totalCount_other": "{{count}} users",
         "search": "Search by name",
         "filterRole": "Role",
         "filterAuthType": "Auth service",
         "noUsers": "No users",
+        "pageOf": "Page {{page}} of {{total}}",
+        "totalCount": "Total: {{count}}",
         "paginationPage": "Page",
         "paginationNext": "Next",
         "paginationPrev": "Previous"
