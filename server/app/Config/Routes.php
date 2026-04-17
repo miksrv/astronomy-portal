@@ -85,9 +85,7 @@ $routes->group('fits', static function ($routes) {
 /** Photos Controller **/
 $routes->group('photos', static function ($routes) {
     $routes->get('/', 'Photos::list');
-    // $routes->get('download/(:any)/(:any)', 'Photos::download/$1/$2');
     $routes->get('(:any)', 'Photos::show/$1');
-    // $routes->get('photos/(:any)/(:any)', 'Photos::show/$1/$2');
     $routes->post('/', 'Photos::create');
     $routes->post('(:any)/upload', 'Photos::upload/$1');
     $routes->patch('(:any)', 'Photos::update/$1');
@@ -137,6 +135,16 @@ $routes->group('mailings', static function ($routes) {
 $routes->group('members', static function ($routes) {
     $routes->get('/', 'Members::list');
     $routes->get('(:alphanum)/events', 'Members::events/$1');
+    $routes->options('/', static function () {});
+    $routes->options('(:any)', static function () {});
+});
+
+/** Comments Controller **/
+$routes->group('comments', static function ($routes) {
+    $routes->get('/', 'Comments::index');
+    $routes->get('random', 'Comments::random');
+    $routes->post('/', 'Comments::create');
+    $routes->delete('(:alphanum)', 'Comments::delete/$1');
     $routes->options('/', static function () {});
     $routes->options('(:any)', static function () {});
 });

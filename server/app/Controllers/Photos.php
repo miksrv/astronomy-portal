@@ -110,40 +110,6 @@ class Photos extends ResourceController
     }
 
     /**
-     * Downloads a photo as a file.
-     *
-     * @param $id The ID of the photo.
-     * @param $date The date of the photo.
-     * @return ResponseInterface Returns a response to download the photo file.
-     */
-    public function download($id = null, $date = null): ResponseInterface
-    {
-        try {
-            $photoModel = new PhotosModel();
-            $photoData  = $photoModel
-                ->select('image_name, image_ext')
-                ->where(['object' => $id, 'date' => $date])
-                ->first();
-
-            if (!$photoData) {
-                return $this->failNotFound(lang('App.photoNotFound'));
-            }
-
-            $photoLink = UPLOAD_PHOTOS . $photoData->image_name . '.' . $photoData->image_ext;
-
-            if (file_exists($photoLink)) {
-                return $this->response->download($photoLink, null);
-            }
-
-            return $this->failNotFound();
-        } catch (Exception $e) {
-            log_message('error', '{exception}', ['exception' => $e]);
-
-            return $this->failNotFound();
-        }
-    }
-
-    /**
      * Creates a new photo item.
      * First, uses the photo upload function, which returns the data of the uploaded image.
      *
