@@ -41,7 +41,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review, canDelete, class
                     <Button
                         size={'small'}
                         mode={'secondary'}
-                        label={t('components.common.review-card.delete', 'Delete')}
+                        label={t('components.common.review-card.delete', 'Удалить')}
                         onClick={() => onDelete(review.id)}
                         className={styles.deleteButton}
                     />
