@@ -50,7 +50,7 @@ app.observatory.webcam_2 = http://localhost:8081/
 #--------------------------------------------------------------------
 
 auth.token.secret = '' # key is the secret key used by the application to sign JWTS
-auth.token.live   = 3600 # indicates the validity period of a signed JWT (in milliseconds)
+auth.token.live   = 15552000 # indicates the validity period of a signed JWT (in seconds); 15552000 = 180 days
 
 auth.google.clientID = ''
 auth.google.secret   = ''

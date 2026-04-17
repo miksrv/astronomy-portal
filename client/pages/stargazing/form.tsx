@@ -123,7 +123,6 @@ const StargazingFormPage: NextPage<object> = () => {
                     <Button
                         icon={'ReportError'}
                         mode={'secondary'}
-                        size={'large'}
                         label={t('common.archive', 'Архивировать')}
                         disabled={isLoading}
                         onClick={() => setShowDeleteDialog(true)}

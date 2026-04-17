@@ -160,7 +160,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
             <ObjectsTable
                 objectsList={filteredObjectsList}
                 photosList={photosList}
-                combinedHeight={toolbarHeight + footerHeight + 95}
+                combinedHeight={toolbarHeight + footerHeight + 110}
             />
 
             <AppFooter ref={footerRef} />

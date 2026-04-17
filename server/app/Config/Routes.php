@@ -35,6 +35,8 @@ $routes->group('auth', static function ($routes) {
     $routes->get('vk', 'Auth::vk');
     //$routes->post('register', 'Auth::register');
     //$routes->post('login', 'Auth::login');
+    $routes->patch('profile', 'Auth::updateProfile');
+    $routes->options('profile', static function () {});
     $routes->options('(:any)', static function () {});
 });
 
@@ -101,6 +103,7 @@ $routes->group('photos', static function ($routes) {
 $routes->group('events', static function ($routes) {
     $routes->get('/', 'Events::list');
     $routes->get('upcoming', 'Events::upcoming');
+    $routes->get('upcoming/registered', 'Events::upcomingRegistered');
     $routes->get('photos', 'Events::photos');
     $routes->get('(:alphanum)', 'Events::show/$1');
     $routes->get('members/(:alphanum)', 'Events::members/$1');
@@ -137,6 +140,16 @@ $routes->group('mailings', static function ($routes) {
 $routes->group('members', static function ($routes) {
     $routes->get('/', 'Members::list');
     $routes->get('(:alphanum)/events', 'Members::events/$1');
+    $routes->options('/', static function () {});
+    $routes->options('(:any)', static function () {});
+});
+
+/** Comments Controller **/
+$routes->group('comments', static function ($routes) {
+    $routes->get('/', 'Comments::index');
+    $routes->get('random', 'Comments::random');
+    $routes->post('/', 'Comments::create');
+    $routes->delete('(:alphanum)', 'Comments::delete/$1');
     $routes->options('/', static function () {});
     $routes->options('(:any)', static function () {});
 });

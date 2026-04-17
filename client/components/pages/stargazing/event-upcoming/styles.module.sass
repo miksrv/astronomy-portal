@@ -1,5 +1,21 @@
 @use '../../../../styles/variables' as variables
 
+.noEvent
+    text-align: center
+    padding: 30px 20px
+
+    h3
+        margin: 12px 0 4px
+
+    p
+        color: var(--text-color-secondary)
+        margin: 0
+
+.noEventIcon
+    width: 40px
+    height: 40px
+    fill: var(--text-color-secondary)
+
 .upcomingEvent
     display: flex
     flex-wrap: wrap
@@ -43,6 +59,9 @@
             font-weight: 300
             text-transform: uppercase
             line-height: normal
+
+            &:after
+                display: none
 
             @media only screen and (max-width: variables.$mobileMaxWidth)
                 margin-top: 15px

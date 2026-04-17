@@ -57,6 +57,7 @@ const MailingListPage: NextPage<object> = () => {
             accessor: 'subject',
             className: styles.subjectCell,
             header: t('pages.mailing.col-subject', 'Тема'),
+            formatter: (_data, row, i) => <Link href={`/mailing/${row[i].id}`}>{row[i].subject}</Link>,
             isSortable: true
         },
         {
@@ -104,13 +105,6 @@ const MailingListPage: NextPage<object> = () => {
             header: '',
             formatter: (_data, row, i) => (
                 <div className={styles.actionsCell}>
-                    <Button
-                        size={'small'}
-                        icon={'BarChart'}
-                        mode={'secondary'}
-                        link={`/mailing/${row[i].id}`}
-                    />
-
                     {row[i].status === 'draft' && (
                         <>
                             <Link href={`/mailing/form?id=${row[i].id}`}>

@@ -10,7 +10,8 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
-import { EventsList, EventUpcoming } from '@/components/pages/stargazing'
+import { EventsList, EventUpcoming, InfoCards, ReviewsWidget } from '@/components/pages/stargazing'
+import type { InfoCardItem } from '@/components/pages/stargazing/info-cards'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
 
 interface StargazingPageProps {
@@ -25,10 +26,33 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     const title = t('pages.stargazing.title', 'Астровыезды')
-    const rulesLink = t('pages.stargazing.rules_link', 'Правила поведения на астровыездах')
-    const howtoLink = t('pages.stargazing.howto_link', 'Как проходят астровыезды')
-    const whereLink = t('pages.stargazing.where_link', 'Где посмотреть в телескоп в Оренбурге')
-    const faqLink = t('pages.stargazing.faq_link', 'Часто задаваемые вопросы')
+
+    const infoCards: InfoCardItem[] = [
+        {
+            href: '/stargazing/rules',
+            icon: 'ReportError',
+            title: t('pages.stargazing.rules_link', 'Правила поведения на астровыездах'),
+            description: t('pages.stargazing.rules_card_desc', 'Что нельзя делать и как уважать других участников')
+        },
+        {
+            href: '/stargazing/howto',
+            icon: 'StarFilled',
+            title: t('pages.stargazing.howto_link', 'Как проходят астровыезды'),
+            description: t('pages.stargazing.howto_card_desc', 'Программа вечера, телескопы и лекции')
+        },
+        {
+            href: '/stargazing/where',
+            icon: 'Map',
+            title: t('pages.stargazing.where_link', 'Где посмотреть в телескоп в Оренбурге'),
+            description: t('pages.stargazing.where_card_desc', 'Место проведения в Оренбургском районе')
+        },
+        {
+            href: '/stargazing/faq',
+            icon: 'Compass',
+            title: t('pages.stargazing.faq_link', 'Часто задаваемые вопросы'),
+            description: t('pages.stargazing.faq_card_desc', 'Ответы на популярные вопросы участников')
+        }
+    ]
 
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
@@ -74,10 +98,14 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
                 )}
             </AppToolbar>
 
-            <EventUpcoming
-                style={{ marginBottom: 10 }}
-                event={upcomingData || undefined}
-            />
+            <div>
+                {t(
+                    'pages.stargazing.text',
+                    'Представьте: ночное небо без городских огней, тысячи звёзд над головой и кольца Сатурна в окуляре телескопа. Наши астровыезды за город - это не просто наблюдения, это вечера, которые меняют взгляд на мир. Присоединяйтесь, чтобы увидеть Вселенную своими глазами!'
+                )}
+            </div>
+
+            <EventUpcoming event={upcomingData || undefined} />
 
             <Link
                 href={'https://t.me/look_at_stars'}
@@ -93,55 +121,9 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
                 )}
             </Link>
 
+            <InfoCards items={infoCards} />
+
             <Container>
-                <p style={{ marginTop: 0 }}>
-                    {t(
-                        'pages.stargazing.text-part-1',
-                        'Астровыезд в Оренбурге - это возможность прикоснуться к тайнам Вселенной, наблюдая звёздное небо в полной темноте. Мы приглашаем вас в увлекательные поездки за город, где телескопы открывают космические горизонты прямо в полях Оренбуржья.'
-                    )}
-                </p>
-                <p>
-                    {t(
-                        'pages.stargazing.text-part-2',
-                        'Каждый астровыезд - это вечер научных открытий, вдохновляющих лекций и живого общения с единомышленниками. Вы узнаете, как проходят наши мероприятия, познакомитесь с основными правилами поведения на астровыездах и сможете заранее подготовиться к наблюдению за звёздами.'
-                    )}
-                </p>
-
-                <ul style={{ marginBottom: '20px' }}>
-                    <li>
-                        <Link
-                            href={'/stargazing/rules'}
-                            title={rulesLink}
-                        >
-                            {rulesLink}
-                        </Link>
-                    </li>
-                    <li>
-                        <Link
-                            href={'/stargazing/howto'}
-                            title={howtoLink}
-                        >
-                            {howtoLink}
-                        </Link>
-                    </li>
-                    <li>
-                        <Link
-                            href={'/stargazing/where'}
-                            title={whereLink}
-                        >
-                            {whereLink}
-                        </Link>
-                    </li>
-                    <li>
-                        <Link
-                            href={'/stargazing/faq'}
-                            title={faqLink}
-                        >
-                            {faqLink}
-                        </Link>
-                    </li>
-                </ul>
-
                 <PhotoGallery
                     photos={
                         photos?.map((photo, index) => ({
@@ -158,29 +140,33 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
                         handlePhotoClick(index)
                     }}
                 />
-
-                <PhotoLightbox
-                    photos={
-                        photos?.map((photo, index) => ({
-                            height: photo.height,
-                            src: createFullPhotoUrl(photo),
-                            width: photo.width,
-                            title: t('pages.stargazing.photo_title', 'Астровыезд: {{name}} - Фото ({{number}})', {
-                                number: index + 1,
-                                name: photo?.title
-                            })
-                        })) || []
-                    }
-                    photoIndex={photoIndex}
-                    showLightbox={showLightbox}
-                    onCloseLightBox={handleHideLightbox}
-                    onChangeIndex={setPhotoIndex}
-                />
             </Container>
+
+            <ReviewsWidget />
+
+            <h2>{t('pages.stargazing.events-archive', 'Архив астровыездов')}</h2>
 
             <EventsList events={events} />
 
             <AppFooter />
+
+            <PhotoLightbox
+                photos={
+                    photos?.map((photo, index) => ({
+                        height: photo.height,
+                        src: createFullPhotoUrl(photo),
+                        width: photo.width,
+                        title: t('pages.stargazing.photo_title', 'Астровыезд: {{name}} - Фото ({{number}})', {
+                            number: index + 1,
+                            name: photo?.title
+                        })
+                    })) || []
+                }
+                photoIndex={photoIndex}
+                showLightbox={showLightbox}
+                onCloseLightBox={handleHideLightbox}
+                onChangeIndex={setPhotoIndex}
+            />
         </AppLayout>
     )
 }

@@ -177,6 +177,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
                                         </li>
                                     )}
 
+                                <li>
+                                    <Link href={'/profile'}>{t('menu.profile', 'Личный кабинет')}</Link>
+                                </li>
+
                                 <li
                                     className={cn(
                                         authSlice?.user?.role !== ApiModel.UserRole.USER && styles.dividerItem

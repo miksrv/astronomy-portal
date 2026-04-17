@@ -221,6 +221,7 @@
     },
     "menu": {
         "users": "Users",
+        "profile": "Personal Cabinet",
         "astrophoto": "Astrophoto",
         "objects": "Objects",
         "stargazing": "Star Parties",
@@ -646,6 +647,27 @@
             "description": "You will no longer receive email notifications about new events.",
             "success": "You have been successfully unsubscribed.",
             "error": "Could not unsubscribe. The link may have already been used or has expired."
+        },
+        "profile": {
+            "title": "Personal Cabinet",
+            "profile-title": "Profile",
+            "field-name": "Name",
+            "field-email": "Email",
+            "field-phone": "Phone",
+            "avatar-note": "Avatar is linked to the authorization service",
+            "email-note": "Email cannot be changed",
+            "save": "Save",
+            "save-error": "Failed to save profile",
+            "save-success": "Profile saved",
+            "upcoming-event-title": "Upcoming Event",
+            "no-upcoming-event": "You have no upcoming events",
+            "history-title": "Event History",
+            "history-empty": "You have not attended any events yet",
+            "history-checkin": "Checked in",
+            "reviews-title": "My Reviews",
+            "reviews-coming-soon": "Your reviews will appear here soon",
+            "reviews-empty": "You have not reviewed any events yet",
+            "reviews-view-event": "View event"
         }
     },
     "equipment": {

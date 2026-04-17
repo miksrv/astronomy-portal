@@ -1,0 +1,85 @@
+.profileCard
+    display: flex
+    gap: 24px
+    align-items: flex-start
+
+    @media (max-width: 768px)
+        flex-direction: column
+
+.avatarSection
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: 8px
+    flex-shrink: 0
+    width: 180px
+
+.avatarNote
+    font-size: 11px
+    color: var(--text-color-secondary, #999)
+    text-align: center
+    margin: 0
+
+.fieldsSection
+    display: flex
+    flex-direction: column
+    gap: 10px
+    flex: 1
+
+.fieldNote
+    font-size: 12px
+    color: var(--text-color-secondary, #999)
+    margin: 4px 0 0
+
+.upcomingEventCard
+    display: flex
+    flex-direction: column
+    gap: 12px
+
+.coverImage
+    border-radius: var(--border-radius)
+    object-fit: cover
+    width: 100%
+    height: auto
+
+.eventMeta
+    display: flex
+    flex-direction: column
+    gap: 6px
+
+.mapLinks
+    display: flex
+    gap: 12px
+    list-style: none
+    padding: 0
+    margin: 4px 0 0
+
+.historyTable
+    width: 100%
+
+.checkinBadge
+    display: inline-block
+    padding: 2px 8px
+    border-radius: var(--border-radius)
+    background-color: var(--green-color, #4caf50)
+    color: #fff
+    font-size: 12px
+
+.reviewsList
+    display: flex
+    flex-direction: column
+    gap: 16px
+
+.reviewItem
+    display: flex
+    flex-direction: column
+    gap: 8px
+
+.reviewEventLink
+    font-size: 13px
+    color: var(--link-color, #4a9eff)
+    text-decoration: none
+    align-self: flex-start
+
+    &:hover
+        text-decoration: underline

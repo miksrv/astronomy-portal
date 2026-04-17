@@ -57,9 +57,9 @@ beforeEach(() => {
 })
 
 describe('EventUpcoming', () => {
-    it('returns null when event has no id', () => {
+    it('renders a no-event placeholder when event is undefined', () => {
         const { container } = render(<EventUpcoming event={undefined} />)
-        expect(container.firstChild).toBeNull()
+        expect(container.firstChild).not.toBeNull()
     })
 
     it('renders the event title', () => {

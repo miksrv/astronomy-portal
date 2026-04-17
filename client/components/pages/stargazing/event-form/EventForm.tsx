@@ -51,7 +51,6 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
     return (
         <Container>
             <Input
-                size={'large'}
                 required={true}
                 disabled={disabled}
                 className={styles.formElement}
@@ -63,7 +62,6 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
 
             <div className={styles.sections}>
                 <Input
-                    size={'large'}
                     required={true}
                     disabled={disabled}
                     className={styles.formElement}
@@ -79,7 +77,6 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
                 />
 
                 <Input
-                    size={'large'}
                     required={true}
                     disabled={disabled}
                     className={styles.formElement}
@@ -92,7 +89,6 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
 
             <div className={styles.sections}>
                 <Input
-                    size={'large'}
                     required={true}
                     disabled={disabled}
                     className={styles.formElement}
@@ -108,7 +104,6 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
                 />
 
                 <Input
-                    size={'large'}
                     required={true}
                     disabled={disabled}
                     className={styles.formElement}
@@ -126,7 +121,6 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
 
             <div className={styles.sections}>
                 <Input
-                    size={'large'}
                     required={true}
                     disabled={disabled}
                     className={styles.formElement}
@@ -142,7 +136,6 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
                 />
 
                 <Input
-                    size={'large'}
                     required={true}
                     disabled={disabled}
                     className={styles.formElement}
@@ -154,7 +147,6 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
             </div>
 
             <TextArea
-                size={'large'}
                 disabled={disabled}
                 className={styles.formElement}
                 label={'Описание'}

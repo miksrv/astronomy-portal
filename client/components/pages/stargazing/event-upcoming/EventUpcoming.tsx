@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
-import { Button, Container, ContainerProps, Dialog, Icon } from 'simple-react-ui-kit'
+import { Button, Container, Dialog, Icon } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import { useTranslation } from 'next-i18next'
@@ -14,11 +14,11 @@ import { EventBookingForm } from './event-booking-form'
 
 import styles from './styles.module.sass'
 
-interface EventUpcomingProps extends ContainerProps {
+interface EventUpcomingProps {
     event?: ApiModel.Event
 }
 
-export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event, ...props }) => {
+export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
     const { t } = useTranslation()
 
     const user = useAppSelector((state) => state.auth.user)
@@ -56,11 +56,7 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event, ...props })
             return false
         }
 
-        if ((getSecondsUntilUTCDate(event?.date?.date) || 0) <= 0) {
-            return false
-        }
-
-        return true
+        return (getSecondsUntilUTCDate(event?.date?.date) || 0) > 0
     }, [event, secondsUntilRegistrationStart, secondsUntilRegistrationEnd, tick])
 
     useEffect(() => {
@@ -75,8 +71,28 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event, ...props })
         return () => clearInterval(interval)
     }, [])
 
-    return event?.id ? (
-        <Container {...props}>
+    if (!event) {
+        return (
+            <Container className={styles.noEvent}>
+                <Icon
+                    name={'Moon'}
+                    className={styles.noEventIcon}
+                />
+                <h3>
+                    {t('components.pages.stargazing.event-upcoming.no-upcoming', 'Пока нет предстоящих астровыездов')}
+                </h3>
+                <p>
+                    {t(
+                        'components.pages.stargazing.event-upcoming.no-upcoming-hint',
+                        'Как только мы запланируем следующий астровыезд - здесь появится форма регистрации.'
+                    )}
+                </p>
+            </Container>
+        )
+    }
+
+    return (
+        <Container>
             <div className={styles.upcomingEvent}>
                 <div className={styles.imageContainer}>
                     <Image
@@ -392,5 +408,5 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event, ...props })
                 </Dialog>
             </div>
         </Container>
-    ) : null
+    )
 }

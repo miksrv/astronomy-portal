@@ -96,10 +96,9 @@ const StargazingWherePage: NextPage<object> = () => {
                 />
             </Container>
 
+            <h2>{t('pages.stargazing-where.what-you-can-see-title', 'Что можно увидеть в телескоп из города?')}</h2>
+
             <Container>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('pages.stargazing-where.what-you-can-see-title', 'Что можно увидеть в телескоп из города?')}
-                </h2>
                 <p>
                     {t(
                         'pages.stargazing-where.what-you-can-see-description',
@@ -140,10 +139,9 @@ const StargazingWherePage: NextPage<object> = () => {
                 </p>
             </Container>
 
+            <h2>{t('pages.stargazing-where.want-to-see-more', 'Хотите увидеть больше? Выезжайте за город!')}</h2>
+
             <Container>
-                <h2 style={{ marginTop: 0 }}>
-                    {t('pages.stargazing-where.want-to-see-more', 'Хотите увидеть больше? Выезжайте за город!')}
-                </h2>
                 <p>
                     {t(
                         'pages.stargazing-where.want-to-see-description-1',

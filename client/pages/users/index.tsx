@@ -114,8 +114,8 @@ const UsersPage: NextPage<object> = () => {
             const footerH = footerRef.current?.offsetHeight || 0
             const filtersH = filtersRef.current?.offsetHeight || 0
             const paginationH = paginationRef.current?.offsetHeight || 0
-            // 20 for margins between containers (10px * 2)
-            setTableHeight(containerHeight - toolbarH - footerH - filtersH - paginationH - 115)
+
+            setTableHeight(containerHeight - toolbarH - footerH - filtersH - paginationH - 135)
         }
 
         calculateTableHeight()
@@ -314,7 +314,6 @@ const UsersPage: NextPage<object> = () => {
             <Container
                 ref={filtersRef}
                 className={styles.filtersRow}
-                style={{ padding: '5px 10px' }}
             >
                 {isFetching && <Spinner className={styles.loader} />}
 

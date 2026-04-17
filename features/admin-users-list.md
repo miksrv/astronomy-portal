@@ -1,6 +1,6 @@
 # FEAT-2 — Admin Users List
 
-**Status:** Planned  
+**Status:** Completed  
 **Priority:** Medium  
 **Affects:** Backend (CodeIgniter 4) + Frontend (Next.js)  
 **Parallel implementation:** Backend and Frontend can work in parallel once the API contract is agreed.

@@ -153,12 +153,10 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                 ]}
             />
 
-            <div>
-                {t(
-                    'pages.observatory.description',
-                    'Самодельная астрономическая обсерватория расположена в пригороде Оренбурга, всего в 15 км от города. Благодаря своему удалению от городской застройки, обсерватория находится в зоне с уровнем светового загрязнения 5 класса по шкале Бортля, что делает её не плохим местом в пригорде для наблюдений за ночным небом.'
-                )}
-            </div>
+            {t(
+                'pages.observatory.description',
+                'Самодельная астрономическая обсерватория расположена в пригороде Оренбурга, всего в 15 км от города. Благодаря своему удалению от городской застройки, обсерватория находится в зоне с уровнем светового загрязнения 5 класса по шкале Бортля, что делает её не плохим местом в пригорде для наблюдений за ночным небом.'
+            )}
 
             <Container>
                 <p style={{ marginTop: 0 }}>
@@ -195,9 +193,10 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                 </p>
             </Container>
 
+            <h2>{t('pages.observatory.equipment-title', 'Оборудование обсерватории')}</h2>
+
             <Container>
-                <h2 style={{ marginTop: 0 }}>{t('pages.observatory.equipment-title', 'Оборудование обсерватории')}</h2>
-                <p>
+                <p style={{ marginTop: 0 }}>
                     {t(
                         'pages.observatory.equipment-description',
                         'Используемые инструменты и технологии обеспечивают высокую точность наблюдений и профессиональное качество снимков. Вот основное оборудование, которое используется в работе:'
@@ -219,8 +218,9 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                 />
             </Container>
 
+            <h2>{t('pages.observatory.photos-and-data-title', 'Фотографии и данные')}</h2>
+
             <Container>
-                <h2 style={{ marginTop: 0 }}>{t('pages.observatory.photos-and-data-title', 'Фотографии и данные')}</h2>
                 <p>
                     <Trans
                         i18nKey={'pages.observatory.photos-and-data'}

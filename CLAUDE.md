@@ -65,9 +65,13 @@ docker-compose up     # Start MariaDB at localhost:3308 (db: db, user: user, pas
 
 **API layer:** RTK Query in `client/api/api.ts` (main API) and `client/api/apiMeteo.ts` (weather/meteo data). Auto-generated hooks consumed throughout. Auth state in `client/api/authSlice.ts`. App-wide state in `client/api/applicationSlice.ts`.
 
-**Data models:** TypeScript interfaces in `client/api/models/` (author, category, equipment, event, file, filter, object, photo, relay, statistic, user, weather). Additional shared interfaces in `client/api/types/`.
+**Data models:** TypeScript interfaces in `client/api/models/` (author, category, comment, equipment, event, file, filter, object, photo, relay, statistic, user, weather). Additional shared interfaces in `client/api/types/`.
 
 **Components:** Organized as `client/components/common/`, `client/components/pages/` (about, index, objects, observatory, photos, stargazing), `client/components/ui/` (breadcrumbs, carousel, counter, show-more).
+
+Key common components added in recent features:
+- `review-card/` — displays a single review with author avatar, star rating, text, date, delete button
+- `review-form/` — form to submit a review (star selector + TextArea + submit); shows API validation errors inline
 
 **Utils:** `client/utils/` — coordinates.ts (celestial math), colors.ts, dates.ts, helpers.ts, moon.ts, photos.ts, strings.ts, eventPhotos.ts, localstorage.ts, constants.ts. Each has a corresponding `.test.ts`.
 
@@ -83,7 +87,12 @@ docker-compose up     # Start MariaDB at localhost:3308 (db: db, user: user, pas
 
 **Carousel:** `embla-carousel-react` for photo slideshows.
 
-**UI library:** `simple-react-ui-kit` (internal component library).
+**UI library:** `simple-react-ui-kit` (internal component library). Always prefer its components over native HTML — use `Button` not `<button>`, `TextArea` not `<textarea>`, `Input` not `<input>`, `Container` for card sections, `Message` for alerts, `Table` for tabular data.
+
+**Coding conventions (frontend):**
+- Component props must use `interface`, not `type` alias
+- Default text in `t('key', 'fallback')` must always be **Russian**
+- Every new i18n key must be added to **both** `client/public/locales/en/translation.json` and `client/public/locales/ru/translation.json` with proper translations — never copy English text into the RU file
 
 ### Backend (`server/`)
 
@@ -101,11 +110,20 @@ docker-compose up     # Start MariaDB at localhost:3308 (db: db, user: user, pas
 - `GET /fits/:name` — FITS file data
 - `GET|POST|PATCH|DELETE /photos` — astrophoto CRUD + upload
 - `GET|POST|PATCH /events` + booking/cancel/checkin/members/upload/photos/upcoming — stargazing events
+- `GET /comments?entityType=&entityId=` — list comments (adds `canReview`+`hasReviewed` for authenticated event requests)
+- `GET /comments/random?entityType=&limit=` — random comments for widget
+- `POST /comments` — create review (auth required)
+- `DELETE /comments/:id` — soft-delete review (own or admin/mod)
 - `GET /sitemap` — sitemap data
 
-**Controllers:** Auth, Author, Camera, Categories, Equipment, Events, Files, Objects, Photos, Relay, Sitemap, Statistic, System (in `server/app/Controllers/`).
+**Controllers:** Auth, Author, Camera, Categories, Comments, Equipment, Events, Files, Objects, Photos, Relay, Sitemap, Statistic, System (in `server/app/Controllers/`).
 
-**Models:** `server/app/Models/ApplicationBaseModel.php` is the shared base. All models extend it. Entity classes in `server/app/Entities/` map to DB rows. Models cover: Users, Photos, PhotosAuthors, PhotosCategories, PhotosEquipments, PhotosFilters, PhotosObjects, Objects, ObjectCategories, ObjectFitsFiles, ObjectFitsFilters, ObservatoryEquipment, ObservatorySettings, Events, EventsPhotos, EventsUsers.
+**Models:** `server/app/Models/ApplicationBaseModel.php` is the shared base. All models extend it. Entity classes in `server/app/Entities/` map to DB rows. Models cover: Users, Photos, PhotosAuthors, PhotosCategories, PhotosEquipments, PhotosFilters, PhotosObjects, Objects, ObjectCategories, ObjectFitsFiles, ObjectFitsFilters, ObservatoryEquipment, ObservatorySettings, Events, EventsPhotos, EventsUsers, CommentsModel.
+
+**Backend conventions:**
+- API responses use **camelCase** field names (e.g. `createdAt`, not `created_at`) — format in model, not controller
+- CodeIgniter 4 Query Builder does **not** have `selectRaw()` — use `select()` which accepts raw SQL expressions and aliases natively
+- `CommentsModel::getForEntity()` and `getRandom()` return author as `{ id, name, avatar }` object with name truncated to "FirstName L." for privacy
 
 **Migrations:** In `server/app/Database/Migrations/`. Always run migrations after pulling changes that add them.
 

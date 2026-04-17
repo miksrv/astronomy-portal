@@ -58,6 +58,25 @@ export const API = createApi({
         }
     }),
     endpoints: (builder) => ({
+        /* Comments Controller */
+        commentsGetList: builder.query<ApiType.Comments.ResList, ApiType.Comments.ReqList>({
+            providesTags: (result, error, { entityId }) => [{ id: entityId, type: 'Comments' }],
+            query: (params) => `comments${encodeQueryData(params)}`
+        }),
+        commentsGetRandom: builder.query<ApiType.Comments.ResRandom, ApiType.Comments.ReqRandom>({
+            providesTags: ['Comments'],
+            query: (params) => `comments/random${encodeQueryData(params)}`
+        }),
+        commentsCreate: builder.mutation<ApiModel.Comment, ApiType.Comments.ReqCreate>({
+            invalidatesTags: (result, error, { entityId }) => [{ id: entityId, type: 'Comments' }, 'Comments'],
+            query: (body) => ({ body, method: 'POST', url: 'comments' }),
+            transformErrorResponse: (response) => response.data
+        }),
+        commentsDelete: builder.mutation<void, string>({
+            invalidatesTags: ['Comments'],
+            query: (id) => ({ method: 'DELETE', url: `comments/${id}` })
+        }),
+
         /* Auth Controller */
         authGetMe: builder.query<ApiType.Auth.ResLogin, void>({
             query: () => 'auth/me'
@@ -72,6 +91,11 @@ export const API = createApi({
                 method: 'POST',
                 url: 'auth/login'
             }),
+            transformErrorResponse: (response) => response.data
+        }),
+        authUpdateProfile: builder.mutation<ApiType.Auth.ResUpdateProfile, ApiType.Auth.ReqUpdateProfile>({
+            invalidatesTags: ['Auth'],
+            query: (body) => ({ body, method: 'PATCH', url: 'auth/profile' }),
             transformErrorResponse: (response) => response.data
         }),
 
@@ -101,6 +125,10 @@ export const API = createApi({
         eventGetUpcoming: builder.query<ApiType.Events.ResItem, void>({
             providesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
             query: () => 'events/upcoming'
+        }),
+        eventGetUpcomingRegistered: builder.query<ApiType.Auth.ResUpcomingEvent, void>({
+            providesTags: [{ id: 'UPCOMING_PROFILE', type: 'Events' }],
+            query: () => 'events/upcoming/registered'
         }),
         eventPhotoUploadPost: builder.mutation<ApiType.Events.ResponsePhoto, ApiType.Events.ReqUploadPhoto>({
             invalidatesTags: (res, err, arg) => [
@@ -315,24 +343,6 @@ export const API = createApi({
         }),
 
         /* Statistic Controller */
-        // statisticGet: builder.query<ApiType.Statistic.ResGeneral, void>({
-        //     providesTags: () => ['Statistic'],
-        //     query: () => 'statistic'
-        // }),
-        // statisticGetCatalogItems: builder.query<
-        //     ApiType.Statistic.ResCatalogNames,
-        //     void
-        // >({
-        //     providesTags: () => ['Statistic'],
-        //     query: () => 'statistic/catalog'
-        // }),
-        // statisticGetPhotosItems: builder.query<
-        //     ApiType.Statistic.ResPhotoNames,
-        //     void
-        // >({
-        //     providesTags: () => ['Statistic'],
-        //     query: () => 'statistic/photos'
-        // }),
         statisticGetTelescope: builder.query<ApiType.Statistic.ResTelescope, Maybe<ApiType.Statistic.ReqTelescope>>({
             providesTags: () => ['Statistic'],
             query: (params) => `statistic/telescope${encodeQueryData(params)}`
@@ -421,6 +431,8 @@ export const API = createApi({
     },
     reducerPath: 'api',
     tagTypes: [
+        'Auth',
+        'Comments',
         'Equipment',
         'Files',
         'Objects',

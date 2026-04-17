@@ -33,7 +33,7 @@ const authSlice = createSlice({
 
             if (payload?.auth && !!payload?.token) {
                 LocalStorage.setItem('AUTH_TOKEN', payload.token)
-                void setCookie('token', payload.token)
+                void setCookie('token', payload.token, { maxAge: 15552000 })
             } else {
                 LocalStorage.removeItem('AUTH_TOKEN')
                 void deleteCookie('token')

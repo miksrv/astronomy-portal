@@ -1,4 +1,5 @@
 export * from './category'
+export * from './comment'
 export * from './equipment'
 export * from './event'
 export * from './file'

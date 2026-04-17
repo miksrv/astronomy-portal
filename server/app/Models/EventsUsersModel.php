@@ -87,4 +87,27 @@ class EventsUsersModel extends ApplicationBaseModel {
             ->groupBy('event_id')
             ->findAll();
     }
+
+    /**
+     * Returns the next upcoming event that the given user is registered for.
+     *
+     * @param string $userId
+     * @return object|null
+     */
+    public function getUpcomingRegisteredEvent(string $userId): ?object
+    {
+        return $this->db->table('events_users eu')
+            ->select('e.id, e.title_ru, e.title_en, e.date, e.cover_file_name, e.cover_file_ext,
+                      e.location_ru, e.location_en, e.yandex_map_link, e.google_map_link,
+                      eu.adults, eu.children, eu.checkin_at')
+            ->join('events e', 'e.id = eu.event_id')
+            ->where('eu.user_id', $userId)
+            ->where('eu.deleted_at IS NULL')
+            ->where('e.deleted_at IS NULL')
+            ->where('e.date > NOW()')
+            ->orderBy('e.date', 'ASC')
+            ->limit(1)
+            ->get()
+            ->getRow();
+    }
 }

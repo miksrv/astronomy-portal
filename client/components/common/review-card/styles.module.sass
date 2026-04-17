@@ -1,0 +1,54 @@
+@use '../../../styles/variables' as variables
+
+.card
+    padding-bottom: 10px
+    margin-bottom: 8px
+    display: flex
+    flex-direction: column
+    gap: 8px
+    border-bottom: 1px solid var(--input-border-color)
+
+.header
+    display: flex
+    align-items: center
+    gap: 8px
+
+.meta
+    display: flex
+    flex-direction: column
+    gap: 2px
+    flex: 1
+    min-width: 0
+
+.authorName
+    font-size: var(--font-size-small)
+    color: var(--text-color-primary)
+    font-weight: 500
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+
+.stars
+    font-size: 13px
+    line-height: 1
+
+.starFilled
+    color: var(--color-orange)
+
+.starEmpty
+    color: var(--text-color-secondary-hover)
+
+.content
+    margin: 0
+    font-size: var(--font-size)
+    color: var(--text-color-primary)
+    line-height: 1.5
+    word-break: break-word
+
+.date
+    font-size: var(--font-size-small)
+    color: var(--text-color-secondary)
+
+.deleteButton
+    flex-shrink: 0
+    margin-left: auto
