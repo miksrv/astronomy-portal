@@ -58,6 +58,25 @@ export const API = createApi({
         }
     }),
     endpoints: (builder) => ({
+        /* Comments Controller */
+        commentsGetList: builder.query<ApiType.Comments.ResList, ApiType.Comments.ReqList>({
+            providesTags: (result, error, { entityId }) => [{ id: entityId, type: 'Comments' }],
+            query: (params) => `comments${encodeQueryData(params)}`
+        }),
+        commentsGetRandom: builder.query<ApiType.Comments.ResRandom, ApiType.Comments.ReqRandom>({
+            providesTags: ['Comments'],
+            query: (params) => `comments/random${encodeQueryData(params)}`
+        }),
+        commentsCreate: builder.mutation<ApiModel.Comment, ApiType.Comments.ReqCreate>({
+            invalidatesTags: (result, error, { entityId }) => [{ id: entityId, type: 'Comments' }, 'Comments'],
+            query: (body) => ({ body, method: 'POST', url: 'comments' }),
+            transformErrorResponse: (response) => response.data
+        }),
+        commentsDelete: builder.mutation<void, string>({
+            invalidatesTags: ['Comments'],
+            query: (id) => ({ method: 'DELETE', url: `comments/${id}` })
+        }),
+
         /* Auth Controller */
         authGetMe: builder.query<ApiType.Auth.ResLogin, void>({
             query: () => 'auth/me'
@@ -421,6 +440,7 @@ export const API = createApi({
     },
     reducerPath: 'api',
     tagTypes: [
+        'Comments',
         'Equipment',
         'Files',
         'Objects',

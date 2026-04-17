@@ -1,5 +1,6 @@
 export * as Auth from './auth'
 export * as Category from './category'
+export * as Comments from './comments'
 export * as Equipment from './equipment'
 export * as Events from './events'
 export * as Files from './files'
