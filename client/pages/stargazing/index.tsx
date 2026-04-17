@@ -142,11 +142,11 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
                 />
             </Container>
 
+            <ReviewsWidget />
+
             <h2>{t('pages.stargazing.events-archive', 'Архив астровыездов')}</h2>
 
             <EventsList events={events} />
-
-            <ReviewsWidget />
 
             <AppFooter />
 

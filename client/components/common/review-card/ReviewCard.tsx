@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button } from 'simple-react-ui-kit'
+import { Button, cn } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next'
 
@@ -14,14 +14,15 @@ import styles from './styles.module.sass'
 interface ReviewCardProps {
     review: ApiModel.Comment
     canDelete?: boolean
+    className?: string
     onDelete?: (id: string) => void
 }
 
-export const ReviewCard: React.FC<ReviewCardProps> = ({ review, canDelete, onDelete }) => {
+export const ReviewCard: React.FC<ReviewCardProps> = ({ review, canDelete, className, onDelete }) => {
     const { t } = useTranslation()
 
     return (
-        <article className={styles.card}>
+        <article className={cn(styles.card, className)}>
             <header className={styles.header}>
                 <UserAvatar
                     src={

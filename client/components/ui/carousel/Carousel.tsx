@@ -2,6 +2,7 @@ import React from 'react'
 import { EmblaCarouselType, EmblaOptionsType } from 'embla-carousel'
 import AutoScroll from 'embla-carousel-auto-scroll'
 import useEmblaCarousel from 'embla-carousel-react'
+import { cn } from 'simple-react-ui-kit'
 
 import { NextButton, PrevButton, usePrevNextButtons } from './CarouselButtons'
 
@@ -11,9 +12,11 @@ interface CarouselProps {
     options?: EmblaOptionsType
     autoScroll?: boolean
     children?: React.ReactNode
+    className?: string
+    containerClassName?: string
 }
 
-export const Carousel: React.FC<CarouselProps> = ({ options, autoScroll, children }) => {
+export const Carousel: React.FC<CarouselProps> = ({ options, autoScroll, children, className, containerClassName }) => {
     const [emblaRef, emblaApi] = useEmblaCarousel(options, [
         ...(autoScroll ? [AutoScroll({ playOnInit: true, speed: 0.5 })] : [])
     ])
@@ -23,12 +26,12 @@ export const Carousel: React.FC<CarouselProps> = ({ options, autoScroll, childre
     )
 
     return (
-        <div className={styles.carousel}>
+        <div className={cn(styles.carousel, className)}>
             <div
                 ref={emblaRef}
                 className={styles.viewport}
             >
-                <div className={styles.container}>{children}</div>
+                <div className={cn(styles.container, containerClassName)}>{children}</div>
             </div>
 
             <div className={styles.buttonsContainer}>

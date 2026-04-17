@@ -62,6 +62,7 @@ class AddComments extends Migration
         ]);
 
         $this->forge->addPrimaryKey('id');
+        $this->forge->addForeignKey('user_id', 'users', 'id', 'CASCADE', 'CASCADE', 'fk_comments_user');
         $this->forge->addUniqueKey(['user_id', 'entity_type', 'entity_id'], 'uq_user_entity');
         $this->forge->addKey(['entity_type', 'entity_id', 'deleted_at', 'status'], false, false, 'idx_entity');
         $this->forge->addKey(['user_id', 'deleted_at'], false, false, 'idx_user');
