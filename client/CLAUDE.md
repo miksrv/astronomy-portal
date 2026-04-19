@@ -73,11 +73,11 @@ All hooks are auto-generated as `API.use<EndpointName>Query/Mutation()`.
 
 ### Relay
 
-| Endpoint         | Hook suffix | Purpose                             |
-| ---------------- | ----------- | ----------------------------------- |
-| `relayGetState`  | Query       | Current state of all relay channels |
-| `relayGetLight`  | Mutation    | Toggle observatory light            |
-| `relayPutStatus` | Mutation    | Set a specific relay channel state  |
+| Endpoint           | Hook suffix | Purpose                             |
+| ------------------ | ----------- | ----------------------------------- |
+| `relayGetState`    | Query       | Current state of all relay channels |
+| `relayToggleLight` | Mutation    | Toggle observatory light            |
+| `relayPutStatus`   | Mutation    | Set a specific relay channel state  |
 
 ### Files
 
