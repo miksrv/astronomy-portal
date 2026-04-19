@@ -1,4 +1,4 @@
-import { HOST_IMG } from '@/api/api'
+import { HOST_IMG } from '@/utils/constants'
 
 export const hosts = {
     maps: `${HOST_IMG}maps/`,
