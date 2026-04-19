@@ -7,7 +7,6 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { API, setLocale, wrapper } from '@/api'
 import { AppLayout, StarMap } from '@/components/common'
 
-// TODO: При добавить URL параметр названия объекта для центрирования карты на нем
 const CelestialPage: NextPage<object> = () => {
     const { t } = useTranslation()
 

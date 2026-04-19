@@ -54,28 +54,27 @@ export const ProjectTeam: React.FC = () => {
     ]
 
     return (
-        <div className={styles.section}>
-            <Carousel
-                options={{ dragFree: true, loop: true }}
-                autoScroll={true}
-            >
-                {teamList?.map((item) => (
-                    <div
-                        key={item.name}
-                        className={styles.item}
-                        role={'listitem'}
-                    >
-                        <Image
-                            className={styles.photo}
-                            src={item.photo?.src || ''}
-                            alt={item?.name || ''}
-                            width={item.photo?.width}
-                            height={item.photo?.height}
-                        />
-                        <div className={styles.title}>{item.name}</div>
-                    </div>
-                ))}
-            </Carousel>
-        </div>
+        <Carousel
+            options={{ dragFree: true, loop: true }}
+            autoScroll={true}
+            className={styles.carousel}
+        >
+            {teamList?.map((item) => (
+                <div
+                    key={item.name}
+                    className={styles.item}
+                    role={'listitem'}
+                >
+                    <Image
+                        className={styles.photo}
+                        src={item.photo?.src || ''}
+                        alt={item?.name || ''}
+                        width={item.photo?.width}
+                        height={item.photo?.height}
+                    />
+                    <div className={styles.title}>{item.name}</div>
+                </div>
+            ))}
+        </Carousel>
     )
 }
