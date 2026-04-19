@@ -1,6 +1,6 @@
 import { ApiModel } from '@/api'
 
-export type AuthServiceType = 'google' | 'yandex' | 'native' | 'vk'
+export type AuthServiceType = ApiModel.UserAuthType
 
 export interface ResLogin {
     message?: string

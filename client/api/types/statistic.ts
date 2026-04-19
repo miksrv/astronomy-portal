@@ -1,9 +1,9 @@
-import { Telescope } from '@/api/models/statistic'
+import { ApiModel } from '@/api'
 
 /* Telescope */
 export interface ResTelescope {
     count: number
-    items: Telescope[]
+    items: ApiModel.Telescope[]
 }
 
 export interface ReqTelescope {
