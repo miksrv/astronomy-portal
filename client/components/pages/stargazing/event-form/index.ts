@@ -1,1 +1,2 @@
-export { EventForm, type EventFormType } from './EventForm'
+export { EventForm } from './EventForm'
+export type { EventFormType } from '@/api/types/events'

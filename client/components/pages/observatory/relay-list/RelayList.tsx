@@ -24,7 +24,7 @@ export const RelayList: React.FC = () => {
         typeof document !== 'undefined' && document.visibilityState === 'hidden' ? 0 : 15 * 1000
     )
 
-    const { data: relayList, isLoading, isError } = API.useRelayGetStateQuery(null, { pollingInterval })
+    const { data: relayList, isLoading, isError } = API.useRelayGetStateQuery(undefined, { pollingInterval })
 
     useEffect(() => {
         const handleVisibilityChange = () => {
@@ -42,7 +42,7 @@ export const RelayList: React.FC = () => {
 
     const [setRelayStatus, { isLoading: loaderSet, data: relaySet }] = API.useRelayPutStatusMutation()
 
-    const [setLightOn, { isLoading: lightLoading }] = API.useRelayGetLightMutation()
+    const [setLightOn, { isLoading: lightLoading }] = API.useRelayToggleLightMutation()
 
     const user = useAppSelector((state) => state.auth.user)
 
@@ -51,7 +51,7 @@ export const RelayList: React.FC = () => {
 
         // Optimistically update the relay state before the server confirms
         const patchResult = dispatch(
-            API.util.updateQueryData('relayGetState', null, (draft) => {
+            API.util.updateQueryData('relayGetState', undefined, (draft) => {
                 if (draft?.items) {
                     const item = draft.items.find((r) => r.id === relay.id)
 

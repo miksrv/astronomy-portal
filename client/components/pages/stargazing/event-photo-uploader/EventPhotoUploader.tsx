@@ -1,7 +1,6 @@
 import React, { Ref, useEffect, useRef, useState } from 'react'
 
-import { ApiModel } from '@/api'
-import { API } from '@/api/api'
+import { API, ApiModel } from '@/api'
 
 interface PhotoUploaderProps {
     eventId?: string
