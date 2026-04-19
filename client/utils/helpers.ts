@@ -1,5 +1,23 @@
 import dayjs, { Dayjs } from 'dayjs'
 
+type QueryParamValue = string | number | boolean | undefined | null
+
+export const encodeQueryData = (data: object | void | undefined): string => {
+    if (!data) {
+        return ''
+    }
+
+    const record = data as Record<string, QueryParamValue>
+    const ret = []
+    for (const d in record) {
+        if (Object.hasOwn(record, d) && record[d] != null) {
+            ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(record[d] as string | number | boolean))
+        }
+    }
+
+    return ret.length ? '?' + ret.join('&') : ''
+}
+
 /**
  * Returns the correct word for plural
  * Example: declOfNum(5, ['кадр', 'кадра', 'кадров']) = '5 кадров'
