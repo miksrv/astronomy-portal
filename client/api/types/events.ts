@@ -6,20 +6,30 @@ export interface ResList {
 
 export type ResItem = ApiModel.Event
 
-export type ResponsePhoto = ApiModel.EventPhoto
+export type ResPhoto = ApiModel.EventPhoto
 
 export type ResCheckin = Pick<ApiModel.Event, 'members'> & {
     checkin?: ApiType.DateTime
 }
 
+export type EventFormType = Partial<
+    Omit<ApiModel.Event, 'date' | 'availableTickets' | 'registrationStart' | 'registrationEnd'>
+> & {
+    date?: string
+    registrationStart?: string
+    registrationEnd?: string
+    tickets?: string
+    upload?: File
+}
+
 /* Photo List */
-export interface RequestPhotoList {
+export interface ReqPhotoList {
     eventId?: string
     limit?: number
     order?: 'date' | 'rand'
 }
 
-export interface ResponsePhotoList {
+export interface ResPhotoList {
     count?: number
     items?: ApiModel.EventPhoto[]
 }
@@ -45,7 +55,18 @@ export interface ResRegistration {
 }
 
 /* Users List */
-export interface ResponseUsersList {
+export interface ResUsersList {
     count?: number
     items?: ApiModel.EventUser[]
+}
+
+/* Cover */
+export interface ReqUpdateCover {
+    id: string
+    formData: FormData
+}
+
+export interface ResUpdateCover {
+    coverFileName: string
+    coverFileExt: string
 }

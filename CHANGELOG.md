@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 4.5.1
+
+### Patch Changes
+
+- Refactored API `baseQuery` configuration, types, and removed unused `filter` model
+- Added environment-based constants for site URL, API URL, and image URL with query parameter encoder utility
+- Refactored RTK Query API types: reorganized events, mailings, auth, category, equipment, photos, statistic, and weather types; added dedicated `mailings.ts` types file
+- Refactored imports to use `utils` barrel exports and fixed auth token getter
+- Improved Redux `HYDRATE` handling and fixed `avatar` URL casting in `UserEntity`
+- Fixed RTK Query cache keys, updated event form types and component imports
+- Removed deprecated ROADMAP files and feature specification documents
+- Updated `CLAUDE.md` documentation: renamed relay hook reference
+
 ## 4.5.0
 
 ### Minor Changes

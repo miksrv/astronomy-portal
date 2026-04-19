@@ -3,20 +3,12 @@ import { Button, Container, Input, TextArea } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 
-import { ApiModel } from '@/api'
+import { ApiModel, ApiType } from '@/api'
 import { hosts } from '@/api/constants'
 
 import styles from './styles.module.sass'
 
-export type EventFormType = Partial<
-    Omit<ApiModel.Event, 'date' | 'availableTickets' | 'registrationStart' | 'registrationEnd'>
-> & {
-    date?: string
-    registrationStart?: string
-    registrationEnd?: string
-    tickets?: string
-    upload?: File
-}
+type EventFormType = ApiType.Events.EventFormType
 
 interface EventFormProps {
     disabled?: boolean

@@ -12,10 +12,10 @@ type InitialStateProps = {
     user?: ApiModel.User
 }
 
-export const getStorageToken = (): string | undefined =>
-    typeof window !== 'undefined' && LocalStorage.getItem('AUTH_TOKEN')
-        ? (LocalStorage.getItem('AUTH_TOKEN') ?? '')
-        : ''
+export const getStorageToken = (): string | undefined => {
+    const token = typeof window !== 'undefined' ? LocalStorage.getItem('AUTH_TOKEN') : undefined
+    return token ?? ''
+}
 
 const authSlice = createSlice({
     initialState: {

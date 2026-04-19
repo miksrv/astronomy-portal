@@ -21,8 +21,3 @@ export interface Request {
     limit?: number
     order?: 'rand' | keyof ApiModel.Photo
 }
-
-export interface PostUploadRequest {
-    id?: string
-    file?: FormData
-}

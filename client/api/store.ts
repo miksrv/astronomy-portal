@@ -1,6 +1,8 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
 import { createWrapper, HYDRATE } from 'next-redux-wrapper'
+// AnyAction is needed here because the HYDRATE handler directly accesses action.payload
+// properties at runtime; UnknownAction breaks configureStore's Reducer type compatibility.
 import { AnyAction, combineReducers, configureStore } from '@reduxjs/toolkit'
 
 import { APIMeteo } from '@/api/apiMeteo'
@@ -20,30 +22,32 @@ const combinedReducer = combineReducers({
 // 2. Process HYDRATE separately
 type RootReducerState = ReturnType<typeof combinedReducer>
 
-const rootReducer: (state: RootReducerState | undefined, action: AnyAction) => RootReducerState = (state, action) => {
+const rootReducer = (state: RootReducerState | undefined, action: AnyAction) => {
     if (action.type === HYDRATE) {
+        // next-redux-wrapper guarantees payload matches RootReducerState; any is needed
+        // because spreading Partial<CombinedState> makes queries optional, breaking configureStore.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const payload: any = action.payload
         return {
             ...state, // old client state
 
             // application can be hydrated
             application:
-                action.payload.application ??
-                state?.application ??
-                combinedReducer(undefined, { type: '' }).application,
+                payload.application ?? state?.application ?? combinedReducer(undefined, { type: '' }).application,
 
             // DO NOT touch auth if there is nothing in payload
             auth:
-                action.payload.auth?.token || action.payload.auth?.isAuth
-                    ? action.payload.auth
+                payload.auth?.token || payload.auth?.isAuth
+                    ? payload.auth
                     : (state?.auth ?? combinedReducer(undefined, { type: '' }).auth),
 
             [API.reducerPath]: {
                 ...state?.[API.reducerPath],
-                ...action.payload[API.reducerPath]
+                ...payload[API.reducerPath]
             },
             [APIMeteo.reducerPath]: {
                 ...state?.[APIMeteo.reducerPath],
-                ...action.payload[APIMeteo.reducerPath]
+                ...payload[APIMeteo.reducerPath]
             }
         }
     }

@@ -1,21 +1,11 @@
-import { API, encodeQueryData, HOST_API, HOST_IMG, SITE_LINK } from './api'
+import { API } from './api'
 import { APIMeteo } from './apiMeteo'
 import { setLocale } from './applicationSlice'
 import * as ApiModel from './models'
 import { useAppDispatch, useAppSelector, wrapper } from './store'
 import * as ApiType from './types'
 
-export {
-    API,
-    APIMeteo,
-    ApiModel,
-    ApiType,
-    encodeQueryData,
-    HOST_API,
-    HOST_IMG,
-    setLocale,
-    SITE_LINK,
-    useAppDispatch,
-    useAppSelector,
-    wrapper
-}
+export { HOST_API, HOST_IMG, SITE_LINK } from '@/utils/constants'
+export { encodeQueryData } from '@/utils/helpers'
+
+export { API, APIMeteo, ApiModel, ApiType, setLocale, useAppDispatch, useAppSelector, wrapper }

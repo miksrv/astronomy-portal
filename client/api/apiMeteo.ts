@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { ApiModel, ApiType } from '@/api'
-import { encodeQueryData } from '@/api/api'
+import { encodeQueryData } from '@/utils/helpers'
 
 export const APIMeteo = createApi({
     baseQuery: fetchBaseQuery({

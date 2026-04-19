@@ -134,7 +134,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
                                     size={'medium'}
                                     src={
                                         authSlice?.user?.avatar
-                                            ? `${HOST_IMG}/users/${authSlice?.user.id}/${authSlice?.user.avatar}`
+                                            ? `${HOST_IMG}/users/${String(authSlice?.user.id)}/${String(authSlice?.user.avatar)}`
                                             : undefined
                                     }
                                     name={authSlice?.user?.name}

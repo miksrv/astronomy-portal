@@ -1,62 +1,46 @@
 import { HYDRATE } from 'next-redux-wrapper'
 import type { Action, PayloadAction } from '@reduxjs/toolkit'
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { ApiModel, ApiType } from '@/api'
-import { EventFormType } from '@/components/pages/stargazing'
+import { HOST_API } from '@/utils/constants'
+import { encodeQueryData } from '@/utils/helpers'
 
 import { RootState } from './store'
 
 type Maybe<T> = T | void
 
-type QueryParamValue = string | number | boolean | undefined | null
-
-// Accepts objects whose property values are primitive query-string–compatible types.
-// We cast to Record internally to iterate since TypeScript does not allow iterating
-// over interfaces without an index signature in a generic constraint.
-export const encodeQueryData = (data: object | void | undefined): string => {
-    if (!data) {
-        return ''
-    }
-
-    const record = data as Record<string, QueryParamValue>
-    const ret = []
-    for (const d in record) {
-        if (Object.hasOwn(record, d) && record[d] != null) {
-            ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(record[d] as string | number | boolean))
-        }
-    }
-
-    return ret.length ? '?' + ret.join('&') : ''
-}
-
 const isHydrateAction = (action: Action): action is PayloadAction<RootState> => action.type === HYDRATE
 
-export const SITE_LINK = process.env.NEXT_PUBLIC_SITE_LINK
+const rawBaseQuery = fetchBaseQuery({
+    baseUrl: HOST_API,
+    prepareHeaders: (headers, { getState }) => {
+        const token = (getState() as RootState).auth.token
+        const locale = (getState() as RootState).application.locale
 
-export const HOST_API = process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:8080/'
+        if (token) {
+            headers.set('Authorization', token)
+        }
 
-export const HOST_IMG = process.env.NEXT_PUBLIC_IMG_HOST || HOST_API
+        if (locale) {
+            headers.set('Locale', locale)
+        }
+
+        return headers
+    }
+})
+
+const baseQueryWithErrorTransform = (async (args, api, extraOptions) => {
+    const result = await rawBaseQuery(args, api, extraOptions)
+    if (result.error && 'data' in result.error) {
+        return { ...result, error: (result.error as FetchBaseQueryError).data }
+    }
+    return result
+}) as BaseQueryFn<string | FetchArgs, unknown, ApiType.ResError>
 
 export const API = createApi({
-    baseQuery: fetchBaseQuery({
-        baseUrl: HOST_API,
-        prepareHeaders: (headers, { getState }) => {
-            // By default, if we have a token in the store, let's use that for authenticated requests
-            const token = (getState() as RootState).auth.token
-            const locale = (getState() as RootState).application.locale
-
-            if (token) {
-                headers.set('Authorization', token)
-            }
-
-            if (locale) {
-                headers.set('Locale', locale)
-            }
-
-            return headers
-        }
-    }),
+    baseQuery: baseQueryWithErrorTransform,
     endpoints: (builder) => ({
         /* Comments Controller */
         commentsGetList: builder.query<ApiType.Comments.ResList, ApiType.Comments.ReqList>({
@@ -69,8 +53,7 @@ export const API = createApi({
         }),
         commentsCreate: builder.mutation<ApiModel.Comment, ApiType.Comments.ReqCreate>({
             invalidatesTags: (result, error, { entityId }) => [{ id: entityId, type: 'Comments' }, 'Comments'],
-            query: (body) => ({ body, method: 'POST', url: 'comments' }),
-            transformErrorResponse: (response) => response.data
+            query: (body) => ({ body, method: 'POST', url: 'comments' })
         }),
         commentsDelete: builder.mutation<void, string>({
             invalidatesTags: ['Comments'],
@@ -79,24 +62,22 @@ export const API = createApi({
 
         /* Auth Controller */
         authGetMe: builder.query<ApiType.Auth.ResLogin, void>({
+            providesTags: ['Auth'],
             query: () => 'auth/me'
         }),
         authLoginService: builder.mutation<ApiType.Auth.ResAuthService, ApiType.Auth.ReqAuthService>({
-            query: ({ service, ...params }) => `auth/${service}${params?.code ? encodeQueryData(params) : ''}`,
-            transformErrorResponse: (response) => response.data
+            query: ({ service, ...params }) => `auth/${service}${params?.code ? encodeQueryData(params) : ''}`
         }),
         authPostLogin: builder.mutation<ApiType.Auth.ResLogin, ApiType.Auth.ReqLogin>({
             query: (credentials) => ({
                 body: credentials,
                 method: 'POST',
                 url: 'auth/login'
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
         authUpdateProfile: builder.mutation<ApiType.Auth.ResUpdateProfile, ApiType.Auth.ReqUpdateProfile>({
             invalidatesTags: ['Auth'],
-            query: (body) => ({ body, method: 'PATCH', url: 'auth/profile' }),
-            transformErrorResponse: (response) => response.data
+            query: (body) => ({ body, method: 'PATCH', url: 'auth/profile' })
         }),
 
         /* Categories Controller */
@@ -110,17 +91,16 @@ export const API = createApi({
             providesTags: (result, error, id) => [{ id, type: 'Events' }],
             query: (id) => `events/${id}`
         }),
-        eventGetPhotoList: builder.query<ApiType.Events.ResponsePhotoList, ApiType.Events.RequestPhotoList>({
+        eventGetPhotoList: builder.query<ApiType.Events.ResPhotoList, ApiType.Events.ReqPhotoList>({
             providesTags: (result, error, arg) => [{ id: arg.eventId ?? 'LIST', type: 'EventPhotos' }],
             query: (params) => `events/photos${encodeQueryData(params)}`
         }),
-        eventGetUsersList: builder.query<ApiType.Events.ResponseUsersList, string>({
+        eventGetUsersList: builder.query<ApiType.Events.ResUsersList, string>({
             providesTags: (result, error, arg) => [{ id: arg, type: 'EventUsers' }],
             query: (id) => `events/members/${id}`
         }),
         eventGetCheckin: builder.mutation<ApiType.Events.ResCheckin, string>({
-            query: (id) => `events/checkin/${id}`,
-            transformErrorResponse: (response) => response.data
+            query: (id) => `events/checkin/${id}`
         }),
         eventGetUpcoming: builder.query<ApiType.Events.ResItem, void>({
             providesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
@@ -130,7 +110,7 @@ export const API = createApi({
             providesTags: [{ id: 'UPCOMING_PROFILE', type: 'Events' }],
             query: () => 'events/upcoming/registered'
         }),
-        eventPhotoUploadPost: builder.mutation<ApiType.Events.ResponsePhoto, ApiType.Events.ReqUploadPhoto>({
+        eventPhotoUploadPost: builder.mutation<ApiType.Events.ResPhoto, ApiType.Events.ReqUploadPhoto>({
             invalidatesTags: (res, err, arg) => [
                 { id: arg.eventId, type: 'Events' },
                 { id: arg.eventId, type: 'EventPhotos' }
@@ -139,8 +119,7 @@ export const API = createApi({
                 body: data.formData,
                 method: 'POST',
                 url: `events/upload/${data.eventId}`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
         eventGetList: builder.query<ApiType.Events.ResList, void>({
             providesTags: () => [{ id: 'LIST', type: 'Events' }],
@@ -153,25 +132,22 @@ export const API = createApi({
                 body: formState,
                 method: 'POST',
                 url: 'events'
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
         eventCoverUploadPost: builder.mutation<ApiType.Events.ResItem | ApiType.ResError, FormData>({
             query: (formData) => ({
                 body: formData,
                 method: 'POST',
                 url: `events/${formData.get('id') as string}/upload`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
-        eventPatch: builder.mutation<ApiType.Events.ResItem | ApiType.ResError, EventFormType>({
+        eventPatch: builder.mutation<ApiType.Events.ResItem | ApiType.ResError, ApiType.Events.EventFormType>({
             invalidatesTags: (result, error, { id }) => [{ id, type: 'Events' }],
             query: ({ id, ...formState }) => ({
                 body: formState,
                 method: 'PATCH',
                 url: `events/${id}`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
         eventDelete: builder.mutation<void, string>({
             invalidatesTags: (result, error, id) => [
@@ -181,20 +157,15 @@ export const API = createApi({
             query: (id) => ({
                 method: 'DELETE',
                 url: `events/${id}`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
-        eventUpdateCover: builder.mutation<
-            { coverFileName: string; coverFileExt: string },
-            { id: string; formData: FormData }
-        >({
+        eventUpdateCover: builder.mutation<ApiType.Events.ResUpdateCover, ApiType.Events.ReqUpdateCover>({
             invalidatesTags: (result, error, { id }) => [{ id, type: 'Events' }],
             query: ({ id, formData }) => ({
                 body: formData,
                 method: 'POST',
                 url: `events/${id}/cover`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
 
         eventsRegistrationPost: builder.mutation<
@@ -206,8 +177,7 @@ export const API = createApi({
                 body: formState,
                 method: 'POST',
                 url: 'events/booking'
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
         eventsCancelRegistrationPost: builder.mutation<
             ApiType.Events.ResRegistration | ApiType.ResError,
@@ -218,8 +188,7 @@ export const API = createApi({
                 body: formState,
                 method: 'POST',
                 url: 'events/cancel'
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
 
         /* Objects controller */
@@ -240,8 +209,7 @@ export const API = createApi({
                 body: formState,
                 method: 'PATCH',
                 url: `objects/${formState.name}`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
         objectsPost: builder.mutation<ApiType.Objects.Response | ApiType.ResError, Partial<ApiType.Objects.Request>>({
             invalidatesTags: () => [{ type: 'Objects' }],
@@ -249,16 +217,14 @@ export const API = createApi({
                 body: formState,
                 method: 'POST',
                 url: 'objects'
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
         objectsDelete: builder.mutation<void, string>({
             invalidatesTags: () => [{ type: 'Objects' }],
             query: (name) => ({
                 method: 'DELETE',
                 url: `objects/${name}`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
 
         /* Files controller */
@@ -280,8 +246,7 @@ export const API = createApi({
         }),
         photosGetList: builder.query<ApiType.Photos.Response, Maybe<ApiType.Photos.Request>>({
             providesTags: () => [{ id: 'LIST', type: 'Photos' }],
-            query: (params) => `photos${encodeQueryData(params)}`,
-            transformErrorResponse: (response) => response.data
+            query: (params) => `photos${encodeQueryData(params)}`
         }),
         photosPost: builder.mutation<ApiType.Photos.PostResponse | ApiType.ResError, ApiType.Photos.PostRequest>({
             invalidatesTags: (result, error, { id }) => [{ id, type: 'Photos' }, { type: 'Statistic' }],
@@ -289,16 +254,14 @@ export const API = createApi({
                 body: formState,
                 method: 'POST',
                 url: 'photos'
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
         photosPostUpload: builder.mutation<ApiType.Photos.PostResponse | ApiType.ResError, FormData>({
             query: (formData) => ({
                 body: formData,
                 method: 'POST',
                 url: `photos/${formData.get('id') as string}/upload`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
         photoPatch: builder.mutation<ApiType.Photos.PostResponse | ApiType.ResError, ApiType.Photos.PostRequest>({
             invalidatesTags: (result, error, { id }) => [{ id, type: 'Photos' }],
@@ -306,24 +269,22 @@ export const API = createApi({
                 body: formState,
                 method: 'PATCH',
                 url: `photos/${id}`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
         photosDelete: builder.mutation<void, string>({
             invalidatesTags: () => [{ type: 'Photos' }],
             query: (id) => ({
                 method: 'DELETE',
                 url: `photos/${id}`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
 
         /* Relay Controller */
-        relayGetLight: builder.mutation<void, void>({
+        relayToggleLight: builder.mutation<void, void>({
             invalidatesTags: () => [{ id: 'LIST', type: 'Relay' }],
             query: () => 'relay/light'
         }),
-        relayGetState: builder.query<ApiType.Relay.ResRelayList, null>({
+        relayGetState: builder.query<ApiType.Relay.ResRelayList, void>({
             providesTags: () => [{ id: 'LIST', type: 'Relay' }],
             query: () => 'relay/list'
         }),
@@ -333,8 +294,7 @@ export const API = createApi({
                 body: data,
                 method: 'PUT',
                 url: 'relay/set'
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
 
         /* Sitemap Controller */
@@ -349,7 +309,7 @@ export const API = createApi({
         }),
 
         /* Mailings Controller */
-        mailingGetList: builder.query<{ items: ApiModel.MailingListItem[]; count: number }, void>({
+        mailingGetList: builder.query<ApiType.Mailings.ResMailingList, void>({
             providesTags: () => [{ id: 'LIST', type: 'Mailings' }],
             query: () => 'mailings'
         }),
@@ -363,8 +323,7 @@ export const API = createApi({
                 body,
                 method: 'POST',
                 url: 'mailings'
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
         mailingUpdate: builder.mutation<ApiModel.Mailing, ApiModel.UpdateMailingRequest & { id: string }>({
             invalidatesTags: (res, err, { id }) => [{ type: 'Mailings' }, { id, type: 'Mailings' }],
@@ -372,41 +331,36 @@ export const API = createApi({
                 body,
                 method: 'PATCH',
                 url: `mailings/${id}`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
         mailingDelete: builder.mutation<void, string>({
             invalidatesTags: () => [{ type: 'Mailings' }],
             query: (id) => ({
                 method: 'DELETE',
                 url: `mailings/${id}`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
-        mailingUploadImage: builder.mutation<{ image: string }, { id: string; formData: FormData }>({
+        mailingUploadImage: builder.mutation<ApiType.Mailings.ResMailingUpload, ApiType.Mailings.ReqMailingUpload>({
             query: ({ id, formData }) => ({
                 body: formData,
                 method: 'POST',
                 url: `mailings/${id}/upload`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
-        mailingTestSend: builder.mutation<{ success: boolean }, string>({
+        mailingTestSend: builder.mutation<ApiType.Mailings.ResMailingTestSend, string>({
             query: (id) => ({
                 method: 'POST',
                 url: `mailings/${id}/test`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
-        mailingLaunch: builder.mutation<{ queued: number }, string>({
+        mailingLaunch: builder.mutation<ApiType.Mailings.ResMailingLaunch, string>({
             invalidatesTags: (res, err, id) => [{ type: 'Mailings' }, { id, type: 'Mailings' }],
             query: (id) => ({
                 method: 'POST',
                 url: `mailings/${id}/send`
-            }),
-            transformErrorResponse: (response) => response.data
+            })
         }),
-        mailingUnsubscribe: builder.query<{ success: boolean; message: string }, string>({
+        mailingUnsubscribe: builder.query<ApiType.Mailings.ResMailingUnsubscribe, string>({
             query: (mail) => `mailings/unsubscribe?mail=${encodeURIComponent(mail)}`
         }),
 
@@ -436,7 +390,6 @@ export const API = createApi({
         'Equipment',
         'Files',
         'Objects',
-        'Catalog',
         'Events',
         'EventPhotos',
         'EventUsers',
