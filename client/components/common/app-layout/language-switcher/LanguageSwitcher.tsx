@@ -5,8 +5,8 @@ import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
 import { ApiType, setLocale, useAppDispatch } from '@/api'
-import useLocalStorage from '@/hooks/useLocalStorage'
 import { LOCAL_STORAGE } from '@/utils/constants'
+import * as LocalStorage from '@/utils/localstorage'
 
 import styles from './styles.module.sass'
 
@@ -14,8 +14,6 @@ export const LanguageSwitcher: React.FC = () => {
     const { i18n } = useTranslation()
     const router = useRouter()
     const dispatch = useAppDispatch()
-
-    const [, setStorageLocale] = useLocalStorage<string>(LOCAL_STORAGE.LOCALE)
 
     const { language: currentLanguage } = i18n
     const { pathname, asPath, query } = router
@@ -26,7 +24,7 @@ export const LanguageSwitcher: React.FC = () => {
         }
 
         await setCookie('NEXT_LOCALE', locale)
-        setStorageLocale(locale)
+        LocalStorage.setItem(LOCAL_STORAGE.LOCALE as 'LOCALE', locale)
 
         dispatch(setLocale(locale))
 
