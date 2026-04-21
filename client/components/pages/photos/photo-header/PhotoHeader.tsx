@@ -137,7 +137,7 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                                   >
                                       {title}
                                   </Link>
-                                  {i < categoriesData.length - 1 && ', '}
+                                  {i < categoriesData.length - 1 && ',\u00A0'}
                               </React.Fragment>
                           ))}
                 </div>
@@ -175,15 +175,16 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                             {t('components.pages.photos.photo-header.objects-on-photo', 'Объекты на фото')}
                             {':'}
                         </span>
-                        {objectsData.map(({ name, title }) => (
-                            <Link
-                                key={name}
-                                href={`/objects/${name}`}
-                                className={styles.objectLink}
-                                title={title}
-                            >
-                                {formatObjectName(name)}
-                            </Link>
+                        {objectsData.map(({ name, title }, i) => (
+                            <React.Fragment key={`object_${name}`}>
+                                <Link
+                                    href={`/objects/${name}`}
+                                    title={title}
+                                >
+                                    {formatObjectName(name)}
+                                </Link>
+                                {i < objectsData.length - 1 && ',\u00A0'}
+                            </React.Fragment>
                         ))}
                     </div>
                 )}
