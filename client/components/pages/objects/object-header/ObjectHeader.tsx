@@ -49,7 +49,7 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
                                 >
                                     {title}
                                 </Link>
-                                {i < categoriesData.length - 1 && ', '}
+                                {i < categoriesData.length - 1 && ',\u00A0'}
                             </React.Fragment>
                         ))}
                     </div>
