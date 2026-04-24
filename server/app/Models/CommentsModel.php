@@ -2,15 +2,21 @@
 
 namespace App\Models;
 
+/**
+ * CommentsModel
+ *
+ * Manages the `comments` table, which stores user reviews and comments on
+ * events and photos. Supports soft deletes, UUID primary keys, and an
+ * `entity_type` / `entity_id` polymorphic relationship pattern.
+ */
 class CommentsModel extends ApplicationBaseModel
 {
-    protected $table      = 'comments';
-    protected $primaryKey = 'id';
-    protected $returnType = 'array';
-
+    protected $table            = 'comments';
+    protected $primaryKey       = 'id';
+    protected $useAutoIncrement = false;
+    protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-    protected $useAutoIncrement = false;
 
     protected $allowedFields = [
         'id',
@@ -22,19 +28,20 @@ class CommentsModel extends ApplicationBaseModel
         'status',
     ];
 
-    protected bool $allowEmptyInserts = false;
-
+    // Dates
     protected $useTimestamps = true;
-    protected $dateFormat    = 'datetime';
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
-    protected $deletedField  = 'deleted_at';
+    protected $dateFormat         = 'datetime';
+    protected $createdField       = 'created_at';
+    protected $updatedField       = 'updated_at';
+    protected $deletedField       = 'deleted_at';
 
+    // Validation
     protected $validationRules      = [];
     protected $validationMessages   = [];
     protected $skipValidation       = true;
     protected $cleanValidationRules = true;
 
+    // Callbacks
     protected $allowCallbacks = true;
     protected $beforeInsert   = [];
     protected $afterInsert    = [];
@@ -48,10 +55,10 @@ class CommentsModel extends ApplicationBaseModel
     /**
      * Get visible comments for an entity, newest first, with author info joined.
      *
-     * @param string $type     Entity type: 'event' or 'photo'
-     * @param string $entityId Entity ID
-     * @param int    $limit    Maximum number of results (default 20)
-     * @return array
+     * @param string $type     Entity type ('event' or 'photo').
+     * @param string $entityId Entity ID.
+     * @param int    $limit    Maximum number of results. Default is 20.
+     * @return array Array of formatted comment rows.
      */
     public function getForEntity(string $type, string $entityId, int $limit = 20): array
     {
@@ -71,11 +78,11 @@ class CommentsModel extends ApplicationBaseModel
     }
 
     /**
-     * Get N random visible comments of an entity type (for widget).
+     * Get N random visible comments of a given entity type (used for widgets).
      *
-     * @param string $type  Entity type: 'event' or 'photo'
-     * @param int    $limit Maximum number of results (default 5)
-     * @return array
+     * @param string $type  Entity type ('event' or 'photo').
+     * @param int    $limit Maximum number of results. Default is 5.
+     * @return array Array of formatted comment rows.
      */
     public function getRandom(string $type, int $limit = 5): array
     {
@@ -93,34 +100,11 @@ class CommentsModel extends ApplicationBaseModel
         return $this->formatRows($rows);
     }
 
-    private function formatRows(array $rows, bool $keepEntity = false): array
-    {
-        foreach ($rows as &$row) {
-            $row['createdAt'] = $row['created_at'] ?? null;
-            $row['author'] = [
-                'id'     => $row['user_id'] ?? null,
-                'name'   => $this->truncateAuthorName((string) ($row['author_name'] ?? '')),
-                'avatar' => $row['avatar'] ?? null,
-            ];
-
-            if ($keepEntity) {
-                $row['entityType'] = $row['entity_type'] ?? null;
-                $row['entityId']   = $row['entity_id'] ?? null;
-            }
-
-            unset($row['created_at'], $row['author_name'], $row['avatar'], $row['user_id'],
-                  $row['entity_type'], $row['entity_id'], $row['status']);
-        }
-        unset($row);
-
-        return $rows;
-    }
-
     /**
-     * Get comments written by a specific user.
+     * Get all comments written by a specific user, including entity references.
      *
-     * @param string $userId
-     * @return array
+     * @param string $userId The user's ID.
+     * @return array Array of formatted comment rows with entityType and entityId included.
      */
     public function getByUser(string $userId): array
     {
@@ -137,12 +121,14 @@ class CommentsModel extends ApplicationBaseModel
     }
 
     /**
-     * Check if a user is eligible to review an event.
-     * Eligible means the user has booked the event AND either checked in OR the event date is in the past.
+     * Check whether a user is eligible to review an event.
      *
-     * @param string $userId
-     * @param string $eventId
-     * @return bool
+     * Eligible means the user has a non-cancelled booking AND either checked in
+     * or the event date is in the past.
+     *
+     * @param string $userId  The user's ID.
+     * @param string $eventId The event's ID.
+     * @return bool True if the user may submit a review.
      */
     public function canReviewEvent(string $userId, string $eventId): bool
     {
@@ -161,12 +147,12 @@ class CommentsModel extends ApplicationBaseModel
     }
 
     /**
-     * Check if a user has already reviewed a specific entity.
+     * Check whether a user has already submitted a review for a specific entity.
      *
-     * @param string $userId
-     * @param string $type
-     * @param string $entityId
-     * @return bool
+     * @param string $userId   The user's ID.
+     * @param string $type     Entity type ('event' or 'photo').
+     * @param string $entityId The entity's ID.
+     * @return bool True if a non-deleted review already exists.
      */
     public function hasReviewed(string $userId, string $type, string $entityId): bool
     {
@@ -181,10 +167,42 @@ class CommentsModel extends ApplicationBaseModel
     }
 
     /**
+     * Normalise raw DB rows into the camelCase API shape with an embedded author object.
+     *
+     * @param array $rows      Raw result rows from the query builder.
+     * @param bool  $keepEntity Whether to include entityType/entityId in the output.
+     * @return array Formatted rows.
+     */
+    private function formatRows(array $rows, bool $keepEntity = false): array
+    {
+        foreach ($rows as &$row) {
+            $row['createdAt'] = $row['created_at'] ?? null;
+            $row['author']    = [
+                'id'     => $row['user_id'] ?? null,
+                'name'   => $this->truncateAuthorName((string) ($row['author_name'] ?? '')),
+                'avatar' => $row['avatar'] ?? null,
+            ];
+
+            if ($keepEntity) {
+                $row['entityType'] = $row['entity_type'] ?? null;
+                $row['entityId']   = $row['entity_id'] ?? null;
+            }
+
+            unset(
+                $row['created_at'], $row['author_name'], $row['avatar'], $row['user_id'],
+                $row['entity_type'], $row['entity_id'], $row['status']
+            );
+        }
+        unset($row);
+
+        return $rows;
+    }
+
+    /**
      * Truncate an author's full name to "FirstName L." format for privacy.
      *
-     * @param string $name
-     * @return string
+     * @param string $name Full name string.
+     * @return string Truncated name, or the original first token if no last name is present.
      */
     private function truncateAuthorName(string $name): string
     {
@@ -198,8 +216,8 @@ class CommentsModel extends ApplicationBaseModel
             return $parts[0];
         }
 
-        $firstName    = $parts[0];
-        $lastInitial  = mb_substr($parts[1], 0, 1, 'UTF-8');
+        $firstName   = $parts[0];
+        $lastInitial = mb_substr($parts[1], 0, 1, 'UTF-8');
 
         return $firstName . ' ' . $lastInitial . '.';
     }
