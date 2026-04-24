@@ -15,6 +15,10 @@ export interface Mailing {
     sentAt?: ApiType.DateTime | null
     createdAt: ApiType.DateTime
     updatedAt: ApiType.DateTime
+    limitDay: number
+    limitHour: number
+    sentToday: number
+    sentThisHour: number
 }
 
 export interface MailingListItem {

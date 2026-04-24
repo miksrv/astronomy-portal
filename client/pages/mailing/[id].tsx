@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { getCookie } from 'cookies-next'
 import { Container } from 'simple-react-ui-kit'
 
@@ -38,6 +38,49 @@ const MailingStatsPage: NextPage<object> = () => {
 
     const sentPct = data && data.totalCount > 0 ? (data.sentCount / data.totalCount) * 100 : 0
     const errorPct = data && data.totalCount > 0 ? (data.errorCount / data.totalCount) * 100 : 0
+
+    const isDayLimitHit = !!data && data.sentToday >= data.limitDay
+    const isHourLimitHit = !!data && data.sentThisHour >= data.limitHour
+    const isLimitHit = isDayLimitHit || isHourLimitHit
+
+    const [countdown, setCountdown] = useState('')
+
+    useEffect(() => {
+        if (!isLimitHit || data?.status !== 'sending' || remaining <= 0) {
+            setCountdown('')
+            return
+        }
+
+        const getTarget = (): Date => {
+            const now = new Date()
+            if (isDayLimitHit) {
+                const midnight = new Date(now)
+                midnight.setHours(24, 0, 0, 0)
+                return midnight
+            }
+            const nextHour = new Date(now)
+            nextHour.setHours(now.getHours() + 1, 0, 0, 0)
+            return nextHour
+        }
+
+        const formatCountdown = (ms: number): string => {
+            const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+            const h = Math.floor(totalSeconds / 3600)
+            const m = Math.floor((totalSeconds % 3600) / 60)
+            const s = totalSeconds % 60
+            return [h, m, s].map((v) => String(v).padStart(2, '0')).join(':')
+        }
+
+        const tick = () => {
+            const now = new Date()
+            const target = getTarget()
+            setCountdown(formatCountdown(target.getTime() - now.getTime()))
+        }
+
+        tick()
+        const id = setInterval(tick, 1000)
+        return () => clearInterval(id)
+    }, [isLimitHit, isDayLimitHit, data?.status, remaining])
 
     const statusLabel = (status: ApiModel.MailingStatus): string => {
         const map: Record<ApiModel.MailingStatus, string> = {
@@ -89,6 +132,41 @@ const MailingStatsPage: NextPage<object> = () => {
                                 )}
                                 <dt>{t('pages.mailing.detail-created-at', 'Дата создания')}</dt>
                                 <dd>{formatDate(data.createdAt.date)}</dd>
+                            </dl>
+
+                            <dl className={styles.metaGrid}>
+                                <dt>{t('pages.mailing.limit-day', 'Лимит в сутки')}</dt>
+                                <dd>
+                                    {data.sentToday} / {data.limitDay}
+                                </dd>
+                                <dt>{t('pages.mailing.limit-hour', 'Лимит в час')}</dt>
+                                <dd>
+                                    {data.sentThisHour} / {data.limitHour}
+                                </dd>
+                                <dt>{t('pages.mailing.limit-status', 'Состояние лимита')}</dt>
+                                <dd>
+                                    {isDayLimitHit ? (
+                                        <span className={styles.limitHit}>
+                                            {t('pages.mailing.limit-day-hit', 'Суточный лимит')}
+                                        </span>
+                                    ) : isHourLimitHit ? (
+                                        <span className={styles.limitHit}>
+                                            {t('pages.mailing.limit-hour-hit', 'Часовой лимит')}
+                                        </span>
+                                    ) : (
+                                        <span className={styles.limitOk}>
+                                            {t('pages.mailing.limit-active', 'Активна')}
+                                        </span>
+                                    )}
+                                </dd>
+                                {isLimitHit && data.status === 'sending' && remaining > 0 && countdown && (
+                                    <>
+                                        <dt>{t('pages.mailing.limit-reset', 'Сброс через')}</dt>
+                                        <dd>
+                                            <span className={styles.countdown}>{countdown}</span>
+                                        </dd>
+                                    </>
+                                )}
                             </dl>
                         </div>
 
