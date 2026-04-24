@@ -3,11 +3,12 @@ import { getCookie } from 'cookies-next'
 import { Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
-import { API, ApiModel, setLocale, wrapper } from '@/api'
+import { API, ApiModel, HOST_IMG, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { formatDate } from '@/utils/dates'
@@ -145,6 +146,19 @@ const MailingStatsPage: NextPage<object> = () => {
                                 </div>
                             </>
                         )}
+
+                        {data.image && (
+                            <div className={styles.imagePreview}>
+                                <Image
+                                    src={HOST_IMG + data.image}
+                                    alt={data.subject}
+                                    width={300}
+                                    height={200}
+                                />
+                            </div>
+                        )}
+
+                        <div className={styles.contentPreview}>{data.content}</div>
                     </>
                 )}
             </Container>
