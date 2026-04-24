@@ -4,17 +4,30 @@ namespace App\Models;
 
 use App\Entities\PhotosCategoryEntity;
 
+/**
+ * PhotosCategoryModel
+ *
+ * Manages the `photos_categories` pivot table that maps astrophotos to their
+ * categories. Uses UUID primary keys generated via the beforeInsert callback.
+ */
 class PhotosCategoryModel extends ApplicationBaseModel
 {
-    protected $table      = 'photos_categories';
-    protected $primaryKey = 'id';
-    protected $returnType = PhotosCategoryEntity::class;
+    protected $table            = 'photos_categories';
+    protected $primaryKey       = 'id';
+    protected $useAutoIncrement = false;
+    protected $returnType       = PhotosCategoryEntity::class;
+    protected $useSoftDeletes   = false;
+    protected $protectFields    = true;
 
     protected $allowedFields = [
         'photo_id',
         'category_id',
     ];
 
+    // Dates
+    protected $useTimestamps = false;
+
+    // Validation
     protected $validationRules = [
         'photo_id'    => 'required|max_length[15]',
         'category_id' => 'required|is_natural_no_zero',
@@ -31,8 +44,7 @@ class PhotosCategoryModel extends ApplicationBaseModel
         ],
     ];
 
-    protected $useTimestamps = false;
-
+    // Callbacks
     protected $allowCallbacks = true;
     protected $beforeInsert   = ['generateId'];
     protected $afterInsert    = [];

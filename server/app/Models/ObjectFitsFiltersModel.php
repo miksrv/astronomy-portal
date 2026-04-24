@@ -4,34 +4,40 @@ namespace App\Models;
 
 use App\Entities\ObjectFitsFiltersEntity;
 
+/**
+ * ObjectFitsFiltersModel
+ *
+ * Manages the `objects_fits_filters` table, which stores aggregated filter statistics
+ * (frame count, exposure time, file size) derived from FITS files per astronomical object.
+ * Supports soft deletes and UUID primary keys generated via the beforeInsert callback.
+ */
 class ObjectFitsFiltersModel extends ApplicationBaseModel
 {
-    protected $table      = 'objects_fits_filters';
-    protected $primaryKey = 'id';
-
-    protected $useAutoIncrement = true;
-
-    protected $returnType     = ObjectFitsFiltersEntity::class;
-    protected $useSoftDeletes = true;
+    protected $table            = 'objects_fits_filters';
+    protected $primaryKey       = 'id';
+    protected $useAutoIncrement = false;  // PK is VARCHAR(15) assigned by generateId callback.
+    protected $returnType       = ObjectFitsFiltersEntity::class;
+    protected $useSoftDeletes   = true;
+    protected $protectFields    = true;
 
     protected $allowedFields = [
         'object_name',
         'filter',
         'frames_count',
         'exposure_time',
-        'files_size'
+        'files_size',
     ];
 
+    /** @var array<string> Fields stripped from query results by the prepareOutput afterFind callback. */
     protected array $hiddenFields = ['created_at', 'updated_at', 'deleted_at'];
 
-    protected bool $allowEmptyInserts = false;
-    protected bool $updateOnlyChanged = true;
-
+    // Dates
     protected $useTimestamps = true;
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
-    protected $deletedField  = 'deleted_at';
+    protected $createdField       = 'created_at';
+    protected $updatedField       = 'updated_at';
+    protected $deletedField       = 'deleted_at';
 
+    // Validation
     protected $validationRules      = [];
     protected $validationMessages   = [];
     protected $skipValidation       = true;
@@ -49,16 +55,11 @@ class ObjectFitsFiltersModel extends ApplicationBaseModel
     protected $afterDelete    = [];
 
     /**
-     * Retrieves the FITS filter data for a given object and filter.
+     * Retrieves the filter statistics record for a specific object and filter combination.
      *
-     * This function queries the database for the record that matches
-     * the specified object and filter. If found, it returns an
-     * instance of ObjectFitsFiltersEntity, otherwise returns null.
-     *
-     * @param string $object The name of the object for which to retrieve the filter data.
-     * @param string $filter The name of the filter to retrieve data for.
-     *
-     * @return ObjectFitsFiltersEntity|null Returns the filter data as an ObjectFitsFiltersEntity or null if no matching record is found.
+     * @param string $object The astronomical object name (catalog name).
+     * @param string $filter The filter identifier (e.g. 'L', 'R', 'H').
+     * @return ObjectFitsFiltersEntity|null The matching entity, or null if not found.
      */
     public function getDataByObjectFilter(string $object, string $filter): ?ObjectFitsFiltersEntity
     {
