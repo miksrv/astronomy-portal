@@ -3,8 +3,14 @@
 namespace App\Models;
 
 use App\Entities\MailingEntity;
-use App\Models\MailingEmailsModel;
 
+/**
+ * MailingsModel
+ *
+ * Manages the `mailings` table, which stores email campaign records including
+ * subject, content, delivery status, and aggregate sent/error counts. Supports
+ * soft deletes and UUID primary keys.
+ */
 class MailingsModel extends ApplicationBaseModel
 {
     protected $table            = 'mailings';
@@ -12,7 +18,7 @@ class MailingsModel extends ApplicationBaseModel
     protected $useAutoIncrement = false;
     protected $returnType       = MailingEntity::class;
     protected $useSoftDeletes   = true;
-    protected $useTimestamps    = true;
+    protected $protectFields    = true;
 
     protected $allowedFields = [
         'subject',
@@ -26,11 +32,19 @@ class MailingsModel extends ApplicationBaseModel
         'sent_at',
     ];
 
-    protected $beforeInsert = ['generateId'];
+    // Dates
+    protected $useTimestamps = true;
+
+    // Callbacks
+    protected $allowCallbacks = true;
+    protected $beforeInsert   = ['generateId'];
 
     /**
-     * Recalculate sent_count and error_count from mailing_emails
-     * and update the mailings row.
+     * Recalculates sent_count and error_count from the mailing_emails table
+     * and persists the updated totals to the mailings row.
+     *
+     * @param string $mailingId The mailing campaign ID to update.
+     * @return void
      */
     public function updateCounts(string $mailingId): void
     {

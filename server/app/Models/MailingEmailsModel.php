@@ -4,6 +4,13 @@ namespace App\Models;
 
 use App\Entities\MailingEmailEntity;
 
+/**
+ * MailingEmailsModel
+ *
+ * Manages the `mailing_emails` table, which stores individual recipient entries
+ * for each mailing campaign. Tracks delivery status, error messages, and send time.
+ * Uses UUID primary keys generated via the beforeInsert callback.
+ */
 class MailingEmailsModel extends ApplicationBaseModel
 {
     protected $table            = 'mailing_emails';
@@ -11,7 +18,7 @@ class MailingEmailsModel extends ApplicationBaseModel
     protected $useAutoIncrement = false;
     protected $returnType       = MailingEmailEntity::class;
     protected $useSoftDeletes   = false;
-    protected $useTimestamps    = true;
+    protected $protectFields    = true;
 
     protected $allowedFields = [
         'mailing_id',
@@ -23,10 +30,19 @@ class MailingEmailsModel extends ApplicationBaseModel
         'sent_at',
     ];
 
-    protected $beforeInsert = ['generateId'];
+    // Dates
+    protected $useTimestamps = true;
+
+    // Callbacks
+    protected $allowCallbacks = true;
+    protected $beforeInsert   = ['generateId'];
 
     /**
-     * Count emails for a given mailing filtered by status.
+     * Counts email entries for a given mailing filtered by delivery status.
+     *
+     * @param string $mailingId The mailing campaign ID.
+     * @param string $status    Status value to filter by (e.g. 'sent', 'error', 'queued').
+     * @return int Count of matching rows.
      */
     public function countByMailingAndStatus(string $mailingId, string $status): int
     {
@@ -37,7 +53,10 @@ class MailingEmailsModel extends ApplicationBaseModel
     }
 
     /**
-     * Return next batch of queued emails ordered by created_at ASC.
+     * Returns the next batch of queued emails ordered by creation time ascending.
+     *
+     * @param int $limit Maximum number of rows to return. Default is 50.
+     * @return array Array of MailingEmailEntity objects with status 'queued'.
      */
     public function getQueuedBatch(int $limit = 50): array
     {
@@ -47,7 +66,9 @@ class MailingEmailsModel extends ApplicationBaseModel
     }
 
     /**
-     * Count emails successfully sent in the last 24 hours.
+     * Counts emails successfully sent in the last 24 hours.
+     *
+     * @return int Number of emails sent in the past 24 hours.
      */
     public function countSentToday(): int
     {
@@ -57,7 +78,9 @@ class MailingEmailsModel extends ApplicationBaseModel
     }
 
     /**
-     * Count emails successfully sent in the last hour.
+     * Counts emails successfully sent in the last hour.
+     *
+     * @return int Number of emails sent in the past hour.
      */
     public function countSentThisHour(): int
     {
