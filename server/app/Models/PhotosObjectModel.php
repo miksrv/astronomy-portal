@@ -4,17 +4,31 @@ namespace App\Models;
 
 use App\Entities\PhotosObjectEntity;
 
+/**
+ * PhotosObjectModel
+ *
+ * Manages the `photos_objects` pivot table that maps astrophotos to the
+ * astronomical objects they depict. Uses UUID primary keys generated via
+ * the beforeInsert callback.
+ */
 class PhotosObjectModel extends ApplicationBaseModel
 {
-    protected $table      = 'photos_objects';
-    protected $primaryKey = 'id';
-    protected $returnType = PhotosObjectEntity::class;
+    protected $table            = 'photos_objects';
+    protected $primaryKey       = 'id';
+    protected $useAutoIncrement = false;
+    protected $returnType       = PhotosObjectEntity::class;
+    protected $useSoftDeletes   = false;
+    protected $protectFields    = true;
 
     protected $allowedFields = [
         'photo_id',
         'object_id',
     ];
 
+    // Dates
+    protected $useTimestamps = false;
+
+    // Validation
     protected $validationRules = [
         'photo_id'  => 'required|max_length[15]',
         'object_id' => 'required|max_length[255]',
@@ -31,8 +45,7 @@ class PhotosObjectModel extends ApplicationBaseModel
         ],
     ];
 
-    protected $useTimestamps = false;
-
+    // Callbacks
     protected $allowCallbacks = true;
     protected $beforeInsert   = ['generateId'];
     protected $afterInsert    = [];

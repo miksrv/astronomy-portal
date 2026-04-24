@@ -4,17 +4,31 @@ namespace App\Models;
 
 use App\Entities\PhotosEquipmentsEntity;
 
+/**
+ * PhotosEquipmentsModel
+ *
+ * Manages the `photos_equipments` pivot table that records which observatory
+ * equipment was used to capture each astrophoto. Uses UUID primary keys
+ * generated via the beforeInsert callback.
+ */
 class PhotosEquipmentsModel extends ApplicationBaseModel
 {
-    protected $table      = 'photos_equipments';
-    protected $primaryKey = 'id';
-    protected $returnType = PhotosEquipmentsEntity::class;
+    protected $table            = 'photos_equipments';
+    protected $primaryKey       = 'id';
+    protected $useAutoIncrement = false;
+    protected $returnType       = PhotosEquipmentsEntity::class;
+    protected $useSoftDeletes   = false;
+    protected $protectFields    = true;
 
     protected $allowedFields = [
         'photo_id',
         'equipment_id',
     ];
 
+    // Dates
+    protected $useTimestamps = false;
+
+    // Validation
     protected $validationRules = [
         'photo_id'     => 'required|max_length[15]',
         'equipment_id' => 'required|is_natural_no_zero',
@@ -31,8 +45,7 @@ class PhotosEquipmentsModel extends ApplicationBaseModel
         ],
     ];
 
-    protected $useTimestamps = false;
-
+    // Callbacks
     protected $allowCallbacks = true;
     protected $beforeInsert   = ['generateId'];
     protected $afterInsert    = [];

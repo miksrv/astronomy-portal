@@ -4,12 +4,23 @@ namespace App\Models;
 
 use App\Entities\PhotoEntity;
 
+/**
+ * PhotosModel
+ *
+ * Manages the `photos` table for the astrophoto archive. Supports soft deletes,
+ * view count tracking, and filtering by object. The photo ID is assigned by the
+ * controller at creation time rather than via a beforeInsert callback. Provides
+ * an internal fetchPhotos() helper that joins related categories, objects, and
+ * equipment data before returning results.
+ */
 class PhotosModel extends ApplicationBaseModel
 {
-    protected $table      = 'photos';
-    protected $primaryKey = 'id';
-    protected $returnType = PhotoEntity::class;
-    protected $useSoftDeletes = true;
+    protected $table            = 'photos';
+    protected $primaryKey       = 'id';
+    protected $useAutoIncrement = false;
+    protected $returnType       = PhotoEntity::class;
+    protected $useSoftDeletes   = true;
+    protected $protectFields    = true;
 
     protected $allowedFields = [
         'id',
@@ -27,6 +38,13 @@ class PhotosModel extends ApplicationBaseModel
         'deleted_at',
     ];
 
+    // Dates
+    protected $useTimestamps = true;
+    protected $createdField       = 'created_at';
+    protected $updatedField       = 'updated_at';
+    protected $deletedField       = 'deleted_at';
+
+    // Validation
     protected $validationRules = [
         'dir_name'     => 'required|max_length[100]',
         'file_name'    => 'required|max_length[50]',
@@ -59,11 +77,7 @@ class PhotosModel extends ApplicationBaseModel
     protected $skipValidation       = true;
     protected $cleanValidationRules = true;
 
-    protected $useTimestamps = true;
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
-    protected $deletedField  = 'deleted_at';
-
+    /** @var array<string, string> CI4 model-level casts for dimension and timestamp fields. */
     protected array $casts = [
         'file_size'    => 'integer',
         'image_width'  => 'integer',
@@ -73,20 +87,17 @@ class PhotosModel extends ApplicationBaseModel
         'deleted_at'   => '?datetime',
     ];
 
-    // ID Генерируется в контроллере при создании новой фото
-    // protected $allowCallbacks = false;
-    // protected $beforeInsert   = ['generateId'];
-
-     // Основной метод для получения фотографий и связанных данных
     /**
-     * Retrieves a list of photos with their localized titles and associated categories.
+     * Core internal helper: retrieves photos with joined categories, objects, and (when
+     * fetching a single photo) equipment data. Results are optionally filtered by photo ID,
+     * astronomical object, count limit, and sort order.
      *
-     * @param string $locale The locale used for selecting the language ('ru' or 'en').
-     * @param string|null $photo_id Optional ID to filter a specific photo.
-     * @param string|null $object Optional object to filter photos by.
-     * @param int|null $limit Optional limit for the number of photos to retrieve. Default is null.
-     * @param string|null $order Optional order for retrieving photos ('rand' for random, 'date' for date order). Default is null.
-     * @return array An array of photos with associated categories and objects.
+     * @param string      $locale   Locale code for any downstream localisation ('ru' or 'en'). Default 'ru'.
+     * @param string|null $photo_id Optional photo ID to retrieve a single photo.
+     * @param string|null $object   Optional object name to filter photos by linked astronomical object.
+     * @param int|null    $limit    Optional row limit. No limit is applied when null.
+     * @param string|null $order    Sort order: 'rand' for random, 'date' for created_at ascending.
+     * @return array Array of PhotoEntity objects enriched with categories, objects, and equipment arrays.
      */
     protected function fetchPhotos(
         string $locale = 'ru',
@@ -94,12 +105,9 @@ class PhotosModel extends ApplicationBaseModel
         ?string $object = null,
         ?int $limit = null,
         ?string $order = null
-    ): array
-    {
-        // Base query
+    ): array {
         $photosQuery = $this->select('*');
 
-        // Retrieve related categories and objects
         $photoCategoryModel   = new PhotosCategoryModel();
         $photoObjectsModel    = new PhotosObjectModel();
         $photoEquipmentsModel = new PhotosEquipmentsModel();
@@ -146,7 +154,6 @@ class PhotosModel extends ApplicationBaseModel
             return [];
         }
 
-        // Map categories and objects
         foreach ($photosList as $photoItem) {
             $photoItem->categories = array_values(array_map(
                 fn($category) => $category->category_id,
@@ -176,48 +183,46 @@ class PhotosModel extends ApplicationBaseModel
     }
 
     /**
-     * Retrieves a list of photos with optional filtering by photo ID.
+     * Retrieves a list of photos with optional filtering by photo ID, count limit, and sort order.
      *
-     * @param string $locale The locale used for selecting the language ('ru' or 'en'). Default is 'ru'.
-     * @param string|null $photo_id Optional photo ID to filter a specific photo. Default is null.
-     * @param int|null $limit Optional limit for the number of photos to retrieve. Default is null.
-     * @param string|null $order Optional order for retrieving photos ('rand' for random, 'date' for date order). Default is null.
-     * @return array An array of photos with their localized titles and associated categories.
+     * @param string      $locale   Locale code ('ru' or 'en'). Default is 'ru'.
+     * @param string|null $photo_id Optional photo ID to retrieve a single photo.
+     * @param int|null    $limit    Optional maximum number of photos to return.
+     * @param string|null $order    Sort order: 'rand' for random, 'date' for date ascending.
+     * @return array Array of PhotoEntity objects with associated categories and objects.
      */
     public function getPhotosList(
         string $locale = 'ru',
         ?string $photo_id = null,
         ?int $limit = null,
         ?string $order = null
-    ): array
-    {
+    ): array {
         return $this->fetchPhotos($locale, $photo_id, null, $limit, $order);
     }
 
     /**
-     * Retrieves a list of photos filtered by a specific object.
+     * Retrieves photos that are linked to a specific astronomical object.
      *
-     * @param string $object The object to filter photos by.
-     * @param string $locale The locale used for selecting the language ('ru' or 'en'). Default is 'ru'.
-     * @param int|null $limit Optional limit for the number of photos to retrieve. Default is null.
-     * @param string|null $order Optional order for retrieving photos ('rand' for random, 'date' for date order). Default is null.
-     * @return array An array of photos filtered by the specified object, with their localized titles and associated categories.
+     * @param string      $object The astronomical object name to filter by.
+     * @param string      $locale Locale code ('ru' or 'en'). Default is 'ru'.
+     * @param int|null    $limit  Optional maximum number of photos to return.
+     * @param string|null $order  Sort order: 'rand' for random, 'date' for date ascending.
+     * @return array Array of PhotoEntity objects linked to the given object.
      */
     public function getPhotosListByObjects(
         string $object,
         string $locale = 'ru',
         ?int $limit = null,
         ?string $order = null
-    ): array
-    {
+    ): array {
         return $this->fetchPhotos($locale, null, $object, $limit, $order);
     }
 
     /**
-     * Increments the view count for a specific photo.
+     * Increments the view counter for a specific photo by 1.
      *
-     * @param string $photoId The ID of the photo for which to increment the view count.
-     * @return bool Returns true if the update was successful, false otherwise.
+     * @param string $photoId The ID of the photo whose view count should be incremented.
+     * @return bool True if the update succeeded, false otherwise.
      */
     public function incrementViews(string $photoId): bool
     {
