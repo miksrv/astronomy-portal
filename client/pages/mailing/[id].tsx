@@ -1,6 +1,6 @@
 import React from 'react'
 import { getCookie } from 'cookies-next'
-import { Container } from 'simple-react-ui-kit'
+import { Container, Message } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
@@ -19,7 +19,7 @@ const MailingStatsPage: NextPage<object> = () => {
 
     const { id } = router.query as { id: string }
 
-    const { data, isLoading } = API.useMailingGetItemQuery(id, {
+    const { data, isLoading, isError } = API.useMailingGetItemQuery(id, {
         pollingInterval: undefined,
         skip: !id
     })
@@ -63,7 +63,7 @@ const MailingStatsPage: NextPage<object> = () => {
             <Container className={styles.statsContainer}>
                 {isLoading && <p>{'...'}</p>}
 
-                {!isLoading && data && (
+                {!isLoading && !isError && data && (
                     <>
                         <div className={styles.statsHeader}>
                             <dl className={styles.metaGrid}>
@@ -159,6 +159,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
             const locale = context.locale ?? 'en'
+            const id = context.params?.id as string
             const translations = await serverSideTranslations(locale)
             const token = await getCookie('token', { req: context.req, res: context.res })
 
@@ -172,10 +173,16 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             const { data: authData } = await store.dispatch(API.endpoints.authGetMe.initiate())
 
-            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
-
             if (authData?.user?.role !== ApiModel.UserRole.ADMIN) {
                 return { redirect: { destination: '/', permanent: false } }
+            }
+
+            const { data: mailingData } = await store.dispatch(API.endpoints.mailingGetItem.initiate(id))
+
+            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+
+            if (!mailingData) {
+                return { notFound: true }
             }
 
             return {
