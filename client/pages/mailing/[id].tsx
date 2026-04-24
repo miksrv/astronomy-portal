@@ -1,15 +1,17 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { getCookie } from 'cookies-next'
 import { Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
-import { API, ApiModel, setLocale, wrapper } from '@/api'
+import { API, ApiModel, HOST_IMG, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { formatDate } from '@/utils/dates'
 
 import styles from './styles.module.sass'
 
@@ -19,7 +21,7 @@ const MailingStatsPage: NextPage<object> = () => {
 
     const { id } = router.query as { id: string }
 
-    const { data, isLoading } = API.useMailingGetItemQuery(id, {
+    const { data, isLoading, isError } = API.useMailingGetItemQuery(id, {
         pollingInterval: undefined,
         skip: !id
     })
@@ -36,6 +38,49 @@ const MailingStatsPage: NextPage<object> = () => {
 
     const sentPct = data && data.totalCount > 0 ? (data.sentCount / data.totalCount) * 100 : 0
     const errorPct = data && data.totalCount > 0 ? (data.errorCount / data.totalCount) * 100 : 0
+
+    const isDayLimitHit = !!data && data.sentToday >= data.limitDay
+    const isHourLimitHit = !!data && data.sentThisHour >= data.limitHour
+    const isLimitHit = isDayLimitHit || isHourLimitHit
+
+    const [countdown, setCountdown] = useState('')
+
+    useEffect(() => {
+        if (!isLimitHit || data?.status !== 'sending' || remaining <= 0) {
+            setCountdown('')
+            return
+        }
+
+        const getTarget = (): Date => {
+            const now = new Date()
+            if (isDayLimitHit) {
+                const midnight = new Date(now)
+                midnight.setHours(24, 0, 0, 0)
+                return midnight
+            }
+            const nextHour = new Date(now)
+            nextHour.setHours(now.getHours() + 1, 0, 0, 0)
+            return nextHour
+        }
+
+        const formatCountdown = (ms: number): string => {
+            const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+            const h = Math.floor(totalSeconds / 3600)
+            const m = Math.floor((totalSeconds % 3600) / 60)
+            const s = totalSeconds % 60
+            return [h, m, s].map((v) => String(v).padStart(2, '0')).join(':')
+        }
+
+        const tick = () => {
+            const now = new Date()
+            const target = getTarget()
+            setCountdown(formatCountdown(target.getTime() - now.getTime()))
+        }
+
+        tick()
+        const id = setInterval(tick, 1000)
+        return () => clearInterval(id)
+    }, [isLimitHit, isDayLimitHit, data?.status, remaining])
 
     const statusLabel = (status: ApiModel.MailingStatus): string => {
         const map: Record<ApiModel.MailingStatus, string> = {
@@ -60,10 +105,8 @@ const MailingStatsPage: NextPage<object> = () => {
                 links={[{ link: '/mailing', text: t('pages.mailing.title', 'Рассылки') }]}
             />
 
-            <Container className={styles.statsContainer}>
-                {isLoading && <p>{'...'}</p>}
-
-                {!isLoading && data && (
+            <Container>
+                {!isLoading && !isError && data && (
                     <>
                         <div className={styles.statsHeader}>
                             <dl className={styles.metaGrid}>
@@ -84,11 +127,46 @@ const MailingStatsPage: NextPage<object> = () => {
                                 {data.sentAt && (
                                     <>
                                         <dt>{t('pages.mailing.detail-sent-at', 'Дата отправки')}</dt>
-                                        <dd>{new Date(data.sentAt.date).toLocaleString()}</dd>
+                                        <dd>{formatDate(data.sentAt.date)}</dd>
                                     </>
                                 )}
                                 <dt>{t('pages.mailing.detail-created-at', 'Дата создания')}</dt>
-                                <dd>{new Date(data.createdAt.date).toLocaleString()}</dd>
+                                <dd>{formatDate(data.createdAt.date)}</dd>
+                            </dl>
+
+                            <dl className={styles.metaGrid}>
+                                <dt>{t('pages.mailing.limit-day', 'Лимит в сутки')}</dt>
+                                <dd>
+                                    {data.sentToday} / {data.limitDay}
+                                </dd>
+                                <dt>{t('pages.mailing.limit-hour', 'Лимит в час')}</dt>
+                                <dd>
+                                    {data.sentThisHour} / {data.limitHour}
+                                </dd>
+                                <dt>{t('pages.mailing.limit-status', 'Состояние лимита')}</dt>
+                                <dd>
+                                    {isDayLimitHit ? (
+                                        <span className={styles.limitHit}>
+                                            {t('pages.mailing.limit-day-hit', 'Суточный лимит')}
+                                        </span>
+                                    ) : isHourLimitHit ? (
+                                        <span className={styles.limitHit}>
+                                            {t('pages.mailing.limit-hour-hit', 'Часовой лимит')}
+                                        </span>
+                                    ) : (
+                                        <span className={styles.limitOk}>
+                                            {t('pages.mailing.limit-active', 'Активна')}
+                                        </span>
+                                    )}
+                                </dd>
+                                {isLimitHit && data.status === 'sending' && remaining > 0 && countdown && (
+                                    <>
+                                        <dt>{t('pages.mailing.limit-reset', 'Сброс через')}</dt>
+                                        <dd>
+                                            <span className={styles.countdown}>{countdown}</span>
+                                        </dd>
+                                    </>
+                                )}
                             </dl>
                         </div>
 
@@ -146,6 +224,19 @@ const MailingStatsPage: NextPage<object> = () => {
                                 </div>
                             </>
                         )}
+
+                        {data.image && (
+                            <div className={styles.imagePreview}>
+                                <Image
+                                    src={HOST_IMG + data.image}
+                                    alt={data.subject}
+                                    width={300}
+                                    height={200}
+                                />
+                            </div>
+                        )}
+
+                        <div className={styles.contentPreview}>{data.content}</div>
                     </>
                 )}
             </Container>
@@ -159,6 +250,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
             const locale = context.locale ?? 'en'
+            const id = context.params?.id as string
             const translations = await serverSideTranslations(locale)
             const token = await getCookie('token', { req: context.req, res: context.res })
 
@@ -172,10 +264,16 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             const { data: authData } = await store.dispatch(API.endpoints.authGetMe.initiate())
 
-            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
-
             if (authData?.user?.role !== ApiModel.UserRole.ADMIN) {
                 return { redirect: { destination: '/', permanent: false } }
+            }
+
+            const { data: mailingData } = await store.dispatch(API.endpoints.mailingGetItem.initiate(id))
+
+            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+
+            if (!mailingData) {
+                return { notFound: true }
             }
 
             return {

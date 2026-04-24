@@ -7,13 +7,23 @@ use CodeIgniter\I18n\Time;
 use Exception;
 use ReflectionException;
 
-class UsersModel extends ApplicationBaseModel {
+/**
+ * UsersModel
+ *
+ * Manages the `users` table. Supports soft deletes, UUID primary keys, and role-based
+ * access (user, moderator, admin). Provides helpers for OAuth look-up, activity tracking,
+ * newsletter subscriber retrieval, and paginated admin user listing with event counts.
+ */
+class UsersModel extends ApplicationBaseModel
+{
     protected $table            = 'users';
     protected $primaryKey       = 'id';
-    protected $returnType       = UserEntity::class;
     protected $useAutoIncrement = false;
+    protected $returnType       = UserEntity::class;
     protected $useSoftDeletes   = true;
+    protected $protectFields    = true;
 
+    /** @var array<string> Fields stripped from query results by the prepareOutput afterFind callback. */
     protected array $hiddenFields = ['deleted_at'];
 
     protected $allowedFields = [
@@ -33,17 +43,20 @@ class UsersModel extends ApplicationBaseModel {
         'activity_at',
     ];
 
+    // Dates
     protected $useTimestamps = true;
-    protected $dateFormat    = 'datetime';
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
-    protected $deletedField  = 'deleted_at';
+    protected $dateFormat         = 'datetime';
+    protected $createdField       = 'created_at';
+    protected $updatedField       = 'updated_at';
+    protected $deletedField       = 'deleted_at';
 
+    // Validation
     protected $validationRules      = [];
     protected $validationMessages   = [];
     protected $skipValidation       = true;
     protected $cleanValidationRules = true;
 
+    // Callbacks
     protected $allowCallbacks = true;
     protected $beforeInsert   = ['generateId'];
     protected $afterInsert    = [];
@@ -58,9 +71,9 @@ class UsersModel extends ApplicationBaseModel {
      * Finds a user by their email address.
      *
      * @param string $emailAddress The email address to search for.
-     * @return UserEntity|array|null The user entity or an array of user data, or null if not found.
+     * @return UserEntity|array|null The user entity or array, or null if not found.
      */
-    public function findUserByEmailAddress(string $emailAddress): UserEntity | array | null
+    public function findUserByEmailAddress(string $emailAddress): UserEntity|array|null
     {
         return $this
             ->select('id, name, phone, avatar, email, auth_type, role, locale')
@@ -70,9 +83,11 @@ class UsersModel extends ApplicationBaseModel {
 
     /**
      * Retrieves all users eligible to receive newsletter emails.
-     * Eligible: non-empty email, not deleted, and subscribe_newsletter is not explicitly false.
      *
-     * @return array Array of objects with id, email, locale fields.
+     * Eligible means: non-empty email address, not soft-deleted, and the
+     * subscribe_newsletter setting is not explicitly set to false (0).
+     *
+     * @return array Array of plain objects with id, email, and locale fields.
      */
     public function getNewsletterSubscribers(): array
     {
@@ -91,10 +106,12 @@ class UsersModel extends ApplicationBaseModel {
     }
 
     /**
-     * Updates the user's activity timestamp.
-     * Debounced: skips the update if activity was recorded less than 5 minutes ago.
+     * Updates the user's last-activity timestamp.
      *
-     * @param string $userId
+     * Debounced: the update is skipped if activity was already recorded within the
+     * last 5 minutes to avoid excessive write load.
+     *
+     * @param string $userId The user's ID.
      * @return void
      * @throws ReflectionException
      * @throws Exception
@@ -104,24 +121,27 @@ class UsersModel extends ApplicationBaseModel {
         $user = $this->select('activity_at')->find($userId);
 
         if ($user && $user->activity_at && (time() - strtotime((string) $user->activity_at)) < 300) {
-            return; // Skip update — activity was updated less than 5 minutes ago
+            return;
         }
 
         $this->update($userId, ['activity_at' => Time::now()]);
     }
 
     /**
-     * Returns a paginated list of users with event attendance count.
-     * Email and phone fields are intentionally excluded.
+     * Returns a paginated list of users with their event attendance count.
      *
-     * @param int    $page     1-based page number
-     * @param int    $limit    Rows per page (max 100)
-     * @param string $search   Optional name substring search
-     * @param string $role     Optional role filter: user|moderator|security|admin
-     * @param string $authType Optional auth_type filter: google|yandex|vk|native
-     * @param string $sortBy   Optional sort column: name|activityAt|createdAt|eventsCount
-     * @param string $sortDir  Optional sort direction: asc|desc
-     * @return array{ items: array, count: int, page: int, totalPages: int }
+     * Email and phone fields are intentionally excluded from the output.
+     * Supports filtering by name substring, role, and auth type, as well as
+     * sorting by name, activity date, creation date, or event count.
+     *
+     * @param int    $page     1-based page number. Default is 1.
+     * @param int    $limit    Rows per page (max 100). Default is 20.
+     * @param string $search   Optional name substring filter.
+     * @param string $role     Optional role filter: user|moderator|security|admin.
+     * @param string $authType Optional auth_type filter: google|yandex|vk|native.
+     * @param string $sortBy   Column to sort by: name|activityAt|createdAt|eventsCount.
+     * @param string $sortDir  Sort direction: asc|desc.
+     * @return array{items: array, count: int, page: int, totalPages: int}
      */
     public function getUsersList(
         int    $page = 1,
@@ -151,7 +171,7 @@ class UsersModel extends ApplicationBaseModel {
             ->where('u.deleted_at IS NULL')
             ->groupBy('u.id')
             ->orderBy($orderColumn, $orderDirection)
-            ->orderBy('u.id', 'ASC'); // stable secondary sort for equal values
+            ->orderBy('u.id', 'ASC');
 
         if ($search !== '') {
             $builder->like('u.name', $search);
@@ -165,7 +185,6 @@ class UsersModel extends ApplicationBaseModel {
             $builder->where('u.auth_type', $authType);
         }
 
-        // Count query (without LIMIT/OFFSET)
         $countBuilder = $this->db->table('users u')
             ->select('COUNT(DISTINCT u.id) AS total')
             ->where('u.deleted_at IS NULL');
@@ -222,11 +241,11 @@ class UsersModel extends ApplicationBaseModel {
     }
 
     /**
-     * Returns all events a user has registered for (non-cancelled).
+     * Returns all events a user has registered for (non-cancelled bookings).
      *
-     * @param string $userId
-     * @param string $locale
-     * @return array
+     * @param string $userId The user's ID.
+     * @param string $locale Locale code for the event title field ('ru' or 'en'). Default is 'ru'.
+     * @return array Array of associative arrays with event and booking details in camelCase.
      */
     public function getUserEvents(string $userId, string $locale = 'ru'): array
     {

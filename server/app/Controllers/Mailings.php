@@ -13,6 +13,7 @@ use App\Models\UsersModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\I18n\Time;
+use Config\MailingLimits;
 use Config\Services;
 use Exception;
 
@@ -97,19 +98,27 @@ class Mailings extends ResourceController
                 return $this->failNotFound();
             }
 
+            $mailingEmailsModel = new MailingEmailsModel();
+            $sentToday          = $mailingEmailsModel->countSentToday();
+            $sentThisHour       = $mailingEmailsModel->countSentThisHour();
+
             return $this->respond([
-                'id'         => $mailing->id,
-                'subject'    => $mailing->subject,
-                'content'    => $mailing->content,
-                'image'      => $mailing->image,
-                'status'     => $mailing->status,
-                'totalCount' => (int) $mailing->total_count,
-                'sentCount'  => (int) $mailing->sent_count,
-                'errorCount' => (int) $mailing->error_count,
-                'createdBy'  => $mailing->created_by,
-                'createdAt'  => $mailing->created_at,
-                'updatedAt'  => $mailing->updated_at,
-                'sentAt'     => $mailing->sent_at,
+                'id'          => $mailing->id,
+                'subject'     => $mailing->subject,
+                'content'     => $mailing->content,
+                'image'       => $mailing->image,
+                'status'      => $mailing->status,
+                'totalCount'  => (int) $mailing->total_count,
+                'sentCount'   => (int) $mailing->sent_count,
+                'errorCount'  => (int) $mailing->error_count,
+                'createdBy'   => $mailing->created_by,
+                'createdAt'   => $mailing->created_at,
+                'updatedAt'   => $mailing->updated_at,
+                'sentAt'      => $mailing->sent_at,
+                'limitDay'    => MailingLimits::DAY_LIMIT,
+                'limitHour'   => MailingLimits::HOUR_LIMIT,
+                'sentToday'   => $sentToday,
+                'sentThisHour' => $sentThisHour,
             ]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);

@@ -2,21 +2,25 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
 use App\Entities\EventEntity;
 use CodeIgniter\I18n\Time;
 
+/**
+ * EventsModel
+ *
+ * Manages the `events` table for stargazing events. Supports soft deletes, UUID
+ * primary keys, and bilingual content fields (title, location, content in EN/RU).
+ */
 class EventsModel extends ApplicationBaseModel
 {
-    protected $table      = 'events';
-    protected $primaryKey = 'id';
-    protected $returnType = EventEntity::class;
-
+    protected $table            = 'events';
+    protected $primaryKey       = 'id';
+    protected $useAutoIncrement = false;
+    protected $returnType       = EventEntity::class;
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-    protected $useAutoIncrement = false;
 
-    protected $allowedFields    = [
+    protected $allowedFields = [
         'id',
         'title_en',
         'title_ru',
@@ -32,22 +36,23 @@ class EventsModel extends ApplicationBaseModel
         'views',
         'date',
         'registration_start',
-        'registration_end'
+        'registration_end',
     ];
 
-    protected bool $allowEmptyInserts = false;
-
+    // Dates
     protected $useTimestamps = true;
-    protected $dateFormat    = 'datetime';
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
-    protected $deletedField  = 'deleted_at';
+    protected $dateFormat         = 'datetime';
+    protected $createdField       = 'created_at';
+    protected $updatedField       = 'updated_at';
+    protected $deletedField       = 'deleted_at';
 
+    // Validation
     protected $validationRules      = [];
     protected $validationMessages   = [];
     protected $skipValidation       = true;
     protected $cleanValidationRules = true;
 
+    // Callbacks
     protected $allowCallbacks = true;
     protected $beforeInsert   = [];
     protected $afterInsert    = [];
@@ -59,14 +64,13 @@ class EventsModel extends ApplicationBaseModel
     protected $afterDelete    = [];
 
     /**
-     * Retrieves the next upcoming event from the database.
+     * Retrieves the next upcoming event, localised to the given locale.
      *
-     * This method returns the closest future event based on the current date and time.
-     * It queries the database for events with a date greater than or equal to the current
-     * timestamp and orders the results in descending order by date to fetch the soonest event.
+     * Returns the event whose date is >= (now - 5 hours), ordered so the
+     * soonest event comes first. Returns null when no upcoming event exists.
      *
-     * @param string $locale The locale for localization of event titles and contents (default is 'ru').
-     * @return EventEntity|null The upcoming event entity if found; otherwise, null.
+     * @param string $locale Locale code for title/location/content selection ('ru' or 'en'). Default is 'ru'.
+     * @return EventEntity|null The upcoming EventEntity, or null if none found.
      */
     public function getUpcomingEvent(string $locale = 'ru'): ?EventEntity
     {
@@ -87,7 +91,6 @@ class EventsModel extends ApplicationBaseModel
         $event->location = getLocalizedString($locale, $event->location_en, $event->location_ru);
         $event->content  = getLocalizedString($locale, $event->content_en, $event->content_ru);
 
-        // Remove unnecessary fields
         unset(
             $event->title_en, $event->title_ru,
             $event->location_en, $event->location_ru,
@@ -98,16 +101,15 @@ class EventsModel extends ApplicationBaseModel
     }
 
     /**
-     * Retrieves a list of past events or a specific event with localized titles and contents.
+     * Retrieves a list of past events or a single event by ID, localised to the given locale.
      *
-     * This method fetches either all past events up to the current date or, if an event ID is provided,
-     * details for that specific event, including additional fields. Events are returned in descending
-     * order by date, with localized titles and contents based on the provided locale.
+     * When $eventId is provided, returns details for that specific event (including content
+     * and registration window fields). Otherwise returns all events whose date is in the past,
+     * ordered newest first.
      *
-     * @param string $locale The locale for localization of event titles and contents (default is 'ru').
-     * @param int|null $eventId Optional. If provided, retrieves details for the specific event by ID.
-     *
-     * @return array|null Returns an array of events with localized fields, or an empty array if no events are found.
+     * @param string   $locale  Locale code for title/content selection ('ru' or 'en'). Default is 'ru'.
+     * @param int|null $eventId Optional event ID. When set, retrieves that specific event only.
+     * @return array Array of EventEntity objects with localised fields, or an empty array.
      */
     public function getPastEventsList(string $locale = 'ru', $eventId = null): ?array
     {
@@ -119,11 +121,10 @@ class EventsModel extends ApplicationBaseModel
             $eventId !== null ? ', content_en, content_ru, date, registration_start, registration_end' : '')
         );
 
-        // Apply filter if a specific event is requested
         if ($eventId !== null) {
             $eventsQuery->where('id', $eventId);
         } else {
-            $eventsQuery->where('date <', $datetime->format('Y-m-d H:m:s'));
+            $eventsQuery->where('date <', $datetime->format('Y-m-d H:i:s'));
         }
 
         $events = $eventsQuery->orderBy('date', 'DESC')->findAll();
@@ -132,7 +133,6 @@ class EventsModel extends ApplicationBaseModel
             return [];
         }
 
-        // Map each event with localized titles
         foreach ($events as $event) {
             $event->title = getLocalizedString($locale, $event->title_en, $event->title_ru);
 
@@ -140,7 +140,6 @@ class EventsModel extends ApplicationBaseModel
                 $event->content = getLocalizedString($locale, $event->content_en, $event->content_ru);
             }
 
-            // Remove unnecessary fields
             unset(
                 $event->title_en, $event->title_ru,
                 $event->content_en, $event->content_ru
@@ -151,12 +150,10 @@ class EventsModel extends ApplicationBaseModel
     }
 
     /**
-     * Increments the view count for a specific event.
+     * Increments the view counter for a specific event by 1.
      *
-     * This method updates the 'views' field of the event with the specified ID by incrementing it by 1.
-     *
-     * @param string $eventId The ID of the event for which to increment the view count.
-     * @return bool Returns true if the update was successful, false otherwise.
+     * @param string $eventId The ID of the event whose view count should be incremented.
+     * @return bool True if the update succeeded, false otherwise.
      */
     public function incrementViews(string $eventId): bool
     {

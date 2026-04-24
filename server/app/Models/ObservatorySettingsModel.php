@@ -2,21 +2,34 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
 use App\Entities\ObservatorySettingsEntity;
 
-class ObservatorySettingsModel extends Model
+/**
+ * ObservatorySettingsModel
+ *
+ * Manages the `observatory_settings` key-value store for observatory configuration.
+ * The primary key is a string `key` column rather than a numeric ID.
+ * This model extends ApplicationBaseModel (and therefore CI4's Model) to stay
+ * consistent with the rest of the application's model hierarchy.
+ */
+class ObservatorySettingsModel extends ApplicationBaseModel
 {
-    protected $table      = 'observatory_settings';
-    protected $primaryKey = 'key';
-    protected $returnType = ObservatorySettingsEntity::class;
-    protected $useSoftDeletes = false;
+    protected $table            = 'observatory_settings';
+    protected $primaryKey       = 'key';
+    protected $useAutoIncrement = false;  // PK is a string key, not auto-increment.
+    protected $returnType       = ObservatorySettingsEntity::class;
+    protected $useSoftDeletes   = false;
+    protected $protectFields    = true;
 
     protected $allowedFields = [
         'key',
         'value',
     ];
 
+    // Dates
+    protected $useTimestamps = false;
+
+    // Validation
     protected $validationRules = [
         'key'   => 'required|max_length[200]|is_unique[observatory_settings.key]',
         'value' => 'max_length[200]',
@@ -32,6 +45,4 @@ class ObservatorySettingsModel extends Model
             'max_length' => 'The value cannot exceed 200 characters.',
         ],
     ];
-
-    protected $useTimestamps = false;
 }

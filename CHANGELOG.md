@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 4.5.2
+
+### Patch Changes
+
+- Fixed mailing stats page returning a blank screen for non-existent campaign IDs — now correctly returns 404 via `getServerSideProps` server-side check
+- Added content and image preview to the mailing stats page (`/mailing/[id]`): campaign body text rendered with `white-space: pre-wrap` and header image via Next.js `<Image>`
+- Replaced all hardcoded hex colors on the mailing pages with CSS custom properties from `theme.css`
+- Extracted email rate-limit constants (`DAY_LIMIT = 2000`, `HOUR_LIMIT = 500`) from `SendEmail` command into a dedicated `Config\MailingLimits` class
+- Extended `GET /mailings/:id` API response with `limitDay`, `limitHour`, `sentToday`, and `sentThisHour` fields so the UI can reflect real-time sending capacity
+- Added a rate-limit status panel on the mailing stats page: two-column layout showing daily and hourly counters against their limits, a status badge (active / hourly limit reached / daily limit reached), and a live `HH:MM:SS` countdown timer until the limit resets — shown only while the campaign is in `sending` state with recipients remaining
+- Added EN/RU i18n keys for the rate-limit panel
+- Audited and refactored all 22 backend models for CodeIgniter 4.7.2 compliance: added class-level and method-level PHPDoc to every model, aligned property declaration order to the CI4 canonical form, and set explicit `$useAutoIncrement`, `$useSoftDeletes`, `$protectFields`, and callback declarations throughout
+- Fixed `$useAutoIncrement = true` bug in `ObjectFitsFiltersModel` and `PhotosFiltersModel` where the PK is a `VARCHAR`, not an auto-increment integer
+- Fixed date format typo in `EventsModel::getPastEventsList()` (`'Y-m-d H:m:s'` → `'Y-m-d H:i:s'`)
+- Fixed `ObservatoryEquipmentModel` incorrectly registering a UUID `generateId` callback on an auto-increment integer PK
+- Aligned `ObservatorySettingsModel` to extend `ApplicationBaseModel` consistently with all other models
+- Refactored `LocalStorage` usage: replaced the `useLocalStorage` hook with the `LocalStorage` utility class across components
+- Moved Carousel wrapper class into the component itself and adjusted carousel styles
+- Replaced plain hyphen separators with non-breaking space (` `) where used as visual separators; bumped dev dependencies
+
 ## 4.5.1
 
 ### Patch Changes

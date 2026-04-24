@@ -4,13 +4,20 @@ namespace App\Models;
 
 use App\Entities\CategoryEntity;
 
+/**
+ * CategoryModel
+ *
+ * Manages the `categories` table, which stores shared photo and object categories
+ * with bilingual (EN/RU) titles and descriptions.
+ */
 class CategoryModel extends ApplicationBaseModel
 {
-    protected $table      = 'categories';
-    protected $primaryKey = 'id';
-    protected $returnType = CategoryEntity::class;
-
-    protected $useSoftDeletes = false;
+    protected $table            = 'categories';
+    protected $primaryKey       = 'id';
+    protected $useAutoIncrement = true;
+    protected $returnType       = CategoryEntity::class;
+    protected $useSoftDeletes   = false;
+    protected $protectFields    = true;
 
     protected $allowedFields = [
         'title_en',
@@ -19,17 +26,17 @@ class CategoryModel extends ApplicationBaseModel
         'description_ru',
     ];
 
+    // Dates
     protected $useTimestamps = false;
 
     /**
-     * Retrieves a list of categories with localized titles and descriptions.
+     * Retrieves all categories with titles and descriptions localised to the given locale.
      *
-     * This method fetches all categories from the database and localizes their titles and descriptions
-     * based on the provided locale. Unused language fields are removed from the result.
+     * Removes the unused-language columns from each result object so the API
+     * response contains only a single `title` and `description` field.
      *
-     * @param string $locale The locale used for selecting the language ('ru' or 'en'). Default is 'ru'.
-     * 
-     * @return array An array of category objects, each containing localized title and description fields.
+     * @param string $locale Locale code used for field selection ('ru' or 'en'). Default is 'ru'.
+     * @return array Array of CategoryEntity objects with localised title and description.
      */
     public function getCategories(string $locale = 'ru'): array
     {
@@ -46,7 +53,7 @@ class CategoryModel extends ApplicationBaseModel
             $category->description = getLocalizedString($locale, $category->description_en, $category->description_ru);
 
             unset(
-                $category->title_en, $category->title_ru, 
+                $category->title_en, $category->title_ru,
                 $category->description_en, $category->description_ru
             );
         }

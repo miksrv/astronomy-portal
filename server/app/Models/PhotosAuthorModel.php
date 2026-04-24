@@ -4,12 +4,21 @@ namespace App\Models;
 
 use App\Entities\PhotosAuthorEntity;
 
+/**
+ * PhotosAuthorModel
+ *
+ * Manages the `photos_authors` table, which stores author attribution records
+ * for astrophotos. Authors may be linked to a registered user account via
+ * `user_id` or stored as anonymous entries. Supports soft deletes and UUID PKs.
+ */
 class PhotosAuthorModel extends ApplicationBaseModel
 {
-    protected $table      = 'photos_authors';
-    protected $primaryKey = 'id';
-    protected $returnType = PhotosAuthorEntity::class;
-    protected $useSoftDeletes = true;
+    protected $table            = 'photos_authors';
+    protected $primaryKey       = 'id';
+    protected $useAutoIncrement = false;
+    protected $returnType       = PhotosAuthorEntity::class;
+    protected $useSoftDeletes   = true;
+    protected $protectFields    = true;
 
     protected $allowedFields = [
         'id',
@@ -21,6 +30,13 @@ class PhotosAuthorModel extends ApplicationBaseModel
         'deleted_at',
     ];
 
+    // Dates
+    protected $useTimestamps = true;
+    protected $createdField       = 'created_at';
+    protected $updatedField       = 'updated_at';
+    protected $deletedField       = 'deleted_at';
+
+    // Validation
     protected $validationRules = [
         'name'    => 'max_length[200]',
         'link'    => 'max_length[200]',
@@ -39,17 +55,14 @@ class PhotosAuthorModel extends ApplicationBaseModel
         ],
     ];
 
-    protected $useTimestamps = true;
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
-    protected $deletedField  = 'deleted_at';
-
+    /** @var array<string, string> CI4 model-level casts for timestamp fields. */
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
 
+    // Callbacks
     protected $allowCallbacks = true;
     protected $beforeInsert   = ['generateId'];
     protected $afterInsert    = [];

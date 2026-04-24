@@ -19,6 +19,7 @@ use App\Models\MailingEmailsModel;
 use App\Models\MailingsModel;
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
+use Config\MailingLimits;
 use Exception;
 
 class SendEmail extends BaseCommand
@@ -27,9 +28,7 @@ class SendEmail extends BaseCommand
     protected $name        = 'system:send-email';
     protected $description = 'Process and send queued newsletter emails';
 
-    private const DAY_EMAIL_LIMIT  = 2000;
-    private const HOUR_EMAIL_LIMIT = 500;
-    private const BATCH_SIZE       = 50;
+    private const BATCH_SIZE = 50;
 
     public function run(array $params)
     {
@@ -40,17 +39,17 @@ class SendEmail extends BaseCommand
         $dayCount  = $mailingEmailsModel->countSentToday();
         $hourCount = $mailingEmailsModel->countSentThisHour();
 
-        if ($dayCount >= self::DAY_EMAIL_LIMIT) {
+        if ($dayCount >= MailingLimits::DAY_LIMIT) {
             CLI::write(
-                'Daily email limit reached (' . self::DAY_EMAIL_LIMIT . '). Skipping until tomorrow.',
+                'Daily email limit reached (' . MailingLimits::DAY_LIMIT . '). Skipping until tomorrow.',
                 'red'
             );
             return;
         }
 
-        if ($hourCount >= self::HOUR_EMAIL_LIMIT) {
+        if ($hourCount >= MailingLimits::HOUR_LIMIT) {
             CLI::write(
-                'Hourly email limit reached (' . self::HOUR_EMAIL_LIMIT . '). Skipping until next hour.',
+                'Hourly email limit reached (' . MailingLimits::HOUR_LIMIT . '). Skipping until next hour.',
                 'red'
             );
             return;
@@ -156,11 +155,11 @@ class SendEmail extends BaseCommand
         CLI::write('  Sent:   ' . $sentCount, 'green');
         CLI::write('  Errors: ' . $errorCount, $errorCount > 0 ? 'red' : 'green');
         CLI::write(
-            '  Daily remaining:  ' . (self::DAY_EMAIL_LIMIT  - $dayCount - $sentCount),
+            '  Daily remaining:  ' . (MailingLimits::DAY_LIMIT  - $dayCount - $sentCount),
             'white'
         );
         CLI::write(
-            '  Hourly remaining: ' . (self::HOUR_EMAIL_LIMIT - $hourCount - $sentCount),
+            '  Hourly remaining: ' . (MailingLimits::HOUR_LIMIT - $hourCount - $sentCount),
             'white'
         );
     }
