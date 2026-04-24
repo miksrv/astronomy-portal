@@ -342,7 +342,14 @@
             "col-date": "Date",
             "no-items": "No mailings yet",
             "delete-confirm-title": "",
-            "delete-confirm-text": ""
+            "delete-confirm-text": "",
+            "limit-day": "Daily limit",
+            "limit-hour": "Hourly limit",
+            "limit-status": "Rate limit",
+            "limit-active": "Active",
+            "limit-day-hit": "Daily limit reached",
+            "limit-hour-hit": "Hourly limit reached",
+            "limit-reset": "Resets in"
         },
         "objects": {
             "title": "Astronomical Objects Catalog",
