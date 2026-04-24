@@ -1,6 +1,6 @@
 import React from 'react'
 import { getCookie } from 'cookies-next'
-import { Container, Message } from 'simple-react-ui-kit'
+import { Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
@@ -10,6 +10,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { formatDate } from '@/utils/dates'
 
 import styles from './styles.module.sass'
 
@@ -60,9 +61,7 @@ const MailingStatsPage: NextPage<object> = () => {
                 links={[{ link: '/mailing', text: t('pages.mailing.title', 'Рассылки') }]}
             />
 
-            <Container className={styles.statsContainer}>
-                {isLoading && <p>{'...'}</p>}
-
+            <Container>
                 {!isLoading && !isError && data && (
                     <>
                         <div className={styles.statsHeader}>
@@ -84,11 +83,11 @@ const MailingStatsPage: NextPage<object> = () => {
                                 {data.sentAt && (
                                     <>
                                         <dt>{t('pages.mailing.detail-sent-at', 'Дата отправки')}</dt>
-                                        <dd>{new Date(data.sentAt.date).toLocaleString()}</dd>
+                                        <dd>{formatDate(data.sentAt.date)}</dd>
                                     </>
                                 )}
                                 <dt>{t('pages.mailing.detail-created-at', 'Дата создания')}</dt>
-                                <dd>{new Date(data.createdAt.date).toLocaleString()}</dd>
+                                <dd>{formatDate(data.createdAt.date)}</dd>
                             </dl>
                         </div>
 

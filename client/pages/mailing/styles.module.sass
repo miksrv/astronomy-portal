@@ -22,8 +22,8 @@
     border-radius: 12px
     font-size: 13px
     font-weight: 500
-    background-color: #e5e7eb !important
-    color: #374151
+    background-color: var(--table-header-background) !important
+    color: var(--text-color-secondary)
 
 .statusSending
     display: inline-block
@@ -31,8 +31,8 @@
     border-radius: 12px
     font-size: 13px
     font-weight: 500
-    background: #dbeafe !important
-    color: #1d4ed8
+    background: var(--color-main-background) !important
+    color: var(--color-main)
 
 .statusCompleted
     display: inline-block
@@ -40,8 +40,8 @@
     border-radius: 12px
     font-size: 13px
     font-weight: 500
-    background: #dcfce7 !important
-    color: #166534
+    background: var(--color-green-background) !important
+    color: var(--color-green)
 
 .statusPaused
     display: inline-block
@@ -49,8 +49,8 @@
     border-radius: 12px
     font-size: 13px
     font-weight: 500
-    background: #ffedd5 !important
-    color: #9a3412
+    background: var(--color-orange-background) !important
+    color: var(--color-orange)
 
 // Form page styles
 .formContainer
@@ -67,17 +67,13 @@
         max-width: 300px
         max-height: 200px
         border-radius: 6px
-        border: 1px solid #e5e7eb
+        border: 1px solid var(--input-border-color)
 
 .formActions
     display: flex
     gap: 10px
     flex-wrap: wrap
     margin-top: 8px
-
-// Stats page styles
-.statsContainer
-    margin-bottom: 10px
 
 .statsHeader
     margin-bottom: 20px
@@ -86,7 +82,6 @@
     display: grid
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr))
     gap: 16px
-    margin-bottom: 20px
 
 .statCard
     display: flex
@@ -94,8 +89,8 @@
     align-items: center
     padding: 16px
     border-radius: 8px
-    background: #f9fafb
-    border: 1px solid #e5e7eb
+    background: var(--table-header-background)
+    border: 1px solid var(--table-border-color)
 
 .statValue
     font-size: 28px
@@ -104,38 +99,38 @@
 
 .statLabel
     font-size: 12px
-    color: #6b7280
+    color: var(--input-label-color)
     margin-top: 4px
     text-align: center
 
 .statTotal
-    color: #374151
+    color: var(--text-color-secondary)
 
 .statSent
-    color: #166534
+    color: var(--color-green)
 
 .statErrors
-    color: #991b1b
+    color: var(--color-red)
 
 .statRemaining
-    color: #6b7280
+    color: var(--input-label-color)
 
 .progressBar
     width: 100%
     height: 10px
-    background: #e5e7eb
+    background: var(--table-border-color)
     border-radius: 5px
     overflow: hidden
     margin-bottom: 20px
     display: flex
 
 .progressSent
-    background: #22c55e
+    background: var(--color-green)
     height: 100%
     transition: width 0.3s ease
 
 .progressErrors
-    background: #ef4444
+    background: var(--color-red)
     height: 100%
     transition: width 0.3s ease
 
@@ -148,7 +143,7 @@
     padding: 0
 
     dt
-        color: #6b7280
+        color: var(--input-label-color)
         font-weight: 500
         padding: 6px 0
 
