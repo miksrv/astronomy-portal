@@ -25,6 +25,8 @@ class MailingsModel extends ApplicationBaseModel
         'content',
         'image',
         'status',
+        'audience_type',
+        'audience_event_id',
         'total_count',
         'sent_count',
         'error_count',
