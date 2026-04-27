@@ -3,7 +3,7 @@ import { Container } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
 import { getTimeFromSec } from '@/utils/helpers'

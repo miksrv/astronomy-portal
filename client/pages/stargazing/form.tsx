@@ -4,8 +4,8 @@ import { Button, Dialog, Message } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { useTranslation } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { useTranslation } from 'next-i18next/pages'
+import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
 import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'

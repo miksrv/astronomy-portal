@@ -2,7 +2,7 @@ import React from 'react'
 import { Container } from 'simple-react-ui-kit'
 
 import Link from 'next/link'
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { API } from '@/api'
 import { formatDate } from '@/utils/dates'

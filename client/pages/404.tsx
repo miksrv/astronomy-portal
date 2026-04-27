@@ -1,8 +1,8 @@
 import React from 'react'
 
 import { GetStaticPropsResult, NextPage } from 'next'
-import { useTranslation } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { useTranslation } from 'next-i18next/pages'
+import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { NextSeo } from 'next-seo'
 
 const Error404Page: NextPage = () => {

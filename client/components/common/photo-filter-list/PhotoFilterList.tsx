@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
 import { getFilterColor } from '@/utils/colors'

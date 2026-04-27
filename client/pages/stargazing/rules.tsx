@@ -3,8 +3,8 @@ import { Container } from 'simple-react-ui-kit'
 
 import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
-import { useTranslation } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { useTranslation } from 'next-i18next/pages'
+import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
 import { setLocale, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'

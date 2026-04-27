@@ -1,7 +1,7 @@
 import React from 'react'
 import { Container } from 'simple-react-ui-kit'
 
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, useAppSelector } from '@/api'
 import { ReviewCard } from '@/components/common/review-card/ReviewCard'

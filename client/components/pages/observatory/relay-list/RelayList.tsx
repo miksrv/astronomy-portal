@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Button, cn, Container, Message, Spinner } from 'simple-react-ui-kit'
 
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, ApiType, useAppDispatch, useAppSelector } from '@/api'
 

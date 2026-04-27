@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import { Button, Container, Dialog, Icon } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, useAppSelector } from '@/api'
 import { hosts } from '@/api/constants'

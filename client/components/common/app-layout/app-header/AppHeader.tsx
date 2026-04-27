@@ -3,7 +3,7 @@ import { Button, cn, Icon, Popout } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, HOST_IMG, useAppDispatch, useAppSelector } from '@/api'
 import { openAuthDialog } from '@/api/applicationSlice'

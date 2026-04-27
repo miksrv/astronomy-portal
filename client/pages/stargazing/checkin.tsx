@@ -4,8 +4,8 @@ import { Html5Qrcode } from 'html5-qrcode'
 import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
-import { useTranslation } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { useTranslation } from 'next-i18next/pages'
+import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
 import { API, ApiModel, ApiType, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'

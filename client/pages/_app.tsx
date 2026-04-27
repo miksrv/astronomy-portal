@@ -6,7 +6,7 @@ import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Script from 'next/script'
-import { appWithTranslation, useTranslation } from 'next-i18next'
+import { appWithTranslation, useTranslation } from 'next-i18next/pages'
 
 import { wrapper } from '@/api'
 import { LOCAL_STORAGE } from '@/utils/constants'

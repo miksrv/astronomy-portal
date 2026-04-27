@@ -3,8 +3,8 @@ import { getCookie } from 'cookies-next'
 import { Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
-import { useTranslation } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { useTranslation } from 'next-i18next/pages'
+import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
 import { API, setLocale, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'

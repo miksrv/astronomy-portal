@@ -7,7 +7,7 @@ import utc from 'dayjs/plugin/utc'
 import ReactECharts, { EChartsOption } from 'echarts-for-react'
 import { Container } from 'simple-react-ui-kit'
 
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
 import { formatDate } from '@/utils/dates'

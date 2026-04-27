@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Container, Message, Spinner } from 'simple-react-ui-kit'
 
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { PhotoLightbox } from '@/components/common'
 

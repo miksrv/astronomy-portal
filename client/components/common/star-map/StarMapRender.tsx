@@ -3,7 +3,7 @@ import { Button, cn, Container, Skeleton } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { API } from '@/api'
 import { createMediumPhotoUrl } from '@/utils/photos'

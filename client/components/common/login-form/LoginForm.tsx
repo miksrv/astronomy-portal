@@ -3,7 +3,7 @@ import { Button, Message } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiType } from '@/api'
 import useLocalStorage from '@/hooks/useLocalStorage'

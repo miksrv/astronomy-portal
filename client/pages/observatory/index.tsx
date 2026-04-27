@@ -2,8 +2,8 @@ import React from 'react'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
-import { useTranslation } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { useTranslation } from 'next-i18next/pages'
+import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
 import { API, setLocale, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'

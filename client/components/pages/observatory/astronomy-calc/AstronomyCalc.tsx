@@ -3,7 +3,7 @@ import { Container } from 'simple-react-ui-kit'
 import SunCalc from 'suncalc'
 
 import Image from 'next/image'
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { MoonPhaseIcon } from '@/components/common'
 import { formatDate } from '@/utils/dates'

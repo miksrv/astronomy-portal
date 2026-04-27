@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Button, Container, Input, Message } from 'simple-react-ui-kit'
 
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, HOST_IMG } from '@/api'
 import { UserAvatar } from '@/components/ui/user-avatar'

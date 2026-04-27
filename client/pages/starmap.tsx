@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
-import { useTranslation } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { useTranslation } from 'next-i18next/pages'
+import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
 import { API, setLocale, wrapper } from '@/api'
 import { AppLayout, StarMap } from '@/components/common'
