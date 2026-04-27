@@ -126,6 +126,7 @@ $routes->group('mailings', static function ($routes) {
     $routes->get('/', 'Mailings::list');
     $routes->post('/', 'Mailings::create');
     $routes->get('unsubscribe', 'Mailings::unsubscribe');  // public — before (:alphanum)
+    $routes->get('audiences', 'Mailings::audiences');      // admin — before (:alphanum)
     $routes->get('(:alphanum)', 'Mailings::show/$1');
     $routes->patch('(:alphanum)', 'Mailings::update/$1');
     $routes->delete('(:alphanum)', 'Mailings::delete/$1');
