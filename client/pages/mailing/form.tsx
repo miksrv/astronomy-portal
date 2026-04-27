@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react'
 import { getCookie } from 'cookies-next'
-import { Button, Container, Dialog, Input, Message, TextArea } from 'simple-react-ui-kit'
+import { Button, Container, Dialog, Input, Message, Select, TextArea } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
@@ -23,6 +23,8 @@ const MailingFormPage: NextPage<object> = () => {
         skip: !id
     })
 
+    const { data: audiencesData, isLoading: audiencesLoading } = API.useMailingGetAudiencesQuery()
+
     const [createMailing, { isLoading: createLoading, isSuccess: createSuccess, error: createError }] =
         API.useMailingCreateMutation()
 
@@ -38,6 +40,7 @@ const MailingFormPage: NextPage<object> = () => {
 
     const [subject, setSubject] = useState('')
     const [content, setContent] = useState('')
+    const [audienceValue, setAudienceValue] = useState<string>('all')
     const [imageUrl, setImageUrl] = useState<string | undefined>()
     const [showConfirm, setShowConfirm] = useState(false)
     const [savedId, setSavedId] = useState<string | undefined>(id)
@@ -49,16 +52,31 @@ const MailingFormPage: NextPage<object> = () => {
             setSubject(mailingData.subject)
             setContent(mailingData.content)
             setImageUrl(mailingData.image ? `${HOST_IMG}${mailingData.image}` : undefined)
+
+            if (mailingData.audienceType === 'event' && mailingData.audienceEventId) {
+                setAudienceValue(`event_${mailingData.audienceEventId}`)
+            } else {
+                setAudienceValue('all')
+            }
         }
     }, [mailingData])
 
     const isValid = subject.trim() !== '' && content.trim() !== ''
 
+    const parseAudienceValue = (value: string) => {
+        if (value.startsWith('event_')) {
+            return { audienceEventId: value.slice('event_'.length), audienceType: 'event' as const }
+        }
+        return { audienceEventId: null, audienceType: 'all' as const }
+    }
+
     const handleSaveDraft = async () => {
+        const audience = parseAudienceValue(audienceValue)
+
         if (savedId ?? id) {
-            await updateMailing({ content, id: (savedId ?? id)!, subject })
+            await updateMailing({ content, id: (savedId ?? id)!, subject, ...audience })
         } else {
-            const result = await createMailing({ content, subject })
+            const result = await createMailing({ content, subject, ...audience })
 
             if ('data' in result && result.data) {
                 setSavedId(result.data.id)
@@ -111,6 +129,7 @@ const MailingFormPage: NextPage<object> = () => {
         ? t('pages.mailing.edit-campaign', 'Редактировать рассылку')
         : t('pages.mailing.create', 'Новая рассылка')
     const isBusy = mailingLoading || createLoading || updateLoading || launchLoading
+    const isDraft = !mailingData || mailingData.status === 'draft'
 
     const saveError = createError ?? updateError
 
@@ -148,6 +167,24 @@ const MailingFormPage: NextPage<object> = () => {
                             : t('pages.mailing.test-send-error', 'Ошибка отправки теста')}
                     </Message>
                 )}
+
+                <Select<string>
+                    className={styles.formGroup}
+                    label={t('mailingAudience', 'Аудитория')}
+                    placeholder={t('mailingAudience', 'Аудитория')}
+                    loading={audiencesLoading}
+                    disabled={!isDraft || isBusy}
+                    value={audienceValue}
+                    options={audiencesData?.items?.map((item) => ({
+                        key: item.type === 'event' && item.eventId ? `event_${item.eventId}` : 'all',
+                        value: `${item.labelRu} (${item.count})`
+                    }))}
+                    onSelect={(values) => {
+                        if (values?.[0]?.key !== undefined) {
+                            setAudienceValue(values[0].key)
+                        }
+                    }}
+                />
 
                 <Input
                     size={'medium'}
