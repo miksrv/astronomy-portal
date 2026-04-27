@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 4.5.3
+
+### Patch Changes
+
+- Added audience targeting to email campaigns: a new `Select` on the mailing form lets admins choose between "All Users" (newsletter subscribers) or a specific stargazing event; only events with at least one registered user appear in the list, and each option shows the recipient count in parentheses
+- Added new `GET /mailings/audiences` endpoint that returns available audiences with bilingual labels and live recipient counts; event audiences are derived from `events_users` joined with `users`, filtered to valid emails only
+- Extended `POST /mailings` and `PATCH /mailings/:id` to accept `audienceType` (`all` | `event`) and `audienceEventId`; `PATCH` resets `audienceEventId` to `null` automatically when switching back to `all`
+- Extended `GET /mailings/:id` response with `audienceType`, `audienceEventId`, `audienceLabelRu`, `audienceLabelEn`, and `audienceCount` fields
+- Updated `POST /mailings/:id/send` to query event registrants (via `events_users JOIN users`) when `audienceType = 'event'`; the newsletter subscription preference is intentionally not applied for event audiences since attendees opted in explicitly
+- Added new database migration `2025-05-20-100000_AddMailingAudience` adding `audience_type ENUM('all','event')` and `audience_event_id VARCHAR(15)` columns to the `mailings` table
+- Added audience info row ("Аудитория") to the mailing detail page (`/mailing/[id]`), displayed after the subject row, with label resolved by locale and recipient count; row is hidden for legacy campaigns that predate audience tracking
+- Upgraded frontend dependencies: `i18next` 25→26, `react-i18next` 16→17, `next-i18next` 15→16, `typescript` 5→6, `eslint-plugin-simple-import-sort` 12→13, `simple-react-ui-kit` 1.8.4→1.8.6, `@types/node` 24→25; `eslint` held at v9 pending `eslint-plugin-react` v10 support, `next-seo` held at v6 pending v7 API migration
+- Updated `tsconfig.json` for TypeScript 6.0: changed `target` from `"es5"` to `"es2017"` (deprecated in TS6) and added explicit `"types": ["node", "jest"]` (TS6 no longer auto-includes `@types/*`)
+- Migrated all `next-i18next` imports to the Pages Router subpath (`next-i18next/pages` and `next-i18next/pages/serverSideTranslations`) required by `next-i18next` v16 across ~60 components and pages
+
 ## 4.5.2
 
 ### Patch Changes
