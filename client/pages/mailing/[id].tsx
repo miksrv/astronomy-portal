@@ -5,8 +5,8 @@ import { Container } from 'simple-react-ui-kit'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useTranslation } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { useTranslation } from 'next-i18next/pages'
+import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
 import { API, ApiModel, HOST_IMG, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
@@ -112,18 +112,15 @@ const MailingStatsPage: NextPage<object> = () => {
                             <dl className={styles.metaGrid}>
                                 <dt>{t('pages.mailing.detail-subject', 'Тема')}</dt>
                                 <dd>{data.subject}</dd>
-                                <dt>{t('pages.mailing.detail-status', 'Статус')}</dt>
-                                <dd>
-                                    <span
-                                        className={
-                                            styles[
-                                                `status${data.status.charAt(0).toUpperCase()}${data.status.slice(1)}`
-                                            ]
-                                        }
-                                    >
-                                        {statusLabel(data.status)}
-                                    </span>
-                                </dd>
+                                {data.audienceType !== undefined && (
+                                    <>
+                                        <dt>{t('mailingAudience', 'Аудитория')}</dt>
+                                        <dd>
+                                            {router.locale === 'ru' ? data.audienceLabelRu : data.audienceLabelEn}
+                                            {data.audienceCount !== undefined && ` (${String(data.audienceCount)})`}
+                                        </dd>
+                                    </>
+                                )}
                                 {data.sentAt && (
                                     <>
                                         <dt>{t('pages.mailing.detail-sent-at', 'Дата отправки')}</dt>
@@ -135,13 +132,17 @@ const MailingStatsPage: NextPage<object> = () => {
                             </dl>
 
                             <dl className={styles.metaGrid}>
-                                <dt>{t('pages.mailing.limit-day', 'Лимит в сутки')}</dt>
+                                <dt>{t('pages.mailing.detail-status', 'Статус')}</dt>
                                 <dd>
-                                    {data.sentToday} / {data.limitDay}
-                                </dd>
-                                <dt>{t('pages.mailing.limit-hour', 'Лимит в час')}</dt>
-                                <dd>
-                                    {data.sentThisHour} / {data.limitHour}
+                                    <span
+                                        className={
+                                            styles[
+                                                `status${data.status.charAt(0).toUpperCase()}${data.status.slice(1)}`
+                                            ]
+                                        }
+                                    >
+                                        {statusLabel(data.status)}
+                                    </span>
                                 </dd>
                                 <dt>{t('pages.mailing.limit-status', 'Состояние лимита')}</dt>
                                 <dd>
@@ -158,6 +159,14 @@ const MailingStatsPage: NextPage<object> = () => {
                                             {t('pages.mailing.limit-active', 'Активна')}
                                         </span>
                                     )}
+                                </dd>
+                                <dt>{t('pages.mailing.limit-day', 'Лимит в сутки')}</dt>
+                                <dd>
+                                    {data.sentToday} / {data.limitDay}
+                                </dd>
+                                <dt>{t('pages.mailing.limit-hour', 'Лимит в час')}</dt>
+                                <dd>
+                                    {data.sentThisHour} / {data.limitHour}
                                 </dd>
                                 {isLimitHit && data.status === 'sending' && remaining > 0 && countdown && (
                                     <>

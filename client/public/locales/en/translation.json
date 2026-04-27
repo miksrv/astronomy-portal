@@ -721,5 +721,6 @@
         "paginationPage": "Page",
         "paginationNext": "Next",
         "paginationPrev": "Previous"
-    }
+    },
+    "mailingAudience": "Audience"
 }

@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react'
 
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { BreadcrumbLink, Breadcrumbs, BreadcrumbsProps } from '@/components/ui'
 

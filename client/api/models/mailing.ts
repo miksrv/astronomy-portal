@@ -1,4 +1,5 @@
 import { ApiType } from '@/api'
+import { MailingAudienceType } from '@/api/types/mailings'
 
 export type MailingStatus = 'draft' | 'sending' | 'completed' | 'paused'
 
@@ -19,6 +20,11 @@ export interface Mailing {
     limitHour: number
     sentToday: number
     sentThisHour: number
+    audienceType?: MailingAudienceType
+    audienceEventId?: string | null
+    audienceLabelRu?: string
+    audienceLabelEn?: string
+    audienceCount?: number
 }
 
 export interface MailingListItem {
@@ -35,9 +41,13 @@ export interface MailingListItem {
 export interface CreateMailingRequest {
     subject: string
     content: string
+    audienceType?: MailingAudienceType
+    audienceEventId?: string | null
 }
 
 export interface UpdateMailingRequest {
     subject?: string
     content?: string
+    audienceType?: MailingAudienceType
+    audienceEventId?: string | null
 }

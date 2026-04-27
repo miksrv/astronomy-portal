@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 
 import type { GetServerSidePropsResult, NextPage } from 'next'
-import { useTranslation } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { useTranslation } from 'next-i18next/pages'
+import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
 import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { AppLayout } from '@/components/common'

@@ -1,7 +1,7 @@
 import React from 'react'
 
 import Image, { StaticImageData } from 'next/image'
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { Carousel } from '@/components/ui'
 import photoIgor from '@/public/photos/team-Igor.jpg'

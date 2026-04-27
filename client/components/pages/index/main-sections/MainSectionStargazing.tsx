@@ -2,7 +2,7 @@ import React from 'react'
 import { cn } from 'simple-react-ui-kit'
 
 import Link from 'next/link'
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { Counter } from '@/components/ui'
 

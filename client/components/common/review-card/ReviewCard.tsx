@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button, cn } from 'simple-react-ui-kit'
 
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel, HOST_IMG } from '@/api'
 import { UserAvatar } from '@/components/ui/user-avatar/UserAvatar'

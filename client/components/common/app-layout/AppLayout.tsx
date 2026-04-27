@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { cn, Dialog } from 'simple-react-ui-kit'
 
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 import { NextSeo } from 'next-seo'
 import { NextSeoProps } from 'next-seo/lib/types'
 import NextNProgress from 'nextjs-progressbar'

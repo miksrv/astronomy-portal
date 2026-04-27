@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { Container } from 'simple-react-ui-kit'
 
 import Link from 'next/link'
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
 import { PhotoFilterList, StarMap } from '@/components/common'

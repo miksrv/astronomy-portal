@@ -102,23 +102,61 @@ class Mailings extends ResourceController
             $sentToday          = $mailingEmailsModel->countSentToday();
             $sentThisHour       = $mailingEmailsModel->countSentThisHour();
 
+            // Resolve audience label and count
+            $audienceType      = $mailing->audience_type ?? 'all';
+            $audienceEventId   = $mailing->audience_event_id;
+            $audienceLabelRu   = 'Все пользователи';
+            $audienceLabelEn   = 'All Users';
+            $audienceCount     = 0;
+
+            $db = \Config\Database::connect();
+
+            if ($audienceType === 'event' && !empty($audienceEventId)) {
+                $row = $db->table('events e')
+                    ->select('e.title_ru, e.title_en, COUNT(DISTINCT eu.user_id) as user_count')
+                    ->join('events_users eu', 'eu.event_id = e.id')
+                    ->join('users u', 'eu.user_id = u.id')
+                    ->where('e.id', $audienceEventId)
+                    ->where('eu.deleted_at IS NULL')
+                    ->where('u.email IS NOT NULL')
+                    ->where("u.email != ''")
+                    ->where('u.deleted_at IS NULL')
+                    ->get()
+                    ->getRowArray();
+
+                if ($row) {
+                    $audienceLabelRu = $row['title_ru'] ?? $row['title_en'] ?? '';
+                    $audienceLabelEn = $row['title_en'] ?? $row['title_ru'] ?? '';
+                    $audienceCount   = (int) $row['user_count'];
+                }
+            } else {
+                $usersModel    = new UsersModel();
+                $subscribers   = $usersModel->getNewsletterSubscribers();
+                $audienceCount = count($subscribers);
+            }
+
             return $this->respond([
-                'id'          => $mailing->id,
-                'subject'     => $mailing->subject,
-                'content'     => $mailing->content,
-                'image'       => $mailing->image,
-                'status'      => $mailing->status,
-                'totalCount'  => (int) $mailing->total_count,
-                'sentCount'   => (int) $mailing->sent_count,
-                'errorCount'  => (int) $mailing->error_count,
-                'createdBy'   => $mailing->created_by,
-                'createdAt'   => $mailing->created_at,
-                'updatedAt'   => $mailing->updated_at,
-                'sentAt'      => $mailing->sent_at,
-                'limitDay'    => MailingLimits::DAY_LIMIT,
-                'limitHour'   => MailingLimits::HOUR_LIMIT,
-                'sentToday'   => $sentToday,
-                'sentThisHour' => $sentThisHour,
+                'id'               => $mailing->id,
+                'subject'          => $mailing->subject,
+                'content'          => $mailing->content,
+                'image'            => $mailing->image,
+                'status'           => $mailing->status,
+                'totalCount'       => (int) $mailing->total_count,
+                'sentCount'        => (int) $mailing->sent_count,
+                'errorCount'       => (int) $mailing->error_count,
+                'createdBy'        => $mailing->created_by,
+                'createdAt'        => $mailing->created_at,
+                'updatedAt'        => $mailing->updated_at,
+                'sentAt'           => $mailing->sent_at,
+                'limitDay'         => MailingLimits::DAY_LIMIT,
+                'limitHour'        => MailingLimits::HOUR_LIMIT,
+                'sentToday'        => $sentToday,
+                'sentThisHour'     => $sentThisHour,
+                'audienceType'     => $audienceType,
+                'audienceEventId'  => $audienceEventId,
+                'audienceLabelRu'  => $audienceLabelRu,
+                'audienceLabelEn'  => $audienceLabelEn,
+                'audienceCount'    => $audienceCount,
             ]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
@@ -144,8 +182,10 @@ class Mailings extends ResourceController
         $input = $this->request->getJSON(true);
 
         $rules = [
-            'subject' => 'required|string|max_length[255]',
-            'content' => 'required|string',
+            'subject'          => 'required|string|max_length[255]',
+            'content'          => 'required|string',
+            'audienceType'     => 'if_exist|in_list[all,event]',
+            'audienceEventId'  => 'if_exist|string|max_length[15]',
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -154,12 +194,28 @@ class Mailings extends ResourceController
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
+        $audienceType    = $input['audienceType'] ?? 'all';
+        $audienceEventId = $input['audienceEventId'] ?? null;
+
+        if ($audienceType === 'event' && empty($audienceEventId)) {
+            return $this->failValidationErrors([
+                'audienceEventId' => lang('Mailings.audienceEventIdRequired'),
+            ]);
+        }
+
+        // Reset event ID if type is 'all'
+        if ($audienceType === 'all') {
+            $audienceEventId = null;
+        }
+
         try {
-            $mailing             = new MailingEntity();
-            $mailing->subject    = $input['subject'];
-            $mailing->content    = $input['content'];
-            $mailing->status     = MailingEntity::STATUS_DRAFT;
-            $mailing->created_by = $this->session->user->id;
+            $mailing                    = new MailingEntity();
+            $mailing->subject           = $input['subject'];
+            $mailing->content           = $input['content'];
+            $mailing->status            = MailingEntity::STATUS_DRAFT;
+            $mailing->audience_type     = $audienceType;
+            $mailing->audience_event_id = $audienceEventId;
+            $mailing->created_by        = $this->session->user->id;
 
             $this->model->save($mailing);
 
@@ -201,8 +257,10 @@ class Mailings extends ResourceController
         $input = $this->request->getJSON(true);
 
         $rules = [
-            'subject' => 'if_exist|string|max_length[255]',
-            'content' => 'if_exist|string',
+            'subject'         => 'if_exist|string|max_length[255]',
+            'content'         => 'if_exist|string',
+            'audienceType'    => 'if_exist|in_list[all,event]',
+            'audienceEventId' => 'if_exist|string|max_length[15]',
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -211,9 +269,20 @@ class Mailings extends ResourceController
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
+        // Validate audience combination when audienceType is being set
+        if (isset($input['audienceType'])) {
+            $audienceType    = $input['audienceType'];
+            $audienceEventId = $input['audienceEventId'] ?? null;
+
+            if ($audienceType === 'event' && empty($audienceEventId)) {
+                return $this->failValidationErrors([
+                    'audienceEventId' => lang('Mailings.audienceEventIdRequired'),
+                ]);
+            }
+        }
+
         try {
             $updateData = [];
-
 
             if (isset($input['subject'])) {
                 $updateData['subject'] = $input['subject'];
@@ -221,6 +290,18 @@ class Mailings extends ResourceController
 
             if (isset($input['content'])) {
                 $updateData['content'] = $input['content'];
+            }
+
+            if (isset($input['audienceType'])) {
+                $updateData['audience_type'] = $input['audienceType'];
+
+                // Explicitly clear event ID when switching back to 'all'
+                $updateData['audience_event_id'] = $input['audienceType'] === 'event'
+                    ? ($input['audienceEventId'] ?? null)
+                    : null;
+            } elseif (isset($input['audienceEventId'])) {
+                // Allow updating event ID independently (only meaningful when type is 'event')
+                $updateData['audience_event_id'] = $input['audienceEventId'];
             }
 
             if (!empty($updateData)) {
@@ -423,7 +504,24 @@ class Mailings extends ResourceController
 
         try {
             $usersModel = new UsersModel();
-            $users      = $usersModel->getNewsletterSubscribers();
+
+            $audienceType = $mailing->audience_type ?? 'all';
+
+            if ($audienceType === 'event' && !empty($mailing->audience_event_id)) {
+                $db    = \Config\Database::connect();
+                $users = $db->table('events_users eu')
+                    ->select('DISTINCT u.id, u.email, COALESCE(u.locale, \'ru\') as locale')
+                    ->join('users u', 'eu.user_id = u.id')
+                    ->where('eu.event_id', $mailing->audience_event_id)
+                    ->where('eu.deleted_at IS NULL')
+                    ->where('u.email IS NOT NULL')
+                    ->where("u.email != ''")
+                    ->where('u.deleted_at IS NULL')
+                    ->get()
+                    ->getResultArray();
+            } else {
+                $users = $usersModel->getNewsletterSubscribers();
+            }
 
             $mailingEmailsModel = new MailingEmailsModel();
             $insertBatch        = [];
@@ -459,6 +557,73 @@ class Mailings extends ResourceController
             ]);
 
             return $this->respond(['queued' => $count]);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * GET /mailings/audiences
+     * Returns the list of available audience options for a campaign (ADMIN only).
+     *
+     * Items include an "all users" option (newsletter subscribers count) and one
+     * entry per event that has at least one registered user with a valid email.
+     */
+    public function audiences(): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
+        }
+
+        try {
+            $db = \Config\Database::connect();
+
+            // "All users" option — count newsletter subscribers
+            $usersModel      = new UsersModel();
+            $subscriberCount = count($usersModel->getNewsletterSubscribers());
+
+            $items = [
+                [
+                    'type'     => 'all',
+                    'eventId'  => null,
+                    'labelRu'  => 'Все пользователи',
+                    'labelEn'  => 'All Users',
+                    'count'    => $subscriberCount,
+                ],
+            ];
+
+            // Per-event options — only events with at least 1 registered user with a valid email
+            $eventRows = $db->table('events e')
+                ->select('e.id as event_id, e.title_ru, e.title_en, COUNT(DISTINCT eu.user_id) as user_count')
+                ->join('events_users eu', 'eu.event_id = e.id')
+                ->join('users u', 'eu.user_id = u.id')
+                ->where('eu.deleted_at IS NULL')
+                ->where('u.email IS NOT NULL')
+                ->where("u.email != ''")
+                ->where('u.deleted_at IS NULL')
+                ->groupBy('e.id')
+                ->having('user_count >', 0)
+                ->orderBy('e.created_at', 'DESC')
+                ->get()
+                ->getResultArray();
+
+            foreach ($eventRows as $row) {
+                $items[] = [
+                    'type'    => 'event',
+                    'eventId' => $row['event_id'],
+                    'labelRu' => $row['title_ru'] ?? $row['title_en'] ?? '',
+                    'labelEn' => $row['title_en'] ?? $row['title_ru'] ?? '',
+                    'count'   => (int) $row['user_count'],
+                ];
+            }
+
+            return $this->respond(['items' => $items]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 

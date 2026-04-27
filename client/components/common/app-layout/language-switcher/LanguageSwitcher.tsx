@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { setCookie } from 'cookies-next'
 
 import { useRouter } from 'next/router'
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import { ApiType, setLocale, useAppDispatch } from '@/api'
 import { LOCAL_STORAGE } from '@/utils/constants'

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Button, cn } from 'simple-react-ui-kit'
 
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next/pages'
 
 import styles from './styles.module.sass'
 
