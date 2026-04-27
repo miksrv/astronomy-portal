@@ -363,6 +363,9 @@ export const API = createApi({
         mailingUnsubscribe: builder.query<ApiType.Mailings.ResMailingUnsubscribe, string>({
             query: (mail) => `mailings/unsubscribe?mail=${encodeURIComponent(mail)}`
         }),
+        mailingGetAudiences: builder.query<ApiType.Mailings.ResMailingAudiences, void>({
+            query: () => 'mailings/audiences'
+        }),
 
         /* Members Controller */
         usersGetList: builder.query<ApiType.Users.UsersListResponse, ApiType.Users.UsersListRequest>({
