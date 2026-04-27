@@ -735,5 +735,6 @@
         "paginationPage": "Страница",
         "paginationNext": "Следующая",
         "paginationPrev": "Предыдущая"
-    }
+    },
+    "mailingAudience": "Аудитория"
 }
