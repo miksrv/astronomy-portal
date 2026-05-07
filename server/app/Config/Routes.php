@@ -105,6 +105,7 @@ $routes->group('events', static function ($routes) {
     $routes->get('upcoming', 'Events::upcoming');
     $routes->get('upcoming/registered', 'Events::upcomingRegistered');
     $routes->get('photos', 'Events::photos');
+    $routes->get('(:alphanum)/statistic', 'Events::statistic/$1');
     $routes->get('(:alphanum)', 'Events::show/$1');
     $routes->get('members/(:alphanum)', 'Events::members/$1');
     $routes->get('checkin/(:alphanum)', 'Events::checkin/$1');

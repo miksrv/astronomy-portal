@@ -34,6 +34,7 @@ use Exception;
  * @method ResponseInterface cancel() Cancels a user's booking for an event.
  * @method ResponseInterface upload(int|null $id) Uploads a photo for a specific event by its ID.
  * @method ResponseInterface delete(int|null $id) Deletes an event by its ID.
+ * @method ResponseInterface statistic($id = null) Returns aggregated statistics for an event.
  */
 class Events extends ResourceController
 {
@@ -358,6 +359,41 @@ class Events extends ResourceController
             $users = $eventUsersModel->getUsersByEventId($id);
 
             return $this->respond($users);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * Returns aggregated statistics for a specific event.
+     *
+     * Restricted to users with the `admin` or `moderator` role.
+     * Delegates all aggregation to EventsUsersModel::getStatisticByEventId().
+     *
+     * @param string|null $id The event ID.
+     * @return ResponseInterface JSON response with aggregated statistics or an error on failure.
+     */
+    public function statistic($id = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if (!in_array($this->session->user->role, ['admin', 'moderator'])) {
+            return $this->failForbidden(lang('App.accessDenied'));
+        }
+
+        try {
+            if (empty($id)) {
+                return $this->failValidationErrors(lang('App.validationError'));
+            }
+
+            $eventUsersModel = new EventsUsersModel();
+            $statistic = $eventUsersModel->getStatisticByEventId($id);
+
+            return $this->respond($statistic);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
