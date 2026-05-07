@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 4.5.4
+
+### Patch Changes
+
+- Added stargazing event statistics page (`/stargazing/[name]/statistic`) for admins and moderators: displays attendance breakdown (registered, checked-in, cancelled) and other per-event metrics as ECharts visualizations
+- Added `EventStatistic` component with chart and styles for the statistics page
+- Added stats link in the events list (`EventsListItem`) visible only to admins and moderators
+- Added backend `GET /events/:id/statistic` route and controller action in `Events` controller
+- Added `getStatisticByEventId()` method to `EventsUsersModel` returning attendance counts grouped by status
+- Added event statistic RTK Query endpoint and response types in `client/api/types/events.ts`
+- Extracted shared ECharts base config utility (`client/utils/charts.ts`) and refactored observatory weather chart to use it
+- Added EN/RU i18n keys for the event statistics page
+- Replaced `NextSeo` component with `generateNextSeo` + `<Head>` across layout and auth/404 pages, completing migration to the custom SEO helper
+- Added `noindex`/`nofollow` meta tags to the profile page, event statistics page, and entry page to exclude them from search engine indexing
+- Updated client dependencies and lockfile
+
 ## 4.5.3
 
 ### Patch Changes
