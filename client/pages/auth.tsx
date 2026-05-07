@@ -3,10 +3,11 @@ import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/dist/client/router'
+import Head from 'next/head'
 import { useSearchParams } from 'next/navigation'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
-import { NextSeo } from 'next-seo'
+import { generateNextSeo } from 'next-seo/pages'
 
 import { API, ApiType, setLocale } from '@/api'
 import { login } from '@/api/authSlice'
@@ -82,12 +83,14 @@ const AuthPage: NextPage<AuthPageProps> = () => {
 
     return (
         <>
-            <NextSeo
-                nofollow={true}
-                noindex={true}
-                canonical={`${i18n.language === 'en' ? 'en/' : ''}auth`}
-                title={t('pages.auth.title', 'Авторизация на сайте')}
-            />
+            <Head>
+                {generateNextSeo({
+                    nofollow: true,
+                    noindex: true,
+                    canonical: `${i18n.language === 'en' ? 'en/' : ''}auth`,
+                    title: t('pages.auth.title', 'Авторизация на сайте')
+                })}
+            </Head>
             <div className={'centerPageContainer'}>
                 <div className={'wrapper'}>
                     <Container>
