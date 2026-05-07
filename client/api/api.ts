@@ -99,6 +99,9 @@ export const API = createApi({
             providesTags: (result, error, arg) => [{ id: arg, type: 'EventUsers' }],
             query: (id) => `events/members/${id}`
         }),
+        eventGetStatistic: builder.query<ApiType.Events.ResEventStatistic, string>({
+            query: (id) => `events/${id}/statistic`
+        }),
         eventGetCheckin: builder.mutation<ApiType.Events.ResCheckin, string>({
             query: (id) => `events/checkin/${id}`
         }),

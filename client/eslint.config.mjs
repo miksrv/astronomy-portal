@@ -1,3 +1,4 @@
+import { fixupPluginRules } from '@eslint/compat'
 import { defineConfig } from 'eslint/config'
 import tseslint from 'typescript-eslint'
 import jestPlugin from 'eslint-plugin-jest'
@@ -15,9 +16,9 @@ export default defineConfig([
         // note - intentionally uses computed syntax to make it easy to sort the keys
         plugins: {
             ['@typescript-eslint']: tseslint.plugin,
-            ['react']: reactPlugin,
+            ['react']: fixupPluginRules(reactPlugin),
             ['react-hooks']: reactHooksPlugin,
-            ['import']: importPlugin,
+            ['import']: fixupPluginRules(importPlugin),
             ['jest']: jestPlugin,
             ['prettier']: prettierPlugin,
             ['simple-import-sort']: simpleImportSortPlugin,

@@ -75,7 +75,7 @@
             align-items: center
             gap: 16px
 
-            div
+            div, a
                 display: flex
                 align-items: center
                 gap: 4px
@@ -85,3 +85,12 @@
                 width: 16px
                 height: 16px
                 fill: var(--text-color-primary)
+
+        .membersLink
+            text-decoration: none
+
+            &:hover
+                color: var(--text-color-primary)
+
+                svg
+                    fill: var(--link-color)

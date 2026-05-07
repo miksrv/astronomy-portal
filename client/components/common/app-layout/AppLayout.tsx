@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { cn, Dialog } from 'simple-react-ui-kit'
 
+import Head from 'next/head'
 import { useTranslation } from 'next-i18next/pages'
-import { NextSeo } from 'next-seo'
-import { NextSeoProps } from 'next-seo/lib/types'
+import { generateNextSeo, NextSeoProps } from 'next-seo/pages'
 import NextNProgress from 'nextjs-progressbar'
 
 import { SITE_LINK, useAppDispatch, useAppSelector } from '@/api'
@@ -58,15 +58,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children, ...pr
 
     return (
         <div className={styles.appLayout}>
-            <NextSeo
-                {...props}
-                canonical={props?.canonical ? `${canonicalUrl}${props.canonical}` : undefined}
-                openGraph={{
-                    images: props?.openGraph?.images,
-                    siteName: t('common.look-at-the-stars', 'Смотри на звёзды'),
-                    locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
-                }}
-            />
+            <Head>
+                {generateNextSeo({
+                    ...props,
+                    canonical: props?.canonical ? `${canonicalUrl}${props.canonical}` : undefined,
+                    openGraph: {
+                        images: props?.openGraph?.images,
+                        siteName: t('common.look-at-the-stars', 'Смотри на звёзды'),
+                        locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
+                    }
+                })}
+            </Head>
 
             <NextNProgress
                 color={'#fbbd08'}

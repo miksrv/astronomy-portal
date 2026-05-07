@@ -449,7 +449,20 @@
             "text-part-1": "A star party in Orenburg is a chance to touch the mysteries of the Universe while observing the starry sky in complete darkness. We invite you on exciting trips outside the city where telescopes open cosmic horizons right in the fields of the Orenburg region.",
             "text-part-2": "Each star party is an evening of scientific discoveries, inspiring lectures, and lively interaction with like-minded people. You will learn how our events work, get acquainted with the basic rules of behavior, and be able to prepare in advance for stargazing.",
             "photo_alt": "Photo ({{number}}) from the star party — {{name}} ",
-            "photo_title": "Star Party: {{name}} — Photo ({{number}})"
+            "photo_title": "Star Party: {{name}} — Photo ({{number}})",
+            "statistic-title": "Event Statistics",
+            "statistic-registrations": "Registrations",
+            "statistic-participants": "Participants",
+            "statistic-children": "Children",
+            "statistic-average-age": "Average Age",
+            "statistic-gender": "Gender distribution",
+            "statistic-age-groups": "Age groups",
+            "statistic-timeline": "Registration timeline",
+            "statistic-male": "Male",
+            "statistic-female": "Female",
+            "statistic-gender-unknown": "Unknown",
+            "statistic-cumulative": "Total",
+            "statistic-years": "years"
         },
         "checkin": {
             "no-cameras": "No cameras found",
@@ -461,6 +474,7 @@
             "continue-scanning": "Continue Scanning"
         },
         "entry": {
+            "title": "Event Ticket",
             "ticket-title": "This is your event ticket",
             "date-time": "Date and Time",
             "participants": "Participants",

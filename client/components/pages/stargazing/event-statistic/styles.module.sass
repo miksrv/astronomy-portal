@@ -1,0 +1,59 @@
+@use '../../../../styles/variables' as variables
+
+.wrapper
+    display: flex
+    flex-direction: column
+    gap: 16px
+
+.kpiRow
+    display: flex
+    gap: 10px
+    flex-wrap: wrap
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column
+
+.kpiCard
+    flex: 1 1 0
+    min-width: 140px
+    display: flex
+    flex-direction: column
+    gap: 8px
+    padding: 16px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-basis: 100%
+
+.kpiLabel
+    font-size: var(--font-size-small)
+    color: var(--text-color-secondary)
+
+.kpiValue
+    font-size: 28px
+    font-weight: 600
+    color: var(--text-color-primary)
+    display: flex
+    align-items: baseline
+    gap: 6px
+
+.kpiSub
+    font-size: var(--font-size-small)
+    font-weight: 400
+    color: var(--text-color-secondary)
+
+.chartTitle
+    font-size: var(--font-size)
+    font-weight: 600
+    color: var(--text-color-primary)
+    margin: 0 0 12px 0
+
+.chartsRow
+    display: flex
+    gap: 16px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column
+
+.chartHalf
+    flex: 1 1 0
+    min-width: 0

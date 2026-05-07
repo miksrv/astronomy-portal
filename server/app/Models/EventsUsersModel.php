@@ -91,6 +91,109 @@ class EventsUsersModel extends ApplicationBaseModel
     }
 
     /**
+     * Returns aggregated statistics for a given event.
+     *
+     * Executes three queries:
+     *  1. Overall aggregates (totals, check-in count, average age, gender split).
+     *  2. Age-group distribution for participants whose birthdays are known.
+     *  3. Daily registration counts, from which a cumulative timeline is computed in PHP.
+     *
+     * @param string $eventId The event ID to aggregate statistics for.
+     * @return array Associative array with keys: totalRegistrations, totalAdults,
+     *               totalChildren, totalParticipants, checkinCount, averageAge,
+     *               genderStats, ageGroups, registrationTimeline.
+     */
+    public function getStatisticByEventId(string $eventId): array
+    {
+        // --- Query 1: overall aggregates ---
+        $aggregates = $this->db->table('events_users eu')
+            ->select('
+                COUNT(eu.id)                                                   AS total_registrations,
+                SUM(eu.adults)                                                 AS total_adults,
+                SUM(eu.children)                                               AS total_children,
+                SUM(eu.adults + eu.children)                                   AS total_participants,
+                COUNT(eu.checkin_at)                                           AS checkin_count,
+                AVG(TIMESTAMPDIFF(YEAR, u.birthday, CURDATE()))                AS average_age,
+                SUM(CASE WHEN u.sex = \'m\' THEN 1 ELSE 0 END)               AS gender_male,
+                SUM(CASE WHEN u.sex = \'f\' THEN 1 ELSE 0 END)               AS gender_female,
+                SUM(CASE WHEN u.sex IS NULL THEN 1 ELSE 0 END)                AS gender_unknown')
+            ->join('users u', 'u.id = eu.user_id', 'left')
+            ->where('eu.event_id', $eventId)
+            ->where('eu.deleted_at IS NULL')
+            ->get()
+            ->getRow();
+
+        // --- Query 2: age groups ---
+        $ageGroupRows = $this->db->table('events_users eu')
+            ->select("
+                CASE
+                    WHEN TIMESTAMPDIFF(YEAR, u.birthday, CURDATE()) < 18  THEN 'under18'
+                    WHEN TIMESTAMPDIFF(YEAR, u.birthday, CURDATE()) <= 25 THEN '18to25'
+                    WHEN TIMESTAMPDIFF(YEAR, u.birthday, CURDATE()) <= 35 THEN '26to35'
+                    WHEN TIMESTAMPDIFF(YEAR, u.birthday, CURDATE()) <= 50 THEN '36to50'
+                    ELSE 'over50'
+                END AS age_group,
+                COUNT(*) AS count")
+            ->join('users u', 'u.id = eu.user_id', 'left')
+            ->where('eu.event_id', $eventId)
+            ->where('eu.deleted_at IS NULL')
+            ->where('u.birthday IS NOT NULL')
+            ->groupBy('age_group')
+            ->get()
+            ->getResultArray();
+
+        // Normalise age groups: ensure all buckets are present with zero counts
+        $ageGroupOrder  = ['under18', '18to25', '26to35', '36to50', 'over50'];
+        $ageGroupLookup = [];
+        foreach ($ageGroupRows as $row) {
+            $ageGroupLookup[$row['age_group']] = (int) $row['count'];
+        }
+        $ageGroups = [];
+        foreach ($ageGroupOrder as $bucket) {
+            $ageGroups[] = [
+                'group' => $bucket,
+                'count' => $ageGroupLookup[$bucket] ?? 0,
+            ];
+        }
+
+        // --- Query 3: individual registration timeline ---
+        $timelineRows = $this->db->table('events_users eu')
+            ->select('eu.created_at AS reg_datetime')
+            ->where('eu.event_id', $eventId)
+            ->where('eu.deleted_at IS NULL')
+            ->orderBy('reg_datetime', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        // Each row gets cumulative count = its 1-based position
+        $timeline = [];
+        foreach ($timelineRows as $i => $row) {
+            $timeline[] = [
+                'datetime'   => $row['reg_datetime'],
+                'cumulative' => $i + 1,
+            ];
+        }
+
+        return [
+            'totalRegistrations'   => (int) ($aggregates->total_registrations ?? 0),
+            'totalAdults'          => (int) ($aggregates->total_adults ?? 0),
+            'totalChildren'        => (int) ($aggregates->total_children ?? 0),
+            'totalParticipants'    => (int) ($aggregates->total_participants ?? 0),
+            'checkinCount'         => (int) ($aggregates->checkin_count ?? 0),
+            'averageAge'           => $aggregates->average_age !== null
+                ? round((float) $aggregates->average_age, 1)
+                : null,
+            'genderStats'          => [
+                'male'    => (int) ($aggregates->gender_male ?? 0),
+                'female'  => (int) ($aggregates->gender_female ?? 0),
+                'unknown' => (int) ($aggregates->gender_unknown ?? 0),
+            ],
+            'ageGroups'            => $ageGroups,
+            'registrationTimeline' => $timeline,
+        ];
+    }
+
+    /**
      * Retrieves total adult and child counts grouped by event ID across all events.
      *
      * @return array Array of objects with event_id, total_adults, and total_children.

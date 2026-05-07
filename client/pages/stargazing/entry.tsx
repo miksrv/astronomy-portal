@@ -3,8 +3,10 @@ import QRCode from 'react-qr-code'
 import { getCookie } from 'cookies-next'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
+import Head from 'next/head'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { generateNextSeo } from 'next-seo/pages'
 
 import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
@@ -28,33 +30,43 @@ const EntryPage: NextPage<EntryPageProps> = ({ upcomingData }) => {
     }, [])
 
     return (
-        <div className={styles.center}>
-            <h1>{t('pages.entry.ticket-title', 'Это ваш билет на мероприятие')}</h1>
-            <h2>{upcomingData?.title}</h2>
-            <p>
-                <strong>{t('pages.entry.date-time', 'Дата и время')}:</strong>{' '}
-                {formatUTCDate(upcomingData?.date?.date, 'D MMMM, YYYY, H:mm')}
-            </p>
-            <p>
-                <strong>{t('pages.entry.participants', 'Участники')}:</strong> {t('pages.entry.adults', 'Взрослых')}{' '}
-                {upcomingData?.members?.adults}, {t('pages.entry.children', 'детей')} {upcomingData?.members?.children}
-            </p>
-            <p>
-                <i>{t('pages.entry.show-qr', 'Покажите этот QR-код на входе')}</i>
-            </p>
-            <div className={styles.qrcode}>
-                <QRCode
-                    size={340}
-                    value={upcomingData?.bookedId || ''}
-                />
+        <>
+            <Head>
+                {generateNextSeo({
+                    nofollow: true,
+                    noindex: true,
+                    title: t('pages.entry.title', 'Билет на мероприятие')
+                })}
+            </Head>
+            <div className={styles.center}>
+                <h1>{t('pages.entry.ticket-title', 'Это ваш билет на мероприятие')}</h1>
+                <h2>{upcomingData?.title}</h2>
+                <p>
+                    <strong>{t('pages.entry.date-time', 'Дата и время')}:</strong>{' '}
+                    {formatUTCDate(upcomingData?.date?.date, 'D MMMM, YYYY, H:mm')}
+                </p>
+                <p>
+                    <strong>{t('pages.entry.participants', 'Участники')}:</strong> {t('pages.entry.adults', 'Взрослых')}{' '}
+                    {upcomingData?.members?.adults}, {t('pages.entry.children', 'детей')}{' '}
+                    {upcomingData?.members?.children}
+                </p>
+                <p>
+                    <i>{t('pages.entry.show-qr', 'Покажите этот QR-код на входе')}</i>
+                </p>
+                <div className={styles.qrcode}>
+                    <QRCode
+                        size={340}
+                        value={upcomingData?.bookedId || ''}
+                    />
+                </div>
+                <button
+                    className={styles.printButton}
+                    onClick={() => window.print()}
+                >
+                    {t('pages.entry.print-ticket', 'Распечатать билет')}
+                </button>
             </div>
-            <button
-                className={styles.printButton}
-                onClick={() => window.print()}
-            >
-                {t('pages.entry.print-ticket', 'Распечатать билет')}
-            </button>
-        </div>
+        </>
     )
 }
 

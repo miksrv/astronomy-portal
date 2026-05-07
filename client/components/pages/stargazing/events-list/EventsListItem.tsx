@@ -4,7 +4,7 @@ import { Container, Icon } from 'simple-react-ui-kit'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { ApiModel } from '@/api'
+import { ApiModel, useAppSelector } from '@/api'
 import { hosts } from '@/api/constants'
 import { formatDate } from '@/utils/dates'
 
@@ -14,52 +14,68 @@ interface EventsListItemProps {
     event: ApiModel.Event
 }
 
-export const EventsListItem: React.FC<EventsListItemProps> = ({ event }) => (
-    <Container className={styles.eventListItem}>
-        <div className={styles.photoSection}>
-            <Link
-                href={`/stargazing/${event.id}`}
-                title={`Астровыезд - ${event.title}`}
-            >
-                {event.coverFileName && (
-                    <Image
-                        className={styles.photo}
-                        alt={`Астровыезд - ${event.title}`}
-                        quality={70}
-                        height={240}
-                        width={370}
-                        src={`${hosts.stargazing}${event.id}/${event.coverFileName}_preview.${event.coverFileExt}`}
-                    />
-                )}
-            </Link>
-        </div>
+export const EventsListItem: React.FC<EventsListItemProps> = ({ event }) => {
+    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
-        <div className={styles.bottomPanel}>
-            <h3 className={styles.title}>
+    const canViewStatistic = userRole === ApiModel.UserRole.ADMIN || userRole === ApiModel.UserRole.MODERATOR
+
+    return (
+        <Container className={styles.eventListItem}>
+            <div className={styles.photoSection}>
                 <Link
                     href={`/stargazing/${event.id}`}
                     title={`Астровыезд - ${event.title}`}
                 >
-                    {event.title}
+                    {event.coverFileName && (
+                        <Image
+                            className={styles.photo}
+                            alt={`Астровыезд - ${event.title}`}
+                            quality={70}
+                            height={240}
+                            width={370}
+                            src={`${hosts.stargazing}${event.id}/${event.coverFileName}_preview.${event.coverFileExt}`}
+                        />
+                    )}
                 </Link>
-            </h3>
+            </div>
 
-            <div className={styles.toolbar}>
-                <div>
-                    <Icon name={'Time'} />
-                    {formatDate(event?.date?.date, 'D MMMM YYYY')}
-                </div>
+            <div className={styles.bottomPanel}>
+                <h3 className={styles.title}>
+                    <Link
+                        href={`/stargazing/${event.id}`}
+                        title={`Астровыезд - ${event.title}`}
+                    >
+                        {event.title}
+                    </Link>
+                </h3>
 
-                <div>
-                    <Icon name={'Eye'} />
-                    {event?.views}
-                </div>
+                <div className={styles.toolbar}>
+                    <div>
+                        <Icon name={'Time'} />
+                        {formatDate(event?.date?.date, 'D MMMM YYYY')}
+                    </div>
 
-                <div>
-                    <Icon name={'Users'} />
-                    {event?.members?.total || event?.availableTickets}
+                    <div>
+                        <Icon name={'Eye'} />
+                        {event?.views}
+                    </div>
+
+                    {canViewStatistic ? (
+                        <Link
+                            className={styles.membersLink}
+                            href={`/stargazing/${event.id}/statistic`}
+                        >
+                            <Icon name={'Users'} />
+                            {event?.members?.total || event?.availableTickets}
+                        </Link>
+                    ) : (
+                        <div>
+                            <Icon name={'Users'} />
+                            {event?.members?.total || event?.availableTickets}
+                        </div>
+                    )}
                 </div>
             </div>
-        </div>
-    </Container>
-)
+        </Container>
+    )
+}

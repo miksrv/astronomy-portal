@@ -70,3 +70,26 @@ export interface ResUpdateCover {
     coverFileName: string
     coverFileExt: string
 }
+
+/* Statistic */
+export interface ResEventStatistic {
+    totalRegistrations: number
+    totalAdults: number
+    totalChildren: number
+    totalParticipants: number
+    checkinCount: number
+    averageAge: number | null
+    genderStats: {
+        male: number
+        female: number
+        unknown: number
+    }
+    ageGroups: Array<{
+        group: 'under18' | '18to25' | '26to35' | '36to50' | 'over50'
+        count: number
+    }>
+    registrationTimeline: Array<{
+        datetime: string // 'YYYY-MM-DD HH:MM:SS'
+        cumulative: number
+    }>
+}
