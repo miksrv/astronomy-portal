@@ -24,6 +24,8 @@ const StargazingStatisticPage: NextPage<StargazingStatisticPageProps> = ({ event
         <AppLayout
             canonical={`stargazing/${eventId}/statistic`}
             title={title}
+            noindex={true}
+            nofollow={true}
         >
             <AppToolbar
                 title={title}

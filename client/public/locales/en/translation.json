@@ -474,6 +474,7 @@
             "continue-scanning": "Continue Scanning"
         },
         "entry": {
+            "title": "Event Ticket",
             "ticket-title": "This is your event ticket",
             "date-time": "Date and Time",
             "participants": "Participants",

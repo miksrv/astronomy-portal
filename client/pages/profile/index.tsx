@@ -22,7 +22,11 @@ const ProfilePage: NextPage<ProfilePageProps> = () => {
     const upcomingEvent = upcomingEventData?.item
 
     return (
-        <AppLayout title={t('pages.profile.title', 'Личный кабинет')}>
+        <AppLayout
+            title={t('pages.profile.title', 'Личный кабинет')}
+            noindex={true}
+            nofollow={true}
+        >
             <AppToolbar title={t('pages.profile.title', 'Личный кабинет')} />
 
             {user && <ProfileCard user={user} />}
