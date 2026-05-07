@@ -5,6 +5,7 @@ import ReactECharts from 'echarts-for-react'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
+import { CHART_COLORS, getBaseChartConfig } from '@/utils/charts'
 import { getSensorColor } from '@/utils/colors'
 import { formatDateFromUnixUTC } from '@/utils/dates'
 import { round } from '@/utils/helpers'
@@ -24,35 +25,8 @@ interface ChartProps {
 export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) => {
     const { t } = useTranslation()
 
-    const backgroundColor = '#2c2d2e' // --container-background-color
-    const borderColor = '#444546' // --input-border-color
-    const textPrimaryColor = '#e1e3e6' // --text-color-primary
-    const textSecondaryColor = '#76787a' // --text-color-secondary
-
     const baseConfig: EChartsOption = {
-        backgroundColor,
-        grid: {
-            left: 10,
-            right: 10,
-            top: 15,
-            bottom: 25,
-            containLabel: true,
-            borderColor: borderColor
-        },
-        legend: {
-            type: 'plain',
-            orient: 'horizontal', // Горизонтальное расположение легенды
-            left: 5, // Выравнивание по левому краю
-            bottom: 0, // Размещение легенды под графиком
-            itemWidth: 20, // Ширина значка линии в легенде
-            itemHeight: 2, // Высота значка линии в легенде (делает линию тоньше)
-            textStyle: {
-                // fontFamily: '-apple-system, system-ui, \'Helvetica Neue\', Roboto, sans-serif',
-                color: textPrimaryColor, // Цвет текста легенды
-                fontSize: '12px'
-            },
-            icon: 'rect' // Используем короткую линию в качестве значка
-        },
+        ...getBaseChartConfig(),
         tooltip: {
             trigger: 'axis',
             axisPointer: {
@@ -73,8 +47,8 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
                     }
                 }
             },
-            backgroundColor,
-            borderColor,
+            backgroundColor: CHART_COLORS.background,
+            borderColor: CHART_COLORS.border,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             formatter: (params: any) => {
                 // An array of strings that will be concatenated and returned as the contents of the tooltip
@@ -110,7 +84,7 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
             axisLabel: {
                 show: true,
                 hideOverlap: true,
-                color: textSecondaryColor, // Color of X-axis labels
+                color: CHART_COLORS.textSecondary,
                 fontSize: '11px',
                 formatter: (value: number) =>
                     formatDateFromUnixUTC(
@@ -124,14 +98,14 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
             axisLine: {
                 show: true,
                 lineStyle: {
-                    color: borderColor // X axis color
+                    color: CHART_COLORS.border
                 }
             },
             splitLine: {
                 show: true,
                 lineStyle: {
                     width: 1,
-                    color: borderColor // Grid line color
+                    color: CHART_COLORS.border
                 }
             }
         },
@@ -144,31 +118,23 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
             axisLine: {
                 show: true,
                 lineStyle: {
-                    color: borderColor // Y axis color
+                    color: CHART_COLORS.border
                 }
             },
             axisLabel: {
                 show: true,
                 formatter: '{value}%',
-                color: textSecondaryColor, // Color of Y axis labels
+                color: CHART_COLORS.textSecondary,
                 fontSize: '11px'
             },
             splitLine: {
                 show: true,
                 lineStyle: {
                     width: 1,
-                    color: borderColor // Grid line color
+                    color: CHART_COLORS.border
                 }
             }
-        },
-        series: [
-            {
-                type: 'line',
-                showSymbol: false,
-                smooth: false,
-                connectNulls: true
-            }
-        ]
+        }
     }
 
     const getChartLineConfig = (source: keyof ApiModel.Weather, name?: string, axis?: number, area?: boolean) => ({
