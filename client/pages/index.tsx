@@ -66,6 +66,7 @@ const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
     return (
         <AppLayout
             fullWidth={true}
+            canonical={''}
             title={t('pages.index.title', 'Проект "Смотри на звёзды"')}
             description={t(
                 'pages.index.description',

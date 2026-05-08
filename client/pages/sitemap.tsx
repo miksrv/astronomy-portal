@@ -62,6 +62,10 @@ export const getServerSideProps = wrapper.getServerSideProps(
             </url>
           `
 
+            // Homepage
+            sitemap += makeUrlNode('', new Date('2025-01-01').toISOString(), 'monthly', '1.0')
+            sitemap += makeUrlNode('en/', new Date('2025-01-01').toISOString(), 'monthly', '1.0')
+
             // Static RU Locale
             sitemap += staticPages.map((url) => makeUrlNode(url, new Date().toISOString(), 'monthly', '0.8')).join('')
 

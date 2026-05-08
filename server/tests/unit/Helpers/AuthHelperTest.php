@@ -68,4 +68,38 @@ final class AuthHelperTest extends CIUnitTestCase
         $parts = explode('.', $token);
         $this->assertCount(3, $parts, 'JWT should have exactly 3 dot-separated parts');
     }
+
+    public function testGenerateAuthTokenDifferentEmailsProduceDifferentTokens(): void
+    {
+        $token1 = generateAuthToken('alice@example.com');
+        $token2 = generateAuthToken('bob@example.com');
+        $this->assertNotSame($token1, $token2);
+    }
+
+    // --- validateAuthToken() tests ---
+
+    public function testValidateAuthTokenWithNullReturnsNull(): void
+    {
+        $result = validateAuthToken(null);
+        $this->assertNull($result);
+    }
+
+    public function testValidateAuthTokenWithEmptyStringReturnsNull(): void
+    {
+        $result = validateAuthToken('');
+        $this->assertNull($result);
+    }
+
+    public function testValidateAuthTokenWithInvalidTokenReturnsNull(): void
+    {
+        // JWT::decode throws for a malformed token; the helper catches \Throwable
+        $result = validateAuthToken('this.is.notvalid');
+        $this->assertNull($result);
+    }
+
+    public function testValidateAuthTokenWithArbitraryStringReturnsNull(): void
+    {
+        $result = validateAuthToken('not-a-jwt-at-all');
+        $this->assertNull($result);
+    }
 }

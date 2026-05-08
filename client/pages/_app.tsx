@@ -8,7 +8,7 @@ import { useRouter } from 'next/router'
 import Script from 'next/script'
 import { appWithTranslation, useTranslation } from 'next-i18next/pages'
 
-import { wrapper } from '@/api'
+import { SITE_LINK, wrapper } from '@/api'
 import { LOCAL_STORAGE } from '@/utils/constants'
 import * as LocalStorage from '@/utils/localstorage'
 
@@ -108,6 +108,19 @@ const App = ({ Component, pageProps }: AppProps) => {
                 <link
                     rel={'manifest'}
                     href={'/site.webmanifest'}
+                />
+                <script
+                    type={'application/ld+json'}
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify({
+                            '@context': 'https://schema.org',
+                            '@type': 'Organization',
+                            name: 'Смотри на звёзды',
+                            url: SITE_LINK?.replace(/\/$/, ''),
+                            logo: `${SITE_LINK}android-chrome-192x192.png`,
+                            sameAs: ['https://t.me/look_at_stars']
+                        })
+                    }}
                 />
             </Head>
 

@@ -110,4 +110,62 @@ final class ApplicationBaseModelTest extends CIUnitTestCase
 
         $reflection->setValue($this->model, []);
     }
+
+    public function testPrepareOutputHidesSpecifiedFieldFromFirstResult(): void
+    {
+        $reflection = new ReflectionProperty($this->model, 'hiddenFields');
+        $reflection->setAccessible(true);
+        $reflection->setValue($this->model, ['token']);
+
+        $data = [
+            'method' => 'first',
+            'data'   => ['email' => 'user@example.com', 'token' => 'secret-token'],
+        ];
+
+        $result = $this->model->prepareOutput($data);
+        $this->assertArrayNotHasKey('token', $result['data']);
+        $this->assertArrayHasKey('email', $result['data']);
+
+        $reflection->setValue($this->model, []);
+    }
+
+    public function testPrepareOutputHidesMultipleFieldsFromFindAllResult(): void
+    {
+        $reflection = new ReflectionProperty($this->model, 'hiddenFields');
+        $reflection->setAccessible(true);
+        $reflection->setValue($this->model, ['password', 'token']);
+
+        $data = [
+            'method' => 'findAll',
+            'data'   => [
+                ['name' => 'Alice', 'password' => 'hash1', 'token' => 'tkn1'],
+                ['name' => 'Bob',   'password' => 'hash2', 'token' => 'tkn2'],
+            ],
+        ];
+
+        $result = $this->model->prepareOutput($data);
+
+        foreach ($result['data'] as $row) {
+            $this->assertArrayNotHasKey('password', $row);
+            $this->assertArrayNotHasKey('token', $row);
+            $this->assertArrayHasKey('name', $row);
+        }
+
+        $reflection->setValue($this->model, []);
+    }
+
+    public function testGenerateIdProducesUniqueIdsOnRepeatedCalls(): void
+    {
+        $result1 = $this->generateIdMethod->invoke($this->model, ['data' => []]);
+        $result2 = $this->generateIdMethod->invoke($this->model, ['data' => []]);
+
+        $this->assertNotSame($result1['data']['id'], $result2['data']['id']);
+    }
+
+    public function testGenerateIdOverwritesExistingIdInData(): void
+    {
+        $result = $this->generateIdMethod->invoke($this->model, ['data' => ['id' => 'old-id', 'name' => 'test']]);
+        $this->assertNotSame('old-id', $result['data']['id']);
+        $this->assertSame('test', $result['data']['name']);
+    }
 }

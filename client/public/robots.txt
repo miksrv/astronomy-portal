@@ -13,6 +13,20 @@ Disallow: /mailing
 Disallow: /mailing/form
 Disallow: /users
 Disallow: /api/
+Disallow: /en/photos/form
+Disallow: /en/objects/form
+Disallow: /en/stargazing/form
+Disallow: /en/stargazing/checkin
+Disallow: /en/stargazing/entry
+Disallow: /en/mailing
+Disallow: /en/mailing/form
+Disallow: /en/users
+Disallow: /profile
+Disallow: /en/profile
+Disallow: /unsubscribe
+Disallow: /en/unsubscribe
+Disallow: /stargazing/*/statistic
+Disallow: /en/stargazing/*/statistic
 
 # Specify the main mirror of the site
 Host: https://astro.miksoft.pro
