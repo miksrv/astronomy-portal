@@ -3,12 +3,13 @@ import { getCookie } from 'cookies-next'
 import { Button, Container, Icon } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
+import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
@@ -44,6 +45,37 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     const PHOTOS_PREVIEW_LIMIT = 12
 
     const title = `${t('menu.stargazing', 'Астровыезды')} - ${event?.title}`
+
+    const eventJsonLd = event
+        ? {
+              '@context': 'https://schema.org',
+              '@type': 'Event',
+              name: event.title,
+              description: sliceText(removeMarkdown(event.content ?? ''), 300),
+              startDate: event.date?.date,
+              eventStatus: 'https://schema.org/EventScheduled',
+              eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+              location: {
+                  '@type': 'Place',
+                  name: event.location ?? 'Оренбургская область',
+                  address: {
+                      '@type': 'PostalAddress',
+                      addressLocality: 'Оренбург',
+                      addressCountry: 'RU'
+                  }
+              },
+              organizer: {
+                  '@type': 'Organization',
+                  name: 'Смотри на звёзды',
+                  url: SITE_LINK?.replace(/\/$/, '')
+              },
+              image:
+                  event.coverFileName && event.coverFileExt
+                      ? `${hosts.stargazing}${event.id}/${event.coverFileName}_preview.${event.coverFileExt}`
+                      : undefined,
+              url: `${SITE_LINK}stargazing/${event.id}`
+          }
+        : null
 
     const adjacentEvents = useMemo(() => {
         const sortedEvents = [...(eventsList || [])].sort((a, b) => {
@@ -90,171 +122,182 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     }, [photos])
 
     return (
-        <AppLayout
-            canonical={`stargazing/${event?.id}`}
-            title={title}
-            description={sliceText(removeMarkdown(event?.content || ''), 300)}
-            openGraph={{
-                images: [
-                    {
-                        height: 400,
-                        url: `${hosts.stargazing}${event?.id}/${event?.coverFileName}_preview.${event?.coverFileExt}`,
-                        width: 500
-                    }
-                ]
-            }}
-        >
-            <AppToolbar
+        <>
+            {eventJsonLd && (
+                <Head>
+                    <script
+                        type={'application/ld+json'}
+                        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
+                    />
+                </Head>
+            )}
+            <AppLayout
+                canonical={`stargazing/${event?.id}`}
                 title={title}
-                currentPage={event?.title}
-                links={[
-                    {
-                        link: '/stargazing',
-                        text: t('menu.stargazing', 'Астровыезды')
-                    }
-                ]}
+                description={sliceText(removeMarkdown(event?.content || ''), 300)}
+                openGraph={{
+                    images: [
+                        {
+                            height: 400,
+                            url: `${hosts.stargazing}${event?.id}/${event?.coverFileName}_preview.${event?.coverFileExt}`,
+                            width: 500
+                        }
+                    ]
+                }}
             >
-                {(userRole === ApiModel.UserRole.ADMIN || userRole === ApiModel.UserRole.MODERATOR) && (
-                    <>
-                        {userRole === ApiModel.UserRole.ADMIN && (
-                            <>
-                                <Button
-                                    disabled={!!uploadingPhotos?.length}
-                                    icon={'Download'}
-                                    mode={'secondary'}
-                                    onClick={handleUploadPhotoClick}
-                                >
-                                    {!uploadingPhotos?.length
-                                        ? 'Загрузить фотографии'
-                                        : `Загрузка ${uploadingPhotos?.length} фото`}
-                                </Button>
+                <AppToolbar
+                    title={title}
+                    currentPage={event?.title}
+                    links={[
+                        {
+                            link: '/stargazing',
+                            text: t('menu.stargazing', 'Астровыезды')
+                        }
+                    ]}
+                >
+                    {(userRole === ApiModel.UserRole.ADMIN || userRole === ApiModel.UserRole.MODERATOR) && (
+                        <>
+                            {userRole === ApiModel.UserRole.ADMIN && (
+                                <>
+                                    <Button
+                                        disabled={!!uploadingPhotos?.length}
+                                        icon={'Download'}
+                                        mode={'secondary'}
+                                        onClick={handleUploadPhotoClick}
+                                    >
+                                        {!uploadingPhotos?.length
+                                            ? 'Загрузить фотографии'
+                                            : `Загрузка ${uploadingPhotos?.length} фото`}
+                                    </Button>
 
-                                <Button
-                                    icon={'Pencil'}
-                                    mode={'secondary'}
-                                    label={t('common.edit', 'Редактировать')}
-                                    disabled={!eventId}
-                                    onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
-                                />
-                            </>
-                        )}
+                                    <Button
+                                        icon={'Pencil'}
+                                        mode={'secondary'}
+                                        label={t('common.edit', 'Редактировать')}
+                                        disabled={!eventId}
+                                        onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
+                                    />
+                                </>
+                            )}
 
-                        <Button
-                            icon={'BarChart'}
-                            mode={'secondary'}
-                            onClick={() => router.push(`/stargazing/${eventId}/statistic`)}
-                        />
-                    </>
-                )}
-            </AppToolbar>
+                            <Button
+                                icon={'BarChart'}
+                                mode={'secondary'}
+                                onClick={() => router.push(`/stargazing/${eventId}/statistic`)}
+                            />
+                        </>
+                    )}
+                </AppToolbar>
 
-            <EventItemData
-                title={title}
-                event={event || undefined}
-            />
+                <EventItemData
+                    title={title}
+                    event={event || undefined}
+                />
 
-            <h2>{`${event?.title} - ${t('pages.stargazing.photos-from-stargazing', 'Фотографии с астровыезда')}`}</h2>
+                <h2>{`${event?.title} - ${t('pages.stargazing.photos-from-stargazing', 'Фотографии с астровыезда')}`}</h2>
 
-            <Container>
-                {localPhotos?.length > 0 ? (
-                    <>
-                        <PhotoGallery
-                            photos={(isPhotosExpanded ? localPhotos : localPhotos.slice(0, PHOTOS_PREVIEW_LIMIT)).map(
-                                (photo, index) => ({
+                <Container>
+                    {localPhotos?.length > 0 ? (
+                        <>
+                            <PhotoGallery
+                                photos={(isPhotosExpanded
+                                    ? localPhotos
+                                    : localPhotos.slice(0, PHOTOS_PREVIEW_LIMIT)
+                                ).map((photo, index) => ({
                                     height: photo.height,
                                     src: createPreviewPhotoUrl(photo),
                                     width: photo.width,
                                     alt: `${photo?.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
-                                })
+                                }))}
+                                onClick={({ index }) => {
+                                    handlePhotoClick(index)
+                                }}
+                            />
+
+                            {localPhotos.length > PHOTOS_PREVIEW_LIMIT && (
+                                <Button
+                                    mode={'secondary'}
+                                    className={styles.showMorePhotos}
+                                    onClick={() => setIsPhotosExpanded(!isPhotosExpanded)}
+                                >
+                                    {isPhotosExpanded
+                                        ? t('pages.stargazing.photos-show-less', 'Показать меньше фотографий')
+                                        : t('pages.stargazing.photos-show-all', 'Показать все {{count}} фотографий', {
+                                              count: localPhotos.length
+                                          })}
+                                </Button>
                             )}
-                            onClick={({ index }) => {
-                                handlePhotoClick(index)
-                            }}
-                        />
+                        </>
+                    ) : (
+                        <p className={styles.noPhotos}>
+                            {t(
+                                'pages.stargazing.no-photos',
+                                'Фотографии с этого события ещё не загружены. Загляните позже!'
+                            )}
+                        </p>
+                    )}
 
-                        {localPhotos.length > PHOTOS_PREVIEW_LIMIT && (
-                            <Button
-                                mode={'secondary'}
-                                className={styles.showMorePhotos}
-                                onClick={() => setIsPhotosExpanded(!isPhotosExpanded)}
-                            >
-                                {isPhotosExpanded
-                                    ? t('pages.stargazing.photos-show-less', 'Показать меньше фотографий')
-                                    : t('pages.stargazing.photos-show-all', 'Показать все {{count}} фотографий', {
-                                          count: localPhotos.length
-                                      })}
-                            </Button>
-                        )}
-                    </>
-                ) : (
-                    <p className={styles.noPhotos}>
-                        {t(
-                            'pages.stargazing.no-photos',
-                            'Фотографии с этого события ещё не загружены. Загляните позже!'
-                        )}
-                    </p>
-                )}
+                    <EventPhotoUploader
+                        eventId={eventId}
+                        fileInputRef={inputFileRef}
+                        onSelectFiles={setUploadingPhotos}
+                        onUploadPhoto={(photo) => {
+                            setLocalPhotos([...localPhotos, photo])
+                        }}
+                    />
+                </Container>
 
-                <EventPhotoUploader
-                    eventId={eventId}
-                    fileInputRef={inputFileRef}
-                    onSelectFiles={setUploadingPhotos}
-                    onUploadPhoto={(photo) => {
-                        setLocalPhotos([...localPhotos, photo])
-                    }}
+                <PhotoLightbox
+                    photos={localPhotos?.map((photo, index) => ({
+                        height: photo.height,
+                        src: createFullPhotoUrl(photo),
+                        width: photo.width,
+                        title: `${photo.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
+                    }))}
+                    photoIndex={photoIndex}
+                    showLightbox={showLightbox}
+                    onCloseLightBox={handleCloseLightbox}
                 />
-            </Container>
 
-            <PhotoLightbox
-                photos={localPhotos?.map((photo, index) => ({
-                    height: photo.height,
-                    src: createFullPhotoUrl(photo),
-                    width: photo.width,
-                    title: `${photo.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
-                }))}
-                photoIndex={photoIndex}
-                showLightbox={showLightbox}
-                onCloseLightBox={handleCloseLightbox}
-            />
+                <h2>{t('pages.stargazing.reviews', 'Отзывы')}</h2>
 
-            <h2>{t('pages.stargazing.reviews', 'Отзывы')}</h2>
+                <EventReviews eventId={eventId} />
 
-            <EventReviews eventId={eventId} />
-
-            <section className={styles.footerLinks}>
-                {adjacentEvents?.previousEvent && (
-                    <Link
-                        href={`/stargazing/${adjacentEvents?.previousEvent?.id}`}
-                        title={adjacentEvents?.previousEvent?.title}
-                    >
-                        <Icon name={'KeyboardLeft'} />
-                        <div className={styles.linkName}>
-                            <div>{adjacentEvents?.previousEvent?.title}</div>
-                            <div className={styles.date}>
-                                {formatDate(adjacentEvents?.previousEvent?.date?.date, 'D MMMM YYYY')}
+                <section className={styles.footerLinks}>
+                    {adjacentEvents?.previousEvent && (
+                        <Link
+                            href={`/stargazing/${adjacentEvents?.previousEvent?.id}`}
+                            title={adjacentEvents?.previousEvent?.title}
+                        >
+                            <Icon name={'KeyboardLeft'} />
+                            <div className={styles.linkName}>
+                                <div>{adjacentEvents?.previousEvent?.title}</div>
+                                <div className={styles.date}>
+                                    {formatDate(adjacentEvents?.previousEvent?.date?.date, 'D MMMM YYYY')}
+                                </div>
                             </div>
-                        </div>
-                    </Link>
-                )}
+                        </Link>
+                    )}
 
-                {adjacentEvents?.nextEvent && (
-                    <Link
-                        href={`/stargazing/${adjacentEvents?.nextEvent?.id}`}
-                        title={adjacentEvents?.nextEvent?.title}
-                    >
-                        <div className={styles.linkName}>
-                            <div>{adjacentEvents?.nextEvent?.title}</div>
-                            <div className={styles.date}>
-                                {formatDate(adjacentEvents?.nextEvent?.date?.date, 'D MMMM YYYY')}
+                    {adjacentEvents?.nextEvent && (
+                        <Link
+                            href={`/stargazing/${adjacentEvents?.nextEvent?.id}`}
+                            title={adjacentEvents?.nextEvent?.title}
+                        >
+                            <div className={styles.linkName}>
+                                <div>{adjacentEvents?.nextEvent?.title}</div>
+                                <div className={styles.date}>
+                                    {formatDate(adjacentEvents?.nextEvent?.date?.date, 'D MMMM YYYY')}
+                                </div>
                             </div>
-                        </div>
-                        <Icon name={'KeyboardRight'} />
-                    </Link>
-                )}
-            </section>
+                            <Icon name={'KeyboardRight'} />
+                        </Link>
+                    )}
+                </section>
 
-            <AppFooter />
-        </AppLayout>
+                <AppFooter />
+            </AppLayout>
+        </>
     )
 }
 
