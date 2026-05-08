@@ -31,6 +31,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children, ...pr
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
 
     const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
+    const pageUrl = canonicalUrl + (props?.canonical ?? '')
 
     const handleCloseOverlay = () => {
         setSidebarOpen(false)
@@ -61,11 +62,25 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children, ...pr
             <Head>
                 {generateNextSeo({
                     ...props,
-                    canonical: props?.canonical ? `${canonicalUrl}${props.canonical}` : undefined,
+                    canonical: props?.canonical !== undefined ? pageUrl : undefined,
+                    languageAlternates:
+                        props?.canonical !== undefined
+                            ? [
+                                  { hrefLang: 'ru', href: `${SITE_LINK}${props.canonical ?? ''}` },
+                                  { hrefLang: 'en', href: `${SITE_LINK}en/${props.canonical ?? ''}` },
+                                  { hrefLang: 'x-default', href: `${SITE_LINK}${props.canonical ?? ''}` }
+                              ]
+                            : undefined,
                     openGraph: {
+                        url: props?.canonical !== undefined ? pageUrl : undefined,
+                        type: 'website',
                         images: props?.openGraph?.images,
                         siteName: t('common.look-at-the-stars', 'Смотри на звёзды'),
                         locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
+                    },
+                    twitter: {
+                        cardType: 'summary_large_image',
+                        ...props?.twitter
                     }
                 })}
             </Head>
