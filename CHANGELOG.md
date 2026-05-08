@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 4.5.5
+
+### Patch Changes
+
+- Enhanced SEO metadata in `AppLayout`: canonical URL is now computed from `SITE_LINK` + path and honored even when set to an empty string; added `languageAlternates` (ru, en, x-default) when a canonical is present; set Open Graph type to `"website"` and default Twitter card to `"summary_large_image"`
+- Added `BreadcrumbList` JSON-LD structured data to `AppToolbar`: breadcrumb URLs are built with locale prefix (`en/` for English), home title is translated, and the schema is injected into `<Head>` via `dangerouslySetInnerHTML`
+- Added `Organization` JSON-LD structured data in `_app.tsx` (name, URL, logo, sameAs links); added canonical prop to the homepage; added homepage URL nodes (`''` and `en/`) to the sitemap with monthly cadence; extended `robots.txt` with Disallow rules for English routes, profile/unsubscribe pages, and stargazing statistic paths
+- Added schema.org `Event` JSON-LD to stargazing event detail pages (`/stargazing/[name]`): includes name, description, startDate, location, organizer, image, and URL; injected via `next/head` when event data is available
+- Added schema.org `FAQPage` JSON-LD to the stargazing FAQ page (`/stargazing/faq`): built from localized translation strings and injected via `next/head`
+- Extended `AuthGuardTest` with additional 401 checks covering photos (`PATCH`/`DELETE`), events (`POST`/`PATCH`/`DELETE`), comments (`POST`/`DELETE`), members endpoints, and mailings (`POST`/`DELETE`)
+- Added `CategoryEntityTest` and `EventPhotoEntityTest`: verify attribute casting, default values, datamap aliases, and that `created_at`/`updated_at`/`deleted_at` are included in the dates list
+- Added `MailingEmailEntityTest`, `ObjectEntityTest`, and `ObjectFitsFileEntityTest`: cover constant values, default attributes, type casting, date field inclusion, and datamap aliases
+- Added `PhotoEntityTest`, `ObservatoryEquipmentEntityTest`, and `ObjectFitsFiltersEntityTest`: verify int/float/string casts, default values for new instances, and datamap alias behavior
+- Expanded `AuthHelperTest` with edge-case coverage: `generateAuthToken` produces different tokens for different emails; `validateAuthToken` returns `null` for `null`, empty, malformed, or arbitrary non-JWT strings
+- Extended `ApplicationBaseModelTest` with tests for `prepareOutput` field-hiding (`first`/`findAll`) and `generateId` uniqueness and overwrite behavior; added `CommentsModelTest` (reflection-based, no DB) covering private helpers `truncateAuthorName` (empty, whitespace, single/multi-word, Cyrillic, initials) and `formatRows` (camelCase mapping, author object, avatar URL, raw DB field removal, `keepEntity` flag, multi-row formatting)
+
 ## 4.5.4
 
 ### Patch Changes
