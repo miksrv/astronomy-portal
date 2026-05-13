@@ -209,6 +209,70 @@ class EventsUsersModel extends ApplicationBaseModel
     }
 
     /**
+     * Returns users with valid emails registered for an event, for use as mailing recipients.
+     *
+     * @param string $eventId
+     * @return array Rows with id, email, locale.
+     */
+    public function getMailingRecipientsByEventId(string $eventId): array
+    {
+        return $this->db->table('events_users eu')
+            ->select('DISTINCT u.id, u.email, COALESCE(u.locale, \'ru\') as locale', false)
+            ->join('users u', 'eu.user_id = u.id')
+            ->where('eu.event_id', $eventId)
+            ->where('eu.deleted_at IS NULL')
+            ->where('u.email IS NOT NULL')
+            ->where("u.email != ''")
+            ->where('u.deleted_at IS NULL')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Returns event title and count of registered users with valid emails for a specific event.
+     *
+     * @param string $eventId
+     * @return array|null Row with title_ru, title_en, user_count or null if not found.
+     */
+    public function getMailingAudienceByEventId(string $eventId): ?array
+    {
+        return $this->db->table('events e')
+            ->select('e.title_ru, e.title_en, COUNT(DISTINCT eu.user_id) as user_count')
+            ->join('events_users eu', 'eu.event_id = e.id')
+            ->join('users u', 'eu.user_id = u.id')
+            ->where('e.id', $eventId)
+            ->where('eu.deleted_at IS NULL')
+            ->where('u.email IS NOT NULL')
+            ->where("u.email != ''")
+            ->where('u.deleted_at IS NULL')
+            ->get()
+            ->getRowArray() ?: null;
+    }
+
+    /**
+     * Returns all events with at least one registered user with a valid email,
+     * ordered newest first; used for mailing audience selection.
+     *
+     * @return array Rows with event_id, title_ru, title_en, user_count.
+     */
+    public function getMailingAudienceEvents(): array
+    {
+        return $this->db->table('events e')
+            ->select('e.id as event_id, e.title_ru, e.title_en, COUNT(DISTINCT eu.user_id) as user_count')
+            ->join('events_users eu', 'eu.event_id = e.id')
+            ->join('users u', 'eu.user_id = u.id')
+            ->where('eu.deleted_at IS NULL')
+            ->where('u.email IS NOT NULL')
+            ->where("u.email != ''")
+            ->where('u.deleted_at IS NULL')
+            ->groupBy('e.id')
+            ->having('user_count >', 0)
+            ->orderBy('e.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
      * Returns the next upcoming event that the given user is registered for.
      *
      * @param string $userId The user's ID.

@@ -6,6 +6,7 @@ use App\Entities\MailingEntity;
 use App\Libraries\EmailLibrary;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
+use App\Models\EventsUsersModel;
 use App\Models\MailingEmailsModel;
 use App\Models\MailingsModel;
 use App\Models\MailingUnsubscribesModel;
@@ -109,20 +110,9 @@ class Mailings extends ResourceController
             $audienceLabelEn   = 'All Users';
             $audienceCount     = 0;
 
-            $db = \Config\Database::connect();
-
             if ($audienceType === 'event' && !empty($audienceEventId)) {
-                $row = $db->table('events e')
-                    ->select('e.title_ru, e.title_en, COUNT(DISTINCT eu.user_id) as user_count')
-                    ->join('events_users eu', 'eu.event_id = e.id')
-                    ->join('users u', 'eu.user_id = u.id')
-                    ->where('e.id', $audienceEventId)
-                    ->where('eu.deleted_at IS NULL')
-                    ->where('u.email IS NOT NULL')
-                    ->where("u.email != ''")
-                    ->where('u.deleted_at IS NULL')
-                    ->get()
-                    ->getRowArray();
+                $eventsUsersModel = new EventsUsersModel();
+                $row              = $eventsUsersModel->getMailingAudienceByEventId($audienceEventId);
 
                 if ($row) {
                     $audienceLabelRu = $row['title_ru'] ?? $row['title_en'] ?? '';
@@ -508,17 +498,8 @@ class Mailings extends ResourceController
             $audienceType = $mailing->audience_type ?? 'all';
 
             if ($audienceType === 'event' && !empty($mailing->audience_event_id)) {
-                $db    = \Config\Database::connect();
-                $users = $db->table('events_users eu')
-                    ->select('DISTINCT u.id, u.email, COALESCE(u.locale, \'ru\') as locale', false)
-                    ->join('users u', 'eu.user_id = u.id')
-                    ->where('eu.event_id', $mailing->audience_event_id)
-                    ->where('eu.deleted_at IS NULL')
-                    ->where('u.email IS NOT NULL')
-                    ->where("u.email != ''")
-                    ->where('u.deleted_at IS NULL')
-                    ->get()
-                    ->getResultArray();
+                $eventsUsersModel = new EventsUsersModel();
+                $users            = $eventsUsersModel->getMailingRecipientsByEventId($mailing->audience_event_id);
             } else {
                 $users = $usersModel->getNewsletterSubscribers();
             }
@@ -582,8 +563,6 @@ class Mailings extends ResourceController
         }
 
         try {
-            $db = \Config\Database::connect();
-
             // "All users" option — count newsletter subscribers
             $usersModel      = new UsersModel();
             $subscriberCount = count($usersModel->getNewsletterSubscribers());
@@ -599,19 +578,8 @@ class Mailings extends ResourceController
             ];
 
             // Per-event options — only events with at least 1 registered user with a valid email
-            $eventRows = $db->table('events e')
-                ->select('e.id as event_id, e.title_ru, e.title_en, COUNT(DISTINCT eu.user_id) as user_count')
-                ->join('events_users eu', 'eu.event_id = e.id')
-                ->join('users u', 'eu.user_id = u.id')
-                ->where('eu.deleted_at IS NULL')
-                ->where('u.email IS NOT NULL')
-                ->where("u.email != ''")
-                ->where('u.deleted_at IS NULL')
-                ->groupBy('e.id')
-                ->having('user_count >', 0)
-                ->orderBy('e.created_at', 'DESC')
-                ->get()
-                ->getResultArray();
+            $eventsUsersModel = new EventsUsersModel();
+            $eventRows        = $eventsUsersModel->getMailingAudienceEvents();
 
             foreach ($eventRows as $row) {
                 $items[] = [
