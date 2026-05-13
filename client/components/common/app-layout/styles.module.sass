@@ -7,15 +7,18 @@
     .mainContainer
         max-width: var(--width-max)
         margin: calc(var(--header-height) + var(--container-margin-top)) auto 0
-        padding: 0 10px
+        padding: 0 16px
         display: flex
         flex-direction: column
-        gap: 10px
+        gap: 16px
 
         &.fullWidth
             max-width: 100%
             padding: 0
             margin-top: var(--header-height)
+
+        &.noTopMargin
+            margin-top: 0
 
     .overlay
         position: fixed
@@ -78,7 +81,7 @@
 
         &:hover, &.active
             background-color: var(--body-background)
-            color: var(--color-orange)
+            color: var(--color-primary)
 
         .arrow
             height: 16px
@@ -94,10 +97,13 @@
         background-color: var(--container-background-color)
         border-radius: var(--border-radius)
         box-shadow: var(--container-shadow)
-        padding: 6px 12px
+        padding: 6px 2px 6px 6px
         list-style: none
         margin: 0
         width: max-content
+
+        a
+            margin-bottom: 2px
 
     &.sidebarMenu
         .dropdownMenu

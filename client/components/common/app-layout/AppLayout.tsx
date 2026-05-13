@@ -18,10 +18,11 @@ import styles from './styles.module.sass'
 
 interface AppLayoutProps extends Omit<NextSeoProps, 'children'> {
     fullWidth?: boolean
+    noTopMargin?: boolean
     children?: React.ReactNode
 }
 
-export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children, ...props }) => {
+export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, noTopMargin, children, ...props }) => {
     const { t, i18n } = useTranslation()
     const dispatch = useAppDispatch()
 
@@ -86,7 +87,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children, ...pr
             </Head>
 
             <NextNProgress
-                color={'#fbbd08'}
+                color={'#6f6ebb'}
                 options={{ showSpinner: false }}
             />
 
@@ -110,7 +111,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, children, ...pr
                 />
             </aside>
 
-            <main className={cn(styles.mainContainer, fullWidth && styles.fullWidth)}>{children}</main>
+            <main
+                className={cn(styles.mainContainer, fullWidth && styles.fullWidth, noTopMargin && styles.noTopMargin)}
+            >
+                {children}
+            </main>
 
             <Dialog
                 open={showAuthDialog}

@@ -5,7 +5,7 @@
     justify-content: space-between
     align-items: center
     flex-wrap: nowrap
-    gap: 10px
+    gap: 16px
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-direction: column
@@ -17,6 +17,7 @@
         justify-content: space-between
         align-items: center
         gap: 10px
+        flex-shrink: 0
 
         @media only screen and (max-width: variables.$mobileMaxWidth)
             flex-direction: column
@@ -35,16 +36,23 @@
             width: 100%
 
         h1
-            margin: 0 0 0
-            padding: 0 20px
+            padding: 4px 16px 4px
             text-transform: uppercase
+            font-size: 20px
+            line-height: 20px
+            font-weight: 400
+            letter-spacing: 0.02em
+
+            @media only screen and (max-width: variables.$mobileMaxWidth)
+                font-size: 22px
 
         &:before
             content: ""
             display: inline-block
-            width: 5px
+            width: 6px
             height: 100%
-            background: #dd9124
+            background: var(--color-primary)
+            border-radius: 2px
             position: absolute
             left: 0
             top: 0
