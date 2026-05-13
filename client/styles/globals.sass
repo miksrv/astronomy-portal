@@ -37,20 +37,24 @@ html
         background: transparent
 
 h2
-    font-size: 16px
-    font-weight: 400
+    font-size: 18px
+    font-weight: 600
     display: flex
     align-items: center
-    gap: 10px
-    margin-bottom: 5px
+    gap: 12px
+    margin: 0
 
     &::after
         content: ''
         flex: 1
         height: 1px
+        margin-top: 3px
         background: var(--input-border-color)
 
 dialog h2
+    border-left: none
+    padding-left: 0
+
     &::after
         display: none
 
@@ -61,7 +65,7 @@ h3
 body
     background-color: var(--body-background)
     margin: 0
-    line-height: 1.5
+    line-height: 1.65
     font-size: var(--font-size)
     letter-spacing: var(--letter-spacing)
     font-family: var(--font-family), sans-serif
@@ -86,7 +90,7 @@ body
 .telegram-message
     color: var(--color-contrast)
     border-radius: var(--border-radius)
-    background: var(--color-main-background)
+    background: var(--color-primary-background)
     transition: background-color .15s ease-out,opacity .15s ease-out
     font-weight: 600
     padding: 10px
@@ -95,7 +99,7 @@ body
     text-decoration: none
 
     &:hover, &:active, &:focus
-        background: var(--color-main-active)
+        background: var(--color-primary-active)
         color: var(--color-contrast)
 
     svg

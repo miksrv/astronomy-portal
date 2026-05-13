@@ -1,0 +1,116 @@
+// Shared tooltip styles for ECharts charts
+=chart-tooltip($title-min-width: 100px)
+    .chartTooltipTitle
+        font-size: 12px
+        color: var(--text-color-primary)
+        margin-bottom: 10px
+        margin-top: -5px
+        min-width: $title-min-width
+
+        &:first-letter
+            text-transform: uppercase
+
+    .chartTooltipItem
+        margin-top: 0
+
+        &:last-of-type
+            margin-bottom: -5px
+
+        .icon
+            float: left
+            display: inline-block
+            margin-right: 5px
+            margin-top: 7px
+            border-radius: 2px
+            width: 6px
+            height: 6px
+
+        .label
+            font-size: 12px
+            display: flex
+            justify-content: space-between
+            align-items: center
+            color: var(--text-color-secondary)
+
+        .value
+            margin-left: 16px
+            font-weight: 500
+            color: var(--text-color-primary)
+
+// Form footer with top border and right-aligned action buttons
+=form-footer
+    border-top: var(--input-border)
+    margin-top: 10px
+    padding-top: 10px
+    display: flex
+    justify-content: flex-end
+    gap: 10px
+
+// Inline badge/pill with configurable colors; pass $important: true to add !important on background
+=status-badge($bg, $color, $important: false)
+    display: inline-block
+    padding: 2px 10px
+    border-radius: 12px
+    font-size: 13px
+    font-weight: 500
+    @if $important
+        background: #{$bg} !important
+    @else
+        background: $bg
+    color: $color
+
+// Tag cloud list: centered wrapping list of links with dividers
+=tag-cloud-list
+    margin: 0
+    padding: 0
+    display: flex
+    flex-wrap: wrap
+    list-style: none
+    justify-content: center
+
+    li:last-of-type .divider
+        display: none
+
+    .divider
+        color: var(--text-color-primary)
+        margin: 0 5px
+
+    a
+        color: var(--text-color-secondary)
+
+        &.active
+            font-weight: bold
+            color: var(--text-color-primary)
+
+        &:hover
+            color: var(--text-color-primary)
+
+// Stargazing full-bleed background with gradient overlay; $height controls the element height
+=stargazing-page-background($height: 100%)
+    position: absolute
+    top: 0
+    left: 0
+    width: 100%
+    height: $height
+    z-index: -1
+    background: url('/images/stargazing-hero-bg.png') center top / cover no-repeat
+
+    &::after
+        content: ''
+        position: absolute
+        top: 0
+        left: 0
+        width: 100%
+        height: 100%
+        background: linear-gradient(#11131824 0%, #11131800 20%, #111318 100%)
+
+// Uppercase section heading — suppresses the global h2 separator line
+=section-title
+    text-transform: uppercase
+    letter-spacing: 0.06em
+    font-weight: 700
+    font-size: 18px
+    line-height: 18px
+
+    &::after
+        display: none
