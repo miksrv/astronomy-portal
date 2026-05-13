@@ -151,7 +151,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}
-                        label={t('pages.objects.create_button', 'Создать объект')}
+                        label={t('pages.objects.create_button', 'Добавить')}
                         link={'/objects/form'}
                     />
                 )}
@@ -160,7 +160,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
             <ObjectsTable
                 objectsList={filteredObjectsList}
                 photosList={photosList}
-                combinedHeight={toolbarHeight + footerHeight + 110}
+                combinedHeight={toolbarHeight + footerHeight + 135}
             />
 
             <AppFooter ref={footerRef} />

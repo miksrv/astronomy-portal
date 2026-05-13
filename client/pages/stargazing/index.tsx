@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { getCookie } from 'cookies-next'
-import { Button, Container, Icon } from 'simple-react-ui-kit'
+import { Button, Icon } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
@@ -9,10 +9,12 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 
 import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
-import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
+import { AppFooter, AppLayout, PhotoGallery, PhotoLightbox } from '@/components/common'
 import { EventsList, EventUpcoming, InfoCards, ReviewsWidget } from '@/components/pages/stargazing'
 import type { InfoCardItem } from '@/components/pages/stargazing/info-cards'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
+
+import styles from './index.module.sass'
 
 interface StargazingPageProps {
     upcomingData: ApiModel.Event | null
@@ -32,7 +34,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
             href: '/stargazing/rules',
             icon: 'ReportError',
             title: t('pages.stargazing.rules_link', 'Правила поведения на астровыездах'),
-            description: t('pages.stargazing.rules_card_desc', 'Что нельзя делать и как уважать других участников')
+            description: t('pages.stargazing.rules_card_desc', 'Что нельзя делать и как уважать других')
         },
         {
             href: '/stargazing/howto',
@@ -43,7 +45,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
         {
             href: '/stargazing/where',
             icon: 'Map',
-            title: t('pages.stargazing.where_link', 'Где посмотреть в телескоп в Оренбурге'),
+            title: t('pages.stargazing.where_link', 'Где посмотреть в телескоп'),
             description: t('pages.stargazing.where_card_desc', 'Место проведения в Оренбургском районе')
         },
         {
@@ -84,10 +86,75 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
                 ]
             }}
         >
-            <AppToolbar
-                title={title}
-                currentPage={title}
-            >
+            <div
+                className={styles.pageBackground}
+                aria-hidden={'true'}
+            />
+
+            <div className={styles.hero}>
+                <p className={styles.heroLabel}>
+                    {t('pages.stargazing.hero-label', 'Оренбург · Наблюдение за звёздами')}
+                </p>
+
+                <h1 className={styles.heroTitle}>
+                    <span>{t('pages.stargazing.hero-title-line1', 'АСТРОВЫЕЗДЫ')}</span>
+                </h1>
+
+                <p className={styles.heroSubtitle}>
+                    {t(
+                        'pages.stargazing.text',
+                        'Представьте: ночное небо без городских огней, тысячи звёзд над головой и кольца Сатурна в окуляре телескопа. Наши астровыезды за город - это не просто наблюдения, это вечера, которые меняют взгляд на мир. Присоединяйтесь, чтобы увидеть Вселенную своими глазами!'
+                    )}
+                </p>
+
+                <div className={styles.heroActions}>
+                    <Button
+                        mode={'primary'}
+                        label={t('pages.stargazing.hero-cta-events', 'Ближайший выезд')}
+                        link={'#upcoming'}
+                    />
+
+                    <Link
+                        href={'https://t.me/look_at_stars'}
+                        className={styles.telegramCta}
+                        title={t('pages.stargazing.telegram', 'Телеграм')}
+                        rel={'noindex nofollow'}
+                        target={'_blank'}
+                    >
+                        <Icon name={'Telegram'} />
+                        {t('pages.stargazing.hero-cta-telegram', 'Подписаться на Telegram')}
+                    </Link>
+                </div>
+            </div>
+
+            <InfoCards items={infoCards} />
+
+            <div id={'upcoming'}>
+                <EventUpcoming event={upcomingData || undefined} />
+            </div>
+
+            <PhotoGallery
+                photos={
+                    photos?.map((photo, index) => ({
+                        height: photo.height,
+                        src: createPreviewPhotoUrl(photo),
+                        width: photo.width,
+                        alt: t('pages.stargazing.photo_alt', 'Фото ({{number}}) с астровыезда - {{name}} ', {
+                            number: index + 1,
+                            name: photo?.title
+                        })
+                    })) || []
+                }
+                onClick={({ index }) => {
+                    handlePhotoClick(index)
+                }}
+            />
+
+            <ReviewsWidget />
+
+            <div className={styles.archiveHeader}>
+                <h2>{t('pages.stargazing.events-archive', 'Архив астровыездов')}</h2>
+
                 {userRole === ApiModel.UserRole.ADMIN && (
                     <Button
                         icon={'PlusCircle'}
@@ -96,55 +163,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
                         link={'/stargazing/form'}
                     />
                 )}
-            </AppToolbar>
-
-            <div>
-                {t(
-                    'pages.stargazing.text',
-                    'Представьте: ночное небо без городских огней, тысячи звёзд над головой и кольца Сатурна в окуляре телескопа. Наши астровыезды за город - это не просто наблюдения, это вечера, которые меняют взгляд на мир. Присоединяйтесь, чтобы увидеть Вселенную своими глазами!'
-                )}
             </div>
-
-            <EventUpcoming event={upcomingData || undefined} />
-
-            <Link
-                href={'https://t.me/look_at_stars'}
-                className={'telegram-message'}
-                title={t('pages.stargazing.telegram', 'Телеграм')}
-                rel={'noindex nofollow'}
-                target={'_blank'}
-            >
-                <Icon name={'Telegram'} />{' '}
-                {t(
-                    'pages.stargazing.telegram-subscription',
-                    'Чтобы не пропустить анонсы - подпишитесь на Telegram канал'
-                )}
-            </Link>
-
-            <InfoCards items={infoCards} />
-
-            <Container>
-                <PhotoGallery
-                    photos={
-                        photos?.map((photo, index) => ({
-                            height: photo.height,
-                            src: createPreviewPhotoUrl(photo),
-                            width: photo.width,
-                            alt: t('pages.stargazing.photo_alt', 'Фото ({{number}}) с астровыезда - {{name}} ', {
-                                number: index + 1,
-                                name: photo?.title
-                            })
-                        })) || []
-                    }
-                    onClick={({ index }) => {
-                        handlePhotoClick(index)
-                    }}
-                />
-            </Container>
-
-            <ReviewsWidget />
-
-            <h2>{t('pages.stargazing.events-archive', 'Архив астровыездов')}</h2>
 
             <EventsList events={events} />
 

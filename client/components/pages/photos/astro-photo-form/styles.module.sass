@@ -1,3 +1,5 @@
+@use '../../../../styles/mixins'
+
 .formElement
     margin-bottom: 10px
 
@@ -50,12 +52,7 @@
         position: relative !important
 
 .footer
-    border-top: var(--input-border)
-    margin-top: 10px
-    padding-top: 10px
-    display: flex
-    justify-content: flex-end
-    gap: 10px
+    +mixins.form-footer
 
 .presets
     display: flex

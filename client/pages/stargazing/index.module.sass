@@ -1,0 +1,82 @@
+@use '../../styles/variables' as variables
+@use '../../styles/mixins'
+
+.pageBackground
+    +mixins.stargazing-page-background(100vh)
+
+.hero
+    position: relative
+    min-height: 320px
+    display: flex
+    flex-direction: column
+    justify-content: center
+    padding-bottom: 8px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        min-height: 220px
+        padding: 0 0 8px
+
+.heroLabel
+    font-size: 11px
+    letter-spacing: 0.14em
+    text-transform: uppercase
+    color: var(--color-primary)
+    margin: 0 0 14px
+    font-weight: 600
+
+.heroTitle
+    font-size: 2.6rem
+    font-weight: 600
+    text-transform: uppercase
+    line-height: 1.05
+    margin: 0 0 18px
+    color: #fff
+
+    span
+        display: block
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        font-size: 2rem
+
+.heroSubtitle
+    font-size: 14px
+    color: rgba(255, 255, 255, 0.68)
+    max-width: 480px
+    line-height: 1.7
+    margin: 0 0 28px
+
+.heroActions
+    display: flex
+    align-items: center
+    gap: 12px
+    flex-wrap: wrap
+
+.telegramCta
+    display: inline-flex
+    align-items: center
+    gap: 8px
+    font-size: 13px
+    color: rgba(255, 255, 255, 0.75)
+    text-decoration: none
+    padding: 6px 14px
+    border-radius: var(--border-radius)
+    border: 1px solid rgba(255, 255, 255, 0.18)
+    transition: color 0.2s, border-color 0.2s
+
+    svg
+        fill: var(--color-primary)
+        width: 16px
+        height: 16px
+        flex-shrink: 0
+
+    &:hover
+        color: #fff
+        border-color: rgba(255, 255, 255, 0.4)
+
+.archiveHeader
+    display: flex
+    align-items: center
+    gap: 12px
+
+    h2
+        flex: 1

@@ -1,0 +1,298 @@
+@use '../../styles/variables' as variables
+@use '../../styles/mixins' as mixins
+
+.pageBackground
+    +mixins.stargazing-page-background
+
+.hero
+    position: relative
+    min-height: 280px
+    display: flex
+    flex-direction: column
+    justify-content: center
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        padding: 32px 20px
+
+.heroLabel
+    font-size: 11px
+    letter-spacing: 0.12em
+    text-transform: uppercase
+    color: var(--color-primary)
+    margin-bottom: 14px
+    font-weight: 600
+
+.heroTitle
+    font-size: 2.6rem
+    font-weight: 600
+    text-transform: uppercase
+    line-height: 1.05
+    margin: 0 0 18px
+    color: #fff
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        font-size: 1.8rem
+
+.heroSubtitle
+    font-size: 14px
+    color: rgba(255,255,255,0.7)
+    max-width: 420px
+    line-height: 1.65
+    margin: 0
+
+.optionsGrid
+    display: grid
+    grid-template-columns: 1fr 1fr
+    gap: 10px
+    max-width: 70%
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: 1fr
+        max-width: 100%
+
+.optionCard
+    background: var(--container-background-color)
+    box-shadow: var(--container-shadow)
+    border-radius: var(--border-radius)
+    padding: 20px
+    display: flex
+    flex-direction: column
+    gap: 14px
+
+.optionHeader
+    display: flex
+    gap: 14px
+    align-items: center
+
+.optionIconWrap
+    width: 56px
+    height: 56px
+    border-radius: 50%
+    flex-shrink: 0
+    background: var(--dropdown-background-color-hover)
+    display: flex
+    align-items: center
+    justify-content: center
+
+.optionIcon
+    width: 32px
+    height: 32px
+    fill: var(--color-primary)
+
+.optionTitle
+    font-size: 16px
+    font-weight: 500
+    line-height: 1.4
+    margin: 0
+    text-transform: uppercase
+    letter-spacing: 0.05em
+
+.optionFeatures
+    list-style: none
+    padding: 0
+    margin: 0
+    display: flex
+    flex-direction: column
+    gap: 7px
+    flex: 1
+
+    li
+        font-size: 13px
+        color: var(--text-color-secondary)
+        display: flex
+        align-items: center
+        gap: 8px
+
+        &::before
+            content: '•'
+            color: var(--color-primary)
+            font-size: 16px
+            line-height: 1
+            flex-shrink: 0
+
+.stepsSection
+    display: flex
+    flex-direction: column
+    gap: 20px
+    padding: 4px 0
+
+.stepsTitle
+    +mixins.section-title
+
+.stepIcon
+    width: 26px
+    height: 26px
+    stroke: rgba(255, 255, 255, 0.4)
+    flex-shrink: 0
+
+.stepsGrid
+    display: grid
+    grid-template-columns: repeat(5, 1fr)
+    gap: 0
+    position: relative
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: 1fr 1fr
+
+.stepConnector
+    position: absolute
+    top: 19px
+    left: calc(10% + 20px)
+    right: calc(10% + 20px)
+    height: 1px
+    background: var(--input-border-color)
+    z-index: 0
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        display: none
+
+.stepItem
+    display: flex
+    flex-direction: column
+    align-items: center
+    text-align: center
+    gap: 10px
+    padding: 0 6px
+    position: relative
+    z-index: 1
+
+.stepNumber
+    width: 40px
+    height: 40px
+    border-radius: 50%
+    background: var(--container-background-color)
+    box-shadow: var(--container-shadow)
+    display: flex
+    align-items: center
+    justify-content: center
+    font-size: 15px
+    font-weight: 700
+    color: var(--color-primary)
+    border: 1px solid rgba(255,255,255,0.1)
+    flex-shrink: 0
+
+.stepTitle
+    font-size: 13px
+    font-weight: 600
+    color: var(--text-color-primary)
+
+.stepText
+    font-size: 12px
+    color: var(--text-color-secondary)
+    line-height: 1.5
+
+.importantInner
+    display: flex
+    align-items: center
+    gap: 32px
+
+.importantContent
+    flex: 1
+
+.telescopeImage
+    height: 190px
+    object-fit: contain
+    flex-shrink: 0
+    opacity: 0.6
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        display: none
+
+.importantHeader
+    display: flex
+    align-items: center
+    gap: 10px
+    margin-bottom: 14px
+    font-weight: 600
+    font-size: 14px
+
+    svg
+        fill: var(--color-primary)
+        width: 20px
+        height: 20px
+
+.importantList
+    list-style: none
+    padding: 0
+    margin: 0
+    display: flex
+    flex-direction: column
+    gap: 10px
+
+    li
+        font-size: 13px
+        color: var(--text-color-secondary)
+        line-height: 1.5
+        padding-left: 16px
+        position: relative
+
+        &::before
+            content: '—'
+            position: absolute
+            left: 0
+            color: var(--color-primary)
+
+.contactsSection
+    display: grid
+    grid-template-columns: 1fr 1fr 1fr
+    gap: 40px
+    align-items: stretch
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: 1fr
+        gap: 24px
+
+.contactsDesc
+    font-size: 13px
+    color: var(--text-color-secondary)
+    margin: 10px 0 16px
+    line-height: 1.5
+
+.contactsItem
+    position: relative
+    display: flex
+    flex-direction: row
+    align-items: center
+    gap: 14px
+
+    &::before
+        content: ''
+        position: absolute
+        left: -20px
+        top: 12px
+        bottom: 12px
+        width: 1px
+        background: var(--input-border-color)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        &::before
+            display: none
+
+.contactsItemIcon
+    width: 36px
+    height: 36px
+    fill: var(--color-primary)
+    flex-shrink: 0
+
+.contactsItemText
+    display: flex
+    flex-direction: column
+    gap: 4px
+
+.contactsItemTitle
+    font-size: 14px
+    font-weight: 600
+    margin: 0
+
+.contactsLink
+    font-size: 13px
+    color: var(--text-color-secondary)
+    text-decoration: none
+
+    &:hover
+        color: var(--text-color-primary)
+
+.contactsSocials
+    font-size: 13px
+    color: var(--text-color-secondary)
+    margin: 0

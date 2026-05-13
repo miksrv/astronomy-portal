@@ -3,13 +3,19 @@
 .appHeader
     position: fixed
     color: var(--text-color-primary)
-    background-color: var(--container-background-color)
-    box-shadow: var(--container-shadow)
+    background-color: transparent
+    border-bottom: 1px solid transparent
     height: var(--header-height)
     width: 100%
-    padding: 0 10px
+    padding: 10px 10px 0
     top: 0
     z-index: 2
+    transition: background-color 0.25s ease, border-color 0.25s ease, padding-top 0.25s ease
+
+    &.scrolled
+        background-color: var(--container-background-color)
+        border-bottom-color: var(--input-border-color)
+        padding-top: 0
 
     .wrapper
         max-width: var(--width-max)
@@ -22,6 +28,7 @@
 
         &.fullWidth
             max-width: 100%
+            margin-top: -5px
 
     .logoLink
         font-size: 0

@@ -40,20 +40,24 @@ export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) =
             text: t('menu.stargazing', 'Астровыезды'),
             subMenuItems: [
                 {
+                    link: '/stargazing/tickets',
+                    text: t('menu.stargazing-tickets', 'Билеты и поддержка')
+                },
+                {
                     link: '/stargazing/rules',
-                    text: t('menu.stargazing-rules', 'Правила поведения на астровыездах')
+                    text: t('menu.stargazing-rules', 'Правила')
                 },
                 {
                     link: '/stargazing/howto',
-                    text: t('menu.stargazing-howto', 'Как проходят астровыезды')
+                    text: t('menu.stargazing-howto', 'Как проходят')
                 },
                 {
                     link: '/stargazing/where',
-                    text: t('menu.stargazing-where', 'Где посмотреть в телескоп в Оренбурге')
+                    text: t('menu.stargazing-where', 'Место проведения')
                 },
                 {
                     link: '/stargazing/faq',
-                    text: t('menu.stargazing-faq', 'Часто задаваемые вопросы')
+                    text: t('menu.stargazing-faq', 'Вопросы и ответы')
                 }
             ]
         },
@@ -63,11 +67,15 @@ export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) =
             subMenuItems: [
                 {
                     link: '/observatory/overview',
-                    text: t('menu.observatory-orenburg', 'Обсерватория в Оренбурге')
+                    text: t('menu.observatory-orenburg', 'Об обсерватории')
                 },
                 {
                     link: '/observatory/weather',
-                    text: t('menu.observatory-orenburg-weather', 'Погода в Обсерватории Оренбурга')
+                    text: t('menu.observatory-orenburg-weather', 'Погода')
+                },
+                {
+                    link: '/observatory/history',
+                    text: t('menu.observatory-history', 'История')
                 }
             ]
         },
@@ -104,7 +112,15 @@ export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) =
                         onMouseLeave={handleMouseLeave}
                     >
                         <Link
-                            className={router.asPath === item.link ? styles.active : undefined}
+                            className={
+                                item.subMenuItems
+                                    ? router.asPath === item.link || router.asPath.startsWith(item.link + '/')
+                                        ? styles.active
+                                        : undefined
+                                    : router.asPath === item.link
+                                      ? styles.active
+                                      : undefined
+                            }
                             href={item.link}
                             title={item.text}
                             onClick={() => onClick?.()}

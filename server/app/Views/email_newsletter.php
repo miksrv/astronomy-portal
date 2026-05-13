@@ -262,7 +262,11 @@
                             <?php endif; ?>
 
                             <!-- Main content body provided by admin -->
-                            <?= nl2br(htmlspecialchars($content ?? '', ENT_QUOTES, 'UTF-8')) ?>
+                            <?= preg_replace(
+                                '/https?:\/\/[^\s<>"\']+/',
+                                '<a href="$0" target="_blank">$0</a>',
+                                nl2br(htmlspecialchars($content ?? '', ENT_QUOTES, 'UTF-8'))
+                            ) ?>
 
                             <!-- Optional CTA button -->
                             <?php if (!empty($actionText) && !empty($actionLink)): ?>

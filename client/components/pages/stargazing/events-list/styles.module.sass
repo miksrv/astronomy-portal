@@ -12,6 +12,16 @@
     overflow: hidden
     flex-basis: calc(33.3333% - 7px)
     padding: 0 !important
+    transition: box-shadow 0.25s ease
+
+    &:hover
+        box-shadow: 0 0 0 2px var(--color-primary), var(--container-shadow)
+
+        .photo
+            transform: scale(1.05)
+
+        .title a
+            color: var(--color-primary)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-basis: 100%
@@ -48,9 +58,10 @@
             width: 100%
             object-fit: cover
             font-size: 0
+            transition: transform 0.35s ease
 
     .bottomPanel
-        padding: 5px 10px
+        padding: 12px 14px
         background-color: var(--container-background-color)
 
         .title
@@ -69,6 +80,7 @@
                 display: block
                 overflow: hidden
                 text-overflow: ellipsis
+                transition: color 0.25s ease
 
         .toolbar
             display: flex
