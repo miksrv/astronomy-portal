@@ -17,8 +17,9 @@ const gallerySidewalk = [photoSidewalk1, photoSidewalk2, photoSidewalk3, photoSi
 
 const StargazingWherePage: NextPage<object> = () => {
     const { t } = useTranslation()
+    const { t: tPage } = useTranslation('stargazing-where')
 
-    const title = t('pages.stargazing-where.title', 'Где посмотреть в телескоп в Оренбурге')
+    const title = tPage('title', 'Где посмотреть в телескоп в Оренбурге')
 
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
@@ -36,8 +37,8 @@ const StargazingWherePage: NextPage<object> = () => {
         <AppLayout
             canonical={'stargazing/where'}
             title={title}
-            description={t(
-                'pages.stargazing-where.description',
+            description={tPage(
+                'description',
                 'Узнайте, где в Оренбурге можно посмотреть в телескоп. Тротуарная астрономия: бесплатные наблюдения Луны, планет и звезд на улицах города. Хотите увидеть больше - отправляйтесь на выезд за город для наблюдения туманностей и галактик!'
             )}
             openGraph={{
@@ -62,18 +63,15 @@ const StargazingWherePage: NextPage<object> = () => {
             />
 
             <div>
-                {t(
-                    'pages.stargazing-where.intro',
+                {tPage(
+                    'intro',
                     'Тротуарная астрономия - это уникальный формат, благодаря которому космос становится ближе. Весной, летом и осенью мы выставляем телескопы прямо на тротуарах и площадях Оренбурга, чтобы любой желающий мог подойти и бесплатно взглянуть на звезды, планеты и Луну. Это отличная возможность для жителей города познакомиться с астрономией в непринужденной и дружественной атмосфере.'
                 )}
             </div>
 
             <Container>
                 <p style={{ marginTop: 0 }}>
-                    {t(
-                        'pages.stargazing-where.announcement-1',
-                        'Анонсы вечеров тротуарной астрономии мы почти всегда публикуем в нашем'
-                    )}
+                    {tPage('announcement-1', 'Анонсы вечеров тротуарной астрономии мы почти всегда публикуем в нашем')}
                     <Link
                         style={{ margin: '0 5px' }}
                         href={'https://t.me/look_at_stars'}
@@ -81,10 +79,10 @@ const StargazingWherePage: NextPage<object> = () => {
                         rel={'noindex nofollow'}
                         target={'_blank'}
                     >
-                        {t('pages.stargazing-where.telegram-channel', 'телеграм-канале')}
+                        {tPage('telegram-channel', 'телеграм-канале')}
                     </Link>
-                    {t(
-                        'pages.stargazing-where.announcement-2',
+                    {tPage(
+                        'announcement-2',
                         ', но иногда наши телескопы можно встретить на улицах города и без предупреждения. Один из вдохновителей проекта, астролектор Владимир Иванович, нередко делится своими знаниями, показывая всем желающим интересные астрономические объекты. Просто ищите телескоп - и вы точно попадете на незабываемую экскурсию по звездному небу!'
                     )}
                 </p>
@@ -96,67 +94,52 @@ const StargazingWherePage: NextPage<object> = () => {
                 />
             </Container>
 
-            <h2>{t('pages.stargazing-where.what-you-can-see-title', 'Что можно увидеть в телескоп из города?')}</h2>
+            <h2>{tPage('what-you-can-see-title', 'Что можно увидеть в телескоп из города?')}</h2>
 
             <Container>
                 <p>
-                    {t(
-                        'pages.stargazing-where.what-you-can-see-description',
+                    {tPage(
+                        'what-you-can-see-description',
                         'В условиях городского светового загрязнения наиболее яркие объекты остаются видимыми. Например, вы сможете рассмотреть:'
                     )}
                 </p>
                 <ul>
                     <li>
-                        {t(
-                            'pages.stargazing-where.what-you-can-see-1',
+                        {tPage(
+                            'what-you-can-see-1',
                             'Кратеры и горы на Луне, особенно впечатляющие в фазах первой и последней четверти;'
                         )}
                     </li>
+                    <li>{tPage('what-you-can-see-2', 'Кольца Сатурна, которые неизменно вызывают восторг;')}</li>
+                    <li>{tPage('what-you-can-see-3', 'Яркие звезды и двойные звезды, такие как Альбирео;')}</li>
                     <li>
-                        {t(
-                            'pages.stargazing-where.what-you-can-see-2',
-                            'Кольца Сатурна, которые неизменно вызывают восторг;'
-                        )}
-                    </li>
-                    <li>
-                        {t(
-                            'pages.stargazing-where.what-you-can-see-3',
-                            'Яркие звезды и двойные звезды, такие как Альбирео;'
-                        )}
-                    </li>
-                    <li>
-                        {t(
-                            'pages.stargazing-where.what-you-can-see-4',
-                            'Парады планет, если они происходят в подходящее время года.'
-                        )}
+                        {tPage('what-you-can-see-4', 'Парады планет, если они происходят в подходящее время года.')}
                     </li>
                 </ul>
                 <p style={{ marginBottom: 0 }}>
-                    {t(
-                        'pages.stargazing-where.what-you-can-see-conclusion',
+                    {tPage(
+                        'what-you-can-see-conclusion',
                         'Однако городское освещение ограничивает наши возможности. Туманности, галактики, метеорные потоки и даже крупные звездные скопления часто остаются скрытыми от взгляда.'
                     )}
                 </p>
             </Container>
 
-            <h2>{t('pages.stargazing-where.want-to-see-more', 'Хотите увидеть больше? Выезжайте за город!')}</h2>
+            <h2>{tPage('want-to-see-more', 'Хотите увидеть больше? Выезжайте за город!')}</h2>
 
             <Container>
                 <p>
-                    {t(
-                        'pages.stargazing-where.want-to-see-description-1',
+                    {tPage(
+                        'want-to-see-description-1',
                         'Для наблюдения слабосветящихся объектов, таких как туманности Ориона, Андромеды, метеорные потоки и звездные скопления, необходимо отправиться подальше от городских огней. В таких местах, как Оренбургская степь или другие удаленные районы, ночное небо поражает своей красотой.'
                     )}
                 </p>
                 <p>
-                    {t(
-                        'pages.stargazing-where.want-to-see-description-2',
+                    {tPage(
+                        'want-to-see-description-2',
                         'Мы регулярно организуем выездные астрономические мероприятия, где можно насладиться полной палитрой космических объектов. Следите за анонсами на нашей странице «Астровыезды» или в Telegram-канале, чтобы присоединиться к одному из таких наблюдений.'
                     )}
                 </p>
-                <p style={{ marginBottom: 0 }}>
-                    {t('pages.stargazing-where.want-to-see-description-3', 'Пусть звезды станут ближе!')}
-                </p>
+                <p style={{ marginBottom: 0 }}>{tPage('want-to-see-description-3', 'Пусть звезды станут ближе!')}</p>
             </Container>
 
             <PhotoLightbox
@@ -180,8 +163,8 @@ const StargazingWherePage: NextPage<object> = () => {
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
         async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<object>> => {
-            const locale = context.locale ?? 'en'
-            const translations = await serverSideTranslations(locale)
+            const locale = context.locale ?? 'ru'
+            const translations = await serverSideTranslations(locale, ['translation', 'stargazing-where'])
 
             store.dispatch(setLocale(locale))
 

@@ -8,6 +8,10 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 
 import { setLocale, wrapper } from '@/api'
 import { AppFooter, AppLayout } from '@/components/common'
+import CalendarIcon from '@/components/icons/CalendarIcon'
+import HeartIcon from '@/components/icons/HeartIcon'
+import TicketIcon from '@/components/icons/TicketIcon'
+import TShirtIcon from '@/components/icons/TShirtIcon'
 
 import styles from './tickets.module.sass'
 
@@ -52,25 +56,7 @@ const StargazingTicketsPage: NextPage<object> = () => {
                 <div className={styles.optionCard}>
                     <div className={styles.optionHeader}>
                         <div className={styles.optionIconWrap}>
-                            <svg
-                                viewBox={'0 0 24 24'}
-                                fill={'none'}
-                                strokeWidth={'1.5'}
-                                strokeLinecap={'round'}
-                                strokeLinejoin={'round'}
-                            >
-                                <rect
-                                    x={'2'}
-                                    y={'6'}
-                                    width={'20'}
-                                    height={'12'}
-                                    rx={'1.5'}
-                                />
-                                <path
-                                    d={'M8.5 6v12'}
-                                    strokeDasharray={'2 2'}
-                                />
-                            </svg>
+                            <TicketIcon className={styles.optionIcon} />
                         </div>
                         <p className={styles.optionTitle}>
                             {t('pages.stargazing-tickets.option1-title', 'Купить билет на одно мероприятие')}
@@ -93,22 +79,7 @@ const StargazingTicketsPage: NextPage<object> = () => {
                 <div className={styles.optionCard}>
                     <div className={styles.optionHeader}>
                         <div className={styles.optionIconWrap}>
-                            <svg
-                                viewBox={'0 0 24 24'}
-                                fill={'none'}
-                                strokeWidth={'1.5'}
-                                strokeLinecap={'round'}
-                                strokeLinejoin={'round'}
-                            >
-                                <rect
-                                    x={'3'}
-                                    y={'4'}
-                                    width={'18'}
-                                    height={'18'}
-                                    rx={'2'}
-                                />
-                                <path d={'M16 2v4M8 2v4M3 10h18'} />
-                            </svg>
+                            <CalendarIcon className={styles.optionIcon} />
                         </div>
                         <p className={styles.optionTitle}>
                             {t('pages.stargazing-tickets.option2-title', 'Купить абонемент на весь сезон 2026')}
@@ -131,15 +102,7 @@ const StargazingTicketsPage: NextPage<object> = () => {
                 <div className={styles.optionCard}>
                     <div className={styles.optionHeader}>
                         <div className={styles.optionIconWrap}>
-                            <svg
-                                viewBox={'0 0 24 24'}
-                                fill={'none'}
-                                strokeWidth={'1.5'}
-                                strokeLinecap={'round'}
-                                strokeLinejoin={'round'}
-                            >
-                                <path d={'M7 4L2 9L5.5 10.5V21H18.5V10.5L22 9L17 4Q14.5 8 12 8Q9.5 8 7 4Z'} />
-                            </svg>
+                            <TShirtIcon className={styles.optionIcon} />
                         </div>
                         <p className={styles.optionTitle}>
                             {t('pages.stargazing-tickets.option3-title', 'Купить мерч')}
@@ -163,19 +126,7 @@ const StargazingTicketsPage: NextPage<object> = () => {
                 <div className={styles.optionCard}>
                     <div className={styles.optionHeader}>
                         <div className={styles.optionIconWrap}>
-                            <svg
-                                viewBox={'0 0 24 24'}
-                                fill={'none'}
-                                strokeWidth={'1.5'}
-                                strokeLinecap={'round'}
-                                strokeLinejoin={'round'}
-                            >
-                                <path
-                                    d={
-                                        'M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z'
-                                    }
-                                />
-                            </svg>
+                            <HeartIcon className={styles.optionIcon} />
                         </div>
                         <p className={styles.optionTitle}>
                             {t('pages.stargazing-tickets.option4-title', 'Поддержать проект')}
@@ -404,46 +355,86 @@ const StargazingTicketsPage: NextPage<object> = () => {
             </Container>
 
             {/* Contacts section */}
-            <div className={styles.contactsGrid}>
-                {/* Left: FAQ */}
-                <div className={styles.contactCard}>
-                    <p className={styles.contactTitle}>
-                        {t('pages.stargazing-tickets.contacts-title', 'Остались вопросы?')}
-                    </p>
-                    <p className={styles.contactDesc}>
-                        {t('pages.stargazing-tickets.contacts-desc', 'Мы всегда на связи и готовы помочь!')}
-                    </p>
-                    <Button
-                        mode={'secondary'}
-                        label={t('pages.stargazing-tickets.contacts-faq-button', 'Перейти в FAQ')}
-                        link={'/stargazing/faq'}
-                    />
-                </div>
+            <Container>
+                <div className={styles.contactsSection}>
+                    {/* Col 1: CTA */}
+                    <div>
+                        <h2 className={styles.stepsTitle}>
+                            {t('pages.stargazing-tickets.contacts-title', 'Остались вопросы?')}
+                        </h2>
+                        <p className={styles.contactsDesc}>
+                            {t('pages.stargazing-tickets.contacts-desc', 'Мы всегда на связи и готовы помочь!')}
+                        </p>
+                        <Button
+                            mode={'secondary'}
+                            label={t('pages.stargazing-tickets.contacts-faq-button', 'Перейти в FAQ')}
+                            link={'/stargazing/faq'}
+                        />
+                    </div>
 
-                {/* Right: Social links */}
-                <div className={styles.contactCard}>
-                    <Link
-                        className={styles.contactLink}
-                        href={'https://t.me/look_at_stars'}
-                        target={'_blank'}
-                        rel={'noindex nofollow'}
-                        title={t('pages.stargazing-tickets.contacts-telegram-label', 'Написать нам в Telegram')}
-                    >
-                        <Icon name={'Telegram'} />
-                        {t('pages.stargazing-tickets.contacts-telegram-label', 'Написать нам в Telegram')}
-                    </Link>
-                    <Link
-                        className={styles.contactLink}
-                        href={'https://t.me/look_at_stars'}
-                        target={'_blank'}
-                        rel={'noindex nofollow'}
-                        title={t('pages.stargazing-tickets.contacts-social-label', 'Следить за новостями')}
-                    >
-                        <Icon name={'External'} />
-                        {t('pages.stargazing-tickets.contacts-social-label', 'Следить за новостями')}
-                    </Link>
+                    {/* Col 2: Telegram */}
+                    <div className={styles.contactsItem}>
+                        <Icon
+                            name={'Telegram'}
+                            className={styles.contactsItemIcon}
+                        />
+                        <div className={styles.contactsItemText}>
+                            <p className={styles.contactsItemTitle}>
+                                {t('pages.stargazing-tickets.contacts-telegram-label', 'Написать нам в Telegram')}
+                            </p>
+                            <Link
+                                className={styles.contactsLink}
+                                href={'https://t.me/look_at_stars'}
+                                target={'_blank'}
+                                rel={'noindex nofollow'}
+                            >
+                                {'@look_at_stars'}
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Col 3: Social */}
+                    <div className={styles.contactsItem}>
+                        <Icon
+                            name={'Bell'}
+                            className={styles.contactsItemIcon}
+                        />
+                        <div className={styles.contactsItemText}>
+                            <p className={styles.contactsItemTitle}>
+                                {t('pages.stargazing-tickets.contacts-social-label', 'Следите за новостями')}
+                            </p>
+                            <p className={styles.contactsSocials}>
+                                <Link
+                                    className={styles.contactsLink}
+                                    href={'https://t.me/look_at_stars'}
+                                    target={'_blank'}
+                                    rel={'noindex nofollow'}
+                                >
+                                    {'VK'}
+                                </Link>
+                                {' · '}
+                                <Link
+                                    className={styles.contactsLink}
+                                    href={'https://t.me/look_at_stars'}
+                                    target={'_blank'}
+                                    rel={'noindex nofollow'}
+                                >
+                                    {'Telegram'}
+                                </Link>
+                                {' · '}
+                                <Link
+                                    className={styles.contactsLink}
+                                    href={'https://t.me/look_at_stars'}
+                                    target={'_blank'}
+                                    rel={'noindex nofollow'}
+                                >
+                                    {'Instagram'}
+                                </Link>
+                            </p>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </Container>
 
             <AppFooter />
         </AppLayout>

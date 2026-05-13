@@ -67,18 +67,17 @@
 .optionIconWrap
     width: 56px
     height: 56px
+    border-radius: 50%
     flex-shrink: 0
-    background: rgba(255,255,255,0.04)
-    border: 1px solid rgba(255,255,255,0.1)
-    border-radius: var(--border-radius)
+    background: var(--dropdown-background-color-hover)
     display: flex
     align-items: center
     justify-content: center
 
-    svg
-        width: 32px
-        height: 32px
-        stroke: rgba(255,255,255,0.65)
+.optionIcon
+    width: 32px
+    height: 32px
+    fill: var(--color-primary)
 
 .optionTitle
     font-size: 16px
@@ -233,45 +232,67 @@
             left: 0
             color: var(--color-primary)
 
-.contactsGrid
+.contactsSection
     display: grid
-    grid-template-columns: 1fr 1fr
-    gap: 10px
+    grid-template-columns: 1fr 1fr 1fr
+    gap: 40px
+    align-items: stretch
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         grid-template-columns: 1fr
+        gap: 24px
 
-.contactCard
-    background: var(--container-background-color)
-    box-shadow: var(--container-shadow)
-    border-radius: var(--border-radius)
-    padding: 24px 20px
-    display: flex
-    flex-direction: column
-    gap: 14px
-
-.contactTitle
-    font-size: 16px
-    font-weight: 700
-    margin: 0
-
-.contactDesc
+.contactsDesc
     font-size: 13px
     color: var(--text-color-secondary)
+    margin: 10px 0 16px
+    line-height: 1.5
+
+.contactsItem
+    position: relative
+    display: flex
+    flex-direction: row
+    align-items: center
+    gap: 14px
+
+    &::before
+        content: ''
+        position: absolute
+        left: -20px
+        top: 12px
+        bottom: 12px
+        width: 1px
+        background: var(--input-border-color)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        &::before
+            display: none
+
+.contactsItemIcon
+    width: 36px
+    height: 36px
+    fill: var(--color-primary)
+    flex-shrink: 0
+
+.contactsItemText
+    display: flex
+    flex-direction: column
+    gap: 4px
+
+.contactsItemTitle
+    font-size: 14px
+    font-weight: 600
     margin: 0
 
-.contactLink
-    display: flex
-    align-items: center
-    gap: 8px
+.contactsLink
     font-size: 13px
     color: var(--text-color-secondary)
     text-decoration: none
 
-    svg
-        fill: var(--color-primary)
-        width: 18px
-        height: 18px
-
     &:hover
         color: var(--text-color-primary)
+
+.contactsSocials
+    font-size: 13px
+    color: var(--text-color-secondary)
+    margin: 0
