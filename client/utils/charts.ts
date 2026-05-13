@@ -1,11 +1,11 @@
 import { EChartsOption } from 'echarts'
 
-// Color tokens matching CSS variables of the project
+// Color tokens matching CSS variables from client/styles/theme.css
 export const CHART_COLORS = {
-    background: '#2c2d2e', // --container-background-color
-    border: '#444546', // --input-border-color
-    textPrimary: '#e1e3e6', // --text-color-primary
-    textSecondary: '#76787a' // --text-color-secondary
+    background: '#1c1f2a', // --container-background-color
+    border: '#2a2e45', // --input-border-color
+    textPrimary: '#ffffff', // --text-color-primary
+    textSecondary: '#bdbdbd' // --text-color-secondary
 } as const
 
 /**
