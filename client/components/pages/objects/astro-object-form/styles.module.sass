@@ -1,3 +1,5 @@
+@use '../../../../styles/mixins'
+
 .sections
     display: flex
     justify-content: space-between
@@ -17,9 +19,4 @@
 
 
 .footer
-    border-top: var(--input-border)
-    margin-top: 10px
-    padding-top: 10px
-    display: flex
-    justify-content: flex-end
-    gap: 10px
+    +mixins.form-footer
