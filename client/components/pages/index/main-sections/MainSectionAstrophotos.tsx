@@ -1,5 +1,5 @@
 import React from 'react'
-import { cn } from 'simple-react-ui-kit'
+import { Button, cn } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -18,45 +18,59 @@ export const MainSectionAstrophotos: React.FC<MainSectionAstrophotosProps> = ({ 
     const { t } = useTranslation()
 
     return (
-        <section className={styles.section}>
+        <section className={cn(styles.section, styles.sectionHero)}>
             <div
-                className={styles.background}
-                style={{
-                    backgroundImage: 'url(/images/astrophoto.jpeg)'
-                }}
+                className={styles.sectionBg}
+                style={{ backgroundImage: 'url(/images/astrophoto.jpeg)' }}
             />
-            <div className={cn(styles.centralContainer, styles.photosContainer, 'animate animate-slide-up')}>
-                {photos?.map((photo) => (
-                    <Link
-                        key={photo.id}
-                        href={`/photos/${photo.id}`}
-                        title={createPhotoTitle(photo, t)}
-                        className={styles.photoItem}
-                    >
-                        <Image
-                            src={createMediumPhotoUrl(photo)}
-                            alt={photo.id}
-                            fill={true}
+            <div className={cn(styles.sectionGrid, styles.sectionHeroGrid)}>
+                <div className={cn(styles.sectionText, 'animate')}>
+                    <span className={styles.sectionLabel}>
+                        {t('components.pages.index.main-sections.label-astrophoto', 'Лучший астрономический проект')}
+                    </span>
+                    <h1 className={styles.sectionTitle}>
+                        {t('components.pages.index.main-sections.hero-title', 'СМОТРИ НА ЗВЁЗДЫ')}
+                    </h1>
+                    <p className={styles.sectionDesc}>
+                        {t(
+                            'components.pages.index.main-sections.hero-description',
+                            'Астрономический проект в Оренбуржье — выезды под звёздное небо, собственная обсерватория и архив астрофотографий.'
+                        )}
+                    </p>
+                    <div className={styles.heroCta}>
+                        <Button
+                            mode={'primary'}
+                            label={t('components.pages.index.main-sections.hero-cta-stargazing', 'Записаться на выезд')}
+                            link={'/stargazing/tickets'}
                         />
-                    </Link>
-                ))}
-            </div>
-
-            <div className={styles.bottomContainer}>
-                <h2 className={'animate'}>{t('components.pages.index.main-sections.astrophoto', 'Астрофото')}</h2>
-                <p className={'animate'}>
-                    {t(
-                        'components.pages.index.main-sections.astrophoto-description',
-                        'Коллекция снимков космоса, сделанных на нашей обсерватории, раскрывающая красоту далеких галактик, туманностей и звездных скоплений.'
+                        <Button
+                            mode={'secondary'}
+                            label={t('components.pages.index.main-sections.hero-cta-photos', 'Смотреть фотографии')}
+                            link={'/photos'}
+                        />
+                    </div>
+                </div>
+                <div className={cn(styles.sectionRightCenter, 'animate')}>
+                    {photos && photos.length > 0 && (
+                        <div className={styles.photoCol}>
+                            {photos.map((photo) => (
+                                <Link
+                                    key={photo.id}
+                                    href={`/photos/${photo.id}`}
+                                    title={createPhotoTitle(photo, t)}
+                                    className={styles.photoThumb}
+                                >
+                                    <Image
+                                        src={createMediumPhotoUrl(photo)}
+                                        alt={createPhotoTitle(photo, t)}
+                                        fill={true}
+                                        style={{ objectFit: 'cover' }}
+                                    />
+                                </Link>
+                            ))}
+                        </div>
                     )}
-                </p>
-                <Link
-                    href={'/photos'}
-                    title={t('components.pages.index.main-sections.astrophoto', 'Астрофото')}
-                    className={'animate'}
-                >
-                    {t('components.pages.index.main-sections.read-more', 'Подробнее')}
-                </Link>
+                </div>
             </div>
         </section>
     )

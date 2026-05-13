@@ -1,101 +1,160 @@
 @use '../../../../styles/variables' as variables
 
 .section
-    height: 100%
     position: relative
+    height: 100vh
+    width: 100%
+    display: flex
+    flex-direction: column
+    justify-content: flex-end
 
-    .background
-        background-position: center
-        background-repeat: no-repeat
-        background-size: cover
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        height: 100svh
+
+.sectionHero
+    justify-content: center
+
+.sectionBg
+    position: absolute
+    top: 0
+    left: 50%
+    transform: translateX(-50%)
+    width: 100vw
+    height: 100%
+    background-position: center
+    background-repeat: no-repeat
+    background-size: cover
+
+    &::after
+        content: ''
         position: absolute
-        height: 100%
-        width: 100%
-        opacity: .8
+        inset: 0
+        background: linear-gradient(to bottom, rgba(17,19,24,0.3) 0%, rgba(17,19,24,0.75) 50%, rgba(17,19,24,0.97) 100%)
 
-    .centralContainer
-        position: absolute
-        width: 100%
-        height: 70%
-        display: flex
-        justify-content: center
-        align-items: center
-        gap: 10%
+.sectionGrid
+    position: relative
+    z-index: 1
+    display: grid
+    grid-template-columns: 1fr 1fr
+    gap: 32px
+    align-items: flex-end
+    max-width: var(--width-max)
+    width: 100%
+    margin: 0 auto
+    padding: 48px 16px 23%
 
-        @media only screen and (max-width: variables.$mobileMaxWidth)
-            top: 50px
-            gap: 30px
-            flex-direction: column
-            height: 50%
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: 1fr
+        padding: 28px 16px
 
-        &.photosContainer
-            gap: 5%
-            padding: 0 10%
+.sectionHeroGrid
+    align-items: center
+    padding-top: 88px
+    padding-bottom: 48px
 
-        .item
-            min-width: 120px
-            text-align: center
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        padding-top: 100px
+        padding-bottom: 32px
 
-        .photoItem
-            display: block
-            width: 30%
-            height: 50%
-            position: relative
-            border: .5px solid #FFFFFF
+.sectionLabel
+    font-size: 11px
+    letter-spacing: 0.12em
+    text-transform: uppercase
+    color: var(--color-primary)
+    margin-bottom: 12px
+    font-weight: 600
+    display: block
 
-            @media only screen and (max-width: variables.$mobileMaxWidth)
-                width: 100%
+.sectionTitle
+    font-size: 2.4rem
+    font-weight: 900
+    text-transform: uppercase
+    line-height: 1.08
+    margin: 0 0 16px
+    color: #fff
 
-                &:nth-child(3)
-                    display: none
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        font-size: 1.7rem
 
-            img
-                width: 100%
-                height: 100%
-                object-fit: cover
+.sectionDesc
+    font-size: 14px
+    color: rgba(255,255,255,0.65)
+    max-width: 480px
+    line-height: 1.65
+    margin: 0 0 28px
 
-        .counter
-            font-size: 5em
-            font-weight: 700
+.heroCta
+    display: flex
+    gap: 12px
+    flex-wrap: wrap
 
-            @media only screen and (max-width: variables.$mobileMaxWidth)
-                font-size: 4em
+.sectionRight
+    display: flex
+    align-items: flex-end
+    justify-content: flex-end
 
-    .bottomContainer
-        position: absolute
-        bottom: 10%
-        left: 50px
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        display: none
 
-        h2
-            font-size: 30px !important
-            text-transform: uppercase
-            transform: translate3d(0px, 0px, 0px)
+.sectionRightCenter
+    display: flex
+    align-items: center
+    justify-content: flex-end
 
-        p
-            max-width: 500px
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        display: none
 
-        a
-            text-transform: uppercase
-            display: inline-block
-            position: relative
-            width: auto
-            padding: 10px 15px
-            margin: 10px 0 0
-            border: 2px solid #fff
-            color: #FFF
+.statsRow
+    display: flex
+    flex-direction: column
+    gap: 28px
+    text-align: right
 
-            &:hover
-                background-color: #FFFFFF
-                color: #000
+.statsRowHorizontal
+    display: flex
+    flex-direction: row
+    gap: 40px
+    text-align: center
+    align-items: flex-end
+    justify-content: flex-end
 
-    :global(.animate)
-        opacity: 0
-        transform: translateY(20px)
-        transition: opacity 1.5s ease, transform 1.5s ease
+.statValue
+    font-size: 3.2rem
+    font-weight: 800
+    color: #fff
+    line-height: 1
+    display: block
 
-        &:global(.animate-slide-up)
-            transform: translateY(-20px)
+.statLabel
+    font-size: 11px
+    color: rgba(255,255,255,0.5)
+    text-transform: uppercase
+    letter-spacing: 0.1em
+    margin-top: 4px
+    display: block
 
-        &:global(.visible)
-            opacity: 1
-            transform: translateY(0)
+.photoCol
+    display: flex
+    flex-direction: column
+    gap: 8px
+    height: 420px
+    width: 100%
+
+.photoThumb
+    flex: 1
+    position: relative
+    border-radius: var(--border-radius)
+    overflow: hidden
+    border: 1px solid rgba(255,255,255,0.08)
+
+    &:hover
+        border-color: rgba(255,255,255,0.2)
+
+:global(.animate)
+    opacity: 0
+    transform: translateY(24px)
+    transition: opacity 1.2s ease, transform 1.2s ease
+
+    &:global(.visible)
+        opacity: 1
+        transform: translateY(0)
