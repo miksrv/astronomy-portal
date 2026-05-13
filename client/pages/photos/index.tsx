@@ -128,7 +128,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}
-                        label={t('pages.photos.create_button', 'Создать')}
+                        label={t('pages.photos.create_button', 'Добавить')}
                         link={'/photos/form'}
                     />
                 )}

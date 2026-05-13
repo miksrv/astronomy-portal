@@ -41,10 +41,7 @@ const StargazingRulesPage: NextPage<object> = () => {
                 )}
             </div>
 
-            <h2>
-                {t('pages.stargazing-rules.prohibited-title', 'Что нельзя делать на астровыездах')}
-                {':'}
-            </h2>
+            <h2>{t('pages.stargazing-rules.prohibited-title', 'Что нельзя делать на астровыездах')}</h2>
 
             <Container>
                 <ul style={{ listStyle: 'decimal', margin: 0, padding: '0 20px' }}>
@@ -98,10 +95,7 @@ const StargazingRulesPage: NextPage<object> = () => {
                 </ul>
             </Container>
 
-            <h2>
-                {t('pages.stargazing-rules.recommendations-title', 'Рекомендации для участников астровыездов')}
-                {':'}
-            </h2>
+            <h2>{t('pages.stargazing-rules.recommendations-title', 'Рекомендации для участников астровыездов')}</h2>
 
             <Container>
                 <ul style={{ listStyle: 'decimal', margin: 0, padding: '0 20px' }}>
