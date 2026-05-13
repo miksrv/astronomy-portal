@@ -10,6 +10,7 @@ import { Container } from 'simple-react-ui-kit'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
+import { CHART_COLORS, getBaseChartConfig } from '@/utils/charts'
 import { formatDate } from '@/utils/dates'
 import { formatObjectName } from '@/utils/strings'
 
@@ -35,10 +36,6 @@ type MarkAreaType = any
 
 export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = LAT, lon = LON }) => {
     const { t } = useTranslation()
-
-    const backgroundColor = '#2c2d2e' // --container-background-color
-    const borderColor = '#444546' // --input-border-color
-    const textSecondaryColor = '#76787a' // --text-color-secondary
 
     const date = dayjs()
 
@@ -125,21 +122,23 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = 
         return { chartData: data, loading: false, markAreas: twilightPhases }
     }, [object?.ra, object?.dec, lat, lon])
 
-    const options: EChartsOption = useMemo(
-        () => ({
+    const options: EChartsOption = useMemo(() => {
+        const base = getBaseChartConfig()
+
+        return {
+            ...base,
+            legend: { show: false },
+            loading,
             grid: {
                 left: 10,
                 right: 10,
                 top: 10,
                 bottom: 10,
                 containLabel: true,
-                borderColor: borderColor
+                borderColor: CHART_COLORS.border
             },
-            loading,
             tooltip: {
-                trigger: 'axis',
-                backgroundColor,
-                borderColor,
+                ...(base.tooltip as object),
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 formatter: (params: any) => {
                     const tooltipContent: string[] = []
@@ -176,72 +175,35 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = 
                 }
             },
             xAxis: {
-                type: 'time',
-                axisTick: {
-                    show: true
-                },
-                axisLabel: {
-                    show: true,
-                    color: textSecondaryColor,
-                    fontSize: '11px'
-                },
-                axisLine: {
-                    show: true,
-                    lineStyle: {
-                        color: borderColor
-                    }
-                },
-                splitLine: {
-                    show: true,
-                    lineStyle: {
-                        width: 1,
-                        color: borderColor
-                    }
-                }
+                ...(base.xAxis as object),
+                axisTick: { show: true }
             },
             yAxis: {
-                type: 'value',
+                ...(base.yAxis as object),
                 name: `${t('components.common.visibility-chart.height', 'Высота')} (°)`,
                 min: 0,
                 max: 90,
                 interval: 10,
-                axisLine: {
-                    show: true,
-                    lineStyle: {
-                        color: borderColor
-                    }
-                },
                 axisLabel: {
-                    show: true,
-                    formatter: '{value}°',
-                    color: textSecondaryColor,
-                    fontSize: '11px'
-                },
-                splitLine: {
-                    show: true,
-                    lineStyle: {
-                        width: 1,
-                        color: borderColor
-                    }
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    ...(base.yAxis as any).axisLabel,
+                    formatter: '{value}°'
                 }
             },
             series: [
                 {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    ...(base.series as any)[0],
                     name: t('components.common.visibility-chart.height', 'Высота'),
-                    type: 'line',
                     data: chartData,
-                    showSymbol: false,
-                    smooth: false,
-                    connectNulls: true,
                     markArea: {
                         silent: true,
                         data: markAreas
                     }
                 }
             ]
-        }),
-        [chartData, markAreas, loading, t]
-    )
+        }
+    }, [chartData, markAreas, loading, t])
 
     return (
         <Container className={styles.container}>
