@@ -1,3 +1,5 @@
+@use '../../styles/mixins'
+
 .tableContainer
     padding: 2px !important
 
@@ -17,40 +19,16 @@
     justify-content: flex-end
 
 .statusDraft
-    display: inline-block
-    padding: 2px 10px
-    border-radius: 12px
-    font-size: 13px
-    font-weight: 500
-    background-color: var(--table-header-background) !important
-    color: var(--text-color-secondary)
+    +mixins.status-badge(var(--table-header-background), var(--text-color-secondary), true)
 
 .statusSending
-    display: inline-block
-    padding: 2px 10px
-    border-radius: 12px
-    font-size: 13px
-    font-weight: 500
-    background: var(--color-main-background) !important
-    color: var(--color-main)
+    +mixins.status-badge(var(--color-main-background), var(--color-main), true)
 
 .statusCompleted
-    display: inline-block
-    padding: 2px 10px
-    border-radius: 12px
-    font-size: 13px
-    font-weight: 500
-    background: var(--color-green-background) !important
-    color: var(--color-green)
+    +mixins.status-badge(var(--color-green-background), var(--color-green), true)
 
 .statusPaused
-    display: inline-block
-    padding: 2px 10px
-    border-radius: 12px
-    font-size: 13px
-    font-weight: 500
-    background: var(--color-orange-background) !important
-    color: var(--color-orange)
+    +mixins.status-badge(var(--color-primary-background), var(--color-primary), true)
 
 // Form page styles
 .formContainer
@@ -175,24 +153,12 @@
     padding-top: 16px
 
 .limitOk
-    display: inline-block
-    padding: 2px 10px
-    border-radius: 12px
-    font-size: 13px
-    font-weight: 500
-    background: var(--color-green-background)
-    color: var(--color-green)
+    +mixins.status-badge(var(--color-green-background), var(--color-green))
 
 .limitHit
-    display: inline-block
-    padding: 2px 10px
-    border-radius: 12px
-    font-size: 13px
-    font-weight: 500
-    background: var(--color-red-background)
-    color: var(--color-red)
+    +mixins.status-badge(var(--color-red-background), var(--color-red))
 
 .countdown
     font-variant-numeric: tabular-nums
     font-weight: 600
-    color: var(--color-orange)
+    color: var(--color-primary)

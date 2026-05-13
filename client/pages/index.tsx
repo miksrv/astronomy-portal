@@ -16,30 +16,6 @@ const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
     const { t } = useTranslation()
 
     useEffect(() => {
-        const sections = document.querySelectorAll('section')
-
-        const setSectionHeight = () => {
-            // Read header height from the CSS custom property defined in theme.css
-            const headerHeightPx =
-                parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height'), 10) || 50
-
-            const windowHeight = window.innerHeight
-            const sectionHeight = windowHeight - headerHeightPx
-
-            sections.forEach((section) => {
-                ;(section as HTMLElement).style.height = `${sectionHeight}px`
-            })
-        }
-
-        setSectionHeight()
-        window.addEventListener('resize', setSectionHeight)
-
-        return () => {
-            window.removeEventListener('resize', setSectionHeight)
-        }
-    }, [])
-
-    useEffect(() => {
         const headings = document.querySelectorAll('.animate')
 
         const options = {
@@ -65,7 +41,7 @@ const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
 
     return (
         <AppLayout
-            fullWidth={true}
+            noTopMargin={true}
             canonical={''}
             title={t('pages.index.title', 'Проект "Смотри на звёзды"')}
             description={t(
