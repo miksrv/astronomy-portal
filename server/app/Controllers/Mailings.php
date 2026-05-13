@@ -510,7 +510,7 @@ class Mailings extends ResourceController
             if ($audienceType === 'event' && !empty($mailing->audience_event_id)) {
                 $db    = \Config\Database::connect();
                 $users = $db->table('events_users eu')
-                    ->select('DISTINCT u.id, u.email, COALESCE(u.locale, \'ru\') as locale')
+                    ->select('DISTINCT u.id, u.email, COALESCE(u.locale, \'ru\') as locale', false)
                     ->join('users u', 'eu.user_id = u.id')
                     ->where('eu.event_id', $mailing->audience_event_id)
                     ->where('eu.deleted_at IS NULL')
