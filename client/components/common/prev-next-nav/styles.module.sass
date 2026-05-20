@@ -1,0 +1,39 @@
+@use '../../../styles/variables' as variables
+
+.nav
+    display: flex
+    justify-content: space-around
+    gap: 15px
+    margin-top: 16px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column
+
+.link
+    text-decoration: none
+    width: 100%
+    background: rgb(255, 255, 255, .03)
+    border-radius: 6px
+    padding: 10px
+    transition: background-color 0.25s ease-in-out
+    display: flex
+    justify-content: center
+    align-items: center
+    gap: 20px
+    color: inherit
+
+    &:hover
+        background: rgb(255, 255, 255, .07)
+
+.linkBody
+    text-align: center
+
+.subtitle
+    font-size: var(--font-size-small)
+    color: var(--text-color-secondary)
+
+.icon
+    width: 40px
+    height: 40px
+    fill: var(--link-color-hover)
+    flex-shrink: 0
