@@ -18,7 +18,7 @@ export const MainSectionObservatory: React.FC = () => {
         <section className={styles.section}>
             <div
                 className={styles.sectionBg}
-                style={{ backgroundImage: 'url(/photos/observatory-1.jpeg)' }}
+                style={{ backgroundImage: 'url(/images/index-observatory.png)' }}
             />
             <div className={styles.sectionGrid}>
                 <div className={cn(styles.sectionText, 'animate')}>

@@ -21,7 +21,7 @@ export const MainSectionAstrophotos: React.FC<MainSectionAstrophotosProps> = ({ 
         <section className={cn(styles.section, styles.sectionHero)}>
             <div
                 className={styles.sectionBg}
-                style={{ backgroundImage: 'url(/images/astrophoto.jpeg)' }}
+                style={{ backgroundImage: 'url(/images/index-hero.png)' }}
             />
             <div className={cn(styles.sectionGrid, styles.sectionHeroGrid)}>
                 <div className={cn(styles.sectionText, 'animate')}>
