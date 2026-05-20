@@ -38,35 +38,35 @@ const StargazingFAQPage: NextPage<object> = () => {
 
     const faqItems: FaqItem[] = [
         {
-            question: tPage('questions.where.question', '❓Как узнать, где проходит?'),
+            question: tPage('questions.where.question', 'Как узнать, где проходит?'),
             answer: tPage(
                 'questions.where.answer',
                 'Наши астровыезды всегда проходят за городом. Обычно в пределах 40-70 км. Мы уезжаем от засветки и городских огней, чтобы увидеть звёзды. Точная локация доступна вам после регистрации. Если вдруг вы потеряли место локации - вернитесь на страницу регистрации снова по той же ссылке. Там есть геолокация - Яндекс.Карта и Google.Карта.'
             )
         },
         {
-            question: tPage('questions.registration.question', '❓Можно ли приехать без регистрации?'),
+            question: tPage('questions.registration.question', 'Можно ли приехать без регистрации?'),
             answer: tPage(
                 'questions.registration.answer',
                 'Нет, нельзя. Регистрация обязательна, так как она позволяет нам планировать мероприятие, уведомлять участников о возможных изменениях и обеспечивать комфорт для всех.'
             )
         },
         {
-            question: tPage('questions.qr.question', '❓Зачем нужен QR-код?'),
+            question: tPage('questions.qr.question', 'Зачем нужен QR-код?'),
             answer: tPage(
                 'questions.qr.answer',
                 'QR-код – это ваш входной билет на наше мероприятие. Его будут проверять на въезде. Просим приготовить заранее, чтобы не создавать пробок на месте. Если у вас нет QR-кода – мы вынуждены вам отказать. QR-код – это наш способ регулировать количество участников астровыезда на площадке. Наш природный ланшафт, да и физические возможности команды имеют границы. Просим уважать это и отнестись с пониманием.'
             )
         },
         {
-            question: tPage('questions.what-to-bring.question', '❓Что брать с собой?'),
+            question: tPage('questions.what-to-bring.question', 'Что брать с собой?'),
             answer: tPage(
                 'questions.what-to-bring.answer',
                 'Для комфортного пребывания на астроплощадке обязательно иметь с собой теплую одежду (мы в степи, ночью там ветер и холодно), туристический коврик, походные стулья, пледы. Рекомендуем также - термосы с чаем/кофе и бутерброды. Советуем взять репеллент от насекомых. Кальяны, шашлыки, алкоголь, сигареты – под запретом! А еще у нас самая чистая площадка. После астровыезда не находим ни одного фантика и бумажки и очень благодарим вас за это!'
             )
         },
         {
-            question: tPage('questions.no-car.question', '❓У меня нет машины, что делать?'),
+            question: tPage('questions.no-car.question', 'У меня нет машины, что делать?'),
             answer: (
                 <>
                     {tPage(
@@ -100,7 +100,7 @@ const StargazingFAQPage: NextPage<object> = () => {
         {
             question: tPage(
                 'questions.public-transport.question',
-                '❓Можно ли добраться до места проведения астровыезда на общественном транспорте?'
+                'Можно ли добраться до места проведения астровыезда на общественном транспорте?'
             ),
             answer: tPage(
                 'questions.public-transport.answer',
@@ -108,14 +108,14 @@ const StargazingFAQPage: NextPage<object> = () => {
             )
         },
         {
-            question: tPage('questions.start-time.question', '❓Во сколько начало?'),
+            question: tPage('questions.start-time.question', 'Во сколько начало?'),
             answer: tPage(
                 'questions.start-time.answer',
                 'В каждом анонсе астровыезда есть конкретное время начала. В этот раз это 21.30. Сбор гостей на площадке объявлен с 20.00 до 21.00. Это означает, что мы просим вас приехать к нам заранее – послушать музыку, сфотографироваться с Луной и в подсолнухах, посмотреть на закаты, надышаться степью. И что важно, припарковать автомобиль и не создавать пробок. Мы очень это ценим!'
             )
         },
         {
-            question: tPage('questions.price.question', '❓Сколько стоит?'),
+            question: tPage('questions.price.question', 'Сколько стоит?'),
             answer: (
                 <>
                     {tPage(
@@ -135,49 +135,49 @@ const StargazingFAQPage: NextPage<object> = () => {
             )
         },
         {
-            question: tPage('questions.duration.question', '❓Сколько длится астровыезд?'),
+            question: tPage('questions.duration.question', 'Сколько длится астровыезд?'),
             answer: tPage(
                 'questions.duration.answer',
                 'В среднем официальная программа от начала лекции - до наблюдений в телескопы длится 2 часа. Но для вас они пролетят незаметно, гарантируем. А дальше вы сами выбираете – оставаться ли смотреть на небо с телескопами, или возвращаться домой. примерное время окончания: 00:30.'
             )
         },
         {
-            question: tPage('questions.weather.question', '❓Что делать, если будет облачно или дождь?'),
+            question: tPage('questions.weather.question', 'Что делать, если будет облачно или дождь?'),
             answer: tPage(
                 'questions.weather.answer',
                 'Если прогноз погоды неблагоприятный (облака или осадки), мероприятие может быть отменено или перенесено. Мы всегда предупреждаем участников о таких изменениях через наш Telegram-канал, поэтому обязательно следите за обновлениями.'
             )
         },
         {
-            question: tPage('questions.telescopes.question', '❓Нужно ли приносить собственный телескоп?'),
+            question: tPage('questions.telescopes.question', 'Нужно ли приносить собственный телескоп?'),
             answer: tPage(
                 'questions.telescopes.answer',
                 'Нет, приносить телескоп не обязательно. У нас всегда есть несколько телескопов для общего пользования. Если у вас есть свой инструмент, вы можете взять его, и наши эксперты помогут вам с настройкой и использованием.'
             )
         },
         {
-            question: tPage('questions.kids.question', '❓Можно ли детям?'),
+            question: tPage('questions.kids.question', 'Можно ли детям?'),
             answer: tPage(
                 'questions.kids.answer',
                 'Можно и нужно! Очень рады, когда подрастающее поколение интересуется наукой! Но есть рекомендованный возраст – от 6 лет. Поверьте нашему опыту.'
             )
         },
         {
-            question: tPage('questions.photo.question', '❓Можно ли фотографировать?'),
+            question: tPage('questions.photo.question', 'Можно ли фотографировать?'),
             answer: tPage(
                 'questions.photo.answer',
                 'Конечно! Вы можете делать фотографии, но просьба соблюдать правила этикета, чтобы не мешать другим участникам. Не используйте яркие вспышки или фонари, так как это может испортить ночное наблюдение.'
             )
         },
         {
-            question: tPage('questions.merch.question', '❓Как и где купить ваш мерч?'),
+            question: tPage('questions.merch.question', 'Как и где купить ваш мерч?'),
             answer: tPage(
                 'questions.merch.answer',
                 'На астрополяну везем худи, футболки, автонаклейки, открытки и стикерпаки. Хотите поддержать проект - купите наш мерч!'
             )
         },
         {
-            question: tPage('questions.cancel.question', '❓Я зарегистрировался и не могу поехать. Что делать?'),
+            question: tPage('questions.cancel.question', 'Я зарегистрировался и не могу поехать. Что делать?'),
             answer: tPage(
                 'questions.cancel.answer',
                 'Просто отмените бронирование по прежней ссылке. На сайте появятся свободные слоты и люди смогут зарегистрироваться.'
@@ -186,7 +186,7 @@ const StargazingFAQPage: NextPage<object> = () => {
         {
             question: tPage(
                 'questions.more-people.question',
-                '❓Я зарегистрировал 1\\2\\3\\4\\5 человек, а можно ли взять больше?'
+                'Я зарегистрировал 1\\2\\3\\4\\5 человек, а можно ли взять больше?'
             ),
             answer: tPage(
                 'questions.more-people.answer',
@@ -196,7 +196,7 @@ const StargazingFAQPage: NextPage<object> = () => {
         {
             question: tPage(
                 'questions.late-registration.question',
-                '❓Регистрация закончилась и я не успел (а). Можно я приеду? Пожалуйста!'
+                'Регистрация закончилась и я не успел (а). Можно я приеду? Пожалуйста!'
             ),
             answer: tPage(
                 'questions.late-registration.answer',
@@ -204,7 +204,7 @@ const StargazingFAQPage: NextPage<object> = () => {
             )
         },
         {
-            question: tPage('questions.support.question', '❓Вы мне нравитесь! Как вас поддержать?'),
+            question: tPage('questions.support.question', 'Вы мне нравитесь! Как вас поддержать?'),
             answer: (
                 <>
                     {tPage('questions.support.answer', 'У нас есть')}{' '}
@@ -224,7 +224,7 @@ const StargazingFAQPage: NextPage<object> = () => {
             )
         },
         {
-            question: tPage('questions.feedback.question', '❓Где написать про вас отзыв?'),
+            question: tPage('questions.feedback.question', 'Где написать про вас отзыв?'),
             answer: tPage(
                 'questions.feedback.answer',
                 'Во всех социальных сетях наша группа называется "Смотри на звёзды". Мы ценим обратную связь и всегда читаем ваши отзывы. Спасибо вам за них!'
@@ -292,7 +292,7 @@ const StargazingFAQPage: NextPage<object> = () => {
                 <div className={styles.faqList}>
                     {faqItems.map((item, idx) => {
                         const isOpen = openItems.has(idx)
-                        const questionText = item.question.replace(/^❓\s*/u, '')
+                        const questionText = item.question.replace(/^\s*/u, '')
 
                         return (
                             <div

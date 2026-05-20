@@ -171,7 +171,7 @@ const StargazingHowToPage: NextPage<object> = () => {
                         title={t('menu.stargazing-faq', 'Часто задаваемые вопросы')}
                         style={{ margin: '0 5px' }}
                     >
-                        {t('menu.stargazing-faq')}
+                        {t('menu.stargazing-faq', 'Часто задаваемые вопросы')}
                     </Link>
                     {tPage('telegram', 'или пишите в нашем Telegram-канале')}
                     <Link
