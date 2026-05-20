@@ -22,7 +22,7 @@ export const ReviewsWidget: React.FC = () => {
 
     return (
         <>
-            <h2>{t('pages.stargazing.reviews', 'Отзывы участников')}</h2>
+            <h2>{t('pages.stargazing.reviews', 'Отзывы')}</h2>
 
             <Carousel
                 options={{ dragFree: true }}
