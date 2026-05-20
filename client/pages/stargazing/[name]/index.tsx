@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { getCookie } from 'cookies-next'
-import { Button, Container, Icon } from 'simple-react-ui-kit'
+import { Button, Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Head from 'next/head'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
@@ -12,13 +11,13 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
-import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
+import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
 import { EventItemData, EventPhotoUploader, EventReviews } from '@/components/pages/stargazing'
 import { formatDate } from '@/utils/dates'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
 import { removeMarkdown, sliceText } from '@/utils/strings'
 
-import styles from './styles.module.sass'
+import styles from '../styles.module.sass'
 
 interface StargazingItemPageProps {
     eventId: string
@@ -263,37 +262,26 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 
                 <EventReviews eventId={eventId} />
 
-                <section className={styles.footerLinks}>
-                    {adjacentEvents?.previousEvent && (
-                        <Link
-                            href={`/stargazing/${adjacentEvents?.previousEvent?.id}`}
-                            title={adjacentEvents?.previousEvent?.title}
-                        >
-                            <Icon name={'KeyboardLeft'} />
-                            <div className={styles.linkName}>
-                                <div>{adjacentEvents?.previousEvent?.title}</div>
-                                <div className={styles.date}>
-                                    {formatDate(adjacentEvents?.previousEvent?.date?.date, 'D MMMM YYYY')}
-                                </div>
-                            </div>
-                        </Link>
-                    )}
-
-                    {adjacentEvents?.nextEvent && (
-                        <Link
-                            href={`/stargazing/${adjacentEvents?.nextEvent?.id}`}
-                            title={adjacentEvents?.nextEvent?.title}
-                        >
-                            <div className={styles.linkName}>
-                                <div>{adjacentEvents?.nextEvent?.title}</div>
-                                <div className={styles.date}>
-                                    {formatDate(adjacentEvents?.nextEvent?.date?.date, 'D MMMM YYYY')}
-                                </div>
-                            </div>
-                            <Icon name={'KeyboardRight'} />
-                        </Link>
-                    )}
-                </section>
+                <PrevNextNav
+                    prev={
+                        adjacentEvents?.previousEvent
+                            ? {
+                                  href: `/stargazing/${adjacentEvents.previousEvent.id}`,
+                                  title: adjacentEvents.previousEvent.title,
+                                  subtitle: formatDate(adjacentEvents.previousEvent.date?.date, 'D MMMM YYYY')
+                              }
+                            : null
+                    }
+                    next={
+                        adjacentEvents?.nextEvent
+                            ? {
+                                  href: `/stargazing/${adjacentEvents.nextEvent.id}`,
+                                  title: adjacentEvents.nextEvent.title,
+                                  subtitle: formatDate(adjacentEvents.nextEvent.date?.date, 'D MMMM YYYY')
+                              }
+                            : null
+                    }
+                />
 
                 <AppFooter />
             </AppLayout>
