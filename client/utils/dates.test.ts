@@ -1,6 +1,6 @@
 import { TFunction } from 'i18next'
 
-import { formatDateFromUnixUTC, getLocalizedTimeFromSec, getSecondsUntilUTCDate } from './dates'
+import { formatDateFromUnixUTC, formatYearMonth, getLocalizedTimeFromSec, getSecondsUntilUTCDate } from './dates'
 
 const mockT: TFunction = ((key: string, defaultValue: string, options?: { count?: number }) =>
     defaultValue?.replace('{{count}}', String(options?.count ?? ''))) as TFunction
@@ -102,6 +102,24 @@ describe('dates', () => {
             const timestampMs = 1700000000000
             const result = formatDateFromUnixUTC(timestampMs, 'YYYY')
             expect(result).toMatch(/^\d{4}$/)
+        })
+    })
+
+    describe('formatYearMonth', () => {
+        it('formats date in Russian with capitalized month', () => {
+            expect(formatYearMonth('2019-07', 'ru')).toBe('Июль 2019')
+        })
+
+        it('formats date in English', () => {
+            expect(formatYearMonth('2022-03', 'en')).toBe('March 2022')
+        })
+
+        it('formats January correctly in Russian', () => {
+            expect(formatYearMonth('2020-01', 'ru')).toBe('Январь 2020')
+        })
+
+        it('formats December correctly in Russian', () => {
+            expect(formatYearMonth('2023-12', 'ru')).toBe('Декабрь 2023')
         })
     })
 })

@@ -92,12 +92,12 @@
     --button-primary-background-hover: #363c78;
     --button-primary-background-active: #282d60;
 
-    --button-secondary-background: rgba(255, 255, 255, 0.1);
-    --button-secondary-background-hover: rgba(255, 255, 255, 0.12);
-    --button-secondary-background-active: rgba(255, 255, 255, 0.14);
-    --button-secondary-color: var(--text-color-primary);
-    --button-secondary-color-hover: var(--text-color-primary);
-    --button-secondary-color-active: var(--text-color-primary);
+    --button-secondary-background: #2f314d;
+    --button-secondary-background-hover: #37395b;
+    --button-secondary-background-active: #292b43;
+    --button-secondary-color: #6e6cd9;
+    --button-secondary-color-hover: #7e7ce0;
+    --button-secondary-color-active: #6564d0;
 
     /* Popout */
     --popout-shadow: 0 0 2px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.08);

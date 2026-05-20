@@ -73,12 +73,13 @@ export const getLocalizedTimeFromSec = (sec: number, full: boolean = false, t: T
     return `${h}:${m}:${s}`
 }
 
-/**
- *
- * @param startDate
- * @param endDate
- * @param enLocale
- */
+export const formatYearMonth = (date: string, locale: string): string => {
+    const [year, month] = date.split('-').map(Number)
+    const d = new Date(year, month - 1)
+    const monthName = new Intl.DateTimeFormat(locale, { month: 'long' }).format(d)
+    return `${monthName.charAt(0).toUpperCase()}${monthName.slice(1)} ${year}`
+}
+
 export const getDateTimeFormat = (startDate?: string, endDate?: string, enLocale?: boolean): string => {
     const start = dayjs(startDate)
     const end = dayjs(endDate)
