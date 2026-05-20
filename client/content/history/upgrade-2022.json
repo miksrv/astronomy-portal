@@ -1,0 +1,99 @@
+{
+    "slug": "upgrade-2022",
+    "date": "2022-03",
+    "title": "Апгрейд: ASI 6200MM и колесо фильтров",
+    "title_en": "Upgrade: ASI 6200MM and Filter Wheel",
+    "summary": "Переход с цветной планетарной камеры на полноформатный монохромный датчик ZWO ASI 6200MM Pro.",
+    "summary_en": "Switching from a color planetary camera to the full-frame monochrome ZWO ASI 6200MM Pro.",
+    "coverPhoto": "history/upgrade-2022/cover.jpg",
+    "sections": [
+        {
+            "blocks": [
+                {
+                    "type": "text",
+                    "content": "Три года съёмки на ASI 294MC дали хорошие результаты, но цветная матрица всегда проигрывает монохромному датчику по чувствительности в узкополосных фильтрах. Весной 2022-го решился на апгрейд: новая камера и колесо фильтров на 8 позиций.",
+                    "content_en": "Three years on the ASI 294MC color camera gave solid results, but a color sensor will always lose to monochrome when it comes to narrowband filter sensitivity. Spring 2022 was the time to upgrade: a new camera and an 8-position filter wheel."
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/upgrade-2022/001.jpg",
+                            "width": 1920,
+                            "height": 1280,
+                            "caption": "ZWO ASI 6200MM Pro",
+                            "caption_en": "ZWO ASI 6200MM Pro"
+                        },
+                        {
+                            "url": "history/upgrade-2022/002.jpg",
+                            "width": 1920,
+                            "height": 1280,
+                            "caption": "ZWO EFW 8x31mm — колесо фильтров",
+                            "caption_en": "ZWO EFW 8-position filter wheel"
+                        },
+                        {
+                            "url": "history/upgrade-2022/003.jpg",
+                            "width": 1920,
+                            "height": 1280,
+                            "caption": "Набор фильтров: L, R, G, B, Ha, OIII, SII",
+                            "caption_en": "Filter set: L, R, G, B, Hα, OIII, SII"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Сборка и балансировка",
+            "heading_en": "Assembly and Balance",
+            "blocks": [
+                {
+                    "type": "text",
+                    "content": "Замена камеры потребовала полной переборки фокусировочного узла и перебалансировки монтировки — 6200MM заметно тяжелее предшественника. Параллельно установили электронный фокусер ZWO EAF для автофокусировки по звёздам.",
+                    "content_en": "Swapping the camera required a full teardown of the focuser assembly and rebalancing the mount — the 6200MM is noticeably heavier. At the same time, the ZWO EAF electronic auto-focuser was installed for star-based autofocus."
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/upgrade-2022/010.jpg",
+                            "width": 1920,
+                            "height": 1280,
+                            "caption": "Сборка связки: камера + EAF + колесо фильтров",
+                            "caption_en": "Assembling the stack: camera + EAF + filter wheel"
+                        },
+                        {
+                            "url": "history/upgrade-2022/011.jpg",
+                            "width": 1920,
+                            "height": 1280,
+                            "caption": "Балансировка монтировки после замены",
+                            "caption_en": "Rebalancing the mount after the swap"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Первый свет",
+            "heading_en": "First Light",
+            "blocks": [
+                {
+                    "type": "text",
+                    "content": "Первый снимок на новой камере получился на третью ночь после установки. Разница с цветной матрицей в узкополосных фильтрах оказалась разительной — туманность Конская Голова в Hα за 4 часа экспозиции выдала детали, которые на 294MC потребовали бы вдвое больше времени.",
+                    "content_en": "First light came on the third night after installation. The difference from the color sensor in narrowband filters was striking — the Horsehead Nebula in Hα over 4 hours of integration showed detail that would have taken twice as long with the 294MC."
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/upgrade-2022/020.jpg",
+                            "width": 1920,
+                            "height": 1920,
+                            "caption": "Первый снимок: туманность Конская Голова (Hα, 4 часа)",
+                            "caption_en": "First light: Horsehead Nebula (Hα, 4 hours)"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

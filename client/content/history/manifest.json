@@ -1,0 +1,19 @@
+[
+    {
+        "slug": "construction-2019",
+        "date": "2019-07",
+        "title": "Строительство обсерватории",
+        "title_en": "Building the Observatory",
+        "summary": "С чего всё началось: выбор места, заливка фундамента, сварочные работы, каркас и открывающаяся крыша",
+        "coverPhoto": "history/construction/construction-085.jpg"
+    },
+    {
+        "slug": "upgrade-2022",
+        "date": "2022-03",
+        "title": "Апгрейд: ASI 6200MM и колесо фильтров",
+        "title_en": "Upgrade: ASI 6200MM and Filter Wheel",
+        "summary": "Переход с цветной планетарной камеры на полноформатный монохромный датчик ZWO ASI 6200MM Pro.",
+        "summary_en": "Switching from a color planetary camera to the full-frame monochrome ZWO ASI 6200MM Pro.",
+        "coverPhoto": "history/upgrade-2022/cover.jpg"
+    }
+]
