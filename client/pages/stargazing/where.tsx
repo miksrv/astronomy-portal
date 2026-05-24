@@ -5,8 +5,9 @@ import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
 
-import { setLocale, wrapper } from '@/api'
+import { setLocale, SITE_LINK, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
 import photoSidewalk1 from '@/public/photos/sidewalk-asrtronomy-1.jpeg'
 import photoSidewalk2 from '@/public/photos/sidewalk-asrtronomy-2.jpeg'
@@ -33,6 +34,28 @@ const StargazingWherePage: NextPage<object> = () => {
         setShowLightbox(false)
     }
 
+    const touristAttractionSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'TouristAttraction',
+        name: tPage('title', 'Где посмотреть в телескоп в Оренбурге'),
+        description: tPage(
+            'description',
+            'Узнайте, где в Оренбурге можно посмотреть в телескоп. Тротуарная астрономия: бесплатные наблюдения Луны, планет и звезд на улицах города.'
+        ),
+        url: `${SITE_LINK}stargazing/where`,
+        address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'Оренбург',
+            addressCountry: 'RU'
+        },
+        isAccessibleForFree: true,
+        organizer: {
+            '@type': 'Organization',
+            name: 'Смотри на звёзды',
+            url: SITE_LINK
+        }
+    }
+
     return (
         <AppLayout
             canonical={'stargazing/where'}
@@ -51,6 +74,10 @@ const StargazingWherePage: NextPage<object> = () => {
                 ]
             }}
         >
+            <JsonLdScript
+                scriptKey={'where-tourist-attraction'}
+                data={touristAttractionSchema}
+            />
             <AppToolbar
                 title={title}
                 currentPage={title}

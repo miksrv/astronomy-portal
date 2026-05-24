@@ -4,9 +4,9 @@ import { Button, Container, Icon } from 'simple-react-ui-kit'
 import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
 
-import { setLocale, wrapper } from '@/api'
+import { SITE_LINK, wrapper } from '@/api'
 import { AppFooter, AppLayout } from '@/components/common'
 import CalendarIcon from '@/components/icons/CalendarIcon'
 import HeartIcon from '@/components/icons/HeartIcon'
@@ -20,6 +20,18 @@ const StargazingTicketsPage: NextPage<object> = () => {
 
     const title = t('pages.stargazing-tickets.title', 'Билеты и поддержка проекта')
 
+    const webPageSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        '@id': `${SITE_LINK}stargazing/tickets`,
+        name: title,
+        url: `${SITE_LINK}stargazing/tickets`,
+        description: t(
+            'pages.stargazing-tickets.description',
+            'Купите билеты на астровыезды, сезонные абонементы и поддержите астрономический проект Miksoft Astro.'
+        )
+    }
+
     return (
         <AppLayout
             canonical={'stargazing/tickets'}
@@ -28,7 +40,14 @@ const StargazingTicketsPage: NextPage<object> = () => {
                 'pages.stargazing-tickets.description',
                 'Купите билеты на астровыезды, сезонные абонементы и поддержите астрономический проект Miksoft Astro.'
             )}
+            openGraph={{
+                images: [{ url: '/images/stargazing-hero-bg.png', width: 1448, height: 1086 }]
+            }}
         >
+            <JsonLdScript
+                scriptKey={'tickets-webpage'}
+                data={webPageSchema}
+            />
             <div
                 className={styles.pageBackground}
                 aria-hidden={'true'}
@@ -442,19 +461,9 @@ const StargazingTicketsPage: NextPage<object> = () => {
 }
 
 export const getStaticProps = wrapper.getStaticProps(
-    (store) =>
-        async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<object>> => {
-            const locale = context.locale ?? 'en'
-            const translations = await serverSideTranslations(locale)
-
-            store.dispatch(setLocale(locale))
-
-            return {
-                props: {
-                    ...translations
-                },
-                revalidate: 86400
-            }
+    (_store) =>
+        async (_context: GetStaticPropsContext): Promise<GetStaticPropsResult<object>> => {
+            return { notFound: true }
         }
 )
 

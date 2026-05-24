@@ -5,8 +5,9 @@ import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
 
-import { setLocale, wrapper } from '@/api'
+import { setLocale, SITE_LINK, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 
 const StargazingRulesPage: NextPage<object> = () => {
@@ -14,6 +15,25 @@ const StargazingRulesPage: NextPage<object> = () => {
     const { t: tPage } = useTranslation('stargazing-rules')
 
     const title = tPage('title', 'Правила поведения на астровыездах')
+
+    const webPageSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        '@id': `${SITE_LINK}stargazing/rules`,
+        name: tPage('title', 'Правила поведения на астровыездах'),
+        url: `${SITE_LINK}stargazing/rules`,
+        description: tPage(
+            'description',
+            'Узнайте правила поведения на астровыездах в Оренбурге: что нельзя делать при наблюдении звезд и планет в телескоп. Соблюдайте рекомендации, чтобы сделать астровыезд безопасным и комфортным для всех участников.'
+        ),
+        breadcrumb: {
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Астровыезды', item: `${SITE_LINK}stargazing` },
+                { '@type': 'ListItem', position: 2, name: tPage('title', 'Правила поведения на астровыездах') }
+            ]
+        }
+    }
 
     return (
         <AppLayout
@@ -23,7 +43,14 @@ const StargazingRulesPage: NextPage<object> = () => {
                 'description',
                 'Узнайте правила поведения на астровыездах в Оренбурге: что нельзя делать при наблюдении звезд и планет в телескоп. Соблюдайте рекомендации, чтобы сделать астровыезд безопасным и комфортным для всех участников.'
             )}
+            openGraph={{
+                images: [{ url: '/photos/stargazing-1.jpeg', width: 1280, height: 853 }]
+            }}
         >
+            <JsonLdScript
+                scriptKey={'rules-webpage'}
+                data={webPageSchema}
+            />
             <AppToolbar
                 title={title}
                 currentPage={title}
