@@ -81,7 +81,15 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
         <AppLayout
             canonical={'photos'}
             title={`${title}${categoryFilter ? `: ${currentCategory?.title}` : ''}`}
-            description={`${t('pages.photos.description', 'Коллекция астрофотографий галактик, звездных скоплений, туманностей, планет и других космических объектов, запечатленных любительской обсерваторией. Найдите и отфильтруйте изображения по категориям и параметрам, чтобы увидеть уникальные снимки Вселенной с деталями по каждому фильтру и выдержке.')} ${currentCategory?.description}`}
+            description={[
+                t(
+                    'pages.photos.description',
+                    'Коллекция астрофотографий галактик, звездных скоплений, туманностей, планет и других космических объектов, запечатленных любительской обсерваторией. Найдите и отфильтруйте изображения по категориям и параметрам, чтобы увидеть уникальные снимки Вселенной с деталями по каждому фильтру и выдержке.'
+                ),
+                currentCategory?.description
+            ]
+                .filter(Boolean)
+                .join(' ')}
             openGraph={{
                 images: [
                     {
