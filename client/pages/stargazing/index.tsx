@@ -7,10 +7,10 @@ import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, PhotoGallery, PhotoLightbox } from '@/components/common'
-import { EventsList, EventUpcoming, InfoCards, ReviewsWidget } from '@/components/pages/stargazing'
+import { EventUpcoming, InfoCards, ReviewsWidget } from '@/components/pages/stargazing'
 import type { InfoCardItem } from '@/components/pages/stargazing/info-cards'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
 
@@ -18,14 +18,11 @@ import styles from './index.module.sass'
 
 interface StargazingPageProps {
     upcomingData: ApiModel.Event | null
-    events: ApiModel.Event[]
     photos: ApiModel.EventPhoto[]
 }
 
-const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, photos }) => {
+const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, photos }) => {
     const { t } = useTranslation()
-
-    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     const title = t('pages.stargazing.title', 'Астровыезды')
 
@@ -152,20 +149,15 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
 
             <ReviewsWidget />
 
-            <div className={styles.archiveHeader}>
-                <h2>{t('pages.stargazing.events-archive', 'Архив астровыездов')}</h2>
-
-                {userRole === ApiModel.UserRole.ADMIN && (
-                    <Button
-                        icon={'PlusCircle'}
-                        mode={'secondary'}
-                        label={t('pages.stargazing.create-stargazing_button', 'Добавить астровыезд')}
-                        link={'/stargazing/form'}
-                    />
-                )}
+            <div className={styles.archiveLink}>
+                <Link
+                    href={'/stargazing/history'}
+                    className={styles.archiveLinkButton}
+                >
+                    {t('pages.stargazing.archive-link', 'Все прошлые астровыезды')}
+                    {' →'}
+                </Link>
             </div>
-
-            <EventsList events={events} />
 
             <AppFooter />
 
@@ -203,7 +195,6 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 store.dispatch(setSSRToken(token))
             }
 
-            const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
             const { data: upcomingData } = await store.dispatch(API.endpoints?.eventGetUpcoming.initiate())
 
             const { data: photosData } = await store.dispatch(
@@ -219,7 +210,6 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 props: {
                     ...translations,
                     upcomingData: upcomingData || null,
-                    events: eventsData?.items || [],
                     photos: photosData?.items || []
                 }
             }

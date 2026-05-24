@@ -73,10 +73,19 @@
         color: #fff
         border-color: rgba(255, 255, 255, 0.4)
 
-.archiveHeader
+.archiveLink
     display: flex
-    align-items: center
-    gap: 12px
+    justify-content: center
+    padding: 32px 0 8px
 
-    h2
-        flex: 1
+.archiveLinkButton
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    font-size: 14px
+    color: var(--text-color-secondary)
+    text-decoration: none
+    transition: color 0.2s
+
+    &:hover
+        color: var(--color-primary)
