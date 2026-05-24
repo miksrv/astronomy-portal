@@ -5,8 +5,9 @@ import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
 
-import { setLocale, wrapper } from '@/api'
+import { setLocale, SITE_LINK, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
 import { ProjectTeam } from '@/components/pages/about'
 import donators from '@/public/data/list_donators.json'
@@ -77,6 +78,20 @@ const AboutPage: NextPage<AboutPageProps> = () => {
         []
     )
 
+    const aboutPageSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'AboutPage',
+        '@id': `${SITE_LINK}about`,
+        name: 'О проекте «Смотри на звёзды»',
+        url: `${SITE_LINK}about`,
+        description: 'Любительская астрономическая обсерватория, астровыезды и астрофотографии в Оренбурге',
+        author: {
+            '@type': 'Person',
+            name: 'Миша Топчило',
+            url: 'https://miksoft.pro'
+        }
+    }
+
     const handlePhotoClick = (index: number) => {
         setPhotoIndex(index)
         setShowLightbox(true)
@@ -104,6 +119,10 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 ]
             }}
         >
+            <JsonLdScript
+                scriptKey={'about-page'}
+                data={aboutPageSchema}
+            />
             <AppToolbar
                 title={title}
                 currentPage={title}
