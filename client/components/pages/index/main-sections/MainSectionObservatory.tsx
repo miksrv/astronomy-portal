@@ -34,11 +34,18 @@ export const MainSectionObservatory: React.FC = () => {
                             'Откройте для себя вселенную с нашего стационарного наблюдательного пункта, оборудованного передовыми телескопами.'
                         )}
                     </p>
-                    <Button
-                        mode={'primary'}
-                        label={t('components.pages.index.main-sections.observatory-button', 'Мониторинг обсерватории')}
-                        link={'/observatory'}
-                    />
+                    <div className={styles.heroCta}>
+                        <Button
+                            mode={'primary'}
+                            label={t('components.pages.index.main-sections.photos-button', 'Фотографии')}
+                            link={'/photos'}
+                        />
+                        <Button
+                            mode={'secondary'}
+                            label={t('components.pages.index.main-sections.objects-button', 'Объекты наблюдения')}
+                            link={'/objects'}
+                        />
+                    </div>
                 </div>
                 <div className={cn(styles.sectionRight, 'animate')}>
                     <div className={styles.statsRow}>

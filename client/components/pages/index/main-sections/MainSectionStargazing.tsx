@@ -37,13 +37,8 @@ export const MainSectionStargazing: React.FC = () => {
                     <div className={styles.heroCta}>
                         <Button
                             mode={'primary'}
-                            label={t('components.pages.index.main-sections.buy-ticket', 'Купить билет')}
-                            link={'/stargazing/tickets'}
-                        />
-                        <Button
-                            mode={'secondary'}
                             label={t('components.pages.index.main-sections.read-more', 'Подробнее')}
-                            link={'/stargazing'}
+                            link={'/stargazing/howto'}
                         />
                     </div>
                 </div>

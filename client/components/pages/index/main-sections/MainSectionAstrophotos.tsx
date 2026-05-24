@@ -41,12 +41,12 @@ export const MainSectionAstrophotos: React.FC<MainSectionAstrophotosProps> = ({ 
                         <Button
                             mode={'primary'}
                             label={t('components.pages.index.main-sections.hero-cta-stargazing', 'Записаться на выезд')}
-                            link={'/stargazing/tickets'}
+                            link={'/stargazing'}
                         />
                         <Button
                             mode={'secondary'}
-                            label={t('components.pages.index.main-sections.hero-cta-photos', 'Смотреть фотографии')}
-                            link={'/photos'}
+                            label={t('components.pages.index.main-sections.hero-cta-photos', 'Все астровыезды')}
+                            link={'/stargazing/history'}
                         />
                     </div>
                 </div>
