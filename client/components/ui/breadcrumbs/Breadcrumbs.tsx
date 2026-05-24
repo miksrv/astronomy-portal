@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 import styles from './styles.module.sass'
 
-export type BreadcrumbLink = {
+export interface BreadcrumbLink {
     link: string
     text: string
 }
@@ -18,33 +18,40 @@ export interface BreadcrumbsProps {
 }
 
 export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ homePageTitle, links, className, currentPage }) => (
-    <ul
+    <nav
         aria-label={'breadcrumb'}
         className={cn(className, styles.breadcrumbs)}
     >
-        {!!homePageTitle?.length && (
-            <li>
-                <Link
-                    color={'inherit'}
-                    href={'/'}
-                    title={homePageTitle}
-                >
-                    {homePageTitle}
-                </Link>
-            </li>
-        )}
-        {!!links?.length &&
-            links.map(({ link, text }) => (
-                <li key={link}>
+        <ol>
+            {!!homePageTitle?.length && (
+                <li>
                     <Link
-                        href={link}
-                        color={'inherit'}
-                        title={text}
+                        href={'/'}
+                        title={homePageTitle}
                     >
-                        {text}
+                        {homePageTitle}
                     </Link>
                 </li>
-            ))}
-        {currentPage && <li className={styles.currentPage}>{currentPage}</li>}
-    </ul>
+            )}
+            {!!links?.length &&
+                links.map(({ link, text }) => (
+                    <li key={link}>
+                        <Link
+                            href={link}
+                            title={text}
+                        >
+                            {text}
+                        </Link>
+                    </li>
+                ))}
+            {currentPage && (
+                <li
+                    aria-current={'page'}
+                    className={styles.currentPage}
+                >
+                    {currentPage}
+                </li>
+            )}
+        </ol>
+    </nav>
 )
