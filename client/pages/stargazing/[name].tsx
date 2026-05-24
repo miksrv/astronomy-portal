@@ -1,0 +1,332 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { getCookie } from 'cookies-next'
+import { Button, Container } from 'simple-react-ui-kit'
+
+import { GetServerSidePropsResult, NextPage } from 'next'
+import { useRouter } from 'next/router'
+import { useTranslation } from 'next-i18next/pages'
+import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
+
+import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
+import { setSSRToken } from '@/api/authSlice'
+import { hosts } from '@/api/constants'
+import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
+import { EventItemData, EventPhotoUploader, EventReviews } from '@/components/pages/stargazing'
+import { formatDate } from '@/utils/dates'
+import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
+import { removeMarkdown, sliceText } from '@/utils/strings'
+
+import styles from './styles.module.sass'
+
+interface StargazingItemPageProps {
+    eventId: string
+    event: ApiModel.Event | null
+    photos: ApiModel.EventPhoto[] | null
+    eventsList: ApiModel.Event[] | null
+}
+
+const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event, photos, eventsList }) => {
+    const { t } = useTranslation()
+    const router = useRouter()
+
+    const user = useAppSelector((state) => state.auth.user)
+    const userRole = useAppSelector((state) => state.auth?.user?.role)
+
+    const inputFileRef = useRef<HTMLInputElement>(undefined)
+
+    const [localPhotos, setLocalPhotos] = useState<ApiModel.EventPhoto[]>([])
+    const [uploadingPhotos, setUploadingPhotos] = useState<string[]>()
+    const [showLightbox, setShowLightbox] = useState<boolean>(false)
+    const [photoIndex, setPhotoIndex] = useState<number>()
+    const [isPhotosExpanded, setIsPhotosExpanded] = useState(false)
+
+    const PHOTOS_PREVIEW_LIMIT = 12
+
+    const title = `${t('menu.stargazing', 'Астровыезды')} - ${event?.title}`
+
+    const eventJsonLd = event
+        ? {
+              '@context': 'https://schema.org',
+              '@type': 'Event',
+              name: event.title,
+              description: sliceText(removeMarkdown(event.content ?? ''), 300),
+              startDate: event.date?.date,
+              eventStatus: 'https://schema.org/EventScheduled',
+              eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+              location: {
+                  '@type': 'Place',
+                  name: event.location ?? 'Оренбургская область',
+                  address: {
+                      '@type': 'PostalAddress',
+                      addressLocality: 'Оренбург',
+                      addressCountry: 'RU'
+                  }
+              },
+              organizer: {
+                  '@type': 'Organization',
+                  name: 'Смотри на звёзды',
+                  url: SITE_LINK?.replace(/\/$/, '')
+              },
+              image:
+                  event.coverFileName && event.coverFileExt
+                      ? `${hosts.stargazing}${event.id}/${event.coverFileName}_preview.${event.coverFileExt}`
+                      : undefined,
+              url: `${SITE_LINK}stargazing/${event.id}`
+          }
+        : null
+
+    const adjacentEvents = useMemo(() => {
+        const sortedEvents = [...(eventsList || [])].sort((a, b) => {
+            const dateA = a?.date?.date ? new Date(a.date.date).getTime() : 0
+            const dateB = b?.date?.date ? new Date(b.date.date).getTime() : 0
+            return dateA - dateB
+        })
+
+        const currentIndex = sortedEvents?.findIndex(({ id }) => id === eventId)
+
+        if (currentIndex === -1) {
+            return { previousEvent: undefined, nextEvent: undefined }
+        }
+
+        const previousEvent =
+            !!sortedEvents?.length && currentIndex < sortedEvents?.length - 1 ? sortedEvents?.[currentIndex + 1] : null
+
+        const nextEvent = currentIndex > 0 ? sortedEvents?.[currentIndex - 1] : null
+
+        return { previousEvent, nextEvent }
+    }, [eventsList, eventId])
+
+    const handleCloseLightbox = () => {
+        setShowLightbox(false)
+    }
+
+    const handlePhotoClick = (index: number) => {
+        setPhotoIndex(index)
+        setShowLightbox(true)
+    }
+
+    const handleUploadPhotoClick = (event: React.MouseEvent | undefined) => {
+        event?.preventDefault()
+
+        if (user?.role !== ApiModel.UserRole.ADMIN) {
+            return
+        }
+
+        inputFileRef?.current?.click()
+    }
+
+    useEffect(() => {
+        setLocalPhotos(photos ?? [])
+    }, [photos])
+
+    return (
+        <AppLayout
+            canonical={`stargazing/${event?.id}`}
+            title={title}
+            description={sliceText(removeMarkdown(event?.content || ''), 300)}
+            openGraph={{
+                images: [
+                    {
+                        height: 400,
+                        url: `${hosts.stargazing}${event?.id}/${event?.coverFileName}_preview.${event?.coverFileExt}`,
+                        width: 500
+                    }
+                ]
+            }}
+        >
+            <JsonLdScript
+                scriptKey={'stargazing-event'}
+                data={eventJsonLd}
+            />
+            <AppToolbar
+                title={title}
+                currentPage={event?.title}
+                links={[
+                    {
+                        link: '/stargazing',
+                        text: t('menu.stargazing', 'Астровыезды')
+                    }
+                ]}
+            >
+                {(userRole === ApiModel.UserRole.ADMIN || userRole === ApiModel.UserRole.MODERATOR) && (
+                    <>
+                        {userRole === ApiModel.UserRole.ADMIN && (
+                            <>
+                                <Button
+                                    disabled={!!uploadingPhotos?.length}
+                                    icon={'Download'}
+                                    mode={'secondary'}
+                                    onClick={handleUploadPhotoClick}
+                                >
+                                    {!uploadingPhotos?.length
+                                        ? 'Загрузить фотографии'
+                                        : `Загрузка ${uploadingPhotos?.length} фото`}
+                                </Button>
+
+                                <Button
+                                    icon={'Pencil'}
+                                    mode={'secondary'}
+                                    label={t('common.edit', 'Редактировать')}
+                                    disabled={!eventId}
+                                    onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
+                                />
+                            </>
+                        )}
+
+                        <Button
+                            icon={'BarChart'}
+                            mode={'secondary'}
+                            onClick={() => router.push(`/stargazing/${eventId}/statistic`)}
+                        />
+                    </>
+                )}
+            </AppToolbar>
+
+            <EventItemData
+                title={title}
+                event={event || undefined}
+            />
+
+            <h2>{`${event?.title} - ${t('pages.stargazing.photos-from-stargazing', 'Фотографии с астровыезда')}`}</h2>
+
+            <Container>
+                {localPhotos?.length > 0 ? (
+                    <>
+                        <PhotoGallery
+                            photos={(isPhotosExpanded ? localPhotos : localPhotos.slice(0, PHOTOS_PREVIEW_LIMIT)).map(
+                                (photo, index) => ({
+                                    height: photo.height,
+                                    src: createPreviewPhotoUrl(photo),
+                                    width: photo.width,
+                                    alt: `${photo?.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
+                                })
+                            )}
+                            onClick={({ index }) => {
+                                handlePhotoClick(index)
+                            }}
+                        />
+
+                        {localPhotos.length > PHOTOS_PREVIEW_LIMIT && (
+                            <Button
+                                mode={'secondary'}
+                                className={styles.showMorePhotos}
+                                onClick={() => setIsPhotosExpanded(!isPhotosExpanded)}
+                            >
+                                {isPhotosExpanded
+                                    ? t('pages.stargazing.photos-show-less', 'Показать меньше фотографий')
+                                    : t('pages.stargazing.photos-show-all', 'Показать все {{count}} фотографий', {
+                                          count: localPhotos.length
+                                      })}
+                            </Button>
+                        )}
+                    </>
+                ) : (
+                    <p className={styles.noPhotos}>
+                        {t(
+                            'pages.stargazing.no-photos',
+                            'Фотографии с этого события ещё не загружены. Загляните позже!'
+                        )}
+                    </p>
+                )}
+
+                <EventPhotoUploader
+                    eventId={eventId}
+                    fileInputRef={inputFileRef}
+                    onSelectFiles={setUploadingPhotos}
+                    onUploadPhoto={(photo) => {
+                        setLocalPhotos([...localPhotos, photo])
+                    }}
+                />
+            </Container>
+
+            <PhotoLightbox
+                photos={localPhotos?.map((photo, index) => ({
+                    height: photo.height,
+                    src: createFullPhotoUrl(photo),
+                    width: photo.width,
+                    title: `${photo.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
+                }))}
+                photoIndex={photoIndex}
+                showLightbox={showLightbox}
+                onCloseLightBox={handleCloseLightbox}
+            />
+
+            <h2>{t('pages.stargazing.reviews', 'Отзывы')}</h2>
+
+            <EventReviews eventId={eventId} />
+
+            <PrevNextNav
+                prev={
+                    adjacentEvents?.previousEvent
+                        ? {
+                              href: `/stargazing/${adjacentEvents.previousEvent.id}`,
+                              title: adjacentEvents.previousEvent.title,
+                              subtitle: formatDate(adjacentEvents.previousEvent.date?.date, 'D MMMM YYYY')
+                          }
+                        : null
+                }
+                next={
+                    adjacentEvents?.nextEvent
+                        ? {
+                              href: `/stargazing/${adjacentEvents.nextEvent.id}`,
+                              title: adjacentEvents.nextEvent.title,
+                              subtitle: formatDate(adjacentEvents.nextEvent.date?.date, 'D MMMM YYYY')
+                          }
+                        : null
+                }
+            />
+
+            <AppFooter />
+        </AppLayout>
+    )
+}
+
+export const getServerSideProps = wrapper.getServerSideProps(
+    (store) =>
+        async (context): Promise<GetServerSidePropsResult<StargazingItemPageProps>> => {
+            const locale = context.locale ?? 'en'
+            const translations = await serverSideTranslations(locale)
+            const eventId = context.params?.name
+
+            if (typeof eventId !== 'string') {
+                return { notFound: true }
+            }
+
+            store.dispatch(setLocale(locale))
+
+            const token = await getCookie('token', { req: context.req, res: context.res })
+
+            if (token) {
+                store.dispatch(setSSRToken(token))
+            }
+
+            const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
+
+            const { data: eventData, isError } = await store.dispatch(API.endpoints?.eventGetItem.initiate(eventId))
+
+            const { data: eventPhotos } = await store.dispatch(
+                API.endpoints?.eventGetPhotoList.initiate({
+                    eventId
+                })
+            )
+
+            if (isError) {
+                return { notFound: true }
+            }
+
+            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+
+            return {
+                props: {
+                    ...translations,
+                    event: eventData || null,
+                    photos: eventPhotos?.items || [],
+                    eventId: eventId,
+                    eventsList: eventsData?.items || []
+                }
+            }
+        }
+)
+
+export default StargazingItemPage
