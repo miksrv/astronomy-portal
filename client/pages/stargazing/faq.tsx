@@ -2,10 +2,10 @@ import React, { useState } from 'react'
 import { cn, Icon } from 'simple-react-ui-kit'
 
 import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
-import Head from 'next/head'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
 
 import { setLocale, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
@@ -246,89 +246,88 @@ const StargazingFAQPage: NextPage<object> = () => {
     }
 
     return (
-        <>
-            <Head>
-                <script
-                    type={'application/ld+json'}
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-                />
-            </Head>
-            <AppLayout
-                canonical={'stargazing/faq'}
+        <AppLayout
+            canonical={'stargazing/faq'}
+            title={title}
+            description={tPage(
+                'description',
+                'Узнайте ответы на частые вопросы об астровыездах: регистрация, что взять с собой, стоимость, длительность и как добраться. Готовьтесь к ночи под звездами с комфортом!'
+            )}
+            openGraph={{
+                images: [{ url: '/photos/stargazing-1.jpeg', width: 1280, height: 853 }]
+            }}
+        >
+            <JsonLdScript
+                scriptKey={'faq-schema'}
+                data={faqJsonLd}
+            />
+            <AppToolbar
                 title={title}
-                description={tPage(
+                currentPage={title}
+                links={[
+                    {
+                        link: '/stargazing',
+                        text: t('menu.stargazing', 'Астровыезды')
+                    }
+                ]}
+            />
+
+            <div>
+                {tPage(
                     'description',
                     'Узнайте ответы на частые вопросы об астровыездах: регистрация, что взять с собой, стоимость, длительность и как добраться. Готовьтесь к ночи под звездами с комфортом!'
                 )}
-            >
-                <AppToolbar
-                    title={title}
-                    currentPage={title}
-                    links={[
-                        {
-                            link: '/stargazing',
-                            text: t('menu.stargazing', 'Астровыезды')
-                        }
-                    ]}
-                />
+                <Link
+                    href={'https://t.me/look_at_stars'}
+                    style={{ marginLeft: '5px' }}
+                    title={t('common.telegram', 'Телеграм')}
+                    rel={'noindex nofollow'}
+                    target={'_blank'}
+                >
+                    {t('common.look-at-the-stars', 'Смотри на звёзды')}
+                </Link>
+                {'.'}
+            </div>
 
-                <div>
-                    {tPage(
-                        'description',
-                        'Узнайте ответы на частые вопросы об астровыездах: регистрация, что взять с собой, стоимость, длительность и как добраться. Готовьтесь к ночи под звездами с комфортом!'
-                    )}
-                    <Link
-                        href={'https://t.me/look_at_stars'}
-                        style={{ marginLeft: '5px' }}
-                        title={t('common.telegram', 'Телеграм')}
-                        rel={'noindex nofollow'}
-                        target={'_blank'}
-                    >
-                        {t('common.look-at-the-stars', 'Смотри на звёзды')}
-                    </Link>
-                    {'.'}
-                </div>
+            <div className={styles.faqList}>
+                {faqItems.map((item, idx) => {
+                    const isOpen = openItems.has(idx)
+                    const questionText = item.question.replace(/^\s*/u, '')
 
-                <div className={styles.faqList}>
-                    {faqItems.map((item, idx) => {
-                        const isOpen = openItems.has(idx)
-                        const questionText = item.question.replace(/^\s*/u, '')
-
-                        return (
-                            <div
-                                key={idx}
-                                className={cn(styles.faqItem, isOpen && styles.open)}
+                    return (
+                        <div
+                            key={idx}
+                            className={cn(styles.faqItem, isOpen && styles.open)}
+                        >
+                            <button
+                                className={styles.faqQuestion}
+                                onClick={() => toggleItem(idx)}
+                                aria-expanded={isOpen}
+                                aria-controls={`faq-answer-${idx}`}
                             >
-                                <button
-                                    className={styles.faqQuestion}
-                                    onClick={() => toggleItem(idx)}
-                                    aria-expanded={isOpen}
-                                    aria-controls={`faq-answer-${idx}`}
-                                >
-                                    <span>{questionText}</span>
-                                    <Icon
-                                        name={'KeyboardDown'}
-                                        className={styles.chevron}
-                                    />
-                                </button>
+                                <span>{questionText}</span>
+                                <Icon
+                                    name={'KeyboardDown'}
+                                    className={styles.chevron}
+                                />
+                            </button>
 
-                                <div
-                                    id={`faq-answer-${idx}`}
-                                    className={styles.faqAnswer}
-                                    role={'region'}
-                                >
-                                    <div>
-                                        <div className={styles.faqAnswerContent}>{item.answer}</div>
-                                    </div>
+                            <div
+                                id={`faq-answer-${idx}`}
+                                className={styles.faqAnswer}
+                                role={'region'}
+                            >
+                                <div>
+                                    <div className={styles.faqAnswerContent}>{item.answer}</div>
                                 </div>
                             </div>
-                        )
-                    })}
-                </div>
+                        </div>
+                    )
+                })}
+            </div>
 
-                <AppFooter />
-            </AppLayout>
-        </>
+            <AppFooter />
+        </AppLayout>
     )
 }
 

@@ -5,8 +5,9 @@ import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
 
-import { setLocale, wrapper } from '@/api'
+import { setLocale, SITE_LINK, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
 import photoStargazing1 from '@/public/photos/stargazing-4.jpeg'
 import photoStargazing2 from '@/public/photos/stargazing-5.jpeg'
@@ -33,6 +34,55 @@ const StargazingHowToPage: NextPage<object> = () => {
         setShowLightbox(false)
     }
 
+    const howToSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'HowTo',
+        name: tPage('title', 'Как проходят астровыезды'),
+        description: tPage(
+            'description',
+            'Узнайте, как проходят астровыезды в Оренбурге: регистрация, лекции о космосе, наблюдения в телескопы и обучение ориентации по звездному небу.'
+        ),
+        url: `${SITE_LINK}stargazing/howto`,
+        step: [
+            {
+                '@type': 'HowToStep',
+                position: 1,
+                name: tPage('arrival', 'Прибытие на место'),
+                text: tPage(
+                    'arrival_text',
+                    'Приезжайте за 15–20 минут до начала, чтобы занять удобное место на астрономической поляне. Возьмите с собой походные стулья или коврики для комфортного размещения.'
+                )
+            },
+            {
+                '@type': 'HowToStep',
+                position: 2,
+                name: tPage('lecture', 'Астролекция'),
+                text: tPage(
+                    'lecture_text',
+                    'Как только наступают сумерки, начинается наша астролекция. На большом экране мы показываем видео и фото, рассказывая о космосе доступным и интересным языком. Лекции рассчитаны на участников от 8 лет и длятся около часа.'
+                )
+            },
+            {
+                '@type': 'HowToStep',
+                position: 3,
+                name: tPage('orientation', 'Ориентация по звездному небу'),
+                text: tPage(
+                    'orientation_text',
+                    'После лекции мы учим вас находить основные звезды и созвездия, показывая их на небе. Эта часть длится около 20 минут.'
+                )
+            },
+            {
+                '@type': 'HowToStep',
+                position: 4,
+                name: tPage('telescope_observation', 'Наблюдение в телескопы'),
+                text: tPage(
+                    'telescope_observation_text',
+                    'На астрономической площадке установлено несколько телескопов, каждый из которых настроен на определенные космические объекты. Вы сможете смотреть в телескопы, задавать вопросы и общаться с астрономами.'
+                )
+            }
+        ]
+    }
+
     return (
         <AppLayout
             canonical={'stargazing/howto'}
@@ -51,6 +101,10 @@ const StargazingHowToPage: NextPage<object> = () => {
                 ]
             }}
         >
+            <JsonLdScript
+                scriptKey={'howto-schema'}
+                data={howToSchema}
+            />
             <AppToolbar
                 title={title}
                 currentPage={title}
