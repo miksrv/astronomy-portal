@@ -39,10 +39,10 @@ export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) =
             link: '/stargazing',
             text: t('menu.stargazing', 'Астровыезды'),
             subMenuItems: [
-                {
-                    link: '/stargazing/tickets',
-                    text: t('menu.stargazing-tickets', 'Билеты и поддержка')
-                },
+                // {
+                //     link: '/stargazing/tickets',
+                //     text: t('menu.stargazing-tickets', 'Билеты и поддержка')
+                // },
                 {
                     link: '/stargazing/rules',
                     text: t('menu.stargazing-rules', 'Правила')
@@ -58,6 +58,10 @@ export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) =
                 {
                     link: '/stargazing/faq',
                     text: t('menu.stargazing-faq', 'Вопросы и ответы')
+                },
+                {
+                    link: '/stargazing/history',
+                    text: t('menu.stargazing-history', 'Архив мероприятий')
                 }
             ]
         },

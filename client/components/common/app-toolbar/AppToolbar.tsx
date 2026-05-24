@@ -4,7 +4,7 @@ import Head from 'next/head'
 import { useTranslation } from 'next-i18next/pages'
 
 import { SITE_LINK } from '@/api'
-import { BreadcrumbLink, Breadcrumbs, BreadcrumbsProps } from '@/components/ui'
+import { Breadcrumbs, BreadcrumbsProps } from '@/components/ui'
 
 import '@/api/applicationSlice'
 
@@ -13,7 +13,6 @@ import styles from './styles.module.sass'
 interface AppToolbarProps extends Pick<BreadcrumbsProps, 'currentPage' | 'links'> {
     title?: string
     children?: React.ReactNode
-    breadcrumbs?: BreadcrumbLink[]
 }
 
 export const AppToolbar = forwardRef<HTMLDivElement, AppToolbarProps>(
@@ -24,7 +23,7 @@ export const AppToolbar = forwardRef<HTMLDivElement, AppToolbarProps>(
         const baseUrl = `${SITE_LINK ?? ''}${localePrefix}`
 
         const breadcrumbItems: Array<{ name: string; item?: string }> = [
-            { name: t('common.look-at-the-stars', 'Смотри на звёзды'), item: SITE_LINK }
+            { name: t('common.look-at-the-stars', 'Смотри на звёзды'), item: baseUrl }
         ]
 
         if (links?.length) {
