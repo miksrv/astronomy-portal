@@ -5,8 +5,9 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { Trans, useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, wrapper } from '@/api'
+import { API, ApiModel, setLocale, SITE_LINK, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable, PhotoGallery, PhotoLightbox } from '@/components/common'
 import photoObservatory1 from '@/public/photos/observatory-1.jpeg'
 import photoObservatory2 from '@/public/photos/observatory-2.jpeg'
@@ -116,6 +117,30 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
         setShowLightbox(false)
     }
 
+    const techArticleSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        '@id': `${SITE_LINK}observatory/overview`,
+        headline: tPage('title', 'Обсерватория в Оренбурге'),
+        description: tPage(
+            'description',
+            'Самодельная астрономическая обсерватория расположена в пригороде Оренбурга, всего в 15 км от города. Телескоп Sky-Watcher BK2001P, камера ASI ZWO 6200MM Pro, удалённое управление.'
+        ),
+        url: `${SITE_LINK}observatory/overview`,
+        image: `${SITE_LINK}photos/observatory-3.jpeg`,
+        author: {
+            '@type': 'Organization',
+            name: 'Смотри на звёзды',
+            url: SITE_LINK
+        },
+        publisher: {
+            '@type': 'Organization',
+            name: 'Смотри на звёзды',
+            url: SITE_LINK,
+            logo: { '@type': 'ImageObject', url: `${SITE_LINK}android-chrome-192x192.png` }
+        }
+    }
+
     return (
         <AppLayout
             canonical={'observatory/overview'}
@@ -134,6 +159,10 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                 ]
             }}
         >
+            <JsonLdScript
+                scriptKey={'observatory-overview-tech-article'}
+                data={techArticleSchema}
+            />
             <AppToolbar
                 title={tPage('title', 'Обсерватория в Оренбурге')}
                 currentPage={tPage('title', 'Обсерватория в Оренбурге')}

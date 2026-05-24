@@ -37,6 +37,9 @@ const HistoryPage: NextPage<object> = () => {
                 'pages.observatory-weather.description',
                 'Актуальные графики погоды с метеостанции любительской обсерватории в пригороде Оренбурга. Температура, влажность, облачность и скорость ветра в реальном времени.'
             )}
+            openGraph={{
+                images: [{ url: '/images/obs-background.png', width: 1717, height: 916 }]
+            }}
         >
             <AppToolbar
                 title={title}

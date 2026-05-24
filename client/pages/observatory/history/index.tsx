@@ -38,6 +38,9 @@ const ObservatoryHistoryPage: NextPage<ObservatoryHistoryPageProps> = ({ chapter
                 'pages.observatory-history.description',
                 'История строительства и развития любительской астрономической обсерватории: от первого колышка до удалённого управления телескопом.'
             )}
+            openGraph={{
+                images: [{ url: '/photos/observatory-3.jpeg', width: 1280, height: 851 }]
+            }}
         >
             <AppToolbar
                 title={title}

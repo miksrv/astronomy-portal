@@ -8,8 +8,9 @@ import { GetStaticPathsResult, GetStaticPropsContext, GetStaticPropsResult, Next
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
 
-import { setLocale, wrapper } from '@/api'
+import { setLocale, SITE_LINK, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
 import { GalleryBlock, HistoryChapter, HistoryChapterMeta } from '@/data/history'
 import { formatYearMonth } from '@/utils/dates'
@@ -68,6 +69,28 @@ const HistoryChapterPage: NextPage<HistoryChapterPageProps> = ({ chapter, prevCh
         setShowLightbox(true)
     }
 
+    const articleSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        '@id': `${SITE_LINK}observatory/history/${chapter.slug}`,
+        headline: title,
+        description: localize(chapter.summary, chapter.summary_en),
+        image: chapter.coverPhoto,
+        url: `${SITE_LINK}observatory/history/${chapter.slug}`,
+        datePublished: chapter.date,
+        author: {
+            '@type': 'Organization',
+            name: 'Смотри на звёзды',
+            url: SITE_LINK
+        },
+        publisher: {
+            '@type': 'Organization',
+            name: 'Смотри на звёзды',
+            url: SITE_LINK,
+            logo: { '@type': 'ImageObject', url: `${SITE_LINK}android-chrome-192x192.png` }
+        }
+    }
+
     return (
         <AppLayout
             canonical={`observatory/history/${chapter.slug}`}
@@ -77,6 +100,10 @@ const HistoryChapterPage: NextPage<HistoryChapterPageProps> = ({ chapter, prevCh
                 images: [{ url: chapter.coverPhoto, width: 1200, height: 630 }]
             }}
         >
+            <JsonLdScript
+                scriptKey={'history-chapter-article'}
+                data={articleSchema}
+            />
             <div
                 className={styles.pageBackground}
                 aria-hidden={'true'}
