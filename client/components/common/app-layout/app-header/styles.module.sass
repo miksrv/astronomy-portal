@@ -80,7 +80,6 @@
 .avatarImage
     margin: 0 !important
     font-size: 0
-    border-radius: var(--border-radius)
 
     &:hover
         opacity: .6
@@ -88,37 +87,44 @@
 .contextListMenu
     list-style: none
     margin: 0
-    padding: 0
+    padding: 6px
+    border-radius: var(--border-radius)
+    box-shadow: var(--container-shadow)
 
     li
-        &:first-of-type
-            border-radius: var(--border-radius) var(--border-radius) 0 0
+        margin-bottom: 2px
 
-        &:last-of-type
-            border-radius: 0 0 var(--border-radius) var(--border-radius)
+        &:last-child
+            margin-bottom: 0
 
         a
-            text-decoration: none
-            height: 100%
+            padding: 6px 12px
             width: 100%
-            padding: 10px 20px
-            white-space: nowrap
+            min-height: 32px
+            display: flex
+            align-items: center
+            border-radius: var(--border-radius)
             color: var(--text-color-primary)
+            text-decoration: none
+            font-weight: 200
+            white-space: nowrap
             cursor: pointer
             background: transparent
             border: none
             text-align: left
-            display: flex
-            align-items: center
+            transition: background-color .15s ease-out, opacity .15s ease-out
 
             svg
                 fill: var(--link-color) !important
-                margin: -10px 10px -10px 0 !important
-                width: 22px
-                height: 22px
+                margin-right: 10px !important
+                width: 20px
+                height: 20px
+
+            &:hover, &.active
+                background-color: var(--body-background)
+                color: var(--color-primary)
 
         &.dividerItem
+            margin-top: 6px
+            padding-top: 6px
             border-top: 1px solid var(--input-border-color)
-
-        &:hover, &.active
-            background-color: var(--input-background-color)
