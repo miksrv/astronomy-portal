@@ -7,13 +7,14 @@ import { JsonLdScript } from 'next-seo'
 
 import { API, ApiModel, setLocale, SITE_LINK, wrapper } from '@/api'
 import { AppLayout } from '@/components/common'
-import { MainSection } from '@/components/pages/index'
+import { MainSectionCommunity, MainSectionHero, MainSectionObservatory } from '@/components/pages/index'
 
 interface HomePageProps {
     photosList: ApiModel.Photo[]
+    eventPhotos: ApiModel.EventPhoto[]
 }
 
-const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
+const HomePage: NextPage<HomePageProps> = ({ photosList, eventPhotos }) => {
     const { t } = useTranslation()
 
     useEffect(() => {
@@ -72,9 +73,9 @@ const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
                 scriptKey={'website'}
                 data={websiteSchema}
             />
-            <MainSection.Astrophotos photos={photosList} />
-            <MainSection.Stargazing />
-            <MainSection.Observatory />
+            <MainSectionHero photos={eventPhotos} />
+            <MainSectionCommunity />
+            <MainSectionObservatory photos={photosList} />
         </AppLayout>
     )
 }
@@ -94,12 +95,20 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 })
             )
 
+            const { data: eventPhotosData } = await store.dispatch(
+                API.endpoints?.eventGetPhotoList.initiate({
+                    limit: 4,
+                    order: 'rand'
+                })
+            )
+
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
             return {
                 props: {
                     ...translations,
-                    photosList: photos?.items || []
+                    photosList: photos?.items || [],
+                    eventPhotos: eventPhotosData?.items || []
                 }
             }
         }

@@ -5,7 +5,7 @@ import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
 import { API, setLocale, wrapper } from '@/api'
-import { AppLayout, StarMap } from '@/components/common'
+import { AppLayout, BreadcrumbJsonLd, StarMap } from '@/components/common'
 
 const CelestialPage: NextPage<object> = () => {
     const { t } = useTranslation()
@@ -36,6 +36,7 @@ const CelestialPage: NextPage<object> = () => {
                 ]
             }}
         >
+            <BreadcrumbJsonLd currentPage={title} />
             <div style={{ height: 'calc(100vh - var(--header-height))', overflow: 'hidden' }}>
                 <StarMap
                     objects={starMapObjects}
