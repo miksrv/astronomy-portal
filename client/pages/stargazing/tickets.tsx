@@ -329,50 +329,6 @@ const StargazingTicketsPage: NextPage<object> = () => {
                 </div>
             </Container>
 
-            {/* Important notes */}
-            <Container>
-                <div className={styles.importantInner}>
-                    <div className={styles.importantContent}>
-                        <div className={styles.importantHeader}>
-                            <Icon name={'ReportError'} />
-                            {t('pages.stargazing-tickets.important-title', 'Важно знать')}
-                        </div>
-                        <ul className={styles.importantList}>
-                            <li>
-                                {t(
-                                    'pages.stargazing-tickets.important1',
-                                    'Количество мест на выездах ограничено — рекомендуем покупать билеты заранее.'
-                                )}
-                            </li>
-                            <li>
-                                {t(
-                                    'pages.stargazing-tickets.important2',
-                                    'Билет именной и не подлежит передаче третьим лицам.'
-                                )}
-                            </li>
-                            <li>
-                                {t(
-                                    'pages.stargazing-tickets.important3',
-                                    'Возврат возможен не позднее чем за 48 часов до мероприятия.'
-                                )}
-                            </li>
-                            <li>
-                                {t(
-                                    'pages.stargazing-tickets.important4',
-                                    'В случае плохой погоды выезд может быть перенесён — следите за уведомлениями.'
-                                )}
-                            </li>
-                        </ul>
-                    </div>
-                    <img
-                        className={styles.telescopeImage}
-                        src={'/images/telescope-illustration.png'}
-                        alt={''}
-                        aria-hidden={'true'}
-                    />
-                </div>
-            </Container>
-
             {/* Contacts section */}
             <Container>
                 <div className={styles.contactsSection}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { getCookie } from 'cookies-next'
 import { Button, Icon } from 'simple-react-ui-kit'
 
@@ -9,19 +9,26 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 
 import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
-import { AppFooter, AppLayout, PhotoGallery, PhotoLightbox } from '@/components/common'
-import { EventUpcoming, InfoCards, ReviewsWidget } from '@/components/pages/stargazing'
+import { AppFooter, AppLayout, BreadcrumbJsonLd, PrevNextNav } from '@/components/common'
+import {
+    EventImportant,
+    EventProgram,
+    EventsList,
+    EventUpcoming,
+    InfoCards,
+    ReviewsWidget
+} from '@/components/pages/stargazing'
 import type { InfoCardItem } from '@/components/pages/stargazing/info-cards'
-import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
+import { getSecondsUntilUTCDate } from '@/utils/dates'
 
 import styles from './index.module.sass'
 
 interface StargazingPageProps {
     upcomingData: ApiModel.Event | null
-    photos: ApiModel.EventPhoto[]
+    pastEvents: ApiModel.Event[]
 }
 
-const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, photos }) => {
+const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvents }) => {
     const { t } = useTranslation()
 
     const title = t('pages.stargazing.title', 'Астровыезды')
@@ -53,18 +60,6 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, photos })
         }
     ]
 
-    const [showLightbox, setShowLightbox] = useState<boolean>(false)
-    const [photoIndex, setPhotoIndex] = useState<number>(0)
-
-    const handlePhotoClick = (index: number) => {
-        setPhotoIndex(index)
-        setShowLightbox(true)
-    }
-
-    const handleHideLightbox = () => {
-        setShowLightbox(false)
-    }
-
     return (
         <AppLayout
             canonical={'stargazing'}
@@ -83,6 +78,8 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, photos })
                 ]
             }}
         >
+            <BreadcrumbJsonLd currentPage={title} />
+
             <div
                 className={styles.pageBackground}
                 aria-hidden={'true'}
@@ -130,54 +127,30 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, photos })
                 <EventUpcoming event={upcomingData || undefined} />
             </div>
 
-            <PhotoGallery
-                photos={
-                    photos?.map((photo, index) => ({
-                        height: photo.height,
-                        src: createPreviewPhotoUrl(photo),
-                        width: photo.width,
-                        alt: t('pages.stargazing.photo_alt', 'Фото ({{number}}) с астровыезда - {{name}} ', {
-                            number: index + 1,
-                            name: photo?.title
-                        })
-                    })) || []
-                }
-                onClick={({ index }) => {
-                    handlePhotoClick(index)
-                }}
-            />
+            <h2>{t('pages.stargazing.program-title', 'Как проходит вечер')}</h2>
+
+            <EventProgram />
+
+            <EventImportant />
 
             <ReviewsWidget />
 
-            <div className={styles.archiveLink}>
-                <Link
-                    href={'/stargazing/history'}
-                    className={styles.archiveLinkButton}
-                >
-                    {t('pages.stargazing.archive-link', 'Все прошлые астровыезды')}
-                    {' →'}
-                </Link>
-            </div>
+            {pastEvents.length > 0 && (
+                <>
+                    <h2>{t('pages.stargazing.past-events', 'Прошедшие астровыезды')}</h2>
+
+                    <EventsList events={pastEvents} />
+                </>
+            )}
+
+            <PrevNextNav
+                next={{
+                    href: '/stargazing/history',
+                    title: t('pages.stargazing.archive-link', 'Все прошлые астровыезды')
+                }}
+            />
 
             <AppFooter />
-
-            <PhotoLightbox
-                photos={
-                    photos?.map((photo, index) => ({
-                        height: photo.height,
-                        src: createFullPhotoUrl(photo),
-                        width: photo.width,
-                        title: t('pages.stargazing.photo_title', 'Астровыезд: {{name}} - Фото ({{number}})', {
-                            number: index + 1,
-                            name: photo?.title
-                        })
-                    })) || []
-                }
-                photoIndex={photoIndex}
-                showLightbox={showLightbox}
-                onCloseLightBox={handleHideLightbox}
-                onChangeIndex={setPhotoIndex}
-            />
         </AppLayout>
     )
 }
@@ -197,20 +170,20 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             const { data: upcomingData } = await store.dispatch(API.endpoints?.eventGetUpcoming.initiate())
 
-            const { data: photosData } = await store.dispatch(
-                API.endpoints?.eventGetPhotoList.initiate({
-                    limit: 4,
-                    order: 'rand'
-                })
-            )
+            const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+
+            // Past events: already happened, most recent first
+            const pastEvents = (eventsData?.items || [])
+                .filter((event) => (getSecondsUntilUTCDate(event.date?.date) ?? 0) < 0)
+                .sort((a, b) => (a.date?.date && b.date?.date ? b.date.date.localeCompare(a.date.date) : 0))
 
             return {
                 props: {
                     ...translations,
                     upcomingData: upcomingData || null,
-                    photos: photosData?.items || []
+                    pastEvents: pastEvents.slice(0, 3)
                 }
             }
         }

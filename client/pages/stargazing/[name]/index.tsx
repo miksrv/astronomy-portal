@@ -17,7 +17,7 @@ import { formatDate } from '@/utils/dates'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
 import { removeMarkdown, sliceText } from '@/utils/strings'
 
-import styles from './styles.module.sass'
+import styles from '../styles.module.sass'
 
 interface StargazingItemPageProps {
     eventId: string
