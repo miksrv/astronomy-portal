@@ -9,7 +9,9 @@
     justify-content: flex-end
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        height: 100svh
+        height: auto
+        min-height: 100svh
+        justify-content: center
 
 .sectionHero
     justify-content: center
@@ -100,7 +102,8 @@
     justify-content: flex-end
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        display: none
+        justify-content: flex-start
+        margin-top: 24px
 
 .sectionRightCenter
     display: flex
@@ -110,11 +113,31 @@
     @media only screen and (max-width: variables.$mobileMaxWidth)
         display: none
 
+.sectionRightCenterVisible
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        display: flex
+        margin-top: 28px
+
+.sectionRightColumn
+    flex-direction: column
+    align-items: flex-end
+    gap: 28px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        align-items: flex-start
+        gap: 20px
+
 .statsRow
     display: flex
     flex-direction: column
     gap: 28px
     text-align: right
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: row
+        flex-wrap: wrap
+        gap: 24px
+        text-align: left
 
 .statsRowHorizontal
     display: flex
@@ -131,6 +154,9 @@
     line-height: 1
     display: block
 
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        font-size: 2rem
+
 .statLabel
     font-size: 11px
     color: rgba(255,255,255,0.5)
@@ -145,6 +171,27 @@
     gap: 8px
     height: 420px
     width: 100%
+
+.photoGrid
+    display: grid
+    grid-template-columns: 1fr 1fr
+    grid-template-rows: 1fr 1fr
+    gap: 8px
+    height: 420px
+    width: 100%
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        height: 280px
+
+.photoRow
+    display: flex
+    flex-direction: row
+    gap: 8px
+    width: 240px
+    height: 80px
+
+    .photoThumb
+        flex: 1
 
 .photoThumb
     flex: 1
@@ -194,3 +241,6 @@
 
         .photoThumb:nth-child(3)
             animation-delay: 0.55s
+
+        .photoThumb:nth-child(4)
+            animation-delay: 0.75s

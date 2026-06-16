@@ -6,15 +6,15 @@ import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
-import { createMediumPhotoUrl, createPhotoTitle } from '@/utils/photos'
+import { createPreviewPhotoUrl } from '@/utils/eventPhotos'
 
 import styles from './styles.module.sass'
 
-interface MainSectionAstrophotosProps {
-    photos?: ApiModel.Photo[]
+interface MainSectionHeroProps {
+    photos?: ApiModel.EventPhoto[]
 }
 
-export const MainSectionAstrophotos: React.FC<MainSectionAstrophotosProps> = ({ photos }) => {
+export const MainSectionHero: React.FC<MainSectionHeroProps> = ({ photos }) => {
     const { t } = useTranslation()
 
     return (
@@ -50,24 +50,35 @@ export const MainSectionAstrophotos: React.FC<MainSectionAstrophotosProps> = ({ 
                         />
                     </div>
                 </div>
-                <div className={cn(styles.sectionRightCenter, 'animate')}>
+                <div className={cn(styles.sectionRightCenter, styles.sectionRightCenterVisible, 'animate')}>
                     {photos && photos.length > 0 && (
-                        <div className={styles.photoCol}>
-                            {photos.map((photo) => (
-                                <Link
-                                    key={photo.id}
-                                    href={`/photos/${photo.id}`}
-                                    title={createPhotoTitle(photo, t)}
-                                    className={styles.photoThumb}
-                                >
-                                    <Image
-                                        src={createMediumPhotoUrl(photo)}
-                                        alt={createPhotoTitle(photo, t)}
-                                        fill={true}
-                                        style={{ objectFit: 'cover' }}
-                                    />
-                                </Link>
-                            ))}
+                        <div className={styles.photoGrid}>
+                            {photos.slice(0, 4).map((photo, index) => {
+                                const alt = t(
+                                    'components.pages.index.main-sections.event-photo-alt',
+                                    'Фото ({{number}}) с астровыезда - {{name}}',
+                                    {
+                                        number: index + 1,
+                                        name: photo?.title
+                                    }
+                                )
+
+                                return (
+                                    <Link
+                                        key={`${photo.eventId}-${photo.name}`}
+                                        href={'/stargazing'}
+                                        title={alt}
+                                        className={styles.photoThumb}
+                                    >
+                                        <Image
+                                            src={createPreviewPhotoUrl(photo)}
+                                            alt={alt}
+                                            fill={true}
+                                            style={{ objectFit: 'cover' }}
+                                        />
+                                    </Link>
+                                )
+                            })}
                         </div>
                     )}
                 </div>

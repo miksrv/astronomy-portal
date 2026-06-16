@@ -1,9 +1,13 @@
 import React from 'react'
 import { Button, cn } from 'simple-react-ui-kit'
 
+import Image from 'next/image'
+import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
+import { ApiModel } from '@/api'
 import { Counter } from '@/components/ui'
+import { createMediumPhotoUrl, createPhotoTitle } from '@/utils/photos'
 
 import styles from './styles.module.sass'
 
@@ -11,7 +15,11 @@ const FRAMES = 6870
 const EXPOSURE = 585
 const OBJECTS = 93
 
-export const MainSectionObservatory: React.FC = () => {
+interface MainSectionObservatoryProps {
+    photos?: ApiModel.Photo[]
+}
+
+export const MainSectionObservatory: React.FC<MainSectionObservatoryProps> = ({ photos }) => {
     const { t } = useTranslation()
 
     return (
@@ -47,7 +55,7 @@ export const MainSectionObservatory: React.FC = () => {
                         />
                     </div>
                 </div>
-                <div className={cn(styles.sectionRight, 'animate')}>
+                <div className={cn(styles.sectionRight, styles.sectionRightColumn, 'animate')}>
                     <div className={styles.statsRow}>
                         <div className={styles.statItem}>
                             <Counter
@@ -77,6 +85,25 @@ export const MainSectionObservatory: React.FC = () => {
                             </span>
                         </div>
                     </div>
+                    {photos && photos.length > 0 && (
+                        <div className={styles.photoRow}>
+                            {photos.map((photo) => (
+                                <Link
+                                    key={photo.id}
+                                    href={`/photos/${photo.id}`}
+                                    title={createPhotoTitle(photo, t)}
+                                    className={styles.photoThumb}
+                                >
+                                    <Image
+                                        src={createMediumPhotoUrl(photo)}
+                                        alt={createPhotoTitle(photo, t)}
+                                        fill={true}
+                                        style={{ objectFit: 'cover' }}
+                                    />
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </section>
