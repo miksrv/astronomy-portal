@@ -11,6 +11,7 @@ import { LoginForm } from '@/components/common'
 import { formatUTCDate, getLocalizedTimeFromSec, getSecondsUntilUTCDate } from '@/utils/dates'
 
 import { EventBookingForm } from './event-booking-form'
+import noEventsImage from './no-events.png'
 
 import styles from './styles.module.sass'
 
@@ -74,9 +75,10 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
     if (!event) {
         return (
             <Container className={styles.noEvent}>
-                <Icon
-                    name={'Moon'}
-                    className={styles.noEventIcon}
+                <Image
+                    className={styles.noEventImage}
+                    src={noEventsImage}
+                    alt={''}
                 />
                 <h3>
                     {t('components.pages.stargazing.event-upcoming.no-upcoming', 'Пока нет предстоящих астровыездов')}
