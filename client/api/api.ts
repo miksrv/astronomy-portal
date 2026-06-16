@@ -311,6 +311,11 @@ export const API = createApi({
             query: (params) => `statistic/telescope${encodeQueryData(params)}`
         }),
 
+        statisticGetStargazing: builder.query<ApiType.Statistic.ResStargazing, void>({
+            providesTags: () => ['Statistic'],
+            query: () => 'statistic/stargazing'
+        }),
+
         /* Mailings Controller */
         mailingGetList: builder.query<ApiType.Mailings.ResMailingList, void>({
             providesTags: () => [{ id: 'LIST', type: 'Mailings' }],
