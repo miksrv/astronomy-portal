@@ -1,0 +1,14 @@
+{
+    "pages": {
+        "stargazing": {
+            "program-arrival-title": "Arrival at the site",
+            "program-arrival-desc": "Arrive by car 15–20 minutes before the start and take a comfortable spot in the designated area of the field.",
+            "program-lecture-title": "Astronomy lecture",
+            "program-lecture-desc": "As dusk falls — an engaging lecture about space on a big screen, about an hour long.",
+            "program-sky-title": "The starry sky",
+            "program-sky-desc": "We learn to spot bright stars and constellations right in the night sky overhead.",
+            "program-telescope-title": "Observing through telescopes",
+            "program-telescope-desc": "Several telescopes are aimed at different objects — take a look and ask the astronomers your questions."
+        }
+    }
+}
