@@ -1,6 +1,8 @@
 export { EventForm, type EventFormType } from './event-form'
+export { EventImportant } from './event-important'
 export { EventItemData } from './event-item-data'
 export { EventPhotoUploader } from './event-photo-uploader'
+export { EventProgram } from './event-program'
 export { EventReviews } from './event-reviews/EventReviews'
 export { EventStatistic } from './event-statistic'
 export { EventUpcoming } from './event-upcoming'
