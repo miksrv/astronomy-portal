@@ -148,6 +148,7 @@ const MailingListPage: NextPage<object> = () => {
 
             <Container className={styles.tableContainer}>
                 <Table<ApiModel.MailingListItem>
+                    className={styles.mailingTable}
                     size={'small'}
                     columns={tableColumns}
                     data={data?.items || []}
