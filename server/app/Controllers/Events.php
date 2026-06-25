@@ -5,12 +5,12 @@ namespace App\Controllers;
 use App\Entities\EventEntity;
 use App\Entities\EventPhotoEntity;
 use App\Entities\PaymentEntity;
-use App\Libraries\EmailLibrary;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\PaymentLibrary;
 use App\Libraries\SessionLibrary;
 use App\Libraries\TelegramLibrary;
 use App\Libraries\TicketLibrary;
+use App\Models\EmailQueueModel;
 use App\Models\EventsPhotosModel;
 use App\Models\EventsUsersModel;
 use App\Models\PaymentsModel;
@@ -66,6 +66,12 @@ class Events extends ResourceController
             }
 
             $eventUsersModel = new EventsUsersModel();
+
+            // Free seats held by expired, unpaid reservations before counting
+            // tickets or resolving the current user's booking state, so a stale
+            // pending booking does not linger or occupy capacity.
+            $eventUsersModel->releaseExpiredPendingByPaymentIds((new PaymentLibrary())->releaseExpired());
+
             $bookedEvents    = $this->session->isAuth && $this->session->user->id
                 ? $eventUsersModel->where(['event_id' => $eventData->id, 'user_id' => $this->session->user->id])->first()
                 : false;
@@ -82,13 +88,38 @@ class Events extends ResourceController
             $eventData->registered = false;
 
             if ($bookedEvents) {
-                $eventData->registered = true;
-                $eventData->bookedId   = $bookedEvents->id;
-                $eventData->canceled   = !empty($bookedEvents->deleted_at);
-                $eventData->members    = [
+                $eventData->registered    = true;
+                $eventData->bookedId      = $bookedEvents->id;
+                $eventData->bookingStatus = $bookedEvents->status;
+                $eventData->canceled      = !empty($bookedEvents->deleted_at);
+                $eventData->members       = [
                     'adults'   => $bookedEvents->adults ?? 0,
                     'children' => $bookedEvents->children ?? 0
                 ];
+
+                // A pending booking holds the seat until its payment expires.
+                // Expose the order so the UI can show a countdown and a
+                // "return to payment" button that resumes the same Alfa-Bank order.
+                if ($bookedEvents->status === 'pending' && !empty($bookedEvents->payment_id)) {
+                    $payment = (new PaymentsModel())->find($bookedEvents->payment_id);
+
+                    if ($payment && $payment->status === 'pending') {
+                        // Send remaining seconds, not an absolute timestamp: the
+                        // stored value is app-timezone wall-clock and serialising
+                        // it lets the client misread the zone. A server-computed
+                        // diff (absolute timestamps) is timezone-proof.
+                        $expiresInSeconds = max(
+                            0,
+                            Time::parse((string) $payment->expires_at)->getTimestamp() - Time::now()->getTimestamp()
+                        );
+
+                        $eventData->payment = [
+                            'orderId'          => $payment->order_id,
+                            'formUrl'          => $payment->form_url,
+                            'expiresInSeconds' => $expiresInSeconds,
+                        ];
+                    }
+                }
             } else {
                 unset($eventData->location);
             }
@@ -324,11 +355,13 @@ class Events extends ResourceController
     }
 
     /**
-     * Generates the PNG ticket, emails it (inline) to the booking owner, then
-     * removes the temporary file. Email failures are logged but never bubble up
-     * — a failed email must not break the booking/payment flow.
+     * Renders the PNG ticket and queues a confirmation email (with the ticket
+     * embedded) to the booking owner for asynchronous delivery by the
+     * `system:send-email` cron. The PNG is written to a durable file the cron
+     * deletes once sent. Enqueue failures are logged but never bubble up —
+     * a failed email must not break the booking/payment flow.
      */
-    private function sendTicketEmail(object $booking, EventEntity $event, ?string $toEmail, ?string $userName, ?string $locale): void
+    private function queueTicketEmail(object $booking, EventEntity $event, ?string $toEmail, ?string $userName, ?string $locale): void
     {
         if (empty($toEmail)) {
             return;
@@ -340,8 +373,18 @@ class Events extends ResourceController
         $ticketPath = null;
 
         try {
-            $data       = $this->buildTicketData($booking, $event, $userName, $locale);
-            $ticketPath = (new TicketLibrary())->renderToTempFile($data);
+            $data = $this->buildTicketData($booking, $event, $userName, $locale);
+
+            // Persist the ticket outside the request lifecycle so the cron can
+            // attach it later; it is removed by the cron after the send.
+            $ticketDir = WRITEPATH . 'email_attachments';
+
+            if (!is_dir($ticketDir)) {
+                mkdir($ticketDir, 0755, true);
+            }
+
+            $ticketPath = $ticketDir . '/ticket_' . $booking->id . '_' . uniqid() . '.png';
+            file_put_contents($ticketPath, (new TicketLibrary())->renderPng($data));
 
             $title   = getLocalizedString($locale, $event->title_en, $event->title_ru);
             $subject = lang('Events.ticketEmailSubject', [$title], $locale);
@@ -353,10 +396,15 @@ class Events extends ResourceController
                 . '<p style="margin:16px 0 0;color:#888;font-size:13px;line-height:1.5;">' . esc(lang('Events.ticketEmailFooter', [], $locale)) . '</p>'
                 . '</div>';
 
-            (new EmailLibrary())->sendWithAttachment($toEmail, $subject, $message, $ticketPath);
+            $queued = (new EmailQueueModel())->enqueue($toEmail, $subject, $message, $ticketPath);
+
+            // If the row could not be inserted, drop the orphaned attachment.
+            if (!$queued && is_file($ticketPath)) {
+                @unlink($ticketPath);
+            }
         } catch (\Throwable $e) {
-            log_message('error', 'Ticket email failed: {msg}', ['msg' => $e->getMessage()]);
-        } finally {
+            log_message('error', 'Ticket email enqueue failed: {msg}', ['msg' => $e->getMessage()]);
+
             if ($ticketPath !== null && is_file($ticketPath)) {
                 @unlink($ticketPath);
             }
@@ -364,9 +412,10 @@ class Events extends ResourceController
     }
 
     /**
-     * Emails a booking-cancellation notice. Failures are logged, never thrown.
+     * Queues a booking-cancellation notice for asynchronous delivery.
+     * Failures are logged, never thrown.
      */
-    private function sendCancellationEmail(EventEntity $event, ?string $toEmail, ?string $locale): void
+    private function queueCancellationEmail(EventEntity $event, ?string $toEmail, ?string $locale): void
     {
         if (empty($toEmail)) {
             return;
@@ -384,9 +433,9 @@ class Events extends ResourceController
                 . '<p style="margin:0;line-height:1.5;">' . esc(lang('Events.cancelEmailIntro', [$title], $locale)) . '</p>'
                 . '</div>';
 
-            (new EmailLibrary())->send($toEmail, $subject, $message);
+            (new EmailQueueModel())->enqueue($toEmail, $subject, $message);
         } catch (\Throwable $e) {
-            log_message('error', 'Cancellation email failed: {msg}', ['msg' => $e->getMessage()]);
+            log_message('error', 'Cancellation email enqueue failed: {msg}', ['msg' => $e->getMessage()]);
         }
     }
 
@@ -788,7 +837,7 @@ class Events extends ResourceController
                     ->first();
 
                 if ($booking) {
-                    $this->sendTicketEmail(
+                    $this->queueTicketEmail(
                         $booking,
                         $event,
                         $this->session->user->email ?? null,
@@ -914,7 +963,7 @@ class Events extends ResourceController
 
             $eventUsersModel->delete($userRegistration->id);
 
-            $this->sendCancellationEmail(
+            $this->queueCancellationEmail(
                 $event,
                 $this->session->user->email ?? null,
                 $this->session->user->locale ?? null
@@ -1359,7 +1408,7 @@ class Events extends ResourceController
                 $owner = (new UsersModel())->find($booking->user_id);
 
                 if ($event && $owner) {
-                    $this->sendTicketEmail(
+                    $this->queueTicketEmail(
                         $booking,
                         $event,
                         $owner->email ?? null,
