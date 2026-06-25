@@ -51,6 +51,8 @@ A web application for a DIY amateur observatory with support for remote monitori
     - [Backend Environment Variables](#backend-environment-variables)
 - [API Overview](#api-overview)
 - [Deployment](#deployment)
+    - [Database Migrations](#database-migrations)
+    - [Payment Acquiring (Alfa-Bank)](#payment-acquiring-alfa-bank)
 - [Contributing](#contributing)
 - [License](#license)
 - [Contact](#contact)
@@ -69,7 +71,7 @@ Amateur Astronomy Observatory Portal is a DIY platform for managing and monitori
 - **Interactive Celestial Map** — explore observed objects, constellations, stars, and their imaging history powered by Celestial.js and D3.js.
 - **Real-Time Observatory Dashboard** — monitor telescope status, weather conditions, and sensor data live.
 - **Astrophotography Archive** — FITS file management and astrophotography archive with detailed metadata, equipment info, and filters.
-- **Stargazing Events** — event management with registration, check-in via QR code, and photo upload.
+- **Stargazing Events** — event management with registration, optional paid ticketing via Alfa-Bank online acquiring (adults pay, children under 18 are free), check-in via QR code, and photo upload.
 - **Astronomy Calculations** — visibility charts, celestial coordinate utilities, moon phase display using `astronomy-engine` and `suncalc`.
 - **Remote Observatory Control** — manage equipment power and receive telemetry via an Arduino-based controller.
 - **OAuth Authentication** — sign in with Google, Yandex, or VK accounts.
@@ -237,11 +239,19 @@ yarn build
 | `app.observatory.controller` | URL of Arduino relay controller | `http://astro.myftp.org:8081/` |
 | `app.observatory.webcam_1` | Webcam 1 snapshot URL | — |
 | `app.observatory.webcam_2` | Webcam 2 snapshot URL | — |
+| `app.siteUrl` | Public frontend URL; used to build the payment return URL | `https://astro.miksoft.pro` |
 | `auth.token.secret` | JWT secret key | — |
 | `auth.token.live` | JWT lifetime in seconds | `1209600` |
 | `auth.google.*` | Google OAuth credentials | — |
 | `auth.yandex.*` | Yandex OAuth credentials | — |
 | `auth.vk.*` | VK OAuth credentials | — |
+| `payment.gateway` | Active acquiring gateway implementation | `alfabank` |
+| `payment.currency` | ISO 4217 numeric currency code (`810` = RUB) | `810` |
+| `payment.sessionTimeoutSecs` | Order lifetime / unpaid seat-hold TTL, in seconds | `1200` |
+| `payment.alfabank.userName` | Alfa-Bank API login (usually ends with `-api`) | — |
+| `payment.alfabank.password` | Alfa-Bank API password | — |
+| `payment.alfabank.gatewayUrl` | Alfa-Bank REST base URL (test / production) | `https://web.rbsuat.com/ab/rest/` |
+| `payment.alfabank.callbackToken` | Symmetric token for HMAC callback verification | — |
 | `database.*.hostname` | DB host | `127.0.0.1` |
 | `database.*.port` | DB port | `3308` |
 | `database.*.database` | DB name | `db` |
@@ -269,8 +279,10 @@ All backend endpoints are defined in `server/app/Config/Routes.php`.
 | `GET` | `/fits/:name` | FITS file data for an object |
 | `GET\|POST\|PATCH\|DELETE` | `/photos` | Astrophoto archive CRUD + upload |
 | `GET\|POST\|PATCH` | `/events` | Stargazing events management |
-| `POST` | `/events/booking` | Book a place at an event |
-| `POST` | `/events/cancel` | Cancel booking |
+| `POST` | `/events/booking` | Book a place at an event (returns a bank payment URL for paid events) |
+| `POST` | `/events/cancel` | Cancel booking (auto-refunds paid bookings) |
+| `POST` | `/events/payment/status` | Verify the payment status of an order after returning from the bank |
+| `GET\|POST` | `/events/payment/callback` | Async payment notification from the acquiring gateway (HMAC-verified) |
 | `POST` | `/events/checkin` | QR check-in |
 | `GET` | `/events/members` | Event member list |
 | `GET` | `/events/upcoming` | Upcoming events |
@@ -289,16 +301,76 @@ All backend endpoints are defined in `server/app/Config/Routes.php`.
 <!-- DEPLOYMENT -->
 ## Deployment
 
-CI/CD is handled by GitHub Actions (`.github/workflows/`):
+CI/CD is handled by GitHub Actions (`.github/workflows/`). Pushing to `main` deploys automatically:
 
 | Workflow | Trigger | Action |
 |----------|---------|--------|
 | `ui-checks.yml` | Pull Request | Lint + test + build frontend |
-| `ui-deploy.yml` | Push to `main` | Deploy frontend via SSH/rsync to VPS, served with PM2 |
+| `ui-deploy.yml` | Push to `main` | Deploy frontend via SSH/rsync to a VPS, served with PM2 |
 | `api-deploy.yml` | Push to `main` | Deploy backend via FTP to shared PHP hosting |
 | `sonarcloud.yml` | PRs + push to `main` | SonarCloud quality gate |
 
-The frontend is built as a Next.js standalone app (`output: 'standalone'` in `next.config.js`) and managed by PM2 (`ecosystem.config.js`).
+- **Frontend** is built as a Next.js standalone app (`output: 'standalone'` in `next.config.js`) and managed by PM2 (`ecosystem.config.js`).
+- **Backend** is uploaded as plain PHP to shared hosting.
+- Production secrets live in the `server/.env` and `client/.env` files **on the target hosts** — they are not committed. Configure them using the tables in the [Configuration](#configuration) section before (or right after) the first deploy. Neither workflow injects them.
+
+### Database Migrations
+
+Migrations are **not** run automatically by the deploy workflows. After deploying changes that add migrations, run them on the server:
+
+```bash
+cd server
+composer migration:run     # apply pending migrations
+composer migration:status  # verify what has been applied
+```
+
+> The paid-ticketing feature adds three migrations (`2026-06-22-100000_AddEventTicketPrice`, `…_AddPayments`, `…_AddEventUserPaymentColumns`). They must be applied before paid events will work.
+
+### Payment Acquiring (Alfa-Bank)
+
+Stargazing events can charge a per-event ticket price (set in the event admin form; `0` = free, children under 18 are always free). Payments use Alfa-Bank **single-stage** REST internet acquiring: the API registers an order, the user is redirected to the bank's payment page, and the result is reconciled both by polling and by an asynchronous HMAC-signed callback.
+
+The integration is gateway-agnostic (`PaymentGatewayInterface` → `AlfaBankClient` → `PaymentLibrary` in `server/app/Libraries/`); adding another provider is a single new class.
+
+**1. Set the environment variables** in `server/.env` (see the [Backend Environment Variables](#backend-environment-variables) table for the full list):
+
+```dotenv
+payment.gateway                = 'alfabank'
+payment.currency               = '810'        # RUB
+payment.sessionTimeoutSecs     = 1200          # how long an unpaid seat is held
+
+payment.alfabank.userName      = ''            # API login from the cabinet (ends with -api)
+payment.alfabank.password      = ''            # API password
+# Test gateway:  https://web.rbsuat.com/ab/rest/
+# Production:    https://payment.alfabank.ru/payment/rest/
+payment.alfabank.gatewayUrl    = 'https://web.rbsuat.com/ab/rest/'
+payment.alfabank.callbackToken = ''            # symmetric token (see step 3)
+
+# Must point to the public frontend URL — used to build the payment return URL:
+app.siteUrl                    = 'https://astro.miksoft.pro'
+```
+
+**2. Get the API credentials.** In the Alfa-Bank merchant cabinet, create/obtain the API user (login usually ends with `-api`) and its password, and put them in `payment.alfabank.userName` / `payment.alfabank.password`.
+
+**3. Enable signed callbacks.** In the cabinet, set the callback signature type to **Symmetric**, generate the **callback token**, and copy it into `payment.alfabank.callbackToken`. The backend verifies every callback with HMAC-SHA256 and rejects unsigned/forged ones.
+
+**4. Register the callback URL** in the cabinet, pointing to the **backend (API)** host:
+
+```
+https://<your-api-host>/events/payment/callback
+```
+
+**5. Confirm the return URL.** After payment the bank redirects the user to the **frontend** page below (built automatically from `app.siteUrl`, with the order id appended by the bank). No cabinet setting is required, but the frontend host must be reachable:
+
+```
+https://<your-frontend-host>/stargazing/payment
+```
+
+**6. Choose the gateway URL.** Use `https://web.rbsuat.com/ab/rest/` for testing (Alfa-Bank's test gateway, with their test cards) and switch `payment.alfabank.gatewayUrl` to `https://payment.alfabank.ru/payment/rest/` for production.
+
+**7. Apply migrations** (see [Database Migrations](#database-migrations)) and restart the API.
+
+> Reference: Alfa-Bank REST API — <https://ecom.alfabank.ru/assets/instructions/merchantManual/pages/index/rest.html>
 
 <p align="right">(<a href="#top">Back to top</a>)</p>
 
