@@ -1,16 +1,41 @@
 @use '../../../../styles/mixins'
+@use '../../../../styles/variables' as variables
 
 .formElement
     margin-bottom: 10px
 
 .sections
     display: flex
+    flex-wrap: wrap
     justify-content: space-between
-    align-items: flex-end
+    align-items: flex-start
     gap: 10px
 
     & > div
-        flex-basis: 50%
+        flex: 1 1 200px
+        min-width: 0
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column
+        align-items: stretch
+
+        & > div
+            flex-basis: auto
+            width: 100%
+
+.fieldWithHint
+    display: flex
+    flex-direction: column
+
+    .formElement
+        margin-bottom: 2px
+
+.hint
+    display: block
+    margin-bottom: 10px
+    font-size: 12px
+    line-height: 1.3
+    color: var(--text-color-secondary)
 
 .imageSection
     flex-basis: 100%

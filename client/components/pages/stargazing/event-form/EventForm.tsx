@@ -18,7 +18,13 @@ interface EventFormProps {
 }
 
 export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onSubmit, onCancel }) => {
-    const [formData, setFormData] = useState<EventFormType>({})
+    // Prefill sensible defaults for a brand-new event. In edit mode the effect
+    // below overwrites these with the existing event's values.
+    const [formData, setFormData] = useState<EventFormType>({
+        ticketPrice: '500',
+        yandexMap: 'https://yandex.com/maps/-/CDvPzZkD',
+        googleMap: 'https://maps.app.goo.gl/MWEcbhNK6wj2eeEPA'
+    })
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, upload: e?.target?.files?.[0] })
@@ -35,7 +41,8 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
                 date: initialData?.date?.date,
                 registrationStart: initialData?.registrationStart?.date,
                 registrationEnd: initialData?.registrationEnd?.date,
-                tickets: initialData?.availableTickets?.toString()
+                tickets: initialData?.availableTickets?.toString(),
+                ticketPrice: initialData?.ticketPrice?.toString()
             })
         }
     }, [initialData])
@@ -53,30 +60,53 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
             />
 
             <div className={styles.sections}>
-                <Input
-                    required={true}
-                    disabled={disabled}
-                    className={styles.formElement}
-                    type={'number'}
-                    label={'Количество доступных мест'}
-                    value={formData.tickets}
-                    onChange={(e) =>
-                        setFormData({
-                            ...formData,
-                            tickets: e.target.value
-                        })
-                    }
-                />
+                <div className={styles.fieldWithHint}>
+                    <Input
+                        required={true}
+                        disabled={disabled}
+                        className={styles.formElement}
+                        type={'number'}
+                        label={'Количество доступных мест'}
+                        value={formData.tickets}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                tickets: e.target.value
+                            })
+                        }
+                    />
+                    <small className={styles.hint}>Считается только по взрослым</small>
+                </div>
 
-                <Input
-                    required={true}
-                    disabled={disabled}
-                    className={styles.formElement}
-                    type={'datetime-local'}
-                    label={'Дата проведения (по Оренбургскому времени)'}
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                />
+                <div className={styles.fieldWithHint}>
+                    <Input
+                        disabled={disabled}
+                        className={styles.formElement}
+                        type={'number'}
+                        label={'Цена билета за взрослого, ₽'}
+                        value={formData.ticketPrice}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                ticketPrice: e.target.value
+                            })
+                        }
+                    />
+                    <small className={styles.hint}>0 — бесплатно, дети до 18 лет бесплатно</small>
+                </div>
+
+                <div className={styles.fieldWithHint}>
+                    <Input
+                        required={true}
+                        disabled={disabled}
+                        className={styles.formElement}
+                        type={'datetime-local'}
+                        label={'Дата и время проведения'}
+                        value={formData.date}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    />
+                    <small className={styles.hint}>по Оренбургскому времени</small>
+                </div>
             </div>
 
             <div className={styles.sections}>
