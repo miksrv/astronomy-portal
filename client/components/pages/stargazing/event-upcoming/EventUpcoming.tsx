@@ -10,6 +10,8 @@ import { hosts } from '@/api/constants'
 import { LoginForm } from '@/components/common'
 import { formatUTCDate, getLocalizedTimeFromSec, getSecondsUntilUTCDate } from '@/utils/dates'
 
+import { EventTicket } from '../event-ticket'
+
 import { EventBookingForm } from './event-booking-form'
 import noEventsImage from './no-events.png'
 
@@ -25,6 +27,7 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
     const user = useAppSelector((state) => state.auth.user)
 
     const [registered, setRegistered] = useState<boolean>(false)
+    const [bookedId, setBookedId] = useState<string>()
     const [confirmation, showConfirmation] = useState<boolean>(false)
     const [tick, setTick] = useState<number>(0)
 
@@ -120,6 +123,12 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
                         <h3 className={styles.registeredTitle}>
                             {t('components.pages.stargazing.event-upcoming.you-are-registered', 'Вы зарегистрированы')}
                         </h3>
+                    )}
+
+                    {registered && (event?.bookedId || bookedId) && (
+                        <div className={styles.ticketBlock}>
+                            <EventTicket bookingId={event?.bookedId || bookedId} />
+                        </div>
                     )}
 
                     <div className={styles.infoSection}>
@@ -317,8 +326,10 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
                             {user?.id && !registered && (
                                 <EventBookingForm
                                     eventId={event?.id}
-                                    onSuccessSubmit={() => {
+                                    ticketPrice={event?.ticketPrice}
+                                    onSuccessSubmit={(id) => {
                                         setRegistered(true)
+                                        setBookedId(id)
                                     }}
                                 />
                             )}
