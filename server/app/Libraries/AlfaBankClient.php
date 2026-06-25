@@ -9,6 +9,13 @@ namespace App\Libraries;
  *   - register.do                — register an order, returns { orderId, formUrl }
  *   - getOrderStatusExtended.do   — poll the authoritative order status
  *   - refund.do                   — refund a paid order
+ *
+ * API requests authenticate with EITHER a payment token OR a userName/password
+ * pair (mutually exclusive — see {@see authParams()}). Merchants on an
+ * "r-login" contract authenticate with the payment token issued in the merchant
+ * cabinet; the r-***-operator login is for the cabinet UI only and cannot sign
+ * API calls.
+ *
  * Asynchronous callbacks are authenticated with an HMAC-SHA256 checksum over the
  * alphabetically-sorted "key;value;" parameter string, using the symmetric
  * callback token configured in the Alfa-Bank merchant cabinet.
@@ -24,29 +31,57 @@ class AlfaBankClient implements PaymentGatewayInterface
     private string $password;
     private string $gatewayUrl;
     private string $callbackToken;
+    private string $token;
 
     private \CodeIgniter\HTTP\CURLRequest $client;
 
     /**
-     * @param string $userName      API login (usually ends with "-api").
-     * @param string $password      API password.
+     * @param string $userName      API login (used only when no payment token is set).
+     * @param string $password      API password (used only when no payment token is set).
      * @param string $gatewayUrl    REST base URL, e.g. https://payment.alfabank.ru/payment/rest/
      * @param string $callbackToken Symmetric callback token for HMAC verification.
+     * @param string $token         Payment token; when set it authenticates API calls
+     *                              instead of userName/password (required for "r-login").
      */
-    public function __construct(string $userName, string $password, string $gatewayUrl, string $callbackToken = '')
+    public function __construct(string $userName, string $password, string $gatewayUrl, string $callbackToken = '', string $token = '')
     {
         $this->userName      = $userName;
         $this->password      = $password;
         $this->gatewayUrl    = $gatewayUrl !== '' ? rtrim($gatewayUrl, '/') . '/' : '';
         $this->callbackToken = $callbackToken;
+        $this->token         = $token;
         $this->client        = \Config\Services::curlrequest();
+    }
+
+    /**
+     * Builds the authentication parameters for token-authorisable requests
+     * (register.do, getOrderStatusExtended.do).
+     *
+     * Alfa-Bank REST accepts EITHER a payment token OR a userName/password pair
+     * (mutually exclusive). When a payment token is configured it takes
+     * precedence — for an "r-login" contract this is the only thing that works,
+     * since the r-***-operator login cannot authenticate API calls.
+     *
+     * NOTE: this does NOT cover refund.do — refunds require a back-office API
+     * login/password and reject the token (see {@see refund()}).
+     *
+     * @return array<string, string>
+     */
+    private function authParams(): array
+    {
+        if ($this->token !== '') {
+            return ['token' => $this->token];
+        }
+
+        return [
+            'userName' => $this->userName,
+            'password' => $this->password,
+        ];
     }
 
     public function registerOrder(string $orderNumber, int $amount, string $returnUrl, array $options = []): ?object
     {
-        $params = array_merge([
-            'userName'    => $this->userName,
-            'password'    => $this->password,
+        $params = array_merge($this->authParams(), [
             'orderNumber' => $orderNumber,
             'amount'      => $amount,
             'returnUrl'   => $returnUrl,
@@ -94,15 +129,17 @@ class AlfaBankClient implements PaymentGatewayInterface
 
     public function getOrderStatus(string $orderId): ?object
     {
-        return $this->request('getOrderStatusExtended.do', [
-            'userName' => $this->userName,
-            'password' => $this->password,
-            'orderId'  => $orderId,
-        ]);
+        return $this->request('getOrderStatusExtended.do', array_merge($this->authParams(), [
+            'orderId' => $orderId,
+        ]));
     }
 
     public function refund(string $orderId, int $amount): bool
     {
+        // refund.do does NOT accept token auth — the payment token authorises
+        // order registration (and status reads) only. The gateway rejects a
+        // token here with errorCode 5 "[userName] или [password] не задан", so a
+        // back-office API login/password is required for refunds.
         $response = $this->request('refund.do', [
             'userName' => $this->userName,
             'password' => $this->password,

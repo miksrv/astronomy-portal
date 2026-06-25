@@ -231,6 +231,10 @@ class EventsUsersModel extends ApplicationBaseModel
     /**
      * Returns users with valid emails registered for an event, for use as mailing recipients.
      *
+     * Mirrors UsersModel::getNewsletterSubscribers(): users who explicitly
+     * unsubscribed (settings->subscribe_newsletter === false) are excluded, so a
+     * per-event campaign honours the same opt-out as the "all users" audience.
+     *
      * @param string $eventId
      * @return array Rows with id, email, locale.
      */
@@ -244,6 +248,11 @@ class EventsUsersModel extends ApplicationBaseModel
             ->where('u.email IS NOT NULL')
             ->where("u.email != ''")
             ->where('u.deleted_at IS NULL')
+            ->groupStart()
+                ->where('u.settings IS NULL')
+                ->orWhere("JSON_EXTRACT(u.settings, '$.subscribe_newsletter') IS NULL")
+                ->orWhere("JSON_EXTRACT(u.settings, '$.subscribe_newsletter') != 0")
+            ->groupEnd()
             ->get()
             ->getResultArray();
     }
@@ -265,6 +274,11 @@ class EventsUsersModel extends ApplicationBaseModel
             ->where('u.email IS NOT NULL')
             ->where("u.email != ''")
             ->where('u.deleted_at IS NULL')
+            ->groupStart()
+                ->where('u.settings IS NULL')
+                ->orWhere("JSON_EXTRACT(u.settings, '$.subscribe_newsletter') IS NULL")
+                ->orWhere("JSON_EXTRACT(u.settings, '$.subscribe_newsletter') != 0")
+            ->groupEnd()
             ->get()
             ->getRowArray() ?: null;
     }
@@ -285,6 +299,11 @@ class EventsUsersModel extends ApplicationBaseModel
             ->where('u.email IS NOT NULL')
             ->where("u.email != ''")
             ->where('u.deleted_at IS NULL')
+            ->groupStart()
+                ->where('u.settings IS NULL')
+                ->orWhere("JSON_EXTRACT(u.settings, '$.subscribe_newsletter') IS NULL")
+                ->orWhere("JSON_EXTRACT(u.settings, '$.subscribe_newsletter') != 0")
+            ->groupEnd()
             ->groupBy('e.id')
             ->having('user_count >', 0)
             ->orderBy('e.created_at', 'DESC')
@@ -325,6 +344,9 @@ class EventsUsersModel extends ApplicationBaseModel
                       eu.id AS booking_id, eu.adults, eu.children, eu.checkin_at')
             ->join('events e', 'e.id = eu.event_id')
             ->where('eu.user_id', $userId)
+            // Only confirmed bookings count as "registered"; a pending (unpaid)
+            // booking must not surface as the user's upcoming event with a ticket.
+            ->where('eu.status', 'confirmed')
             ->where('eu.deleted_at IS NULL')
             ->where('e.deleted_at IS NULL')
             ->where('e.date > NOW()')

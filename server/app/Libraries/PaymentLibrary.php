@@ -19,8 +19,9 @@ use InvalidArgumentException;
  *   payment.gateway                 — gateway name (default "alfabank")
  *   payment.currency                — ISO 4217 numeric currency (default "810" / RUB)
  *   payment.sessionTimeoutSecs      — order lifetime / seat-hold TTL (default 1200)
- *   payment.alfabank.userName       — Alfa-Bank API login
- *   payment.alfabank.password       — Alfa-Bank API password
+ *   payment.alfabank.token          — Alfa-Bank payment token (preferred; required for "r-login")
+ *   payment.alfabank.userName       — Alfa-Bank API login (fallback when no token is set)
+ *   payment.alfabank.password       — Alfa-Bank API password (fallback when no token is set)
  *   payment.alfabank.gatewayUrl     — Alfa-Bank REST base URL
  *   payment.alfabank.callbackToken  — Alfa-Bank symmetric callback token
  */
@@ -54,7 +55,8 @@ class PaymentLibrary
                     (string) getenv('payment.alfabank.userName'),
                     (string) getenv('payment.alfabank.password'),
                     (string) getenv('payment.alfabank.gatewayUrl'),
-                    (string) getenv('payment.alfabank.callbackToken')
+                    (string) getenv('payment.alfabank.callbackToken'),
+                    (string) getenv('payment.alfabank.token')
                 );
             default:
                 throw new InvalidArgumentException("Unknown payment gateway: {$name}");
@@ -125,6 +127,8 @@ class PaymentLibrary
             'currency'     => $currency,
             'status'       => 'pending',
             'form_url'     => $result->formUrl,
+            // App-timezone wall-clock, consistent with the expiry sweep in
+            // PaymentsModel::getExpiredPendingIds() (also app-timezone "now").
             'expires_at'   => (new Time('now'))->addSeconds($sessionTimeout)->toDateTimeString(),
         ]);
 

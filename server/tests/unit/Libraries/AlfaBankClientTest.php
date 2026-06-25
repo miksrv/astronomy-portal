@@ -46,6 +46,38 @@ final class AlfaBankClientTest extends CIUnitTestCase
         $this->assertSame('', $reflection->getValue($client));
     }
 
+    // --- authParams() ---
+
+    public function testAuthParamsUsesUserNamePasswordByDefault(): void
+    {
+        $params = $this->invokeAuthParams($this->client);
+
+        $this->assertSame(['userName' => 'login-api', 'password' => 'password'], $params);
+        $this->assertArrayNotHasKey('token', $params);
+    }
+
+    public function testAuthParamsUsesTokenWhenConfigured(): void
+    {
+        $client = new AlfaBankClient('login-api', 'password', 'https://x/', '', 'pay-token-123');
+
+        $params = $this->invokeAuthParams($client);
+
+        $this->assertSame(['token' => 'pay-token-123'], $params);
+        $this->assertArrayNotHasKey('userName', $params);
+        $this->assertArrayNotHasKey('password', $params);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function invokeAuthParams(AlfaBankClient $client): array
+    {
+        $method = new ReflectionMethod($client, 'authParams');
+        $method->setAccessible(true);
+
+        return $method->invoke($client);
+    }
+
     // --- calculateChecksum() ---
 
     public function testCalculateChecksumMatchesSortedKeyValueFormat(): void
