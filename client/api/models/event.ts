@@ -24,6 +24,8 @@ export type Event = {
     registrationStart?: DateTime
     registrationEnd?: DateTime
     availableTickets?: number
+    /** Price per adult in RUB. 0 / undefined means the event is free (children under 18 are always free). */
+    ticketPrice?: number
     views?: number
 }
 

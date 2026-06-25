@@ -113,6 +113,12 @@ export const API = createApi({
             providesTags: [{ id: 'UPCOMING_PROFILE', type: 'Events' }],
             query: () => 'events/upcoming/registered'
         }),
+        eventGetTicket: builder.query<Blob, string>({
+            query: (bookingId) => ({
+                responseHandler: (response) => response.blob(),
+                url: `events/ticket/${bookingId}`
+            })
+        }),
         eventPhotoUploadPost: builder.mutation<ApiType.Events.ResPhoto, ApiType.Events.ReqUploadPhoto>({
             invalidatesTags: (res, err, arg) => [
                 { id: arg.eventId, type: 'Events' },
@@ -191,6 +197,14 @@ export const API = createApi({
                 body: formState,
                 method: 'POST',
                 url: 'events/cancel'
+            })
+        }),
+        eventPaymentStatus: builder.mutation<ApiType.Events.ResPaymentStatus, ApiType.Events.ReqPaymentStatus>({
+            invalidatesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
+            query: (body) => ({
+                body,
+                method: 'POST',
+                url: 'events/payment/status'
             })
         }),
 
