@@ -4,11 +4,16 @@ namespace App\Controllers;
 
 use App\Entities\EventEntity;
 use App\Entities\EventPhotoEntity;
+use App\Entities\PaymentEntity;
+use App\Libraries\EmailLibrary;
 use App\Libraries\LocaleLibrary;
+use App\Libraries\PaymentLibrary;
 use App\Libraries\SessionLibrary;
 use App\Libraries\TelegramLibrary;
+use App\Libraries\TicketLibrary;
 use App\Models\EventsPhotosModel;
 use App\Models\EventsUsersModel;
+use App\Models\PaymentsModel;
 use App\Models\UsersModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
@@ -125,6 +130,7 @@ class Events extends ResourceController
         if ($row) {
             $item = [
                 'id'             => $row->id,
+                'bookedId'       => $row->booking_id,
                 'titleRu'        => $row->title_ru,
                 'titleEn'        => $row->title_en,
                 'date'           => $row->date,
@@ -204,6 +210,183 @@ class Events extends ResourceController
             log_message('error', '{exception}', ['exception' => $e]);
 
             return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * Streams the PNG ticket for a booking (events_users id), generated on the fly.
+     *
+     * Nothing is stored on disk. Access is restricted to the booking owner or to
+     * staff (admin/moderator/security). Soft-deleted (cancelled) bookings 404.
+     *
+     * @param string|null $id The booking id (events_users.id), also the QR payload.
+     */
+    public function ticket($id = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if (empty($id)) {
+            return $this->failValidationErrors(lang('Events.invalidQrCode'));
+        }
+
+        try {
+            $eventUsersModel = new EventsUsersModel();
+            $booking         = $eventUsersModel->find($id);
+
+            if (empty($booking)) {
+                return $this->failNotFound(lang('Events.notFound'));
+            }
+
+            $isStaff = in_array($this->session->user->role, ['admin', 'moderator', 'security'], true);
+
+            if (!$isStaff && $booking->user_id !== $this->session->user->id) {
+                return $this->failForbidden(lang('App.accessDenied'));
+            }
+
+            $event = $this->model->find($booking->event_id);
+
+            if (empty($event)) {
+                return $this->failNotFound(lang('Events.notFound'));
+            }
+
+            // Guest name: the booking owner (resolve from DB when staff views someone else's ticket).
+            $userName = $this->session->user->name ?? null;
+
+            if ($booking->user_id !== $this->session->user->id) {
+                $owner    = (new UsersModel())->find($booking->user_id);
+                $userName = $owner->name ?? null;
+            }
+
+            $data = $this->buildTicketData($booking, $event, $userName, $this->request->getLocale());
+            $png  = (new TicketLibrary())->renderPng($data);
+
+            return $this->response
+                ->setHeader('Content-Type', 'image/png')
+                ->setHeader('Cache-Control', 'private, max-age=300')
+                ->setBody($png);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * Assembles the localised data array consumed by {@see TicketLibrary::renderPng()}.
+     *
+     * Presentation strings are resolved here (labels via lang(), title via the
+     * locale helper, date formatted in Orenburg time to match the rest of the UI).
+     *
+     * @param object      $booking  events_users row.
+     * @param EventEntity $event    The event the booking belongs to.
+     * @param string|null $userName Guest display name.
+     * @param string      $locale   Locale code ('ru' | 'en').
+     */
+    private function buildTicketData(object $booking, EventEntity $event, ?string $userName, string $locale): array
+    {
+        helper('locale');
+
+        $rawDate   = $event->toRawArray()['date'] ?? null;
+        $dateValue = '';
+
+        if (!empty($rawDate)) {
+            // Stored as UTC; display in Orenburg time (UTC+5), like the rest of the UI.
+            $dateValue = Time::parse($rawDate, 'UTC')
+                ->setTimezone('Asia/Yekaterinburg')
+                ->toLocalizedString(lang('Events.ticketDateFormat', [], $locale));
+        }
+
+        $coverPath = null;
+
+        if (!empty($event->coverFileName) && !empty($event->coverFileExt)) {
+            $candidate = UPLOAD_EVENTS . $event->id . '/' . $event->coverFileName . '.' . $event->coverFileExt;
+
+            if (is_file($candidate)) {
+                $coverPath = $candidate;
+            }
+        }
+
+        return [
+            'qrData'      => (string) $booking->id,
+            'heading'     => lang('Events.ticketHeading', [], $locale),
+            'title'       => getLocalizedString($locale, $event->title_en, $event->title_ru),
+            'dateLabel'   => lang('Events.ticketDateLabel', [], $locale),
+            'dateValue'   => $dateValue,
+            'peopleLabel' => lang('Events.ticketPeopleLabel', [], $locale),
+            'peopleValue' => lang('Events.ticketPeopleValue', [(int) $booking->adults, (int) $booking->children], $locale),
+            'guestLabel'  => lang('Events.ticketGuestLabel', [], $locale),
+            'guestValue'  => $userName ?? '',
+            'footer'      => lang('Events.ticketShowQr', [], $locale),
+            'coverPath'   => $coverPath,
+        ];
+    }
+
+    /**
+     * Generates the PNG ticket, emails it (inline) to the booking owner, then
+     * removes the temporary file. Email failures are logged but never bubble up
+     * — a failed email must not break the booking/payment flow.
+     */
+    private function sendTicketEmail(object $booking, EventEntity $event, ?string $toEmail, ?string $userName, ?string $locale): void
+    {
+        if (empty($toEmail)) {
+            return;
+        }
+
+        helper('locale');
+
+        $locale     = $locale ?: 'ru';
+        $ticketPath = null;
+
+        try {
+            $data       = $this->buildTicketData($booking, $event, $userName, $locale);
+            $ticketPath = (new TicketLibrary())->renderToTempFile($data);
+
+            $title   = getLocalizedString($locale, $event->title_en, $event->title_ru);
+            $subject = lang('Events.ticketEmailSubject', [$title], $locale);
+            $message = '<div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;color:#1b1f27;">'
+                . '<h2 style="margin:0 0 12px;">' . esc(lang('Events.ticketEmailTitle', [], $locale)) . '</h2>'
+                . '<p style="margin:0 0 12px;line-height:1.5;">' . esc(lang('Events.ticketEmailIntro', [$title], $locale)) . '</p>'
+                . '<p style="margin:0 0 16px;"><strong>' . esc(lang('Events.ticketEmailDate', [$data['dateValue']], $locale)) . '</strong></p>'
+                . '<img src="cid:COVER_IMAGE_CID" alt="' . esc($title) . '" style="display:block;width:100%;max-width:600px;border-radius:10px;" />'
+                . '<p style="margin:16px 0 0;color:#888;font-size:13px;line-height:1.5;">' . esc(lang('Events.ticketEmailFooter', [], $locale)) . '</p>'
+                . '</div>';
+
+            (new EmailLibrary())->sendWithAttachment($toEmail, $subject, $message, $ticketPath);
+        } catch (\Throwable $e) {
+            log_message('error', 'Ticket email failed: {msg}', ['msg' => $e->getMessage()]);
+        } finally {
+            if ($ticketPath !== null && is_file($ticketPath)) {
+                @unlink($ticketPath);
+            }
+        }
+    }
+
+    /**
+     * Emails a booking-cancellation notice. Failures are logged, never thrown.
+     */
+    private function sendCancellationEmail(EventEntity $event, ?string $toEmail, ?string $locale): void
+    {
+        if (empty($toEmail)) {
+            return;
+        }
+
+        helper('locale');
+
+        $locale = $locale ?: 'ru';
+
+        try {
+            $title   = getLocalizedString($locale, $event->title_en, $event->title_ru);
+            $subject = lang('Events.cancelEmailSubject', [$title], $locale);
+            $message = '<div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;color:#1b1f27;">'
+                . '<h2 style="margin:0 0 12px;">' . esc(lang('Events.cancelEmailTitle', [], $locale)) . '</h2>'
+                . '<p style="margin:0;line-height:1.5;">' . esc(lang('Events.cancelEmailIntro', [$title], $locale)) . '</p>'
+                . '</div>';
+
+            (new EmailLibrary())->send($toEmail, $subject, $message);
+        } catch (\Throwable $e) {
+            log_message('error', 'Cancellation email failed: {msg}', ['msg' => $e->getMessage()]);
         }
     }
 
@@ -425,6 +608,7 @@ class Events extends ResourceController
         $rules = [
             'title'             => 'required|string|max_length[250]',
             'tickets'           => 'required|integer|greater_than[0]|less_than[5000]',
+            'ticketPrice'       => 'if_exist|decimal|greater_than_equal_to[0]',
             'date'              => 'required|string|max_length[50]',
             'registrationStart' => 'required|string|max_length[50]',
             'registrationEnd'   => 'required|string|max_length[50]',
@@ -456,6 +640,7 @@ class Events extends ResourceController
             $event->content_ru  = $input['content'];
             $event->content_en  = $input['content'];
             $event->max_tickets = $input['tickets'];
+            $event->ticket_price = isset($input['ticketPrice']) ? (float) $input['ticketPrice'] : 0;
             $event->googleMap   = $input['googleMap'];
             $event->yandexMap   = $input['yandexMap'];
 
@@ -548,43 +733,23 @@ class Events extends ResourceController
                 return $this->failValidationErrors(['error' => lang('Events.registrationClosed')]);
             }
 
-            // Check available tickets
+            // Release seats held by expired, unpaid reservations before counting.
+            $paymentLibrary = new PaymentLibrary();
+            $eventUsersModel->releaseExpiredPendingByPaymentIds($paymentLibrary->releaseExpired());
+
+            // Check available tickets (adults occupy the bookable slots).
             $currentTickets = $eventUsersModel
                 ->selectSum('adults')
-                ->selectSum('children')
                 ->where('event_id', $input['eventId'])
                 ->first();
 
-            // $currentTickets = $currentTickets->adults + $currentTickets->children;
-//            $totalMembers   = (int) $currentTickets->adults + (int) $currentTickets->children;
             $currentTickets = (int) $currentTickets->adults;
 
             if ($currentTickets >= (int) $event->max_tickets) {
                 return $this->failValidationErrors(['error' => lang('Events.noTicketsAvailable')]);
             }
 
-            $childrenAges = $input['childrenAges'] ?? [];
-            $eventUsersModel->insert([
-                'event_id' => $input['eventId'],
-                'user_id'  => $this->session->user->id,
-                'adults'   => $input['adults'],
-                'children' => $input['children'],
-
-                'children_ages' => json_encode($childrenAges),
-            ]);
-
-//            $safeName       = htmlspecialchars($input['name'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
-//            $safeEventTitle = htmlspecialchars($event->title_ru ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
-//            $message = "<b>🙋РЕГИСТРАЦИЯ НА АСТРОВЫЕЗД</b>\n" .
-//                "<b>{$safeEventTitle}</b>\n" .
-//                "🔹<i>{$safeName}</i>\n" .
-//                "🔹(<b>{$input['adults']}</b>) взрослых, ({$input['children']}) детей\n" .
-//                (count($childrenAges) > 0 ? "🔹Возраст детей <b>" . implode(', ', $childrenAges) . "</b> (лет)\n" : "") .
-//                "🔹Доступно мест <b>" . ($event->max_tickets - ($currentTickets + (int) $input['adults'])) . "</b> из <b>{$event->max_tickets}</b>\n" .
-//                "🔹Всего участников: <b>" . ($totalMembers + (int) $input['adults'] + (int) $input['children']) . "</b>";
-//
-//            (new TelegramLibrary())->sendMessage($message);
-
+            // Persist (or refresh) the user's profile name/phone.
             $userModel  = new UsersModel();
             $updateData = [];
 
@@ -600,7 +765,91 @@ class Events extends ResourceController
                 $userModel->update($this->session->user->id, $updateData);
             }
 
-            return $this->respond(['message' => lang('Events.bookingSuccess')]);
+            $childrenAges = $input['childrenAges'] ?? [];
+            // Access via the datamap property (`ticketPrice`), not the raw column
+            // name: CI4 Entity's __isset() returns false for a datamap *target*
+            // column, so `$event->ticket_price ?? 0` would coalesce to 0 and send
+            // every paid booking down the free branch.
+            $ticketPrice  = (float) ($event->ticketPrice ?? 0);
+
+            // Free event — confirm the booking immediately, no payment required.
+            if ($ticketPrice <= 0) {
+                $eventUsersModel->insert([
+                    'event_id'      => $input['eventId'],
+                    'user_id'       => $this->session->user->id,
+                    'adults'        => $input['adults'],
+                    'children'      => $input['children'],
+                    'children_ages' => json_encode($childrenAges),
+                    'status'        => 'confirmed',
+                ]);
+
+                $booking = $eventUsersModel
+                    ->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])
+                    ->first();
+
+                if ($booking) {
+                    $this->sendTicketEmail(
+                        $booking,
+                        $event,
+                        $this->session->user->email ?? null,
+                        $this->session->user->name ?? null,
+                        $this->session->user->locale ?? null
+                    );
+                }
+
+                return $this->respond([
+                    'result'    => true,
+                    'message'   => lang('Events.bookingSuccess'),
+                    'bookingId' => $booking->id ?? null,
+                ]);
+            }
+
+            // Paid event — hold the seat as pending and register an acquiring order.
+            $eventUsersModel->insert([
+                'event_id'      => $input['eventId'],
+                'user_id'       => $this->session->user->id,
+                'adults'        => $input['adults'],
+                'children'      => $input['children'],
+                'children_ages' => json_encode($childrenAges),
+                'status'        => 'pending',
+            ]);
+
+            // The booking is unique per (event, user); fetch the row we just created.
+            $booking   = $eventUsersModel
+                ->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])
+                ->first();
+            $bookingId = $booking->id;
+
+            $amountRub     = round((int) $input['adults'] * $ticketPrice, 2);
+            $amountKopecks = (int) round($amountRub * 100);
+            $returnUrl     = rtrim((string) getenv('app.siteUrl'), '/') . '/stargazing/payment';
+
+            $payment = $paymentLibrary->createPayment(
+                'event_booking',
+                $bookingId,
+                $amountKopecks,
+                $event->title_ru ?? 'Stargazing',
+                $returnUrl,
+                $returnUrl
+            );
+
+            if ($payment === null) {
+                // Could not start the payment — release the held seat.
+                $eventUsersModel->delete($bookingId);
+
+                return $this->failServerError(lang('Events.paymentFailed'));
+            }
+
+            $eventUsersModel->update($bookingId, ['payment_id' => $payment->id]);
+
+            return $this->respond([
+                'result'  => true,
+                'payment' => [
+                    'formUrl' => $payment->form_url,
+                    'orderId' => $payment->order_id,
+                    'amount'  => $amountRub,
+                ],
+            ]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
@@ -654,7 +903,22 @@ class Events extends ResourceController
 //                ->where('event_id', $input['eventId'])
 //                ->first();
 
+            // Refund the linked payment (if any, and if paid) before releasing the seat.
+            if (!empty($userRegistration->payment_id)) {
+                $payment = (new PaymentsModel())->find($userRegistration->payment_id);
+
+                if ($payment && $payment->status === 'paid') {
+                    (new PaymentLibrary())->refund($payment);
+                }
+            }
+
             $eventUsersModel->delete($userRegistration->id);
+
+            $this->sendCancellationEmail(
+                $event,
+                $this->session->user->email ?? null,
+                $this->session->user->locale ?? null
+            );
 
 //            $safeCancelName  = htmlspecialchars($this->session->user->name ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
 //            $safeCancelTitle = htmlspecialchars($event->title_ru ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -888,6 +1152,7 @@ class Events extends ResourceController
             'title'             => 'if_exist|string|max_length[250]',
             'content'           => 'if_exist|string',
             'tickets'           => 'if_exist|integer|greater_than[0]|less_than[5000]',
+            'ticketPrice'       => 'if_exist|decimal|greater_than_equal_to[0]',
             'date'              => 'if_exist|string|max_length[50]',
             'registrationStart' => 'if_exist|string|max_length[50]',
             'registrationEnd'   => 'if_exist|string|max_length[50]',
@@ -917,6 +1182,10 @@ class Events extends ResourceController
 
             if (isset($input['tickets'])) {
                 $updateData['max_tickets'] = $input['tickets'];
+            }
+
+            if (isset($input['ticketPrice'])) {
+                $updateData['ticket_price'] = (float) $input['ticketPrice'];
             }
 
             if (isset($input['date'])) {
@@ -958,6 +1227,156 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', $e->getMessage());
             return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * Returns the verified payment status for an order and reconciles the
+     * related booking. Used by the client after returning from the bank's
+     * payment page (the gateway appends the order id to the return URL).
+     *
+     * @return ResponseInterface JSON: { status: new|pending|paid|failed|canceled|refunded }.
+     */
+    public function paymentStatus(): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized();
+        }
+
+        $input = $this->request->getJSON(true);
+        $rules = ['orderId' => 'required|string|max_length[64]'];
+
+        $this->validator = Services::Validation()->setRules($rules);
+
+        if (!$this->validator->run($input)) {
+            return $this->failValidationErrors($this->validator->getErrors());
+        }
+
+        try {
+            $paymentLibrary = new PaymentLibrary();
+            $payment        = $paymentLibrary->findByOrderId($input['orderId']);
+
+            if ($payment === null) {
+                return $this->failNotFound(lang('Events.paymentNotFound'));
+            }
+
+            // Only the booking owner may query its payment status.
+            if ($payment->entity_type === 'event_booking') {
+                $booking = (new EventsUsersModel())->withDeleted()->find($payment->entity_id);
+
+                if ($booking === null || $booking->user_id !== $this->session->user->id) {
+                    return $this->failForbidden(lang('App.accessDenied'));
+                }
+            }
+
+            $status = $paymentLibrary->getVerifiedStatus($payment);
+            $this->reconcileBooking($payment, $status);
+
+            $response = ['status' => $status];
+
+            // Expose the booking id so the return page can render the ticket once paid.
+            if ($payment->entity_type === 'event_booking') {
+                $response['bookingId'] = $payment->entity_id;
+            }
+
+            return $this->respond($response);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * Asynchronous payment gateway callback endpoint (server-to-server).
+     *
+     * Authenticity is verified via the gateway signature before the booking is
+     * reconciled. Returns HTTP 200 on success so the gateway stops retrying,
+     * and HTTP 400 when the signature is invalid.
+     *
+     * @return ResponseInterface
+     */
+    public function paymentCallback(): ResponseInterface
+    {
+        $params = $this->request->getGet();
+
+        if (empty($params)) {
+            $params = $this->request->getPost();
+        }
+
+        $paymentLibrary = new PaymentLibrary();
+
+        if (!$paymentLibrary->verifyCallbackParams($params)) {
+            log_message('error', 'Payment callback rejected: invalid signature');
+
+            return $this->failValidationErrors(lang('Events.paymentInvalidCallback'));
+        }
+
+        try {
+            $payment = $paymentLibrary->handleCallback($params);
+
+            if ($payment !== null) {
+                $this->reconcileBooking($payment, $payment->status);
+            }
+
+            return $this->respond(['status' => 'ok']);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * Reconciles an event booking with its payment outcome.
+     *
+     * Paid → the pending booking is confirmed. Failed/canceled → a still-pending
+     * booking is soft-deleted to free the held seat.
+     *
+     * @param PaymentEntity $payment The payment to reconcile.
+     * @param string        $status  Normalised payment status.
+     * @return void
+     */
+    private function reconcileBooking(PaymentEntity $payment, string $status): void
+    {
+        if ($payment->entity_type !== 'event_booking') {
+            return;
+        }
+
+        $eventUsersModel = new EventsUsersModel();
+        $booking         = $eventUsersModel->withDeleted()->find($payment->entity_id);
+
+        if ($booking === null) {
+            return;
+        }
+
+        if ($status === 'paid') {
+            if ($booking->status !== 'confirmed') {
+                $eventUsersModel->update($payment->entity_id, ['status' => 'confirmed']);
+
+                // Email the ticket once, on the transition to confirmed.
+                $event = $this->model->find($booking->event_id);
+                $owner = (new UsersModel())->find($booking->user_id);
+
+                if ($event && $owner) {
+                    $this->sendTicketEmail(
+                        $booking,
+                        $event,
+                        $owner->email ?? null,
+                        $owner->name ?? null,
+                        $owner->locale ?? null
+                    );
+                }
+            }
+
+            return;
+        }
+
+        if (in_array($status, ['failed', 'canceled'], true)
+            && $booking->status === 'pending'
+            && empty($booking->deleted_at)
+        ) {
+            $eventUsersModel->delete($payment->entity_id);
         }
     }
 }

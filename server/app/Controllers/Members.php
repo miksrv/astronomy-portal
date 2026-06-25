@@ -49,20 +49,14 @@ class Members extends ResourceController
             $limit = ($limit >= 1 && $limit <= 100) ? $limit : 20;
 
             $search   = (string) $this->request->getGet('search', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '';
-            $role     = (string) $this->request->getGet('role', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '';
             $authType = (string) $this->request->getGet('authType', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '';
 
             $sortBy  = (string) $this->request->getGet('sortBy', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '';
             $sortDir = (string) $this->request->getGet('sortDir', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '';
 
-            $validRoles     = ['', 'user', 'moderator', 'security', 'admin'];
             $validAuthTypes = ['', 'google', 'yandex', 'vk', 'native'];
             $validSortBy    = ['', 'name', 'activityAt', 'createdAt', 'eventsCount'];
             $validSortDir   = ['', 'asc', 'desc'];
-
-            if (!in_array($role, $validRoles, true)) {
-                return $this->failValidationErrors(lang('Members.invalidRole'));
-            }
 
             if (!in_array($authType, $validAuthTypes, true)) {
                 return $this->failValidationErrors(lang('Members.invalidAuthType'));
@@ -77,7 +71,7 @@ class Members extends ResourceController
             }
 
             $usersModel = new UsersModel();
-            $result     = $usersModel->getUsersList($page, $limit, $search, $role, $authType, $sortBy, $sortDir);
+            $result     = $usersModel->getUsersList($page, $limit, $search, $authType, $sortBy, $sortDir);
 
             return $this->respond($result);
         } catch (Exception $e) {

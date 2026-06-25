@@ -24,6 +24,7 @@ $routes->group('statistic', static function ($routes) {
     // $routes->get('statistic/catalog', 'Statistic::catalog');
     // $routes->get('statistic/photos', 'Statistic::photos');
     $routes->get('telescope', 'Statistic::telescope');
+    $routes->get('stargazing', 'Statistic::stargazing');
     $routes->options('(:any)', static function () {});
 });
 
@@ -109,6 +110,7 @@ $routes->group('events', static function ($routes) {
     $routes->get('(:alphanum)', 'Events::show/$1');
     $routes->get('members/(:alphanum)', 'Events::members/$1');
     $routes->get('checkin/(:alphanum)', 'Events::checkin/$1');
+    $routes->get('ticket/(:alphanum)', 'Events::ticket/$1');
 
     $routes->post('/', 'Events::create');
     $routes->patch('(:alphanum)', 'Events::update/$1');
@@ -117,6 +119,8 @@ $routes->group('events', static function ($routes) {
 
     $routes->post('booking', 'Events::booking');
     $routes->post('cancel', 'Events::cancel');
+    $routes->post('payment/status', 'Events::paymentStatus');
+    $routes->match(['get', 'post'], 'payment/callback', 'Events::paymentCallback');
     $routes->post('upload/(:alphanum)', 'Events::upload/$1');
     $routes->options('/', static function () {});
     $routes->options('(:any)', static function () {});
