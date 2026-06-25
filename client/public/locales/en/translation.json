@@ -9,6 +9,52 @@
             "program-sky-desc": "We learn to spot bright stars and constellations right in the night sky overhead.",
             "program-telescope-title": "Observing through telescopes",
             "program-telescope-desc": "Several telescopes are aimed at different objects — take a look and ask the astronomers your questions."
+        },
+        "privacy": {
+            "title": "Privacy Policy",
+            "description": "Personal data processing policy of the “Look at the Stars” project: what data we collect at sign-in, why, how we store it, and how to withdraw consent or unsubscribe.",
+            "intro": "This Privacy Policy (the “Policy”) sets out how personal data of users of the “Look at the Stars” project website (the “Site”) is processed and protected, and applies to all information the Operator may obtain about a user while they use the Site. The Policy is prepared in accordance with Russian Federal Law No. 152-FZ of 27 July 2006 “On Personal Data”.",
+            "operator-title": "1. Personal data operator",
+            "operator-text": "The personal data operator is the “Look at the Stars” project. Contact address for personal data enquiries: astro@miksoft.pro.",
+            "data-title": "2. What data we collect",
+            "data-text": "When signing in to the Site via third-party services (Google, Yandex, VK), the Operator receives and stores the following profile data: e-mail address, name (display name) and, if available, the profile photo (avatar). Technical data may also be collected automatically: cookies, IP address, browser information and activity on the Site.",
+            "purpose-title": "3. Purposes of personal data processing",
+            "purpose-text": "Personal data is processed for the following purposes: authentication and identification of the user on the Site; sending informational e-mails about upcoming stargazing events and project activities; operating and improving the Site’s functionality.",
+            "legal-title": "4. Legal basis and consent",
+            "legal-text": "The legal basis for processing is the user’s consent, given when signing in to the Site. By signing in, the user confirms their consent to the processing of their personal data under the terms of this Policy, as well as consent to receive informational e-mails about the project’s events.",
+            "transfer-title": "5. Transfer of data to third parties",
+            "transfer-text": "The Operator does not sell or transfer personal data to third parties, except as provided by the legislation of the Russian Federation. Authentication is performed via third-party services (Google, Yandex, VK), whose data processing is governed by their own privacy policies.",
+            "mailing-title": "6. Email newsletter and opting out",
+            "mailing-text": "After signing in, the user is automatically subscribed to the newsletter about upcoming stargazing events. The user may unsubscribe at any time via the “Unsubscribe” link in any received e-mail or on the unsubscribe page. Unsubscribing does not affect the ability to use the Site.",
+            "cookies-title": "7. Cookies",
+            "cookies-text": "The Site uses cookies to maintain the sign-in session and to operate the service correctly. The user can disable cookies in their browser settings, though this may limit the Site’s functionality.",
+            "storage-title": "8. Data retention and protection",
+            "storage-text": "Personal data is stored until the user withdraws their consent to its processing. The Operator takes the necessary organizational and technical measures to protect personal data from unlawful access, alteration, disclosure or destruction.",
+            "rights-title": "9. User rights",
+            "rights-text": "The user has the right to obtain information about the processing of their personal data, to request its correction, blocking or deletion, and to withdraw their consent to processing. To do so, send a request to the Operator’s contact address specified in section 1.",
+            "changes-title": "10. Changes to the Policy",
+            "changes-text": "The Operator may amend this Policy. A new version of the Policy takes effect once it is published on the Site, unless the new version provides otherwise.",
+            "contacts-title": "11. Contacts",
+            "contacts-text": "For any questions related to the processing of personal data, you can contact the Operator at: astro@miksoft.pro.",
+            "telegram": "Project Telegram"
+        },
+        "payment": {
+            "title": "Event payment",
+            "checking": "Checking the payment status, please wait…",
+            "success-title": "Payment successful",
+            "success-text": "You are registered for the stargazing event. Your ticket with a QR code is available to download.",
+            "to-ticket": "Open ticket",
+            "failed-title": "Payment failed",
+            "failed-text": "The payment was not completed. Your booking is not confirmed — you can try to register again.",
+            "back-to-stargazing": "Back to stargazing events"
+        }
+    },
+    "components": {
+        "common": {
+            "login-form": {
+                "consent": "By signing in, you agree to the processing of your personal data and to receiving e-mails about upcoming stargazing events. Learn more in the",
+                "privacy-link": "Privacy Policy"
+            }
         }
     }
 }
