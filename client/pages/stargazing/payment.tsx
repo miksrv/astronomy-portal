@@ -24,6 +24,7 @@ const StargazingPaymentPage: NextPage<object> = () => {
     const orderId = typeof router.query.orderId === 'string' ? router.query.orderId : undefined
 
     const [status, setStatus] = useState<PaymentViewStatus>('loading')
+    const [pollExhausted, setPollExhausted] = useState<boolean>(false)
     const [bookingId, setBookingId] = useState<string>()
     const [checkPaymentStatus] = API.useEventPaymentStatusMutation()
     const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -70,6 +71,9 @@ const StargazingPaymentPage: NextPage<object> = () => {
 
                 if (attempts < MAX_POLL_ATTEMPTS) {
                     timerRef.current = setTimeout(poll, POLL_INTERVAL_MS)
+                } else {
+                    // Don't leave the user on an endless spinner — surface a notice.
+                    setPollExhausted(true)
                 }
             } catch {
                 if (!cancelled) {
@@ -109,11 +113,31 @@ const StargazingPaymentPage: NextPage<object> = () => {
             />
 
             <Container>
-                {(status === 'loading' || status === 'pending') && (
+                {(status === 'loading' || (status === 'pending' && !pollExhausted)) && (
                     <div style={{ alignItems: 'center', display: 'flex', flexDirection: 'column', gap: 12 }}>
                         <Spinner />
                         <p>{t('pages.payment.checking', 'Проверяем статус оплаты, пожалуйста, подождите…')}</p>
                     </div>
+                )}
+
+                {status === 'pending' && pollExhausted && (
+                    <Message
+                        type={'warning'}
+                        title={t('pages.payment.pending-title', 'Оплата ещё обрабатывается')}
+                    >
+                        <p>
+                            {t(
+                                'pages.payment.pending-timeout',
+                                'Мы пока не получили подтверждение оплаты. Если вы оплатили — место удерживается, статус обновится в течение нескольких минут. Если оплата не завершена — вернитесь к мероприятию и завершите её.'
+                            )}
+                        </p>
+                        <Button
+                            mode={'secondary'}
+                            onClick={() => router.push('/stargazing')}
+                        >
+                            {t('pages.payment.back-to-stargazing', 'Вернуться к астровыездам')}
+                        </Button>
+                    </Message>
                 )}
 
                 {status === 'paid' && (

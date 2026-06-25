@@ -1,4 +1,18 @@
 {
+    "common": {
+        "days_one": "{{count}} день",
+        "days_few": "{{count}} дня",
+        "days_many": "{{count}} дней",
+        "hours_one": "{{count}} час",
+        "hours_few": "{{count}} часа",
+        "hours_many": "{{count}} часов",
+        "minutes_one": "{{count}} минута",
+        "minutes_few": "{{count}} минуты",
+        "minutes_many": "{{count}} минут",
+        "seconds_one": "{{count}} секунда",
+        "seconds_few": "{{count}} секунды",
+        "seconds_many": "{{count}} секунд"
+    },
     "pages": {
         "stargazing": {
             "program-arrival-title": "Прибытие на место",
@@ -46,7 +60,9 @@
             "to-ticket": "Открыть билет",
             "failed-title": "Оплата не прошла",
             "failed-text": "Платёж не был завершён. Бронирование не подтверждено — вы можете попробовать зарегистрироваться снова.",
-            "back-to-stargazing": "Вернуться к астровыездам"
+            "back-to-stargazing": "Вернуться к астровыездам",
+            "pending-title": "Оплата ещё обрабатывается",
+            "pending-timeout": "Мы пока не получили подтверждение оплаты. Если вы оплатили — место удерживается, статус обновится в течение нескольких минут. Если оплата не завершена — вернитесь к мероприятию и завершите её."
         }
     },
     "components": {

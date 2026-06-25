@@ -1,4 +1,14 @@
 {
+    "common": {
+        "days_one": "{{count}} day",
+        "days_other": "{{count}} days",
+        "hours_one": "{{count}} hour",
+        "hours_other": "{{count}} hours",
+        "minutes_one": "{{count}} minute",
+        "minutes_other": "{{count}} minutes",
+        "seconds_one": "{{count}} second",
+        "seconds_other": "{{count}} seconds"
+    },
     "pages": {
         "stargazing": {
             "program-arrival-title": "Arrival at the site",
@@ -46,7 +56,9 @@
             "to-ticket": "Open ticket",
             "failed-title": "Payment failed",
             "failed-text": "The payment was not completed. Your booking is not confirmed — you can try to register again.",
-            "back-to-stargazing": "Back to stargazing events"
+            "back-to-stargazing": "Back to stargazing events",
+            "pending-title": "Payment is still processing",
+            "pending-timeout": "We haven't received payment confirmation yet. If you have paid, your seat is held and the status will update within a few minutes. If the payment wasn't completed, return to the event and finish it."
         }
     },
     "components": {
