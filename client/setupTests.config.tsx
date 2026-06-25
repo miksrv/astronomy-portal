@@ -16,8 +16,18 @@ import '@testing-library/jest-dom'
 jest.mock('next/image', () => ({
     __esModule: true,
 
-    // eslint-disable-next-line next/no-img-element
-    default: (props: ClassAttributes<HTMLImageElement>) => <img {...props} />
+    // Next.js static image imports resolve to an object ({ src, height, width });
+    // normalize it to the string the real component would render.
+    default: ({ src, ...props }: ClassAttributes<HTMLImageElement> & { src?: unknown }) => {
+        const resolvedSrc = src && typeof src === 'object' ? (src as { src?: string }).src : src
+
+        return (
+            <img
+                src={resolvedSrc as string}
+                {...props}
+            />
+        )
+    }
 }))
 
 // export const testStore = (state: Partial<RootState>) => {
