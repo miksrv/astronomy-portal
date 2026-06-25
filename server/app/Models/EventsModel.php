@@ -31,6 +31,7 @@ class EventsModel extends ApplicationBaseModel
         'cover_file_name',
         'cover_file_ext',
         'max_tickets',
+        'ticket_price',
         'yandex_map_link',
         'google_map_link',
         'views',
@@ -161,5 +162,19 @@ class EventsModel extends ApplicationBaseModel
             ->set('views', 'views + 1', false)
             ->where('id', $eventId)
             ->update([], null, false);
+    }
+
+    /**
+     * Counts stargazing events that have already taken place (date in the past,
+     * adjusted to Orenburg time, UTC+5). Used for aggregate public statistics.
+     *
+     * @return int Number of conducted events.
+     */
+    public function getConductedCount(): int
+    {
+        $datetime = (new Time('now'))->addHours(5);
+
+        return $this->where('date <', $datetime->format('Y-m-d H:i:s'))
+            ->countAllResults();
     }
 }

@@ -26,6 +26,8 @@ class EventsUsersModel extends ApplicationBaseModel
         'adults',
         'children',
         'children_ages',
+        'status',
+        'payment_id',
         'checkin_by_user_id',
         'checkin_at',
     ];
@@ -209,6 +211,24 @@ class EventsUsersModel extends ApplicationBaseModel
     }
 
     /**
+     * Returns the total number of registered participants (adults + children)
+     * across all events, excluding cancelled (soft-deleted) bookings. Used for
+     * aggregate public statistics.
+     *
+     * @return int Total participants.
+     */
+    public function getTotalParticipants(): int
+    {
+        $row = $this->builder()
+            ->select('SUM(adults + children) as total')
+            ->where('deleted_at', null)
+            ->get()
+            ->getRow();
+
+        return (int) ($row->total ?? 0);
+    }
+
+    /**
      * Returns users with valid emails registered for an event, for use as mailing recipients.
      *
      * @param string $eventId
@@ -273,6 +293,25 @@ class EventsUsersModel extends ApplicationBaseModel
     }
 
     /**
+     * Soft-deletes pending bookings whose payment hold has expired, freeing
+     * their seats. Called during booking/availability checks so abandoned,
+     * unpaid reservations do not block other users indefinitely.
+     *
+     * @param array<string> $paymentIds Ids of expired, unpaid payments.
+     * @return void
+     */
+    public function releaseExpiredPendingByPaymentIds(array $paymentIds): void
+    {
+        if (empty($paymentIds)) {
+            return;
+        }
+
+        $this->whereIn('payment_id', $paymentIds)
+            ->where('status', 'pending')
+            ->delete();
+    }
+
+    /**
      * Returns the next upcoming event that the given user is registered for.
      *
      * @param string $userId The user's ID.
@@ -283,7 +322,7 @@ class EventsUsersModel extends ApplicationBaseModel
         return $this->db->table('events_users eu')
             ->select('e.id, e.title_ru, e.title_en, e.date, e.cover_file_name, e.cover_file_ext,
                       e.location_ru, e.location_en, e.yandex_map_link, e.google_map_link,
-                      eu.adults, eu.children, eu.checkin_at')
+                      eu.id AS booking_id, eu.adults, eu.children, eu.checkin_at')
             ->join('events e', 'e.id = eu.event_id')
             ->where('eu.user_id', $userId)
             ->where('eu.deleted_at IS NULL')
