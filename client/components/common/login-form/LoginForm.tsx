@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { Button, Message } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 
@@ -112,6 +113,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
                     />
                 </Button>
             </div>
+
+            <p className={styles.consent}>
+                {t(
+                    'components.common.login-form.consent',
+                    'Авторизуясь, вы соглашаетесь на обработку персональных данных и получение писем о ближайших астровыездах. Подробнее — в'
+                )}
+                <Link
+                    style={{ marginLeft: '5px' }}
+                    href={'/privacy'}
+                    title={t('components.common.login-form.privacy-link', 'Политике конфиденциальности')}
+                    target={'_blank'}
+                >
+                    {t('components.common.login-form.privacy-link', 'Политике конфиденциальности')}
+                </Link>
+                {'.'}
+            </p>
         </div>
     )
 }
