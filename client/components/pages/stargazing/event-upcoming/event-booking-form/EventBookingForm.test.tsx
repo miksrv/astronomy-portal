@@ -86,6 +86,22 @@ describe('EventBookingForm', () => {
         expect(screen.getByText('Вы зарегистрировались на мероприятие')).toBeDefined()
     })
 
+    it('does not show the registration success message for a paid event (defers to payment)', () => {
+        ;(API.useEventsRegistrationPostMutation as jest.Mock).mockReturnValue([
+            mockMutate,
+            { ...defaultMutationState, isSuccess: true }
+        ])
+
+        render(
+            <EventBookingForm
+                eventId='event-1'
+                ticketPrice={500}
+            />
+        )
+
+        expect(screen.queryByText('Вы зарегистрировались на мероприятие')).toBeNull()
+    })
+
     it('renders the price summary and payment button label for a paid event', () => {
         render(
             <EventBookingForm

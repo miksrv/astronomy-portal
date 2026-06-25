@@ -111,12 +111,21 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, tic
                 </Message>
             )}
 
-            {isSuccess && (
+            {isSuccess && !isPaid && (
                 <Message
                     type={'success'}
                     title={'Успешно!'}
                 >
                     {'Вы зарегистрировались на мероприятие'}
+                </Message>
+            )}
+
+            {paymentRedirect && (
+                <Message
+                    type={'info'}
+                    title={'Бронируем место'}
+                >
+                    {'Место забронировано, перенаправляем вас на страницу оплаты…'}
                 </Message>
             )}
 
