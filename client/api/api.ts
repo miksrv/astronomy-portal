@@ -143,13 +143,6 @@ export const API = createApi({
                 url: 'events'
             })
         }),
-        eventCoverUploadPost: builder.mutation<ApiType.Events.ResItem | ApiType.ResError, FormData>({
-            query: (formData) => ({
-                body: formData,
-                method: 'POST',
-                url: `events/${formData.get('id') as string}/upload`
-            })
-        }),
         eventPatch: builder.mutation<ApiType.Events.ResItem | ApiType.ResError, ApiType.Events.EventFormType>({
             invalidatesTags: (result, error, { id }) => [{ id, type: 'Events' }],
             query: ({ id, ...formState }) => ({

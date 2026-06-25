@@ -44,7 +44,6 @@ All hooks are auto-generated as `API.use<EndpointName>Query/Mutation()`.
 | `eventCreatePost`              | Mutation    | Create a new event (FormData)             |
 | `eventPatch`                   | Mutation    | Update event fields                       |
 | `eventDelete`                  | Mutation    | Delete an event                           |
-| `eventCoverUploadPost`         | Mutation    | Upload event cover image                  |
 | `eventUpdateCover`             | Mutation    | Replace event cover (`/events/:id/cover`) |
 | `eventPhotoUploadPost`         | Mutation    | Upload photo to event gallery             |
 | `eventsRegistrationPost`       | Mutation    | Register for an event                     |
