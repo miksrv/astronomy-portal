@@ -131,13 +131,12 @@ class UsersModel extends ApplicationBaseModel
      * Returns a paginated list of users with their event attendance count.
      *
      * Email and phone fields are intentionally excluded from the output.
-     * Supports filtering by name substring, role, and auth type, as well as
+     * Supports filtering by name substring and auth type, as well as
      * sorting by name, activity date, creation date, or event count.
      *
      * @param int    $page     1-based page number. Default is 1.
      * @param int    $limit    Rows per page (max 100). Default is 20.
      * @param string $search   Optional name substring filter.
-     * @param string $role     Optional role filter: user|moderator|security|admin.
      * @param string $authType Optional auth_type filter: google|yandex|vk|native.
      * @param string $sortBy   Column to sort by: name|activityAt|createdAt|eventsCount.
      * @param string $sortDir  Sort direction: asc|desc.
@@ -147,7 +146,6 @@ class UsersModel extends ApplicationBaseModel
         int    $page = 1,
         int    $limit = 20,
         string $search = '',
-        string $role = '',
         string $authType = '',
         string $sortBy = 'createdAt',
         string $sortDir = 'desc'
@@ -177,10 +175,6 @@ class UsersModel extends ApplicationBaseModel
             $builder->like('u.name', $search);
         }
 
-        if ($role !== '') {
-            $builder->where('u.role', $role);
-        }
-
         if ($authType !== '') {
             $builder->where('u.auth_type', $authType);
         }
@@ -191,10 +185,6 @@ class UsersModel extends ApplicationBaseModel
 
         if ($search !== '') {
             $countBuilder->like('u.name', $search);
-        }
-
-        if ($role !== '') {
-            $countBuilder->where('u.role', $role);
         }
 
         if ($authType !== '') {
