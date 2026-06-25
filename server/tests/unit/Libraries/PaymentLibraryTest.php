@@ -62,6 +62,24 @@ final class PaymentLibraryTest extends CIUnitTestCase
         PaymentLibrary::createGateway('paypal');
     }
 
+    public function testCreateGatewayUsesTestCredentialsWhenEnvironmentIsTest(): void
+    {
+        putenv('payment.alfabank.environment=test');
+        putenv('payment.alfabank.test.gatewayUrl=https://alfa.rbsuat.com/payment/rest/');
+
+        try {
+            $gateway = PaymentLibrary::createGateway('alfabank');
+
+            $ref = new ReflectionProperty($gateway, 'gatewayUrl');
+            $ref->setAccessible(true);
+
+            $this->assertSame('https://alfa.rbsuat.com/payment/rest/', $ref->getValue($gateway));
+        } finally {
+            putenv('payment.alfabank.environment');
+            putenv('payment.alfabank.test.gatewayUrl');
+        }
+    }
+
     // --- getVerifiedStatus() terminal short-circuit ---
 
     public function testGetVerifiedStatusShortCircuitsForPaid(): void

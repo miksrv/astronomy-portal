@@ -19,11 +19,13 @@ use InvalidArgumentException;
  *   payment.gateway                 — gateway name (default "alfabank")
  *   payment.currency                — ISO 4217 numeric currency (default "810" / RUB)
  *   payment.sessionTimeoutSecs      — order lifetime / seat-hold TTL (default 1200)
+ *   payment.alfabank.environment    — 'test' (rbsuat sandbox) or 'production' (default)
  *   payment.alfabank.token          — Alfa-Bank payment token (preferred; required for "r-login")
  *   payment.alfabank.userName       — Alfa-Bank API login (fallback when no token is set)
  *   payment.alfabank.password       — Alfa-Bank API password (fallback when no token is set)
  *   payment.alfabank.gatewayUrl     — Alfa-Bank REST base URL
  *   payment.alfabank.callbackToken  — Alfa-Bank symmetric callback token
+ *   payment.alfabank.test.*         — same keys for the 'test' environment
  */
 class PaymentLibrary
 {
@@ -51,12 +53,19 @@ class PaymentLibrary
     {
         switch ($name) {
             case 'alfabank':
+                // 'test' uses the rbsuat sandbox (test cards, no real money) with
+                // its own UAT credentials under the payment.alfabank.test.* keys;
+                // any other value uses the live cabinet credentials.
+                $prefix = (getenv('payment.alfabank.environment') ?: 'production') === 'test'
+                    ? 'payment.alfabank.test.'
+                    : 'payment.alfabank.';
+
                 return new AlfaBankClient(
-                    (string) getenv('payment.alfabank.userName'),
-                    (string) getenv('payment.alfabank.password'),
-                    (string) getenv('payment.alfabank.gatewayUrl'),
-                    (string) getenv('payment.alfabank.callbackToken'),
-                    (string) getenv('payment.alfabank.token')
+                    (string) getenv($prefix . 'userName'),
+                    (string) getenv($prefix . 'password'),
+                    (string) getenv($prefix . 'gatewayUrl'),
+                    (string) getenv($prefix . 'callbackToken'),
+                    (string) getenv($prefix . 'token')
                 );
             default:
                 throw new InvalidArgumentException("Unknown payment gateway: {$name}");
