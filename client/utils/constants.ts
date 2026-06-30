@@ -20,3 +20,8 @@ export const STARGAZING_LEGACY_MEMBERS = 50000
 // The community has been running astronomy activities since this year; used to
 // derive the "years in astronomy" counter (chosen so it currently reads 11).
 export const STARGAZING_FOUNDING_YEAR = 2015
+
+// Google OAuth is disabled to comply with Russian Federation legislation
+// (foreign authentication services restriction effective March 2025).
+// Set to true to re-enable the Google login button.
+export const AUTH_GOOGLE_ENABLED = false
