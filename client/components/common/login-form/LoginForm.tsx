@@ -11,7 +11,7 @@ import useLocalStorage from '@/hooks/useLocalStorage'
 import googleLogo from '@/public/images/google-logo.png'
 import vkLogo from '@/public/images/vk-logo.png'
 import yandexLogo from '@/public/images/yandex-logo.png'
-import { LOCAL_STORAGE } from '@/utils/constants'
+import { AUTH_GOOGLE_ENABLED, LOCAL_STORAGE } from '@/utils/constants'
 
 import styles from './styles.module.sass'
 
@@ -35,7 +35,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
 
     // Whitelist of trusted OAuth provider origins
     const OAUTH_ALLOWED_ORIGINS = [
-        'https://accounts.google.com',
+        ...(AUTH_GOOGLE_ENABLED ? ['https://accounts.google.com'] : []),
         'https://oauth.yandex.com',
         'https://oauth.yandex.ru',
         'https://oauth.vk.com',
@@ -87,18 +87,20 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
                     />
                 </Button>
 
-                <Button
-                    mode={'outline'}
-                    disabled={isLoading}
-                    onClick={() => handleLoginServiceButton('google')}
-                >
-                    <Image
-                        src={googleLogo.src}
-                        width={40}
-                        height={40}
-                        alt={''}
-                    />
-                </Button>
+                {AUTH_GOOGLE_ENABLED && (
+                    <Button
+                        mode={'outline'}
+                        disabled={isLoading}
+                        onClick={() => handleLoginServiceButton('google')}
+                    >
+                        <Image
+                            src={googleLogo.src}
+                            width={40}
+                            height={40}
+                            alt={''}
+                        />
+                    </Button>
+                )}
 
                 <Button
                     mode={'outline'}
