@@ -8,6 +8,8 @@ A DIY amateur observatory web application with remote monitoring, equipment cont
 
 **Current version:** 4.5.5 (see `CHANGELOG.md` for history)
 
+**Feature specs:** `ROADMAP.md` gives a high-level list of planned/in-flight features; each one is detailed in its own file under `features/` (e.g. `features/stargazing-waitlist.md`).
+
 ### Domain rule: subscription = authentication
 
 Stargazing events are rare (~3 per year), so the product's primary "dead-time" conversion is list-building, not booking. **There is no separate subscribe form/endpoint.** When a user authenticates via an OAuth service (Google/Yandex/VK), their email is persisted and they are **automatically subscribed** to the event mailing — they stay subscribed until they explicitly unsubscribe (`/unsubscribe`, `MailingUnsubscribes`). UX consequence:
@@ -67,9 +69,10 @@ docker-compose up     # Start MariaDB at localhost:3308 (db: db, user: user, pas
 - `/objects`, `/objects/[name]`, `/objects/form` — astronomical objects catalog + create/edit form
 - `/observatory`, `/observatory/overview`, `/observatory/weather`, `/observatory/history`, `/observatory/history/[slug]` — observatory monitoring + history
 - `/photos`, `/photos/[name]`, `/photos/form` — astrophoto archive + upload/edit form
-- `/stargazing`, `/stargazing/[name]`, `/stargazing/[name]/statistic`, `/stargazing/checkin`, `/stargazing/entry`, `/stargazing/faq`, `/stargazing/form`, `/stargazing/history`, `/stargazing/howto`, `/stargazing/rules`, `/stargazing/tickets`, `/stargazing/where` — stargazing events
+- `/stargazing`, `/stargazing/[name]`, `/stargazing/[name]/statistic`, `/stargazing/checkin`, `/stargazing/entry`, `/stargazing/faq`, `/stargazing/form`, `/stargazing/history`, `/stargazing/howto`, `/stargazing/payment`, `/stargazing/rules`, `/stargazing/tickets`, `/stargazing/where` — stargazing events, ticket payment (Alfa-Bank) and check-in
 - `/mailing`, `/mailing/form`, `/mailing/[id]` — email mailing campaigns
 - `/unsubscribe` — mailing unsubscribe landing
+- `/privacy` — privacy policy
 - `/starmap` — interactive star map
 - `/sitemap.tsx` — sitemap generation
 
@@ -121,7 +124,7 @@ Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, 
 - `GET|POST|PATCH|DELETE /objects`, `/objects/:any` — astronomical objects CRUD
 - `GET /fits/:any` — FITS file data (`Fits::show`)
 - `GET|POST|PATCH|DELETE /photos`, `/photos/:any` + `POST /photos/:any/upload` — astrophoto CRUD + upload
-- `GET|POST|PATCH|DELETE /events` + `upcoming`, `upcoming/registered`, `photos`, `:id/statistic`, `members/:id`, `checkin/:id`, `:id/cover`, `booking`, `cancel`, `upload/:id` — stargazing events
+- `GET|POST|PATCH|DELETE /events` + `upcoming`, `upcoming/registered`, `photos`, `:id/statistic`, `members/:id`, `checkin/:id`, `ticket/:id`, `:id/cover`, `booking`, `cancel`, `payment/status`, `payment/callback`, `upload/:id` — stargazing events, ticketing and payment (Alfa-Bank)
 - `GET|POST|PATCH|DELETE /mailings`, `/mailings/:id` + `unsubscribe`, `audiences`, `:id/upload`, `:id/test`, `:id/send` — email mailing campaigns
 - `GET /members`, `GET /members/:id/events` — members list and their events
 - `GET /comments?entityType=&entityId=` — list comments (adds `canReview`+`hasReviewed` for authenticated event requests)
@@ -132,16 +135,16 @@ Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, 
 
 **Controllers** (`server/app/Controllers/`): Auth, Camera, Categories, Comments, Equipment, Events, Files, Mailings, Members, Objects, Photos, Relay, Sitemap, Statistic.
 
-**Models:** `server/app/Models/ApplicationBaseModel.php` is the shared base; all models extend it. Entity classes in `server/app/Entities/` map to DB rows. Models cover: Users, Photos, PhotosAuthor, PhotosCategory, PhotosEquipments, PhotosFilters, PhotosObject, Objects, ObjectCategory, ObjectFitsFiles, ObjectFitsFilters, ObservatoryEquipment, ObservatorySettings, Events, EventsPhotos, EventsUsers, Category, Comments, Mailings, MailingEmails, MailingUnsubscribes.
+**Models:** `server/app/Models/ApplicationBaseModel.php` is the shared base; all models extend it. Entity classes in `server/app/Entities/` map to DB rows. Models cover: Users, Photos, PhotosAuthor, PhotosCategory, PhotosEquipments, PhotosFilters, PhotosObject, Objects, ObjectCategory, ObjectFitsFiles, ObjectFitsFilters, ObservatoryEquipment, ObservatorySettings, Events, EventsPhotos, EventsUsers, Category, Comments, Mailings, MailingEmails, MailingUnsubscribes, Payments, EmailQueue.
 
 **Backend conventions:**
 - API responses use **camelCase** field names (e.g. `createdAt`, not `created_at`) — format in model, not controller
 - CodeIgniter 4 Query Builder does **not** have `selectRaw()` — use `select()` which accepts raw SQL expressions and aliases natively
 - `CommentsModel::getForEntity()` and `getRandom()` return author as `{ id, name, avatar }` object with name truncated to "FirstName L." for privacy
 
-**Libraries** (`server/app/Libraries/`): CatalogLibrary (FITS), EmailLibrary, GoogleClient/YandexClient/VkClient (OAuth), LocaleLibrary, PhotosLibrary, PhotoUploadLibrary, RelayLibrary (Arduino comms), SessionLibrary (JWT validation), StatisticLibrary, TelegramLibrary.
+**Libraries** (`server/app/Libraries/`): CatalogLibrary (FITS), EmailLibrary, GoogleClient/YandexClient/VkClient (OAuth), LocaleLibrary, PhotosLibrary, PhotoUploadLibrary, RelayLibrary (Arduino comms), SessionLibrary (JWT validation), StatisticLibrary, TelegramLibrary, TicketLibrary (event ticket generation), PaymentLibrary + `PaymentGatewayInterface` (gateway-agnostic payment orchestration — adding a new provider means adding one class implementing the interface), AlfaBankClient (current `PaymentGatewayInterface` implementation, test/production environment switch).
 
-**Migrations & seeders:** Migrations in `server/app/Database/Migrations/` (schema spans Oct 2024 → Apr 2026; latest add `comments` table and `photos.views`). Seeders in `server/app/Database/Seeds/`: CategoriesSeeder, ObservatoryEquipmentSeeder, ObservatorySettingsSeeder. Always run migrations after pulling changes that add them.
+**Migrations & seeders:** Migrations in `server/app/Database/Migrations/` (schema spans Oct 2024 → Jun 2026; latest add ticket pricing, `payments` table, event-user payment columns, and an `email_queue` table for transactional/queued email sending). Seeders in `server/app/Database/Seeds/`: CategoriesSeeder, ObservatoryEquipmentSeeder, ObservatorySettingsSeeder. Always run migrations after pulling changes that add them.
 
 **CORS:** Configured in `server/app/Config/Cors.php`.
 
@@ -155,6 +158,7 @@ Arduino/embedded firmware for observatory hardware control (relay boards, sensor
 - **Backend:** FTP upload to shared PHP hosting via GitHub Actions.
 - CI/CD workflows in `.github/workflows/`:
   - `ui-checks.yml` — runs on PRs: lint + test + build
+  - `api-checks.yml` — runs on PRs: PHPUnit tests
   - `ui-deploy.yml` — deploys frontend on push to `main`
   - `api-deploy.yml` — deploys backend on push to `main`
   - `sonarcloud.yml` — SonarCloud quality gate on PRs and pushes to `main`
