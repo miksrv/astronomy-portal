@@ -1,16 +1,19 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import dayjs from 'dayjs'
 import { Button, Container, Dialog, Icon } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import { useTranslation } from 'next-i18next/pages'
 
-import { API, ApiModel, useAppSelector } from '@/api'
+import { API, ApiModel, useAppDispatch, useAppSelector } from '@/api'
 import { hosts } from '@/api/constants'
 import { LoginForm } from '@/components/common'
-import { formatUTCDate, getLocalizedTimeFromSec, getSecondsUntilUTCDate } from '@/utils/dates'
+import { formatUTCDate, getHumanTimeFromSec, getLocalizedTimeFromSec, getSecondsUntilUTCDate } from '@/utils/dates'
+
+import { EventTicket } from '../event-ticket'
 
 import { EventBookingForm } from './event-booking-form'
+import noEventsImage from './no-events.png'
 
 import styles from './styles.module.sass'
 
@@ -23,9 +26,15 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
 
     const user = useAppSelector((state) => state.auth.user)
 
+    const dispatch = useAppDispatch()
+
     const [registered, setRegistered] = useState<boolean>(false)
+    const [bookedId, setBookedId] = useState<string>()
     const [confirmation, showConfirmation] = useState<boolean>(false)
     const [tick, setTick] = useState<number>(0)
+    const [paymentExpiryTs, setPaymentExpiryTs] = useState<number>()
+
+    const expiredHandledRef = useRef<boolean>(false)
 
     const [cancelRegistration, { isLoading }] = API.useEventsCancelRegistrationPostMutation()
 
@@ -42,6 +51,24 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
     // Recomputed on every tick so countdown values update each second
     const secondsUntilRegistrationStart = getSecondsUntilUTCDate(event?.registrationStart?.date) || 0
     const secondsUntilRegistrationEnd = getSecondsUntilUTCDate(event?.registrationEnd?.date) || 0
+
+    // A paid booking holds the seat as "pending" until its payment expires (~20 min).
+    const pendingPayment = registered && event?.bookingStatus === 'pending' ? event?.payment : undefined
+
+    // Seconds left on the payment hold, counted down locally against the absolute
+    // target captured from the server's expiresInSeconds (recomputed each tick).
+    const paymentSecondsLeft =
+        pendingPayment && paymentExpiryTs !== undefined
+            ? Math.max(0, Math.round((paymentExpiryTs - Date.now()) / 1000))
+            : undefined
+
+    const awaitingPayment = !!pendingPayment && (paymentSecondsLeft ?? 0) > 0
+
+    // A booking shows ticket / QR / location only once it is confirmed (paid or free),
+    // never while it is still a pending-payment hold.
+    const isConfirmed = registered && event?.bookingStatus !== 'pending'
+
+    const paymentTimeLeftLabel = getHumanTimeFromSec(paymentSecondsLeft ?? 0, t)
 
     const registrationAvailable = useMemo(() => {
         if (event?.availableTickets === 0) {
@@ -64,6 +91,13 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
     }, [event?.registered])
 
     useEffect(() => {
+        // Capture the payment deadline as an absolute client instant whenever the
+        // server data changes, so the countdown survives re-renders and refetches.
+        const secondsLeft = event?.bookingStatus === 'pending' ? event?.payment?.expiresInSeconds : undefined
+        setPaymentExpiryTs(typeof secondsLeft === 'number' ? Date.now() + secondsLeft * 1000 : undefined)
+    }, [event?.bookingStatus, event?.payment?.expiresInSeconds])
+
+    useEffect(() => {
         const interval = setInterval(() => {
             setTick((prev) => prev + 1)
         }, 1000)
@@ -71,12 +105,47 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
         return () => clearInterval(interval)
     }, [])
 
+    useEffect(() => {
+        // Returning via the browser "Back" button after the bank page restores
+        // this page from the bfcache with stale data (the booking form). Refetch
+        // the upcoming event on bfcache restore so the correct state shows.
+        const handlePageShow = (e: PageTransitionEvent) => {
+            if (e.persisted) {
+                dispatch(API.util.invalidateTags([{ id: 'UPCOMING', type: 'Events' }]))
+            }
+        }
+
+        window.addEventListener('pageshow', handlePageShow)
+
+        return () => window.removeEventListener('pageshow', handlePageShow)
+    }, [dispatch])
+
+    useEffect(() => {
+        // When the payment hold lapses, refetch the upcoming event once: the
+        // backend releases the expired booking on read, so the booking form
+        // reappears instead of a dead "awaiting payment" panel.
+        if (
+            pendingPayment &&
+            paymentSecondsLeft !== undefined &&
+            paymentSecondsLeft <= 0 &&
+            !expiredHandledRef.current
+        ) {
+            expiredHandledRef.current = true
+            dispatch(API.util.invalidateTags([{ id: 'UPCOMING', type: 'Events' }]))
+        }
+
+        if (!pendingPayment) {
+            expiredHandledRef.current = false
+        }
+    }, [pendingPayment, paymentSecondsLeft, dispatch])
+
     if (!event) {
         return (
             <Container className={styles.noEvent}>
-                <Icon
-                    name={'Moon'}
-                    className={styles.noEventIcon}
+                <Image
+                    className={styles.noEventImage}
+                    src={noEventsImage}
+                    alt={''}
                 />
                 <h3>
                     {t('components.pages.stargazing.event-upcoming.no-upcoming', 'Пока нет предстоящих астровыездов')}
@@ -114,10 +183,86 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
                 <div className={styles.stargazing}>
                     <h2 className={styles.title}>{event?.title}</h2>
 
-                    {registered && (
+                    {isConfirmed && (
                         <h3 className={styles.registeredTitle}>
                             {t('components.pages.stargazing.event-upcoming.you-are-registered', 'Вы зарегистрированы')}
                         </h3>
+                    )}
+
+                    {isConfirmed && (event?.bookedId || bookedId) && (
+                        <div className={styles.ticketBlock}>
+                            <EventTicket bookingId={event?.bookedId || bookedId} />
+                        </div>
+                    )}
+
+                    {/* Paid booking awaiting payment — seat is held with a 20-min countdown */}
+                    {awaitingPayment && pendingPayment && (
+                        <div className={styles.infoBlock}>
+                            <h3>
+                                {t(
+                                    'components.pages.stargazing.event-upcoming.awaiting-payment-title',
+                                    'Бронь ожидает оплаты'
+                                )}
+                            </h3>
+                            <p>
+                                {t(
+                                    'components.pages.stargazing.event-upcoming.awaiting-payment-text',
+                                    'Место забронировано. Завершите оплату до конца таймера, иначе бронь будет автоматически отменена и место освободится.'
+                                )}
+                            </p>
+                            <p>
+                                <strong>
+                                    {t(
+                                        'components.pages.stargazing.event-upcoming.payment-time-left',
+                                        'Осталось на оплату: {{time}}',
+                                        { time: paymentTimeLeftLabel }
+                                    )}
+                                </strong>
+                            </p>
+                            <div className={styles.awaitingPaymentActions}>
+                                <Button
+                                    mode={'primary'}
+                                    variant={'positive'}
+                                    onClick={() => {
+                                        window.location.href = pendingPayment.formUrl
+                                    }}
+                                >
+                                    {t(
+                                        'components.pages.stargazing.event-upcoming.return-to-payment',
+                                        'Вернуться к оплате'
+                                    )}
+                                </Button>
+                                <Button
+                                    mode={'secondary'}
+                                    loading={isLoading}
+                                    disabled={isLoading}
+                                    onClick={() => showConfirmation(true)}
+                                >
+                                    {t(
+                                        'components.pages.stargazing.event-upcoming.cancel-booking',
+                                        'Отменить бронирование'
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Payment hold lapsed — refetch is triggered; show a brief notice meanwhile */}
+                    {registered && event?.bookingStatus === 'pending' && !awaitingPayment && (
+                        <div className={styles.infoBlock}>
+                            <h3>
+                                {t(
+                                    'components.pages.stargazing.event-upcoming.payment-expired-title',
+                                    'Время на оплату истекло'
+                                )}
+                            </h3>
+                            <p>
+                                {t(
+                                    'components.pages.stargazing.event-upcoming.payment-expired-text',
+                                    'Бронь отменена, место освобождено. Обновите страницу, чтобы забронировать снова.'
+                                )}
+                            </p>
+                        </div>
                     )}
 
                     <div className={styles.infoSection}>
@@ -142,7 +287,7 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
                         </span>
                     </div>
 
-                    {registered && (
+                    {isConfirmed && (
                         <div className={styles.infoSection}>
                             <Icon
                                 name={'Tag'}
@@ -173,7 +318,7 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
                         </div>
                     )}
 
-                    {registered && !!event?.members?.adults && (
+                    {isConfirmed && !!event?.members?.adults && (
                         <div className={styles.infoSection}>
                             <Icon
                                 name={'Users'}
@@ -196,13 +341,13 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
                             className={styles.icon}
                         />
                         <div>
-                            {registered && event?.location
+                            {isConfirmed && event?.location
                                 ? event.location
                                 : t(
                                       'components.pages.stargazing.event-upcoming.location-default',
                                       'Оренбургский район (~40 км от Оренбурга)'
                                   )}
-                            {registered ? (
+                            {isConfirmed ? (
                                 <ul className={styles.mapLinks}>
                                     <li>
                                         <a
@@ -315,8 +460,10 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
                             {user?.id && !registered && (
                                 <EventBookingForm
                                     eventId={event?.id}
-                                    onSuccessSubmit={() => {
+                                    ticketPrice={event?.ticketPrice}
+                                    onSuccessSubmit={(id) => {
                                         setRegistered(true)
+                                        setBookedId(id)
                                     }}
                                 />
                             )}
@@ -338,8 +485,8 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
                         ''
                     )}
 
-                    {/* If user is registered */}
-                    {registered &&
+                    {/* If user is registered (confirmed) */}
+                    {isConfirmed &&
                         !(dayjs.utc(event?.registrationEnd?.date).local().diff(dayjs()) <= 0) &&
                         !(dayjs.utc(event?.date?.date).local().diff(dayjs()) <= 0) && (
                             <div className={styles.cancelRegistration}>

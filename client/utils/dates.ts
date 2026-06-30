@@ -74,11 +74,49 @@ export const getLocalizedTimeFromSec = (sec: number, full: boolean = false, t: T
 }
 
 /**
- *
- * @param startDate
- * @param endDate
- * @param enLocale
+ * Formats a duration in seconds as a human-readable, localized string,
+ * e.g. "17 минут 49 секунд" / "1 час 5 минут" / "8 минут". Uses i18next
+ * pluralization (common.* keys). Seconds are shown when below an hour so a
+ * short countdown (a payment hold) stays precise; zero renders as "0 секунд".
  */
+export const getHumanTimeFromSec = (sec: number, t: TFunction): string => {
+    const total = Math.max(0, Math.floor(sec))
+
+    const d = dayjs.duration(total * 1000)
+    const days = Math.floor(d.asDays())
+    const hours = d.hours()
+    const minutes = d.minutes()
+    const seconds = d.seconds()
+
+    const parts: string[] = []
+
+    if (days) {
+        parts.push(t('common.days', '{{count}} день', { count: days }))
+    }
+
+    if (hours) {
+        parts.push(t('common.hours', '{{count}} час', { count: hours }))
+    }
+
+    if (minutes) {
+        parts.push(t('common.minutes', '{{count}} минута', { count: minutes }))
+    }
+
+    // Show seconds for short spans (< 1 hour) or when nothing else qualifies.
+    if ((seconds && days === 0 && hours === 0) || parts.length === 0) {
+        parts.push(t('common.seconds', '{{count}} секунда', { count: seconds }))
+    }
+
+    return parts.join(' ')
+}
+
+export const formatYearMonth = (date: string, locale: string): string => {
+    const [year, month] = date.split('-').map(Number)
+    const d = new Date(year, month - 1)
+    const monthName = new Intl.DateTimeFormat(locale, { month: 'long' }).format(d)
+    return `${monthName.charAt(0).toUpperCase()}${monthName.slice(1)} ${year}`
+}
+
 export const getDateTimeFormat = (startDate?: string, endDate?: string, enLocale?: boolean): string => {
     const start = dayjs(startDate)
     const end = dayjs(endDate)

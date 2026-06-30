@@ -1,29 +1,35 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { getCookie } from 'cookies-next'
-import { Button, Container, Icon } from 'simple-react-ui-kit'
+import { Button, Icon } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
-import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
-import { EventsList, EventUpcoming, InfoCards, ReviewsWidget } from '@/components/pages/stargazing'
+import { AppFooter, AppLayout, BreadcrumbJsonLd, PrevNextNav } from '@/components/common'
+import {
+    EventImportant,
+    EventProgram,
+    EventsList,
+    EventUpcoming,
+    InfoCards,
+    ReviewsWidget
+} from '@/components/pages/stargazing'
 import type { InfoCardItem } from '@/components/pages/stargazing/info-cards'
-import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
+import { getSecondsUntilUTCDate } from '@/utils/dates'
+
+import styles from './index.module.sass'
 
 interface StargazingPageProps {
     upcomingData: ApiModel.Event | null
-    events: ApiModel.Event[]
-    photos: ApiModel.EventPhoto[]
+    pastEvents: ApiModel.Event[]
 }
 
-const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, photos }) => {
+const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvents }) => {
     const { t } = useTranslation()
-
-    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     const title = t('pages.stargazing.title', 'Астровыезды')
 
@@ -32,7 +38,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
             href: '/stargazing/rules',
             icon: 'ReportError',
             title: t('pages.stargazing.rules_link', 'Правила поведения на астровыездах'),
-            description: t('pages.stargazing.rules_card_desc', 'Что нельзя делать и как уважать других участников')
+            description: t('pages.stargazing.rules_card_desc', 'Что нельзя делать и как уважать других')
         },
         {
             href: '/stargazing/howto',
@@ -43,7 +49,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
         {
             href: '/stargazing/where',
             icon: 'Map',
-            title: t('pages.stargazing.where_link', 'Где посмотреть в телескоп в Оренбурге'),
+            title: t('pages.stargazing.where_link', 'Где посмотреть в телескоп'),
             description: t('pages.stargazing.where_card_desc', 'Место проведения в Оренбургском районе')
         },
         {
@@ -53,18 +59,6 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
             description: t('pages.stargazing.faq_card_desc', 'Ответы на популярные вопросы участников')
         }
     ]
-
-    const [showLightbox, setShowLightbox] = useState<boolean>(false)
-    const [photoIndex, setPhotoIndex] = useState<number>(0)
-
-    const handlePhotoClick = (index: number) => {
-        setPhotoIndex(index)
-        setShowLightbox(true)
-    }
-
-    const handleHideLightbox = () => {
-        setShowLightbox(false)
-    }
 
     return (
         <AppLayout
@@ -84,89 +78,79 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, events, p
                 ]
             }}
         >
-            <AppToolbar
-                title={title}
-                currentPage={title}
-            >
-                {userRole === ApiModel.UserRole.ADMIN && (
+            <BreadcrumbJsonLd currentPage={title} />
+
+            <div
+                className={styles.pageBackground}
+                aria-hidden={'true'}
+            />
+
+            <div className={styles.hero}>
+                <p className={styles.heroLabel}>
+                    {t('pages.stargazing.hero-label', 'Оренбург · Наблюдение за звёздами')}
+                </p>
+
+                <h1 className={styles.heroTitle}>
+                    <span>{t('pages.stargazing.hero-title-line1', 'АСТРОВЫЕЗДЫ')}</span>
+                </h1>
+
+                <p className={styles.heroSubtitle}>
+                    {t(
+                        'pages.stargazing.text',
+                        'Представьте: ночное небо без городских огней, тысячи звёзд над головой и кольца Сатурна в окуляре телескопа. Наши астровыезды за город - это не просто наблюдения, это вечера, которые меняют взгляд на мир. Присоединяйтесь, чтобы увидеть Вселенную своими глазами!'
+                    )}
+                </p>
+
+                <div className={styles.heroActions}>
                     <Button
-                        icon={'PlusCircle'}
-                        mode={'secondary'}
-                        label={t('pages.stargazing.create-stargazing_button', 'Добавить астровыезд')}
-                        link={'/stargazing/form'}
+                        mode={'primary'}
+                        label={t('pages.stargazing.hero-cta-events', 'Ближайший выезд')}
+                        link={'#upcoming'}
                     />
-                )}
-            </AppToolbar>
 
-            <div>
-                {t(
-                    'pages.stargazing.text',
-                    'Представьте: ночное небо без городских огней, тысячи звёзд над головой и кольца Сатурна в окуляре телескопа. Наши астровыезды за город - это не просто наблюдения, это вечера, которые меняют взгляд на мир. Присоединяйтесь, чтобы увидеть Вселенную своими глазами!'
-                )}
+                    <Link
+                        href={'https://t.me/look_at_stars'}
+                        className={styles.telegramCta}
+                        title={t('pages.stargazing.telegram', 'Телеграм')}
+                        rel={'noindex nofollow'}
+                        target={'_blank'}
+                    >
+                        <Icon name={'Telegram'} />
+                        {t('pages.stargazing.hero-cta-telegram', 'Подписаться на Telegram')}
+                    </Link>
+                </div>
             </div>
-
-            <EventUpcoming event={upcomingData || undefined} />
-
-            <Link
-                href={'https://t.me/look_at_stars'}
-                className={'telegram-message'}
-                title={t('pages.stargazing.telegram', 'Телеграм')}
-                rel={'noindex nofollow'}
-                target={'_blank'}
-            >
-                <Icon name={'Telegram'} />{' '}
-                {t(
-                    'pages.stargazing.telegram-subscription',
-                    'Чтобы не пропустить анонсы - подпишитесь на Telegram канал'
-                )}
-            </Link>
 
             <InfoCards items={infoCards} />
 
-            <Container>
-                <PhotoGallery
-                    photos={
-                        photos?.map((photo, index) => ({
-                            height: photo.height,
-                            src: createPreviewPhotoUrl(photo),
-                            width: photo.width,
-                            alt: t('pages.stargazing.photo_alt', 'Фото ({{number}}) с астровыезда - {{name}} ', {
-                                number: index + 1,
-                                name: photo?.title
-                            })
-                        })) || []
-                    }
-                    onClick={({ index }) => {
-                        handlePhotoClick(index)
-                    }}
-                />
-            </Container>
+            <div id={'upcoming'}>
+                <EventUpcoming event={upcomingData || undefined} />
+            </div>
+
+            <h2>{t('pages.stargazing.program-title', 'Как проходит вечер')}</h2>
+
+            <EventProgram />
+
+            <EventImportant />
 
             <ReviewsWidget />
 
-            <h2>{t('pages.stargazing.events-archive', 'Архив астровыездов')}</h2>
+            {pastEvents.length > 0 && (
+                <>
+                    <h2>{t('pages.stargazing.past-events', 'Прошедшие астровыезды')}</h2>
 
-            <EventsList events={events} />
+                    <EventsList events={pastEvents} />
+                </>
+            )}
+
+            <PrevNextNav
+                next={{
+                    href: '/stargazing/history',
+                    title: t('pages.stargazing.archive-link', 'Все прошлые астровыезды')
+                }}
+            />
 
             <AppFooter />
-
-            <PhotoLightbox
-                photos={
-                    photos?.map((photo, index) => ({
-                        height: photo.height,
-                        src: createFullPhotoUrl(photo),
-                        width: photo.width,
-                        title: t('pages.stargazing.photo_title', 'Астровыезд: {{name}} - Фото ({{number}})', {
-                            number: index + 1,
-                            name: photo?.title
-                        })
-                    })) || []
-                }
-                photoIndex={photoIndex}
-                showLightbox={showLightbox}
-                onCloseLightBox={handleHideLightbox}
-                onChangeIndex={setPhotoIndex}
-            />
         </AppLayout>
     )
 }
@@ -184,24 +168,22 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 store.dispatch(setSSRToken(token))
             }
 
-            const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
             const { data: upcomingData } = await store.dispatch(API.endpoints?.eventGetUpcoming.initiate())
 
-            const { data: photosData } = await store.dispatch(
-                API.endpoints?.eventGetPhotoList.initiate({
-                    limit: 4,
-                    order: 'rand'
-                })
-            )
+            const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+
+            // Past events: already happened, most recent first
+            const pastEvents = (eventsData?.items || [])
+                .filter((event) => (getSecondsUntilUTCDate(event.date?.date) ?? 0) < 0)
+                .sort((a, b) => (a.date?.date && b.date?.date ? b.date.date.localeCompare(a.date.date) : 0))
 
             return {
                 props: {
                     ...translations,
                     upcomingData: upcomingData || null,
-                    events: eventsData?.items || [],
-                    photos: photosData?.items || []
+                    pastEvents: pastEvents.slice(0, 3)
                 }
             }
         }

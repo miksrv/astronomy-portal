@@ -17,6 +17,15 @@ export type Event = {
     }
     bookedId?: string
     registered?: boolean
+    /** Booking lifecycle: 'pending' holds the seat until payment, 'confirmed' is paid/free. */
+    bookingStatus?: 'pending' | 'confirmed'
+    /** Present only while a paid booking awaits payment — drives the countdown + "return to payment". */
+    payment?: {
+        orderId: string
+        formUrl: string
+        /** Server-computed seconds left on the payment hold (timezone-proof; client counts down from it). */
+        expiresInSeconds: number
+    }
     canceled?: boolean
     yandexMap?: string
     googleMap?: string
@@ -24,6 +33,8 @@ export type Event = {
     registrationStart?: DateTime
     registrationEnd?: DateTime
     availableTickets?: number
+    /** Price per adult in RUB. 0 / undefined means the event is free (children under 18 are always free). */
+    ticketPrice?: number
     views?: number
 }
 

@@ -5,8 +5,9 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { Trans, useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, wrapper } from '@/api'
+import { API, ApiModel, setLocale, SITE_LINK, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable, PhotoGallery, PhotoLightbox } from '@/components/common'
 import photoObservatory1 from '@/public/photos/observatory-1.jpeg'
 import photoObservatory2 from '@/public/photos/observatory-2.jpeg'
@@ -36,80 +37,72 @@ interface ObservatoryOverviewPageProps {
 
 const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photosList }) => {
     const { t } = useTranslation()
+    const { t: tPage } = useTranslation('observatory-overview')
 
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>(0)
 
     const equipmentList = [
         {
-            title: t('pages.observatory.equipment-list.mount.title', 'Монтировка: Sky-Watcher EQ6'),
-            description: t(
-                'pages.observatory.equipment-list.mount.description',
+            title: tPage('equipment-list.mount.title', 'Монтировка: Sky-Watcher EQ6'),
+            description: tPage(
+                'equipment-list.mount.description',
                 'Надёжная и точная монтировка, обеспечивающая стабильность телескопа даже при длительных экспозициях.'
             )
         },
         {
-            title: t('pages.observatory.equipment-list.telescope.title', 'Телескоп: Sky-Watcher BK2001P'),
-            description: t(
-                'pages.observatory.equipment-list.telescope.description',
+            title: tPage('equipment-list.telescope.title', 'Телескоп: Sky-Watcher BK2001P'),
+            description: tPage(
+                'equipment-list.telescope.description',
                 'Рефлекторный телескоп с апертурой 200 мм, идеально подходящий для наблюдений за объектами глубокого космоса.'
             )
         },
         {
-            title: t('pages.observatory.equipment-list.main-camera.title', 'Основная камера: ASI ZWO 6200MM Pro'),
-            description: t(
-                'pages.observatory.equipment-list.main-camera.description',
+            title: tPage('equipment-list.main-camera.title', 'Основная камера: ASI ZWO 6200MM Pro'),
+            description: tPage(
+                'equipment-list.main-camera.description',
                 'Высокочувствительная астрономическая камера с разрешением 24 МП, способная захватывать мельчайшие детали далёких объектов.'
             )
         },
         {
-            title: t('pages.observatory.equipment-list.guide-camera.title', 'Гид-камера: QHY QHY5'),
-            description: t(
-                'pages.observatory.equipment-list.guide-camera.description',
+            title: tPage('equipment-list.guide-camera.title', 'Гид-камера: QHY QHY5'),
+            description: tPage(
+                'equipment-list.guide-camera.description',
                 'Камера для точного наведения и слежения за объектами.'
             )
         },
         {
-            title: t(
-                'pages.observatory.equipment-list.guide-scope.title',
-                'Гид-телескоп: SV106 Guide Scope 50mm (Helical Focuser)'
-            ),
-            description: t(
-                'pages.observatory.equipment-list.guide-scope.description',
+            title: tPage('equipment-list.guide-scope.title', 'Гид-телескоп: SV106 Guide Scope 50mm (Helical Focuser)'),
+            description: tPage(
+                'equipment-list.guide-scope.description',
                 'Компактный телескоп для гидирования при съемках с длинными выдержками.'
             )
         },
         {
-            title: t('pages.observatory.equipment-list.focuser.title', 'Фокусер: ZWO EAF'),
-            description: t(
-                'pages.observatory.equipment-list.focuser.description',
+            title: tPage('equipment-list.focuser.title', 'Фокусер: ZWO EAF'),
+            description: tPage(
+                'equipment-list.focuser.description',
                 'Электронный фокусер, обеспечивающий точную настройку фокусировки.'
             )
         },
         {
-            title: t('pages.observatory.equipment-list.filter-wheel.title', 'Колесо фильтров: ZWO EFW 8x31mm'),
-            description: t(
-                'pages.observatory.equipment-list.filter-wheel.description',
+            title: tPage('equipment-list.filter-wheel.title', 'Колесо фильтров: ZWO EFW 8x31mm'),
+            description: tPage(
+                'equipment-list.filter-wheel.description',
                 'Универсальное колесо фильтров для работы с различными спектральными диапазонами.'
             )
         },
         {
-            title: t(
-                'pages.observatory.equipment-list.filters.title',
-                'Фильтры: ZWO L, R, G, B, Ha, OIII, SII (1.25")'
-            ),
-            description: t(
-                'pages.observatory.equipment-list.filters.description',
+            title: tPage('equipment-list.filters.title', 'Фильтры: ZWO L, R, G, B, Ha, OIII, SII (1.25")'),
+            description: tPage(
+                'equipment-list.filters.description',
                 'Набор фильтров для получения цветных изображений и съёмки в узких спектрах.'
             )
         },
         {
-            title: t(
-                'pages.observatory.equipment-list.coma-corrector.title',
-                'Корректор комы: Baader 2" Mark III MPCC'
-            ),
-            description: t(
-                'pages.observatory.equipment-list.coma-corrector.description',
+            title: tPage('equipment-list.coma-corrector.title', 'Корректор комы: Baader 2" Mark III MPCC'),
+            description: tPage(
+                'equipment-list.coma-corrector.description',
                 'Устраняет оптические искажения, обеспечивая чёткость изображения.'
             )
         }
@@ -124,12 +117,36 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
         setShowLightbox(false)
     }
 
+    const techArticleSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        '@id': `${SITE_LINK}observatory/overview`,
+        headline: tPage('title', 'Обсерватория в Оренбурге'),
+        description: tPage(
+            'description',
+            'Самодельная астрономическая обсерватория расположена в пригороде Оренбурга, всего в 15 км от города. Телескоп Sky-Watcher BK2001P, камера ASI ZWO 6200MM Pro, удалённое управление.'
+        ),
+        url: `${SITE_LINK}observatory/overview`,
+        image: `${SITE_LINK}photos/observatory-3.jpeg`,
+        author: {
+            '@type': 'Organization',
+            name: 'Смотри на звёзды',
+            url: SITE_LINK
+        },
+        publisher: {
+            '@type': 'Organization',
+            name: 'Смотри на звёзды',
+            url: SITE_LINK,
+            logo: { '@type': 'ImageObject', url: `${SITE_LINK}android-chrome-192x192.png` }
+        }
+    }
+
     return (
         <AppLayout
             canonical={'observatory/overview'}
-            title={t('pages.observatory.title', 'Обсерватория в Оренбурге')}
-            description={t(
-                'pages.observatory.description',
+            title={tPage('title', 'Обсерватория в Оренбурге')}
+            description={tPage(
+                'description',
                 'Самодельная астрономическая обсерватория расположена в пригороде Оренбурга, всего в 15 км от города. Благодаря своему удалению от городской застройки, обсерватория находится в зоне с уровнем светового загрязнения 5 класса по шкале Бортля, что делает её не плохим местом в пригорде для наблюдений за ночным небом.'
             )}
             openGraph={{
@@ -142,9 +159,13 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                 ]
             }}
         >
+            <JsonLdScript
+                scriptKey={'observatory-overview-tech-article'}
+                data={techArticleSchema}
+            />
             <AppToolbar
-                title={t('pages.observatory.title', 'Обсерватория в Оренбурге')}
-                currentPage={t('pages.observatory.title', 'Обсерватория в Оренбурге')}
+                title={tPage('title', 'Обсерватория в Оренбурге')}
+                currentPage={tPage('title', 'Обсерватория в Оренбурге')}
                 links={[
                     {
                         link: '/observatory',
@@ -153,21 +174,21 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                 ]}
             />
 
-            {t(
-                'pages.observatory.description',
+            {tPage(
+                'description',
                 'Самодельная астрономическая обсерватория расположена в пригороде Оренбурга, всего в 15 км от города. Благодаря своему удалению от городской застройки, обсерватория находится в зоне с уровнем светового загрязнения 5 класса по шкале Бортля, что делает её не плохим местом в пригорде для наблюдений за ночным небом.'
             )}
 
             <Container>
                 <p style={{ marginTop: 0 }}>
-                    {t(
-                        'pages.observatory.description-1',
+                    {tPage(
+                        'description-1',
                         'Основное направление деятельности обсерватории - фотографирование объектов глубокого космоса (deep-sky), таких как туманности, галактики и звёздные скопления. Оборудование и технологии, используемые в обсерватории, позволяют получать высококачественные изображения, которые могут использоваться как для научных исследований, так и для образовательных целей.'
                     )}
                 </p>
                 <p>
-                    {t(
-                        'pages.observatory.description-2',
+                    {tPage(
+                        'description-2',
                         'Обсерватория функционирует в полуавтоматическом режиме, что позволяет управлять ею удалённо из любой точки мира через Интернет. Это делает её доступной для астрономов-любителей, исследователей и энтузиастов со всего мира.'
                     )}
                 </p>
@@ -180,25 +201,25 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                 />
 
                 <p>
-                    {t(
-                        'pages.observatory.description-3',
+                    {tPage(
+                        'description-3',
                         'Обсерватория открыта для сотрудничества с астрономами-любителями, исследователями и образовательными учреждениями. Мы рады предоставить доступ к нашим данным для научных и образовательных целей. Если вы хотите стать частью нашего сообщества или использовать наши ресурсы для своих проектов, свяжитесь с нами через форму обратной связи.'
                     )}
                 </p>
                 <p style={{ marginBottom: 0 }}>
-                    {t(
-                        'pages.observatory.description-4',
+                    {tPage(
+                        'description-4',
                         'Оренбургская обсерватория - это уникальное сочетание современных технологий и энтузиазма астрономов-любителей. Мы стремимся сделать астрономию доступной для всех, кто интересуется загадками Вселенной. Присоединяйтесь к нам, чтобы вместе исследовать бескрайние просторы космоса!'
                     )}
                 </p>
             </Container>
 
-            <h2>{t('pages.observatory.equipment-title', 'Оборудование обсерватории')}</h2>
+            <h2>{tPage('equipment-title', 'Оборудование обсерватории')}</h2>
 
             <Container>
                 <p style={{ marginTop: 0 }}>
-                    {t(
-                        'pages.observatory.equipment-description',
+                    {tPage(
+                        'equipment-description',
                         'Используемые инструменты и технологии обеспечивают высокую точность наблюдений и профессиональное качество снимков. Вот основное оборудование, которое используется в работе:'
                     )}
                 </p>
@@ -218,12 +239,13 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                 />
             </Container>
 
-            <h2>{t('pages.observatory.photos-and-data-title', 'Фотографии и данные')}</h2>
+            <h2>{tPage('photos-and-data-title', 'Фотографии и данные')}</h2>
 
             <Container>
                 <p>
                     <Trans
-                        i18nKey={'pages.observatory.photos-and-data'}
+                        ns={'observatory-overview'}
+                        i18nKey={'photos-and-data'}
                         defaults={
                             'На специальном разделе сайта представлены <photosLink>фотографии</photosLink> снятых <objectsLink>объектов</objectsLink> глубокого космоса. Для каждого объекта доступны подробные параметры и характеристики, такие как расстояние до объекта, его размер, спектральные данные и многое другое. Эти материалы могут быть полезны как для начинающих астрономов, так и для профессионалов.'
                         }
@@ -237,7 +259,7 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                             objectsLink: (
                                 <Link
                                     href='/objects'
-                                    title={t('pages.observatory.photos-and-data-part-objects', 'объектов')}
+                                    title={tPage('photos-and-data-part-objects', 'объектов')}
                                 />
                             )
                         }}
@@ -252,9 +274,9 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                         mode={'secondary'}
                         link={'/photos'}
                         stretched={true}
-                        title={t('pages.observatory.astrophoto', 'Астрофото')}
+                        title={tPage('astrophoto', 'Астрофото')}
                     >
-                        {t('pages.observatory.photos-and-data-all-photos', 'Все астрономические фотографии')}
+                        {tPage('photos-and-data-all-photos', 'Все астрономические фотографии')}
                     </Button>
                 </div>
             </Container>
@@ -280,8 +302,8 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<ObservatoryOverviewPageProps>> => {
-            const locale = context.locale ?? 'en'
-            const translations = await serverSideTranslations(locale)
+            const locale = context.locale ?? 'ru'
+            const translations = await serverSideTranslations(locale, ['translation', 'observatory-overview'])
 
             store.dispatch(setLocale(locale))
 

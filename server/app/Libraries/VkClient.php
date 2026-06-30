@@ -49,7 +49,12 @@ class VkClient
         $this->redirectUri = $redirectUri;
         $this->theme       = $theme === 'light' ? 'light' : 'dark';
 
-        $this->codeVerifier = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+        // PKCE: the code_verifier MUST be identical between the authorize step (code_challenge)
+        // and the token-exchange step, which happen in two separate stateless requests.
+        // A random per-request value would never match across them, so derive it deterministically
+        // from the confidential client credentials: stable across both requests, yet unguessable
+        // by third parties (the secret never leaves the server).
+        $this->codeVerifier = rtrim(strtr(base64_encode(hash('sha256', $this->secret . '|' . $this->clientId, true)), '+/', '-_'), '=');
     }
 
 

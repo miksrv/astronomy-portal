@@ -9,3 +9,9 @@ export interface ResTelescope {
 export interface ReqTelescope {
     period?: string
 }
+
+/* Stargazing */
+export interface ResStargazing {
+    events: number
+    members: number
+}

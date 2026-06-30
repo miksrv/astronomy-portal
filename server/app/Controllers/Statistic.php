@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Models\EventsModel;
+use App\Models\EventsUsersModel;
 use App\Models\ObjectFitsFilesModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
@@ -10,6 +12,25 @@ use CodeIgniter\API\ResponseTrait;
 class Statistic extends ResourceController
 {
     use ResponseTrait;
+
+    /**
+     * Returns aggregate stargazing statistics shared by the landing page and the
+     * /stargazing section: the number of conducted events and the total number of
+     * registered participants. The legacy-participants offset (events held before
+     * the registration system existed) is added on the client.
+     *
+     * @return ResponseInterface
+     */
+    public function stargazing(): ResponseInterface
+    {
+        $eventsModel      = new EventsModel();
+        $eventsUsersModel = new EventsUsersModel();
+
+        return $this->respond([
+            'events'  => $eventsModel->getConductedCount(),
+            'members' => $eventsUsersModel->getTotalParticipants(),
+        ]);
+    }
 
     /**
      * @return ResponseInterface

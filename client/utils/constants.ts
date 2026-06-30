@@ -11,3 +11,12 @@ export const SITE_LINK = process.env.NEXT_PUBLIC_SITE_LINK
 export const HOST_API = process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:8080/'
 
 export const HOST_IMG = process.env.NEXT_PUBLIC_IMG_HOST || HOST_API
+
+// Approximate number of stargazing participants from the years before the
+// registration system existed. Added on top of the registered count so the
+// landing page and the /stargazing section show the same total.
+export const STARGAZING_LEGACY_MEMBERS = 50000
+
+// The community has been running astronomy activities since this year; used to
+// derive the "years in astronomy" counter (chosen so it currently reads 11).
+export const STARGAZING_FOUNDING_YEAR = 2015

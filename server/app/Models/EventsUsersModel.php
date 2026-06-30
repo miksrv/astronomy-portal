@@ -26,6 +26,8 @@ class EventsUsersModel extends ApplicationBaseModel
         'adults',
         'children',
         'children_ages',
+        'status',
+        'payment_id',
         'checkin_by_user_id',
         'checkin_at',
     ];
@@ -209,6 +211,126 @@ class EventsUsersModel extends ApplicationBaseModel
     }
 
     /**
+     * Returns the total number of registered participants (adults + children)
+     * across all events, excluding cancelled (soft-deleted) bookings. Used for
+     * aggregate public statistics.
+     *
+     * @return int Total participants.
+     */
+    public function getTotalParticipants(): int
+    {
+        $row = $this->builder()
+            ->select('SUM(adults + children) as total')
+            ->where('deleted_at', null)
+            ->get()
+            ->getRow();
+
+        return (int) ($row->total ?? 0);
+    }
+
+    /**
+     * Returns users with valid emails registered for an event, for use as mailing recipients.
+     *
+     * Mirrors UsersModel::getNewsletterSubscribers(): users who explicitly
+     * unsubscribed (settings->subscribe_newsletter === false) are excluded, so a
+     * per-event campaign honours the same opt-out as the "all users" audience.
+     *
+     * @param string $eventId
+     * @return array Rows with id, email, locale.
+     */
+    public function getMailingRecipientsByEventId(string $eventId): array
+    {
+        return $this->db->table('events_users eu')
+            ->select('DISTINCT u.id, u.email, COALESCE(u.locale, \'ru\') as locale', false)
+            ->join('users u', 'eu.user_id = u.id')
+            ->where('eu.event_id', $eventId)
+            ->where('eu.deleted_at IS NULL')
+            ->where('u.email IS NOT NULL')
+            ->where("u.email != ''")
+            ->where('u.deleted_at IS NULL')
+            ->groupStart()
+                ->where('u.settings IS NULL')
+                ->orWhere("JSON_EXTRACT(u.settings, '$.subscribe_newsletter') IS NULL")
+                ->orWhere("JSON_EXTRACT(u.settings, '$.subscribe_newsletter') != 0")
+            ->groupEnd()
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Returns event title and count of registered users with valid emails for a specific event.
+     *
+     * @param string $eventId
+     * @return array|null Row with title_ru, title_en, user_count or null if not found.
+     */
+    public function getMailingAudienceByEventId(string $eventId): ?array
+    {
+        return $this->db->table('events e')
+            ->select('e.title_ru, e.title_en, COUNT(DISTINCT eu.user_id) as user_count')
+            ->join('events_users eu', 'eu.event_id = e.id')
+            ->join('users u', 'eu.user_id = u.id')
+            ->where('e.id', $eventId)
+            ->where('eu.deleted_at IS NULL')
+            ->where('u.email IS NOT NULL')
+            ->where("u.email != ''")
+            ->where('u.deleted_at IS NULL')
+            ->groupStart()
+                ->where('u.settings IS NULL')
+                ->orWhere("JSON_EXTRACT(u.settings, '$.subscribe_newsletter') IS NULL")
+                ->orWhere("JSON_EXTRACT(u.settings, '$.subscribe_newsletter') != 0")
+            ->groupEnd()
+            ->get()
+            ->getRowArray() ?: null;
+    }
+
+    /**
+     * Returns all events with at least one registered user with a valid email,
+     * ordered newest first; used for mailing audience selection.
+     *
+     * @return array Rows with event_id, title_ru, title_en, user_count.
+     */
+    public function getMailingAudienceEvents(): array
+    {
+        return $this->db->table('events e')
+            ->select('e.id as event_id, e.title_ru, e.title_en, COUNT(DISTINCT eu.user_id) as user_count')
+            ->join('events_users eu', 'eu.event_id = e.id')
+            ->join('users u', 'eu.user_id = u.id')
+            ->where('eu.deleted_at IS NULL')
+            ->where('u.email IS NOT NULL')
+            ->where("u.email != ''")
+            ->where('u.deleted_at IS NULL')
+            ->groupStart()
+                ->where('u.settings IS NULL')
+                ->orWhere("JSON_EXTRACT(u.settings, '$.subscribe_newsletter') IS NULL")
+                ->orWhere("JSON_EXTRACT(u.settings, '$.subscribe_newsletter') != 0")
+            ->groupEnd()
+            ->groupBy('e.id')
+            ->having('user_count >', 0)
+            ->orderBy('e.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Soft-deletes pending bookings whose payment hold has expired, freeing
+     * their seats. Called during booking/availability checks so abandoned,
+     * unpaid reservations do not block other users indefinitely.
+     *
+     * @param array<string> $paymentIds Ids of expired, unpaid payments.
+     * @return void
+     */
+    public function releaseExpiredPendingByPaymentIds(array $paymentIds): void
+    {
+        if (empty($paymentIds)) {
+            return;
+        }
+
+        $this->whereIn('payment_id', $paymentIds)
+            ->where('status', 'pending')
+            ->delete();
+    }
+
+    /**
      * Returns the next upcoming event that the given user is registered for.
      *
      * @param string $userId The user's ID.
@@ -219,9 +341,12 @@ class EventsUsersModel extends ApplicationBaseModel
         return $this->db->table('events_users eu')
             ->select('e.id, e.title_ru, e.title_en, e.date, e.cover_file_name, e.cover_file_ext,
                       e.location_ru, e.location_en, e.yandex_map_link, e.google_map_link,
-                      eu.adults, eu.children, eu.checkin_at')
+                      eu.id AS booking_id, eu.adults, eu.children, eu.checkin_at')
             ->join('events e', 'e.id = eu.event_id')
             ->where('eu.user_id', $userId)
+            // Only confirmed bookings count as "registered"; a pending (unpaid)
+            // booking must not surface as the user's upcoming event with a ticket.
+            ->where('eu.status', 'confirmed')
             ->where('eu.deleted_at IS NULL')
             ->where('e.deleted_at IS NULL')
             ->where('e.date > NOW()')

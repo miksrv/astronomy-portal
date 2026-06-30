@@ -11,7 +11,17 @@ const Error404Page: NextPage = () => {
 
     return (
         <main>
-            <Head>{generateNextSeo({ title: t('pages.404.title', 'Ошибка 404 - Такой страницы не существует') })}</Head>
+            <Head>
+                {generateNextSeo({
+                    noindex: true,
+                    nofollow: true,
+                    title: t('pages.404.title', 'Ошибка 404 - Такой страницы не существует'),
+                    description: t(
+                        'pages.404.description',
+                        'Возможно, страница, которую вы ищете, была удалена,\nпереименована или временно недоступна.'
+                    )
+                })}
+            </Head>
             <div className={'errorPage'}>
                 <h1>{t('pages.404.heading', 'Houston, we have a problem')}</h1>
                 <h2>{t('pages.404.subheading', 'Страница не найдена')}</h2>

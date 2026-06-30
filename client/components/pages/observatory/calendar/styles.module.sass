@@ -4,7 +4,7 @@
     display: flex
     padding: 1px 1px 1px 4px
     margin-top: 3px
-    background-color: #43464d
+    background-color: var(--table-border-color)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-direction: column
@@ -54,7 +54,7 @@
 
     .weatherEvent
         @extend .eventCalendarBlock
-        background-color: #475e85
+        background-color: var(--color-main-background)
         padding-left: 6px
 
         span
@@ -68,7 +68,7 @@
 
     .telescopeEvent
         @extend .eventCalendarBlock
-        background-color: #7a5f5f
+        background-color: var(--color-red-background)
         padding-left: 6px
 
         span
@@ -81,7 +81,7 @@
             margin-right: 4px
 
         i
-            color: var(--color-orange)
+            color: var(--color-primary)
 
     .calendarToolbar
         margin: 0 0 5px
@@ -108,21 +108,21 @@
 
     .dayNumber
         display: inline-block
-        border: 1px solid #6b6b6b
+        border: 1px solid var(--input-border-color)
         padding: 1px 3px
         width: 23px
         height: 23px
         line-height: 20px
         text-align: center
-        color: #FFF
+        color: var(--text-color-primary)
 
         &.green
             background-color: var(--color-green-background)
             border-color: var(--color-green)
 
         &.orange
-            background-color: var(--color-orange-background)
-            border-color: var(--color-orange)
+            background-color: var(--color-primary-background)
+            border-color: var(--color-primary)
 
         &.red
             background-color: var(--color-red-background)
@@ -144,31 +144,31 @@
 
             thead tr > th
                 height: 50px
-                border: 1px solid #3f3f3f
-                background-color: #242424
+                border: 1px solid var(--table-border-color)
+                background-color: var(--table-header-background)
                 text-transform: uppercase
 
             tbody tr > *
-                background-color: #333
+                background-color: var(--container-background-color)
 
                 &.calendarDay
                     position: relative
-                    border: 1px solid #565656
+                    border: 1px solid var(--table-border-color)
                     vertical-align: top
                     padding: 3px
                     width: 14.2%
                     font-size: 12px
-                    color: #c8c8c8
+                    color: var(--text-color-secondary)
 
                     &.currentDay
-                        background-color: #414141
+                        background-color: var(--table-header-background-hover)
 
                 &.empty, &.disable
                     cursor: not-allowed
-                    background-color: #424242
+                    background-color: var(--body-background)
 
                 &.today
-                    background-color: #414141
+                    background-color: var(--table-header-background-hover)
 
                     .dayNumber
                         font-weight: 900

@@ -9,7 +9,7 @@ import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { generateNextSeo } from 'next-seo/pages'
 
-import { API, ApiType, setLocale } from '@/api'
+import { API, ApiType, setLocale, SITE_LINK } from '@/api'
 import { login } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector, wrapper } from '@/api/store'
 import useLocalStorage from '@/hooks/useLocalStorage'
@@ -87,7 +87,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
                 {generateNextSeo({
                     nofollow: true,
                     noindex: true,
-                    canonical: `${i18n.language === 'en' ? 'en/' : ''}auth`,
+                    canonical: `${SITE_LINK}${i18n.language === 'en' ? 'en/' : ''}auth`,
                     title: t('pages.auth.title', 'Авторизация на сайте')
                 })}
             </Head>

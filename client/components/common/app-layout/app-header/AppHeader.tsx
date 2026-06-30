@@ -32,6 +32,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
     // Button's className to differ from the SSR-rendered HTML.
     // We suppress that difference by treating isLoading as false until mounted.
     const [mounted, setMounted] = useState(false)
+    const [scrolled, setScrolled] = useState(false)
 
     const {
         data: meData,
@@ -74,6 +75,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
 
     useEffect(() => {
         setMounted(true)
+
+        const handleScroll = () => setScrolled(window.scrollY > 10)
+
+        window.addEventListener('scroll', handleScroll, { passive: true })
+
+        return () => window.removeEventListener('scroll', handleScroll)
     }, [])
 
     useEffect(() => {
@@ -85,7 +92,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
     }, [meData, error])
 
     return (
-        <header className={styles.appHeader}>
+        <header className={cn(styles.appHeader, scrolled && styles.scrolled)}>
             <div className={cn(fullWidth && styles.fullWidth, styles.wrapper)}>
                 <Link
                     href={'/'}

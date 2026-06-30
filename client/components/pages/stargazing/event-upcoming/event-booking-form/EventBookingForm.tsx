@@ -7,7 +7,10 @@ import styles from './styles.module.sass'
 
 interface EventBookingFormProps {
     eventId?: string
-    onSuccessSubmit?: () => void
+    /** Price per adult in RUB. Falsy / 0 means a free event. Children under 18 are always free. */
+    ticketPrice?: number
+    /** Called after a confirmed (free) booking; receives the booking id for ticket rendering. */
+    onSuccessSubmit?: (bookingId?: string) => void
 }
 
 type EventBookingFormState = {
@@ -18,10 +21,14 @@ type EventBookingFormState = {
     childrenAges?: number[]
 }
 
-export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onSuccessSubmit }) => {
+export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, ticketPrice, onSuccessSubmit }) => {
     const user = useAppSelector((state) => state.auth.user)
 
+    const isPaid = !!ticketPrice && ticketPrice > 0
+
     const [submitted, setSubmitted] = useState<boolean>(false)
+    const [paymentRedirect, setPaymentRedirect] = useState<boolean>(false)
+    const [bookingId, setBookingId] = useState<string>()
     const [formState, setFormState] = useState<EventBookingFormState>({
         adults: '1',
         children: '0',
@@ -47,7 +54,7 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onS
 
         setSubmitted(true)
 
-        await bookEvent({
+        const result = await bookEvent({
             adults: Number(formState.adults || 1),
             children: Number(formState.children || 1),
             childrenAges: formState.childrenAges?.length ? formState.childrenAges : undefined,
@@ -55,7 +62,21 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onS
             name: formState.name,
             phone: formState.phone?.length ? formState.phone : undefined
         })
-    }, [formState])
+
+        const data = 'data' in result ? (result.data as ApiType.Events.ResRegistration) : undefined
+
+        // Paid event — the API returns a bank payment page URL to redirect to.
+        if (data?.payment?.formUrl) {
+            setPaymentRedirect(true)
+            window.location.href = data.payment.formUrl
+            return
+        }
+
+        // Free event — confirmed immediately; keep the booking id to render the ticket.
+        if (data?.bookingId) {
+            setBookingId(data.bookingId)
+        }
+    }, [formState, eventId, bookEvent])
 
     useEffect(() => {
         if (
@@ -71,10 +92,12 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onS
     }, [formState?.children])
 
     useEffect(() => {
-        if (isSuccess && submitted) {
-            onSuccessSubmit?.()
+        // For paid events the user is redirected to the bank; confirmation
+        // happens on return, so don't mark as registered here.
+        if (isSuccess && submitted && !paymentRedirect) {
+            onSuccessSubmit?.(bookingId)
         }
-    }, [isSuccess])
+    }, [isSuccess, bookingId])
 
     return (
         <div className={styles.form}>
@@ -88,12 +111,21 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onS
                 </Message>
             )}
 
-            {isSuccess && (
+            {isSuccess && !isPaid && (
                 <Message
                     type={'success'}
                     title={'Успешно!'}
                 >
                     {'Вы зарегистрировались на мероприятие'}
+                </Message>
+            )}
+
+            {paymentRedirect && (
+                <Message
+                    type={'info'}
+                    title={'Бронируем место'}
+                >
+                    {'Место забронировано, перенаправляем вас на страницу оплаты…'}
                 </Message>
             )}
 
@@ -185,13 +217,26 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, onS
                     </div>
                 ))}
 
+            {isPaid && (
+                <div
+                    className={styles.priceContainer}
+                    data-testid={'price-summary'}
+                >
+                    <div className={styles.priceTotal}>
+                        {`${Number(formState.adults || 1)} взрослых × ${ticketPrice} ₽ = `}
+                        <strong>{`${Number(formState.adults || 1) * (ticketPrice || 0)} ₽`}</strong>
+                    </div>
+                    <div className={styles.priceNote}>{'Дети до 18 лет — бесплатно'}</div>
+                </div>
+            )}
+
             <Button
                 className={styles.submitButton}
                 onClick={handleSubmit}
                 disabled={isLoading || isSuccess || Number(formState?.children) !== formState?.childrenAges?.length}
                 loading={isLoading}
             >
-                {'Забронировать'}
+                {isPaid ? 'Перейти к оплате' : 'Забронировать'}
             </Button>
         </div>
     )

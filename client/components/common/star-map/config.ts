@@ -6,7 +6,7 @@ export const defaultConfig = {
     advanced: false, // Display fewer form fields if false
     background: {
         // Background style
-        fill: '#232323', // Area fill
+        fill: '#111318', // Area fill — matches --body-background
         opacity: 1,
         stroke: '#000000', // Outline
         width: 1.5
@@ -26,7 +26,7 @@ export const defaultConfig = {
         nameStyle: {
             align: 'center',
             baseline: 'middle',
-            fill: '#cccc99',
+            fill: '#6f6ebb', // matches --color-primary
             font: [
                 `14px ${FONT}`, // Style for constellations
                 `12px ${FONT}`, // Different fonts for diff.
@@ -265,7 +265,7 @@ export const customConfig = {
         nameStyle: {
             align: 'center',
             baseline: 'middle',
-            fill: '#ffa51f',
+            fill: '#6f6ebb', // matches --color-primary
             font: `13px ${FONT}`
         },
         names: true,

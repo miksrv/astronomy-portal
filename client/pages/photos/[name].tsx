@@ -4,8 +4,9 @@ import { Button } from 'simple-react-ui-kit'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable } from '@/components/common'
 import { PhotoCloud, PhotoHeader } from '@/components/pages/photos'
 import { createLargePhotoUrl, createPhotoTitle, normalizeAndFilterObjects } from '@/utils/photos'
@@ -40,6 +41,33 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
 
     const normalizeAndFilterPhotos = useMemo(() => normalizeAndFilterObjects(photosList), [photosList])
 
+    const imageObjectSchema = useMemo(
+        () =>
+            photoData
+                ? {
+                      '@context': 'https://schema.org',
+                      '@type': 'ImageObject',
+                      '@id': `${SITE_LINK}photos/${photoId}`,
+                      name: photoTitle,
+                      contentUrl: createLargePhotoUrl(photoData),
+                      url: `${SITE_LINK}photos/${photoId}`,
+                      datePublished: photoData.date,
+                      dateModified: photoData.updated?.date,
+                      author: {
+                          '@type': 'Organization',
+                          name: 'Смотри на звёзды',
+                          url: SITE_LINK
+                      },
+                      copyrightHolder: {
+                          '@type': 'Organization',
+                          name: 'Смотри на звёзды'
+                      },
+                      license: 'https://creativecommons.org/licenses/by-nc/4.0/'
+                  }
+                : null,
+        [photoData, photoId, photoTitle]
+    )
+
     const equipmentsDataDescription = useMemo(
         () =>
             equipmentsList
@@ -68,6 +96,10 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                 ]
             }}
         >
+            <JsonLdScript
+                scriptKey={'photo-image-object'}
+                data={imageObjectSchema}
+            />
             <AppToolbar
                 title={photoTitle}
                 currentPage={photoTitle}

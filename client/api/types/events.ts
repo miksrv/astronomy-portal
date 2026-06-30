@@ -13,12 +13,13 @@ export type ResCheckin = Pick<ApiModel.Event, 'members'> & {
 }
 
 export type EventFormType = Partial<
-    Omit<ApiModel.Event, 'date' | 'availableTickets' | 'registrationStart' | 'registrationEnd'>
+    Omit<ApiModel.Event, 'date' | 'availableTickets' | 'registrationStart' | 'registrationEnd' | 'ticketPrice'>
 > & {
     date?: string
     registrationStart?: string
     registrationEnd?: string
     tickets?: string
+    ticketPrice?: string
     upload?: File
 }
 
@@ -49,9 +50,36 @@ export interface ReqRegistration {
     childrenAges?: number[]
 }
 
+export interface ResRegistrationPayment {
+    /** Bank payment page URL the user must be redirected to. */
+    formUrl: string
+    /** Gateway order id, used to poll the payment status on return. */
+    orderId: string
+    /** Total amount to pay, in RUB. */
+    amount: number
+}
+
 export interface ResRegistration {
     result: boolean
     message?: string
+    /** Booking id (events_users.id) — present for free events, used to render the ticket. */
+    bookingId?: string
+    /** Present only for paid events — the client redirects to `payment.formUrl`. */
+    payment?: ResRegistrationPayment
+}
+
+/* Payment status */
+export type PaymentStatus = 'new' | 'pending' | 'paid' | 'failed' | 'canceled' | 'refunded'
+
+export interface ReqPaymentStatus {
+    orderId: string
+}
+
+export interface ResPaymentStatus {
+    status: PaymentStatus
+    message?: string
+    /** Booking id (events_users.id) for event-booking payments — used to render the ticket. */
+    bookingId?: string
 }
 
 /* Users List */

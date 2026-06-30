@@ -7,7 +7,6 @@ export interface UsersListRequest {
     page?: number
     limit?: number
     search?: string
-    role?: ApiModel.UserRole | ''
     authType?: ApiModel.UserAuthType | ''
     sortBy?: UsersSortBy
     sortDir?: UsersSortDir

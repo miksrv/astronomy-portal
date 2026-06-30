@@ -86,6 +86,86 @@ describe('EventBookingForm', () => {
         expect(screen.getByText('Вы зарегистрировались на мероприятие')).toBeDefined()
     })
 
+    it('does not show the registration success message for a paid event (defers to payment)', () => {
+        ;(API.useEventsRegistrationPostMutation as jest.Mock).mockReturnValue([
+            mockMutate,
+            { ...defaultMutationState, isSuccess: true }
+        ])
+
+        render(
+            <EventBookingForm
+                eventId='event-1'
+                ticketPrice={500}
+            />
+        )
+
+        expect(screen.queryByText('Вы зарегистрировались на мероприятие')).toBeNull()
+    })
+
+    it('renders the price summary and payment button label for a paid event', () => {
+        render(
+            <EventBookingForm
+                eventId='event-1'
+                ticketPrice={500}
+            />
+        )
+
+        expect(screen.getByTestId('price-summary')).toBeDefined()
+        expect(screen.getByText('Перейти к оплате')).toBeDefined()
+        // Default 1 adult × 500 ₽
+        expect(screen.getByText('500 ₽')).toBeDefined()
+    })
+
+    it('does not render the price summary for a free event', () => {
+        render(<EventBookingForm eventId='event-1' />)
+
+        expect(screen.queryByTestId('price-summary')).toBeNull()
+        expect(screen.getByText('Забронировать')).toBeDefined()
+    })
+
+    it('submits a paid booking and defers confirmation to the payment return (no onSuccessSubmit)', async () => {
+        // Paid booking → API responds with a bank payment URL; the component
+        // redirects to the bank and must NOT mark the user as registered yet.
+        mockMutate.mockResolvedValue({
+            data: { result: true, payment: { formUrl: 'https://bank/pay', orderId: 'o1', amount: 500 } }
+        })
+
+        const onSuccess = jest.fn()
+
+        const { rerender } = render(
+            <EventBookingForm
+                eventId='event-1'
+                ticketPrice={500}
+                onSuccessSubmit={onSuccess}
+            />
+        )
+
+        fireEvent.click(screen.getByText('Перейти к оплате'))
+
+        await waitFor(() => {
+            expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({ eventId: 'event-1' }))
+        })
+
+        // Even once the mutation reports success, confirmation is deferred until
+        // the user returns from the bank, so onSuccessSubmit stays uncalled.
+        ;(API.useEventsRegistrationPostMutation as jest.Mock).mockReturnValue([
+            mockMutate,
+            { ...defaultMutationState, isSuccess: true }
+        ])
+
+        rerender(
+            <EventBookingForm
+                eventId='event-1'
+                ticketPrice={500}
+                onSuccessSubmit={onSuccess}
+            />
+        )
+
+        await waitFor(() => {
+            expect(onSuccess).not.toHaveBeenCalled()
+        })
+    })
+
     it('calls onSuccessSubmit callback when submission succeeds', async () => {
         const onSuccess = jest.fn()
 

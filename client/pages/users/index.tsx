@@ -32,14 +32,6 @@ const LIMIT = 50
 const DEFAULT_SORT_BY: ApiType.Users.UsersSortBy = 'createdAt'
 const DEFAULT_SORT_DIR: ApiType.Users.UsersSortDir = 'desc'
 
-const ROLE_OPTIONS = [
-    { key: '', value: '' },
-    { key: 'user', value: 'user' },
-    { key: 'moderator', value: 'moderator' },
-    { key: 'security', value: 'security' },
-    { key: 'admin', value: 'admin' }
-]
-
 const AUTH_TYPE_OPTIONS = [
     { key: '', value: '' },
     { key: 'google', value: 'google' },
@@ -77,13 +69,11 @@ const UsersPage: NextPage<object> = () => {
 
     const toolbarRef = useRef<HTMLDivElement>(null)
     const footerRef = useRef<HTMLDivElement>(null)
-    const filtersRef = useRef<HTMLDivElement>(null)
     const paginationRef = useRef<HTMLDivElement>(null)
     const [tableHeight, setTableHeight] = useState<number | undefined>()
 
     const [search, setSearch] = useState<string>((router.query.search as string) || '')
     const [debouncedSearch, setDebouncedSearch] = useState<string>((router.query.search as string) || '')
-    const [role, setRole] = useState<ApiModel.UserRole | ''>((router.query.role as ApiModel.UserRole) || '')
     const [authType, setAuthType] = useState<ApiModel.UserAuthType | ''>(
         (router.query.authType as ApiModel.UserAuthType) || ''
     )
@@ -100,7 +90,6 @@ const UsersPage: NextPage<object> = () => {
         page,
         limit: LIMIT,
         search: debouncedSearch,
-        role,
         authType,
         sortBy: sort.key as ApiType.Users.UsersSortBy,
         sortDir: sort.direction
@@ -112,10 +101,9 @@ const UsersPage: NextPage<object> = () => {
             const containerHeight = document.documentElement.clientHeight
             const toolbarH = toolbarRef.current?.offsetHeight || 0
             const footerH = footerRef.current?.offsetHeight || 0
-            const filtersH = filtersRef.current?.offsetHeight || 0
             const paginationH = paginationRef.current?.offsetHeight || 0
 
-            setTableHeight(containerHeight - toolbarH - footerH - filtersH - paginationH - 135)
+            setTableHeight(containerHeight - toolbarH - footerH - paginationH - 155)
         }
 
         calculateTableHeight()
@@ -141,9 +129,6 @@ const UsersPage: NextPage<object> = () => {
         if (debouncedSearch) {
             query.search = debouncedSearch
         }
-        if (role) {
-            query.role = role
-        }
         if (authType) {
             query.authType = authType
         }
@@ -158,12 +143,7 @@ const UsersPage: NextPage<object> = () => {
         }
 
         void router.push({ pathname: '/users', query }, undefined, { shallow: true })
-    }, [debouncedSearch, role, authType, page, sort])
-
-    const handleRoleChange = useCallback((selected: Array<SelectOptionType<string>> | undefined) => {
-        setRole((selected?.[0]?.key ?? '') as ApiModel.UserRole | '')
-        setPage(1)
-    }, [])
+    }, [debouncedSearch, authType, page, sort])
 
     const handleAuthTypeChange = useCallback((selected: Array<SelectOptionType<string>> | undefined) => {
         setAuthType((selected?.[0]?.key ?? '') as ApiModel.UserAuthType | '')
@@ -309,33 +289,12 @@ const UsersPage: NextPage<object> = () => {
                 ref={toolbarRef}
                 title={pageTitle}
                 currentPage={pageTitle}
-            />
-
-            <Container
-                ref={filtersRef}
-                className={styles.filtersRow}
             >
-                {isFetching && <Spinner className={styles.loader} />}
-
-                {data?.count !== undefined && t('users.totalCount', { count: data.count })}
-
                 <Input
                     clearable={true}
                     value={search}
-                    className={styles.searchInput}
                     placeholder={t('users.search', 'Поиск по имени')}
                     onChange={(e) => setSearch(e.target.value)}
-                />
-
-                <Select<string>
-                    placeholder={t('users.filterRole', 'Роль')}
-                    value={role}
-                    className={styles.selectFilter}
-                    onSelect={handleRoleChange}
-                    options={ROLE_OPTIONS.map((o) => ({
-                        key: o.key,
-                        value: roleLabel(o.value as ApiModel.UserRole | '')
-                    }))}
                 />
 
                 <Select<string>
@@ -348,10 +307,11 @@ const UsersPage: NextPage<object> = () => {
                         value: authTypeLabel(o.value as ApiModel.UserAuthType | '')
                     }))}
                 />
-            </Container>
+            </AppToolbar>
 
             <Container style={{ padding: '2px' }}>
                 <Table<ApiModel.AdminUserItem>
+                    className={styles.usersTable}
                     size={'small'}
                     sort={sort}
                     data={data?.items || []}
@@ -364,23 +324,27 @@ const UsersPage: NextPage<object> = () => {
                 />
             </Container>
 
-            {!!data?.count && data.count > LIMIT && (
-                <Container
-                    ref={paginationRef}
-                    style={{ padding: '1px' }}
-                >
-                    <Pagination
-                        currentPage={page}
-                        totalItemsCount={data?.count ?? 0}
-                        perPage={LIMIT}
-                        hideIfOnePage={true}
-                        onChangePage={setPage}
-                        captionPage={t('users.paginationPage', 'Страница')}
-                        captionNextPage={t('users.paginationNext', 'Следующая')}
-                        captionPrevPage={t('users.paginationPrev', 'Предыдущая')}
-                    />
-                </Container>
-            )}
+            <Container
+                ref={paginationRef}
+                className={styles.tableFooter}
+            >
+                <div className={styles.footerCount}>
+                    {isFetching && <Spinner className={styles.loader} />}
+                    {data?.count !== undefined &&
+                        t('users.totalCount', 'Всего пользователей: {{count}}', { count: data.count })}
+                </div>
+
+                <Pagination
+                    currentPage={page}
+                    totalItemsCount={data?.count ?? 0}
+                    perPage={LIMIT}
+                    hideIfOnePage={true}
+                    onChangePage={setPage}
+                    captionPage={t('users.paginationPage', 'Страница')}
+                    captionNextPage={t('users.paginationNext', 'Следующая')}
+                    captionPrevPage={t('users.paginationPrev', 'Предыдущая')}
+                />
+            </Container>
 
             <UserEventsDialog
                 userId={eventsUserId}

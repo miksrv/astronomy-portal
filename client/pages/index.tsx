@@ -3,41 +3,19 @@ import React, { useEffect } from 'react'
 import type { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, wrapper } from '@/api'
+import { API, ApiModel, setLocale, SITE_LINK, wrapper } from '@/api'
 import { AppLayout } from '@/components/common'
-import { MainSection } from '@/components/pages/index'
+import { MainSectionCommunity, MainSectionHero, MainSectionObservatory } from '@/components/pages/index'
 
 interface HomePageProps {
     photosList: ApiModel.Photo[]
+    eventPhotos: ApiModel.EventPhoto[]
 }
 
-const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
+const HomePage: NextPage<HomePageProps> = ({ photosList, eventPhotos }) => {
     const { t } = useTranslation()
-
-    useEffect(() => {
-        const sections = document.querySelectorAll('section')
-
-        const setSectionHeight = () => {
-            // Read header height from the CSS custom property defined in theme.css
-            const headerHeightPx =
-                parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height'), 10) || 50
-
-            const windowHeight = window.innerHeight
-            const sectionHeight = windowHeight - headerHeightPx
-
-            sections.forEach((section) => {
-                ;(section as HTMLElement).style.height = `${sectionHeight}px`
-            })
-        }
-
-        setSectionHeight()
-        window.addEventListener('resize', setSectionHeight)
-
-        return () => {
-            window.removeEventListener('resize', setSectionHeight)
-        }
-    }, [])
 
     useEffect(() => {
         const headings = document.querySelectorAll('.animate')
@@ -63,19 +41,41 @@ const HomePage: NextPage<HomePageProps> = ({ photosList }) => {
         return () => observer.disconnect()
     }, [])
 
+    const websiteSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Смотри на звёзды',
+        url: SITE_LINK,
+        potentialAction: {
+            '@type': 'SearchAction',
+            target: {
+                '@type': 'EntryPoint',
+                urlTemplate: `${SITE_LINK}objects?search={search_term_string}`
+            },
+            'query-input': 'required name=search_term_string'
+        }
+    }
+
     return (
         <AppLayout
-            fullWidth={true}
+            noTopMargin={true}
             canonical={''}
             title={t('pages.index.title', 'Проект "Смотри на звёзды"')}
             description={t(
                 'pages.index.description',
                 'Смотри на звезды - уникальный проект в Оренбургской области: наблюдения в телескопы за городом, тротуарная астрономия, обсерватория в Оренбургской области и астрофотографии'
             )}
+            openGraph={{
+                images: [{ url: '/images/index-hero.png', width: 1536, height: 1024 }]
+            }}
         >
-            <MainSection.Astrophotos photos={photosList} />
-            <MainSection.Stargazing />
-            <MainSection.Observatory />
+            <JsonLdScript
+                scriptKey={'website'}
+                data={websiteSchema}
+            />
+            <MainSectionHero photos={eventPhotos} />
+            <MainSectionCommunity />
+            <MainSectionObservatory photos={photosList} />
         </AppLayout>
     )
 }
@@ -95,12 +95,20 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 })
             )
 
+            const { data: eventPhotosData } = await store.dispatch(
+                API.endpoints?.eventGetPhotoList.initiate({
+                    limit: 4,
+                    order: 'rand'
+                })
+            )
+
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
             return {
                 props: {
                     ...translations,
-                    photosList: photos?.items || []
+                    photosList: photos?.items || [],
+                    eventPhotos: eventPhotosData?.items || []
                 }
             }
         }

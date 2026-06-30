@@ -1,1 +1,1 @@
-export { MainSection } from './main-sections'
+export { MainSectionCommunity, MainSectionHero, MainSectionObservatory } from './main-sections'

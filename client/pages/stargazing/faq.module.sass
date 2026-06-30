@@ -1,0 +1,74 @@
+@use '../../styles/variables' as variables
+
+.faqList
+    display: flex
+    flex-direction: column
+    gap: 8px
+
+.faqItem
+    border-radius: var(--border-radius)
+    border: 1px solid var(--input-border-color)
+    overflow: hidden
+    transition: border-color 0.2s ease
+
+    &.open
+        border-color: var(--color-primary)
+
+        .chevron
+            transform: rotate(180deg)
+
+        .faqAnswer
+            grid-template-rows: 1fr
+            opacity: 1
+
+    .faqQuestion
+        width: 100%
+        display: flex
+        align-items: center
+        justify-content: space-between
+        gap: 12px
+        padding: 14px 16px
+        background: var(--container-background-color)
+        text-align: left
+        border: none
+        cursor: pointer
+        color: var(--text-color-primary)
+        font-size: var(--font-size)
+        font-weight: 500
+        line-height: 1.4
+        transition: background-color 0.15s ease
+
+        &:hover
+            background: var(--body-background)
+
+    .chevron
+        flex-shrink: 0
+        width: 18px
+        height: 18px
+        fill: var(--text-color-secondary)
+        transition: transform 0.25s ease
+
+    .faqAnswer
+        display: grid
+        grid-template-rows: 0fr
+        transition: grid-template-rows 0.25s ease, opacity 0.2s ease
+        opacity: 0
+
+        // immediate grid child must have overflow:hidden and no padding
+        // so the grid can collapse it to exactly 0 height
+        > div
+            overflow: hidden
+            min-height: 0
+
+    .faqAnswerContent
+        padding: 14px 16px 16px
+        color: var(--text-color-secondary)
+        line-height: 1.6
+        border-top: 1px solid var(--input-border-color)
+        background-color: var(--container-background-color)
+
+        a
+            color: var(--link-color)
+
+            &:hover
+                color: var(--link-color-hover)

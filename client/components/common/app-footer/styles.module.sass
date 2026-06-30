@@ -1,8 +1,43 @@
+@use '../../../styles/variables' as variables
+
 .footer
     margin: var(--container-margin-top) 0
-    text-align: center
-    color: var(--text-color-secondary)
+    color: var(--text-color-secondary-hover)
     font-size: var(--font-size-small)
+    display: flex
+    align-items: center
+    justify-content: space-between
+    margin-top: 0
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column
+        gap: 8px
+        text-align: center
+
+    .copyright
+        display: flex
+        align-items: center
+        flex-wrap: wrap
+        gap: 0
+
+        a
+            color: var(--text-color-secondary)
+            text-decoration: underline
+
+            &:hover
+                color: var(--text-color-primary)
+
+    .madeWithLove
+        display: flex
+        align-items: center
+        gap: 6px
+        white-space: nowrap
+
+    .starIcon
+        width: 14px
+        height: 14px
+        fill: var(--color-primary)
+        flex-shrink: 0
 
     .link
         margin: 0 3px

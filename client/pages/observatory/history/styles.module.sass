@@ -1,0 +1,71 @@
+@use '../../../styles/variables' as variables
+@use '../../../styles/mixins'
+
+.pageBackground
+    +mixins.hero-background(100vh)
+    background-image: url('/images/obs-background.png')
+
+.grid
+    display: grid
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))
+    gap: 16px
+
+.card
+    display: flex
+    flex-direction: column
+    overflow: hidden
+    cursor: pointer
+    text-decoration: none
+    color: inherit
+
+.coverWrapper
+    position: relative
+    width: 100%
+    aspect-ratio: 16 / 9
+    overflow: hidden
+
+.cover
+    object-fit: cover
+    border-radius: var(--border-radius)
+
+.cardBody
+    padding: 12px 0 4px
+
+.cardDate
+    font-size: 13px
+    opacity: 0.55
+    margin-bottom: 4px
+
+.cardTitle
+    font-size: 17px
+    font-weight: 600
+    margin: 0 0 6px
+
+.cardSummary
+    font-size: 14px
+    opacity: 0.75
+    margin: 0 0 12px
+    line-height: 1.5
+
+// Chapter detail page
+
+.chapterDate
+    font-size: 14px
+    opacity: 0.55
+    margin-bottom: 16px
+
+.blockText
+    line-height: 1.7
+    margin: 12px 0
+
+.sectionHeading
+    font-size: 20px
+    font-weight: 600
+    margin: 0
+
+.section
+    margin: 0
+
+.blockGallery
+    margin-top: 16px
+

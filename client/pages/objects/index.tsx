@@ -103,7 +103,15 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
         <AppLayout
             canonical={'objects'}
             title={`${title}${categoryFilter ? `: ${currentCategory?.title}` : ''}`}
-            description={`${t('pages.objects.description', 'Каталог астрономических объектов, отснятых обсерваторией: галактики, туманности, астероиды и кометы. Таблица с объектами включает информацию о суммарной выдержке, наличии обработанных фото и данных по каждому фильтру: Luminance, Red, Green, Blue, Ha, OIII, SII. Узнайте больше о каждом объекте и деталях наблюдения, проведенных обсерваторией.')} ${currentCategory?.description}`}
+            description={[
+                t(
+                    'pages.objects.description',
+                    'Каталог астрономических объектов, отснятых обсерваторией: галактики, туманности, астероиды и кометы. Таблица с объектами включает информацию о суммарной выдержке, наличии обработанных фото и данных по каждому фильтру: Luminance, Red, Green, Blue, Ha, OIII, SII. Узнайте больше о каждом объекте и деталях наблюдения, проведенных обсерваторией.'
+                ),
+                currentCategory?.description
+            ]
+                .filter(Boolean)
+                .join(' ')}
             openGraph={{
                 images: [
                     {
@@ -151,7 +159,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}
-                        label={t('pages.objects.create_button', 'Создать объект')}
+                        label={t('pages.objects.create_button', 'Добавить')}
                         link={'/objects/form'}
                     />
                 )}
@@ -160,7 +168,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
             <ObjectsTable
                 objectsList={filteredObjectsList}
                 photosList={photosList}
-                combinedHeight={toolbarHeight + footerHeight + 110}
+                combinedHeight={toolbarHeight + footerHeight + 135}
             />
 
             <AppFooter ref={footerRef} />

@@ -8,6 +8,7 @@
         "php": "^8.2",
         "ext-json": "*",
         "codeigniter4/framework": "^4.6",
+        "endroid/qr-code": "^6.0",
         "firebase/php-jwt": "^6.10",
         "longman/telegram-bot": "^0.83.1"
     },

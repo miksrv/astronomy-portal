@@ -1,0 +1,49 @@
+@use '../../../styles/variables' as variables
+
+// Vertical, right-aligned layout used inside the landing community section
+.statsRow
+    display: flex
+    flex-direction: column
+    gap: 28px
+    text-align: right
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: row
+        flex-wrap: wrap
+        gap: 24px
+        text-align: left
+
+// Horizontal, centered layout used as a standalone band on the /stargazing page
+.statsRowHorizontal
+    display: flex
+    flex-direction: row
+    flex-wrap: wrap
+    justify-content: center
+    gap: 48px
+    text-align: center
+    margin: 8px 0
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        gap: 32px
+
+.statItem
+    display: flex
+    flex-direction: column
+
+.statValue
+    font-size: 3.2rem
+    font-weight: 800
+    color: #fff
+    line-height: 1
+    display: block
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        font-size: 2rem
+
+.statLabel
+    font-size: 11px
+    color: rgba(255, 255, 255, 0.5)
+    text-transform: uppercase
+    letter-spacing: 0.1em
+    margin-top: 4px
+    display: block

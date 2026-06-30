@@ -1,0 +1,820 @@
+{
+    "slug": "construction-2019",
+    "date": "2019-07",
+    "title": "Строительство обсерватории",
+    "title_en": "Building the Observatory",
+    "summary": "С чего всё началось: выбор места, заливка фундамента, сварочные работы, каркас и открывающаяся крыша",
+    "coverPhoto": "history/construction/construction-085.jpg",
+    "sections": [
+        {
+            "blocks": [
+                {
+                    "type": "text",
+                    "content": "В сентябре 2019 года было принято окончательное решение: пора строить. Взял недельный отпуск, составил список материалов и приступил к закупкам. Задача первого этапа - залить фундаменты под несущие столбы и бетонную колонну телескопа, а затем оставить их набирать прочность до весны. Строительного опыта у меня не было совсем - всё приходилось изучать в процессе.",
+                    "content_en": ""
+                },
+                {
+                    "type": "text",
+                    "content": "Закупил металлическую трубу для колонны телескопа, два фланца для крепления экваториальной монтировки и квадратные профили для каркаса. Чертежей не было: весь план держал в голове. Выкопал ямы на расчётную глубину, насыпал песчаную подушку, выставил трубы. Из досок собрал опалубку и связал арматурный каркас. Цементный раствор готовил самостоятельно по рецепту из интернета, одолжив бетономешалку у товарища. Готовый раствор возил тачкой метров за тридцать. В итоге залил около 600 кг бетона - работал в одиночку и в отпуске, хотя рабочие звонки так и не прекратились. Залив все фундаменты, оставил их набирать прочность до весны.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-001.jpg",
+                            "width": 1280,
+                            "height": 719,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-002.jpg",
+                            "width": 607,
+                            "height": 1080,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-003.jpg",
+                            "width": 3184,
+                            "height": 5664,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-004.jpg",
+                            "width": 3184,
+                            "height": 5664,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Адаптер для монтировки",
+            "heading_en": "Foundation and Pier",
+            "blocks": [
+                {
+                    "type": "text",
+                    "content": "Пока фундаменты набирали прочность, взялся за изготовление адаптера для установки монтировки SkyWatcher HEQ5 на самодельную колонну. Конструкция основана на двух фланцах от водопроводных труб: нижний приварен к вершине колонны, верхний удерживается четырьмя регулировочными шпильками. Такое решение позволяет точно выставлять высоту и горизонталь без каких-либо подкладок.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-005.jpg",
+                            "width": 1200,
+                            "height": 1600,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-006.jpg",
+                            "width": 1200,
+                            "height": 1600,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-007.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-008.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-009.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-010.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-011.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "content": "Первый же прототип адаптера в тот же вечер примерил на колонну - посадка оказалась точной. Утром следующего дня установил телескоп и проверил вращение монтировки во всех плоскостях: люфтов и заеданий нет, ход плавный. В дальнейшем конструкция несколько раз дорабатывалась - в итоге адаптер стал удобным в ежедневном использовании.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-012.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-013.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-014.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-015.jpg",
+                            "width": 1200,
+                            "height": 1600,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-016.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-017.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-018.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "content": "На оригинальной колонне HEQ5 есть позиционирующий штырь: он ограничивает горизонтальный поворот монтировки и служит ориентиром при полярной юстировке. Воспроизвести его на самодельном адаптере оказалось несложно. Снял монтировку, с помощью компаса точно определил направление на север и нанёс насечку на адаптере. Приварил штырь из металлической арматуры, обрезал до нужной длины и проверил правильность посадки монтировки. После покраски в белый цвет адаптер принял окончательный вид: монтировка устанавливается и снимается быстро, полярная юстировка воспроизводима без дополнительных измерений.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-019.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-020.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-021.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Пол и каркас обсерватории",
+            "heading_en": "The Dome",
+            "blocks": [
+                {
+                    "type": "text",
+                    "content": "Следующий шаг - возведение основания будки обсерватории. К четырём несущим колоннам по периметру приварил металлические уголки, служащие опорой для деревянного каркаса пола. Каркас собрал из мощного деревянного бруса и усилил поперечными рёбрами жёсткости. Ключевое конструктивное решение - виброизоляция: между металлическими уголками и деревянным каркасом установил деревянные прокладки, чтобы вибрация от работы монтировки не передавалась на конструкцию и не влияла на качество астрофотографии.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-022.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-023.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-024.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-025.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-026.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-027.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "content": "Каркас получился тяжёлым и прочным. В процессе сборки несколько раз снимал и подгонял его по месту. Снизу обшил ОСБ-плитой - с этим помог брат, одному было не справиться. Когда каркас наконец встал на место, пол оказался ровным и жёстким.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-028.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-029.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-030.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-031.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "content": "Полость внутри каркаса заполнил пеноблоками: в тот день сильный ветер раскидал их с окрестных строек, и было бы расточительно не воспользоваться этим. Теплоизоляция пола оказалась отличным решением: зимой обсерватория хорошо держит тепло, летом медленнее нагревается. Оба фактора важны для астрофотографии - чем ближе температура внутри к уличной, тем меньше тепловых потоков вблизи оптики и короче время термостабилизации телескопа.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-032.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-033.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-034.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "content": "После монтажа пола вернул на место монтировку и телескоп, подключил камеру, колесо фильтров, гид-телескоп и управляющий компьютер. Пока в течение следующей недели возводился каркас будки, телескоп работал каждую ночь - утром я накрывал его брезентом.",
+                    "content_en": ""
+                }
+            ]
+        },
+        {
+            "heading": "Возведение стен и крыши обсерватории",
+            "heading_en": "",
+            "blocks": [
+                {
+                    "type": "text",
+                    "content": "Проектной документации не было: все размеры и пропорции держал в голове, подгоняя их прямо по месту. Ориентир был простой - представить себя на месте телескопа и продумать всё, что должно быть в зоне досягаемости. Каркас и стены обсерватории возвёл за два дня, работая в одиночку.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-035.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-036.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-037.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-038.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-039.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "content": "На изготовление двери ушёл почти целый день - делал дверную коробку впервые в жизни. После просмотра нескольких видеоинструкций собрал коробку из деревянного бруса, обшил её ОСБ-плитой и навесил на петли. Дверь получилась надёжной и открывается без перекосов.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-040.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-041.jpg",
+                            "width": 1200,
+                            "height": 1600,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-042.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-043.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-044.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-045.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-046.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "content": "После стен сразу приступил к откатной крыше: стоял май, и любой дождь мог залить незащищённый интерьер. Сдвижная конструкция на двух рельсах - оптимальное решение для небольшой обсерватории: крыша полностью открывает небо для наблюдений и убирается за считаные секунды. Для рельсов закупил четырёхметровые металлические уголки.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-047.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-048.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-049.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-050.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-051.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "content": "Уголки обрезал по длине, с одной стороны закрепил саморезами к деревянному каркасу, с другой - приварил к металлическому столбу. Собрал деревянное основание крыши, установил на него ролики и примерил конструкцию. Наиболее ответственный момент - симметричная установка рельсов: малейший перекос приводит к заклиниванию при открывании. С первой попытки получилось точно.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-052.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-053.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-054.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "content": "Каркас крыши собрал из дерева - материала ушло немного, но конструкция получилась тяжёлой. Поднять её на рельсы в одиночку не вышло, поэтому снова позвонил брату.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-055.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-056.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-057.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-058.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-059.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-060.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "content": "Каркас обшил двумя листами ОСБ, обрезанными по размеру. Поверх уложил металлический профлист зеркальной стороной к солнцу: отражение снижает нагрев внутреннего пространства обсерватории и сокращает время термостабилизации оптики перед съёмкой.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-061.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-062.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-063.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-064.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Внутренняя отделка и финальные штрихи",
+            "heading_en": "",
+            "blocks": [
+                {
+                    "type": "text",
+                    "content": "Крышу успели установить до первых майских дождей. Оставшиеся пеноблоки пошли в дело: заполнили пространство между каркасом и наружной обшивкой стен, щели задули монтажной пеной. Хорошая теплоизоляция стен критически важна для обсерватории - зимой она удерживает тепло, летом замедляет нагрев и снижает разницу температур между воздухом внутри и снаружи.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-065.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-066.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-066.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-067.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-068.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-069.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "content": "После утепления приступил к финальной отделке интерьера. Внутренние стены обшил остатками ОСБ-плит - стык в стык, без зазоров. Интерьер получился аккуратным и функциональным.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-070.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-071.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-072.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-073.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-074.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "content": "Отдельная задача - ветровая защита откатной крыши. Несмотря на значительный вес, в открытом положении парусность крыши велика: при сильном порыве ветра её могло бы сдёрнуть с рельсов. Изготовил самодельные шторм-захваты - металлические уголки, которые фиксируют крышу с обоих бортов и не позволяют ей подниматься.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-075.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-076.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-077.jpg",
+                            "width": 1200,
+                            "height": 1600,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-078.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-079.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-080.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "content": "Оставшиеся пеноблоки уложил на крышу изнутри: перегрев кровли летом значительно увеличивает время термостабилизации оптики. Обрезки заложил в зазоры между колонной и каркасом будки - закрыл пути для птиц и мелких животных. На этом строительство было завершено. Самодельная обсерватория обошлась значительно дешевле готовых аналогов и с первого же сезона работает в штатном режиме.",
+                    "content_en": ""
+                },
+                {
+                    "type": "gallery",
+                    "photos": [
+                        {
+                            "url": "history/construction/construction-081.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-082.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-083.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-084.jpg",
+                            "width": 1600,
+                            "height": 1200,
+                            "caption": "",
+                            "caption_en": ""
+                        },
+                        {
+                            "url": "history/construction/construction-085.jpg",
+                            "width": 5792,
+                            "height": 3851,
+                            "caption": "",
+                            "caption_en": ""
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

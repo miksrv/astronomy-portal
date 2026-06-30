@@ -4,8 +4,9 @@ import { Button } from 'simple-react-ui-kit'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, HOST_IMG, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, HOST_IMG, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable, VisibilityChart } from '@/components/common'
 import { ObjectDescription, ObjectFilesTable, ObjectHeader, ObjectsCloud } from '@/components/pages/objects'
 import { removeMarkdown, sliceText } from '@/utils/strings'
@@ -35,6 +36,34 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 
     const allObjectsNames = useMemo(() => objectsList?.map(({ name }) => name), [objectsList])
 
+    const articleSchema = useMemo(
+        () => ({
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            '@id': `${SITE_LINK}objects/${objectName}`,
+            headline: objectData?.title || objectName,
+            description: sliceText(removeMarkdown(objectData?.description), 160),
+            image: objectData?.image ? `${HOST_IMG}${objectData.image}` : undefined,
+            url: `${SITE_LINK}objects/${objectName}`,
+            dateModified: objectData?.updated?.date,
+            author: {
+                '@type': 'Organization',
+                name: 'Смотри на звёзды',
+                url: SITE_LINK
+            },
+            publisher: {
+                '@type': 'Organization',
+                name: 'Смотри на звёзды',
+                url: SITE_LINK,
+                logo: {
+                    '@type': 'ImageObject',
+                    url: `${SITE_LINK}android-chrome-192x192.png`
+                }
+            }
+        }),
+        [objectData, objectName]
+    )
+
     return (
         <AppLayout
             canonical={`objects/${objectName}`}
@@ -50,6 +79,10 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 ]
             }}
         >
+            <JsonLdScript
+                scriptKey={'object-article'}
+                data={articleSchema}
+            />
             <AppToolbar
                 title={objectData?.title || objectName}
                 currentPage={objectData?.title || objectName}

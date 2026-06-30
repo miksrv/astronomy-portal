@@ -1,5 +1,4 @@
 import React from 'react'
-import { Container } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -19,7 +18,7 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({ photosList }) => {
     const { t } = useTranslation()
 
     return (
-        <Container className={styles.photoGrid}>
+        <div className={styles.photoGrid}>
             {photosList && !photosList.length && (
                 <div className={'notFoundContainer'}>
                     {t('components.pages.photos.photo-grid.no-results', 'По вашему запросу ничего не найдено')}
@@ -57,6 +56,6 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({ photosList }) => {
                     </div>
                 </Link>
             ))}
-        </Container>
+        </div>
     )
 }

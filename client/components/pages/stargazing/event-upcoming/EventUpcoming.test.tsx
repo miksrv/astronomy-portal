@@ -5,6 +5,7 @@ import utc from 'dayjs/plugin/utc'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 
 import { API, ApiModel, useAppSelector } from '@/api'
+import { getSecondsUntilUTCDate } from '@/utils/dates'
 
 import { EventUpcoming } from './EventUpcoming'
 
@@ -12,9 +13,11 @@ dayjs.extend(utc)
 
 jest.mock('@/api', () => ({
     API: {
-        useEventsCancelRegistrationPostMutation: jest.fn()
+        useEventsCancelRegistrationPostMutation: jest.fn(),
+        util: { invalidateTags: jest.fn() }
     },
-    useAppSelector: jest.fn()
+    useAppSelector: jest.fn(),
+    useAppDispatch: () => jest.fn()
 }))
 
 jest.mock('next-i18next', () => ({
@@ -23,8 +26,9 @@ jest.mock('next-i18next', () => ({
 
 jest.mock('@/utils/dates', () => ({
     formatUTCDate: () => '1 January, 2025',
+    getHumanTimeFromSec: () => '8 минут 20 секунд',
     getLocalizedTimeFromSec: () => '1 день',
-    getSecondsUntilUTCDate: () => undefined
+    getSecondsUntilUTCDate: jest.fn(() => undefined)
 }))
 
 jest.mock('@/components/common', () => ({
@@ -54,6 +58,7 @@ beforeEach(() => {
     jest.clearAllMocks()
     ;(API.useEventsCancelRegistrationPostMutation as jest.Mock).mockReturnValue([mockCancelMutate, defaultCancelState])
     ;(useAppSelector as jest.Mock).mockReturnValue({ id: 'user-1', name: 'Test User' })
+    ;(getSecondsUntilUTCDate as jest.Mock).mockReturnValue(undefined)
 })
 
 describe('EventUpcoming', () => {
@@ -107,6 +112,26 @@ describe('EventUpcoming', () => {
         await waitFor(() => {
             expect(mockCancelMutate).toHaveBeenCalledWith({ eventId: 'event-1' })
         })
+    })
+
+    it('shows the awaiting-payment panel with a return-to-payment button for a pending booking', () => {
+        const pendingEvent: ApiModel.Event = {
+            ...baseEvent,
+            bookingStatus: 'pending',
+            payment: {
+                orderId: 'order-1',
+                formUrl: 'https://pay.example/form',
+                // Positive remaining time keeps the booking inside its payment hold window.
+                expiresInSeconds: 600
+            }
+        }
+
+        render(<EventUpcoming event={pendingEvent} />)
+
+        expect(screen.getByText('Бронь ожидает оплаты')).toBeDefined()
+        expect(screen.getByText('Вернуться к оплате')).toBeDefined()
+        // A pending (unpaid) hold must NOT read as a confirmed registration.
+        expect(screen.queryByText('Вы зарегистрированы')).toBeNull()
     })
 
     it('does not update registered state when cancel API call fails (BUG-05 regression)', async () => {

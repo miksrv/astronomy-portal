@@ -7,6 +7,7 @@ import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
+import { EventTicket } from '@/components/pages/stargazing/event-ticket'
 import { formatUTCDate } from '@/utils/dates'
 
 import styles from './styles.module.sass'
@@ -94,6 +95,12 @@ export const UpcomingEventCard: React.FC<UpcomingEventCardProps> = ({ event }) =
                                 </li>
                             )}
                         </ul>
+                    )}
+
+                    {event.bookedId && (
+                        <div className={styles.ticketBlock}>
+                            <EventTicket bookingId={event.bookedId} />
+                        </div>
                     )}
 
                     <Button
