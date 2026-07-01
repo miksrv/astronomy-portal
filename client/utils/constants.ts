@@ -2,9 +2,16 @@ export const LOCAL_STORAGE_KEY = 'astro'
 
 export const LOCAL_STORAGE = {
     AUTH_TOKEN: 'token',
+    COOKIE_CONSENT: 'cookieConsent',
     LOCALE: 'locale',
     RETURN_PATH: 'returnPath'
 }
+
+// sessionStorage key: the last submitted event-registration form data, saved
+// right before redirecting to the bank so a declined/failed payment can be
+// retried (new order) from the /stargazing/payment page without re-filling
+// the booking form. Cleared once no longer needed.
+export const STARGAZING_RETRY_STORAGE_KEY = 'astro:lastBookingAttempt'
 
 export const SITE_LINK = process.env.NEXT_PUBLIC_SITE_LINK
 
