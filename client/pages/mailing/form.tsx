@@ -170,8 +170,8 @@ const MailingFormPage: NextPage<object> = () => {
 
                 <Select<string>
                     className={styles.formGroup}
-                    label={t('mailingAudience', 'Аудитория')}
-                    placeholder={t('mailingAudience', 'Аудитория')}
+                    label={t('pages.mailing.field-audience', 'Аудитория')}
+                    placeholder={t('pages.mailing.field-audience', 'Аудитория')}
                     loading={audiencesLoading}
                     disabled={!isDraft || isBusy}
                     value={audienceValue}

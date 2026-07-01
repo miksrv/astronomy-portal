@@ -114,7 +114,7 @@ const MailingStatsPage: NextPage<object> = () => {
                                 <dd>{data.subject}</dd>
                                 {data.audienceType !== undefined && (
                                     <>
-                                        <dt>{t('mailingAudience', 'Аудитория')}</dt>
+                                        <dt>{t('pages.mailing.detail-audience', 'Аудитория')}</dt>
                                         <dd>
                                             {router.locale === 'ru' ? data.audienceLabelRu : data.audienceLabelEn}
                                             {data.audienceCount !== undefined && ` (${String(data.audienceCount)})`}
