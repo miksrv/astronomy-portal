@@ -209,6 +209,32 @@ final class AlfaBankClientTest extends CIUnitTestCase
         $this->assertSame('pending', $this->client->mapStatus(null));
     }
 
+    // --- extractFailureReason() ---
+
+    public function testExtractFailureReasonReturnsActionCodeAndDescription(): void
+    {
+        $reason = $this->client->extractFailureReason((object) [
+            'actionCode'            => -2005,
+            'actionCodeDescription' => 'Операция отклонена. Обратитесь в банк, выпустивший карту.',
+        ]);
+
+        $this->assertSame('-2005', $reason['code']);
+        $this->assertSame('Операция отклонена. Обратитесь в банк, выпустивший карту.', $reason['message']);
+    }
+
+    public function testExtractFailureReasonNullWhenNoDetail(): void
+    {
+        $this->assertNull($this->client->extractFailureReason((object) ['orderStatus' => 6]));
+    }
+
+    public function testExtractFailureReasonHandlesMissingDescription(): void
+    {
+        $reason = $this->client->extractFailureReason((object) ['actionCode' => -2005]);
+
+        $this->assertSame('-2005', $reason['code']);
+        $this->assertNull($reason['message']);
+    }
+
     // --- parseRegisterResponse() ---
 
     public function testParseRegisterResponseNullStaysNull(): void
