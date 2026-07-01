@@ -19,6 +19,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Files\File;
+use Config\Database;
 use Config\Services;
 
 //use Longman\TelegramBot\Exception\TelegramException;
@@ -80,6 +81,7 @@ class Events extends ResourceController
                 ->selectSum('adults')
                 // ->selectSum('children')
                 ->where('event_id', $eventData->id)
+                ->whereIn('status', ['pending', 'confirmed'])
                 ->first();
 
             // $currentTickets = $currentTickets->adults + $currentTickets->children;
@@ -93,8 +95,12 @@ class Events extends ResourceController
                 $eventData->bookingStatus = $bookedEvents->status;
                 $eventData->canceled      = !empty($bookedEvents->deleted_at);
                 $eventData->members       = [
-                    'adults'   => $bookedEvents->adults ?? 0,
-                    'children' => $bookedEvents->children ?? 0
+                    'adults'       => $bookedEvents->adults ?? 0,
+                    'children'     => $bookedEvents->children ?? 0,
+                    // Exposed so a declined/expired payment can be retried
+                    // (new order for the same resurrected booking) without
+                    // re-entering the children's ages.
+                    'childrenAges' => $bookedEvents->children_ages ?? []
                 ];
 
                 // A pending booking holds the seat until its payment expires.
@@ -767,12 +773,6 @@ class Events extends ResourceController
 
             $eventUsersModel = new EventsUsersModel();
 
-            // Check that user not already registered at this event
-            // withDeleted()
-            if ($eventUsersModel->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])->first()) {
-                return $this->failValidationErrors(['error' => lang('Events.alreadyRegistered')]);
-            }
-
             // Check registration start and end dates
             $currentTime   = new Time('now');
             $timeDiffStart = $currentTime->difference($event->registration_start);
@@ -785,18 +785,6 @@ class Events extends ResourceController
             // Release seats held by expired, unpaid reservations before counting.
             $paymentLibrary = new PaymentLibrary();
             $eventUsersModel->releaseExpiredPendingByPaymentIds($paymentLibrary->releaseExpired());
-
-            // Check available tickets (adults occupy the bookable slots).
-            $currentTickets = $eventUsersModel
-                ->selectSum('adults')
-                ->where('event_id', $input['eventId'])
-                ->first();
-
-            $currentTickets = (int) $currentTickets->adults;
-
-            if ($currentTickets >= (int) $event->max_tickets) {
-                return $this->failValidationErrors(['error' => lang('Events.noTicketsAvailable')]);
-            }
 
             // Persist (or refresh) the user's profile name/phone.
             $userModel  = new UsersModel();
@@ -820,53 +808,102 @@ class Events extends ResourceController
             // column, so `$event->ticket_price ?? 0` would coalesce to 0 and send
             // every paid booking down the free branch.
             $ticketPrice  = (float) ($event->ticketPrice ?? 0);
+            $bookingStatus = $ticketPrice <= 0 ? 'confirmed' : 'pending';
 
-            // Free event — confirm the booking immediately, no payment required.
-            if ($ticketPrice <= 0) {
-                $eventUsersModel->insert([
-                    'event_id'      => $input['eventId'],
-                    'user_id'       => $this->session->user->id,
-                    'adults'        => $input['adults'],
-                    'children'      => $input['children'],
-                    'children_ages' => json_encode($childrenAges),
-                    'status'        => 'confirmed',
-                ]);
+            // Serialize concurrent booking attempts for the same event: without
+            // this lock, two requests (a double-submit, or two different users
+            // going for the last seat) could both pass the "already
+            // registered" / "seats available" checks below before either
+            // commits its INSERT, producing a duplicate booking or overselling
+            // the last seat.
+            $db = Database::connect();
+            $db->transStart();
 
-                $booking = $eventUsersModel
-                    ->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])
-                    ->first();
-
-                if ($booking) {
-                    $this->queueTicketEmail(
-                        $booking,
-                        $event,
-                        $this->session->user->email ?? null,
-                        $this->session->user->name ?? null,
-                        $this->session->user->locale ?? null
-                    );
-                }
-
-                return $this->respond([
-                    'result'    => true,
-                    'message'   => lang('Events.bookingSuccess'),
-                    'bookingId' => $booking->id ?? null,
-                ]);
+            // SQLite (used by the test suite) doesn't support FOR UPDATE; the
+            // lock is only meaningful against the real MySQLi/MariaDB backend.
+            if (in_array($db->DBDriver, ['MySQLi', 'Postgre', 'OCI8'], true)) {
+                $db->query('SELECT id FROM events WHERE id = ? FOR UPDATE', [$input['eventId']]);
             }
 
-            // Paid event — hold the seat as pending and register an acquiring order.
-            $eventUsersModel->insert([
+            // A previous attempt for this (event, user) that ended in a
+            // declined/expired payment is kept as status = 'failed' (not
+            // soft-deleted) so it can be resurrected here instead of piling
+            // up a new row per retry. 'pending'/'confirmed' means a real,
+            // still-active registration — block those as already registered.
+            $existingBooking = $eventUsersModel
+                ->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])
+                ->first();
+
+            if ($existingBooking && $existingBooking->status !== 'failed') {
+                $db->transComplete();
+
+                return $this->failValidationErrors(['error' => lang('Events.alreadyRegistered')]);
+            }
+
+            // Check available tickets (adults occupy the bookable slots; a
+            // 'failed' row from a past attempt is excluded, it holds no seat).
+            $currentTickets = $eventUsersModel
+                ->selectSum('adults')
+                ->where('event_id', $input['eventId'])
+                ->whereIn('status', ['pending', 'confirmed'])
+                ->first();
+
+            $currentTickets = (int) $currentTickets->adults;
+
+            if ($currentTickets >= (int) $event->max_tickets) {
+                $db->transComplete();
+
+                return $this->failValidationErrors(['error' => lang('Events.noTicketsAvailable')]);
+            }
+
+            $bookingFields = [
                 'event_id'      => $input['eventId'],
                 'user_id'       => $this->session->user->id,
                 'adults'        => $input['adults'],
                 'children'      => $input['children'],
                 'children_ages' => json_encode($childrenAges),
-                'status'        => 'pending',
-            ]);
+                'status'        => $bookingStatus,
+                'payment_id'    => null,
+            ];
 
-            // The booking is unique per (event, user); fetch the row we just created.
-            $booking   = $eventUsersModel
-                ->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])
-                ->first();
+            if ($existingBooking) {
+                $eventUsersModel->update($existingBooking->id, $bookingFields);
+                $booking = $eventUsersModel->find($existingBooking->id);
+            } else {
+                $eventUsersModel->insert($bookingFields);
+
+                // The booking is unique per (event, user); fetch the row we just created.
+                $booking = $eventUsersModel
+                    ->where(['event_id' => $input['eventId'], 'user_id' => $this->session->user->id])
+                    ->first();
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false || !$booking) {
+                return $this->failServerError(lang('General.serverError'));
+            }
+
+            // Free event — confirm the booking immediately, no payment required.
+            if ($bookingStatus === 'confirmed') {
+                $this->queueTicketEmail(
+                    $booking,
+                    $event,
+                    $this->session->user->email ?? null,
+                    $this->session->user->name ?? null,
+                    $this->session->user->locale ?? null
+                );
+
+                return $this->respond([
+                    'result'    => true,
+                    'message'   => lang('Events.bookingSuccess'),
+                    'bookingId' => $booking->id,
+                ]);
+            }
+
+            // Paid event — the seat is already held as pending; register an
+            // acquiring order for it (outside the lock — this is an external
+            // HTTP call to the gateway and must not hold a DB row lock).
             $bookingId = $booking->id;
 
             $amountRub     = round((int) $input['adults'] * $ticketPrice, 2);
@@ -883,8 +920,9 @@ class Events extends ResourceController
             );
 
             if ($payment === null) {
-                // Could not start the payment — release the held seat.
-                $eventUsersModel->delete($bookingId);
+                // Could not start the payment — release the held seat, but
+                // keep the row (status = 'failed') so a retry resurrects it.
+                $eventUsersModel->update($bookingId, ['status' => 'failed']);
 
                 return $this->failServerError(lang('Events.paymentFailed'));
             }
@@ -937,13 +975,17 @@ class Events extends ResourceController
                 return $this->failValidationErrors(['error' => lang('Events.notRegistered')]);
             }
 
-            // Check registration start and end dates
-            $currentTime   = new Time('now');
-            $timeDiffStart = $currentTime->difference($event->registration_start);
-            $timeDiffEnd   = $currentTime->difference($event->registration_end);
+            // The registration window only protects confirmed seats. An unpaid
+            // pending hold must always be cancellable — otherwise a stuck
+            // payment can never be released once registration closes.
+            if ($userRegistration->status === 'confirmed') {
+                $currentTime   = new Time('now');
+                $timeDiffStart = $currentTime->difference($event->registration_start);
+                $timeDiffEnd   = $currentTime->difference($event->registration_end);
 
-            if ($timeDiffStart->getSeconds() >= 0 || $timeDiffEnd->getSeconds() <= 0) {
-                return $this->failValidationErrors(['error' => lang('Events.registrationClosed')]);
+                if ($timeDiffStart->getSeconds() >= 0 || $timeDiffEnd->getSeconds() <= 0) {
+                    return $this->failValidationErrors(['error' => lang('Events.registrationClosed')]);
+                }
             }
 
             // Check available tickets
@@ -952,12 +994,20 @@ class Events extends ResourceController
 //                ->where('event_id', $input['eventId'])
 //                ->first();
 
-            // Refund the linked payment (if any, and if paid) before releasing the seat.
+            // Settle the linked payment before releasing the seat: refund it if
+            // already paid, or mark it cancelled if still pending. Marking it
+            // cancelled is a best-effort audit trail — if the customer still
+            // completes payment on an abandoned form afterwards,
+            // reconcileBooking() will auto-refund it since this booking will
+            // already be soft-deleted by then.
             if (!empty($userRegistration->payment_id)) {
-                $payment = (new PaymentsModel())->find($userRegistration->payment_id);
+                $paymentsModel = new PaymentsModel();
+                $payment       = $paymentsModel->find($userRegistration->payment_id);
 
                 if ($payment && $payment->status === 'paid') {
                     (new PaymentLibrary())->refund($payment);
+                } elseif ($payment && in_array($payment->status, ['new', 'pending'], true)) {
+                    $paymentsModel->update($payment->id, ['status' => 'canceled']);
                 }
             }
 
@@ -1163,6 +1213,8 @@ class Events extends ResourceController
                 return $this->failNotFound();
             }
 
+            $this->refundAndNotifyBookings($eventData);
+
             $this->model->delete($id);
 
             return $this->respondDeleted($eventData);
@@ -1170,6 +1222,52 @@ class Events extends ResourceController
             log_message('error', '{exception}', ['exception' => $e]);
 
             return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * Refunds every paid booking and notifies every still-active registrant
+     * before an event is removed. Called from {@see delete()}.
+     *
+     * Best-effort: a failed refund or email is logged, not thrown, so one bad
+     * booking cannot block the deletion. Idempotent — PaymentLibrary::refund()
+     * is a no-op for a payment that isn't 'paid', so re-running this (e.g. a
+     * retried request) will not double-refund.
+     */
+    private function refundAndNotifyBookings(EventEntity $event): void
+    {
+        $bookings = (new EventsUsersModel())
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->where('event_id', $event->id)
+            ->findAll();
+
+        if (empty($bookings)) {
+            return;
+        }
+
+        $paymentsModel  = new PaymentsModel();
+        $paymentLibrary = new PaymentLibrary();
+        $usersModel     = new UsersModel();
+
+        foreach ($bookings as $booking) {
+            if (!empty($booking->payment_id)) {
+                $payment = $paymentsModel->find($booking->payment_id);
+
+                if ($payment && $payment->status === 'paid' && !$paymentLibrary->refund($payment)) {
+                    log_message('error', 'Auto-refund failed for payment {id} on deletion of event {eventId}', [
+                        'id'      => $payment->id,
+                        'eventId' => $event->id,
+                    ]);
+                }
+            }
+
+            $owner = $usersModel->find($booking->user_id);
+
+            $this->queueCancellationEmail(
+                $event,
+                $owner->email ?? null,
+                $owner->locale ?? null
+            );
         }
     }
 
@@ -1323,6 +1421,17 @@ class Events extends ResourceController
 
             $response = ['status' => $status];
 
+            if (in_array($status, ['failed', 'canceled'], true)) {
+                // getVerifiedStatus() persists error_code/error_message to the
+                // DB but doesn't mutate this in-memory entity — re-fetch to
+                // read what was just saved.
+                $refreshed = $paymentLibrary->findByOrderId($input['orderId']);
+
+                if (!empty($refreshed->errorMessage)) {
+                    $response['errorMessage'] = $refreshed->errorMessage;
+                }
+            }
+
             // Expose the booking id so the return page can render the ticket once paid.
             if ($payment->entity_type === 'event_booking') {
                 $response['bookingId'] = $payment->entity_id;
@@ -1379,8 +1488,18 @@ class Events extends ResourceController
     /**
      * Reconciles an event booking with its payment outcome.
      *
-     * Paid → the pending booking is confirmed. Failed/canceled → a still-pending
-     * booking is soft-deleted to free the held seat.
+     * Paid → the pending booking is confirmed (atomically — and only if this
+     * payment is still the booking's active attempt — so a racing webhook
+     * and status poll cannot both send the ticket email). Failed/canceled →
+     * a still-pending booking tied to this exact payment is marked 'failed'
+     * (not soft-deleted), so a retry can resurrect the same row.
+     *
+     * The booking's payment_id may no longer match this payment by the time
+     * a late "paid" outcome arrives — e.g. the customer completed payment on
+     * an abandoned form after the hold expired, after they cancelled, or
+     * after they retried under a new order. There is no seat to honour for
+     * an outdated payment, so it is refunded automatically instead of being
+     * confirmed and emailed as a valid ticket.
      *
      * @param PaymentEntity $payment The payment to reconcile.
      * @param string        $status  Normalised payment status.
@@ -1400,9 +1519,14 @@ class Events extends ResourceController
         }
 
         if ($status === 'paid') {
-            if ($booking->status !== 'confirmed') {
-                $eventUsersModel->update($payment->entity_id, ['status' => 'confirmed']);
+            // Already confirmed by this exact payment — idempotent re-poll or
+            // re-callback. Without this check, every subsequent poll after a
+            // legitimate success would fall through to the refund branch below.
+            if ($booking->status === 'confirmed' && $booking->payment_id === $payment->id) {
+                return;
+            }
 
+            if ($eventUsersModel->confirmIfPending($payment->entity_id, (string) $payment->id)) {
                 // Email the ticket once, on the transition to confirmed.
                 $event = $this->model->find($booking->event_id);
                 $owner = (new UsersModel())->find($booking->user_id);
@@ -1416,6 +1540,21 @@ class Events extends ResourceController
                         $owner->locale ?? null
                     );
                 }
+
+                return;
+            }
+
+            // Could not honour it as a live pending attempt: the booking was
+            // cancelled, its hold already expired, or it was retried under a
+            // newer payment. Refund automatically instead of confirming (or
+            // silently ignoring) a payment that no longer has a seat behind it.
+            $freshPayment = (new PaymentsModel())->find($payment->id) ?? $payment;
+
+            if (!(new PaymentLibrary())->refund($freshPayment)) {
+                log_message('error', 'Auto-refund failed for payment {id} — booking {bookingId} is no longer awaiting it', [
+                    'id'        => $payment->id,
+                    'bookingId' => $payment->entity_id,
+                ]);
             }
 
             return;
@@ -1423,9 +1562,9 @@ class Events extends ResourceController
 
         if (in_array($status, ['failed', 'canceled'], true)
             && $booking->status === 'pending'
-            && empty($booking->deleted_at)
+            && $booking->payment_id === $payment->id
         ) {
-            $eventUsersModel->delete($payment->entity_id);
+            $eventUsersModel->update($payment->entity_id, ['status' => 'failed']);
         }
     }
 }
