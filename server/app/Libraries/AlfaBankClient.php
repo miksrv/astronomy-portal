@@ -190,6 +190,18 @@ class AlfaBankClient implements PaymentGatewayInterface
         return strtoupper(hash_hmac('sha256', $data, $token));
     }
 
+    public function extractFailureReason(object $remote): ?array
+    {
+        if (empty($remote->actionCode) && empty($remote->actionCodeDescription)) {
+            return null;
+        }
+
+        return [
+            'code'    => isset($remote->actionCode) ? (string) $remote->actionCode : null,
+            'message' => isset($remote->actionCodeDescription) ? (string) $remote->actionCodeDescription : null,
+        ];
+    }
+
     public function mapStatus(?int $orderStatus): string
     {
         switch ($orderStatus) {
