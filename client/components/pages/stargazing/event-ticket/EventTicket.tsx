@@ -38,7 +38,7 @@ export const EventTicket: React.FC<EventTicketProps> = ({ bookingId }) => {
     if (isLoading || (!url && !isError)) {
         return (
             <div className={styles.ticketLoader}>
-                <Spinner />
+                <Spinner style={{ width: '32px', height: '32px' }} />
             </div>
         )
     }
@@ -66,8 +66,8 @@ export const EventTicket: React.FC<EventTicketProps> = ({ bookingId }) => {
                 download={`ticket-${bookingId}.png`}
             >
                 <Button
-                    mode={'primary'}
                     size={'medium'}
+                    stretched={true}
                 >
                     {t('components.pages.stargazing.event-ticket.download', 'Скачать билет')}
                 </Button>
