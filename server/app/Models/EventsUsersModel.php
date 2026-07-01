@@ -8,8 +8,13 @@ use App\Entities\EventUserEntity;
  * EventsUsersModel
  *
  * Manages the `events_users` pivot table that records user bookings and
- * check-ins for stargazing events. Supports soft deletes (cancelled bookings)
- * and UUID primary keys generated via the beforeInsert callback.
+ * check-ins for stargazing events. Supports soft deletes (explicit user
+ * cancellation) and UUID primary keys generated via the beforeInsert
+ * callback. A declined/expired payment does NOT soft-delete the row — it
+ * sets status = 'failed' instead, so the same (event, user) row can be
+ * resurrected by a retry rather than accumulating one row per attempt.
+ * Read queries must explicitly exclude 'failed' where it matters (member
+ * lists, statistics, mailing audiences, participant counts).
  */
 class EventsUsersModel extends ApplicationBaseModel
 {
@@ -69,6 +74,7 @@ class EventsUsersModel extends ApplicationBaseModel
                 events_users.created_at, users.name, users.avatar, users.auth_type')
             ->join('users', 'users.id = events_users.user_id', 'left')
             ->where('event_id', $eventId)
+            ->whereIn('events_users.status', ['pending', 'confirmed'])
             ->orderBy('created_at', 'ASC')
             ->findAll();
 
@@ -87,6 +93,7 @@ class EventsUsersModel extends ApplicationBaseModel
                 SUM(events_users.adults) as total_adults,
                 SUM(events_users.children) as total_children')
             ->where('event_id', $eventId)
+            ->whereIn('status', ['pending', 'confirmed'])
             ->findAll();
 
         return $eventUsersQuery[0] ?: null;
@@ -122,6 +129,7 @@ class EventsUsersModel extends ApplicationBaseModel
             ->join('users u', 'u.id = eu.user_id', 'left')
             ->where('eu.event_id', $eventId)
             ->where('eu.deleted_at IS NULL')
+            ->whereIn('eu.status', ['pending', 'confirmed'])
             ->get()
             ->getRow();
 
@@ -139,6 +147,7 @@ class EventsUsersModel extends ApplicationBaseModel
             ->join('users u', 'u.id = eu.user_id', 'left')
             ->where('eu.event_id', $eventId)
             ->where('eu.deleted_at IS NULL')
+            ->whereIn('eu.status', ['pending', 'confirmed'])
             ->where('u.birthday IS NOT NULL')
             ->groupBy('age_group')
             ->get()
@@ -163,6 +172,7 @@ class EventsUsersModel extends ApplicationBaseModel
             ->select('eu.created_at AS reg_datetime')
             ->where('eu.event_id', $eventId)
             ->where('eu.deleted_at IS NULL')
+            ->whereIn('eu.status', ['pending', 'confirmed'])
             ->orderBy('reg_datetime', 'ASC')
             ->get()
             ->getResultArray();
@@ -206,14 +216,15 @@ class EventsUsersModel extends ApplicationBaseModel
                 event_id,
                 SUM(events_users.adults) as total_adults,
                 SUM(events_users.children) as total_children')
+            ->whereIn('status', ['pending', 'confirmed'])
             ->groupBy('event_id')
             ->findAll();
     }
 
     /**
      * Returns the total number of registered participants (adults + children)
-     * across all events, excluding cancelled (soft-deleted) bookings. Used for
-     * aggregate public statistics.
+     * across all events, excluding cancelled (soft-deleted) and failed
+     * (declined/expired payment) bookings. Used for aggregate public statistics.
      *
      * @return int Total participants.
      */
@@ -222,6 +233,7 @@ class EventsUsersModel extends ApplicationBaseModel
         $row = $this->builder()
             ->select('SUM(adults + children) as total')
             ->where('deleted_at', null)
+            ->whereIn('status', ['pending', 'confirmed'])
             ->get()
             ->getRow();
 
@@ -245,6 +257,7 @@ class EventsUsersModel extends ApplicationBaseModel
             ->join('users u', 'eu.user_id = u.id')
             ->where('eu.event_id', $eventId)
             ->where('eu.deleted_at IS NULL')
+            ->whereIn('eu.status', ['pending', 'confirmed'])
             ->where('u.email IS NOT NULL')
             ->where("u.email != ''")
             ->where('u.deleted_at IS NULL')
@@ -271,6 +284,7 @@ class EventsUsersModel extends ApplicationBaseModel
             ->join('users u', 'eu.user_id = u.id')
             ->where('e.id', $eventId)
             ->where('eu.deleted_at IS NULL')
+            ->whereIn('eu.status', ['pending', 'confirmed'])
             ->where('u.email IS NOT NULL')
             ->where("u.email != ''")
             ->where('u.deleted_at IS NULL')
@@ -296,6 +310,7 @@ class EventsUsersModel extends ApplicationBaseModel
             ->join('events_users eu', 'eu.event_id = e.id')
             ->join('users u', 'eu.user_id = u.id')
             ->where('eu.deleted_at IS NULL')
+            ->whereIn('eu.status', ['pending', 'confirmed'])
             ->where('u.email IS NOT NULL')
             ->where("u.email != ''")
             ->where('u.deleted_at IS NULL')
@@ -312,9 +327,12 @@ class EventsUsersModel extends ApplicationBaseModel
     }
 
     /**
-     * Soft-deletes pending bookings whose payment hold has expired, freeing
-     * their seats. Called during booking/availability checks so abandoned,
-     * unpaid reservations do not block other users indefinitely.
+     * Marks pending bookings whose payment hold has expired as 'failed',
+     * freeing their seats (excluded from capacity/audience/statistics
+     * queries). The row is kept — not soft-deleted — so a later booking
+     * attempt for the same (event, user) resurrects it instead of piling up
+     * a new row per attempt. Called during booking/availability checks so
+     * abandoned, unpaid reservations do not block other users indefinitely.
      *
      * @param array<string> $paymentIds Ids of expired, unpaid payments.
      * @return void
@@ -327,7 +345,40 @@ class EventsUsersModel extends ApplicationBaseModel
 
         $this->whereIn('payment_id', $paymentIds)
             ->where('status', 'pending')
-            ->delete();
+            ->set('status', 'failed')
+            ->update();
+    }
+
+    /**
+     * Atomically transitions a booking from 'pending' to 'confirmed', but
+     * only if `$paymentId` is still its current payment_id.
+     *
+     * The gateway callback and the client's payment-status poll can both race
+     * to reconcile the same payment; guarding the UPDATE with `WHERE status =
+     * 'pending'` means only the call that actually performs the transition
+     * gets `true` back, so the caller can safely gate a one-time side effect
+     * (e.g. sending the ticket email) on the return value.
+     *
+     * The payment_id match additionally guards against a *stale* payment: if
+     * the booking was retried since (a new payment_id set on the same row —
+     * see {@see Events::booking()}), a late "paid" signal from the earlier,
+     * superseded payment must not confirm a booking attempt it was never
+     * actually part of.
+     *
+     * @param string $id        Booking (events_users) id.
+     * @param string $paymentId The payment id being reconciled.
+     * @return bool True when this call performed the transition.
+     */
+    public function confirmIfPending(string $id, string $paymentId): bool
+    {
+        $this->builder()
+            ->where('id', $id)
+            ->where('status', 'pending')
+            ->where('payment_id', $paymentId)
+            ->where('deleted_at', null)
+            ->update(['status' => 'confirmed']);
+
+        return $this->db->affectedRows() > 0;
     }
 
     /**
