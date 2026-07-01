@@ -176,7 +176,11 @@ class PaymentLibrary
             isset($remote->orderStatus) ? (int) $remote->orderStatus : null
         );
 
-        $this->applyStatus($payment, $status);
+        $failureReason = in_array($status, ['failed', 'canceled'], true)
+            ? $this->gateway->extractFailureReason($remote)
+            : null;
+
+        $this->applyStatus($payment, $status, $failureReason);
 
         return $status;
     }
@@ -250,9 +254,12 @@ class PaymentLibrary
     }
 
     /**
-     * Persists a normalised status (and paid_at on first transition to paid).
+     * Persists a normalised status (and paid_at on first transition to paid,
+     * or error_code/error_message on first transition to failed/canceled).
+     *
+     * @param array{code: string|null, message: string|null}|null $failureReason
      */
-    private function applyStatus(PaymentEntity $payment, string $status): void
+    private function applyStatus(PaymentEntity $payment, string $status, ?array $failureReason = null): void
     {
         if ($payment->status === $status) {
             return;
@@ -262,6 +269,16 @@ class PaymentLibrary
 
         if ($status === 'paid' && empty($payment->paid_at)) {
             $update['paid_at'] = (new Time('now'))->toDateTimeString();
+        }
+
+        if ($failureReason !== null) {
+            if ($failureReason['code'] !== null) {
+                $update['error_code'] = $failureReason['code'];
+            }
+
+            if ($failureReason['message'] !== null) {
+                $update['error_message'] = $failureReason['message'];
+            }
         }
 
         $this->model->update($payment->id, $update);
