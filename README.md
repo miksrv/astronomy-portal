@@ -248,10 +248,13 @@ yarn build
 | `payment.gateway` | Active acquiring gateway implementation | `alfabank` |
 | `payment.currency` | ISO 4217 numeric currency code (`810` = RUB) | `810` |
 | `payment.sessionTimeoutSecs` | Order lifetime / unpaid seat-hold TTL, in seconds | `1200` |
+| `payment.alfabank.environment` | `'test'` to use the `payment.alfabank.test.*` block below, anything else uses production | `production` |
 | `payment.alfabank.userName` | Alfa-Bank API login (usually ends with `-api`) | — |
 | `payment.alfabank.password` | Alfa-Bank API password | — |
-| `payment.alfabank.gatewayUrl` | Alfa-Bank REST base URL (test / production) | `https://web.rbsuat.com/ab/rest/` |
+| `payment.alfabank.token` | Payment token; preferred over `userName`/`password` when set (required for an "r-login" contract). Not used by `refund.do`, which always needs `userName`/`password` | — |
+| `payment.alfabank.gatewayUrl` | Alfa-Bank REST base URL (production) | `https://payment.alfabank.ru/payment/rest/` |
 | `payment.alfabank.callbackToken` | Symmetric token for HMAC callback verification | — |
+| `payment.alfabank.test.*` | Same keys as above (`userName`/`password`/`token`/`gatewayUrl`/`callbackToken`), used when `payment.alfabank.environment = 'test'` | `gatewayUrl`: `https://alfa.rbsuat.com/payment/rest/` |
 | `database.*.hostname` | DB host | `127.0.0.1` |
 | `database.*.port` | DB port | `3308` |
 | `database.*.database` | DB name | `db` |
@@ -332,27 +335,37 @@ Stargazing events can charge a per-event ticket price (set in the event admin fo
 
 The integration is gateway-agnostic (`PaymentGatewayInterface` → `AlfaBankClient` → `PaymentLibrary` in `server/app/Libraries/`); adding another provider is a single new class.
 
-**1. Set the environment variables** in `server/.env` (see the [Backend Environment Variables](#backend-environment-variables) table for the full list):
+**1. Set the environment variables** in `server/.env` (see the [Backend Environment Variables](#backend-environment-variables) table for the full list). `payment.alfabank.environment` switches between two independent credential/URL sets — `test.*` (sandbox/UAT) and the bare `payment.alfabank.*` keys (production):
 
 ```dotenv
 payment.gateway                = 'alfabank'
 payment.currency               = '810'        # RUB
 payment.sessionTimeoutSecs     = 1200          # how long an unpaid seat is held
 
+payment.alfabank.environment   = 'production'  # or 'test' to use the block below
+
 payment.alfabank.userName      = ''            # API login from the cabinet (ends with -api)
 payment.alfabank.password      = ''            # API password
-# Test gateway:  https://web.rbsuat.com/ab/rest/
-# Production:    https://payment.alfabank.ru/payment/rest/
-payment.alfabank.gatewayUrl    = 'https://web.rbsuat.com/ab/rest/'
+payment.alfabank.token         = ''            # preferred over userName/password when set (required for an "r-login" contract); NOT used by refund.do, which always needs userName/password
+payment.alfabank.gatewayUrl    = 'https://payment.alfabank.ru/payment/rest/'
 payment.alfabank.callbackToken = ''            # symmetric token (see step 3)
+
+# Sandbox/UAT — same keys, used only when payment.alfabank.environment = 'test'.
+# gatewayUrl is Alfa-Bank's public rbsuat sandbox host (test cards, no real
+# money); userName/password/token still come from the bank/integrator.
+payment.alfabank.test.userName      = ''
+payment.alfabank.test.password      = ''
+payment.alfabank.test.token         = ''
+payment.alfabank.test.gatewayUrl    = 'https://alfa.rbsuat.com/payment/rest/'
+payment.alfabank.test.callbackToken = ''
 
 # Must point to the public frontend URL — used to build the payment return URL:
 app.siteUrl                    = 'https://astro.miksoft.pro'
 ```
 
-**2. Get the API credentials.** In the Alfa-Bank merchant cabinet, create/obtain the API user (login usually ends with `-api`) and its password, and put them in `payment.alfabank.userName` / `payment.alfabank.password`.
+**2. Get the API credentials.** In the Alfa-Bank merchant cabinet (or from your acquiring integrator, if you're onboarded through one), create/obtain the API user (login usually ends with `-api`) and its password, and put them in `payment.alfabank.userName` / `payment.alfabank.password` (production) or the matching `payment.alfabank.test.*` keys (sandbox — same request, just ask for sandbox/UAT credentials).
 
-**3. Enable signed callbacks.** In the cabinet, set the callback signature type to **Symmetric**, generate the **callback token**, and copy it into `payment.alfabank.callbackToken`. The backend verifies every callback with HMAC-SHA256 and rejects unsigned/forged ones.
+**3. Enable signed callbacks.** In the cabinet, set the callback signature type to **Symmetric**, generate the **callback token**, and copy it into `payment.alfabank.callbackToken` (or `payment.alfabank.test.callbackToken` for sandbox). The backend verifies every callback with HMAC-SHA256 and rejects unsigned/forged ones. Without a real, publicly reachable callback URL (e.g. testing from `localhost`), leave this blank — the app still reconciles payments by polling (`/events/payment/status`), just without the async webhook.
 
 **4. Register the callback URL** in the cabinet, pointing to the **backend (API)** host:
 
@@ -366,9 +379,7 @@ https://<your-api-host>/events/payment/callback
 https://<your-frontend-host>/stargazing/payment
 ```
 
-**6. Choose the gateway URL.** Use `https://web.rbsuat.com/ab/rest/` for testing (Alfa-Bank's test gateway, with their test cards) and switch `payment.alfabank.gatewayUrl` to `https://payment.alfabank.ru/payment/rest/` for production.
-
-**7. Apply migrations** (see [Database Migrations](#database-migrations)) and restart the API.
+**6. Apply migrations** (see [Database Migrations](#database-migrations)) and restart the API.
 
 > Reference: Alfa-Bank REST API — <https://ecom.alfabank.ru/assets/instructions/merchantManual/pages/index/rest.html>
 
