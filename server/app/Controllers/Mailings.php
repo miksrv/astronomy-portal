@@ -175,7 +175,7 @@ class Mailings extends ResourceController
             'subject'          => 'required|string|max_length[255]',
             'content'          => 'required|string',
             'audienceType'     => 'if_exist|in_list[all,event]',
-            'audienceEventId'  => 'if_exist|string|max_length[15]',
+            'audienceEventId'  => 'if_exist|permit_empty|string|max_length[15]',
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -250,7 +250,7 @@ class Mailings extends ResourceController
             'subject'         => 'if_exist|string|max_length[255]',
             'content'         => 'if_exist|string',
             'audienceType'    => 'if_exist|in_list[all,event]',
-            'audienceEventId' => 'if_exist|string|max_length[15]',
+            'audienceEventId' => 'if_exist|permit_empty|string|max_length[15]',
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
