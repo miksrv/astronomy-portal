@@ -5,9 +5,10 @@ export const Button: React.FC<
         loading?: boolean
         mode?: string
         variant?: string
+        label?: string
     }
-> = ({ children, loading, mode: _mode, variant: _variant, ...props }) => (
-    <button {...props}>{loading ? 'Loading...' : children}</button>
+> = ({ children, loading, mode: _mode, variant: _variant, label, ...props }) => (
+    <button {...props}>{loading ? 'Loading...' : (label ?? children)}</button>
 )
 
 export const Input: React.FC<{
