@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { useRouter } from 'next/router'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 
 import { API } from '@/api'
 // NOTE: the page lives under pages/ (a Next route), so its test is kept here
@@ -11,6 +11,7 @@ import StargazingPaymentPage from '@/pages/stargazing/payment'
 jest.mock('@/api', () => ({
     API: {
         useEventPaymentStatusMutation: jest.fn(),
+        useEventsRegistrationPostMutation: jest.fn(),
         util: { getRunningQueriesThunk: jest.fn() }
     },
     setLocale: jest.fn(),
@@ -53,13 +54,16 @@ jest.mock('@/components/common', () => ({
 }))
 
 const mockTrigger = jest.fn()
+const mockRetryBooking = jest.fn()
 const mockPush = jest.fn()
 
 const resolveStatus = (status: string) => ({ unwrap: () => Promise.resolve({ status }) })
 
 beforeEach(() => {
     jest.clearAllMocks()
+    sessionStorage.clear()
     ;(API.useEventPaymentStatusMutation as jest.Mock).mockReturnValue([mockTrigger, {}])
+    ;(API.useEventsRegistrationPostMutation as jest.Mock).mockReturnValue([mockRetryBooking, { isLoading: false }])
     ;(useRouter as jest.Mock).mockReturnValue({
         isReady: true,
         push: mockPush,
@@ -104,5 +108,34 @@ describe('StargazingPaymentPage', () => {
 
         expect(await screen.findByText('Оплата не прошла')).toBeDefined()
         expect(mockTrigger).not.toHaveBeenCalled()
+    })
+
+    it('does not show the retry button when no attempt was saved', async () => {
+        mockTrigger.mockReturnValue(resolveStatus('failed'))
+
+        render(<StargazingPaymentPage />)
+
+        await screen.findByText('Оплата не прошла')
+
+        expect(screen.queryByText('Попробовать снова')).toBeNull()
+    })
+
+    it('retries with the saved attempt data and redirects to the new payment form', async () => {
+        mockTrigger.mockReturnValue(resolveStatus('failed'))
+
+        const savedAttempt = { adults: 2, children: 0, eventId: 'event-1', name: 'Ivan' }
+        sessionStorage.setItem('astro:lastBookingAttempt', JSON.stringify(savedAttempt))
+
+        mockRetryBooking.mockReturnValue({
+            unwrap: () => Promise.resolve({ payment: { formUrl: 'https://pay/new', orderId: 'order-2' }, result: true })
+        })
+
+        render(<StargazingPaymentPage />)
+
+        const retryButton = await screen.findByText('Попробовать снова')
+
+        fireEvent.click(retryButton)
+
+        await waitFor(() => expect(mockRetryBooking).toHaveBeenCalledWith(savedAttempt))
     })
 })

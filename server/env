@@ -1,37 +1,33 @@
 #--------------------------------------------------------------------
 # Example Environment Configuration file
 #
-# This file can be used as a starting point for your own
-# custom .env files, and contains most of the possible settings
-# available in a default install.
-#
-# By default, all of the settings are commented out. If you want
-# to override the setting, you must un-comment it by removing the '#'
-# at the beginning of the line.
+# Copy this file to `.env` and fill in the real values. `.env` is
+# gitignored — it is never committed, so real secrets stay local.
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
 # ENVIRONMENT
 #--------------------------------------------------------------------
 
+CI_ENVIRONMENT = development
 # CI_ENVIRONMENT = production
-
 
 #--------------------------------------------------------------------
 # APP SITE URL
 #--------------------------------------------------------------------
 
-# app.siteUrl = 'https://your-site.example.com'
+# Public frontend URL; used to build the payment return URL.
+app.siteUrl = 'http://localhost:3000'
 
 #--------------------------------------------------------------------
 # APP
 #--------------------------------------------------------------------
 
-# app.baseURL = ''
+app.baseURL = 'http://localhost:8080/'
 
 # Key for parser of FITS files, which downloads data about FITS files
 # and their image preview (see project https://github.com/miksrv/astronomy-fits-parser)
-app.fitsApiKey = YOUR_API_KEY
+app.fitsApiKey = ''
 
 app.telegramBotKey = ''
 app.telegramChatID = ''
@@ -49,8 +45,8 @@ app.observatory.webcam_2 = http://localhost:8081/
 # AUTHORIZATION
 #--------------------------------------------------------------------
 
-auth.token.secret = '' # key is the secret key used by the application to sign JWTS
-auth.token.live   = 15552000 # indicates the validity period of a signed JWT (in seconds); 15552000 = 180 days
+auth.token.secret = '' # secret key used by the application to sign JWTs
+auth.token.live   = 15552000 # JWT validity period, in seconds; 15552000 = 180 days
 
 auth.google.clientID = ''
 auth.google.secret   = ''
@@ -65,35 +61,71 @@ auth.vk.secret   = ''
 auth.vk.redirect = ''
 
 #--------------------------------------------------------------------
+# PAYMENT / ACQUIRING (ALFA-BANK)
+#--------------------------------------------------------------------
+
+payment.gateway            = 'alfabank'
+payment.currency           = '810' # RUB
+payment.sessionTimeoutSecs = 1200  # how long an unpaid seat is held, in seconds
+
+# 'test' uses the rbsuat sandbox (test cards, no real money) via the
+# payment.alfabank.test.* credentials below; any other value uses the
+# live payment.alfabank.* credentials. Sandbox credentials (userName/
+# password/token) still come from the bank/acquiring provider — the
+# gatewayUrl below is the public sandbox host, not merchant-specific.
+payment.alfabank.environment = 'test'
+
+payment.alfabank.userName      = ''
+payment.alfabank.password      = ''
+payment.alfabank.token         = '' # preferred over userName/password when set (required for an "r-login" contract)
+payment.alfabank.gatewayUrl    = 'https://payment.alfabank.ru/payment/rest/'
+payment.alfabank.callbackToken = ''
+
+payment.alfabank.test.userName      = ''
+payment.alfabank.test.password      = ''
+payment.alfabank.test.token         = ''
+payment.alfabank.test.gatewayUrl    = 'https://alfa.rbsuat.com/payment/rest/'
+payment.alfabank.test.callbackToken = ''
+
+#--------------------------------------------------------------------
 # DATABASE
 #--------------------------------------------------------------------
 
-# database.default.hostname = localhost
-# database.default.database = ci4
-# database.default.username = root
-# database.default.password = root
-# database.default.DBDriver = MySQLi
-# database.default.DBPrefix =
-# database.default.port = 3306
+# Local Docker MariaDB (see config/docker-compose.yml); used because
+# CI_ENVIRONMENT = development selects the 'development' DB group.
+database.development.hostname = 127.0.0.1
+database.development.port     = 3308
+database.development.database = db
+database.development.username = user
+database.development.password = password
+database.development.DBDriver = MySQLi
 
+database.production.hostname = localhost
+database.production.database = ''
+database.production.username = ''
+database.production.password = ''
+database.production.DBDriver = MySQLi
+
+# The 'tests' group is fully defined in code (app/Config/Database.php,
+# in-memory SQLite) and selected automatically when running PHPUnit —
+# no .env override is needed.
 # database.tests.hostname = localhost
-# database.tests.database = ci4_test
+# database.tests.database = ci4
 # database.tests.username = root
 # database.tests.password = root
 # database.tests.DBDriver = MySQLi
-# database.tests.DBPrefix =
-# database.tests.port = 3306
 
 #--------------------------------------------------------------------
 # SMTP
 #--------------------------------------------------------------------
 
-# smtp.port = 465
-# smtp.mail = 'no-reply@your-domain.com'
-# smtp.host = 'smtp.your-provider.com'
-# smtp.user = 'no-reply@your-domain.com'
-# smtp.pass = 'YOUR_SMTP_PASSWORD'
-# smtp.senderName = 'Astro Observatory'
+smtp.port = 465
+smtp.mail = ''
+smtp.host = ''
+smtp.user = ''
+smtp.pass = ''
+smtp.crypto = 'ssl'
+smtp.senderName = ''
 
 #--------------------------------------------------------------------
 # CONTENT SECURITY POLICY
@@ -183,7 +215,7 @@ auth.vk.redirect = ''
 # LOGGER
 #--------------------------------------------------------------------
 
-# logger.threshold = 4
+logger.threshold = 4
 
 #--------------------------------------------------------------------
 # CURLRequest

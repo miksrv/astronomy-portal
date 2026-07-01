@@ -14,6 +14,11 @@ const nextConfig = {
                 protocol: 'https'
             },
             {
+                hostname: 'astro.miksoft.pro',
+                port: '',
+                protocol: 'https'
+            },
+            {
                 hostname: 'miksoft.pro',
                 port: '',
                 protocol: 'https'

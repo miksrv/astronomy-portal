@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Input, Message, Select } from 'simple-react-ui-kit'
 
 import { API, ApiType, useAppSelector } from '@/api'
+import { STARGAZING_RETRY_STORAGE_KEY } from '@/utils/constants'
 
 import styles from './styles.module.sass'
 
@@ -54,19 +55,25 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, tic
 
         setSubmitted(true)
 
-        const result = await bookEvent({
+        const request: ApiType.Events.ReqRegistration = {
             adults: Number(formState.adults || 1),
             children: Number(formState.children || 1),
             childrenAges: formState.childrenAges?.length ? formState.childrenAges : undefined,
             eventId: eventId,
             name: formState.name,
             phone: formState.phone?.length ? formState.phone : undefined
-        })
+        }
+
+        const result = await bookEvent(request)
 
         const data = 'data' in result ? (result.data as ApiType.Events.ResRegistration) : undefined
 
         // Paid event — the API returns a bank payment page URL to redirect to.
         if (data?.payment?.formUrl) {
+            // Saved so a declined/failed payment can be retried (new order) from
+            // the payment result page without re-filling this form.
+            sessionStorage.setItem(STARGAZING_RETRY_STORAGE_KEY, JSON.stringify(request))
+
             setPaymentRedirect(true)
             window.location.href = data.payment.formUrl
             return

@@ -1,6 +1,7 @@
 import React, { forwardRef } from 'react'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import packageInfo from '@/package.json'
@@ -46,16 +47,29 @@ export const AppFooter = forwardRef<HTMLDivElement>((props, ref) => {
                 {`(${formatDate(update, 'DD.MM.YYYY, HH:mm')})`}
             </div>
 
-            <div className={styles.madeWithLove}>
-                {t('components.common.app-footer.made-with-love', 'Сделано с любовью к звёздам')}
-                <svg
-                    className={styles.starIcon}
-                    viewBox={'0 0 24 24'}
-                    xmlns={'http://www.w3.org/2000/svg'}
-                    aria-hidden={'true'}
-                >
-                    <path d={'M12 2 L13.5 9.5 L21 12 L13.5 14.5 L12 22 L10.5 14.5 L3 12 L10.5 9.5 Z'} />
-                </svg>
+            <div className={styles.rightGroup}>
+                <div className={styles.madeWithLove}>
+                    {t('components.common.app-footer.made-with-love', 'Сделано с любовью к звёздам')}
+                    <svg
+                        className={styles.starIcon}
+                        viewBox={'0 0 24 24'}
+                        xmlns={'http://www.w3.org/2000/svg'}
+                        aria-hidden={'true'}
+                    >
+                        <path d={'M12 2 L13.5 9.5 L21 12 L13.5 14.5 L12 22 L10.5 14.5 L3 12 L10.5 9.5 Z'} />
+                    </svg>
+                </div>
+
+                <div className={styles.privacyLink}>
+                    <span aria-hidden={'true'}>{'·'}</span>
+                    <Link
+                        href={'/privacy'}
+                        className={styles.link}
+                        title={t('pages.privacy.title', 'Политика конфиденциальности')}
+                    >
+                        {t('pages.privacy.title', 'Политика конфиденциальности')}
+                    </Link>
+                </div>
             </div>
         </footer>
     )

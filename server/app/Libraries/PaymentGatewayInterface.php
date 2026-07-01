@@ -60,4 +60,15 @@ interface PaymentGatewayInterface
      * @return string One of: new, pending, paid, failed, canceled, refunded.
      */
     public function mapStatus(?int $orderStatus): string;
+
+    /**
+     * Extracts a human-readable failure reason (e.g. "card declined by
+     * issuer") from a raw {@see getOrderStatus()} response, for a failed or
+     * canceled order.
+     *
+     * @param object $remote Raw response from getOrderStatus().
+     * @return array{code: string|null, message: string|null}|null Null when
+     *                                                              the response carries no failure detail.
+     */
+    public function extractFailureReason(object $remote): ?array;
 }

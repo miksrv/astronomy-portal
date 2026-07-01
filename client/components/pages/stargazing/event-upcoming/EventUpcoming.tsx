@@ -5,7 +5,7 @@ import { Button, Container, Dialog, Icon } from 'simple-react-ui-kit'
 import Image from 'next/image'
 import { useTranslation } from 'next-i18next/pages'
 
-import { API, ApiModel, useAppDispatch, useAppSelector } from '@/api'
+import { API, ApiModel, ApiType, useAppDispatch, useAppSelector } from '@/api'
 import { hosts } from '@/api/constants'
 import { LoginForm } from '@/components/common'
 import { formatUTCDate, getHumanTimeFromSec, getLocalizedTimeFromSec, getSecondsUntilUTCDate } from '@/utils/dates'
@@ -37,6 +37,8 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
     const expiredHandledRef = useRef<boolean>(false)
 
     const [cancelRegistration, { isLoading }] = API.useEventsCancelRegistrationPostMutation()
+    const [retryBooking, { isLoading: isRetrying }] = API.useEventsRegistrationPostMutation()
+    const [retryError, setRetryError] = useState<string>()
 
     const handleCancelRegistration = async () => {
         try {
@@ -45,6 +47,37 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
             setRegistered(false)
         } catch {
             showConfirmation(false)
+        }
+    }
+
+    const handleRetryPayment = async () => {
+        if (!event?.id) {
+            return
+        }
+
+        setRetryError(undefined)
+
+        try {
+            const data = (await retryBooking({
+                adults: event.members?.adults || 1,
+                children: event.members?.children || 0,
+                childrenAges: event.members?.childrenAges,
+                eventId: event.id,
+                name: user?.name,
+                phone: user?.phone
+            }).unwrap()) as ApiType.Events.ResRegistration
+
+            if (data.payment?.formUrl) {
+                window.location.href = data.payment.formUrl
+            }
+        } catch (e) {
+            setRetryError(
+                (e as { data?: ApiType.ResError })?.data?.messages?.error ||
+                    t(
+                        'components.pages.stargazing.event-upcoming.retry-payment-error',
+                        'Не удалось создать новую попытку оплаты. Попробуйте позже.'
+                    )
+            )
         }
     }
 
@@ -64,11 +97,21 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
 
     const awaitingPayment = !!pendingPayment && (paymentSecondsLeft ?? 0) > 0
 
-    // A booking shows ticket / QR / location only once it is confirmed (paid or free),
-    // never while it is still a pending-payment hold.
-    const isConfirmed = registered && event?.bookingStatus !== 'pending'
+    // A booking shows ticket / QR / location only once it is actually
+    // confirmed (paid or free) — explicitly, not just "not pending", since a
+    // declined/expired payment attempt ('failed') is also not 'pending'.
+    const isConfirmed = registered && event?.bookingStatus === 'confirmed'
+
+    // A declined/expired payment attempt: the row is kept (not deleted) so
+    // it can be retried with the same adults/children instead of re-filling
+    // the form.
+    const failedPayment = registered && event?.bookingStatus === 'failed'
 
     const paymentTimeLeftLabel = getHumanTimeFromSec(paymentSecondsLeft ?? 0, t)
+
+    // Money was actually captured only once the booking is confirmed on a paid
+    // event — cancelling an unpaid (pending) hold has nothing to refund.
+    const isPaidConfirmedBooking = isConfirmed && !!event?.ticketPrice
 
     const registrationAvailable = useMemo(() => {
         if (event?.availableTickets === 0) {
@@ -234,6 +277,7 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
                                 </Button>
                                 <Button
                                     mode={'secondary'}
+                                    variant={'negative'}
                                     loading={isLoading}
                                     disabled={isLoading}
                                     onClick={() => showConfirmation(true)}
@@ -259,9 +303,45 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
                             <p>
                                 {t(
                                     'components.pages.stargazing.event-upcoming.payment-expired-text',
-                                    'Бронь отменена, место освобождено. Обновите страницу, чтобы забронировать снова.'
+                                    'Место освобождено. Обновите страницу, чтобы попробовать снова.'
                                 )}
                             </p>
+                        </div>
+                    )}
+
+                    {/* Payment declined or the hold already lapsed — the booking is kept (not
+                        deleted) so retrying reuses it instead of re-filling the form. */}
+                    {failedPayment && (
+                        <div className={styles.infoBlock}>
+                            <h3>
+                                {t(
+                                    'components.pages.stargazing.event-upcoming.payment-failed-title',
+                                    'Оплата не прошла'
+                                )}
+                            </h3>
+                            <p>
+                                {t(
+                                    'components.pages.stargazing.event-upcoming.payment-failed-text',
+                                    'Предыдущая попытка оплаты не была завершена. Место не забронировано — вы можете попробовать оплатить снова.'
+                                )}
+                            </p>
+
+                            {retryError && <p className={styles.notifyText}>{retryError}</p>}
+
+                            <div className={styles.awaitingPaymentActions}>
+                                <Button
+                                    mode={'primary'}
+                                    variant={'positive'}
+                                    loading={isRetrying}
+                                    disabled={isRetrying}
+                                    onClick={handleRetryPayment}
+                                >
+                                    {t(
+                                        'components.pages.stargazing.event-upcoming.retry-payment',
+                                        'Попробовать оплатить снова'
+                                    )}
+                                </Button>
+                            </div>
                         </div>
                     )}
 
@@ -499,6 +579,7 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
                                 <Button
                                     className={styles.cancelRegistrationButton}
                                     mode={'secondary'}
+                                    variant={'negative'}
                                     loading={isLoading}
                                     disabled={isLoading}
                                     onClick={() => showConfirmation(true)}
@@ -533,6 +614,14 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
                                 'Вы сможете повторно зарегистрироваться на этот астровыезд, если места ещё будут свободны.'
                             )}
                         </p>
+                        {isPaidConfirmedBooking && (
+                            <p>
+                                {t(
+                                    'components.pages.stargazing.event-upcoming.confirm-cancel-refund-text',
+                                    'Оплата за билет будет автоматически возвращена на карту, с которой производилась оплата, в течение 1–10 рабочих дней.'
+                                )}
+                            </p>
+                        )}
                     </div>
                     <div className={styles.confirmationFooter}>
                         <Button

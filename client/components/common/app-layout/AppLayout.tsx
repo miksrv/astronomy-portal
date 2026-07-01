@@ -9,6 +9,7 @@ import NextNProgress from 'nextjs-progressbar'
 import { SITE_LINK, useAppDispatch, useAppSelector } from '@/api'
 import { closeAuthDialog } from '@/api/applicationSlice'
 
+import { CookieConsent } from '../cookie-consent'
 import { LoginForm } from '../login-form'
 
 import { AppHeader } from './app-header'
@@ -130,6 +131,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, noTopMargin, ch
                     }}
                 />
             </Dialog>
+
+            <CookieConsent />
         </div>
     )
 }

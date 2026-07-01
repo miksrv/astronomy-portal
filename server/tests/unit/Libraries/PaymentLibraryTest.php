@@ -39,6 +39,11 @@ final class FakePaymentGateway implements PaymentGatewayInterface
     {
         return $orderStatus === 2 ? 'paid' : 'pending';
     }
+
+    public function extractFailureReason(object $remote): ?array
+    {
+        return null;
+    }
 }
 
 /**

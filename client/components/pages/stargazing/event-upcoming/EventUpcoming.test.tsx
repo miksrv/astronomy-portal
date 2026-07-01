@@ -14,6 +14,7 @@ dayjs.extend(utc)
 jest.mock('@/api', () => ({
     API: {
         useEventsCancelRegistrationPostMutation: jest.fn(),
+        useEventsRegistrationPostMutation: jest.fn(),
         util: { invalidateTags: jest.fn() }
     },
     useAppSelector: jest.fn(),
@@ -41,6 +42,8 @@ jest.mock('./event-booking-form', () => ({
 
 const mockCancelMutate = jest.fn()
 const defaultCancelState = { isLoading: false }
+const mockRetryMutate = jest.fn()
+const defaultRetryState = { isLoading: false }
 
 const baseEvent: ApiModel.Event = {
     id: 'event-1',
@@ -48,6 +51,8 @@ const baseEvent: ApiModel.Event = {
     coverFileName: 'cover',
     coverFileExt: 'jpg',
     registered: true,
+    // The real API always sets this alongside registered: true.
+    bookingStatus: 'confirmed',
     availableTickets: 5,
     date: { date: new Date(Date.now() + 86400000 * 10).toISOString() },
     registrationStart: { date: new Date(Date.now() - 86400000 * 5).toISOString() },
@@ -57,6 +62,7 @@ const baseEvent: ApiModel.Event = {
 beforeEach(() => {
     jest.clearAllMocks()
     ;(API.useEventsCancelRegistrationPostMutation as jest.Mock).mockReturnValue([mockCancelMutate, defaultCancelState])
+    ;(API.useEventsRegistrationPostMutation as jest.Mock).mockReturnValue([mockRetryMutate, defaultRetryState])
     ;(useAppSelector as jest.Mock).mockReturnValue({ id: 'user-1', name: 'Test User' })
     ;(getSecondsUntilUTCDate as jest.Mock).mockReturnValue(undefined)
 })
@@ -132,6 +138,48 @@ describe('EventUpcoming', () => {
         expect(screen.getByText('Вернуться к оплате')).toBeDefined()
         // A pending (unpaid) hold must NOT read as a confirmed registration.
         expect(screen.queryByText('Вы зарегистрированы')).toBeNull()
+    })
+
+    it('shows a retry-payment prompt for a failed booking instead of a confirmed registration', () => {
+        const failedEvent: ApiModel.Event = {
+            ...baseEvent,
+            bookingStatus: 'failed',
+            members: { adults: 2, children: 0, total: 2 }
+        }
+
+        render(<EventUpcoming event={failedEvent} />)
+
+        expect(screen.getByText('Оплата не прошла')).toBeDefined()
+        expect(screen.getByText('Попробовать оплатить снова')).toBeDefined()
+        // A declined/expired attempt must NOT read as a confirmed registration.
+        expect(screen.queryByText('Вы зарегистрированы')).toBeNull()
+    })
+
+    it('retries the booking with the remembered adults/children and redirects on success', async () => {
+        const failedEvent: ApiModel.Event = {
+            ...baseEvent,
+            bookingStatus: 'failed',
+            members: { adults: 3, children: 1, childrenAges: [10], total: 4 }
+        }
+
+        mockRetryMutate.mockReturnValue({
+            unwrap: () => Promise.resolve({ payment: { formUrl: 'https://pay.example/new', orderId: 'order-2' } })
+        })
+
+        render(<EventUpcoming event={failedEvent} />)
+
+        fireEvent.click(screen.getByText('Попробовать оплатить снова'))
+
+        await waitFor(() =>
+            expect(mockRetryMutate).toHaveBeenCalledWith({
+                adults: 3,
+                children: 1,
+                childrenAges: [10],
+                eventId: 'event-1',
+                name: 'Test User',
+                phone: undefined
+            })
+        )
     })
 
     it('does not update registered state when cancel API call fails (BUG-05 regression)', async () => {

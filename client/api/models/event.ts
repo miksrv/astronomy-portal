@@ -14,11 +14,17 @@ export type Event = {
         total: number
         adults: number
         children: number
+        /** Present alongside a 'pending'/'failed' booking — used to retry payment without re-filling the form. */
+        childrenAges?: number[]
     }
     bookedId?: string
     registered?: boolean
-    /** Booking lifecycle: 'pending' holds the seat until payment, 'confirmed' is paid/free. */
-    bookingStatus?: 'pending' | 'confirmed'
+    /**
+     * Booking lifecycle: 'pending' holds the seat until payment, 'confirmed'
+     * is paid/free, 'failed' is a declined/expired payment attempt kept
+     * around (not deleted) so it can be retried instead of re-filling the form.
+     */
+    bookingStatus?: 'pending' | 'confirmed' | 'failed'
     /** Present only while a paid booking awaits payment — drives the countdown + "return to payment". */
     payment?: {
         orderId: string

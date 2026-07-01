@@ -78,6 +78,8 @@ export interface ReqPaymentStatus {
 export interface ResPaymentStatus {
     status: PaymentStatus
     message?: string
+    /** Present when status is 'failed' or 'canceled' — the bank's decline reason, if available. */
+    errorMessage?: string
     /** Booking id (events_users.id) for event-booking payments — used to render the ticket. */
     bookingId?: string
 }

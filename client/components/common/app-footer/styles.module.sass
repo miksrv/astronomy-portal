@@ -27,7 +27,23 @@
             &:hover
                 color: var(--text-color-primary)
 
+    .rightGroup
+        display: flex
+        align-items: center
+        flex-wrap: wrap
+        justify-content: flex-end
+        gap: 6px
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            justify-content: center
+
     .madeWithLove
+        display: flex
+        align-items: center
+        gap: 6px
+        white-space: nowrap
+
+    .privacyLink
         display: flex
         align-items: center
         gap: 6px
@@ -41,6 +57,11 @@
 
     .link
         margin: 0 3px
+        color: var(--text-color-secondary)
+        text-decoration: underline
+
+        &:hover
+            color: var(--text-color-primary)
 
         .copyrightImage
             vertical-align: middle
