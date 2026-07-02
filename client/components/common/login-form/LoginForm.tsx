@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { Button, Message } from 'simple-react-ui-kit'
+import React, { useEffect, useState } from 'react'
+import { Button, Input, Message } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -19,6 +19,8 @@ interface LoginFormProps {
     onError?: (error?: ApiType.ResError) => void
 }
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
     const { t } = useTranslation()
 
@@ -26,11 +28,35 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
 
     const [, setReturnPath] = useLocalStorage<string>(LOCAL_STORAGE.RETURN_PATH)
 
+    const [email, setEmail] = useState<string>('')
+
     const [authLoginService, { data: serviceData, error, isLoading, isError }] = API.useAuthLoginServiceMutation()
+
+    const [
+        requestMagicLink,
+        { data: magicLinkData, error: magicLinkError, isLoading: isMagicLinkLoading, isError: isMagicLinkError }
+    ] = API.useAuthRequestMagicLinkMutation()
 
     const handleLoginServiceButton = async (service: ApiType.Auth.AuthServiceType) => {
         setReturnPath(router.asPath)
         await authLoginService({ service })
+    }
+
+    const isValidEmail = EMAIL_PATTERN.test(email.trim())
+
+    const handleRequestMagicLink = async () => {
+        if (!isValidEmail) {
+            return
+        }
+
+        setReturnPath(router.asPath)
+
+        const isValidReturnPath = router.asPath.startsWith('/') && !router.asPath.includes('://')
+
+        await requestMagicLink({
+            email: email.trim(),
+            returnPath: isValidReturnPath ? router.asPath : undefined
+        })
     }
 
     // Whitelist of trusted OAuth provider origins
@@ -62,14 +88,66 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
         }
     }, [error, onError])
 
+    useEffect(() => {
+        if (magicLinkError) {
+            onError?.(magicLinkError as ApiType.ResError)
+        }
+    }, [magicLinkError, onError])
+
+    if (magicLinkData?.sent) {
+        return (
+            <div className={styles.loginForm}>
+                <p>
+                    {t(
+                        'components.common.login-form.magic-link-sent',
+                        'Письмо со ссылкой для входа отправлено на {{email}}.',
+                        { email }
+                    )}
+                </p>
+                <p>
+                    {t(
+                        'components.common.login-form.magic-link-instructions',
+                        'Перейдите по ссылке из письма — она действует 5 минут. Если письма нет, проверьте папку «Спам».'
+                    )}
+                </p>
+            </div>
+        )
+    }
+
     return (
         <div className={styles.loginForm}>
-            <p>
-                {t(
-                    'components.common.login-form.auth-description',
-                    'Для авторизации на сайте используйте один из сервисов ниже'
-                )}
-            </p>
+            <p>{t('components.common.login-form.auth-description', 'Войдите по ссылке из письма или через сервис')}</p>
+
+            {isMagicLinkError && (
+                <Message type={'error'}>{(magicLinkError as ApiType.ResError)?.messages?.error || ''}</Message>
+            )}
+
+            <div className={styles.emailRow}>
+                <Input
+                    type={'email'}
+                    placeholder={t('components.common.login-form.email-placeholder', 'Ваш email')}
+                    value={email}
+                    disabled={isMagicLinkLoading}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            void handleRequestMagicLink()
+                        }
+                    }}
+                />
+                <Button
+                    mode={'primary'}
+                    loading={isMagicLinkLoading}
+                    disabled={isMagicLinkLoading || !isValidEmail}
+                    onClick={handleRequestMagicLink}
+                >
+                    {t('components.common.login-form.email-submit', 'Войти')}
+                </Button>
+            </div>
+
+            <div className={styles.divider}>
+                <span>{t('components.common.login-form.divider', 'или')}</span>
+            </div>
 
             {isError && <Message type={'error'}>{(error as ApiType.ResError)?.messages?.error || ''}</Message>}
 

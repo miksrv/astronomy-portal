@@ -13,7 +13,8 @@ use Exception;
  * Class Members
  * @package App\Controllers
  *
- * Manages the admin members (users) list. All endpoints require ADMIN role.
+ * Manages the admin members (users) list. list() requires ADMIN role;
+ * events() also allows a user to fetch their own event history.
  */
 class Members extends ResourceController
 {
@@ -83,7 +84,8 @@ class Members extends ResourceController
 
     /**
      * GET /members/:id/events
-     * List of events a user has registered for (non-cancelled). ADMIN only.
+     * List of events a user has registered for (non-cancelled). Available to
+     * an ADMIN for any user, or to a regular user for their own history.
      */
     public function events(string $id = null): ResponseInterface
     {
@@ -91,7 +93,9 @@ class Members extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        $isAdmin = $this->session->user->role === 'admin';
+
+        if (!$isAdmin && $this->session->user->id !== $id) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 

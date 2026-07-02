@@ -5,10 +5,13 @@ const Vinyl = require('vinyl')
 const typescript = require('typescript')
 
 // ---------------------------------------------------------------------------
-// Snapshot existing EN translations at module-load time so the flush step can
-// preserve any value that is already correctly translated.
+// Snapshot existing EN/RU translations at module-load time so the flush step
+// can preserve any value that is already correctly translated (e.g. hand-
+// authored plural forms that the scanner cannot derive from a single default
+// string in source).
 // ---------------------------------------------------------------------------
 const EN_TRANSLATION_PATH = path.resolve(__dirname, 'public/locales/en/translation.json')
+const RU_TRANSLATION_PATH = path.resolve(__dirname, 'public/locales/ru/translation.json')
 
 /**
  * Recursively flatten a nested object into dot-separated key → value entries.
@@ -29,32 +32,46 @@ function flattenObject(obj, prefix, map) {
     return map
 }
 
-let existingEnSnapshot = new Map()
-try {
-    const raw = fs.readFileSync(EN_TRANSLATION_PATH, 'utf-8')
-    existingEnSnapshot = flattenObject(JSON.parse(raw))
-} catch (_) {
-    // File doesn't exist yet — all keys will be treated as new
+function loadSnapshot(filePath) {
+    try {
+        const raw = fs.readFileSync(filePath, 'utf-8')
+        return flattenObject(JSON.parse(raw))
+    } catch (_) {
+        // File doesn't exist yet — all keys will be treated as new
+        return new Map()
+    }
 }
+
+const existingEnSnapshot = loadSnapshot(EN_TRANSLATION_PATH)
+const existingRuSnapshot = loadSnapshot(RU_TRANSLATION_PATH)
 
 // ---------------------------------------------------------------------------
 // Deep-merge helper used in flush: for every leaf in `scanned`, if the
-// snapshot had a non-empty string for that key keep the snapshot value;
-// otherwise write an empty string (new key placeholder).
-// Only applied to the EN output; RU is written verbatim from the scanner.
+// snapshot had a non-empty string for that key keep the snapshot value
+// (e.g. a manually corrected plural form the scanner can't generate on its
+// own, since it only ever sees one default string per key in source).
+//
+// For brand-new keys with no snapshot value:
+//  - EN falls back to '' (an empty placeholder waiting for translation)
+//  - RU falls back to the freshly scanned value (the source default is
+//    already valid Russian, since ru is defaultLng)
 // ---------------------------------------------------------------------------
-function mergeEnOutput(scanned, prefix) {
+function mergeOutput(scanned, snapshot, fallbackToScanned, prefix) {
     prefix = prefix || ''
     const result = {}
     Object.keys(scanned).forEach((key) => {
         const fullKey = prefix ? `${prefix}.${key}` : key
         const value = scanned[key]
         if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-            result[key] = mergeEnOutput(value, fullKey)
+            result[key] = mergeOutput(value, snapshot, fallbackToScanned, fullKey)
         } else {
-            const snapshotValue = existingEnSnapshot.get(fullKey)
-            // Keep existing translation if non-empty; otherwise placeholder
-            result[key] = typeof snapshotValue === 'string' && snapshotValue !== '' ? snapshotValue : ''
+            const snapshotValue = snapshot.get(fullKey)
+            result[key] =
+                typeof snapshotValue === 'string' && snapshotValue !== ''
+                    ? snapshotValue
+                    : fallbackToScanned
+                      ? value
+                      : ''
         }
     })
     return result
@@ -93,8 +110,9 @@ module.exports = {
     },
 
     // ---------------------------------------------------------------------------
-    // Custom flush: write RU verbatim from scanner; write EN with preserved
-    // existing translations merged over scanner output (new keys get "").
+    // Custom flush: write both EN and RU with preserved existing translations
+    // merged over scanner output. New EN keys get "" (untranslated
+    // placeholder); new RU keys fall back to the scanned source default.
     // ---------------------------------------------------------------------------
     flush: function customFlush(done) {
         const parser = this.parser
@@ -108,9 +126,10 @@ module.exports = {
             Object.keys(namespaces).forEach((ns) => {
                 let obj = namespaces[ns]
 
-                // For EN, replace scanner output with merged values
                 if (lng === 'en') {
-                    obj = mergeEnOutput(obj)
+                    obj = mergeOutput(obj, existingEnSnapshot, false)
+                } else if (lng === 'ru') {
+                    obj = mergeOutput(obj, existingRuSnapshot, true)
                 }
 
                 const resPath = parser.formatResourceSavePath(lng, ns)

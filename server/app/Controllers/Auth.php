@@ -3,10 +3,12 @@
 namespace App\Controllers;
 
 use App\Entities\UserEntity;
+use App\Libraries\EmailLibrary;
 use App\Libraries\GoogleClient;
 use App\Libraries\SessionLibrary;
 use App\Libraries\YandexClient;
 use App\Libraries\VkClient;
+use App\Models\MagicLinkTokensModel;
 use App\Models\UsersModel;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Files\File;
@@ -21,6 +23,7 @@ define('AUTH_TYPE_NATIVE', 'native');
 define('AUTH_TYPE_GOOGLE', 'google');
 define('AUTH_TYPE_YANDEX', 'yandex');
 define('AUTH_TYPE_VK', 'vk');
+define('AUTH_TYPE_EMAIL', 'email');
 
 /**
  * Class Auth
@@ -163,6 +166,112 @@ class Auth extends ResourceController
     }
 
     /**
+     * Requests a passwordless login link by email. Always responds with the
+     * same generic success shape regardless of whether the email is
+     * registered, malformed-but-valid, or currently rate-limited — this
+     * endpoint must never reveal account existence.
+     */
+    public function requestMagicLink(): ResponseInterface
+    {
+        if ($this->session->isAuth) {
+            return $this->failForbidden(lang('Auth.alreadyAuthorized'));
+        }
+
+        $input = $this->request->getJSON(true);
+
+        $rules = [
+            'email' => 'required|valid_email|max_length[255]',
+        ];
+
+        if (!$this->validateRequest($input, $rules)) {
+            return $this->failValidationErrors($this->validator->getErrors());
+        }
+
+        $email      = strtolower(trim($input['email']));
+        $returnPath = $this->sanitizeReturnPath($input['returnPath'] ?? null);
+        $ip         = $this->request->getIPAddress();
+
+        $tokenModel = new MagicLinkTokensModel();
+
+        if (!$tokenModel->isRateLimited($email, $ip)) {
+            $rawToken = $tokenModel->createToken($email, $returnPath, $ip);
+
+            $siteUrl = rtrim(getenv('app.siteUrl'), '/');
+            $link    = $siteUrl . '/auth?token=' . $rawToken . ($returnPath !== null ? '&return=' . rawurlencode($returnPath) : '');
+
+            try {
+                $locale  = $this->request->getLocale();
+                $subject = lang('Auth.magicLinkEmailSubject', [], $locale);
+                $body    = '<div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;color:#1b1f27;">'
+                    . '<h2 style="margin:0 0 12px;">' . esc(lang('Auth.magicLinkEmailTitle', [], $locale)) . '</h2>'
+                    . '<p style="margin:0 0 16px;line-height:1.5;">' . esc(lang('Auth.magicLinkEmailIntro', [], $locale)) . '</p>'
+                    . '<p style="margin:0 0 16px;"><a href="' . esc($link) . '" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">'
+                    . esc(lang('Auth.magicLinkEmailButton', [], $locale)) . '</a></p>'
+                    . '<p style="margin:0 0 12px;color:#656d76;font-size:13px;line-height:1.5;">' . esc(lang('Auth.magicLinkEmailExpiry', [], $locale)) . '</p>'
+                    . '<p style="margin:0;color:#656d76;font-size:13px;line-height:1.5;">' . esc(lang('Auth.magicLinkEmailFooter', [], $locale)) . '</p>'
+                    . '</div>';
+
+                (new EmailLibrary())->send($email, $subject, $body);
+            } catch (Exception $e) {
+                EmailLibrary::logError('[Auth] Failed to send magic link email: ' . $e->getMessage());
+            }
+        }
+
+        return $this->respond(['sent' => true]);
+    }
+
+    /**
+     * Verifies a magic-link token and logs the user in, creating the account
+     * on first use. Deliberately does not enforce the OAuth auth_type
+     * mismatch check from `_serviceAuth()` — proving mailbox ownership is
+     * treated as strictly stronger than any OAuth provider's email claim.
+     */
+    public function verifyMagicLink(): ResponseInterface
+    {
+        if ($this->session->isAuth) {
+            return $this->failForbidden(lang('Auth.alreadyAuthorized'));
+        }
+
+        $input = $this->request->getJSON(true);
+        $token = $input['token'] ?? null;
+
+        if (empty($token)) {
+            return $this->failValidationErrors(lang('Auth.magicLinkInvalidOrExpired'));
+        }
+
+        $claim = (new MagicLinkTokensModel())->consumeToken($token);
+
+        if (!$claim) {
+            return $this->failValidationErrors(lang('Auth.magicLinkInvalidOrExpired'));
+        }
+
+        [$userData, $isNewUser] = (new UsersModel())->findOrCreateByEmail($claim['email'], AUTH_TYPE_EMAIL);
+
+        $this->session->authorization($userData);
+
+        log_message('info', '[Auth] Successfully authorized user {id} via email link (new={isNew})', [
+            'id'     => $userData->id,
+            'isNew'  => $isNewUser ? 'yes' : 'no',
+        ]);
+
+        return $this->responseAuth($isNewUser);
+    }
+
+    /**
+     * Keeps only a same-origin relative path (no scheme/host), to prevent an
+     * attacker-supplied returnPath from being embedded in the emailed link
+     * and used as an open redirect.
+     */
+    private function sanitizeReturnPath(?string $returnPath): ?string
+    {
+        if (empty($returnPath) || !str_starts_with($returnPath, '/') || str_contains($returnPath, '://')) {
+            return null;
+        }
+
+        return $returnPath;
+    }
+
+    /**
      * @param $input
      * @param array $rules
      * @param array $messages
@@ -280,16 +389,16 @@ class Auth extends ResourceController
             $userData->id = $newUserId;
         }
 
-        // All migrated users will not have an authorization type in the database, so it will be possible to
-        // either recover the password or log in through Google or another system.
-        // But if the authorization type is already specified, you should authorize only this way.
+        // A verified email address is treated as equally strong proof of identity
+        // regardless of which service confirmed it, so signing in via a different
+        // service than last time is allowed — it just becomes the new auth_type
+        // (see the equivalent reasoning for magic-link auth further up this file).
         if ($userData->auth_type !== null && $userData->auth_type !== $authType) {
-            log_message('error', '[Auth] Auth type mismatch for user {id}: expected={expected}, got={got}', [
-                'id'       => $userData->id ?? 'N/A',
-                'expected' => $userData->auth_type,
-                'got'      => $authType,
+            log_message('info', '[Auth] User {id} switched auth method from {old} to {new}', [
+                'id'  => $userData->id ?? 'N/A',
+                'old' => $userData->auth_type,
+                'new' => $authType,
             ]);
-            return $this->failValidationErrors(lang('Auth.authWrongService'));
         }
 
         if (empty($userData->service_id) && !empty($serviceProfile->id)) {
@@ -338,8 +447,10 @@ class Auth extends ResourceController
         $input = $this->request->getJSON(true);
 
         $rules = [
-            'name'  => 'required|min_length[2]|max_length[100]',
-            'phone' => 'permit_empty|max_length[20]',
+            'name'     => 'required|min_length[2]|max_length[100]',
+            'phone'    => 'permit_empty|max_length[20]',
+            'birthday' => 'permit_empty|valid_date[Y-m-d]',
+            'sex'      => 'permit_empty|in_list[m,f]',
         ];
 
         if (!$this->validateRequest($input, $rules)) {
@@ -354,6 +465,14 @@ class Auth extends ResourceController
             $updateData['phone'] = $input['phone'];
         }
 
+        if (array_key_exists('birthday', $input)) {
+            $updateData['birthday'] = $input['birthday'];
+        }
+
+        if (array_key_exists('sex', $input)) {
+            $updateData['sex'] = $input['sex'];
+        }
+
         $updated = $userModel->update($this->session->user->id, $updateData);
 
         if (!$updated) {
@@ -364,9 +483,14 @@ class Auth extends ResourceController
     }
 
     /**
+     * @param bool $isNewUser Set when the account was just created via the
+     *                        magic-link flow; adds `isNewUser` to the response
+     *                        so the frontend can route to profile onboarding.
+     *                        Omitted (false) by every existing caller, so
+     *                        their response shape is unchanged.
      * @return ResponseInterface
      */
-    protected function responseAuth(): ResponseInterface
+    protected function responseAuth(bool $isNewUser = false): ResponseInterface
     {
         $response = (object) ['auth' => $this->session->isAuth];
 
@@ -378,6 +502,10 @@ class Auth extends ResourceController
 
             if ($response->user->role === 'user') {
                 unset($response->user->role);
+            }
+
+            if ($isNewUser) {
+                $response->isNewUser = true;
             }
         }
 

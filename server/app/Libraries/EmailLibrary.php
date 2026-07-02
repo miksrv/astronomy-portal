@@ -12,18 +12,21 @@ class EmailLibrary
     public function __construct()
     {
         $this->config = [
-            'protocol'   => 'smtp',
-            'SMTPHost'   => getenv('smtp.host'),
-            'SMTPUser'   => getenv('smtp.user'),
-            'SMTPPass'   => getenv('smtp.pass'),
-            'SMTPPort'   => (int) getenv('smtp.port'),
-            'mailType'   => 'html',
-            'SMTPCrypto' => 'ssl',
-            'charset'    => 'UTF-8',
-            'wordWrap'   => false,
-            'validate'   => false,
-            'CRLF'       => "\r\n",
-            'newline'    => "\r\n",
+            'protocol'    => 'smtp',
+            'SMTPHost'    => getenv('smtp.host'),
+            'SMTPUser'    => getenv('smtp.user'),
+            'SMTPPass'    => getenv('smtp.pass'),
+            'SMTPPort'    => (int) getenv('smtp.port'),
+            // A synchronous send blocking the login-request endpoint must not
+            // let a hung mail server stall that request indefinitely.
+            'SMTPTimeout' => 5,
+            'mailType'    => 'html',
+            'SMTPCrypto'  => 'ssl',
+            'charset'     => 'UTF-8',
+            'wordWrap'    => false,
+            'validate'    => false,
+            'CRLF'        => "\r\n",
+            'newline'     => "\r\n",
         ];
 
         $this->email = \Config\Services::email();
@@ -33,6 +36,19 @@ class EmailLibrary
     private function getSenderName(): string
     {
         return getenv('smtp.senderName') ?: 'Astro Observatory';
+    }
+
+    /**
+     * Writes email send failures to a dedicated `email-*.log` file instead of
+     * the shared application log — SMTP debug dumps are verbose and would
+     * otherwise drown out unrelated errors in `log-*.log`.
+     */
+    public static function logError(string $message): void
+    {
+        $logPath = WRITEPATH . 'logs/email-' . date('Y-m-d') . '.log';
+        $entry   = 'ERROR - ' . date('Y-m-d H:i:s') . ' --> ' . $message . PHP_EOL . PHP_EOL;
+
+        file_put_contents($logPath, $entry, FILE_APPEND | LOCK_EX);
     }
 
     /**
@@ -53,7 +69,7 @@ class EmailLibrary
 
         if (!$this->email->send()) {
             $debugInfo = $this->email->printDebugger(['headers', 'subject', 'body']);
-            log_message('error', 'Email send failed: ' . $debugInfo);
+            self::logError('Email send failed: ' . $debugInfo);
             throw new Exception('Failed to send email: ' . $debugInfo);
         }
     }
@@ -86,7 +102,7 @@ class EmailLibrary
 
         if (!$this->email->send()) {
             $debugInfo = $this->email->printDebugger(['headers', 'subject', 'body']);
-            log_message('error', 'Email send failed: ' . $debugInfo);
+            self::logError('Email send failed: ' . $debugInfo);
             throw new Exception('Failed to send email: ' . $debugInfo);
         }
     }

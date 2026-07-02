@@ -9,7 +9,12 @@ module.exports = {
     debug: false,
     i18n: {
         defaultLocale: 'ru',
-        locales: ['ru', 'en']
+        locales: ['ru', 'en'],
+        // Disabled: Next's built-in Accept-Language redirect served different
+        // content/redirects to crawlers depending on their header, which is bad
+        // for SEO. Locale preference is now handled explicitly in middleware.ts
+        // based solely on the NEXT_LOCALE cookie set by the language switcher.
+        localeDetection: false
     },
     defaultNS: 'translation',
     localePath: path.resolve('./public/locales'),

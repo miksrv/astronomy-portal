@@ -41,9 +41,9 @@ interface PaymentGatewayInterface
      *
      * @param string $orderId Gateway-side order id.
      * @param int    $amount  Amount to refund in kopecks.
-     * @return bool True when the gateway accepted the refund.
+     * @return object Normalised result: { success: bool, errorCode?: string, errorMessage?: string }.
      */
-    public function refund(string $orderId, int $amount): bool;
+    public function refund(string $orderId, int $amount): object;
 
     /**
      * Verifies the integrity/authenticity of an asynchronous callback.

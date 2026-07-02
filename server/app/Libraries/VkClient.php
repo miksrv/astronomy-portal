@@ -127,8 +127,9 @@ class VkClient
             $decoded = json_decode($body);
 
             if (empty($decoded->access_token)) {
-                log_message('error', '[VkClient] Token exchange response missing access_token, keys: {keys}', [
-                    'keys' => implode(', ', array_keys((array) $decoded)),
+                log_message('error', '[VkClient] Token exchange response missing access_token: error={error}, error_description={description}', [
+                    'error'       => $decoded->error ?? 'unknown',
+                    'description' => $decoded->error_description ?? 'n/a',
                 ]);
                 return null;
             }

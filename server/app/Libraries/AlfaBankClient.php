@@ -134,7 +134,7 @@ class AlfaBankClient implements PaymentGatewayInterface
         ]));
     }
 
-    public function refund(string $orderId, int $amount): bool
+    public function refund(string $orderId, int $amount): object
     {
         // refund.do does NOT accept token auth — the payment token authorises
         // order registration (and status reads) only. The gateway rejects a
@@ -148,10 +148,22 @@ class AlfaBankClient implements PaymentGatewayInterface
         ]);
 
         if ($response === null) {
-            return false;
+            return (object) [
+                'success'      => false,
+                'errorCode'    => 'TRANSPORT_ERROR',
+                'errorMessage' => 'Refund request failed (transport error)',
+            ];
         }
 
-        return !isset($response->errorCode) || (int) $response->errorCode === 0;
+        if (isset($response->errorCode) && (int) $response->errorCode !== 0) {
+            return (object) [
+                'success'      => false,
+                'errorCode'    => (string) $response->errorCode,
+                'errorMessage' => $response->errorMessage ?? '',
+            ];
+        }
+
+        return (object) ['success' => true];
     }
 
     public function verifyCallback(array $params): bool

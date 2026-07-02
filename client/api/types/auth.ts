@@ -32,10 +32,29 @@ export interface ResAuthService {
 export interface ReqUpdateProfile {
     name: string
     phone?: string
+    birthday?: string
+    sex?: 'm' | 'f'
 }
 
 export interface ResUpdateProfile {
     user: ApiModel.User
+}
+
+export interface ReqMagicLinkRequest {
+    email: string
+    returnPath?: string
+}
+
+export interface ResMagicLinkRequest {
+    sent: boolean
+}
+
+export interface ReqMagicLinkVerify {
+    token: string
+}
+
+export interface ResMagicLinkVerify extends ResLogin {
+    isNewUser?: boolean
 }
 
 export interface ResUpcomingEvent {

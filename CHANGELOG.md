@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 4.6.0
+
+### Minor Changes
+
+- Added stargazing event ticketing and paid bookings via Alfa-Bank acquiring, with a test/production environment switch, QR/PNG ticket rendering, payment status polling, retry and reconciliation for failed or abandoned payments, and alerting on failed refunds
+- Added a transactional email queue for reliable delivery of ticket, payment, and login emails
+- Added passwordless "magic link" email sign-in as an alternative to OAuth login
+- Removed Google as a login option (VK and Yandex remain); hardened VK OAuth with a deterministic PKCE `code_verifier`, clearer failure logging, and switching auth method on repeat login instead of hard-blocking it
+- Added a privacy policy page and cookie consent banner
+- Reworked the stargazing section: FAQ/How-to/Rules/Where pages, event program and attendance-statistics components, observatory history pages, and a redesigned homepage/hero layout
+- Expanded SEO with JSON-LD structured data (`Organization`, `Event`, `FAQPage`, `Article`, `ImageObject`, `BreadcrumbList`) across pages and an improved sitemap with hreflang support
+- Refactored UI styling onto shared SASS mixins and theme tokens, with refreshed header, menu, and breadcrumb styles
+
 ## 4.5.5
 
 ### Patch Changes

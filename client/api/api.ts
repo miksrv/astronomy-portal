@@ -79,6 +79,12 @@ export const API = createApi({
             invalidatesTags: ['Auth'],
             query: (body) => ({ body, method: 'PATCH', url: 'auth/profile' })
         }),
+        authRequestMagicLink: builder.mutation<ApiType.Auth.ResMagicLinkRequest, ApiType.Auth.ReqMagicLinkRequest>({
+            query: (body) => ({ body, method: 'POST', url: 'auth/magic-link' })
+        }),
+        authVerifyMagicLink: builder.mutation<ApiType.Auth.ResMagicLinkVerify, ApiType.Auth.ReqMagicLinkVerify>({
+            query: (body) => ({ body, method: 'POST', url: 'auth/magic-link/verify' })
+        }),
 
         /* Categories Controller */
         categoriesGetList: builder.query<ApiType.Category.Response, void>({

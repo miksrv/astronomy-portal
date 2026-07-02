@@ -221,6 +221,10 @@ class PaymentLibrary
 
     /**
      * Refunds a paid payment in full.
+     *
+     * On failure the payment is left as 'paid' (the money was never actually
+     * returned) but `error_code`/`error_message` are persisted so the failure
+     * is visible on the row itself, not only in the log.
      */
     public function refund(PaymentEntity $payment): bool
     {
@@ -228,13 +232,18 @@ class PaymentLibrary
             return false;
         }
 
-        $ok = $this->gateway->refund((string) $payment->order_id, (int) $payment->amount);
+        $result = $this->gateway->refund((string) $payment->order_id, (int) $payment->amount);
 
-        if ($ok) {
+        if ($result->success) {
             $this->model->update($payment->id, ['status' => 'refunded']);
+        } else {
+            $this->model->update($payment->id, [
+                'error_code'    => $result->errorCode ?? null,
+                'error_message' => $result->errorMessage ?? null,
+            ]);
         }
 
-        return $ok;
+        return $result->success;
     }
 
     /**
