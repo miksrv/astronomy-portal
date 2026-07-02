@@ -3,6 +3,7 @@ import { getCookie } from 'cookies-next'
 import { Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
@@ -15,8 +16,10 @@ type ProfilePageProps = object
 
 const ProfilePage: NextPage<ProfilePageProps> = () => {
     const { t } = useTranslation()
+    const router = useRouter()
 
     const user = useAppSelector((state) => state.auth.user)
+    const isOnboarding = router.query.onboarding === '1'
 
     const { data: upcomingEventData } = API.useEventGetUpcomingRegisteredQuery()
     const upcomingEvent = upcomingEventData?.item
@@ -29,7 +32,12 @@ const ProfilePage: NextPage<ProfilePageProps> = () => {
         >
             <AppToolbar title={t('pages.profile.title', 'Личный кабинет')} />
 
-            {user && <ProfileCard user={user} />}
+            {user && (
+                <ProfileCard
+                    user={user}
+                    isOnboarding={isOnboarding}
+                />
+            )}
 
             <h2>{t('pages.profile.upcoming-event-title', 'Предстоящее мероприятие')}</h2>
             {upcomingEvent ? (
