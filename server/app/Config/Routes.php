@@ -36,6 +36,8 @@ $routes->group('auth', static function ($routes) {
     $routes->get('vk', 'Auth::vk');
     //$routes->post('register', 'Auth::register');
     //$routes->post('login', 'Auth::login');
+    $routes->post('magic-link', 'Auth::requestMagicLink');
+    $routes->post('magic-link/verify', 'Auth::verifyMagicLink');
     $routes->patch('profile', 'Auth::updateProfile');
     $routes->options('profile', static function () {});
     $routes->options('(:any)', static function () {});
