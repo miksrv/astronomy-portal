@@ -27,7 +27,7 @@ export const MainSectionCommunity: React.FC = () => {
                     <p className={styles.sectionDesc}>
                         {t(
                             'components.pages.index.main-sections.stargazing-description',
-                            'Организуем регулярные поездки под открытое небо, чтобы наблюдать за звездами и планетами через мощные телескопы.'
+                            'Организуем регулярные поездки под открытое небо, чтобы наблюдать за звёздами и планетами через мощные телескопы.'
                         )}
                     </p>
                     <div className={styles.heroCta}>

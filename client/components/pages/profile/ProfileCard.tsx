@@ -1,28 +1,48 @@
 import React, { useState } from 'react'
-import { Button, Container, Input, Message } from 'simple-react-ui-kit'
+import { Button, Container, Input, Message, Select } from 'simple-react-ui-kit'
 
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, HOST_IMG } from '@/api'
 import { UserAvatar } from '@/components/ui/user-avatar'
+import useLocalStorage from '@/hooks/useLocalStorage'
+import { LOCAL_STORAGE } from '@/utils/constants'
 
 import styles from './styles.module.sass'
 
 interface ProfileCardProps {
     user: ApiModel.User
+    isOnboarding?: boolean
 }
 
-export const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
+export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) => {
     const { t } = useTranslation()
+    const router = useRouter()
+
+    const [returnPath] = useLocalStorage<string>(LOCAL_STORAGE.RETURN_PATH)
 
     const [name, setName] = useState<string>(user.name)
     const [phone, setPhone] = useState<string>(user.phone ?? '')
+    const [birthday, setBirthday] = useState<string>(user.birthday ?? '')
+    const [sex, setSex] = useState<'m' | 'f' | undefined>(user.sex)
     const [saveSuccess, setSaveSuccess] = useState<boolean>(false)
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
     const [updateProfile, { isLoading }] = API.useAuthUpdateProfileMutation()
 
     const avatarSrc = user.avatar ? `${HOST_IMG}/users/${user.id}/${user.avatar}` : undefined
+
+    const sexOptions = [
+        { key: 'm' as const, value: t('pages.profile.field-sex-male', 'Мужской') },
+        { key: 'f' as const, value: t('pages.profile.field-sex-female', 'Женский') }
+    ]
+
+    const goToReturnPath = () => {
+        const isValidPath = typeof returnPath === 'string' && returnPath.startsWith('/') && !returnPath.includes('://')
+
+        void router.push(isValidPath ? returnPath : '/profile')
+    }
 
     const handleSave = async () => {
         setSaveSuccess(false)
@@ -31,8 +51,16 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
         try {
             await updateProfile({
                 name,
-                phone: phone || undefined
+                phone: phone || undefined,
+                birthday: birthday || undefined,
+                sex
             }).unwrap()
+
+            if (isOnboarding) {
+                goToReturnPath()
+                return
+            }
+
             setSaveSuccess(true)
         } catch (err) {
             const messages = (err as { data?: { messages?: Record<string, string> } })?.data?.messages
@@ -57,6 +85,15 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                 </div>
 
                 <div className={styles.fieldsSection}>
+                    {isOnboarding && (
+                        <Message type={'info'}>
+                            {t(
+                                'pages.profile.onboarding-intro',
+                                'Добро пожаловать! Заполните профиль — это не обязательно, можно сделать позже.'
+                            )}
+                        </Message>
+                    )}
+
                     <Input
                         label={t('pages.profile.field-name', 'Имя')}
                         value={name}
@@ -88,15 +125,51 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                         }}
                     />
 
-                    <Button
-                        mode={'primary'}
-                        size={'medium'}
-                        loading={isLoading}
-                        disabled={isLoading}
-                        onClick={handleSave}
-                    >
-                        {t('pages.profile.save', 'Сохранить')}
-                    </Button>
+                    <Input
+                        type={'date'}
+                        label={t('pages.profile.field-birthday', 'Дата рождения')}
+                        value={birthday}
+                        error={fieldErrors['birthday']}
+                        onChange={(e) => {
+                            setBirthday(e.target.value)
+                            setSaveSuccess(false)
+                        }}
+                    />
+
+                    <Select
+                        label={t('pages.profile.field-sex', 'Пол')}
+                        options={sexOptions}
+                        value={sex}
+                        clearable={true}
+                        error={fieldErrors['sex']}
+                        onSelect={(selected) => {
+                            setSex(selected?.[0]?.key)
+                            setSaveSuccess(false)
+                        }}
+                    />
+
+                    <div className={styles.actionsRow}>
+                        <Button
+                            mode={'primary'}
+                            size={'medium'}
+                            loading={isLoading}
+                            disabled={isLoading}
+                            onClick={handleSave}
+                        >
+                            {t('pages.profile.save', 'Сохранить')}
+                        </Button>
+
+                        {isOnboarding && (
+                            <Button
+                                mode={'outline'}
+                                size={'medium'}
+                                disabled={isLoading}
+                                onClick={goToReturnPath}
+                            >
+                                {t('pages.profile.onboarding-skip', 'Пропустить')}
+                            </Button>
+                        )}
+                    </div>
 
                     {saveSuccess && (
                         <Message type={'success'}>{t('pages.profile.save-success', 'Профиль обновлён')}</Message>
