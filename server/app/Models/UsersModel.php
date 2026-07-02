@@ -76,9 +76,42 @@ class UsersModel extends ApplicationBaseModel
     public function findUserByEmailAddress(string $emailAddress): UserEntity|array|null
     {
         return $this
-            ->select('id, name, phone, avatar, email, auth_type, role, locale')
+            ->select('id, name, phone, avatar, email, auth_type, role, locale, sex, birthday')
             ->where('email', $emailAddress)
             ->first();
+    }
+
+    /**
+     * Finds a user by email, or creates a bare new one if none exists.
+     *
+     * Used by the passwordless email login flow only. Unlike OAuth's
+     * `Auth::_serviceAuth()`, this never overwrites an existing user's
+     * auth_type — logging in via a magic link must work regardless of which
+     * provider an account originally signed up with, and must not clobber
+     * that provider's auth_type on subsequent logins. auth_type is only set
+     * when the account is created here for the first time.
+     *
+     * @param string $email    Email address, already validated by the caller.
+     * @param string $authType auth_type to assign only if a new user is created.
+     * @return array{0: UserEntity, 1: bool} The user, and whether it was just created.
+     */
+    public function findOrCreateByEmail(string $email, string $authType): array
+    {
+        $userData = $this->findUserByEmailAddress($email);
+
+        if (!empty($userData)) {
+            return [$userData, false];
+        }
+
+        $newUser = new UserEntity();
+        $newUser->name      = explode('@', $email)[0];
+        $newUser->email     = $email;
+        $newUser->auth_type = $authType;
+
+        $this->insert($newUser);
+        $newUser->id = $this->getInsertID();
+
+        return [$newUser, true];
     }
 
     /**
