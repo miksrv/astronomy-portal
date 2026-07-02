@@ -10,6 +10,34 @@
         color: var(--text-color-primary)
         text-align: center
 
+    .emailRow
+        display: flex
+        align-items: flex-start
+        gap: 10px
+        width: 100%
+
+        > div:first-child
+            flex: 1
+
+    .divider
+        display: flex
+        align-items: center
+        width: 100%
+        margin: 10px 0
+        color: var(--text-color-secondary)
+        font-size: 13px
+
+        &::before,
+        &::after
+            content: ''
+            flex: 1
+            height: 1px
+            background: var(--border-color, currentColor)
+            opacity: 0.3
+
+        span
+            margin: 0 10px
+
     .buttons
         display: flex
         justify-content: space-between

@@ -76,7 +76,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, noTopMargin, ch
                     openGraph: {
                         url: props?.canonical !== undefined ? pageUrl : undefined,
                         type: 'website',
-                        images: props?.openGraph?.images,
+                        images: props?.openGraph?.images?.map((image) => ({
+                            ...image,
+                            url: image.url.startsWith('http')
+                                ? image.url
+                                : `${SITE_LINK}${image.url.replace(/^\//, '')}`
+                        })),
                         siteName: t('common.look-at-the-stars', 'Смотри на звёзды'),
                         locale: i18n.language === 'ru' ? 'ru_RU' : 'en_US'
                     },
