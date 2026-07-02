@@ -1,1 +1,40 @@
-{}
+{
+    "title": "Rules of Conduct on Stargazing Trips",
+    "description": "Learn the rules of conduct on stargazing trips in Orenburg: what not to do while observing stars and planets through a telescope. Follow these recommendations to keep every trip safe and comfortable for all participants.",
+    "welcome": "Welcome to the stargazing trips in Orenburg, organized by the \"Look at the Stars\" project! To make sure everyone enjoys observing the night sky and planets safely and comfortably, it's important to follow a few simple rules. These guidelines help preserve the atmosphere of nighttime observation and ensure everyone can enjoy the view of stars and planets through a telescope.",
+    "prohibited-title": "What not to do on stargazing trips",
+    "prohibited-items-1": {
+        "title": "Using bright light sources",
+        "description": "Flashlights, phone screens and any bright lights disrupt your eyes' adaptation to the dark, reducing visibility of the night sky. Use only red lights or special light filters for your devices."
+    },
+    "prohibited-items-2": {
+        "title": "Lighting campfires or open flames",
+        "description": "Stargazing trips take place in fields and open areas with a high fire risk. Lighting campfires is strictly prohibited."
+    },
+    "prohibited-items-3": {
+        "title": "Drinking alcohol or smoking",
+        "description": "Alcoholic drinks, cigarettes, e-cigarettes, vapes and hookahs are prohibited. This isn't just about fire safety - it's also about respecting other participants, for whom a clear night sky and fresh air matter."
+    },
+    "prohibited-items-4": {
+        "title": "Making noise or disturbing other participants",
+        "description": "Loud music, shouting or other sudden noises can distract and interfere with concentration while observing through a telescope. Please respect the quiet and mood of those around you."
+    },
+    "recommendations-title": "Recommendations for stargazing trip participants",
+    "recommendations-items-1": {
+        "title": "Take care of nature",
+        "description": "Take all your trash with you when the observations are over. We try to leave stargazing sites as clean as they were before we arrived."
+    },
+    "recommendations-items-2": {
+        "title": "Follow safety guidelines",
+        "description": "Move around carefully to avoid damaging equipment or hurting yourself."
+    },
+    "recommendations-items-3": {
+        "title": "Respect other participants",
+        "description": "Everyone comes to a stargazing trip to enjoy the beauty of space. Treating each other with respect makes the atmosphere friendly and comfortable."
+    },
+    "importance-title": "Why is it important to follow the rules?",
+    "importance-description": "Following these guidelines helps make observing the night sky in Orenburg as comfortable as possible for everyone. We aim to create an atmosphere where every participant can witness amazing celestial phenomena, explore planets through a telescope and gain an unforgettable experience.",
+    "join-title": "Join our stargazing trips!",
+    "join-description": "Want to learn more about our events organized in Orenburg?",
+    "subscribe": "Subscribe"
+}

@@ -1,1 +1,89 @@
-{}
+{
+    "title": "Frequently Asked Questions",
+    "description": "Find answers to frequently asked questions about stargazing trips: registration, what to bring, cost, duration and how to get there. Get ready for a comfortable night under the stars!",
+    "questions": {
+        "where": {
+            "question": "How do I find out where it takes place?",
+            "answer": "Our stargazing trips always take place out of town, usually within 40-70 km. We head away from light pollution and city lights to see the stars. The exact location becomes available after you register. If you happen to lose the location, just go back to the registration page using the same link. It includes geolocation links for Yandex.Maps and Google Maps."
+        },
+        "registration": {
+            "question": "Can I come without registering?",
+            "answer": "No, you can't. Registration is required, as it lets us plan the event, notify participants about any changes, and ensure comfort for everyone."
+        },
+        "qr": {
+            "question": "Why do I need a QR code?",
+            "answer": "The QR code is your entry ticket to our event. It will be checked at the entrance. Please have it ready in advance to avoid creating a queue on site. If you don't have a QR code, we'll have to turn you away. The QR code is how we manage the number of participants at the site. Our natural surroundings, as well as the team's physical capacity, have their limits. Please respect that and understand."
+        },
+        "what-to-bring": {
+            "question": "What should I bring?",
+            "answer": "For a comfortable stay at the observing site, be sure to bring warm clothing (we're out in the steppe, and it's windy and cold at night), a camping mat, folding chairs, and blankets. We also recommend a thermos with tea or coffee and some sandwiches. Consider bringing insect repellent. Hookahs, barbecues, alcohol and cigarettes are prohibited! And by the way, we run the cleanest site around - after a trip we don't find a single wrapper or scrap of paper, and we're very grateful to you for that!"
+        },
+        "no-car": {
+            "question": "I don't have a car, what should I do?",
+            "answer": "We don't organize transport or arrange rides. Our job is to put on a great event, and yours is to get there. But for your convenience, we created a chat called",
+            "poputchiki": "Astro.Rideshare",
+            "answer2": ". Join in, meet people and find company. Everyone there is friendly, easy to reach and reliable. Want to chat about space topics? Join our themed",
+            "chat": "Astro.Chat"
+        },
+        "public-transport": {
+            "question": "Can I get to the stargazing site by public transport?",
+            "answer": "Unfortunately, no. The site is far from any public transport routes. You can get there by your own car or join other participants if they're willing to give you a ride. We recommend arranging this in advance through our Telegram channel."
+        },
+        "start-time": {
+            "question": "What time does it start?",
+            "answer": "Every trip announcement includes a specific start time. This time it's 9:30 PM. Guests are asked to gather at the site between 8:00 PM and 9:00 PM. This means we ask you to arrive early - to listen to music, take photos with the Moon and among the sunflowers, watch the sunset, and breathe in the steppe air. And importantly, to park your car without creating traffic jams. We really appreciate that!"
+        },
+        "price": {
+            "question": "How much does it cost?",
+            "answer": "All of our stargazing trips are free. The project is growing and developing, and we're always glad to receive support from our listeners and subscribers. That's what",
+            "donates": "DONATIONS",
+            "answer2": "are for. Want to support us - we'd be grateful!"
+        },
+        "duration": {
+            "question": "How long does a stargazing trip last?",
+            "answer": "On average, the official program - from the start of the talk to the telescope observations - lasts 2 hours. But we guarantee it will fly by for you. After that, it's up to you - stay and watch the sky through the telescopes, or head home. Approximate end time: 12:30 AM."
+        },
+        "weather": {
+            "question": "What happens if it's cloudy or rainy?",
+            "answer": "If the weather forecast is unfavorable (clouds or precipitation), the event may be canceled or rescheduled. We always notify participants of such changes through our Telegram channel, so be sure to watch for updates."
+        },
+        "telescopes": {
+            "question": "Do I need to bring my own telescope?",
+            "answer": "No, bringing a telescope is not required. We always have several telescopes available for everyone to use. If you have your own equipment, feel free to bring it, and our experts will help you set it up and use it."
+        },
+        "kids": {
+            "question": "Can children come?",
+            "answer": "Yes, and we're happy to have them! We're always glad to see young people take an interest in science! That said, the recommended age is 6 and up. Trust our experience on this."
+        },
+        "photo": {
+            "question": "Can I take photos?",
+            "answer": "Of course! You can take photos, but please follow good etiquette so as not to disturb other participants. Don't use bright flashes or lights, as they can spoil the night observation for others."
+        },
+        "merch": {
+            "question": "How and where can I buy your merch?",
+            "answer": "We bring hoodies, T-shirts, car stickers, postcards and sticker packs to the observing site. Want to support the project - buy our merch!"
+        },
+        "cancel": {
+            "question": "I registered but can't make it. What should I do?",
+            "answer": "Just cancel your booking using the same link you registered with. Open slots will then appear on the site so others can register."
+        },
+        "more-people": {
+            "question": "I registered 1/2/3/4/5 people, can I bring more?",
+            "answer": "No, you can't. Our rules are the same for everyone. The QR code lets through only as many people as you registered - no exceptions."
+        },
+        "late-registration": {
+            "question": "Registration is closed and I missed it. Can I still come? Please!",
+            "answer": "No, unfortunately not. Our rules are the same for everyone. We introduced the registration system for a reason, and we monitor entry to the observing site."
+        },
+        "support": {
+            "question": "I like what you do! How can I support you?",
+            "answer": "We have",
+            "donates": "donations",
+            "answer2": "available. We're constantly buying new equipment, upgrading our technical capabilities, creating merch and other activities. Your support means the world to us ❤︎❤︎❤︎"
+        },
+        "feedback": {
+            "question": "Where can I leave a review about you?",
+            "answer": "Across all social networks our group is called \"Look at the Stars\". We value feedback and always read your reviews. Thank you for them!"
+        }
+    }
+}
