@@ -25,9 +25,9 @@ final class FakePaymentGateway implements PaymentGatewayInterface
         return (object) ['orderStatus' => 2];
     }
 
-    public function refund(string $orderId, int $amount): bool
+    public function refund(string $orderId, int $amount): object
     {
-        return true;
+        return (object) ['success' => true];
     }
 
     public function verifyCallback(array $params): bool
