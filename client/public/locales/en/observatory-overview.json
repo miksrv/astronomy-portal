@@ -1,1 +1,53 @@
-{}
+{
+    "title": "Observatory in Orenburg",
+    "description": "A homemade astronomical observatory located on the outskirts of Orenburg, just 15 km from the city. Thanks to its distance from urban development, the observatory sits in an area with a Bortle scale light pollution level of class 5, making it a decent suburban spot for observing the night sky.",
+    "description-1": "The observatory's main focus is deep-sky astrophotography - capturing objects such as nebulae, galaxies and star clusters. The equipment and technology used at the observatory make it possible to obtain high-quality images suitable for both scientific research and educational purposes.",
+    "description-2": "The observatory operates in a semi-automatic mode, allowing it to be controlled remotely from anywhere in the world via the internet. This makes it accessible to amateur astronomers, researchers and enthusiasts worldwide.",
+    "description-3": "The observatory is open to collaboration with amateur astronomers, researchers and educational institutions. We're happy to provide access to our data for scientific and educational purposes. If you'd like to become part of our community or use our resources for your own projects, get in touch with us through the contact form.",
+    "description-4": "The Orenburg observatory is a unique blend of modern technology and the enthusiasm of amateur astronomers. We strive to make astronomy accessible to everyone interested in the mysteries of the universe. Join us to explore the boundless expanse of space together!",
+    "equipment-title": "Observatory Equipment",
+    "equipment-description": "The instruments and technology in use ensure high observation accuracy and professional image quality. Here's the main equipment used in our work:",
+    "equipment-list": {
+        "mount": {
+            "title": "Mount: Sky-Watcher EQ6",
+            "description": "A reliable and precise mount that keeps the telescope stable even during long exposures."
+        },
+        "telescope": {
+            "title": "Telescope: Sky-Watcher BK2001P",
+            "description": "A reflector telescope with a 200 mm aperture, ideal for observing deep-sky objects."
+        },
+        "main-camera": {
+            "title": "Main camera: ASI ZWO 6200MM Pro",
+            "description": "A highly sensitive astronomical camera with 24 MP resolution, capable of capturing the finest details of distant objects."
+        },
+        "guide-camera": {
+            "title": "Guide camera: QHY QHY5",
+            "description": "A camera for precise pointing and object tracking."
+        },
+        "guide-scope": {
+            "title": "Guide scope: SV106 Guide Scope 50mm (Helical Focuser)",
+            "description": "A compact telescope for guiding during long-exposure imaging."
+        },
+        "focuser": {
+            "title": "Focuser: ZWO EAF",
+            "description": "An electronic focuser that provides precise focus adjustment."
+        },
+        "filter-wheel": {
+            "title": "Filter wheel: ZWO EFW 8x31mm",
+            "description": "A versatile filter wheel for working across different spectral ranges."
+        },
+        "filters": {
+            "title": "Filters: ZWO L, R, G, B, Ha, OIII, SII (1.25\")",
+            "description": "A set of filters for capturing color images and narrowband imaging."
+        },
+        "coma-corrector": {
+            "title": "Coma corrector: Baader 2\" Mark III MPCC",
+            "description": "Eliminates optical distortion, ensuring image sharpness."
+        }
+    },
+    "photos-and-data-title": "Photos and Data",
+    "photos-and-data": "A dedicated section of the site features <photosLink>photos</photosLink> of the deep-sky <objectsLink>objects</objectsLink> we've captured. Detailed parameters and characteristics are available for each object, such as distance, size, spectral data and much more. These materials can be useful for both beginner astronomers and professionals.",
+    "photos-and-data-part-objects": "objects",
+    "astrophoto": "Astrophotos",
+    "photos-and-data-all-photos": "All astronomical photos"
+}
