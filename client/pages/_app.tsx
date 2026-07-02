@@ -4,13 +4,10 @@ import dayjs from 'dayjs'
 
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
-import { useRouter } from 'next/router'
 import Script from 'next/script'
 import { appWithTranslation, useTranslation } from 'next-i18next/pages'
 
 import { SITE_LINK, wrapper } from '@/api'
-import { LOCAL_STORAGE } from '@/utils/constants'
-import * as LocalStorage from '@/utils/localstorage'
 
 import i18Config from '../next-i18next.config'
 
@@ -20,25 +17,8 @@ import '@/styles/theme.css'
 import '@/styles/globals.sass'
 
 const App = ({ Component, pageProps }: AppProps) => {
-    const router = useRouter()
     const { i18n } = useTranslation()
     const { store } = wrapper.useWrappedStore(pageProps)
-
-    useEffect(() => {
-        // Read the persisted locale preference on the client only.
-        // LocalStorage.getItem returns '' on the server, so this effect
-        // is intentionally client-only and safe to call on every language change.
-        const storedLocale = LocalStorage.getItem(LOCAL_STORAGE.LOCALE as 'LOCALE')
-
-        if (
-            storedLocale &&
-            i18n.language !== storedLocale &&
-            i18Config.i18n.locales.includes(storedLocale) &&
-            router.pathname !== '/404'
-        ) {
-            void router.replace(router.asPath, router.asPath, { locale: storedLocale })
-        }
-    }, [i18n.language, router])
 
     // dayjs.locale() mutates a global singleton and must not be called during
     // the render phase — doing so can trigger "Cannot update a component while
