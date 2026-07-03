@@ -13,10 +13,12 @@ import styles from './styles.module.sass'
 interface AppToolbarProps extends Pick<BreadcrumbsProps, 'currentPage' | 'links'> {
     title?: string
     children?: React.ReactNode
+    /** Rendered below the breadcrumbs line, e.g. a live "last updated" indicator. */
+    afterBreadcrumbs?: React.ReactNode
 }
 
 export const AppToolbar = forwardRef<HTMLDivElement, AppToolbarProps>(
-    ({ title, links, currentPage, children }, ref) => {
+    ({ title, links, currentPage, children, afterBreadcrumbs }, ref) => {
         const { t } = useTranslation()
 
         return (
@@ -38,6 +40,7 @@ export const AppToolbar = forwardRef<HTMLDivElement, AppToolbarProps>(
                                 homePageTitle={t('common.look-at-the-stars', 'Смотри на звёзды')}
                             />
                         )}
+                        {afterBreadcrumbs && <div className={styles.toolbarMeta}>{afterBreadcrumbs}</div>}
                     </div>
                     {children && <div className={styles.toolbarActions}>{children}</div>}
                 </div>

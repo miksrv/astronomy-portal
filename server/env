@@ -66,7 +66,7 @@ auth.vk.redirect = ''
 
 payment.gateway            = 'alfabank'
 payment.currency           = '810' # RUB
-payment.sessionTimeoutSecs = 1200  # how long an unpaid seat is held, in seconds
+payment.sessionTimeoutSecs = 3600  # how long an unpaid seat is held, in seconds
 
 # 'test' uses the rbsuat sandbox (test cards, no real money) via the
 # payment.alfabank.test.* credentials below; any other value uses the

@@ -109,6 +109,7 @@ $routes->group('events', static function ($routes) {
     $routes->get('upcoming/registered', 'Events::upcomingRegistered');
     $routes->get('photos', 'Events::photos');
     $routes->get('(:alphanum)/statistic', 'Events::statistic/$1');
+    $routes->get('(:alphanum)/registrations', 'Events::registrations/$1');
     $routes->get('(:alphanum)', 'Events::show/$1');
     $routes->get('members/(:alphanum)', 'Events::members/$1');
     $routes->get('checkin/(:alphanum)', 'Events::checkin/$1');
@@ -123,6 +124,7 @@ $routes->group('events', static function ($routes) {
     $routes->post('cancel', 'Events::cancel');
     $routes->post('payment/status', 'Events::paymentStatus');
     $routes->match(['get', 'post'], 'payment/callback', 'Events::paymentCallback');
+    $routes->post('registrations/(:alphanum)/verify-payment', 'Events::verifyRegistrationPayment/$1');
     $routes->post('upload/(:alphanum)', 'Events::upload/$1');
     $routes->options('/', static function () {});
     $routes->options('(:any)', static function () {});

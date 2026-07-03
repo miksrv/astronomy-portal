@@ -5,6 +5,7 @@ import Image from 'next/image'
 
 import { ApiModel, ApiType } from '@/api'
 import { hosts } from '@/api/constants'
+import { toDateTimeLocalValue } from '@/utils/dates'
 
 import styles from './styles.module.sass'
 
@@ -38,9 +39,9 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
         if (initialData) {
             setFormData({
                 ...initialData,
-                date: initialData?.date?.date,
-                registrationStart: initialData?.registrationStart?.date,
-                registrationEnd: initialData?.registrationEnd?.date,
+                date: toDateTimeLocalValue(initialData?.date?.date),
+                registrationStart: toDateTimeLocalValue(initialData?.registrationStart?.date),
+                registrationEnd: toDateTimeLocalValue(initialData?.registrationEnd?.date),
                 tickets: initialData?.availableTickets?.toString(),
                 ticketPrice: initialData?.ticketPrice?.toString()
             })

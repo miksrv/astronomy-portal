@@ -5,10 +5,9 @@ import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
-import { JsonLdScript } from 'next-seo'
 
 import { setLocale, wrapper } from '@/api'
-import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { StaticInfoPageLayout } from '@/components/common'
 
 import styles from './faq.module.sass'
 
@@ -23,6 +22,10 @@ const StargazingFAQPage: NextPage<object> = () => {
     const [openItems, setOpenItems] = useState<Set<number>>(new Set([0]))
 
     const title = tPage('title', 'Часто задаваемые вопросы')
+    const description = tPage(
+        'description',
+        'Узнайте ответы на частые вопросы об астровыездах: регистрация, что взять с собой, стоимость, длительность и как добраться. Готовьтесь к ночи под звёздами с комфортом!'
+    )
 
     const toggleItem = (idx: number) => {
         setOpenItems((prev) => {
@@ -246,37 +249,23 @@ const StargazingFAQPage: NextPage<object> = () => {
     }
 
     return (
-        <AppLayout
+        <StaticInfoPageLayout
             canonical={'stargazing/faq'}
             title={title}
-            description={tPage(
-                'description',
-                'Узнайте ответы на частые вопросы об астровыездах: регистрация, что взять с собой, стоимость, длительность и как добраться. Готовьтесь к ночи под звёздами с комфортом!'
-            )}
+            description={description}
             openGraph={{
                 images: [{ url: '/photos/stargazing-1.jpeg', width: 1280, height: 853 }]
             }}
+            jsonLd={{ scriptKey: 'faq-schema', data: faqJsonLd }}
+            breadcrumbLinks={[
+                {
+                    link: '/stargazing',
+                    text: t('menu.stargazing', 'Астровыезды')
+                }
+            ]}
         >
-            <JsonLdScript
-                scriptKey={'faq-schema'}
-                data={faqJsonLd}
-            />
-            <AppToolbar
-                title={title}
-                currentPage={title}
-                links={[
-                    {
-                        link: '/stargazing',
-                        text: t('menu.stargazing', 'Астровыезды')
-                    }
-                ]}
-            />
-
             <div>
-                {tPage(
-                    'description',
-                    'Узнайте ответы на частые вопросы об астровыездах: регистрация, что взять с собой, стоимость, длительность и как добраться. Готовьтесь к ночи под звёздами с комфортом!'
-                )}
+                {description}
                 <Link
                     href={'https://t.me/look_at_stars'}
                     style={{ marginLeft: '5px' }}
@@ -325,9 +314,7 @@ const StargazingFAQPage: NextPage<object> = () => {
                     )
                 })}
             </div>
-
-            <AppFooter />
-        </AppLayout>
+        </StaticInfoPageLayout>
     )
 }
 

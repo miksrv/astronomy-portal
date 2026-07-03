@@ -90,6 +90,39 @@ export interface ResUsersList {
     items?: ApiModel.EventUser[]
 }
 
+/* Registrations (admin roster) */
+export interface EventRegistration {
+    id: string
+    userId: string
+    name: string
+    email: string
+    adults: number
+    children: number
+    status: 'pending' | 'confirmed' | 'failed'
+    createdAt: string
+    checkinAt?: string
+    deletedAt?: string
+    paymentId?: string
+    paymentOrderId?: string
+    paymentStatus?: PaymentStatus
+    paymentErrorMessage?: string
+}
+
+export interface ResEventRegistrationsList {
+    items: EventRegistration[]
+}
+
+export interface ReqVerifyRegistrationPayment {
+    id: string
+    eventId: string
+}
+
+export interface ResVerifyRegistrationPayment {
+    paymentStatus: PaymentStatus
+    registrationStatus: 'pending' | 'confirmed' | 'failed'
+    message: string
+}
+
 /* Cover */
 export interface ReqUpdateCover {
     id: string

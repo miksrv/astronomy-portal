@@ -41,6 +41,7 @@ A web application for a DIY amateur observatory with support for remote monitori
     - [Key Features](#key-features)
     - [Built With](#built-with)
 - [Project Structure](#project-structure)
+- [User Roles & Permissions](#user-roles--permissions)
 - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Database](#database)
@@ -127,6 +128,46 @@ astronomy-portal/
 │   └── main/
 └── config/              # Docker Compose and Nginx configuration
 ```
+
+<p align="right">(<a href="#top">Back to top</a>)</p>
+
+---
+
+<!-- USER ROLES & PERMISSIONS -->
+## User Roles & Permissions
+
+There is no central permission/filter middleware — every backend controller checks `session.user.role` inline (a raw string comparison, no `hasRole()` helper), and the frontend mirrors the same checks to show/hide pages and UI. Roles are stored as a single ENUM column, `users.role`, defined in `server/app/Database/Migrations/2024-10-22-100000_AddUsers.php` and mirrored by the `UserRole` enum in `client/api/models/user.ts`. There are exactly four values:
+
+- **`user`** (default) — any authenticated account with no elevated role. The API omits the `role` field entirely for plain users in the `/auth/me` response (`Auth::responseAuth()`), so the frontend treats "no role" the same as `user`.
+- **`security`** — event door-staff. Adds QR check-in access on top of `user`.
+- **`moderator`** — adds comment moderation and event-statistics access on top of `security`.
+- **`admin`** — full access to every management screen and endpoint.
+
+"Guest" is not a stored role, just the absence of a session (`!isAuth`); "staff" (`admin`/`moderator`/`security` together) is an ad hoc grouping used by several checks, not a persisted value.
+
+### Frontend access by role
+
+| Role | Pages / UI gated |
+|------|-------------------|
+| Guest | Public pages only; prompted to sign in for reviews, event booking, and the mailing subscription (which happens automatically on login — see [Domain rule](#about-the-project) in `CLAUDE.md`) |
+| `user` | Own profile, own reviews/comments, own event bookings & tickets, own event history |
+| `security` | Everything `user` has, plus the "Проверка QR-кодов" menu link and the `/stargazing/checkin` page |
+| `moderator` | Everything `security` has, plus `/stargazing/[name]/statistic`, deleting any review/comment, and admin/moderator-only blocks on the event detail page |
+| `admin` | Full admin menu (`/photos/form`, `/objects/form`, `/stargazing/form`, `/mailing`, `/users`), all object/photo/event/mailing create-edit-delete forms, the `/users` member list, and enabled relay power-switch controls |
+
+### Backend endpoints by role
+
+| Requirement | Endpoints |
+|-------------|-----------|
+| Owner, or `admin`/`moderator` | `DELETE /comments/:id` |
+| Owner, or `admin` | `GET /members/:id/events` |
+| Owner, or `admin`/`moderator`/`security` | `GET /events/ticket/:id` |
+| `admin`, `moderator`, `security` | `POST /events/checkin/:id` |
+| `admin`, `moderator` | `GET /events/:id/statistic` |
+| `admin` only | `PUT /relay/set`; `POST\|PATCH\|DELETE /objects`; `GET /members`; `GET /events/members/:id`; `POST\|PATCH\|DELETE /events`, `POST /events/upload/:id`, `POST /events/:id/cover`; all `/mailings*` routes except `unsubscribe`; `POST\|PATCH\|DELETE /photos` |
+| None (public) | Everything else — health check, camera, telescope statistics, equipment/categories, file serving, read-only objects/photos/events, comment listing, sitemap, mailing unsubscribe |
+
+> **Known gap:** `POST /photos/:any/upload` (`Photos::upload()`) currently has no auth/role check at all, unlike its sibling `create`/`update`/`delete` actions on the same controller which all require `admin`. This looks like an oversight rather than an intentional public endpoint.
 
 <p align="right">(<a href="#top">Back to top</a>)</p>
 

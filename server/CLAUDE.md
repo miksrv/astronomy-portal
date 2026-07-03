@@ -43,6 +43,8 @@ DELETE /photos/:id                  → Photos::delete
 GET    /events                      → Events::list
 GET    /events/upcoming             → Events::upcoming
 GET    /events/photos               → Events::photos
+GET    /events/:id/statistic        → Events::statistic
+GET    /events/:id/registrations    → Events::registrations
 GET    /events/:id                  → Events::show
 GET    /events/members/:id          → Events::members
 GET    /events/checkin/:id          → Events::checkin
@@ -52,6 +54,8 @@ DELETE /events/:id                  → Events::delete
 POST   /events/:id/cover            → Events::cover
 POST   /events/booking              → Events::booking
 POST   /events/cancel               → Events::cancel
+POST   /events/payment/status       → Events::paymentStatus
+POST   /events/registrations/:id/verify-payment → Events::verifyRegistrationPayment
 POST   /events/upload/:id           → Events::upload
 
 GET    /mailings                    → Mailings::list

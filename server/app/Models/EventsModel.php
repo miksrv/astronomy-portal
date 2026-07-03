@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Entities\EventEntity;
-use CodeIgniter\I18n\Time;
 
 /**
  * EventsModel
@@ -67,8 +66,10 @@ class EventsModel extends ApplicationBaseModel
     /**
      * Retrieves the next upcoming event, localised to the given locale.
      *
-     * Returns the event whose date is >= (now - 5 hours), ordered so the
-     * soonest event comes first. Returns null when no upcoming event exists.
+     * Returns the event whose local (Orenburg) calendar date is today or
+     * later, ordered so the soonest event comes first. An event stays
+     * "upcoming" for its entire local day regardless of its time of day.
+     * Returns null when no upcoming event exists.
      *
      * @param string $locale Locale code for title/location/content selection ('ru' or 'en'). Default is 'ru'.
      * @return EventEntity|null The upcoming EventEntity, or null if none found.
@@ -77,11 +78,9 @@ class EventsModel extends ApplicationBaseModel
     {
         helper('locale');
 
-        $datetime = (new Time('now'))->subHours(5);
-
         $event = $this
-            ->where('date >=', $datetime->format('Y-m-d H:i:s'))
-            ->orderBy('date', 'DESC')
+            ->where('date >=', $this->startOfTodayOrenburg()->format('Y-m-d H:i:s'))
+            ->orderBy('date', 'ASC')
             ->first();
 
         if ($event === null) {
@@ -105,8 +104,9 @@ class EventsModel extends ApplicationBaseModel
      * Retrieves a list of past events or a single event by ID, localised to the given locale.
      *
      * When $eventId is provided, returns details for that specific event (including content
-     * and registration window fields). Otherwise returns all events whose date is in the past,
-     * ordered newest first.
+     * and registration window fields). Otherwise returns all events whose local (Orenburg)
+     * calendar date is before today — i.e. events archive at the start of the day *after*
+     * their date, not at their exact time — ordered newest first.
      *
      * @param string   $locale  Locale code for title/content selection ('ru' or 'en'). Default is 'ru'.
      * @param int|null $eventId Optional event ID. When set, retrieves that specific event only.
@@ -116,16 +116,16 @@ class EventsModel extends ApplicationBaseModel
     {
         helper('locale');
 
-        $datetime = (new Time('now'))->addHours(5);
-
         $eventsQuery = $this->select('id, title_en, title_ru, date, cover_file_name, cover_file_ext, max_tickets, views' . (
-            $eventId !== null ? ', content_en, content_ru, date, registration_start, registration_end' : '')
+            $eventId !== null
+                ? ', content_en, content_ru, date, registration_start, registration_end, ticket_price, yandex_map_link, google_map_link, location_en, location_ru'
+                : '')
         );
 
         if ($eventId !== null) {
             $eventsQuery->where('id', $eventId);
         } else {
-            $eventsQuery->where('date <', $datetime->format('Y-m-d H:i:s'));
+            $eventsQuery->where('date <', $this->startOfTodayOrenburg()->format('Y-m-d H:i:s'));
         }
 
         $events = $eventsQuery->orderBy('date', 'DESC')->findAll();
@@ -138,12 +138,14 @@ class EventsModel extends ApplicationBaseModel
             $event->title = getLocalizedString($locale, $event->title_en, $event->title_ru);
 
             if ($eventId !== null) {
-                $event->content = getLocalizedString($locale, $event->content_en, $event->content_ru);
+                $event->content  = getLocalizedString($locale, $event->content_en, $event->content_ru);
+                $event->location = getLocalizedString($locale, $event->location_en, $event->location_ru);
             }
 
             unset(
                 $event->title_en, $event->title_ru,
-                $event->content_en, $event->content_ru
+                $event->content_en, $event->content_ru,
+                $event->location_en, $event->location_ru
             );
         }
 
@@ -165,16 +167,15 @@ class EventsModel extends ApplicationBaseModel
     }
 
     /**
-     * Counts stargazing events that have already taken place (date in the past,
-     * adjusted to Orenburg time, UTC+5). Used for aggregate public statistics.
+     * Counts stargazing events that have already taken place — i.e. whose
+     * local (Orenburg) calendar date is before today. Used for aggregate
+     * public statistics.
      *
      * @return int Number of conducted events.
      */
     public function getConductedCount(): int
     {
-        $datetime = (new Time('now'))->addHours(5);
-
-        return $this->where('date <', $datetime->format('Y-m-d H:i:s'))
+        return $this->where('date <', $this->startOfTodayOrenburg()->format('Y-m-d H:i:s'))
             ->countAllResults();
     }
 }

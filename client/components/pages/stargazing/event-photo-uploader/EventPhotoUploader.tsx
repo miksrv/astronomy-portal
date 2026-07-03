@@ -15,80 +15,76 @@ export const EventPhotoUploader: React.FC<PhotoUploaderProps> = ({
     onUploadPhoto,
     fileInputRef
 }) => {
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+    const [isUploading, setIsUploading] = useState<boolean>(false)
     // Track object URLs so we can revoke them to prevent memory leaks
     const objectUrlsRef = useRef<string[]>([])
+    // Bumped whenever the pending queue should be abandoned (event changes mid-upload)
+    const uploadTokenRef = useRef<number>(0)
 
-    const [handleUploadPhoto, { data: uploadedPhoto, isLoading: uploadLoading, isError: uploadError }] =
-        API.useEventPhotoUploadPostMutation()
+    const [handleUploadPhoto] = API.useEventPhotoUploadPostMutation()
+
+    const showPreview = (files: File[]) => {
+        objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url))
+
+        const urls = files.map((file) => URL.createObjectURL(file)).reverse()
+
+        objectUrlsRef.current = urls
+        onSelectFiles?.(urls)
+    }
+
+    const uploadQueue = async (files: File[], token: number) => {
+        setIsUploading(true)
+        showPreview(files)
+
+        let remaining = files
+
+        for (const file of files) {
+            if (uploadTokenRef.current !== token) {
+                // Superseded by a newer selection or an event change — stop here.
+                return
+            }
+
+            const formData = new FormData()
+            formData.append('photo', file)
+
+            const result = await handleUploadPhoto({ eventId, formData })
+
+            if ('error' in result) {
+                // #TODO: Add notification
+                showPreview([])
+                break
+            }
+
+            onUploadPhoto?.(result.data)
+            remaining = remaining.slice(1)
+            showPreview(remaining)
+        }
+
+        setIsUploading(false)
+    }
 
     const handleSelectedFilesUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files
 
-        if (files?.length && eventId && !uploadLoading) {
-            const filesList = Array.from(files).map((file) => file)
-            setSelectedFiles(filesList)
+        if (files?.length && eventId && !isUploading) {
+            uploadTokenRef.current += 1
+            void uploadQueue(Array.from(files), uploadTokenRef.current)
         }
     }
 
-    /**
-     * If an error occurs in downloading a file, clear the queue of the list of photos for downloading
-     * #TODO:Add notification
-     */
     useEffect(() => {
-        setSelectedFiles([])
-    }, [uploadError])
-
-    /** After successfully uploading each photo:
-     * - remove one file from the download queue
-     * - add the uploaded photo to the list of other photos
-     */
-    useEffect(() => {
-        if (uploadedPhoto) {
-            const uploadingFiles = [...selectedFiles]
-            uploadingFiles.shift()
-
-            setSelectedFiles(uploadingFiles)
-            onUploadPhoto?.(uploadedPhoto)
-        }
-    }, [uploadedPhoto])
-
-    /**
-     * After each update of the download queue:
-     * - perform a request to download the first file from the queue
-     */
-    useEffect(() => {
-        if (selectedFiles.length) {
-            const formData = new FormData()
-
-            formData.append('photo', selectedFiles[0])
-
-            void handleUploadPhoto({
-                eventId: eventId,
-                formData
-            })
-        }
-    }, [selectedFiles])
-
-    useEffect(() => {
-        setSelectedFiles([])
+        // Abandon any in-flight queue when the event changes (e.g. navigating between event pages).
+        uploadTokenRef.current += 1
+        setIsUploading(false)
+        showPreview([])
     }, [eventId])
 
-    useEffect(() => {
-        // Revoke previously created object URLs before creating new ones
-        objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url))
-
-        const urls = selectedFiles.map((file) => URL.createObjectURL(file)).reverse()
-
-        objectUrlsRef.current = urls
-        onSelectFiles?.(urls)
-
-        return () => {
-            // Revoke on cleanup (unmount or next effect run)
+    useEffect(
+        () => () => {
             objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url))
-            objectUrlsRef.current = []
-        }
-    }, [selectedFiles])
+        },
+        []
+    )
 
     return (
         <input

@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Input, Message, Select } from 'simple-react-ui-kit'
 
-import { API, ApiType, useAppSelector } from '@/api'
-import { STARGAZING_RETRY_STORAGE_KEY } from '@/utils/constants'
+import { ApiType, useAppSelector } from '@/api'
+
+import { useEventBookingSubmit } from '../useEventBookingSubmit'
 
 import styles from './styles.module.sass'
 
@@ -38,7 +39,7 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, tic
         phone: user?.phone || ''
     })
 
-    const [bookEvent, { isLoading, isSuccess, isError, error }] = API.useEventsRegistrationPostMutation()
+    const { submit, isLoading, isSuccess, isError, error } = useEventBookingSubmit()
 
     const findError = (field: keyof ApiType.Events.ReqRegistration) =>
         ((error as ApiType.ResError)?.messages?.[field as never] as string | undefined) || undefined
@@ -64,26 +65,20 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, tic
             phone: formState.phone?.length ? formState.phone : undefined
         }
 
-        const result = await bookEvent(request)
+        const result = await submit(request)
 
-        const data = 'data' in result ? (result.data as ApiType.Events.ResRegistration) : undefined
-
-        // Paid event — the API returns a bank payment page URL to redirect to.
-        if (data?.payment?.formUrl) {
-            // Saved so a declined/failed payment can be retried (new order) from
-            // the payment result page without re-filling this form.
-            sessionStorage.setItem(STARGAZING_RETRY_STORAGE_KEY, JSON.stringify(request))
-
+        // Paid event — the API returns a bank payment page URL; submit() has
+        // already redirected there, this only updates the local "redirecting" state.
+        if (result?.redirectedToPayment) {
             setPaymentRedirect(true)
-            window.location.href = data.payment.formUrl
             return
         }
 
         // Free event — confirmed immediately; keep the booking id to render the ticket.
-        if (data?.bookingId) {
-            setBookingId(data.bookingId)
+        if (result?.bookingId) {
+            setBookingId(result.bookingId)
         }
-    }, [formState, eventId, bookEvent])
+    }, [formState, eventId, submit])
 
     useEffect(() => {
         if (

@@ -5,16 +5,48 @@ import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
-import { JsonLdScript } from 'next-seo'
 
 import { setLocale, SITE_LINK, wrapper } from '@/api'
-import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
+import { PhotoGallery, PhotoLightbox, StaticInfoPageLayout } from '@/components/common'
 import photoStargazing1 from '@/public/photos/stargazing-4.jpeg'
 import photoStargazing2 from '@/public/photos/stargazing-5.jpeg'
 import photoStargazing3 from '@/public/photos/stargazing-9.jpeg'
 import photoStargazing4 from '@/public/photos/stargazing-10.jpeg'
 
 const photosGallery = [photoStargazing1, photoStargazing2, photoStargazing3, photoStargazing4]
+
+// Single source of truth for the 4-step plan, shared by the HowTo JSON-LD schema
+// and the visible "event_plan" list below — editing a step only means editing it here.
+const PLAN_STEPS = [
+    {
+        key: 'arrival',
+        titleFallback: 'Прибытие на место',
+        textKey: 'arrival_text',
+        textFallback:
+            'Приезжайте за 15–20 минут до начала, чтобы занять удобное место на астрономической поляне. Возьмите с собой походные стулья или коврики для комфортного размещения.'
+    },
+    {
+        key: 'lecture',
+        titleFallback: 'Астролекция',
+        textKey: 'lecture_text',
+        textFallback:
+            'Как только наступают сумерки, начинается наша астролекция. На большом экране мы показываем видео и фото, рассказывая о космосе доступным и интересным языком. Темы лекций варьируются: от «Метеоритный поток Персеиды» до «Что скрывают Черные дыры». Лекции рассчитаны на участников от 8 лет и длятся около часа.'
+    },
+    {
+        key: 'orientation',
+        titleFallback: 'Ориентация по звёздному небу',
+        textKey: 'orientation_text',
+        textFallback:
+            'После лекции мы учим вас находить основные звёзды и созвездия, показывая их на небе. Эта часть длится около 20 минут.'
+    },
+    {
+        key: 'telescope_observation',
+        titleFallback: 'Наблюдение в телескопы',
+        textKey: 'telescope_observation_text',
+        textFallback:
+            'На астрономической площадке установлено несколько телескопов, каждый из которых настроен на определенные космические объекты. Вы сможете смотреть в телескопы, задавать вопросы и общаться с астрономами.'
+    }
+] as const
 
 const StargazingHowToPage: NextPage<object> = () => {
     const { t } = useTranslation()
@@ -34,6 +66,11 @@ const StargazingHowToPage: NextPage<object> = () => {
         setShowLightbox(false)
     }
 
+    const planSteps = PLAN_STEPS.map((step) => ({
+        name: tPage(step.key, step.titleFallback),
+        text: tPage(step.textKey, step.textFallback)
+    }))
+
     const howToSchema = {
         '@context': 'https://schema.org',
         '@type': 'HowTo',
@@ -43,48 +80,16 @@ const StargazingHowToPage: NextPage<object> = () => {
             'Узнайте, как проходят астровыезды в Оренбурге: регистрация, лекции о космосе, наблюдения в телескопы и обучение ориентации по звёздному небу.'
         ),
         url: `${SITE_LINK}stargazing/howto`,
-        step: [
-            {
-                '@type': 'HowToStep',
-                position: 1,
-                name: tPage('arrival', 'Прибытие на место'),
-                text: tPage(
-                    'arrival_text',
-                    'Приезжайте за 15–20 минут до начала, чтобы занять удобное место на астрономической поляне. Возьмите с собой походные стулья или коврики для комфортного размещения.'
-                )
-            },
-            {
-                '@type': 'HowToStep',
-                position: 2,
-                name: tPage('lecture', 'Астролекция'),
-                text: tPage(
-                    'lecture_text',
-                    'Как только наступают сумерки, начинается наша астролекция. На большом экране мы показываем видео и фото, рассказывая о космосе доступным и интересным языком. Лекции рассчитаны на участников от 8 лет и длятся около часа.'
-                )
-            },
-            {
-                '@type': 'HowToStep',
-                position: 3,
-                name: tPage('orientation', 'Ориентация по звёздному небу'),
-                text: tPage(
-                    'orientation_text',
-                    'После лекции мы учим вас находить основные звёзды и созвездия, показывая их на небе. Эта часть длится около 20 минут.'
-                )
-            },
-            {
-                '@type': 'HowToStep',
-                position: 4,
-                name: tPage('telescope_observation', 'Наблюдение в телескопы'),
-                text: tPage(
-                    'telescope_observation_text',
-                    'На астрономической площадке установлено несколько телескопов, каждый из которых настроен на определенные космические объекты. Вы сможете смотреть в телескопы, задавать вопросы и общаться с астрономами.'
-                )
-            }
-        ]
+        step: planSteps.map((step, index) => ({
+            '@type': 'HowToStep',
+            position: index + 1,
+            name: step.name,
+            text: step.text
+        }))
     }
 
     return (
-        <AppLayout
+        <StaticInfoPageLayout
             canonical={'stargazing/howto'}
             title={title}
             description={tPage(
@@ -100,22 +105,14 @@ const StargazingHowToPage: NextPage<object> = () => {
                     }
                 ]
             }}
+            jsonLd={{ scriptKey: 'howto-schema', data: howToSchema }}
+            breadcrumbLinks={[
+                {
+                    link: '/stargazing',
+                    text: t('menu.stargazing', 'Астровыезды')
+                }
+            ]}
         >
-            <JsonLdScript
-                scriptKey={'howto-schema'}
-                data={howToSchema}
-            />
-            <AppToolbar
-                title={title}
-                currentPage={title}
-                links={[
-                    {
-                        link: '/stargazing',
-                        text: t('menu.stargazing', 'Астровыезды')
-                    }
-                ]}
-            />
-
             <div>
                 {tPage(
                     'unique_event',
@@ -157,42 +154,15 @@ const StargazingHowToPage: NextPage<object> = () => {
 
             <Container>
                 <ul style={{ listStyle: 'decimal', margin: 0, padding: '0 20px' }}>
-                    <li style={{ marginBottom: '10px' }}>
-                        <h3>{tPage('arrival', 'Прибытие на место')}</h3>
-                        <p style={{ margin: 0 }}>
-                            {tPage(
-                                'arrival_text',
-                                'Приезжайте за 15–20 минут до начала, чтобы занять удобное место на астрономической поляне. Возьмите с собой походные стулья или коврики для комфортного размещения.'
-                            )}
-                        </p>
-                    </li>
-                    <li style={{ marginBottom: '10px' }}>
-                        <h3>{tPage('lecture', 'Астролекция')}</h3>
-                        <p style={{ margin: 0 }}>
-                            {tPage(
-                                'lecture_text',
-                                'Как только наступают сумерки, начинается наша астролекция. На большом экране мы показываем видео и фото, рассказывая о космосе доступным и интересным языком. Темы лекций варьируются: от «Метеоритный поток Персеиды» до «Что скрывают Черные дыры». Лекции рассчитаны на участников от 8 лет и длятся около часа.'
-                            )}
-                        </p>
-                    </li>
-                    <li style={{ marginBottom: '10px' }}>
-                        <h3>{tPage('orientation', 'Ориентация по звёздному небу')}</h3>
-                        <p style={{ margin: 0 }}>
-                            {tPage(
-                                'orientation_text',
-                                'После лекции мы учим вас находить основные звёзды и созвездия, показывая их на небе. Эта часть длится около 20 минут.'
-                            )}
-                        </p>
-                    </li>
-                    <li>
-                        <h3>{tPage('telescope_observation', 'Наблюдение в телескопы')}</h3>
-                        <p style={{ margin: 0 }}>
-                            {tPage(
-                                'telescope_observation_text',
-                                'На астрономической площадке установлено несколько телескопов, каждый из которых настроен на определенные космические объекты. Вы сможете смотреть в телескопы, задавать вопросы и общаться с астрономами.'
-                            )}
-                        </p>
-                    </li>
+                    {planSteps.map((step, index) => (
+                        <li
+                            key={step.name}
+                            style={index < planSteps.length - 1 ? { marginBottom: '10px' } : undefined}
+                        >
+                            <h3>{step.name}</h3>
+                            <p style={{ margin: 0 }}>{step.text}</p>
+                        </li>
+                    ))}
                 </ul>
             </Container>
 
@@ -253,9 +223,7 @@ const StargazingHowToPage: NextPage<object> = () => {
                 onCloseLightBox={handleHideLightbox}
                 onChangeIndex={setPhotoIndex}
             />
-
-            <AppFooter />
-        </AppLayout>
+        </StaticInfoPageLayout>
     )
 }
 

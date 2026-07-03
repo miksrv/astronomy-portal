@@ -12,6 +12,7 @@ import googleLogo from '@/public/images/google-logo.png'
 import vkLogo from '@/public/images/vk-logo.png'
 import yandexLogo from '@/public/images/yandex-logo.png'
 import { AUTH_GOOGLE_ENABLED, LOCAL_STORAGE } from '@/utils/constants'
+import { getErrorMessage } from '@/utils/errors'
 
 import styles from './styles.module.sass'
 
@@ -118,9 +119,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
         <div className={styles.loginForm}>
             <p>{t('components.common.login-form.auth-description', 'Войдите по ссылке из письма или через сервис')}</p>
 
-            {isMagicLinkError && (
-                <Message type={'error'}>{(magicLinkError as ApiType.ResError)?.messages?.error || ''}</Message>
-            )}
+            {isMagicLinkError && <Message type={'error'}>{getErrorMessage(magicLinkError) || ''}</Message>}
 
             <div className={styles.emailRow}>
                 <Input
@@ -149,7 +148,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
                 <span>{t('components.common.login-form.divider', 'или')}</span>
             </div>
 
-            {isError && <Message type={'error'}>{(error as ApiType.ResError)?.messages?.error || ''}</Message>}
+            {isError && <Message type={'error'}>{getErrorMessage(error) || ''}</Message>}
 
             <div className={styles.buttons}>
                 <Button

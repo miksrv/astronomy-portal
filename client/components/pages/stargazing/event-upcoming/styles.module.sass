@@ -22,8 +22,13 @@
     display: flex
     flex-wrap: wrap
 
+    &.compact
+        .stargazing
+            width: 100%
+            padding-left: 0
+
     .imageContainer
-        width: 60%
+        width: 50%
         position: relative
 
         .blur
@@ -42,13 +47,21 @@
             height: 100%
             object-fit: contain
 
+        .adminActions
+            position: absolute
+            top: 10px
+            left: 10px
+            z-index: 2
+            display: flex
+            gap: 8px
+
         @media only screen and (max-width: variables.$mobileMaxWidth)
             width: 100%
 
     .stargazing
         padding-left: 15px
         text-align: left
-        width: 40%
+        width: 50%
 
         @media only screen and (max-width: variables.$mobileMaxWidth)
             width: 100%
@@ -73,7 +86,6 @@
             font-weight: 300
             margin-bottom: 10px
             line-height: normal
-            text-align: center
             color: var(--color-green)
 
         .ticketBlock
@@ -166,10 +178,35 @@
                 font-size: 20px !important
                 color: var(--color-red)
 
+        .guestSubscribe
+            width: 80%
+            margin: 0 auto
+
         .cancelRegistration
             margin: 20px auto 0
 
             .cancelRegistrationButton
+                width: 100%
+
+        .compactColumns
+            display: flex
+            align-items: flex-start
+            gap: 24px
+
+            @media only screen and (max-width: variables.$mobileMaxWidth)
+                flex-direction: column
+
+        .compactInfo
+            flex: 1
+            min-width: 0
+
+        .compactTicket
+            flex: 0 0 320px
+            max-width: 320px
+
+            @media only screen and (max-width: variables.$mobileMaxWidth)
+                flex: 1
+                max-width: 100%
                 width: 100%
 
 .content

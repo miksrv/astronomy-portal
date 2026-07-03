@@ -85,16 +85,15 @@ class EventsPhotosModel extends ApplicationBaseModel
             $photosQuery->where('event_id', $eventId);
         }
 
-        if ($eventId && (is_numeric($limit) && $limit > 0)) {
-            $photosQuery->limit($limit);
-        }
+        // Always capped at 100, regardless of whether the list is scoped to
+        // one event — an unbounded $limit here was previously possible when
+        // $eventId was set.
+        $photosQuery->limit((is_numeric($limit) && $limit > 0 && $limit <= 100) ? $limit : 20);
 
-        if (!$eventId) {
-            $photosQuery->limit(($limit > 0 && $limit <= 100) ? $limit : 20);
-        }
-
-        if ($order !== null && in_array($order, ['rand', 'date'])) {
-            $photosQuery->orderBy($order === 'rand' ? 'RAND()' : 'date');
+        if ($order !== null && in_array($order, ['rand', 'date'], true)) {
+            // 'date' orders by upload time — the table has no `date` column,
+            // only `created_at`.
+            $photosQuery->orderBy($order === 'rand' ? 'RAND()' : 'created_at');
         }
 
         $photosList = $photosQuery->findAll();

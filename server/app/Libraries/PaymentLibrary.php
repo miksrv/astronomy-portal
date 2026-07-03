@@ -18,7 +18,7 @@ use InvalidArgumentException;
  * Configuration is read from environment variables:
  *   payment.gateway                 — gateway name (default "alfabank")
  *   payment.currency                — ISO 4217 numeric currency (default "810" / RUB)
- *   payment.sessionTimeoutSecs      — order lifetime / seat-hold TTL (default 1200)
+ *   payment.sessionTimeoutSecs      — order lifetime / seat-hold TTL (default 3600)
  *   payment.alfabank.environment    — 'test' (rbsuat sandbox) or 'production' (default)
  *   payment.alfabank.token          — Alfa-Bank payment token (preferred; required for "r-login")
  *   payment.alfabank.userName       — Alfa-Bank API login (fallback when no token is set)
@@ -93,7 +93,7 @@ class PaymentLibrary
         ?string $failUrl = null
     ): ?PaymentEntity {
         $currency       = (string) (getenv('payment.currency') ?: '810');
-        $sessionTimeout = (int) (getenv('payment.sessionTimeoutSecs') ?: 1200);
+        $sessionTimeout = (int) (getenv('payment.sessionTimeoutSecs') ?: 3600);
         $orderNumber    = $entityId . '-' . substr(uniqid(), -8);
 
         $options = [
@@ -156,13 +156,18 @@ class PaymentLibrary
     /**
      * Re-fetches the authoritative status from the gateway and persists it.
      *
-     * Terminal statuses (paid, refunded) short-circuit without a gateway call.
+     * Terminal/in-flight statuses (paid, refunded, refunding) short-circuit
+     * without a gateway call.
      *
      * @return string Normalised status (new|pending|paid|failed|canceled|refunded).
      */
     public function getVerifiedStatus(PaymentEntity $payment): string
     {
-        if (in_array($payment->status, ['paid', 'refunded'], true)) {
+        // 'refunding' is an in-flight claim owned exclusively by refund(); a
+        // gateway poll landing mid-refund must not resolve it back to 'paid'
+        // (the gateway may still report the pre-refund status), or it would
+        // reopen the double-refund race refund() guards against.
+        if (in_array($payment->status, ['paid', 'refunded', 'refunding'], true)) {
             return $payment->status;
         }
 
@@ -222,14 +227,39 @@ class PaymentLibrary
     /**
      * Refunds a paid payment in full.
      *
-     * On failure the payment is left as 'paid' (the money was never actually
-     * returned) but `error_code`/`error_message` are persisted so the failure
-     * is visible on the row itself, not only in the log.
+     * Idempotent: a payment that is already `refunding` (claimed by a
+     * concurrent caller) or `refunded` (already completed) returns true
+     * instead of false, so a racing caller (e.g. a webhook and a status poll
+     * reconciling the same payment) doesn't treat an in-progress/completed
+     * refund as a failure.
+     *
+     * On failure the payment is put back to 'paid' (the money was never
+     * actually returned) but `error_code`/`error_message` are persisted so
+     * the failure is visible on the row itself, not only in the log.
      */
     public function refund(PaymentEntity $payment): bool
     {
+        if (in_array($payment->status, ['refunding', 'refunded'], true)) {
+            return true;
+        }
+
         if ($payment->status !== 'paid') {
             return false;
+        }
+
+        // Atomically claim the refund: only one concurrent caller can flip
+        // 'paid' -> 'refunding'. Without this, a double-click cancel (or a
+        // cancellation racing an admin's manual re-verify) could both read
+        // the same 'paid' row and both call the gateway.
+        $this->model->where('id', $payment->id)->where('status', 'paid')->set('status', 'refunding')->update();
+
+        if ($this->model->affectedRows() === 0) {
+            // Another call already claimed or resolved it. Re-check the
+            // current row instead of assuming failure: if it's now
+            // refunding/refunded, this is an idempotent no-op, not an error.
+            $current = $this->model->find($payment->id);
+
+            return $current !== null && in_array($current->status, ['refunding', 'refunded'], true);
         }
 
         $result = $this->gateway->refund((string) $payment->order_id, (int) $payment->amount);
@@ -237,7 +267,10 @@ class PaymentLibrary
         if ($result->success) {
             $this->model->update($payment->id, ['status' => 'refunded']);
         } else {
+            // Roll the claim back so a later retry (e.g. a manual admin
+            // re-verify) can attempt the refund again.
             $this->model->update($payment->id, [
+                'status'        => 'paid',
                 'error_code'    => $result->errorCode ?? null,
                 'error_message' => $result->errorMessage ?? null,
             ]);

@@ -5,10 +5,9 @@ import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
-import { JsonLdScript } from 'next-seo'
 
 import { setLocale, SITE_LINK, wrapper } from '@/api'
-import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { StaticInfoPageLayout } from '@/components/common'
 
 const PrivacyPolicyPage: NextPage<object> = () => {
     const { t } = useTranslation()
@@ -37,20 +36,12 @@ const PrivacyPolicyPage: NextPage<object> = () => {
     }
 
     return (
-        <AppLayout
+        <StaticInfoPageLayout
             canonical={'privacy'}
             title={title}
             description={description}
+            jsonLd={{ scriptKey: 'privacy-webpage', data: webPageSchema }}
         >
-            <JsonLdScript
-                scriptKey={'privacy-webpage'}
-                data={webPageSchema}
-            />
-            <AppToolbar
-                title={title}
-                currentPage={title}
-            />
-
             <Container>
                 <p style={{ marginTop: 0 }}>
                     {t(
@@ -296,9 +287,7 @@ const PrivacyPolicyPage: NextPage<object> = () => {
                     </Link>
                 </p>
             </Container>
-
-            <AppFooter />
-        </AppLayout>
+        </StaticInfoPageLayout>
     )
 }
 
