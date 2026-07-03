@@ -1,0 +1,64 @@
+@use '../../../../styles/variables' as variables
+
+.wrapper
+    display: flex
+    flex-direction: column
+    gap: 16px
+
+.header
+    display: flex
+    align-items: center
+    justify-content: space-between
+    flex-wrap: wrap
+    gap: 10px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column
+        align-items: stretch
+
+.title
+    font-size: var(--font-size)
+    font-weight: 600
+    color: var(--text-color-primary)
+    margin: 0
+
+.search
+    min-width: 260px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        width: 100%
+
+.noPayment
+    color: var(--text-color-secondary)
+
+.verifyCell
+    display: flex
+    flex-direction: column
+    gap: 6px
+    align-items: flex-start
+
+.verifyResult
+    font-size: var(--font-size-small)
+    color: var(--text-color-secondary)
+    max-width: 220px
+
+.verifyError
+    font-size: var(--font-size-small)
+    color: var(--color-error, #e5484d)
+    max-width: 220px
+
+.badgeConfirmed
+    background: #2e7d32 !important
+    color: #fff !important
+
+.badgePending
+    background: #ff8c00 !important
+    color: #fff !important
+
+.badgeFailed
+    background: #ff4444 !important
+    color: #fff !important
+
+.badgeCanceled
+    background: #ccc !important
+    color: #333 !important

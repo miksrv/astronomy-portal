@@ -2,6 +2,7 @@
 
 return [
     'notFound'           => 'Event not found.',
+    'hasRegistrations'   => 'This event cannot be deleted because it already has registrations. Cancel all bookings first.',
     'noUpcomingEvents'   => 'No upcoming events.',
     'invalidQrCode'      => 'Invalid QR code.',
     'notExists'          => 'This event does not exist.',
@@ -9,11 +10,18 @@ return [
     'registrationClosed' => 'Registration for this event has already ended or not yet started.',
     'noTicketsAvailable' => 'Registration is closed — all spots are already booked.',
     'notRegistered'      => 'You are not registered for this event.',
+    'bookingNotConfirmed' => 'This registration has not been confirmed yet.',
+    'invalidDateFormat'   => 'Invalid date format.',
+    'invalidRegistrationWindow' => 'Invalid registration window: it must open before it closes, and close no later than the event date.',
     'bookingSuccess'     => 'You have successfully registered for the event.',
     'cancelSuccess'      => 'You have cancelled your booking.',
     'paymentFailed'      => 'Could not create the payment. Please try again later.',
     'paymentNotFound'    => 'Payment not found.',
     'paymentInvalidCallback' => 'Invalid payment notification signature.',
+    'noPaymentLinked'    => 'This registration has no linked payment.',
+    'paymentVerifiedConfirmed' => 'Transaction succeeded — the registration has been confirmed.',
+    'paymentVerifiedFailed'    => 'Transaction failed — the registration remains unconfirmed.',
+    'paymentVerifiedPending'   => 'Transaction is still pending.',
 
     // Ticket (rendered onto the PNG ticket image)
     'ticketHeading'      => 'Stargazing ticket',
