@@ -1,5 +1,7 @@
 import React from 'react'
 
+export const cn = (...args: unknown[]): string => args.filter(Boolean).join(' ')
+
 export const Button: React.FC<
     React.ButtonHTMLAttributes<HTMLButtonElement> & {
         loading?: boolean

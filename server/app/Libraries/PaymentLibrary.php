@@ -18,7 +18,7 @@ use InvalidArgumentException;
  * Configuration is read from environment variables:
  *   payment.gateway                 — gateway name (default "alfabank")
  *   payment.currency                — ISO 4217 numeric currency (default "810" / RUB)
- *   payment.sessionTimeoutSecs      — order lifetime / seat-hold TTL (default 1200)
+ *   payment.sessionTimeoutSecs      — order lifetime / seat-hold TTL (default 3600)
  *   payment.alfabank.environment    — 'test' (rbsuat sandbox) or 'production' (default)
  *   payment.alfabank.token          — Alfa-Bank payment token (preferred; required for "r-login")
  *   payment.alfabank.userName       — Alfa-Bank API login (fallback when no token is set)
@@ -93,7 +93,7 @@ class PaymentLibrary
         ?string $failUrl = null
     ): ?PaymentEntity {
         $currency       = (string) (getenv('payment.currency') ?: '810');
-        $sessionTimeout = (int) (getenv('payment.sessionTimeoutSecs') ?: 1200);
+        $sessionTimeout = (int) (getenv('payment.sessionTimeoutSecs') ?: 3600);
         $orderNumber    = $entityId . '-' . substr(uniqid(), -8);
 
         $options = [
@@ -222,13 +222,25 @@ class PaymentLibrary
     /**
      * Refunds a paid payment in full.
      *
-     * On failure the payment is left as 'paid' (the money was never actually
-     * returned) but `error_code`/`error_message` are persisted so the failure
-     * is visible on the row itself, not only in the log.
+     * On failure the payment is put back to 'paid' (the money was never
+     * actually returned) but `error_code`/`error_message` are persisted so
+     * the failure is visible on the row itself, not only in the log.
      */
     public function refund(PaymentEntity $payment): bool
     {
         if ($payment->status !== 'paid') {
+            return false;
+        }
+
+        // Atomically claim the refund: only one concurrent caller can flip
+        // 'paid' -> 'refunding'. Without this, a double-click cancel (or a
+        // cancellation racing an admin's manual re-verify) could both read
+        // the same 'paid' row and both call the gateway. If this affects 0
+        // rows, another call already claimed or resolved it — bail out
+        // without touching the gateway a second time.
+        $this->model->where('id', $payment->id)->where('status', 'paid')->set('status', 'refunding')->update();
+
+        if ($this->model->affectedRows() === 0) {
             return false;
         }
 
@@ -237,7 +249,10 @@ class PaymentLibrary
         if ($result->success) {
             $this->model->update($payment->id, ['status' => 'refunded']);
         } else {
+            // Roll the claim back so a later retry (e.g. a manual admin
+            // re-verify) can attempt the refund again.
             $this->model->update($payment->id, [
+                'status'        => 'paid',
                 'error_code'    => $result->errorCode ?? null,
                 'error_message' => $result->errorMessage ?? null,
             ]);
