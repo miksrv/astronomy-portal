@@ -13,6 +13,8 @@ dayjs.extend(utc)
 
 jest.mock('@/api', () => ({
     API: {
+        useEventGetUpcomingQuery: jest.fn(),
+        useEventPaymentStatusMutation: jest.fn(),
         useEventsCancelRegistrationPostMutation: jest.fn(),
         useEventsRegistrationPostMutation: jest.fn(),
         util: { invalidateTags: jest.fn() }
@@ -44,6 +46,8 @@ const mockCancelMutate = jest.fn()
 const defaultCancelState = { isLoading: false }
 const mockRetryMutate = jest.fn()
 const defaultRetryState = { isLoading: false }
+const mockCheckPaymentStatus = jest.fn(() => ({ unwrap: () => new Promise(() => {}) }))
+const defaultCheckPaymentStatusState = { isLoading: false }
 
 const baseEvent: ApiModel.Event = {
     id: 'event-1',
@@ -63,6 +67,11 @@ beforeEach(() => {
     jest.clearAllMocks()
     ;(API.useEventsCancelRegistrationPostMutation as jest.Mock).mockReturnValue([mockCancelMutate, defaultCancelState])
     ;(API.useEventsRegistrationPostMutation as jest.Mock).mockReturnValue([mockRetryMutate, defaultRetryState])
+    ;(API.useEventPaymentStatusMutation as jest.Mock).mockReturnValue([
+        mockCheckPaymentStatus,
+        defaultCheckPaymentStatusState
+    ])
+    ;(API.useEventGetUpcomingQuery as jest.Mock).mockReturnValue({ data: undefined })
     ;(useAppSelector as jest.Mock).mockReturnValue({ id: 'user-1', name: 'Test User' })
     ;(getSecondsUntilUTCDate as jest.Mock).mockReturnValue(undefined)
 })

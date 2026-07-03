@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import dayjs from 'dayjs'
-import { Button, Container, Dialog, Icon } from 'simple-react-ui-kit'
+import { Button, Container, Dialog, Icon, Spinner } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import { useTranslation } from 'next-i18next/pages'
@@ -21,12 +21,21 @@ interface EventUpcomingProps {
     event?: ApiModel.Event
 }
 
-export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
+export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp }) => {
     const { t } = useTranslation()
 
     const user = useAppSelector((state) => state.auth.user)
 
     const dispatch = useAppDispatch()
+
+    // The page passes `event` as a plain SSR prop (getServerSideProps), which
+    // never updates on its own. Subscribing to the same query here (RTK Query
+    // reuses the SSR-hydrated cache entry, so this doesn't cause an extra
+    // fetch) means a payment-status re-check that invalidates the 'UPCOMING'
+    // tag actually refreshes what's rendered, instead of requiring a full
+    // page reload to see the confirmed booking.
+    const { data: eventData } = API.useEventGetUpcomingQuery()
+    const event = eventData ?? eventProp
 
     const [registered, setRegistered] = useState<boolean>(false)
     const [bookedId, setBookedId] = useState<string>()
@@ -35,9 +44,11 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
     const [paymentExpiryTs, setPaymentExpiryTs] = useState<number>()
 
     const expiredHandledRef = useRef<boolean>(false)
+    const checkedOrderIdRef = useRef<string | undefined>(undefined)
 
     const [cancelRegistration, { isLoading }] = API.useEventsCancelRegistrationPostMutation()
     const [retryBooking, { isLoading: isRetrying }] = API.useEventsRegistrationPostMutation()
+    const [checkPaymentStatus, { isLoading: isVerifyingPayment }] = API.useEventPaymentStatusMutation()
     const [retryError, setRetryError] = useState<string>()
 
     const handleCancelRegistration = async () => {
@@ -113,6 +124,30 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
     // event — cancelling an unpaid (pending) hold has nothing to refund.
     const isPaidConfirmedBooking = isConfirmed && !!event?.ticketPrice
 
+    // Actively re-verifies a pending payment with the gateway. There is no bank
+    // webhook configured, so if the visitor closes the bank tab after paying and
+    // simply comes back to the site later (instead of following the bank's
+    // redirect), this is the only way the booking gets reconciled before the
+    // seat-hold TTL lapses. Guarded per orderId so it fires once per mount/
+    // pageshow rather than on every countdown tick.
+    const verifyPendingPayment = useCallback(
+        (orderId: string) => {
+            if (checkedOrderIdRef.current === orderId) {
+                return
+            }
+
+            checkedOrderIdRef.current = orderId
+
+            checkPaymentStatus({ orderId })
+                .unwrap()
+                .catch(() => {
+                    // Allow a retry on the next mount/pageshow instead of getting stuck.
+                    checkedOrderIdRef.current = undefined
+                })
+        },
+        [checkPaymentStatus]
+    )
+
     const registrationAvailable = useMemo(() => {
         if (event?.availableTickets === 0) {
             return false
@@ -149,19 +184,35 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
     }, [])
 
     useEffect(() => {
+        // Fires once whenever a pending payment first appears — covers a direct/
+        // repeat visit to the page with an already-pending booking, not just the
+        // bank's own redirect back.
+        if (pendingPayment?.orderId) {
+            verifyPendingPayment(pendingPayment.orderId)
+        }
+    }, [pendingPayment?.orderId, verifyPendingPayment])
+
+    useEffect(() => {
         // Returning via the browser "Back" button after the bank page restores
         // this page from the bfcache with stale data (the booking form). Refetch
-        // the upcoming event on bfcache restore so the correct state shows.
+        // the upcoming event on bfcache restore, and actively re-verify a still-
+        // pending payment with the gateway rather than trusting the stale local
+        // status.
         const handlePageShow = (e: PageTransitionEvent) => {
             if (e.persisted) {
                 dispatch(API.util.invalidateTags([{ id: 'UPCOMING', type: 'Events' }]))
+
+                if (pendingPayment?.orderId) {
+                    checkedOrderIdRef.current = undefined
+                    verifyPendingPayment(pendingPayment.orderId)
+                }
             }
         }
 
         window.addEventListener('pageshow', handlePageShow)
 
         return () => window.removeEventListener('pageshow', handlePageShow)
-    }, [dispatch])
+    }, [dispatch, pendingPayment?.orderId, verifyPendingPayment])
 
     useEffect(() => {
         // When the payment hold lapses, refetch the upcoming event once: the
@@ -238,56 +289,71 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event }) => {
                         </div>
                     )}
 
-                    {/* Paid booking awaiting payment — seat is held with a 20-min countdown */}
+                    {/* Paid booking awaiting payment — seat is held with a countdown. While a
+                        pending payment is being actively re-verified with the gateway (on
+                        mount and on bfcache restore — there is no bank webhook), show a
+                        loader instead of the stale countdown/actions. */}
                     {awaitingPayment && pendingPayment && (
                         <div className={styles.infoBlock}>
-                            <h3>
-                                {t(
-                                    'components.pages.stargazing.event-upcoming.awaiting-payment-title',
-                                    'Бронь ожидает оплаты'
-                                )}
-                            </h3>
-                            <p>
-                                {t(
-                                    'components.pages.stargazing.event-upcoming.awaiting-payment-text',
-                                    'Место забронировано. Завершите оплату до конца таймера, иначе бронь будет автоматически отменена и место освободится.'
-                                )}
-                            </p>
-                            <p>
-                                <strong>
+                            {isVerifyingPayment ? (
+                                <div className={styles.verifyingPayment}>
+                                    <Spinner style={{ height: 20, width: 20 }} />
                                     {t(
-                                        'components.pages.stargazing.event-upcoming.payment-time-left',
-                                        'Осталось на оплату: {{time}}',
-                                        { time: paymentTimeLeftLabel }
+                                        'components.pages.stargazing.event-upcoming.verifying-payment',
+                                        'Проверяем статус оплаты…'
                                     )}
-                                </strong>
-                            </p>
-                            <div className={styles.awaitingPaymentActions}>
-                                <Button
-                                    mode={'primary'}
-                                    variant={'positive'}
-                                    onClick={() => {
-                                        window.location.href = pendingPayment.formUrl
-                                    }}
-                                >
-                                    {t(
-                                        'components.pages.stargazing.event-upcoming.return-to-payment',
-                                        'Вернуться к оплате'
-                                    )}
-                                </Button>
-                                <Button
-                                    mode={'secondary'}
-                                    variant={'negative'}
-                                    loading={isLoading}
-                                    disabled={isLoading}
-                                    onClick={() => showConfirmation(true)}
-                                >
-                                    {t(
-                                        'components.pages.stargazing.event-upcoming.cancel-booking',
-                                        'Отменить бронирование'
-                                    )}
-                                </Button>
-                            </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <h3>
+                                        {t(
+                                            'components.pages.stargazing.event-upcoming.awaiting-payment-title',
+                                            'Бронь ожидает оплаты'
+                                        )}
+                                    </h3>
+                                    <p>
+                                        {t(
+                                            'components.pages.stargazing.event-upcoming.awaiting-payment-text',
+                                            'Место забронировано. Завершите оплату до конца таймера, иначе бронь будет автоматически отменена и место освободится.'
+                                        )}
+                                    </p>
+                                    <p>
+                                        <strong>
+                                            {t(
+                                                'components.pages.stargazing.event-upcoming.payment-time-left',
+                                                'Осталось на оплату: {{time}}',
+                                                { time: paymentTimeLeftLabel }
+                                            )}
+                                        </strong>
+                                    </p>
+                                    <div className={styles.awaitingPaymentActions}>
+                                        <Button
+                                            mode={'primary'}
+                                            variant={'positive'}
+                                            onClick={() => {
+                                                window.location.href = pendingPayment.formUrl
+                                            }}
+                                        >
+                                            {t(
+                                                'components.pages.stargazing.event-upcoming.return-to-payment',
+                                                'Вернуться к оплате'
+                                            )}
+                                        </Button>
+                                        <Button
+                                            mode={'secondary'}
+                                            variant={'negative'}
+                                            loading={isLoading}
+                                            disabled={isLoading}
+                                            onClick={() => showConfirmation(true)}
+                                        >
+                                            {t(
+                                                'components.pages.stargazing.event-upcoming.cancel-booking',
+                                                'Отменить бронирование'
+                                            )}
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
 
