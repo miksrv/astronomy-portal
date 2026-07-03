@@ -108,6 +108,20 @@ export const API = createApi({
         eventGetStatistic: builder.query<ApiType.Events.ResEventStatistic, string>({
             query: (id) => `events/${id}/statistic`
         }),
+        eventGetRegistrationsList: builder.query<ApiType.Events.ResEventRegistrationsList, string>({
+            providesTags: (result, error, id) => [{ id, type: 'EventUsers' }],
+            query: (id) => `events/${id}/registrations`
+        }),
+        eventVerifyRegistrationPayment: builder.mutation<
+            ApiType.Events.ResVerifyRegistrationPayment,
+            ApiType.Events.ReqVerifyRegistrationPayment
+        >({
+            invalidatesTags: (result, error, { eventId }) => [{ id: eventId, type: 'EventUsers' }],
+            query: ({ id }) => ({
+                method: 'POST',
+                url: `events/registrations/${id}/verify-payment`
+            })
+        }),
         eventGetCheckin: builder.mutation<ApiType.Events.ResCheckin, string>({
             query: (id) => `events/checkin/${id}`
         }),
@@ -180,7 +194,10 @@ export const API = createApi({
             ApiType.Events.ResRegistration | ApiType.ResError,
             ApiType.Events.ReqRegistration
         >({
-            invalidatesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
+            invalidatesTags: () => [
+                { id: 'UPCOMING', type: 'Events' },
+                { id: 'UPCOMING_PROFILE', type: 'Events' }
+            ],
             query: (formState) => ({
                 body: formState,
                 method: 'POST',
@@ -191,7 +208,10 @@ export const API = createApi({
             ApiType.Events.ResRegistration | ApiType.ResError,
             Pick<ApiType.Events.ReqRegistration, 'eventId'>
         >({
-            invalidatesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
+            invalidatesTags: () => [
+                { id: 'UPCOMING', type: 'Events' },
+                { id: 'UPCOMING_PROFILE', type: 'Events' }
+            ],
             query: (formState) => ({
                 body: formState,
                 method: 'POST',
@@ -199,7 +219,10 @@ export const API = createApi({
             })
         }),
         eventPaymentStatus: builder.mutation<ApiType.Events.ResPaymentStatus, ApiType.Events.ReqPaymentStatus>({
-            invalidatesTags: () => [{ id: 'UPCOMING', type: 'Events' }],
+            invalidatesTags: () => [
+                { id: 'UPCOMING', type: 'Events' },
+                { id: 'UPCOMING_PROFILE', type: 'Events' }
+            ],
             query: (body) => ({
                 body,
                 method: 'POST',
