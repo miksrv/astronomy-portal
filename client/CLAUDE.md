@@ -218,26 +218,27 @@ type MyComponentProps = { ... }
 
 ### RTK Query error shape
 
-Errors from `.unwrap()` have this shape:
+`baseQueryWithErrorTransform` in `client/api/api.ts` unwraps the raw `FetchBaseQueryError.data` into the error itself, so by the time an error reaches a component (via `.unwrap()` rejection or a mutation hook's `error` field), its shape is already flat — matching `ApiType.ResError`:
 
 ```ts
 {
-    status: number,
-    data: {
-        messages: Record<string, string>
-    }
+    status?: number,
+    code?: number,
+    messages: Record<string, string>
 }
 ```
 
-Always read `error.data.messages`, not `error.messages`.
+Always read `error.messages`, not `error.data.messages` — there is no `.data` wrapper at this point.
 
 ```ts
 // Correct
-const msg = Object.values(error.data.messages)[0]
+const msg = getErrorMessage(error) // client/utils/errors.ts — messages.error, falling back to the first value
 
 // Wrong
-const msg = Object.values(error.messages)[0]
+const msg = (error as { data?: { messages?: Record<string, string> } })?.data?.messages
 ```
+
+Prefer the shared `getErrorMessage(error)` helper (`client/utils/errors.ts`) over inlining `error.messages.error` in new code, so error-shape fixes only need to happen in one place.
 
 ---
 
