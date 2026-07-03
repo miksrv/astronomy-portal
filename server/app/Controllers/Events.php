@@ -1010,7 +1010,8 @@ class Events extends ResourceController
             $db->transStart();
 
             // SQLite (used by the test suite) doesn't support FOR UPDATE; the
-            // lock is only meaningful against the real MySQLi/MariaDB backend.
+            // lock is only meaningful against backends with real row-level
+            // locking (MySQLi/MariaDB, Postgres, Oracle).
             if (in_array($db->DBDriver, ['MySQLi', 'Postgre', 'OCI8'], true)) {
                 $db->query('SELECT id FROM events WHERE id = ? FOR UPDATE', [$input['eventId']]);
             }
@@ -1190,7 +1191,8 @@ class Events extends ResourceController
             $db->transStart();
 
             // SQLite (used by the test suite) doesn't support FOR UPDATE; the
-            // lock is only meaningful against the real MySQLi/MariaDB backend.
+            // lock is only meaningful against backends with real row-level
+            // locking (MySQLi/MariaDB, Postgres, Oracle).
             if (in_array($db->DBDriver, ['MySQLi', 'Postgre', 'OCI8'], true)) {
                 $db->query('SELECT id FROM events_users WHERE id = ? FOR UPDATE', [$userRegistration->id]);
             }

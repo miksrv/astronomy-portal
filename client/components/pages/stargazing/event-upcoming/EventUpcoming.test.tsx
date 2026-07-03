@@ -18,6 +18,7 @@ jest.mock('@/api', () => ({
         useEventsCancelRegistrationPostMutation: jest.fn(),
         useEventsRegistrationPostMutation: jest.fn(),
         useEventDeleteMutation: jest.fn(),
+        useEventGetUpcomingQuery: jest.fn(),
         util: { invalidateTags: jest.fn() }
     },
     ApiModel: {
@@ -87,6 +88,7 @@ beforeEach(() => {
         defaultCheckPaymentStatusState
     ])
     ;(API.useEventDeleteMutation as jest.Mock).mockReturnValue([mockDeleteMutate, defaultDeleteState])
+    ;(API.useEventGetUpcomingQuery as jest.Mock).mockReturnValue({ data: undefined })
     ;(useAppSelector as jest.Mock).mockImplementation((selector) =>
         selector({ auth: { user: { id: 'user-1', name: 'Test User' } } })
     )

@@ -48,9 +48,23 @@ const GuestLoginPrompt: React.FC<GuestLoginPromptProps> = ({ className, heading 
     </div>
 )
 
-export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event, layout = 'hero' }) => {
+export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, layout = 'hero' }) => {
     const { t } = useTranslation()
     const router = useRouter()
+
+    const isHero = layout === 'hero'
+
+    // The 'hero' widget (public stargazing page) only ever received its event
+    // as an SSR prop, with no client-side subscriber to the query — so the
+    // `UPCOMING` tag invalidation that useEventBookingStatus() dispatches
+    // after payment reconciliation/bfcache restore had nothing to trigger a
+    // refetch, and the widget went stale until a full page reload. Subscribe
+    // here so the tag invalidation actually refreshes the data. 'compact'
+    // (profile page) already gets a live subscription from its caller via
+    // useEventGetUpcomingRegisteredQuery(), so it's skipped here.
+    const { data: liveEvent } = API.useEventGetUpcomingQuery(undefined, { skip: !isHero })
+
+    const event = isHero ? (liveEvent ?? eventProp) : eventProp
 
     const user = useAppSelector((state) => state.auth.user)
     const userRole = useAppSelector((state) => state.auth?.user?.role)
