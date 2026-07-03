@@ -20,6 +20,15 @@ export const formatDate = (date?: string | Date | Dayjs, format?: string): strin
 export const formatUTCDate = (date?: string | Date, format: string = DEFAULT_FULL_DATE_FORMAT): string | undefined =>
     date ? dayjs.utc(date).tz(TIME_ZONE).format(format) : undefined
 
+/**
+ * Converts a UTC date (as stored/returned by the API) into the value format
+ * required by an `<input type="datetime-local">` ("YYYY-MM-DDTHH:mm"),
+ * expressed in Orenburg time — the timezone the backend assumes when it
+ * parses these inputs back on submit (see Events::update/create).
+ */
+export const toDateTimeLocalValue = (date?: string): string | undefined =>
+    date ? dayjs.utc(date).tz(TIME_ZONE).format('YYYY-MM-DDTHH:mm') : undefined
+
 export const formatDateFromUnixUTC = (timestamp?: number, format: string = DEFAULT_FULL_DATE_FORMAT): string =>
     timestamp
         ? dayjs

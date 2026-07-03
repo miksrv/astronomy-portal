@@ -14,6 +14,7 @@ import { login } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector, wrapper } from '@/api/store'
 import useLocalStorage from '@/hooks/useLocalStorage'
 import { LOCAL_STORAGE } from '@/utils/constants'
+import { getErrorMessage } from '@/utils/errors'
 import * as LocalStorage from '@/utils/localstorage'
 
 type AuthPageProps = object
@@ -173,7 +174,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
                                 title={t('pages.auth.notification_error', 'Ошибка')}
                             >
                                 {token
-                                    ? (magicError as ApiType.ResError)?.messages?.error ||
+                                    ? getErrorMessage(magicError) ||
                                       t('pages.auth.magic-link-error', 'Ссылка для входа недействительна или истекла')
                                     : (error as string)}
                             </Message>
