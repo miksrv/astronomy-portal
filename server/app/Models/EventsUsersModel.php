@@ -206,6 +206,37 @@ class EventsUsersModel extends ApplicationBaseModel
     }
 
     /**
+     * Returns every registration for an event — every status (pending,
+     * confirmed, failed) and including soft-deleted (cancelled) rows —
+     * joined with the registrant's name/email and, if any, their payment's
+     * order id/status/error. Used by the admin registrations table, which
+     * is the one place in the codebase that intentionally shows everything
+     * rather than filtering to 'pending'/'confirmed' like the other reads
+     * on this table.
+     *
+     * @param string $eventId The event ID to fetch registrations for.
+     * @return array Rows with id, user_id, adults, children, status, created_at,
+     *               checkin_at, deleted_at, payment_id, name, email,
+     *               payment_order_id, payment_status, payment_error_message.
+     */
+    public function getRegistrationsByEventId(string $eventId): array
+    {
+        return $this->db->table('events_users eu')
+            ->select('
+                eu.id, eu.user_id, eu.adults, eu.children, eu.status, eu.created_at,
+                eu.checkin_at, eu.deleted_at, eu.payment_id,
+                u.name, u.email,
+                p.order_id AS payment_order_id, p.status AS payment_status,
+                p.error_message AS payment_error_message')
+            ->join('users u', 'u.id = eu.user_id', 'left')
+            ->join('payments p', 'p.id = eu.payment_id', 'left')
+            ->where('eu.event_id', $eventId)
+            ->orderBy('eu.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
      * Retrieves total adult and child counts grouped by event ID across all events.
      *
      * @return array Array of objects with event_id, total_adults, and total_children.
@@ -382,17 +413,18 @@ class EventsUsersModel extends ApplicationBaseModel
     }
 
     /**
-     * Returns the next upcoming event that the given user is registered for.
+     * Returns the booking (and event id) for the next upcoming event that the
+     * given user is registered for. The full event itself is fetched
+     * separately via EventsModel so it comes back locale-resolved and
+     * shaped like every other event response.
      *
      * @param string $userId The user's ID.
-     * @return object|null A result row with event and booking details, or null if none found.
+     * @return object|null A result row with the booking details, or null if none found.
      */
-    public function getUpcomingRegisteredEvent(string $userId): ?object
+    public function getUpcomingRegisteredBooking(string $userId): ?object
     {
         return $this->db->table('events_users eu')
-            ->select('e.id, e.title_ru, e.title_en, e.date, e.cover_file_name, e.cover_file_ext,
-                      e.location_ru, e.location_en, e.yandex_map_link, e.google_map_link,
-                      eu.id AS booking_id, eu.adults, eu.children, eu.checkin_at')
+            ->select('e.id AS event_id, eu.id AS booking_id, eu.adults, eu.children, eu.checkin_at')
             ->join('events e', 'e.id = eu.event_id')
             ->where('eu.user_id', $userId)
             // Only confirmed bookings count as "registered"; a pending (unpaid)
@@ -400,7 +432,10 @@ class EventsUsersModel extends ApplicationBaseModel
             ->where('eu.status', 'confirmed')
             ->where('eu.deleted_at IS NULL')
             ->where('e.deleted_at IS NULL')
-            ->where('e.date > NOW()')
+            // Same "local calendar day" boundary as EventsModel::getUpcomingEvent()
+            // — an event stays current through its entire Orenburg-local day, not
+            // just until its exact start time.
+            ->where('e.date >=', $this->startOfTodayOrenburg()->format('Y-m-d H:i:s'))
             ->orderBy('e.date', 'ASC')
             ->limit(1)
             ->get()
