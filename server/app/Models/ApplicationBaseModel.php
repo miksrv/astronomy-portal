@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use CodeIgniter\I18n\Time;
 use CodeIgniter\Model;
 
 /**
  * ApplicationBaseModel
  *
  * Shared base class for all application models. Extends CI4's Model and adds
- * two common utilities used across models:
- *   - prepareOutput(): strips hidden fields from afterFind callback data.
- *   - generateId():    beforeInsert callback that assigns a uniqid() string PK.
+ * common utilities used across models:
+ *   - prepareOutput():         strips hidden fields from afterFind callback data.
+ *   - generateId():            beforeInsert callback that assigns a uniqid() string PK.
+ *   - startOfTodayOrenburg():  UTC instant of local midnight, for "local calendar day" queries.
  */
 class ApplicationBaseModel extends Model
 {
@@ -82,5 +84,20 @@ class ApplicationBaseModel extends Model
         $data['data']['id'] = uniqid();
 
         return $data;
+    }
+
+    /**
+     * Returns the UTC instant corresponding to midnight at the start of
+     * "today" in Orenburg/Yekaterinburg local time (UTC+5). Used by any
+     * query that needs to treat a stored UTC datetime as belonging to a
+     * local calendar day rather than an exact moment (e.g. keeping a
+     * stargazing event "current" through its entire local day).
+     */
+    protected function startOfTodayOrenburg(): Time
+    {
+        $nowLocal = Time::now('Asia/Yekaterinburg');
+
+        return Time::parse($nowLocal->format('Y-m-d') . ' 00:00:00', 'Asia/Yekaterinburg')
+            ->setTimezone('UTC');
     }
 }
