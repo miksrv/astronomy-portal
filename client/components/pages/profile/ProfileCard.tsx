@@ -4,7 +4,7 @@ import { Button, Container, Input, Message, Select } from 'simple-react-ui-kit'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 
-import { API, ApiModel, HOST_IMG } from '@/api'
+import { API, ApiModel, ApiType, HOST_IMG } from '@/api'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import useLocalStorage from '@/hooks/useLocalStorage'
 import { LOCAL_STORAGE } from '@/utils/constants'
@@ -63,7 +63,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
 
             setSaveSuccess(true)
         } catch (err) {
-            const messages = (err as { data?: { messages?: Record<string, string> } })?.data?.messages
+            const messages = (err as ApiType.ResError)?.messages
             if (messages) {
                 setFieldErrors(messages)
             }
