@@ -15,6 +15,7 @@ jest.mock('@/api', () => ({
         util: { getRunningQueriesThunk: jest.fn() }
     },
     setLocale: jest.fn(),
+    SITE_LINK: 'https://example.test/',
     wrapper: { getServerSideProps: () => () => ({}) }
 }))
 
@@ -43,21 +44,23 @@ jest.mock('simple-react-ui-kit', () => {
 
 jest.mock('@/api/authSlice', () => ({ setSSRToken: jest.fn() }))
 jest.mock('cookies-next', () => ({ getCookie: jest.fn() }))
-jest.mock('next-i18next/pages', () => ({ useTranslation: () => ({ t: (_key: string, fallback: string) => fallback }) }))
-jest.mock('next-i18next/pages/serverSideTranslations', () => ({ serverSideTranslations: jest.fn() }))
-jest.mock('next/router', () => ({ useRouter: jest.fn() }))
-
-jest.mock('@/components/common', () => ({
-    AppFooter: () => <div />,
-    AppLayout: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    AppToolbar: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>
+jest.mock('next-i18next/pages', () => ({
+    useTranslation: () => ({ t: (_key: string, fallback: string) => fallback, i18n: { language: 'ru' } })
 }))
+jest.mock('next-i18next/pages/serverSideTranslations', () => ({ serverSideTranslations: jest.fn() }))
+jest.mock('next-seo/pages', () => ({ generateNextSeo: () => null }))
+jest.mock('next/router', () => ({ useRouter: jest.fn() }))
 
 const mockTrigger = jest.fn()
 const mockRetryBooking = jest.fn()
 const mockPush = jest.fn()
+const mockReplace = jest.fn()
+const mockEventsOn = jest.fn()
+const mockEventsOff = jest.fn()
+const mockEventsEmit = jest.fn()
 
 const resolveStatus = (status: string) => ({ unwrap: () => Promise.resolve({ status }) })
+const rejectWith = (error: unknown) => ({ unwrap: () => Promise.reject(error) })
 
 beforeEach(() => {
     jest.clearAllMocks()
@@ -67,18 +70,29 @@ beforeEach(() => {
     ;(useRouter as jest.Mock).mockReturnValue({
         isReady: true,
         push: mockPush,
-        query: { orderId: 'order-1' }
+        replace: mockReplace,
+        query: { orderId: 'order-1' },
+        events: { on: mockEventsOn, off: mockEventsOff, emit: mockEventsEmit }
     })
 })
 
 describe('StargazingPaymentPage', () => {
-    it('shows the success message when the payment is paid', async () => {
+    it('redirects to the profile ticket section when the payment is paid', async () => {
         mockTrigger.mockReturnValue(resolveStatus('paid'))
 
         render(<StargazingPaymentPage />)
 
-        expect(await screen.findByText('Оплата прошла успешно')).toBeDefined()
+        await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/profile#upcoming-event'))
         expect(mockTrigger).toHaveBeenCalledWith({ orderId: 'order-1' })
+    })
+
+    it('quietly redirects to the profile page when the payment belongs to another user', async () => {
+        mockTrigger.mockReturnValue(rejectWith({ status: 403, messages: { error: 'Forbidden' } }))
+
+        render(<StargazingPaymentPage />)
+
+        await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/profile'))
+        expect(screen.queryByText('Оплата не прошла')).toBeNull()
     })
 
     it('shows the failure message when the payment failed', async () => {
@@ -101,7 +115,9 @@ describe('StargazingPaymentPage', () => {
         ;(useRouter as jest.Mock).mockReturnValue({
             isReady: true,
             push: mockPush,
-            query: {}
+            replace: mockReplace,
+            query: {},
+            events: { on: mockEventsOn, off: mockEventsOff, emit: mockEventsEmit }
         })
 
         render(<StargazingPaymentPage />)
@@ -126,8 +142,8 @@ describe('StargazingPaymentPage', () => {
         const savedAttempt = { adults: 2, children: 0, eventId: 'event-1', name: 'Ivan' }
         sessionStorage.setItem('astro:lastBookingAttempt', JSON.stringify(savedAttempt))
 
-        mockRetryBooking.mockReturnValue({
-            unwrap: () => Promise.resolve({ payment: { formUrl: 'https://pay/new', orderId: 'order-2' }, result: true })
+        mockRetryBooking.mockResolvedValue({
+            data: { payment: { formUrl: 'https://pay/new', orderId: 'order-2' }, result: true }
         })
 
         render(<StargazingPaymentPage />)
@@ -137,5 +153,29 @@ describe('StargazingPaymentPage', () => {
         fireEvent.click(retryButton)
 
         await waitFor(() => expect(mockRetryBooking).toHaveBeenCalledWith(savedAttempt))
+    })
+
+    it('registers a routeChangeStart guard that blocks leaving while a request is in flight', async () => {
+        let resolveTrigger: (value: { status: string }) => void = () => {}
+        mockTrigger.mockReturnValue({
+            unwrap: () =>
+                new Promise((resolve) => {
+                    resolveTrigger = resolve
+                })
+        })
+
+        render(<StargazingPaymentPage />)
+
+        expect(mockEventsOn).toHaveBeenCalledWith('routeChangeStart', expect.any(Function))
+        const guard = mockEventsOn.mock.calls.find(([event]) => event === 'routeChangeStart')?.[1]
+
+        const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(false)
+
+        expect(() => guard()).toThrow()
+        expect(confirmSpy).toHaveBeenCalled()
+        expect(mockEventsEmit).toHaveBeenCalledWith('routeChangeError')
+
+        confirmSpy.mockRestore()
+        resolveTrigger({ status: 'paid' })
     })
 })
