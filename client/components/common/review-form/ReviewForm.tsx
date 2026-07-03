@@ -3,7 +3,7 @@ import { Button, TextArea } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
-import { API, ApiModel } from '@/api'
+import { API, ApiModel, ApiType } from '@/api'
 
 import styles from './styles.module.sass'
 
@@ -43,9 +43,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
             setSubmitSuccess(true)
             onSuccess?.()
         } catch (error) {
-            const messages =
-                (error as { data?: { messages?: Record<string, string> } })?.data?.messages ??
-                (error as { messages?: Record<string, string> })?.messages
+            const messages = (error as ApiType.ResError)?.messages
 
             if (messages && typeof messages === 'object') {
                 setFieldErrors(messages)
