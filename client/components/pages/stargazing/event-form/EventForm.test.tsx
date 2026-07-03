@@ -56,4 +56,40 @@ describe('EventForm', () => {
 
         expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ ticketPrice: '750' }))
     })
+
+    it('prefills the ticket price from initialData when editing an event', () => {
+        const { container } = render(
+            <EventForm
+                initialData={{
+                    id: 'event-1',
+                    title: 'Test Event',
+                    ticketPrice: 750
+                }}
+            />
+        )
+
+        const numberInputs = container.querySelectorAll('input[type="number"]')
+        expect((numberInputs[1] as HTMLInputElement).value).toBe('750')
+    })
+
+    it('prefills date fields with a datetime-local-compatible value (YYYY-MM-DDTHH:mm) when editing an event', () => {
+        const { container } = render(
+            <EventForm
+                initialData={{
+                    id: 'event-1',
+                    title: 'Test Event',
+                    // Stored/returned as UTC; Orenburg (Asia/Yekaterinburg) is UTC+5.
+                    date: { date: '2026-08-15 15:00:00.000000', timezone_type: 3, timezone: 'UTC' },
+                    registrationStart: { date: '2026-08-01 00:00:00.000000', timezone_type: 3, timezone: 'UTC' },
+                    registrationEnd: { date: '2026-08-14 00:00:00.000000', timezone_type: 3, timezone: 'UTC' }
+                }}
+            />
+        )
+
+        const dateInputs = container.querySelectorAll('input[type="datetime-local"]')
+
+        expect((dateInputs[0] as HTMLInputElement).value).toBe('2026-08-15T20:00')
+        expect((dateInputs[1] as HTMLInputElement).value).toBe('2026-08-01T05:00')
+        expect((dateInputs[2] as HTMLInputElement).value).toBe('2026-08-14T05:00')
+    })
 })

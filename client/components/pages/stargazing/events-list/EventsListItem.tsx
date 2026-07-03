@@ -1,12 +1,14 @@
 import React from 'react'
-import { Container, Icon } from 'simple-react-ui-kit'
+import { Container } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel, useAppSelector } from '@/api'
 import { hosts } from '@/api/constants'
-import { formatDate } from '@/utils/dates'
+
+import { EventMetaRow } from '../event-meta-row'
 
 import styles from './styles.module.sass'
 
@@ -15,21 +17,27 @@ interface EventsListItemProps {
 }
 
 export const EventsListItem: React.FC<EventsListItemProps> = ({ event }) => {
+    const { t } = useTranslation()
+
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     const canViewStatistic = userRole === ApiModel.UserRole.ADMIN || userRole === ApiModel.UserRole.MODERATOR
+
+    const itemTitle = t('components.pages.stargazing.events-list.item-title', 'Астровыезд - {{title}}', {
+        title: event.title
+    })
 
     return (
         <Container className={styles.eventListItem}>
             <div className={styles.photoSection}>
                 <Link
                     href={`/stargazing/${event.id}`}
-                    title={`Астровыезд - ${event.title}`}
+                    title={itemTitle}
                 >
                     {event.coverFileName && (
                         <Image
                             className={styles.photo}
-                            alt={`Астровыезд - ${event.title}`}
+                            alt={itemTitle}
                             quality={70}
                             height={240}
                             width={370}
@@ -43,38 +51,18 @@ export const EventsListItem: React.FC<EventsListItemProps> = ({ event }) => {
                 <h3 className={styles.title}>
                     <Link
                         href={`/stargazing/${event.id}`}
-                        title={`Астровыезд - ${event.title}`}
+                        title={itemTitle}
                     >
                         {event.title}
                     </Link>
                 </h3>
 
-                <div className={styles.toolbar}>
-                    <div>
-                        <Icon name={'Time'} />
-                        {formatDate(event?.date?.date, 'D MMMM YYYY')}
-                    </div>
-
-                    <div>
-                        <Icon name={'Eye'} />
-                        {event?.views}
-                    </div>
-
-                    {canViewStatistic ? (
-                        <Link
-                            className={styles.membersLink}
-                            href={`/stargazing/${event.id}/statistic`}
-                        >
-                            <Icon name={'Users'} />
-                            {event?.members?.total || event?.availableTickets}
-                        </Link>
-                    ) : (
-                        <div>
-                            <Icon name={'Users'} />
-                            {event?.members?.total || event?.availableTickets}
-                        </div>
-                    )}
-                </div>
+                <EventMetaRow
+                    date={event?.date?.date}
+                    views={event?.views}
+                    membersCount={event?.members?.total || event?.availableTickets}
+                    statisticHref={canViewStatistic ? `/stargazing/${event.id}/statistic` : undefined}
+                />
             </div>
         </Container>
     )

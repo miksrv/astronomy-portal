@@ -1,15 +1,14 @@
 import React from 'react'
 import Markdown from 'react-markdown'
-import { Container, ContainerProps, Icon } from 'simple-react-ui-kit'
+import { Container, ContainerProps } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 
 import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
 import { ShowMore } from '@/components/ui'
-import { formatDate } from '@/utils/dates'
 
-import styles from './styles.module.sass'
+import { EventMetaRow } from '../event-meta-row'
 
 interface EventItemDataProps extends ContainerProps {
     title?: string
@@ -30,22 +29,11 @@ export const EventItemData: React.FC<EventItemDataProps> = ({ title, event, ...p
             height={768}
         />
 
-        <div className={styles.toolbar}>
-            <div>
-                <Icon name={'Time'} />
-                {formatDate(event?.date?.date, 'D MMMM YYYY')}
-            </div>
-
-            <div>
-                <Icon name={'Eye'} />
-                {event?.views}
-            </div>
-
-            <div>
-                <Icon name={'Users'} />
-                {event?.members?.total || event?.availableTickets}
-            </div>
-        </div>
+        <EventMetaRow
+            date={event?.date?.date}
+            views={event?.views}
+            membersCount={event?.members?.total || event?.availableTickets}
+        />
 
         <ShowMore content={<Markdown>{event?.content}</Markdown>} />
     </Container>
