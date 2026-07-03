@@ -2,6 +2,7 @@ import React from 'react'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 
+import { useRouter } from 'next/router'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 
 import { API, ApiModel, useAppSelector } from '@/api'
@@ -13,13 +14,25 @@ dayjs.extend(utc)
 
 jest.mock('@/api', () => ({
     API: {
+        useEventPaymentStatusMutation: jest.fn(),
         useEventsCancelRegistrationPostMutation: jest.fn(),
         useEventsRegistrationPostMutation: jest.fn(),
+        useEventDeleteMutation: jest.fn(),
         util: { invalidateTags: jest.fn() }
+    },
+    ApiModel: {
+        UserRole: {
+            USER: 'user',
+            SECURITY: 'security',
+            MODERATOR: 'moderator',
+            ADMIN: 'admin'
+        }
     },
     useAppSelector: jest.fn(),
     useAppDispatch: () => jest.fn()
 }))
+
+jest.mock('next/router', () => ({ useRouter: jest.fn() }))
 
 jest.mock('next-i18next', () => ({
     useTranslation: () => ({ t: (_key: string, defaultValue: string) => defaultValue })
@@ -44,6 +57,12 @@ const mockCancelMutate = jest.fn()
 const defaultCancelState = { isLoading: false }
 const mockRetryMutate = jest.fn()
 const defaultRetryState = { isLoading: false }
+const mockCheckPaymentStatus = jest.fn(() => ({ unwrap: () => new Promise(() => {}) }))
+const defaultCheckPaymentStatusState = { isLoading: false }
+const mockDeleteMutate = jest.fn()
+const defaultDeleteState = { isLoading: false }
+const mockRouterPush = jest.fn()
+const mockRouterReplace = jest.fn()
 
 const baseEvent: ApiModel.Event = {
     id: 'event-1',
@@ -63,8 +82,20 @@ beforeEach(() => {
     jest.clearAllMocks()
     ;(API.useEventsCancelRegistrationPostMutation as jest.Mock).mockReturnValue([mockCancelMutate, defaultCancelState])
     ;(API.useEventsRegistrationPostMutation as jest.Mock).mockReturnValue([mockRetryMutate, defaultRetryState])
-    ;(useAppSelector as jest.Mock).mockReturnValue({ id: 'user-1', name: 'Test User' })
+    ;(API.useEventPaymentStatusMutation as jest.Mock).mockReturnValue([
+        mockCheckPaymentStatus,
+        defaultCheckPaymentStatusState
+    ])
+    ;(API.useEventDeleteMutation as jest.Mock).mockReturnValue([mockDeleteMutate, defaultDeleteState])
+    ;(useAppSelector as jest.Mock).mockImplementation((selector) =>
+        selector({ auth: { user: { id: 'user-1', name: 'Test User' } } })
+    )
     ;(getSecondsUntilUTCDate as jest.Mock).mockReturnValue(undefined)
+    ;(useRouter as jest.Mock).mockReturnValue({
+        push: mockRouterPush,
+        replace: mockRouterReplace,
+        asPath: '/stargazing'
+    })
 })
 
 describe('EventUpcoming', () => {
@@ -162,8 +193,8 @@ describe('EventUpcoming', () => {
             members: { adults: 3, children: 1, childrenAges: [10], total: 4 }
         }
 
-        mockRetryMutate.mockReturnValue({
-            unwrap: () => Promise.resolve({ payment: { formUrl: 'https://pay.example/new', orderId: 'order-2' } })
+        mockRetryMutate.mockResolvedValue({
+            data: { payment: { formUrl: 'https://pay.example/new', orderId: 'order-2' } }
         })
 
         render(<EventUpcoming event={failedEvent} />)
@@ -198,5 +229,93 @@ describe('EventUpcoming', () => {
         })
 
         expect(screen.getByText('Вы зарегистрированы')).toBeDefined()
+    })
+
+    it('does not show moderation actions for a regular user', () => {
+        render(<EventUpcoming event={baseEvent} />)
+
+        expect(screen.queryByTitle('Редактировать')).toBeNull()
+        expect(screen.queryByTitle('Статистика')).toBeNull()
+        expect(screen.queryByTitle('Удалить')).toBeNull()
+    })
+
+    it('shows the statistic action but not edit/delete for a moderator', () => {
+        ;(useAppSelector as jest.Mock).mockImplementation((selector) =>
+            selector({ auth: { user: { id: 'user-1', name: 'Test User', role: ApiModel.UserRole.MODERATOR } } })
+        )
+
+        render(<EventUpcoming event={baseEvent} />)
+
+        expect(screen.queryByTitle('Редактировать')).toBeNull()
+        expect(screen.queryByTitle('Удалить')).toBeNull()
+
+        fireEvent.click(screen.getByTitle('Статистика'))
+        expect(mockRouterPush).toHaveBeenCalledWith('/stargazing/event-1/statistic')
+    })
+
+    it('shows edit, statistic and delete actions for an admin and navigates to the edit form', () => {
+        ;(useAppSelector as jest.Mock).mockImplementation((selector) =>
+            selector({ auth: { user: { id: 'user-1', name: 'Test User', role: ApiModel.UserRole.ADMIN } } })
+        )
+
+        render(<EventUpcoming event={baseEvent} />)
+
+        fireEvent.click(screen.getByTitle('Редактировать'))
+        expect(mockRouterPush).toHaveBeenCalledWith('/stargazing/form?id=event-1')
+
+        fireEvent.click(screen.getByTitle('Статистика'))
+        expect(mockRouterPush).toHaveBeenCalledWith('/stargazing/event-1/statistic')
+    })
+
+    it('opens the delete confirmation dialog and deletes the event on confirm', async () => {
+        ;(useAppSelector as jest.Mock).mockImplementation((selector) =>
+            selector({ auth: { user: { id: 'user-1', name: 'Test User', role: ApiModel.UserRole.ADMIN } } })
+        )
+        mockDeleteMutate.mockReturnValue({ unwrap: () => Promise.resolve({}) })
+
+        render(<EventUpcoming event={baseEvent} />)
+
+        fireEvent.click(screen.getByTitle('Удалить'))
+        expect(screen.getByText('Удалить астровыезд?')).toBeDefined()
+
+        const confirmButtons = screen.getAllByText('Удалить')
+        fireEvent.click(confirmButtons[confirmButtons.length - 1])
+
+        await waitFor(() => {
+            expect(mockDeleteMutate).toHaveBeenCalledWith('event-1')
+        })
+        expect(mockRouterReplace).toHaveBeenCalledWith('/stargazing')
+    })
+
+    it('keeps the delete dialog open and surfaces the error when the event has registrations', async () => {
+        ;(useAppSelector as jest.Mock).mockImplementation((selector) =>
+            selector({ auth: { user: { id: 'user-1', name: 'Test User', role: ApiModel.UserRole.ADMIN } } })
+        )
+        const rejectedPromise = Promise.reject({
+            messages: { error: 'Нельзя удалить мероприятие, на которое уже есть регистрации.' }
+        })
+        rejectedPromise.catch(() => {})
+        mockDeleteMutate.mockReturnValue({ unwrap: () => rejectedPromise })
+        ;(API.useEventDeleteMutation as jest.Mock).mockReturnValue([
+            mockDeleteMutate,
+            {
+                isLoading: false,
+                error: { messages: { error: 'Нельзя удалить мероприятие, на которое уже есть регистрации.' } }
+            }
+        ])
+
+        render(<EventUpcoming event={baseEvent} />)
+
+        fireEvent.click(screen.getByTitle('Удалить'))
+        const confirmButtons = screen.getAllByText('Удалить')
+        fireEvent.click(confirmButtons[confirmButtons.length - 1])
+
+        await waitFor(() => {
+            expect(mockDeleteMutate).toHaveBeenCalledWith('event-1')
+        })
+
+        expect(screen.getByText('Нельзя удалить мероприятие, на которое уже есть регистрации.')).toBeDefined()
+        expect(screen.getByText('Удалить астровыезд?')).toBeDefined()
+        expect(mockRouterReplace).not.toHaveBeenCalled()
     })
 })
