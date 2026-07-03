@@ -5,10 +5,9 @@ import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
-import { JsonLdScript } from 'next-seo'
 
 import { setLocale, SITE_LINK, wrapper } from '@/api'
-import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { StaticInfoPageLayout } from '@/components/common'
 
 const StargazingRulesPage: NextPage<object> = () => {
     const { t } = useTranslation()
@@ -36,7 +35,7 @@ const StargazingRulesPage: NextPage<object> = () => {
     }
 
     return (
-        <AppLayout
+        <StaticInfoPageLayout
             canonical={'stargazing/rules'}
             title={title}
             description={tPage(
@@ -46,22 +45,14 @@ const StargazingRulesPage: NextPage<object> = () => {
             openGraph={{
                 images: [{ url: '/photos/stargazing-1.jpeg', width: 1280, height: 853 }]
             }}
+            jsonLd={{ scriptKey: 'rules-webpage', data: webPageSchema }}
+            breadcrumbLinks={[
+                {
+                    link: '/stargazing',
+                    text: t('menu.stargazing', 'Астровыезды')
+                }
+            ]}
         >
-            <JsonLdScript
-                scriptKey={'rules-webpage'}
-                data={webPageSchema}
-            />
-            <AppToolbar
-                title={title}
-                currentPage={title}
-                links={[
-                    {
-                        link: '/stargazing',
-                        text: t('menu.stargazing', 'Астровыезды')
-                    }
-                ]}
-            />
-
             <div>
                 {tPage(
                     'welcome',
@@ -181,9 +172,7 @@ const StargazingRulesPage: NextPage<object> = () => {
                     {tPage('subscribe', 'Подписывайтесь')}
                 </Link>
             </Container>
-
-            <AppFooter />
-        </AppLayout>
+        </StaticInfoPageLayout>
     )
 }
 

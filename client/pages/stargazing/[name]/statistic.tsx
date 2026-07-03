@@ -8,7 +8,7 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
-import { EventStatistic } from '@/components/pages/stargazing'
+import { EventRegistrationsTable, EventStatistic, EventStatisticRefreshInfo } from '@/components/pages/stargazing'
 
 interface StargazingStatisticPageProps {
     eventId: string
@@ -40,9 +40,12 @@ const StargazingStatisticPage: NextPage<StargazingStatisticPageProps> = ({ event
                         text: eventTitle ?? ''
                     }
                 ]}
+                afterBreadcrumbs={<EventStatisticRefreshInfo eventId={eventId} />}
             />
 
             <EventStatistic eventId={eventId} />
+
+            <EventRegistrationsTable eventId={eventId} />
 
             <AppFooter />
         </AppLayout>

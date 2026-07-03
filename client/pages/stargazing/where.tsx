@@ -5,10 +5,9 @@ import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
-import { JsonLdScript } from 'next-seo'
 
 import { setLocale, SITE_LINK, wrapper } from '@/api'
-import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
+import { PhotoGallery, PhotoLightbox, StaticInfoPageLayout } from '@/components/common'
 import photoSidewalk1 from '@/public/photos/sidewalk-asrtronomy-1.jpeg'
 import photoSidewalk2 from '@/public/photos/sidewalk-asrtronomy-2.jpeg'
 import photoSidewalk3 from '@/public/photos/sidewalk-asrtronomy-3.jpeg'
@@ -57,7 +56,7 @@ const StargazingWherePage: NextPage<object> = () => {
     }
 
     return (
-        <AppLayout
+        <StaticInfoPageLayout
             canonical={'stargazing/where'}
             title={title}
             description={tPage(
@@ -73,22 +72,14 @@ const StargazingWherePage: NextPage<object> = () => {
                     }
                 ]
             }}
+            jsonLd={{ scriptKey: 'where-tourist-attraction', data: touristAttractionSchema }}
+            breadcrumbLinks={[
+                {
+                    link: '/stargazing',
+                    text: t('menu.stargazing', 'Астровыезды')
+                }
+            ]}
         >
-            <JsonLdScript
-                scriptKey={'where-tourist-attraction'}
-                data={touristAttractionSchema}
-            />
-            <AppToolbar
-                title={title}
-                currentPage={title}
-                links={[
-                    {
-                        link: '/stargazing',
-                        text: t('menu.stargazing', 'Астровыезды')
-                    }
-                ]}
-            />
-
             <div>
                 {tPage(
                     'intro',
@@ -181,9 +172,7 @@ const StargazingWherePage: NextPage<object> = () => {
                 onCloseLightBox={handleHideLightbox}
                 onChangeIndex={setPhotoIndex}
             />
-
-            <AppFooter />
-        </AppLayout>
+        </StaticInfoPageLayout>
     )
 }
 

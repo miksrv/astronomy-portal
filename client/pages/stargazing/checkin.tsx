@@ -10,6 +10,7 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 import { API, ApiModel, ApiType, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppLayout, AppToolbar } from '@/components/common'
+import { getErrorMessage } from '@/utils/errors'
 
 enum ScannerStatusEnum {
     IDLE = 'idle',
@@ -99,7 +100,7 @@ const CheckinPage: NextPage<object> = () => {
     useEffect(() => {
         if (isError) {
             setStatus(ScannerStatusEnum.ERROR)
-            setMessage((error as ApiType.ResError)?.messages?.error as string)
+            setMessage(getErrorMessage(error) || '')
         }
 
         if (isSuccess) {
