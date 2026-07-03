@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 4.6.1
+
+### Patch Changes
+
+- Added admin registration management for stargazing events: a registrations table (search, status badges, payment transaction links) and a payment verification action, backed by a new `getRegistrationsByEventId()` model method and typed API endpoints; `EventUpcoming` gained role-based moderation controls (statistic link for moderators, edit/delete with confirmation for admins)
+- Enforced booking concurrency safety: a DB migration adds a unique key preventing more than one active (`pending`/`confirmed`) booking per user/event, and a `refunding` payment status enables atomic `paid → refunding` transitions to prevent duplicate gateway refund calls
+- Fixed event upcoming/past/conducted status and ordering to use a centralized Orenburg local-day boundary (`ApplicationBaseModel::startOfTodayOrenburg()`) instead of ad-hoc hour offsets
+- Reworked the stargazing payment status page to poll and redirect to the profile after successful payment, guard navigation while status checks are in flight, and reuse the shared booking retry flow; removed the separate printable ticket page (`/stargazing/entry`)
+- Unified the FAQ, how-to, rules, and location pages onto a shared `StaticInfoPageLayout`, and removed the unused `react-qr-code` dependency
+- Fixed and simplified various bugs and improvements: event edit form datetime-local prefill conversion, safer async photo-upload queue with cancellation, unified API error handling (`getErrorMessage`/`ResError`) across login, review, and profile forms, removed the unused profile `UpcomingEventCard` in favor of a compact `EventUpcoming`, added `AppToolbar` meta slot and exported `AppLayoutProps`, refreshed EN/RU locale strings for payment and registration flows, and expanded documentation (README roles & permissions, updated CLAUDE guides)
+
 ## 4.6.0
 
 ### Minor Changes
