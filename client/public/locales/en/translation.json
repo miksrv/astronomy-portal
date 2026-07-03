@@ -233,6 +233,7 @@
                     "no-upcoming-hint": "As soon as we schedule the next trip, a registration form will appear here.",
                     "stargazing": "Stargazing trips",
                     "you-are-registered": "You are registered",
+                    "verifying-payment": "Checking payment status…",
                     "awaiting-payment-title": "Booking awaiting payment",
                     "awaiting-payment-text": "Your spot is booked. Complete payment before the timer runs out, otherwise the booking will be canceled automatically and the spot released.",
                     "payment-time-left": "Time left to pay: {{time}}",
