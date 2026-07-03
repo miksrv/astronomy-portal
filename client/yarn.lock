@@ -3239,7 +3239,6 @@ __metadata:
     react-i18next: "npm:^17.0.7"
     react-markdown: "npm:^10.1.0"
     react-photo-album: "npm:^3.6.0"
-    react-qr-code: "npm:^2.0.21"
     react-redux: "npm:^9.2.0"
     sass: "npm:^1.99.0"
     sharp: "npm:^0.34.5"
@@ -8135,13 +8134,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qr.js@npm:0.0.0":
-  version: 0.0.0
-  resolution: "qr.js@npm:0.0.0"
-  checksum: 10c0/1c6a4c7a58d04e52ec2fee99e39b680fdc5b2a510a981df42c36b716a8eac6634d130fc4d65af8f030f2a07dbf5fa046b97cdfa7456c250ebb50a73916efdcb5
-  languageName: node
-  linkType: hard
-
 "queue-microtask@npm:^1.2.2":
   version: 1.2.3
   resolution: "queue-microtask@npm:1.2.3"
@@ -8253,18 +8245,6 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10c0/eeb5cc49b4a657e7c87bfaa694df967897d633da8b4f368bedd383617c1ffdbd0b51a1350b28fe5b9407d2066099c4d3ac23715662050b794dba984c3dface40
-  languageName: node
-  linkType: hard
-
-"react-qr-code@npm:^2.0.21":
-  version: 2.0.21
-  resolution: "react-qr-code@npm:2.0.21"
-  dependencies:
-    prop-types: "npm:^15.8.1"
-    qr.js: "npm:0.0.0"
-  peerDependencies:
-    react: "*"
-  checksum: 10c0/db3787d0d65ff095a3ae642bdf88024b052235410fe64edb70ad90d3dca57a3b051827e0380da82fb6f29818d5c2b2855475a6082eb4445925866db935e77788
   languageName: node
   linkType: hard
 

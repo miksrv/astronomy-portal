@@ -42,7 +42,6 @@
         "react-i18next": "^17.0.7",
         "react-markdown": "^10.1.0",
         "react-photo-album": "^3.6.0",
-        "react-qr-code": "^2.0.21",
         "react-redux": "^9.2.0",
         "sharp": "^0.34.5",
         "simple-react-ui-kit": "^1.8.6",
