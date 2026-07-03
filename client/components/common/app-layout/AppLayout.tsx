@@ -17,7 +17,7 @@ import { Menu } from './Menu'
 
 import styles from './styles.module.sass'
 
-interface AppLayoutProps extends Omit<NextSeoProps, 'children'> {
+export interface AppLayoutProps extends Omit<NextSeoProps, 'children'> {
     fullWidth?: boolean
     noTopMargin?: boolean
     children?: React.ReactNode
