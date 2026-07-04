@@ -161,7 +161,7 @@ class EventsModel extends ApplicationBaseModel
     public function incrementViews(string $eventId): bool
     {
         return $this->builder()
-            ->set('views', 'views + 1', false)
+            ->set('views', 'COALESCE(views, 0) + 1', false)
             ->where('id', $eventId)
             ->update([], null, false);
     }

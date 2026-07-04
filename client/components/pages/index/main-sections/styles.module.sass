@@ -1,4 +1,5 @@
 @use '../../../../styles/variables' as variables
+@use '../../../../styles/mixins'
 
 .section
     position: relative
@@ -65,21 +66,11 @@
         padding-bottom: 32px
 
 .sectionLabel
-    font-size: 11px
-    letter-spacing: 0.12em
-    text-transform: uppercase
-    color: var(--color-primary)
-    margin-bottom: 12px
-    font-weight: 600
+    +mixins.hero-label($margin-bottom: 12px)
     display: block
 
 .sectionTitle
-    font-size: 2.4rem
-    font-weight: 900
-    text-transform: uppercase
-    line-height: 1.08
-    margin: 0 0 16px
-    color: #fff
+    +mixins.hero-title($font-size: 2.4rem, $font-weight: 900, $line-height: 1.08, $margin-bottom: 16px)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         font-size: 1.7rem

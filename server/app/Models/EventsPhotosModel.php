@@ -58,12 +58,15 @@ class EventsPhotosModel extends ApplicationBaseModel
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
+    private const MAX_LIMIT = 500;
+
     /**
      * Retrieves a paginated and optionally ordered list of event photos.
      *
      * When $eventId is provided the results are scoped to that event. When
      * $order is 'rand' the rows are returned in random order; 'date' orders
-     * by the created date ascending. The $limit is capped at 100 for safety.
+     * by the created date ascending. The $limit is capped at MAX_LIMIT for
+     * safety, regardless of whether the list is scoped to one event.
      *
      * @param string      $locale  Locale code for title selection ('ru' or 'en'). Default is 'ru'.
      * @param string|null $eventId Optional event ID to filter results.
@@ -85,10 +88,10 @@ class EventsPhotosModel extends ApplicationBaseModel
             $photosQuery->where('event_id', $eventId);
         }
 
-        // Always capped at 100, regardless of whether the list is scoped to
-        // one event — an unbounded $limit here was previously possible when
-        // $eventId was set.
-        $photosQuery->limit((is_numeric($limit) && $limit > 0 && $limit <= 100) ? $limit : 20);
+        // A requested limit above MAX_LIMIT is clamped to it, not discarded
+        // in favor of the small default — otherwise callers asking for "all"
+        // photos of an event with e.g. 150 items would silently get 20 back.
+        $photosQuery->limit(is_numeric($limit) && $limit > 0 ? min((int) $limit, self::MAX_LIMIT) : 20);
 
         if ($order !== null && in_array($order, ['rand', 'date'], true)) {
             // 'date' orders by upload time — the table has no `date` column,

@@ -15,20 +15,10 @@
         padding: 32px 20px
 
 .heroLabel
-    font-size: 11px
-    letter-spacing: 0.12em
-    text-transform: uppercase
-    color: var(--color-primary)
-    margin-bottom: 14px
-    font-weight: 600
+    +mixins.hero-label
 
 .heroTitle
-    font-size: 2.6rem
-    font-weight: 600
-    text-transform: uppercase
-    line-height: 1.05
-    margin: 0 0 18px
-    color: #fff
+    +mixins.hero-title
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         font-size: 1.8rem

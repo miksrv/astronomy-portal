@@ -1,16 +1,22 @@
 .languageSwitcher
     display: flex
-    margin: 0 15px
+    align-items: center
+    gap: 4px
 
-    button
+    .separator
+        color: var(--text-color-secondary)
+
+    .langButton
         border: none
         background-color: transparent
         cursor: pointer
         padding: 0
+        font: inherit
         color: var(--text-color-secondary)
 
-        &:hover, &:active, &:focus
+        &:hover:not(:disabled)
             color: var(--text-color-primary)
 
-        &:last-of-type
-            margin-right: 0
+        &.active
+            color: var(--text-color-primary)
+            cursor: default

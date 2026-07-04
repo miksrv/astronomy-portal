@@ -13,19 +13,20 @@ import { ObjectsTable } from '@/components/pages/objects'
 import { formatObjectName } from '@/utils/strings'
 
 interface ObjectsPageProps {
-    category: string
+    search: string
     categoriesList: ApiModel.Category[]
     objectsList: ApiModel.Object[]
     photosList: ApiModel.Photo[]
 }
 
-const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, objectsList, photosList }) => {
+const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, categoriesList, objectsList, photosList }) => {
     const { t } = useTranslation()
     const router = useRouter()
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
-    const [searchFilter, setSearchFilter] = useState<string>()
+    const [searchFilter, setSearchFilter] = useState<string | undefined>(search || undefined)
+    const [debouncedSearchFilter, setDebouncedSearchFilter] = useState<string | undefined>(search || undefined)
     const [categoryFilter, setCategoryFilter] = useState<number | undefined>()
     const [toolbarHeight, setToolbarHeight] = useState<number>(0)
     const [footerHeight, setFooterHeight] = useState<number>(0)
@@ -61,22 +62,6 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
 
     const title = t('pages.objects.title', 'Список астрономических объектов')
 
-    const handleChangeCategoryFilter = async (category: number | undefined) => {
-        if (category !== undefined) {
-            await router.push({
-                pathname: router.pathname,
-                query: { ...router.query, category }
-            })
-        } else {
-            await router.push({
-                pathname: router.pathname,
-                query: undefined
-            })
-        }
-
-        setCategoryFilter(category)
-    }
-
     useEffect(() => {
         const updateHeights = () => {
             if (toolbarRef.current) {
@@ -95,9 +80,51 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
         }
     }, [])
 
+    // Derive filters from router.query (not just the initial SSR props) so
+    // shallow-routed URL updates and Back/Forward navigation stay in sync.
     useEffect(() => {
-        setCategoryFilter(category ? parseInt(category) : undefined)
-    }, [category])
+        const queryCategory = router.query.category as string | undefined
+
+        setCategoryFilter(queryCategory ? parseInt(queryCategory) : undefined)
+    }, [router.query.category])
+
+    useEffect(() => {
+        const querySearch = (router.query.search as string) || undefined
+
+        setSearchFilter(querySearch)
+        setDebouncedSearchFilter(querySearch)
+    }, [router.query.search])
+
+    // Debounce the search input before syncing it to the URL - avoids pushing
+    // a history entry on every keystroke.
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearchFilter(searchFilter), 400)
+
+        return () => clearTimeout(timer)
+    }, [searchFilter])
+
+    // Sync filters to the URL (shallow - filtering is client-side, no need to
+    // re-run getServerSideProps). Keeps ?search= functional for direct links
+    // and for the WebSite/SearchAction structured data on the home page.
+    useEffect(() => {
+        const currentSearch = (router.query.search as string) || undefined
+        const currentCategory = router.query.category ? parseInt(router.query.category as string) : undefined
+
+        if (currentSearch === debouncedSearchFilter && currentCategory === categoryFilter) {
+            return
+        }
+
+        const query: Record<string, string | number> = {}
+
+        if (debouncedSearchFilter) {
+            query.search = debouncedSearchFilter
+        }
+        if (categoryFilter !== undefined) {
+            query.category = categoryFilter
+        }
+
+        void router.push({ pathname: router.pathname, query }, undefined, { shallow: true })
+    }, [debouncedSearchFilter, categoryFilter, router.query.search, router.query.category])
 
     return (
         <AppLayout
@@ -148,7 +175,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ category, categoriesList, obj
                     clearable={true}
                     value={categoryFilter}
                     placeholder={t('pages.objects.filter-by-category', 'Фильтр по категории')}
-                    onSelect={(category) => handleChangeCategoryFilter(category?.[0]?.key)}
+                    onSelect={(category) => setCategoryFilter(category?.[0]?.key)}
                     options={filteredCategoriesList?.map((category) => ({
                         key: category.id,
                         value: category.title
@@ -180,7 +207,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<ObjectsPageProps>> => {
             const locale = context.locale ?? 'en'
-            const category = (context.query.category as string) || ''
+            const search = (context.query.search as string) || ''
             const translations = await serverSideTranslations(locale)
 
             store.dispatch(setLocale(locale))
@@ -197,7 +224,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
             return {
                 props: {
                     ...translations,
-                    category,
+                    search,
                     categoriesList: categories?.items || [],
                     objectsList: objects?.items || [],
                     photosList: photos?.items || []

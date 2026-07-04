@@ -60,7 +60,7 @@ const HomePage: NextPage<HomePageProps> = ({ photosList, eventPhotos }) => {
         <AppLayout
             noTopMargin={true}
             canonical={''}
-            title={t('pages.index.title', 'Проект "Смотри на звёзды"')}
+            title={t('pages.index.title', 'Смотри на звёзды')}
             description={t(
                 'pages.index.description',
                 'Смотри на звёзды - уникальный проект в Оренбургской области: наблюдения в телескопы за городом, тротуарная астрономия, обсерватория в Оренбургской области и астрофотографии'

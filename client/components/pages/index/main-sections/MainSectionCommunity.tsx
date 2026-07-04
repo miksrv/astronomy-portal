@@ -19,10 +19,10 @@ export const MainSectionCommunity: React.FC = () => {
             <div className={styles.sectionGrid}>
                 <div className={cn(styles.sectionText, 'animate')}>
                     <span className={styles.sectionLabel}>
-                        {t('components.pages.index.main-sections.label-stargazing', 'АСТРОВЫЕЗДЫ')}
+                        {t('components.pages.index.main-sections.label-stargazing', 'Астровыезды')}
                     </span>
                     <h2 className={styles.sectionTitle}>
-                        {t('components.pages.index.main-sections.stargazing-title', 'ПОД ОТКРЫТЫМ НЕБОМ')}
+                        {t('components.pages.index.main-sections.stargazing-title', 'Под открытым небом')}
                     </h2>
                     <p className={styles.sectionDesc}>
                         {t(

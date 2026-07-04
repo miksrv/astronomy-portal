@@ -7,6 +7,9 @@ import { API, ApiModel, ApiType } from '@/api'
 
 import styles from './styles.module.sass'
 
+const MIN_CONTENT_LENGTH = 10
+const MAX_CONTENT_LENGTH = 1000
+
 interface ReviewFormProps {
     entityType: ApiModel.CommentEntityType
     entityId: string
@@ -24,14 +27,50 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
 
     const [createComment, { isLoading }] = API.useCommentsCreateMutation()
 
+    const validate = (trimmedContent: string): Record<string, string> => {
+        const errors: Record<string, string> = {}
+
+        if (entityType === 'event' && rating === 0) {
+            errors.rating = t('components.common.review-form.rating-required', 'Пожалуйста, выберите оценку')
+        }
+
+        if (!trimmedContent) {
+            errors.content = t('components.common.review-form.content-required', 'Пожалуйста, напишите отзыв')
+        } else if (trimmedContent.length < MIN_CONTENT_LENGTH) {
+            errors.content = t(
+                'components.common.review-form.content-too-short',
+                'Отзыв должен содержать не менее {{min}} символов',
+                { min: MIN_CONTENT_LENGTH }
+            )
+        } else if (trimmedContent.length > MAX_CONTENT_LENGTH) {
+            errors.content = t(
+                'components.common.review-form.content-too-long',
+                'Отзыв не должен превышать {{max}} символов',
+                { max: MAX_CONTENT_LENGTH }
+            )
+        }
+
+        return errors
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        const trimmedContent = content.trim()
+        const validationErrors = validate(trimmedContent)
+
+        if (Object.keys(validationErrors).length > 0) {
+            setFieldErrors(validationErrors)
+            setSubmitSuccess(false)
+            return
+        }
+
         setFieldErrors({})
         setSubmitSuccess(false)
 
         try {
             await createComment({
-                content,
+                content: trimmedContent,
                 entityId,
                 entityType,
                 rating: rating > 0 ? rating : undefined
@@ -78,10 +117,15 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
                             <button
                                 key={value}
                                 type={'button'}
+                                disabled={isLoading}
                                 className={value <= activeRating ? styles.starFilled : styles.starEmpty}
                                 aria-label={`${value} star${value !== 1 ? 's' : ''}`}
                                 aria-pressed={rating === value}
-                                onClick={() => setRating(value)}
+                                onClick={() => {
+                                    setRating(value)
+                                    setFieldErrors(({ rating: _rating, ...rest }) => rest)
+                                    setSubmitSuccess(false)
+                                }}
                                 onMouseEnter={() => setHoverRating(value)}
                                 onMouseLeave={() => setHoverRating(0)}
                             >
@@ -96,12 +140,17 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
 
             <TextArea
                 rows={4}
-                required={true}
                 autoResize={true}
+                disabled={isLoading}
                 value={content}
+                maxLength={MAX_CONTENT_LENGTH}
                 placeholder={t('components.common.review-form.placeholder', 'Поделитесь впечатлениями...')}
                 error={fieldErrors.content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={(e) => {
+                    setContent(e.target.value)
+                    setFieldErrors(({ content: _content, ...rest }) => rest)
+                    setSubmitSuccess(false)
+                }}
             />
 
             {(fieldErrors._general || submitSuccess) && (
@@ -119,7 +168,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
                 type={'submit'}
                 mode={'primary'}
                 size={'medium'}
-                disabled={isLoading || !content.trim()}
+                disabled={isLoading}
                 label={
                     isLoading
                         ? t('common.loading', 'Загрузка...')

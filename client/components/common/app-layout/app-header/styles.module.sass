@@ -77,17 +77,32 @@
         margin-left: auto
         display: flex
 
+.userMenuTrigger
+    display: flex
+    align-items: center
+    cursor: pointer
+
+    &:hover
+        .avatarImage
+            opacity: .6
+
+    .arrow
+        height: 16px
+        width: 16px
+        fill: currentColor
+        margin-left: 5px
+        opacity: .7
+
 .avatarImage
     margin: 0 !important
     font-size: 0
-
-    &:hover
-        opacity: .6
+    transition: opacity .15s ease-out
 
 .contextListMenu
     list-style: none
     margin: 0
     padding: 6px
+    width: max-content
     border-radius: var(--border-radius)
     box-shadow: var(--container-shadow)
 
@@ -99,7 +114,6 @@
 
         a
             padding: 6px 12px
-            width: 100%
             min-height: 32px
             display: flex
             align-items: center
@@ -119,6 +133,7 @@
                 margin-right: 10px !important
                 width: 20px
                 height: 20px
+                flex-shrink: 0
 
             &:hover, &.active
                 background-color: var(--body-background)

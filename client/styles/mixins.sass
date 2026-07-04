@@ -114,3 +114,28 @@
 
     &::after
         display: none
+
+// Small eyecatcher label above a hero/section title.
+// Uppercase is applied here in CSS - keep the translated source text in
+// normal case. Screen readers (notably VoiceOver) can spell out literal
+// all-caps DOM text letter by letter instead of reading it as a word.
+=hero-label($letter-spacing: 0.12em, $margin-bottom: 14px)
+    font-size: 11px
+    letter-spacing: $letter-spacing
+    text-transform: uppercase
+    color: var(--color-primary)
+    font-weight: 600
+    margin: 0 0 $margin-bottom
+
+// Big hero/section title. Same accessibility note as hero-label above -
+// keep the source text in normal case, uppercase is a purely visual effect.
+=hero-title($font-size: 2.6rem, $font-weight: 600, $line-height: 1.05, $margin-bottom: 18px)
+    font-size: $font-size
+    font-weight: $font-weight
+    text-transform: uppercase
+    line-height: $line-height
+    margin: 0 0 $margin-bottom
+    color: #fff
+
+    span
+        display: block

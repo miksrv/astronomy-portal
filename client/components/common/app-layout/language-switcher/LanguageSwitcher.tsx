@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { setCookie } from 'cookies-next'
+import { cn } from 'simple-react-ui-kit'
 
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
@@ -9,6 +10,11 @@ import { LOCAL_STORAGE } from '@/utils/constants'
 import * as LocalStorage from '@/utils/localstorage'
 
 import styles from './styles.module.sass'
+
+const LANGUAGES: Array<{ locale: ApiType.Locale; label: string }> = [
+    { locale: 'ru', label: 'Ru' },
+    { locale: 'en', label: 'En' }
+]
 
 export const LanguageSwitcher: React.FC = () => {
     const { i18n } = useTranslation()
@@ -38,23 +44,19 @@ export const LanguageSwitcher: React.FC = () => {
 
     return (
         <div className={styles.languageSwitcher}>
-            {currentLanguage === 'ru' && (
-                <button
-                    className={styles.active}
-                    onClick={() => changeLanguage('en')}
-                >
-                    {'Eng'}
-                </button>
-            )}
-
-            {currentLanguage === 'en' && (
-                <button
-                    className={styles.active}
-                    onClick={() => changeLanguage('ru')}
-                >
-                    {'Rus'}
-                </button>
-            )}
+            {LANGUAGES.map(({ locale, label }, index) => (
+                <React.Fragment key={locale}>
+                    {index > 0 && <span className={styles.separator}>{'/'}</span>}
+                    <button
+                        type={'button'}
+                        className={cn(styles.langButton, currentLanguage === locale && styles.active)}
+                        onClick={() => changeLanguage(locale)}
+                        disabled={currentLanguage === locale}
+                    >
+                        {label}
+                    </button>
+                </React.Fragment>
+            ))}
         </div>
     )
 }

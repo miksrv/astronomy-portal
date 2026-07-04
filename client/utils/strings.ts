@@ -20,8 +20,16 @@ export const sliceText = (text?: string, length: number = 350): string => {
     }
 
     const cleanedText = text.replace(/(\r\n|\n|\r)/gm, '')
+
+    if (cleanedText.length <= length) {
+        return cleanedText
+    }
+
     const sliced = cleanedText.slice(0, length)
-    return sliced + (sliced.length < cleanedText.length ? '...' : '')
+    const lastSpaceIndex = sliced.lastIndexOf(' ')
+    const trimmed = lastSpaceIndex > 0 ? sliced.slice(0, lastSpaceIndex) : sliced
+
+    return `${trimmed}...`
 }
 
 /**
