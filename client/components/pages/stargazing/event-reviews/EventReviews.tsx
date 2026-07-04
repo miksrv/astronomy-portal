@@ -27,6 +27,8 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
     const canReview = data?.canReview ?? false
     const hasReviewed = data?.hasReviewed ?? false
     const showForm = isAuth && canReview && !hasReviewed
+    const showNotEligible = isAuth && !canReview && !hasReviewed
+    const showTopSection = showForm || showNotEligible
 
     const canDeleteReview = (review: ApiModel.Comment): boolean => {
         if (!user) {
@@ -50,7 +52,7 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
                 </div>
             )}
 
-            {isAuth && !canReview && !hasReviewed && (
+            {showNotEligible && (
                 <p className={styles.infoText}>
                     {t(
                         'components.common.review-form.not-eligible',
@@ -58,6 +60,8 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
                     )}
                 </p>
             )}
+
+            {showTopSection && <hr className={styles.divider} />}
 
             {items.length > 0 ? (
                 <ul className={styles.list}>
