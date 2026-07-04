@@ -109,10 +109,12 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
         >
             <BreadcrumbJsonLd currentPage={title} />
 
-            <JsonLdScript
-                scriptKey={'stargazing-events-list'}
-                data={eventsListJsonLd}
-            />
+            {eventsListJsonLd && (
+                <JsonLdScript
+                    scriptKey={'stargazing-events-list'}
+                    data={eventsListJsonLd}
+                />
+            )}
 
             <div
                 className={styles.pageBackground}

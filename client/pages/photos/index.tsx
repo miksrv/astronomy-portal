@@ -13,13 +13,12 @@ import { PhotoGrid } from '@/components/pages/photos'
 import { formatObjectName } from '@/utils/strings'
 
 interface PhotosPageProps {
-    category: string
     search: string
     photosList: ApiModel.Photo[]
     categoriesList: ApiModel.Category[]
 }
 
-const PhotosPage: NextPage<PhotosPageProps> = ({ category, search, photosList, categoriesList }) => {
+const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesList }) => {
     const { t } = useTranslation()
     const router = useRouter()
 
@@ -59,13 +58,20 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, search, photosList, c
 
     const title = t('pages.photos.title', 'Астрофото')
 
+    // Derive filters from router.query (not just the initial SSR props) so
+    // shallow-routed URL updates and Back/Forward navigation stay in sync.
     useEffect(() => {
-        setCategoryFilter(category ? parseInt(category) : undefined)
-    }, [category])
+        const queryCategory = router.query.category as string | undefined
+
+        setCategoryFilter(queryCategory ? parseInt(queryCategory) : undefined)
+    }, [router.query.category])
 
     useEffect(() => {
-        setSearchFilter(search || undefined)
-    }, [search])
+        const querySearch = (router.query.search as string) || undefined
+
+        setSearchFilter(querySearch)
+        setDebouncedSearchFilter(querySearch)
+    }, [router.query.search])
 
     // Debounce the search input before syncing it to the URL - avoids pushing
     // a history entry on every keystroke.
@@ -78,6 +84,13 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, search, photosList, c
     // Sync filters to the URL (shallow - filtering is client-side, no need to
     // re-run getServerSideProps).
     useEffect(() => {
+        const currentSearch = (router.query.search as string) || undefined
+        const currentCategory = router.query.category ? parseInt(router.query.category as string) : undefined
+
+        if (currentSearch === debouncedSearchFilter && currentCategory === categoryFilter) {
+            return
+        }
+
         const query: Record<string, string | number> = {}
 
         if (debouncedSearchFilter) {
@@ -88,7 +101,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, search, photosList, c
         }
 
         void router.push({ pathname: router.pathname, query }, undefined, { shallow: true })
-    }, [debouncedSearchFilter, categoryFilter])
+    }, [debouncedSearchFilter, categoryFilter, router.query.search, router.query.category])
 
     return (
         <AppLayout
@@ -166,7 +179,6 @@ export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<PhotosPageProps>> => {
             const locale = context.locale ?? 'en'
-            const category = (context.query.category as string) || ''
             const search = (context.query.search as string) || ''
             const translations = await serverSideTranslations(locale)
 
@@ -181,7 +193,6 @@ export const getServerSideProps = wrapper.getServerSideProps(
             return {
                 props: {
                     ...translations,
-                    category,
                     search,
                     photosList: photos?.items || [],
                     categoriesList: categories?.items || []
