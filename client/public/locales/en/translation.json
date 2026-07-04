@@ -42,12 +42,12 @@
                 "delete": "Delete"
             },
             "review-form": {
-                "error": "Couldn't submit the review. Please try again.",
-                "rating-label": "Rating",
                 "rating-required": "Please select a rating",
                 "content-required": "Please write a review",
                 "content-too-short": "The review must be at least {{min}} characters long",
                 "content-too-long": "The review must not exceed {{max}} characters",
+                "error": "Couldn't submit the review. Please try again.",
+                "rating-label": "Rating",
                 "placeholder": "Share your impressions...",
                 "success": "Review published!",
                 "submit": "Submit review",
@@ -458,6 +458,9 @@
             "contacts-social-label": "Follow the news"
         },
         "stargazing": {
+            "event-date-label": "Date",
+            "views-label": "Views",
+            "members-label": "Members",
             "program-arrival-title": "Arrival at the site",
             "program-arrival-desc": "Arrive by car 15-20 minutes before the start and take a comfortable spot in the designated area of the field.",
             "program-lecture-title": "Astronomy lecture",
@@ -638,13 +641,13 @@
             "description": "A list of all past stargazing trips in Orenburg - photos, dates, participants and impressions from each event."
         },
         "payment": {
+            "leave-confirm": "The payment check hasn't finished yet. Leave the page?",
             "title": "Please wait",
             "checking": "Checking the payment status, please wait…",
+            "redirecting": "Payment successful! Redirecting you to your profile…",
             "pending-title": "Payment is still processing",
             "pending-timeout": "We haven't received payment confirmation yet. If you have paid, your spot is held and the status will update within a few minutes. If the payment wasn't completed, return to the event and finish it.",
             "back-to-stargazing": "Back to stargazing trips",
-            "redirecting": "Payment successful! Redirecting you to your profile…",
-            "leave-confirm": "The payment check hasn't finished yet. Leave the page?",
             "failed-title": "Payment failed",
             "failed-text": "The payment was not completed. Your booking is not confirmed - you can try to register again.",
             "failed-reason-fallback": "The bank did not specify a reason for the decline. Try using a different card or contact the bank that issued your card.",

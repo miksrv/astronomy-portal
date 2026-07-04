@@ -27,6 +27,7 @@ export const EventItemData: React.FC<EventItemDataProps> = ({ title, event, ...p
             alt={title || ''}
             width={1024}
             height={768}
+            priority
         />
 
         <EventMetaRow

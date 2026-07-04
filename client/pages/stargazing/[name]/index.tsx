@@ -44,6 +44,13 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     const PHOTOS_PREVIEW_LIMIT = 12
 
     const title = `${t('menu.stargazing', 'Астровыезды')} - ${event?.title}`
+    const siteName = t('common.look-at-the-stars', 'Смотри на звёзды')
+    const metaTitle = event?.title ? `${event.title} — ${siteName}` : title
+
+    const coverImageUrl =
+        event?.coverFileName && event?.coverFileExt
+            ? `${hosts.stargazing}${event.id}/${event.coverFileName}.${event.coverFileExt}`
+            : undefined
 
     const eventJsonLd = event
         ? {
@@ -52,7 +59,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
               name: event.title,
               description: sliceText(removeMarkdown(event.content ?? ''), 300),
               startDate: event.date?.date,
-              eventStatus: 'https://schema.org/EventScheduled',
+              eventStatus: event.canceled ? 'https://schema.org/EventCancelled' : 'https://schema.org/EventScheduled',
               eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
               location: {
                   '@type': 'Place',
@@ -68,10 +75,15 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                   name: 'Смотри на звёзды',
                   url: SITE_LINK?.replace(/\/$/, '')
               },
-              image:
-                  event.coverFileName && event.coverFileExt
-                      ? `${hosts.stargazing}${event.id}/${event.coverFileName}_preview.${event.coverFileExt}`
-                      : undefined,
+              offers: {
+                  '@type': 'Offer',
+                  price: event.ticketPrice ?? 0,
+                  priceCurrency: 'RUB',
+                  availability:
+                      (event.availableTickets ?? 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
+                  url: `${SITE_LINK}stargazing/${event.id}`
+              },
+              image: coverImageUrl,
               url: `${SITE_LINK}stargazing/${event.id}`
           }
         : null
@@ -123,16 +135,10 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     return (
         <AppLayout
             canonical={`stargazing/${event?.id}`}
-            title={title}
-            description={sliceText(removeMarkdown(event?.content || ''), 300)}
+            title={metaTitle}
+            description={sliceText(removeMarkdown(event?.content || ''), 160)}
             openGraph={{
-                images: [
-                    {
-                        height: 400,
-                        url: `${hosts.stargazing}${event?.id}/${event?.coverFileName}_preview.${event?.coverFileExt}`,
-                        width: 500
-                    }
-                ]
+                images: coverImageUrl ? [{ url: coverImageUrl }] : undefined
             }}
         >
             <JsonLdScript

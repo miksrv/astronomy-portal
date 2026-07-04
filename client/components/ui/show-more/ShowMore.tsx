@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useId, useState } from 'react'
 import { Button, cn } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
@@ -12,14 +12,22 @@ interface ShowMoreProps {
 export const ShowMore: React.FC<ShowMoreProps> = ({ content }) => {
     const { t } = useTranslation()
     const [isExpanded, setIsExpanded] = useState(false)
+    const contentId = useId()
 
     return (
         <div className={cn(styles.showMore, isExpanded && styles.expanded)}>
-            <div className={styles.content}>{content}</div>
+            <div
+                id={contentId}
+                className={styles.content}
+            >
+                {content}
+            </div>
             <Button
                 className={styles.showMoreButton}
                 mode={'secondary'}
                 size={'medium'}
+                aria-expanded={isExpanded}
+                aria-controls={contentId}
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 {isExpanded
