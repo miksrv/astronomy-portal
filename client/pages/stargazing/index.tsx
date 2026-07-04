@@ -6,9 +6,11 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, wrapper } from '@/api'
+import { API, ApiModel, setLocale, SITE_LINK, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
+import { hosts } from '@/api/constants'
 import { AppFooter, AppLayout, BreadcrumbJsonLd, PrevNextNav } from '@/components/common'
 import {
     EventImportant,
@@ -60,13 +62,40 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
         }
     ]
 
+    const eventsForSchema = [...(upcomingData ? [upcomingData] : []), ...pastEvents]
+
+    const eventsListJsonLd =
+        eventsForSchema.length > 0
+            ? {
+                  '@context': 'https://schema.org',
+                  '@type': 'ItemList',
+                  itemListElement: eventsForSchema.map((event, index) => ({
+                      '@type': 'ListItem',
+                      position: index + 1,
+                      item: {
+                          '@type': 'Event',
+                          name: event.title,
+                          url: `${SITE_LINK}stargazing/${event.id}`,
+                          startDate: event.date?.date,
+                          eventStatus: event.canceled
+                              ? 'https://schema.org/EventCancelled'
+                              : 'https://schema.org/EventScheduled',
+                          image:
+                              event.coverFileName && event.coverFileExt
+                                  ? `${hosts.stargazing}${event.id}/${event.coverFileName}.${event.coverFileExt}`
+                                  : undefined
+                      }
+                  }))
+              }
+            : null
+
     return (
         <AppLayout
             canonical={'stargazing'}
             title={title}
             description={t(
                 'pages.stargazing.description',
-                'Астровыезд в Оренбурге - увлекательные поездки за город, где телескопы открывают космические горизонты. Вечера научных открытий, лекций и живого общения с единомышленниками. Узнайте правила поведения и подготовьтесь к наблюдению за звёздами.'
+                'Астровыезды в Оренбурге — поездки за город с телескопами, лекциями и наблюдением звёзд. Программа вечера, правила и запись на ближайший выезд.'
             )}
             openGraph={{
                 images: [
@@ -79,6 +108,11 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
             }}
         >
             <BreadcrumbJsonLd currentPage={title} />
+
+            <JsonLdScript
+                scriptKey={'stargazing-events-list'}
+                data={eventsListJsonLd}
+            />
 
             <div
                 className={styles.pageBackground}

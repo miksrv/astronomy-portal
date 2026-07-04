@@ -150,9 +150,9 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
                     src={noEventsImage}
                     alt={''}
                 />
-                <h3>
+                <h2 className={cn(styles.noEventTitle, 'centeredHeading')}>
                     {t('components.pages.stargazing.event-upcoming.no-upcoming', 'Пока нет предстоящих астровыездов')}
-                </h3>
+                </h2>
                 <p>
                     {t(
                         'components.pages.stargazing.event-upcoming.no-upcoming-hint',

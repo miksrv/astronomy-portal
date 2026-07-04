@@ -51,6 +51,15 @@ h2
         margin-top: 3px
         background: var(--input-border-color)
 
+// Centered heading without the trailing divider line - for standalone/empty-state
+// headings that aren't a section title (e.g. an empty-state message).
+.centeredHeading
+    display: block
+    text-align: center
+
+    &::after
+        display: none
+
 dialog h2
     border-left: none
     padding-left: 0

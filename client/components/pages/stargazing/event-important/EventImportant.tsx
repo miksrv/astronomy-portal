@@ -1,6 +1,7 @@
 import React from 'react'
 import { Container, Icon } from 'simple-react-ui-kit'
 
+import Image from 'next/image'
 import { useTranslation } from 'next-i18next/pages'
 
 import styles from './styles.module.sass'
@@ -41,9 +42,11 @@ export const EventImportant: React.FC = () => {
                         ))}
                     </ul>
                 </div>
-                <img
+                <Image
                     className={styles.telescopeImage}
                     src={'/images/telescope-illustration.png'}
+                    width={1235}
+                    height={687}
                     alt={''}
                     aria-hidden={'true'}
                 />
