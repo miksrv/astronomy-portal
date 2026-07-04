@@ -93,7 +93,8 @@ export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) =
         },
         {
             link: 'https://t.me/look_at_stars',
-            text: t('menu.telegram', 'Телеграм')
+            text: t('menu.telegram', 'Телеграм'),
+            external: true
         }
     ]
 
@@ -105,68 +106,70 @@ export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) =
         setDropdownOpen(undefined)
     }
 
+    const isActive = (link: string) => router.asPath === link || router.asPath.startsWith(`${link}/`)
+
     return (
         <menu className={cn(className, styles.menu, sidebarMenu && styles.sidebarMenu)}>
-            {menuItems
-                .filter(({ link }) => !!link)
-                .map((item, i) => (
-                    <li
-                        key={`menu${i}`}
-                        onMouseEnter={() => handleMouseEnter(i)}
-                        onMouseLeave={handleMouseLeave}
+            {menuItems.map((item, i) => (
+                <li
+                    key={item.link}
+                    onMouseEnter={() => handleMouseEnter(i)}
+                    onMouseLeave={handleMouseLeave}
+                    onFocus={() => handleMouseEnter(i)}
+                    onBlur={(event) => {
+                        if (!event.currentTarget.contains(event.relatedTarget)) {
+                            handleMouseLeave()
+                        }
+                    }}
+                >
+                    <Link
+                        className={isActive(item.link) ? styles.active : undefined}
+                        href={item.link}
+                        title={item.text}
+                        onClick={() => onClick?.()}
+                        target={item.external ? '_blank' : undefined}
+                        rel={item.external ? 'noopener noreferrer' : undefined}
+                        aria-haspopup={item.subMenuItems ? true : undefined}
+                        aria-expanded={item.subMenuItems ? dropdownOpen === i : undefined}
                     >
-                        <Link
-                            className={
-                                item.subMenuItems
-                                    ? router.asPath === item.link || router.asPath.startsWith(item.link + '/')
-                                        ? styles.active
-                                        : undefined
-                                    : router.asPath === item.link
-                                      ? styles.active
-                                      : undefined
-                            }
-                            href={item.link}
-                            title={item.text}
-                            onClick={() => onClick?.()}
-                            target={item.external ? '_blank' : undefined}
-                        >
-                            {item.text}
-                            {item.subMenuItems && !sidebarMenu ? (
-                                dropdownOpen === i ? (
-                                    <Icon
-                                        name={'KeyboardUp'}
-                                        className={styles.arrow}
-                                    />
-                                ) : (
-                                    <Icon
-                                        name={'KeyboardDown'}
-                                        className={styles.arrow}
-                                    />
-                                )
+                        {item.text}
+                        {item.subMenuItems && !sidebarMenu ? (
+                            dropdownOpen === i ? (
+                                <Icon
+                                    name={'KeyboardUp'}
+                                    className={styles.arrow}
+                                />
                             ) : (
-                                ''
-                            )}
-                        </Link>
-
-                        {item.subMenuItems && (dropdownOpen === i || sidebarMenu) && (
-                            <ul className={styles.dropdownMenu}>
-                                {item.subMenuItems.map((subItem, j) => (
-                                    <li key={`submenu${j}`}>
-                                        <Link
-                                            className={router.asPath === subItem.link ? styles.active : undefined}
-                                            href={subItem.link}
-                                            title={subItem.text}
-                                            onClick={() => onClick?.()}
-                                            target={subItem.external ? '_blank' : undefined}
-                                        >
-                                            {subItem.text}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
+                                <Icon
+                                    name={'KeyboardDown'}
+                                    className={styles.arrow}
+                                />
+                            )
+                        ) : (
+                            ''
                         )}
-                    </li>
-                ))}
+                    </Link>
+
+                    {item.subMenuItems && (dropdownOpen === i || sidebarMenu) && (
+                        <ul className={styles.dropdownMenu}>
+                            {item.subMenuItems.map((subItem) => (
+                                <li key={subItem.link}>
+                                    <Link
+                                        className={isActive(subItem.link) ? styles.active : undefined}
+                                        href={subItem.link}
+                                        title={subItem.text}
+                                        onClick={() => onClick?.()}
+                                        target={subItem.external ? '_blank' : undefined}
+                                        rel={subItem.external ? 'noopener noreferrer' : undefined}
+                                    >
+                                        {subItem.text}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </li>
+            ))}
         </menu>
     )
 }
