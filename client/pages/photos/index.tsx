@@ -14,17 +14,19 @@ import { formatObjectName } from '@/utils/strings'
 
 interface PhotosPageProps {
     category: string
+    search: string
     photosList: ApiModel.Photo[]
     categoriesList: ApiModel.Category[]
 }
 
-const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categoriesList }) => {
+const PhotosPage: NextPage<PhotosPageProps> = ({ category, search, photosList, categoriesList }) => {
     const { t } = useTranslation()
     const router = useRouter()
 
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
-    const [searchFilter, setSearchFilter] = useState<string>()
+    const [searchFilter, setSearchFilter] = useState<string | undefined>(search || undefined)
+    const [debouncedSearchFilter, setDebouncedSearchFilter] = useState<string | undefined>(search || undefined)
     const [categoryFilter, setCategoryFilter] = useState<number | undefined>()
 
     const filteredCategoriesList = useMemo(
@@ -57,25 +59,36 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
 
     const title = t('pages.photos.title', 'Астрофото')
 
-    const handleChangeCategoryFilter = async (category: number | undefined) => {
-        if (category !== undefined) {
-            await router.push({
-                pathname: router.pathname,
-                query: { ...router.query, category }
-            })
-        } else {
-            await router.push({
-                pathname: router.pathname,
-                query: undefined
-            })
-        }
-
-        setCategoryFilter(category)
-    }
-
     useEffect(() => {
         setCategoryFilter(category ? parseInt(category) : undefined)
     }, [category])
+
+    useEffect(() => {
+        setSearchFilter(search || undefined)
+    }, [search])
+
+    // Debounce the search input before syncing it to the URL - avoids pushing
+    // a history entry on every keystroke.
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearchFilter(searchFilter), 400)
+
+        return () => clearTimeout(timer)
+    }, [searchFilter])
+
+    // Sync filters to the URL (shallow - filtering is client-side, no need to
+    // re-run getServerSideProps).
+    useEffect(() => {
+        const query: Record<string, string | number> = {}
+
+        if (debouncedSearchFilter) {
+            query.search = debouncedSearchFilter
+        }
+        if (categoryFilter !== undefined) {
+            query.category = categoryFilter
+        }
+
+        void router.push({ pathname: router.pathname, query }, undefined, { shallow: true })
+    }, [debouncedSearchFilter, categoryFilter])
 
     return (
         <AppLayout
@@ -125,7 +138,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ category, photosList, categorie
                     clearable={true}
                     value={categoryFilter}
                     placeholder={t('pages.photos.filter-by-category', 'Фильтр по категории')}
-                    onSelect={(category) => handleChangeCategoryFilter(category?.[0]?.key)}
+                    onSelect={(category) => setCategoryFilter(category?.[0]?.key)}
                     options={filteredCategoriesList?.map((category) => ({
                         key: category.id,
                         value: category.title
@@ -154,6 +167,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
         async (context): Promise<GetServerSidePropsResult<PhotosPageProps>> => {
             const locale = context.locale ?? 'en'
             const category = (context.query.category as string) || ''
+            const search = (context.query.search as string) || ''
             const translations = await serverSideTranslations(locale)
 
             store.dispatch(setLocale(locale))
@@ -168,6 +182,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 props: {
                     ...translations,
                     category,
+                    search,
                     photosList: photos?.items || [],
                     categoriesList: categories?.items || []
                 }
