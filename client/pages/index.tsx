@@ -3,9 +3,8 @@ import React, { useEffect } from 'react'
 import type { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
-import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, SITE_LINK, wrapper } from '@/api'
+import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { AppLayout } from '@/components/common'
 import { MainSectionCommunity, MainSectionHero, MainSectionObservatory } from '@/components/pages/index'
 
@@ -41,26 +40,11 @@ const HomePage: NextPage<HomePageProps> = ({ photosList, eventPhotos }) => {
         return () => observer.disconnect()
     }, [])
 
-    const websiteSchema = {
-        '@context': 'https://schema.org',
-        '@type': 'WebSite',
-        name: 'Смотри на звёзды',
-        url: SITE_LINK,
-        potentialAction: {
-            '@type': 'SearchAction',
-            target: {
-                '@type': 'EntryPoint',
-                urlTemplate: `${SITE_LINK}objects?search={search_term_string}`
-            },
-            'query-input': 'required name=search_term_string'
-        }
-    }
-
     return (
         <AppLayout
             noTopMargin={true}
             canonical={''}
-            title={t('pages.index.title', 'Проект "Смотри на звёзды"')}
+            title={t('pages.index.title', 'Смотри на звёзды')}
             description={t(
                 'pages.index.description',
                 'Смотри на звёзды - уникальный проект в Оренбургской области: наблюдения в телескопы за городом, тротуарная астрономия, обсерватория в Оренбургской области и астрофотографии'
@@ -69,10 +53,6 @@ const HomePage: NextPage<HomePageProps> = ({ photosList, eventPhotos }) => {
                 images: [{ url: '/images/index-hero.png', width: 1536, height: 1024 }]
             }}
         >
-            <JsonLdScript
-                scriptKey={'website'}
-                data={websiteSchema}
-            />
             <MainSectionHero photos={eventPhotos} />
             <MainSectionCommunity />
             <MainSectionObservatory photos={photosList} />
