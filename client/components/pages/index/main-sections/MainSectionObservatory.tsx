@@ -31,10 +31,10 @@ export const MainSectionObservatory: React.FC<MainSectionObservatoryProps> = ({ 
             <div className={styles.sectionGrid}>
                 <div className={cn(styles.sectionText, 'animate')}>
                     <span className={styles.sectionLabel}>
-                        {t('components.pages.index.main-sections.label-observatory', 'ОБСЕРВАТОРИЯ')}
+                        {t('components.pages.index.main-sections.label-observatory', 'Обсерватория')}
                     </span>
                     <h2 className={styles.sectionTitle}>
-                        {t('components.pages.index.main-sections.observatory-title', 'НАШ НАБЛЮДАТЕЛЬНЫЙ ПУНКТ')}
+                        {t('components.pages.index.main-sections.observatory-title', 'Наш наблюдательный пункт')}
                     </h2>
                     <p className={styles.sectionDesc}>
                         {t(

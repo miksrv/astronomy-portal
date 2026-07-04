@@ -29,7 +29,7 @@ export const MainSectionHero: React.FC<MainSectionHeroProps> = ({ photos }) => {
                         {t('components.pages.index.main-sections.label-astrophoto', 'Лучший астрономический проект')}
                     </span>
                     <h1 className={styles.sectionTitle}>
-                        {t('components.pages.index.main-sections.hero-title', 'СМОТРИ НА ЗВЁЗДЫ')}
+                        {t('components.pages.index.main-sections.hero-title', 'Смотри на звёзды')}
                     </h1>
                     <p className={styles.sectionDesc}>
                         {t(

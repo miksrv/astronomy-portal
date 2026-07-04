@@ -56,10 +56,8 @@ const StargazingTicketsPage: NextPage<object> = () => {
             {/* Hero section */}
             <div className={styles.hero}>
                 <h1 className={styles.heroTitle}>
-                    <span style={{ display: 'block' }}>{t('pages.stargazing-tickets.hero-title-line1', 'БИЛЕТЫ')}</span>
-                    <span style={{ display: 'block' }}>
-                        {t('pages.stargazing-tickets.hero-title-line2', 'И ПОДДЕРЖКА ПРОЕКТА')}
-                    </span>
+                    <span>{t('pages.stargazing-tickets.hero-title-line1', 'Билеты')}</span>
+                    <span>{t('pages.stargazing-tickets.hero-title-line2', 'И поддержка проекта')}</span>
                 </h1>
                 <p className={styles.heroSubtitle}>
                     {t(

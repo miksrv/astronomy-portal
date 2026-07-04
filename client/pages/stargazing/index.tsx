@@ -125,7 +125,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
                 </p>
 
                 <h1 className={styles.heroTitle}>
-                    <span>{t('pages.stargazing.hero-title-line1', 'АСТРОВЫЕЗДЫ')}</span>
+                    <span>{t('pages.stargazing.hero-title-line1', 'Астровыезды')}</span>
                 </h1>
 
                 <p className={styles.heroSubtitle}>
