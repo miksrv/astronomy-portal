@@ -307,7 +307,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             const { data: eventPhotos } = await store.dispatch(
                 API.endpoints?.eventGetPhotoList.initiate({
-                    eventId
+                    eventId,
+                    limit: 500
                 })
             )
 
