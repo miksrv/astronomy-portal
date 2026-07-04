@@ -44,6 +44,10 @@
             "review-form": {
                 "error": "Couldn't submit the review. Please try again.",
                 "rating-label": "Rating",
+                "rating-required": "Please select a rating",
+                "content-required": "Please write a review",
+                "content-too-short": "The review must be at least {{min}} characters long",
+                "content-too-long": "The review must not exceed {{max}} characters",
                 "placeholder": "Share your impressions...",
                 "success": "Review published!",
                 "submit": "Submit review",
