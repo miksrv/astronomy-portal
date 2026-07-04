@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 4.6.2
+
+### Patch Changes
+
+- Reworked the app header/menu: stable link-based keys, unified active-route matching for nested paths, improved dropdown accessibility (focus/blur handling, ARIA state), safer external links (`noopener/noreferrer`), and a chevron indicator tracking the open state of the user menu popout; moved the language switcher from the header to the footer nav, now showing both locales with active-state styling
+- Improved stargazing SEO and accessibility: meaningful alt text and image priority loading, better ARIA semantics for event meta and `ShowMore`, cancellation-aware `Event` JSON-LD with offer details, `ItemList`/`Event` structured data for upcoming and past events, refreshed EN/RU page descriptions, and a safer `sliceText` that avoids cutting words mid-way
+- Simplified homepage SEO: removed the redundant `WebSite` JSON-LD block and unused SEO constants, added `WebSite`/`SearchAction` JSON-LD to support object search discovery, and shortened the homepage title copy in EN/RU
+- Synced object and photo list filters (`search`, `category`) to the URL with debounced, shallow routing so filtered views are shareable without triggering full SSR reloads
+- Moved hero/section heading uppercase styling from translation text to CSS (`hero-label`/`hero-title` mixins) for correct screen reader pronunciation of all-caps text
+- Added client-side validation to the review form (required rating, trimmed content, 10–1000 char length, localized field errors, disabled inputs while submitting) and refined the event reviews layout with a consistent top-section separator
+- Fixed event view counter initialization so new events start at `views = 0` and increments use `COALESCE(views, 0) + 1`, preventing incorrect counts on legacy rows with `NULL` views
+- Raised the event photos limit from 100 to 500 (clamped instead of discarded when out of range) so events with many photos no longer silently return only 20 items
+
 ## 4.6.1
 
 ### Patch Changes
