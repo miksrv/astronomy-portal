@@ -900,6 +900,7 @@ class Events extends ResourceController
             $event->date               = $eventDateUtc;
             $event->registration_start = $registrationStartUtc;
             $event->registration_end   = $registrationEndUtc;
+            $event->views              = 0;
 
             if ($file) {
                 $image = Services::image('gd');
