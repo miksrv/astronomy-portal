@@ -3,8 +3,9 @@ import React, { useEffect } from 'react'
 import type { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
+import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, wrapper } from '@/api'
+import { API, ApiModel, setLocale, SITE_LINK, wrapper } from '@/api'
 import { AppLayout } from '@/components/common'
 import { MainSectionCommunity, MainSectionHero, MainSectionObservatory } from '@/components/pages/index'
 
@@ -40,6 +41,21 @@ const HomePage: NextPage<HomePageProps> = ({ photosList, eventPhotos }) => {
         return () => observer.disconnect()
     }, [])
 
+    const websiteSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Смотри на звёзды',
+        url: SITE_LINK,
+        potentialAction: {
+            '@type': 'SearchAction',
+            target: {
+                '@type': 'EntryPoint',
+                urlTemplate: `${SITE_LINK}objects?search={search_term_string}`
+            },
+            'query-input': 'required name=search_term_string'
+        }
+    }
+
     return (
         <AppLayout
             noTopMargin={true}
@@ -53,6 +69,10 @@ const HomePage: NextPage<HomePageProps> = ({ photosList, eventPhotos }) => {
                 images: [{ url: '/images/index-hero.png', width: 1536, height: 1024 }]
             }}
         >
+            <JsonLdScript
+                scriptKey={'website'}
+                data={websiteSchema}
+            />
             <MainSectionHero photos={eventPhotos} />
             <MainSectionCommunity />
             <MainSectionObservatory photos={photosList} />
