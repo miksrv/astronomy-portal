@@ -77,12 +77,26 @@
         margin-left: auto
         display: flex
 
+.userMenuTrigger
+    display: flex
+    align-items: center
+    cursor: pointer
+
+    &:hover
+        .avatarImage
+            opacity: .6
+
+    .arrow
+        height: 16px
+        width: 16px
+        fill: currentColor
+        margin-left: 5px
+        opacity: .7
+
 .avatarImage
     margin: 0 !important
     font-size: 0
-
-    &:hover
-        opacity: .6
+    transition: opacity .15s ease-out
 
 .contextListMenu
     list-style: none

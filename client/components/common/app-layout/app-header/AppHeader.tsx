@@ -32,6 +32,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
     // We suppress that difference by treating isLoading as false until mounted.
     const [mounted, setMounted] = useState(false)
     const [scrolled, setScrolled] = useState(false)
+    const [userMenuOpen, setUserMenuOpen] = useState(false)
 
     const {
         data: meData,
@@ -133,17 +134,24 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
 
                     {authSlice?.isAuth && (
                         <Popout
+                            onOpenChange={setUserMenuOpen}
                             trigger={
-                                <UserAvatar
-                                    size={'medium'}
-                                    src={
-                                        authSlice?.user?.avatar
-                                            ? `${HOST_IMG}/users/${String(authSlice?.user.id)}/${String(authSlice?.user.avatar)}`
-                                            : undefined
-                                    }
-                                    name={authSlice?.user?.name}
-                                    className={styles.avatarImage}
-                                />
+                                <span className={styles.userMenuTrigger}>
+                                    <UserAvatar
+                                        size={'medium'}
+                                        src={
+                                            authSlice?.user?.avatar
+                                                ? `${HOST_IMG}/users/${String(authSlice?.user.id)}/${String(authSlice?.user.avatar)}`
+                                                : undefined
+                                        }
+                                        name={authSlice?.user?.name}
+                                        className={styles.avatarImage}
+                                    />
+                                    <Icon
+                                        name={userMenuOpen ? 'KeyboardUp' : 'KeyboardDown'}
+                                        className={styles.arrow}
+                                    />
+                                </span>
                             }
                         >
                             <ul className={styles.contextListMenu}>
