@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
+import { LanguageSwitcher } from '@/components/common/app-layout/language-switcher'
 import packageInfo from '@/package.json'
 import { update } from '@/update'
 import { formatDate } from '@/utils/dates'
@@ -69,6 +70,11 @@ export const AppFooter = forwardRef<HTMLDivElement>((props, ref) => {
                     >
                         {t('pages.privacy.title', 'Политика конфиденциальности')}
                     </Link>
+                </div>
+
+                <div className={styles.languageSwitcherWrap}>
+                    <span aria-hidden={'true'}>{'·'}</span>
+                    <LanguageSwitcher />
                 </div>
             </div>
         </footer>

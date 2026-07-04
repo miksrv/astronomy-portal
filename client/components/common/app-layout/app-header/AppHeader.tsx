@@ -11,7 +11,6 @@ import { login, logout } from '@/api/authSlice'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import logo from '@/public/images/logo.png'
 
-import { LanguageSwitcher } from '../language-switcher'
 import { Menu } from '../Menu'
 
 import styles from './styles.module.sass'
@@ -118,8 +117,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
                 <Menu className={styles.appMenu} />
 
                 <div className={styles.rightSection}>
-                    <LanguageSwitcher />
-
                     {!authSlice.isAuth && (
                         <Button
                             mode={'secondary'}
