@@ -30,9 +30,11 @@ class AddEventRequiresRegistration extends Migration
             ],
         ]);
 
+        // Deliberately ignores `deleted_at`: even a cancelled (soft-deleted)
+        // booking proves the event went through real online registration, so
+        // it must not be reclassified as a no-registration event.
         $registeredEventIds = $this->db->table('events_users')
-            ->select('event_id')
-            ->where('deleted_at IS NULL');
+            ->select('event_id');
 
         $this->db->table('events')
             ->where('date <', date('Y-m-d H:i:s'))

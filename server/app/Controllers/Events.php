@@ -843,7 +843,15 @@ class Events extends ResourceController
         $input = $this->request->getPost();
         $file  = $this->request->getFile('upload');
 
-        $requiresRegistration = filter_var($input['requiresRegistration'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $requiresRegistration = true;
+
+        if (isset($input['requiresRegistration'])) {
+            $requiresRegistration = filter_var($input['requiresRegistration'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+            if ($requiresRegistration === null) {
+                return $this->failValidationErrors(['error' => lang('Events.invalidRequiresRegistrationValue')]);
+            }
+        }
 
         $rules = [
             'title'             => 'required|string|max_length[250]',
@@ -1520,9 +1528,15 @@ class Events extends ResourceController
 
         // Effective "requires registration" for this update: the incoming
         // value if sent, otherwise whatever the event already has.
-        $requiresRegistration = isset($input['requiresRegistration'])
-            ? filter_var($input['requiresRegistration'], FILTER_VALIDATE_BOOLEAN)
-            : (bool) $eventData->requiresRegistration;
+        $requiresRegistration = (bool) $eventData->requiresRegistration;
+
+        if (isset($input['requiresRegistration'])) {
+            $requiresRegistration = filter_var($input['requiresRegistration'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+            if ($requiresRegistration === null) {
+                return $this->failValidationErrors(['error' => lang('Events.invalidRequiresRegistrationValue')]);
+            }
+        }
 
         if (isset($input['requiresRegistration']) && !$requiresRegistration && (bool) $eventData->requiresRegistration) {
             $hasActiveBookings = (new EventsUsersModel())
