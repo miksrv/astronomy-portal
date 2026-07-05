@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Container, Input, TextArea } from 'simple-react-ui-kit'
+import { Button, Checkbox, Container, Input, TextArea } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 
@@ -22,6 +22,7 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
     // Prefill sensible defaults for a brand-new event. In edit mode the effect
     // below overwrites these with the existing event's values.
     const [formData, setFormData] = useState<EventFormType>({
+        requiresRegistration: true,
         ticketPrice: '500',
         yandexMap: 'https://yandex.com/maps/-/CDvPzZkD',
         googleMap: 'https://maps.app.goo.gl/MWEcbhNK6wj2eeEPA'
@@ -110,10 +111,18 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
                 </div>
             </div>
 
+            <Checkbox
+                className={styles.formElement}
+                label={'Требуется регистрация'}
+                checked={formData.requiresRegistration ?? true}
+                disabled={disabled}
+                onChange={(e) => setFormData({ ...formData, requiresRegistration: e.target.checked })}
+            />
+
             <div className={styles.sections}>
                 <Input
-                    required={true}
-                    disabled={disabled}
+                    required={formData.requiresRegistration ?? true}
+                    disabled={disabled || !(formData.requiresRegistration ?? true)}
                     className={styles.formElement}
                     type={'datetime-local'}
                     label={'Дата начала регистрации'}
@@ -127,8 +136,8 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
                 />
 
                 <Input
-                    required={true}
-                    disabled={disabled}
+                    required={formData.requiresRegistration ?? true}
+                    disabled={disabled || !(formData.requiresRegistration ?? true)}
                     className={styles.formElement}
                     type={'datetime-local'}
                     label={'Дата завершения регистрации'}

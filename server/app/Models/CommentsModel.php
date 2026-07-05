@@ -123,8 +123,11 @@ class CommentsModel extends ApplicationBaseModel
     /**
      * Check whether a user is eligible to review an event.
      *
-     * Eligible means the user has a non-cancelled booking AND either checked in
-     * or the event date is in the past.
+     * For events that require registration, eligible means the user has a
+     * non-cancelled booking AND either checked in or the event date is in
+     * the past. For events that never required registration (sidewalk
+     * astronomy, legacy archive imports), there is no `events_users` row to
+     * check against — anyone may review once the event has taken place.
      *
      * @param string $userId  The user's ID.
      * @param string $eventId The event's ID.
@@ -132,6 +135,21 @@ class CommentsModel extends ApplicationBaseModel
      */
     public function canReviewEvent(string $userId, string $eventId): bool
     {
+        $event = $this->db->table('events')
+            ->select('date, requires_registration')
+            ->where('id', $eventId)
+            ->where('deleted_at IS NULL')
+            ->get()
+            ->getRow();
+
+        if (!$event) {
+            return false;
+        }
+
+        if ((int) $event->requires_registration === 0) {
+            return $event->date !== null && $event->date < date('Y-m-d H:i:s');
+        }
+
         $count = $this->db->table('events_users eu')
             ->join('events e', 'e.id = eu.event_id')
             ->where('eu.user_id', $userId)

@@ -36,6 +36,8 @@ export type Event = {
     yandexMap?: string
     googleMap?: string
     photos?: EventPhoto[]
+    /** False for events that never went through online booking (sidewalk astronomy, legacy archive imports) — no registration window applies. */
+    requiresRegistration?: boolean
     registrationStart?: DateTime
     registrationEnd?: DateTime
     availableTickets?: number
