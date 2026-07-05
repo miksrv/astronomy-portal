@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 4.6.3
+
+### Patch Changes
+
+- Added a `requires_registration` flag for stargazing events (with migration/backfill) so legacy or walk-in events can skip the online booking flow; the client exposes a form toggle and adjusts registration/availability messaging accordingly. Hardened the flag to accept only strict booleans (defaulting to `true`), blocked disabling registration while active bookings exist, and reclassified past events with any booking history (including soft-deleted) as registration-based during backfill
+- Surfaced photo upload failures on stargazing event pages: stale errors are cleared, the upload queue stops on the first failed file, and a localized error message with loading state is shown to the user; also fixed the header dropdown menu to respect the full trigger width
+- Revamped profile event history from a table into card-style items with cover previews, localized dates/location, and an attended badge
+- Enriched profile reviews with event context: each review now shows the event title, date, and cover thumbnail alongside the rating and delete action, replacing the old separate "view event" link
+- Improved the profile form: fields now use a responsive two-column grid (collapsing to one column below 768px), a current-page label was added to the profile toolbar breadcrumb, and a helper note reminds users to enter real personal information in the name field
+- Refined review card header layout (right-aligned date/delete section) and gave stargazing review widget cards a fixed height for more consistent sizing
+- Temporarily hid the observatory history pages (menu, sitemap, and routes return 404) ahead of public launch, keeping the code in place for later re-enabling
+- Tightened stargazing info card padding and slightly reduced the global container border radius for a sharper visual style
+- Documented a planned web push notifications feature (FEAT-13) in `features/web-push-notifications.md`
+- Updated client dependencies and lockfile (Next.js, React, i18n, Redux Toolkit, ECharts, and lint/test/format toolchain)
+
 ## 4.6.2
 
 ### Patch Changes
