@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { getCookie } from 'cookies-next'
-import { Button, Container } from 'simple-react-ui-kit'
+import { Button, Container, Message } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
@@ -14,6 +14,7 @@ import { hosts } from '@/api/constants'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
 import { EventItemData, EventPhotoUploader, EventReviews } from '@/components/pages/stargazing'
 import { formatDate } from '@/utils/dates'
+import { getErrorMessage } from '@/utils/errors'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
 import { removeMarkdown, sliceText } from '@/utils/strings'
 
@@ -37,6 +38,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 
     const [localPhotos, setLocalPhotos] = useState<ApiModel.EventPhoto[]>([])
     const [uploadingPhotos, setUploadingPhotos] = useState<string[]>()
+    const [uploadError, setUploadError] = useState<unknown>()
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>()
     const [isPhotosExpanded, setIsPhotosExpanded] = useState(false)
@@ -161,6 +163,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                             <>
                                 <Button
                                     disabled={!!uploadingPhotos?.length}
+                                    loading={!!uploadingPhotos?.length}
                                     icon={'Download'}
                                     mode={'secondary'}
                                     onClick={handleUploadPhotoClick}
@@ -241,9 +244,23 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                     fileInputRef={inputFileRef}
                     onSelectFiles={setUploadingPhotos}
                     onUploadPhoto={(photo) => {
-                        setLocalPhotos([...localPhotos, photo])
+                        setLocalPhotos((prev) => [...prev, photo])
                     }}
+                    onUploadError={setUploadError}
                 />
+
+                {!!uploadError && (
+                    <Message
+                        type={'error'}
+                        className={styles.uploadError}
+                    >
+                        {getErrorMessage(uploadError) ||
+                            t(
+                                'pages.stargazing.upload-photo-error',
+                                'Не удалось загрузить фотографию. Попробуйте позже.'
+                            )}
+                    </Message>
+                )}
             </Container>
 
             <PhotoLightbox

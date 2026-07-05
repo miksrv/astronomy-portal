@@ -6,6 +6,7 @@ interface PhotoUploaderProps {
     eventId?: string
     onSelectFiles?: (uploadingPhotosData?: string[]) => void
     onUploadPhoto?: (photo: ApiModel.EventPhoto) => void
+    onUploadError?: (error: unknown) => void
     fileInputRef?: React.RefObject<HTMLInputElement | undefined>
 }
 
@@ -13,6 +14,7 @@ export const EventPhotoUploader: React.FC<PhotoUploaderProps> = ({
     eventId,
     onSelectFiles,
     onUploadPhoto,
+    onUploadError,
     fileInputRef
 }) => {
     const [isUploading, setIsUploading] = useState<boolean>(false)
@@ -34,6 +36,7 @@ export const EventPhotoUploader: React.FC<PhotoUploaderProps> = ({
 
     const uploadQueue = async (files: File[], token: number) => {
         setIsUploading(true)
+        onUploadError?.(undefined)
         showPreview(files)
 
         let remaining = files
@@ -50,8 +53,10 @@ export const EventPhotoUploader: React.FC<PhotoUploaderProps> = ({
             const result = await handleUploadPhoto({ eventId, formData })
 
             if ('error' in result) {
-                // #TODO: Add notification
+                // Stop the queue on the first failure — the remaining files are
+                // left unsent rather than skipped, so the user can retry them.
                 showPreview([])
+                onUploadError?.(result.error)
                 break
             }
 
