@@ -95,15 +95,20 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
                     )}
 
                     <div className={styles.fieldsGrid}>
-                        <Input
-                            label={t('pages.profile.field-name', 'Имя')}
-                            value={name}
-                            error={fieldErrors['name']}
-                            onChange={(e) => {
-                                setName(e.target.value)
-                                setSaveSuccess(false)
-                            }}
-                        />
+                        <div>
+                            <Input
+                                label={t('pages.profile.field-name', 'Имя')}
+                                value={name}
+                                error={fieldErrors['name']}
+                                onChange={(e) => {
+                                    setName(e.target.value)
+                                    setSaveSuccess(false)
+                                }}
+                            />
+                            <p className={styles.fieldNote}>
+                                {t('pages.profile.name-note', 'Указывайте только реальные данные')}
+                            </p>
+                        </div>
 
                         <div>
                             <Input

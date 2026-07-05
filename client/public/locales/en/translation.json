@@ -398,6 +398,7 @@
             "avatar-note": "Your avatar is linked to your sign-in service",
             "onboarding-intro": "Welcome! Fill in your profile — this is optional, you can also do it later.",
             "field-name": "Name",
+            "name-note": "Please use your real information",
             "field-email": "Email",
             "email-note": "Email cannot be changed",
             "field-phone": "Phone",
