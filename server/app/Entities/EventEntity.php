@@ -17,6 +17,7 @@ class EventEntity extends Entity
         'cover_file_name'    => null,
         'cover_file_ext'     => null,
         'max_tickets'        => null,
+        'requires_registration' => null,
         'ticket_price'       => null,
         'yandex_map_link'    => null,
         'google_map_link'    => null,
@@ -33,6 +34,7 @@ class EventEntity extends Entity
         'registrationStart' => 'registration_start',
         'registrationEnd'   => 'registration_end',
         'availableTickets'  => 'max_tickets',
+        'requiresRegistration' => 'requires_registration',
         'ticketPrice'   => 'ticket_price',
         'yandexMap'     => 'yandex_map_link',
         'googleMap'     => 'google_map_link',
@@ -54,6 +56,7 @@ class EventEntity extends Entity
         'registration_start' => 'datetime',
         'registration_end'   => 'datetime',
         'max_tickets'        => 'int',
+        'requires_registration' => 'boolean',
         'ticket_price'       => 'float',
         'views'              => 'int'
     ];

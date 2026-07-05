@@ -390,83 +390,105 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
                 </div>
             </div>
 
-            {/* If registration has already started AND there are no more places AND the user is not registered */}
-            {secondsUntilRegistrationStart < 0 && event?.availableTickets === 0 && !registered && (
+            {/* This event never goes through online booking (sidewalk astronomy,
+                legacy archive imports) — skip all registration-window messaging
+                and the booking form entirely. */}
+            {event?.requiresRegistration === false ? (
                 <div className={styles.infoBlock}>
                     <h3>
                         {t(
-                            'components.pages.stargazing.event-upcoming.no-tickets',
-                            'К сожалению, все места закончились'
+                            'components.pages.stargazing.event-upcoming.no-registration-required',
+                            'Регистрация не требуется'
                         )}
                     </h3>
                     <p>
                         {t(
-                            'components.pages.stargazing.event-upcoming.no-tickets-hint',
-                            'Дополнительные места могут появиться, если кто-то отменит свою регистриацию. Или просто дождитесь следующего мероприятия.'
+                            'components.pages.stargazing.event-upcoming.no-registration-required-hint',
+                            'Просто приходите в указанное время — предварительная запись не нужна.'
                         )}
                     </p>
                 </div>
-            )}
-
-            {/* If registration has not started yet */}
-            {secondsUntilRegistrationStart >= 0 && secondsUntilRegistrationEnd > 0 && (
-                <div className={styles.bookingLogin}>
-                    <h3>
-                        {t(
-                            'components.pages.stargazing.event-upcoming.registration-opens-in',
-                            'Регистрация на астровыезд откроется через'
-                        )}{' '}
-                        {getLocalizedTimeFromSec(secondsUntilRegistrationStart, true, t)}
-                    </h3>
-                </div>
-            )}
-
-            {/* If registration has ended */}
-            {secondsUntilRegistrationEnd <= 0 && (
-                <div className={styles.bookingLogin}>
-                    <h3>
-                        {t(
-                            'components.pages.stargazing.event-upcoming.registration-closed',
-                            'Регистрация на астровыезд завершена'
-                        )}
-                    </h3>
-                    <p>
-                        {t(
-                            'components.pages.stargazing.event-upcoming.registration-closed-hint',
-                            'Пожалуйста дождитесь нашего следующего астровыезда, что бы его не пропустить - подпишитесь на Telegram канал'
-                        )}
-                    </p>
-                </div>
-            )}
-
-            {/* If registration is available */}
-            {registrationAvailable ? (
+            ) : (
                 <>
-                    {!user?.id && (
-                        <GuestLoginPrompt
-                            className={styles.bookingLogin}
-                            heading={t(
-                                'components.pages.stargazing.event-upcoming.login-to-register',
-                                'Для регистрации на астровыезд войдите под своей учетной записью'
-                            )}
-                        />
+                    {/* If registration has already started AND there are no more places AND the user is not registered */}
+                    {secondsUntilRegistrationStart < 0 && event?.availableTickets === 0 && !registered && (
+                        <div className={styles.infoBlock}>
+                            <h3>
+                                {t(
+                                    'components.pages.stargazing.event-upcoming.no-tickets',
+                                    'К сожалению, все места закончились'
+                                )}
+                            </h3>
+                            <p>
+                                {t(
+                                    'components.pages.stargazing.event-upcoming.no-tickets-hint',
+                                    'Дополнительные места могут появиться, если кто-то отменит свою регистриацию. Или просто дождитесь следующего мероприятия.'
+                                )}
+                            </p>
+                        </div>
                     )}
 
-                    {user?.id && !registered && (
-                        <EventBookingForm
-                            eventId={event?.id}
-                            ticketPrice={event?.ticketPrice}
-                            onSuccessSubmit={(id) => {
-                                setRegistered(true)
-                                setBookedId(id)
-                            }}
-                        />
+                    {/* If registration has not started yet */}
+                    {secondsUntilRegistrationStart >= 0 && secondsUntilRegistrationEnd > 0 && (
+                        <div className={styles.bookingLogin}>
+                            <h3>
+                                {t(
+                                    'components.pages.stargazing.event-upcoming.registration-opens-in',
+                                    'Регистрация на астровыезд откроется через'
+                                )}{' '}
+                                {getLocalizedTimeFromSec(secondsUntilRegistrationStart, true, t)}
+                            </h3>
+                        </div>
+                    )}
+
+                    {/* If registration has ended */}
+                    {secondsUntilRegistrationEnd <= 0 && (
+                        <div className={styles.bookingLogin}>
+                            <h3>
+                                {t(
+                                    'components.pages.stargazing.event-upcoming.registration-closed',
+                                    'Регистрация на астровыезд завершена'
+                                )}
+                            </h3>
+                            <p>
+                                {t(
+                                    'components.pages.stargazing.event-upcoming.registration-closed-hint',
+                                    'Пожалуйста дождитесь нашего следующего астровыезда, что бы его не пропустить - подпишитесь на Telegram канал'
+                                )}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* If registration is available */}
+                    {registrationAvailable ? (
+                        <>
+                            {!user?.id && (
+                                <GuestLoginPrompt
+                                    className={styles.bookingLogin}
+                                    heading={t(
+                                        'components.pages.stargazing.event-upcoming.login-to-register',
+                                        'Для регистрации на астровыезд войдите под своей учетной записью'
+                                    )}
+                                />
+                            )}
+
+                            {user?.id && !registered && (
+                                <EventBookingForm
+                                    eventId={event?.id}
+                                    ticketPrice={event?.ticketPrice}
+                                    onSuccessSubmit={(id) => {
+                                        setRegistered(true)
+                                        setBookedId(id)
+                                    }}
+                                />
+                            )}
+                        </>
+                    ) : !registered ? (
+                        <>{!user?.id && <GuestLoginPrompt className={styles.guestSubscribe} />}</>
+                    ) : (
+                        ''
                     )}
                 </>
-            ) : !registered ? (
-                <>{!user?.id && <GuestLoginPrompt className={styles.guestSubscribe} />}</>
-            ) : (
-                ''
             )}
 
             {/* If user is registered (confirmed) */}

@@ -7,11 +7,29 @@ import { EventForm } from './EventForm'
 jest.mock('@/api', () => ({}))
 jest.mock('@/api/constants', () => ({ hosts: { stargazing: '' } }))
 
-// The Jest CJS build of the kit does not expose TextArea; provide light stand-ins.
+// The Jest CJS build of the kit does not expose TextArea/Checkbox; provide light stand-ins.
 jest.mock('simple-react-ui-kit', () => {
     return {
         Button: ({ label, onClick }: { label?: string; onClick?: () => void }) => (
             <button onClick={onClick}>{label}</button>
+        ),
+        Checkbox: ({
+            label,
+            checked,
+            onChange
+        }: {
+            label?: string
+            checked?: boolean
+            onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+        }) => (
+            <label>
+                {label}
+                <input
+                    type={'checkbox'}
+                    checked={checked ?? false}
+                    onChange={onChange}
+                />
+            </label>
         ),
         Container: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
         Input: ({

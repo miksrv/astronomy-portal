@@ -843,14 +843,16 @@ class Events extends ResourceController
         $input = $this->request->getPost();
         $file  = $this->request->getFile('upload');
 
+        $requiresRegistration = filter_var($input['requiresRegistration'] ?? true, FILTER_VALIDATE_BOOLEAN);
+
         $rules = [
             'title'             => 'required|string|max_length[250]',
             'content'           => 'if_exist|string',
             'tickets'           => 'required|integer|greater_than[0]|less_than[5000]',
             'ticketPrice'       => 'if_exist|decimal|greater_than_equal_to[0]',
             'date'              => 'required|string|max_length[50]',
-            'registrationStart' => 'required|string|max_length[50]',
-            'registrationEnd'   => 'required|string|max_length[50]',
+            'registrationStart' => $requiresRegistration ? 'required|string|max_length[50]' : 'if_exist|string|max_length[50]',
+            'registrationEnd'   => $requiresRegistration ? 'required|string|max_length[50]' : 'if_exist|string|max_length[50]',
             'googleMap'         => 'required|string|max_length[100]',
             'yandexMap'         => 'required|string|max_length[100]',
         ];
@@ -874,16 +876,26 @@ class Events extends ResourceController
         // Parse and validate the dates before touching the filesystem, so a
         // malformed date or an inconsistent registration window fails fast
         // (400) without leaving an orphaned upload directory behind.
-        $eventDateUtc         = $this->parseOrenburgDateTime($input['date']);
-        $registrationStartUtc = $this->parseOrenburgDateTime($input['registrationStart']);
-        $registrationEndUtc   = $this->parseOrenburgDateTime($input['registrationEnd']);
+        $eventDateUtc = $this->parseOrenburgDateTime($input['date']);
 
-        if ($eventDateUtc === null || $registrationStartUtc === null || $registrationEndUtc === null) {
+        if ($eventDateUtc === null) {
             return $this->failValidationErrors(['error' => lang('Events.invalidDateFormat')]);
         }
 
-        if ($registrationStartUtc >= $registrationEndUtc || $registrationEndUtc > $eventDateUtc) {
-            return $this->failValidationErrors(['error' => lang('Events.invalidRegistrationWindow')]);
+        $registrationStartUtc = null;
+        $registrationEndUtc   = null;
+
+        if ($requiresRegistration) {
+            $registrationStartUtc = $this->parseOrenburgDateTime($input['registrationStart']);
+            $registrationEndUtc   = $this->parseOrenburgDateTime($input['registrationEnd']);
+
+            if ($registrationStartUtc === null || $registrationEndUtc === null) {
+                return $this->failValidationErrors(['error' => lang('Events.invalidDateFormat')]);
+            }
+
+            if ($registrationStartUtc >= $registrationEndUtc || $registrationEndUtc > $eventDateUtc) {
+                return $this->failValidationErrors(['error' => lang('Events.invalidRegistrationWindow')]);
+            }
         }
 
         try {
@@ -894,6 +906,7 @@ class Events extends ResourceController
             $event->content_ru         = $input['content'] ?? '';
             $event->content_en         = $input['content'] ?? '';
             $event->max_tickets        = $input['tickets'];
+            $event->requiresRegistration = $requiresRegistration;
             $event->ticket_price       = isset($input['ticketPrice']) ? (float) $input['ticketPrice'] : 0;
             $event->googleMap          = $input['googleMap'];
             $event->yandexMap          = $input['yandexMap'];
@@ -960,6 +973,10 @@ class Events extends ResourceController
             // Check that event with ID is exists
             if (!$event) {
                 return $this->failValidationErrors(['error' => lang('Events.notExists')]);
+            }
+
+            if (!$event->requiresRegistration) {
+                return $this->failValidationErrors(['error' => lang('Events.registrationNotRequired')]);
             }
 
             $eventUsersModel = new EventsUsersModel();
@@ -1482,16 +1499,17 @@ class Events extends ResourceController
         $input = $this->request->getJSON(true);
 
         $rules = [
-            'title'             => 'if_exist|string|max_length[250]',
-            'content'           => 'if_exist|string',
-            'tickets'           => 'if_exist|integer|greater_than[0]|less_than[5000]',
-            'ticketPrice'       => 'if_exist|decimal|greater_than_equal_to[0]',
-            'date'              => 'if_exist|string|max_length[50]',
-            'registrationStart' => 'if_exist|string|max_length[50]',
-            'registrationEnd'   => 'if_exist|string|max_length[50]',
-            'googleMap'         => 'if_exist|string|max_length[100]',
-            'yandexMap'         => 'if_exist|string|max_length[100]',
-            'location'          => 'if_exist|string|max_length[250]',
+            'title'                 => 'if_exist|string|max_length[250]',
+            'content'               => 'if_exist|string',
+            'tickets'               => 'if_exist|integer|greater_than[0]|less_than[5000]',
+            'ticketPrice'           => 'if_exist|decimal|greater_than_equal_to[0]',
+            'date'                  => 'if_exist|string|max_length[50]',
+            'requiresRegistration'  => 'if_exist',
+            'registrationStart'     => 'if_exist|string|max_length[50]',
+            'registrationEnd'       => 'if_exist|string|max_length[50]',
+            'googleMap'             => 'if_exist|string|max_length[100]',
+            'yandexMap'             => 'if_exist|string|max_length[100]',
+            'location'              => 'if_exist|string|max_length[250]',
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -1500,13 +1518,37 @@ class Events extends ResourceController
             return $this->failValidationErrors($this->validator->getErrors());
         }
 
+        // Effective "requires registration" for this update: the incoming
+        // value if sent, otherwise whatever the event already has.
+        $requiresRegistration = isset($input['requiresRegistration'])
+            ? filter_var($input['requiresRegistration'], FILTER_VALIDATE_BOOLEAN)
+            : (bool) $eventData->requiresRegistration;
+
+        if (isset($input['requiresRegistration']) && !$requiresRegistration && (bool) $eventData->requiresRegistration) {
+            $hasActiveBookings = (new EventsUsersModel())
+                ->where('event_id', $id)
+                ->whereIn('status', ['pending', 'confirmed'])
+                ->countAllResults() > 0;
+
+            if ($hasActiveBookings) {
+                return $this->failValidationErrors(['error' => lang('Events.cannotDisableRegistrationWithBookings')]);
+            }
+        }
+
         // Re-validate the registration window whenever any of the three date
         // fields changes, using the existing stored value for whichever ones
         // weren't sent — so a partial update can't leave the event with an
         // inconsistent window (e.g. registration closing after the event).
+        // Skipped entirely when the event doesn't require registration.
+        // Also runs when registration is being turned back on, so it can't
+        // silently keep the null dates left behind by a prior disable.
         $eventDateUtc = $registrationStartUtc = $registrationEndUtc = null;
 
-        if (isset($input['date']) || isset($input['registrationStart']) || isset($input['registrationEnd'])) {
+        $togglingRegistrationOn = isset($input['requiresRegistration'])
+            && $requiresRegistration
+            && !(bool) $eventData->requiresRegistration;
+
+        if ($requiresRegistration && (isset($input['date']) || isset($input['registrationStart']) || isset($input['registrationEnd']) || $togglingRegistrationOn)) {
             $rawEvent = $eventData->toRawArray();
 
             $eventDateUtc = isset($input['date'])
@@ -1527,6 +1569,12 @@ class Events extends ResourceController
 
             if ($registrationStartUtc >= $registrationEndUtc || $registrationEndUtc > $eventDateUtc) {
                 return $this->failValidationErrors(['error' => lang('Events.invalidRegistrationWindow')]);
+            }
+        } elseif (isset($input['date'])) {
+            $eventDateUtc = $this->parseOrenburgDateTime($input['date']);
+
+            if ($eventDateUtc === null) {
+                return $this->failValidationErrors(['error' => lang('Events.invalidDateFormat')]);
             }
         }
 
@@ -1555,11 +1603,20 @@ class Events extends ResourceController
                 $updateData['date'] = $eventDateUtc;
             }
 
-            if (isset($input['registrationStart'])) {
+            if (isset($input['requiresRegistration'])) {
+                $updateData['requires_registration'] = $requiresRegistration ? 1 : 0;
+
+                if (!$requiresRegistration) {
+                    $updateData['registration_start'] = null;
+                    $updateData['registration_end']   = null;
+                }
+            }
+
+            if ($requiresRegistration && isset($input['registrationStart'])) {
                 $updateData['registration_start'] = $registrationStartUtc;
             }
 
-            if (isset($input['registrationEnd'])) {
+            if ($requiresRegistration && isset($input['registrationEnd'])) {
                 $updateData['registration_end'] = $registrationEndUtc;
             }
 

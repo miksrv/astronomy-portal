@@ -248,6 +248,8 @@
                     "google-maps-title": "Link on Google Maps",
                     "google-maps": "Google Maps",
                     "location-hidden": "The exact event location will be available after registration",
+                    "no-registration-required": "No registration required",
+                    "no-registration-required-hint": "Just come at the scheduled time — no advance sign-up needed.",
                     "no-tickets": "Unfortunately, all spots are taken",
                     "no-tickets-hint": "Additional spots may open up if someone cancels their registration. Or just wait for the next event.",
                     "registration-opens-in": "Registration for the stargazing trip opens in",

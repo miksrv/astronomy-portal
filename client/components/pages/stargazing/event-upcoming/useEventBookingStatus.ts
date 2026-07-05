@@ -85,6 +85,10 @@ export const useEventBookingStatus = (event?: ApiModel.Event) => {
     )
 
     const registrationAvailable = useMemo(() => {
+        if (event?.requiresRegistration === false) {
+            return false
+        }
+
         if (event?.availableTickets === 0) {
             return false
         }
