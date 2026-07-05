@@ -103,21 +103,29 @@ class CommentsModel extends ApplicationBaseModel
     /**
      * Get all comments written by a specific user, including entity references.
      *
+     * For 'event' comments, also joins the referenced event's title, date, and
+     * cover image so the profile "my reviews" list can render event context
+     * without a separate lookup.
+     *
      * @param string $userId The user's ID.
+     * @param string $locale Locale code for the joined event title. Default is 'ru'.
      * @return array Array of formatted comment rows with entityType and entityId included.
      */
-    public function getByUser(string $userId): array
+    public function getByUser(string $userId, string $locale = 'ru'): array
     {
+        helper('locale');
+
         $rows = $this->db->table('comments c')
-            ->select('c.id, c.user_id, c.entity_type, c.entity_id, c.content, c.rating, c.status, c.created_at, u.avatar, u.name AS author_name')
+            ->select('c.id, c.user_id, c.entity_type, c.entity_id, c.content, c.rating, c.status, c.created_at, u.avatar, u.name AS author_name, e.title_en AS event_title_en, e.title_ru AS event_title_ru, e.date AS event_date, e.cover_file_name AS event_cover_file_name, e.cover_file_ext AS event_cover_file_ext')
             ->join('users u', 'u.id = c.user_id', 'left')
+            ->join('events e', "e.id = c.entity_id AND c.entity_type = 'event'", 'left')
             ->where('c.user_id', $userId)
             ->where('c.deleted_at IS NULL')
             ->orderBy('c.created_at', 'DESC')
             ->get()
             ->getResultArray();
 
-        return $this->formatRows($rows, true);
+        return $this->formatRows($rows, true, $locale);
     }
 
     /**
@@ -187,11 +195,12 @@ class CommentsModel extends ApplicationBaseModel
     /**
      * Normalise raw DB rows into the camelCase API shape with an embedded author object.
      *
-     * @param array $rows      Raw result rows from the query builder.
-     * @param bool  $keepEntity Whether to include entityType/entityId in the output.
+     * @param array  $rows       Raw result rows from the query builder.
+     * @param bool   $keepEntity Whether to include entityType/entityId (and joined event info) in the output.
+     * @param string $locale     Locale code for the joined event title, when present. Default is 'ru'.
      * @return array Formatted rows.
      */
-    private function formatRows(array $rows, bool $keepEntity = false): array
+    private function formatRows(array $rows, bool $keepEntity = false, string $locale = 'ru'): array
     {
         foreach ($rows as &$row) {
             $row['createdAt'] = $row['created_at'] ?? null;
@@ -204,11 +213,22 @@ class CommentsModel extends ApplicationBaseModel
             if ($keepEntity) {
                 $row['entityType'] = $row['entity_type'] ?? null;
                 $row['entityId']   = $row['entity_id'] ?? null;
+
+                if (($row['entity_type'] ?? null) === 'event' && (($row['event_title_en'] ?? null) !== null || ($row['event_title_ru'] ?? null) !== null)) {
+                    $row['entity'] = [
+                        'title'         => getLocalizedString($locale, $row['event_title_en'] ?? null, $row['event_title_ru'] ?? null),
+                        'date'          => $row['event_date'] ?? null,
+                        'coverFileName' => $row['event_cover_file_name'] ?? null,
+                        'coverFileExt'  => $row['event_cover_file_ext'] ?? null,
+                    ];
+                }
             }
 
             unset(
                 $row['created_at'], $row['author_name'], $row['avatar'], $row['user_id'],
-                $row['entity_type'], $row['entity_id'], $row['status']
+                $row['entity_type'], $row['entity_id'], $row['status'],
+                $row['event_title_en'], $row['event_title_ru'], $row['event_date'],
+                $row['event_cover_file_name'], $row['event_cover_file_ext']
             );
         }
         unset($row);

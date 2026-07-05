@@ -131,18 +131,77 @@
 .reviewsList
     display: flex
     flex-direction: column
-    gap: 16px
+    gap: 12px
 
-.reviewItem
+.reviewCard
+    display: flex
+    align-items: flex-start
+    gap: 16px
+    padding: 12px
+    border-radius: var(--border-radius)
+    background: var(--input-background)
+
+    @media (max-width: 576px)
+        flex-wrap: wrap
+
+.reviewThumbnail
+    flex-shrink: 0
+    width: 120px
+    height: 90px
+    border-radius: var(--border-radius)
+    overflow: hidden
+    display: flex
+    align-items: center
+    justify-content: center
+    background: var(--table-header-background)
+
+    img
+        width: 100%
+        height: 100%
+        object-fit: cover
+
+.reviewThumbnailEmpty
+    svg
+        width: 32px
+        height: 32px
+        fill: var(--text-color-secondary, #999)
+
+.reviewBody
     display: flex
     flex-direction: column
-    gap: 8px
+    gap: 6px
+    flex: 1
+    min-width: 0
 
-.reviewEventLink
-    font-size: 13px
-    color: var(--link-color, #4a9eff)
+.reviewHeader
+    display: flex
+    align-items: center
+    flex-wrap: wrap
+    gap: 4px 12px
+
+.reviewTitle
+    font-weight: 600
+    color: var(--text-color-primary)
     text-decoration: none
-    align-self: flex-start
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
 
     &:hover
         text-decoration: underline
+
+.reviewDate
+    font-size: 13px
+    color: var(--text-color-secondary, #999)
+    white-space: nowrap
+
+.reviewContent
+    margin: 0
+    font-size: var(--font-size)
+    color: var(--text-color-primary)
+    line-height: 1.5
+    word-break: break-word
+
+.reviewDeleteButton
+    flex-shrink: 0
+    align-self: flex-start
