@@ -16,7 +16,7 @@ Each feature is described in detail in the `features/` directory.
 | FEAT-9  | "What's Visible Tonight" Planner   | Planned   | —                                                            |
 | FEAT-11 | OpenGraph Meta for Photos/Objects  | Planned   | —                                                            |
 | FEAT-12 | Object Catalog Filters & Sorting   | Planned   | —                                                            |
-| FEAT-13 | Web Push Notifications             | Planned   | —                                                            |
+| FEAT-13 | Web Push Notifications             | Planned   | [features/web-push-notifications.md](features/web-push-notifications.md) |
 | **Stargazing UX improvements** ||||
 | FEAT-15 | Fix QR-code 404 + Email Confirmation After Booking | Planned | [features/stargazing-qr-email-confirmation.md](features/stargazing-qr-email-confirmation.md) |
 | FEAT-17 | Event Waitlist System              | Planned   | [features/stargazing-waitlist.md](features/stargazing-waitlist.md) |
