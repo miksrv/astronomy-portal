@@ -272,10 +272,15 @@ class UsersModel extends ApplicationBaseModel
      */
     public function getUserEvents(string $userId, string $locale = 'ru'): array
     {
-        $titleField = in_array($locale, ['ru', 'en'], true) ? 'title_' . $locale : 'title_ru';
+        $titleField    = in_array($locale, ['ru', 'en'], true) ? 'title_' . $locale : 'title_ru';
+        $locationField = in_array($locale, ['ru', 'en'], true) ? 'location_' . $locale : 'location_ru';
 
         $rows = $this->db->table('events_users eu')
-            ->select("e.id, e.{$titleField} AS title, e.date, eu.adults, eu.children, eu.checkin_at, eu.created_at AS registered_at")
+            ->select(
+                "e.id, e.{$titleField} AS title, e.{$locationField} AS location, e.date, " .
+                'e.cover_file_name, e.cover_file_ext, ' .
+                'eu.adults, eu.children, eu.checkin_at, eu.created_at AS registered_at'
+            )
             ->join('events e', 'e.id = eu.event_id')
             ->where('eu.user_id', $userId)
             ->where('eu.deleted_at IS NULL')
@@ -287,13 +292,16 @@ class UsersModel extends ApplicationBaseModel
 
         foreach ($rows as $row) {
             $items[] = [
-                'id'           => $row->id,
-                'title'        => $row->title,
-                'date'         => $row->date,
-                'adults'       => (int) $row->adults,
-                'children'     => (int) $row->children,
-                'checkinAt'    => $row->checkin_at,
-                'registeredAt' => $row->registered_at,
+                'id'            => $row->id,
+                'title'         => $row->title,
+                'location'      => $row->location,
+                'date'          => $row->date,
+                'coverFileName' => $row->cover_file_name,
+                'coverFileExt'  => $row->cover_file_ext,
+                'adults'        => (int) $row->adults,
+                'children'      => (int) $row->children,
+                'checkinAt'     => $row->checkin_at,
+                'registeredAt'  => $row->registered_at,
             ];
         }
 

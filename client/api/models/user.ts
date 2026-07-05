@@ -37,7 +37,10 @@ export interface AdminUserItem {
 export interface AdminUserEvent {
     id: string
     title: string
+    location?: string
     date: string
+    coverFileName?: string
+    coverFileExt?: string
     adults: number
     children: number
     checkinAt?: string

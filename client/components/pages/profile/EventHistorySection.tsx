@@ -1,10 +1,12 @@
 import React from 'react'
-import { Container } from 'simple-react-ui-kit'
+import { Badge, cn, Container, Icon } from 'simple-react-ui-kit'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API } from '@/api'
+import { hosts } from '@/api/constants'
 import { formatDate } from '@/utils/dates'
 
 import styles from './styles.module.sass'
@@ -31,36 +33,65 @@ export const EventHistorySection: React.FC<EventHistorySectionProps> = ({ userId
     }
 
     return (
-        <Container>
-            <table className={styles.historyTable}>
-                <tbody>
-                    {data.items.map((event) => (
-                        <tr key={event.id}>
-                            <td>
-                                <Link href={`/stargazing/${event.id}`}>{event.title}</Link>
-                            </td>
-                            <td>{formatDate(event.date)}</td>
-                            <td>
-                                {t(
-                                    'components.pages.stargazing.event-upcoming.members',
-                                    'Взрослых: {{adults}}, детей: {{children}}',
-                                    {
-                                        adults: event.adults,
-                                        children: event.children
-                                    }
-                                )}
-                            </td>
-                            <td>
-                                {event.checkinAt && (
-                                    <span className={styles.checkinBadge}>
-                                        {t('pages.profile.history-checkin', 'Отмечен')}
-                                    </span>
-                                )}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+        <Container className={styles.historyList}>
+            {data.items.map((event) => {
+                const itemTitle = t('pages.profile.history-item-title', 'Астровыезд - {{title}}', {
+                    title: event.title
+                })
+
+                return (
+                    <Link
+                        key={event.id}
+                        href={`/stargazing/${event.id}`}
+                        title={itemTitle}
+                        className={styles.historyCard}
+                    >
+                        <div
+                            className={cn(
+                                styles.historyThumbnail,
+                                !event.coverFileName && styles.historyThumbnailEmpty
+                            )}
+                        >
+                            {event.coverFileName ? (
+                                <Image
+                                    alt={itemTitle}
+                                    quality={70}
+                                    width={120}
+                                    height={90}
+                                    src={`${hosts.stargazing}${event.id}/${event.coverFileName}_preview.${event.coverFileExt}`}
+                                />
+                            ) : (
+                                <Icon
+                                    name={'Moon'}
+                                    aria-hidden
+                                />
+                            )}
+                        </div>
+
+                        <div className={styles.historyContent}>
+                            <div className={styles.historyTitle}>{event.title}</div>
+                            <div className={styles.historyMeta}>
+                                {formatDate(event.date, 'D MMMM YYYY, dd • HH:mm')}
+                            </div>
+                            {event.location && <div className={styles.historyLocation}>{event.location}</div>}
+                        </div>
+
+                        <div className={styles.historyStatus}>
+                            <Badge
+                                className={styles.historyVisitedBadge}
+                                icon={'CheckCircle'}
+                                label={t('pages.profile.history-visited', 'Посещено')}
+                                size={'small'}
+                            />
+                            <Icon
+                                className={styles.historyChevron}
+                                name={'KeyboardRight'}
+                                aria-hidden
+                            />
+                        </div>
+                    </Link>
+                )
+            })}
         </Container>
     )
 }
