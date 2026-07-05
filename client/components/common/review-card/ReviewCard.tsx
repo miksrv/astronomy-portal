@@ -37,25 +37,26 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review, canDelete, class
                     <span className={styles.authorName}>{review.author.name}</span>
                     {review.rating !== undefined && <StarRating rating={review.rating} />}
                 </div>
-                {canDelete && onDelete && (
-                    <Button
-                        size={'small'}
-                        mode={'secondary'}
-                        label={t('components.common.review-card.delete', 'Удалить')}
-                        onClick={() => onDelete(review.id)}
-                        className={styles.deleteButton}
-                    />
-                )}
+                <div className={styles.headerAside}>
+                    <time
+                        className={styles.date}
+                        dateTime={review.createdAt}
+                    >
+                        {formatDate(review.createdAt)}
+                    </time>
+                    {canDelete && onDelete && (
+                        <Button
+                            size={'small'}
+                            mode={'secondary'}
+                            label={t('components.common.review-card.delete', 'Удалить')}
+                            onClick={() => onDelete(review.id)}
+                            className={styles.deleteButton}
+                        />
+                    )}
+                </div>
             </header>
 
             <p className={styles.content}>{review.content}</p>
-
-            <time
-                className={styles.date}
-                dateTime={review.createdAt}
-            >
-                {formatDate(review.createdAt)}
-            </time>
         </article>
     )
 }

@@ -28,6 +28,14 @@
     overflow: hidden
     text-overflow: ellipsis
 
+.headerAside
+    display: flex
+    flex-direction: column
+    align-items: flex-end
+    gap: 4px
+    flex-shrink: 0
+    margin-left: auto
+
 .stars
     font-size: 13px
     line-height: 1
@@ -48,7 +56,7 @@
 .date
     font-size: var(--font-size-small)
     color: var(--text-color-secondary)
+    white-space: nowrap
 
 .deleteButton
     flex-shrink: 0
-    margin-left: auto
