@@ -59,7 +59,7 @@
     --text-color-secondary-hover: #7b7d7f;
 
     /* Layout and Containers */
-    --border-radius: 10px;
+    --border-radius: 8px;
     --body-background: #111318;
     --modal-background: #1c1f2a;
     --overlay-background: rgba(0, 0, 0, 0.6);

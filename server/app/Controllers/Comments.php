@@ -51,7 +51,7 @@ class Comments extends ResourceController
             }
 
             try {
-                $items = $this->model->getByUser($userId);
+                $items = $this->model->getByUser($userId, $this->request->getLocale());
 
                 return $this->respond([
                     'count' => count($items),

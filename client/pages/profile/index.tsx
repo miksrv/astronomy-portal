@@ -31,7 +31,10 @@ const ProfilePage: NextPage<ProfilePageProps> = () => {
             noindex={true}
             nofollow={true}
         >
-            <AppToolbar title={t('pages.profile.title', 'Личный кабинет')} />
+            <AppToolbar
+                title={t('pages.profile.title', 'Личный кабинет')}
+                currentPage={t('pages.profile.title', 'Личный кабинет')}
+            />
 
             {user && (
                 <ProfileCard

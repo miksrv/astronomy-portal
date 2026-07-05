@@ -225,8 +225,12 @@
                 }
             },
             "stargazing": {
+                "event-ticket": {
+                    "error": "Failed to load the ticket",
+                    "alt": "Stargazing trip ticket",
+                    "download": "Download ticket"
+                },
                 "event-upcoming": {
-                    "members": "Adults: {{adults}}, children: {{children}}",
                     "no-upcoming": "No upcoming stargazing trips yet",
                     "no-upcoming-hint": "As soon as we schedule the next trip, a registration form will appear here.",
                     "verifying-payment": "Checking payment status…",
@@ -242,6 +246,7 @@
                     "retry-payment-error": "Failed to create a new payment attempt. Please try again later.",
                     "retry-payment": "Try paying again",
                     "timezone": "(Orenburg time, UTC+5)",
+                    "members": "Adults: {{adults}}, children: {{children}}",
                     "location-default": "Orenburg district (~40 km from Orenburg)",
                     "yandex-maps-title": "Link on Yandex Maps",
                     "yandex-maps": "Yandex Maps",
@@ -268,11 +273,6 @@
                     "delete-confirm-title": "Delete stargazing trip?",
                     "delete-confirm-text": "This action cannot be undone. The stargazing trip will be permanently deleted.",
                     "delete-error": "Failed to delete the stargazing trip. Please try again later."
-                },
-                "event-ticket": {
-                    "error": "Failed to load the ticket",
-                    "alt": "Stargazing trip ticket",
-                    "download": "Download ticket"
                 },
                 "events-list": {
                     "item-title": "Stargazing trip - {{title}}"
@@ -389,14 +389,15 @@
         },
         "profile": {
             "history-empty": "You haven't attended any events yet",
-            "history-checkin": "Checked in",
+            "history-item-title": "Stargazing trip - {{title}}",
+            "history-visited": "Attended",
             "reviews-empty": "You haven't left any reviews yet",
-            "reviews-view-event": "View event",
             "field-sex-male": "Male",
             "field-sex-female": "Female",
             "avatar-note": "Your avatar is linked to your sign-in service",
             "onboarding-intro": "Welcome! Fill in your profile — this is optional, you can also do it later.",
             "field-name": "Name",
+            "name-note": "Please use your real information",
             "field-email": "Email",
             "email-note": "Email cannot be changed",
             "field-phone": "Phone",

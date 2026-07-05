@@ -5,6 +5,12 @@ export type Comment = {
     createdAt: string
     entityType?: string
     entityId?: string
+    entity?: {
+        title: string
+        date: string
+        coverFileName?: string
+        coverFileExt?: string
+    }
     author: {
         id: string
         name: string

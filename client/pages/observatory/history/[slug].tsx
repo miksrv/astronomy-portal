@@ -17,6 +17,8 @@ import { formatYearMonth } from '@/utils/dates'
 
 import styles from './styles.module.sass'
 
+const SECTION_ENABLED = false
+
 interface HistoryChapterPageProps {
     chapter: HistoryChapter
     prevChapter: HistoryChapterMeta | null
@@ -222,6 +224,10 @@ const applyHostMeta = (hostImg: string, meta: HistoryChapterMeta): HistoryChapte
 })
 
 export const getStaticPaths = async (): Promise<GetStaticPathsResult> => {
+    if (!SECTION_ENABLED) {
+        return { paths: [], fallback: false }
+    }
+
     const manifest: HistoryChapterMeta[] = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8'))
     return {
         paths: manifest.map(({ slug }) => ({ params: { slug } })),
@@ -232,6 +238,10 @@ export const getStaticPaths = async (): Promise<GetStaticPathsResult> => {
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
         async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<HistoryChapterPageProps>> => {
+            if (!SECTION_ENABLED) {
+                return { notFound: true }
+            }
+
             const locale = context.locale ?? 'ru'
             const slug = context.params?.slug
 

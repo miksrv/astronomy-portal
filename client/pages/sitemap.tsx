@@ -1,12 +1,12 @@
 import React from 'react'
 
-import fs from 'fs'
-import path from 'path'
-
+// Section not yet ready for public access
+// import fs from 'fs'
+// import path from 'path'
 import { GetServerSidePropsResult, NextPage } from 'next'
 
 import { API, SITE_LINK, wrapper } from '@/api'
-import { HistoryChapterMeta } from '@/data/history'
+// import { HistoryChapterMeta } from '@/data/history'
 
 type DynamicPage = {
     link: string
@@ -22,7 +22,8 @@ type StaticPage = {
 
 const Sitemap: NextPage<object> = () => <></>
 
-const MANIFEST_PATH = path.join(process.cwd(), 'content/history/manifest.json')
+// Section not yet ready for public access
+// const MANIFEST_PATH = path.join(process.cwd(), 'content/history/manifest.json')
 
 const base = (SITE_LINK ?? '').replace(/\/$/, '')
 
@@ -43,10 +44,11 @@ export const getServerSideProps = wrapper.getServerSideProps(
             const { data } = await store.dispatch(API.endpoints.sitemapGetList.initiate())
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
-            let historyChapters: HistoryChapterMeta[] = []
-            try {
-                historyChapters = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8'))
-            } catch {}
+            // Section not yet ready for public access
+            // let historyChapters: HistoryChapterMeta[] = []
+            // try {
+            //     historyChapters = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8'))
+            // } catch {}
 
             const today = new Date().toISOString()
 
@@ -83,22 +85,24 @@ export const getServerSideProps = wrapper.getServerSideProps(
                     changefreq: 'monthly',
                     lastmod: '2025-01-01T00:00:00.000Z'
                 },
-                {
-                    url: 'observatory/history',
-                    priority: '0.6',
-                    changefreq: 'monthly',
-                    lastmod: '2025-01-01T00:00:00.000Z'
-                },
+                // Section not yet ready for public access
+                // {
+                //     url: 'observatory/history',
+                //     priority: '0.6',
+                //     changefreq: 'monthly',
+                //     lastmod: '2025-01-01T00:00:00.000Z'
+                // },
                 { url: 'observatory/weather', priority: '0.5', changefreq: 'always', lastmod: today },
                 { url: 'starmap', priority: '0.6', changefreq: 'monthly', lastmod: '2025-01-01T00:00:00.000Z' }
             ]
 
-            const historyPages: StaticPage[] = historyChapters.map((chapter) => ({
-                url: `observatory/history/${chapter.slug}`,
-                priority: '0.6',
-                changefreq: 'monthly',
-                lastmod: new Date(`${chapter.date}-01`).toISOString()
-            }))
+            // Section not yet ready for public access
+            // const historyPages: StaticPage[] = historyChapters.map((chapter) => ({
+            //     url: `observatory/history/${chapter.slug}`,
+            //     priority: '0.6',
+            //     changefreq: 'monthly',
+            //     lastmod: new Date(`${chapter.date}-01`).toISOString()
+            // }))
 
             const photosPages: DynamicPage[] =
                 data?.photos?.map((item) => ({
@@ -121,7 +125,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
             let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">`
 
-            for (const page of [...staticPages, ...historyPages]) {
+            for (const page of staticPages) {
                 sitemap += makeUrl(page.url, `en/${page.url}`, page.lastmod ?? today, page.changefreq, page.priority)
             }
 

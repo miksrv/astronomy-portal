@@ -94,59 +94,66 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
                         </Message>
                     )}
 
-                    <Input
-                        label={t('pages.profile.field-name', 'Имя')}
-                        value={name}
-                        error={fieldErrors['name']}
-                        onChange={(e) => {
-                            setName(e.target.value)
-                            setSaveSuccess(false)
-                        }}
-                    />
+                    <div className={styles.fieldsGrid}>
+                        <div>
+                            <Input
+                                label={t('pages.profile.field-name', 'Имя')}
+                                value={name}
+                                error={fieldErrors['name']}
+                                onChange={(e) => {
+                                    setName(e.target.value)
+                                    setSaveSuccess(false)
+                                }}
+                            />
+                            <p className={styles.fieldNote}>
+                                {t('pages.profile.name-note', 'Указывайте только реальные данные')}
+                            </p>
+                        </div>
 
-                    <div>
+                        <div>
+                            <Input
+                                label={t('pages.profile.field-email', 'Email')}
+                                value={user.email}
+                                disabled={true}
+                            />
+                            <p className={styles.fieldNote}>
+                                {t('pages.profile.email-note', 'Email не может быть изменён')}
+                            </p>
+                        </div>
+
                         <Input
-                            label={t('pages.profile.field-email', 'Email')}
-                            value={user.email}
-                            disabled={true}
+                            label={t('pages.profile.field-phone', 'Телефон')}
+                            value={phone}
+                            error={fieldErrors['phone']}
+                            onChange={(e) => {
+                                setPhone(e.target.value)
+                                setSaveSuccess(false)
+                            }}
                         />
-                        <p className={styles.fieldNote}>
-                            {t('pages.profile.email-note', 'Email не может быть изменён')}
-                        </p>
+
+                        <Input
+                            type={'date'}
+                            label={t('pages.profile.field-birthday', 'Дата рождения')}
+                            value={birthday}
+                            error={fieldErrors['birthday']}
+                            onChange={(e) => {
+                                setBirthday(e.target.value)
+                                setSaveSuccess(false)
+                            }}
+                        />
+
+                        <Select
+                            label={t('pages.profile.field-sex', 'Пол')}
+                            options={sexOptions}
+                            value={sex}
+                            clearable={true}
+                            error={fieldErrors['sex']}
+                            onSelect={(selected) => {
+                                setSex(selected?.[0]?.key)
+                                setSaveSuccess(false)
+                            }}
+                        />
                     </div>
-
-                    <Input
-                        label={t('pages.profile.field-phone', 'Телефон')}
-                        value={phone}
-                        error={fieldErrors['phone']}
-                        onChange={(e) => {
-                            setPhone(e.target.value)
-                            setSaveSuccess(false)
-                        }}
-                    />
-
-                    <Input
-                        type={'date'}
-                        label={t('pages.profile.field-birthday', 'Дата рождения')}
-                        value={birthday}
-                        error={fieldErrors['birthday']}
-                        onChange={(e) => {
-                            setBirthday(e.target.value)
-                            setSaveSuccess(false)
-                        }}
-                    />
-
-                    <Select
-                        label={t('pages.profile.field-sex', 'Пол')}
-                        options={sexOptions}
-                        value={sex}
-                        clearable={true}
-                        error={fieldErrors['sex']}
-                        onSelect={(selected) => {
-                            setSex(selected?.[0]?.key)
-                            setSaveSuccess(false)
-                        }}
-                    />
 
                     <div className={styles.actionsRow}>
                         <Button
