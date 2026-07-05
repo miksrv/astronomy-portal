@@ -18,6 +18,8 @@ import { formatYearMonth } from '@/utils/dates'
 
 import styles from './styles.module.sass'
 
+const SECTION_ENABLED = false
+
 interface ObservatoryHistoryPageProps {
     chapters: HistoryChapterMeta[]
 }
@@ -86,6 +88,10 @@ const MANIFEST_PATH = path.join(process.cwd(), 'content/history/manifest.json')
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
         async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<ObservatoryHistoryPageProps>> => {
+            if (!SECTION_ENABLED) {
+                return { notFound: true }
+            }
+
             const locale = context.locale ?? 'ru'
             const translations = await serverSideTranslations(locale)
 
