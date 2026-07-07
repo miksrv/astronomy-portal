@@ -42,6 +42,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
         skip: !authSlice?.token?.length || authSlice?.isAuth
     })
 
+    const [logoutRequest] = API.useAuthLogoutMutation()
+
     const adminLinks = [
         {
             href: '/photos/form',
@@ -70,6 +72,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
     }
 
     const handleLogout = () => {
+        void logoutRequest()
         dispatch(logout())
     }
 

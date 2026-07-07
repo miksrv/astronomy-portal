@@ -85,6 +85,10 @@ export const API = createApi({
         authVerifyMagicLink: builder.mutation<ApiType.Auth.ResMagicLinkVerify, ApiType.Auth.ReqMagicLinkVerify>({
             query: (body) => ({ body, method: 'POST', url: 'auth/magic-link/verify' })
         }),
+        authLogout: builder.mutation<ApiType.Auth.ResLogout, void>({
+            invalidatesTags: ['Auth'],
+            query: () => ({ method: 'POST', url: 'auth/logout' })
+        }),
 
         /* Categories Controller */
         categoriesGetList: builder.query<ApiType.Category.Response, void>({
