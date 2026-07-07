@@ -57,22 +57,29 @@ final class AuthHelperTest extends CIUnitTestCase
 
     public function testGenerateAuthTokenReturnsNonEmptyString(): void
     {
-        $token = generateAuthToken('test@example.com');
+        $token = generateAuthToken('test@example.com', 'session-abc');
         $this->assertNotEmpty($token);
         $this->assertIsString($token);
     }
 
     public function testGenerateAuthTokenHasJwtStructure(): void
     {
-        $token = generateAuthToken('test@example.com');
+        $token = generateAuthToken('test@example.com', 'session-abc');
         $parts = explode('.', $token);
         $this->assertCount(3, $parts, 'JWT should have exactly 3 dot-separated parts');
     }
 
     public function testGenerateAuthTokenDifferentEmailsProduceDifferentTokens(): void
     {
-        $token1 = generateAuthToken('alice@example.com');
-        $token2 = generateAuthToken('bob@example.com');
+        $token1 = generateAuthToken('alice@example.com', 'session-abc');
+        $token2 = generateAuthToken('bob@example.com', 'session-abc');
+        $this->assertNotSame($token1, $token2);
+    }
+
+    public function testGenerateAuthTokenDifferentSessionsProduceDifferentTokens(): void
+    {
+        $token1 = generateAuthToken('alice@example.com', 'session-abc');
+        $token2 = generateAuthToken('alice@example.com', 'session-xyz');
         $this->assertNotSame($token1, $token2);
     }
 

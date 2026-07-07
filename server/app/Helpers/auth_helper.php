@@ -25,6 +25,16 @@ function validateAuthToken(string $encodedToken = null):? UserEntity {
             return null;
         }
 
+        // The token carries the session id that was active when it was issued.
+        // Logout clears users.session_token to NULL, which never matches any
+        // previously issued token's `sid` — instantly revoking it everywhere,
+        // regardless of how much of its lifetime (exp) is left.
+        $tokenSessionId = $decoded->sid ?? null;
+
+        if (empty($userData->session_token) || $tokenSessionId !== $userData->session_token) {
+            return null;
+        }
+
         return $userData;
     } catch (\Throwable $e) {
         return null;
@@ -33,15 +43,17 @@ function validateAuthToken(string $encodedToken = null):? UserEntity {
 
 /**
  * @param string $email
+ * @param string $sessionToken Current session id (users.session_token) to embed as the `sid` claim.
  * @return string
  */
-function generateAuthToken(string $email): string {
+function generateAuthToken(string $email, string $sessionToken): string {
     $issuedAtTime    = time();
     $tokenTimeToLive = getenv('auth.token.live');
     $tokenExpiration = $issuedAtTime + ($tokenTimeToLive);
 
     $payload = [
         'email' => $email,
+        'sid'   => $sessionToken,
         'iat'   => $issuedAtTime,
         'exp'   => $tokenExpiration,
     ];
