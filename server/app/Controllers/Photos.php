@@ -142,6 +142,14 @@ class Photos extends ResourceController
      */
     public function upload($id = null): ResponseInterface
     {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
+        }
+
         $fileUpload = $this->request->getFile('file');
 
         if (!$fileUpload || !$fileUpload->isValid()) {
