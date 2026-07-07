@@ -6,6 +6,7 @@ return [
     'photoNotFound'  => 'Photo not found',
     'eventNotFound'  => 'Event not found',
     'invalidRequest'      => 'Invalid request format',
+    'tooManyRequests'     => 'Too many requests. Please try again later.',
     'profileUpdated'      => 'Profile updated successfully.',
     'profileUpdateFailed' => 'Failed to update profile.',
 ];
