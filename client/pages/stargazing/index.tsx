@@ -101,7 +101,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
                 images: [
                     {
                         height: 853,
-                        url: '/photos/stargazing-1.jpeg',
+                        url: '/photos/stargazing-4.jpeg',
                         width: 1280
                     }
                 ]

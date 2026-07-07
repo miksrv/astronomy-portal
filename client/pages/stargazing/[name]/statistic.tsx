@@ -18,7 +18,8 @@ interface StargazingStatisticPageProps {
 const StargazingStatisticPage: NextPage<StargazingStatisticPageProps> = ({ eventId, eventTitle }) => {
     const { t } = useTranslation()
 
-    const title = `${t('menu.stargazing', 'Астровыезды')} - ${eventTitle} - ${t('pages.stargazing.statistic-title', 'Статистика мероприятия')}`
+    const title = `${t('menu.stargazing', 'Астровыезды')} - ${eventTitle} - ${t('pages.stargazing.statistic-title', 'Статистика')}`
+    const heading = `${eventTitle} - ${t('pages.stargazing.statistic-title', 'Статистика')}`
 
     return (
         <AppLayout
@@ -28,8 +29,8 @@ const StargazingStatisticPage: NextPage<StargazingStatisticPageProps> = ({ event
             nofollow={true}
         >
             <AppToolbar
-                title={title}
-                currentPage={t('pages.stargazing.statistic-title', 'Статистика мероприятия')}
+                title={heading}
+                currentPage={t('pages.stargazing.statistic-title', 'Статистика')}
                 links={[
                     {
                         link: '/stargazing',

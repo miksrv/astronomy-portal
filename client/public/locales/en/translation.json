@@ -515,7 +515,7 @@
             "photos-show-all_other": "Show all {{count}} photos",
             "no-photos": "No photos have been uploaded from this event yet. Check back later!",
             "upload-photo-error": "Failed to upload the photo. Please try again later.",
-            "statistic-title": "Event statistics",
+            "statistic-title": "Statistics",
             "edit-event": "Edit stargazing trip",
             "add-event": "Add stargazing trip",
             "save-error": "Save error",
