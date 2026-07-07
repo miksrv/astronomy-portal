@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A DIY amateur observatory web application with remote monitoring, equipment control, weather data, astrophoto archive, stargazing events, and email mailings. The project is a monorepo with three subsystems: a Next.js frontend (`client/`), a CodeIgniter 4 PHP backend (`server/`), and Arduino firmware (`firmware/`).
 
-**Current version:** 4.5.5 (see `CHANGELOG.md` for history)
+**Current version:** 4.6.3 (see `CHANGELOG.md` for history)
 
 **Feature specs:** `ROADMAP.md` gives a high-level list of planned/in-flight features; each one is detailed in its own file under `features/` (e.g. `features/stargazing-waitlist.md`).
 
@@ -117,8 +117,8 @@ Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, 
 - `GET /` — health check (`{name, version, status}`)
 - `GET /camera/:num` — camera image data
 - `GET /statistic/telescope` — telescope statistics
-- `GET /auth/me`, `GET /auth/google`, `GET /auth/yandex`, `GET /auth/vk` — OAuth authentication; `PATCH /auth/profile` — update profile
-- `GET /relay/list`, `GET /relay/light`, `PUT /relay/set` — power relay control
+- `GET /auth/me`, `GET /auth/google`, `GET /auth/yandex`, `GET /auth/vk` — OAuth authentication (OAuth routes rate-limited per-IP); `POST /auth/magic-link`, `POST /auth/magic-link/verify` — passwordless email login; `POST /auth/logout` — revokes the user's session everywhere (see Rate limiting/session note below); `PATCH /auth/profile` — update profile
+- `GET /relay/list`, `GET /relay/light` (rate-limited per-IP), `PUT /relay/set` — power relay control
 - `GET /files/:any` — file serving
 - `GET /equipments`, `GET /categories` — equipment and categories
 - `GET|POST|PATCH|DELETE /objects`, `/objects/:any` — astronomical objects CRUD
@@ -135,7 +135,7 @@ Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, 
 
 **Controllers** (`server/app/Controllers/`): Auth, Camera, Categories, Comments, Equipment, Events, Files, Mailings, Members, Objects, Photos, Relay, Sitemap, Statistic.
 
-**Models:** `server/app/Models/ApplicationBaseModel.php` is the shared base; all models extend it. Entity classes in `server/app/Entities/` map to DB rows. Models cover: Users, Photos, PhotosAuthor, PhotosCategory, PhotosEquipments, PhotosFilters, PhotosObject, Objects, ObjectCategory, ObjectFitsFiles, ObjectFitsFilters, ObservatoryEquipment, ObservatorySettings, Events, EventsPhotos, EventsUsers, Category, Comments, Mailings, MailingEmails, MailingUnsubscribes, Payments, EmailQueue.
+**Models:** `server/app/Models/ApplicationBaseModel.php` is the shared base; all models extend it. Entity classes in `server/app/Entities/` map to DB rows. Models cover: Users, Photos, PhotosAuthor, PhotosCategory, PhotosEquipments, PhotosFilters, PhotosObject, Objects, ObjectCategory, ObjectFitsFiles, ObjectFitsFilters, ObservatoryEquipment, ObservatorySettings, Events, EventsPhotos, EventsUsers, Category, Comments, Mailings, MailingEmails, MailingUnsubscribes, Payments, EmailQueue, MagicLinkTokens.
 
 **Backend conventions:**
 - API responses use **camelCase** field names (e.g. `createdAt`, not `created_at`) — format in model, not controller
@@ -144,9 +144,13 @@ Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, 
 
 **Libraries** (`server/app/Libraries/`): CatalogLibrary (FITS), EmailLibrary, GoogleClient/YandexClient/VkClient (OAuth), LocaleLibrary, PhotosLibrary, PhotoUploadLibrary, RelayLibrary (Arduino comms), SessionLibrary (JWT validation), StatisticLibrary, TelegramLibrary, TicketLibrary (event ticket generation), PaymentLibrary + `PaymentGatewayInterface` (gateway-agnostic payment orchestration — adding a new provider means adding one class implementing the interface), AlfaBankClient (current `PaymentGatewayInterface` implementation, test/production environment switch).
 
-**Migrations & seeders:** Migrations in `server/app/Database/Migrations/` (schema spans Oct 2024 → Jun 2026; latest add ticket pricing, `payments` table, event-user payment columns, and an `email_queue` table for transactional/queued email sending). Seeders in `server/app/Database/Seeds/`: CategoriesSeeder, ObservatoryEquipmentSeeder, ObservatorySettingsSeeder. Always run migrations after pulling changes that add them.
+**Migrations & seeders:** Migrations in `server/app/Database/Migrations/` (schema spans Oct 2024 → Jul 2026; latest add a per-user session-revocation token, passwordless magic-link tokens, a payment `refunding` status, a unique active-booking constraint, and a per-event `requires_registration` flag). Seeders in `server/app/Database/Seeds/`: CategoriesSeeder, ObservatoryEquipmentSeeder, ObservatorySettingsSeeder. Always run migrations after pulling changes that add them.
 
 **CORS:** Configured in `server/app/Config/Cors.php`.
+
+**Rate limiting:** `server/app/Filters/RateLimitFilter.php` (alias `ratelimit`) throttles abuse-prone public routes per-IP via a token bucket (CI4's `Services::throttler()`), applied per-route in `Routes.php` — currently OAuth login, `relay/light`, `events/booking`, `comments` create, and `mailings/:id/test`. Disabled under `ENVIRONMENT === 'testing'`.
+
+**Session revocation:** The JWT lifetime is intentionally long (180 days) and unchanged by logout. Instead, `users.session_token` is embedded in every token as a `sid` claim and checked on every request; `POST /auth/logout` clears it, instantly invalidating every token issued to that user on any device — see "Authentication" in `server/CLAUDE.md` for the full mechanism.
 
 ### Firmware (`firmware/`)
 

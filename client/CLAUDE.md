@@ -19,11 +19,15 @@ All hooks are auto-generated as `API.use<EndpointName>Query/Mutation()`.
 
 ### Auth
 
-| Endpoint           | Hook suffix | Purpose                                     |
-| ------------------ | ----------- | ------------------------------------------- |
-| `authGetMe`        | Query       | Fetch the currently authenticated user      |
-| `authLoginService` | Mutation    | OAuth login via `google`, `yandex`, or `vk` |
-| `authPostLogin`    | Mutation    | Native email/password login                 |
+| Endpoint               | Hook suffix | Purpose                                                                                       |
+| ---------------------- | ----------- | --------------------------------------------------------------------------------------------- |
+| `authGetMe`            | Query       | Fetch the currently authenticated user                                                        |
+| `authLoginService`     | Mutation    | OAuth login via `google`, `yandex`, or `vk`                                                   |
+| `authPostLogin`        | Mutation    | Native email/password login                                                                   |
+| `authUpdateProfile`    | Mutation    | Update the current user's profile (name/phone/birthday/sex)                                   |
+| `authRequestMagicLink` | Mutation    | Request a passwordless login link by email                                                    |
+| `authVerifyMagicLink`  | Mutation    | Exchange a magic-link token for a session                                                     |
+| `authLogout`           | Mutation    | Revoke the session server-side (`users.session_token`); call before clearing local auth state |
 
 ### Categories
 
