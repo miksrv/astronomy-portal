@@ -273,12 +273,11 @@ class UsersModel extends ApplicationBaseModel
      */
     public function getUserEvents(string $userId, string $locale = 'ru'): array
     {
-        $titleField    = in_array($locale, ['ru', 'en'], true) ? 'title_' . $locale : 'title_ru';
-        $locationField = in_array($locale, ['ru', 'en'], true) ? 'location_' . $locale : 'location_ru';
+        $titleField = in_array($locale, ['ru', 'en'], true) ? 'title_' . $locale : 'title_ru';
 
         $rows = $this->db->table('events_users eu')
             ->select(
-                "e.id, e.{$titleField} AS title, e.{$locationField} AS location, e.date, " .
+                "e.id, e.{$titleField} AS title, e.location, e.date, " .
                 'e.cover_file_name, e.cover_file_ext, ' .
                 'eu.adults, eu.children, eu.checkin_at, eu.created_at AS registered_at'
             )
