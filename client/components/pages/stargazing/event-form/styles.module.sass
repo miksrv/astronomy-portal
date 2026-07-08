@@ -37,6 +37,23 @@
     line-height: 1.3
     color: var(--text-color-secondary)
 
+.addressRow
+    display: flex
+    align-items: flex-end
+    gap: 10px
+    margin-bottom: 10px
+
+    .formElement
+        flex: 1
+        margin-bottom: 0
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column
+        align-items: stretch
+
+.mapSection
+    margin-bottom: 10px
+
 .imageSection
     flex-basis: 100%
     width: 100%

@@ -104,10 +104,11 @@ describe('EventForm', () => {
             />
         )
 
+        // datetime-local inputs order: [0] event date, [1] event end date, [2] registration start, [3] registration end
         const dateInputs = container.querySelectorAll('input[type="datetime-local"]')
 
         expect((dateInputs[0] as HTMLInputElement).value).toBe('2026-08-15T20:00')
-        expect((dateInputs[1] as HTMLInputElement).value).toBe('2026-08-01T05:00')
-        expect((dateInputs[2] as HTMLInputElement).value).toBe('2026-08-14T05:00')
+        expect((dateInputs[2] as HTMLInputElement).value).toBe('2026-08-01T05:00')
+        expect((dateInputs[3] as HTMLInputElement).value).toBe('2026-08-14T05:00')
     })
 })

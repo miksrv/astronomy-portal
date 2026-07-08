@@ -8,7 +8,9 @@ import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
 import { ShowMore } from '@/components/ui'
 
-import { EventMetaRow } from '../event-meta-row'
+import { EventInfoPanel } from '../event-info-panel'
+
+import styles from './styles.module.sass'
 
 interface EventItemDataProps extends ContainerProps {
     title?: string
@@ -16,26 +18,29 @@ interface EventItemDataProps extends ContainerProps {
 }
 
 export const EventItemData: React.FC<EventItemDataProps> = ({ title, event, ...props }) => (
-    <Container {...props}>
-        <Image
-            style={{
-                objectFit: 'cover',
-                height: 'auto',
-                width: '100%'
-            }}
-            src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
-            alt={title || ''}
-            width={1024}
-            height={768}
-            priority
-        />
+    <>
+        <div className={styles.grid}>
+            <Container
+                {...props}
+                className={styles.media}
+            >
+                <Image
+                    style={{}}
+                    width={1200}
+                    height={630}
+                    src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
+                    alt={title || ''}
+                    priority
+                />
+            </Container>
 
-        <EventMetaRow
-            date={event?.date?.date}
-            views={event?.views}
-            membersCount={event?.members?.total || event?.availableTickets}
-        />
+            <Container {...props}>
+                <EventInfoPanel event={event} />
+            </Container>
+        </div>
 
-        <ShowMore content={<Markdown>{event?.content}</Markdown>} />
-    </Container>
+        <Container>
+            <ShowMore content={<Markdown>{event?.content}</Markdown>} />
+        </Container>
+    </>
 )
