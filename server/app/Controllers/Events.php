@@ -44,6 +44,11 @@ use Exception;
  */
 class Events extends ResourceController
 {
+    // Default venue coordinates, used when a new event is created without an
+    // explicit pin (matches the `events` table column defaults).
+    private const DEFAULT_LATITUDE  = 51.8250225;
+    private const DEFAULT_LONGITUDE = 55.7107200;
+
     private SessionLibrary $session;
 
     protected $model;
@@ -127,17 +132,13 @@ class Events extends ResourceController
                     }
                 }
             } else {
-                unset($eventData->location);
+                unset($eventData->location, $eventData->address, $eventData->latitude, $eventData->longitude);
             }
 
             $eventData->max_tickets = $eventData->max_tickets - $currentTickets;
 
             if ($eventData->max_tickets < 0) {
                 $eventData->max_tickets = 0;
-            }
-
-            if (!$eventData->registered) {
-                unset($eventData->yandexMap, $eventData->googleMap);
             }
 
             unset($eventData->created_at, $eventData->updated_at, $eventData->deleted_at);
@@ -591,7 +592,6 @@ class Events extends ResourceController
     {
         $locale = $this->request->getLocale();
 
-        // TODO Если событие архивное - не нужно присылать ссылку на карты, даты начала и окончания регистрации
         try {
             // Fetch data from models
             $result = $this->model->getPastEventsList($locale, $id);
@@ -600,11 +600,27 @@ class Events extends ResourceController
                 return $this->failNotFound();
             }
 
+            $event = $result[0];
+
             $eventUsersModel = new EventsUsersModel();
+
+            // The exact venue (name, address, coordinates) is only shown once the
+            // viewer has a booking for the event — same rule as Events::upcoming().
+            // Past events have nothing left to protect, so they're exempt.
+            if ($event->requiresRegistration && $this->model->isUpcoming($event)) {
+                $hasBooking = $this->session->isAuth && $this->session->user->id
+                    ? $eventUsersModel->where(['event_id' => $id, 'user_id' => $this->session->user->id])->first()
+                    : false;
+
+                if (!$hasBooking) {
+                    unset($event->location, $event->address, $event->latitude, $event->longitude);
+                }
+            }
+
             $usersCount = $eventUsersModel->getUsersCountByEventId($id);
 
             if ($usersCount->total_adults || $usersCount->total_children) {
-                $result[0]->members = (object) [
+                $event->members = (object) [
                     'total'    => $usersCount->total_adults + $usersCount->total_children,
                     'adults'   => $usersCount->total_adults ?? 0,
                     'children' => $usersCount->total_children ?? 0
@@ -614,7 +630,7 @@ class Events extends ResourceController
             // Incrementing view counter
             $this->model->incrementViews($id);
 
-            return $this->respond($result[0]);
+            return $this->respond($event);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
@@ -859,10 +875,14 @@ class Events extends ResourceController
             'tickets'           => 'required|integer|greater_than[0]|less_than[5000]',
             'ticketPrice'       => 'if_exist|decimal|greater_than_equal_to[0]',
             'date'              => 'required|string|max_length[50]',
+            'endDate'           => 'if_exist|string|max_length[50]',
             'registrationStart' => $requiresRegistration ? 'required|string|max_length[50]' : 'if_exist|string|max_length[50]',
             'registrationEnd'   => $requiresRegistration ? 'required|string|max_length[50]' : 'if_exist|string|max_length[50]',
-            'googleMap'         => 'required|string|max_length[100]',
-            'yandexMap'         => 'required|string|max_length[100]',
+            'location'          => 'if_exist|string|max_length[150]',
+            'address'           => 'if_exist|string|max_length[255]',
+            'latitude'          => 'if_exist|decimal',
+            'longitude'         => 'if_exist|decimal',
+            'minAge'            => 'if_exist|integer|greater_than_equal_to[0]',
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -888,6 +908,20 @@ class Events extends ResourceController
 
         if ($eventDateUtc === null) {
             return $this->failValidationErrors(['error' => lang('Events.invalidDateFormat')]);
+        }
+
+        $eventEndDateUtc = null;
+
+        if (isset($input['endDate'])) {
+            $eventEndDateUtc = $this->parseOrenburgDateTime($input['endDate']);
+
+            if ($eventEndDateUtc === null) {
+                return $this->failValidationErrors(['error' => lang('Events.invalidDateFormat')]);
+            }
+
+            if ($eventEndDateUtc <= $eventDateUtc) {
+                return $this->failValidationErrors(['error' => lang('Events.invalidEventEndDate')]);
+            }
         }
 
         $registrationStartUtc = null;
@@ -916,9 +950,13 @@ class Events extends ResourceController
             $event->max_tickets        = $input['tickets'];
             $event->requiresRegistration = $requiresRegistration;
             $event->ticket_price       = isset($input['ticketPrice']) ? (float) $input['ticketPrice'] : 0;
-            $event->googleMap          = $input['googleMap'];
-            $event->yandexMap          = $input['yandexMap'];
+            $event->location           = $input['location'] ?? null;
+            $event->address            = $input['address'] ?? null;
+            $event->latitude           = isset($input['latitude']) ? (float) $input['latitude'] : self::DEFAULT_LATITUDE;
+            $event->longitude          = isset($input['longitude']) ? (float) $input['longitude'] : self::DEFAULT_LONGITUDE;
+            $event->minAge             = isset($input['minAge']) ? (int) $input['minAge'] : null;
             $event->date               = $eventDateUtc;
+            $event->endDate            = $eventEndDateUtc;
             $event->registration_start = $registrationStartUtc;
             $event->registration_end   = $registrationEndUtc;
             $event->views              = 0;
@@ -1512,12 +1550,15 @@ class Events extends ResourceController
             'tickets'               => 'if_exist|integer|greater_than[0]|less_than[5000]',
             'ticketPrice'           => 'if_exist|decimal|greater_than_equal_to[0]',
             'date'                  => 'if_exist|string|max_length[50]',
+            'endDate'               => 'if_exist|string|max_length[50]',
             'requiresRegistration'  => 'if_exist',
             'registrationStart'     => 'if_exist|string|max_length[50]',
             'registrationEnd'       => 'if_exist|string|max_length[50]',
-            'googleMap'             => 'if_exist|string|max_length[100]',
-            'yandexMap'             => 'if_exist|string|max_length[100]',
-            'location'              => 'if_exist|string|max_length[250]',
+            'location'              => 'if_exist|string|max_length[150]',
+            'address'               => 'if_exist|string|max_length[255]',
+            'latitude'              => 'if_exist|decimal',
+            'longitude'             => 'if_exist|decimal',
+            'minAge'                => 'if_exist|integer|greater_than_equal_to[0]',
         ];
 
         $this->validator = Services::Validation()->setRules($rules);
@@ -1592,6 +1633,22 @@ class Events extends ResourceController
             }
         }
 
+        $eventEndDateUtc = null;
+
+        if (isset($input['endDate'])) {
+            $eventEndDateUtc = $this->parseOrenburgDateTime($input['endDate']);
+
+            if ($eventEndDateUtc === null) {
+                return $this->failValidationErrors(['error' => lang('Events.invalidDateFormat')]);
+            }
+
+            $effectiveEventDateUtc = $eventDateUtc ?? $eventData->toRawArray()['date'];
+
+            if ($eventEndDateUtc <= $effectiveEventDateUtc) {
+                return $this->failValidationErrors(['error' => lang('Events.invalidEventEndDate')]);
+            }
+        }
+
         try {
             $updateData = [];
 
@@ -1617,6 +1674,10 @@ class Events extends ResourceController
                 $updateData['date'] = $eventDateUtc;
             }
 
+            if (isset($input['endDate'])) {
+                $updateData['end_date'] = $eventEndDateUtc;
+            }
+
             if (isset($input['requiresRegistration'])) {
                 $updateData['requires_registration'] = $requiresRegistration ? 1 : 0;
 
@@ -1634,17 +1695,24 @@ class Events extends ResourceController
                 $updateData['registration_end'] = $registrationEndUtc;
             }
 
-            if (isset($input['googleMap'])) {
-                $updateData['google_map_link'] = $input['googleMap'];
-            }
-
-            if (isset($input['yandexMap'])) {
-                $updateData['yandex_map_link'] = $input['yandexMap'];
-            }
-
             if (isset($input['location'])) {
-                $updateData['location_ru'] = $input['location'];
-                $updateData['location_en'] = $input['location'];
+                $updateData['location'] = $input['location'];
+            }
+
+            if (isset($input['address'])) {
+                $updateData['address'] = $input['address'];
+            }
+
+            if (isset($input['latitude'])) {
+                $updateData['latitude'] = (float) $input['latitude'];
+            }
+
+            if (isset($input['longitude'])) {
+                $updateData['longitude'] = (float) $input['longitude'];
+            }
+
+            if (isset($input['minAge'])) {
+                $updateData['min_age'] = (int) $input['minAge'];
             }
 
             if (!empty($updateData)) {
