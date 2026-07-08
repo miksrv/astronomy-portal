@@ -63,7 +63,7 @@
     --body-background: #111318;
     --modal-background: #1c1f2a;
     --overlay-background: rgba(0, 0, 0, 0.6);
-    --container-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    --container-shadow: inset 0 0 0 1px rgb(35 38 58 / 0.73);
     --container-background-color: #1c1f2a;
     --container-error-background-color: #ffe9e9;
     --container-error-color: var(--color-red);
