@@ -226,8 +226,13 @@ Listed in execution order. Tables created unless noted as ALTER.
   - `session_token` is never exposed in API responses — `Auth::responseAuth()` strips it from the returned user object the same way it strips `auth_type`/`role`.
 
 ### Bilingual Content
-- Events and Objects store bilingual text as separate columns: `title_en`, `title_ru`, `content_en`, `content_ru`, `location_en`, `location_ru`, etc.
+- Events and Objects store bilingual text as separate columns: `title_en`, `title_ru`, `content_en`, `content_ru`, etc. Event location (`location`, `address`, `latitude`, `longitude`, `min_age`) is single-language.
 - Locale is resolved per-request via `LocaleLibrary`.
+
+### Event Location & Map
+- `events` columns: `location` (venue name), `address` (free-text), `latitude`/`longitude` (`DECIMAL(10,7)`, default the observatory's usual field), `min_age` (nullable), `end_date` (nullable).
+- These four location fields (not `min_age`/`end_date`) are stripped from the API response until the viewer has a booking for an *upcoming* event that `requires_registration` — see `EventsModel::isUpcoming()` and the gating in `Events::show()`/`Events::upcoming()`. Past events and no-registration events are never gated.
+- No `yandex_map_link`/`google_map_link` columns anymore — the frontend generates map links on the fly from coordinates (`client/utils/maps.ts`).
 
 ### Language Files
 - Located in `app/Language/en/` and `app/Language/ru/`.

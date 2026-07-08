@@ -92,7 +92,7 @@ Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, 
 
 **i18n:** Translation files are auto-generated via `yarn locales:build` (i18next-scanner). Locales live in `client/public/locales/{en,ru}/` — `translation.json` plus per-page namespaces (`observatory-overview`, `stargazing-faq`, `stargazing-howto`, `stargazing-rules`, `stargazing-where`). Do not manually edit generated locale files.
 
-**Other notable deps:** `html5-qrcode` + `react-qr-code` (event check-in QR codes), `react-markdown` (rich text), `react-photo-album` + `yet-another-react-lightbox` (galleries), `next-seo` (SEO/JSON-LD), `dayjs` (dates), `sharp` (image processing), `cookies-next`.
+**Other notable deps:** `html5-qrcode` + `react-qr-code` (event check-in QR codes), `react-markdown` (rich text), `react-photo-album` + `yet-another-react-lightbox` (galleries), `next-seo` (SEO/JSON-LD), `dayjs` (dates), `sharp` (image processing), `cookies-next`, `leaflet` + `react-leaflet` (event location map, `client/components/common/event-map`, dynamically imported with `ssr: false`).
 
 **Star map:** Uses Celestial.js + D3.js loaded via `client/public/scripts/`. These are vanilla JS libraries, not npm packages.
 
@@ -144,7 +144,7 @@ Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, 
 
 **Libraries** (`server/app/Libraries/`): CatalogLibrary (FITS), EmailLibrary, GoogleClient/YandexClient/VkClient (OAuth), LocaleLibrary, PhotosLibrary, PhotoUploadLibrary, RelayLibrary (Arduino comms), SessionLibrary (JWT validation), StatisticLibrary, TelegramLibrary, TicketLibrary (event ticket generation), PaymentLibrary + `PaymentGatewayInterface` (gateway-agnostic payment orchestration — adding a new provider means adding one class implementing the interface), AlfaBankClient (current `PaymentGatewayInterface` implementation, test/production environment switch).
 
-**Migrations & seeders:** Migrations in `server/app/Database/Migrations/` (schema spans Oct 2024 → Jul 2026; latest add a per-user session-revocation token, passwordless magic-link tokens, a payment `refunding` status, a unique active-booking constraint, and a per-event `requires_registration` flag). Seeders in `server/app/Database/Seeds/`: CategoriesSeeder, ObservatoryEquipmentSeeder, ObservatorySettingsSeeder. Always run migrations after pulling changes that add them.
+**Migrations & seeders:** Migrations in `server/app/Database/Migrations/` (schema spans Oct 2024 → Jul 2026; latest add a per-user session-revocation token, passwordless magic-link tokens, a payment `refunding` status, a unique active-booking constraint, a per-event `requires_registration` flag, and a rework of event location — `location`/`address`/`latitude`/`longitude`/`min_age`/`end_date` replacing the bilingual venue name and manual map links). Seeders in `server/app/Database/Seeds/`: CategoriesSeeder, ObservatoryEquipmentSeeder, ObservatorySettingsSeeder. Always run migrations after pulling changes that add them.
 
 **CORS:** Configured in `server/app/Config/Cors.php`.
 
