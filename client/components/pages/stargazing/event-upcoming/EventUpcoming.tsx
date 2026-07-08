@@ -9,6 +9,7 @@ import { useTranslation } from 'next-i18next/pages'
 import { API, ApiModel, useAppSelector } from '@/api'
 import { hosts } from '@/api/constants'
 import { LoginForm } from '@/components/common'
+import { EventMap } from '@/components/common/event-map'
 import { formatUTCDate, getLocalizedTimeFromSec } from '@/utils/dates'
 import { getErrorMessage } from '@/utils/errors'
 
@@ -350,35 +351,17 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
                               'components.pages.stargazing.event-upcoming.location-default',
                               'Оренбургский район (~40 км от Оренбурга)'
                           )}
+                    {isConfirmed && event?.address && <div className={styles.addressText}>{event.address}</div>}
                     {isConfirmed ? (
-                        <ul className={styles.mapLinks}>
-                            <li>
-                                <a
-                                    href={event?.yandexMap}
-                                    title={t(
-                                        'components.pages.stargazing.event-upcoming.yandex-maps-title',
-                                        'Ссылка на Яндекс Картах'
-                                    )}
-                                    target={'_blank'}
-                                    rel={'noreferrer'}
-                                >
-                                    {t('components.pages.stargazing.event-upcoming.yandex-maps', 'Яндекс Карты')}
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    href={event?.googleMap}
-                                    title={t(
-                                        'components.pages.stargazing.event-upcoming.google-maps-title',
-                                        'Ссылка на Google Картах'
-                                    )}
-                                    target={'_blank'}
-                                    rel={'noreferrer'}
-                                >
-                                    {t('components.pages.stargazing.event-upcoming.google-maps', 'Google Карты')}
-                                </a>
-                            </li>
-                        </ul>
+                        event?.latitude !== undefined &&
+                        event?.longitude !== undefined && (
+                            <EventMap
+                                className={styles.map}
+                                latitude={event.latitude}
+                                longitude={event.longitude}
+                                height={200}
+                            />
+                        )
                     ) : (
                         <div className={styles.notifyText}>
                             {t(
