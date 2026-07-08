@@ -10,8 +10,11 @@ class EventEntity extends Entity
         'id'                 => null,
         'title_en'           => null,
         'title_ru'           => null,
-        'location_en'        => null,
-        'location_ru'        => null,
+        'location'           => null,
+        'address'            => null,
+        'latitude'           => null,
+        'longitude'          => null,
+        'min_age'            => null,
         'content_en'         => null,
         'content_ru'         => null,
         'cover_file_name'    => null,
@@ -19,9 +22,8 @@ class EventEntity extends Entity
         'max_tickets'        => null,
         'requires_registration' => null,
         'ticket_price'       => null,
-        'yandex_map_link'    => null,
-        'google_map_link'    => null,
         'date'               => null,
+        'end_date'           => null,
         'views'              => null,
         'registration_start' => null,
         'registration_end'   => null,
@@ -36,14 +38,15 @@ class EventEntity extends Entity
         'availableTickets'  => 'max_tickets',
         'requiresRegistration' => 'requires_registration',
         'ticketPrice'   => 'ticket_price',
-        'yandexMap'     => 'yandex_map_link',
-        'googleMap'     => 'google_map_link',
+        'minAge'        => 'min_age',
+        'endDate'       => 'end_date',
         'coverFileName' => 'cover_file_name',
         'coverFileExt'  => 'cover_file_ext',
     ];
 
     protected $dates   = [
         'date',
+        'end_date',
         'registration_start',
         'registration_end',
         'created_at',
@@ -53,11 +56,15 @@ class EventEntity extends Entity
 
     protected $casts   = [
         'date'               => 'datetime',
+        'end_date'           => 'datetime',
         'registration_start' => 'datetime',
         'registration_end'   => 'datetime',
         'max_tickets'        => 'int',
         'requires_registration' => 'boolean',
         'ticket_price'       => 'float',
+        'latitude'           => '?float',
+        'longitude'          => '?float',
+        'min_age'            => '?int',
         'views'              => 'int'
     ];
 }

@@ -16,8 +16,11 @@ final class EventEntityTest extends CIUnitTestCase
         $this->assertNull($entity->id);
         $this->assertNull($entity->title_en);
         $this->assertNull($entity->title_ru);
-        $this->assertNull($entity->yandex_map_link);
-        $this->assertNull($entity->google_map_link);
+        $this->assertNull($entity->location);
+        $this->assertNull($entity->address);
+        $this->assertNull($entity->latitude);
+        $this->assertNull($entity->longitude);
+        $this->assertNull($entity->min_age);
         $this->assertNull($entity->cover_file_name);
         $this->assertNull($entity->cover_file_ext);
     }
@@ -26,19 +29,27 @@ final class EventEntityTest extends CIUnitTestCase
     // CI4 Entity's toArray() returns the datamap aliases as keys (not DB column names).
     // Accessing the aliased property getter reads through to the underlying DB column.
 
-    public function testYandexMapDatamapAlias(): void
+    public function testMinAgeDatamapAlias(): void
     {
-        $entity            = new EventEntity();
-        $entity->yandexMap = 'https://yandex.ru/maps/link';
-        // Reading back via the underlying DB column name works via magic getter
-        $this->assertSame('https://yandex.ru/maps/link', $entity->yandex_map_link);
+        $entity          = new EventEntity();
+        $entity->minAge  = '6';
+        $this->assertSame(6, $entity->min_age);
     }
 
-    public function testGoogleMapDatamapAlias(): void
+    public function testEndDateDatamapAlias(): void
+    {
+        $entity          = new EventEntity();
+        $entity->endDate = '2025-01-01 10:00:00';
+        $this->assertNotNull($entity->endDate);
+    }
+
+    public function testLatitudeLongitudeCastToFloat(): void
     {
         $entity            = new EventEntity();
-        $entity->googleMap = 'https://maps.google.com/link';
-        $this->assertSame('https://maps.google.com/link', $entity->google_map_link);
+        $entity->latitude  = '51.8250225';
+        $entity->longitude = '55.7107200';
+        $this->assertIsFloat($entity->latitude);
+        $this->assertIsFloat($entity->longitude);
     }
 
     public function testCoverFileNameDatamapAlias(): void
