@@ -13,6 +13,7 @@ return [
     'bookingNotConfirmed' => 'This registration has not been confirmed yet.',
     'invalidDateFormat'   => 'Invalid date format.',
     'invalidRegistrationWindow' => 'Invalid registration window: it must open before it closes, and close no later than the event date.',
+    'invalidEventEndDate' => 'The event end time must be later than the start time.',
     'registrationNotRequired' => 'This event does not require registration.',
     'invalidRequiresRegistrationValue' => 'Invalid value for "requires registration" — expected a boolean.',
     'cannotDisableRegistrationWithBookings' => 'Cannot disable registration — this event already has active bookings.',
