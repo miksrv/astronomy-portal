@@ -4,3 +4,4 @@ NEXT_PUBLIC_SITE_LINK = 'http://localhost:3000/'
 NEXT_PUBLIC_API_HOST = 'https://astro.miksoft.pro/api/'
 NEXT_PUBLIC_LAT = 51.7
 NEXT_PUBLIC_LON = 55.2
+NEXT_PUBLIC_THUNDERFOREST_API_KEY = ''
