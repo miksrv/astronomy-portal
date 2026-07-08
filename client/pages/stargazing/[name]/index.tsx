@@ -45,9 +45,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 
     const PHOTOS_PREVIEW_LIMIT = 12
 
-    const title = `${t('menu.stargazing', 'Астровыезды')} - ${event?.title}`
-    const siteName = t('common.look-at-the-stars', 'Смотри на звёзды')
-    const metaTitle = event?.title ? `${event.title} — ${siteName}` : title
+    const title = event?.title || t('menu.stargazing', 'Астровыезды')
 
     const coverImageUrl =
         event?.coverFileName && event?.coverFileExt
@@ -137,7 +135,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     return (
         <AppLayout
             canonical={`stargazing/${event?.id}`}
-            title={metaTitle}
+            title={title}
             description={sliceText(removeMarkdown(event?.content || ''), 160)}
             openGraph={{
                 images: coverImageUrl ? [{ url: coverImageUrl }] : undefined
@@ -197,7 +195,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 event={event || undefined}
             />
 
-            <h2>{`${event?.title} - ${t('pages.stargazing.photos-from-stargazing', 'Фотографии с астровыезда')}`}</h2>
+            <h2>{t('pages.stargazing.photos-from-stargazing', 'Фотографии с мероприятия')}</h2>
 
             <Container>
                 {localPhotos?.length > 0 ? (
@@ -275,7 +273,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 onCloseLightBox={handleCloseLightbox}
             />
 
-            <h2>{t('pages.stargazing.reviews', 'Отзывы')}</h2>
+            <h2>{t('pages.stargazing.reviews', 'Отзывы участников')}</h2>
 
             <EventReviews eventId={eventId} />
 

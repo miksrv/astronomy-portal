@@ -13,6 +13,7 @@ import i18Config from '../next-i18next.config'
 
 import 'dayjs/locale/ru'
 
+import 'leaflet/dist/leaflet.css'
 import '@/styles/theme.css'
 import '@/styles/globals.sass'
 
