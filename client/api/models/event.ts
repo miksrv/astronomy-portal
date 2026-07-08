@@ -5,11 +5,19 @@ import { User } from './user'
 export type Event = {
     id: string
     title: string
+    /** Venue name, e.g. "Загородная обсерватория «Смотри на звёзды»". Hidden pre-registration — see `address`. */
     location?: string
+    /** Free-text address/directions. Hidden (along with `location`/`latitude`/`longitude`) until the viewer has a booking for an upcoming event that requires registration. */
+    address?: string
+    latitude?: number
+    longitude?: number
+    /** Minimum recommended age in years. Undefined/null means no restriction. */
+    minAge?: number
     content?: string
     coverFileName?: string
     coverFileExt?: string
     date?: DateTime
+    endDate?: DateTime
     members?: {
         total: number
         adults: number
@@ -33,8 +41,6 @@ export type Event = {
         expiresInSeconds: number
     }
     canceled?: boolean
-    yandexMap?: string
-    googleMap?: string
     photos?: EventPhoto[]
     /** False for events that never went through online booking (sidewalk astronomy, legacy archive imports) — no registration window applies. */
     requiresRegistration?: boolean

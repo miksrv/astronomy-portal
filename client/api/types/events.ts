@@ -13,13 +13,28 @@ export type ResCheckin = Pick<ApiModel.Event, 'members'> & {
 }
 
 export type EventFormType = Partial<
-    Omit<ApiModel.Event, 'date' | 'availableTickets' | 'registrationStart' | 'registrationEnd' | 'ticketPrice'>
+    Omit<
+        ApiModel.Event,
+        | 'date'
+        | 'endDate'
+        | 'availableTickets'
+        | 'registrationStart'
+        | 'registrationEnd'
+        | 'ticketPrice'
+        | 'latitude'
+        | 'longitude'
+        | 'minAge'
+    >
 > & {
     date?: string
+    endDate?: string
     registrationStart?: string
     registrationEnd?: string
     tickets?: string
     ticketPrice?: string
+    latitude?: string
+    longitude?: string
+    minAge?: string
     upload?: File
 }
 
