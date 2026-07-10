@@ -34,6 +34,12 @@ export interface EventMapRenderProps {
     zoom?: number
     height?: number | string
     className?: string
+    /**
+     * Stretches the map to fill its parent's height instead of the fixed
+     * `height` (used when the parent's height is itself dictated by a sibling
+     * — e.g. an equal-height grid column — rather than by this component).
+     */
+    fillHeight?: boolean
     onChange?: (coords: { latitude: number; longitude: number }) => void
 }
 
@@ -56,6 +62,26 @@ const MapCenterSync: React.FC<MapCenterSyncProps> = ({ latitude, longitude }) =>
     return null
 }
 
+// In `fillHeight` mode the container's actual pixel size comes from a CSS
+// Grid row shared with a sibling (e.g. the ticket column) whose own height
+// can change after mount (the ticket starts as a loading spinner, then swaps
+// to the real image) — Leaflet only measures its container once at init, so
+// without this it keeps rendering tiles sized to the stale initial height.
+const MapAutoResize: React.FC = () => {
+    const map = useMap()
+
+    useEffect(() => {
+        const container = map.getContainer()
+        const observer = new ResizeObserver(() => map.invalidateSize())
+
+        observer.observe(container)
+
+        return () => observer.disconnect()
+    }, [map])
+
+    return null
+}
+
 export const EventMapRender: React.FC<EventMapRenderProps> = ({
     latitude,
     longitude,
@@ -63,18 +89,19 @@ export const EventMapRender: React.FC<EventMapRenderProps> = ({
     zoom = 14,
     height = 260,
     className,
+    fillHeight = false,
     onChange
 }) => {
     const { t } = useTranslation()
 
     return (
-        <div className={cn(styles.wrapper, className)}>
+        <div className={cn(styles.wrapper, fillHeight && styles.wrapperFill, className)}>
             <MapContainer
                 center={[latitude, longitude]}
                 zoom={zoom}
                 scrollWheelZoom={editable}
-                style={{ height, width: '100%' }}
-                className={styles.mapContainer}
+                style={fillHeight ? { width: '100%' } : { height, width: '100%' }}
+                className={cn(styles.mapContainer, fillHeight && styles.mapContainerFill)}
                 attributionControl={false}
             >
                 <TileLayer
@@ -107,6 +134,8 @@ export const EventMapRender: React.FC<EventMapRenderProps> = ({
                     latitude={latitude}
                     longitude={longitude}
                 />
+
+                {fillHeight && <MapAutoResize />}
             </MapContainer>
 
             {!editable && (
