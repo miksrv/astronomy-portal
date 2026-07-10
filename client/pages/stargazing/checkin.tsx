@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { getCookie } from 'cookies-next'
 import { Html5Qrcode } from 'html5-qrcode'
-import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
+import { Container, Spinner } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
@@ -10,7 +10,9 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 import { API, ApiModel, ApiType, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppLayout, AppToolbar } from '@/components/common'
+import { CheckinResult, CheckinResultStatus } from '@/components/pages/stargazing'
 import { getErrorMessage } from '@/utils/errors'
+import { extractBookingIdFromScan } from '@/utils/strings'
 
 enum ScannerStatusEnum {
     IDLE = 'idle',
@@ -55,7 +57,7 @@ const CheckinPage: NextPage<object> = () => {
 
     const handleScan = async (decodedText: string) => {
         await stopScanner()
-        const code = decodedText.trim()
+        const code = extractBookingIdFromScan(decodedText)
 
         if (code.length !== 13) {
             setStatus(ScannerStatusEnum.ERROR)
@@ -138,39 +140,21 @@ const CheckinPage: NextPage<object> = () => {
                 )}
 
                 {!scanning && (
-                    <Message
-                        type={
+                    <CheckinResult
+                        status={
                             status === ScannerStatusEnum.SUCCESS
-                                ? 'success'
+                                ? CheckinResultStatus.SUCCESS
                                 : status === ScannerStatusEnum.DUPLICATE
-                                  ? 'warning'
-                                  : 'error'
+                                  ? CheckinResultStatus.DUPLICATE
+                                  : CheckinResultStatus.ERROR
                         }
-                        title={message}
-                    >
-                        {status !== ScannerStatusEnum.ERROR && (
-                            <div style={{ margin: '20px 0' }}>
-                                {status === ScannerStatusEnum.DUPLICATE && (
-                                    <div>
-                                        <strong>
-                                            {t('pages.checkin.duplicate-qr', 'Этот QR код уже был проверен ранее!')}
-                                        </strong>
-                                    </div>
-                                )}
-                                {t('pages.checkin.members-count', 'Взрослых: {{adults}}, детей: {{children}} чел.', {
-                                    adults: participant?.members?.adults || 0,
-                                    children: participant?.members?.children || 0
-                                })}
-                            </div>
-                        )}
-                        <Button
-                            style={{ width: '100%' }}
-                            mode={'secondary'}
-                            onClick={handleContinue}
-                        >
-                            {t('pages.checkin.continue-scanning', 'Продолжить сканирование')}
-                        </Button>
-                    </Message>
+                        message={message}
+                        name={participant?.name}
+                        adults={participant?.members?.adults}
+                        children={participant?.members?.children}
+                        continueLabel={t('pages.checkin.continue-scanning', 'Продолжить сканирование')}
+                        onContinue={handleContinue}
+                    />
                 )}
             </Container>
         </AppLayout>
