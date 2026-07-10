@@ -28,6 +28,7 @@ class EmailQueueModel extends ApplicationBaseModel
         'subject',
         'body',
         'attachment_path',
+        'ics_attachment_path',
         'status',
         'attempts',
         'error_message',
@@ -44,20 +45,27 @@ class EmailQueueModel extends ApplicationBaseModel
     /**
      * Queues a transactional email for asynchronous delivery.
      *
-     * @param string      $email          Recipient address.
-     * @param string      $subject        Email subject.
-     * @param string      $body           Fully-rendered HTML body (may contain cid:COVER_IMAGE_CID).
-     * @param string|null $attachmentPath Absolute path to a file to attach/embed, or null.
+     * @param string      $email             Recipient address.
+     * @param string      $subject           Email subject.
+     * @param string      $body              Fully-rendered HTML body (may contain cid:COVER_IMAGE_CID).
+     * @param string|null $attachmentPath    Absolute path to a file to attach/embed, or null.
+     * @param string|null $icsAttachmentPath Absolute path to a plain (non-cid) .ics attachment, or null.
      * @return bool True on success.
      */
-    public function enqueue(string $email, string $subject, string $body, ?string $attachmentPath = null): bool
-    {
+    public function enqueue(
+        string $email,
+        string $subject,
+        string $body,
+        ?string $attachmentPath = null,
+        ?string $icsAttachmentPath = null
+    ): bool {
         return (bool) $this->insert([
-            'email'           => $email,
-            'subject'         => $subject,
-            'body'            => $body,
-            'attachment_path' => $attachmentPath,
-            'status'          => EmailQueueEntity::STATUS_QUEUED,
+            'email'               => $email,
+            'subject'             => $subject,
+            'body'                => $body,
+            'attachment_path'     => $attachmentPath,
+            'ics_attachment_path' => $icsAttachmentPath,
+            'status'              => EmailQueueEntity::STATUS_QUEUED,
         ]);
     }
 
