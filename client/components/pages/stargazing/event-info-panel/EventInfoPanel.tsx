@@ -13,6 +13,7 @@ import { formatUTCDate } from '@/utils/dates'
 import styles from './styles.module.sass'
 
 const WEATHER_HISTORY_LINK = 'https://meteo.miksoft.pro/history'
+const WEATHER_FORECAST_LINK = 'https://meteo.miksoft.pro/forecast'
 const WEATHER_AVERAGE_WINDOW_HOURS = 3
 
 interface EventInfoPanelProps {
@@ -61,38 +62,66 @@ export const EventInfoPanel: React.FC<EventInfoPanelProps> = ({ event }) => {
     const { t } = useTranslation()
 
     const eventDate = event?.date?.date
+    const isEventPast = !!eventDate && dayjs.utc(eventDate).isBefore(dayjs.utc())
 
-    const { data: weatherHistory, isFetching: isWeatherLoading } = APIMeteo.useGetHistoryQuery(
+    const { data: weatherHistory, isFetching: isHistoryLoading } = APIMeteo.useGetHistoryQuery(
         {
             start_date: dayjs(eventDate).format('YYYY-MM-DD'),
             end_date: dayjs(eventDate).format('YYYY-MM-DD')
         },
-        { skip: !eventDate }
+        { skip: !eventDate || !isEventPast }
     )
 
+    const { data: weatherForecast, isFetching: isForecastLoading } = APIMeteo.useGetForecastDailyQuery(undefined, {
+        skip: !eventDate || isEventPast
+    })
+
+    const isWeatherLoading = isEventPast ? isHistoryLoading : isForecastLoading
+
     const averageWeather = useMemo(() => {
-        if (!eventDate || !weatherHistory?.length) {
+        if (!eventDate) {
             return undefined
         }
 
-        const windowStart = dayjs(eventDate)
-        const windowEnd = windowStart.add(WEATHER_AVERAGE_WINDOW_HOURS, 'hour')
+        if (isEventPast) {
+            if (!weatherHistory?.length) {
+                return undefined
+            }
 
-        const relevant = weatherHistory.filter(
-            (item) => item.date && !dayjs(item.date).isBefore(windowStart) && !dayjs(item.date).isAfter(windowEnd)
-        )
+            const windowStart = dayjs(eventDate)
+            const windowEnd = windowStart.add(WEATHER_AVERAGE_WINDOW_HOURS, 'hour')
 
-        if (!relevant.length) {
+            const relevant = weatherHistory.filter(
+                (item) => item.date && !dayjs(item.date).isBefore(windowStart) && !dayjs(item.date).isAfter(windowEnd)
+            )
+
+            if (!relevant.length) {
+                return undefined
+            }
+
+            return {
+                temperature: averageOf(relevant, 'temperature'),
+                clouds: averageOf(relevant, 'clouds')
+            }
+        }
+
+        const forecastDay = weatherForecast?.find((item) => item.date && dayjs(item.date).isSame(eventDate, 'day'))
+
+        if (!forecastDay) {
             return undefined
         }
 
         return {
-            temperature: averageOf(relevant, 'temperature'),
-            clouds: averageOf(relevant, 'clouds')
+            temperature: forecastDay.temperature,
+            clouds: forecastDay.clouds
         }
-    }, [eventDate, weatherHistory])
+    }, [eventDate, isEventPast, weatherHistory, weatherForecast])
 
-    const weatherHistoryLink = useMemo(() => {
+    const weatherLink = useMemo(() => {
+        if (!isEventPast) {
+            return WEATHER_FORECAST_LINK
+        }
+
         if (!eventDate) {
             return WEATHER_HISTORY_LINK
         }
@@ -101,7 +130,7 @@ export const EventInfoPanel: React.FC<EventInfoPanelProps> = ({ event }) => {
         const endDate = dayjs(eventDate).add(1, 'day').format('YYYY-MM-DD')
 
         return `${WEATHER_HISTORY_LINK}?end_date=${endDate}&start_date=${startDate}`
-    }, [eventDate])
+    }, [eventDate, isEventPast])
 
     const weatherText = useMemo(() => {
         if (isWeatherLoading) {
@@ -118,16 +147,15 @@ export const EventInfoPanel: React.FC<EventInfoPanelProps> = ({ event }) => {
     }, [averageWeather, isWeatherLoading, t])
 
     const membersCount = event?.members?.total || event?.availableTickets
-    const isEventPast = !!eventDate && dayjs.utc(eventDate).isBefore(dayjs.utc())
 
     const formattedDate = formatUTCDate(eventDate, 'dddd, D MMMM YYYY')
     const capitalizedDate = formattedDate
         ? `${formattedDate.charAt(0).toUpperCase()}${formattedDate.slice(1)}`
         : formattedDate
 
-    // `latitude`/`longitude` (along with `location`/`address`) are stripped
-    // server-side until the viewer has a booking for an upcoming event that
-    // requires registration — see Events::show()/upcoming() on the backend.
+    // `latitude`/`longitude`/`address` are stripped server-side until the
+    // viewer has a booking for an upcoming event that requires registration
+    // — see Events::show()/upcoming() on the backend. `location` is public.
     const preciseLocation =
         event?.latitude !== undefined && event?.longitude !== undefined
             ? { latitude: event.latitude, longitude: event.longitude }
@@ -185,7 +213,7 @@ export const EventInfoPanel: React.FC<EventInfoPanelProps> = ({ event }) => {
     ]
 
     return (
-        <>
+        <div className={styles.infoContainer}>
             <ul className={styles.list}>
                 {rows.map((row) => (
                     <li
@@ -215,11 +243,13 @@ export const EventInfoPanel: React.FC<EventInfoPanelProps> = ({ event }) => {
                         {weatherText}
                         <Link
                             className={styles.weatherLink}
-                            href={weatherHistoryLink}
+                            href={weatherLink}
                             target={'_blank'}
                             rel={'noopener noreferrer'}
                         >
-                            {t('pages.stargazing.event-weather-link', 'Смотреть погоду')}
+                            {isEventPast
+                                ? t('pages.stargazing.event-weather-history-link', 'Смотреть погоду')
+                                : t('pages.stargazing.event-weather-forecast-link', 'Смотреть прогноз')}
                         </Link>
                     </span>
                 </li>
@@ -232,6 +262,6 @@ export const EventInfoPanel: React.FC<EventInfoPanelProps> = ({ event }) => {
                     height={140}
                 />
             )}
-        </>
+        </div>
     )
 }

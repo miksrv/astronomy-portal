@@ -1,3 +1,5 @@
+export { CheckinResult, CheckinResultStatus } from './checkin-result'
+export { EventDeleteDialog, type EventDeleteDialogProps } from './event-delete-dialog'
 export { EventForm, type EventFormType } from './event-form'
 export { EventImportant } from './event-important'
 export { EventInfoPanel } from './event-info-panel'
