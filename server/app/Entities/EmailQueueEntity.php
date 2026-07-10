@@ -18,15 +18,16 @@ class EmailQueueEntity extends Entity
     const STATUS_ERROR  = 'error';
 
     protected $attributes = [
-        'id'              => null,
-        'email'           => null,
-        'subject'         => null,
-        'body'            => null,
-        'attachment_path' => null,
-        'status'          => 'queued',
-        'attempts'        => 0,
-        'error_message'   => null,
-        'sent_at'         => null,
+        'id'                  => null,
+        'email'               => null,
+        'subject'             => null,
+        'body'                => null,
+        'attachment_path'     => null,
+        'ics_attachment_path' => null,
+        'status'              => 'queued',
+        'attempts'            => 0,
+        'error_message'       => null,
+        'sent_at'             => null,
     ];
 
     protected $dates = [
@@ -36,14 +37,15 @@ class EmailQueueEntity extends Entity
     ];
 
     protected $casts = [
-        'id'              => 'string',
-        'email'           => 'string',
-        'subject'         => 'string',
-        'body'            => 'string',
-        'attachment_path' => '?string',
-        'status'          => 'string',
-        'attempts'        => 'integer',
-        'error_message'   => '?string',
-        'sent_at'         => 'datetime',
+        'id'                  => 'string',
+        'email'               => 'string',
+        'subject'             => 'string',
+        'body'                => 'string',
+        'attachment_path'     => '?string',
+        'ics_attachment_path' => '?string',
+        'status'              => 'string',
+        'attempts'            => 'integer',
+        'error_message'       => '?string',
+        'sent_at'             => 'datetime',
     ];
 }

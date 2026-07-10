@@ -75,14 +75,24 @@ class EmailLibrary
     }
 
     /**
-     * Send an HTML email with an optional inline image attachment.
+     * Send an HTML email with an optional inline image attachment and an
+     * optional plain (non-cid) file attachment — e.g. an .ics calendar file
+     * alongside the ticket image.
+     *
      * The image is embedded as a CID and replaces the placeholder "cid:COVER_IMAGE_CID"
-     * in the message body.
+     * in the message body. The plain attachment is just attached normally,
+     * with its own filename, and is not referenced from the body.
      *
      * @throws Exception
      */
-    public function sendWithAttachment(string $mailTo, string $subject, string $message, ?string $attachmentPath = null): void
-    {
+    public function sendWithAttachment(
+        string $mailTo,
+        string $subject,
+        string $message,
+        ?string $attachmentPath = null,
+        ?string $plainAttachmentPath = null,
+        string $plainAttachmentName = 'attachment'
+    ): void {
         // Clear previous email state (important for sequential sends)
         $this->email->clear(true);
         $this->email->initialize($this->config);
@@ -96,6 +106,16 @@ class EmailLibrary
             $this->email->attach($attachmentPath);
             $cid     = $this->email->setAttachmentCID($attachmentPath);
             $message = str_replace('cid:COVER_IMAGE_CID', 'cid:' . $cid, $message);
+        }
+
+        if ($plainAttachmentPath !== null) {
+            // No explicit $mime here — CI4's attach() only reads the file
+            // from disk when $mime is omitted; passing one switches it into
+            // "buffer" mode, which would base64-encode $plainAttachmentPath
+            // itself (the path string) instead of the file's contents. CI4
+            // auto-detects the mime type from the extension anyway
+            // (.ics -> text/calendar, per Config\Mimes).
+            $this->email->attach($plainAttachmentPath, 'attachment', $plainAttachmentName);
         }
 
         $this->email->setMessage($message);
