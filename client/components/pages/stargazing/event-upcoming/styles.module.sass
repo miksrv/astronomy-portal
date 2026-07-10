@@ -1,5 +1,12 @@
 @use '../../../../styles/variables' as variables
 
+// Background for the "blocked state" icon circle (guest login prompt, etc.)
+// — a translucent tint of the brand primary color.
+$stateIconPrimaryBackground: #7672a94f
+// Same, but for the danger variant (sold-out, payment-failed) — a translucent
+// tint of the brand red color.
+$stateIconDangerBackground: #a3464694
+
 .noEvent
     text-align: center
     padding: 30px 20px
@@ -70,9 +77,12 @@
         .title
             margin-top: 0
             margin-bottom: 10px
-            font-size: 30px !important
+            display: flex
+            align-items: center
+            gap: 8px
+            font-size: 22px !important
             font-weight: 300
-            text-transform: uppercase
+            //text-transform: uppercase
             line-height: normal
 
             &:after
@@ -81,15 +91,18 @@
             @media only screen and (max-width: variables.$mobileMaxWidth)
                 margin-top: 15px
 
-        .registeredTitle
-            font-size: 23px
-            font-weight: 300
-            margin-bottom: 10px
-            line-height: normal
-            color: var(--color-green)
+        .titleIcon
+            fill: var(--color-primary)
+            min-width: 24px
+            width: 24px
+            height: 24px
 
-        .ticketBlock
-            margin-bottom: 16px
+        .eventTitle
+            margin-top: 0
+            margin-bottom: 15px
+            font-size: 18px
+            font-weight: 300
+            color: var(--text-color-secondary)
 
         .notifyText
             font-size: var(--font-size-small)
@@ -102,17 +115,43 @@
             font-weight: 200
             font-size: 16px
             margin-bottom: 5px
+            margin-left: 3px
 
             .icon
-                fill: var(--text-color-secondary)
+                fill: var(--color-primary)
                 min-width: 18px
                 width: 18px
                 height: 18px
                 margin-top: 3px
 
-            .mapLinks
-                margin: 5px 0 0 15px
-                padding: 0
+            .rowLabel
+                display: flex
+                align-items: center
+                gap: 8px
+                width: 160px
+                flex-shrink: 0
+                font-size: 14px
+                font-weight: 400
+                color: var(--text-color-secondary)
+
+                .icon
+                    margin-top: 0
+
+            .rowValue
+                display: flex
+                flex: 1
+                flex-direction: column
+                align-items: flex-start
+                gap: 0
+                text-align: left
+                font-size: 14px
+                font-weight: 500
+                color: var(--text-color-primary)
+
+            .addressText
+                margin-top: 3px
+                font-size: var(--font-size-small)
+                color: var(--text-color-secondary)
 
         .infoSectionNotification
             margin-top: 15px
@@ -133,81 +172,226 @@
 
         .awaitingPaymentActions
             display: flex
-            flex-wrap: wrap
+            flex-wrap: nowrap
             gap: 10px
             margin-top: 15px
+            width: 100%
+
+            > button
+                flex: 1 1 50%
+                min-width: 0
 
         .verifyingPayment
+            margin: 25px 0 0
             display: flex
             align-items: center
             gap: 10px
             font-size: 13px
             color: var(--text-color-secondary)
 
-        //.registered
-        //    margin-top: 15px
-        //
-        //    h3
-        //        font-size: 23px
-        //        font-weight: 300
-        //        margin-bottom: 10px
-        //        line-height: normal
-        //        color: var(--color-green)
-        //
-        //    .mapLinks
-        //        display: flex
-        //        align-items: center
-        //        justify-content: center
-        //        gap: 10%
-        //        margin-top: 15px
-        //
-        //        a
-        //            display: block
-        //            font-size: 20px
-        //
-        //    .qrcode
-        //        margin-top: 20px
-        //        text-align: center
-
-        .bookingLogin
-            max-width: 400px
-            margin: 20px auto 0
+        // Shared card used by the "blocked"/confirmation states of the booking
+        // flow: guest login prompt, sold-out, payment-failed, registered, etc.
+        // A single flex gap spaces all direct children — no per-block margins.
+        .stateCard
+            margin: 25px 0 0
+            display: flex
+            flex-direction: column
+            align-items: center
+            gap: 10px
             text-align: center
 
-            h3
-                font-size: 20px !important
+            .stateIcon
+                display: flex
+                align-items: center
+                justify-content: center
+                width: 56px
+                height: 56px
+                border-radius: 50%
+
+                svg
+                    width: 26px
+                    height: 26px
+
+            .stateIconPrimary
+                color: var(--color-primary)
+                background: $stateIconPrimaryBackground
+
+                svg
+                    fill: var(--color-primary)
+
+            .stateIconDanger
                 color: var(--color-red)
+                background: $stateIconDangerBackground
 
-        .guestSubscribe
-            width: 80%
-            margin: 0 auto
+                svg
+                    fill: var(--color-red)
 
-        .cancelRegistration
-            margin: 20px auto 0
-
-            .cancelRegistrationButton
+            .stateHeading
                 width: 100%
+                margin: 0
+                font-size: 20px !important
+                font-weight: 500
+                color: var(--text-color-primary)
 
-        .compactColumns
+            .stateText
+                width: 100%
+                margin: 0
+                font-size: 13px
+                line-height: 1.5
+                color: var(--text-color-secondary)
+
+            .stateActionButton
+                display: inline-flex
+
+            // Wraps the "add to calendar" + "cancel booking" buttons: stacked
+            // (each full width) on mobile, side by side at 50/50 on desktop.
+            // :only-child covers the case where just one of the two renders
+            // (e.g. cancellation window closed) — it then takes the full row.
+            .registeredActions
+                width: 100%
+                display: flex
+                flex-direction: column
+                gap: 10px
+
+                > button
+                    width: 100%
+
+                @media only screen and (min-width: (variables.$mobileMaxWidth + 1))
+                    flex-direction: row
+
+                    > button
+                        width: auto
+                        flex: 1 1 50%
+                        min-width: 0
+
+                        &:only-child
+                            flex: 1 1 100%
+
+            .map
+                width: 100%
+                // Floor so the map stays usable even if the ticket column next to
+                // it (its equal-height reference on desktop) happens to be short.
+                min-height: 200px
+
+            .ticketBlock
+                width: 100%
+                text-align: left
+
+            // 'compact' layout (profile page) split of the registered-state card:
+            // map on the left, ticket + cancel button on the right. A fixed row
+            // height keeps the single-column mobile stack close to the map's old
+            // standalone height (tiles + the Yandex/Google links row below them);
+            // on desktop the two columns sit side by side and stretch to an equal
+            // (content-driven) height via CSS Grid's default track sizing.
+            .registeredSplit
+                width: 100%
+                display: grid
+                grid-template-columns: 1fr
+                grid-template-rows: 260px auto
+                gap: 16px
+
+                @media only screen and (min-width: (variables.$mobileMaxWidth + 1))
+                    grid-template-columns: 1fr 1fr
+                    grid-template-rows: auto
+
+            .registeredRight
+                width: 100%
+                display: flex
+                flex-direction: column
+                gap: 16px
+                text-align: left
+
+            // Overrides the shared .notifyText rule below (error hints inside a
+            // failed-payment/payment-expired card) — full width, no default <p> margin.
+            .notifyText
+                width: 100%
+                margin: 0
+
+        .helpCard
+            width: 100%
+            padding: 14px 16px
+            border: 1px solid var(--input-border-color)
+            border-radius: var(--border-radius)
+            text-align: left
+
+            h4
+                margin: 0 0 10px
+                font-size: 14px
+                font-weight: 500
+                color: var(--text-color-primary)
+
+        .helpList
+            display: flex
+            flex-direction: column
+            gap: 10px
+            margin: 0
+            padding: 0
+            list-style: none
+
+            li
+                display: flex
+                align-items: center
+                gap: 10px
+                font-size: 13px
+                color: var(--text-color-secondary)
+
+                a
+                    color: inherit
+
+            .helpIcon
+                display: flex
+                align-items: center
+                justify-content: center
+                width: 24px
+                height: 24px
+                flex-shrink: 0
+                border: 1px solid var(--color-primary)
+                border-radius: 50%
+                color: var(--color-primary)
+
+                svg
+                    width: 14px
+                    height: 14px
+                    fill: var(--color-primary)
+
+        .detailsCard
+            width: 100%
+            padding: 14px 16px
+            border: 1px solid var(--input-border-color)
+            border-radius: var(--border-radius)
+            text-align: left
+
+            h4
+                margin: 0 0 10px
+                font-size: 14px
+                font-weight: 500
+                color: var(--text-color-primary)
+
+        .detailsRow
             display: flex
             align-items: flex-start
-            gap: 24px
+            justify-content: space-between
+            gap: 10px
+            padding: 4px 0
+            font-size: 13px
+            color: var(--text-color-secondary)
 
-            @media only screen and (max-width: variables.$mobileMaxWidth)
-                flex-direction: column
+            .detailsValue
+                text-align: right
+                color: var(--text-color-primary)
 
-        .compactInfo
-            flex: 1
-            min-width: 0
+        .failedPaymentActions
+            width: 100%
+            display: flex
+            flex-direction: column
+            gap: 10px
 
-        .compactTicket
-            flex: 0 0 320px
-            max-width: 320px
-
-            @media only screen and (max-width: variables.$mobileMaxWidth)
-                flex: 1
-                max-width: 100%
+            button
                 width: 100%
+
+        .subscribeSignInButton
+            display: flex
+            margin: 15px auto 0
 
 .content
     margin-top: 10px

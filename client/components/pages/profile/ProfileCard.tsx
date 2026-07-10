@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, ApiType, HOST_IMG } from '@/api'
+import { PhoneInput } from '@/components/common/phone-input'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import useLocalStorage from '@/hooks/useLocalStorage'
 import { LOCAL_STORAGE } from '@/utils/constants'
@@ -121,7 +122,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
                             </p>
                         </div>
 
-                        <Input
+                        <PhoneInput
                             label={t('pages.profile.field-phone', 'Телефон')}
                             value={phone}
                             error={fieldErrors['phone']}

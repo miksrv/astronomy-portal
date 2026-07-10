@@ -37,19 +37,13 @@ html
         background: transparent
 
 h2
-    font-size: 18px
-    font-weight: 600
+    font-size: 16px
+    line-height: 16px
+    font-weight: 400
     display: flex
     align-items: center
     gap: 12px
-    margin: 0
-
-    &::after
-        content: ''
-        flex: 1
-        height: 1px
-        margin-top: 3px
-        background: var(--input-border-color)
+    margin: 5px 0 0 0
 
 // Centered heading without the trailing divider line - for standalone/empty-state
 // headings that aren't a section title (e.g. an empty-state message).
@@ -198,3 +192,45 @@ blockquote
     svg
         width: 100px
         height: 100px
+
+// Leaflet zoom controls (EventMap) themed to match the site's secondary buttons.
+// Global (not a CSS module) because react-leaflet renders these outside our components.
+// Leaflet adds a `leaflet-touch` variant (thicker border, bigger buttons) whenever it
+// detects a touch-capable browser, so those overrides need to be cancelled explicitly
+// rather than relying on the base .leaflet-bar/.leaflet-control-zoom-in rules alone.
+.leaflet-control-zoom
+    border: none
+    border-radius: var(--border-radius)
+    overflow: hidden
+    box-shadow: none
+
+    &.leaflet-bar
+        border: none
+
+    a.leaflet-control-zoom-in,
+    a.leaflet-control-zoom-out
+        width: 26px
+        height: 26px
+        line-height: 26px
+        font-size: 14px
+        background-color: var(--button-secondary-background)
+        color: var(--text-color-secondary)
+        border: none
+        box-shadow: none
+        opacity: .8
+
+        &:hover
+            background-color: var(--button-secondary-background-hover)
+            color: var(--text-color-secondary-hover)
+
+        &:active
+            background-color: var(--button-secondary-background-active)
+            color: var(--text-color-secondary-active)
+
+    a.leaflet-control-zoom-in
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08)
+
+// React Photo Album
+.react-photo-album
+    border-radius: var(--border-radius)
+    overflow: hidden

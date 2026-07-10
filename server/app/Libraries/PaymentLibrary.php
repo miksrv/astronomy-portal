@@ -137,7 +137,7 @@ class PaymentLibrary
             'status'       => 'pending',
             'form_url'     => $result->formUrl,
             // App-timezone wall-clock, consistent with the expiry sweep in
-            // PaymentsModel::getExpiredPendingIds() (also app-timezone "now").
+            // PaymentsModel::getExpiredPending() (also app-timezone "now").
             'expires_at'   => (new Time('now'))->addSeconds($sessionTimeout)->toDateTimeString(),
         ]);
 
@@ -280,19 +280,38 @@ class PaymentLibrary
     }
 
     /**
-     * Marks all expired, unpaid payments as failed.
+     * Resolves every timed-out pending/new payment against the gateway
+     * instead of blindly marking it failed by elapsed time alone — a payment
+     * can time out locally (no webhook is configured, see
+     * {@see \App\Controllers\Events::paymentCallback()}) while the bank
+     * actually captured it, and a bare time-based sweep would silently keep
+     * the customer's money without a seat and without ever finding out.
      *
-     * @return array<string> Ids of the payments that were expired.
+     * Persists whatever status the gateway reports (via
+     * {@see getVerifiedStatus()}) but does NOT touch the associated booking —
+     * that decision (confirm, refund, or mark the booking failed) belongs to
+     * the caller, since it already knows how to reconcile a booking (see
+     * {@see \App\Controllers\Events::reconcileBooking()}).
+     *
+     * @return array<int, array{payment: PaymentEntity, status: string}> One
+     *         entry per expired payment, pairing it with its freshly verified
+     *         status — read the `status` value, not `payment->status`, since
+     *         {@see getVerifiedStatus()} persists to the database without
+     *         mutating the entity instance passed in.
      */
     public function releaseExpired(): array
     {
-        $ids = $this->model->getExpiredPendingIds();
+        $expired = $this->model->getExpiredPending();
+        $results = [];
 
-        if (!empty($ids)) {
-            $this->model->whereIn('id', $ids)->set('status', 'failed')->update();
+        foreach ($expired as $payment) {
+            $results[] = [
+                'payment' => $payment,
+                'status'  => $this->getVerifiedStatus($payment),
+            ];
         }
 
-        return $ids;
+        return $results;
     }
 
     /**

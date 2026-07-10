@@ -207,12 +207,14 @@ class SendEmail extends BaseCommand
         foreach ($batch as $item) {
             /** @var EmailQueueEntity $item */
             try {
-                // sendWithAttachment handles a null path (plain email, no CID swap).
+                // sendWithAttachment handles null paths (plain email, no CID swap, no ics).
                 $emailLibrary->sendWithAttachment(
                     $item->email,
                     $item->subject,
                     $item->body,
-                    $item->attachment_path ?: null
+                    $item->attachment_path ?: null,
+                    $item->ics_attachment_path ?: null,
+                    'event.ics'
                 );
 
                 $queueModel->update($item->id, [
@@ -221,6 +223,7 @@ class SendEmail extends BaseCommand
                 ]);
 
                 $this->deleteAttachment($item->attachment_path);
+                $this->deleteAttachment($item->ics_attachment_path);
                 $sentCount++;
             } catch (Exception $e) {
                 log_message('error', 'Transactional email error for queue ID ' . $item->id . ': {exception}', ['exception' => $e]);
@@ -235,6 +238,7 @@ class SendEmail extends BaseCommand
                 if ($attempts >= self::MAX_ATTEMPTS) {
                     $update['status'] = EmailQueueEntity::STATUS_ERROR;
                     $this->deleteAttachment($item->attachment_path);
+                    $this->deleteAttachment($item->ics_attachment_path);
                 }
 
                 $queueModel->update($item->id, $update);

@@ -84,18 +84,27 @@ class PaymentsModel extends ApplicationBaseModel
     }
 
     /**
-     * Returns ids of payments that are still unpaid and whose hold has expired.
+     * Returns payments that are still unpaid, whose hold has expired, and that
+     * are old enough to be worth re-checking with the gateway before being
+     * force-failed (see {@see \App\Libraries\PaymentLibrary::releaseExpired()}).
      *
-     * @return array<string>
+     * Capped to a small batch and ordered oldest-first, so a burst of expired
+     * holds can't turn a single request into dozens of gateway calls.
+     *
+     * @param int $limit Max rows to return.
+     * @return PaymentEntity[]
      */
-    public function getExpiredPendingIds(): array
+    public function getExpiredPending(int $limit = 5): array
     {
-        $rows = $this->select('id')
-            ->whereIn('status', ['new', 'pending'])
+        return $this->whereIn('status', ['new', 'pending'])
             ->where('expires_at IS NOT NULL')
             ->where('expires_at <', (new Time('now'))->toDateTimeString())
+            // Defensive extra margin on top of the hold's own expiry (in case
+            // expires_at is ever misconfigured to something very short), and
+            // one more way to keep this batch small.
+            ->where('created_at <=', (new Time('now'))->subMinutes(10)->toDateTimeString())
+            ->orderBy('expires_at', 'ASC')
+            ->limit($limit)
             ->findAll();
-
-        return array_map(static fn ($row) => $row->id, $rows);
     }
 }

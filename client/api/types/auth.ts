@@ -60,3 +60,7 @@ export interface ResMagicLinkVerify extends ResLogin {
 export interface ResUpcomingEvent {
     item: ApiModel.Event | null
 }
+
+export interface ResLogout {
+    success: boolean
+}

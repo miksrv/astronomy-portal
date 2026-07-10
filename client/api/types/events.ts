@@ -10,16 +10,35 @@ export type ResPhoto = ApiModel.EventPhoto
 
 export type ResCheckin = Pick<ApiModel.Event, 'members'> & {
     checkin?: ApiType.DateTime
+    /** Guest display name, resolved server-side — present only for the staff check-in flow. */
+    name?: string
+    /** Present only when the viewer is the booking owner (not staff) — the event to redirect them to. */
+    eventId?: string
 }
 
 export type EventFormType = Partial<
-    Omit<ApiModel.Event, 'date' | 'availableTickets' | 'registrationStart' | 'registrationEnd' | 'ticketPrice'>
+    Omit<
+        ApiModel.Event,
+        | 'date'
+        | 'endDate'
+        | 'availableTickets'
+        | 'registrationStart'
+        | 'registrationEnd'
+        | 'ticketPrice'
+        | 'latitude'
+        | 'longitude'
+        | 'minAge'
+    >
 > & {
     date?: string
+    endDate?: string
     registrationStart?: string
     registrationEnd?: string
     tickets?: string
     ticketPrice?: string
+    latitude?: string
+    longitude?: string
+    minAge?: string
     upload?: File
 }
 

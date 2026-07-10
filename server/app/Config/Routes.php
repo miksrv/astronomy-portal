@@ -31,13 +31,14 @@ $routes->group('statistic', static function ($routes) {
 /** Auth Controller **/
 $routes->group('auth', static function ($routes) {
     $routes->get('me', 'Auth::me');
-    $routes->get('google', 'Auth::google');
-    $routes->get('yandex', 'Auth::yandex');
-    $routes->get('vk', 'Auth::vk');
+    $routes->get('google', 'Auth::google', ['filter' => 'ratelimit:auth_oauth,15,300']);
+    $routes->get('yandex', 'Auth::yandex', ['filter' => 'ratelimit:auth_oauth,15,300']);
+    $routes->get('vk', 'Auth::vk', ['filter' => 'ratelimit:auth_oauth,15,300']);
     //$routes->post('register', 'Auth::register');
     //$routes->post('login', 'Auth::login');
     $routes->post('magic-link', 'Auth::requestMagicLink');
     $routes->post('magic-link/verify', 'Auth::verifyMagicLink');
+    $routes->post('logout', 'Auth::logout');
     $routes->patch('profile', 'Auth::updateProfile');
     $routes->options('profile', static function () {});
     $routes->options('(:any)', static function () {});
@@ -46,7 +47,7 @@ $routes->group('auth', static function ($routes) {
 /** Relay Controller **/
 $routes->group('relay', static function ($routes) {
     $routes->get('list', 'Relay::list');
-    $routes->get('light', 'Relay::light');
+    $routes->get('light', 'Relay::light', ['filter' => 'ratelimit:relay_light,6,300']);
     $routes->put('set', 'Relay::set');
     $routes->options('(:any)', static function () {});
 });
@@ -120,7 +121,7 @@ $routes->group('events', static function ($routes) {
     $routes->delete('(:alphanum)', 'Events::delete/$1');
     $routes->post('(:alphanum)/cover', 'Events::cover/$1');
 
-    $routes->post('booking', 'Events::booking');
+    $routes->post('booking', 'Events::booking', ['filter' => 'ratelimit:events_booking,5,300']);
     $routes->post('cancel', 'Events::cancel');
     $routes->post('payment/status', 'Events::paymentStatus');
     $routes->match(['get', 'post'], 'payment/callback', 'Events::paymentCallback');
@@ -140,7 +141,7 @@ $routes->group('mailings', static function ($routes) {
     $routes->patch('(:alphanum)', 'Mailings::update/$1');
     $routes->delete('(:alphanum)', 'Mailings::delete/$1');
     $routes->post('(:alphanum)/upload', 'Mailings::upload/$1');
-    $routes->post('(:alphanum)/test', 'Mailings::test/$1');
+    $routes->post('(:alphanum)/test', 'Mailings::test/$1', ['filter' => 'ratelimit:mailings_test,5,60']);
     $routes->post('(:alphanum)/send', 'Mailings::send/$1');
     $routes->options('/', static function () {});
     $routes->options('(:any)', static function () {});
@@ -158,7 +159,7 @@ $routes->group('members', static function ($routes) {
 $routes->group('comments', static function ($routes) {
     $routes->get('/', 'Comments::index');
     $routes->get('random', 'Comments::random');
-    $routes->post('/', 'Comments::create');
+    $routes->post('/', 'Comments::create', ['filter' => 'ratelimit:comments_create,10,60']);
     $routes->delete('(:alphanum)', 'Comments::delete/$1');
     $routes->options('/', static function () {});
     $routes->options('(:any)', static function () {});

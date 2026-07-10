@@ -1,6 +1,28 @@
-import { humanizeFileSize, removeMarkdown, sliceText } from './strings'
+import { extractBookingIdFromScan, humanizeFileSize, removeMarkdown, sliceText } from './strings'
 
 describe('strings', () => {
+    describe('extractBookingIdFromScan', () => {
+        it('returns the raw text unchanged when it is not a URL', () => {
+            expect(extractBookingIdFromScan('abc1234567890')).toBe('abc1234567890')
+        })
+
+        it('extracts the last path segment from a check-in URL', () => {
+            expect(extractBookingIdFromScan('https://smotrinazvezdy.ru/stargazing/checkin/abc1234567890')).toBe(
+                'abc1234567890'
+            )
+        })
+
+        it('extracts the last path segment ignoring a trailing slash', () => {
+            expect(extractBookingIdFromScan('https://smotrinazvezdy.ru/stargazing/checkin/abc1234567890/')).toBe(
+                'abc1234567890'
+            )
+        })
+
+        it('trims surrounding whitespace', () => {
+            expect(extractBookingIdFromScan('  abc1234567890  ')).toBe('abc1234567890')
+        })
+    })
+
     describe('removeMarkdown', () => {
         it('returns empty string for undefined', () => {
             expect(removeMarkdown(undefined)).toBe('')

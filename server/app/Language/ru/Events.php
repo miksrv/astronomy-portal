@@ -13,6 +13,7 @@ return [
     'bookingNotConfirmed' => 'Эта регистрация ещё не подтверждена.',
     'invalidDateFormat'   => 'Неверный формат даты.',
     'invalidRegistrationWindow' => 'Некорректный период регистрации: он должен открываться до закрытия и заканчиваться не позднее даты мероприятия.',
+    'invalidEventEndDate' => 'Время окончания мероприятия должно быть позже времени начала.',
     'registrationNotRequired' => 'Для этого мероприятия регистрация не требуется.',
     'invalidRequiresRegistrationValue' => 'Некорректное значение поля "требуется регистрация" — ожидается логическое значение.',
     'cannotDisableRegistrationWithBookings' => 'Нельзя отключить регистрацию — на это мероприятие уже есть активные записи.',
@@ -27,20 +28,14 @@ return [
     'paymentVerifiedPending'   => 'Транзакция ещё в обработке.',
 
     // Ticket (rendered onto the PNG ticket image)
-    'ticketHeading'      => 'Билет на астровыезд',
-    'ticketDateLabel'    => 'Дата и время',
-    'ticketPeopleLabel'  => 'Участники',
-    'ticketGuestLabel'   => 'Участник',
-    'ticketPeopleValue'  => 'Взрослых: {0}, детей: {1}',
-    'ticketShowQr'       => 'Покажите QR-код на входе',
-    'ticketDateFormat'   => 'd MMMM y, HH:mm',
+    'ticketHeading'           => 'Билет на астровыезд',
+    'ticketParticipantsLabel' => 'Участников',
+    'ticketAdultsValue'       => '{0} взрослых',
+    'ticketChildrenValue'     => '{0} детей',
+    'ticketDateLine'          => 'EEEE, d MMMM y',
 
-    // Ticket / cancellation emails
-    'ticketEmailSubject' => 'Ваш билет на астровыезд «{0}»',
-    'ticketEmailTitle'   => 'Вы зарегистрированы!',
-    'ticketEmailIntro'   => 'Спасибо за регистрацию на астровыезд «{0}». Ваш билет с QR-кодом — ниже. Покажите его при входе на мероприятие.',
-    'ticketEmailDate'    => 'Дата и время: {0} (Оренбургское время, UTC+5)',
-    'ticketEmailFooter'  => 'Если вы не сможете приехать, пожалуйста, отмените бронирование в личном кабинете — это освободит место для других.',
+    // Cancellation email (the ticket confirmation email is static Russian —
+    // see Views/email_ticket.php — not routed through lang())
     'cancelEmailSubject' => 'Бронирование на астровыезд «{0}» отменено',
     'cancelEmailTitle'   => 'Бронирование отменено',
     'cancelEmailIntro'   => 'Ваше бронирование на астровыезд «{0}» отменено. Если это произошло по ошибке, вы можете зарегистрироваться снова, пока есть свободные места.',

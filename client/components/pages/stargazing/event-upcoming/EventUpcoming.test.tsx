@@ -111,9 +111,10 @@ describe('EventUpcoming', () => {
         expect(screen.getByText('Test Stargazing Event')).toBeDefined()
     })
 
-    it('shows registered title when user is registered', () => {
+    it('shows the cancel-booking action for a confirmed registration instead of the booking form', () => {
         render(<EventUpcoming event={baseEvent} />)
-        expect(screen.getByText('Вы зарегистрированы')).toBeDefined()
+        expect(screen.queryByText('EventBookingForm')).toBeNull()
+        expect(screen.getByText('Отменить бронирование')).toBeDefined()
     })
 
     it('opens the cancellation dialog when cancel button is clicked', () => {
@@ -169,8 +170,6 @@ describe('EventUpcoming', () => {
 
         expect(screen.getByText('Бронь ожидает оплаты')).toBeDefined()
         expect(screen.getByText('Вернуться к оплате')).toBeDefined()
-        // A pending (unpaid) hold must NOT read as a confirmed registration.
-        expect(screen.queryByText('Вы зарегистрированы')).toBeNull()
     })
 
     it('shows a retry-payment prompt for a failed booking instead of a confirmed registration', () => {
@@ -184,8 +183,6 @@ describe('EventUpcoming', () => {
 
         expect(screen.getByText('Оплата не прошла')).toBeDefined()
         expect(screen.getByText('Попробовать оплатить снова')).toBeDefined()
-        // A declined/expired attempt must NOT read as a confirmed registration.
-        expect(screen.queryByText('Вы зарегистрированы')).toBeNull()
     })
 
     it('retries the booking with the remembered adults/children and redirects on success', async () => {
@@ -230,7 +227,7 @@ describe('EventUpcoming', () => {
             expect(mockCancelMutate).toHaveBeenCalled()
         })
 
-        expect(screen.getByText('Вы зарегистрированы')).toBeDefined()
+        expect(screen.getByText('Отменить бронирование')).toBeDefined()
     })
 
     it('does not show moderation actions for a regular user', () => {

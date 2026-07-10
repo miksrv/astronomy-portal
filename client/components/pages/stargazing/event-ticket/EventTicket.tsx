@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Message, Spinner } from 'simple-react-ui-kit'
+import { Message, Spinner } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
@@ -14,8 +14,8 @@ interface EventTicketProps {
 
 /**
  * Fetches the server-rendered PNG ticket as a blob (authorized request) and
- * displays it with a download button. The image is never persisted on the
- * server — it is generated on the fly per request.
+ * displays it as a clickable image that downloads on click. The image is
+ * never persisted on the server — it is generated on the fly per request.
  */
 export const EventTicket: React.FC<EventTicketProps> = ({ bookingId }) => {
     const { t } = useTranslation()
@@ -53,24 +53,19 @@ export const EventTicket: React.FC<EventTicketProps> = ({ bookingId }) => {
 
     return (
         <div className={styles.ticket}>
-            {/* eslint-disable-next-line next/no-img-element -- blob object URL can't use next/image */}
-            <img
-                className={styles.ticketImage}
-                src={url}
-                alt={t('components.pages.stargazing.event-ticket.alt', 'Билет на астровыезд')}
-            />
-
             <a
                 className={styles.downloadLink}
                 href={url}
                 download={`ticket-${bookingId}.png`}
+                title={t('components.pages.stargazing.event-ticket.download', 'Скачать билет')}
+                aria-label={t('components.pages.stargazing.event-ticket.download', 'Скачать билет')}
             >
-                <Button
-                    size={'medium'}
-                    stretched={true}
-                >
-                    {t('components.pages.stargazing.event-ticket.download', 'Скачать билет')}
-                </Button>
+                {/* eslint-disable-next-line next/no-img-element -- blob object URL can't use next/image */}
+                <img
+                    className={styles.ticketImage}
+                    src={url}
+                    alt={t('components.pages.stargazing.event-ticket.alt', 'Билет на астровыезд')}
+                />
             </a>
         </div>
     )

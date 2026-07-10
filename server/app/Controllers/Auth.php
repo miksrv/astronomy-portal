@@ -58,6 +58,23 @@ class Auth extends ResourceController
     }
 
     /**
+     * Revokes every token currently issued to the authenticated user (on any
+     * device) by clearing their session id. Deliberately does not shorten or
+     * otherwise touch the JWT's own lifetime (`auth.token.live`) — this is a
+     * server-side kill switch layered on top of it, not a replacement for it.
+     */
+    public function logout(): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        (new UsersModel())->update($this->session->user->id, ['session_token' => null]);
+
+        return $this->respond(['success' => true]);
+    }
+
+    /**
      * Auth via Google
      * @link https://console.developers.google.com/
      * @throws ReflectionException
@@ -248,6 +265,7 @@ class Auth extends ResourceController
         [$userData, $isNewUser] = (new UsersModel())->findOrCreateByEmail($claim['email'], AUTH_TYPE_EMAIL);
 
         $this->session->authorization($userData);
+        $this->ensureSessionToken($userData);
 
         log_message('info', '[Auth] Successfully authorized user {id} via email link (new={isNew})', [
             'id'     => $userData->id,
@@ -425,6 +443,7 @@ class Auth extends ResourceController
         }
 
         $this->session->authorization($userData);
+        $this->ensureSessionToken($userData);
 
         log_message('info', '[Auth] Successfully authorized user {id} via {type}', [
             'id'   => $userData->id,
@@ -483,6 +502,33 @@ class Auth extends ResourceController
     }
 
     /**
+     * Ensures the user has an active session id, generating one only if
+     * there isn't one yet (first login since account creation, or since the
+     * last explicit logout). Deliberately does not rotate an existing
+     * session id on every login, so signing in on a new device doesn't
+     * invalidate sessions already active on other devices — only an
+     * explicit `logout()` call does that.
+     *
+     * @param UserEntity $user Mutated in place so the caller's in-memory
+     *                         `$this->session->user` (same object reference)
+     *                         reflects the token immediately, without a re-fetch.
+     */
+    private function ensureSessionToken(UserEntity $user): string
+    {
+        if (!empty($user->session_token)) {
+            return $user->session_token;
+        }
+
+        $sessionToken = bin2hex(random_bytes(32));
+
+        (new UsersModel())->update($user->id, ['session_token' => $sessionToken]);
+
+        $user->session_token = $sessionToken;
+
+        return $sessionToken;
+    }
+
+    /**
      * @param bool $isNewUser Set when the account was just created via the
      *                        magic-link flow; adds `isNewUser` to the response
      *                        so the frontend can route to profile onboarding.
@@ -496,9 +542,10 @@ class Auth extends ResourceController
 
         if ($this->session->isAuth && $this->session->user) {
             $response->user  = $this->session->user;
-            $response->token = generateAuthToken($this->session->user->email);
+            $response->token = generateAuthToken($this->session->user->email, $this->session->user->session_token);
 
             unset($response->user->auth_type);
+            unset($response->user->session_token);
 
             if ($response->user->role === 'user') {
                 unset($response->user->role);

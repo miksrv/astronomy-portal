@@ -57,13 +57,14 @@
     --text-color-primary: #ffffff;
     --text-color-secondary: #bdbdbd;
     --text-color-secondary-hover: #7b7d7f;
+    --text-color-secondary-active: #656769;
 
     /* Layout and Containers */
     --border-radius: 8px;
     --body-background: #111318;
     --modal-background: #1c1f2a;
     --overlay-background: rgba(0, 0, 0, 0.6);
-    --container-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    --container-shadow: inset 0 0 0 1px rgb(35 38 58 / 0.73);
     --container-background-color: #1c1f2a;
     --container-error-background-color: #ffe9e9;
     --container-error-color: var(--color-red);
@@ -95,9 +96,6 @@
     --button-secondary-background: #2f314d;
     --button-secondary-background-hover: #37395b;
     --button-secondary-background-active: #292b43;
-    --button-secondary-color: #6e6cd9;
-    --button-secondary-color-hover: #7e7ce0;
-    --button-secondary-color-active: #6564d0;
 
     /* Popout */
     --popout-shadow: 0 0 2px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.08);

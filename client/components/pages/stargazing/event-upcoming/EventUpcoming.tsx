@@ -1,52 +1,61 @@
 import React, { useState } from 'react'
 import dayjs from 'dayjs'
-import { Button, cn, Container, Dialog, Icon, Spinner } from 'simple-react-ui-kit'
+import { Button, cn, Container, Icon } from 'simple-react-ui-kit'
 
+import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 
-import { API, ApiModel, useAppSelector } from '@/api'
+import { API, ApiModel, useAppDispatch, useAppSelector } from '@/api'
+import { openAuthDialog } from '@/api/applicationSlice'
 import { hosts } from '@/api/constants'
-import { LoginForm } from '@/components/common'
-import { formatUTCDate, getLocalizedTimeFromSec } from '@/utils/dates'
+import { formatUTCDate } from '@/utils/dates'
 import { getErrorMessage } from '@/utils/errors'
-
-import { EventTicket } from '../event-ticket'
 
 import { EventBookingForm } from './event-booking-form'
 import noEventsImage from './no-events.png'
+import { StatusAwaitingPayment } from './StatusAwaitingPayment'
+import { StatusLoginRequired } from './StatusLoginRequired'
+import { StatusNoRegistrationRequired } from './StatusNoRegistrationRequired'
+import { StatusPaymentExpired } from './StatusPaymentExpired'
+import { StatusPaymentFailed } from './StatusPaymentFailed'
+import { StatusPaymentRedirect } from './StatusPaymentRedirect'
+import { StatusRegistered } from './StatusRegistered'
+import { StatusRegistrationClosed } from './StatusRegistrationClosed'
+import { StatusRegistrationOpensIn } from './StatusRegistrationOpensIn'
+import { StatusSoldOut } from './StatusSoldOut'
 import { useEventBookingStatus } from './useEventBookingStatus'
 import { useEventBookingSubmit } from './useEventBookingSubmit'
 
 import styles from './styles.module.sass'
 
+// Admin-only and rarely used — kept out of the main bundle for everyone else.
+const EventDeleteDialog = dynamic(() => import('../event-delete-dialog').then((mod) => mod.EventDeleteDialog), {
+    ssr: false
+})
+
+// Most visitors never cancel a registration — kept out of the main bundle.
+const CancelRegistrationDialog = dynamic(
+    () => import('./CancelRegistrationDialog').then((mod) => mod.CancelRegistrationDialog),
+    { ssr: false }
+)
+
+type EventInfoRow = {
+    icon: React.ComponentProps<typeof Icon>['name']
+    label: string
+    value: React.ReactNode
+}
+
 interface EventUpcomingProps {
     event?: ApiModel.Event
     /**
      * 'hero' (default) is the full-width stargazing-page widget with a cover
-     * image. 'compact' drops the cover image and, on desktop, splits the
-     * remaining content into an info column + a ticket column — used to
-     * re-embed the same registration info/cancel flow inside the profile page.
+     * image. 'compact' drops the cover image — used to re-embed the same
+     * registration info/cancel flow inside the profile page.
      */
     layout?: 'hero' | 'compact'
 }
-
-interface GuestLoginPromptProps {
-    className?: string
-    heading?: React.ReactNode
-}
-
-// Guest (unauthenticated) call-to-action: per the "subscription = authentication"
-// rule, logging in is itself what subscribes the visitor to the mailing — there
-// is no separate subscribe form. Reused wherever a guest needs this nudge, with
-// an optional heading for contexts that have a specific ask (e.g. "log in to register").
-const GuestLoginPrompt: React.FC<GuestLoginPromptProps> = ({ className, heading }) => (
-    <div className={className}>
-        {heading && <h3>{heading}</h3>}
-        <LoginForm />
-    </div>
-)
 
 export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, layout = 'hero' }) => {
     const { t } = useTranslation()
@@ -66,6 +75,8 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
 
     const event = isHero ? (liveEvent ?? eventProp) : eventProp
 
+    const dispatch = useAppDispatch()
+
     const user = useAppSelector((state) => state.auth.user)
     const userRole = useAppSelector((state) => state.auth?.user?.role)
 
@@ -74,10 +85,13 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
 
     const [confirmation, showConfirmation] = useState<boolean>(false)
     const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false)
+    // Bridges the ~1-2s gap between the bank payment URL being ready and the
+    // browser actually navigating there (window.location.href doesn't unload
+    // synchronously) — set as soon as either the booking form or a payment
+    // retry gets a formUrl, so that gap shows a proper panel instead of nothing.
+    const [redirectFormUrl, setRedirectFormUrl] = useState<string>()
 
-    const [cancelRegistration, { isLoading }] = API.useEventsCancelRegistrationPostMutation()
-
-    const [deleteEvent, { isLoading: isDeleting, error: deleteError }] = API.useEventDeleteMutation()
+    const [cancelRegistration, { isLoading, error: cancelError }] = API.useEventsCancelRegistrationPostMutation()
 
     const {
         awaitingPayment,
@@ -103,27 +117,16 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
         errorMessage: retryErrorMessage
     } = useEventBookingSubmit()
 
-    const handleCancelRegistration = async () => {
+    // "Зарегистрироваться заново" after a lapsed payment hold — deletes the
+    // stale booking (same endpoint as the regular cancel flow, no confirmation
+    // dialog needed since there's nothing active left to lose) so the user can
+    // immediately book again instead of waiting on the background reconciliation.
+    const handleReregister = async () => {
         try {
             await cancelRegistration({ eventId: event?.id || '' }).unwrap()
-            showConfirmation(false)
             setRegistered(false)
         } catch {
-            showConfirmation(false)
-        }
-    }
-
-    const handleDeleteConfirm = async () => {
-        if (!event?.id) {
-            return
-        }
-
-        try {
-            await deleteEvent(event.id).unwrap()
-            setShowDeleteDialog(false)
-            await router.replace(router.asPath)
-        } catch {
-            // Error surfaces from `deleteError` inside the confirmation dialog
+            // Error surfaces from `cancelError` inside the payment-expired panel
         }
     }
 
@@ -132,7 +135,7 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
             return
         }
 
-        await retrySubmit({
+        const result = await retrySubmit({
             adults: event.members?.adults || 1,
             children: event.members?.children || 0,
             childrenAges: event.members?.childrenAges,
@@ -140,6 +143,10 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
             name: user?.name,
             phone: user?.phone
         })
+
+        if (result?.redirectedToPayment) {
+            setRedirectFormUrl(result.formUrl || '')
+        }
     }
 
     if (!event) {
@@ -165,355 +172,210 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
 
     const isCompact = layout === 'compact'
 
-    const ticketNode =
-        isConfirmed && (event?.bookedId || bookedId) ? (
-            <div className={styles.ticketBlock}>
-                <EventTicket bookingId={event?.bookedId || bookedId} />
-            </div>
-        ) : null
+    // The cancel button inside the "registered" status card hides once
+    // registration has closed or the event itself has already started —
+    // nothing left to give up by then.
+    const canCancelRegistration =
+        isConfirmed &&
+        !(dayjs.utc(event?.registrationEnd?.date).local().diff(dayjs()) <= 0) &&
+        !(dayjs.utc(event?.date?.date).local().diff(dayjs()) <= 0)
+
+    // Summary shown in the "Детали заявки" card of the payment-failed panel —
+    // the amount matches EventBookingForm's calculation (children are free).
+    const failedBookingDateTime = event?.endDate?.date
+        ? `${formatUTCDate(event?.date?.date, 'D MMMM YYYY')}, ${formatUTCDate(event?.date?.date, 'HH:mm')} — ${formatUTCDate(event.endDate.date, 'HH:mm')}`
+        : formatUTCDate(event?.date?.date, 'D MMMM YYYY, HH:mm')
+
+    const failedBookingAmount = (event?.members?.adults || 0) * (event?.ticketPrice || 0)
+
+    const infoRows: EventInfoRow[] = [
+        {
+            icon: 'Time',
+            label: t('pages.stargazing.event-date-label', 'Дата (GMT+5)'),
+            value: formatUTCDate(event?.date?.date, 'D MMMM, YYYY')
+        },
+        {
+            icon: 'Time',
+            label: t('pages.stargazing.event-time-label', 'Время (GMT+5)'),
+            value: event?.endDate?.date
+                ? `${formatUTCDate(event?.date?.date, 'HH:mm')} — ${formatUTCDate(event.endDate.date, 'HH:mm')}`
+                : formatUTCDate(event?.date?.date, 'HH:mm')
+        },
+        {
+            icon: 'PinDrop',
+            label: t('pages.stargazing.event-location-label', 'Место'),
+            value: (
+                <>
+                    {event?.location ||
+                        t('components.pages.stargazing.event-upcoming.location-fallback', 'Загородная обсерватория')}
+                    {isConfirmed && event?.address && <div className={styles.addressText}>{event.address}</div>}
+                    {!isConfirmed && (
+                        <div className={styles.notifyText}>
+                            {t(
+                                'components.pages.stargazing.event-upcoming.address-hidden',
+                                'Адрес будет доступен после регистрации'
+                            )}
+                        </div>
+                    )}
+                </>
+            )
+        }
+    ]
 
     const mainContent = (
         <>
+            {infoRows.map((row) => (
+                <div
+                    key={row.label}
+                    className={styles.infoSection}
+                >
+                    <span className={styles.rowLabel}>
+                        <Icon
+                            name={row.icon}
+                            className={styles.icon}
+                        />
+                        {row.label}
+                    </span>
+                    <span className={styles.rowValue}>{row.value}</span>
+                </div>
+            ))}
+
             {/* Paid booking awaiting payment — seat is held with a countdown. While a
                 pending payment is being actively re-verified with the gateway (on
                 mount and on bfcache restore — there is no bank webhook), show a
                 loader instead of the stale countdown/actions. */}
-            {awaitingPayment && pendingPayment && (
-                <div className={styles.infoBlock}>
-                    {isVerifyingPayment ? (
-                        <div className={styles.verifyingPayment}>
-                            <Spinner style={{ height: 20, width: 20 }} />
-                            {t(
-                                'components.pages.stargazing.event-upcoming.verifying-payment',
-                                'Проверяем статус оплаты…'
-                            )}
-                        </div>
-                    ) : (
-                        <>
-                            <h3>
-                                {t(
-                                    'components.pages.stargazing.event-upcoming.awaiting-payment-title',
-                                    'Бронь ожидает оплаты'
-                                )}
-                            </h3>
-                            <p>
-                                {t(
-                                    'components.pages.stargazing.event-upcoming.awaiting-payment-text',
-                                    'Место забронировано. Завершите оплату до конца таймера, иначе бронь будет автоматически отменена и место освободится.'
-                                )}
-                            </p>
-                            <p>
-                                <strong>
-                                    {t(
-                                        'components.pages.stargazing.event-upcoming.payment-time-left',
-                                        'Осталось на оплату: {{time}}',
-                                        { time: paymentTimeLeftLabel }
-                                    )}
-                                </strong>
-                            </p>
-                            <div className={styles.awaitingPaymentActions}>
-                                <Button
-                                    mode={'primary'}
-                                    variant={'positive'}
-                                    onClick={() => {
-                                        window.location.href = pendingPayment.formUrl
-                                    }}
-                                >
-                                    {t(
-                                        'components.pages.stargazing.event-upcoming.return-to-payment',
-                                        'Вернуться к оплате'
-                                    )}
-                                </Button>
-                                <Button
-                                    mode={'secondary'}
-                                    variant={'negative'}
-                                    loading={isLoading}
-                                    disabled={isLoading}
-                                    onClick={() => showConfirmation(true)}
-                                >
-                                    {t(
-                                        'components.pages.stargazing.event-upcoming.cancel-booking',
-                                        'Отменить бронирование'
-                                    )}
-                                </Button>
-                            </div>
-                        </>
-                    )}
-                </div>
-            )}
-
-            {/* Payment hold lapsed — refetch is triggered; show a brief notice meanwhile */}
-            {registered && event?.bookingStatus === 'pending' && !awaitingPayment && (
-                <div className={styles.infoBlock}>
-                    <h3>
-                        {t(
-                            'components.pages.stargazing.event-upcoming.payment-expired-title',
-                            'Время на оплату истекло'
-                        )}
-                    </h3>
-                    <p>
-                        {t(
-                            'components.pages.stargazing.event-upcoming.payment-expired-text',
-                            'Место освобождено. Обновите страницу, чтобы попробовать снова.'
-                        )}
-                    </p>
-                </div>
+            {!redirectFormUrl && awaitingPayment && pendingPayment && (
+                <StatusAwaitingPayment
+                    isVerifyingPayment={isVerifyingPayment}
+                    paymentTimeLeftLabel={paymentTimeLeftLabel}
+                    formUrl={pendingPayment.formUrl}
+                    isLoading={isLoading}
+                    onCancelBooking={() => showConfirmation(true)}
+                />
             )}
 
             {/* Payment declined or the hold already lapsed — the booking is kept (not
                 deleted) so retrying reuses it instead of re-filling the form. */}
-            {failedPayment && (
-                <div className={styles.infoBlock}>
-                    <h3>{t('components.pages.stargazing.event-upcoming.payment-failed-title', 'Оплата не прошла')}</h3>
-                    <p>
-                        {t(
-                            'components.pages.stargazing.event-upcoming.payment-failed-text',
-                            'Предыдущая попытка оплаты не была завершена. Место не забронировано — вы можете попробовать оплатить снова.'
-                        )}
-                    </p>
-
-                    {isRetryError && (
-                        <p className={styles.notifyText}>
-                            {retryErrorMessage ||
-                                t(
-                                    'components.pages.stargazing.event-upcoming.retry-payment-error',
-                                    'Не удалось создать новую попытку оплаты. Попробуйте позже.'
-                                )}
-                        </p>
-                    )}
-
-                    <div className={styles.awaitingPaymentActions}>
-                        <Button
-                            mode={'primary'}
-                            variant={'positive'}
-                            loading={isRetrying}
-                            disabled={isRetrying}
-                            onClick={handleRetryPayment}
-                        >
-                            {t(
-                                'components.pages.stargazing.event-upcoming.retry-payment',
-                                'Попробовать оплатить снова'
-                            )}
-                        </Button>
-                    </div>
-                </div>
+            {!redirectFormUrl && failedPayment && (
+                <StatusPaymentFailed
+                    dateTime={failedBookingDateTime}
+                    location={
+                        event?.location ||
+                        t('components.pages.stargazing.event-upcoming.location-fallback', 'Загородная обсерватория')
+                    }
+                    adults={event?.members?.adults || 0}
+                    children={event?.members?.children || 0}
+                    childrenAges={event?.members?.childrenAges}
+                    amount={failedBookingAmount}
+                    isRetryError={isRetryError}
+                    retryErrorMessage={retryErrorMessage}
+                    isRetrying={isRetrying}
+                    isLoading={isLoading}
+                    onRetryPayment={handleRetryPayment}
+                    onCancelRequest={() => showConfirmation(true)}
+                />
             )}
 
-            <div className={styles.infoSection}>
-                <Icon
-                    name={'Bell'}
-                    className={styles.icon}
+            {/* Payment hold lapsed but the server hasn't reconciled it yet (a
+                refetch is already in flight — see useEventBookingStatus) — this
+                should be brief and self-correct into the confirmed/failed state.
+                The button lets the user clear the stale hold immediately instead
+                of waiting on that background reconciliation. */}
+            {!redirectFormUrl && registered && event?.bookingStatus === 'pending' && !awaitingPayment && (
+                <StatusPaymentExpired
+                    hasError={!!cancelError}
+                    errorMessage={getErrorMessage(cancelError)}
+                    isLoading={isLoading}
+                    onReregister={handleReregister}
                 />
-                {formatUTCDate(event?.date?.date, 'D MMMM, YYYY')}
-            </div>
-
-            <div className={styles.infoSection}>
-                <Icon
-                    name={'Time'}
-                    className={styles.icon}
-                />
-                {formatUTCDate(event?.date?.date, 'H:mm')}{' '}
-                <span
-                    className={styles.notifyText}
-                    style={{ marginTop: 3 }}
-                >
-                    {t('components.pages.stargazing.event-upcoming.timezone', '(Оренбургское время, UTC+5)')}
-                </span>
-            </div>
-
-            {isConfirmed && !!event?.members?.adults && (
-                <div className={styles.infoSection}>
-                    <Icon
-                        name={'Users'}
-                        className={styles.icon}
-                    />
-                    {t(
-                        'components.pages.stargazing.event-upcoming.members',
-                        'Взрослых: {{adults}}, детей: {{children}}',
-                        {
-                            adults: event.members.adults,
-                            children: event?.members?.children || 0
-                        }
-                    )}
-                </div>
             )}
 
-            <div className={styles.infoSection}>
-                <Icon
-                    name={'Point'}
-                    className={styles.icon}
-                />
-                <div>
-                    {isConfirmed && event?.location
-                        ? event.location
-                        : t(
-                              'components.pages.stargazing.event-upcoming.location-default',
-                              'Оренбургский район (~40 км от Оренбурга)'
-                          )}
-                    {isConfirmed ? (
-                        <ul className={styles.mapLinks}>
-                            <li>
-                                <a
-                                    href={event?.yandexMap}
-                                    title={t(
-                                        'components.pages.stargazing.event-upcoming.yandex-maps-title',
-                                        'Ссылка на Яндекс Картах'
-                                    )}
-                                    target={'_blank'}
-                                    rel={'noreferrer'}
-                                >
-                                    {t('components.pages.stargazing.event-upcoming.yandex-maps', 'Яндекс Карты')}
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    href={event?.googleMap}
-                                    title={t(
-                                        'components.pages.stargazing.event-upcoming.google-maps-title',
-                                        'Ссылка на Google Картах'
-                                    )}
-                                    target={'_blank'}
-                                    rel={'noreferrer'}
-                                >
-                                    {t('components.pages.stargazing.event-upcoming.google-maps', 'Google Карты')}
-                                </a>
-                            </li>
-                        </ul>
-                    ) : (
-                        <div className={styles.notifyText}>
-                            {t(
-                                'components.pages.stargazing.event-upcoming.location-hidden',
-                                'Точное место проведения мероприятия будет доступно после регистрации'
-                            )}
-                        </div>
-                    )}
-                </div>
-            </div>
+            {/* Booking form submitted a paid registration and got a bank formUrl —
+                bridges the gap before the browser actually navigates there. Shown
+                in the same slot as the other "blocked" states, below the static
+                event info (date/time/location) like everywhere else. */}
+            {redirectFormUrl && <StatusPaymentRedirect formUrl={redirectFormUrl} />}
 
             {/* This event never goes through online booking (sidewalk astronomy,
                 legacy archive imports) — skip all registration-window messaging
                 and the booking form entirely. */}
-            {event?.requiresRegistration === false ? (
-                <div className={styles.infoBlock}>
-                    <h3>
-                        {t(
-                            'components.pages.stargazing.event-upcoming.no-registration-required',
-                            'Регистрация не требуется'
+            {!redirectFormUrl &&
+                (event?.requiresRegistration === false ? (
+                    <StatusNoRegistrationRequired />
+                ) : (
+                    <>
+                        {/* If registration has already started AND there are no more places AND the user is not registered */}
+                        {secondsUntilRegistrationStart < 0 && event?.availableTickets === 0 && !registered && (
+                            <StatusSoldOut />
                         )}
-                    </h3>
-                    <p>
-                        {t(
-                            'components.pages.stargazing.event-upcoming.no-registration-required-hint',
-                            'Просто приходите в указанное время — предварительная запись не нужна.'
+
+                        {/* If registration has not started yet AND the user is not registered */}
+                        {secondsUntilRegistrationStart >= 0 && secondsUntilRegistrationEnd > 0 && !registered && (
+                            <StatusRegistrationOpensIn secondsUntilStart={secondsUntilRegistrationStart} />
                         )}
-                    </p>
-                </div>
-            ) : (
-                <>
-                    {/* If registration has already started AND there are no more places AND the user is not registered */}
-                    {secondsUntilRegistrationStart < 0 && event?.availableTickets === 0 && !registered && (
-                        <div className={styles.infoBlock}>
-                            <h3>
-                                {t(
-                                    'components.pages.stargazing.event-upcoming.no-tickets',
-                                    'К сожалению, все места закончились'
-                                )}
-                            </h3>
-                            <p>
-                                {t(
-                                    'components.pages.stargazing.event-upcoming.no-tickets-hint',
-                                    'Дополнительные места могут появиться, если кто-то отменит свою регистриацию. Или просто дождитесь следующего мероприятия.'
-                                )}
-                            </p>
-                        </div>
-                    )}
 
-                    {/* If registration has not started yet */}
-                    {secondsUntilRegistrationStart >= 0 && secondsUntilRegistrationEnd > 0 && (
-                        <div className={styles.bookingLogin}>
-                            <h3>
-                                {t(
-                                    'components.pages.stargazing.event-upcoming.registration-opens-in',
-                                    'Регистрация на астровыезд откроется через'
-                                )}{' '}
-                                {getLocalizedTimeFromSec(secondsUntilRegistrationStart, true, t)}
-                            </h3>
-                        </div>
-                    )}
+                        {/* If registration has ended AND the user is not registered — otherwise a
+                            confirmed/pending booking whose event still lies ahead (registration
+                            windows commonly close before the event itself) would show this
+                            "closed" panel alongside their ticket/map. */}
+                        {secondsUntilRegistrationEnd <= 0 && !registered && <StatusRegistrationClosed />}
 
-                    {/* If registration has ended */}
-                    {secondsUntilRegistrationEnd <= 0 && (
-                        <div className={styles.bookingLogin}>
-                            <h3>
-                                {t(
-                                    'components.pages.stargazing.event-upcoming.registration-closed',
-                                    'Регистрация на астровыезд завершена'
+                        {/* If registration is available */}
+                        {registrationAvailable ? (
+                            <>
+                                {!user?.id && <StatusLoginRequired onSignIn={() => dispatch(openAuthDialog())} />}
+
+                                {user?.id && !registered && (
+                                    <EventBookingForm
+                                        eventId={event?.id}
+                                        ticketPrice={event?.ticketPrice}
+                                        onSuccessSubmit={(id) => {
+                                            setRegistered(true)
+                                            setBookedId(id)
+                                        }}
+                                        onPaymentRedirect={(formUrl) => setRedirectFormUrl(formUrl)}
+                                    />
                                 )}
-                            </h3>
-                            <p>
-                                {t(
-                                    'components.pages.stargazing.event-upcoming.registration-closed-hint',
-                                    'Пожалуйста дождитесь нашего следующего астровыезда, что бы его не пропустить - подпишитесь на Telegram канал'
+                            </>
+                        ) : !registered ? (
+                            <>
+                                {!user?.id && (
+                                    <Button
+                                        className={styles.subscribeSignInButton}
+                                        mode={'primary'}
+                                        icon={'User'}
+                                        onClick={() => dispatch(openAuthDialog())}
+                                    >
+                                        {t('components.pages.stargazing.event-upcoming.sign-in', 'Войти')}
+                                    </Button>
                                 )}
-                            </p>
-                        </div>
-                    )}
+                            </>
+                        ) : (
+                            ''
+                        )}
+                    </>
+                ))}
 
-                    {/* If registration is available */}
-                    {registrationAvailable ? (
-                        <>
-                            {!user?.id && (
-                                <GuestLoginPrompt
-                                    className={styles.bookingLogin}
-                                    heading={t(
-                                        'components.pages.stargazing.event-upcoming.login-to-register',
-                                        'Для регистрации на астровыезд войдите под своей учетной записью'
-                                    )}
-                                />
-                            )}
-
-                            {user?.id && !registered && (
-                                <EventBookingForm
-                                    eventId={event?.id}
-                                    ticketPrice={event?.ticketPrice}
-                                    onSuccessSubmit={(id) => {
-                                        setRegistered(true)
-                                        setBookedId(id)
-                                    }}
-                                />
-                            )}
-                        </>
-                    ) : !registered ? (
-                        <>{!user?.id && <GuestLoginPrompt className={styles.guestSubscribe} />}</>
-                    ) : (
-                        ''
-                    )}
-                </>
+            {/* If user is registered (confirmed) — the ticket itself is the
+                confirmation, so this card is just map with directions, ticket
+                (click to download), and the cancel button. */}
+            {isConfirmed && (
+                <StatusRegistered
+                    eventId={event?.id}
+                    title={event?.title}
+                    date={event?.date}
+                    endDate={event?.endDate}
+                    location={event?.location}
+                    address={event?.address}
+                    latitude={event?.latitude}
+                    longitude={event?.longitude}
+                    bookingId={event?.bookedId || bookedId}
+                    showCancelButton={canCancelRegistration}
+                    isLoading={isLoading}
+                    isCompact={isCompact}
+                    onCancelBooking={() => showConfirmation(true)}
+                />
             )}
-
-            {/* If user is registered (confirmed) */}
-            {isConfirmed &&
-                !(dayjs.utc(event?.registrationEnd?.date).local().diff(dayjs()) <= 0) &&
-                !(dayjs.utc(event?.date?.date).local().diff(dayjs()) <= 0) && (
-                    <div className={styles.cancelRegistration}>
-                        <p className={styles.notifyText}>
-                            {t(
-                                'components.pages.stargazing.event-upcoming.cancel-hint',
-                                'Если вы не сможете приехать, пожалуйста, отмените регистрацию - это поможет другим занять ваше место.'
-                            )}
-                        </p>
-                        <Button
-                            className={styles.cancelRegistrationButton}
-                            mode={'secondary'}
-                            variant={'negative'}
-                            loading={isLoading}
-                            disabled={isLoading}
-                            onClick={() => showConfirmation(true)}
-                        >
-                            {t('components.pages.stargazing.event-upcoming.cancel-booking', 'Отменить бронирование')}
-                        </Button>
-                    </div>
-                )}
         </>
     )
 
@@ -573,120 +435,43 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
                 )}
 
                 <div className={styles.stargazing}>
-                    <h2 className={styles.title}>{event?.title}</h2>
+                    <h2 className={styles.title}>
+                        {isConfirmed ? (
+                            <>
+                                <Icon
+                                    name={'CheckCircle'}
+                                    className={styles.titleIcon}
+                                />
+                                {t(
+                                    'components.pages.stargazing.event-upcoming.registered-title',
+                                    'Вы зарегистрированы на астровыезд'
+                                )}
+                            </>
+                        ) : (
+                            t('components.pages.stargazing.event-upcoming.title', 'Регистрация на астровыезд')
+                        )}
+                    </h2>
 
-                    {isConfirmed && (
-                        <h3 className={styles.registeredTitle}>
-                            {t('components.pages.stargazing.event-upcoming.you-are-registered', 'Вы зарегистрированы')}
-                        </h3>
-                    )}
+                    {event?.title && <h3 className={styles.eventTitle}>{event.title}</h3>}
 
-                    {isCompact ? (
-                        <div className={styles.compactColumns}>
-                            <div className={styles.compactInfo}>{mainContent}</div>
-
-                            {ticketNode && <div className={styles.compactTicket}>{ticketNode}</div>}
-                        </div>
-                    ) : (
-                        <>
-                            {ticketNode}
-                            {mainContent}
-                        </>
-                    )}
+                    {mainContent}
                 </div>
 
-                <Dialog
-                    title={t(
-                        'components.pages.stargazing.event-upcoming.confirm-cancel-title',
-                        'Подтвердите отмену бронирования'
-                    )}
+                <CancelRegistrationDialog
+                    eventId={event?.id}
+                    isPaidConfirmedBooking={isPaidConfirmedBooking}
                     open={confirmation}
-                    onCloseDialog={() => showConfirmation(false)}
-                >
-                    <div className={styles.confirmContent}>
-                        <p>
-                            {t(
-                                'components.pages.stargazing.event-upcoming.confirm-cancel-text-1',
-                                'Если вы отмените своё бронирование на этот астровыезд, то освободившимися местами смогут воспользоваться другие участники, которые хотят поехать.'
-                            )}
-                        </p>
-                        <p>
-                            {t(
-                                'components.pages.stargazing.event-upcoming.confirm-cancel-text-2',
-                                'Вы сможете повторно зарегистрироваться на этот астровыезд, если места ещё будут свободны.'
-                            )}
-                        </p>
-                        {isPaidConfirmedBooking && (
-                            <p>
-                                {t(
-                                    'components.pages.stargazing.event-upcoming.confirm-cancel-refund-text',
-                                    'Оплата за билет будет автоматически возвращена на карту, с которой производилась оплата, в течение 1–10 рабочих дней.'
-                                )}
-                            </p>
-                        )}
-                    </div>
-                    <div className={styles.confirmationFooter}>
-                        <Button
-                            mode={'secondary'}
-                            onClick={() => showConfirmation(false)}
-                        >
-                            {t('components.pages.stargazing.event-upcoming.cancel', 'Отмена')}
-                        </Button>
+                    onClose={() => showConfirmation(false)}
+                    onCancelled={() => setRegistered(false)}
+                />
 
-                        <Button
-                            variant={'negative'}
-                            mode={'primary'}
-                            loading={isLoading}
-                            disabled={isLoading}
-                            onClick={handleCancelRegistration}
-                        >
-                            {t('components.pages.stargazing.event-upcoming.cancel-booking', 'Отменить бронирование')}
-                        </Button>
-                    </div>
-                </Dialog>
-
-                <Dialog
-                    title={t('components.pages.stargazing.event-upcoming.delete-confirm-title', 'Удалить астровыезд?')}
-                    open={showDeleteDialog}
-                    onCloseDialog={() => setShowDeleteDialog(false)}
-                >
-                    <div className={styles.confirmContent}>
-                        <p>
-                            {t(
-                                'components.pages.stargazing.event-upcoming.delete-confirm-text',
-                                'Это действие нельзя отменить. Астровыезд будет удалён безвозвратно.'
-                            )}
-                        </p>
-
-                        {deleteError && (
-                            <p className={styles.notifyText}>
-                                {getErrorMessage(deleteError) ||
-                                    t(
-                                        'components.pages.stargazing.event-upcoming.delete-error',
-                                        'Не удалось удалить астровыезд. Попробуйте позже.'
-                                    )}
-                            </p>
-                        )}
-                    </div>
-                    <div className={styles.confirmationFooter}>
-                        <Button
-                            mode={'secondary'}
-                            onClick={() => setShowDeleteDialog(false)}
-                        >
-                            {t('common.cancel', 'Отмена')}
-                        </Button>
-
-                        <Button
-                            variant={'negative'}
-                            mode={'primary'}
-                            loading={isDeleting}
-                            disabled={isDeleting}
-                            onClick={handleDeleteConfirm}
-                        >
-                            {t('common.delete', 'Удалить')}
-                        </Button>
-                    </div>
-                </Dialog>
+                {canDelete && (
+                    <EventDeleteDialog
+                        eventId={event?.id}
+                        open={showDeleteDialog}
+                        onClose={() => setShowDeleteDialog(false)}
+                    />
+                )}
             </div>
         </Container>
     )

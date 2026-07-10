@@ -1,4 +1,5 @@
 import React from 'react'
+import dayjs from 'dayjs'
 import { Badge, cn, Container, Icon } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
@@ -39,6 +40,11 @@ export const EventHistorySection: React.FC<EventHistorySectionProps> = ({ userId
                     title: event.title
                 })
 
+                // The event date is stored/returned as UTC — compare against local
+                // "now" to tell an already-happened trip from an upcoming one the
+                // user has simply registered for.
+                const isPastEvent = dayjs.utc(event.date).local().diff(dayjs()) <= 0
+
                 return (
                     <Link
                         key={event.id}
@@ -77,12 +83,14 @@ export const EventHistorySection: React.FC<EventHistorySectionProps> = ({ userId
                         </div>
 
                         <div className={styles.historyStatus}>
-                            <Badge
-                                className={styles.historyVisitedBadge}
-                                icon={'CheckCircle'}
-                                label={t('pages.profile.history-visited', 'Посещено')}
-                                size={'small'}
-                            />
+                            {isPastEvent && (
+                                <Badge
+                                    className={styles.historyVisitedBadge}
+                                    icon={'CheckCircle'}
+                                    label={t('pages.profile.history-visited', 'Посещено')}
+                                    size={'small'}
+                                />
+                            )}
                             <Icon
                                 className={styles.historyChevron}
                                 name={'KeyboardRight'}

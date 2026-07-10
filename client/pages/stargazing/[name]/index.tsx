@@ -3,22 +3,31 @@ import { getCookie } from 'cookies-next'
 import { Button, Container, Message } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
-import { EventItemData, EventPhotoUploader, EventReviews } from '@/components/pages/stargazing'
+import { EventItemData, EventReviews } from '@/components/pages/stargazing'
 import { formatDate } from '@/utils/dates'
 import { getErrorMessage } from '@/utils/errors'
+import { buildEventJsonLd } from '@/utils/eventJsonLd'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
 import { removeMarkdown, sliceText } from '@/utils/strings'
 
 import styles from '../styles.module.sass'
+
+// Admin-only, single hidden <input> — dynamically imported so it never enters
+// the bundle or DOM for regular visitors.
+const EventPhotoUploader = dynamic(
+    () => import('@/components/pages/stargazing/event-photo-uploader').then((mod) => mod.EventPhotoUploader),
+    { ssr: false }
+)
 
 interface StargazingItemPageProps {
     eventId: string
@@ -45,50 +54,14 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 
     const PHOTOS_PREVIEW_LIMIT = 12
 
-    const title = `${t('menu.stargazing', 'Астровыезды')} - ${event?.title}`
-    const siteName = t('common.look-at-the-stars', 'Смотри на звёзды')
-    const metaTitle = event?.title ? `${event.title} — ${siteName}` : title
+    const title = event?.title || t('menu.stargazing', 'Астровыезды')
 
     const coverImageUrl =
         event?.coverFileName && event?.coverFileExt
             ? `${hosts.stargazing}${event.id}/${event.coverFileName}.${event.coverFileExt}`
             : undefined
 
-    const eventJsonLd = event
-        ? {
-              '@context': 'https://schema.org',
-              '@type': 'Event',
-              name: event.title,
-              description: sliceText(removeMarkdown(event.content ?? ''), 300),
-              startDate: event.date?.date,
-              eventStatus: event.canceled ? 'https://schema.org/EventCancelled' : 'https://schema.org/EventScheduled',
-              eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-              location: {
-                  '@type': 'Place',
-                  name: event.location ?? 'Оренбургская область',
-                  address: {
-                      '@type': 'PostalAddress',
-                      addressLocality: 'Оренбург',
-                      addressCountry: 'RU'
-                  }
-              },
-              organizer: {
-                  '@type': 'Organization',
-                  name: 'Смотри на звёзды',
-                  url: SITE_LINK?.replace(/\/$/, '')
-              },
-              offers: {
-                  '@type': 'Offer',
-                  price: event.ticketPrice ?? 0,
-                  priceCurrency: 'RUB',
-                  availability:
-                      (event.availableTickets ?? 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
-                  url: `${SITE_LINK}stargazing/${event.id}`
-              },
-              image: coverImageUrl,
-              url: `${SITE_LINK}stargazing/${event.id}`
-          }
-        : null
+    const eventJsonLd = event ? buildEventJsonLd(event) : null
 
     const adjacentEvents = useMemo(() => {
         const sortedEvents = [...(eventsList || [])].sort((a, b) => {
@@ -137,7 +110,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     return (
         <AppLayout
             canonical={`stargazing/${event?.id}`}
-            title={metaTitle}
+            title={title}
             description={sliceText(removeMarkdown(event?.content || ''), 160)}
             openGraph={{
                 images: coverImageUrl ? [{ url: coverImageUrl }] : undefined
@@ -197,48 +170,52 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 event={event || undefined}
             />
 
-            <h2>{`${event?.title} - ${t('pages.stargazing.photos-from-stargazing', 'Фотографии с астровыезда')}`}</h2>
+            <h2>
+                {t('pages.stargazing.photos-from-stargazing', 'Фотографии с мероприятия')}
 
-            <Container>
-                {localPhotos?.length > 0 ? (
-                    <>
-                        <PhotoGallery
-                            photos={(isPhotosExpanded ? localPhotos : localPhotos.slice(0, PHOTOS_PREVIEW_LIMIT)).map(
-                                (photo, index) => ({
-                                    height: photo.height,
-                                    src: createPreviewPhotoUrl(photo),
-                                    width: photo.width,
-                                    alt: `${photo?.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
-                                })
-                            )}
-                            onClick={({ index }) => {
-                                handlePhotoClick(index)
-                            }}
-                        />
+                {localPhotos.length > PHOTOS_PREVIEW_LIMIT && (
+                    <a
+                        role={'button'}
+                        tabIndex={0}
+                        className={styles.showMorePhotos}
+                        onClick={() => setIsPhotosExpanded(!isPhotosExpanded)}
+                        onKeyDown={() => setIsPhotosExpanded(!isPhotosExpanded)}
+                    >
+                        {isPhotosExpanded
+                            ? t('pages.stargazing.photos-show-less', 'Показать меньше фотографий')
+                            : t('pages.stargazing.photos-show-all', 'Смотреть все ({{count}})', {
+                                  count: localPhotos.length
+                              })}
+                    </a>
+                )}
+            </h2>
 
-                        {localPhotos.length > PHOTOS_PREVIEW_LIMIT && (
-                            <Button
-                                mode={'secondary'}
-                                className={styles.showMorePhotos}
-                                onClick={() => setIsPhotosExpanded(!isPhotosExpanded)}
-                            >
-                                {isPhotosExpanded
-                                    ? t('pages.stargazing.photos-show-less', 'Показать меньше фотографий')
-                                    : t('pages.stargazing.photos-show-all', 'Показать все {{count}} фотографий', {
-                                          count: localPhotos.length
-                                      })}
-                            </Button>
-                        )}
-                    </>
-                ) : (
+            {localPhotos?.length > 0 ? (
+                <PhotoGallery
+                    photos={(isPhotosExpanded ? localPhotos : localPhotos.slice(0, PHOTOS_PREVIEW_LIMIT)).map(
+                        (photo, index) => ({
+                            height: photo.height,
+                            src: createPreviewPhotoUrl(photo),
+                            width: photo.width,
+                            alt: `${photo?.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
+                        })
+                    )}
+                    onClick={({ index }) => {
+                        handlePhotoClick(index)
+                    }}
+                />
+            ) : (
+                <Container>
                     <p className={styles.noPhotos}>
                         {t(
                             'pages.stargazing.no-photos',
                             'Фотографии с этого события ещё не загружены. Загляните позже!'
                         )}
                     </p>
-                )}
+                </Container>
+            )}
 
+            {userRole === ApiModel.UserRole.ADMIN && (
                 <EventPhotoUploader
                     eventId={eventId}
                     fileInputRef={inputFileRef}
@@ -248,20 +225,17 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                     }}
                     onUploadError={setUploadError}
                 />
+            )}
 
-                {!!uploadError && (
-                    <Message
-                        type={'error'}
-                        className={styles.uploadError}
-                    >
-                        {getErrorMessage(uploadError) ||
-                            t(
-                                'pages.stargazing.upload-photo-error',
-                                'Не удалось загрузить фотографию. Попробуйте позже.'
-                            )}
-                    </Message>
-                )}
-            </Container>
+            {!!uploadError && (
+                <Message
+                    type={'error'}
+                    className={styles.uploadError}
+                >
+                    {getErrorMessage(uploadError) ||
+                        t('pages.stargazing.upload-photo-error', 'Не удалось загрузить фотографию. Попробуйте позже.')}
+                </Message>
+            )}
 
             <PhotoLightbox
                 photos={localPhotos?.map((photo, index) => ({
@@ -275,7 +249,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 onCloseLightBox={handleCloseLightbox}
             />
 
-            <h2>{t('pages.stargazing.reviews', 'Отзывы')}</h2>
+            <h2>{t('pages.stargazing.reviews', 'Отзывы участников')}</h2>
 
             <EventReviews eventId={eventId} />
 

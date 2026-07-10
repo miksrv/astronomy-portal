@@ -13,6 +13,9 @@ export const APIMeteo = createApi({
         }),
         getHistory: builder.query<ApiType.Weather.ResponseHistory, ApiType.Weather.RequestHistory>({
             query: (params) => `history${encodeQueryData(params)}`
+        }),
+        getForecastDaily: builder.query<ApiType.Weather.ResponseForecastDaily, void>({
+            query: () => 'forecast/daily'
         })
     }),
     reducerPath: 'APIMeteo'

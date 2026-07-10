@@ -8,9 +8,8 @@ import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, SITE_LINK, wrapper } from '@/api'
+import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
-import { hosts } from '@/api/constants'
 import { AppFooter, AppLayout, BreadcrumbJsonLd, PrevNextNav } from '@/components/common'
 import {
     EventImportant,
@@ -22,6 +21,7 @@ import {
 } from '@/components/pages/stargazing'
 import type { InfoCardItem } from '@/components/pages/stargazing/info-cards'
 import { getSecondsUntilUTCDate } from '@/utils/dates'
+import { buildEventJsonLd } from '@/utils/eventJsonLd'
 
 import styles from './index.module.sass'
 
@@ -62,32 +62,9 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
         }
     ]
 
-    const eventsForSchema = [...(upcomingData ? [upcomingData] : []), ...pastEvents]
-
-    const eventsListJsonLd =
-        eventsForSchema.length > 0
-            ? {
-                  '@context': 'https://schema.org',
-                  '@type': 'ItemList',
-                  itemListElement: eventsForSchema.map((event, index) => ({
-                      '@type': 'ListItem',
-                      position: index + 1,
-                      item: {
-                          '@type': 'Event',
-                          name: event.title,
-                          url: `${SITE_LINK}stargazing/${event.id}`,
-                          startDate: event.date?.date,
-                          eventStatus: event.canceled
-                              ? 'https://schema.org/EventCancelled'
-                              : 'https://schema.org/EventScheduled',
-                          image:
-                              event.coverFileName && event.coverFileExt
-                                  ? `${hosts.stargazing}${event.id}/${event.coverFileName}.${event.coverFileExt}`
-                                  : undefined
-                      }
-                  }))
-              }
-            : null
+    // Only the active upcoming event gets Event markup — /stargazing is a listing page,
+    // and /stargazing/history / past entries here are covered by their own event page.
+    const upcomingEventJsonLd = upcomingData ? buildEventJsonLd(upcomingData) : null
 
     return (
         <AppLayout
@@ -101,7 +78,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
                 images: [
                     {
                         height: 853,
-                        url: '/photos/stargazing-1.jpeg',
+                        url: '/photos/stargazing-4.jpeg',
                         width: 1280
                     }
                 ]
@@ -109,10 +86,10 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
         >
             <BreadcrumbJsonLd currentPage={title} />
 
-            {eventsListJsonLd && (
+            {upcomingEventJsonLd && (
                 <JsonLdScript
-                    scriptKey={'stargazing-events-list'}
-                    data={eventsListJsonLd}
+                    scriptKey={'stargazing-upcoming-event'}
+                    data={upcomingEventJsonLd}
                 />
             )}
 

@@ -1,7 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Input, Message, Select } from 'simple-react-ui-kit'
 
+import { useTranslation } from 'next-i18next/pages'
+
 import { ApiType, useAppSelector } from '@/api'
+import { PhoneInput } from '@/components/common/phone-input'
 
 import { useEventBookingSubmit } from '../useEventBookingSubmit'
 
@@ -13,6 +16,10 @@ interface EventBookingFormProps {
     ticketPrice?: number
     /** Called after a confirmed (free) booking; receives the booking id for ticket rendering. */
     onSuccessSubmit?: (bookingId?: string) => void
+    /** Called once a paid booking got its bank payment URL — the caller (EventUpcoming)
+     * takes over rendering a "redirecting…" panel for the moment before the browser
+     * actually navigates away. */
+    onPaymentRedirect?: (formUrl: string) => void
 }
 
 type EventBookingFormState = {
@@ -23,7 +30,14 @@ type EventBookingFormState = {
     childrenAges?: number[]
 }
 
-export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, ticketPrice, onSuccessSubmit }) => {
+export const EventBookingForm: React.FC<EventBookingFormProps> = ({
+    eventId,
+    ticketPrice,
+    onSuccessSubmit,
+    onPaymentRedirect
+}) => {
+    const { t } = useTranslation()
+
     const user = useAppSelector((state) => state.auth.user)
 
     const isPaid = !!ticketPrice && ticketPrice > 0
@@ -68,9 +82,11 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, tic
         const result = await submit(request)
 
         // Paid event — the API returns a bank payment page URL; submit() has
-        // already redirected there, this only updates the local "redirecting" state.
+        // already redirected there. `paymentRedirect` only gates the effect
+        // below; the redirecting panel itself is rendered by the parent.
         if (result?.redirectedToPayment) {
             setPaymentRedirect(true)
+            onPaymentRedirect?.(result.formUrl || '')
             return
         }
 
@@ -106,58 +122,63 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, tic
             {isError && (
                 <Message
                     type={'error'}
-                    title={'Ошибка'}
+                    title={t('components.pages.stargazing.event-upcoming.booking-form-error-title', 'Ошибка')}
                 >
                     {(error as ApiType.ResError)?.messages?.error ||
-                        'При регистрации были допущены ошибки, проверьте правильность заполнения полей'}
+                        t(
+                            'components.pages.stargazing.event-upcoming.booking-form-error-default',
+                            'При регистрации были допущены ошибки, проверьте правильность заполнения полей'
+                        )}
                 </Message>
             )}
 
             {isSuccess && !isPaid && (
                 <Message
                     type={'success'}
-                    title={'Успешно!'}
+                    title={t('components.pages.stargazing.event-upcoming.booking-form-success-title', 'Успешно!')}
                 >
-                    {'Вы зарегистрировались на мероприятие'}
+                    {t(
+                        'components.pages.stargazing.event-upcoming.booking-form-success-text',
+                        'Вы зарегистрировались на мероприятие'
+                    )}
                 </Message>
             )}
 
-            {paymentRedirect && (
-                <Message
-                    type={'info'}
-                    title={'Бронируем место'}
-                >
-                    {'Место забронировано, перенаправляем вас на страницу оплаты…'}
-                </Message>
-            )}
+            <div className={styles.identityFields}>
+                <Input
+                    className={styles.field}
+                    required={true}
+                    label={t('components.pages.stargazing.event-upcoming.booking-form-name-label', 'Ваше имя')}
+                    name={'name'}
+                    placeholder={t(
+                        'components.pages.stargazing.event-upcoming.booking-form-name-placeholder',
+                        'Укажите ваше имя'
+                    )}
+                    value={formState.name || ''}
+                    error={findError('name')}
+                    onChange={handleChange}
+                    onKeyDown={handleKeyDown}
+                />
 
-            <Input
-                className={styles.field}
-                required={true}
-                label={'Укажите ваше имя'}
-                name={'name'}
-                placeholder={'Укажите ваше имя'}
-                value={formState.name || ''}
-                error={findError('name')}
-                onChange={handleChange}
-                onKeyDown={handleKeyDown}
-            />
-
-            <Input
-                className={styles.field}
-                label={'Укажите ваш номер телефона'}
-                name={'phone'}
-                placeholder={'Укажите ваш номер телефона'}
-                value={formState.phone || ''}
-                error={findError('phone')}
-                onChange={handleChange}
-                onKeyDown={handleKeyDown}
-            />
+                <PhoneInput
+                    className={styles.field}
+                    label={t('components.pages.stargazing.event-upcoming.booking-form-phone-label', 'Номер телефона')}
+                    name={'phone'}
+                    placeholder={t(
+                        'components.pages.stargazing.event-upcoming.booking-form-phone-placeholder',
+                        'Укажите ваш номер телефона'
+                    )}
+                    value={formState.phone || ''}
+                    error={findError('phone')}
+                    onChange={handleChange}
+                    onKeyDown={handleKeyDown}
+                />
+            </div>
 
             <div className={styles.countPeopleContainer}>
                 <Select<string>
                     className={styles.countPeopleField}
-                    label={'Взрослых'}
+                    label={t('components.pages.stargazing.event-upcoming.booking-form-adults-label', 'Взрослых')}
                     options={[...Array(5)].map((_, value) => ({
                         key: String(value + 1),
                         value: String(value + 1)
@@ -173,7 +194,7 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, tic
 
                 <Select<string>
                     className={styles.countPeopleField}
-                    label={'Детей'}
+                    label={t('components.pages.stargazing.event-upcoming.booking-form-children-label', 'Детей')}
                     options={[...Array(6)].map((_, value) => ({
                         key: String(value),
                         value: String(value)
@@ -196,13 +217,24 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, tic
                         className={styles.childrenAges}
                     >
                         <label>
-                            {'Возраст ребенка'} {index + 1}
+                            {t(
+                                'components.pages.stargazing.event-upcoming.booking-form-child-age-label',
+                                'Возраст ребенка {{index}}',
+                                { index: index + 1 }
+                            )}
                         </label>
                         <Select<string>
-                            placeholder={'Выберите возраст'}
+                            placeholder={t(
+                                'components.pages.stargazing.event-upcoming.booking-form-child-age-placeholder',
+                                'Выберите возраст'
+                            )}
                             options={[...Array(13)].map((_, age) => ({
                                 key: String(age + 5),
-                                value: `${age + 5} лет`
+                                value: t(
+                                    'components.pages.stargazing.event-upcoming.booking-form-child-age-option',
+                                    '{{age}} лет',
+                                    { age: age + 5 }
+                                )
                             }))}
                             value={String(formState?.childrenAges?.[index]) || ''}
                             onSelect={(option) => {
@@ -225,10 +257,19 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, tic
                     data-testid={'price-summary'}
                 >
                     <div className={styles.priceTotal}>
-                        {`${Number(formState.adults || 1)} взрослых × ${ticketPrice} ₽ = `}
+                        {t(
+                            'components.pages.stargazing.event-upcoming.booking-form-price-summary',
+                            '{{adults}} взрослых × {{price}} ₽ = ',
+                            { adults: Number(formState.adults || 1), price: ticketPrice }
+                        )}
                         <strong>{`${Number(formState.adults || 1) * (ticketPrice || 0)} ₽`}</strong>
                     </div>
-                    <div className={styles.priceNote}>{'Дети до 18 лет — бесплатно'}</div>
+                    <div className={styles.priceNote}>
+                        {t(
+                            'components.pages.stargazing.event-upcoming.booking-form-price-note',
+                            'Дети до 18 лет — бесплатно'
+                        )}
+                    </div>
                 </div>
             )}
 
@@ -238,7 +279,9 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({ eventId, tic
                 disabled={isLoading || isSuccess || Number(formState?.children) !== formState?.childrenAges?.length}
                 loading={isLoading}
             >
-                {isPaid ? 'Перейти к оплате' : 'Забронировать'}
+                {isPaid
+                    ? t('components.pages.stargazing.event-upcoming.booking-form-submit-pay', 'Перейти к оплате')
+                    : t('components.pages.stargazing.event-upcoming.booking-form-submit-book', 'Забронировать')}
             </Button>
         </div>
     )

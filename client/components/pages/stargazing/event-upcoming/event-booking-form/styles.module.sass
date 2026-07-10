@@ -1,8 +1,18 @@
+@use '../../../../../styles/variables' as variables
+
 .form
     margin: 10px auto 0
 
     .field
         margin-bottom: 5px
+
+    .identityFields
+        display: grid
+        grid-template-columns: 1fr 1fr
+        gap: 15px
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            grid-template-columns: 1fr
 
     .countPeopleContainer
         display: flex

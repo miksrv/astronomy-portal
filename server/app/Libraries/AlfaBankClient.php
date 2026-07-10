@@ -50,7 +50,20 @@ class AlfaBankClient implements PaymentGatewayInterface
         $this->gatewayUrl    = $gatewayUrl !== '' ? rtrim($gatewayUrl, '/') . '/' : '';
         $this->callbackToken = $callbackToken;
         $this->token         = $token;
-        $this->client        = \Config\Services::curlrequest();
+
+        // CI4's CURLRequest defaults to `timeout => 0` (no limit) — a slow or
+        // unreachable gateway would otherwise hang this request (and, on the
+        // single-threaded PHP built-in dev server, the whole process) forever
+        // instead of failing into request()'s catch block below. `$getShared
+        // = false` guarantees these options actually apply: Services::curlrequest()
+        // keys its shared instance by service name only, ignoring $options, so a
+        // shared instance created elsewhere first would silently keep its own config.
+        $this->client = \Config\Services::curlrequest(
+            ['timeout' => 15, 'connect_timeout' => 5],
+            null,
+            null,
+            false
+        );
     }
 
     /**

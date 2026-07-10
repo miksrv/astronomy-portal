@@ -19,11 +19,15 @@ All hooks are auto-generated as `API.use<EndpointName>Query/Mutation()`.
 
 ### Auth
 
-| Endpoint           | Hook suffix | Purpose                                     |
-| ------------------ | ----------- | ------------------------------------------- |
-| `authGetMe`        | Query       | Fetch the currently authenticated user      |
-| `authLoginService` | Mutation    | OAuth login via `google`, `yandex`, or `vk` |
-| `authPostLogin`    | Mutation    | Native email/password login                 |
+| Endpoint               | Hook suffix | Purpose                                                                                       |
+| ---------------------- | ----------- | --------------------------------------------------------------------------------------------- |
+| `authGetMe`            | Query       | Fetch the currently authenticated user                                                        |
+| `authLoginService`     | Mutation    | OAuth login via `google`, `yandex`, or `vk`                                                   |
+| `authPostLogin`        | Mutation    | Native email/password login                                                                   |
+| `authUpdateProfile`    | Mutation    | Update the current user's profile (name/phone/birthday/sex)                                   |
+| `authRequestMagicLink` | Mutation    | Request a passwordless login link by email                                                    |
+| `authVerifyMagicLink`  | Mutation    | Exchange a magic-link token for a session                                                     |
+| `authLogout`           | Mutation    | Revoke the session server-side (`users.session_token`); call before clearing local auth state |
 
 ### Categories
 
@@ -129,23 +133,23 @@ All hooks are auto-generated as `API.use<EndpointName>Query/Mutation()`.
 
 Import via `import { ApiModel } from '@/api'`.
 
-| Model                  | Description                                                                                                            |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `ApiModel.Category`    | Photo/object category (`id`, `title`, `description`)                                                                   |
-| `ApiModel.Comment`     | User review/comment with `rating`, `content`, and nested `author`; `CommentEntityType = 'event' \| 'photo'`            |
-| `ApiModel.Equipment`   | Observatory equipment item with `EquipmentType` enum                                                                   |
-| `ApiModel.Event`       | Stargazing event with tickets, registration window, cover image, and map links; `EventPhoto` and `EventUser` sub-types |
-| `ApiModel.File`        | FITS file record with filter, exposure, gain, offset, ccdTemp                                                          |
-| `ApiModel.FilterTypes` | Union of LRGBHOSN filter codes; `ApiModel.Filters` maps each to a `Statistic`                                          |
-| `ApiModel.Mailing`     | Email campaign with status, sent/error counts; `MailingListItem` is the list-safe subset                               |
-| `ApiModel.Object`      | Astronomical object with RA/DEC, description, and linked statistic/filters                                             |
-| `ApiModel.Photo`       | Astrophoto record with file metadata, linked objects, categories, equipment                                            |
-| `ApiModel.Relay`       | Observatory relay channel (`id`, `name`, `state`)                                                                      |
-| `ApiModel.SiteMap`     | Sitemap entry with `id` and `updated` timestamp                                                                        |
-| `ApiModel.Statistic`   | Frames/exposure/fileSize aggregate (shared by Objects and Photos)                                                      |
-| `ApiModel.Telescope`   | Raw telescope session row (date, total_exposure, frames_count, catalog_items)                                          |
-| `ApiModel.User`        | User profile; `UserRole` enum: `user / security / moderator / admin`; `AdminUserItem` is the admin table shape         |
-| `ApiModel.Weather`     | Weather snapshot (temperature, wind, humidity, clouds, UV, solar radiation, etc.)                                      |
+| Model                  | Description                                                                                                                                                                                          |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ApiModel.Category`    | Photo/object category (`id`, `title`, `description`)                                                                                                                                                 |
+| `ApiModel.Comment`     | User review/comment with `rating`, `content`, and nested `author`; `CommentEntityType = 'event' \| 'photo'`                                                                                          |
+| `ApiModel.Equipment`   | Observatory equipment item with `EquipmentType` enum                                                                                                                                                 |
+| `ApiModel.Event`       | Stargazing event with tickets, registration window, cover image, and location (`location`/`address`/`latitude`/`longitude`/`minAge`, gated pre-registration); `EventPhoto` and `EventUser` sub-types |
+| `ApiModel.File`        | FITS file record with filter, exposure, gain, offset, ccdTemp                                                                                                                                        |
+| `ApiModel.FilterTypes` | Union of LRGBHOSN filter codes; `ApiModel.Filters` maps each to a `Statistic`                                                                                                                        |
+| `ApiModel.Mailing`     | Email campaign with status, sent/error counts; `MailingListItem` is the list-safe subset                                                                                                             |
+| `ApiModel.Object`      | Astronomical object with RA/DEC, description, and linked statistic/filters                                                                                                                           |
+| `ApiModel.Photo`       | Astrophoto record with file metadata, linked objects, categories, equipment                                                                                                                          |
+| `ApiModel.Relay`       | Observatory relay channel (`id`, `name`, `state`)                                                                                                                                                    |
+| `ApiModel.SiteMap`     | Sitemap entry with `id` and `updated` timestamp                                                                                                                                                      |
+| `ApiModel.Statistic`   | Frames/exposure/fileSize aggregate (shared by Objects and Photos)                                                                                                                                    |
+| `ApiModel.Telescope`   | Raw telescope session row (date, total_exposure, frames_count, catalog_items)                                                                                                                        |
+| `ApiModel.User`        | User profile; `UserRole` enum: `user / security / moderator / admin`; `AdminUserItem` is the admin table shape                                                                                       |
+| `ApiModel.Weather`     | Weather snapshot (temperature, wind, humidity, clouds, UV, solar radiation, etc.)                                                                                                                    |
 
 ---
 
@@ -153,34 +157,36 @@ Import via `import { ApiModel } from '@/api'`.
 
 ### `client/components/common/`
 
-| Component          | Description                                                                          |
-| ------------------ | ------------------------------------------------------------------------------------ |
-| `AppFooter`        | Site-wide footer                                                                     |
-| `AppLayout`        | Root page wrapper — handles SEO (NextSeo), auth dialog, and progress bar             |
-| `AppToolbar`       | Top navigation bar with locale switcher and auth state                               |
-| `LoginForm`        | OAuth + native login form, used inside a Dialog                                      |
-| `MoonPhaseIcon`    | SVG icon that renders the current moon phase                                         |
-| `ObjectPhotoTable` | Table of FITS files for an astronomical object                                       |
-| `PhotoFilterList`  | Filter chip list for narrowing photo gallery results                                 |
-| `PhotoGallery`     | Masonry/grid photo gallery with lazy loading                                         |
-| `PhotoLightbox`    | Full-screen photo lightbox with navigation                                           |
-| `ReviewCard`       | Displays a single review: avatar, star rating, content, date, optional delete        |
-| `ReviewForm`       | Authenticated form to submit a star rating + text review; calls `commentsCreate`     |
-| `StarMap`          | Interactive Celestial.js/D3 star map (vanilla JS libs loaded from `public/scripts/`) |
-| `VisibilityChart`  | ECharts visibility chart for an astronomical object over a night                     |
+| Component          | Description                                                                                                                                              |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AppFooter`        | Site-wide footer                                                                                                                                         |
+| `AppLayout`        | Root page wrapper — handles SEO (NextSeo), auth dialog, and progress bar                                                                                 |
+| `AppToolbar`       | Top navigation bar with locale switcher and auth state                                                                                                   |
+| `EventMap`         | Leaflet map (dynamic, `ssr: false`) showing/editing an event's coordinates; draggable marker in `editable` mode, generated Yandex/Google links otherwise |
+| `LoginForm`        | OAuth + native login form, used inside a Dialog                                                                                                          |
+| `MoonPhaseIcon`    | SVG icon that renders the current moon phase                                                                                                             |
+| `ObjectPhotoTable` | Table of FITS files for an astronomical object                                                                                                           |
+| `PhotoFilterList`  | Filter chip list for narrowing photo gallery results                                                                                                     |
+| `PhotoGallery`     | Masonry/grid photo gallery with lazy loading                                                                                                             |
+| `PhotoLightbox`    | Full-screen photo lightbox with navigation                                                                                                               |
+| `ReviewCard`       | Displays a single review: avatar, star rating, content, date, optional delete                                                                            |
+| `ReviewForm`       | Authenticated form to submit a star rating + text review; calls `commentsCreate`                                                                         |
+| `StarMap`          | Interactive Celestial.js/D3 star map (vanilla JS libs loaded from `public/scripts/`)                                                                     |
+| `VisibilityChart`  | ECharts visibility chart for an astronomical object over a night                                                                                         |
 
 ### `client/components/pages/stargazing/`
 
-| Component            | Description                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| `EventForm`          | Admin create/edit form for a stargazing event; exports `EventFormType`                      |
-| `EventItemData`      | Detail block rendering event metadata (date, location, member counts)                       |
-| `EventPhotoUploader` | Drag-and-drop photo upload for a specific event                                             |
-| `EventReviews`       | Reviews section for an event page: shows `ReviewForm` (if eligible) + list of `ReviewCard`s |
-| `EventUpcoming`      | Hero widget for the next upcoming event with registration/cancellation dialog               |
-| `EventsList`         | List/grid of all events with status indicators                                              |
-| `InfoCards`          | Grid of icon link-cards used on the stargazing index page; accepts `InfoCardItem[]`         |
-| `ReviewsWidget`      | Sidebar/homepage widget showing random event reviews via `commentsGetRandom`                |
+| Component            | Description                                                                                       |
+| -------------------- | ------------------------------------------------------------------------------------------------- |
+| `EventForm`          | Admin create/edit form for a stargazing event; exports `EventFormType`                            |
+| `EventInfoPanel`     | Sidebar block on the event page: date/time/location/members/age/views + live weather + `EventMap` |
+| `EventItemData`      | Detail block rendering the event cover image + `EventInfoPanel` + description                     |
+| `EventPhotoUploader` | Drag-and-drop photo upload for a specific event                                                   |
+| `EventReviews`       | Reviews section for an event page: shows `ReviewForm` (if eligible) + list of `ReviewCard`s       |
+| `EventUpcoming`      | Hero widget for the next upcoming event with registration/cancellation dialog                     |
+| `EventsList`         | List/grid of all events with status indicators                                                    |
+| `InfoCards`          | Grid of icon link-cards used on the stargazing index page; accepts `InfoCardItem[]`               |
+| `ReviewsWidget`      | Sidebar/homepage widget showing random event reviews via `commentsGetRandom`                      |
 
 ---
 

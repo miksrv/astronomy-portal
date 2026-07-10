@@ -47,6 +47,25 @@ export const humanizeFileSize = (bytes: number): string => {
 }
 
 /**
+ * Extracts a booking id from a scanned QR code's decoded text. Ticket QR
+ * codes encode a full check-in URL (e.g. "https://…/stargazing/checkin/abc123"),
+ * so this takes the last path segment; a raw id (no URL) is returned as-is.
+ * @param {string} text - The raw decoded QR code text.
+ * @returns {string} The extracted booking id.
+ */
+export const extractBookingIdFromScan = (text: string): string => {
+    const trimmed = text.trim()
+
+    try {
+        const segments = new URL(trimmed).pathname.split('/').filter(Boolean)
+
+        return segments.length ? segments[segments.length - 1] : trimmed
+    } catch {
+        return trimmed
+    }
+}
+
+/**
  * Removes Markdown formatting from the given text.
  * @param {string} text - The text from which to remove Markdown formatting.
  * @returns {string} The text without Markdown formatting.

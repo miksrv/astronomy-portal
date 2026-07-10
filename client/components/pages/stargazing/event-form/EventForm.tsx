@@ -5,7 +5,9 @@ import Image from 'next/image'
 
 import { ApiModel, ApiType } from '@/api'
 import { hosts } from '@/api/constants'
+import { DEFAULT_EVENT_COORDINATES, EventMap } from '@/components/common/event-map'
 import { toDateTimeLocalValue } from '@/utils/dates'
+import { reverseGeocode } from '@/utils/geocoding'
 
 import styles from './styles.module.sass'
 
@@ -18,15 +20,23 @@ interface EventFormProps {
     onCancel?: () => void
 }
 
+const toCoordinate = (value: string | undefined, fallback: number): number => {
+    const parsed = value !== undefined ? parseFloat(value) : NaN
+
+    return Number.isFinite(parsed) ? parsed : fallback
+}
+
 export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onSubmit, onCancel }) => {
     // Prefill sensible defaults for a brand-new event. In edit mode the effect
     // below overwrites these with the existing event's values.
     const [formData, setFormData] = useState<EventFormType>({
         requiresRegistration: true,
         ticketPrice: '500',
-        yandexMap: 'https://yandex.com/maps/-/CDvPzZkD',
-        googleMap: 'https://maps.app.goo.gl/MWEcbhNK6wj2eeEPA'
+        latitude: String(DEFAULT_EVENT_COORDINATES.latitude),
+        longitude: String(DEFAULT_EVENT_COORDINATES.longitude)
     })
+
+    const [isGeocoding, setIsGeocoding] = useState(false)
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, upload: e?.target?.files?.[0] })
@@ -36,15 +46,40 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
         onSubmit?.(formData)
     }
 
+    const handleMapChange = ({ latitude, longitude }: { latitude: number; longitude: number }) => {
+        setFormData({ ...formData, latitude: latitude.toFixed(7), longitude: longitude.toFixed(7) })
+    }
+
+    const handleFindAddress = async () => {
+        const latitude = toCoordinate(formData.latitude, DEFAULT_EVENT_COORDINATES.latitude)
+        const longitude = toCoordinate(formData.longitude, DEFAULT_EVENT_COORDINATES.longitude)
+
+        setIsGeocoding(true)
+
+        try {
+            const address = await reverseGeocode(latitude, longitude)
+
+            if (address) {
+                setFormData((prev) => ({ ...prev, address }))
+            }
+        } finally {
+            setIsGeocoding(false)
+        }
+    }
+
     useEffect(() => {
         if (initialData) {
             setFormData({
                 ...initialData,
                 date: toDateTimeLocalValue(initialData?.date?.date),
+                endDate: toDateTimeLocalValue(initialData?.endDate?.date),
                 registrationStart: toDateTimeLocalValue(initialData?.registrationStart?.date),
                 registrationEnd: toDateTimeLocalValue(initialData?.registrationEnd?.date),
                 tickets: initialData?.availableTickets?.toString(),
-                ticketPrice: initialData?.ticketPrice?.toString()
+                ticketPrice: initialData?.ticketPrice?.toString(),
+                latitude: (initialData?.latitude ?? DEFAULT_EVENT_COORDINATES.latitude).toString(),
+                longitude: (initialData?.longitude ?? DEFAULT_EVENT_COORDINATES.longitude).toString(),
+                minAge: initialData?.minAge?.toString()
             })
         }
     }, [initialData])
@@ -109,6 +144,30 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
                     />
                     <small className={styles.hint}>по Оренбургскому времени</small>
                 </div>
+
+                <div className={styles.fieldWithHint}>
+                    <Input
+                        disabled={disabled}
+                        className={styles.formElement}
+                        type={'datetime-local'}
+                        label={'Дата и время окончания'}
+                        value={formData.endDate}
+                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    />
+                    <small className={styles.hint}>необязательно, по Оренбургскому времени</small>
+                </div>
+
+                <div className={styles.fieldWithHint}>
+                    <Input
+                        disabled={disabled}
+                        className={styles.formElement}
+                        type={'number'}
+                        label={'Возрастное ограничение, лет'}
+                        value={formData.minAge}
+                        onChange={(e) => setFormData({ ...formData, minAge: e.target.value })}
+                    />
+                    <small className={styles.hint}>необязательно, например 6</small>
+                </div>
             </div>
 
             <Checkbox
@@ -151,30 +210,60 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
                 />
             </div>
 
-            <div className={styles.sections}>
+            <Input
+                disabled={disabled}
+                className={styles.formElement}
+                type={'input'}
+                label={'Название площадки'}
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+            />
+
+            <div className={styles.addressRow}>
                 <Input
-                    required={true}
                     disabled={disabled}
                     className={styles.formElement}
                     type={'input'}
-                    label={'Ссылка на карту Google'}
-                    value={formData.googleMap}
-                    onChange={(e) =>
-                        setFormData({
-                            ...formData,
-                            googleMap: e.target.value
-                        })
-                    }
+                    label={'Адрес'}
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                />
+                <Button
+                    mode={'secondary'}
+                    label={'Найти по координатам'}
+                    disabled={disabled}
+                    loading={isGeocoding}
+                    onClick={handleFindAddress}
+                />
+            </div>
+
+            <div className={styles.sections}>
+                <Input
+                    disabled={disabled}
+                    className={styles.formElement}
+                    type={'number'}
+                    label={'Широта'}
+                    value={formData.latitude}
+                    onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
                 />
 
                 <Input
-                    required={true}
                     disabled={disabled}
                     className={styles.formElement}
-                    type={'input'}
-                    label={'Ссылка на карту Yandex'}
-                    value={formData.yandexMap}
-                    onChange={(e) => setFormData({ ...formData, yandexMap: e.target.value })}
+                    type={'number'}
+                    label={'Долгота'}
+                    value={formData.longitude}
+                    onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                />
+            </div>
+
+            <div className={styles.mapSection}>
+                <EventMap
+                    editable
+                    height={300}
+                    latitude={toCoordinate(formData.latitude, DEFAULT_EVENT_COORDINATES.latitude)}
+                    longitude={toCoordinate(formData.longitude, DEFAULT_EVENT_COORDINATES.longitude)}
+                    onChange={handleMapChange}
                 />
             </div>
 

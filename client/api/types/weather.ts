@@ -7,3 +7,5 @@ export interface RequestHistory {
 }
 
 export type ResponseHistory = ApiModel.Weather[]
+
+export type ResponseForecastDaily = ApiModel.Weather[]

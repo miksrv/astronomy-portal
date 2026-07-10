@@ -8,7 +8,8 @@ use App\Entities\EventEntity;
  * EventsModel
  *
  * Manages the `events` table for stargazing events. Supports soft deletes, UUID
- * primary keys, and bilingual content fields (title, location, content in EN/RU).
+ * primary keys, and bilingual content fields (title, content in EN/RU). Location
+ * (venue name, address, coordinates) is single-language.
  */
 class EventsModel extends ApplicationBaseModel
 {
@@ -23,8 +24,11 @@ class EventsModel extends ApplicationBaseModel
         'id',
         'title_en',
         'title_ru',
-        'location_en',
-        'location_ru',
+        'location',
+        'address',
+        'latitude',
+        'longitude',
+        'min_age',
         'content_en',
         'content_ru',
         'cover_file_name',
@@ -32,10 +36,9 @@ class EventsModel extends ApplicationBaseModel
         'max_tickets',
         'requires_registration',
         'ticket_price',
-        'yandex_map_link',
-        'google_map_link',
         'views',
         'date',
+        'end_date',
         'registration_start',
         'registration_end',
     ];
@@ -88,17 +91,31 @@ class EventsModel extends ApplicationBaseModel
             return null;
         }
 
-        $event->title    = getLocalizedString($locale, $event->title_en, $event->title_ru);
-        $event->location = getLocalizedString($locale, $event->location_en, $event->location_ru);
-        $event->content  = getLocalizedString($locale, $event->content_en, $event->content_ru);
+        $event->title   = getLocalizedString($locale, $event->title_en, $event->title_ru);
+        $event->content = getLocalizedString($locale, $event->content_en, $event->content_ru);
 
         unset(
             $event->title_en, $event->title_ru,
-            $event->location_en, $event->location_ru,
             $event->content_en, $event->content_ru
         );
 
         return $event;
+    }
+
+    /**
+     * Whether the given event's local (Orenburg) calendar date is today or later.
+     *
+     * Used to decide whether the exact location (venue name, address,
+     * coordinates) still needs to be gated behind a confirmed registration —
+     * once an event has passed there is nothing left to protect.
+     */
+    public function isUpcoming(EventEntity $event): bool
+    {
+        if ($event->date === null) {
+            return false;
+        }
+
+        return $event->date->getTimestamp() >= $this->startOfTodayOrenburg()->getTimestamp();
     }
 
     /**
@@ -119,7 +136,7 @@ class EventsModel extends ApplicationBaseModel
 
         $eventsQuery = $this->select('id, title_en, title_ru, date, cover_file_name, cover_file_ext, max_tickets, views' . (
             $eventId !== null
-                ? ', content_en, content_ru, date, requires_registration, registration_start, registration_end, ticket_price, yandex_map_link, google_map_link, location_en, location_ru'
+                ? ', content_en, content_ru, end_date, requires_registration, registration_start, registration_end, ticket_price, location, address, latitude, longitude, min_age'
                 : '')
         );
 
@@ -139,15 +156,10 @@ class EventsModel extends ApplicationBaseModel
             $event->title = getLocalizedString($locale, $event->title_en, $event->title_ru);
 
             if ($eventId !== null) {
-                $event->content  = getLocalizedString($locale, $event->content_en, $event->content_ru);
-                $event->location = getLocalizedString($locale, $event->location_en, $event->location_ru);
+                $event->content = getLocalizedString($locale, $event->content_en, $event->content_ru);
             }
 
-            unset(
-                $event->title_en, $event->title_ru,
-                $event->content_en, $event->content_ru,
-                $event->location_en, $event->location_ru
-            );
+            unset($event->title_en, $event->title_ru, $event->content_en, $event->content_ru);
         }
 
         return $events;

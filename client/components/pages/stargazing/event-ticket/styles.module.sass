@@ -9,10 +9,16 @@
     max-width: 600px
     height: auto
     border-radius: 10px
+    transition: opacity 0.15s ease
 
 .downloadLink
-    text-decoration: none
+    display: block
     width: 100%
+    cursor: pointer
+    font-size: 0
+
+    &:hover .ticketImage
+        opacity: 0.85
 
 .ticketLoader
     display: flex
