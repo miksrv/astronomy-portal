@@ -36,8 +36,8 @@ class RateLimitFilter implements FilterInterface
         [$bucket, $capacity, $seconds] = $arguments;
 
         // IPv6 addresses contain ':', which the cache backend rejects as a key
-        // character, so the IP is hashed rather than used verbatim.
-        $key       = $bucket . '_' . md5($request->getIPAddress());
+        // character, so it's replaced rather than hashed (no need for a hash here).
+        $key       = $bucket . '_' . str_replace(':', '_', $request->getIPAddress());
         $throttler = Services::throttler();
 
         if ($throttler->check($key, (int) $capacity, (int) $seconds)) {

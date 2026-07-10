@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 4.7.0
+
+### Minor Changes
+
+- Reworked the stargazing event location model: replaced bilingual venue/map-link fields with structured `location`, `address`, `latitude`, `longitude`, `minAge`, and optional `endDate` (schema migration with backfill from legacy data); added a reusable Leaflet-based `EventMap` component (editable marker + reverse geocoding in the event form, read-only embedded map on event pages) and an `EventInfoPanel` showing date/time, age limit, location, participant count, and weather
+- Added session-based JWT revocation: a `sid` claim tied to `users.session_token` lets `POST /auth/logout` instantly invalidate every previously issued token across devices without shortening the JWT lifetime
+- Added per-IP rate limiting (`RateLimitFilter`) to flood-prone public routes: OAuth login, relay light check, event booking, comment creation, and mailing test send
+- Restricted the photo upload endpoint to admins (401 for guests, 403 for non-admin users)
+- Redesigned stargazing ticket delivery: `.ics` calendar attachments alongside PNG tickets (new `CalendarLibrary`), a static-template PNG renderer with an embedded check-in QR, and a QR check-in landing page (`/stargazing/checkin/[id]`) for staff scanning
+- Hardened payment expiry handling: timed-out payments are now reconciled with the gateway before being marked failed (in batches, oldest first), and `AlfaBankClient` uses explicit connect/request timeouts to avoid indefinite hangs
+- Reworked the stargazing booking UI into focused status components (login required, sold out, payment states, registered) with a fully localized booking form, a shared sanitized `PhoneInput` component, and a payment-redirect interim state
+- Polished profile and stargazing pages: card-style event history with a correct "visited" badge, an admin event delete dialog, mobile layout fixes for statistics/breadcrumbs, and refreshed EN/RU copy and SEO/JSON-LD
+
 ## 4.6.3
 
 ### Patch Changes

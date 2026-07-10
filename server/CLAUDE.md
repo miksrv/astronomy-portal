@@ -231,7 +231,7 @@ Listed in execution order. Tables created unless noted as ALTER.
 
 ### Event Location & Map
 - `events` columns: `location` (venue name), `address` (free-text), `latitude`/`longitude` (`DECIMAL(10,7)`, default the observatory's usual field), `min_age` (nullable), `end_date` (nullable).
-- These four location fields (not `min_age`/`end_date`) are stripped from the API response until the viewer has a booking for an *upcoming* event that `requires_registration` — see `EventsModel::isUpcoming()` and the gating in `Events::show()`/`Events::upcoming()`. Past events and no-registration events are never gated.
+- `address`/`latitude`/`longitude` (not `location`, `min_age`, or `end_date`) are stripped from the API response until the viewer has a booking for an *upcoming* event that `requires_registration` — see `EventsModel::isUpcoming()` and the gating in `Events::show()`/`Events::upcoming()`. `location` (the general venue name) is always public. Past events and no-registration events are never gated.
 - No `yandex_map_link`/`google_map_link` columns anymore — the frontend generates map links on the fly from coordinates (`client/utils/maps.ts`).
 
 ### Language Files
@@ -255,7 +255,7 @@ Listed in execution order. Tables created unless noted as ALTER.
 | `PaymentLibrary` | Gateway-agnostic payment orchestration (uses `PaymentGatewayInterface`) |
 | `PaymentGatewayInterface` | Contract a new payment provider must implement |
 | `AlfaBankClient` | Current `PaymentGatewayInterface` implementation; test/production environment switch |
-| `TicketLibrary` | Generates event ticket PDFs/QR codes for check-in |
+| `TicketLibrary` | Renders event ticket PNGs (static background asset + QR code) for check-in |
 
 ### Filters (`app/Filters/`)
 | Filter | Purpose |

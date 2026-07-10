@@ -452,6 +452,8 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
                         )}
                     </h2>
 
+                    {event?.title && <h3 className={styles.eventTitle}>{event.title}</h3>}
+
                     {mainContent}
                 </div>
 

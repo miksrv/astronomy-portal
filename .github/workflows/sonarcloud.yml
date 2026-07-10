@@ -49,7 +49,8 @@ jobs:
         run: |
           echo "NEXT_PUBLIC_API_HOST = '${{ secrets.NEXT_PUBLIC_API_HOST }}'
           NEXT_PUBLIC_LAT = 51.7
-          NEXT_PUBLIC_LON = 55.2" > .env
+          NEXT_PUBLIC_LON = 55.2
+          NEXT_PUBLIC_THUNDERFOREST_API_KEY = ${{ secrets.NEXT_PUBLIC_THUNDERFOREST_API_KEY }}" > .env
         working-directory: client
 
       - name: UI Unit Tests with Coverage

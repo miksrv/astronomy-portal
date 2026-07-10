@@ -17,7 +17,9 @@ const ORGANIZATION = {
 
 export const buildEventJsonLd = (event: ApiModel.Event) => {
     const startDate = event.date?.date
-    const endDate = event.endDate?.date ?? (startDate ? dayjs(startDate).add(DEFAULT_EVENT_DURATION_HOURS, 'hour').toISOString() : undefined)
+    const endDate =
+        event.endDate?.date ??
+        (startDate ? dayjs(startDate).add(DEFAULT_EVENT_DURATION_HOURS, 'hour').toISOString() : undefined)
 
     const eventUrl = `${SITE_LINK}stargazing/${event.id}`
     const coverImageUrl =

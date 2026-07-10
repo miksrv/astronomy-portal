@@ -10,6 +10,8 @@ A DIY amateur observatory web application with remote monitoring, equipment cont
 
 **Feature specs:** `ROADMAP.md` gives a high-level list of planned/in-flight features; each one is detailed in its own file under `features/` (e.g. `features/stargazing-waitlist.md`).
 
+**Known gap — sold-out event UI:** the "Места закончились" panel in `EventUpcoming` (`client/components/pages/stargazing/event-upcoming/`) currently only shows the "what you can do" info card. It deliberately omits a "Уведомить меня" (notify-me) waitlist opt-in button, since that requires the FEAT-17 waitlist backend (new `events_waitlist` table + endpoints — see `features/stargazing-waitlist.md`) which hasn't been built yet. Wire the button up once FEAT-17 lands.
+
 ### Domain rule: subscription = authentication
 
 Stargazing events are rare (~3 per year), so the product's primary "dead-time" conversion is list-building, not booking. **There is no separate subscribe form/endpoint.** When a user authenticates via an OAuth service (Google/Yandex/VK), their email is persisted and they are **automatically subscribed** to the event mailing — they stay subscribed until they explicitly unsubscribe (`/unsubscribe`, `MailingUnsubscribes`). UX consequence:
