@@ -12,17 +12,18 @@ use CodeIgniter\Test\CIUnitTestCase;
 final class TicketLibraryTest extends CIUnitTestCase
 {
     private array $sample = [
-        'qrData'      => 'abc1234567890',
-        'heading'     => 'Билет на астровыезд',
-        'title'       => 'Тестовый платный астровыезд под Оренбургом',
-        'dateLabel'   => 'Дата и время',
-        'dateValue'   => '26 июня 2026, 21:00',
-        'peopleLabel' => 'Участники',
-        'peopleValue' => 'Взрослых: 2, детей: 1',
-        'guestLabel'  => 'Участник',
-        'guestValue'  => 'Михаил Т.',
-        'footer'      => 'Покажите QR-код на входе',
-        'coverPath'   => null,
+        'qrData'             => 'abc1234567890',
+        'heading'            => 'Билет на астровыезд',
+        'title'              => 'Тестовый платный астровыезд под Оренбургом',
+        'dateLine'           => 'Пятница, 26 июня 2026',
+        'timeLine'           => '21:00 — 01:00',
+        'locationValue'      => 'Загородная обсерватория «Смотри на звёзды»',
+        'addressValue'       => 'Трасса Р239, 15 км',
+        'orderValue'         => 'ABC1234567890',
+        'guestValue'         => 'Михаил Т.',
+        'participantsLabel'  => 'Участников',
+        'adultsValue'        => '2 взрослых',
+        'childrenValue'      => '1 ребёнок',
     ];
 
     public function testRenderPngReturnsValidPngImage(): void
@@ -35,8 +36,8 @@ final class TicketLibraryTest extends CIUnitTestCase
 
         $image = imagecreatefromstring($png);
         $this->assertNotFalse($image);
-        $this->assertSame(1000, imagesx($image));
-        $this->assertSame(560, imagesy($image));
+        $this->assertSame(1400, imagesx($image));
+        $this->assertSame(440, imagesy($image));
         imagedestroy($image);
     }
 

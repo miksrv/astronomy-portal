@@ -61,7 +61,7 @@ final class EmailQueueModelTest extends CIUnitTestCase
     {
         $allowed  = $this->prop('allowedFields');
         $expected = [
-            'email', 'subject', 'body', 'attachment_path',
+            'email', 'subject', 'body', 'attachment_path', 'ics_attachment_path',
             'status', 'attempts', 'error_message', 'sent_at',
         ];
 
