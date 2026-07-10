@@ -7,6 +7,9 @@ import { getErrorMessage } from '@/utils/errors'
 export interface EventBookingSubmitResult {
     bookingId?: string
     redirectedToPayment: boolean
+    /** Set alongside `redirectedToPayment` — lets the caller offer a manual
+     * link/button for the brief window before the browser actually navigates. */
+    formUrl?: string
 }
 
 /**
@@ -29,7 +32,7 @@ export const useEventBookingSubmit = () => {
             if (data.payment?.formUrl) {
                 sessionStorage.setItem(STARGAZING_RETRY_STORAGE_KEY, JSON.stringify(request))
                 window.location.href = data.payment.formUrl
-                return { redirectedToPayment: true }
+                return { formUrl: data.payment.formUrl, redirectedToPayment: true }
             }
 
             sessionStorage.removeItem(STARGAZING_RETRY_STORAGE_KEY)
