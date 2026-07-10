@@ -8,22 +8,32 @@ use Endroid\QrCode\Writer\PngWriter;
 use GdImage;
 
 /**
- * Renders an event ticket as a PNG image (template + overlaid data + QR).
+ * Renders an event ticket as a PNG image (static background + overlaid data + QR).
  *
- * The library is presentation-only: it receives already-localised strings and
- * draws them — no DB access, no translation. The QR encodes the booking id
- * (events_users.id), the same value the check-in scanner expects, so emailed
- * and on-screen tickets remain compatible with {@see \App\Controllers\Events::checkin()}.
+ * The ticket background (shape, notches, divider, QR placeholder card) is a
+ * fixed asset ({@see BACKGROUND_PATH}) reused for every event — the library
+ * itself is presentation-only: it receives already-localised strings and
+ * draws them over that background, no DB access, no translation. The QR
+ * encodes the frontend check-in URL (`/stargazing/checkin/{bookingId}`), so
+ * scanning it with any camera app — not just the staff scanner — lands on a
+ * page that calls {@see \App\Controllers\Events::checkin()} itself.
  *
  * Nothing is persisted by {@see renderPng()}; {@see renderToTempFile()} writes a
  * throwaway file the caller must delete after use (e.g. after emailing).
  */
 class TicketLibrary
 {
-    private const WIDTH    = 1000;
-    private const HEIGHT   = 560;
-    private const PADDING  = 56;
-    private const QR_SIZE  = 300;
+    private const WIDTH  = 1400;
+    private const HEIGHT = 440;
+    private const PADDING = 48;
+
+    // Must match the layout baked into the background asset.
+    private const QR_X    = 48;
+    private const QR_Y    = 70;
+    private const QR_SIZE = 300;
+    private const DIVIDER_X = 1000;
+
+    private const BACKGROUND_PATH = APPPATH . 'Libraries/assets/ticket-bg.png';
 
     private string $fontPath;
 
@@ -36,83 +46,113 @@ class TicketLibrary
      * Renders the ticket and returns the raw PNG bytes.
      *
      * Expected $data keys (all strings unless noted):
-     *   qrData       — value encoded in the QR (the booking id)
-     *   heading      — small caps line above the title (e.g. "Билет на астровыезд")
-     *   title        — event title
-     *   dateLabel    / dateValue
-     *   peopleLabel  / peopleValue
-     *   guestLabel   / guestValue
-     *   footer       — hint under the QR (e.g. "Покажите QR-код на входе")
-     *   coverPath    — optional absolute path to a background image (jpg/png)
+     *   qrData             — value encoded in the QR (the check-in URL, e.g. "https://…/stargazing/checkin/{id}")
+     *   heading            — fixed "ticket" label, e.g. "Билет на астровыезд"
+     *   title              — event title
+     *   dateLine           — weekday + date, e.g. "Четверг, 11 июля 2026"
+     *   timeLine           — time (+ end-time range, if any), e.g. "21:30 — 00:00"
+     *   locationValue      — venue name
+     *   addressValue       — venue address (smaller, muted; empty hides the line)
+     *   orderValue         — ticket id, e.g. "6A4EE2465DFDD" (gray, centered under the QR code)
+     *   guestValue         — guest display name, e.g. "Михаил Т."
+     *   participantsLabel  — e.g. "Участников"
+     *   adultsValue        — e.g. "2 взрослых"
+     *   childrenValue      — e.g. "2 ребёнка" (empty/omitted hides the line)
      */
     public function renderPng(array $data): string
     {
-        $canvas = imagecreatetruecolor(self::WIDTH, self::HEIGHT);
-
-        $this->drawBackground($canvas, $data['coverPath'] ?? null);
-        $this->drawAccent($canvas);
+        $canvas = $this->loadBackground();
 
         $white  = imagecolorallocate($canvas, 255, 255, 255);
         $muted  = imagecolorallocate($canvas, 178, 188, 204);
-        $accent = imagecolorallocate($canvas, 120, 170, 255);
+        $accent = imagecolorallocate($canvas, 140, 172, 255);
 
-        $textLeft  = self::PADDING;
-        $textRight = self::WIDTH - self::QR_SIZE - self::PADDING * 2;
+        $textLeft  = self::QR_X + self::QR_SIZE + self::PADDING;
+        $textRight = self::DIVIDER_X - 40;
         $maxText   = $textRight - $textLeft;
 
-        // Heading (small, accented, letter-spaced look via uppercase)
-        $this->text($canvas, 15, $textLeft, 92, $accent, mb_strtoupper($data['heading'] ?? ''));
+        // Fixed "ticket" heading, same size as the title, directly above it.
+        $y = 108;
 
-        // Title (large, wrapped to up to 3 lines)
-        $titleLines = $this->wrap($data['title'] ?? '', 30, $maxText, 3);
-        $y          = 150;
+        if (!empty($data['heading'])) {
+            $this->boldText($canvas, 30, $textLeft, $y, $accent, mb_strtoupper($data['heading']));
+        }
+
+        // Title (large, bold-ish, wrapped to up to 2 lines).
+        $titleLines = $this->wrap($data['title'] ?? '', 30, $maxText, 2);
+        $y          = 172;
         foreach ($titleLines as $line) {
-            $this->text($canvas, 30, $textLeft, $y, $white, $line);
-            $y += 46;
+            $this->boldText($canvas, 30, $textLeft, $y, $white, $line);
+            $y += 40;
         }
 
-        $y = max($y + 18, 270);
+        $y += 25;
 
-        $rows = [
-            [$data['dateLabel'] ?? '', $data['dateValue'] ?? ''],
-            [$data['peopleLabel'] ?? '', $data['peopleValue'] ?? ''],
-            [$data['guestLabel'] ?? '', $data['guestValue'] ?? ''],
-        ];
-
-        foreach ($rows as [$label, $value]) {
-            if ($value === '') {
-                continue;
-            }
-
-            $this->text($canvas, 14, $textLeft, $y, $muted, mb_strtoupper($label));
-            $this->text($canvas, 21, $textLeft, $y + 30, $white, $value);
-            $y += 76;
-        }
-
-        // QR block: white rounded card on the right, vertically centred-ish.
-        $qrX = self::WIDTH - self::QR_SIZE - self::PADDING;
-        $qrY = (int) ((self::HEIGHT - self::QR_SIZE) / 2) - 10;
-
-        $this->roundedRect(
-            $canvas,
-            $qrX - 18,
-            $qrY - 18,
-            $qrX + self::QR_SIZE + 18,
-            $qrY + self::QR_SIZE + 18,
-            22,
-            imagecolorallocate($canvas, 255, 255, 255)
+        // Date and time share a single line, e.g. "Пятница, 26 июня 2026, 21:00 — 01:00".
+        $dateTimeLine = trim(
+            ($data['dateLine'] ?? '') . (!empty($data['dateLine']) && !empty($data['timeLine']) ? ', ' : '') . ($data['timeLine'] ?? '')
         );
 
-        $qr = $this->qrImage((string) ($data['qrData'] ?? ''), self::QR_SIZE);
-        imagecopy($canvas, $qr, $qrX, $qrY, 0, 0, self::QR_SIZE, self::QR_SIZE);
+        if ($dateTimeLine !== '') {
+            $this->text($canvas, 21, $textLeft, $y, $white, $dateTimeLine);
+            $y += 28;
+        }
+
+        $y += 20;
+
+        if (!empty($data['locationValue'])) {
+            foreach ($this->wrap($data['locationValue'], 19, $maxText, 2) as $line) {
+                $this->text($canvas, 19, $textLeft, $y, $white, $line);
+                $y += 25;
+            }
+        }
+
+        if (!empty($data['addressValue'])) {
+            $this->text($canvas, 15, $textLeft, $y, $muted, $this->wrap($data['addressValue'], 15, $maxText, 1)[0]);
+            $y += 20;
+        }
+
+        $y += 35;
+        $this->text($canvas, 17, $textLeft, $y, $accent, 'смотриназвезды.рф');
+
+        // Right column: participant name, then participant counts.
+        $colX     = self::DIVIDER_X + 60;
+        $colWidth = self::WIDTH - self::PADDING - $colX;
+
+        $ry = 140;
+
+        if (!empty($data['guestValue'])) {
+            foreach ($this->wrap($data['guestValue'], 23, $colWidth, 2) as $line) {
+                $this->boldText($canvas, 23, $colX, $ry, $white, $line);
+                $ry += 30;
+            }
+            $ry += 56;
+        }
+
+        if (!empty($data['adultsValue']) || !empty($data['childrenValue'])) {
+            $this->text($canvas, 13, $colX, $ry, $muted, mb_strtoupper($data['participantsLabel'] ?? ''));
+            $ry += 36;
+
+            if (!empty($data['adultsValue'])) {
+                $this->boldText($canvas, 22, $colX, $ry, $white, $data['adultsValue']);
+                $ry += 32;
+            }
+
+            if (!empty($data['childrenValue'])) {
+                $this->boldText($canvas, 22, $colX, $ry, $white, $data['childrenValue']);
+            }
+        }
+
+        // QR code, pasted onto the placeholder card baked into the background.
+        $qrInset = 20;
+        $qrSize  = self::QR_SIZE - $qrInset * 2;
+        $qr      = $this->qrImage((string) ($data['qrData'] ?? ''), $qrSize);
+        imagecopy($canvas, $qr, self::QR_X + $qrInset, self::QR_Y + $qrInset, 0, 0, $qrSize, $qrSize);
         imagedestroy($qr);
 
-        if (!empty($data['footer'])) {
-            $footer = $data['footer'];
-            $bbox   = imagettfbbox(13, 0, $this->fontPath, $footer);
-            $fw     = $bbox[2] - $bbox[0];
-            $fx     = $qrX + (int) ((self::QR_SIZE - $fw) / 2);
-            $this->text($canvas, 13, $fx, $qrY + self::QR_SIZE + 44, $muted, $footer);
+        // Ticket id, centered under the QR code.
+        if (!empty($data['orderValue'])) {
+            $this->centeredText($canvas, 15, self::QR_X + self::QR_SIZE / 2, self::QR_Y + self::QR_SIZE + 30, $muted, $data['orderValue']);
         }
 
         ob_start();
@@ -134,6 +174,26 @@ class TicketLibrary
         file_put_contents($path, $this->renderPng($data));
 
         return $path;
+    }
+
+    /**
+     * Loads the static ticket background asset, falling back to a flat dark
+     * canvas of the same size if the asset is somehow missing.
+     */
+    private function loadBackground(): GdImage
+    {
+        $image = is_file(self::BACKGROUND_PATH) ? @imagecreatefrompng(self::BACKGROUND_PATH) : false;
+
+        if ($image instanceof GdImage) {
+            imagesavealpha($image, true);
+
+            return $image;
+        }
+
+        $canvas = imagecreatetruecolor(self::WIDTH, self::HEIGHT);
+        imagefilledrectangle($canvas, 0, 0, self::WIDTH, self::HEIGHT, imagecolorallocate($canvas, 22, 26, 36));
+
+        return $canvas;
     }
 
     /**
@@ -162,76 +222,6 @@ class TicketLibrary
         return $image instanceof GdImage ? $image : imagecreatetruecolor($size, $size);
     }
 
-    /**
-     * Fills the canvas with the event cover (cover-fit + dark scrim) or a flat
-     * dark background when no usable cover is available.
-     */
-    private function drawBackground(GdImage $canvas, ?string $coverPath): void
-    {
-        $base = imagecolorallocate($canvas, 15, 19, 24);
-        imagefilledrectangle($canvas, 0, 0, self::WIDTH, self::HEIGHT, $base);
-
-        $cover = $this->loadImage($coverPath);
-
-        if ($cover instanceof GdImage) {
-            $this->coverFit($canvas, $cover);
-            imagedestroy($cover);
-
-            // Dark scrim so light text stays legible over any cover.
-            $scrim = imagecreatetruecolor(self::WIDTH, self::HEIGHT);
-            imagefilledrectangle($scrim, 0, 0, self::WIDTH, self::HEIGHT, imagecolorallocate($scrim, 8, 11, 16));
-            imagecopymerge($canvas, $scrim, 0, 0, 0, 0, self::WIDTH, self::HEIGHT, 68);
-            imagedestroy($scrim);
-        }
-    }
-
-    /**
-     * Draws the cover image scaled to cover the whole canvas (centre crop).
-     */
-    private function coverFit(GdImage $canvas, GdImage $cover): void
-    {
-        $cw = imagesx($cover);
-        $ch = imagesy($cover);
-
-        if ($cw <= 0 || $ch <= 0) {
-            return;
-        }
-
-        $scale = max(self::WIDTH / $cw, self::HEIGHT / $ch);
-        $dw    = (int) ceil($cw * $scale);
-        $dh    = (int) ceil($ch * $scale);
-        $dx    = (int) (((self::WIDTH - $dw) / 2));
-        $dy    = (int) (((self::HEIGHT - $dh) / 2));
-
-        imagecopyresampled($canvas, $cover, $dx, $dy, 0, 0, $dw, $dh, $cw, $ch);
-    }
-
-    /**
-     * Draws a thin accent bar down the left edge as a ticket-like flourish.
-     */
-    private function drawAccent(GdImage $canvas): void
-    {
-        $accent = imagecolorallocate($canvas, 120, 170, 255);
-        imagefilledrectangle($canvas, 0, 0, 8, self::HEIGHT, $accent);
-    }
-
-    private function loadImage(?string $path): GdImage|false
-    {
-        if ($path === null || $path === '' || !is_file($path)) {
-            return false;
-        }
-
-        $bytes = @file_get_contents($path);
-
-        if ($bytes === false) {
-            return false;
-        }
-
-        $image = @imagecreatefromstring($bytes);
-
-        return $image instanceof GdImage ? $image : false;
-    }
-
     private function text(GdImage $canvas, int $size, int $x, int $y, int $color, string $text): void
     {
         if ($text === '') {
@@ -239,6 +229,31 @@ class TicketLibrary
         }
 
         imagettftext($canvas, $size, 0, $x, $y, $color, $this->fontPath, $text);
+    }
+
+    /**
+     * Draws text twice with a 1px horizontal offset to fake a bold weight —
+     * the bundled font ships in a single (regular) weight only.
+     */
+    private function boldText(GdImage $canvas, int $size, int $x, int $y, int $color, string $text): void
+    {
+        $this->text($canvas, $size, $x, $y, $color, $text);
+        $this->text($canvas, $size, $x + 1, $y, $color, $text);
+    }
+
+    /**
+     * Draws text horizontally centered on $centerX.
+     */
+    private function centeredText(GdImage $canvas, int $size, float $centerX, int $y, int $color, string $text): void
+    {
+        if ($text === '') {
+            return;
+        }
+
+        $bbox  = imagettfbbox($size, 0, $this->fontPath, $text);
+        $width = $bbox[2] - $bbox[0];
+
+        $this->text($canvas, $size, (int) round($centerX - $width / 2), $y, $color, $text);
     }
 
     /**
@@ -276,15 +291,5 @@ class TicketLibrary
         }
 
         return $lines === [] ? [''] : $lines;
-    }
-
-    private function roundedRect(GdImage $im, int $x1, int $y1, int $x2, int $y2, int $r, int $color): void
-    {
-        imagefilledrectangle($im, $x1 + $r, $y1, $x2 - $r, $y2, $color);
-        imagefilledrectangle($im, $x1, $y1 + $r, $x2, $y2 - $r, $color);
-        imagefilledarc($im, $x1 + $r, $y1 + $r, $r * 2, $r * 2, 180, 270, $color, IMG_ARC_PIE);
-        imagefilledarc($im, $x2 - $r, $y1 + $r, $r * 2, $r * 2, 270, 360, $color, IMG_ARC_PIE);
-        imagefilledarc($im, $x1 + $r, $y2 - $r, $r * 2, $r * 2, 90, 180, $color, IMG_ARC_PIE);
-        imagefilledarc($im, $x2 - $r, $y2 - $r, $r * 2, $r * 2, 0, 90, $color, IMG_ARC_PIE);
     }
 }
