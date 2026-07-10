@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Entities\EventEntity;
 use App\Entities\EventPhotoEntity;
 use App\Entities\PaymentEntity;
+use App\Libraries\CalendarLibrary;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\PaymentLibrary;
 use App\Libraries\SessionLibrary;
@@ -76,7 +77,7 @@ class Events extends ResourceController
             // Free seats held by expired, unpaid reservations before counting
             // tickets or resolving the current user's booking state, so a stale
             // pending booking does not linger or occupy capacity.
-            $eventUsersModel->releaseExpiredPendingByPaymentIds((new PaymentLibrary())->releaseExpired());
+            $this->releaseExpiredBookings($eventUsersModel, new PaymentLibrary());
 
             $bookedEvents    = $this->session->isAuth && $this->session->user->id
                 ? $eventUsersModel->where(['event_id' => $eventData->id, 'user_id' => $this->session->user->id])->first()
@@ -132,7 +133,7 @@ class Events extends ResourceController
                     }
                 }
             } else {
-                unset($eventData->location, $eventData->address, $eventData->latitude, $eventData->longitude);
+                unset($eventData->address, $eventData->latitude, $eventData->longitude);
             }
 
             $eventData->max_tickets = $eventData->max_tickets - $currentTickets;
@@ -192,19 +193,27 @@ class Events extends ResourceController
     }
 
     /**
-     * Checks in a user for an event by its ID.
+     * Checks in a user for an event by its booking ID, or — for the booking's
+     * own owner — resolves which event a ticket belongs to.
      *
-     * Validates user permissions, retrieves the event data, checks if the user has booked the event,
-     * and updates the check-in status if applicable. Returns a response with check-in status and member details.
+     * The ticket QR now links straight to `/stargazing/checkin/:id` on the
+     * frontend, which always calls this endpoint regardless of who opened it:
+     * - Staff (admin/moderator/security): performs the actual check-in (or
+     *   reports it as already done) and returns the guest's name + member
+     *   counts, same as before.
+     * - Anyone else (typically the guest scanning their own ticket): no side
+     *   effects — just returns the booking's `eventId` so the frontend can
+     *   redirect them to the event page instead of the staff flow.
      *
-     * Response Format:
+     * Response Format (staff):
      * - checkin: datetime
-     * - members: {
-     *     adults: int
-     *     children: int
-     * }
+     * - name: string
+     * - members: { adults: int, children: int }
      *
-     * @param int|null $id The ID of the booked event.
+     * Response Format (non-staff, own booking):
+     * - eventId: string
+     *
+     * @param int|null $id The booking ID (events_users.id).
      * @return ResponseInterface JSON response with check-in status and member details or an error message.
      */
     public function checkin($id = null): ResponseInterface
@@ -213,25 +222,41 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if (!in_array($this->session->user->role, ['admin', 'moderator', 'security'])) {
-            return $this->failForbidden(lang('App.accessDenied'));
-        }
-
         try {
-            $response  = [];
-            $locale    = $this->request->getLocale();
-            $eventData = $this->model->getUpcomingEvent($locale);
-
-            if (empty($id) || empty($eventData)) {
-                return $this->failValidationErrors(lang('Events.noUpcomingEvents'));
+            if (empty($id)) {
+                return $this->failValidationErrors(lang('Events.invalidQrCode'));
             }
 
             $eventUsersModel  = new EventsUsersModel();
             $bookedEventsData = $eventUsersModel->where(['id' => $id])->first();
 
+            if (empty($bookedEventsData)) {
+                return $this->failValidationErrors(lang('Events.invalidQrCode'));
+            }
+
+            $isStaff = in_array($this->session->user->role, ['admin', 'moderator', 'security'], true);
+
+            // Not staff — presumably the guest who scanned their own ticket's
+            // QR. No side effects, no access to anyone else's booking; just
+            // hand back the event id so the frontend can redirect them there.
+            if (!$isStaff) {
+                if ($bookedEventsData->user_id !== $this->session->user->id) {
+                    return $this->failForbidden(lang('App.accessDenied'));
+                }
+
+                return $this->respond(['eventId' => $bookedEventsData->event_id]);
+            }
+
+            $locale    = $this->request->getLocale();
+            $eventData = $this->model->getUpcomingEvent($locale);
+
+            if (empty($eventData)) {
+                return $this->failValidationErrors(lang('Events.noUpcomingEvents'));
+            }
+
             // The QR must belong to the currently upcoming event — not to a
             // different (past, future, or already-superseded) one.
-            if (empty($bookedEventsData) || $bookedEventsData->event_id !== $eventData->id) {
+            if ($bookedEventsData->event_id !== $eventData->id) {
                 return $this->failValidationErrors(lang('Events.invalidQrCode'));
             }
 
@@ -240,6 +265,8 @@ class Events extends ResourceController
             if ($bookedEventsData->status !== 'confirmed') {
                 return $this->failValidationErrors(lang('Events.bookingNotConfirmed'));
             }
+
+            $response = [];
 
             if (empty($bookedEventsData->checkin_at)) {
                 $eventUsersModel->update($id, [
@@ -250,6 +277,11 @@ class Events extends ResourceController
                 $response['checkin'] = $bookedEventsData->checkin_at;
             }
 
+            // Real, DB-sourced name — lets staff visually compare it against
+            // the guest's ID, regardless of what a screenshotted ticket shows.
+            $owner = (new UsersModel())->find($bookedEventsData->user_id);
+
+            $response['name']    = $owner->name ?? null;
             $response['members'] = [
                 'adults'   => $bookedEventsData->adults ?? 0,
                 'children' => $bookedEventsData->children ?? 0
@@ -269,7 +301,7 @@ class Events extends ResourceController
      * Nothing is stored on disk. Access is restricted to the booking owner or to
      * staff (admin/moderator/security). Soft-deleted (cancelled) bookings 404.
      *
-     * @param string|null $id The booking id (events_users.id), also the QR payload.
+     * @param string|null $id The booking id (events_users.id); the QR itself encodes the check-in URL, not this id directly.
      */
     public function ticket($id = null): ResponseInterface
     {
@@ -344,38 +376,70 @@ class Events extends ResourceController
     {
         helper('locale');
 
-        $rawDate   = $event->toRawArray()['date'] ?? null;
-        $dateValue = '';
+        $rawEvent = $event->toRawArray();
+        $rawDate  = $rawEvent['date'] ?? null;
+        $dateLine = '';
+        $timeLine = '';
 
         if (!empty($rawDate)) {
             // Stored as UTC; display in Orenburg time (UTC+5), like the rest of the UI.
-            $dateValue = Time::parse($rawDate, 'UTC')
-                ->setTimezone('Asia/Yekaterinburg')
-                ->toLocalizedString(lang('Events.ticketDateFormat', [], $locale));
-        }
+            // Locale is passed explicitly to Time::parse() so the formatted
+            // string doesn't depend on whatever locale the current request
+            // happens to be negotiated to.
+            $startTime   = Time::parse($rawDate, 'UTC', $locale)->setTimezone('Asia/Yekaterinburg');
+            $rawDateLine = $startTime->toLocalizedString(lang('Events.ticketDateLine', [], $locale));
+            $dateLine    = mb_strtoupper(mb_substr($rawDateLine, 0, 1)) . mb_substr($rawDateLine, 1);
+            $timeLine    = $startTime->toLocalizedString('HH:mm');
 
-        $coverPath = null;
+            $rawEndDate = $rawEvent['end_date'] ?? null;
 
-        if (!empty($event->coverFileName) && !empty($event->coverFileExt)) {
-            $candidate = UPLOAD_EVENTS . $event->id . '/' . $event->coverFileName . '.' . $event->coverFileExt;
-
-            if (is_file($candidate)) {
-                $coverPath = $candidate;
+            if (!empty($rawEndDate)) {
+                $endTime   = Time::parse($rawEndDate, 'UTC', $locale)->setTimezone('Asia/Yekaterinburg');
+                $timeLine .= ' — ' . $endTime->toLocalizedString('HH:mm');
             }
         }
 
+        $childrenValue = (int) $booking->children > 0
+            ? lang('Events.ticketChildrenValue', [(int) $booking->children], $locale)
+            : '';
+
+        $checkinUrl = rtrim((string) getenv('app.siteUrl'), '/') . '/stargazing/checkin/' . $booking->id;
+
         return [
-            'qrData'      => (string) $booking->id,
-            'heading'     => lang('Events.ticketHeading', [], $locale),
-            'title'       => getLocalizedString($locale, $event->title_en, $event->title_ru),
-            'dateLabel'   => lang('Events.ticketDateLabel', [], $locale),
-            'dateValue'   => $dateValue,
-            'peopleLabel' => lang('Events.ticketPeopleLabel', [], $locale),
-            'peopleValue' => lang('Events.ticketPeopleValue', [(int) $booking->adults, (int) $booking->children], $locale),
-            'guestLabel'  => lang('Events.ticketGuestLabel', [], $locale),
-            'guestValue'  => $userName ?? '',
-            'footer'      => lang('Events.ticketShowQr', [], $locale),
-            'coverPath'   => $coverPath,
+            'qrData'            => $checkinUrl,
+            'heading'           => lang('Events.ticketHeading', [], $locale),
+            'title'             => getLocalizedString($locale, $event->title_en, $event->title_ru),
+            'dateLine'          => $dateLine,
+            'timeLine'          => $timeLine,
+            'locationValue'     => trim((string) ($event->location ?? '')),
+            'addressValue'      => trim((string) ($event->address ?? '')),
+            'orderValue'        => strtoupper((string) $booking->id),
+            'guestValue'        => $userName ?? '',
+            'participantsLabel' => lang('Events.ticketParticipantsLabel', [], $locale),
+            'adultsValue'       => lang('Events.ticketAdultsValue', [(int) $booking->adults], $locale),
+            'childrenValue'     => $childrenValue,
+        ];
+    }
+
+    /**
+     * Builds the Yandex/Google map links for an event's coordinates — the
+     * server-side equivalent of `client/utils/maps.ts`, used for the ticket
+     * confirmation email (which is plain HTML, not a rendered `EventMap`).
+     *
+     * @return array{yandex: ?string, google: ?string}
+     */
+    private function buildEventMapLinks(EventEntity $event): array
+    {
+        $latitude  = $event->latitude;
+        $longitude = $event->longitude;
+
+        if ($latitude === null || $longitude === null) {
+            return ['yandex' => null, 'google' => null];
+        }
+
+        return [
+            'yandex' => sprintf('https://yandex.ru/maps/?pt=%s,%s&z=16&l=map', $longitude, $latitude),
+            'google' => sprintf('https://www.google.com/maps?q=%s,%s', $latitude, $longitude),
         ];
     }
 
@@ -385,20 +449,20 @@ class Events extends ResourceController
      * `system:send-email` cron. The PNG is written to a durable file the cron
      * deletes once sent. Enqueue failures are logged but never bubble up —
      * a failed email must not break the booking/payment flow.
+     *
+     * The email itself is Russian-only (no i18n) — see `Views/email_ticket.php`.
      */
-    private function queueTicketEmail(object $booking, EventEntity $event, ?string $toEmail, ?string $userName, ?string $locale): void
+    private function queueTicketEmail(object $booking, EventEntity $event, ?string $toEmail, ?string $userName): void
     {
         if (empty($toEmail)) {
             return;
         }
 
-        helper('locale');
-
-        $locale     = $locale ?: 'ru';
         $ticketPath = null;
+        $icsPath    = null;
 
         try {
-            $data = $this->buildTicketData($booking, $event, $userName, $locale);
+            $data = $this->buildTicketData($booking, $event, $userName, 'ru');
 
             // Persist the ticket outside the request lifecycle so the cron can
             // attach it later; it is removed by the cron after the send.
@@ -411,27 +475,68 @@ class Events extends ResourceController
             $ticketPath = $ticketDir . '/ticket_' . $booking->id . '_' . uniqid() . '.png';
             file_put_contents($ticketPath, (new TicketLibrary())->renderPng($data));
 
-            $title   = getLocalizedString($locale, $event->title_en, $event->title_ru);
-            $subject = lang('Events.ticketEmailSubject', [$title], $locale);
-            $message = '<div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;color:#1b1f27;">'
-                . '<h2 style="margin:0 0 12px;">' . esc(lang('Events.ticketEmailTitle', [], $locale)) . '</h2>'
-                . '<p style="margin:0 0 12px;line-height:1.5;">' . esc(lang('Events.ticketEmailIntro', [$title], $locale)) . '</p>'
-                . '<p style="margin:0 0 16px;"><strong>' . esc(lang('Events.ticketEmailDate', [$data['dateValue']], $locale)) . '</strong></p>'
-                . '<img src="cid:COVER_IMAGE_CID" alt="' . esc($title) . '" style="display:block;width:100%;max-width:600px;border-radius:10px;" />'
-                . '<p style="margin:16px 0 0;color:#888;font-size:13px;line-height:1.5;">' . esc(lang('Events.ticketEmailFooter', [], $locale)) . '</p>'
-                . '</div>';
+            $rawEvent  = $event->toRawArray();
+            $shortDate = '';
 
-            $queued = (new EmailQueueModel())->enqueue($toEmail, $subject, $message, $ticketPath);
+            if (!empty($rawEvent['date'])) {
+                $shortDate = Time::parse($rawEvent['date'], 'UTC', 'ru')
+                    ->setTimezone('Asia/Yekaterinburg')
+                    ->toLocalizedString('d MMMM');
+            }
 
-            // If the row could not be inserted, drop the orphaned attachment.
-            if (!$queued && is_file($ticketPath)) {
-                @unlink($ticketPath);
+            $subject = 'Ваш билет на астровыезд' . ($shortDate !== '' ? ' (' . $shortDate . ')' : '');
+
+            $dateTimeValue = trim($data['dateLine'] . (!empty($data['timeLine']) ? ', ' . $data['timeLine'] : ''));
+            $mapLinks      = $this->buildEventMapLinks($event);
+
+            $message = view('email_ticket', [
+                'subject'       => $subject,
+                'eventTitle'    => $event->title_ru,
+                'dateTimeValue' => $dateTimeValue,
+                'locationValue' => trim((string) ($event->location ?? '')),
+                'addressValue'  => trim((string) ($event->address ?? '')),
+                'yandexMapLink' => $mapLinks['yandex'],
+                'googleMapLink' => $mapLinks['google'],
+            ]);
+
+            // Same .ics content the "Add to calendar" button builds client-side
+            // (client/utils/calendar.ts) — see CalendarLibrary.
+            $ics = (new CalendarLibrary())->buildEventIcs([
+                'uid'       => (string) $booking->id,
+                'title'     => (string) $event->title_ru,
+                'start'     => (string) ($rawEvent['date'] ?? ''),
+                'end'       => $rawEvent['end_date'] ?? null,
+                'location'  => $event->location,
+                'address'   => $event->address,
+                'latitude'  => $event->latitude,
+                'longitude' => $event->longitude,
+                'pageUrl'   => rtrim((string) getenv('app.siteUrl'), '/') . '/stargazing/' . $event->id,
+            ]);
+
+            $icsPath = $ticketDir . '/event_' . $booking->id . '_' . uniqid() . '.ics';
+            file_put_contents($icsPath, $ics);
+
+            $queued = (new EmailQueueModel())->enqueue($toEmail, $subject, $message, $ticketPath, $icsPath);
+
+            // If the row could not be inserted, drop the orphaned attachments.
+            if (!$queued) {
+                if (is_file($ticketPath)) {
+                    @unlink($ticketPath);
+                }
+
+                if (is_file($icsPath)) {
+                    @unlink($icsPath);
+                }
             }
         } catch (\Throwable $e) {
             log_message('error', 'Ticket email enqueue failed: {msg}', ['msg' => $e->getMessage()]);
 
             if ($ticketPath !== null && is_file($ticketPath)) {
                 @unlink($ticketPath);
+            }
+
+            if ($icsPath !== null && is_file($icsPath)) {
+                @unlink($icsPath);
             }
         }
     }
@@ -604,16 +709,17 @@ class Events extends ResourceController
 
             $eventUsersModel = new EventsUsersModel();
 
-            // The exact venue (name, address, coordinates) is only shown once the
-            // viewer has a booking for the event — same rule as Events::upcoming().
-            // Past events have nothing left to protect, so they're exempt.
+            // The exact address and coordinates are only shown once the viewer
+            // has a booking for the event — same rule as Events::upcoming().
+            // `location` (general venue name) stays public. Past events have
+            // nothing left to protect, so they're exempt.
             if ($event->requiresRegistration && $this->model->isUpcoming($event)) {
                 $hasBooking = $this->session->isAuth && $this->session->user->id
                     ? $eventUsersModel->where(['event_id' => $id, 'user_id' => $this->session->user->id])->first()
                     : false;
 
                 if (!$hasBooking) {
-                    unset($event->location, $event->address, $event->latitude, $event->longitude);
+                    unset($event->address, $event->latitude, $event->longitude);
                 }
             }
 
@@ -1038,7 +1144,7 @@ class Events extends ResourceController
 
             // Release seats held by expired, unpaid reservations before counting.
             $paymentLibrary = new PaymentLibrary();
-            $eventUsersModel->releaseExpiredPendingByPaymentIds($paymentLibrary->releaseExpired());
+            $this->releaseExpiredBookings($eventUsersModel, $paymentLibrary);
 
             // Persist (or refresh) the user's profile name/phone.
             $userModel  = new UsersModel();
@@ -1145,8 +1251,7 @@ class Events extends ResourceController
                     $booking,
                     $event,
                     $this->session->user->email ?? null,
-                    $this->session->user->name ?? null,
-                    $this->session->user->locale ?? null
+                    $this->session->user->name ?? null
                 );
 
                 return $this->respond([
@@ -1838,6 +1943,46 @@ class Events extends ResourceController
     }
 
     /**
+     * Releases seats held by expired, unpaid reservations — but verifies each
+     * one against the gateway first (via {@see PaymentLibrary::releaseExpired()})
+     * instead of trusting our own local hold timer alone, so a payment the
+     * bank actually captured is confirmed or refunded via {@see reconcileBooking()}
+     * rather than silently written off as failed while keeping the customer's
+     * money.
+     *
+     * PERFORMANCE NOTE: PaymentLibrary::releaseExpired() makes one synchronous
+     * HTTP request to the payment gateway per expired payment (batch-limited
+     * by PaymentsModel::getExpiredPending(), but still a real network call).
+     * This can be slow — or stall entirely — if the gateway is slow or
+     * unreachable. It is called from `upcoming()`, a public, unauthenticated,
+     * high-traffic endpoint, so do not assume this returns quickly.
+     *
+     * @param EventsUsersModel $eventUsersModel
+     * @param PaymentLibrary   $paymentLibrary
+     * @return void
+     */
+    private function releaseExpiredBookings(EventsUsersModel $eventUsersModel, PaymentLibrary $paymentLibrary): void
+    {
+        $failedPaymentIds = [];
+
+        foreach ($paymentLibrary->releaseExpired() as ['payment' => $payment, 'status' => $status]) {
+            if ($status === 'paid') {
+                // The bank says the customer *was* charged even though our
+                // local hold already lapsed. Let the normal reconciliation
+                // path confirm the booking (if a seat can still be honoured)
+                // or auto-refund it (if not), instead of marking a paid
+                // booking as failed.
+                $this->reconcileBooking($payment, 'paid');
+                continue;
+            }
+
+            $failedPaymentIds[] = $payment->id;
+        }
+
+        $eventUsersModel->releaseExpiredPendingByPaymentIds($failedPaymentIds);
+    }
+
+    /**
      * Reconciles an event booking with its payment outcome.
      *
      * Paid → the pending booking is confirmed (atomically — and only if this
@@ -1888,8 +2033,7 @@ class Events extends ResourceController
                         $booking,
                         $event,
                         $owner->email ?? null,
-                        $owner->name ?? null,
-                        $owner->locale ?? null
+                        $owner->name ?? null
                     );
                 }
 
