@@ -10,6 +10,10 @@ export type ResPhoto = ApiModel.EventPhoto
 
 export type ResCheckin = Pick<ApiModel.Event, 'members'> & {
     checkin?: ApiType.DateTime
+    /** Guest display name, resolved server-side — present only for the staff check-in flow. */
+    name?: string
+    /** Present only when the viewer is the booking owner (not staff) — the event to redirect them to. */
+    eventId?: string
 }
 
 export type EventFormType = Partial<
