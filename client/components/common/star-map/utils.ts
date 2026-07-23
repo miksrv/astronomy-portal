@@ -3,47 +3,49 @@ import { formatObjectName } from '@/utils/strings'
 import {
     DEFAULT_STARMAP_SETTINGS,
     POINT_RADIUS,
+    POPUP_ARROW_MARGIN,
+    POPUP_ARROW_SIZE,
     POPUP_HEIGHT,
     POPUP_OFFSET,
     POPUP_WIDTH,
     STARMAP_STORAGE_KEY
 } from './constants'
 import { StarMapObject } from './StarMap'
-import { GeoJSON, HitResult, StarMapSettings } from './types'
+import { GeoJSON, HitResult, PopupPlacement, StarMapSettings } from './types'
+
+export type PopupPosition = {
+    x: number
+    y: number
+    arrowOffset: number
+    placement: PopupPlacement
+}
 
 /**
- * Clamp popup position so it stays within the container bounds.
- * If the popup would overflow right/bottom, flip it to the left/above the point.
+ * Position the popup centered under the marker (arrow pointing up at it), falling back to
+ * above the marker (arrow pointing down) only when there isn't enough room below. The popup
+ * itself is then clamped to the container's horizontal bounds, and the arrow offset is kept
+ * pointing at the marker's actual position within the (possibly shifted) popup.
  */
 export const clampPopupPosition = (
     pointX: number,
     pointY: number,
     containerWidth: number,
     containerHeight: number
-): { x: number; y: number } => {
-    let x = pointX + POINT_RADIUS + POPUP_OFFSET
-    let y = pointY - POINT_RADIUS - POPUP_OFFSET
+): PopupPosition => {
+    const gap = POINT_RADIUS + POPUP_OFFSET + POPUP_ARROW_SIZE
 
-    // Flip horizontally if overflowing right edge
-    if (x + POPUP_WIDTH > containerWidth) {
-        x = pointX - POINT_RADIUS - POPUP_OFFSET - POPUP_WIDTH
-    }
+    const belowY = pointY + gap
+    const aboveY = pointY - gap - POPUP_HEIGHT
+    const fitsBelow = belowY + POPUP_HEIGHT <= containerHeight
+    const fitsAbove = aboveY >= 0
 
-    // Flip vertically if overflowing top edge
-    if (y < 0) {
-        y = pointY + POINT_RADIUS + POPUP_OFFSET
-    }
+    const placement: PopupPlacement = fitsBelow || !fitsAbove ? 'below' : 'above'
+    const y = Math.max(0, placement === 'below' ? Math.min(belowY, containerHeight - POPUP_HEIGHT) : aboveY)
 
-    // Flip vertically if overflowing bottom edge
-    if (y + POPUP_HEIGHT > containerHeight) {
-        y = containerHeight - POPUP_HEIGHT
-    }
+    const x = Math.max(0, Math.min(pointX - POPUP_WIDTH / 2, containerWidth - POPUP_WIDTH))
+    const arrowOffset = Math.max(POPUP_ARROW_MARGIN, Math.min(pointX - x, POPUP_WIDTH - POPUP_ARROW_MARGIN))
 
-    // Final safety clamp
-    x = Math.max(0, Math.min(x, containerWidth - POPUP_WIDTH))
-    y = Math.max(0, Math.min(y, containerHeight - POPUP_HEIGHT))
-
-    return { x, y }
+    return { x, y, arrowOffset, placement }
 }
 
 /**

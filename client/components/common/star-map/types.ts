@@ -17,10 +17,16 @@ export type GeoJSON = {
     features: GeoJSONFeature[]
 }
 
+/** Whether the popup sits below the marker (arrow points up) or above it (arrow points down). */
+export type PopupPlacement = 'below' | 'above'
+
 export type PopupState = {
     visible: boolean
     x: number
     y: number
+    /** Horizontal offset (px) of the arrow tip from the popup's left edge. */
+    arrowOffset: number
+    placement: PopupPlacement
     object?: string
     name?: string
 }

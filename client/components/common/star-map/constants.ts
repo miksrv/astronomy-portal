@@ -5,6 +5,12 @@ export const POINT_RADIUS = 5
 export const POPUP_WIDTH = 200
 export const POPUP_HEIGHT = 180
 export const POPUP_OFFSET = 10
+// Half-width/height of the border-triangle arrow that connects the popup to its marker.
+export const POPUP_ARROW_SIZE = 8
+// Minimum distance (px) the arrow tip is kept from the popup's left/right edges, so it
+// never renders over the popup's rounded corners even when the popup itself had to shift
+// away from centering on the marker to stay within the container.
+export const POPUP_ARROW_MARGIN = 16
 
 export const STARMAP_STORAGE_KEY = 'astro_starmap_settings'
 

@@ -87,6 +87,34 @@
         transform: scale(1)
         pointer-events: auto
 
+    // Border-triangle arrow connecting the popup to its marker. Kept as a sibling of
+    // .popup (not a child) since .popup clips its content with overflow:hidden, which
+    // would otherwise clip the part of the arrow poking outside the popup's own box.
+    .popupArrow
+        position: absolute
+        z-index: 9
+        width: 0
+        height: 0
+        border-style: solid
+        opacity: 0
+        visibility: hidden
+        pointer-events: none
+        transition: opacity 0.15s ease, visibility 0.15s
+
+    // Popup below the marker — arrow points up, flush with the popup's top edge
+    .popupArrowUp
+        border-width: 0 8px 8px 8px
+        border-color: transparent transparent rgb(44 45 46) transparent
+
+    // Popup above the marker — arrow points down, flush with the popup's bottom edge
+    .popupArrowDown
+        border-width: 8px 8px 0 8px
+        border-color: rgb(44 45 46) transparent transparent transparent
+
+    .popupArrowVisible
+        opacity: 1
+        visibility: visible
+
     .popout
         position: absolute
         left: 0
@@ -104,4 +132,22 @@
             color: #fff
             position: relative
             z-index: 11
+
+// Clamps #celestial-map to its ancestor's height (see pages/starmap.tsx), overriding
+// Celestial's own inline `element.style.height = ...px` (celestial.js sets this on both
+// #celestial-map itself and its <canvas>, matching the projected map height — which can be
+// taller or shorter than the viewport). `!important` is required to win over that inline
+// style. Overlay controls (zoom buttons, settings button/panel, popup) are position:absolute
+// against this now viewport-clamped box, so they stay anchored to the visible corners
+// instead of drifting off-screen with an oversized canvas. Only the <canvas> itself — the
+// one element actually taller/shorter than the box — is centered and cropped within it.
+.starMapFit
+    height: 100% !important
+    overflow: hidden
+
+    :global(canvas)
+        position: absolute
+        top: 50%
+        left: 0
+        transform: translateY(-50%)
 

@@ -13,6 +13,7 @@ import {
     DEFAULT_STARMAP_SETTINGS,
     MOBILE_MAX_WIDTH,
     POINT_RADIUS,
+    POPUP_ARROW_SIZE,
     POPUP_HEIGHT,
     POPUP_WIDTH,
     stylePoint,
@@ -25,13 +26,83 @@ import { clampPopupPosition, createObjectsJSON, findHitPoint, loadStarMapSetting
 
 import styles from './styles.module.sass'
 
-const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, className, config, showSettings }) => {
+/**
+ * Full snapshot of the settings-panel-driven Celestial config. Used only to build the
+ * config object passed to `Celestial.display()` (initial mount / objects / zoom / language
+ * change) — never to `Celestial.apply()`, see `buildLiveSettingsPatch` below for why.
+ */
+const buildVisualConfig = (settings: StarMapSettings) => ({
+    stars: {
+        ...defaultConfig.stars,
+        ...customConfig.stars,
+        show: settings.starsShow,
+        limit: settings.starsLimit
+    },
+    dsos: { ...defaultConfig.dsos, show: settings.dsosShow },
+    constellations: {
+        ...customConfig.constellations,
+        names: settings.constellationNames,
+        lines: settings.constellationLines,
+        bounds: settings.constellationBounds
+    },
+    lines: {
+        graticule: { ...customConfig.lines.graticule, show: settings.graticule },
+        equatorial: { ...defaultConfig.lines.equatorial, show: settings.equatorial },
+        ecliptic: { ...defaultConfig.lines.ecliptic, show: settings.ecliptic },
+        galactic: { ...defaultConfig.lines.galactic, show: settings.galactic },
+        supergalactic: defaultConfig.lines.supergalactic
+    },
+    mw: { ...defaultConfig.mw, show: settings.milkyWay },
+    planets: { ...defaultConfig.planets, show: settings.planetsShow }
+})
+
+/**
+ * Minimal patch for `Celestial.apply()` — only the leaf fields the settings panel can
+ * actually toggle. `Celestial.apply()` merges each top-level group (stars/dsos/constellations/...)
+ * one level deep against its already-resolved internal state, it does not re-run the
+ * defaults/normalization pass that `Celestial.display()` does on mount. Static fields like
+ * `constellations.namesType` start out symbolic ('iau') and get resolved once at mount to the
+ * actual GeoJSON property key ('name'). Re-sending the raw 'iau' on every apply() call (as the
+ * old shared buildVisualConfig did) reverted that resolution, so constellation labels rendered
+ * as literal "undefined" (`feature.properties['iau']` doesn't exist) once names were toggled
+ * back on. Omitting namesType/designationType/propernameType/etc. here lets Celestial keep
+ * whatever it already resolved.
+ */
+const buildLiveSettingsPatch = (settings: StarMapSettings) => ({
+    stars: { show: settings.starsShow, limit: settings.starsLimit },
+    dsos: { show: settings.dsosShow },
+    constellations: {
+        names: settings.constellationNames,
+        lines: settings.constellationLines,
+        bounds: settings.constellationBounds
+    },
+    lines: {
+        graticule: { ...customConfig.lines.graticule, show: settings.graticule },
+        equatorial: { ...defaultConfig.lines.equatorial, show: settings.equatorial },
+        ecliptic: { ...defaultConfig.lines.ecliptic, show: settings.ecliptic },
+        galactic: { ...defaultConfig.lines.galactic, show: settings.galactic }
+    },
+    mw: { show: settings.milkyWay },
+    planets: { show: settings.planetsShow }
+})
+
+const StarMapRender: React.FC<StarMapProps> = ({
+    objects,
+    zoom,
+    interactive,
+    className,
+    config,
+    showSettings,
+    fitContainer
+}) => {
     const { i18n } = useTranslation()
 
     const [popup, setPopup] = useState<PopupState>({
         visible: false,
         x: 0,
-        y: 0
+        y: 0,
+        arrowOffset: 0,
+        placement: 'below'
     })
 
     // Settings state — only loaded from localStorage when showSettings is enabled
@@ -59,6 +130,10 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
     const centerRef = useRef<[number, number, number]>(
         showSettings ? loadStarMapSettings().center : DEFAULT_STARMAP_SETTINGS.center
     )
+    // Mirrors `settings` for callbacks registered once with Celestial (handleRedraw), which
+    // otherwise would only ever see the settings snapshot captured at registration time.
+    const settingsRef = useRef<StarMapSettings>(settings)
+    settingsRef.current = settings
 
     const objectsJSON = useMemo(() => createObjectsJSON(objects), [objects])
 
@@ -81,12 +156,31 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
 
         const containerWidth = ref.current?.offsetWidth ?? 0
         const containerHeight = ref.current?.offsetHeight ?? 0
-        const { x, y } = clampPopupPosition(screenCoords[0], screenCoords[1], containerWidth, containerHeight)
+
+        // `screenCoords` is relative to the <canvas> element's own top-left corner. The
+        // popup/arrow, however, are positioned relative to #celestial-map (the containing
+        // block for their `position: absolute`) — normally the same origin, but fitContainer
+        // mode centers a taller/shorter canvas inside #celestial-map via CSS transform, so the
+        // two origins can differ. Re-anchor to #celestial-map's origin before clamping.
+        const canvas: HTMLCanvasElement | undefined = Celestial.context?.canvas
+        const canvasRect = canvas?.getBoundingClientRect()
+        const containerRect = ref.current?.getBoundingClientRect()
+        const offsetX = canvasRect && containerRect ? canvasRect.left - containerRect.left : 0
+        const offsetY = canvasRect && containerRect ? canvasRect.top - containerRect.top : 0
+
+        const { x, y, arrowOffset, placement } = clampPopupPosition(
+            screenCoords[0] + offsetX,
+            screenCoords[1] + offsetY,
+            containerWidth,
+            containerHeight
+        )
 
         setPopup({
             visible: true,
             x,
             y,
+            arrowOffset,
+            placement,
             name: pending.name,
             object: pending.object
         })
@@ -121,6 +215,10 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
     }
 
     const handleRedraw = () => {
+        if (showSettings && !settingsRef.current.customObjectsShow) {
+            return
+        }
+
         Celestial.container.selectAll('.sky-points').each((point: SkyPoint) => {
             if (Celestial.clip(point.geometry.coordinates)) {
                 const pointCoords = Celestial.mapProjection(point.geometry.coordinates)
@@ -142,6 +240,9 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
     }
 
     const initializedRef = useRef<boolean>(false)
+    // Last width handed to Celestial.resize() when fitContainer is enabled — avoids
+    // redundant resize() calls on every ResizeObserver tick.
+    const lastFitWidthRef = useRef<number>(0)
 
     // Single combined effect: initialise Celestial and (re-)display with objects.
     useEffect(() => {
@@ -152,30 +253,11 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
             lang: i18n?.language || customConfig.lang
         }
 
-        // Apply user settings when the settings panel is enabled
+        // Apply user settings (initial snapshot) when the settings panel is enabled.
+        // Later toggles are applied live via Celestial.apply() — see the effect below —
+        // so this branch only runs again on mount or when objects/zoom/language change.
         if (showSettings) {
-            localConfig.stars = {
-                ...defaultConfig.stars,
-                ...localConfig.stars,
-                show: settings.starsShow,
-                limit: settings.starsLimit
-            }
-            localConfig.dsos = { ...defaultConfig.dsos, show: settings.dsosShow }
-            localConfig.constellations = {
-                ...customConfig.constellations,
-                names: settings.constellationNames,
-                lines: settings.constellationLines,
-                bounds: settings.constellationBounds
-            }
-            ;(localConfig as Record<string, unknown>).lines = {
-                graticule: { ...customConfig.lines.graticule, show: settings.graticule },
-                equatorial: { ...defaultConfig.lines.equatorial, show: settings.equatorial },
-                ecliptic: { ...defaultConfig.lines.ecliptic, show: settings.ecliptic },
-                galactic: { ...defaultConfig.lines.galactic, show: settings.galactic },
-                supergalactic: defaultConfig.lines.supergalactic
-            }
-            localConfig.mw = { ...defaultConfig.mw, show: settings.milkyWay }
-            localConfig.planets = { ...defaultConfig.planets, show: settings.planetsShow }
+            Object.assign(localConfig, buildVisualConfig(settingsRef.current))
             localConfig.center = centerRef.current
             localConfig.follow = [centerRef.current[0], centerRef.current[1]]
         }
@@ -189,6 +271,10 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
                 return false
             }
 
+            if (fitContainer) {
+                lastFitWidthRef.current = localConfig.width
+            }
+
             // For non-settings mode (object detail pages), center on the single object
             if (!showSettings && objects?.length === 1) {
                 localConfig.follow = [objects[0].ra || 0, objects[0].dec || 0]
@@ -197,9 +283,11 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
 
             Celestial.clear()
 
-            const shouldShowObjects = objects?.length && (!showSettings || settings.customObjectsShow)
-
-            if (shouldShowObjects) {
+            // Always add the layer if there are objects — visibility of the layer itself
+            // is toggled live inside handleRedraw via settingsRef, so this doesn't need to
+            // depend on `settings.customObjectsShow` (which would force this effect to rebuild
+            // the whole map on every panel toggle).
+            if (objects?.length) {
                 Celestial.add(
                     {
                         callback: handleCallback,
@@ -243,7 +331,55 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
             clearTimeout(hideTimeoutRef.current)
             clearTimeout(showPopupTimeoutRef.current)
         }
-    }, [objects, zoom, i18n?.language, settings])
+    }, [objects, zoom, i18n?.language])
+
+    // Keep the map fitted to its container on resize. Celestial has its own window-resize
+    // listener, but it's a no-op once an explicit numeric width has been set (its getWidth()
+    // just echoes back cfg.width), so fitContainer mode has to drive resizing itself via the
+    // public Celestial.resize() API.
+    useEffect(() => {
+        if (!fitContainer || !ref.current) {
+            return
+        }
+
+        const container = ref.current
+
+        const handleResize = () => {
+            if (!initializedRef.current) {
+                return
+            }
+
+            const width = container.offsetWidth
+
+            if (width > 0 && Math.round(width) !== Math.round(lastFitWidthRef.current)) {
+                lastFitWidthRef.current = width
+                Celestial.resize({ width })
+            }
+        }
+
+        const observer = new ResizeObserver(handleResize)
+        observer.observe(container)
+
+        return () => observer.disconnect()
+    }, [fitContainer])
+
+    // Apply settings-panel toggles live via Celestial.apply(), which merges the partial
+    // config and redraws in place — no Celestial.clear()/display() rebuild, so the map
+    // doesn't blink on every checkbox change. Skips the very first run since the initial
+    // values are already applied by the mount pass of the effect above.
+    const settingsAppliedOnceRef = useRef(false)
+    useEffect(() => {
+        if (!showSettings) {
+            return
+        }
+
+        if (!settingsAppliedOnceRef.current) {
+            settingsAppliedOnceRef.current = true
+            return
+        }
+
+        Celestial.apply(buildLiveSettingsPatch(settings))
+    }, [showSettings, settings])
 
     // Periodically save center position to localStorage when user drags/zooms the map.
     // Uses a ref (not state) to avoid triggering Celestial rebuilds.
@@ -365,7 +501,7 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
         <div
             ref={ref}
             id={'celestial-map'}
-            className={cn(styles.starMap, className)}
+            className={cn(styles.starMap, fitContainer && styles.starMapFit, className)}
         >
             {showSettings && (
                 <Button
@@ -382,6 +518,18 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
                     onChange={handleSettingsChange}
                 />
             )}
+
+            <div
+                className={cn(
+                    styles.popupArrow,
+                    popup.placement === 'above' ? styles.popupArrowDown : styles.popupArrowUp,
+                    popup.visible && styles.popupArrowVisible
+                )}
+                style={{
+                    left: popup.x + popup.arrowOffset - POPUP_ARROW_SIZE,
+                    top: popup.placement === 'above' ? popup.y + POPUP_HEIGHT : popup.y - POPUP_ARROW_SIZE
+                }}
+            />
 
             <Container
                 className={cn(styles.popup, popup.visible && styles.popupVisible)}
