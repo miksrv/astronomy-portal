@@ -105,3 +105,16 @@
             position: relative
             z-index: 11
 
+// Vertically centers the map within a fixed-height, overflow-hidden ancestor (see
+// pages/starmap.tsx) regardless of whether Celestial's projected canvas ends up taller
+// or shorter than that ancestor — `left/right: 0` keeps the element spanning the full
+// width (like a normal block element would), `top: 50% + translateY(-50%)` centers it
+// vertically without depending on its own height, so it keeps re-centering as Celestial
+// mutates this element's inline height on init/resize.
+.starMapFit
+    position: absolute
+    top: 50%
+    left: 0
+    right: 0
+    transform: translateY(-50%)
+

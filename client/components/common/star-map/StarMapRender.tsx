@@ -85,7 +85,15 @@ const buildLiveSettingsPatch = (settings: StarMapSettings) => ({
     planets: { show: settings.planetsShow }
 })
 
-const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, className, config, showSettings }) => {
+const StarMapRender: React.FC<StarMapProps> = ({
+    objects,
+    zoom,
+    interactive,
+    className,
+    config,
+    showSettings,
+    fitContainer
+}) => {
     const { i18n } = useTranslation()
 
     const [popup, setPopup] = useState<PopupState>({
@@ -210,6 +218,9 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
     }
 
     const initializedRef = useRef<boolean>(false)
+    // Last width handed to Celestial.resize() when fitContainer is enabled — avoids
+    // redundant resize() calls on every ResizeObserver tick.
+    const lastFitWidthRef = useRef<number>(0)
 
     // Single combined effect: initialise Celestial and (re-)display with objects.
     useEffect(() => {
@@ -236,6 +247,10 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
 
             if (localConfig.width <= 0 && ref.current) {
                 return false
+            }
+
+            if (fitContainer) {
+                lastFitWidthRef.current = localConfig.width
             }
 
             // For non-settings mode (object detail pages), center on the single object
@@ -295,6 +310,36 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
             clearTimeout(showPopupTimeoutRef.current)
         }
     }, [objects, zoom, i18n?.language])
+
+    // Keep the map fitted to its container on resize. Celestial has its own window-resize
+    // listener, but it's a no-op once an explicit numeric width has been set (its getWidth()
+    // just echoes back cfg.width), so fitContainer mode has to drive resizing itself via the
+    // public Celestial.resize() API.
+    useEffect(() => {
+        if (!fitContainer || !ref.current) {
+            return
+        }
+
+        const container = ref.current
+
+        const handleResize = () => {
+            if (!initializedRef.current) {
+                return
+            }
+
+            const width = container.offsetWidth
+
+            if (width > 0 && Math.round(width) !== Math.round(lastFitWidthRef.current)) {
+                lastFitWidthRef.current = width
+                Celestial.resize({ width })
+            }
+        }
+
+        const observer = new ResizeObserver(handleResize)
+        observer.observe(container)
+
+        return () => observer.disconnect()
+    }, [fitContainer])
 
     // Apply settings-panel toggles live via Celestial.apply(), which merges the partial
     // config and redraws in place — no Celestial.clear()/display() rebuild, so the map
@@ -434,7 +479,7 @@ const StarMapRender: React.FC<StarMapProps> = ({ objects, zoom, interactive, cla
         <div
             ref={ref}
             id={'celestial-map'}
-            className={cn(styles.starMap, className)}
+            className={cn(styles.starMap, fitContainer && styles.starMapFit, className)}
         >
             {showSettings && (
                 <Button

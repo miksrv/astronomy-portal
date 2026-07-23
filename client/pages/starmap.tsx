@@ -37,11 +37,18 @@ const CelestialPage: NextPage<object> = () => {
             }}
         >
             <BreadcrumbJsonLd currentPage={title} />
-            <div style={{ height: 'calc(100vh - var(--header-height))', overflow: 'hidden' }}>
+            <div
+                style={{
+                    position: 'relative',
+                    height: 'calc(100vh - var(--header-height))',
+                    overflow: 'hidden'
+                }}
+            >
                 <StarMap
                     objects={starMapObjects}
                     interactive={true}
                     showSettings={true}
+                    fitContainer={true}
                 />
             </div>
         </AppLayout>
