@@ -13,6 +13,7 @@ import {
     DEFAULT_STARMAP_SETTINGS,
     MOBILE_MAX_WIDTH,
     POINT_RADIUS,
+    POPUP_ARROW_SIZE,
     POPUP_HEIGHT,
     POPUP_WIDTH,
     stylePoint,
@@ -99,7 +100,9 @@ const StarMapRender: React.FC<StarMapProps> = ({
     const [popup, setPopup] = useState<PopupState>({
         visible: false,
         x: 0,
-        y: 0
+        y: 0,
+        arrowOffset: 0,
+        placement: 'below'
     })
 
     // Settings state — only loaded from localStorage when showSettings is enabled
@@ -153,12 +156,31 @@ const StarMapRender: React.FC<StarMapProps> = ({
 
         const containerWidth = ref.current?.offsetWidth ?? 0
         const containerHeight = ref.current?.offsetHeight ?? 0
-        const { x, y } = clampPopupPosition(screenCoords[0], screenCoords[1], containerWidth, containerHeight)
+
+        // `screenCoords` is relative to the <canvas> element's own top-left corner. The
+        // popup/arrow, however, are positioned relative to #celestial-map (the containing
+        // block for their `position: absolute`) — normally the same origin, but fitContainer
+        // mode centers a taller/shorter canvas inside #celestial-map via CSS transform, so the
+        // two origins can differ. Re-anchor to #celestial-map's origin before clamping.
+        const canvas: HTMLCanvasElement | undefined = Celestial.context?.canvas
+        const canvasRect = canvas?.getBoundingClientRect()
+        const containerRect = ref.current?.getBoundingClientRect()
+        const offsetX = canvasRect && containerRect ? canvasRect.left - containerRect.left : 0
+        const offsetY = canvasRect && containerRect ? canvasRect.top - containerRect.top : 0
+
+        const { x, y, arrowOffset, placement } = clampPopupPosition(
+            screenCoords[0] + offsetX,
+            screenCoords[1] + offsetY,
+            containerWidth,
+            containerHeight
+        )
 
         setPopup({
             visible: true,
             x,
             y,
+            arrowOffset,
+            placement,
             name: pending.name,
             object: pending.object
         })
@@ -496,6 +518,18 @@ const StarMapRender: React.FC<StarMapProps> = ({
                     onChange={handleSettingsChange}
                 />
             )}
+
+            <div
+                className={cn(
+                    styles.popupArrow,
+                    popup.placement === 'above' ? styles.popupArrowDown : styles.popupArrowUp,
+                    popup.visible && styles.popupArrowVisible
+                )}
+                style={{
+                    left: popup.x + popup.arrowOffset - POPUP_ARROW_SIZE,
+                    top: popup.placement === 'above' ? popup.y + POPUP_HEIGHT : popup.y - POPUP_ARROW_SIZE
+                }}
+            />
 
             <Container
                 className={cn(styles.popup, popup.visible && styles.popupVisible)}
