@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 4.7.1
+
+### Patch Changes
+
+- Added deploy-time maintenance mode: each deploy workflow (UI, API) sets a lock file on the VPS for the duration of its file swap/restart, and nginx serves a static "please wait" page while either lock is present, so client-only, API-only, and simultaneous deploys all show the same screen until every started job finishes
+- Allowed moderators to create, edit, and change the cover image of stargazing events (previously admin-only); archiving/deleting events remains admin-only, and the README roles & permissions tables were tightened to match
+- Reworked the event registrations table: merged name/email into a single participant column, added an adults/children column, and replaced the separate payment-status column with a combined booking+payment status (distinct labels/badges for canceled and refunded)
+- Updated stargazing FAQ/how-to copy to reflect paid adult tickets (children still free), covering online payment, QR check-in, refunds after cancellation, and a warning that payments only happen through the website
+- Fixed mobile layout issues: profile history rows now wrap correctly on small screens (shrunk thumbnails, full-width status line), and stargazing awaiting-payment action buttons stack full-width on mobile
+- Improved the star map: fixed live filter/name toggles causing redraw glitches or `undefined` labels, added viewport-responsive resizing via `ResizeObserver` in a new fit-container mode, and corrected popup positioning/arrow alignment when the map is fit to its container
+- Reordered stargazing info cards to howto → rules → faq → where
+
 ## 4.7.0
 
 ### Minor Changes
