@@ -11,7 +11,7 @@
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-direction: column
-        gap: 8px
+        gap: 2px
         text-align: center
 
     .copyright
@@ -36,6 +36,7 @@
 
         @media only screen and (max-width: variables.$mobileMaxWidth)
             justify-content: center
+            row-gap: 0px
 
     .madeWithLove
         display: flex
@@ -48,6 +49,10 @@
         align-items: center
         gap: 6px
         white-space: nowrap
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            span
+                display: none
 
     .languageSwitcherWrap
         display: flex
