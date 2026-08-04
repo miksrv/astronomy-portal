@@ -6,19 +6,19 @@ import { useTranslation } from 'next-i18next/pages'
 import { API, ApiType } from '@/api'
 import { formatDate } from '@/utils/dates'
 import { getErrorMessage } from '@/utils/errors'
+import {
+    CombinedStatus,
+    DisplayStatus,
+    getCombinedStatus,
+    getDisplayStatus,
+    getStatusLabel
+} from '@/utils/eventRegistrations'
 
 import styles from './styles.module.sass'
 
 interface EventRegistrationsTableProps {
     eventId: string
 }
-
-type DisplayStatus = 'pending' | 'confirmed' | 'failed' | 'canceled'
-
-// Merges the booking status with the payment status into a single status the
-// admin sees in one column — 'canceled' additionally splits into a plain
-// cancellation vs. one that already got its money back.
-type CombinedStatus = Exclude<DisplayStatus, 'canceled'> | 'canceled' | 'refunded'
 
 type RegistrationRow = ApiType.Events.EventRegistration & { displayStatus: DisplayStatus }
 
@@ -30,14 +30,6 @@ const STATUS_BADGE_CLASS: Record<CombinedStatus, string> = {
     failed: styles.badgeFailed,
     pending: styles.badgePending,
     refunded: styles.badgeRefunded
-}
-
-const getCombinedStatus = (row: RegistrationRow): CombinedStatus => {
-    if (row.displayStatus === 'canceled') {
-        return row.paymentStatus === 'refunded' ? 'refunded' : 'canceled'
-    }
-
-    return row.displayStatus
 }
 
 const truncateOrderId = (orderId: string): string =>
@@ -86,7 +78,7 @@ export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = (
         () =>
             (data?.items ?? []).map((item) => ({
                 ...item,
-                displayStatus: (item.deletedAt ? 'canceled' : item.status) as DisplayStatus
+                displayStatus: getDisplayStatus(item)
             })),
         [data]
     )
@@ -100,18 +92,6 @@ export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = (
 
         return rows.filter((row) => row.name?.toLowerCase().includes(query) || row.email?.toLowerCase().includes(query))
     }, [rows, search])
-
-    const statusLabel = (status: CombinedStatus): string => {
-        const map: Record<CombinedStatus, string> = {
-            canceled: t('pages.stargazing.registrations-status-canceled', 'Отменена'),
-            confirmed: t('pages.stargazing.registrations-status-confirmed', 'Подтверждена'),
-            failed: t('pages.stargazing.registrations-status-failed', 'Не оплачена'),
-            pending: t('pages.stargazing.registrations-status-pending', 'Ожидает оплаты'),
-            refunded: t('pages.stargazing.registrations-status-refunded', 'Возврат оформлен')
-        }
-
-        return map[status]
-    }
 
     const columns: Array<TableColumnProps<RegistrationRow>> = [
         {
@@ -144,7 +124,7 @@ export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = (
 
                 return (
                     <Badge
-                        label={statusLabel(status)}
+                        label={getStatusLabel(t, status)}
                         size={'small'}
                         className={STATUS_BADGE_CLASS[status]}
                     />

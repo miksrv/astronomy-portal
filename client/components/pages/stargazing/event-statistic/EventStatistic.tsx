@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { EChartsOption } from 'echarts'
 import ReactECharts from 'echarts-for-react'
 import { Container, Skeleton } from 'simple-react-ui-kit'
@@ -7,6 +7,13 @@ import { useTranslation } from 'next-i18next/pages'
 
 import { API } from '@/api'
 import { CHART_COLORS, getBaseChartConfig } from '@/utils/charts'
+import {
+    CombinedStatus,
+    getCombinedStatus,
+    getStatusLabel,
+    STATUS_COLORS,
+    STATUS_ORDER
+} from '@/utils/eventRegistrations'
 
 import styles from './styles.module.sass'
 
@@ -28,6 +35,29 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
     const { t } = useTranslation()
 
     const { data, isLoading } = API.useEventGetStatisticQuery(eventId)
+
+    // Registration status breakdown is derived on the client from the same list
+    // the "Регистрации" table already fetches (RTK Query dedupes the identical
+    // request), since the /statistic endpoint intentionally counts only
+    // pending/confirmed registrations and doesn't expose a per-status split.
+    const { data: registrationsData, isLoading: isRegistrationsLoading } =
+        API.useEventGetRegistrationsListQuery(eventId)
+
+    const statusCounts = useMemo(() => {
+        const counts: Record<CombinedStatus, number> = {
+            canceled: 0,
+            confirmed: 0,
+            failed: 0,
+            pending: 0,
+            refunded: 0
+        }
+
+        for (const item of registrationsData?.items ?? []) {
+            counts[getCombinedStatus(item)] += 1
+        }
+
+        return counts
+    }, [registrationsData])
 
     // Timeline chart config (step-line over real datetime x-axis)
     const timelineConfig: EChartsOption = {
@@ -114,6 +144,42 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
                         itemStyle: { color: '#fac858' }
                     }
                 ],
+                label: { show: false },
+                emphasis: {
+                    label: { show: true, fontSize: 13, fontWeight: 'bold' }
+                }
+            }
+        ]
+    }
+
+    // Registration status pie chart config
+    const statusConfig: EChartsOption = {
+        backgroundColor: CHART_COLORS.background,
+        legend: {
+            type: 'plain',
+            orient: 'horizontal',
+            left: 5,
+            bottom: 0,
+            itemWidth: 14,
+            itemHeight: 14,
+            textStyle: { color: CHART_COLORS.textPrimary, fontSize: '12px' }
+        },
+        tooltip: {
+            trigger: 'item',
+            backgroundColor: CHART_COLORS.background,
+            borderColor: CHART_COLORS.border,
+            textStyle: { color: CHART_COLORS.textPrimary, fontSize: 12 }
+        },
+        series: [
+            {
+                type: 'pie',
+                radius: ['40%', '70%'],
+                center: ['50%', '45%'],
+                data: STATUS_ORDER.map((status) => ({
+                    name: getStatusLabel(t, status),
+                    value: statusCounts[status],
+                    itemStyle: { color: STATUS_COLORS[status] }
+                })),
                 label: { show: false },
                 emphasis: {
                     label: { show: true, fontSize: 13, fontWeight: 'bold' }
@@ -281,6 +347,20 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
                     ) : (
                         <ReactECharts
                             option={ageGroupsConfig}
+                            style={{ height: '260px', width: '100%' }}
+                        />
+                    )}
+                </Container>
+
+                <Container className={styles.chartHalf}>
+                    <h3 className={styles.chartTitle}>
+                        {t('pages.stargazing.statistic-registration-status', 'Статусы регистраций')}
+                    </h3>
+                    {isRegistrationsLoading ? (
+                        <Skeleton style={{ height: '260px', width: '100%' }} />
+                    ) : (
+                        <ReactECharts
+                            option={statusConfig}
                             style={{ height: '260px', width: '100%' }}
                         />
                     )}
