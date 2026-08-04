@@ -50,6 +50,32 @@ jobs:
       - name: Load Secrets
         run: echo "machine ${{ secrets.FTP_HOSTNAME }} login ${{ secrets.FTP_USERNAME }} password ${{ secrets.FTP_PASSWORD }}" > ~/.netrc
 
+      # The API has no server of its own to serve a maintenance page from -
+      # it's plain PHP on shared hosting - so it borrows the frontend VPS
+      # (same nginx config as ui-deploy.yml) purely to flip its own lock
+      # file there for the duration of the FTP mirror below.
+      - name: Configure SSH
+        env:
+          SSH_HOST: ${{secrets.SSH_HOST}}
+          SSH_PORT: ${{secrets.SSH_PORT}}
+          SSH_USER: ${{secrets.SSH_USER}}
+          SSH_KEY: ${{secrets.SSH_KEY}}
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/deploy
+          chmod 400 ~/.ssh/deploy
+          cat >>~/.ssh/config <<END
+          Host vps
+            HostName $SSH_HOST
+            Port $SSH_PORT
+            User $SSH_USER
+            IdentityFile ~/.ssh/deploy
+            StrictHostKeyChecking no
+          END
+
+      - name: Enable maintenance mode
+        run: ssh vps "mkdir -p /var/www/astro.miksoft.pro/.deploy-lock && touch /var/www/astro.miksoft.pro/.deploy-lock/api.lock"
+
       - name: Upload Folder
         run: |
           lftp -e "rm -r app" ${{ secrets.FTP_HOSTNAME }}
@@ -62,3 +88,9 @@ jobs:
           lftp -e "mirror --parallel=100 -R public" ${{ secrets.FTP_HOSTNAME }}
           lftp -e "mirror --parallel=100 -R writable" ${{ secrets.FTP_HOSTNAME }}
         working-directory: server
+
+      # Runs even if a previous step failed, so a broken deploy never leaves
+      # the site stuck behind the maintenance page.
+      - name: Disable maintenance mode
+        if: always()
+        run: ssh vps "rm -f /var/www/astro.miksoft.pro/.deploy-lock/api.lock"

@@ -358,6 +358,16 @@ CI/CD is handled by GitHub Actions (`.github/workflows/`). Pushing to `main` dep
 - **Backend** is uploaded as plain PHP to shared hosting.
 - Production secrets live in the `server/.env` and `client/.env` files **on the target hosts** — they are not committed. Configure them using the tables in the [Configuration](#configuration) section before (or right after) the first deploy. Neither workflow injects them.
 
+### Maintenance Mode
+
+Both deploy workflows show a static "please wait" page (`client/public/maintenance.html`) to visitors for the duration of the file swap, so nobody hits a half-deployed app. The gate lives in nginx (`config/nginx.conf`), which is only manually synced to the VPS — re-copy it there after editing.
+
+Each workflow touches its own lock file on the frontend VPS right before the disruptive step (rsync + PM2 restart for `ui-deploy.yml`; the FTP mirror for `api-deploy.yml`, which reaches the VPS over SSH purely for this) and removes it (`if: always()`) once that step finishes, success or failure. nginx serves the maintenance page whenever **either** lock file exists, so a client-only, API-only, or simultaneous deploy all show the same screen until every job that started has finished. If a run is killed before its cleanup step, clear the stuck lock manually:
+
+```bash
+ssh vps "rm -f /var/www/astro.miksoft.pro/.deploy-lock/*.lock"
+```
+
 ### Database Migrations
 
 Migrations are **not** run automatically by the deploy workflows. After deploying changes that add migrations, run them on the server:

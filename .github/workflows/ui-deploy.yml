@@ -87,6 +87,13 @@ jobs:
             StrictHostKeyChecking no
           END
 
+      # Show the maintenance page (config/nginx.conf) instead of the app for
+      # the duration of the file swap + restart below. Kept separate from the
+      # api-deploy.yml lock so nginx only clears maintenance once BOTH jobs
+      # that started are done.
+      - name: Enable maintenance mode
+        run: ssh vps "mkdir -p /var/www/astro.miksoft.pro/.deploy-lock && touch /var/www/astro.miksoft.pro/.deploy-lock/ui.lock"
+
       # If we just use nginx and the application is exported to plain HTML
       #- name: Send files
       #  run: rsync -avz -e ssh ./client/out/ vps:/var/www/astro.miksoft.pro
@@ -104,6 +111,12 @@ jobs:
       # pm2 start ecosystem.config.js && pm2 save
       - name: Restart PM2
         run: ssh vps "pm2 restart astro.miksoft.pro"
+
+      # Runs even if a previous step failed, so a broken deploy never leaves
+      # the site stuck behind the maintenance page.
+      - name: Disable maintenance mode
+        if: always()
+        run: ssh vps "rm -f /var/www/astro.miksoft.pro/.deploy-lock/ui.lock"
 
       # If for deployment we use not SSH, but an FTP connection
       # - name: Export UI
