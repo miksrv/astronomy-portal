@@ -7,7 +7,7 @@ import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, setLocale, wrapper } from '@/api'
+import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { EventForm, EventFormType } from '@/components/pages/stargazing'
@@ -18,6 +18,11 @@ const StargazingFormPage: NextPage<object> = () => {
     const { id: rawId } = router.query
     const id = typeof rawId === 'string' ? rawId : undefined
     const { t } = useTranslation()
+
+    const currentUser = useAppSelector((state) => state.auth.user)
+    // Archiving (soft-delete) an event is intentionally admin-only on the backend
+    // (`Events::delete`) — moderators can create/edit/change cover but not archive.
+    const canArchive = currentUser?.role === ApiModel.UserRole.ADMIN
 
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
@@ -119,7 +124,7 @@ const StargazingFormPage: NextPage<object> = () => {
                     }
                 ]}
             >
-                {isEditMode && (
+                {isEditMode && canArchive && (
                     <Button
                         icon={'ReportError'}
                         mode={'secondary'}
@@ -197,7 +202,10 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
-            if (authData?.user?.role !== ApiModel.UserRole.ADMIN) {
+            if (
+                authData?.user?.role !== ApiModel.UserRole.ADMIN &&
+                authData?.user?.role !== ApiModel.UserRole.MODERATOR
+            ) {
                 return { redirect: { destination: '/stargazing', permanent: false } }
             }
 

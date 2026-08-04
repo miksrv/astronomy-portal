@@ -45,7 +45,7 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
                 links={[{ link: '/stargazing', text: t('pages.stargazing.title', 'Астровыезды') }]}
                 currentPage={title}
             >
-                {userRole === ApiModel.UserRole.ADMIN && (
+                {(userRole === ApiModel.UserRole.ADMIN || userRole === ApiModel.UserRole.MODERATOR) && (
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}

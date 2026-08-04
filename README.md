@@ -140,7 +140,7 @@ There is no central permission/filter middleware — every backend controller ch
 
 - **`user`** (default) — any authenticated account with no elevated role. The API omits the `role` field entirely for plain users in the `/auth/me` response (`Auth::responseAuth()`), so the frontend treats "no role" the same as `user`.
 - **`security`** — event door-staff. Adds QR check-in access on top of `user`.
-- **`moderator`** — adds comment moderation and event-statistics access on top of `security`.
+- **`moderator`** — adds comment moderation, event-statistics access, and creating/editing stargazing events (including replacing their cover image) on top of `security`.
 - **`admin`** — full access to every management screen and endpoint.
 
 "Guest" is not a stored role, just the absence of a session (`!isAuth`); "staff" (`admin`/`moderator`/`security` together) is an ad hoc grouping used by several checks, not a persisted value.

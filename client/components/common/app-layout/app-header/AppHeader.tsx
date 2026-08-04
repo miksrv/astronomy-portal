@@ -24,6 +24,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
     const { t } = useTranslation()
     const dispatch = useAppDispatch()
     const authSlice = useAppSelector((state) => state.auth)
+    const userRole = authSlice?.user?.role
 
     // Track client-side mount to avoid hydration mismatches.
     // The auth query may immediately set isLoading=true on the client (when a
@@ -44,26 +45,33 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
 
     const [logoutRequest] = API.useAuthLogoutMutation()
 
+    // `roles` lists who sees each link — most are admin-only, but stargazing
+    // event create/edit is also open to moderators (Events::create/update/cover).
     const adminLinks = [
         {
             href: '/photos/form',
-            label: t('components.common.app-layout.app-header.add-photo', 'Добавить фото')
+            label: t('components.common.app-layout.app-header.add-photo', 'Добавить фото'),
+            roles: [ApiModel.UserRole.ADMIN]
         },
         {
             href: '/objects/form',
-            label: t('components.common.app-layout.app-header.add-object', 'Добавить объект')
+            label: t('components.common.app-layout.app-header.add-object', 'Добавить объект'),
+            roles: [ApiModel.UserRole.ADMIN]
         },
         {
             href: '/stargazing/form',
-            label: t('components.common.app-layout.app-header.add-stargazing', 'Добавить мероприятие')
+            label: t('components.common.app-layout.app-header.add-stargazing', 'Добавить мероприятие'),
+            roles: [ApiModel.UserRole.ADMIN, ApiModel.UserRole.MODERATOR]
         },
         {
             href: '/mailing',
-            label: t('components.common.app-layout.app-header.mailings', 'Email рассылки')
+            label: t('components.common.app-layout.app-header.mailings', 'Email рассылки'),
+            roles: [ApiModel.UserRole.ADMIN]
         },
         {
             href: '/users',
-            label: t('menu.users', 'Пользователи')
+            label: t('menu.users', 'Пользователи'),
+            roles: [ApiModel.UserRole.ADMIN]
         }
     ]
 
@@ -158,17 +166,19 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
                             }
                         >
                             <ul className={styles.contextListMenu}>
-                                {authSlice?.user?.role === ApiModel.UserRole.ADMIN &&
-                                    adminLinks.map((item) => (
-                                        <li key={item.href}>
-                                            <Link
-                                                href={item.href}
-                                                title={item.label}
-                                            >
-                                                {item.label}
-                                            </Link>
-                                        </li>
-                                    ))}
+                                {userRole &&
+                                    adminLinks
+                                        .filter((item) => item.roles.includes(userRole))
+                                        .map((item) => (
+                                            <li key={item.href}>
+                                                <Link
+                                                    href={item.href}
+                                                    title={item.label}
+                                                >
+                                                    {item.label}
+                                                </Link>
+                                            </li>
+                                        ))}
 
                                 {authSlice?.user?.role &&
                                     [
