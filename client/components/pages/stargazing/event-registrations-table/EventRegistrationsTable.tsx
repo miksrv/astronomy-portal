@@ -15,24 +15,29 @@ interface EventRegistrationsTableProps {
 
 type DisplayStatus = 'pending' | 'confirmed' | 'failed' | 'canceled'
 
+// Merges the booking status with the payment status into a single status the
+// admin sees in one column — 'canceled' additionally splits into a plain
+// cancellation vs. one that already got its money back.
+type CombinedStatus = Exclude<DisplayStatus, 'canceled'> | 'canceled' | 'refunded'
+
 type RegistrationRow = ApiType.Events.EventRegistration & { displayStatus: DisplayStatus }
 
 const ALFABANK_TRANSACTION_URL = 'https://payment.alfabank.ru/generalmp3/admin/transactions/'
 
-const STATUS_BADGE_CLASS: Record<DisplayStatus, string> = {
+const STATUS_BADGE_CLASS: Record<CombinedStatus, string> = {
     canceled: styles.badgeCanceled,
     confirmed: styles.badgeConfirmed,
     failed: styles.badgeFailed,
-    pending: styles.badgePending
+    pending: styles.badgePending,
+    refunded: styles.badgeRefunded
 }
 
-const PAYMENT_BADGE_CLASS: Record<ApiType.Events.PaymentStatus, string> = {
-    canceled: styles.badgeCanceled,
-    failed: styles.badgeFailed,
-    new: styles.badgePending,
-    paid: styles.badgeConfirmed,
-    pending: styles.badgePending,
-    refunded: styles.badgeCanceled
+const getCombinedStatus = (row: RegistrationRow): CombinedStatus => {
+    if (row.displayStatus === 'canceled') {
+        return row.paymentStatus === 'refunded' ? 'refunded' : 'canceled'
+    }
+
+    return row.displayStatus
 }
 
 const truncateOrderId = (orderId: string): string =>
@@ -96,55 +101,55 @@ export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = (
         return rows.filter((row) => row.name?.toLowerCase().includes(query) || row.email?.toLowerCase().includes(query))
     }, [rows, search])
 
-    const statusLabel = (status: DisplayStatus): string => {
-        const map: Record<DisplayStatus, string> = {
+    const statusLabel = (status: CombinedStatus): string => {
+        const map: Record<CombinedStatus, string> = {
             canceled: t('pages.stargazing.registrations-status-canceled', 'Отменена'),
             confirmed: t('pages.stargazing.registrations-status-confirmed', 'Подтверждена'),
             failed: t('pages.stargazing.registrations-status-failed', 'Не оплачена'),
-            pending: t('pages.stargazing.registrations-status-pending', 'Ожидает оплаты')
+            pending: t('pages.stargazing.registrations-status-pending', 'Ожидает оплаты'),
+            refunded: t('pages.stargazing.registrations-status-refunded', 'Возврат оформлен')
         }
 
         return map[status]
     }
 
-    const paymentStatusLabel = (status?: ApiType.Events.PaymentStatus): string => {
-        const map: Record<ApiType.Events.PaymentStatus, string> = {
-            canceled: t('pages.stargazing.registrations-payment-canceled', 'Отменён'),
-            failed: t('pages.stargazing.registrations-payment-failed', 'Отклонён'),
-            new: t('pages.stargazing.registrations-payment-new', 'Создан'),
-            paid: t('pages.stargazing.registrations-payment-paid', 'Оплачен'),
-            pending: t('pages.stargazing.registrations-payment-pending', 'В обработке'),
-            refunded: t('pages.stargazing.registrations-payment-refunded', 'Возврат')
-        }
-
-        return status ? (map[status] ?? status) : '—'
-    }
-
     const columns: Array<TableColumnProps<RegistrationRow>> = [
         {
             accessor: 'name',
-            header: t('pages.stargazing.registrations-column-name', 'Имя'),
+            formatter: (_value, row, i) => (
+                <div className={styles.participant}>
+                    <div className={styles.participantName}>{row[i].name}</div>
+                    <div className={styles.participantEmail}>{row[i].email}</div>
+                </div>
+            ),
+            header: t('pages.stargazing.registrations-column-participant', 'Участник'),
             isSortable: true
         },
         {
-            accessor: 'email',
-            header: t('pages.stargazing.registrations-column-email', 'Email')
-        },
-        {
             accessor: 'createdAt',
+            className: styles.nowrap,
             formatter: (value) => formatDate(value as string, 'DD MMMM YYYY, HH:mm'),
             header: t('pages.stargazing.registrations-column-date', 'Дата регистрации'),
             isSortable: true
         },
         {
+            accessor: 'adults',
+            formatter: (_value, row, i) => `${row[i].adults} / ${row[i].children}`,
+            header: t('pages.stargazing.registrations-column-members', 'Взрослые / Дети')
+        },
+        {
             accessor: 'displayStatus',
-            formatter: (value) => (
-                <Badge
-                    label={statusLabel(value as DisplayStatus)}
-                    size={'small'}
-                    className={STATUS_BADGE_CLASS[value as DisplayStatus]}
-                />
-            ),
+            formatter: (_value, row, i) => {
+                const status = getCombinedStatus(row[i])
+
+                return (
+                    <Badge
+                        label={statusLabel(status)}
+                        size={'small'}
+                        className={STATUS_BADGE_CLASS[status]}
+                    />
+                )
+            },
             header: t('pages.stargazing.registrations-column-status', 'Статус'),
             isSortable: true
         },
@@ -165,21 +170,6 @@ export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = (
                               '—'
                           ),
                       header: t('pages.stargazing.registrations-column-order', 'ID транзакции'),
-                      isSortable: true
-                  },
-                  {
-                      accessor: 'paymentStatus',
-                      formatter: (value) =>
-                          value ? (
-                              <Badge
-                                  label={paymentStatusLabel(value as ApiType.Events.PaymentStatus)}
-                                  size={'small'}
-                                  className={PAYMENT_BADGE_CLASS[value as ApiType.Events.PaymentStatus]}
-                              />
-                          ) : (
-                              '—'
-                          ),
-                      header: t('pages.stargazing.registrations-column-payment-status', 'Статус транзакции'),
                       isSortable: true
                   },
                   {

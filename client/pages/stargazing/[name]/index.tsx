@@ -133,28 +133,26 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 {(userRole === ApiModel.UserRole.ADMIN || userRole === ApiModel.UserRole.MODERATOR) && (
                     <>
                         {userRole === ApiModel.UserRole.ADMIN && (
-                            <>
-                                <Button
-                                    disabled={!!uploadingPhotos?.length}
-                                    loading={!!uploadingPhotos?.length}
-                                    icon={'Download'}
-                                    mode={'secondary'}
-                                    onClick={handleUploadPhotoClick}
-                                >
-                                    {!uploadingPhotos?.length
-                                        ? 'Загрузить фотографии'
-                                        : `Загрузка ${uploadingPhotos?.length} фото`}
-                                </Button>
-
-                                <Button
-                                    icon={'Pencil'}
-                                    mode={'secondary'}
-                                    label={t('common.edit', 'Редактировать')}
-                                    disabled={!eventId}
-                                    onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
-                                />
-                            </>
+                            <Button
+                                disabled={!!uploadingPhotos?.length}
+                                loading={!!uploadingPhotos?.length}
+                                icon={'Download'}
+                                mode={'secondary'}
+                                onClick={handleUploadPhotoClick}
+                            >
+                                {!uploadingPhotos?.length
+                                    ? 'Загрузить фотографии'
+                                    : `Загрузка ${uploadingPhotos?.length} фото`}
+                            </Button>
                         )}
+
+                        <Button
+                            icon={'Pencil'}
+                            mode={'secondary'}
+                            label={t('common.edit', 'Редактировать')}
+                            disabled={!eventId}
+                            onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
+                        />
 
                         <Button
                             icon={'BarChart'}

@@ -66,6 +66,14 @@
     &:hover
         background: var(--table-header-background)
 
+    // Below this width the thumbnail + status column left too little room for
+    // historyContent (flex:1, min-width:0) — it collapsed toward zero and its
+    // text wrapped one letter per line. Wrap the row and push historyStatus
+    // onto its own full-width line so thumbnail+content keep the first row.
+    @media (max-width: 576px)
+        flex-wrap: wrap
+        gap: 10px 12px
+
 .historyThumbnail
     flex-shrink: 0
     width: 120px
@@ -81,6 +89,10 @@
         width: 100%
         height: 100%
         object-fit: cover
+
+    @media (max-width: 576px)
+        width: 72px
+        height: 72px
 
 .historyThumbnailEmpty
     svg
@@ -117,6 +129,10 @@
     align-items: center
     gap: 12px
     flex-shrink: 0
+
+    @media (max-width: 576px)
+        flex-basis: 100%
+        justify-content: space-between
 
 .historyVisitedBadge
     +mixins.status-badge(var(--color-green-background), var(--color-green), true)

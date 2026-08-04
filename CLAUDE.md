@@ -18,6 +18,10 @@ Stargazing events are rare (~3 per year), so the product's primary "dead-time" c
 - **Guest** → prompt to log in ("авторизуйтесь, чтобы получить письмо о ближайшем астровыезде") via the existing auth dialog (`openAuthDialog`).
 - **Authenticated** → already subscribed; show reassurance (will be emailed) + Telegram as an extra channel, not a subscribe form.
 
+### Maintenance rule: roles & permissions table
+
+There is no central permission/filter middleware — every backend controller checks `session.user.role` inline, and the frontend mirrors those checks to show/hide pages and UI (see "User Roles & Permissions" in `README.md`). Whenever a change touches who can do what — a role gains/loses access to an endpoint or action, a new role is introduced, a role check is added/removed/loosened/tightened on either the backend or the frontend — **update the "User Roles & Permissions" tables in `README.md` in the same change**. That section is the single source of truth for the access matrix; letting it drift from the code makes it actively misleading.
+
 ## Development Commands
 
 ### Frontend (`client/`)

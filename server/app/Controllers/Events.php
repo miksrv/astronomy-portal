@@ -958,7 +958,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!in_array($this->session->user->role, ['admin', 'moderator'], true)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -1529,7 +1529,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!in_array($this->session->user->role, ['admin', 'moderator'], true)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -1637,7 +1637,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!in_array($this->session->user->role, ['admin', 'moderator'], true)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 

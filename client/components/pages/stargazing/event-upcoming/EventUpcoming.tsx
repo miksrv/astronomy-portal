@@ -401,15 +401,13 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
 
                         {canModerate && (
                             <div className={styles.adminActions}>
-                                {userRole === ApiModel.UserRole.ADMIN && (
-                                    <Button
-                                        size={'small'}
-                                        mode={'secondary'}
-                                        icon={'Pencil'}
-                                        title={t('common.edit', 'Редактировать')}
-                                        onClick={() => router.push(`/stargazing/form?id=${event?.id}`)}
-                                    />
-                                )}
+                                <Button
+                                    size={'small'}
+                                    mode={'secondary'}
+                                    icon={'Pencil'}
+                                    title={t('common.edit', 'Редактировать')}
+                                    onClick={() => router.push(`/stargazing/form?id=${event?.id}`)}
+                                />
 
                                 <Button
                                     size={'small'}

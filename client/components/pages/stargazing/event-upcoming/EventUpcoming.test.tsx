@@ -238,14 +238,16 @@ describe('EventUpcoming', () => {
         expect(screen.queryByTitle('Удалить')).toBeNull()
     })
 
-    it('shows the statistic action but not edit/delete for a moderator', () => {
+    it('shows edit and statistic but not delete for a moderator', () => {
         ;(useAppSelector as jest.Mock).mockImplementation((selector) =>
             selector({ auth: { user: { id: 'user-1', name: 'Test User', role: ApiModel.UserRole.MODERATOR } } })
         )
 
         render(<EventUpcoming event={baseEvent} />)
 
-        expect(screen.queryByTitle('Редактировать')).toBeNull()
+        fireEvent.click(screen.getByTitle('Редактировать'))
+        expect(mockRouterPush).toHaveBeenCalledWith('/stargazing/form?id=event-1')
+
         expect(screen.queryByTitle('Удалить')).toBeNull()
 
         fireEvent.click(screen.getByTitle('Статистика'))

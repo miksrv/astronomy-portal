@@ -170,16 +170,27 @@ $stateIconDangerBackground: #a3464694
                 font-size: 13px
                 margin: 0
 
+        // Stacked (full width) on mobile, side by side on desktop — same
+        // convention as .registeredActions below. Previously always side by
+        // side with min-width:0, which let "Отменить бронирование" get
+        // squeezed/wrapped against the other button on narrow screens.
         .awaitingPaymentActions
             display: flex
-            flex-wrap: nowrap
+            flex-direction: column
             gap: 10px
             margin-top: 15px
             width: 100%
 
             > button
-                flex: 1 1 50%
-                min-width: 0
+                width: 100%
+
+            @media only screen and (min-width: (variables.$mobileMaxWidth + 1))
+                flex-direction: row
+
+                > button
+                    width: auto
+                    flex: 1 1 50%
+                    min-width: 0
 
         .verifyingPayment
             margin: 25px 0 0

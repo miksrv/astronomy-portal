@@ -140,7 +140,7 @@ There is no central permission/filter middleware — every backend controller ch
 
 - **`user`** (default) — any authenticated account with no elevated role. The API omits the `role` field entirely for plain users in the `/auth/me` response (`Auth::responseAuth()`), so the frontend treats "no role" the same as `user`.
 - **`security`** — event door-staff. Adds QR check-in access on top of `user`.
-- **`moderator`** — adds comment moderation and event-statistics access on top of `security`.
+- **`moderator`** — adds comment moderation, event-statistics access, and creating/editing stargazing events (including replacing their cover image) on top of `security`.
 - **`admin`** — full access to every management screen and endpoint.
 
 "Guest" is not a stored role, just the absence of a session (`!isAuth`); "staff" (`admin`/`moderator`/`security` together) is an ad hoc grouping used by several checks, not a persisted value.
@@ -152,8 +152,8 @@ There is no central permission/filter middleware — every backend controller ch
 | Guest | Public pages only; prompted to sign in for reviews, event booking, and the mailing subscription (which happens automatically on login — see [Domain rule](#about-the-project) in `CLAUDE.md`) |
 | `user` | Own profile, own reviews/comments, own event bookings & tickets, own event history |
 | `security` | Everything `user` has, plus the "Проверка QR-кодов" menu link and the `/stargazing/checkin` page |
-| `moderator` | Everything `security` has, plus `/stargazing/[name]/statistic`, deleting any review/comment, and admin/moderator-only blocks on the event detail page |
-| `admin` | Full admin menu (`/photos/form`, `/objects/form`, `/stargazing/form`, `/mailing`, `/users`), all object/photo/event/mailing create-edit-delete forms, the `/users` member list, and enabled relay power-switch controls |
+| `moderator` | Everything `security` has, plus `/stargazing/[name]/statistic`, deleting any review/comment, creating/editing stargazing events and replacing their cover image via `/stargazing/form` (archiving/deleting an event is `admin`-only), and admin/moderator-only blocks on the event detail page |
+| `admin` | Full admin menu (`/photos/form`, `/objects/form`, `/stargazing/form`, `/mailing`, `/users`), all object/photo/event/mailing create-edit-delete forms, archiving stargazing events, event photo uploads, the `/users` member list, and enabled relay power-switch controls |
 
 ### Backend endpoints by role
 
@@ -163,8 +163,8 @@ There is no central permission/filter middleware — every backend controller ch
 | Owner, or `admin` | `GET /members/:id/events` |
 | Owner, or `admin`/`moderator`/`security` | `GET /events/ticket/:id` |
 | `admin`, `moderator`, `security` | `POST /events/checkin/:id` |
-| `admin`, `moderator` | `GET /events/:id/statistic` |
-| `admin` only | `PUT /relay/set`; `POST\|PATCH\|DELETE /objects`; `GET /members`; `GET /events/members/:id`; `POST\|PATCH\|DELETE /events`, `POST /events/upload/:id`, `POST /events/:id/cover`; all `/mailings*` routes except `unsubscribe`; `POST\|PATCH\|DELETE /photos` |
+| `admin`, `moderator` | `GET /events/:id/statistic`; `POST /events` (create); `PATCH /events/:id` (update); `POST /events/:id/cover` |
+| `admin` only | `PUT /relay/set`; `POST\|PATCH\|DELETE /objects`; `GET /members`; `GET /events/members/:id`; `DELETE /events/:id`, `POST /events/upload/:id`; all `/mailings*` routes except `unsubscribe`; `POST\|PATCH\|DELETE /photos` |
 | None (public) | Everything else — health check, camera, telescope statistics, equipment/categories, file serving, read-only objects/photos/events, comment listing, sitemap, mailing unsubscribe |
 
 > **Known gap:** `POST /photos/:any/upload` (`Photos::upload()`) currently has no auth/role check at all, unlike its sibling `create`/`update`/`delete` actions on the same controller which all require `admin`. This looks like an oversight rather than an intentional public endpoint.
@@ -357,6 +357,16 @@ CI/CD is handled by GitHub Actions (`.github/workflows/`). Pushing to `main` dep
 - **Frontend** is built as a Next.js standalone app (`output: 'standalone'` in `next.config.js`) and managed by PM2 (`ecosystem.config.js`).
 - **Backend** is uploaded as plain PHP to shared hosting.
 - Production secrets live in the `server/.env` and `client/.env` files **on the target hosts** — they are not committed. Configure them using the tables in the [Configuration](#configuration) section before (or right after) the first deploy. Neither workflow injects them.
+
+### Maintenance Mode
+
+Both deploy workflows show a static "please wait" page (`client/public/maintenance.html`) to visitors for the duration of the file swap, so nobody hits a half-deployed app. The gate lives in nginx (`config/nginx.conf`), which is only manually synced to the VPS — re-copy it there after editing.
+
+Each workflow touches its own lock file on the frontend VPS right before the disruptive step (rsync + PM2 restart for `ui-deploy.yml`; the FTP mirror for `api-deploy.yml`, which reaches the VPS over SSH purely for this) and removes it (`if: always()`) once that step finishes, success or failure. nginx serves the maintenance page whenever **either** lock file exists, so a client-only, API-only, or simultaneous deploy all show the same screen until every job that started has finished. If a run is killed before its cleanup step, clear the stuck lock manually:
+
+```bash
+ssh vps "rm -f /var/www/astro.miksoft.pro/.deploy-lock/*.lock"
+```
 
 ### Database Migrations
 
