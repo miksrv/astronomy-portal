@@ -37,28 +37,28 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
 
     const infoCards: InfoCardItem[] = [
         {
-            href: '/stargazing/rules',
-            icon: 'ReportError',
-            title: t('pages.stargazing.rules_link', 'Правила поведения на астровыездах'),
-            description: t('pages.stargazing.rules_card_desc', 'Что нельзя делать и как уважать других')
-        },
-        {
             href: '/stargazing/howto',
             icon: 'StarFilled',
             title: t('pages.stargazing.howto_link', 'Как проходят астровыезды'),
             description: t('pages.stargazing.howto_card_desc', 'Программа вечера, телескопы и лекции')
         },
         {
-            href: '/stargazing/where',
-            icon: 'Map',
-            title: t('pages.stargazing.where_link', 'Где посмотреть в телескоп'),
-            description: t('pages.stargazing.where_card_desc', 'Место проведения в Оренбургском районе')
+            href: '/stargazing/rules',
+            icon: 'ReportError',
+            title: t('pages.stargazing.rules_link', 'Правила поведения на астровыездах'),
+            description: t('pages.stargazing.rules_card_desc', 'Что нельзя делать и как уважать других')
         },
         {
             href: '/stargazing/faq',
             icon: 'Compass',
             title: t('pages.stargazing.faq_link', 'Часто задаваемые вопросы'),
             description: t('pages.stargazing.faq_card_desc', 'Ответы на популярные вопросы участников')
+        },
+        {
+            href: '/stargazing/where',
+            icon: 'Map',
+            title: t('pages.stargazing.where_link', 'Где посмотреть в телескоп'),
+            description: t('pages.stargazing.where_card_desc', 'Место проведения в Оренбургском районе')
         }
     ]
 
