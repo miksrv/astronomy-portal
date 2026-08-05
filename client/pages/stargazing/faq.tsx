@@ -41,6 +41,36 @@ const StargazingFAQPage: NextPage<object> = () => {
 
     const faqItems: FaqItem[] = [
         {
+            question: tPage('questions.next-event.question', 'Когда следующий астровыезд?'),
+            answer: (
+                <>
+                    {tPage(
+                        'questions.next-event.answer',
+                        'Астровыезды мы проводим с мая по октябрь каждый год, но конкретные даты сильно зависят от погоды. Достаточно точный прогноз становится известен только за 2-4 дня до выезда, поэтому расписание на весь сезон заранее мы не публикуем. Чтобы не пропустить открытие регистрации на ближайший астровыезд – подпишитесь на наш'
+                    )}{' '}
+                    <a
+                        href={'https://t.me/look_at_stars'}
+                        rel={'nofollow noopener'}
+                        target={'_blank'}
+                        title={tPage('questions.next-event.telegram', 'Telegram-канал')}
+                    >
+                        {tPage('questions.next-event.telegram', 'Telegram-канал')}
+                    </a>
+                    {tPage(
+                        'questions.next-event.answer2',
+                        ', авторизуйтесь на сайте – после входа через почту или сервисы Яндекс или VK вы автоматически подключаетесь к рассылке о новых мероприятиях, а ещё периодически заглядывайте на страницу'
+                    )}{' '}
+                    <Link
+                        href={'/stargazing'}
+                        title={tPage('questions.next-event.stargazing', 'астровыездов')}
+                    >
+                        {tPage('questions.next-event.stargazing', 'астровыездов')}
+                    </Link>
+                    {tPage('questions.next-event.answer3', ', где мы публикуем анонсы.')}
+                </>
+            )
+        },
+        {
             question: tPage('questions.where.question', 'Как узнать, где проходит?'),
             answer: tPage(
                 'questions.where.answer',
@@ -114,7 +144,7 @@ const StargazingFAQPage: NextPage<object> = () => {
             question: tPage('questions.start-time.question', 'Во сколько начало?'),
             answer: tPage(
                 'questions.start-time.answer',
-                'В каждом анонсе астровыезда есть конкретное время начала. В этот раз это 21.30. Сбор гостей на площадке объявлен с 20.00 до 21.00. Это означает, что мы просим вас приехать к нам заранее – послушать музыку, сфотографироваться с Луной и в подсолнухах, посмотреть на закаты, надышаться степью. И что важно, припарковать автомобиль и не создавать пробок. Мы очень это ценим!'
+                'Точное время начала указано в афише мероприятия и на странице регистрации – оно своё у каждого астровыезда. Как правило, мы начинаем, когда солнце садится за горизонт. Поэтому советуем приезжать на площадку заранее – за час-полтора до времени начала. Так вы успеете спокойно найти место на поляне, расположиться, сфотографироваться и встретить закат. И конечно, важно без спешки припарковать автомобиль, чтобы не создавать пробок на въезде. Мы очень это ценим!'
             )
         },
         {
@@ -228,9 +258,35 @@ const StargazingFAQPage: NextPage<object> = () => {
         },
         {
             question: tPage('questions.feedback.question', 'Где написать про вас отзыв?'),
-            answer: tPage(
-                'questions.feedback.answer',
-                'Во всех социальных сетях наша группа называется "Смотри на звёзды". Мы ценим обратную связь и всегда читаем ваши отзывы. Спасибо вам за них!'
+            answer: (
+                <>
+                    {tPage(
+                        'questions.feedback.answer',
+                        'Отзыв можно оставить прямо на странице того мероприятия, которое вы посетили – откройте её и заполните форму с оценкой. Посмотреть, какие мероприятия вы посетили, можно в'
+                    )}{' '}
+                    <Link
+                        href={'/profile'}
+                        title={tPage('questions.feedback.profile', 'личном кабинете')}
+                    >
+                        {tPage('questions.feedback.profile', 'личном кабинете')}
+                    </Link>
+                    {tPage(
+                        'questions.feedback.answer2',
+                        ', в разделе «История мероприятий». Также вы можете написать отзыв в комментариях в нашем'
+                    )}{' '}
+                    <a
+                        href={'https://t.me/look_at_stars'}
+                        rel={'nofollow noopener'}
+                        target={'_blank'}
+                        title={tPage('questions.feedback.telegram', 'Telegram-канале')}
+                    >
+                        {tPage('questions.feedback.telegram', 'Telegram-канале')}
+                    </a>
+                    {tPage(
+                        'questions.feedback.answer3',
+                        '. Мы ценим обратную связь и всегда читаем ваши отзывы. Спасибо вам за них!'
+                    )}
+                </>
             )
         }
     ]
