@@ -74,9 +74,17 @@ const baseEvent: ApiModel.Event = {
     // The real API always sets this alongside registered: true.
     bookingStatus: 'confirmed',
     availableTickets: 5,
-    date: { date: new Date(Date.now() + 86400000 * 10).toISOString() },
-    registrationStart: { date: new Date(Date.now() - 86400000 * 5).toISOString() },
-    registrationEnd: { date: new Date(Date.now() + 86400000 * 5).toISOString() }
+    date: { date: new Date(Date.now() + 86400000 * 10).toISOString(), timezone_type: 3, timezone: 'UTC' },
+    registrationStart: {
+        date: new Date(Date.now() - 86400000 * 5).toISOString(),
+        timezone_type: 3,
+        timezone: 'UTC'
+    },
+    registrationEnd: {
+        date: new Date(Date.now() + 86400000 * 5).toISOString(),
+        timezone_type: 3,
+        timezone: 'UTC'
+    }
 }
 
 beforeEach(() => {

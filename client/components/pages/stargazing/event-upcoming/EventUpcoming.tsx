@@ -190,7 +190,7 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
 
     const infoRows: EventInfoRow[] = [
         {
-            icon: 'Time',
+            icon: 'Calendar',
             label: t('pages.stargazing.event-date-label', 'Дата (GMT+5)'),
             value: formatUTCDate(event?.date?.date, 'D MMMM, YYYY')
         },

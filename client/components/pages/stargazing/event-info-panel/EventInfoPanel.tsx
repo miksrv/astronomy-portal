@@ -177,7 +177,7 @@ export const EventInfoPanel: React.FC<EventInfoPanelProps> = ({ event }) => {
 
     const rows: InfoRow[] = [
         {
-            icon: 'Time',
+            icon: 'Calendar',
             label: t('pages.stargazing.event-date-label', 'Дата (GMT+5)'),
             value: capitalizedDate
         },

@@ -50,7 +50,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
         },
         {
             href: '/stargazing/faq',
-            icon: 'Compass',
+            icon: 'QuestionCircle',
             title: t('pages.stargazing.faq_link', 'Часто задаваемые вопросы'),
             description: t('pages.stargazing.faq_card_desc', 'Ответы на популярные вопросы участников')
         },
