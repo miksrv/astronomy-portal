@@ -43,6 +43,29 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
     const { data: registrationsData, isLoading: isRegistrationsLoading } =
         API.useEventGetRegistrationsListQuery(eventId)
 
+    // The page's getServerSideProps already fetched this event for the title,
+    // so this dedupes against the same cached request rather than firing a
+    // second one. Unlike `Events::upcoming()` (which turns `availableTickets`
+    // into a remaining count), `Events::show()` — what this hook calls —
+    // returns the raw `max_tickets` unmodified, so `availableTickets` here is
+    // the event's total *capacity*. Remaining seats = capacity minus adults
+    // already booked (tickets are only counted by adults — children are free
+    // and don't consume capacity, mirroring `Events::upcoming()`'s own logic).
+    const { data: eventData, isLoading: isEventLoading } = API.useEventGetItemQuery(eventId)
+
+    const ticketsCapacity = eventData?.availableTickets
+    const soldTickets = data?.totalAdults ?? 0
+    const remainingTickets = ticketsCapacity != null ? Math.max(0, ticketsCapacity - soldTickets) : undefined
+    const percentSold =
+        ticketsCapacity && ticketsCapacity > 0 ? Math.round((soldTickets / ticketsCapacity) * 100) : null
+
+    const seatsLoading = isEventLoading || isLoading
+
+    const avgGroupSize = data && data.totalRegistrations > 0 ? data.totalParticipants / data.totalRegistrations : null
+
+    const progressColor =
+        percentSold == null ? undefined : percentSold >= 100 ? 'red' : percentSold >= 80 ? 'orange' : 'green'
+
     const statusCounts = useMemo(() => {
         const counts: Record<CombinedStatus, number> = {
             canceled: 0,
@@ -264,6 +287,13 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
                             (data?.totalRegistrations ?? '—')
                         )}
                     </div>
+                    {!isLoading && data && (
+                        <div className={styles.kpiSub}>
+                            {t('pages.stargazing.statistic-registrations-participants', '→ {{count}} участников', {
+                                count: data.totalParticipants
+                            })}
+                        </div>
+                    )}
                 </Container>
 
                 <Container className={styles.kpiCard}>
@@ -275,35 +305,71 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
                             (data?.totalParticipants ?? '—')
                         )}
                     </div>
-                </Container>
-
-                <Container className={styles.kpiCard}>
-                    <div className={styles.kpiLabel}>{t('pages.stargazing.statistic-children', 'Детей')}</div>
-                    <div className={styles.kpiValue}>
-                        {isLoading ? (
-                            <Skeleton style={{ height: '36px', width: '80px' }} />
-                        ) : (
-                            (data?.totalChildren ?? '—')
-                        )}
-                    </div>
+                    {!isLoading && data && (
+                        <div className={styles.kpiSub}>
+                            {t(
+                                'pages.stargazing.statistic-participants-breakdown',
+                                '{{adults}} взрослых · {{children}} детей',
+                                {
+                                    adults: data.totalAdults,
+                                    children: data.totalChildren
+                                }
+                            )}
+                        </div>
+                    )}
                 </Container>
 
                 <Container className={styles.kpiCard}>
                     <div className={styles.kpiLabel}>
-                        {t('pages.stargazing.statistic-average-age', 'Средний возраст')}
+                        {t('pages.stargazing.statistic-avg-group-size', 'Средний размер группы')}
                     </div>
                     <div className={styles.kpiValue}>
                         {isLoading ? (
                             <Skeleton style={{ height: '36px', width: '80px' }} />
-                        ) : data?.averageAge != null ? (
-                            <>
-                                {Math.round(data.averageAge)}
-                                <span className={styles.kpiSub}>{t('pages.stargazing.statistic-years', 'лет')}</span>
-                            </>
                         ) : (
-                            '—'
+                            (avgGroupSize?.toFixed(1) ?? '—')
                         )}
                     </div>
+                    {!isLoading && avgGroupSize != null && (
+                        <div className={styles.kpiSub}>
+                            {t('pages.stargazing.statistic-avg-group-size-unit', 'чел. на заявку')}
+                        </div>
+                    )}
+                </Container>
+
+                <Container className={styles.kpiCard}>
+                    <div className={styles.kpiLabel}>
+                        {t('pages.stargazing.statistic-seats-remaining', 'Осталось мест')}
+                    </div>
+                    <div className={styles.kpiValue}>
+                        {seatsLoading ? (
+                            <Skeleton style={{ height: '36px', width: '80px' }} />
+                        ) : (
+                            (remainingTickets ?? '—')
+                        )}
+                    </div>
+                    {!seatsLoading && percentSold != null && (
+                        <div className={styles.kpiProgress}>
+                            <div
+                                className={styles.kpiProgressTrack}
+                                role='progressbar'
+                                aria-valuenow={percentSold}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                            >
+                                <div
+                                    className={styles.kpiProgressBar}
+                                    data-color={progressColor}
+                                    style={{ width: `${Math.min(percentSold, 100)}%` }}
+                                />
+                            </div>
+                            <div className={styles.kpiSub}>
+                                {t('pages.stargazing.statistic-percent-sold', 'Забронировано {{percent}}%', {
+                                    percent: percentSold
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </Container>
             </div>
 
