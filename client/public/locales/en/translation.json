@@ -553,7 +553,7 @@
             "registrations-title": "Registrations",
             "registrations-search": "Search by name or email",
             "registrations-empty": "No registrations",
-            "statistic-cumulative": "Cumulative total",
+            "statistic-hourly-total": "Total: {{count}}",
             "statistic-male": "Men",
             "statistic-female": "Women",
             "statistic-gender-unknown": "Not specified",

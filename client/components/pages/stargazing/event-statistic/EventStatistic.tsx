@@ -7,6 +7,7 @@ import { useTranslation } from 'next-i18next/pages'
 
 import { API } from '@/api'
 import { CHART_COLORS, getBaseChartConfig } from '@/utils/charts'
+import { formatDate } from '@/utils/dates'
 import {
     CombinedStatus,
     getCombinedStatus,
@@ -82,10 +83,44 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
         return counts
     }, [registrationsData])
 
-    // Timeline chart config (step-line over real datetime x-axis)
+    // Registrations are bucketed into hourly bins and split by combined status
+    // (client-side, from the same registrations list the status pie chart and
+    // "Регистрации" table already fetch — RTK Query dedupes the identical
+    // request) so the chart shows both *when* people register and *what
+    // happened* to those bookings — e.g. a burst of registrations after a
+    // mailing that mostly ended up unpaid. Bins with zero registrations are
+    // simply absent rather than plotted as zero, since a real-time x-axis
+    // already spaces sparse activity correctly.
+    const hourlyStatusBuckets = useMemo(() => {
+        const buckets = new Map<number, Record<CombinedStatus, number>>()
+
+        for (const item of registrationsData?.items ?? []) {
+            const hourStart = new Date(item.createdAt).setMinutes(0, 0, 0)
+
+            if (!buckets.has(hourStart)) {
+                buckets.set(hourStart, { canceled: 0, confirmed: 0, failed: 0, pending: 0, refunded: 0 })
+            }
+
+            buckets.get(hourStart)![getCombinedStatus(item)] += 1
+        }
+
+        const hours = Array.from(buckets.keys()).sort((a, b) => a - b)
+
+        return { buckets, hours }
+    }, [registrationsData])
+
+    // Timeline chart config (hourly registration counts, stacked by status, over real datetime x-axis)
     const timelineConfig: EChartsOption = {
         ...getBaseChartConfig(),
-        legend: { show: false },
+        legend: {
+            type: 'plain',
+            orient: 'horizontal',
+            left: 5,
+            bottom: 0,
+            itemWidth: 14,
+            itemHeight: 14,
+            textStyle: { color: CHART_COLORS.textPrimary, fontSize: '12px' }
+        },
         xAxis: {
             type: 'time',
             axisLabel: {
@@ -110,21 +145,32 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
             trigger: 'axis',
             backgroundColor: CHART_COLORS.background,
             borderColor: CHART_COLORS.border,
-            textStyle: { color: CHART_COLORS.textPrimary, fontSize: 12 }
-        },
-        series: [
-            {
-                name: t('pages.stargazing.statistic-cumulative', 'Нарастающим итогом'),
-                type: 'line',
-                step: 'end',
-                data: data?.registrationTimeline.map((item) => [item.datetime, item.cumulative]) ?? [],
-                showSymbol: true,
-                symbolSize: 5,
-                lineStyle: { color: '#5470c6', width: 2 },
-                itemStyle: { color: '#5470c6' },
-                areaStyle: { color: 'rgba(84, 112, 198, 0.15)' }
+            textStyle: { color: CHART_COLORS.textPrimary, fontSize: 12 },
+            formatter: (params) => {
+                const points = Array.isArray(params) ? params : [params]
+                const timestamp = (points[0]?.value as [number, number])[0]
+                const total = points.reduce((sum, p) => sum + ((p.value as [number, number])[1] ?? 0), 0)
+
+                const rows = points
+                    .filter((p) => ((p.value as [number, number])[1] ?? 0) > 0)
+                    .map((p) => `${String(p.marker)} ${p.seriesName}: ${(p.value as [number, number])[1]}`)
+                    .join('<br/>')
+
+                return `${formatDate(new Date(timestamp), 'D MMM, HH:00')}<br/>${rows}<br/>${t(
+                    'pages.stargazing.statistic-hourly-total',
+                    'Всего: {{count}}',
+                    { count: total }
+                )}`
             }
-        ]
+        },
+        series: STATUS_ORDER.map((status) => ({
+            name: getStatusLabel(t, status),
+            type: 'bar',
+            stack: 'registrations',
+            barWidth: 18,
+            itemStyle: { color: STATUS_COLORS[status] },
+            data: hourlyStatusBuckets.hours.map((hour) => [hour, hourlyStatusBuckets.buckets.get(hour)![status]])
+        }))
     }
 
     // Gender pie chart config
@@ -378,7 +424,7 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
                 <h3 className={styles.chartTitle}>
                     {t('pages.stargazing.statistic-timeline', 'Динамика регистраций')}
                 </h3>
-                {isLoading ? (
+                {isRegistrationsLoading ? (
                     <Skeleton style={{ height: '300px', width: '100%' }} />
                 ) : (
                     <ReactECharts

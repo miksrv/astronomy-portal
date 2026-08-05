@@ -557,7 +557,7 @@
             "registrations-title": "Регистрации",
             "registrations-search": "Поиск по имени или email",
             "registrations-empty": "Нет регистраций",
-            "statistic-cumulative": "Нарастающим итогом",
+            "statistic-hourly-total": "Всего: {{count}}",
             "statistic-male": "Мужчины",
             "statistic-female": "Женщины",
             "statistic-gender-unknown": "Не указан",
