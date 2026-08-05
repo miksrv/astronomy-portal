@@ -66,13 +66,13 @@ describe('photos', () => {
         })
 
         it('includes the t function label for photo and from', () => {
-            // @ts-expect-error: simplified TFunction mock
             const mockT = (key: string, defaultValue: string) => defaultValue
             const photo: ApiModel.Photo = {
                 ...basePhoto,
                 date: '2024-01-01',
                 objects: ['M31']
             }
+            // @ts-expect-error: simplified TFunction mock
             const result = createPhotoTitle(photo, mockT)
             expect(result).toContain('Фото')
             expect(result).toContain('от')
