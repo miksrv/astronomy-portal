@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { Badge, Button, Container, Input, Message, Table, TableColumnProps } from 'simple-react-ui-kit'
+import { Badge, Button, Container, Input, Message, Select, Table, TableColumnProps } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
@@ -11,7 +11,8 @@ import {
     DisplayStatus,
     getCombinedStatus,
     getDisplayStatus,
-    getStatusLabel
+    getStatusLabel,
+    STATUS_ORDER
 } from '@/utils/eventRegistrations'
 
 import styles from './styles.module.sass'
@@ -68,11 +69,17 @@ const VerifyPaymentButton: React.FC<VerifyPaymentButtonProps> = ({ eventId, regi
 export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = ({ eventId }) => {
     const { t } = useTranslation()
     const [search, setSearch] = useState('')
+    const [statusFilter, setStatusFilter] = useState<CombinedStatus | undefined>()
 
     const { data, isLoading, error } = API.useEventGetRegistrationsListQuery(eventId)
     const { data: event } = API.useEventGetItemQuery(eventId)
 
     const isPaidEvent = !!event?.ticketPrice && event.ticketPrice > 0
+
+    const statusOptions = STATUS_ORDER.map((status) => ({
+        key: status,
+        value: getStatusLabel(t, status)
+    }))
 
     const rows: RegistrationRow[] = useMemo(
         () =>
@@ -86,12 +93,12 @@ export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = (
     const filteredRows = useMemo(() => {
         const query = search.trim().toLowerCase()
 
-        if (!query) {
-            return rows
-        }
-
-        return rows.filter((row) => row.name?.toLowerCase().includes(query) || row.email?.toLowerCase().includes(query))
-    }, [rows, search])
+        return rows
+            .filter((row) => !statusFilter || getCombinedStatus(row) === statusFilter)
+            .filter(
+                (row) => !query || row.name?.toLowerCase().includes(query) || row.email?.toLowerCase().includes(query)
+            )
+    }, [rows, search, statusFilter])
 
     const columns: Array<TableColumnProps<RegistrationRow>> = [
         {
@@ -169,20 +176,38 @@ export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = (
     return (
         <Container className={styles.wrapper}>
             <div className={styles.header}>
-                <h3 className={styles.title}>{t('pages.stargazing.registrations-title', 'Регистрации')}</h3>
-                <Input
-                    clearable={true}
-                    value={search}
-                    placeholder={t('pages.stargazing.registrations-search', 'Поиск по имени или email')}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className={styles.search}
-                />
+                <div className={styles.titleGroup}>
+                    <h3 className={styles.title}>{t('pages.stargazing.registrations-title', 'Регистрации')}</h3>
+                    <div className={styles.subtitle}>
+                        {t('pages.stargazing.registrations-count', '{{count}} регистраций', {
+                            count: filteredRows.length
+                        })}
+                    </div>
+                </div>
+                <div className={styles.filters}>
+                    <Input
+                        clearable={true}
+                        value={search}
+                        placeholder={t('pages.stargazing.registrations-search', 'Поиск по имени или email')}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className={styles.search}
+                    />
+                    <Select<CombinedStatus>
+                        clearable={true}
+                        options={statusOptions}
+                        value={statusFilter}
+                        placeholder={t('pages.stargazing.registrations-filter-status', 'Все статусы')}
+                        onSelect={(selected) => setStatusFilter(selected?.[0]?.key)}
+                        className={styles.statusFilter}
+                    />
+                </div>
             </div>
 
             {error && <Message type={'error'}>{getErrorMessage(error)}</Message>}
 
             {!error && (
                 <Table<RegistrationRow>
+                    className={styles.table}
                     size={'small'}
                     data={filteredRows}
                     columns={columns}
