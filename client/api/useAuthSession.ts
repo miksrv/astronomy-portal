@@ -46,7 +46,6 @@ export const useAuthSession = () => {
         // `error` is intentionally in the deps list even though it isn't read here:
         // a transient network error shouldn't log the user out (no `meData`, no
         // dispatch), but it should re-run this effect once the query settles.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [meData, error, dispatch])
 
     return { isLoading }

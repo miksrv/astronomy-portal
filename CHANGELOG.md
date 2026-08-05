@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 4.7.2
+
+### Patch Changes
+
+- Centralized stargazing registration status handling in a new `eventRegistrations` util (combined status/type mapping, shared ordering, badge/chart colors, localized labels) and reused it across the registrations table and statistics page
+- Added a status filter and live filtered count to the event registrations table, combinable with the existing search
+- Enhanced event statistics: added a donut chart of registrations by combined status (including refunded), reworked KPI cards with participant subtotals, average group size, remaining seats and a booked-percentage progress bar, and replaced the cumulative timeline line chart with a stacked hourly bar chart split by booking status
+- Added a compact "← Parent" mobile breadcrumb link (nearest ancestor, home fallback) alongside the existing full trail, now hidden on small screens
+- Tightened mobile footer/toolbar spacing (reduced footer gaps, hid the "made with love" label, adjusted toolbar title line-height)
+- Refreshed stargazing FAQ/how-to copy: added a FAQ item about announcing the next trip (Telegram + sign-in/mailing guidance), rewrote start-time/review answers, and updated the how-to timeline text
+- Extracted `/auth/me` session sync into a reusable `useAuthSession` hook mounted app-wide, so sliding session expiration and token refresh run on every page load regardless of whether `AppHeader` is rendered
+- Fixed stale upcoming-event caching by also invalidating `Events/UPCOMING_PROFILE` alongside `Events/UPCOMING` after payment status changes, BFCache restores, and booking expiration
+- Polished the error page layout (full-height centered flex, tighter padding) and refined the 404 background-pan animation, disabling it under `prefers-reduced-motion`
+
 ## 4.7.1
 
 ### Patch Changes

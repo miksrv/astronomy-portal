@@ -20,12 +20,10 @@
     min-width: 140px
     display: flex
     flex-direction: column
-    gap: 8px
-    padding: 16px
+    gap: 2px
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         min-width: 0
-        padding: 12px
 
 .kpiLabel
     font-size: var(--font-size-small)
@@ -43,6 +41,30 @@
     font-size: var(--font-size-small)
     font-weight: 400
     color: var(--text-color-secondary)
+
+.kpiProgress
+    display: flex
+    flex-direction: column
+    gap: 4px
+
+.kpiProgressTrack
+    width: 100%
+    height: 6px
+    border-radius: 3px
+    background: var(--input-border-color)
+    overflow: hidden
+
+.kpiProgressBar
+    height: 100%
+    border-radius: 3px
+    background: var(--color-green)
+    transition: width 0.3s ease
+
+    &[data-color='orange']
+        background: var(--color-orange)
+
+    &[data-color='red']
+        background: var(--color-red)
 
 .chartTitle
     font-size: var(--font-size)

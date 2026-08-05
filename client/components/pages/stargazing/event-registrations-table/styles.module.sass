@@ -11,10 +11,15 @@
     justify-content: space-between
     flex-wrap: wrap
     gap: 10px
+    margin: -5px
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-direction: column
         align-items: stretch
+
+.titleGroup
+    display: flex
+    flex-direction: column
 
 .title
     font-size: var(--font-size)
@@ -22,8 +27,32 @@
     color: var(--text-color-primary)
     margin: 0
 
+.subtitle
+    font-size: var(--font-size-small)
+    color: var(--text-color-secondary)
+
+.filters
+    display: flex
+    align-items: center
+    gap: 10px
+    flex-wrap: wrap
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        width: 100%
+        flex-direction: column
+        align-items: stretch
+
+.table
+    margin: 0 -15px
+
 .search
     min-width: 260px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        width: 100%
+
+.statusFilter
+    min-width: 180px
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         width: 100%
