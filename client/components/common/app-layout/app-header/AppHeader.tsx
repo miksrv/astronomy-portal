@@ -7,7 +7,8 @@ import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, HOST_IMG, useAppDispatch, useAppSelector } from '@/api'
 import { openAuthDialog } from '@/api/applicationSlice'
-import { login, logout } from '@/api/authSlice'
+import { logout } from '@/api/authSlice'
+import { useAuthSession } from '@/api/useAuthSession'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import logo from '@/public/images/logo.png'
 
@@ -35,13 +36,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
     const [scrolled, setScrolled] = useState(false)
     const [userMenuOpen, setUserMenuOpen] = useState(false)
 
-    const {
-        data: meData,
-        error,
-        isLoading
-    } = API.useAuthGetMeQuery(undefined, {
-        skip: !authSlice?.token?.length || authSlice?.isAuth
-    })
+    // Also drives the actual token refresh (see useAuthSession) — AppHeader just
+    // needs `isLoading` for the sign-in button spinner. RTK Query dedupes this
+    // against the identical call made globally in AuthSessionSync (_app.tsx),
+    // so this doesn't trigger an extra request.
+    const { isLoading } = useAuthSession()
 
     const [logoutRequest] = API.useAuthLogoutMutation()
 
@@ -93,14 +92,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
 
         return () => window.removeEventListener('scroll', handleScroll)
     }, [])
-
-    useEffect(() => {
-        if (meData?.auth === true) {
-            dispatch(login(meData))
-        } else if (meData?.auth === false) {
-            dispatch(logout())
-        }
-    }, [meData, error])
 
     return (
         <header className={cn(styles.appHeader, scrolled && styles.scrolled)}>

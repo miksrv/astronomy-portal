@@ -2,6 +2,14 @@
     "title": "Frequently Asked Questions",
     "description": "Find answers to frequently asked questions about stargazing trips: registration, what to bring, cost, duration and how to get there. Get ready for a comfortable night under the stars!",
     "questions": {
+        "next-event": {
+            "question": "When is the next stargazing trip?",
+            "answer": "We run stargazing trips from May to October every year, but the specific dates depend heavily on the weather. A fairly reliable forecast is only available 2-4 days before a trip, so we can't publish a schedule for the whole season in advance. To make sure you don't miss the next registration opening, subscribe to our",
+            "telegram": "Telegram channel",
+            "answer2": ", and log in on the site - once you sign in by email or via Yandex or VK you're automatically subscribed to our event mailing. It's also worth checking the",
+            "stargazing": "stargazing trips page",
+            "answer3": " from time to time, where we post announcements."
+        },
         "where": {
             "question": "How do I find out where it takes place?",
             "answer": "Our stargazing trips always take place out of town, usually within 40-70 km. We head away from light pollution and city lights to see the stars. The exact location becomes available after you register. If you happen to lose the location, just go back to the registration page using the same link. It includes geolocation links for Yandex.Maps and Google Maps."
@@ -31,7 +39,7 @@
         },
         "start-time": {
             "question": "What time does it start?",
-            "answer": "Every trip announcement includes a specific start time. This time it's 9:30 PM. Guests are asked to gather at the site between 8:00 PM and 9:00 PM. This means we ask you to arrive early - to listen to music, take photos with the Moon and among the sunflowers, watch the sunset, and breathe in the steppe air. And importantly, to park your car without creating traffic jams. We really appreciate that!"
+            "answer": "The exact start time is listed in the event poster and on the registration page - it's different for every trip. As a rule, we start right around sunset, once the sun dips below the horizon. So we recommend arriving at the site early - an hour to an hour and a half before the start time. That way you'll have time to calmly find a spot in the field, get settled, take some photos, and watch the sunset. And of course, it's important to park without rushing, so as not to create traffic jams at the entrance. We really appreciate that!"
         },
         "price": {
             "question": "How much does it cost?",
@@ -83,7 +91,11 @@
         },
         "feedback": {
             "question": "Where can I leave a review about you?",
-            "answer": "Across all social networks our group is called \"Look at the Stars\". We value feedback and always read your reviews. Thank you for them!"
+            "answer": "You can leave a review right on the page of the event you attended - just open it and fill out the rating form. You can see which events you've attended in your",
+            "profile": "personal account",
+            "answer2": ", in the \"Event history\" section. You can also leave a review in the comments on our",
+            "telegram": "Telegram channel",
+            "answer3": ". We value feedback and always read your reviews. Thank you for them!"
         }
     }
 }

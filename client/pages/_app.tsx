@@ -8,6 +8,7 @@ import Script from 'next/script'
 import { appWithTranslation, useTranslation } from 'next-i18next/pages'
 
 import { SITE_LINK, wrapper } from '@/api'
+import { useAuthSession } from '@/api/useAuthSession'
 
 import i18Config from '../next-i18next.config'
 
@@ -16,6 +17,15 @@ import 'dayjs/locale/ru'
 import 'leaflet/dist/leaflet.css'
 import '@/styles/theme.css'
 import '@/styles/globals.sass'
+
+// Refreshes the auth token on every fresh page load (see useAuthSession for
+// why). Rendered as its own component so the hook runs inside <Provider>,
+// unconditionally on every route — not only on pages whose layout happens
+// to mount AppHeader.
+const AuthSessionSync = () => {
+    useAuthSession()
+    return null
+}
 
 const App = ({ Component, pageProps }: AppProps) => {
     const { i18n } = useTranslation()
@@ -106,6 +116,7 @@ const App = ({ Component, pageProps }: AppProps) => {
             </Head>
 
             <Provider store={store}>
+                <AuthSessionSync />
                 <Component {...pageProps} />
             </Provider>
 
