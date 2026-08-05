@@ -148,8 +148,13 @@ blockquote
         color: var(--text-color-secondary)
 
 .errorPage
+    display: flex
+    flex-direction: column
+    justify-content: center
+    align-items: center
+    min-height: 100vh
     text-align: center
-    padding: 100px 0
+    padding: 40px 0
 
     $background404Image: '/images/error404_background.jpg'
 
@@ -159,8 +164,9 @@ blockquote
         font-weight: 900
         max-width: 700px
         margin: 0 auto 70px
-        background: url($background404Image) no-repeat 100% 50%
-        background-size: cover
+        background: url($background404Image) no-repeat 0% 50%
+        background-size: 200% auto
+        animation: error404BgPan 24s ease-in-out infinite alternate
         text-transform: uppercase
         -webkit-background-clip: text
         -webkit-text-fill-color: transparent
@@ -169,12 +175,22 @@ blockquote
             font-size: 60px !important
             line-height: 60px
 
+        @media (prefers-reduced-motion: reduce)
+            animation: none
+
     h2
         display: block
         font-size: 36px !important
 
         &::after
             display: none
+
+@keyframes error404BgPan
+    0%
+        background-position: 0% 50%
+
+    100%
+        background-position: 100% 50%
 
 .notFoundContainer
     padding: 40px
