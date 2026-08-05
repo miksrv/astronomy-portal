@@ -74,7 +74,12 @@ export const useEventBookingStatus = (event?: ApiModel.Event) => {
                 .unwrap()
                 .then((result) => {
                     if (result.status !== 'new' && result.status !== 'pending') {
-                        dispatch(API.util.invalidateTags([{ id: 'UPCOMING', type: 'Events' }]))
+                        dispatch(
+                            API.util.invalidateTags([
+                                { id: 'UPCOMING', type: 'Events' },
+                                { id: 'UPCOMING_PROFILE', type: 'Events' }
+                            ])
+                        )
                     }
                 })
                 .catch(() => {
@@ -139,7 +144,12 @@ export const useEventBookingStatus = (event?: ApiModel.Event) => {
         // status.
         const handlePageShow = (e: PageTransitionEvent) => {
             if (e.persisted) {
-                dispatch(API.util.invalidateTags([{ id: 'UPCOMING', type: 'Events' }]))
+                dispatch(
+                    API.util.invalidateTags([
+                        { id: 'UPCOMING', type: 'Events' },
+                        { id: 'UPCOMING_PROFILE', type: 'Events' }
+                    ])
+                )
 
                 if (pendingPayment?.orderId) {
                     checkedOrderIdRef.current = undefined
@@ -164,7 +174,12 @@ export const useEventBookingStatus = (event?: ApiModel.Event) => {
             !expiredHandledRef.current
         ) {
             expiredHandledRef.current = true
-            dispatch(API.util.invalidateTags([{ id: 'UPCOMING', type: 'Events' }]))
+            dispatch(
+                API.util.invalidateTags([
+                    { id: 'UPCOMING', type: 'Events' },
+                    { id: 'UPCOMING_PROFILE', type: 'Events' }
+                ])
+            )
         }
 
         if (!pendingPayment) {
