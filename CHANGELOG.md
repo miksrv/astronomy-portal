@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 4.7.3
+
+### Patch Changes
+
+- Reworked the stargazing upcoming event desktop layout so the left media column no longer controls card height (absolutely positioned image content, admin actions staying over the cover, overflow text clipped with a fade), and added a plain-text filler description via a new `removeMarkdownPreserveParagraphs()` string utility
+- Added a floating review prompt on stargazing event pages for users who can leave a review, dismissible for 24 hours via a per-event cookie and positioned to avoid overlapping the cookie-consent banner
+- Increased the Next.js optimized image cache TTL to one year (uploaded photo filenames are immutable) and updated `robots.txt` to block stargazing payment pages from indexing and collapse tracked Yandex URLs to their canonical form
+- Removed the unused `/stargazing/tickets` page and leftover menu/icon remnants from the old tickets/support flow
+- Bumped frontend dependencies (Next.js, React, sharp etc.) and fixed icon names on stargazing pages (`Calendar` instead of `Time`, `QuestionCircle` instead of `Compass`)
+
 ## 4.7.2
 
 ### Patch Changes
