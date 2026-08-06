@@ -55,7 +55,9 @@
                 "placeholder": "Share your impressions...",
                 "success": "Review published!",
                 "submit": "Submit review",
-                "not-eligible": "You'll be able to leave a review after attending the event"
+                "not-eligible": "You'll be able to leave a review after attending the event",
+                "floating-title": "Leave a review about the event",
+                "floating-close": "Dismiss the review reminder"
             },
             "star-map": {
                 "settings": {

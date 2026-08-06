@@ -34,3 +34,53 @@
     color: var(--text-color-secondary)
     text-align: center
     margin: 20px
+
+.floatingPrompt
+    position: fixed
+    bottom: 0 !important
+    left: 16px
+    right: 16px
+    z-index: 690
+    max-width: var(--width-max)
+    margin: 0 auto
+    padding: 18px 18px 16px
+    background-color: var(--container-background-color)
+    box-shadow: var(--container-shadow), 0 -4px 16px rgba(0, 0, 0, 0.16)
+    border-radius: var(--border-radius) var(--border-radius) 0 0
+    transition: bottom 0.2s ease
+
+    // On desktop, match the content column's max width, inset by 8px on
+    // each side (rather than the mobile 16px)
+    @media only screen and (min-width: (variables.$mobileMaxWidth + 1))
+        left: 8px
+        right: 8px
+        max-width: calc(var(--width-max) - 16px)
+
+.floatingClose
+    position: absolute
+    top: 8px
+    right: 8px
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 28px
+    height: 28px
+    padding: 0
+    border: none
+    border-radius: var(--border-radius)
+    background: none
+    color: var(--color-contrast)
+    cursor: pointer
+
+    svg
+        fill: var(--color-contrast)
+
+    &:hover
+        background-color: var(--button-default-background-hover)
+
+.floatingTitle
+    margin: 0 0 12px
+    padding-right: 28px
+    font-size: var(--font-size)
+    font-weight: 500
+    color: var(--text-color-primary)
