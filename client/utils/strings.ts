@@ -112,3 +112,25 @@ export const removeMarkdown = (text?: string): string => {
 
     return result
 }
+
+/**
+ * Same as removeMarkdown(), but paragraph breaks (blank lines) in the source
+ * survive as a blank line in the output instead of being collapsed into a
+ * single space. Use this when the cleaned text is displayed as plain text
+ * with `white-space: pre-line` and paragraph structure still matters —
+ * removeMarkdown()'s single-line output is for contexts like SEO snippets,
+ * where it doesn't.
+ * @param {string} text - The Markdown text to clean.
+ * @returns {string} The text without Markdown formatting, with paragraphs preserved.
+ */
+export const removeMarkdownPreserveParagraphs = (text?: string): string => {
+    if (!text?.length) {
+        return ''
+    }
+
+    return text
+        .split(/\n\s*\n/)
+        .map((paragraph) => removeMarkdown(paragraph))
+        .filter(Boolean)
+        .join('\n\n')
+}

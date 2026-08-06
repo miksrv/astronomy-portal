@@ -1,4 +1,10 @@
-import { extractBookingIdFromScan, humanizeFileSize, removeMarkdown, sliceText } from './strings'
+import {
+    extractBookingIdFromScan,
+    humanizeFileSize,
+    removeMarkdown,
+    removeMarkdownPreserveParagraphs,
+    sliceText
+} from './strings'
 
 describe('strings', () => {
     describe('extractBookingIdFromScan', () => {
@@ -84,6 +90,36 @@ describe('strings', () => {
 
         it('trims excess whitespace', () => {
             expect(removeMarkdown('  hello   world  ')).toBe('hello world')
+        })
+    })
+
+    describe('removeMarkdownPreserveParagraphs', () => {
+        it('returns empty string for undefined', () => {
+            expect(removeMarkdownPreserveParagraphs(undefined)).toBe('')
+        })
+
+        it('returns empty string for empty string', () => {
+            expect(removeMarkdownPreserveParagraphs('')).toBe('')
+        })
+
+        it('keeps a blank line between paragraphs', () => {
+            expect(removeMarkdownPreserveParagraphs('First paragraph.\n\nSecond paragraph.')).toBe(
+                'First paragraph.\n\nSecond paragraph.'
+            )
+        })
+
+        it('still cleans Markdown formatting within each paragraph', () => {
+            expect(removeMarkdownPreserveParagraphs('# Heading\n\n**bold** and _italic_.')).toBe(
+                'Heading\n\nbold and italic.'
+            )
+        })
+
+        it('collapses single line breaks within a paragraph like removeMarkdown does', () => {
+            expect(removeMarkdownPreserveParagraphs('Line one\nline two.')).toBe('Line one line two.')
+        })
+
+        it('drops paragraphs that become empty after cleaning', () => {
+            expect(removeMarkdownPreserveParagraphs('First.\n\n`code only`\n\nSecond.')).toBe('First.\n\nSecond.')
         })
     })
 
