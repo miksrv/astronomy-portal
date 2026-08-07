@@ -32,6 +32,40 @@ const AGE_GROUP_LABELS: Record<string, string> = {
 
 const AGE_GROUP_ORDER = ['under18', '18to25', '26to35', '36to50', 'over50']
 
+// Children's ages are entered per-child at booking time (`EventBookingForm`'s
+// age selector only offers 5–17), so these buckets are sized for that range
+// (2-year steps, with the last one widened to 15–17 to cover the remainder)
+// rather than mirroring the adult under18/18to25/... groups above.
+const CHILD_AGE_GROUP_LABELS: Record<string, string> = {
+    '11to12': '11–12',
+    '13to14': '13–14',
+    '15to17': '15–17',
+    '5to6': '5–6',
+    '7to8': '7–8',
+    '9to10': '9–10'
+}
+
+const CHILD_AGE_GROUP_ORDER = ['5to6', '7to8', '9to10', '11to12', '13to14', '15to17']
+
+const getChildAgeGroup = (age: number): string => {
+    if (age <= 6) {
+        return '5to6'
+    }
+    if (age <= 8) {
+        return '7to8'
+    }
+    if (age <= 10) {
+        return '9to10'
+    }
+    if (age <= 12) {
+        return '11to12'
+    }
+    if (age <= 14) {
+        return '13to14'
+    }
+    return '15to17'
+}
+
 export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
     const { t } = useTranslation()
 
@@ -78,6 +112,35 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
 
         for (const item of registrationsData?.items ?? []) {
             counts[getCombinedStatus(item)] += 1
+        }
+
+        return counts
+    }, [registrationsData])
+
+    // Children's age distribution, bucketed from the same registrations list
+    // (see `statusCounts` above for why — RTK Query dedupes the request).
+    // Only 'pending'/'confirmed' bookings count, mirroring the adult
+    // `ageGroups` breakdown the /statistic endpoint computes server-side, so
+    // cancelled/failed/refunded registrations don't skew the distribution.
+    const childrenAgeGroupCounts = useMemo(() => {
+        const counts: Record<string, number> = {
+            '11to12': 0,
+            '13to14': 0,
+            '15to17': 0,
+            '5to6': 0,
+            '7to8': 0,
+            '9to10': 0
+        }
+
+        for (const item of registrationsData?.items ?? []) {
+            const combinedStatus = getCombinedStatus(item)
+            if (combinedStatus !== 'confirmed' && combinedStatus !== 'pending') {
+                continue
+            }
+
+            for (const age of item.childrenAges ?? []) {
+                counts[getChildAgeGroup(age)] += 1
+            }
         }
 
         return counts
@@ -318,6 +381,63 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
         ]
     }
 
+    // Children's age groups bar chart config
+    const childrenAgeGroupsConfig: EChartsOption = {
+        backgroundColor: CHART_COLORS.background,
+        grid: {
+            left: 10,
+            right: 10,
+            top: 15,
+            bottom: 25,
+            containLabel: true
+        },
+        tooltip: {
+            trigger: 'axis',
+            backgroundColor: CHART_COLORS.background,
+            borderColor: CHART_COLORS.border,
+            textStyle: { color: CHART_COLORS.textPrimary, fontSize: 12 }
+        },
+        xAxis: {
+            type: 'category',
+            data: CHILD_AGE_GROUP_ORDER.map((k) => CHILD_AGE_GROUP_LABELS[k]),
+            axisLabel: {
+                show: true,
+                color: CHART_COLORS.textSecondary,
+                fontSize: '11px'
+            },
+            axisLine: {
+                show: true,
+                lineStyle: { color: CHART_COLORS.border }
+            },
+            axisTick: { show: true }
+        },
+        yAxis: {
+            type: 'value',
+            minInterval: 1,
+            axisTick: { show: true },
+            axisLine: {
+                show: true,
+                lineStyle: { color: CHART_COLORS.border }
+            },
+            axisLabel: {
+                show: true,
+                color: CHART_COLORS.textSecondary,
+                fontSize: '11px'
+            },
+            splitLine: {
+                show: true,
+                lineStyle: { width: 1, color: CHART_COLORS.border }
+            }
+        },
+        series: [
+            {
+                type: 'bar',
+                data: CHILD_AGE_GROUP_ORDER.map((k) => childrenAgeGroupCounts[k]),
+                itemStyle: { color: '#91cc75' }
+            }
+        ]
+    }
+
     return (
         <div className={styles.wrapper}>
             {/* KPI cards */}
@@ -419,22 +539,38 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
                 </Container>
             </div>
 
-            {/* Registration timeline chart */}
-            <Container>
-                <h3 className={styles.chartTitle}>
-                    {t('pages.stargazing.statistic-timeline', 'Динамика регистраций')}
-                </h3>
-                {isRegistrationsLoading ? (
-                    <Skeleton style={{ height: '300px', width: '100%' }} />
-                ) : (
-                    <ReactECharts
-                        option={timelineConfig}
-                        style={{ height: '300px', width: '100%' }}
-                    />
-                )}
-            </Container>
+            {/* Registration timeline + status breakdown */}
+            <div className={styles.chartsRow}>
+                <Container className={styles.chartWide}>
+                    <h3 className={styles.chartTitle}>
+                        {t('pages.stargazing.statistic-timeline', 'Динамика регистраций')}
+                    </h3>
+                    {isRegistrationsLoading ? (
+                        <Skeleton style={{ height: '300px', width: '100%' }} />
+                    ) : (
+                        <ReactECharts
+                            option={timelineConfig}
+                            style={{ height: '300px', width: '100%' }}
+                        />
+                    )}
+                </Container>
 
-            {/* Gender + Age groups */}
+                <Container className={styles.chartHalf}>
+                    <h3 className={styles.chartTitle}>
+                        {t('pages.stargazing.statistic-registration-status', 'Статусы регистраций')}
+                    </h3>
+                    {isRegistrationsLoading ? (
+                        <Skeleton style={{ height: '300px', width: '100%' }} />
+                    ) : (
+                        <ReactECharts
+                            option={statusConfig}
+                            style={{ height: '300px', width: '100%' }}
+                        />
+                    )}
+                </Container>
+            </div>
+
+            {/* Gender + Age groups (adults & children) */}
             <div className={styles.chartsRow}>
                 <Container className={styles.chartHalf}>
                     <h3 className={styles.chartTitle}>
@@ -452,7 +588,7 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
 
                 <Container className={styles.chartHalf}>
                     <h3 className={styles.chartTitle}>
-                        {t('pages.stargazing.statistic-age-groups', 'Возрастные группы')}
+                        {t('pages.stargazing.statistic-age-groups-adults', 'Возрастные группы взрослых')}
                     </h3>
                     {isLoading ? (
                         <Skeleton style={{ height: '260px', width: '100%' }} />
@@ -466,13 +602,13 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
 
                 <Container className={styles.chartHalf}>
                     <h3 className={styles.chartTitle}>
-                        {t('pages.stargazing.statistic-registration-status', 'Статусы регистраций')}
+                        {t('pages.stargazing.statistic-age-groups-children', 'Возрастные группы детей')}
                     </h3>
                     {isRegistrationsLoading ? (
                         <Skeleton style={{ height: '260px', width: '100%' }} />
                     ) : (
                         <ReactECharts
-                            option={statusConfig}
+                            option={childrenAgeGroupsConfig}
                             style={{ height: '260px', width: '100%' }}
                         />
                     )}

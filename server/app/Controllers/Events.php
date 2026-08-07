@@ -871,6 +871,7 @@ class Events extends ResourceController
                 'email'                => $r['email'],
                 'adults'               => (int) $r['adults'],
                 'children'             => (int) $r['children'],
+                'childrenAges'         => json_decode($r['children_ages'] ?? '[]', true) ?: [],
                 'status'               => $r['status'],
                 'createdAt'            => $r['created_at'],
                 'checkinAt'            => $r['checkin_at'],
