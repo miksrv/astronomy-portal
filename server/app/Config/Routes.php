@@ -126,6 +126,7 @@ $routes->group('events', static function ($routes) {
     $routes->post('payment/status', 'Events::paymentStatus');
     $routes->match(['get', 'post'], 'payment/callback', 'Events::paymentCallback');
     $routes->post('registrations/(:alphanum)/verify-payment', 'Events::verifyRegistrationPayment/$1');
+    $routes->post('registrations/(:alphanum)/refund', 'Events::refundRegistrationPayment/$1');
     $routes->post('upload/(:alphanum)', 'Events::upload/$1');
     $routes->options('/', static function () {});
     $routes->options('(:any)', static function () {});

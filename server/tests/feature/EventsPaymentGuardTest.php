@@ -54,6 +54,12 @@ final class EventsPaymentGuardTest extends CIUnitTestCase
         $result->assertStatus(401);
     }
 
+    public function testRefundRegistrationPaymentWithoutTokenReturns401(): void
+    {
+        $result = $this->post('events/registrations/abc1234567890/refund', []);
+        $result->assertStatus(401);
+    }
+
     public function testPaymentCallbackWithInvalidSignatureReturns400(): void
     {
         // No callback token is configured in the test env, so any signature is

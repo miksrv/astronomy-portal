@@ -153,7 +153,7 @@ There is no central permission/filter middleware — every backend controller ch
 | `user` | Own profile, own reviews/comments, own event bookings & tickets, own event history |
 | `security` | Everything `user` has, plus the "Проверка QR-кодов" menu link and the `/stargazing/checkin` page |
 | `moderator` | Everything `security` has, plus `/stargazing/[name]/statistic`, deleting any review/comment, creating/editing stargazing events and replacing their cover image via `/stargazing/form` (archiving/deleting an event is `admin`-only), and admin/moderator-only blocks on the event detail page |
-| `admin` | Full admin menu (`/photos/form`, `/objects/form`, `/stargazing/form`, `/mailing`, `/users`), all object/photo/event/mailing create-edit-delete forms, archiving stargazing events, event photo uploads, the `/users` member list, and enabled relay power-switch controls |
+| `admin` | Full admin menu (`/photos/form`, `/objects/form`, `/stargazing/form`, `/mailing`, `/users`), all object/photo/event/mailing create-edit-delete forms, archiving stargazing events, event photo uploads, the `/users` member list, enabled relay power-switch controls, and the "Возврат" (forced refund) action in the `/stargazing/[name]/statistic` registrations table |
 
 ### Backend endpoints by role
 
@@ -164,7 +164,7 @@ There is no central permission/filter middleware — every backend controller ch
 | Owner, or `admin`/`moderator`/`security` | `GET /events/ticket/:id` |
 | `admin`, `moderator`, `security` | `POST /events/checkin/:id` |
 | `admin`, `moderator` | `GET /events/:id/statistic`; `POST /events` (create); `PATCH /events/:id` (update); `POST /events/:id/cover` |
-| `admin` only | `PUT /relay/set`; `POST\|PATCH\|DELETE /objects`; `GET /members`; `GET /events/members/:id`; `DELETE /events/:id`, `POST /events/upload/:id`; all `/mailings*` routes except `unsubscribe`; `POST\|PATCH\|DELETE /photos` |
+| `admin` only | `PUT /relay/set`; `POST\|PATCH\|DELETE /objects`; `GET /members`; `GET /events/members/:id`; `DELETE /events/:id`, `POST /events/upload/:id`; `POST /events/registrations/:id/refund` (forced refund + cancellation — stricter than the `admin`/`moderator` verify-payment endpoint, since it moves real money); all `/mailings*` routes except `unsubscribe`; `POST\|PATCH\|DELETE /photos` |
 | None (public) | Everything else — health check, camera, telescope statistics, equipment/categories, file serving, read-only objects/photos/events, comment listing, sitemap, mailing unsubscribe |
 
 > **Known gap:** `POST /photos/:any/upload` (`Photos::upload()`) currently has no auth/role check at all, unlike its sibling `create`/`update`/`delete` actions on the same controller which all require `admin`. This looks like an oversight rather than an intentional public endpoint.

@@ -72,13 +72,21 @@
     color: var(--text-color-primary)
     margin: 0 0 12px 0
 
+// A 3-column grid (rather than flex) so a spanning cell in one row lines up
+// pixel-for-pixel with the same number of cells in the row below — flex-grow
+// ratios alone drift apart once the two rows have a different item count,
+// since each row then subtracts a different number of gaps from its width.
 .chartsRow
-    display: flex
+    display: grid
+    grid-template-columns: repeat(3, 1fr)
     gap: 16px
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        flex-direction: column
+        grid-template-columns: 1fr
 
 .chartHalf
-    flex: 1 1 0
+    min-width: 0
+
+.chartWide
+    grid-column: span 2
     min-width: 0

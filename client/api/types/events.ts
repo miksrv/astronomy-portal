@@ -117,6 +117,8 @@ export interface EventRegistration {
     email: string
     adults: number
     children: number
+    /** Ages entered per child at booking time (see `ReqRegistration.childrenAges`); may be shorter than `children` for old bookings made before this field existed. */
+    childrenAges?: number[]
     status: 'pending' | 'confirmed' | 'failed'
     createdAt: string
     checkinAt?: string
@@ -137,6 +139,17 @@ export interface ReqVerifyRegistrationPayment {
 }
 
 export interface ResVerifyRegistrationPayment {
+    paymentStatus: PaymentStatus
+    registrationStatus: 'pending' | 'confirmed' | 'failed'
+    message: string
+}
+
+export interface ReqRefundRegistrationPayment {
+    id: string
+    eventId: string
+}
+
+export interface ResRefundRegistrationPayment {
     paymentStatus: PaymentStatus
     registrationStatus: 'pending' | 'confirmed' | 'failed'
     message: string

@@ -57,7 +57,8 @@
                 "submit": "Submit review",
                 "not-eligible": "You'll be able to leave a review after attending the event",
                 "floating-title": "Leave a review about the event",
-                "floating-close": "Dismiss the review reminder"
+                "floating-close": "Dismiss the review reminder",
+                "floating-thanks": "Thank you for your review!"
             },
             "star-map": {
                 "settings": {
@@ -235,6 +236,13 @@
                     "title": "Delete stargazing trip?",
                     "text": "This action cannot be undone. The stargazing trip will be permanently deleted.",
                     "error": "Failed to delete the stargazing trip. Please try again later."
+                },
+                "event-refund-dialog": {
+                    "title": "Issue a refund?",
+                    "text": "The payment will be fully refunded to the card it was made from (usually within 1–10 business days), and the registration will be cancelled. This action cannot be undone.",
+                    "confirm": "Issue refund",
+                    "done": "Done",
+                    "error": "Could not process the refund. Please try again later."
                 },
                 "event-ticket": {
                     "error": "Failed to load the ticket",
@@ -499,7 +507,8 @@
             "program-sky-desc": "We learn to spot bright stars and constellations right in the night sky overhead.",
             "program-telescope-title": "Observing through telescopes",
             "program-telescope-desc": "Several telescopes are aimed at different objects - take a look and ask the astronomers your questions.",
-            "registrations-verify": "Verify transaction",
+            "registrations-verify": "Verify",
+            "registrations-refund": "Refund",
             "registrations-status-canceled": "Canceled",
             "registrations-status-confirmed": "Confirmed",
             "registrations-status-failed": "Unpaid",
@@ -531,7 +540,8 @@
             "statistic-percent-sold": "Booked {{percent}}%",
             "statistic-timeline": "Registration trends",
             "statistic-gender": "Gender distribution",
-            "statistic-age-groups": "Age groups",
+            "statistic-age-groups-adults": "Adult age groups",
+            "statistic-age-groups-children": "Children's age groups",
             "statistic-registration-status": "Registration status",
             "statistic-updated": "Updated",
             "statistic-next-update": "Next update in",

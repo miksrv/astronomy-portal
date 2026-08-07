@@ -570,6 +570,36 @@ class Events extends ResourceController
     }
 
     /**
+     * Notifies the customer after an admin-initiated forced refund (see
+     * {@see refundRegistrationPayment()}) — same shape as
+     * {@see queueCancellationEmail()}, but the copy explicitly confirms the
+     * money is on its way back rather than just that the booking is gone.
+     */
+    private function queueRefundEmail(EventEntity $event, ?string $toEmail, ?string $locale): void
+    {
+        if (empty($toEmail)) {
+            return;
+        }
+
+        helper('locale');
+
+        $locale = $locale ?: 'ru';
+
+        try {
+            $title   = getLocalizedString($locale, $event->title_en, $event->title_ru);
+            $subject = lang('Events.refundEmailSubject', [$title], $locale);
+            $message = '<div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;color:#1b1f27;">'
+                . '<h2 style="margin:0 0 12px;">' . esc(lang('Events.refundEmailTitle', [], $locale)) . '</h2>'
+                . '<p style="margin:0;line-height:1.5;">' . esc(lang('Events.refundEmailIntro', [$title], $locale)) . '</p>'
+                . '</div>';
+
+            (new EmailQueueModel())->enqueue($toEmail, $subject, $message);
+        } catch (\Throwable $e) {
+            log_message('error', 'Refund email enqueue failed: {msg}', ['msg' => $e->getMessage()]);
+        }
+    }
+
+    /**
      * Alerts the admin via Telegram when an automatic refund fails during
      * user-initiated cancellation. The booking is still cancelled either way
      * (see {@see cancel()}) — this is what keeps a stuck refund from being
@@ -841,6 +871,7 @@ class Events extends ResourceController
                 'email'                => $r['email'],
                 'adults'               => (int) $r['adults'],
                 'children'             => (int) $r['children'],
+                'childrenAges'         => json_decode($r['children_ages'] ?? '[]', true) ?: [],
                 'status'               => $r['status'],
                 'createdAt'            => $r['created_at'],
                 'checkinAt'            => $r['checkin_at'],
@@ -921,6 +952,124 @@ class Events extends ResourceController
                 'paymentStatus'      => $status,
                 'registrationStatus' => $refreshed->status,
                 'message'            => $message,
+            ]);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * Admin-only forced refund: returns the full payment to the customer's
+     * card and cancels the booking, bypassing the self-cancellation deadline
+     * that {@see cancel()} enforces. Meant for the case where a paid,
+     * confirmed registration can no longer be self-cancelled (the
+     * registration window has closed) but the customer still needs their
+     * money back — e.g. a force-majeure no-show.
+     *
+     * Unlike the automatic refund inside {@see cancel()} (fire-and-forget,
+     * alerted via Telegram on failure since nobody is watching the
+     * response), this call is synchronous and admin-initiated: the caller
+     * sees the bank's result immediately, so no separate alert is sent here.
+     */
+    public function refundRegistrationPayment($id = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        // Stricter than verifyRegistrationPayment() (admin+moderator) — this
+        // action moves real money and cannot be undone, so it's admin-only.
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
+        }
+
+        try {
+            if (empty($id)) {
+                return $this->failValidationErrors(lang('App.validationError'));
+            }
+
+            $eventUsersModel = new EventsUsersModel();
+            $booking         = $eventUsersModel->withDeleted()->find($id);
+
+            if ($booking === null) {
+                return $this->failNotFound(lang('Events.notRegistered'));
+            }
+
+            if ($booking->deleted_at !== null) {
+                return $this->fail(lang('Events.refundAlreadyCanceled'), 400);
+            }
+
+            if (empty($booking->payment_id)) {
+                return $this->fail(lang('Events.noPaymentLinked'), 400);
+            }
+
+            $paymentsModel = new PaymentsModel();
+            $payment       = $paymentsModel->find($booking->payment_id);
+
+            if ($payment === null) {
+                return $this->failNotFound(lang('Events.paymentNotFound'));
+            }
+
+            // Idempotent: money is already back, just make sure the booking
+            // itself is cancelled too (e.g. a previous attempt refunded the
+            // payment but the process died before the booking was deleted).
+            if ($payment->status === 'refunded') {
+                if ($booking->deleted_at === null) {
+                    $eventUsersModel->delete($booking->id);
+                }
+
+                return $this->respond([
+                    'paymentStatus'      => 'refunded',
+                    'registrationStatus' => $booking->status,
+                    'message'            => lang('Events.refundAlreadyDone'),
+                ]);
+            }
+
+            if ($payment->status !== 'paid') {
+                return $this->fail(lang('Events.refundNotPaid'), 400);
+            }
+
+            // No row lock here on purpose: unlike cancel() (which frees the
+            // seat first and refunds best-effort afterwards, alerting on
+            // failure since it's unattended), this admin action deliberately
+            // leaves the booking untouched until the gateway call actually
+            // succeeds — so a failed refund is a safe, retryable no-op, and
+            // there's nothing on the events_users side to race over yet. The
+            // external HTTP call below must not happen inside a DB
+            // transaction/lock (see cancel()'s comment on the same rule).
+            // Concurrent duplicate calls (e.g. a double click) are still
+            // safe: PaymentLibrary::refund() atomically claims the payment
+            // row ('paid' -> 'refunding') before calling the gateway, so at
+            // most one caller actually reaches the bank.
+            $refundOk = (new PaymentLibrary())->refund($payment);
+
+            if (!$refundOk) {
+                // Re-fetch: refund() persisted error_code/error_message on
+                // the row but didn't mutate this in-memory entity.
+                $refreshedPayment = $paymentsModel->find($payment->id);
+
+                return $this->fail(
+                    lang('Events.refundFailed', [$refreshedPayment->error_message ?? '']),
+                    502
+                );
+            }
+
+            $eventUsersModel->delete($booking->id);
+
+            $refreshed = $eventUsersModel->withDeleted()->find($id);
+            $event     = $this->model->find($booking->event_id);
+
+            if ($event) {
+                $user = (new UsersModel())->find($booking->user_id);
+                $this->queueRefundEmail($event, $user->email ?? null, $user->locale ?? null);
+            }
+
+            return $this->respond([
+                'paymentStatus'      => 'refunded',
+                'registrationStatus' => $refreshed->status,
+                'message'            => lang('Events.refundSuccess'),
             ]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);

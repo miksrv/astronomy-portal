@@ -215,15 +215,15 @@ class EventsUsersModel extends ApplicationBaseModel
      * on this table.
      *
      * @param string $eventId The event ID to fetch registrations for.
-     * @return array Rows with id, user_id, adults, children, status, created_at,
-     *               checkin_at, deleted_at, payment_id, name, email,
+     * @return array Rows with id, user_id, adults, children, children_ages, status,
+     *               created_at, checkin_at, deleted_at, payment_id, name, email,
      *               payment_order_id, payment_status, payment_error_message.
      */
     public function getRegistrationsByEventId(string $eventId): array
     {
         return $this->db->table('events_users eu')
             ->select('
-                eu.id, eu.user_id, eu.adults, eu.children, eu.status, eu.created_at,
+                eu.id, eu.user_id, eu.adults, eu.children, eu.children_ages, eu.status, eu.created_at,
                 eu.checkin_at, eu.deleted_at, eu.payment_id,
                 u.name, u.email,
                 p.order_id AS payment_order_id, p.status AS payment_status,

@@ -57,7 +57,8 @@
                 "submit": "Отправить отзыв",
                 "not-eligible": "Вы сможете оставить отзыв после посещения события",
                 "floating-title": "Оставьте отзыв о мероприятии",
-                "floating-close": "Закрыть напоминание об отзыве"
+                "floating-close": "Закрыть напоминание об отзыве",
+                "floating-thanks": "Спасибо за ваш отзыв!"
             },
             "star-map": {
                 "settings": {
@@ -237,6 +238,13 @@
                     "title": "Удалить астровыезд?",
                     "text": "Это действие нельзя отменить. Астровыезд будет удалён безвозвратно.",
                     "error": "Не удалось удалить астровыезд. Попробуйте позже."
+                },
+                "event-refund-dialog": {
+                    "title": "Оформить возврат?",
+                    "text": "Оплата будет полностью возвращена на карту, с которой производился платёж (обычно в течение 1–10 рабочих дней), а регистрация — аннулирована. Действие необратимо.",
+                    "confirm": "Оформить возврат",
+                    "done": "Готово",
+                    "error": "Не удалось выполнить возврат. Попробуйте позже."
                 },
                 "event-ticket": {
                     "error": "Не удалось загрузить билет",
@@ -503,12 +511,13 @@
             "program-sky-desc": "Учимся находить яркие звёзды и созвездия прямо на ночном небе над головой.",
             "program-telescope-title": "Наблюдения в телескопы",
             "program-telescope-desc": "Несколько телескопов наведены на разные объекты - смотрите и задавайте вопросы астрономам.",
-            "registrations-verify": "Проверить транзакцию",
+            "registrations-verify": "Проверить",
+            "registrations-refund": "Возврат",
             "registrations-status-canceled": "Отменена",
             "registrations-status-confirmed": "Подтверждена",
             "registrations-status-failed": "Не оплачена",
             "registrations-status-pending": "Ожидает оплаты",
-            "registrations-status-refunded": "Возврат оформлен",
+            "registrations-status-refunded": "Возврат",
             "registrations-column-participant": "Участник",
             "registrations-column-date": "Дата регистрации",
             "registrations-column-members": "Взрослые / Дети",
@@ -537,7 +546,8 @@
             "statistic-percent-sold": "Забронировано {{percent}}%",
             "statistic-timeline": "Динамика регистраций",
             "statistic-gender": "Распределение по полу",
-            "statistic-age-groups": "Возрастные группы",
+            "statistic-age-groups-adults": "Возрастные группы взрослых",
+            "statistic-age-groups-children": "Возрастные группы детей",
             "statistic-registration-status": "Статусы регистраций",
             "statistic-updated": "Обновлено",
             "statistic-next-update": "Следующее обновление через",
