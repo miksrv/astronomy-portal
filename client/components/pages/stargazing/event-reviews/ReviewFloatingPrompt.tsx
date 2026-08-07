@@ -19,6 +19,10 @@ import styles from './styles.module.sass'
 // starting point when stacking above the cookie-consent banner.
 const BASE_OFFSET = 16
 
+// How long the "Спасибо за ваш отзыв" confirmation stays up before the
+// panel auto-closes itself.
+const THANKS_DURATION = 3000
+
 interface ReviewFloatingPromptProps {
     eventId: string
     // Whether the user is eligible to leave a review and hasn't yet - mirrors
@@ -29,11 +33,14 @@ interface ReviewFloatingPromptProps {
 /**
  * Persistent bottom-of-viewport reminder to leave a review, shown on top of
  * the regular in-page review form so it doesn't get missed by users who
- * don't scroll all the way down. Reuses ReviewForm and hides itself once the
- * user submits a review (via `show` going false), dismisses it (in which
- * case it stays hidden for REVIEW_PROMPT_DISMISS_DURATION via a cookie), or
- * scrolls down far enough to see the permanent in-page form - reappearing
- * once that form scrolls back out of view.
+ * don't scroll all the way down. Reuses ReviewForm; on successful submission
+ * it swaps the form for a brief "Спасибо за ваш отзыв" confirmation and
+ * auto-closes after THANKS_DURATION rather than disappearing instantly (the
+ * parent's `show` typically flips false around the same time anyway, once
+ * `hasReviewed` refetches). It otherwise hides itself when dismissed (in
+ * which case it stays hidden for REVIEW_PROMPT_DISMISS_DURATION via a
+ * cookie), or when the user scrolls down far enough to see the permanent
+ * in-page form - reappearing once that form scrolls back out of view.
  */
 export const ReviewFloatingPrompt: React.FC<ReviewFloatingPromptProps> = ({ eventId, show }) => {
     const { t } = useTranslation()
@@ -43,6 +50,7 @@ export const ReviewFloatingPrompt: React.FC<ReviewFloatingPromptProps> = ({ even
     const [dismissed, setDismissed] = useState<boolean | null>(null)
     const [bottomOffset, setBottomOffset] = useState(BASE_OFFSET)
     const [inlineFormVisible, setInlineFormVisible] = useState(false)
+    const [justSubmitted, setJustSubmitted] = useState(false)
 
     useEffect(() => {
         setDismissed(!!getCookie(dismissCookieName))
@@ -89,6 +97,19 @@ export const ReviewFloatingPrompt: React.FC<ReviewFloatingPromptProps> = ({ even
         }
     }, [])
 
+    // Auto-close the "Спасибо" confirmation a few seconds after submission,
+    // instead of relying on `show` (which flips false once the parent
+    // refetches `hasReviewed`, but not necessarily right away).
+    useEffect(() => {
+        if (!justSubmitted) {
+            return
+        }
+
+        const timer = setTimeout(() => setJustSubmitted(false), THANKS_DURATION)
+
+        return () => clearTimeout(timer)
+    }, [justSubmitted])
+
     const handleClose = () => {
         void setCookie(dismissCookieName, '1', { maxAge: REVIEW_PROMPT_DISMISS_DURATION })
         setDismissed(true)
@@ -96,7 +117,10 @@ export const ReviewFloatingPrompt: React.FC<ReviewFloatingPromptProps> = ({ even
 
     // dismissed === null means the cookie check hasn't run yet (SSR/first
     // paint) - stay hidden until it has, to avoid a flash of the panel.
-    if (!show || dismissed !== false || inlineFormVisible) {
+    // `justSubmitted` overrides all of that so the thank-you confirmation
+    // stays visible for its full duration even as `show`/`hasReviewed`
+    // change underneath it.
+    if (!justSubmitted && (!show || dismissed !== false || inlineFormVisible)) {
         return null
     }
 
@@ -105,25 +129,46 @@ export const ReviewFloatingPrompt: React.FC<ReviewFloatingPromptProps> = ({ even
             className={styles.floatingPrompt}
             style={{ bottom: bottomOffset }}
             role={'complementary'}
-            aria-label={t('components.common.review-form.floating-title', 'Оставьте отзыв о мероприятии')}
+            aria-label={
+                justSubmitted
+                    ? t('components.common.review-form.floating-thanks', 'Спасибо за ваш отзыв!')
+                    : t('components.common.review-form.floating-title', 'Оставьте отзыв о мероприятии')
+            }
         >
-            <button
-                type={'button'}
-                className={styles.floatingClose}
-                aria-label={t('components.common.review-form.floating-close', 'Закрыть напоминание об отзыве')}
-                onClick={handleClose}
-            >
-                <Icon name={'Close'} />
-            </button>
+            {!justSubmitted && (
+                <button
+                    type={'button'}
+                    className={styles.floatingClose}
+                    aria-label={t('components.common.review-form.floating-close', 'Закрыть напоминание об отзыве')}
+                    onClick={handleClose}
+                >
+                    <Icon name={'Close'} />
+                </button>
+            )}
 
-            <p className={styles.floatingTitle}>
-                {t('components.common.review-form.floating-title', 'Оставьте отзыв о мероприятии')}
-            </p>
+            {justSubmitted ? (
+                <div className={styles.floatingThanks}>
+                    <Icon
+                        name={'CheckCircle'}
+                        className={styles.floatingThanksIcon}
+                    />
+                    <p className={styles.floatingThanksText}>
+                        {t('components.common.review-form.floating-thanks', 'Спасибо за ваш отзыв!')}
+                    </p>
+                </div>
+            ) : (
+                <>
+                    <p className={styles.floatingTitle}>
+                        {t('components.common.review-form.floating-title', 'Оставьте отзыв о мероприятии')}
+                    </p>
 
-            <ReviewForm
-                entityType={'event'}
-                entityId={eventId}
-            />
+                    <ReviewForm
+                        entityType={'event'}
+                        entityId={eventId}
+                        onSuccess={() => setJustSubmitted(true)}
+                    />
+                </>
+            )}
         </div>
     )
 }

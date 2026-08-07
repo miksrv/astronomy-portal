@@ -57,7 +57,8 @@
                 "submit": "Submit review",
                 "not-eligible": "You'll be able to leave a review after attending the event",
                 "floating-title": "Leave a review about the event",
-                "floating-close": "Dismiss the review reminder"
+                "floating-close": "Dismiss the review reminder",
+                "floating-thanks": "Thank you for your review!"
             },
             "star-map": {
                 "settings": {
