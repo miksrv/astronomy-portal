@@ -7,6 +7,7 @@ Disallow: /objects/form
 Disallow: /stargazing/form
 Disallow: /stargazing/checkin
 Disallow: /stargazing/entry
+Disallow: /stargazing/payment
 Disallow: /auth
 Disallow: /en/auth
 Disallow: /mailing
@@ -18,6 +19,7 @@ Disallow: /en/objects/form
 Disallow: /en/stargazing/form
 Disallow: /en/stargazing/checkin
 Disallow: /en/stargazing/entry
+Disallow: /en/stargazing/payment
 Disallow: /en/mailing
 Disallow: /en/mailing/form
 Disallow: /en/users
@@ -27,6 +29,15 @@ Disallow: /unsubscribe
 Disallow: /en/unsubscribe
 Disallow: /stargazing/*/statistic
 Disallow: /en/stargazing/*/statistic
+
+# Yandex-specific: strip tracking/UTM params before indexing so links shared
+# with campaign/referrer tags (e.g. ?trk=..., ?ref=..., ?_ym_status-check=...)
+# are treated as the same URL as the clean page instead of being indexed as
+# separate duplicates with an identical title.
+Clean-param: _ym_status-check&_ym_lang /
+Clean-param: trk /
+Clean-param: ref /
+Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content /
 
 # Specify the main mirror of the site
 Host: https://astro.miksoft.pro

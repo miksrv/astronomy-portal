@@ -32,3 +32,20 @@ export const STARGAZING_FOUNDING_YEAR = 2015
 // (foreign authentication services restriction effective March 2025).
 // Set to true to re-enable the Google login button.
 export const AUTH_GOOGLE_ENABLED = false
+
+// DOM id of the fixed cookie-consent banner and the custom event it fires when
+// dismissed, so other fixed/floating bottom UI (e.g. the review reminder) can
+// read its rendered height and avoid overlapping it.
+export const COOKIE_CONSENT_BANNER_ID = 'cookie-consent-banner'
+export const COOKIE_CONSENT_DISMISSED_EVENT = 'cookie-consent:dismissed'
+
+// Cookie name prefix (per event id) used to remember that a user closed the
+// floating "leave a review" reminder, and how long that dismissal lasts
+// before the reminder is shown again.
+export const REVIEW_PROMPT_DISMISS_COOKIE_PREFIX = 'reviewPromptDismissed_'
+export const REVIEW_PROMPT_DISMISS_DURATION = 24 * 60 * 60 // seconds (24 hours)
+
+// DOM id of the permanent in-page review form, so the floating reminder can
+// hide itself while that form is visible on screen (no point showing both at
+// once) and reappear once it's scrolled out of view again.
+export const REVIEW_INLINE_FORM_ID = 'event-review-inline-form'

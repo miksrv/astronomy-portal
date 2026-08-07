@@ -12,6 +12,7 @@ import { openAuthDialog } from '@/api/applicationSlice'
 import { hosts } from '@/api/constants'
 import { formatUTCDate } from '@/utils/dates'
 import { getErrorMessage } from '@/utils/errors'
+import { removeMarkdownPreserveParagraphs } from '@/utils/strings'
 
 import { EventBookingForm } from './event-booking-form'
 import noEventsImage from './no-events.png'
@@ -384,51 +385,68 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
             <div className={cn(styles.upcomingEvent, isCompact && styles.compact)}>
                 {!isCompact && (
                     <div className={styles.imageContainer}>
-                        <Image
-                            className={styles.blur}
-                            src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
-                            alt={''}
-                            fill={true}
-                        />
-
-                        <Image
-                            className={styles.image}
-                            src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
-                            alt={`${t('components.pages.stargazing.event-upcoming.stargazing', 'Астровыезды')}: ${event?.title}`}
-                            width={1024}
-                            height={768}
-                        />
-
-                        {canModerate && (
-                            <div className={styles.adminActions}>
-                                <Button
-                                    size={'small'}
-                                    mode={'secondary'}
-                                    icon={'Pencil'}
-                                    title={t('common.edit', 'Редактировать')}
-                                    onClick={() => router.push(`/stargazing/form?id=${event?.id}`)}
+                        {/* Absolutely positioned so this column's own content (image +
+                            description) is excluded from the flex row's height
+                            calculation on desktop — the info column on the right is the
+                            actual source of truth for how tall this block is; this
+                            column just fills whatever height that ends up being and
+                            clips (with a fade) anything that doesn't fit. On mobile the
+                            columns stack instead, so this reverts to normal flow — see
+                            the media query in styles.module.sass. */}
+                        <div className={styles.imageContent}>
+                            <div className={styles.imageWrapper}>
+                                <Image
+                                    className={styles.image}
+                                    src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
+                                    alt={`${t('components.pages.stargazing.event-upcoming.stargazing', 'Астровыезды')}: ${event?.title}`}
+                                    width={1024}
+                                    height={768}
                                 />
 
-                                <Button
-                                    size={'small'}
-                                    mode={'secondary'}
-                                    icon={'BarChart'}
-                                    title={t('components.pages.stargazing.event-upcoming.statistic', 'Статистика')}
-                                    onClick={() => router.push(`/stargazing/${event?.id}/statistic`)}
-                                />
+                                {canModerate && (
+                                    <div className={styles.adminActions}>
+                                        <Button
+                                            size={'small'}
+                                            mode={'secondary'}
+                                            icon={'Pencil'}
+                                            title={t('common.edit', 'Редактировать')}
+                                            onClick={() => router.push(`/stargazing/form?id=${event?.id}`)}
+                                        />
 
-                                {canDelete && (
-                                    <Button
-                                        size={'small'}
-                                        mode={'primary'}
-                                        variant={'negative'}
-                                        icon={'Close'}
-                                        title={t('common.delete', 'Удалить')}
-                                        onClick={() => setShowDeleteDialog(true)}
-                                    />
+                                        <Button
+                                            size={'small'}
+                                            mode={'secondary'}
+                                            icon={'BarChart'}
+                                            title={t(
+                                                'components.pages.stargazing.event-upcoming.statistic',
+                                                'Статистика'
+                                            )}
+                                            onClick={() => router.push(`/stargazing/${event?.id}/statistic`)}
+                                        />
+
+                                        {canDelete && (
+                                            <Button
+                                                size={'small'}
+                                                mode={'primary'}
+                                                variant={'negative'}
+                                                icon={'Close'}
+                                                title={t('common.delete', 'Удалить')}
+                                                onClick={() => setShowDeleteDialog(true)}
+                                            />
+                                        )}
+                                    </div>
                                 )}
                             </div>
-                        )}
+
+                            {/* Stripped of Markdown since it's shown as plain filler text
+                                filling the space below the cover photo, not rendered rich
+                                content. Hidden on mobile, where there's no gap to fill. */}
+                            {event?.content && (
+                                <div className={styles.imageDescription}>
+                                    {removeMarkdownPreserveParagraphs(event.content)}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
 

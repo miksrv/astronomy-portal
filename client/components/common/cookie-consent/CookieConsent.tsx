@@ -4,7 +4,7 @@ import { Button } from 'simple-react-ui-kit'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
-import { LOCAL_STORAGE } from '@/utils/constants'
+import { COOKIE_CONSENT_BANNER_ID, COOKIE_CONSENT_DISMISSED_EVENT, LOCAL_STORAGE } from '@/utils/constants'
 import * as LocalStorage from '@/utils/localstorage'
 
 import styles from './styles.module.sass'
@@ -21,6 +21,10 @@ export const CookieConsent: React.FC = () => {
     const handleAccept = () => {
         LocalStorage.setItem(LOCAL_STORAGE.COOKIE_CONSENT as 'COOKIE_CONSENT', 'true')
         setVisible(false)
+
+        // Lets other fixed/floating bottom UI (e.g. the review reminder) know
+        // it can reclaim the space this banner used to occupy.
+        window.dispatchEvent(new Event(COOKIE_CONSENT_DISMISSED_EVENT))
     }
 
     if (!visible) {
@@ -29,6 +33,7 @@ export const CookieConsent: React.FC = () => {
 
     return (
         <div
+            id={COOKIE_CONSENT_BANNER_ID}
             className={styles.cookieConsent}
             role={'region'}
             aria-label={t('components.common.cookie-consent.title', 'Уведомление об использовании cookies')}

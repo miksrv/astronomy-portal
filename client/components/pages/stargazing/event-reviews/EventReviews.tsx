@@ -6,6 +6,9 @@ import { useTranslation } from 'next-i18next/pages'
 import { API, ApiModel, useAppSelector } from '@/api'
 import { ReviewCard } from '@/components/common/review-card/ReviewCard'
 import { ReviewForm } from '@/components/common/review-form/ReviewForm'
+import { REVIEW_INLINE_FORM_ID } from '@/utils/constants'
+
+import { ReviewFloatingPrompt } from './ReviewFloatingPrompt'
 
 import styles from './styles.module.sass'
 
@@ -42,46 +45,56 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
     }
 
     return (
-        <Container>
-            {showForm && (
-                <div className={styles.formWrapper}>
-                    <ReviewForm
-                        entityType={'event'}
-                        entityId={eventId}
-                    />
-                </div>
-            )}
+        <>
+            <Container>
+                {showForm && (
+                    <div
+                        id={REVIEW_INLINE_FORM_ID}
+                        className={styles.formWrapper}
+                    >
+                        <ReviewForm
+                            entityType={'event'}
+                            entityId={eventId}
+                        />
+                    </div>
+                )}
 
-            {showNotEligible && (
-                <p className={styles.infoText}>
-                    {t(
-                        'components.common.review-form.not-eligible',
-                        'Вы сможете оставить отзыв после посещения события'
-                    )}
-                </p>
-            )}
+                {showNotEligible && (
+                    <p className={styles.infoText}>
+                        {t(
+                            'components.common.review-form.not-eligible',
+                            'Вы сможете оставить отзыв после посещения события'
+                        )}
+                    </p>
+                )}
 
-            {showTopSection && <hr className={styles.divider} />}
+                {showTopSection && <hr className={styles.divider} />}
 
-            {items.length > 0 ? (
-                <ul className={styles.list}>
-                    {items.map((review) => (
-                        <li key={review.id}>
-                            <ReviewCard
-                                review={review}
-                                canDelete={canDeleteReview(review)}
-                                onDelete={(id) => {
-                                    void deleteComment(id)
-                                }}
-                            />
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <p className={styles.empty}>
-                    {t('components.common.reviews-section.empty', 'Отзывов пока нет. Будьте первым!')}
-                </p>
-            )}
-        </Container>
+                {items.length > 0 ? (
+                    <ul className={styles.list}>
+                        {items.map((review) => (
+                            <li key={review.id}>
+                                <ReviewCard
+                                    review={review}
+                                    canDelete={canDeleteReview(review)}
+                                    onDelete={(id) => {
+                                        void deleteComment(id)
+                                    }}
+                                />
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className={styles.empty}>
+                        {t('components.common.reviews-section.empty', 'Отзывов пока нет. Будьте первым!')}
+                    </p>
+                )}
+            </Container>
+
+            <ReviewFloatingPrompt
+                eventId={eventId}
+                show={showForm}
+            />
+        </>
     )
 }
