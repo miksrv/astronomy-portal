@@ -508,7 +508,7 @@
             "registrations-status-confirmed": "Подтверждена",
             "registrations-status-failed": "Не оплачена",
             "registrations-status-pending": "Ожидает оплаты",
-            "registrations-status-refunded": "Возврат оформлен",
+            "registrations-status-refunded": "Возврат",
             "registrations-column-participant": "Участник",
             "registrations-column-date": "Дата регистрации",
             "registrations-column-members": "Взрослые / Дети",

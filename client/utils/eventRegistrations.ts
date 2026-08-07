@@ -43,7 +43,7 @@ export const getStatusLabel = (t: (key: string, fallback: string) => string, sta
         confirmed: t('pages.stargazing.registrations-status-confirmed', 'Подтверждена'),
         failed: t('pages.stargazing.registrations-status-failed', 'Не оплачена'),
         pending: t('pages.stargazing.registrations-status-pending', 'Ожидает оплаты'),
-        refunded: t('pages.stargazing.registrations-status-refunded', 'Возврат оформлен')
+        refunded: t('pages.stargazing.registrations-status-refunded', 'Возврат')
     }
 
     return map[status]
