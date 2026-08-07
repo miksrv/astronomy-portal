@@ -63,6 +63,7 @@ POST   /events/cancel               → Events::cancel
 POST   /events/payment/status       → Events::paymentStatus
 GET|POST /events/payment/callback   → Events::paymentCallback   (Alfa-Bank server-to-server callback; HMAC-verified)
 POST   /events/registrations/:id/verify-payment → Events::verifyRegistrationPayment
+POST   /events/registrations/:id/refund → Events::refundRegistrationPayment (admin only — forced refund + cancellation)
 POST   /events/upload/:id           → Events::upload
 
 GET    /mailings                    → Mailings::list
