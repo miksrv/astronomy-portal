@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 4.7.4
+
+### Patch Changes
+
+- Added an admin-only forced-refund action for paid event registrations: a new `POST /events/registrations/:id/refund` endpoint performs an idempotent synchronous refund via `PaymentLibrary`, cancels the registration on success, returns clear statuses for already-cancelled/already-refunded/not-paid/bank-declined cases, and queues a refund confirmation email (localized EN/RU); the client surfaces it as a grouped verify/refund action with a confirmation dialog, available only for confirmed, active, paid registrations. Documented as admin-only in README and `server/CLAUDE.md`
+- Kept the floating stargazing review prompt visible briefly after submission with a thank-you confirmation state before auto-closing
+- Shortened the "refunded" registration status label from "Возврат оформлен" to "Возврат"
+
 ## 4.7.3
 
 ### Patch Changes
