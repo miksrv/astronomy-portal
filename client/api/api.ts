@@ -126,6 +126,16 @@ export const API = createApi({
                 url: `events/registrations/${id}/verify-payment`
             })
         }),
+        eventRefundRegistrationPayment: builder.mutation<
+            ApiType.Events.ResRefundRegistrationPayment,
+            ApiType.Events.ReqRefundRegistrationPayment
+        >({
+            invalidatesTags: (result, error, { eventId }) => [{ id: eventId, type: 'EventUsers' }],
+            query: ({ id }) => ({
+                method: 'POST',
+                url: `events/registrations/${id}/refund`
+            })
+        }),
         eventGetCheckin: builder.mutation<ApiType.Events.ResCheckin, string>({
             query: (id) => `events/checkin/${id}`
         }),

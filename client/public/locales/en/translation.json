@@ -236,6 +236,13 @@
                     "text": "This action cannot be undone. The stargazing trip will be permanently deleted.",
                     "error": "Failed to delete the stargazing trip. Please try again later."
                 },
+                "event-refund-dialog": {
+                    "title": "Issue a refund?",
+                    "text": "The payment will be fully refunded to the card it was made from (usually within 1–10 business days), and the registration will be cancelled. This action cannot be undone.",
+                    "confirm": "Issue refund",
+                    "done": "Done",
+                    "error": "Could not process the refund. Please try again later."
+                },
                 "event-ticket": {
                     "error": "Failed to load the ticket",
                     "download": "Download ticket",
@@ -499,7 +506,8 @@
             "program-sky-desc": "We learn to spot bright stars and constellations right in the night sky overhead.",
             "program-telescope-title": "Observing through telescopes",
             "program-telescope-desc": "Several telescopes are aimed at different objects - take a look and ask the astronomers your questions.",
-            "registrations-verify": "Verify transaction",
+            "registrations-verify": "Verify",
+            "registrations-refund": "Refund",
             "registrations-status-canceled": "Canceled",
             "registrations-status-confirmed": "Confirmed",
             "registrations-status-failed": "Unpaid",

@@ -75,6 +75,12 @@
 .nowrap
     white-space: nowrap
 
+.actionsCell
+    display: flex
+    flex-wrap: wrap
+    gap: 6px
+    align-items: flex-start
+
 .verifyCell
     display: flex
     flex-direction: column
@@ -90,6 +96,22 @@
     font-size: var(--font-size-small)
     color: var(--color-error, #e5484d)
     max-width: 220px
+
+.confirmContent
+    margin: 10px 20px
+
+.notifyText
+    font-size: var(--font-size-small)
+    font-weight: 100
+
+.notifySuccess
+    font-size: var(--font-size-small)
+    color: var(--color-success, #2e7d32)
+
+.confirmationFooter
+    display: flex
+    gap: 10px
+    justify-content: right
 
 .badgeConfirmed
     background: #2e7d32 !important

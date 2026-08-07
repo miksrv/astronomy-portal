@@ -142,6 +142,17 @@ export interface ResVerifyRegistrationPayment {
     message: string
 }
 
+export interface ReqRefundRegistrationPayment {
+    id: string
+    eventId: string
+}
+
+export interface ResRefundRegistrationPayment {
+    paymentStatus: PaymentStatus
+    registrationStatus: 'pending' | 'confirmed' | 'failed'
+    message: string
+}
+
 /* Cover */
 export interface ReqUpdateCover {
     id: string
