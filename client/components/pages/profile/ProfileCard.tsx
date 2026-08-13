@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Button, Container, Input, Message, Select } from 'simple-react-ui-kit'
 
 import { useRouter } from 'next/router'
@@ -31,6 +31,23 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
     const [updateProfile, { isLoading }] = API.useAuthUpdateProfileMutation()
+
+    // `user` is still undefined on the very first render (it's populated a tick
+    // later by useAuthSession's login() dispatch), so the useState initializers
+    // above capture empty defaults. Re-sync the fields once real user data
+    // shows up, but only the first time for a given user — otherwise a
+    // background refetch of `authGetMe` would stomp on an in-progress edit.
+    const syncedUserId = useRef<string | undefined>(undefined)
+
+    useEffect(() => {
+        if (user && syncedUserId.current !== user.id) {
+            setName(user.name ?? '')
+            setPhone(user.phone ?? '')
+            setBirthday(user.birthday ?? '')
+            setSex(user.sex)
+            syncedUserId.current = user.id
+        }
+    }, [user])
 
     if (!user) {
         return null
