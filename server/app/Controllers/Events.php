@@ -1771,6 +1771,10 @@ class Events extends ResourceController
                 return $this->failNotFound();
             }
 
+            if (!$this->model->isUpcoming($eventData)) {
+                return $this->failValidationErrors(['error' => lang('Events.cannotDeletePastEvent')]);
+            }
+
             $hasRegistrations = (new EventsUsersModel())
                 ->whereIn('status', ['pending', 'confirmed'])
                 ->where('event_id', $id)

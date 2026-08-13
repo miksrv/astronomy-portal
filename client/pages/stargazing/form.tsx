@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { getCookie } from 'cookies-next'
-import { Button, Dialog, Message } from 'simple-react-ui-kit'
+import { Message } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { EventForm, EventFormType } from '@/components/pages/stargazing'
@@ -18,13 +18,6 @@ const StargazingFormPage: NextPage<object> = () => {
     const { id: rawId } = router.query
     const id = typeof rawId === 'string' ? rawId : undefined
     const { t } = useTranslation()
-
-    const currentUser = useAppSelector((state) => state.auth.user)
-    // Archiving (soft-delete) an event is intentionally admin-only on the backend
-    // (`Events::delete`) — moderators can create/edit/change cover but not archive.
-    const canArchive = currentUser?.role === ApiModel.UserRole.ADMIN
-
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
     const {
         data: eventData,
@@ -41,8 +34,6 @@ const StargazingFormPage: NextPage<object> = () => {
         API.useEventPatchMutation()
 
     const [updateCover, { isLoading: coverLoading }] = API.useEventUpdateCoverMutation()
-
-    const [deleteEvent, { isLoading: deleteLoading }] = API.useEventDeleteMutation()
 
     const isEditMode = !!id
 
@@ -91,17 +82,7 @@ const StargazingFormPage: NextPage<object> = () => {
         router.back()
     }
 
-    const handleDeleteConfirm = async () => {
-        if (!id) {
-            return
-        }
-
-        setShowDeleteDialog(false)
-        await deleteEvent(id)
-        await router.push('/stargazing')
-    }
-
-    const isLoading = eventLoading || createLoading || patchLoading || coverLoading || deleteLoading
+    const isLoading = eventLoading || createLoading || patchLoading || coverLoading
     const isSuccess = createSuccess || patchSuccess
 
     const currentPageTitle = isEditMode
@@ -123,17 +104,7 @@ const StargazingFormPage: NextPage<object> = () => {
                         text: t('menu.stargazing', 'Астровыезды')
                     }
                 ]}
-            >
-                {isEditMode && canArchive && (
-                    <Button
-                        icon={'ReportError'}
-                        mode={'secondary'}
-                        label={t('common.archive', 'Архивировать')}
-                        disabled={isLoading}
-                        onClick={() => setShowDeleteDialog(true)}
-                    />
-                )}
-            </AppToolbar>
+            />
 
             {(createError || patchError || isSuccess) && (
                 <Message
@@ -151,32 +122,6 @@ const StargazingFormPage: NextPage<object> = () => {
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
             />
-
-            <Dialog
-                open={showDeleteDialog}
-                title={t('pages.stargazing.archive-confirm-title', 'Архивировать мероприятие?')}
-                onCloseDialog={() => setShowDeleteDialog(false)}
-            >
-                <p>
-                    {t(
-                        'pages.stargazing.archive-confirm-body',
-                        'Вы уверены? Мероприятие будет скрыто от пользователей.'
-                    )}
-                </p>
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '16px' }}>
-                    <Button
-                        mode={'secondary'}
-                        label={t('common.cancel', 'Отмена')}
-                        onClick={() => setShowDeleteDialog(false)}
-                    />
-                    <Button
-                        mode={'primary'}
-                        variant={'negative'}
-                        label={t('common.confirm', 'Подтвердить')}
-                        onClick={handleDeleteConfirm}
-                    />
-                </div>
-            </Dialog>
 
             <AppFooter />
         </AppLayout>

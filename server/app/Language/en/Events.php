@@ -3,6 +3,7 @@
 return [
     'notFound'           => 'Event not found.',
     'hasRegistrations'   => 'This event cannot be deleted because it already has registrations. Cancel all bookings first.',
+    'cannotDeletePastEvent' => 'This event cannot be deleted because its date has already passed.',
     'noUpcomingEvents'   => 'No upcoming events.',
     'invalidQrCode'      => 'Invalid QR code.',
     'notExists'          => 'This event does not exist.',
