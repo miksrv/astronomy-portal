@@ -5,6 +5,18 @@ const nextConfig = {
     compiler: {
         removeConsole: process.env.NODE_ENV === 'production'
     },
+    // The public sitemap URL is "/sitemap" (see public/robots.txt), served by the
+    // pages/api/sitemap.ts route handler. It can't live at pages/sitemap.tsx as a normal
+    // page: Next.js reserves any route resolving to "/sitemap" as an App Router metadata
+    // route and rejects `getServerSideProps` there, even under the Pages Router.
+    async rewrites() {
+        return [
+            {
+                source: '/sitemap',
+                destination: '/api/sitemap'
+            }
+        ]
+    },
     i18n,
     images: {
         remotePatterns: [
