@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Container, Spinner } from 'simple-react-ui-kit'
+import { Container } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
@@ -8,6 +8,7 @@ import { ReviewCard } from '@/components/common/review-card/ReviewCard'
 import { ReviewForm } from '@/components/common/review-form/ReviewForm'
 import { REVIEW_INLINE_FORM_ID, REVIEWS_PAGE_SIZE } from '@/utils/constants'
 
+import { EventReviewsSkeleton } from './EventReviewsSkeleton'
 import { ReviewFloatingPrompt } from './ReviewFloatingPrompt'
 
 import styles from './styles.module.sass'
@@ -72,6 +73,12 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
     const showNotEligible = isAuth && !canReview && !hasReviewed
     const showTopSection = showForm || showNotEligible
 
+    // Only the very first page fetch (no items yet) shows the full-list
+    // skeleton; a fetch triggered by the sentinel while items are already on
+    // screen gets the smaller "loading more" skeleton instead.
+    const isInitialLoading = isFetching && items.length === 0
+    const isLoadingMore = isFetching && items.length > 0
+
     const canDeleteReview = (review: ApiModel.Comment): boolean => {
         if (!user) {
             return false
@@ -123,20 +130,20 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
                             </li>
                         ))}
                     </ul>
+                ) : isInitialLoading ? (
+                    <EventReviewsSkeleton />
                 ) : (
-                    !isFetching && (
-                        <p className={styles.empty}>
-                            {t('components.common.reviews-section.empty', 'Отзывов пока нет. Будьте первым!')}
-                        </p>
-                    )
+                    <p className={styles.empty}>
+                        {t('components.common.reviews-section.empty', 'Отзывов пока нет. Будьте первым!')}
+                    </p>
                 )}
 
-                {(hasMore || (isFetching && items.length === 0)) && (
+                {hasMore && (
                     <div
                         ref={sentinelRef}
                         className={styles.loadMoreSentinel}
                     >
-                        {isFetching && <Spinner />}
+                        {isLoadingMore && <EventReviewsSkeleton count={2} />}
                     </div>
                 )}
             </Container>
