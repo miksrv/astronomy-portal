@@ -106,12 +106,20 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
                 )}
 
                 {showNotEligible && (
-                    <p className={styles.infoText}>
-                        {t(
-                            'components.common.review-form.not-eligible',
-                            'Вы сможете оставить отзыв после посещения события'
-                        )}
-                    </p>
+                    <div className={styles.infoBlock}>
+                        <p className={styles.infoTitle}>
+                            {t(
+                                'components.common.review-form.not-eligible-title',
+                                'Отзыв могут оставить только участники'
+                            )}
+                        </p>
+                        <p className={styles.infoText}>
+                            {t(
+                                'components.common.review-form.not-eligible',
+                                'Оставить отзыв может любой, кто был зарегистрирован на этот астровыезд'
+                            )}
+                        </p>
+                    </div>
                 )}
 
                 {showTopSection && <hr className={styles.divider} />}

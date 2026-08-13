@@ -55,7 +55,8 @@
                 "placeholder": "Share your impressions...",
                 "success": "Review published!",
                 "submit": "Submit review",
-                "not-eligible": "You'll be able to leave a review after attending the event",
+                "not-eligible-title": "Only participants can leave a review",
+                "not-eligible": "Anyone who was registered for this stargazing event can leave a review",
                 "floating-title": "Leave a review about the event",
                 "floating-close": "Dismiss the review reminder",
                 "floating-thanks": "Thank you for your review!"
