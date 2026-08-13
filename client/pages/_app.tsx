@@ -122,6 +122,24 @@ const App = ({ Component, pageProps }: AppProps) => {
 
             {process.env.NODE_ENV === 'production' && (
                 <>
+                    {/* Google tag (gtag.js) */}
+                    <Script
+                        src={'https://www.googletagmanager.com/gtag/js?id=G-BGBKSHELMF'}
+                        strategy={'afterInteractive'}
+                    />
+                    <Script
+                        id={'google-analytics'}
+                        strategy={'afterInteractive'}
+                    >
+                        {`
+                            window.dataLayer = window.dataLayer || [];
+                            function gtag(){dataLayer.push(arguments);}
+                            gtag('js', new Date());
+
+                            gtag('config', 'G-BGBKSHELMF');
+                        `}
+                    </Script>
+
                     {/* Yandex.Metrika counter */}
                     <Script
                         id={'yandex-metrika'}

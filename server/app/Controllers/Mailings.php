@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Entities\MailingEmailEntity;
 use App\Entities\MailingEntity;
 use App\Libraries\EmailLibrary;
 use App\Libraries\LocaleLibrary;
@@ -411,6 +412,41 @@ class Mailings extends ResourceController
     }
 
     /**
+     * GET /mailings/:id/preview
+     * Returns the campaign rendered through the same HTML template used for the
+     * real send, so the admin can see exactly what a subscriber's inbox will show
+     * (ADMIN only). Read-only — no email is sent.
+     */
+    public function preview($id = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
+        }
+
+        $mailing = $this->model->find($id);
+
+        if (!$mailing) {
+            return $this->failNotFound();
+        }
+
+        try {
+            $locale = $this->session->user->locale ?? 'ru';
+
+            $html = $this->renderNewsletterBody($mailing, $locale, 'preview');
+
+            return $this->respond(['html' => $html]);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
      * POST /mailings/:id/test
      * Send a test email immediately to the requesting admin (ADMIN only).
      */
@@ -435,23 +471,9 @@ class Mailings extends ResourceController
         }
 
         try {
-            $locale  = $this->session->user->locale ?? 'ru';
-            $siteUrl = rtrim(getenv('app.siteUrl'), '/');
-            $apiUrl  = rtrim(getenv('app.baseURL'), '/');
+            $locale = $this->session->user->locale ?? 'ru';
 
-            $imageUrl = null;
-
-            if (!empty($mailing->image)) {
-                $imageUrl = $apiUrl . '/' . $mailing->image;
-            }
-
-            $body = view('email_newsletter', [
-                'subject'        => $mailing->subject,
-                'content'        => $mailing->content,
-                'imageUrl'       => $imageUrl,
-                'unsubscribeUrl' => $siteUrl . '/unsubscribe?mail=test',
-                'locale'         => $locale,
-            ]);
+            $body = $this->renderNewsletterBody($mailing, $locale, 'test');
 
             $emailLibrary = new EmailLibrary();
             $emailLibrary->send(
@@ -466,6 +488,32 @@ class Mailings extends ResourceController
 
             return $this->failServerError(lang('Mailings.testEmailFailed'));
         }
+    }
+
+    /**
+     * Renders the `email_newsletter` view for a campaign — the single source of
+     * truth for "what does this email look like", shared by preview() and test()
+     * (the real bulk send in `App\Commands\SendEmail` renders it independently
+     * since it runs per-recipient with a per-recipient unsubscribe link).
+     */
+    private function renderNewsletterBody(MailingEntity $mailing, string $locale, string $unsubscribeMailParam): string
+    {
+        $siteUrl = rtrim(getenv('app.siteUrl'), '/');
+        $apiUrl  = rtrim(getenv('app.baseURL'), '/');
+
+        $imageUrl = null;
+
+        if (!empty($mailing->image)) {
+            $imageUrl = $apiUrl . '/' . $mailing->image;
+        }
+
+        return view('email_newsletter', [
+            'subject'        => $mailing->subject,
+            'content'        => $mailing->content,
+            'imageUrl'       => $imageUrl,
+            'unsubscribeUrl' => $siteUrl . '/unsubscribe?mail=' . $unsubscribeMailParam,
+            'locale'         => $locale,
+        ]);
     }
 
     /**
@@ -538,6 +586,61 @@ class Mailings extends ResourceController
             ]);
 
             return $this->respond(['queued' => $count]);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * POST /mailings/:id/cancel
+     * Cancel a campaign that hasn't finished sending yet (ADMIN only).
+     *
+     * A draft is simply marked canceled — nothing has been queued yet. A
+     * campaign mid-send additionally has its still-queued `mailing_emails`
+     * rows flipped to 'canceled', so `system:send-email` (which only ever
+     * pulls rows with status = 'queued') stops delivering it. Completed or
+     * already-canceled campaigns can't be canceled again; a second request
+     * for an already-canceled campaign is treated as an idempotent no-op
+     * rather than an error, to survive a double-click safely.
+     */
+    public function cancel($id = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
+        }
+
+        $mailing = $this->model->find($id);
+
+        if (!$mailing) {
+            return $this->failNotFound();
+        }
+
+        if ($mailing->status === MailingEntity::STATUS_CANCELED) {
+            return $this->respond(['success' => true]);
+        }
+
+        if (!in_array($mailing->status, [MailingEntity::STATUS_DRAFT, MailingEntity::STATUS_SENDING], true)) {
+            return $this->failForbidden(lang('Mailings.onlyDraftOrSendingCancelable'));
+        }
+
+        try {
+            if ($mailing->status === MailingEntity::STATUS_SENDING) {
+                $mailingEmailsModel = new MailingEmailsModel();
+                $mailingEmailsModel
+                    ->where('mailing_id', $id)
+                    ->where('status', MailingEmailEntity::STATUS_QUEUED)
+                    ->update(null, ['status' => MailingEmailEntity::STATUS_CANCELED]);
+            }
+
+            $this->model->update($id, ['status' => MailingEntity::STATUS_CANCELED]);
+
+            return $this->respond(['success' => true]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 

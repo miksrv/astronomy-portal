@@ -36,12 +36,10 @@ const ProfilePage: NextPage<ProfilePageProps> = () => {
                 currentPage={t('pages.profile.title', 'Личный кабинет')}
             />
 
-            {user && (
-                <ProfileCard
-                    user={user}
-                    isOnboarding={isOnboarding}
-                />
-            )}
+            <ProfileCard
+                user={user}
+                isOnboarding={isOnboarding}
+            />
 
             <h2 id={'upcoming-event'}>{t('pages.profile.upcoming-event-title', 'Предстоящее мероприятие')}</h2>
             {upcomingEvent ? (
@@ -56,10 +54,10 @@ const ProfilePage: NextPage<ProfilePageProps> = () => {
             )}
 
             <h2>{t('pages.profile.history-title', 'История мероприятий')}</h2>
-            {user && <EventHistorySection userId={user.id} />}
+            <EventHistorySection userId={user?.id} />
 
             <h2>{t('pages.profile.reviews-title', 'Мои отзывы')}</h2>
-            {user && <MyReviewsSection userId={user.id} />}
+            <MyReviewsSection userId={user?.id} />
 
             <AppFooter />
         </AppLayout>

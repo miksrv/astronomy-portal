@@ -33,6 +33,9 @@
 .statusPaused
     +mixins.status-badge(var(--color-primary-background), var(--color-primary), true)
 
+.statusCanceled
+    +mixins.status-badge(var(--color-red-background), var(--color-red), true)
+
 // Form page styles
 .formContainer
     margin-bottom: 10px
@@ -145,15 +148,6 @@
     display: flex
     gap: 10px
     justify-content: flex-end
-
-.contentPreview
-    margin-top: 16px
-    font-size: 14px
-    line-height: 1.6
-    white-space: pre-wrap
-    color: var(--text-color-primary)
-    border-top: 1px solid var(--table-border-color)
-    padding-top: 16px
 
 .limitOk
     +mixins.status-badge(var(--color-green-background), var(--color-green))

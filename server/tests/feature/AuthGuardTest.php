@@ -151,6 +151,14 @@ final class AuthGuardTest extends CIUnitTestCase
 
     // --- Mailings write endpoints ---
 
+    public function testGetMailingPreviewWithoutTokenReturns401(): void
+    {
+        $result = $this->get('mailings/abc123/preview');
+        $result->assertStatus(401);
+        $json = json_decode($result->getJSON(), true);
+        $this->assertArrayHasKey('messages', $json);
+    }
+
     public function testPostMailingsWithoutTokenReturns401(): void
     {
         $result = $this->post('mailings', []);

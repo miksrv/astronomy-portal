@@ -14,6 +14,7 @@ import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
 import { EventItemData, EventReviews } from '@/components/pages/stargazing'
+import { REVIEWS_PAGE_SIZE } from '@/utils/constants'
 import { formatDate } from '@/utils/dates'
 import { getErrorMessage } from '@/utils/errors'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
@@ -61,7 +62,18 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
             ? `${hosts.stargazing}${event.id}/${event.coverFileName}.${event.coverFileExt}`
             : undefined
 
-    const eventJsonLd = event ? buildEventJsonLd(event) : null
+    // Same query args as the SSR prefetch below and `EventReviews` itself, so this
+    // reuses the cached first page instead of firing an extra request.
+    const { data: reviewsData } = API.useCommentsGetListQuery({
+        entityId: eventId,
+        entityType: 'event',
+        limit: REVIEWS_PAGE_SIZE,
+        offset: 0
+    })
+
+    const eventJsonLd = event
+        ? buildEventJsonLd(event, reviewsData ? { items: reviewsData.items, total: reviewsData.total } : undefined)
+        : null
 
     const adjacentEvents = useMemo(() => {
         const sortedEvents = [...(eventsList || [])].sort((a, b) => {
@@ -304,6 +316,21 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 API.endpoints?.eventGetPhotoList.initiate({
                     eventId,
                     limit: 500
+                })
+            )
+
+            // Prefetch the first page of reviews so it's part of the initial HTML
+            // instead of only appearing after client-side hydration (bad for SEO -
+            // crawlers that don't execute JS never see review text at all, and
+            // Google's JS-render pass is delayed). The query args match exactly
+            // what `EventReviews` requests on mount, so the client hook reuses this
+            // cached entry with no extra request or loading flash.
+            await store.dispatch(
+                API.endpoints?.commentsGetList.initiate({
+                    entityId: eventId,
+                    entityType: 'event',
+                    limit: REVIEWS_PAGE_SIZE,
+                    offset: 0
                 })
             )
 

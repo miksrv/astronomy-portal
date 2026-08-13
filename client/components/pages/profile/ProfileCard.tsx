@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Button, Container, Input, Message, Select } from 'simple-react-ui-kit'
 
 import { useRouter } from 'next/router'
@@ -13,7 +13,7 @@ import { LOCAL_STORAGE } from '@/utils/constants'
 import styles from './styles.module.sass'
 
 interface ProfileCardProps {
-    user: ApiModel.User
+    user?: ApiModel.User
     isOnboarding?: boolean
 }
 
@@ -23,14 +23,35 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
 
     const [returnPath] = useLocalStorage<string>(LOCAL_STORAGE.RETURN_PATH)
 
-    const [name, setName] = useState<string>(user.name)
-    const [phone, setPhone] = useState<string>(user.phone ?? '')
-    const [birthday, setBirthday] = useState<string>(user.birthday ?? '')
-    const [sex, setSex] = useState<'m' | 'f' | undefined>(user.sex)
+    const [name, setName] = useState<string>(user?.name ?? '')
+    const [phone, setPhone] = useState<string>(user?.phone ?? '')
+    const [birthday, setBirthday] = useState<string>(user?.birthday ?? '')
+    const [sex, setSex] = useState<'m' | 'f' | undefined>(user?.sex)
     const [saveSuccess, setSaveSuccess] = useState<boolean>(false)
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
     const [updateProfile, { isLoading }] = API.useAuthUpdateProfileMutation()
+
+    // `user` is still undefined on the very first render (it's populated a tick
+    // later by useAuthSession's login() dispatch), so the useState initializers
+    // above capture empty defaults. Re-sync the fields once real user data
+    // shows up, but only the first time for a given user — otherwise a
+    // background refetch of `authGetMe` would stomp on an in-progress edit.
+    const syncedUserId = useRef<string | undefined>(undefined)
+
+    useEffect(() => {
+        if (user && syncedUserId.current !== user.id) {
+            setName(user.name ?? '')
+            setPhone(user.phone ?? '')
+            setBirthday(user.birthday ?? '')
+            setSex(user.sex)
+            syncedUserId.current = user.id
+        }
+    }, [user])
+
+    if (!user) {
+        return null
+    }
 
     const avatarSrc = user.avatar ? `${HOST_IMG}/users/${user.id}/${user.avatar}` : undefined
 
@@ -160,6 +181,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
                         <Button
                             mode={'primary'}
                             size={'medium'}
+                            stretched={true}
                             loading={isLoading}
                             disabled={isLoading}
                             onClick={handleSave}

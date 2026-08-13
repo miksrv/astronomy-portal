@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { getCookie } from 'cookies-next'
-import { Container } from 'simple-react-ui-kit'
+import { Button, Container, Dialog } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
-import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, HOST_IMG, setLocale, wrapper } from '@/api'
+import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { MailingPreview } from '@/components/pages/mailing'
 import { formatDate } from '@/utils/dates'
 
 import styles from './styles.module.sass'
@@ -31,6 +31,21 @@ const MailingStatsPage: NextPage<object> = () => {
         pollingInterval: data?.status === 'sending' ? 30000 : undefined,
         skip: !id || data?.status !== 'sending'
     })
+
+    const [cancelMailing, { isLoading: cancelLoading }] = API.useMailingCancelMutation()
+
+    const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+
+    const isCancelable = data?.status === 'draft' || data?.status === 'sending'
+
+    const handleCancelConfirm = async () => {
+        if (!id) {
+            return
+        }
+
+        await cancelMailing(id)
+        setShowCancelConfirm(false)
+    }
 
     const pageTitle = data?.subject ?? t('pages.mailing.title', 'Рассылки')
 
@@ -84,6 +99,7 @@ const MailingStatsPage: NextPage<object> = () => {
 
     const statusLabel = (status: ApiModel.MailingStatus): string => {
         const map: Record<ApiModel.MailingStatus, string> = {
+            canceled: t('pages.mailing.status-canceled', 'Отменена'),
             completed: t('pages.mailing.status-completed', 'Завершена'),
             draft: t('pages.mailing.status-draft', 'Черновик'),
             paused: t('pages.mailing.status-paused', 'Приостановлена'),
@@ -103,7 +119,17 @@ const MailingStatsPage: NextPage<object> = () => {
                 title={pageTitle}
                 currentPage={pageTitle}
                 links={[{ link: '/mailing', text: t('pages.mailing.title', 'Рассылки') }]}
-            />
+            >
+                {isCancelable && (
+                    <Button
+                        icon={'Close'}
+                        mode={'primary'}
+                        variant={'negative'}
+                        label={t('pages.mailing.cancel-mailing', 'Отменить рассылку')}
+                        onClick={() => setShowCancelConfirm(true)}
+                    />
+                )}
+            </AppToolbar>
 
             <Container>
                 {!isLoading && !isError && data && (
@@ -234,21 +260,39 @@ const MailingStatsPage: NextPage<object> = () => {
                             </>
                         )}
 
-                        {data.image && (
-                            <div className={styles.imagePreview}>
-                                <Image
-                                    src={HOST_IMG + data.image}
-                                    alt={data.subject}
-                                    width={300}
-                                    height={200}
-                                />
-                            </div>
-                        )}
-
-                        <div className={styles.contentPreview}>{data.content}</div>
+                        <MailingPreview mailingId={id} />
                     </>
                 )}
             </Container>
+
+            <Dialog
+                title={t('pages.mailing.cancel-confirm-title', 'Отменить рассылку?')}
+                open={showCancelConfirm}
+                showOverlay={true}
+                showCloseButton={true}
+                onCloseDialog={() => setShowCancelConfirm(false)}
+            >
+                <p>
+                    {t(
+                        'pages.mailing.cancel-confirm-text',
+                        'Рассылка будет отменена. Уже отправленные письма отозвать не удастся, но оставшиеся получатели его не получат. Отменить это действие будет невозможно.'
+                    )}
+                </p>
+                <div className={styles.modalActions}>
+                    <Button
+                        mode={'secondary'}
+                        label={t('pages.mailing.cancel', 'Отмена')}
+                        onClick={() => setShowCancelConfirm(false)}
+                    />
+                    <Button
+                        mode={'primary'}
+                        variant={'negative'}
+                        label={t('pages.mailing.cancel-mailing', 'Отменить рассылку')}
+                        onClick={handleCancelConfirm}
+                        loading={cancelLoading}
+                    />
+                </div>
+            </Dialog>
 
             <AppFooter />
         </AppLayout>
@@ -278,6 +322,10 @@ export const getServerSideProps = wrapper.getServerSideProps(
             }
 
             const { data: mailingData } = await store.dispatch(API.endpoints.mailingGetItem.initiate(id))
+
+            // Prefetched alongside the mailing itself so the inbox preview iframe
+            // has its HTML ready on first paint instead of popping in client-side.
+            await store.dispatch(API.endpoints.mailingGetPreview.initiate(id))
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 

@@ -34,10 +34,12 @@ class Comments extends ResourceController
     }
 
     /**
-     * GET /comments?entityType=event&entityId=:id&limit=20
+     * GET /comments?entityType=event&entityId=:id&limit=20&offset=0
      *
-     * Returns visible comments for the specified entity, newest first, with author info.
-     * Public endpoint — no authentication required.
+     * Returns a slice of visible comments for the specified entity, newest first, with
+     * author info, plus the real total count so clients can tell whether more remain
+     * (the caller already knows what `limit`/`offset` it asked for, so the response
+     * doesn't echo those back). Public endpoint — no authentication required.
      *
      * @return ResponseInterface
      */
@@ -54,7 +56,7 @@ class Comments extends ResourceController
                 $items = $this->model->getByUser($userId, $this->request->getLocale());
 
                 return $this->respond([
-                    'count' => count($items),
+                    'total' => count($items),
                     'items' => $items,
                 ]);
             } catch (Exception $e) {
@@ -67,6 +69,7 @@ class Comments extends ResourceController
         $entityType = $this->request->getGet('entityType', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $entityId   = $this->request->getGet('entityId', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $limit      = $this->request->getGet('limit', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 100]]);
+        $offset     = $this->request->getGet('offset', FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
 
         if (empty($entityType) || empty($entityId)) {
             return $this->failValidationErrors(['error' => 'entityType and entityId are required.']);
@@ -76,13 +79,15 @@ class Comments extends ResourceController
             return $this->failValidationErrors(['error' => 'entityType must be one of: event, photo.']);
         }
 
-        $limit = $limit ?: 20;
+        $limit  = $limit ?: 20;
+        $offset = $offset ?: 0;
 
         try {
-            $items = $this->model->getForEntity($entityType, $entityId, $limit);
+            $items = $this->model->getForEntity($entityType, $entityId, $limit, $offset);
+            $total = $this->model->countForEntity($entityType, $entityId);
 
             $response = [
-                'count' => count($items),
+                'total' => $total,
                 'items' => $items,
             ];
 

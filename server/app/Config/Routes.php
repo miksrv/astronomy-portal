@@ -142,8 +142,10 @@ $routes->group('mailings', static function ($routes) {
     $routes->patch('(:alphanum)', 'Mailings::update/$1');
     $routes->delete('(:alphanum)', 'Mailings::delete/$1');
     $routes->post('(:alphanum)/upload', 'Mailings::upload/$1');
+    $routes->get('(:alphanum)/preview', 'Mailings::preview/$1');
     $routes->post('(:alphanum)/test', 'Mailings::test/$1', ['filter' => 'ratelimit:mailings_test,5,60']);
     $routes->post('(:alphanum)/send', 'Mailings::send/$1');
+    $routes->post('(:alphanum)/cancel', 'Mailings::cancel/$1');
     $routes->options('/', static function () {});
     $routes->options('(:any)', static function () {});
 });

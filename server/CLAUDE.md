@@ -74,8 +74,10 @@ GET    /mailings/:id                → Mailings::show
 PATCH  /mailings/:id                → Mailings::update
 DELETE /mailings/:id                → Mailings::delete
 POST   /mailings/:id/upload         → Mailings::upload
+GET    /mailings/:id/preview        → Mailings::preview        (renders email_newsletter HTML, no send)
 POST   /mailings/:id/test           → Mailings::test           [rate-limited: mailings_test, 5/60s]
 POST   /mailings/:id/send           → Mailings::send
+POST   /mailings/:id/cancel         → Mailings::cancel          (only from draft/sending; mid-send also cancels queued mailing_emails rows)
 
 GET  /members                       → Members::list
 GET  /members/:id/events            → Members::events
@@ -195,6 +197,9 @@ Listed in execution order. Tables created unless noted as ALTER.
 | `2026-07-03-100003_AddEventUsersActiveBookingUniqueKey` | ALTER `events_users` — unique key preventing duplicate active bookings |
 | `2026-07-04-100000_AddEventRequiresRegistration` | ALTER `events` — adds `requires_registration` flag |
 | `2026-07-06-100000_AddUsersSessionToken` | ALTER `users` — adds `session_token` (logout revocation, see Authentication above) |
+| `2026-07-07-100000_ReworkEventLocationFields` | ALTER `events` — replaces bilingual venue name/manual map links with `location`/`address`/`latitude`/`longitude`/`min_age`/`end_date` |
+| `2026-07-09-100000_AddEmailQueueIcsAttachment` | ALTER `email_queue` — adds ICS calendar attachment column |
+| `2026-08-13-100000_AddMailingsCanceledStatus` | ALTER `mailings` and `mailing_emails` — adds a `canceled` status |
 
 ---
 

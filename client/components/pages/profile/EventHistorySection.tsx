@@ -10,19 +10,21 @@ import { API } from '@/api'
 import { hosts } from '@/api/constants'
 import { formatDate } from '@/utils/dates'
 
+import { EventHistorySectionSkeleton } from './EventHistorySectionSkeleton'
+
 import styles from './styles.module.sass'
 
 interface EventHistorySectionProps {
-    userId: string
+    userId?: string
 }
 
 export const EventHistorySection: React.FC<EventHistorySectionProps> = ({ userId }) => {
     const { t } = useTranslation()
 
-    const { data, isLoading } = API.useUsersGetEventsQuery(userId)
+    const { data, isLoading } = API.useUsersGetEventsQuery(userId!, { skip: !userId })
 
     if (isLoading) {
-        return null
+        return <EventHistorySectionSkeleton />
     }
 
     if (!data?.items?.length) {
@@ -34,7 +36,7 @@ export const EventHistorySection: React.FC<EventHistorySectionProps> = ({ userId
     }
 
     return (
-        <Container className={styles.historyList}>
+        <>
             {data.items.map((event) => {
                 const itemTitle = t('pages.profile.history-item-title', 'Астровыезд - {{title}}', {
                     title: event.title
@@ -100,6 +102,6 @@ export const EventHistorySection: React.FC<EventHistorySectionProps> = ({ userId
                     </Link>
                 )
             })}
-        </Container>
+        </>
     )
 }

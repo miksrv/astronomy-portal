@@ -424,12 +424,21 @@ class EventsUsersModel extends ApplicationBaseModel
     public function getUpcomingRegisteredBooking(string $userId): ?object
     {
         return $this->db->table('events_users eu')
-            ->select('e.id AS event_id, eu.id AS booking_id, eu.adults, eu.children, eu.checkin_at')
+            ->select(
+                'e.id AS event_id, eu.id AS booking_id, eu.status, eu.payment_id, ' .
+                'eu.adults, eu.children, eu.checkin_at'
+            )
             ->join('events e', 'e.id = eu.event_id')
             ->where('eu.user_id', $userId)
-            // Only confirmed bookings count as "registered"; a pending (unpaid)
-            // booking must not surface as the user's upcoming event with a ticket.
-            ->where('eu.status', 'confirmed')
+            // Confirmed AND pending bookings both surface here — a pending
+            // (unpaid) booking still needs to show up as the user's upcoming
+            // event so the profile can render its awaiting-payment / payment-
+            // expired panel, instead of silently claiming there is nothing
+            // upcoming while a booking's payment is still being reconciled
+            // (e.g. the user paid but closed the bank tab before it redirected
+            // back). A 'failed' booking is deliberately excluded — that one
+            // still surfaces as "no upcoming event" here, same as before.
+            ->whereIn('eu.status', ['confirmed', 'pending'])
             ->where('eu.deleted_at IS NULL')
             ->where('e.deleted_at IS NULL')
             // Same "local calendar day" boundary as EventsModel::getUpcomingEvent()

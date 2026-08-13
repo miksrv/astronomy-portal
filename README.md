@@ -152,8 +152,8 @@ There is no central permission/filter middleware — every backend controller ch
 | Guest | Public pages only; prompted to sign in for reviews, event booking, and the mailing subscription (which happens automatically on login — see [Domain rule](#about-the-project) in `CLAUDE.md`) |
 | `user` | Own profile, own reviews/comments, own event bookings & tickets, own event history |
 | `security` | Everything `user` has, plus the "Проверка QR-кодов" menu link and the `/stargazing/checkin` page |
-| `moderator` | Everything `security` has, plus `/stargazing/[name]/statistic`, deleting any review/comment, creating/editing stargazing events and replacing their cover image via `/stargazing/form` (archiving/deleting an event is `admin`-only), and admin/moderator-only blocks on the event detail page |
-| `admin` | Full admin menu (`/photos/form`, `/objects/form`, `/stargazing/form`, `/mailing`, `/users`), all object/photo/event/mailing create-edit-delete forms, archiving stargazing events, event photo uploads, the `/users` member list, enabled relay power-switch controls, and the "Возврат" (forced refund) action in the `/stargazing/[name]/statistic` registrations table |
+| `moderator` | Everything `security` has, plus `/stargazing/[name]/statistic`, deleting any review/comment, creating/editing stargazing events and replacing their cover image via `/stargazing/form`, and admin/moderator-only blocks on the event detail page |
+| `admin` | Full admin menu (`/photos/form`, `/objects/form`, `/stargazing/form`, `/mailing`, `/users`), all object/photo/event/mailing create-edit-delete forms, event photo uploads, the `/users` member list, enabled relay power-switch controls, and the "Возврат" (forced refund) action in the `/stargazing/[name]/statistic` registrations table |
 
 ### Backend endpoints by role
 
@@ -168,6 +168,8 @@ There is no central permission/filter middleware — every backend controller ch
 | None (public) | Everything else — health check, camera, telescope statistics, equipment/categories, file serving, read-only objects/photos/events, comment listing, sitemap, mailing unsubscribe |
 
 > **Known gap:** `POST /photos/:any/upload` (`Photos::upload()`) currently has no auth/role check at all, unlike its sibling `create`/`update`/`delete` actions on the same controller which all require `admin`. This looks like an oversight rather than an intentional public endpoint.
+>
+> **Known gap:** `DELETE /events/:id` (archiving an event) has no frontend entry point — the "Архивировать" button on `/stargazing/form` was removed as misleading. The endpoint itself is untouched; it's reachable only by calling the API directly.
 
 <p align="right">(<a href="#top">Back to top</a>)</p>
 

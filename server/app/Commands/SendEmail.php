@@ -106,6 +106,17 @@ class SendEmail extends BaseCommand
                 continue;
             }
 
+            // The campaign was canceled after this row was queued (and possibly
+            // after getQueuedBatch() already fetched it into $batch) — re-checking
+            // the parent's live status here, rather than trusting the batch
+            // snapshot, closes that race. `Mailings::cancel()` already flips
+            // every still-queued row to 'canceled' itself; this only catches the
+            // row(s) fetched into $batch in between that update and this loop.
+            if ($mailing->status === MailingEntity::STATUS_CANCELED) {
+                $mailingEmailsModel->update($item->id, ['status' => MailingEmailEntity::STATUS_CANCELED]);
+                continue;
+            }
+
             $affectedMailings[$mailingId] = true;
 
             // Build unsubscribe URL pointing to the frontend

@@ -210,51 +210,55 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
                 />
             </div>
 
-            <Input
-                disabled={disabled}
-                className={styles.formElement}
-                type={'input'}
-                label={'Название площадки'}
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-            />
+            <div className={styles.locationSection}>
+                <div className={styles.coordsColumn}>
+                    <Input
+                        disabled={disabled}
+                        className={styles.formElement}
+                        type={'number'}
+                        label={'Широта'}
+                        value={formData.latitude}
+                        onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                    />
 
-            <div className={styles.addressRow}>
-                <Input
-                    disabled={disabled}
-                    className={styles.formElement}
-                    type={'input'}
-                    label={'Адрес'}
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                />
-                <Button
-                    mode={'secondary'}
-                    label={'Найти по координатам'}
-                    disabled={disabled}
-                    loading={isGeocoding}
-                    onClick={handleFindAddress}
-                />
-            </div>
+                    <Input
+                        disabled={disabled}
+                        className={styles.formElement}
+                        type={'number'}
+                        label={'Долгота'}
+                        value={formData.longitude}
+                        onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                    />
+                </div>
 
-            <div className={styles.sections}>
-                <Input
-                    disabled={disabled}
-                    className={styles.formElement}
-                    type={'number'}
-                    label={'Широта'}
-                    value={formData.latitude}
-                    onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                />
+                <div className={styles.addressColumn}>
+                    <Input
+                        disabled={disabled}
+                        className={styles.formElement}
+                        type={'input'}
+                        label={'Название площадки'}
+                        value={formData.location}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    />
 
-                <Input
-                    disabled={disabled}
-                    className={styles.formElement}
-                    type={'number'}
-                    label={'Долгота'}
-                    value={formData.longitude}
-                    onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                />
+                    <div className={styles.addressRow}>
+                        <Input
+                            disabled={disabled}
+                            className={styles.formElement}
+                            type={'input'}
+                            label={'Адрес'}
+                            value={formData.address}
+                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        />
+                        <Button
+                            mode={'secondary'}
+                            label={'Найти по координатам'}
+                            disabled={disabled}
+                            loading={isGeocoding}
+                            onClick={handleFindAddress}
+                        />
+                    </div>
+                </div>
             </div>
 
             <div className={styles.mapSection}>

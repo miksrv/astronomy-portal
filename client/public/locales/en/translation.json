@@ -55,7 +55,8 @@
                 "placeholder": "Share your impressions...",
                 "success": "Review published!",
                 "submit": "Submit review",
-                "not-eligible": "You'll be able to leave a review after attending the event",
+                "not-eligible-title": "Only participants can leave a review",
+                "not-eligible": "Anyone who was registered for this stargazing event can leave a review",
                 "floating-title": "Leave a review about the event",
                 "floating-close": "Dismiss the review reminder",
                 "floating-thanks": "Thank you for your review!"
@@ -558,8 +559,6 @@
             "add-event": "Add stargazing trip",
             "save-error": "Save error",
             "save-success": "Stargazing trip saved",
-            "archive-confirm-title": "Archive this event?",
-            "archive-confirm-body": "Are you sure? The event will be hidden from users.",
             "title": "Stargazing trips",
             "create-stargazing_button": "Add stargazing trip",
             "rules_link": "Rules of conduct on stargazing trips",
@@ -593,6 +592,7 @@
         },
         "mailing": {
             "title": "Newsletters",
+            "status-canceled": "Canceled",
             "status-completed": "Completed",
             "status-draft": "Draft",
             "status-paused": "Paused",
@@ -602,6 +602,8 @@
             "detail-sent-at": "Sent date",
             "detail-created-at": "Created date",
             "detail-status": "Status",
+            "preview-title": "Email preview",
+            "preview-error": "Failed to load the email preview",
             "limit-status": "Limit status",
             "limit-day-hit": "Daily limit",
             "limit-hour-hit": "Hourly limit",
@@ -636,7 +638,10 @@
             "col-date": "Date",
             "no-items": "No newsletters yet",
             "delete-confirm-title": "Delete draft?",
-            "delete-confirm-text": "This action cannot be undone. The draft will be permanently deleted."
+            "delete-confirm-text": "This action cannot be undone. The draft will be permanently deleted.",
+            "cancel-mailing": "Cancel newsletter",
+            "cancel-confirm-title": "Cancel this newsletter?",
+            "cancel-confirm-text": "The campaign will be canceled. Emails already sent cannot be recalled, but the remaining recipients will not receive it. This action cannot be undone."
         },
         "objects": {
             "title": "List of astronomical objects",
@@ -730,8 +735,6 @@
         "edit": "Edit",
         "telegram": "Telegram",
         "add": "Add",
-        "archive": "Archive",
-        "confirm": "Confirm",
         "go-to-home-page": "Home",
         "day_one": "{{count}} day",
         "day_other": "{{count}} days",

@@ -49,3 +49,6 @@ export const REVIEW_PROMPT_DISMISS_DURATION = 24 * 60 * 60 // seconds (24 hours)
 // hide itself while that form is visible on screen (no point showing both at
 // once) and reappear once it's scrolled out of view again.
 export const REVIEW_INLINE_FORM_ID = 'event-review-inline-form'
+
+// Number of reviews fetched per page in EventReviews' infinite scroll.
+export const REVIEWS_PAGE_SIZE = 10

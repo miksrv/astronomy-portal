@@ -10,6 +10,7 @@ class MailingEmailEntity extends Entity
     const STATUS_SENT     = 'sent';
     const STATUS_ERROR    = 'error';
     const STATUS_REJECTED = 'rejected';
+    const STATUS_CANCELED = 'canceled';
 
     protected $attributes = [
         'id'            => null,

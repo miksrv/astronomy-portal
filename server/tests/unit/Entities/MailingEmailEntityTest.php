@@ -30,6 +30,11 @@ final class MailingEmailEntityTest extends CIUnitTestCase
         $this->assertSame('rejected', MailingEmailEntity::STATUS_REJECTED);
     }
 
+    public function testStatusCanceledConstantValue(): void
+    {
+        $this->assertSame('canceled', MailingEmailEntity::STATUS_CANCELED);
+    }
+
     // --- Default attribute values ---
 
     public function testNewInstanceDefaultLocaleIsRu(): void

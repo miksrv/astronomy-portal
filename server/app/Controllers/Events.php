@@ -183,11 +183,33 @@ class Events extends ResourceController
 
         $event->bookedId      = $booking->booking_id;
         $event->registered    = true;
-        $event->bookingStatus = 'confirmed';
+        $event->bookingStatus = $booking->status;
         $event->members       = [
             'adults'   => (int) $booking->adults,
             'children' => (int) $booking->children
         ];
+
+        // A pending booking still holds its seat on a payment timer — expose the
+        // order so the profile can render the same countdown / "return to
+        // payment" panel as the stargazing page, instead of showing nothing
+        // while the payment is still being reconciled (e.g. the user paid but
+        // closed the bank tab before it redirected back).
+        if ($booking->status === 'pending' && !empty($booking->payment_id)) {
+            $payment = (new PaymentsModel())->find($booking->payment_id);
+
+            if ($payment && $payment->status === 'pending') {
+                $expiresInSeconds = max(
+                    0,
+                    Time::parse((string) $payment->expires_at)->getTimestamp() - Time::now()->getTimestamp()
+                );
+
+                $event->payment = [
+                    'orderId'          => $payment->order_id,
+                    'formUrl'          => $payment->form_url,
+                    'expiresInSeconds' => $expiresInSeconds
+                ];
+            }
+        }
 
         return $this->respond(['item' => $event]);
     }
@@ -1747,6 +1769,10 @@ class Events extends ResourceController
 
             if (!$eventData) {
                 return $this->failNotFound();
+            }
+
+            if (!$this->model->isUpcoming($eventData)) {
+                return $this->failValidationErrors(['error' => lang('Events.cannotDeletePastEvent')]);
             }
 
             $hasRegistrations = (new EventsUsersModel())

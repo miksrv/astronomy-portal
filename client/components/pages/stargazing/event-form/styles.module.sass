@@ -51,6 +51,28 @@
         flex-direction: column
         align-items: stretch
 
+.locationSection
+    display: flex
+    align-items: flex-start
+    gap: 10px
+    margin-bottom: 10px
+
+    & > div
+        flex: 1 1 0
+        min-width: 0
+        width: 100%
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column-reverse
+
+.coordsColumn
+    display: flex
+    flex-direction: column
+
+.addressColumn
+    display: flex
+    flex-direction: column
+
 .mapSection
     margin-bottom: 10px
 
