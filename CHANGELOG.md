@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 4.7.5
+
+### Patch Changes
+
+- Added paginated, infinite-scroll loading for stargazing event reviews with new offset/limit support in the comments API; the first page is now prefetched during SSR for SEO, skeleton placeholders replace the old spinner for both initial and infinite-scroll loading, and the review form hides immediately after a successful submit (resetting to page one) instead of waiting on a refetch
+- Clarified the event review empty-state message for non-eligible users with a titled info block explaining only registered participants may leave a review, and enriched event JSON-LD to include review entries with a conditional aggregate rating (skipped unless all reviews are loaded)
+- Added mailing campaign cancellation: a new `POST /mailings/:id/cancel` endpoint (idempotent, new `canceled` status on `mailings`/`mailing_emails` with migration, race-safe handling of already-queued emails) and a matching admin UI action (destructive "Cancel newsletter" with confirmation dialog for draft/sending campaigns)
+- Added a `GET /mailings/:id/preview` admin endpoint that renders the newsletter through the real email template, replacing the old raw content/image preview with an isolated iframe view on the mailing details page
+- Revamped the profile page: reworked the reviews section with a dedicated skeleton and a simplified compact list layout, fixed a form-init race so fields resync when user data arrives after the first render, made the card/history/reviews sections tolerate a missing user while auth is still loading, and improved mobile layout (full-width fields and save button below 768px)
+- Moved sitemap generation from `pages/sitemap.tsx` to `pages/api/sitemap.ts` (with a rewrite) to avoid a Next.js reserved-route conflict; extended upcoming-booking lookups to include `pending` (not just `confirmed`) bookings, surfacing the payment order/form URL and remaining expiry time for in-flight payments
+- Removed the stargazing event archive UI (button/dialog and unused strings) and made backend event deletion reject past events with a localized error; reworked the event form's location block layout and updated README role/permission notes accordingly
+- Bumped Next.js to 16.3.0 and refreshed ESLint/TypeScript-ESLint tooling
+
 ## 4.7.4
 
 ### Patch Changes
