@@ -164,6 +164,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
                         <Button
                             mode={'primary'}
                             size={'medium'}
+                            stretched={true}
                             loading={isLoading}
                             disabled={isLoading}
                             onClick={handleSave}
