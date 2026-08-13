@@ -45,7 +45,26 @@ export const API = createApi({
         /* Comments Controller */
         commentsGetList: builder.query<ApiType.Comments.ResList, ApiType.Comments.ReqList>({
             providesTags: (result, error, { entityId }) => [{ id: entityId, type: 'Comments' }],
-            query: (params) => `comments${encodeQueryData(params)}`
+            query: (params) => `comments${encodeQueryData(params)}`,
+            // Infinite-scroll cache: group all requests for the same entity/user
+            // under one cache entry (ignoring `offset`). Each response replaces the
+            // tail of the list from `offset` onward - this covers both normal
+            // pagination growth (offset === current item count, so it's a pure
+            // append) and a tag-invalidated refetch of an already-loaded slice
+            // (e.g. after posting a new review) without duplicating items.
+            serializeQueryArgs: ({ queryArgs }) => {
+                const { offset: _offset, ...rest } = queryArgs
+                return rest
+            },
+            merge: (currentCache, newItems, { arg }) => {
+                if (!arg.offset) {
+                    return newItems
+                }
+
+                currentCache.items = [...currentCache.items.slice(0, arg.offset), ...newItems.items]
+                currentCache.total = newItems.total
+            },
+            forceRefetch: ({ currentArg, previousArg }) => currentArg?.offset !== previousArg?.offset
         }),
         commentsGetRandom: builder.query<ApiType.Comments.ResRandom, ApiType.Comments.ReqRandom>({
             providesTags: ['Comments'],

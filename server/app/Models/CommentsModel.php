@@ -58,9 +58,10 @@ class CommentsModel extends ApplicationBaseModel
      * @param string $type     Entity type ('event' or 'photo').
      * @param string $entityId Entity ID.
      * @param int    $limit    Maximum number of results. Default is 20.
+     * @param int    $offset   Number of rows to skip, for pagination. Default is 0.
      * @return array Array of formatted comment rows.
      */
-    public function getForEntity(string $type, string $entityId, int $limit = 20): array
+    public function getForEntity(string $type, string $entityId, int $limit = 20, int $offset = 0): array
     {
         $rows = $this->db->table('comments c')
             ->select('c.id, c.user_id, c.entity_type, c.entity_id, c.content, c.rating, c.status, c.created_at, u.avatar, u.name AS author_name')
@@ -70,11 +71,29 @@ class CommentsModel extends ApplicationBaseModel
             ->where('c.deleted_at IS NULL')
             ->where('c.status', 'visible')
             ->orderBy('c.created_at', 'DESC')
-            ->limit($limit)
+            ->limit($limit, $offset)
             ->get()
             ->getResultArray();
 
         return $this->formatRows($rows);
+    }
+
+    /**
+     * Count visible comments for an entity, ignoring pagination — used to let
+     * clients know the real total so they know whether more pages remain.
+     *
+     * @param string $type     Entity type ('event' or 'photo').
+     * @param string $entityId Entity ID.
+     * @return int Total number of visible comments.
+     */
+    public function countForEntity(string $type, string $entityId): int
+    {
+        return $this->db->table('comments c')
+            ->where('c.entity_type', $type)
+            ->where('c.entity_id', $entityId)
+            ->where('c.deleted_at IS NULL')
+            ->where('c.status', 'visible')
+            ->countAllResults();
     }
 
     /**

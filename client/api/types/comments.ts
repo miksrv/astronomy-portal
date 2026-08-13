@@ -4,10 +4,12 @@ export interface ReqList {
     entityType?: string
     entityId?: string
     userId?: string
+    offset?: number
+    limit?: number
 }
 
 export interface ResList {
-    count: number
+    total: number
     items: ApiModel.Comment[]
     canReview?: boolean
     hasReviewed?: boolean
