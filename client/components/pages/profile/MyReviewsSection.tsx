@@ -1,14 +1,14 @@
 import React from 'react'
-import { Button, cn, Container, Icon } from 'simple-react-ui-kit'
+import { Button, Container } from 'simple-react-ui-kit'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API } from '@/api'
-import { hosts } from '@/api/constants'
 import { StarRating } from '@/components/common/review-card/StarRating'
 import { formatDate } from '@/utils/dates'
+
+import { MyReviewsSectionSkeleton } from './MyReviewsSectionSkeleton'
 
 import styles from './styles.module.sass'
 
@@ -23,7 +23,11 @@ export const MyReviewsSection: React.FC<MyReviewsSectionProps> = ({ userId }) =>
     const [deleteComment] = API.useCommentsDeleteMutation()
 
     if (isLoading) {
-        return null
+        return (
+            <Container className={styles.reviewsList}>
+                <MyReviewsSectionSkeleton />
+            </Container>
+        )
     }
 
     if (!data?.items?.length) {
@@ -43,75 +47,40 @@ export const MyReviewsSection: React.FC<MyReviewsSectionProps> = ({ userId }) =>
                 return (
                     <div
                         key={review.id}
-                        className={styles.reviewCard}
+                        className={styles.reviewItem}
                     >
-                        {eventHref ? (
-                            <Link
-                                href={eventHref}
-                                className={cn(
-                                    styles.reviewThumbnail,
-                                    !review.entity?.coverFileName && styles.reviewThumbnailEmpty
-                                )}
-                            >
-                                {review.entity?.coverFileName ? (
-                                    <Image
-                                        alt={eventTitle ?? ''}
-                                        quality={70}
-                                        width={120}
-                                        height={90}
-                                        src={`${hosts.stargazing}${review.entityId}/${review.entity.coverFileName}_preview.${review.entity.coverFileExt}`}
-                                    />
-                                ) : (
-                                    <Icon
-                                        name={'Moon'}
-                                        aria-hidden
-                                    />
-                                )}
-                            </Link>
-                        ) : (
-                            <div className={cn(styles.reviewThumbnail, styles.reviewThumbnailEmpty)}>
-                                <Icon
-                                    name={'Moon'}
-                                    aria-hidden
-                                />
-                            </div>
-                        )}
-
-                        <div className={styles.reviewBody}>
-                            <div className={styles.reviewHeader}>
-                                {eventTitle &&
-                                    (eventHref ? (
-                                        <Link
-                                            href={eventHref}
-                                            className={styles.reviewTitle}
-                                        >
-                                            {eventTitle}
-                                        </Link>
-                                    ) : (
-                                        <span className={styles.reviewTitle}>{eventTitle}</span>
-                                    ))}
-                                {review.entity?.date && (
-                                    <time
-                                        className={styles.reviewDate}
-                                        dateTime={review.entity.date}
+                        <div className={styles.reviewHeader}>
+                            {eventTitle &&
+                                (eventHref ? (
+                                    <Link
+                                        href={eventHref}
+                                        className={styles.reviewTitle}
                                     >
-                                        {formatDate(review.entity.date, 'D MMMM YYYY')}
-                                    </time>
-                                )}
-                                {review.rating !== undefined && <StarRating rating={review.rating} />}
-                            </div>
-                            <p className={styles.reviewContent}>{review.content}</p>
+                                        {eventTitle}
+                                    </Link>
+                                ) : (
+                                    <span className={styles.reviewTitle}>{eventTitle}</span>
+                                ))}
+                            {review.entity?.date && (
+                                <time
+                                    className={styles.reviewDate}
+                                    dateTime={review.entity.date}
+                                >
+                                    {formatDate(review.entity.date, 'D MMMM YYYY')}
+                                </time>
+                            )}
+                            {review.rating !== undefined && <StarRating rating={review.rating} />}
+                            <Button
+                                size={'small'}
+                                mode={'secondary'}
+                                label={t('components.common.review-card.delete', 'Удалить')}
+                                onClick={() => {
+                                    void deleteComment(review.id)
+                                }}
+                                className={styles.reviewDeleteButton}
+                            />
                         </div>
-
-                        <Button
-                            size={'small'}
-                            mode={'secondary'}
-                            label={t('components.common.review-card.delete', 'Удалить')}
-                            onClick={() => {
-                                void deleteComment(review.id)
-                            }}
-                            className={styles.reviewDeleteButton}
-                        />
+                        <p className={styles.reviewContent}>{review.content}</p>
                     </div>
                 )
             })}
