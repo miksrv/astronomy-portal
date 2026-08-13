@@ -1,7 +1,7 @@
 import { ApiType } from '@/api'
 import { MailingAudienceType } from '@/api/types/mailings'
 
-export type MailingStatus = 'draft' | 'sending' | 'completed' | 'paused'
+export type MailingStatus = 'draft' | 'sending' | 'completed' | 'paused' | 'canceled'
 
 export interface Mailing {
     id: string

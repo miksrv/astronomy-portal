@@ -441,6 +441,13 @@ export const API = createApi({
                 url: `mailings/${id}/send`
             })
         }),
+        mailingCancel: builder.mutation<ApiType.Mailings.ResMailingCancel, string>({
+            invalidatesTags: (res, err, id) => [{ type: 'Mailings' }, { id, type: 'Mailings' }],
+            query: (id) => ({
+                method: 'POST',
+                url: `mailings/${id}/cancel`
+            })
+        }),
         mailingUnsubscribe: builder.query<ApiType.Mailings.ResMailingUnsubscribe, string>({
             query: (mail) => `mailings/unsubscribe?mail=${encodeURIComponent(mail)}`
         }),

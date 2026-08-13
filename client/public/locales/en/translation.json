@@ -594,6 +594,7 @@
         },
         "mailing": {
             "title": "Newsletters",
+            "status-canceled": "Canceled",
             "status-completed": "Completed",
             "status-draft": "Draft",
             "status-paused": "Paused",
@@ -639,7 +640,10 @@
             "col-date": "Date",
             "no-items": "No newsletters yet",
             "delete-confirm-title": "Delete draft?",
-            "delete-confirm-text": "This action cannot be undone. The draft will be permanently deleted."
+            "delete-confirm-text": "This action cannot be undone. The draft will be permanently deleted.",
+            "cancel-mailing": "Cancel newsletter",
+            "cancel-confirm-title": "Cancel this newsletter?",
+            "cancel-confirm-text": "The campaign will be canceled. Emails already sent cannot be recalled, but the remaining recipients will not receive it. This action cannot be undone."
         },
         "objects": {
             "title": "List of astronomical objects",

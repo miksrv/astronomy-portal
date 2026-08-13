@@ -41,6 +41,10 @@ export interface ResMailingLaunch {
     queued: number
 }
 
+export interface ResMailingCancel {
+    success: boolean
+}
+
 export interface ResMailingUnsubscribe {
     success: boolean
     message: string

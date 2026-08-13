@@ -113,6 +113,7 @@ All hooks are auto-generated as `API.use<EndpointName>Query/Mutation()`.
 | `mailingGetPreview`  | Query       | Rendered HTML of the mailing, as it will appear in the inbox |
 | `mailingTestSend`    | Mutation    | Send a test email for a mailing                              |
 | `mailingLaunch`      | Mutation    | Send a mailing to all subscribers                            |
+| `mailingCancel`      | Mutation    | Cancel a mailing (only from draft/sending)                   |
 | `mailingUnsubscribe` | Query       | Unsubscribe a user by email address                          |
 
 ### Users (Members)

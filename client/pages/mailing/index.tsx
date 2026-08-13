@@ -15,6 +15,7 @@ import { formatDate } from '@/utils/dates'
 import styles from './styles.module.sass'
 
 const statusColorMap: Record<ApiModel.MailingStatus, string> = {
+    canceled: styles.statusCanceled,
     completed: styles.statusCompleted,
     draft: styles.statusDraft,
     paused: styles.statusPaused,
@@ -34,6 +35,7 @@ const MailingListPage: NextPage<object> = () => {
 
     const statusLabel = (status: ApiModel.MailingStatus): string => {
         const map: Record<ApiModel.MailingStatus, string> = {
+            canceled: t('pages.mailing.status-canceled', 'Отменена'),
             completed: t('pages.mailing.status-completed', 'Завершена'),
             draft: t('pages.mailing.status-draft', 'Черновик'),
             paused: t('pages.mailing.status-paused', 'Приостановлена'),
