@@ -24,12 +24,16 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
     const user = useAppSelector((state) => state.auth.user)
 
     const [offset, setOffset] = useState(0)
+    // Sidesteps the round-trip to `hasReviewed` refetching: hides the form the
+    // instant a review is posted instead of waiting for the network.
+    const [justPosted, setJustPosted] = useState(false)
     const sentinelRef = useRef<HTMLDivElement | null>(null)
 
     // Reset back to the first page whenever the event itself changes, so a
     // stale accumulated list from a previous event id can't leak in.
     useEffect(() => {
         setOffset(0)
+        setJustPosted(false)
     }, [eventId])
 
     const { data, isFetching } = API.useCommentsGetListQuery({
@@ -42,6 +46,16 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
 
     const items = data?.items ?? []
     const hasMore = items.length < (data?.total ?? 0)
+
+    // Once the post-submit refetch (triggered by `handleReviewSuccess` below)
+    // has landed, `justPosted` has done its job - hasReviewed now covers
+    // hiding the form on its own, so let it go rather than have it linger
+    // forever (e.g. blocking the form if a review is later removed).
+    useEffect(() => {
+        if (justPosted && !isFetching) {
+            setJustPosted(false)
+        }
+    }, [justPosted, isFetching])
 
     // Load the next page once the sentinel below the list scrolls into view -
     // skipped while a fetch is already in flight or there's nothing more.
@@ -69,15 +83,33 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
 
     const canReview = data?.canReview ?? false
     const hasReviewed = data?.hasReviewed ?? false
-    const showForm = isAuth && canReview && !hasReviewed
+    const showForm = isAuth && canReview && !hasReviewed && !justPosted
     const showNotEligible = isAuth && !canReview && !hasReviewed
     const showTopSection = showForm || showNotEligible
+
+    // The list itself refreshes on its own - `commentsCreate` invalidates the
+    // entity's Comments tag, so RTK Query refetches this query in the
+    // background and the new review (newest-first on the backend) lands at
+    // the top. Jumping back to the first page here just guards the case where
+    // the user had scrolled further down before posting: without it, the
+    // background refetch would reload whatever page was last in view instead
+    // of the first one.
+    const handleReviewSuccess = () => {
+        setJustPosted(true)
+        setOffset(0)
+    }
+
+    // While the post-submit refetch is in flight, show a single-card skeleton
+    // above the (still-stale) list as a placeholder for the incoming review -
+    // takes priority over the initial-load / load-more skeletons below, which
+    // would otherwise also match during this same window.
+    const isPostingRefresh = justPosted && isFetching
 
     // Only the very first page fetch (no items yet) shows the full-list
     // skeleton; a fetch triggered by the sentinel while items are already on
     // screen gets the smaller "loading more" skeleton instead.
-    const isInitialLoading = isFetching && items.length === 0
-    const isLoadingMore = isFetching && items.length > 0
+    const isInitialLoading = isFetching && items.length === 0 && !isPostingRefresh
+    const isLoadingMore = isFetching && items.length > 0 && !isPostingRefresh
 
     const canDeleteReview = (review: ApiModel.Comment): boolean => {
         if (!user) {
@@ -101,6 +133,7 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
                         <ReviewForm
                             entityType={'event'}
                             entityId={eventId}
+                            onSuccess={handleReviewSuccess}
                         />
                     </div>
                 )}
@@ -124,6 +157,12 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
 
                 {showTopSection && <hr className={styles.divider} />}
 
+                {isPostingRefresh && (
+                    <div className={styles.postingSkeleton}>
+                        <EventReviewsSkeleton count={1} />
+                    </div>
+                )}
+
                 {items.length > 0 ? (
                     <ul className={styles.list}>
                         {items.map((review) => (
@@ -140,7 +179,7 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
                     </ul>
                 ) : isInitialLoading ? (
                     <EventReviewsSkeleton />
-                ) : (
+                ) : isPostingRefresh ? null : (
                     <p className={styles.empty}>
                         {t('components.common.reviews-section.empty', 'Отзывов пока нет. Будьте первым!')}
                     </p>
