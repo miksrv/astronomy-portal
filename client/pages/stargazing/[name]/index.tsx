@@ -62,7 +62,18 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
             ? `${hosts.stargazing}${event.id}/${event.coverFileName}.${event.coverFileExt}`
             : undefined
 
-    const eventJsonLd = event ? buildEventJsonLd(event) : null
+    // Same query args as the SSR prefetch below and `EventReviews` itself, so this
+    // reuses the cached first page instead of firing an extra request.
+    const { data: reviewsData } = API.useCommentsGetListQuery({
+        entityId: eventId,
+        entityType: 'event',
+        limit: REVIEWS_PAGE_SIZE,
+        offset: 0
+    })
+
+    const eventJsonLd = event
+        ? buildEventJsonLd(event, reviewsData ? { items: reviewsData.items, total: reviewsData.total } : undefined)
+        : null
 
     const adjacentEvents = useMemo(() => {
         const sortedEvents = [...(eventsList || [])].sort((a, b) => {

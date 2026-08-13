@@ -1,9 +1,7 @@
 import React from 'react'
-import { Button, cn } from 'simple-react-ui-kit'
+import { Button, cn, Icon } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
-
-import LockIcon from '@/components/icons/LockIcon'
 
 import styles from './styles.module.sass'
 
@@ -17,7 +15,7 @@ export const StatusLoginRequired: React.FC<StatusLoginRequiredProps> = ({ onSign
     return (
         <div className={styles.stateCard}>
             <div className={cn(styles.stateIcon, styles.stateIconPrimary)}>
-                <LockIcon />
+                <Icon name={'Lock'} />
             </div>
             <h3 className={styles.stateHeading}>
                 {t('components.pages.stargazing.event-upcoming.login-to-register', 'Войдите, чтобы зарегистрироваться')}

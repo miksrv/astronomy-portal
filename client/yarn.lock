@@ -3292,7 +3292,7 @@ __metadata:
     react-redux: "npm:^9.3.0"
     sass: "npm:^1.102.0"
     sharp: "npm:^0.35.3"
-    simple-react-ui-kit: "npm:^1.8.10"
+    simple-react-ui-kit: "npm:^1.8.11"
     suncalc: "npm:^1.9.0"
     ts-jest: "npm:^29.4.12"
     ts-node: "npm:^10.9.2"
@@ -8963,16 +8963,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-react-ui-kit@npm:^1.8.10":
-  version: 1.8.10
-  resolution: "simple-react-ui-kit@npm:1.8.10"
+"simple-react-ui-kit@npm:^1.8.11":
+  version: 1.8.11
+  resolution: "simple-react-ui-kit@npm:1.8.11"
   dependencies:
     lodash-es: "npm:^4.18.1"
   peerDependencies:
     dayjs: ^1.11.0
     react: ^19.0.0
     react-dom: ^19.0.0
-  checksum: 10c0/bcfe505de97a78f3fc286796ba2662a83f25b70266bffd04d9df1c405749fe3a381ab6aaa270c749db6f0723b3b9678206d594c676ba9bf01728a773396c5fbc
+  checksum: 10c0/95ce01ba826ee38a9f0b364ab8fecb17ae27d8091914119a573ee960c8c03d5b413a69638c37320544e2cd37057fce03f554afcaa1bc65df8984eb875a39bdca
   languageName: node
   linkType: hard
 

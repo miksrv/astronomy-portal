@@ -15,7 +15,34 @@ const ORGANIZATION = {
     url: SITE_LINK?.replace(/\/$/, '')
 }
 
-export const buildEventJsonLd = (event: ApiModel.Event) => {
+/** Reviews use a 1-5 star scale (see `ReviewForm`). */
+const RATING_SCALE = { bestRating: 5, worstRating: 1 }
+
+interface EventReviewsData {
+    items: ApiModel.Comment[]
+    total: number
+}
+
+const buildReviewJsonLd = (comment: ApiModel.Comment) => ({
+    '@type': 'Review',
+    author: {
+        '@type': 'Person',
+        name: comment.author?.name ?? 'Аноним'
+    },
+    datePublished: comment.createdAt,
+    reviewBody: comment.content,
+    ...(typeof comment.rating === 'number'
+        ? {
+              reviewRating: {
+                  '@type': 'Rating',
+                  ratingValue: comment.rating,
+                  ...RATING_SCALE
+              }
+          }
+        : {})
+})
+
+export const buildEventJsonLd = (event: ApiModel.Event, reviews?: EventReviewsData) => {
     const startDate = event.date?.date
     const endDate =
         event.endDate?.date ??
@@ -25,6 +52,23 @@ export const buildEventJsonLd = (event: ApiModel.Event) => {
     const coverImageUrl =
         event.coverFileName && event.coverFileExt
             ? `${hosts.stargazing}${event.id}/${event.coverFileName}.${event.coverFileExt}`
+            : undefined
+
+    const ratedReviews = reviews?.items.filter((item) => typeof item.rating === 'number') ?? []
+    // Only report an aggregate once every review for the event has actually been
+    // fetched - callers only ever pass in the first page, so averaging that alone
+    // would misrepresent the event to search engines whenever there are more.
+    const hasCompleteReviewSet = !!reviews && reviews.items.length >= reviews.total
+    const aggregateRating =
+        hasCompleteReviewSet && ratedReviews.length > 0
+            ? {
+                  '@type': 'AggregateRating',
+                  ratingValue: Number(
+                      (ratedReviews.reduce((sum, item) => sum + (item.rating ?? 0), 0) / ratedReviews.length).toFixed(2)
+                  ),
+                  reviewCount: ratedReviews.length,
+                  ...RATING_SCALE
+              }
             : undefined
 
     return {
@@ -47,6 +91,8 @@ export const buildEventJsonLd = (event: ApiModel.Event) => {
         },
         organizer: ORGANIZATION,
         performer: ORGANIZATION,
+        aggregateRating,
+        review: reviews?.items.length ? reviews.items.map(buildReviewJsonLd) : undefined,
         offers: {
             '@type': 'Offer',
             price: event.ticketPrice ?? 0,

@@ -10,6 +10,8 @@ import { API } from '@/api'
 import { hosts } from '@/api/constants'
 import { formatDate } from '@/utils/dates'
 
+import { EventHistorySectionSkeleton } from './EventHistorySectionSkeleton'
+
 import styles from './styles.module.sass'
 
 interface EventHistorySectionProps {
@@ -22,7 +24,7 @@ export const EventHistorySection: React.FC<EventHistorySectionProps> = ({ userId
     const { data, isLoading } = API.useUsersGetEventsQuery(userId!, { skip: !userId })
 
     if (isLoading) {
-        return null
+        return <EventHistorySectionSkeleton />
     }
 
     if (!data?.items?.length) {
