@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Entities\MailingEmailEntity;
 use App\Entities\MailingEntity;
 use App\Libraries\EmailLibrary;
 use App\Libraries\LocaleLibrary;
@@ -585,6 +586,61 @@ class Mailings extends ResourceController
             ]);
 
             return $this->respond(['queued' => $count]);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->failServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * POST /mailings/:id/cancel
+     * Cancel a campaign that hasn't finished sending yet (ADMIN only).
+     *
+     * A draft is simply marked canceled — nothing has been queued yet. A
+     * campaign mid-send additionally has its still-queued `mailing_emails`
+     * rows flipped to 'canceled', so `system:send-email` (which only ever
+     * pulls rows with status = 'queued') stops delivering it. Completed or
+     * already-canceled campaigns can't be canceled again; a second request
+     * for an already-canceled campaign is treated as an idempotent no-op
+     * rather than an error, to survive a double-click safely.
+     */
+    public function cancel($id = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->failUnauthorized(lang('App.accessDenied'));
+        }
+
+        if ($this->session->user->role !== 'admin') {
+            return $this->failForbidden(lang('App.accessDenied'));
+        }
+
+        $mailing = $this->model->find($id);
+
+        if (!$mailing) {
+            return $this->failNotFound();
+        }
+
+        if ($mailing->status === MailingEntity::STATUS_CANCELED) {
+            return $this->respond(['success' => true]);
+        }
+
+        if (!in_array($mailing->status, [MailingEntity::STATUS_DRAFT, MailingEntity::STATUS_SENDING], true)) {
+            return $this->failForbidden(lang('Mailings.onlyDraftOrSendingCancelable'));
+        }
+
+        try {
+            if ($mailing->status === MailingEntity::STATUS_SENDING) {
+                $mailingEmailsModel = new MailingEmailsModel();
+                $mailingEmailsModel
+                    ->where('mailing_id', $id)
+                    ->where('status', MailingEmailEntity::STATUS_QUEUED)
+                    ->update(null, ['status' => MailingEmailEntity::STATUS_CANCELED]);
+            }
+
+            $this->model->update($id, ['status' => MailingEntity::STATUS_CANCELED]);
+
+            return $this->respond(['success' => true]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 

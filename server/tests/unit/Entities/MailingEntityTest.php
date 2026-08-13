@@ -30,6 +30,11 @@ final class MailingEntityTest extends CIUnitTestCase
         $this->assertSame('paused', MailingEntity::STATUS_PAUSED);
     }
 
+    public function testStatusCanceledConstantValue(): void
+    {
+        $this->assertSame('canceled', MailingEntity::STATUS_CANCELED);
+    }
+
     // --- Default attribute values ---
 
     public function testNewInstanceDefaultStatusIsDraft(): void

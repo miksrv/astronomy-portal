@@ -10,6 +10,7 @@ class MailingEntity extends Entity
     const STATUS_SENDING   = 'sending';
     const STATUS_COMPLETED = 'completed';
     const STATUS_PAUSED    = 'paused';
+    const STATUS_CANCELED  = 'canceled';
 
     protected $attributes = [
         'id'                 => null,
