@@ -13,13 +13,13 @@ import { MyReviewsSectionSkeleton } from './MyReviewsSectionSkeleton'
 import styles from './styles.module.sass'
 
 interface MyReviewsSectionProps {
-    userId: string
+    userId?: string
 }
 
 export const MyReviewsSection: React.FC<MyReviewsSectionProps> = ({ userId }) => {
     const { t } = useTranslation()
 
-    const { data, isLoading } = API.useCommentsGetListQuery({ userId })
+    const { data, isLoading } = API.useCommentsGetListQuery({ userId: userId! }, { skip: !userId })
     const [deleteComment] = API.useCommentsDeleteMutation()
 
     if (isLoading) {

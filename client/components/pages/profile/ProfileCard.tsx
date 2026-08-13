@@ -13,7 +13,7 @@ import { LOCAL_STORAGE } from '@/utils/constants'
 import styles from './styles.module.sass'
 
 interface ProfileCardProps {
-    user: ApiModel.User
+    user?: ApiModel.User
     isOnboarding?: boolean
 }
 
@@ -23,14 +23,18 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
 
     const [returnPath] = useLocalStorage<string>(LOCAL_STORAGE.RETURN_PATH)
 
-    const [name, setName] = useState<string>(user.name)
-    const [phone, setPhone] = useState<string>(user.phone ?? '')
-    const [birthday, setBirthday] = useState<string>(user.birthday ?? '')
-    const [sex, setSex] = useState<'m' | 'f' | undefined>(user.sex)
+    const [name, setName] = useState<string>(user?.name ?? '')
+    const [phone, setPhone] = useState<string>(user?.phone ?? '')
+    const [birthday, setBirthday] = useState<string>(user?.birthday ?? '')
+    const [sex, setSex] = useState<'m' | 'f' | undefined>(user?.sex)
     const [saveSuccess, setSaveSuccess] = useState<boolean>(false)
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
     const [updateProfile, { isLoading }] = API.useAuthUpdateProfileMutation()
+
+    if (!user) {
+        return null
+    }
 
     const avatarSrc = user.avatar ? `${HOST_IMG}/users/${user.id}/${user.avatar}` : undefined
 
