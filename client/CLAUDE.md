@@ -102,17 +102,18 @@ All hooks are auto-generated as `API.use<EndpointName>Query/Mutation()`.
 
 ### Mailings
 
-| Endpoint             | Hook suffix | Purpose                             |
-| -------------------- | ----------- | ----------------------------------- |
-| `mailingGetList`     | Query       | All mailing campaigns (list view)   |
-| `mailingGetItem`     | Query       | Single mailing by id                |
-| `mailingCreate`      | Mutation    | Create a new mailing draft          |
-| `mailingUpdate`      | Mutation    | Update mailing subject/content      |
-| `mailingDelete`      | Mutation    | Delete a mailing                    |
-| `mailingUploadImage` | Mutation    | Upload header image for a mailing   |
-| `mailingTestSend`    | Mutation    | Send a test email for a mailing     |
-| `mailingLaunch`      | Mutation    | Send a mailing to all subscribers   |
-| `mailingUnsubscribe` | Query       | Unsubscribe a user by email address |
+| Endpoint             | Hook suffix | Purpose                                                      |
+| -------------------- | ----------- | ------------------------------------------------------------ |
+| `mailingGetList`     | Query       | All mailing campaigns (list view)                            |
+| `mailingGetItem`     | Query       | Single mailing by id                                         |
+| `mailingCreate`      | Mutation    | Create a new mailing draft                                   |
+| `mailingUpdate`      | Mutation    | Update mailing subject/content                               |
+| `mailingDelete`      | Mutation    | Delete a mailing                                             |
+| `mailingUploadImage` | Mutation    | Upload header image for a mailing                            |
+| `mailingGetPreview`  | Query       | Rendered HTML of the mailing, as it will appear in the inbox |
+| `mailingTestSend`    | Mutation    | Send a test email for a mailing                              |
+| `mailingLaunch`      | Mutation    | Send a mailing to all subscribers                            |
+| `mailingUnsubscribe` | Query       | Unsubscribe a user by email address                          |
 
 ### Users (Members)
 

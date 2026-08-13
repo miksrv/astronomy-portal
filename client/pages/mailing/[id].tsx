@@ -3,14 +3,14 @@ import { getCookie } from 'cookies-next'
 import { Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
-import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, HOST_IMG, setLocale, wrapper } from '@/api'
+import { API, ApiModel, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { MailingPreview } from '@/components/pages/mailing'
 import { formatDate } from '@/utils/dates'
 
 import styles from './styles.module.sass'
@@ -234,18 +234,7 @@ const MailingStatsPage: NextPage<object> = () => {
                             </>
                         )}
 
-                        {data.image && (
-                            <div className={styles.imagePreview}>
-                                <Image
-                                    src={HOST_IMG + data.image}
-                                    alt={data.subject}
-                                    width={300}
-                                    height={200}
-                                />
-                            </div>
-                        )}
-
-                        <div className={styles.contentPreview}>{data.content}</div>
+                        <MailingPreview mailingId={id} />
                     </>
                 )}
             </Container>
@@ -278,6 +267,10 @@ export const getServerSideProps = wrapper.getServerSideProps(
             }
 
             const { data: mailingData } = await store.dispatch(API.endpoints.mailingGetItem.initiate(id))
+
+            // Prefetched alongside the mailing itself so the inbox preview iframe
+            // has its HTML ready on first paint instead of popping in client-side.
+            await store.dispatch(API.endpoints.mailingGetPreview.initiate(id))
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 

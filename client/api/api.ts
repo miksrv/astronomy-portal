@@ -424,6 +424,10 @@ export const API = createApi({
                 url: `mailings/${id}/upload`
             })
         }),
+        mailingGetPreview: builder.query<ApiType.Mailings.ResMailingPreview, string>({
+            providesTags: (res, err, id) => [{ id, type: 'Mailings' }],
+            query: (id) => `mailings/${id}/preview`
+        }),
         mailingTestSend: builder.mutation<ApiType.Mailings.ResMailingTestSend, string>({
             query: (id) => ({
                 method: 'POST',

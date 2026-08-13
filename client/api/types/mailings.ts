@@ -33,6 +33,10 @@ export interface ResMailingTestSend {
     success: boolean
 }
 
+export interface ResMailingPreview {
+    html: string
+}
+
 export interface ResMailingLaunch {
     queued: number
 }

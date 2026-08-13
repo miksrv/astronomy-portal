@@ -74,6 +74,7 @@ GET    /mailings/:id                → Mailings::show
 PATCH  /mailings/:id                → Mailings::update
 DELETE /mailings/:id                → Mailings::delete
 POST   /mailings/:id/upload         → Mailings::upload
+GET    /mailings/:id/preview        → Mailings::preview        (renders email_newsletter HTML, no send)
 POST   /mailings/:id/test           → Mailings::test           [rate-limited: mailings_test, 5/60s]
 POST   /mailings/:id/send           → Mailings::send
 

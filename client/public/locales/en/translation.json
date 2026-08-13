@@ -603,6 +603,8 @@
             "detail-sent-at": "Sent date",
             "detail-created-at": "Created date",
             "detail-status": "Status",
+            "preview-title": "Email preview",
+            "preview-error": "Failed to load the email preview",
             "limit-status": "Limit status",
             "limit-day-hit": "Daily limit",
             "limit-hour-hit": "Hourly limit",

@@ -611,6 +611,8 @@
             "detail-sent-at": "Дата отправки",
             "detail-created-at": "Дата создания",
             "detail-status": "Статус",
+            "preview-title": "Превью письма",
+            "preview-error": "Не удалось загрузить превью письма",
             "limit-status": "Состояние лимита",
             "limit-day-hit": "Суточный лимит",
             "limit-hour-hit": "Часовой лимит",
