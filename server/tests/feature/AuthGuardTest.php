@@ -174,4 +174,54 @@ final class AuthGuardTest extends CIUnitTestCase
         $json = json_decode($result->getJSON(), true);
         $this->assertArrayHasKey('messages', $json);
     }
+
+    // --- Roles endpoints ---
+
+    public function testGetRolesWithoutTokenReturns401(): void
+    {
+        $result = $this->get('roles');
+        $result->assertStatus(401);
+        $json = json_decode($result->getJSON(), true);
+        $this->assertArrayHasKey('messages', $json);
+    }
+
+    public function testGetRolePermissionsWithoutTokenReturns401(): void
+    {
+        $result = $this->get('roles/permissions');
+        $result->assertStatus(401);
+        $json = json_decode($result->getJSON(), true);
+        $this->assertArrayHasKey('messages', $json);
+    }
+
+    public function testPostRolesWithoutTokenReturns401(): void
+    {
+        $result = $this->post('roles', []);
+        $result->assertStatus(401);
+        $json = json_decode($result->getJSON(), true);
+        $this->assertArrayHasKey('messages', $json);
+    }
+
+    public function testPatchRoleWithoutTokenReturns401(): void
+    {
+        $result = $this->patch('roles/1', []);
+        $result->assertStatus(401);
+        $json = json_decode($result->getJSON(), true);
+        $this->assertArrayHasKey('messages', $json);
+    }
+
+    public function testDeleteRoleWithoutTokenReturns401(): void
+    {
+        $result = $this->delete('roles/1');
+        $result->assertStatus(401);
+        $json = json_decode($result->getJSON(), true);
+        $this->assertArrayHasKey('messages', $json);
+    }
+
+    public function testPatchMemberRolesWithoutTokenReturns401(): void
+    {
+        $result = $this->patch('members/abc123/roles', []);
+        $result->assertStatus(401);
+        $json = json_decode($result->getJSON(), true);
+        $this->assertArrayHasKey('messages', $json);
+    }
 }
