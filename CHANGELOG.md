@@ -10,6 +10,7 @@
 - Replaced the single-file hidden-input uploader with a batch upload dialog (`EventPhotoUploadDialog`): drag-and-drop or click-to-browse for up to hundreds of files at once, a bounded-concurrency upload queue with an overall progress bar, a non-cumulative "current file" status line alongside a cumulative error list, a Cancel action that aborts in-flight/pending uploads, and a "retry failed only" action once a batch settles — the dialog and the page itself cannot be closed/left while a batch is uploading (new shared `useNavigationGuard` hook)
 - Removed the unused bilingual `title_en`/`title_ru` snapshot columns from `events_photos` (a copy of the event's own title taken at upload time, never independently editable); the homepage hero photo strip and the event page now build their own captions from already-loaded data instead
 - Replaced the event photo gallery's up-to-500-at-once fetch with real server-side pagination (`limit`/`offset`/`photographer` on `GET /events/photos`, mirroring the comments API): the event page now prefetches only the first 15 photos during SSR, "Смотреть все" loads everything remaining in a single request instead of growing the grid while scrolling, and the distinct photographer list for the filter chips is bundled into the same response rather than a separate endpoint; also fixed `react-photo-album` to actually render photos during SSR (`defaultContainerWidth`), so the gallery is no longer invisible until client-side hydration
+- Fixed `PhotoLightbox` showing a blank/black slide (or, briefly, a broken-image icon) while the full-size image loads: the already-loaded thumbnail is now shown as a blurred backdrop underneath, with the full image cross-fading in on load, wired up on the stargazing event and astrophoto detail pages
 
 ## 4.7.5
 
@@ -663,3 +664,4 @@
 -   Rewritten all core functions for enhanced performance
 -   Redesigned and optimized all API controllers
 -   Added new pages and forms
+

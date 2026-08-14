@@ -313,6 +313,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
             <PhotoLightbox
                 photos={photos.map((photo, index) => ({
                     height: photo.height,
+                    preview: createPreviewPhotoUrl(photo),
                     src: createFullPhotoUrl(photo),
                     width: photo.width,
                     title: getPhotoCaption(photo, index)
