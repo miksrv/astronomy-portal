@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { getCookie } from 'cookies-next'
-import { Button, Container, Message } from 'simple-react-ui-kit'
+import { Button, Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import dynamic from 'next/dynamic'
@@ -13,10 +13,9 @@ import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
-import { EventItemData, EventReviews } from '@/components/pages/stargazing'
+import { EventItemData, EventPhotoFilter, EventReviews } from '@/components/pages/stargazing'
 import { REVIEWS_PAGE_SIZE } from '@/utils/constants'
 import { formatDate } from '@/utils/dates'
-import { getErrorMessage } from '@/utils/errors'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
 import { hasAnyPermission, hasPermission } from '@/utils/permissions'
@@ -24,10 +23,9 @@ import { removeMarkdown, sliceText } from '@/utils/strings'
 
 import styles from '../styles.module.sass'
 
-// Admin-only, single hidden <input> — dynamically imported so it never enters
-// the bundle or DOM for regular visitors.
-const EventPhotoUploader = dynamic(
-    () => import('@/components/pages/stargazing/event-photo-uploader').then((mod) => mod.EventPhotoUploader),
+// Admin-only, dynamically imported so it never enters the bundle for regular visitors.
+const EventPhotoUploadDialog = dynamic(
+    () => import('@/components/pages/stargazing/event-photo-upload-dialog').then((mod) => mod.EventPhotoUploadDialog),
     { ssr: false }
 )
 
@@ -44,11 +42,9 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 
     const user = useAppSelector((state) => state.auth.user)
 
-    const inputFileRef = useRef<HTMLInputElement>(undefined)
-
     const [localPhotos, setLocalPhotos] = useState<ApiModel.EventPhoto[]>([])
-    const [uploadingPhotos, setUploadingPhotos] = useState<string[]>()
-    const [uploadError, setUploadError] = useState<unknown>()
+    const [isUploadDialogOpen, setIsUploadDialogOpen] = useState<boolean>(false)
+    const [selectedPhotographer, setSelectedPhotographer] = useState<string | undefined>(undefined)
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>()
     const [isPhotosExpanded, setIsPhotosExpanded] = useState(false)
@@ -74,6 +70,27 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     const eventJsonLd = event
         ? buildEventJsonLd(event, reviewsData ? { items: reviewsData.items, total: reviewsData.total } : undefined)
         : null
+
+    // Purely client-side narrowing by photographer - no extra request, the
+    // filter chips (`EventPhotoFilter`) are derived from this same `localPhotos` list.
+    const filteredPhotos = useMemo(
+        () =>
+            selectedPhotographer
+                ? localPhotos.filter((photo) => photo.photographer === selectedPhotographer)
+                : localPhotos,
+        [localPhotos, selectedPhotographer]
+    )
+
+    const getPhotoCaption = (photo: ApiModel.EventPhoto, index: number): string =>
+        photo.photographer
+            ? t('pages.stargazing.photo-caption-with-photographer', '{{eventTitle}} — фото от {{photographer}}', {
+                  eventTitle: title,
+                  photographer: photo.photographer
+              })
+            : t('pages.stargazing.photo-caption', '{{eventTitle}} (Фото №{{number}})', {
+                  eventTitle: title,
+                  number: index + 1
+              })
 
     const adjacentEvents = useMemo(() => {
         const sortedEvents = [...(eventsList || [])].sort((a, b) => {
@@ -112,7 +129,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
             return
         }
 
-        inputFileRef?.current?.click()
+        setIsUploadDialogOpen(true)
     }
 
     useEffect(() => {
@@ -150,15 +167,12 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                     <>
                         {hasPermission(user, ApiModel.Permission.EVENTS_GALLERY_UPLOAD) && (
                             <Button
-                                disabled={!!uploadingPhotos?.length}
-                                loading={!!uploadingPhotos?.length}
+                                disabled={isUploadDialogOpen}
                                 icon={'Download'}
                                 mode={'secondary'}
                                 onClick={handleUploadPhotoClick}
                             >
-                                {!uploadingPhotos?.length
-                                    ? 'Загрузить фотографии'
-                                    : `Загрузка ${uploadingPhotos?.length} фото`}
+                                {t('pages.stargazing.upload-photos-button', 'Загрузить фотографии')}
                             </Button>
                         )}
 
@@ -191,7 +205,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
             <h2>
                 {t('pages.stargazing.photos-from-stargazing', 'Фотографии с мероприятия')}
 
-                {localPhotos.length > PHOTOS_PREVIEW_LIMIT && (
+                {filteredPhotos.length > PHOTOS_PREVIEW_LIMIT && (
                     <a
                         role={'button'}
                         tabIndex={0}
@@ -202,20 +216,26 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                         {isPhotosExpanded
                             ? t('pages.stargazing.photos-show-less', 'Показать меньше фотографий')
                             : t('pages.stargazing.photos-show-all', 'Смотреть все ({{count}})', {
-                                  count: localPhotos.length
+                                  count: filteredPhotos.length
                               })}
                     </a>
                 )}
             </h2>
 
-            {localPhotos?.length > 0 ? (
+            <EventPhotoFilter
+                photos={localPhotos}
+                selected={selectedPhotographer}
+                onChange={setSelectedPhotographer}
+            />
+
+            {filteredPhotos?.length > 0 ? (
                 <PhotoGallery
-                    photos={(isPhotosExpanded ? localPhotos : localPhotos.slice(0, PHOTOS_PREVIEW_LIMIT)).map(
+                    photos={(isPhotosExpanded ? filteredPhotos : filteredPhotos.slice(0, PHOTOS_PREVIEW_LIMIT)).map(
                         (photo, index) => ({
                             height: photo.height,
                             src: createPreviewPhotoUrl(photo),
                             width: photo.width,
-                            alt: `${photo?.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
+                            alt: getPhotoCaption(photo, index)
                         })
                     )}
                     onClick={({ index }) => {
@@ -234,33 +254,23 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
             )}
 
             {hasPermission(user, ApiModel.Permission.EVENTS_GALLERY_UPLOAD) && (
-                <EventPhotoUploader
+                <EventPhotoUploadDialog
                     eventId={eventId}
-                    fileInputRef={inputFileRef}
-                    onSelectFiles={setUploadingPhotos}
+                    photos={localPhotos}
+                    open={isUploadDialogOpen}
+                    onClose={() => setIsUploadDialogOpen(false)}
                     onUploadPhoto={(photo) => {
                         setLocalPhotos((prev) => [...prev, photo])
                     }}
-                    onUploadError={setUploadError}
                 />
             )}
 
-            {!!uploadError && (
-                <Message
-                    type={'error'}
-                    className={styles.uploadError}
-                >
-                    {getErrorMessage(uploadError) ||
-                        t('pages.stargazing.upload-photo-error', 'Не удалось загрузить фотографию. Попробуйте позже.')}
-                </Message>
-            )}
-
             <PhotoLightbox
-                photos={localPhotos?.map((photo, index) => ({
+                photos={filteredPhotos?.map((photo, index) => ({
                     height: photo.height,
                     src: createFullPhotoUrl(photo),
                     width: photo.width,
-                    title: `${photo.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
+                    title: getPhotoCaption(photo, index)
                 }))}
                 photoIndex={photoIndex}
                 showLightbox={showLightbox}
