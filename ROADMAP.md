@@ -18,12 +18,9 @@ Each feature is described in detail in the `features/` directory.
 | FEAT-12 | Object Catalog Filters & Sorting   | Planned   | —                                                            |
 | FEAT-13 | Web Push Notifications             | Planned   | [features/web-push-notifications.md](features/web-push-notifications.md) |
 | **Stargazing UX improvements** ||||
-| FEAT-15 | Fix QR-code 404 + Email Confirmation After Booking | Planned | [features/stargazing-qr-email-confirmation.md](features/stargazing-qr-email-confirmation.md) |
 | FEAT-17 | Event Waitlist System              | Planned   | [features/stargazing-waitlist.md](features/stargazing-waitlist.md) |
 | FEAT-18 | Event Reminder Emails (24h Before) | Planned   | [features/stargazing-event-reminders.md](features/stargazing-event-reminders.md) |
 | FEAT-19 | i18n Fixes in EventBookingForm     | Planned   | [features/stargazing-i18n-booking-form.md](features/stargazing-i18n-booking-form.md) |
-| FEAT-20 | Calendar Invite (.ics) Download    | Planned   | [features/stargazing-calendar-invite.md](features/stargazing-calendar-invite.md) |
-| FEAT-22 | Stargazing Index Page Redesign     | Planned   | [features/stargazing-index-redesign.md](features/stargazing-index-redesign.md) |
 | **Core UX** ||||
 | FEAT-25 | Admin / Moderator Dashboard        | Planned   | [features/admin-dashboard.md](features/admin-dashboard.md)   |
 
