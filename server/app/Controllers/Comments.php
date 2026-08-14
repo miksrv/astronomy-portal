@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Enums\Permission;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
 use App\Models\CommentsModel;
@@ -232,10 +233,9 @@ class Comments extends ResourceController
                 return $this->failNotFound(lang('Comments.commentNotFound'));
             }
 
-            $userId    = $this->session->user->id;
-            $userRole  = $this->session->user->role;
-            $isOwner   = $comment['user_id'] === $userId;
-            $isPrivileged = in_array($userRole, ['admin', 'moderator'], true);
+            $userId       = $this->session->user->id;
+            $isOwner      = $comment['user_id'] === $userId;
+            $isPrivileged = $this->session->can(Permission::COMMENTS_MODERATE);
 
             if (!$isOwner && !$isPrivileged) {
                 return $this->failForbidden(lang('App.accessDenied'));

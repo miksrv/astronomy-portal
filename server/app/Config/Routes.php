@@ -154,6 +154,19 @@ $routes->group('mailings', static function ($routes) {
 $routes->group('members', static function ($routes) {
     $routes->get('/', 'Members::list');
     $routes->get('(:alphanum)/events', 'Members::events/$1');
+    $routes->patch('(:alphanum)/roles', 'Members::updateRoles/$1');
+    $routes->options('/', static function () {});
+    $routes->options('(:any)', static function () {});
+});
+
+/** Roles Controller **/
+$routes->group('roles', static function ($routes) {
+    $routes->get('/', 'Roles::list');
+    $routes->get('permissions', 'Roles::permissions'); // before (:num), or it's shadowed by show
+    $routes->get('(:num)', 'Roles::show/$1');
+    $routes->post('/', 'Roles::create');
+    $routes->patch('(:num)', 'Roles::update/$1');
+    $routes->delete('(:num)', 'Roles::delete/$1');
     $routes->options('/', static function () {});
     $routes->options('(:any)', static function () {});
 });

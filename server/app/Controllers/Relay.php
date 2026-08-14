@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Enums\Permission;
 use App\Libraries\RelayLibrary;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
@@ -100,7 +101,7 @@ class Relay extends ResourceController
             return $this->failUnauthorized('Ошибка прав доступа');
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::RELAY_CONTROL)) {
             return $this->failForbidden('Ошибка прав доступа');
         }
 

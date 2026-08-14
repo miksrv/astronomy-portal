@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Entities\EventEntity;
 use App\Entities\EventPhotoEntity;
 use App\Entities\PaymentEntity;
+use App\Enums\Permission;
 use App\Libraries\CalendarLibrary;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\PaymentLibrary;
@@ -256,7 +257,7 @@ class Events extends ResourceController
                 return $this->failValidationErrors(lang('Events.invalidQrCode'));
             }
 
-            $isStaff = in_array($this->session->user->role, ['admin', 'moderator', 'security'], true);
+            $isStaff = $this->session->can(Permission::EVENTS_CHECKIN);
 
             // Not staff — presumably the guest who scanned their own ticket's
             // QR. No side effects, no access to anyone else's booking; just
@@ -343,7 +344,7 @@ class Events extends ResourceController
                 return $this->failNotFound(lang('Events.notFound'));
             }
 
-            $isStaff = in_array($this->session->user->role, ['admin', 'moderator', 'security'], true);
+            $isStaff = $this->session->can(Permission::EVENTS_CHECKIN);
 
             if (!$isStaff && $booking->user_id !== $this->session->user->id) {
                 return $this->failForbidden(lang('App.accessDenied'));
@@ -808,7 +809,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::EVENTS_USERS)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -839,7 +840,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if (!in_array($this->session->user->role, ['admin', 'moderator'])) {
+        if (!$this->session->can(Permission::EVENTS_STATISTIC)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -875,7 +876,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if (!in_array($this->session->user->role, ['admin', 'moderator'])) {
+        if (!$this->session->can(Permission::EVENTS_STATISTIC)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -931,7 +932,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if (!in_array($this->session->user->role, ['admin', 'moderator'])) {
+        if (!$this->session->can(Permission::EVENTS_STATISTIC)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -1001,9 +1002,10 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        // Stricter than verifyRegistrationPayment() (admin+moderator) — this
-        // action moves real money and cannot be undone, so it's admin-only.
-        if ($this->session->user->role !== 'admin') {
+        // Stricter than verifyRegistrationPayment() (events.statistic) — this
+        // action moves real money and cannot be undone, so it needs its own
+        // dedicated privilege rather than reusing a broader one.
+        if (!$this->session->can(Permission::EVENTS_REFUND)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -1129,7 +1131,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if (!in_array($this->session->user->role, ['admin', 'moderator'], true)) {
+        if (!$this->session->can(Permission::EVENTS_CREATE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -1606,7 +1608,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::EVENTS_GALLERY_UPLOAD)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -1700,7 +1702,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if (!in_array($this->session->user->role, ['admin', 'moderator'], true)) {
+        if (!$this->session->can(Permission::EVENTS_UPDATE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -1760,7 +1762,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::EVENTS_DELETE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -1812,7 +1814,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if (!in_array($this->session->user->role, ['admin', 'moderator'], true)) {
+        if (!$this->session->can(Permission::EVENTS_UPDATE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 

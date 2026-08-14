@@ -9,6 +9,7 @@ use App\Libraries\SessionLibrary;
 use App\Libraries\YandexClient;
 use App\Libraries\VkClient;
 use App\Models\MagicLinkTokensModel;
+use App\Models\RolesModel;
 use App\Models\UsersModel;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Files\File;
@@ -547,9 +548,12 @@ class Auth extends ResourceController
             unset($response->user->auth_type);
             unset($response->user->session_token);
 
-            if ($response->user->role === 'user') {
-                unset($response->user->role);
-            }
+            $roleIds = $this->session->user->roles ?? [];
+            $roles   = empty($roleIds) ? [] : (new RolesModel())->whereIn('id', $roleIds)->findAll();
+
+            unset($response->user->roles);
+            $response->user->roles       = array_map(static fn ($role) => $role->name, $roles);
+            $response->user->permissions = $this->session->permissions;
 
             if ($isNewUser) {
                 $response->isNewUser = true;
