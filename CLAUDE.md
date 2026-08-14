@@ -20,7 +20,7 @@ Stargazing events are rare (~3 per year), so the product's primary "dead-time" c
 
 ### Maintenance rule: roles & permissions table
 
-There is no central permission/filter middleware — every backend controller checks `session.user.role` inline, and the frontend mirrors those checks to show/hide pages and UI (see "User Roles & Permissions" in `README.md`). Whenever a change touches who can do what — a role gains/loses access to an endpoint or action, a new role is introduced, a role check is added/removed/loosened/tightened on either the backend or the frontend — **update the "User Roles & Permissions" tables in `README.md` in the same change**. That section is the single source of truth for the access matrix; letting it drift from the code makes it actively misleading.
+There is no central permission/filter middleware — every backend controller checks `session->can(Permission::X)` inline (`App\Enums\Permission`, a fixed backed enum), and the frontend mirrors those checks via `hasPermission()`/`hasAnyPermission()` (`client/utils/permissions.ts`) to show/hide pages and UI (see "User Roles & Permissions" in `README.md`). Roles (`user_roles` table, admin-editable via `/admin/roles`) are just named bundles of privileges a user can be assigned any number of; there is no admin bypass. Whenever a change touches who can do what — a new privilege is introduced, a privilege check is added/removed/loosened/tightened on either the backend or the frontend, a seeded role's default privileges change — **update the "User Roles & Permissions" tables in `README.md` in the same change**. That section is the single source of truth for the access matrix; letting it drift from the code makes it actively misleading.
 
 ## Development Commands
 
@@ -71,12 +71,13 @@ docker-compose up     # Start MariaDB at localhost:3308 (db: db, user: user, pas
 - `/about` — about page with donators list
 - `/auth` — authentication
 - `/profile` — user profile
-- `/users` — users list
 - `/objects`, `/objects/[name]`, `/objects/form` — astronomical objects catalog + create/edit form
 - `/observatory`, `/observatory/overview`, `/observatory/weather`, `/observatory/history`, `/observatory/history/[slug]` — observatory monitoring + history
 - `/photos`, `/photos/[name]`, `/photos/form` — astrophoto archive + upload/edit form
 - `/stargazing`, `/stargazing/[name]`, `/stargazing/[name]/statistic`, `/stargazing/checkin`, `/stargazing/entry`, `/stargazing/faq`, `/stargazing/form`, `/stargazing/history`, `/stargazing/howto`, `/stargazing/payment`, `/stargazing/rules`, `/stargazing/tickets`, `/stargazing/where` — stargazing events, ticket payment (Alfa-Bank) and check-in
-- `/mailing`, `/mailing/form`, `/mailing/[id]` — email mailing campaigns
+- `/admin/mailing`, `/admin/mailing/form`, `/admin/mailing/[id]` — email mailing campaigns (`mailings.manage` privilege)
+- `/admin/users` — users list + role assignment (`users.manage` privilege)
+- `/admin/roles` — create/edit roles and their granted privileges (`users.manage` privilege)
 - `/unsubscribe` — mailing unsubscribe landing
 - `/privacy` — privacy policy
 - `/starmap` — interactive star map

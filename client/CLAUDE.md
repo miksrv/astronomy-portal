@@ -118,10 +118,21 @@ All hooks are auto-generated as `API.use<EndpointName>Query/Mutation()`.
 
 ### Users (Members)
 
-| Endpoint         | Hook suffix | Purpose                           |
-| ---------------- | ----------- | --------------------------------- |
-| `usersGetList`   | Query       | Paginated admin user list         |
-| `usersGetEvents` | Query       | Event history for a specific user |
+| Endpoint           | Hook suffix | Purpose                                     |
+| ------------------ | ----------- | ------------------------------------------- |
+| `usersGetList`     | Query       | Paginated admin user list                   |
+| `usersGetEvents`   | Query       | Event history for a specific user           |
+| `usersUpdateRoles` | Mutation    | Replace a user's full set of assigned roles |
+
+### Roles
+
+| Endpoint             | Hook suffix | Purpose                                                     |
+| -------------------- | ----------- | ----------------------------------------------------------- |
+| `rolesGetList`       | Query       | All roles (name + granted privileges + assigned user count) |
+| `roleGetPermissions` | Query       | The fixed privilege catalog, for the role-editor checkboxes |
+| `roleCreate`         | Mutation    | Create a role                                               |
+| `roleUpdate`         | Mutation    | Update a role's name/privileges                             |
+| `roleDelete`         | Mutation    | Delete a role (also strips it from every assigned user)     |
 
 ### Sitemap
 
@@ -135,23 +146,25 @@ All hooks are auto-generated as `API.use<EndpointName>Query/Mutation()`.
 
 Import via `import { ApiModel } from '@/api'`.
 
-| Model                  | Description                                                                                                                                                                                          |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ApiModel.Category`    | Photo/object category (`id`, `title`, `description`)                                                                                                                                                 |
-| `ApiModel.Comment`     | User review/comment with `rating`, `content`, and nested `author`; `CommentEntityType = 'event' \| 'photo'`                                                                                          |
-| `ApiModel.Equipment`   | Observatory equipment item with `EquipmentType` enum                                                                                                                                                 |
-| `ApiModel.Event`       | Stargazing event with tickets, registration window, cover image, and location (`location`/`address`/`latitude`/`longitude`/`minAge`, gated pre-registration); `EventPhoto` and `EventUser` sub-types |
-| `ApiModel.File`        | FITS file record with filter, exposure, gain, offset, ccdTemp                                                                                                                                        |
-| `ApiModel.FilterTypes` | Union of LRGBHOSN filter codes; `ApiModel.Filters` maps each to a `Statistic`                                                                                                                        |
-| `ApiModel.Mailing`     | Email campaign with status, sent/error counts; `MailingListItem` is the list-safe subset                                                                                                             |
-| `ApiModel.Object`      | Astronomical object with RA/DEC, description, and linked statistic/filters                                                                                                                           |
-| `ApiModel.Photo`       | Astrophoto record with file metadata, linked objects, categories, equipment                                                                                                                          |
-| `ApiModel.Relay`       | Observatory relay channel (`id`, `name`, `state`)                                                                                                                                                    |
-| `ApiModel.SiteMap`     | Sitemap entry with `id` and `updated` timestamp                                                                                                                                                      |
-| `ApiModel.Statistic`   | Frames/exposure/fileSize aggregate (shared by Objects and Photos)                                                                                                                                    |
-| `ApiModel.Telescope`   | Raw telescope session row (date, total_exposure, frames_count, catalog_items)                                                                                                                        |
-| `ApiModel.User`        | User profile; `UserRole` enum: `user / security / moderator / admin`; `AdminUserItem` is the admin table shape                                                                                       |
-| `ApiModel.Weather`     | Weather snapshot (temperature, wind, humidity, clouds, UV, solar radiation, etc.)                                                                                                                    |
+| Model                  | Description                                                                                                                                                                                           |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ApiModel.Category`    | Photo/object category (`id`, `title`, `description`)                                                                                                                                                  |
+| `ApiModel.Comment`     | User review/comment with `rating`, `content`, and nested `author`; `CommentEntityType = 'event' \| 'photo'`                                                                                           |
+| `ApiModel.Equipment`   | Observatory equipment item with `EquipmentType` enum                                                                                                                                                  |
+| `ApiModel.Event`       | Stargazing event with tickets, registration window, cover image, and location (`location`/`address`/`latitude`/`longitude`/`minAge`, gated pre-registration); `EventPhoto` and `EventUser` sub-types  |
+| `ApiModel.File`        | FITS file record with filter, exposure, gain, offset, ccdTemp                                                                                                                                         |
+| `ApiModel.FilterTypes` | Union of LRGBHOSN filter codes; `ApiModel.Filters` maps each to a `Statistic`                                                                                                                         |
+| `ApiModel.Mailing`     | Email campaign with status, sent/error counts; `MailingListItem` is the list-safe subset                                                                                                              |
+| `ApiModel.Object`      | Astronomical object with RA/DEC, description, and linked statistic/filters                                                                                                                            |
+| `ApiModel.Photo`       | Astrophoto record with file metadata, linked objects, categories, equipment                                                                                                                           |
+| `ApiModel.Relay`       | Observatory relay channel (`id`, `name`, `state`)                                                                                                                                                     |
+| `ApiModel.SiteMap`     | Sitemap entry with `id` and `updated` timestamp                                                                                                                                                       |
+| `ApiModel.Statistic`   | Frames/exposure/fileSize aggregate (shared by Objects and Photos)                                                                                                                                     |
+| `ApiModel.Telescope`   | Raw telescope session row (date, total_exposure, frames_count, catalog_items)                                                                                                                         |
+| `ApiModel.User`        | User profile; `roles` (display-only names) + `permissions` (the flat privilege list access checks use) come from `/auth/me`; `AdminUserItem` is the admin table shape, with `roles: Role[]` (id+name) |
+| `ApiModel.Permission`  | Mirrors the backend `Permission` enum — the fixed privilege catalog; `hasPermission()`/`hasAnyPermission()` (`client/utils/permissions.ts`) are the only things that should read it                   |
+| `ApiModel.Role`        | `{ id, name, permissions, usersCount? }` — a named, admin-editable bundle of privileges; `usersCount` is only present in the `/roles` list response                                                   |
+| `ApiModel.Weather`     | Weather snapshot (temperature, wind, humidity, clouds, UV, solar radiation, etc.)                                                                                                                     |
 
 ---
 

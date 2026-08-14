@@ -51,7 +51,7 @@ GET    /events/photos               → Events::photos
 GET    /events/:id/statistic        → Events::statistic
 GET    /events/:id/registrations    → Events::registrations
 GET    /events/:id                  → Events::show
-GET    /events/members/:id          → Events::members
+GET    /events/members/:id          → Events::members (events.users privilege)
 GET    /events/checkin/:id          → Events::checkin
 GET    /events/ticket/:id           → Events::ticket
 POST   /events                      → Events::create
@@ -63,13 +63,13 @@ POST   /events/cancel               → Events::cancel
 POST   /events/payment/status       → Events::paymentStatus
 GET|POST /events/payment/callback   → Events::paymentCallback   (Alfa-Bank server-to-server callback; HMAC-verified)
 POST   /events/registrations/:id/verify-payment → Events::verifyRegistrationPayment
-POST   /events/registrations/:id/refund → Events::refundRegistrationPayment (admin only — forced refund + cancellation)
+POST   /events/registrations/:id/refund → Events::refundRegistrationPayment (events.refund privilege — forced refund + cancellation)
 POST   /events/upload/:id           → Events::upload
 
 GET    /mailings                    → Mailings::list
 POST   /mailings                    → Mailings::create
 GET    /mailings/unsubscribe        → Mailings::unsubscribe  (public; declared before (:alphanum))
-GET    /mailings/audiences          → Mailings::audiences    (admin; declared before (:alphanum))
+GET    /mailings/audiences          → Mailings::audiences    (mailings.manage privilege; declared before (:alphanum))
 GET    /mailings/:id                → Mailings::show
 PATCH  /mailings/:id                → Mailings::update
 DELETE /mailings/:id                → Mailings::delete
@@ -79,8 +79,16 @@ POST   /mailings/:id/test           → Mailings::test           [rate-limited: 
 POST   /mailings/:id/send           → Mailings::send
 POST   /mailings/:id/cancel         → Mailings::cancel          (only from draft/sending; mid-send also cancels queued mailing_emails rows)
 
-GET  /members                       → Members::list
-GET  /members/:id/events            → Members::events
+GET   /members                      → Members::list
+GET   /members/:id/events           → Members::events
+PATCH /members/:id/roles            → Members::updateRoles     (replaces a user's full set of assigned roles)
+
+GET    /roles                       → Roles::list
+GET    /roles/permissions           → Roles::permissions       (the fixed Permission catalog, for the role-editor checkboxes; declared before (:num))
+GET    /roles/:id                   → Roles::show
+POST   /roles                       → Roles::create
+PATCH  /roles/:id                   → Roles::update
+DELETE /roles/:id                   → Roles::delete            (strips the role from every user's `roles` array first — see UsersModel::removeRoleFromAllUsers())
 
 GET    /comments                    → Comments::index
 GET    /comments/random             → Comments::random
@@ -114,6 +122,7 @@ All controllers extend `ResourceController` and use the `ResponseTrait`.
 | `Objects.php` | CRUD for astronomical objects catalog (locale-aware titles/descriptions) |
 | `Photos.php` | CRUD for astrophoto archive; image upload via `PhotoUploadLibrary` |
 | `Relay.php` | Observatory power relay control (list state, toggle light with cooldown guard) |
+| `Roles.php` | CRUD for roles (name + a set of `Permission` privileges); `permissions()` returns the fixed privilege catalog for the admin UI's checkbox list |
 | `Sitemap.php` | Returns URL slugs for photos, objects, and events for sitemap generation |
 | `Statistic.php` | Aggregates telescope imaging statistics (exposure time, filter usage) by month |
 
@@ -128,7 +137,8 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 | File | Table | Soft-deletes | Notes |
 |---|---|---|---|
 | `ApplicationBaseModel.php` | — | — | Base class; adds `prepareOutput()` for stripping `hiddenFields` |
-| `UsersModel.php` | `users` | yes | `UserEntity`; roles: `user`, `moderator`, `admin`; UUID PKs; `session_token` powers logout revocation — see Authentication below |
+| `UsersModel.php` | `users` | yes | `UserEntity`; `roles` is a JSON array of `user_roles.id` values (see `RolesModel`) — a user can hold several roles; UUID PKs; `session_token` powers logout revocation — see Authentication below |
+| `RolesModel.php` | `user_roles` | no | `RoleEntity`; `permissions` is a JSON array of `App\Enums\Permission` values; `getPermissionsForIds()` resolves a user's effective privileges (union across all their roles); `countUsersPerRole()` powers the "assigned to N users" delete warning (single query for all roles, not one per role); `idsExist()` validates role ids before they're persisted onto a user; `DEVELOPER_ROLE_ID` (= 1, "Разработчик") is the one hardcoded role — see "The reserved developer role" in the root README |
 | `EventsModel.php` | `events` | yes | `EventEntity`; bilingual fields (`title_en/ru`, `content_en/ru`) |
 | `EventsPhotosModel.php` | `events_photos` | yes | Pivot: photos uploaded to a specific event |
 | `EventsUsersModel.php` | `events_users` | yes | Pivot: user bookings/check-ins for events |
@@ -200,6 +210,8 @@ Listed in execution order. Tables created unless noted as ALTER.
 | `2026-07-07-100000_ReworkEventLocationFields` | ALTER `events` — replaces bilingual venue name/manual map links with `location`/`address`/`latitude`/`longitude`/`min_age`/`end_date` |
 | `2026-07-09-100000_AddEmailQueueIcsAttachment` | ALTER `email_queue` — adds ICS calendar attachment column |
 | `2026-08-13-100000_AddMailingsCanceledStatus` | ALTER `mailings` and `mailing_emails` — adds a `canceled` status |
+| `2026-08-13-100001_AddRolesTable` | `user_roles` — seeds 3 starter roles (Разработчик/Команда/Охрана) preserving the legacy `users.role` ENUM's behaviour; role id 1 ("Разработчик") is reserved/hardcoded, see `RolesModel::DEVELOPER_ROLE_ID` |
+| `2026-08-13-100002_AddUsersRolesColumn` | ALTER `users` — adds `roles JSON` (array of `roles.id`), backfilled from the legacy `role` column, which is left in place for now as a rollback safety net |
 
 ---
 
@@ -223,13 +235,13 @@ Listed in execution order. Tables created unless noted as ALTER.
 - Instantiate in controller: `$this->session = new SessionLibrary();`
 - Check auth: `$this->session->isAuth` (bool)
 - Get current user: `$this->session->user` (returns `UserEntity | null`)
-- User roles: `user`, `moderator`, `admin`
+- Check a privilege: `$this->session->can(Permission::X)` (bool) — resolved from the union of every role in `$this->session->user->roles`; no admin bypass, see "User Roles & Permissions" in the root `README.md`
 - **Token lifetime is intentionally long** (`auth.token.live`, currently 180 days) — logout does not shorten it. Instead, revocation is layered on top via `users.session_token`:
   - The JWT carries a `sid` claim = `users.session_token` at issuance time (`generateAuthToken($email, $sessionToken)`).
   - `validateAuthToken()` rejects the token if `sid` doesn't match the user's current `session_token` (or if it's `NULL`) — checked on every request, piggybacking on the user row `SessionLibrary` already loads (no extra query).
   - On login (`Auth::_serviceAuth()`, `Auth::verifyMagicLink()`), `Auth::ensureSessionToken()` generates a `session_token` only if the user doesn't already have one — logging in on a new device does **not** invalidate sessions already active elsewhere.
   - `POST /auth/logout` (`Auth::logout()`) clears `session_token` to `NULL`, instantly invalidating every token issued to that user, on every device, regardless of `exp`. The next login mints a fresh `session_token` and full-lifetime tokens work normally again.
-  - `session_token` is never exposed in API responses — `Auth::responseAuth()` strips it from the returned user object the same way it strips `auth_type`/`role`.
+  - `session_token` is never exposed in API responses — `Auth::responseAuth()` strips it from the returned user object the same way it strips `auth_type`; the raw `roles` id array is likewise replaced with `roles` (role names, display-only) and `permissions` (the flat privilege list actually used for access checks).
 
 ### Bilingual Content
 - Events and Objects store bilingual text as separate columns: `title_en`, `title_ru`, `content_en`, `content_ru`, etc. Event location (`location`, `address`, `latitude`, `longitude`, `min_age`) is single-language.
@@ -242,7 +254,7 @@ Listed in execution order. Tables created unless noted as ALTER.
 
 ### Language Files
 - Located in `app/Language/en/` and `app/Language/ru/`.
-- Files: `App.php`, `Auth.php`, `Categories.php`, `Comments.php`, `Events.php`, `General.php`, `Mailings.php`, `Members.php`, `Objects.php`, `Photos.php`, `Validation.php`.
+- Files: `App.php`, `Auth.php`, `Categories.php`, `Comments.php`, `Events.php`, `General.php`, `Mailings.php`, `Members.php`, `Objects.php`, `Photos.php`, `Roles.php`, `Validation.php`.
 - Load with: `lang('Events.someKey')` after `LocaleLibrary` sets the locale.
 
 ### Libraries (`app/Libraries/`)
