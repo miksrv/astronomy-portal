@@ -11,6 +11,7 @@
 - Removed the unused bilingual `title_en`/`title_ru` snapshot columns from `events_photos` (a copy of the event's own title taken at upload time, never independently editable); the homepage hero photo strip and the event page now build their own captions from already-loaded data instead
 - Replaced the event photo gallery's up-to-500-at-once fetch with real server-side pagination (`limit`/`offset`/`photographer` on `GET /events/photos`, mirroring the comments API): the event page now prefetches only the first 15 photos during SSR, "Смотреть все" loads everything remaining in a single request instead of growing the grid while scrolling, and the distinct photographer list for the filter chips is bundled into the same response rather than a separate endpoint; also fixed `react-photo-album` to actually render photos during SSR (`defaultContainerWidth`), so the gallery is no longer invisible until client-side hydration
 - Fixed `PhotoLightbox` showing a blank/black slide (or, briefly, a broken-image icon) while the full-size image loads: the already-loaded thumbnail is now shown as a blurred backdrop underneath, with the full image cross-fading in on load, wired up on the stargazing event and astrophoto detail pages
+- Switched `PhotoGallery`'s image rendering from a plain `<img>` to `next/image` (via `react-photo-album`'s `render.image` slot), so every gallery on the site now gets automatic AVIF/WebP conversion and on-demand resizing through `/_next/image` instead of serving the backend's fixed-size preview as-is
 
 ## 4.7.5
 
