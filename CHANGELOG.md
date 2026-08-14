@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 4.8.0
+
+### Minor Changes
+
+- Full access-control refactor: replaced the fixed `admin`/`moderator`/`security` role ENUM with a privilege-based system (`App\Enums\Permission`) — every backend check now tests a specific privilege instead of a hardcoded role name, mirrored on the frontend via `hasPermission()`/`hasAnyPermission()`
+- Added admin-editable roles as named bundles of privileges (a user can hold several at once) with a new `/admin/roles` management page and the ability to assign roles to a user from `/admin/users`, including a reserved, single-assignment "Разработчик" role that alone may grant the `users.manage` privilege
+
 ## 4.7.5
 
 ### Patch Changes
