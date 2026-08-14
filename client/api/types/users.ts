@@ -7,7 +7,8 @@ export interface UsersListRequest {
     page?: number
     limit?: number
     search?: string
-    authType?: ApiModel.UserAuthType | ''
+    /** Comma-separated role ids — matches a user holding ANY of them (a user can hold several roles at once). */
+    roleIds?: string
     sortBy?: UsersSortBy
     sortDir?: UsersSortDir
 }
@@ -21,4 +22,9 @@ export interface UsersListResponse {
 
 export interface UserEventsResponse {
     items: ApiModel.AdminUserEvent[]
+}
+
+export interface UsersUpdateRolesRequest {
+    id: string
+    roleIds: number[]
 }
