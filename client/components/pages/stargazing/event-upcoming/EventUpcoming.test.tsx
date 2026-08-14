@@ -22,11 +22,10 @@ jest.mock('@/api', () => ({
         util: { invalidateTags: jest.fn() }
     },
     ApiModel: {
-        UserRole: {
-            USER: 'user',
-            SECURITY: 'security',
-            MODERATOR: 'moderator',
-            ADMIN: 'admin'
+        Permission: {
+            EVENTS_UPDATE: 'events.update',
+            EVENTS_DELETE: 'events.delete',
+            EVENTS_STATISTIC: 'events.statistic'
         }
     },
     useAppSelector: jest.fn(),
@@ -248,7 +247,15 @@ describe('EventUpcoming', () => {
 
     it('shows edit and statistic but not delete for a moderator', () => {
         ;(useAppSelector as jest.Mock).mockImplementation((selector) =>
-            selector({ auth: { user: { id: 'user-1', name: 'Test User', role: ApiModel.UserRole.MODERATOR } } })
+            selector({
+                auth: {
+                    user: {
+                        id: 'user-1',
+                        name: 'Test User',
+                        permissions: [ApiModel.Permission.EVENTS_UPDATE, ApiModel.Permission.EVENTS_STATISTIC]
+                    }
+                }
+            })
         )
 
         render(<EventUpcoming event={baseEvent} />)
@@ -264,7 +271,19 @@ describe('EventUpcoming', () => {
 
     it('shows edit, statistic and delete actions for an admin and navigates to the edit form', () => {
         ;(useAppSelector as jest.Mock).mockImplementation((selector) =>
-            selector({ auth: { user: { id: 'user-1', name: 'Test User', role: ApiModel.UserRole.ADMIN } } })
+            selector({
+                auth: {
+                    user: {
+                        id: 'user-1',
+                        name: 'Test User',
+                        permissions: [
+                            ApiModel.Permission.EVENTS_UPDATE,
+                            ApiModel.Permission.EVENTS_STATISTIC,
+                            ApiModel.Permission.EVENTS_DELETE
+                        ]
+                    }
+                }
+            })
         )
 
         render(<EventUpcoming event={baseEvent} />)
@@ -278,7 +297,19 @@ describe('EventUpcoming', () => {
 
     it('opens the delete confirmation dialog and deletes the event on confirm', async () => {
         ;(useAppSelector as jest.Mock).mockImplementation((selector) =>
-            selector({ auth: { user: { id: 'user-1', name: 'Test User', role: ApiModel.UserRole.ADMIN } } })
+            selector({
+                auth: {
+                    user: {
+                        id: 'user-1',
+                        name: 'Test User',
+                        permissions: [
+                            ApiModel.Permission.EVENTS_UPDATE,
+                            ApiModel.Permission.EVENTS_STATISTIC,
+                            ApiModel.Permission.EVENTS_DELETE
+                        ]
+                    }
+                }
+            })
         )
         mockDeleteMutate.mockReturnValue({ unwrap: () => Promise.resolve({}) })
 
@@ -298,7 +329,19 @@ describe('EventUpcoming', () => {
 
     it('keeps the delete dialog open and surfaces the error when the event has registrations', async () => {
         ;(useAppSelector as jest.Mock).mockImplementation((selector) =>
-            selector({ auth: { user: { id: 'user-1', name: 'Test User', role: ApiModel.UserRole.ADMIN } } })
+            selector({
+                auth: {
+                    user: {
+                        id: 'user-1',
+                        name: 'Test User',
+                        permissions: [
+                            ApiModel.Permission.EVENTS_UPDATE,
+                            ApiModel.Permission.EVENTS_STATISTIC,
+                            ApiModel.Permission.EVENTS_DELETE
+                        ]
+                    }
+                }
+            })
         )
         const rejectedPromise = Promise.reject({
             messages: { error: 'Нельзя удалить мероприятие, на которое уже есть регистрации.' }

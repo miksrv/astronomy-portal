@@ -7,6 +7,7 @@ import { API, ApiModel, useAppSelector } from '@/api'
 import { ReviewCard } from '@/components/common/review-card/ReviewCard'
 import { ReviewForm } from '@/components/common/review-form/ReviewForm'
 import { REVIEW_INLINE_FORM_ID, REVIEWS_PAGE_SIZE } from '@/utils/constants'
+import { hasPermission } from '@/utils/permissions'
 
 import { EventReviewsSkeleton } from './EventReviewsSkeleton'
 import { ReviewFloatingPrompt } from './ReviewFloatingPrompt'
@@ -115,11 +116,7 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
         if (!user) {
             return false
         }
-        return (
-            user.id === review.author.id ||
-            user.role === ApiModel.UserRole.ADMIN ||
-            user.role === ApiModel.UserRole.MODERATOR
-        )
+        return user.id === review.author.id || hasPermission(user, ApiModel.Permission.COMMENTS_MODERATE)
     }
 
     return (
