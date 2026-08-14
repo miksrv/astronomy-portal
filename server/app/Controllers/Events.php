@@ -710,7 +710,6 @@ class Events extends ResourceController
      */
     public function photos(): ResponseInterface
     {
-        $locale = $this->request->getLocale();
         $limit  = $this->request->getGet('limit', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         $order  = $this->request->getGet('order', FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
         $event  = $this->request->getGet('eventId', FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
@@ -719,7 +718,7 @@ class Events extends ResourceController
             $eventPhotosModel = new EventsPhotosModel();
 
             // Fetch data from models
-            $result = $eventPhotosModel->getPhotoList($locale, $event, $limit, $order);
+            $result = $eventPhotosModel->getPhotoList($event, $limit, $order);
 
             // Return the response with count and items
             return $this->respond([
@@ -1115,6 +1114,28 @@ class Events extends ResourceController
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    /**
+     * Parses the client-supplied EXIF capture timestamp (`takenAt`) for an
+     * event photo upload. Unlike {@see parseOrenburgDateTime()}, a bad value
+     * here must never fail the upload — EXIF data is frequently missing or
+     * malformed — so any unparseable or future-dated input silently becomes
+     * null instead of surfacing a validation error.
+     */
+    private function parseTakenAt(?string $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        $timestamp = strtotime($value);
+
+        if ($timestamp === false || $timestamp > time()) {
+            return null;
+        }
+
+        return date('Y-m-d H:i:s', $timestamp);
     }
 
     /**
@@ -1656,28 +1677,34 @@ class Events extends ResourceController
                 ->resize(PHOTO_PREVIEW_WIDTH, PHOTO_PREVIEW_HEIGHT, true)
                 ->save($eventDir . $name . '_preview.' . $ext);
 
+            $photographerName = trim((string) ($this->request->getPost('photographerName') ?? ''));
+            $photographerName = $photographerName !== '' ? $photographerName : null;
+
+            $takenAt = $this->parseTakenAt($this->request->getPost('takenAt'));
+
             // Сохраняем в базу
             $photoEntity = new EventPhotoEntity([
-                'event_id'     => $eventData->id,
-                'user_id'      => $this->session->user?->id,
-                'title_ru'     => $eventData->title_ru,
-                'title_en'     => $eventData->title_en,
-                'file_name'    => $name,
-                'file_ext'     => $ext,
-                'file_size'    => $file->getSize(),
-                'image_width'  => $width,
-                'image_height' => $height,
+                'event_id'          => $eventData->id,
+                'user_id'           => $this->session->user?->id,
+                'photographer_name' => $photographerName,
+                'taken_at'          => $takenAt,
+                'file_name'         => $name,
+                'file_ext'          => $ext,
+                'file_size'         => $file->getSize(),
+                'image_width'       => $width,
+                'image_height'      => $height,
             ]);
 
             (new EventsPhotosModel())->insert($photoEntity);
 
             return $this->respondCreated((object)[
-                'name'    => $name,
-                'ext'     => $ext,
-                'width'   => $width,
-                'height'  => $height,
-                'title'   => $photoEntity->title_ru,
-                'eventId' => $photoEntity->event_id,
+                'name'         => $name,
+                'ext'          => $ext,
+                'width'        => $width,
+                'height'       => $height,
+                'photographer' => $photoEntity->photographer,
+                'takenAt'      => $photoEntity->takenAt,
+                'eventId'      => $photoEntity->event_id,
             ]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
