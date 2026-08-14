@@ -11,7 +11,7 @@
 
 A second delivery channel for stargazing event announcements, alongside the existing email mailing campaigns. Uses the standard **Web Push API** (Service Worker + Push API + Notification API, VAPID-authenticated, no third-party account/SDK required).
 
-The admin workflow is identical to `/mailing`: **create a draft → send a test → launch → per-recipient delivery rows are drained by a cron command**. Everywhere the existing mailing system uses `mailings` / `mailing_emails`, this feature adds a parallel `push_notifications` / `push_notification_deliveries` pair and reuses the same status machine (`draft → sending → completed`, with `paused` available).
+The admin workflow is identical to `/admin/mailing`: **create a draft → send a test → launch → per-recipient delivery rows are drained by a cron command**. Everywhere the existing mailing system uses `mailings` / `mailing_emails`, this feature adds a parallel `push_notifications` / `push_notification_deliveries` pair and reuses the same status machine (`draft → sending → completed`, with `paused` available).
 
 ### Key difference from email
 
@@ -246,7 +246,7 @@ Register alongside `system:send-email` in the hosting cron.
 
 ### BE-10 — Admin visibility: who has push enabled
 
-Extend `Members::list` (backing `/users`) to include, per user:
+Extend `Members::list` (backing `/admin/users`) to include, per user:
 ```json
 "pushEnabled": true,
 "pushSubscriptionCount": 2
@@ -328,24 +328,24 @@ Add a toggle in `/profile` settings, next to the existing newsletter/Telegram pr
 
 `client/api/models/push.ts` (`ApiModel.PushNotification`, `PushNotificationListItem`, `PushNotificationStatus`), `client/api/types/push.ts` (request/response shapes) — same split as `mailing.ts`/`types/mailings.ts`.
 
-### FE-6 — Admin pages (mirror `/mailing`)
+### FE-6 — Admin pages (mirror `/admin/mailing`)
 
 ```
-client/pages/push-notifications/index.tsx   — list + status badges + delete draft (copy client/pages/mailing/index.tsx)
-client/pages/push-notifications/form.tsx    — create/edit draft (title, body, icon upload, url, audience picker)
-client/pages/push-notifications/[id].tsx    — detail: stats (total/sent/error), test-send button, launch button
+client/pages/admin/push-notifications/index.tsx   — list + status badges + delete draft (copy client/pages/admin/mailing/index.tsx)
+client/pages/admin/push-notifications/form.tsx    — create/edit draft (title, body, icon upload, url, audience picker)
+client/pages/admin/push-notifications/[id].tsx    — detail: stats (total/sent/error), test-send button, launch button
 ```
 
-Same SSR admin-role guard as `client/pages/mailing/index.tsx` (`getServerSideProps` checks `authData.user.role !== ApiModel.UserRole.ADMIN` → redirect `/`).
+Same SSR admin-role guard as `client/pages/admin/mailing/index.tsx` — use the shared `requireAdminSSR()` helper (`client/utils/adminAuth.ts`) rather than re-copying the check.
 
 ### FE-7 — Nav link
 
 In `AppHeader.tsx` `adminLinks`, add:
 ```ts
-{ href: '/push-notifications', label: t('components.common.app-layout.app-header.push-notifications', 'Push-уведомления') }
+{ href: '/admin/push-notifications', label: t('components.common.app-layout.app-header.push-notifications', 'Push-уведомления') }
 ```
 
-### FE-8 — `/users` admin table
+### FE-8 — `/admin/users` admin table
 
 Add a column/badge showing `pushEnabled` (and `pushSubscriptionCount` on hover/tooltip) to `AdminUserItem` rendering, next to however the newsletter status is currently shown (if at all) — otherwise as a new column.
 
@@ -374,7 +374,7 @@ Prefix `pages.push-notifications.*` (list/form/detail strings, mirroring `pages.
 - [ ] `/push-notifications/:id/test` delivers a real browser notification to the admin's own subscribed device(s)
 - [ ] `/push-notifications/:id/send` enqueues one delivery row per subscription in the chosen audience and flips status to `sending`
 - [ ] `system:send-push` drains the queue, respects batching, marks `sent`/`error`, deletes expired subscriptions on 404/410, and marks the campaign `completed` once drained
-- [ ] `/users` admin page shows whether each user has push enabled and how many active subscriptions
+- [ ] `/admin/users` admin page shows whether each user has push enabled and how many active subscriptions
 - [ ] Clicking a delivered notification opens the configured `url`
 - [ ] `/profile` has a working opt-in/opt-out toggle that reflects real subscription state
 - [ ] `/push-notifications` is admin-only (SSR guard) and added to `robots.txt`

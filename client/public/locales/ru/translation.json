@@ -463,6 +463,38 @@
             "history-title": "История мероприятий",
             "reviews-title": "Мои отзывы"
         },
+        "roles": {
+            "title": "Роли",
+            "permission-relay-control": "Управление реле",
+            "permission-objects-manage": "Управление каталогом объектов",
+            "permission-photos-manage": "Управление архивом астрофото",
+            "permission-mailings-manage": "Управление рассылками",
+            "permission-users-manage": "Управление пользователями и ролями",
+            "permission-comments-moderate": "Модерация комментариев",
+            "permission-events-create": "Создание астровыездов",
+            "permission-events-update": "Редактирование астровыездов",
+            "permission-events-delete": "Удаление астровыездов",
+            "permission-events-gallery-upload": "Загрузка фото в галерею астровыезда",
+            "permission-events-checkin": "Проверка QR-кодов",
+            "permission-events-statistic": "Статистика и регистрации на астровыезд",
+            "permission-events-refund": "Принудительный возврат оплаты",
+            "permission-events-users": "Просмотр участников астровыезда",
+            "permission-pipeline-manage": "Управление pipeline обсерватории",
+            "column-name": "Название",
+            "column-permissions": "Привилегии",
+            "column-users-count": "Пользователей",
+            "create-button": "Добавить роль",
+            "no-roles": "Ролей ещё нет",
+            "create-title": "Новая роль",
+            "edit-title": "Редактирование роли",
+            "save-error": "Ошибка сохранения",
+            "field-name": "Название",
+            "save-button": "Сохранить",
+            "delete-title": "Удалить роль?",
+            "delete-error": "Ошибка удаления",
+            "delete-warning-with-users": "Роль «{{name}}» назначена {{count}} пользователям — после удаления они её лишатся.",
+            "delete-warning": "Удалить роль «{{name}}»?"
+        },
         "checkin": {
             "duplicate-qr": "Этот QR код уже был проверен ранее!",
             "members-count": "Взрослых: {{adults}}, детей: {{children}} чел.",
@@ -815,7 +847,7 @@
         "columnActivity": "Активность",
         "columnRegistered": "Регистрация",
         "search": "Поиск по имени",
-        "filterAuthType": "Сервис входа",
+        "filterByRole": "Роль",
         "noUsers": "Нет пользователей",
         "totalCount_one": "Всего пользователей: {{count}}",
         "totalCount_few": "Всего пользователей: {{count}}",
@@ -823,6 +855,9 @@
         "totalCount_other": "Всего пользователей: {{count}}",
         "paginationPage": "Страница",
         "paginationNext": "Следующая",
-        "paginationPrev": "Предыдущая"
+        "paginationPrev": "Предыдущая",
+        "editRolesTitle": "Роли пользователя: {{name}}",
+        "saveRoles": "Сохранить",
+        "saveRolesError": "Ошибка сохранения ролей"
     }
 }

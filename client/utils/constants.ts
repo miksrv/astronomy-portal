@@ -1,3 +1,10 @@
+// The reserved, hardcoded "Разработчик" role seeded by the roles migration
+// (server: RolesModel::DEVELOPER_ROLE_ID) — the only role allowed to hold
+// Permission.USERS_MANAGE, and the only role allowed to be assigned to just
+// one user at a time. Used by the admin roles/users UI to lock down the
+// corresponding controls instead of relying solely on the API's rejection.
+export const DEVELOPER_ROLE_ID = 1
+
 export const LOCAL_STORAGE_KEY = 'astro'
 
 export const LOCAL_STORAGE = {
