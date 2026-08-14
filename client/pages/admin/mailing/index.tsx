@@ -1,15 +1,13 @@
 import React, { useState } from 'react'
-import { getCookie } from 'cookies-next'
 import { Badge, Button, Container, Dialog, Table, TableColumnProps } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, setLocale, wrapper } from '@/api'
-import { setSSRToken } from '@/api/authSlice'
+import { API, ApiModel, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { requirePermissionSSR } from '@/utils/adminAuth'
 import { formatDate } from '@/utils/dates'
 
 import styles from './styles.module.sass'
@@ -59,7 +57,7 @@ const MailingListPage: NextPage<object> = () => {
             accessor: 'subject',
             className: styles.subjectCell,
             header: t('pages.mailing.col-subject', 'Тема'),
-            formatter: (_data, row, i) => <Link href={`/mailing/${row[i].id}`}>{row[i].subject}</Link>,
+            formatter: (_data, row, i) => <Link href={`/admin/mailing/${row[i].id}`}>{row[i].subject}</Link>,
             isSortable: true
         },
         {
@@ -109,7 +107,7 @@ const MailingListPage: NextPage<object> = () => {
                 <div className={styles.actionsCell}>
                     {row[i].status === 'draft' && (
                         <>
-                            <Link href={`/mailing/form?id=${row[i].id}`}>
+                            <Link href={`/admin/mailing/form?id=${row[i].id}`}>
                                 <Button
                                     size={'small'}
                                     icon={'Pencil'}
@@ -143,7 +141,7 @@ const MailingListPage: NextPage<object> = () => {
                 <Button
                     mode={'secondary'}
                     icon={'PlusCircle'}
-                    link={'/mailing/form'}
+                    link={'/admin/mailing/form'}
                     label={t('pages.mailing.create', 'Новая рассылка')}
                 />
             </AppToolbar>
@@ -197,29 +195,17 @@ const MailingListPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? 'en'
-            const translations = await serverSideTranslations(locale)
-            const token = await getCookie('token', { req: context.req, res: context.res })
+            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.MAILINGS_MANAGE)
 
-            store.dispatch(setLocale(locale))
-
-            if (token) {
-                store.dispatch(setSSRToken(token))
-            } else {
-                return { redirect: { destination: '/', permanent: false } }
+            if (!guard.ok) {
+                return { redirect: guard.redirect }
             }
-
-            const { data: authData } = await store.dispatch(API.endpoints.authGetMe.initiate())
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
-            if (authData?.user?.role !== ApiModel.UserRole.ADMIN) {
-                return { redirect: { destination: '/', permanent: false } }
-            }
-
             return {
                 props: {
-                    ...translations
+                    ...guard.translations
                 }
             }
         }

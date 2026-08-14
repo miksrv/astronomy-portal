@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { getCookie } from 'cookies-next'
 import { Button, Container, Dialog } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, setLocale, wrapper } from '@/api'
-import { setSSRToken } from '@/api/authSlice'
+import { API, ApiModel, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { MailingPreview } from '@/components/pages/mailing'
+import { requirePermissionSSR } from '@/utils/adminAuth'
 import { formatDate } from '@/utils/dates'
 
 import styles from './styles.module.sass'
@@ -118,7 +116,7 @@ const MailingStatsPage: NextPage<object> = () => {
             <AppToolbar
                 title={pageTitle}
                 currentPage={pageTitle}
-                links={[{ link: '/mailing', text: t('pages.mailing.title', 'Рассылки') }]}
+                links={[{ link: '/admin/mailing', text: t('pages.mailing.title', 'Рассылки') }]}
             >
                 {isCancelable && (
                     <Button
@@ -302,23 +300,11 @@ const MailingStatsPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? 'en'
             const id = context.params?.id as string
-            const translations = await serverSideTranslations(locale)
-            const token = await getCookie('token', { req: context.req, res: context.res })
+            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.MAILINGS_MANAGE)
 
-            store.dispatch(setLocale(locale))
-
-            if (token) {
-                store.dispatch(setSSRToken(token))
-            } else {
-                return { redirect: { destination: '/', permanent: false } }
-            }
-
-            const { data: authData } = await store.dispatch(API.endpoints.authGetMe.initiate())
-
-            if (authData?.user?.role !== ApiModel.UserRole.ADMIN) {
-                return { redirect: { destination: '/', permanent: false } }
+            if (!guard.ok) {
+                return { redirect: guard.redirect }
             }
 
             const { data: mailingData } = await store.dispatch(API.endpoints.mailingGetItem.initiate(id))
@@ -335,7 +321,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             return {
                 props: {
-                    ...translations
+                    ...guard.translations
                 }
             }
         }

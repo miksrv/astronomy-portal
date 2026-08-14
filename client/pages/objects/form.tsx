@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { getCookie } from 'cookies-next'
 import { Message } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, setLocale, wrapper } from '@/api'
-import { setSSRToken } from '@/api/authSlice'
+import { API, ApiModel, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { AstroObjectForm, AstroObjectFormType } from '@/components/pages/objects'
+import { requirePermissionSSR } from '@/utils/adminAuth'
 import { formatObjectName } from '@/utils/strings'
 
 // TODO: Добавить обработку ошибки, когда пытаемся отредактировать объект, которого нет
@@ -107,29 +105,17 @@ const ObjectFormPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? 'en'
-            const translations = await serverSideTranslations(locale)
-            const token = await getCookie('token', { req: context.req, res: context.res })
+            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.OBJECTS_MANAGE, '/objects')
 
-            store.dispatch(setLocale(locale))
-
-            if (token) {
-                store.dispatch(setSSRToken(token))
-            } else {
-                return { redirect: { destination: '/objects', permanent: false } }
+            if (!guard.ok) {
+                return { redirect: guard.redirect }
             }
-
-            const { data: authData } = await store.dispatch(API.endpoints.authGetMe.initiate())
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
-            if (authData?.user?.role !== ApiModel.UserRole.ADMIN) {
-                return { redirect: { destination: '/objects', permanent: false } }
-            }
-
             return {
                 props: {
-                    ...translations
+                    ...guard.translations
                 }
             }
         }

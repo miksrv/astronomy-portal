@@ -19,6 +19,7 @@ import { formatDate } from '@/utils/dates'
 import { getErrorMessage } from '@/utils/errors'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
+import { hasAnyPermission, hasPermission } from '@/utils/permissions'
 import { removeMarkdown, sliceText } from '@/utils/strings'
 
 import styles from '../styles.module.sass'
@@ -42,7 +43,6 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     const router = useRouter()
 
     const user = useAppSelector((state) => state.auth.user)
-    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
     const inputFileRef = useRef<HTMLInputElement>(undefined)
 
@@ -108,7 +108,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     const handleUploadPhotoClick = (event: React.MouseEvent | undefined) => {
         event?.preventDefault()
 
-        if (user?.role !== ApiModel.UserRole.ADMIN) {
+        if (!hasPermission(user, ApiModel.Permission.EVENTS_GALLERY_UPLOAD)) {
             return
         }
 
@@ -142,9 +142,13 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                     }
                 ]}
             >
-                {(userRole === ApiModel.UserRole.ADMIN || userRole === ApiModel.UserRole.MODERATOR) && (
+                {hasAnyPermission(user, [
+                    ApiModel.Permission.EVENTS_UPDATE,
+                    ApiModel.Permission.EVENTS_STATISTIC,
+                    ApiModel.Permission.EVENTS_GALLERY_UPLOAD
+                ]) && (
                     <>
-                        {userRole === ApiModel.UserRole.ADMIN && (
+                        {hasPermission(user, ApiModel.Permission.EVENTS_GALLERY_UPLOAD) && (
                             <Button
                                 disabled={!!uploadingPhotos?.length}
                                 loading={!!uploadingPhotos?.length}
@@ -158,19 +162,23 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                             </Button>
                         )}
 
-                        <Button
-                            icon={'Pencil'}
-                            mode={'secondary'}
-                            label={t('common.edit', 'Редактировать')}
-                            disabled={!eventId}
-                            onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
-                        />
+                        {hasPermission(user, ApiModel.Permission.EVENTS_UPDATE) && (
+                            <Button
+                                icon={'Pencil'}
+                                mode={'secondary'}
+                                label={t('common.edit', 'Редактировать')}
+                                disabled={!eventId}
+                                onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
+                            />
+                        )}
 
-                        <Button
-                            icon={'BarChart'}
-                            mode={'secondary'}
-                            onClick={() => router.push(`/stargazing/${eventId}/statistic`)}
-                        />
+                        {hasPermission(user, ApiModel.Permission.EVENTS_STATISTIC) && (
+                            <Button
+                                icon={'BarChart'}
+                                mode={'secondary'}
+                                onClick={() => router.push(`/stargazing/${eventId}/statistic`)}
+                            />
+                        )}
                     </>
                 )}
             </AppToolbar>
@@ -225,7 +233,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 </Container>
             )}
 
-            {userRole === ApiModel.UserRole.ADMIN && (
+            {hasPermission(user, ApiModel.Permission.EVENTS_GALLERY_UPLOAD) && (
                 <EventPhotoUploader
                     eventId={eventId}
                     fileInputRef={inputFileRef}

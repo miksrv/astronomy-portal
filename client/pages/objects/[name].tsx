@@ -9,6 +9,7 @@ import { JsonLdScript } from 'next-seo'
 import { API, ApiModel, HOST_IMG, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable, VisibilityChart } from '@/components/common'
 import { ObjectDescription, ObjectFilesTable, ObjectHeader, ObjectsCloud } from '@/components/pages/objects'
+import { hasPermission } from '@/utils/permissions'
 import { removeMarkdown, sliceText } from '@/utils/strings'
 
 interface ObjectItemPageProps {
@@ -28,7 +29,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 }) => {
     const { t } = useTranslation()
 
-    const userRole = useAppSelector((state) => state.auth?.user?.role)
+    const user = useAppSelector((state) => state.auth?.user)
 
     const { data: objectFilesData, isLoading: objectFilesLoading } = API.useFilesGetListQuery(objectName, {
         skip: !objectName
@@ -93,7 +94,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                     }
                 ]}
             >
-                {userRole === ApiModel.UserRole.ADMIN && (
+                {hasPermission(user, ApiModel.Permission.OBJECTS_MANAGE) && (
                     <>
                         <Button
                             icon={'Pencil'}

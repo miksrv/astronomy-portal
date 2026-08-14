@@ -10,6 +10,7 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { PhotoGrid } from '@/components/pages/photos'
+import { hasPermission } from '@/utils/permissions'
 import { formatObjectName } from '@/utils/strings'
 
 interface PhotosPageProps {
@@ -22,7 +23,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
     const { t } = useTranslation()
     const router = useRouter()
 
-    const userRole = useAppSelector((state) => state.auth?.user?.role)
+    const user = useAppSelector((state) => state.auth?.user)
 
     const [searchFilter, setSearchFilter] = useState<string | undefined>(search || undefined)
     const [debouncedSearchFilter, setDebouncedSearchFilter] = useState<string | undefined>(search || undefined)
@@ -158,7 +159,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
                     }))}
                 />
 
-                {userRole === ApiModel.UserRole.ADMIN && (
+                {hasPermission(user, ApiModel.Permission.PHOTOS_MANAGE) && (
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}
