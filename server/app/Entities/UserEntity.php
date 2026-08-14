@@ -13,7 +13,7 @@ class UserEntity extends Entity
         'phone'      => null,
         'avatar'     => null,
         'auth_type'  => 'native',
-        'role'       => 'user',
+        'roles'      => null,
         'locale'     => 'ru',
         'settings'   => null,
     ];
@@ -32,7 +32,7 @@ class UserEntity extends Entity
         'phone'         => '?string',
         'avatar'        => '?string',
         'auth_type'     => '?string',
-        'role'          => 'string',
+        'roles'         => 'json-array',
         'locale'        => 'string',
         'settings'      => 'json-array',
         'sex'           => '?string',

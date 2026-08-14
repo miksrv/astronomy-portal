@@ -10,9 +10,10 @@ use ReflectionException;
 /**
  * UsersModel
  *
- * Manages the `users` table. Supports soft deletes, UUID primary keys, and role-based
- * access (user, moderator, admin). Provides helpers for OAuth look-up, activity tracking,
- * newsletter subscriber retrieval, and paginated admin user listing with event counts.
+ * Manages the `users` table. Supports soft deletes, UUID primary keys, and multi-role
+ * access (`roles` — a JSON array of `user_roles.id` values; see RolesModel/Permission).
+ * Provides helpers for OAuth look-up, activity tracking, newsletter subscriber
+ * retrieval, and paginated admin user listing with event counts.
  */
 class UsersModel extends ApplicationBaseModel
 {
@@ -32,7 +33,7 @@ class UsersModel extends ApplicationBaseModel
         'phone',
         'avatar',
         'auth_type',
-        'role',
+        'roles',
         'locale',
         'settings',
         'sex',
@@ -77,7 +78,7 @@ class UsersModel extends ApplicationBaseModel
     public function findUserByEmailAddress(string $emailAddress): UserEntity|array|null
     {
         return $this
-            ->select('id, name, phone, avatar, email, auth_type, role, locale, sex, birthday, session_token')
+            ->select('id, name, phone, avatar, email, auth_type, roles, locale, sex, birthday, session_token')
             ->where('email', $emailAddress)
             ->first();
     }
@@ -165,22 +166,26 @@ class UsersModel extends ApplicationBaseModel
      * Returns a paginated list of users with their event attendance count.
      *
      * Email and phone fields are intentionally excluded from the output.
-     * Supports filtering by name substring and auth type, as well as
-     * sorting by name, activity date, creation date, or event count.
+     * Supports filtering by name substring and by role, as well as sorting
+     * by name, activity date, creation date, or event count.
      *
-     * @param int    $page     1-based page number. Default is 1.
-     * @param int    $limit    Rows per page (max 100). Default is 20.
-     * @param string $search   Optional name substring filter.
-     * @param string $authType Optional auth_type filter: google|yandex|vk|native.
-     * @param string $sortBy   Column to sort by: name|activityAt|createdAt|eventsCount.
-     * @param string $sortDir  Sort direction: asc|desc.
+     * @param int        $page    1-based page number. Default is 1.
+     * @param int        $limit   Rows per page (max 100). Default is 20.
+     * @param string     $search  Optional name substring filter.
+     * @param array<int> $roleIds Optional role id filter — matches a user
+     *                            holding ANY of the given roles (OR
+     *                            semantics), since a user can be assigned
+     *                            several roles at once (see RolesModel).
+     *                            Empty array means "no filter".
+     * @param string     $sortBy  Column to sort by: name|activityAt|createdAt|eventsCount.
+     * @param string     $sortDir Sort direction: asc|desc.
      * @return array{items: array, count: int, page: int, totalPages: int}
      */
     public function getUsersList(
         int    $page = 1,
         int    $limit = 20,
         string $search = '',
-        string $authType = '',
+        array  $roleIds = [],
         string $sortBy = 'createdAt',
         string $sortDir = 'desc'
     ): array {
@@ -197,7 +202,7 @@ class UsersModel extends ApplicationBaseModel
         $orderDirection = strtoupper($sortDir) === 'ASC' ? 'ASC' : 'DESC';
 
         $builder = $this->db->table('users u')
-            ->select('u.id, u.name, u.avatar, u.role, u.auth_type, u.locale, u.sex, u.birthday, u.activity_at, u.created_at, COUNT(eu.id) AS events_count')
+            ->select('u.id, u.name, u.avatar, u.roles, u.auth_type, u.locale, u.sex, u.birthday, u.activity_at, u.created_at, COUNT(eu.id) AS events_count')
             ->join('events_users eu', 'eu.user_id = u.id AND eu.deleted_at IS NULL', 'left')
             ->join('events e', 'e.id = eu.event_id AND e.deleted_at IS NULL', 'left')
             ->where('u.deleted_at IS NULL')
@@ -209,8 +214,8 @@ class UsersModel extends ApplicationBaseModel
             $builder->like('u.name', $search);
         }
 
-        if ($authType !== '') {
-            $builder->where('u.auth_type', $authType);
+        if (!empty($roleIds)) {
+            $this->_filterByRoleIds($builder, $roleIds);
         }
 
         $countBuilder = $this->db->table('users u')
@@ -221,15 +226,39 @@ class UsersModel extends ApplicationBaseModel
             $countBuilder->like('u.name', $search);
         }
 
-        if ($authType !== '') {
-            $countBuilder->where('u.auth_type', $authType);
+        if (!empty($roleIds)) {
+            $this->_filterByRoleIds($countBuilder, $roleIds);
         }
 
         $count      = (int) $countBuilder->get()->getRow()->total;
         $totalPages = $limit > 0 ? (int) ceil($count / $limit) : 1;
         $offset     = ($page - 1) * $limit;
 
-        $rows  = $builder->limit($limit, $offset)->get()->getResult();
+        $rows = $builder->limit($limit, $offset)->get()->getResult();
+
+        // Resolve every distinct role id referenced across this page in one
+        // query, rather than joining the JSON array in SQL.
+        $allRoleIds = [];
+
+        foreach ($rows as $user) {
+            $userRoleIds = json_decode($user->roles ?? '[]', true) ?: [];
+            $allRoleIds  = array_merge($allRoleIds, $userRoleIds);
+        }
+
+        $roleNamesById = [];
+
+        if (!empty($allRoleIds)) {
+            $roleRows = $this->db->table('user_roles')
+                ->select('id, name')
+                ->whereIn('id', array_unique($allRoleIds))
+                ->get()
+                ->getResult();
+
+            foreach ($roleRows as $role) {
+                $roleNamesById[(int) $role->id] = $role->name;
+            }
+        }
+
         $items = [];
 
         foreach ($rows as $user) {
@@ -241,11 +270,20 @@ class UsersModel extends ApplicationBaseModel
                 $age       = (int) $birthDate->diff($today)->y;
             }
 
+            $userRoleIds = json_decode($user->roles ?? '[]', true) ?: [];
+            $userRoles   = [];
+
+            foreach ($userRoleIds as $roleId) {
+                if (isset($roleNamesById[(int) $roleId])) {
+                    $userRoles[] = ['id' => (int) $roleId, 'name' => $roleNamesById[(int) $roleId]];
+                }
+            }
+
             $items[] = [
                 'id'          => $user->id,
                 'name'        => $user->name,
                 'avatar'      => $user->avatar,
-                'role'        => $user->role,
+                'roles'       => $userRoles,
                 'authType'    => $user->auth_type,
                 'locale'      => $user->locale,
                 'sex'         => $user->sex,
@@ -306,5 +344,83 @@ class UsersModel extends ApplicationBaseModel
         }
 
         return $items;
+    }
+
+    /**
+     * Replaces a user's full set of assigned roles.
+     *
+     * @param string     $userId  The user's ID.
+     * @param array<int> $roleIds Role ids to assign; an empty array means
+     *                            "no elevated roles" (a plain user).
+     */
+    public function updateRoles(string $userId, array $roleIds): void
+    {
+        $roleIds = array_values(array_unique(array_map('intval', $roleIds)));
+
+        $this->update($userId, ['roles' => json_encode($roleIds)]);
+    }
+
+    /**
+     * Restricts a `users u` query builder to rows holding at least one of
+     * the given role ids — OR'd JSON_CONTAINS checks, since a user's `roles`
+     * column can list several. Shared by getUsersList()'s row and count
+     * queries (see the `roleIds` filter there).
+     *
+     * @param array<int> $roleIds
+     */
+    private function _filterByRoleIds($builder, array $roleIds): void
+    {
+        $builder->groupStart();
+
+        foreach (array_values($roleIds) as $index => $roleId) {
+            $method = $index === 0 ? 'where' : 'orWhere';
+            $builder->{$method}("JSON_CONTAINS(u.roles, '" . (int) $roleId . "')", null, false);
+        }
+
+        $builder->groupEnd();
+    }
+
+    /**
+     * Whether $roleId is currently assigned to any user other than
+     * $excludeUserId. Used to enforce that the reserved developer role
+     * (RolesModel::DEVELOPER_ROLE_ID) is never held by more than one person
+     * at a time — see Members::updateRoles().
+     */
+    public function isRoleAssignedToOtherUser(int $roleId, string $excludeUserId): bool
+    {
+        return $this->db->table('users')
+            ->where('deleted_at IS NULL')
+            ->where('id !=', $excludeUserId)
+            ->where("JSON_CONTAINS(roles, '{$roleId}')", null, false)
+            ->countAllResults() > 0;
+    }
+
+    /**
+     * Strips a role id from every user's `roles` array. Called by
+     * Roles::delete() before the role row itself is removed — there is no
+     * foreign key to cascade this automatically, since `users.roles` is a
+     * plain JSON array rather than a join table.
+     *
+     * A PHP-side read/rewrite is used instead of a raw JSON_REMOVE/JSON_SEARCH
+     * query for portability across MySQL/MariaDB versions on shared hosting,
+     * and because the affected row count is expected to be small.
+     */
+    public function removeRoleFromAllUsers(int $roleId): void
+    {
+        $affectedUsers = $this->db->table('users')
+            ->select('id, roles')
+            ->where('deleted_at IS NULL')
+            ->where("JSON_CONTAINS(roles, '{$roleId}')", null, false)
+            ->get()
+            ->getResult();
+
+        foreach ($affectedUsers as $user) {
+            $roleIds = json_decode($user->roles ?? '[]', true) ?: [];
+            $roleIds = array_values(array_diff($roleIds, [$roleId]));
+
+            $this->db->table('users')
+                ->where('id', $user->id)
+                ->update(['roles' => json_encode($roleIds)]);
+        }
     }
 }
