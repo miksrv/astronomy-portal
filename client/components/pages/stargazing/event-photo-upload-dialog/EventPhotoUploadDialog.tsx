@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { parse as parseExif } from 'exifr'
 import { Button, cn, Dialog, Input, Message, Progress } from 'simple-react-ui-kit'
 
@@ -36,8 +36,13 @@ const fileKey = (file: File): string => `${file.name}-${file.size}-${file.lastMo
 
 export interface EventPhotoUploadDialogProps {
     eventId?: string
-    /** Already-uploaded event photos, used only to build the photographer autocomplete suggestions. */
-    photos?: ApiModel.EventPhoto[]
+    /**
+     * Distinct photographer credits already used for this event, sourced from
+     * the dedicated `events/:id/photographers` endpoint - independent of
+     * which page of the (server-paginated) gallery happens to be loaded, so
+     * suggestions aren't missing anyone whose photos are past the first page.
+     */
+    photographers?: string[]
     open: boolean
     onClose: () => void
     onUploadPhoto?: (photo: ApiModel.EventPhoto) => void
@@ -60,7 +65,7 @@ export interface EventPhotoUploadDialogProps {
  */
 export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
     eventId,
-    photos,
+    photographers,
     open,
     onClose,
     onUploadPhoto
@@ -96,17 +101,7 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
         )
     )
 
-    const photographerSuggestions = useMemo(() => {
-        const names = new Set<string>()
-
-        photos?.forEach((photo) => {
-            if (photo.photographer) {
-                names.add(photo.photographer)
-            }
-        })
-
-        return Array.from(names).sort((a, b) => a.localeCompare(b, 'ru'))
-    }, [photos])
+    const photographerSuggestions = photographers ?? []
 
     const total = items.length
     const processedCount = items.filter((item) => item.status !== 'pending' && item.status !== 'uploading').length

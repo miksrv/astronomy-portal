@@ -122,6 +122,11 @@ export const API = createApi({
         }),
         eventGetPhotoList: builder.query<ApiType.Events.ResPhotoList, ApiType.Events.ReqPhotoList>({
             providesTags: (result, error, arg) => [{ id: arg.eventId ?? 'LIST', type: 'EventPhotos' }],
+            // A plain, one-shot query - the event page fetches either a small
+            // first page or (once "Смотреть все" is clicked) everything in a
+            // single request, never grows an existing page incrementally, so
+            // each distinct set of args (including `limit`) is just its own
+            // cache entry.
             query: (params) => `events/photos${encodeQueryData(params)}`
         }),
         eventGetUsersList: builder.query<ApiType.Events.ResUsersList, string>({

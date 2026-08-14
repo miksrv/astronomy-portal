@@ -46,12 +46,23 @@ export type EventFormType = Partial<
 export interface ReqPhotoList {
     eventId?: string
     limit?: number
+    /** Number of rows to skip, for pagination — mirrors the comments API. */
+    offset?: number
     order?: 'date' | 'rand'
+    /** Exact photographer credit to filter by; omitted/undefined means "all photographers". */
+    photographer?: string
 }
 
 export interface ResPhotoList {
-    count?: number
+    /** Total matching rows, ignoring pagination — same shape as the comments list response. */
+    total?: number
     items?: ApiModel.EventPhoto[]
+    /**
+     * Every distinct photographer credit for the event, regardless of this
+     * request's own `limit`/`offset`/`photographer` filter — used for the
+     * gallery's filter chips and the upload dialog's autocomplete.
+     */
+    photographers?: string[]
 }
 
 export interface ReqUploadPhoto {

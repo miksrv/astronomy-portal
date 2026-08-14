@@ -14,7 +14,7 @@ import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
 import { EventItemData, EventPhotoFilter, EventReviews } from '@/components/pages/stargazing'
-import { REVIEWS_PAGE_SIZE } from '@/utils/constants'
+import { PHOTOS_PAGE_SIZE, REVIEWS_PAGE_SIZE } from '@/utils/constants'
 import { formatDate } from '@/utils/dates'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
@@ -32,24 +32,45 @@ const EventPhotoUploadDialog = dynamic(
 interface StargazingItemPageProps {
     eventId: string
     event: ApiModel.Event | null
-    photos: ApiModel.EventPhoto[] | null
     eventsList: ApiModel.Event[] | null
 }
 
-const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event, photos, eventsList }) => {
+const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event, eventsList }) => {
     const { t } = useTranslation()
     const router = useRouter()
 
     const user = useAppSelector((state) => state.auth.user)
 
-    const [localPhotos, setLocalPhotos] = useState<ApiModel.EventPhoto[]>([])
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState<boolean>(false)
     const [selectedPhotographer, setSelectedPhotographer] = useState<string | undefined>(undefined)
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>()
-    const [isPhotosExpanded, setIsPhotosExpanded] = useState(false)
 
-    const PHOTOS_PREVIEW_LIMIT = 12
+    // Only the first PHOTOS_PAGE_SIZE photos are fetched up front - an event
+    // can have up to ~400, and this is also what lets that first page be
+    // present in the SSR HTML (and JSON-LD) instead of only appearing after
+    // client-side hydration. "Смотреть все" (below) bumps this straight to the
+    // full total and re-fetches everything in one request, rather than
+    // growing the grid in batches while scrolling - simpler, and it avoids the
+    // grid visibly shifting mid-scroll; the one-time cost of laying out the
+    // rest at once only happens on a deliberate click, not while casually
+    // scrolling.
+    const [pageLimit, setPageLimit] = useState(PHOTOS_PAGE_SIZE)
+
+    // Reset back to the first, unfiltered page whenever the event itself
+    // changes, so state from a previous event id can't leak in across a
+    // client-side (non-full-reload) navigation.
+    useEffect(() => {
+        setPageLimit(PHOTOS_PAGE_SIZE)
+        setSelectedPhotographer(undefined)
+    }, [eventId])
+
+    // Switching the photographer filter swaps the underlying (server-side
+    // filtered) list entirely - back to the first page for the new filter,
+    // rather than keeping "show all" carried over from a different photographer.
+    useEffect(() => {
+        setPageLimit(PHOTOS_PAGE_SIZE)
+    }, [selectedPhotographer])
 
     const title = event?.title || t('menu.stargazing', 'Астровыезды')
 
@@ -57,6 +78,29 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
         event?.coverFileName && event?.coverFileExt
             ? `${hosts.stargazing}${event.id}/${event.coverFileName}.${event.coverFileExt}`
             : undefined
+
+    // Same query args as the SSR prefetch below - the first page (no
+    // photographer filter) matches exactly what getServerSideProps dispatched,
+    // so this reuses that cached result with no extra request or loading
+    // flash. Clicking "Смотреть все" (below) just re-requests this same query
+    // with a bigger `limit` - a distinct, one-shot cache entry, not a growing
+    // one.
+    const { data: photosData, isFetching: isPhotosFetching } = API.useEventGetPhotoListQuery({
+        eventId,
+        limit: pageLimit,
+        photographer: selectedPhotographer
+    })
+
+    const photos = photosData?.items ?? []
+    const totalPhotos = photosData?.total ?? 0
+    const hasMorePhotos = photos.length < totalPhotos
+    const isInitialPhotosLoading = isPhotosFetching && photos.length === 0
+    // Always the event's full, unfiltered photographer list (see the backend's
+    // `Events::photos()`) - so the filter chips and upload dialog autocomplete
+    // aren't missing anyone whose photos happen to live outside the currently
+    // loaded/filtered page.
+    const photographers = photosData?.photographers
+    const isLoadingAllPhotos = isPhotosFetching && pageLimit > PHOTOS_PAGE_SIZE
 
     // Same query args as the SSR prefetch below and `EventReviews` itself, so this
     // reuses the cached first page instead of firing an extra request.
@@ -70,16 +114,6 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     const eventJsonLd = event
         ? buildEventJsonLd(event, reviewsData ? { items: reviewsData.items, total: reviewsData.total } : undefined)
         : null
-
-    // Purely client-side narrowing by photographer - no extra request, the
-    // filter chips (`EventPhotoFilter`) are derived from this same `localPhotos` list.
-    const filteredPhotos = useMemo(
-        () =>
-            selectedPhotographer
-                ? localPhotos.filter((photo) => photo.photographer === selectedPhotographer)
-                : localPhotos,
-        [localPhotos, selectedPhotographer]
-    )
 
     const getPhotoCaption = (photo: ApiModel.EventPhoto, index: number): string =>
         photo.photographer
@@ -132,9 +166,13 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
         setIsUploadDialogOpen(true)
     }
 
-    useEffect(() => {
-        setLocalPhotos(photos ?? [])
-    }, [photos])
+    const handleShowAllPhotos = () => {
+        if (isLoadingAllPhotos || !totalPhotos) {
+            return
+        }
+
+        setPageLimit(totalPhotos)
+    }
 
     return (
         <AppLayout
@@ -205,68 +243,75 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
             <h2>
                 {t('pages.stargazing.photos-from-stargazing', 'Фотографии с мероприятия')}
 
-                {filteredPhotos.length > PHOTOS_PREVIEW_LIMIT && (
+                {hasMorePhotos && (
                     <a
                         role={'button'}
                         tabIndex={0}
                         className={styles.showMorePhotos}
-                        onClick={() => setIsPhotosExpanded(!isPhotosExpanded)}
-                        onKeyDown={() => setIsPhotosExpanded(!isPhotosExpanded)}
+                        onClick={handleShowAllPhotos}
+                        onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                                handleShowAllPhotos()
+                            }
+                        }}
                     >
-                        {isPhotosExpanded
-                            ? t('pages.stargazing.photos-show-less', 'Показать меньше фотографий')
-                            : t('pages.stargazing.photos-show-all', 'Смотреть все ({{count}})', {
-                                  count: filteredPhotos.length
-                              })}
+                        {isLoadingAllPhotos
+                            ? t('pages.stargazing.photos-loading-more', 'Загрузка ещё фотографий…')
+                            : t('pages.stargazing.photos-show-all', 'Смотреть все ({{total}})', { total: totalPhotos })}
                     </a>
                 )}
             </h2>
 
             <EventPhotoFilter
-                photos={localPhotos}
+                photographers={photographers}
                 selected={selectedPhotographer}
                 onChange={setSelectedPhotographer}
             />
 
-            {filteredPhotos?.length > 0 ? (
+            {photos.length > 0 ? (
                 <PhotoGallery
-                    photos={(isPhotosExpanded ? filteredPhotos : filteredPhotos.slice(0, PHOTOS_PREVIEW_LIMIT)).map(
-                        (photo, index) => ({
-                            height: photo.height,
-                            src: createPreviewPhotoUrl(photo),
-                            width: photo.width,
-                            alt: getPhotoCaption(photo, index)
-                        })
-                    )}
+                    photos={photos.map((photo, index) => ({
+                        height: photo.height,
+                        src: createPreviewPhotoUrl(photo),
+                        width: photo.width,
+                        alt: getPhotoCaption(photo, index)
+                    }))}
                     onClick={({ index }) => {
                         handlePhotoClick(index)
                     }}
                 />
             ) : (
-                <Container>
-                    <p className={styles.noPhotos}>
-                        {t(
-                            'pages.stargazing.no-photos',
-                            'Фотографии с этого события ещё не загружены. Загляните позже!'
-                        )}
-                    </p>
-                </Container>
+                !isInitialPhotosLoading && (
+                    <Container>
+                        <p className={styles.noPhotos}>
+                            {t(
+                                'pages.stargazing.no-photos',
+                                'Фотографии с этого события ещё не загружены. Загляните позже!'
+                            )}
+                        </p>
+                    </Container>
+                )
             )}
 
             {hasPermission(user, ApiModel.Permission.EVENTS_GALLERY_UPLOAD) && (
                 <EventPhotoUploadDialog
                     eventId={eventId}
-                    photos={localPhotos}
+                    photographers={photographers}
                     open={isUploadDialogOpen}
                     onClose={() => setIsUploadDialogOpen(false)}
-                    onUploadPhoto={(photo) => {
-                        setLocalPhotos((prev) => [...prev, photo])
+                    onUploadPhoto={() => {
+                        // The upload mutation invalidates this event's EventPhotos
+                        // tag, so RTK Query refetches the active page(s) in the
+                        // background - reset to the small first page so the
+                        // freshly uploaded photo is visible right away instead of
+                        // landing wherever a "show all" fetch used to end.
+                        setPageLimit(PHOTOS_PAGE_SIZE)
                     }}
                 />
             )}
 
             <PhotoLightbox
-                photos={filteredPhotos?.map((photo, index) => ({
+                photos={photos.map((photo, index) => ({
                     height: photo.height,
                     src: createFullPhotoUrl(photo),
                     width: photo.width,
@@ -330,10 +375,16 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             const { data: eventData, isError } = await store.dispatch(API.endpoints?.eventGetItem.initiate(eventId))
 
-            const { data: eventPhotos } = await store.dispatch(
+            // Prefetch only the first page of the gallery (not the whole,
+            // potentially hundreds-strong list) so it's part of the initial HTML
+            // and JSON-LD instead of only appearing after client-side hydration -
+            // the rest loads via the "Смотреть все" button on the client. Args
+            // match exactly what the component requests on mount, so the client
+            // hook reuses this cached entry with no extra request.
+            await store.dispatch(
                 API.endpoints?.eventGetPhotoList.initiate({
                     eventId,
-                    limit: 500
+                    limit: PHOTOS_PAGE_SIZE
                 })
             )
 
@@ -362,7 +413,6 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 props: {
                     ...translations,
                     event: eventData || null,
-                    photos: eventPhotos?.items || [],
                     eventId: eventId,
                     eventsList: eventsData?.items || []
                 }

@@ -59,3 +59,7 @@ export const REVIEW_INLINE_FORM_ID = 'event-review-inline-form'
 
 // Number of reviews fetched per page in EventReviews' infinite scroll.
 export const REVIEWS_PAGE_SIZE = 10
+
+// Number of event gallery photos fetched per page (SSR-prefetched first page,
+// then loaded further via the "Смотреть все"/scroll flow on the event page).
+export const PHOTOS_PAGE_SIZE = 15
