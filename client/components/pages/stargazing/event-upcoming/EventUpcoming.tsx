@@ -12,6 +12,7 @@ import { openAuthDialog } from '@/api/applicationSlice'
 import { hosts } from '@/api/constants'
 import { formatUTCDate } from '@/utils/dates'
 import { getErrorMessage } from '@/utils/errors'
+import { hasAnyPermission, hasPermission } from '@/utils/permissions'
 import { removeMarkdownPreserveParagraphs } from '@/utils/strings'
 
 import { EventBookingForm } from './event-booking-form'
@@ -79,10 +80,12 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
     const dispatch = useAppDispatch()
 
     const user = useAppSelector((state) => state.auth.user)
-    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
-    const canModerate = userRole === ApiModel.UserRole.ADMIN || userRole === ApiModel.UserRole.MODERATOR
-    const canDelete = userRole === ApiModel.UserRole.ADMIN
+    const canModerate = hasAnyPermission(user, [
+        ApiModel.Permission.EVENTS_UPDATE,
+        ApiModel.Permission.EVENTS_STATISTIC
+    ])
+    const canDelete = hasPermission(user, ApiModel.Permission.EVENTS_DELETE)
 
     const [confirmation, showConfirmation] = useState<boolean>(false)
     const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false)

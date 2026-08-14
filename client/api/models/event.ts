@@ -58,7 +58,10 @@ export type EventPhoto = {
     ext: string
     width: number
     height: number
-    title?: string
+    /** Free-text photographer credit, entered at upload time. */
+    photographer?: string
+    /** ISO datetime the photo was taken (from EXIF `DateTimeOriginal`), used for chronological ordering. */
+    takenAt?: string
 }
 
 export type EventUser = User & {

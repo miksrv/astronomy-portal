@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Enums\Permission;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
 use App\Libraries\PhotoUploadLibrary;
@@ -146,7 +147,7 @@ class Photos extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::PHOTOS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -209,7 +210,7 @@ class Photos extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::PHOTOS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -242,7 +243,7 @@ class Photos extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::PHOTOS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -263,11 +264,6 @@ class Photos extends ResourceController
         if (!$this->validator->run($input)) {
             return $this->failValidationErrors($this->validator->getErrors());
         }
-
-        // Additional access check
-        // if ($this->session?->user?->role !== 'admin') {
-        //     return $this->failForbidden('Access Denied');
-        // }
 
         // Validate the decoded fields (ensure arrays)
         if (!is_array($input['categories']) || !is_array($input['objects']) ||

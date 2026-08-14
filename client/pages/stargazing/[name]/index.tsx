@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { getCookie } from 'cookies-next'
-import { Button, Container, Message } from 'simple-react-ui-kit'
+import { Button, Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import dynamic from 'next/dynamic'
@@ -13,47 +13,64 @@ import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
-import { EventItemData, EventReviews } from '@/components/pages/stargazing'
-import { REVIEWS_PAGE_SIZE } from '@/utils/constants'
+import { EventItemData, EventPhotoFilter, EventReviews } from '@/components/pages/stargazing'
+import { PHOTOS_PAGE_SIZE, REVIEWS_PAGE_SIZE } from '@/utils/constants'
 import { formatDate } from '@/utils/dates'
-import { getErrorMessage } from '@/utils/errors'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
+import { hasAnyPermission, hasPermission } from '@/utils/permissions'
 import { removeMarkdown, sliceText } from '@/utils/strings'
 
 import styles from '../styles.module.sass'
 
-// Admin-only, single hidden <input> — dynamically imported so it never enters
-// the bundle or DOM for regular visitors.
-const EventPhotoUploader = dynamic(
-    () => import('@/components/pages/stargazing/event-photo-uploader').then((mod) => mod.EventPhotoUploader),
+// Admin-only, dynamically imported so it never enters the bundle for regular visitors.
+const EventPhotoUploadDialog = dynamic(
+    () => import('@/components/pages/stargazing/event-photo-upload-dialog').then((mod) => mod.EventPhotoUploadDialog),
     { ssr: false }
 )
 
 interface StargazingItemPageProps {
     eventId: string
     event: ApiModel.Event | null
-    photos: ApiModel.EventPhoto[] | null
     eventsList: ApiModel.Event[] | null
 }
 
-const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event, photos, eventsList }) => {
+const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event, eventsList }) => {
     const { t } = useTranslation()
     const router = useRouter()
 
     const user = useAppSelector((state) => state.auth.user)
-    const userRole = useAppSelector((state) => state.auth?.user?.role)
 
-    const inputFileRef = useRef<HTMLInputElement>(undefined)
-
-    const [localPhotos, setLocalPhotos] = useState<ApiModel.EventPhoto[]>([])
-    const [uploadingPhotos, setUploadingPhotos] = useState<string[]>()
-    const [uploadError, setUploadError] = useState<unknown>()
+    const [isUploadDialogOpen, setIsUploadDialogOpen] = useState<boolean>(false)
+    const [selectedPhotographer, setSelectedPhotographer] = useState<string | undefined>(undefined)
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
     const [photoIndex, setPhotoIndex] = useState<number>()
-    const [isPhotosExpanded, setIsPhotosExpanded] = useState(false)
 
-    const PHOTOS_PREVIEW_LIMIT = 12
+    // Only the first PHOTOS_PAGE_SIZE photos are fetched up front - an event
+    // can have up to ~400, and this is also what lets that first page be
+    // present in the SSR HTML (and JSON-LD) instead of only appearing after
+    // client-side hydration. "Смотреть все" (below) bumps this straight to the
+    // full total and re-fetches everything in one request, rather than
+    // growing the grid in batches while scrolling - simpler, and it avoids the
+    // grid visibly shifting mid-scroll; the one-time cost of laying out the
+    // rest at once only happens on a deliberate click, not while casually
+    // scrolling.
+    const [pageLimit, setPageLimit] = useState(PHOTOS_PAGE_SIZE)
+
+    // Reset back to the first, unfiltered page whenever the event itself
+    // changes, so state from a previous event id can't leak in across a
+    // client-side (non-full-reload) navigation.
+    useEffect(() => {
+        setPageLimit(PHOTOS_PAGE_SIZE)
+        setSelectedPhotographer(undefined)
+    }, [eventId])
+
+    // Switching the photographer filter swaps the underlying (server-side
+    // filtered) list entirely - back to the first page for the new filter,
+    // rather than keeping "show all" carried over from a different photographer.
+    useEffect(() => {
+        setPageLimit(PHOTOS_PAGE_SIZE)
+    }, [selectedPhotographer])
 
     const title = event?.title || t('menu.stargazing', 'Астровыезды')
 
@@ -61,6 +78,29 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
         event?.coverFileName && event?.coverFileExt
             ? `${hosts.stargazing}${event.id}/${event.coverFileName}.${event.coverFileExt}`
             : undefined
+
+    // Same query args as the SSR prefetch below - the first page (no
+    // photographer filter) matches exactly what getServerSideProps dispatched,
+    // so this reuses that cached result with no extra request or loading
+    // flash. Clicking "Смотреть все" (below) just re-requests this same query
+    // with a bigger `limit` - a distinct, one-shot cache entry, not a growing
+    // one.
+    const { data: photosData, isFetching: isPhotosFetching } = API.useEventGetPhotoListQuery({
+        eventId,
+        limit: pageLimit,
+        photographer: selectedPhotographer
+    })
+
+    const photos = photosData?.items ?? []
+    const totalPhotos = photosData?.total ?? 0
+    const hasMorePhotos = photos.length < totalPhotos
+    const isInitialPhotosLoading = isPhotosFetching && photos.length === 0
+    // Always the event's full, unfiltered photographer list (see the backend's
+    // `Events::photos()`) - so the filter chips and upload dialog autocomplete
+    // aren't missing anyone whose photos happen to live outside the currently
+    // loaded/filtered page.
+    const photographers = photosData?.photographers
+    const isLoadingAllPhotos = isPhotosFetching && pageLimit > PHOTOS_PAGE_SIZE
 
     // Same query args as the SSR prefetch below and `EventReviews` itself, so this
     // reuses the cached first page instead of firing an extra request.
@@ -74,6 +114,17 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     const eventJsonLd = event
         ? buildEventJsonLd(event, reviewsData ? { items: reviewsData.items, total: reviewsData.total } : undefined)
         : null
+
+    const getPhotoCaption = (photo: ApiModel.EventPhoto, index: number): string =>
+        photo.photographer
+            ? t('pages.stargazing.photo-caption-with-photographer', '{{eventTitle}} — фото от {{photographer}}', {
+                  eventTitle: title,
+                  photographer: photo.photographer
+              })
+            : t('pages.stargazing.photo-caption', '{{eventTitle}} (Фото №{{number}})', {
+                  eventTitle: title,
+                  number: index + 1
+              })
 
     const adjacentEvents = useMemo(() => {
         const sortedEvents = [...(eventsList || [])].sort((a, b) => {
@@ -108,16 +159,20 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     const handleUploadPhotoClick = (event: React.MouseEvent | undefined) => {
         event?.preventDefault()
 
-        if (user?.role !== ApiModel.UserRole.ADMIN) {
+        if (!hasPermission(user, ApiModel.Permission.EVENTS_GALLERY_UPLOAD)) {
             return
         }
 
-        inputFileRef?.current?.click()
+        setIsUploadDialogOpen(true)
     }
 
-    useEffect(() => {
-        setLocalPhotos(photos ?? [])
-    }, [photos])
+    const handleShowAllPhotos = () => {
+        if (isLoadingAllPhotos || !totalPhotos) {
+            return
+        }
+
+        setPageLimit(totalPhotos)
+    }
 
     return (
         <AppLayout
@@ -142,35 +197,40 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                     }
                 ]}
             >
-                {(userRole === ApiModel.UserRole.ADMIN || userRole === ApiModel.UserRole.MODERATOR) && (
+                {hasAnyPermission(user, [
+                    ApiModel.Permission.EVENTS_UPDATE,
+                    ApiModel.Permission.EVENTS_STATISTIC,
+                    ApiModel.Permission.EVENTS_GALLERY_UPLOAD
+                ]) && (
                     <>
-                        {userRole === ApiModel.UserRole.ADMIN && (
+                        {hasPermission(user, ApiModel.Permission.EVENTS_GALLERY_UPLOAD) && (
                             <Button
-                                disabled={!!uploadingPhotos?.length}
-                                loading={!!uploadingPhotos?.length}
+                                disabled={isUploadDialogOpen}
                                 icon={'Download'}
                                 mode={'secondary'}
                                 onClick={handleUploadPhotoClick}
                             >
-                                {!uploadingPhotos?.length
-                                    ? 'Загрузить фотографии'
-                                    : `Загрузка ${uploadingPhotos?.length} фото`}
+                                {t('pages.stargazing.upload-photos-button', 'Загрузить фотографии')}
                             </Button>
                         )}
 
-                        <Button
-                            icon={'Pencil'}
-                            mode={'secondary'}
-                            label={t('common.edit', 'Редактировать')}
-                            disabled={!eventId}
-                            onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
-                        />
+                        {hasPermission(user, ApiModel.Permission.EVENTS_UPDATE) && (
+                            <Button
+                                icon={'Pencil'}
+                                mode={'secondary'}
+                                label={t('common.edit', 'Редактировать')}
+                                disabled={!eventId}
+                                onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
+                            />
+                        )}
 
-                        <Button
-                            icon={'BarChart'}
-                            mode={'secondary'}
-                            onClick={() => router.push(`/stargazing/${eventId}/statistic`)}
-                        />
+                        {hasPermission(user, ApiModel.Permission.EVENTS_STATISTIC) && (
+                            <Button
+                                icon={'BarChart'}
+                                mode={'secondary'}
+                                onClick={() => router.push(`/stargazing/${eventId}/statistic`)}
+                            />
+                        )}
                     </>
                 )}
             </AppToolbar>
@@ -183,76 +243,80 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
             <h2>
                 {t('pages.stargazing.photos-from-stargazing', 'Фотографии с мероприятия')}
 
-                {localPhotos.length > PHOTOS_PREVIEW_LIMIT && (
+                {hasMorePhotos && (
                     <a
                         role={'button'}
                         tabIndex={0}
                         className={styles.showMorePhotos}
-                        onClick={() => setIsPhotosExpanded(!isPhotosExpanded)}
-                        onKeyDown={() => setIsPhotosExpanded(!isPhotosExpanded)}
+                        onClick={handleShowAllPhotos}
+                        onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                                handleShowAllPhotos()
+                            }
+                        }}
                     >
-                        {isPhotosExpanded
-                            ? t('pages.stargazing.photos-show-less', 'Показать меньше фотографий')
-                            : t('pages.stargazing.photos-show-all', 'Смотреть все ({{count}})', {
-                                  count: localPhotos.length
-                              })}
+                        {isLoadingAllPhotos
+                            ? t('pages.stargazing.photos-loading-more', 'Загрузка ещё фотографий…')
+                            : t('pages.stargazing.photos-show-all', 'Смотреть все ({{total}})', { total: totalPhotos })}
                     </a>
                 )}
             </h2>
 
-            {localPhotos?.length > 0 ? (
+            <EventPhotoFilter
+                photographers={photographers}
+                selected={selectedPhotographer}
+                onChange={setSelectedPhotographer}
+            />
+
+            {photos.length > 0 ? (
                 <PhotoGallery
-                    photos={(isPhotosExpanded ? localPhotos : localPhotos.slice(0, PHOTOS_PREVIEW_LIMIT)).map(
-                        (photo, index) => ({
-                            height: photo.height,
-                            src: createPreviewPhotoUrl(photo),
-                            width: photo.width,
-                            alt: `${photo?.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
-                        })
-                    )}
+                    photos={photos.map((photo, index) => ({
+                        height: photo.height,
+                        src: createPreviewPhotoUrl(photo),
+                        width: photo.width,
+                        alt: getPhotoCaption(photo, index)
+                    }))}
                     onClick={({ index }) => {
                         handlePhotoClick(index)
                     }}
                 />
             ) : (
-                <Container>
-                    <p className={styles.noPhotos}>
-                        {t(
-                            'pages.stargazing.no-photos',
-                            'Фотографии с этого события ещё не загружены. Загляните позже!'
-                        )}
-                    </p>
-                </Container>
+                !isInitialPhotosLoading && (
+                    <Container>
+                        <p className={styles.noPhotos}>
+                            {t(
+                                'pages.stargazing.no-photos',
+                                'Фотографии с этого события ещё не загружены. Загляните позже!'
+                            )}
+                        </p>
+                    </Container>
+                )
             )}
 
-            {userRole === ApiModel.UserRole.ADMIN && (
-                <EventPhotoUploader
+            {hasPermission(user, ApiModel.Permission.EVENTS_GALLERY_UPLOAD) && (
+                <EventPhotoUploadDialog
                     eventId={eventId}
-                    fileInputRef={inputFileRef}
-                    onSelectFiles={setUploadingPhotos}
-                    onUploadPhoto={(photo) => {
-                        setLocalPhotos((prev) => [...prev, photo])
+                    photographers={photographers}
+                    open={isUploadDialogOpen}
+                    onClose={() => setIsUploadDialogOpen(false)}
+                    onUploadPhoto={() => {
+                        // The upload mutation invalidates this event's EventPhotos
+                        // tag, so RTK Query refetches the active page(s) in the
+                        // background - reset to the small first page so the
+                        // freshly uploaded photo is visible right away instead of
+                        // landing wherever a "show all" fetch used to end.
+                        setPageLimit(PHOTOS_PAGE_SIZE)
                     }}
-                    onUploadError={setUploadError}
                 />
             )}
 
-            {!!uploadError && (
-                <Message
-                    type={'error'}
-                    className={styles.uploadError}
-                >
-                    {getErrorMessage(uploadError) ||
-                        t('pages.stargazing.upload-photo-error', 'Не удалось загрузить фотографию. Попробуйте позже.')}
-                </Message>
-            )}
-
             <PhotoLightbox
-                photos={localPhotos?.map((photo, index) => ({
+                photos={photos.map((photo, index) => ({
                     height: photo.height,
+                    preview: createPreviewPhotoUrl(photo),
                     src: createFullPhotoUrl(photo),
                     width: photo.width,
-                    title: `${photo.title} (${t('pages.stargazing.photo', 'Фото')} ${index + 1})`
+                    title: getPhotoCaption(photo, index)
                 }))}
                 photoIndex={photoIndex}
                 showLightbox={showLightbox}
@@ -312,10 +376,16 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             const { data: eventData, isError } = await store.dispatch(API.endpoints?.eventGetItem.initiate(eventId))
 
-            const { data: eventPhotos } = await store.dispatch(
+            // Prefetch only the first page of the gallery (not the whole,
+            // potentially hundreds-strong list) so it's part of the initial HTML
+            // and JSON-LD instead of only appearing after client-side hydration -
+            // the rest loads via the "Смотреть все" button on the client. Args
+            // match exactly what the component requests on mount, so the client
+            // hook reuses this cached entry with no extra request.
+            await store.dispatch(
                 API.endpoints?.eventGetPhotoList.initiate({
                     eventId,
-                    limit: 500
+                    limit: PHOTOS_PAGE_SIZE
                 })
             )
 
@@ -344,7 +414,6 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 props: {
                     ...translations,
                     event: eventData || null,
-                    photos: eventPhotos?.items || [],
                     eventId: eventId,
                     eventsList: eventsData?.items || []
                 }

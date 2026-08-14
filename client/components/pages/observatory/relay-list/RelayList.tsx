@@ -4,6 +4,7 @@ import { Button, cn, Container, Message, Spinner } from 'simple-react-ui-kit'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, ApiType, useAppDispatch, useAppSelector } from '@/api'
+import { hasPermission } from '@/utils/permissions'
 
 import styles from './styles.module.sass'
 
@@ -112,7 +113,7 @@ export const RelayList: React.FC = () => {
                         name={item.name}
                         state={item.state === 1 || (relaySet?.state === 1 && relaySet?.id === item.id)}
                         loading={loaderSet && relayLoading === item.id}
-                        isAdmin={user?.role === ApiModel.UserRole.ADMIN}
+                        isAdmin={hasPermission(user, ApiModel.Permission.RELAY_CONTROL)}
                         handleClick={async (relay) => await handleSetRelay(relay)}
                     />
                 ))}

@@ -7,6 +7,7 @@ import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel, useAppSelector } from '@/api'
 import { hosts } from '@/api/constants'
+import { hasPermission } from '@/utils/permissions'
 
 import { EventMetaRow } from '../event-meta-row'
 
@@ -19,9 +20,9 @@ interface EventsListItemProps {
 export const EventsListItem: React.FC<EventsListItemProps> = ({ event }) => {
     const { t } = useTranslation()
 
-    const userRole = useAppSelector((state) => state.auth?.user?.role)
+    const user = useAppSelector((state) => state.auth?.user)
 
-    const canViewStatistic = userRole === ApiModel.UserRole.ADMIN || userRole === ApiModel.UserRole.MODERATOR
+    const canViewStatistic = hasPermission(user, ApiModel.Permission.EVENTS_STATISTIC)
 
     const itemTitle = t('components.pages.stargazing.events-list.item-title', 'Астровыезд - {{title}}', {
         title: event.title

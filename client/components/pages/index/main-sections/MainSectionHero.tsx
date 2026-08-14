@@ -56,10 +56,9 @@ export const MainSectionHero: React.FC<MainSectionHeroProps> = ({ photos }) => {
                             {photos.slice(0, 4).map((photo, index) => {
                                 const alt = t(
                                     'components.pages.index.main-sections.event-photo-alt',
-                                    'Фото ({{number}}) с астровыезда - {{name}}',
+                                    'Смотри на звёзды. Астровыезды в Оренбурге — фото {{number}}',
                                     {
-                                        number: index + 1,
-                                        name: photo?.title
+                                        number: index + 1
                                     }
                                 )
 

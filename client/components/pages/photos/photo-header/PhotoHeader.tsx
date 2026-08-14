@@ -234,6 +234,7 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                 photos={[
                     {
                         src: createLargePhotoUrl(props as ApiModel.Photo),
+                        preview: createMediumPhotoUrl(props as ApiModel.Photo),
                         width: props.imageWidth || 1280,
                         height: props.imageHeight || 1024,
                         title: photoTitle || ''

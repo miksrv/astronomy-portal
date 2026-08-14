@@ -1,9 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { getCookie } from 'cookies-next'
 import {
     Badge,
+    Button,
+    Checkbox,
     Container,
+    Dialog,
     Input,
+    Message,
     Select,
     SelectOptionType,
     Spinner,
@@ -15,16 +18,18 @@ import {
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, ApiType, HOST_IMG, setLocale, wrapper } from '@/api'
-import { setSSRToken } from '@/api/authSlice'
+import { API, ApiModel, ApiType, HOST_IMG, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import UserEventsDialog from '@/components/pages/users/UserEventsDialog'
 import { Pagination } from '@/components/ui/pagination'
 import { UserAvatar } from '@/components/ui/user-avatar'
+import { requirePermissionSSR } from '@/utils/adminAuth'
+import { DEVELOPER_ROLE_ID } from '@/utils/constants'
 import { formatDate } from '@/utils/dates'
+import { getErrorMessage } from '@/utils/errors'
 import { minutesAgo } from '@/utils/helpers'
+import { hasPermission } from '@/utils/permissions'
 
 import styles from './styles.module.sass'
 
@@ -32,23 +37,13 @@ const LIMIT = 50
 const DEFAULT_SORT_BY: ApiType.Users.UsersSortBy = 'createdAt'
 const DEFAULT_SORT_DIR: ApiType.Users.UsersSortDir = 'desc'
 
-const AUTH_TYPE_OPTIONS = [
-    { key: '', value: '' },
-    { key: 'google', value: 'google' },
-    { key: 'yandex', value: 'yandex' },
-    { key: 'vk', value: 'vk' },
-    { key: 'native', value: 'native' }
-]
-
-const roleBadgeClass = (role: ApiModel.UserRole): string => {
-    const map: Partial<Record<ApiModel.UserRole, string>> = {
-        [ApiModel.UserRole.ADMIN]: styles.badgeAdmin,
-        [ApiModel.UserRole.MODERATOR]: styles.badgeModerator,
-        [ApiModel.UserRole.SECURITY]: styles.badgeSecurity
-    }
-
-    return map[role] ?? styles.badgeDefault
-}
+// Parses the `roleIds` URL/query param (comma-separated ids, e.g. "1,3")
+// back into a number array for the multi-select filter's initial state.
+const parseRoleIdsParam = (value: string): number[] =>
+    value
+        .split(',')
+        .map((part) => parseInt(part, 10))
+        .filter((id) => !Number.isNaN(id))
 
 const authTypeBadgeClass = (authType: ApiModel.UserAuthType): string => {
     const map: Record<ApiModel.UserAuthType, string> = {
@@ -74,8 +69,8 @@ const UsersPage: NextPage<object> = () => {
 
     const [search, setSearch] = useState<string>((router.query.search as string) || '')
     const [debouncedSearch, setDebouncedSearch] = useState<string>((router.query.search as string) || '')
-    const [authType, setAuthType] = useState<ApiModel.UserAuthType | ''>(
-        (router.query.authType as ApiModel.UserAuthType) || ''
+    const [roleFilterIds, setRoleFilterIds] = useState<number[]>(
+        parseRoleIdsParam((router.query.roleIds as string) || '')
     )
     const [page, setPage] = useState<number>(parseInt((router.query.page as string) || '1', 10))
     const [sort, setSort] = useState<TableSortConfig<ApiModel.AdminUserItem>>({
@@ -86,11 +81,29 @@ const UsersPage: NextPage<object> = () => {
     const [eventsUserId, setEventsUserId] = useState<string | undefined>()
     const [eventsUserName, setEventsUserName] = useState<string | undefined>()
 
+    const [editRolesUser, setEditRolesUser] = useState<ApiModel.AdminUserItem | undefined>()
+    const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([])
+    // saveRolesError persists on the mutation hook until the next call —
+    // gate display to only the attempt just made for the currently open
+    // dialog, so a failure for one user doesn't resurface when a different
+    // user's roles dialog is opened next.
+    const [saveRolesAttempted, setSaveRolesAttempted] = useState(false)
+
+    // The roles-edit tool below is gated on this in addition to the page-level
+    // SSR guard (requirePermissionSSR) — belt-and-braces, mirroring the
+    // convention elsewhere in the app (e.g. AppHeader's admin links) of never
+    // relying solely on a route guard to hide privileged UI.
+    const authUser = useAppSelector((state) => state.auth.user)
+    const canManageRoles = hasPermission(authUser, ApiModel.Permission.USERS_MANAGE)
+
+    const { data: rolesData } = API.useRolesGetListQuery()
+    const [updateUserRoles, { isLoading: isSavingRoles, error: saveRolesError }] = API.useUsersUpdateRolesMutation()
+
     const { data, isLoading, isFetching } = API.useUsersGetListQuery({
         page,
         limit: LIMIT,
         search: debouncedSearch,
-        authType,
+        roleIds: roleFilterIds.length > 0 ? roleFilterIds.join(',') : undefined,
         sortBy: sort.key as ApiType.Users.UsersSortBy,
         sortDir: sort.direction
     })
@@ -129,8 +142,8 @@ const UsersPage: NextPage<object> = () => {
         if (debouncedSearch) {
             query.search = debouncedSearch
         }
-        if (authType) {
-            query.authType = authType
+        if (roleFilterIds.length > 0) {
+            query.roleIds = roleFilterIds.join(',')
         }
         if (page > 1) {
             query.page = page
@@ -142,11 +155,11 @@ const UsersPage: NextPage<object> = () => {
             query.sortDir = sort.direction
         }
 
-        void router.push({ pathname: '/users', query }, undefined, { shallow: true })
-    }, [debouncedSearch, authType, page, sort])
+        void router.push({ pathname: '/admin/users', query }, undefined, { shallow: true })
+    }, [debouncedSearch, roleFilterIds, page, sort])
 
-    const handleAuthTypeChange = useCallback((selected: Array<SelectOptionType<string>> | undefined) => {
-        setAuthType((selected?.[0]?.key ?? '') as ApiModel.UserAuthType | '')
+    const handleRoleFilterChange = useCallback((selected: Array<SelectOptionType<number>> | undefined) => {
+        setRoleFilterIds(selected?.map(({ key }) => key) ?? [])
         setPage(1)
     }, [])
 
@@ -155,17 +168,49 @@ const UsersPage: NextPage<object> = () => {
         setPage(1)
     }, [])
 
-    const roleLabel = (r: ApiModel.UserRole | ''): string => {
-        const map: Record<string, string> = {
-            '': t('users.filterAll', 'Все'),
-            admin: t('users.roleAdmin', 'Администратор'),
-            moderator: t('users.roleModerator', 'Модератор'),
-            security: t('users.roleSecurity', 'Охрана'),
-            user: t('users.roleUser', 'Пользователь')
+    const openEditRoles = useCallback((user: ApiModel.AdminUserItem) => {
+        setSaveRolesAttempted(false)
+        setEditRolesUser(user)
+        setSelectedRoleIds(user.roles.map((role) => role.id))
+    }, [])
+
+    const closeEditRoles = useCallback(() => {
+        setEditRolesUser(undefined)
+        setSelectedRoleIds([])
+    }, [])
+
+    // The developer role (see server/app/Models/RolesModel::DEVELOPER_ROLE_ID)
+    // is hardcoded to allow only a single holder at a time — disable the
+    // checkbox once it's already assigned to someone other than the user
+    // currently being edited, instead of only surfacing the API's rejection
+    // after Save.
+    const isDeveloperRoleTakenByOther = useCallback(
+        (role: ApiModel.Role) =>
+            role.id === DEVELOPER_ROLE_ID &&
+            (role.usersCount ?? 0) > 0 &&
+            !editRolesUser?.roles.some((r) => r.id === DEVELOPER_ROLE_ID),
+        [editRolesUser]
+    )
+
+    const toggleRoleId = useCallback((roleId: number, checked: boolean) => {
+        setSelectedRoleIds((current) => (checked ? [...current, roleId] : current.filter((id) => id !== roleId)))
+    }, [])
+
+    const handleSaveRoles = useCallback(async () => {
+        if (!editRolesUser) {
+            return
         }
 
-        return map[r] ?? r
-    }
+        setSaveRolesAttempted(true)
+
+        const result = await updateUserRoles({ id: editRolesUser.id, roleIds: selectedRoleIds })
+
+        if ('error' in result) {
+            return
+        }
+
+        closeEditRoles()
+    }, [editRolesUser, selectedRoleIds, updateUserRoles, closeEditRoles])
 
     const authTypeLabel = (a: ApiModel.UserAuthType | ''): string => {
         const map: Record<string, string> = {
@@ -220,15 +265,45 @@ const UsersPage: NextPage<object> = () => {
             }
         },
         {
-            accessor: 'role',
+            accessor: 'roles',
             header: t('users.columnRole', 'Роль'),
-            formatter: (data) => (
-                <Badge
-                    label={roleLabel(data as ApiModel.UserRole)}
-                    size={'small'}
-                    className={roleBadgeClass(data as ApiModel.UserRole)}
-                />
-            )
+            formatter: (_data, row, i) => {
+                const item = row[i]
+
+                const badges =
+                    item.roles.length > 0 ? (
+                        item.roles.map((role) => (
+                            <Badge
+                                key={role.id}
+                                label={role.name}
+                                size={'small'}
+                                className={styles.badgeDefault}
+                            />
+                        ))
+                    ) : (
+                        <Badge
+                            label={t('users.roleUser', 'Пользователь')}
+                            size={'small'}
+                            className={styles.badgeDefault}
+                        />
+                    )
+
+                // The edit tool is only rendered for someone holding
+                // USERS_MANAGE — everyone else sees the same badges as plain,
+                // non-interactive text (see `canManageRoles` above).
+                if (!canManageRoles) {
+                    return <div className={styles.rolesCellButton}>{badges}</div>
+                }
+
+                return (
+                    <button
+                        className={styles.rolesCellButton}
+                        onClick={() => openEditRoles(item)}
+                    >
+                        {badges}
+                    </button>
+                )
+            }
         },
         {
             accessor: 'authType',
@@ -297,14 +372,16 @@ const UsersPage: NextPage<object> = () => {
                     onChange={(e) => setSearch(e.target.value)}
                 />
 
-                <Select<string>
-                    placeholder={t('users.filterAuthType', 'Сервис входа')}
-                    value={authType}
+                <Select<number>
+                    multiple={true}
+                    closeOnSelect={true}
+                    placeholder={t('users.filterByRole', 'Роль')}
+                    value={roleFilterIds}
                     className={styles.selectFilter}
-                    onSelect={handleAuthTypeChange}
-                    options={AUTH_TYPE_OPTIONS.map((o) => ({
-                        key: o.key,
-                        value: authTypeLabel(o.value as ApiModel.UserAuthType | '')
+                    onSelect={handleRoleFilterChange}
+                    options={(rolesData?.items ?? []).map((role) => ({
+                        key: role.id,
+                        value: role.name
                     }))}
                 />
             </AppToolbar>
@@ -355,6 +432,42 @@ const UsersPage: NextPage<object> = () => {
                 }}
             />
 
+            {editRolesUser && (
+                <Dialog
+                    open={true}
+                    title={t('users.editRolesTitle', 'Роли пользователя: {{name}}', { name: editRolesUser.name })}
+                    onCloseDialog={closeEditRoles}
+                >
+                    {saveRolesAttempted && saveRolesError && (
+                        <Message
+                            type={'error'}
+                            style={{ marginBottom: '10px' }}
+                        >
+                            {getErrorMessage(saveRolesError) ?? t('users.saveRolesError', 'Ошибка сохранения ролей')}
+                        </Message>
+                    )}
+
+                    <div className={styles.rolesDialogList}>
+                        {(rolesData?.items ?? []).map((role) => (
+                            <Checkbox
+                                key={role.id}
+                                label={role.name}
+                                checked={selectedRoleIds.includes(role.id)}
+                                disabled={isDeveloperRoleTakenByOther(role)}
+                                onChange={(e) => toggleRoleId(role.id, e.target.checked)}
+                            />
+                        ))}
+                    </div>
+
+                    <Button
+                        mode={'primary'}
+                        label={t('users.saveRoles', 'Сохранить')}
+                        loading={isSavingRoles}
+                        onClick={handleSaveRoles}
+                    />
+                </Dialog>
+            )}
+
             <AppFooter ref={footerRef} />
         </AppLayout>
     )
@@ -363,29 +476,17 @@ const UsersPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? 'en'
-            const translations = await serverSideTranslations(locale)
-            const token = await getCookie('token', { req: context.req, res: context.res })
+            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.USERS_MANAGE)
 
-            store.dispatch(setLocale(locale))
-
-            if (token) {
-                store.dispatch(setSSRToken(token))
-            } else {
-                return { redirect: { destination: '/', permanent: false } }
+            if (!guard.ok) {
+                return { redirect: guard.redirect }
             }
-
-            const { data: authData } = await store.dispatch(API.endpoints.authGetMe.initiate())
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
-            if (authData?.user?.role !== ApiModel.UserRole.ADMIN) {
-                return { redirect: { destination: '/', permanent: false } }
-            }
-
             return {
                 props: {
-                    ...translations
+                    ...guard.translations
                 }
             }
         }

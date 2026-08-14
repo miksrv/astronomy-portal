@@ -10,10 +10,12 @@ final class UserEntityTest extends CIUnitTestCase
 {
     // --- Default attribute values ---
 
-    public function testNewInstanceDefaultRoleIsUser(): void
+    public function testNewInstanceDefaultRolesIsNull(): void
     {
         $entity = new UserEntity();
-        $this->assertSame('user', $entity->role);
+        // 'roles' is cast to 'json-array'; a null attribute stays null (same
+        // convention as 'settings') — callers guard with `?? []`.
+        $this->assertNull($entity->roles);
     }
 
     public function testNewInstanceDefaultAuthTypeIsNative(): void
@@ -65,10 +67,10 @@ final class UserEntityTest extends CIUnitTestCase
         $this->assertSame('Alice', $entity->name);
     }
 
-    public function testSettingRoleStoresCorrectly(): void
+    public function testSettingRolesStoresCorrectly(): void
     {
-        $entity       = new UserEntity();
-        $entity->role = 'admin';
-        $this->assertSame('admin', $entity->role);
+        $entity        = new UserEntity();
+        $entity->roles = [1, 2];
+        $this->assertSame([1, 2], $entity->roles);
     }
 }

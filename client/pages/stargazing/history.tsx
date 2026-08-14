@@ -10,6 +10,7 @@ import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { EventsList } from '@/components/pages/stargazing'
+import { hasPermission } from '@/utils/permissions'
 
 interface StargazingHistoryPageProps {
     events: ApiModel.Event[]
@@ -18,7 +19,7 @@ interface StargazingHistoryPageProps {
 const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events }) => {
     const { t } = useTranslation()
 
-    const userRole = useAppSelector((state) => state.auth?.user?.role)
+    const user = useAppSelector((state) => state.auth?.user)
 
     const title = t('pages.stargazing-history.title', 'Архив астровыездов')
 
@@ -45,7 +46,7 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
                 links={[{ link: '/stargazing', text: t('pages.stargazing.title', 'Астровыезды') }]}
                 currentPage={title}
             >
-                {(userRole === ApiModel.UserRole.ADMIN || userRole === ApiModel.UserRole.MODERATOR) && (
+                {hasPermission(user, ApiModel.Permission.EVENTS_CREATE) && (
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}

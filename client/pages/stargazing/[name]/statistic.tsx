@@ -1,14 +1,12 @@
 import React from 'react'
-import { getCookie } from 'cookies-next'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, setLocale, wrapper } from '@/api'
-import { setSSRToken } from '@/api/authSlice'
+import { API, ApiModel, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { EventRegistrationsTable, EventStatistic, EventStatisticRefreshInfo } from '@/components/pages/stargazing'
+import { requirePermissionSSR } from '@/utils/adminAuth'
 
 interface StargazingStatisticPageProps {
     eventId: string
@@ -56,30 +54,21 @@ const StargazingStatisticPage: NextPage<StargazingStatisticPageProps> = ({ event
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<StargazingStatisticPageProps>> => {
-            const locale = context.locale ?? 'en'
-            const translations = await serverSideTranslations(locale)
             const eventId = context.params?.name
 
             if (typeof eventId !== 'string') {
                 return { notFound: true }
             }
 
-            store.dispatch(setLocale(locale))
+            const guard = await requirePermissionSSR(
+                store,
+                context,
+                ApiModel.Permission.EVENTS_STATISTIC,
+                `/stargazing/${eventId}`
+            )
 
-            const token = await getCookie('token', { req: context.req, res: context.res })
-
-            if (!token) {
-                return { redirect: { destination: `/stargazing/${eventId}`, permanent: false } }
-            }
-
-            store.dispatch(setSSRToken(token))
-
-            const { data: authData } = await store.dispatch(API.endpoints.authGetMe.initiate())
-
-            const role = authData?.user?.role
-
-            if (role !== ApiModel.UserRole.ADMIN && role !== ApiModel.UserRole.MODERATOR) {
-                return { redirect: { destination: `/stargazing/${eventId}`, permanent: false } }
+            if (!guard.ok) {
+                return { redirect: guard.redirect }
             }
 
             const { data: eventData, isError } = await store.dispatch(API.endpoints?.eventGetItem.initiate(eventId))
@@ -92,7 +81,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             return {
                 props: {
-                    ...translations,
+                    ...guard.translations,
                     eventId,
                     eventTitle: eventData?.title ?? null
                 }

@@ -101,4 +101,50 @@ final class EventPhotoEntityTest extends CIUnitTestCase
         $prop->setAccessible(true);
         $this->assertContains('deleted_at', $prop->getValue($entity));
     }
+
+    // --- Photographer / taken_at (grouping + EXIF sort feature) ---
+
+    public function testPhotographerDatamapAlias(): void
+    {
+        $entity               = new EventPhotoEntity();
+        $entity->photographer = 'Иван Иванов';
+        $this->assertSame('Иван Иванов', $entity->photographer_name);
+    }
+
+    public function testTakenAtDatamapAlias(): void
+    {
+        $entity          = new EventPhotoEntity();
+        $entity->takenAt = '2026-06-01 22:15:00';
+        $this->assertSame('2026-06-01 22:15:00', $entity->taken_at);
+    }
+
+    /**
+     * `taken_at` must stay a plain string on output, not the {date,
+     * timezone_type, timezone} object shape produced when a field is listed
+     * in $dates (as deleted_at/created_at/updated_at are) — the frontend's
+     * `EventPhoto.takenAt` is typed as a plain string, not the shared
+     * `DateTime` wire type used by every other entity datetime field.
+     */
+    public function testTakenAtIsNotInDatesList(): void
+    {
+        $entity     = new EventPhotoEntity();
+        $reflection = new ReflectionClass($entity);
+        $prop       = $reflection->getProperty('dates');
+        $prop->setAccessible(true);
+        $this->assertNotContains('taken_at', $prop->getValue($entity));
+    }
+
+    public function testTakenAtRemainsStringNotTimeObject(): void
+    {
+        $entity            = new EventPhotoEntity();
+        $entity->taken_at = '2026-06-01 22:15:00';
+        $this->assertIsString($entity->taken_at);
+        $this->assertSame('2026-06-01 22:15:00', $entity->taken_at);
+    }
+
+    public function testTakenAtDefaultsToNull(): void
+    {
+        $entity = new EventPhotoEntity();
+        $this->assertNull($entity->taken_at);
+    }
 }

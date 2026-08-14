@@ -122,6 +122,11 @@ export const API = createApi({
         }),
         eventGetPhotoList: builder.query<ApiType.Events.ResPhotoList, ApiType.Events.ReqPhotoList>({
             providesTags: (result, error, arg) => [{ id: arg.eventId ?? 'LIST', type: 'EventPhotos' }],
+            // A plain, one-shot query - the event page fetches either a small
+            // first page or (once "Смотреть все" is clicked) everything in a
+            // single request, never grows an existing page incrementally, so
+            // each distinct set of args (including `limit`) is just its own
+            // cache entry.
             query: (params) => `events/photos${encodeQueryData(params)}`
         }),
         eventGetUsersList: builder.query<ApiType.Events.ResUsersList, string>({
@@ -463,6 +468,49 @@ export const API = createApi({
         usersGetEvents: builder.query<ApiType.Users.UserEventsResponse, string>({
             providesTags: (res, err, id) => [{ id, type: 'Users' }],
             query: (id) => `members/${id}/events`
+        }),
+        usersUpdateRoles: builder.mutation<{ id: string; roleIds: number[] }, ApiType.Users.UsersUpdateRolesRequest>({
+            invalidatesTags: () => [{ id: 'LIST', type: 'Users' }],
+            query: ({ id, roleIds }) => ({
+                body: { roleIds },
+                method: 'PATCH',
+                url: `members/${id}/roles`
+            })
+        }),
+
+        /* Roles Controller */
+        rolesGetList: builder.query<ApiType.Roles.RolesListResponse, void>({
+            providesTags: () => [{ id: 'LIST', type: 'Roles' }],
+            query: () => 'roles'
+        }),
+        roleGetPermissions: builder.query<ApiType.Roles.RolePermissionsResponse, void>({
+            query: () => 'roles/permissions'
+        }),
+        roleCreate: builder.mutation<ApiModel.Role, ApiType.Roles.RoleCreateRequest>({
+            invalidatesTags: () => [{ id: 'LIST', type: 'Roles' }],
+            query: (body) => ({
+                body,
+                method: 'POST',
+                url: 'roles'
+            })
+        }),
+        roleUpdate: builder.mutation<ApiModel.Role, ApiType.Roles.RoleUpdateRequest>({
+            invalidatesTags: () => [{ id: 'LIST', type: 'Roles' }],
+            query: ({ id, ...body }) => ({
+                body,
+                method: 'PATCH',
+                url: `roles/${id}`
+            })
+        }),
+        roleDelete: builder.mutation<void, number>({
+            invalidatesTags: () => [
+                { id: 'LIST', type: 'Roles' },
+                { id: 'LIST', type: 'Users' }
+            ],
+            query: (id) => ({
+                method: 'DELETE',
+                url: `roles/${id}`
+            })
         })
     }),
     // RTK Query requires the return type of extractRehydrationInfo to match its
@@ -489,6 +537,7 @@ export const API = createApi({
         'Category',
         'Relay',
         'Mailings',
-        'Users'
+        'Users',
+        'Roles'
     ]
 })

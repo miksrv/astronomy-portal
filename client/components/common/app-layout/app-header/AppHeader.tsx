@@ -25,7 +25,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
     const { t } = useTranslation()
     const dispatch = useAppDispatch()
     const authSlice = useAppSelector((state) => state.auth)
-    const userRole = authSlice?.user?.role
+    const userPermissions = authSlice?.user?.permissions ?? []
 
     // Track client-side mount to avoid hydration mismatches.
     // The auth query may immediately set isLoading=true on the client (when a
@@ -44,33 +44,38 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
 
     const [logoutRequest] = API.useAuthLogoutMutation()
 
-    // `roles` lists who sees each link — most are admin-only, but stargazing
-    // event create/edit is also open to moderators (Events::create/update/cover).
+    // `permissions` lists which privilege unlocks each link — a link shows if
+    // the user has any one of them.
     const adminLinks = [
         {
             href: '/photos/form',
             label: t('components.common.app-layout.app-header.add-photo', 'Добавить фото'),
-            roles: [ApiModel.UserRole.ADMIN]
+            permissions: [ApiModel.Permission.PHOTOS_MANAGE]
         },
         {
             href: '/objects/form',
             label: t('components.common.app-layout.app-header.add-object', 'Добавить объект'),
-            roles: [ApiModel.UserRole.ADMIN]
+            permissions: [ApiModel.Permission.OBJECTS_MANAGE]
         },
         {
             href: '/stargazing/form',
             label: t('components.common.app-layout.app-header.add-stargazing', 'Добавить мероприятие'),
-            roles: [ApiModel.UserRole.ADMIN, ApiModel.UserRole.MODERATOR]
+            permissions: [ApiModel.Permission.EVENTS_CREATE, ApiModel.Permission.EVENTS_UPDATE]
         },
         {
-            href: '/mailing',
+            href: '/admin/mailing',
             label: t('components.common.app-layout.app-header.mailings', 'Email рассылки'),
-            roles: [ApiModel.UserRole.ADMIN]
+            permissions: [ApiModel.Permission.MAILINGS_MANAGE]
         },
         {
-            href: '/users',
+            href: '/admin/users',
             label: t('menu.users', 'Пользователи'),
-            roles: [ApiModel.UserRole.ADMIN]
+            permissions: [ApiModel.Permission.USERS_MANAGE]
+        },
+        {
+            href: '/admin/roles',
+            label: t('menu.roles', 'Роли'),
+            permissions: [ApiModel.Permission.USERS_MANAGE]
         }
     ]
 
@@ -157,51 +162,41 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
                             }
                         >
                             <ul className={styles.contextListMenu}>
-                                {userRole &&
-                                    adminLinks
-                                        .filter((item) => item.roles.includes(userRole))
-                                        .map((item) => (
-                                            <li key={item.href}>
-                                                <Link
-                                                    href={item.href}
-                                                    title={item.label}
-                                                >
-                                                    {item.label}
-                                                </Link>
-                                            </li>
-                                        ))}
-
-                                {authSlice?.user?.role &&
-                                    [
-                                        ApiModel.UserRole.ADMIN,
-                                        ApiModel.UserRole.MODERATOR,
-                                        ApiModel.UserRole.SECURITY
-                                    ].includes(authSlice?.user?.role) && (
-                                        <li>
+                                {adminLinks
+                                    .filter((item) => item.permissions.some((p) => userPermissions.includes(p)))
+                                    .map((item) => (
+                                        <li key={item.href}>
                                             <Link
-                                                href={'/stargazing/checkin'}
-                                                title={t(
-                                                    'components.common.app-layout.app-header.qrcode-check',
-                                                    'Проверка QR-кодов'
-                                                )}
+                                                href={item.href}
+                                                title={item.label}
                                             >
-                                                {t(
-                                                    'components.common.app-layout.app-header.qrcode-check',
-                                                    'Проверка QR-кодов'
-                                                )}
+                                                {item.label}
                                             </Link>
                                         </li>
-                                    )}
+                                    ))}
+
+                                {userPermissions.includes(ApiModel.Permission.EVENTS_CHECKIN) && (
+                                    <li>
+                                        <Link
+                                            href={'/stargazing/checkin'}
+                                            title={t(
+                                                'components.common.app-layout.app-header.qrcode-check',
+                                                'Проверка QR-кодов'
+                                            )}
+                                        >
+                                            {t(
+                                                'components.common.app-layout.app-header.qrcode-check',
+                                                'Проверка QR-кодов'
+                                            )}
+                                        </Link>
+                                    </li>
+                                )}
 
                                 <li>
                                     <Link href={'/profile'}>{t('menu.profile', 'Личный кабинет')}</Link>
                                 </li>
 
-                                <li
-                                    className={cn(
-                                        authSlice?.user?.role !== ApiModel.UserRole.USER && styles.dividerItem
-                                    )}
-                                >
+                                <li className={cn(userPermissions.length > 0 && styles.dividerItem)}>
                                     <Link
                                         href={'/'}
                                         title={t('components.common.app-layout.app-header.logout', 'Выйти')}

@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Enums\Permission;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
 use App\Models\ObjectsModel;
@@ -119,7 +120,7 @@ class Objects extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::OBJECTS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -197,7 +198,7 @@ class Objects extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::OBJECTS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -289,7 +290,7 @@ class Objects extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::OBJECTS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 

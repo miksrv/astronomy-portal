@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Entities\MailingEmailEntity;
 use App\Entities\MailingEntity;
+use App\Enums\Permission;
 use App\Libraries\EmailLibrary;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
@@ -48,7 +49,7 @@ class Mailings extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -89,7 +90,7 @@ class Mailings extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -166,7 +167,7 @@ class Mailings extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -231,7 +232,7 @@ class Mailings extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -317,7 +318,7 @@ class Mailings extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -365,7 +366,7 @@ class Mailings extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -423,7 +424,7 @@ class Mailings extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -456,7 +457,7 @@ class Mailings extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -526,7 +527,7 @@ class Mailings extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -611,7 +612,7 @@ class Mailings extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -661,7 +662,7 @@ class Mailings extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 

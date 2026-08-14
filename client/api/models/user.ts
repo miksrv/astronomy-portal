@@ -1,3 +1,6 @@
+import { Permission } from './permission'
+import { Role } from './role'
+
 export type User = {
     id: string
     name: string
@@ -5,17 +8,13 @@ export type User = {
     phone?: string
     birthday?: string
     sex?: 'm' | 'f'
-    role?: UserRole
+    /** Role names, for display only — never used for access checks. */
+    roles?: string[]
+    /** Flat, deduplicated union of every privilege the user's roles grant. Use `hasPermission()` (client/utils/permissions.ts), not a direct `.includes()`. */
+    permissions?: Permission[]
     avatar?: string
     updated?: string
     created?: string
-}
-
-export enum UserRole {
-    USER = 'user',
-    SECURITY = 'security',
-    MODERATOR = 'moderator',
-    ADMIN = 'admin'
 }
 
 export type UserAuthType = 'google' | 'yandex' | 'vk' | 'native'
@@ -24,7 +23,7 @@ export interface AdminUserItem {
     id: string
     name: string
     avatar?: string
-    role: UserRole
+    roles: Role[]
     authType: UserAuthType
     locale: string
     sex?: 'm' | 'f'

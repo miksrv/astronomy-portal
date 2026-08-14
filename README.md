@@ -136,39 +136,57 @@ astronomy-portal/
 <!-- USER ROLES & PERMISSIONS -->
 ## User Roles & Permissions
 
-There is no central permission/filter middleware — every backend controller checks `session.user.role` inline (a raw string comparison, no `hasRole()` helper), and the frontend mirrors the same checks to show/hide pages and UI. Roles are stored as a single ENUM column, `users.role`, defined in `server/app/Database/Migrations/2024-10-22-100000_AddUsers.php` and mirrored by the `UserRole` enum in `client/api/models/user.ts`. There are exactly four values:
+Access control is privilege-based, not role-based: every backend check tests for one of a fixed set of **privileges** (`App\Enums\Permission`, a PHP backed enum — the single place a new privilege is introduced when new functionality needs one), and a **role** (`user_roles` table) is just a named, admin-editable bundle of privileges. A user can hold several roles at once (`users.roles`, a JSON array of `user_roles.id` values); their effective privileges are the union of every role they're assigned. There is no general admin bypass — the one hardcoded exception is `USERS_MANAGE` itself, see below.
 
-- **`user`** (default) — any authenticated account with no elevated role. The API omits the `role` field entirely for plain users in the `/auth/me` response (`Auth::responseAuth()`), so the frontend treats "no role" the same as `user`.
-- **`security`** — event door-staff. Adds QR check-in access on top of `user`.
-- **`moderator`** — adds comment moderation, event-statistics access, and creating/editing stargazing events (including replacing their cover image) on top of `security`.
-- **`admin`** — full access to every management screen and endpoint.
+Roles are managed entirely through data, not code — `/admin/roles` lets an admin create a role, name it, and grant it any subset of the fixed privilege list; `/admin/users` assigns roles to a specific user. Adding a new privilege still requires a code change (a new `Permission` case plus the checks that use it); deciding who gets it does not. The one exception is `USERS_MANAGE` (see "The reserved developer role" below), which is deliberately kept out of the "just data" model because it's the privilege that controls every other privilege.
 
-"Guest" is not a stored role, just the absence of a session (`!isAuth`); "staff" (`admin`/`moderator`/`security` together) is an ad hoc grouping used by several checks, not a persisted value.
+`isAuth` (is there a session at all) is a separate, orthogonal check from privileges — it gates the baseline actions any authenticated account gets (posting a comment, booking an event, editing your own profile), which every account has regardless of which roles, if any, it holds. A user with zero assigned roles is simply a plain authenticated account.
 
-### Frontend access by role
+### The privilege catalog
 
-| Role | Pages / UI gated |
-|------|-------------------|
-| Guest | Public pages only; prompted to sign in for reviews, event booking, and the mailing subscription (which happens automatically on login — see [Domain rule](#about-the-project) in `CLAUDE.md`) |
-| `user` | Own profile, own reviews/comments, own event bookings & tickets, own event history |
-| `security` | Everything `user` has, plus the "Проверка QR-кодов" menu link and the `/stargazing/checkin` page |
-| `moderator` | Everything `security` has, plus `/stargazing/[name]/statistic`, deleting any review/comment, creating/editing stargazing events and replacing their cover image via `/stargazing/form`, and admin/moderator-only blocks on the event detail page |
-| `admin` | Full admin menu (`/photos/form`, `/objects/form`, `/stargazing/form`, `/mailing`, `/users`), all object/photo/event/mailing create-edit-delete forms, event photo uploads, the `/users` member list, enabled relay power-switch controls, and the "Возврат" (forced refund) action in the `/stargazing/[name]/statistic` registrations table |
+| `Permission::` | Grants |
+|---|---|
+| `RELAY_CONTROL` | `PUT /relay/set` — observatory power relay control |
+| `OBJECTS_MANAGE` | Create/update/delete on the astronomical objects catalog |
+| `PHOTOS_MANAGE` | Create/update/delete/upload on the astrophoto archive |
+| `MAILINGS_MANAGE` | All `/mailings*` endpoints except `unsubscribe` |
+| `USERS_MANAGE` | Admin member list (`/admin/users`), viewing another user's event history, and all of `/roles*` (creating/editing roles and assigning them to users). **Reserved** — see "The reserved developer role" below; not a privilege any admin-created role can be granted. |
+| `COMMENTS_MODERATE` | Deleting any comment/review (not just your own) |
+| `EVENTS_CREATE` | Creating a new stargazing event |
+| `EVENTS_UPDATE` | Editing an event and replacing its cover image |
+| `EVENTS_DELETE` | Deleting an event |
+| `EVENTS_GALLERY_UPLOAD` | Uploading photos to an event's gallery after the fact |
+| `EVENTS_CHECKIN` | QR check-in and viewing any attendee's ticket |
+| `EVENTS_STATISTIC` | Event statistics, the registrations table, and re-verifying a registration's payment |
+| `EVENTS_REFUND` | Forced refund of a paid registration (stricter than `EVENTS_STATISTIC` — moves real money) |
+| `EVENTS_USERS` | `GET /events/members/:id` — viewing the registered-members list for a single event. Distinct from `EVENTS_STATISTIC` (the aggregated registrations/statistics table for an event) and from `USERS_MANAGE` (the site-wide member directory) — a role can be given visibility into one event's attendees without also getting the admin member list or role management. |
+| `PIPELINE_MANAGE` | Reserved for the observatory pipeline-management section (in development — no endpoint checks it yet) |
 
-### Backend endpoints by role
+Owner overrides still apply on top of a privilege check where they always did: `DELETE /comments/:id` (own comment, or `COMMENTS_MODERATE`), `GET /members/:id/events` and `GET /events/ticket/:id` (own data, or `USERS_MANAGE`/`EVENTS_CHECKIN` respectively).
 
-| Requirement | Endpoints |
-|-------------|-----------|
-| Owner, or `admin`/`moderator` | `DELETE /comments/:id` |
-| Owner, or `admin` | `GET /members/:id/events` |
-| Owner, or `admin`/`moderator`/`security` | `GET /events/ticket/:id` |
-| `admin`, `moderator`, `security` | `POST /events/checkin/:id` |
-| `admin`, `moderator` | `GET /events/:id/statistic`; `POST /events` (create); `PATCH /events/:id` (update); `POST /events/:id/cover` |
-| `admin` only | `PUT /relay/set`; `POST\|PATCH\|DELETE /objects`; `GET /members`; `GET /events/members/:id`; `DELETE /events/:id`, `POST /events/upload/:id`; `POST /events/registrations/:id/refund` (forced refund + cancellation — stricter than the `admin`/`moderator` verify-payment endpoint, since it moves real money); all `/mailings*` routes except `unsubscribe`; `POST\|PATCH\|DELETE /photos` |
-| None (public) | Everything else — health check, camera, telescope statistics, equipment/categories, file serving, read-only objects/photos/events, comment listing, sitemap, mailing unsubscribe |
+### The reserved developer role
 
-> **Known gap:** `POST /photos/:any/upload` (`Photos::upload()`) currently has no auth/role check at all, unlike its sibling `create`/`update`/`delete` actions on the same controller which all require `admin`. This looks like an oversight rather than an intentional public endpoint.
->
+`USERS_MANAGE` is the one privilege that isn't "just data": it grants the ability to create/edit roles and assign them to users (`/roles*`, `Members::updateRoles()`), so a role holding it could otherwise grant itself — or anyone — every other privilege, including itself. To close that escalation path, it's hardcoded rather than left to admin discretion:
+
+- **Only role id 1** (`RolesModel::DEVELOPER_ROLE_ID`, seeded as **"Разработчик"** by `AddRolesTable`) may ever hold `USERS_MANAGE`. `Roles::create()`/`Roles::update()` reject granting it to any other role, and reject removing it from role 1 — the privilege can't be handed out and can't be orphaned.
+- Role id 1 can never be **deleted** (`Roles::delete()` rejects it) — there must always be exactly one role capable of managing roles/users.
+- Role id 1 can be **assigned to only one user at a time** — `Members::updateRoles()` rejects assigning it to a second user while another already holds it (`UsersModel::isRoleAssignedToOtherUser()`). To hand it off, remove it from the current holder first, then assign it to the new one.
+- The admin UI mirrors all three rules (`/admin/roles` hides the `USERS_MANAGE` checkbox for every role except the developer role and won't let it be unchecked there; `/admin/users` disables the developer-role checkbox once someone else already holds it), but the API enforces them independently — the UI restrictions are a convenience, not the security boundary.
+
+### Seeded roles
+
+The migration that introduced this system (`server/app/Database/Migrations/2026-08-13-100001_AddRolesTable.php`) seeded three starter roles, preserving exactly what the old `users.role` ENUM values (`admin`/`moderator`/`security`) could do — any further roles (e.g. a role for event curators with `EVENTS_GALLERY_UPLOAD` + `MAILINGS_MANAGE`, or one for the pipeline team) are created afterwards through `/admin/roles`, not hardcoded:
+
+| Seeded role | Privileges |
+|---|---|
+| Разработчик (id 1, reserved — see above) | All of the above |
+| Команда | `COMMENTS_MODERATE`, `EVENTS_CREATE`, `EVENTS_UPDATE`, `EVENTS_STATISTIC`, `EVENTS_CHECKIN` |
+| Охрана | `EVENTS_CHECKIN` |
+
+### Frontend
+
+`GET /auth/me` returns `roles` (role names, display-only — e.g. for the badge list in `/admin/users`) and `permissions` (the flat privilege list, the only thing ever checked). `client/utils/permissions.ts` exports `hasPermission(user, permission)` / `hasAnyPermission(user, permissions)`; every page/component gate and the `requirePermissionSSR()` SSR guard (`client/utils/adminAuth.ts`) go through these instead of comparing a role. `client/api/models/permission.ts` mirrors the backend `Permission` enum — the one remaining place the two ends duplicate each other, down from every call site duplicating a role comparison.
+
 > **Known gap:** `DELETE /events/:id` (archiving an event) has no frontend entry point — the "Архивировать" button on `/stargazing/form` was removed as misleading. The endpoint itself is untouched; it's reachable only by calling the API directly.
 
 <p align="right">(<a href="#top">Back to top</a>)</p>

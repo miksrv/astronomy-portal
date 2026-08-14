@@ -1,4 +1,4 @@
-@use '../../styles/variables' as variables
+@use '../../../styles/variables' as variables
 
 .usersTable
     border-radius: var(--border-radius) var(--border-radius) 0 0
@@ -50,19 +50,23 @@
     &:active
         color: var(--link-color-active)
 
+.rolesCellButton
+    display: flex
+    flex-wrap: wrap
+    gap: 4px
+    background: none
+    border: none
+    padding: 0
+    cursor: pointer
+    text-align: left
+
+.rolesDialogList
+    display: flex
+    flex-direction: column
+    gap: 10px
+    margin-bottom: 16px
+
 // Badge color overrides for role and auth type
-.badgeAdmin
-    background: #ff4444 !important
-    color: #fff !important
-
-.badgeModerator
-    background: #ff8c00 !important
-    color: #fff !important
-
-.badgeSecurity
-    background: #0070f3 !important
-    color: #fff !important
-
 .badgeDefault
     background: #ccc !important
     color: #333 !important

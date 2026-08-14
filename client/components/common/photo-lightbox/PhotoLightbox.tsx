@@ -14,6 +14,9 @@ type Photo = {
     width: number
     title: string
     src: string
+    // Already-loaded (thumbnail/preview) image URL - shown blurred behind the
+    // full-size image while it loads, instead of a blank/black slide.
+    preview?: string
 }
 
 interface PhotoLightboxProps {
@@ -48,15 +51,18 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
                     ({
                         alt: photo?.title,
                         height: photo?.height,
+                        // Custom field (not part of the library's Slide type, picked up by
+                        // `ImageSlide`) - already-loaded thumbnail shown behind the full
+                        // image while it loads, instead of a blank/black slide. Deliberately
+                        // NOT wired through next/image's `placeholder="blur"` +
+                        // `blurDataURL`: that mechanism renders the placeholder as an
+                        // external <image> reference inside an inline SVG, and browsers
+                        // refuse to load cross-origin resources referenced from an
+                        // SVG-used-as-image (a "broken image" glyph shows instead) - it
+                        // only works with an actual base64 data URI.
+                        preview: photo?.preview,
                         // src: makeImageLink(photo?.src),
                         src: photo?.src,
-                        // srcSet: [
-                        //     {
-                        //         height: 200,
-                        //         src: makeImageLink(photo?.preview),
-                        //         width: 300
-                        //     }
-                        // ],
                         title: photo.title || '',
                         width: photo?.width
                     }) as Slide

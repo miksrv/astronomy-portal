@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Entities\EventEntity;
 use App\Entities\EventPhotoEntity;
 use App\Entities\PaymentEntity;
+use App\Enums\Permission;
 use App\Libraries\CalendarLibrary;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\PaymentLibrary;
@@ -256,7 +257,7 @@ class Events extends ResourceController
                 return $this->failValidationErrors(lang('Events.invalidQrCode'));
             }
 
-            $isStaff = in_array($this->session->user->role, ['admin', 'moderator', 'security'], true);
+            $isStaff = $this->session->can(Permission::EVENTS_CHECKIN);
 
             // Not staff — presumably the guest who scanned their own ticket's
             // QR. No side effects, no access to anyone else's booking; just
@@ -343,7 +344,7 @@ class Events extends ResourceController
                 return $this->failNotFound(lang('Events.notFound'));
             }
 
-            $isStaff = in_array($this->session->user->role, ['admin', 'moderator', 'security'], true);
+            $isStaff = $this->session->can(Permission::EVENTS_CHECKIN);
 
             if (!$isStaff && $booking->user_id !== $this->session->user->id) {
                 return $this->failForbidden(lang('App.accessDenied'));
@@ -699,31 +700,46 @@ class Events extends ResourceController
     }
 
     /**
-     * Retrieves a list of event photos with localized details and returns them in a structured response.
+     * Retrieves a paginated list of event photos and returns them in a
+     * structured response, mirroring the offset/limit + total pattern used by
+     * `Comments::index()` — the frontend gallery loads the first page during
+     * SSR and grows it further via "load more" / infinite scroll, rather than
+     * fetching the whole (potentially hundreds-strong) gallery in one shot.
      *
-     * This method fetches the list of event photos using the specified locale, event, limit, and order,
-     * which are obtained from the request object. The response includes the count of photos and an array of photo items.
-     * If an error occurs, a server error response is returned and the exception is logged.
+     * Also includes the event's full, unfiltered list of distinct photographer
+     * credits (`photographers`) — used for the gallery's filter chips and the
+     * upload dialog's autocomplete. Bundled in here rather than a separate
+     * endpoint since every caller that wants one already wants the other,
+     * and it's always the same, cheap, `eventId`-scoped lookup regardless of
+     * this request's own `limit`/`offset`/`photographer` filter.
      *
-     * @return ResponseInterface Returns a JSON response with the count and items or an error message on failure.
+     * @return ResponseInterface Returns a JSON response with the total count, this page's items, and the event's distinct photographers, or an error message on failure.
      */
     public function photos(): ResponseInterface
     {
-        $locale = $this->request->getLocale();
-        $limit  = $this->request->getGet('limit', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-        $order  = $this->request->getGet('order', FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
-        $event  = $this->request->getGet('eventId', FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+        $limit        = $this->request->getGet('limit', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $offset       = $this->request->getGet('offset', FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        $order        = $this->request->getGet('order', FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+        $event        = $this->request->getGet('eventId', FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+        $photographer = $this->request->getGet('photographer', FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
 
         try {
             $eventPhotosModel = new EventsPhotosModel();
 
-            // Fetch data from models
-            $result = $eventPhotosModel->getPhotoList($locale, $event, $limit, $order);
+            // Fetch this page plus the true total (ignoring pagination) so the
+            // client knows whether more pages remain.
+            $result = $eventPhotosModel->getPhotoList($event, $limit, $offset, $order, $photographer);
+            $total  = $eventPhotosModel->countPhotoList($event, $photographer);
 
-            // Return the response with count and items
+            // Always the event's *full* photographer list, never narrowed by
+            // $photographer - otherwise selecting one photographer would wipe
+            // out the other filter chips.
+            $photographers = $event ? $eventPhotosModel->getDistinctPhotographers($event) : [];
+
             return $this->respond([
-                'count' => count($result),
-                'items' => $result
+                'total'         => $total,
+                'items'         => $result,
+                'photographers' => $photographers
             ]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
@@ -808,7 +824,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::EVENTS_USERS)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -839,7 +855,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if (!in_array($this->session->user->role, ['admin', 'moderator'])) {
+        if (!$this->session->can(Permission::EVENTS_STATISTIC)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -875,7 +891,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if (!in_array($this->session->user->role, ['admin', 'moderator'])) {
+        if (!$this->session->can(Permission::EVENTS_STATISTIC)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -931,7 +947,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if (!in_array($this->session->user->role, ['admin', 'moderator'])) {
+        if (!$this->session->can(Permission::EVENTS_STATISTIC)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -1001,9 +1017,10 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        // Stricter than verifyRegistrationPayment() (admin+moderator) — this
-        // action moves real money and cannot be undone, so it's admin-only.
-        if ($this->session->user->role !== 'admin') {
+        // Stricter than verifyRegistrationPayment() (events.statistic) — this
+        // action moves real money and cannot be undone, so it needs its own
+        // dedicated privilege rather than reusing a broader one.
+        if (!$this->session->can(Permission::EVENTS_REFUND)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -1116,6 +1133,28 @@ class Events extends ResourceController
     }
 
     /**
+     * Parses the client-supplied EXIF capture timestamp (`takenAt`) for an
+     * event photo upload. Unlike {@see parseOrenburgDateTime()}, a bad value
+     * here must never fail the upload — EXIF data is frequently missing or
+     * malformed — so any unparseable or future-dated input silently becomes
+     * null instead of surfacing a validation error.
+     */
+    private function parseTakenAt(?string $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        $timestamp = strtotime($value);
+
+        if ($timestamp === false || $timestamp > time()) {
+            return null;
+        }
+
+        return date('Y-m-d H:i:s', $timestamp);
+    }
+
+    /**
      * Creates a new event with the provided details.
      *
      * Validates user permissions and input data, processes the uploaded cover image,
@@ -1129,7 +1168,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if (!in_array($this->session->user->role, ['admin', 'moderator'], true)) {
+        if (!$this->session->can(Permission::EVENTS_CREATE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -1606,7 +1645,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::EVENTS_GALLERY_UPLOAD)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -1654,28 +1693,34 @@ class Events extends ResourceController
                 ->resize(PHOTO_PREVIEW_WIDTH, PHOTO_PREVIEW_HEIGHT, true)
                 ->save($eventDir . $name . '_preview.' . $ext);
 
+            $photographerName = trim((string) ($this->request->getPost('photographerName') ?? ''));
+            $photographerName = $photographerName !== '' ? $photographerName : null;
+
+            $takenAt = $this->parseTakenAt($this->request->getPost('takenAt'));
+
             // Сохраняем в базу
             $photoEntity = new EventPhotoEntity([
-                'event_id'     => $eventData->id,
-                'user_id'      => $this->session->user?->id,
-                'title_ru'     => $eventData->title_ru,
-                'title_en'     => $eventData->title_en,
-                'file_name'    => $name,
-                'file_ext'     => $ext,
-                'file_size'    => $file->getSize(),
-                'image_width'  => $width,
-                'image_height' => $height,
+                'event_id'          => $eventData->id,
+                'user_id'           => $this->session->user?->id,
+                'photographer_name' => $photographerName,
+                'taken_at'          => $takenAt,
+                'file_name'         => $name,
+                'file_ext'          => $ext,
+                'file_size'         => $file->getSize(),
+                'image_width'       => $width,
+                'image_height'      => $height,
             ]);
 
             (new EventsPhotosModel())->insert($photoEntity);
 
             return $this->respondCreated((object)[
-                'name'    => $name,
-                'ext'     => $ext,
-                'width'   => $width,
-                'height'  => $height,
-                'title'   => $photoEntity->title_ru,
-                'eventId' => $photoEntity->event_id,
+                'name'         => $name,
+                'ext'          => $ext,
+                'width'        => $width,
+                'height'       => $height,
+                'photographer' => $photoEntity->photographer,
+                'takenAt'      => $photoEntity->takenAt,
+                'eventId'      => $photoEntity->event_id,
             ]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
@@ -1700,7 +1745,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if (!in_array($this->session->user->role, ['admin', 'moderator'], true)) {
+        if (!$this->session->can(Permission::EVENTS_UPDATE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -1760,7 +1805,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if ($this->session->user->role !== 'admin') {
+        if (!$this->session->can(Permission::EVENTS_DELETE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
@@ -1812,7 +1857,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if (!in_array($this->session->user->role, ['admin', 'moderator'], true)) {
+        if (!$this->session->can(Permission::EVENTS_UPDATE)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 

@@ -10,9 +10,8 @@ Disallow: /stargazing/entry
 Disallow: /stargazing/payment
 Disallow: /auth
 Disallow: /en/auth
-Disallow: /mailing
-Disallow: /mailing/form
-Disallow: /users
+Disallow: /admin/
+Disallow: /en/admin/
 Disallow: /api/
 Disallow: /en/photos/form
 Disallow: /en/objects/form
@@ -20,9 +19,6 @@ Disallow: /en/stargazing/form
 Disallow: /en/stargazing/checkin
 Disallow: /en/stargazing/entry
 Disallow: /en/stargazing/payment
-Disallow: /en/mailing
-Disallow: /en/mailing/form
-Disallow: /en/users
 Disallow: /profile
 Disallow: /en/profile
 Disallow: /unsubscribe

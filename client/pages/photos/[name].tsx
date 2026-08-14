@@ -9,6 +9,7 @@ import { JsonLdScript } from 'next-seo'
 import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable } from '@/components/common'
 import { PhotoCloud, PhotoHeader } from '@/components/pages/photos'
+import { hasPermission } from '@/utils/permissions'
 import { createLargePhotoUrl, createPhotoTitle, normalizeAndFilterObjects } from '@/utils/photos'
 
 interface PhotoItemPageProps {
@@ -32,7 +33,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
 
     const photoTitle = createPhotoTitle(photoData, t)
 
-    const userRole = useAppSelector((state) => state.auth?.user?.role)
+    const user = useAppSelector((state) => state.auth?.user)
 
     const filteredPhotosList = useMemo(
         () => photosList?.filter((photo) => photo.objects?.some((object) => photoData?.objects?.includes(object))),
@@ -110,7 +111,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                     }
                 ]}
             >
-                {userRole === ApiModel.UserRole.ADMIN && (
+                {hasPermission(user, ApiModel.Permission.PHOTOS_MANAGE) && (
                     <>
                         <Button
                             icon={'Pencil'}

@@ -10,6 +10,7 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { ObjectsTable } from '@/components/pages/objects'
+import { hasPermission } from '@/utils/permissions'
 import { formatObjectName } from '@/utils/strings'
 
 interface ObjectsPageProps {
@@ -23,7 +24,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, categoriesList, objec
     const { t } = useTranslation()
     const router = useRouter()
 
-    const userRole = useAppSelector((state) => state.auth?.user?.role)
+    const user = useAppSelector((state) => state.auth?.user)
 
     const [searchFilter, setSearchFilter] = useState<string | undefined>(search || undefined)
     const [debouncedSearchFilter, setDebouncedSearchFilter] = useState<string | undefined>(search || undefined)
@@ -182,7 +183,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, categoriesList, objec
                     }))}
                 />
 
-                {userRole === ApiModel.UserRole.ADMIN && (
+                {hasPermission(user, ApiModel.Permission.OBJECTS_MANAGE) && (
                     <Button
                         icon={'PlusCircle'}
                         mode={'secondary'}

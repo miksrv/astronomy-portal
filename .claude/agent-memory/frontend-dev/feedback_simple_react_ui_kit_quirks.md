@@ -1,0 +1,13 @@
+---
+name: simple-react-ui-kit-quirks
+description: Non-obvious behavior of simple-react-ui-kit's Dialog and Input found by reading the bundled source — relevant whenever a dialog must block being closed
+type: feedback
+---
+
+**`Dialog`'s overlay click and Escape key both call `onCloseDialog` directly, ignoring `showCloseButton`.** Verified 2026-08-14 by reading `node_modules/simple-react-ui-kit/dist/index.esm.js`: the Escape keydown handler calls `onCloseDialog?.()` whenever the dialog is open, and the overlay component is given `onClose: onCloseDialog` as its own close callback — `showCloseButton` only toggles the visible X button in the header, it does not gate these two paths.
+
+**Why this matters:** to make a dialog truly unclosable while some async operation is in flight (e.g. an active upload queue), it is **not enough** to pass `showCloseButton={false}`. You must also pass `onCloseDialog={undefined}` (or omit it) for the duration of the blocking state — a guard function that just returns early still gets invoked harmlessly, but if you want the prop itself to reflect "closing is currently impossible" for clarity, conditionally swap it: `onCloseDialog={isBlocking ? undefined : handleClose}`.
+
+**How to apply:** any dialog with a "cannot be closed mid-operation" requirement (upload progress, in-flight payment, etc.) needs both `showCloseButton={!isBlocking}` and `onCloseDialog={isBlocking ? undefined : handleClose}` together. Used in `client/components/pages/stargazing/event-photo-upload-dialog/EventPhotoUploadDialog.tsx`.
+
+**`Input` spreads all rest props onto the native `<input>`** (it extends `React.InputHTMLAttributes<HTMLInputElement>`, `Omit<'size'>`), so a native `<datalist>` autocomplete works by passing `list="some-id"` straight through to `Input` and rendering a sibling `<datalist id="some-id">` — no special kit support needed.
