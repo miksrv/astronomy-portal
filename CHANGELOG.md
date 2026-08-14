@@ -6,6 +6,9 @@
 
 - Full access-control refactor: replaced the fixed `admin`/`moderator`/`security` role ENUM with a privilege-based system (`App\Enums\Permission`) — every backend check now tests a specific privilege instead of a hardcoded role name, mirrored on the frontend via `hasPermission()`/`hasAnyPermission()`
 - Added admin-editable roles as named bundles of privileges (a user can hold several at once) with a new `/admin/roles` management page and the ability to assign roles to a user from `/admin/users`, including a reserved, single-assignment "Разработчик" role that alone may grant the `users.manage` privilege
+- Event photo galleries can now be grouped by photographer: uploads accept a free-text photographer credit, photos carry an EXIF-derived (`DateTimeOriginal`) capture date used for chronological ordering (falling back to upload time when absent), and the event page shows a client-side filter chip row ("Все" + one per photographer) whenever an event has more than one contributor
+- Replaced the single-file hidden-input uploader with a batch upload dialog (`EventPhotoUploadDialog`): drag-and-drop or click-to-browse for up to hundreds of files at once, a bounded-concurrency upload queue with an overall progress bar, a non-cumulative "current file" status line alongside a cumulative error list, a Cancel action that aborts in-flight/pending uploads, and a "retry failed only" action once a batch settles — the dialog and the page itself cannot be closed/left while a batch is uploading (new shared `useNavigationGuard` hook)
+- Removed the unused bilingual `title_en`/`title_ru` snapshot columns from `events_photos` (a copy of the event's own title taken at upload time, never independently editable); the homepage hero photo strip and the event page now build their own captions from already-loaded data instead
 
 ## 4.7.5
 
