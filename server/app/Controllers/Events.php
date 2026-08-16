@@ -891,7 +891,7 @@ class Events extends ResourceController
             return $this->failUnauthorized(lang('App.accessDenied'));
         }
 
-        if (!$this->session->can(Permission::EVENTS_STATISTIC)) {
+        if (!$this->session->can(Permission::EVENTS_STATISTIC) || !$this->session->can(Permission::EVENTS_USERS)) {
             return $this->failForbidden(lang('App.accessDenied'));
         }
 
