@@ -1,38 +1,24 @@
 import React, { useMemo, useState } from 'react'
-import { Badge, Button, Container, Input, Message, Select, Table, TableColumnProps } from 'simple-react-ui-kit'
+import { Badge, Container, Input, Message, Select, Table, TableColumnProps } from 'simple-react-ui-kit'
 
-import dynamic from 'next/dynamic'
 import { useTranslation } from 'next-i18next/pages'
 
-import { API, ApiType } from '@/api'
+import { API } from '@/api'
 import { formatDate } from '@/utils/dates'
 import { getErrorMessage } from '@/utils/errors'
 import {
     CombinedStatus,
-    DisplayStatus,
     getCombinedStatus,
     getDisplayStatus,
     getStatusLabel,
     STATUS_ORDER
 } from '@/utils/eventRegistrations'
 
+import { RegistrationActions } from './RegistrationActions'
+import { ALFABANK_TRANSACTION_URL, EventRegistrationsTableProps, RegistrationRow } from './types'
+import { truncateOrderId } from './utils'
+
 import styles from './styles.module.sass'
-
-// Dialog uses a native <dialog> element — mounted client-side only, same
-// convention as EventDeleteDialog/CancelRegistrationDialog, since this
-// table's page renders via getServerSideProps.
-const RefundRegistrationDialog = dynamic(
-    () => import('./RefundRegistrationDialog').then((mod) => mod.RefundRegistrationDialog),
-    { ssr: false }
-)
-
-interface EventRegistrationsTableProps {
-    eventId: string
-}
-
-type RegistrationRow = ApiType.Events.EventRegistration & { displayStatus: DisplayStatus }
-
-const ALFABANK_TRANSACTION_URL = 'https://payment.alfabank.ru/generalmp3/admin/transactions/'
 
 const STATUS_BADGE_CLASS: Record<CombinedStatus, string> = {
     canceled: styles.badgeCanceled,
@@ -40,105 +26,6 @@ const STATUS_BADGE_CLASS: Record<CombinedStatus, string> = {
     failed: styles.badgeFailed,
     pending: styles.badgePending,
     refunded: styles.badgeRefunded
-}
-
-const truncateOrderId = (orderId: string): string =>
-    orderId.length > 14 ? `${orderId.slice(0, 8)}…${orderId.slice(-4)}` : orderId
-
-interface VerifyPaymentButtonProps {
-    eventId: string
-    registration: RegistrationRow
-}
-
-const VerifyPaymentButton: React.FC<VerifyPaymentButtonProps> = ({ eventId, registration }) => {
-    const { t } = useTranslation()
-    const [verifyPayment, { data, isLoading, error }] = API.useEventVerifyRegistrationPaymentMutation()
-
-    return (
-        <div className={styles.verifyCell}>
-            <Button
-                size={'small'}
-                mode={'outline'}
-                loading={isLoading}
-                onClick={() => void verifyPayment({ eventId, id: registration.id })}
-            >
-                {t('pages.stargazing.registrations-verify', 'Проверить')}
-            </Button>
-
-            {data && <div className={styles.verifyResult}>{data.message}</div>}
-            {error && <div className={styles.verifyError}>{getErrorMessage(error)}</div>}
-        </div>
-    )
-}
-
-interface RefundButtonProps {
-    eventId: string
-    registration: RegistrationRow
-}
-
-/**
- * Force-refund trigger — only meaningful for a booking that's actually
- * confirmed, active, and paid; a pending/failed/already-cancelled/unpaid
- * registration has nothing to refund via this action (an unpaid pending
- * hold is released by the ordinary self-cancel flow instead).
- */
-const RefundButton: React.FC<RefundButtonProps> = ({ eventId, registration }) => {
-    const { t } = useTranslation()
-    const [dialogOpen, setDialogOpen] = useState(false)
-
-    const canRefund =
-        registration.status === 'confirmed' && !registration.deletedAt && registration.paymentStatus === 'paid'
-
-    if (!canRefund) {
-        return null
-    }
-
-    return (
-        <>
-            <Button
-                size={'small'}
-                mode={'outline'}
-                variant={'negative'}
-                onClick={() => setDialogOpen(true)}
-            >
-                {t('pages.stargazing.registrations-refund', 'Возврат')}
-            </Button>
-
-            {dialogOpen && (
-                <RefundRegistrationDialog
-                    eventId={eventId}
-                    registrationId={registration.id}
-                    open={dialogOpen}
-                    onClose={() => setDialogOpen(false)}
-                />
-            )}
-        </>
-    )
-}
-
-interface RegistrationActionsProps {
-    eventId: string
-    registration: RegistrationRow
-}
-
-const RegistrationActions: React.FC<RegistrationActionsProps> = ({ eventId, registration }) => {
-    if (!registration.paymentOrderId) {
-        return <span className={styles.noPayment}>{'—'}</span>
-    }
-
-    return (
-        <div className={styles.actionsCell}>
-            <VerifyPaymentButton
-                eventId={eventId}
-                registration={registration}
-            />
-
-            <RefundButton
-                eventId={eventId}
-                registration={registration}
-            />
-        </div>
-    )
 }
 
 export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = ({ eventId }) => {
