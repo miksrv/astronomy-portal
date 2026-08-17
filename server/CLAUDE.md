@@ -129,7 +129,7 @@ All controllers extend `ResourceController` and use the `ResponseTrait`.
 | `Categories.php` | Lists photo/object categories (read-only, locale-aware) |
 | `Comments.php` | CRUD for user comments/reviews on events and photos; soft-delete, auth required for write |
 | `Equipment.php` | Lists observatory equipment (read-only) |
-| `Events.php` | Full CRUD for stargazing events; booking, cancellation, check-in, ticket/QR generation, Alfa-Bank payment flow, photo uploads, Telegram notifications |
+| `Events.php` | Full CRUD for stargazing events; booking, cancellation, check-in, ticket/QR generation, Alfa-Bank payment flow, photo uploads |
 | `Files.php` | Serves raw files (FITS thumbnails, etc.) associated with astronomical objects |
 | `Mailings.php` | Admin mailing campaign CRUD; audience targeting, test send and bulk send via `EmailLibrary`/`EmailQueueModel` |
 | `Members.php` | Admin-only list of registered users and their event history |
@@ -288,7 +288,6 @@ Listed in execution order. Tables created unless noted as ALTER.
 | `SessionLibrary` | JWT validation, populates `$this->session->user` and `->isAuth` |
 | `LocaleLibrary` | Sets CI4 locale from request header or user preference |
 | `EmailLibrary` | Wraps CodeIgniter email service for mailing campaigns |
-| `TelegramLibrary` | Sends Telegram notifications for event bookings |
 | `RelayLibrary` | HTTP communication with Arduino relay board |
 | `PhotoUploadLibrary` | Handles photo file validation, resizing, and storage |
 | `PhotosLibrary` | Helper utilities for photo data aggregation |

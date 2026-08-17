@@ -123,7 +123,7 @@ astronomy-portal/
 │       ├── Database/
 │       │   └── Migrations/ # Database migrations
 │       ├── Config/      # Routes, CORS, Filters, Services
-│       └── Libraries/   # JWT, Telegram, Locale helpers
+│       └── Libraries/   # JWT, Locale helpers
 ├── firmware/            # Arduino firmware for observatory hardware control
 │   └── main/
 └── config/              # Docker Compose and Nginx configuration
@@ -296,8 +296,6 @@ yarn build
 | `app.latitude` | Observatory latitude | `51.7727` |
 | `app.longitude` | Observatory longitude | `55.0988` |
 | `app.fitsApiKey` | API key for FITS data source | — |
-| `app.telegramBotKey` | Telegram bot token | — |
-| `app.telegramChatID` | Telegram channel/chat ID | — |
 | `app.observatory.controller` | URL of Arduino relay controller | `http://astro.myftp.org:8081/` |
 | `app.observatory.webcam_1` | Webcam 1 snapshot URL | — |
 | `app.observatory.webcam_2` | Webcam 2 snapshot URL | — |

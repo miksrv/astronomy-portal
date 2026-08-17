@@ -10,7 +10,6 @@ use App\Libraries\CalendarLibrary;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\PaymentLibrary;
 use App\Libraries\SessionLibrary;
-use App\Libraries\TelegramLibrary;
 use App\Libraries\TicketLibrary;
 use App\Models\EmailQueueModel;
 use App\Models\EventsPhotosModel;
@@ -23,8 +22,6 @@ use CodeIgniter\I18n\Time;
 use CodeIgniter\Files\File;
 use Config\Database;
 use Config\Services;
-
-//use Longman\TelegramBot\Exception\TelegramException;
 
 use ReflectionException;
 use Exception;
@@ -623,34 +620,6 @@ class Events extends ResourceController
     }
 
     /**
-     * Alerts the admin via Telegram when an automatic refund fails during
-     * user-initiated cancellation. The booking is still cancelled either way
-     * (see {@see cancel()}) — this is what keeps a stuck refund from being
-     * visible only in the server log.
-     */
-    private function notifyRefundFailure(PaymentEntity $payment, EventEntity $event): void
-    {
-        try {
-            helper('locale');
-
-            $title      = getLocalizedString('ru', $event->title_en, $event->title_ru);
-            $safeTitle  = htmlspecialchars($title, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            $amountRub  = number_format($payment->amount / 100, 2, '.', ' ');
-
-            $message = "⚠️ <b>ОШИБКА АВТОМАТИЧЕСКОГО ВОЗВРАТА</b>\n" .
-                "<b>{$safeTitle}</b>\n" .
-                "🔹Платёж: <code>{$payment->id}</code> (заказ {$payment->order_id})\n" .
-                "🔹Сумма: <b>{$amountRub} ₽</b>\n" .
-                "🔹Ошибка: <code>{$payment->error_code}</code> {$payment->error_message}\n" .
-                "Бронирование отменено, деньги не возвращены — требуется возврат вручную.";
-
-            (new TelegramLibrary())->sendMessage($message);
-        } catch (\Throwable $e) {
-            log_message('error', 'Refund-failure Telegram alert failed: {msg}', ['msg' => $e->getMessage()]);
-        }
-    }
-
-    /**
      * Retrieves a list of past events with localized details and returns them in a structured response.
      *
      * This method fetches the list of past events using the specified locale, which is obtained from the
@@ -1007,9 +976,9 @@ class Events extends ResourceController
      * money back — e.g. a force-majeure no-show.
      *
      * Unlike the automatic refund inside {@see cancel()} (fire-and-forget,
-     * alerted via Telegram on failure since nobody is watching the
-     * response), this call is synchronous and admin-initiated: the caller
-     * sees the bank's result immediately, so no separate alert is sent here.
+     * only logged on failure since nobody is watching the response), this
+     * call is synchronous and admin-initiated: the caller sees the bank's
+     * result immediately.
      */
     public function refundRegistrationPayment($id = null): ResponseInterface
     {
@@ -1609,10 +1578,6 @@ class Events extends ResourceController
                             'id'      => $payment->id,
                             'eventId' => $input['eventId'],
                         ]);
-
-                        // Re-fetch: refund() persisted error_code/error_message
-                        // on the row, but didn't mutate this in-memory entity.
-                        $this->notifyRefundFailure($paymentsModel->find($payment->id) ?? $payment, $event);
                     }
                 } elseif ($payment && in_array($payment->status, ['new', 'pending'], true)) {
                     $paymentsModel->update($payment->id, ['status' => 'canceled']);
@@ -2271,14 +2236,6 @@ class Events extends ResourceController
                     'id'        => $payment->id,
                     'bookingId' => $payment->entity_id,
                 ]);
-
-                $event = $this->model->find($booking->event_id);
-
-                if ($event) {
-                    // Re-fetch: refund() persisted error_code/error_message
-                    // on the row, but didn't mutate this in-memory entity.
-                    $this->notifyRefundFailure((new PaymentsModel())->find($payment->id) ?? $freshPayment, $event);
-                }
             }
 
             return;
