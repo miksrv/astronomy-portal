@@ -111,7 +111,7 @@
 - Refined review card header layout (right-aligned date/delete section) and gave stargazing review widget cards a fixed height for more consistent sizing
 - Temporarily hid the observatory history pages (menu, sitemap, and routes return 404) ahead of public launch, keeping the code in place for later re-enabling
 - Tightened stargazing info card padding and slightly reduced the global container border radius for a sharper visual style
-- Documented a planned web push notifications feature (FEAT-13) in `features/web-push-notifications.md`
+- Documented a planned web push notifications feature
 - Updated client dependencies and lockfile (Next.js, React, i18n, Redux Toolkit, ECharts, and lint/test/format toolchain)
 
 ## 4.6.2

@@ -10,9 +10,8 @@
  *   * * * * * cd /path/to/server && php spark system:send-push >> /dev/null 2>&1
  *
  * Unlike SendEmail, there is no day/hour rate-limit check here — push
- * services don't throttle by sender reputation the way SMTP providers do
- * (see FEAT-13 in features/web-push-notifications.md). Still batched to
- * bound per-run work.
+ * services don't throttle by sender reputation the way SMTP providers do.
+ * Still batched to bound per-run work.
  */
 
 namespace App\Commands;
