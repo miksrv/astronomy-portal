@@ -6,6 +6,7 @@
 
 - Push notifications with the "all" audience now also reach anonymous (not-logged-in) subscribers, not just account-claimed ones; fixed `.htaccess` incorrectly caching dynamic API responses
 - Fixed `push_notification_deliveries` rows silently disappearing (instead of staying `rejected`) when `system:send-push` removed an expired subscription — the FK was `ON DELETE CASCADE`, so the delivery record vanished along with it, undercounting the campaign's `error_count`; switched to `ON DELETE SET NULL` so the delivery row now survives as a permanent record
+- Fixed failed email sends dumping their full SMTP debug output (headers, subject, body) into the shared app log — `system:send-email` and `Mailings::test()` now log a short `warning`-level line with the recipient and mailing/queue ID instead; the full debug dump still goes to the dedicated `email-*.log`
 
 ## 4.9.0
 

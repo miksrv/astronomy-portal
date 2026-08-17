@@ -152,7 +152,15 @@ class SendEmail extends BaseCommand
 
                 $sentCount++;
             } catch (Exception $e) {
-                log_message('error', 'SendEmail command error for mail ID ' . $item->id . ': {exception}', ['exception' => $e]);
+                // The full SMTP debug dump (headers/subject/body) is already
+                // written to the dedicated email-*.log by EmailLibrary::logError() —
+                // keep the shared app log to a short line so a bad recipient
+                // address doesn't flood it every minute. Requires
+                // Config\Logger::$threshold >= 5 in production to appear at all.
+                log_message('warning', 'Failed to send mailing email ID {id} to {email}', [
+                    'id'    => $item->id,
+                    'email' => $item->email,
+                ]);
 
                 $mailingEmailsModel->update($item->id, [
                     'status'        => MailingEmailEntity::STATUS_ERROR,
@@ -237,7 +245,12 @@ class SendEmail extends BaseCommand
                 $this->deleteAttachment($item->ics_attachment_path);
                 $sentCount++;
             } catch (Exception $e) {
-                log_message('error', 'Transactional email error for queue ID ' . $item->id . ': {exception}', ['exception' => $e]);
+                // See the note above: EmailLibrary::logError() already has the
+                // full debug dump in email-*.log, keep this one short.
+                log_message('warning', 'Failed to send transactional email ID {id} to {email}', [
+                    'id'    => $item->id,
+                    'email' => $item->email,
+                ]);
 
                 $attempts = (int) $item->attempts + 1;
                 $update   = [
