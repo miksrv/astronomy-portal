@@ -12,6 +12,7 @@
 - Reworked the `email_newsletter` footer: the site link is now a bold "СМОТРИ НА ЗВЁЗДЫ" title over a "Галактика «Млечный Путь», Планета Земля — 51.7°N, 55.0°E" tagline, followed by a Сайт/Telegram/Контакты/Политика конфиденциальности link row and a subscription-reason line above the (now grey, matching the rest of the footer) unsubscribe link
 - Extracted the shared HTML shell (head/CSS, 600px centered layout, brand footer) out of `email_newsletter.php`/`email_ticket.php` into a new `email_layout.php` partial to remove duplication; the ticket confirmation email is now the same 600px width as the newsletter (previously full-width/left-aligned) and shares its footer, minus the unsubscribe section which only applies to mailing subscriptions; also fixed `Mailings::renderNewsletterBody()` (used by the campaign preview and test-send endpoints) rendering the wrong view (`email_ticket` instead of `email_newsletter`)
 - Fixed `/admin/roles`, `/admin/users`, `/admin/mailing`, and `/admin/push-notifications` getting stuck on an infinite loading skeleton when navigating to the same page again (e.g. clicking its own menu item): the Redux `HYDRATE` handler in `store.ts` was overwriting the entire RTK Query cache slice on every re-navigation instead of merging it per query key, wiping out already-loaded list data for pages whose `getServerSideProps` doesn't prefetch it
+- Expand stargazing FAQ on sold-out events
 
 ## 4.9.0
 

@@ -81,7 +81,14 @@
         },
         "late-registration": {
             "question": "Registration is closed and I missed it. Can I still come? Please!",
-            "answer": "No, unfortunately not. Our rules are the same for everyone. We introduced the registration system for a reason, and we monitor entry to the observing site."
+            "answer": "Unfortunately, no. Our rules are the same for everyone. The observing site has limited capacity, which is why we introduced the registration system and monitor entry to the site."
+        },
+        "no-more-tickets": {
+            "question": "I didn't manage to register in time, can you add more tickets?",
+            "answer": "Unfortunately, no. We limit the number of participants for a reason: the observing site and its parking area have limited capacity, and security checks QR codes at the entrance. We can't let anyone in without registration, and we can't add extra spots either.",
+            "answer2": "The best thing to do is check the registration page from time to time - participants sometimes cancel their booking, and free spots open up again. We'd also recommend subscribing to our",
+            "telegram": "Telegram channel",
+            "answer3": " - we always announce new stargazing trips in advance, and registration usually opens a few days before the event."
         },
         "support": {
             "question": "I like what you do! How can I support you?",
