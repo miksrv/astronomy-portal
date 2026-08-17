@@ -28,6 +28,18 @@ const rootReducer = (state: RootReducerState | undefined, action: AnyAction) => 
         // because spreading Partial<CombinedState> makes queries optional, breaking configureStore.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const payload: any = action.payload
+
+        // API.reducer / APIMeteo.reducer define `extractRehydrationInfo`, which merges the
+        // SSR-fetched cache into the existing client cache per query key. Route HYDRATE through
+        // combinedReducer for those two slices instead of shallow-spreading them ourselves below -
+        // otherwise a same-route re-navigation (Next.js re-runs getServerSideProps and dispatches a
+        // fresh HYDRATE even when linking to the current page) wholesale-replaces `queries`/
+        // `subscriptions` with whatever that particular getServerSideProps call happened to
+        // prefetch, wiping out any already-cached query it didn't (e.g. the admin list pages, whose
+        // getServerSideProps only runs the permission guard and never prefetches their own list
+        // query) and sending an already-loaded page back into an infinite loading state.
+        const hydratedApiSlices = combinedReducer(state, action)
+
         return {
             ...state, // old client state
 
@@ -41,14 +53,8 @@ const rootReducer = (state: RootReducerState | undefined, action: AnyAction) => 
                     ? payload.auth
                     : (state?.auth ?? combinedReducer(undefined, { type: '' }).auth),
 
-            [API.reducerPath]: {
-                ...state?.[API.reducerPath],
-                ...payload[API.reducerPath]
-            },
-            [APIMeteo.reducerPath]: {
-                ...state?.[APIMeteo.reducerPath],
-                ...payload[APIMeteo.reducerPath]
-            }
+            [API.reducerPath]: hydratedApiSlices[API.reducerPath],
+            [APIMeteo.reducerPath]: hydratedApiSlices[APIMeteo.reducerPath]
         }
     }
 
