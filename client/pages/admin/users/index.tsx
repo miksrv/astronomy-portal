@@ -317,6 +317,27 @@ const UsersPage: NextPage<object> = () => {
             )
         },
         {
+            accessor: 'pushEnabled',
+            header: t('users.columnPush', 'Push'),
+            formatter: (_data, row, i) => {
+                const item = row[i]
+
+                return item.pushEnabled ? (
+                    <Badge
+                        label={`${t('users.pushOn', 'Вкл')} (${item.pushSubscriptionCount})`}
+                        size={'small'}
+                        className={styles.badgeDefault}
+                    />
+                ) : (
+                    <Badge
+                        label={t('users.pushOff', 'Выкл')}
+                        size={'small'}
+                        className={styles.badgeMuted}
+                    />
+                )
+            }
+        },
+        {
             accessor: 'age',
             header: t('users.columnAge', 'Пол / Возраст'),
             formatter: (_data, row, i) => sexAgeLabel(row[i])
