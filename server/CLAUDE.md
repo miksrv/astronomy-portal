@@ -44,7 +44,7 @@ POST   /photos/:id/upload           → Photos::upload
 PATCH  /photos/:id                  → Photos::update
 DELETE /photos/:id                  → Photos::delete
 
-GET    /events                      → Events::list
+GET    /events                      → Events::list   (optional `?userId=` narrows to that user's own attended events — only honoured when it matches the caller's own session, otherwise silently ignored)
 GET    /events/upcoming             → Events::upcoming
 GET    /events/upcoming/registered  → Events::upcomingRegistered
 GET    /events/photos               → Events::photos

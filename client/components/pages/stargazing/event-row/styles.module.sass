@@ -178,15 +178,11 @@
         align-items: flex-start
         flex-basis: 100%
 
-.visitedBadge
+.greenBadge
     +mixins.status-badge(var(--color-green-background), var(--color-green), true)
-    padding: 4px 12px !important
-    height: auto !important
 
-.guests
-    font-size: 13px
-    color: var(--text-color-secondary)
-    white-space: nowrap
+.redBadge
+    +mixins.status-badge(var(--color-red-background), var(--color-red), true)
 
 .chevron
     flex-shrink: 0

@@ -10,8 +10,6 @@ import { formatDate } from '@/utils/dates'
 
 import styles from './styles.module.sass'
 
-export type EventRowVariant = 'public' | 'personal'
-
 interface EventRowProps {
     id: string
     title: string
@@ -23,20 +21,16 @@ interface EventRowProps {
     excerpt?: string
     coverFileName?: string
     coverFileExt?: string
-    /** 'public' (event lists) shows views + members/spots next to the location; 'personal' (profile history) shows the user's own booking. Defaults to 'public'. */
-    variant?: EventRowVariant
-    /** variant="public" only — rendered as an icon + count next to the location */
+    /** Rendered as an icon + count next to the location. */
     views?: number
-    /** variant="public" only — rendered as an icon + count next to the location */
+    /** Rendered as an icon + count next to the location. */
     membersCount?: number
-    /** variant="public" only — when present, membersCount links to the event's statistic page instead of a static block. */
+    /** When present, membersCount links to the event's statistic page instead of a static block. */
     statisticHref?: string
-    /** variant="personal" only — adults on this user's own booking */
-    adults?: number
-    /** variant="personal" only — children on this user's own booking */
-    childrenCount?: number
-    /** variant="personal" only — whether the event date has already passed */
-    visited?: boolean
+    /** Whether the current viewer attended this event (a confirmed booking for an already-past date) — omitted entirely for a guest. */
+    attended?: boolean
+    /** Whether the current viewer already left a review for this event — omitted entirely for a guest. */
+    hasReviewed?: boolean
 }
 
 export const EventRow: React.FC<EventRowProps> = ({
@@ -48,27 +42,22 @@ export const EventRow: React.FC<EventRowProps> = ({
     excerpt,
     coverFileName,
     coverFileExt,
-    variant = 'public',
     views,
     membersCount,
     statisticHref,
-    adults,
-    childrenCount,
-    visited
+    attended,
+    hasReviewed
 }) => {
     const { t } = useTranslation()
 
     const itemTitle = linkTitle || title
 
     const dateLabel = t('pages.stargazing.event-date-label', 'Дата')
-    const visitedLabel = t('pages.profile.history-visited', 'Посещено')
+    const attendedLabel = t('pages.profile.history-visited', 'Посещено')
+    const reviewedLabel = t('components.pages.stargazing.event-row.reviewed', 'Отзыв оставлен')
+    const noReviewLabel = t('components.pages.stargazing.event-row.no-review', 'Нет отзыва')
     const viewsCount = views || 0
     const membersCountValue = membersCount || 0
-    const guestsSummary = t(
-        'components.pages.stargazing.event-row.guests',
-        'Взрослых: {{adults}}, детей: {{children}}',
-        { adults: adults || 0, children: childrenCount || 0 }
-    )
 
     const formattedDate = formatDate(date, 'D MMMM YYYY')
 
@@ -121,71 +110,82 @@ export const EventRow: React.FC<EventRowProps> = ({
                             </span>
                         )}
 
-                        {variant === 'public' && (
-                            <>
-                                {location && (
-                                    <span
-                                        className={styles.metaDivider}
-                                        aria-hidden
-                                    >
-                                        •
-                                    </span>
-                                )}
-
-                                {statisticHref ? (
-                                    <Link
-                                        className={styles.metaStat}
-                                        href={statisticHref}
-                                    >
-                                        <Icon
-                                            name={'Users'}
-                                            aria-hidden
-                                        />
-                                        {membersCountValue}
-                                    </Link>
-                                ) : (
-                                    <span className={styles.metaStat}>
-                                        <Icon
-                                            name={'Users'}
-                                            aria-hidden
-                                        />
-                                        {membersCountValue}
-                                    </span>
-                                )}
-
-                                <span
-                                    className={styles.metaDivider}
-                                    aria-hidden
-                                >
-                                    •
-                                </span>
-
-                                <span className={styles.metaStat}>
-                                    <Icon
-                                        name={'Eye'}
-                                        aria-hidden
-                                    />
-                                    {viewsCount}
-                                </span>
-                            </>
+                        {location && (
+                            <span
+                                className={styles.metaDivider}
+                                aria-hidden
+                            >
+                                •
+                            </span>
                         )}
+
+                        {statisticHref ? (
+                            <Link
+                                className={styles.metaStat}
+                                href={statisticHref}
+                            >
+                                <Icon
+                                    name={'Users'}
+                                    aria-hidden
+                                />
+                                {membersCountValue}
+                            </Link>
+                        ) : (
+                            <span className={styles.metaStat}>
+                                <Icon
+                                    name={'Users'}
+                                    aria-hidden
+                                />
+                                {membersCountValue}
+                            </span>
+                        )}
+
+                        <span
+                            className={styles.metaDivider}
+                            aria-hidden
+                        >
+                            •
+                        </span>
+
+                        <span className={styles.metaStat}>
+                            <Icon
+                                name={'Eye'}
+                                aria-hidden
+                            />
+                            {viewsCount}
+                        </span>
                     </div>
 
                     {excerpt && <div className={styles.excerpt}>{excerpt}</div>}
                 </div>
             </Link>
 
-            {variant === 'personal' && (
+            {(attended || hasReviewed) && (
                 <div className={styles.stats}>
-                    {visited && (
+                    {attended && (
                         <Badge
-                            className={styles.visitedBadge}
+                            className={styles.greenBadge}
                             icon={'CheckCircle'}
-                            label={visitedLabel}
+                            label={attendedLabel}
                             size={'small'}
                         />
                     )}
-                    <div className={styles.guests}>{guestsSummary}</div>
+                    {hasReviewed && (
+                        <Badge
+                            className={styles.greenBadge}
+                            icon={'StarFilled'}
+                            label={reviewedLabel}
+                            size={'small'}
+                        />
+                    )}
+                    {attended && !hasReviewed && (
+                        <Badge
+                            className={styles.redBadge}
+                            icon={'StarEmpty'}
+                            label={noReviewLabel}
+                            size={'small'}
+                        />
+                    )}
                 </div>
             )}
 

@@ -237,6 +237,30 @@ class EventsUsersModel extends ApplicationBaseModel
     }
 
     /**
+     * Returns this user's own booking (id + status) for every event in $eventIds — the list-view
+     * equivalent of the single-event lookup Events::show()/upcoming() already do, batched so
+     * Events::list() can attach `registered`/`bookedId`/`bookingStatus` to a whole page of events
+     * in one query. 'failed' bookings are excluded, same rule as everywhere else on this table —
+     * a declined/expired payment attempt is not a registration.
+     *
+     * @param string        $userId   The user's ID.
+     * @param array<string> $eventIds Candidate event ids to check.
+     * @return array Rows (EventUserEntity) with event_id, id (booking id), and status.
+     */
+    public function getBookingsForUserByEventIds(string $userId, array $eventIds): array
+    {
+        if (empty($eventIds)) {
+            return [];
+        }
+
+        return $this->select('event_id, id, status')
+            ->where('user_id', $userId)
+            ->whereIn('event_id', $eventIds)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->findAll();
+    }
+
+    /**
      * Retrieves total adult and child counts grouped by event ID across all events.
      *
      * @return array Array of objects with event_id, total_adults, and total_children.

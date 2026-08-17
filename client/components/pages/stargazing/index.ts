@@ -9,7 +9,7 @@ export { EventPhotoUploadDialog, type EventPhotoUploadDialogProps } from './even
 export { EventProgram } from './event-program'
 export { EventRegistrationsTable } from './event-registrations-table'
 export { EventReviews } from './event-reviews/EventReviews'
-export { EventRow, type EventRowVariant } from './event-row'
+export { EventRow } from './event-row'
 export { EventStatistic, EventStatisticRefreshInfo } from './event-statistic'
 export { EventTicket } from './event-ticket'
 export { EventUpcoming } from './event-upcoming'

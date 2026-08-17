@@ -279,6 +279,10 @@
                     "confirm": "Оформить возврат",
                     "done": "Готово"
                 },
+                "event-row": {
+                    "reviewed": "Отзыв оставлен",
+                    "no-review": "Нет отзыва"
+                },
                 "event-ticket": {
                     "error": "Не удалось загрузить билет",
                     "download": "Скачать билет",
@@ -359,9 +363,6 @@
                 },
                 "events-list": {
                     "item-title": "Астровыезд - {{title}}"
-                },
-                "event-row": {
-                    "guests": "Взрослых: {{adults}}, детей: {{children}}"
                 }
             }
         },
@@ -528,8 +529,6 @@
         },
         "profile": {
             "history-empty": "Вы ещё не посещали мероприятий",
-            "history-item-title": "Астровыезд - {{title}}",
-            "history-visited": "Посещено",
             "reviews-empty": "Вы ещё не оставляли отзывов",
             "field-sex-male": "Мужской",
             "field-sex-female": "Женский",
@@ -550,6 +549,7 @@
             "push-toggle-label": "Push-уведомления в браузере",
             "push-toggle-note": "Получайте уведомления о ближайших астровыездах прямо в браузере",
             "push-blocked": "Уведомления заблокированы в настройках браузера. Разрешите их, чтобы включить эту опцию.",
+            "history-visited": "Посещено",
             "title": "Личный кабинет",
             "upcoming-event-title": "Предстоящее мероприятие",
             "no-upcoming-event": "У вас нет предстоящих мероприятий",
@@ -596,7 +596,6 @@
             "event-weather-label": "Погода",
             "event-weather-history-link": "Смотреть погоду",
             "event-weather-forecast-link": "Смотреть прогноз",
-            "views-label": "Просмотров",
             "program-arrival-title": "Прибытие на место",
             "program-arrival-desc": "Приезжайте на машине за 15–20 минут до начала и занимайте удобное место на поляне в отведенных местах.",
             "program-lecture-title": "Астролекция",

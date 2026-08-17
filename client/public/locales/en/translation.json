@@ -275,6 +275,10 @@
                     "confirm": "Issue refund",
                     "done": "Done"
                 },
+                "event-row": {
+                    "reviewed": "Review left",
+                    "no-review": "No review"
+                },
                 "event-ticket": {
                     "error": "Failed to load the ticket",
                     "download": "Download ticket",
@@ -355,9 +359,6 @@
                 },
                 "events-list": {
                     "item-title": "Stargazing trip - {{title}}"
-                },
-                "event-row": {
-                    "guests": "Adults: {{adults}}, children: {{children}}"
                 }
             }
         },
@@ -524,8 +525,6 @@
         },
         "profile": {
             "history-empty": "You haven't attended any events yet",
-            "history-item-title": "Stargazing trip - {{title}}",
-            "history-visited": "Attended",
             "reviews-empty": "You haven't left any reviews yet",
             "field-sex-male": "Male",
             "field-sex-female": "Female",
@@ -546,6 +545,7 @@
             "push-toggle-label": "Browser push notifications",
             "push-toggle-note": "Get notified about upcoming stargazing trips right in your browser",
             "push-blocked": "Notifications are blocked in your browser settings. Allow them to enable this option.",
+            "history-visited": "Attended",
             "title": "My account",
             "upcoming-event-title": "Upcoming event",
             "no-upcoming-event": "You have no upcoming events",
@@ -590,7 +590,6 @@
             "event-weather-label": "Weather",
             "event-weather-history-link": "See weather",
             "event-weather-forecast-link": "See forecast",
-            "views-label": "Views",
             "program-arrival-title": "Arrival at the site",
             "program-arrival-desc": "Arrive by car 15-20 minutes before the start and take a comfortable spot in the designated area of the field.",
             "program-lecture-title": "Astronomy lecture",

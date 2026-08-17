@@ -11,6 +11,7 @@ use App\Libraries\LocaleLibrary;
 use App\Libraries\PaymentLibrary;
 use App\Libraries\SessionLibrary;
 use App\Libraries\TicketLibrary;
+use App\Models\CommentsModel;
 use App\Models\EmailQueueModel;
 use App\Models\EventsPhotosModel;
 use App\Models\EventsUsersModel;
@@ -646,10 +647,25 @@ class Events extends ResourceController
     public function list(): ResponseInterface
     {
         $locale = $this->request->getLocale();
+        $userId = $this->request->getGet('userId', FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+        $userId = $userId !== '' ? $userId : null;
+
+        $sessionUserId = $this->session->isAuth ? $this->session->user->id : null;
+
+        // A `userId` that isn't the caller's own id is silently ignored — never
+        // used to filter, never used to attach the viewer-scoped fields below.
+        // Honouring an arbitrary id here (or even 403-ing on a mismatch) would
+        // let anyone probe "was user X at event Y" / "did user X review it" for
+        // any id; the only supported use is a user filtering their own history
+        // (the profile page), which is why the check is an exact match against
+        // the current session rather than a permission.
+        $isOwnUserId = $userId !== null && $sessionUserId !== null && $userId === $sessionUserId;
 
         try {
-            // Fetch data from models
-            $result = $this->model->getPastEventsList($locale);
+            // Fetch data from models — filtered to $userId's own bookings only
+            // when it's genuinely their own id; otherwise behaves exactly like
+            // the plain, unfiltered call.
+            $result = $this->model->getPastEventsList($locale, null, $isOwnUserId ? $userId : null);
 
             $eventUsersModel = new EventsUsersModel();
             $usersData = $eventUsersModel->getUsersCountGroupedByEventId();
@@ -668,6 +684,38 @@ class Events extends ResourceController
                         'adults'   => $item->total_adults ?? 0,
                         'children' => $item->total_children ?? 0
                     ];
+                }
+            }
+
+            // Viewer-scoped "did I attend this event / did I already review
+            // it" flags — attached for an authenticated session as long as it
+            // isn't being asked to look through someone else's `userId` (see
+            // above). This runs for a plain request too (not just the
+            // self-filtered one), so the same cards on /stargazing and
+            // /stargazing/history pick up a "Посещено"/review badge for any
+            // event the logged-in viewer personally attended, not only inside
+            // their filtered profile history.
+            if ($sessionUserId !== null && ($userId === null || $isOwnUserId)) {
+                $eventIds = array_map(static fn ($event) => $event->id, $result);
+
+                $bookingsByEventId = [];
+                foreach ($eventUsersModel->getBookingsForUserByEventIds($sessionUserId, $eventIds) as $booking) {
+                    $bookingsByEventId[$booking->event_id] = $booking;
+                }
+
+                $reviewedEventIds = array_flip((new CommentsModel())->getReviewedEventIds($sessionUserId, $eventIds));
+
+                foreach ($result as $event) {
+                    if (isset($bookingsByEventId[$event->id])) {
+                        $booking = $bookingsByEventId[$event->id];
+                        $event->registered    = true;
+                        $event->bookedId      = $booking->id;
+                        $event->bookingStatus = $booking->status;
+                    } else {
+                        $event->registered = false;
+                    }
+
+                    $event->hasReviewed = isset($reviewedEventIds[$event->id]);
                 }
             }
 

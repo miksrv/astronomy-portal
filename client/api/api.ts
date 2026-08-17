@@ -188,9 +188,12 @@ export const API = createApi({
                 url: `events/upload/${data.eventId}`
             })
         }),
-        eventGetList: builder.query<ApiType.Events.ResList, void>({
+        eventGetList: builder.query<ApiType.Events.ResList, ApiType.Events.ReqList | void>({
             providesTags: () => [{ id: 'LIST', type: 'Events' }],
-            query: () => 'events'
+            // `userId` (own id only — the API silently ignores anyone else's)
+            // narrows the list to the events that user attended, for the
+            // profile history section; omitted, it's the plain public/archive list.
+            query: (params) => `events${encodeQueryData(params)}`
         }),
 
         eventCreatePost: builder.mutation<ApiType.Events.ResItem | ApiType.ResError, FormData>({

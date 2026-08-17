@@ -48,11 +48,6 @@
 
 // Inline badge/pill with configurable colors; pass $important: true to add !important on background
 =status-badge($bg, $color, $important: false)
-    display: inline-block
-    padding: 2px 10px
-    border-radius: 12px
-    font-size: 13px
-    font-weight: 500
     @if $important
         background: #{$bg} !important
     @else

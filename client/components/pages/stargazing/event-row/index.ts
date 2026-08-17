@@ -1,1 +1,1 @@
-export { EventRow, type EventRowVariant } from './EventRow'
+export { EventRow } from './EventRow'
