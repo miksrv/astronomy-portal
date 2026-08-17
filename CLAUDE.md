@@ -133,6 +133,8 @@ Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, 
 - `GET|POST|PATCH|DELETE /photos`, `/photos/:any` + `POST /photos/:any/upload` — astrophoto CRUD + upload
 - `GET|POST|PATCH|DELETE /events` + `upcoming`, `upcoming/registered`, `photos`, `:id/statistic`, `members/:id`, `checkin/:id`, `ticket/:id`, `:id/cover`, `booking`, `cancel`, `payment/status`, `payment/callback`, `upload/:id` — stargazing events, ticketing and payment (Alfa-Bank)
 - `GET|POST|PATCH|DELETE /mailings`, `/mailings/:id` + `unsubscribe`, `audiences`, `:id/upload`, `:id/test`, `:id/send` — email mailing campaigns
+- `GET /push/vapid-key`, `POST /push/subscribe` (public, rate-limited — a guest may opt in before logging in), `DELETE /push/subscribe` (auth required) — Web Push opt-in/opt-out
+- `GET|POST|PATCH|DELETE /push-notifications`, `/push-notifications/:id` + `audiences`, `:id/upload`, `:id/test` (rate-limited), `:id/send` — admin Web Push campaigns (mirrors `/mailings`)
 - `GET /members`, `GET /members/:id/events` — members list and their events
 - `GET /comments?entityType=&entityId=` — list comments (adds `canReview`+`hasReviewed` for authenticated event requests)
 - `GET /comments/random?entityType=&limit=` — random comments for widget
@@ -155,7 +157,7 @@ Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, 
 
 **CORS:** Configured in `server/app/Config/Cors.php`.
 
-**Rate limiting:** `server/app/Filters/RateLimitFilter.php` (alias `ratelimit`) throttles abuse-prone public routes per-IP via a token bucket (CI4's `Services::throttler()`), applied per-route in `Routes.php` — currently OAuth login, `relay/light`, `events/booking`, `comments` create, and `mailings/:id/test`. Disabled under `ENVIRONMENT === 'testing'`.
+**Rate limiting:** `server/app/Filters/RateLimitFilter.php` (alias `ratelimit`) throttles abuse-prone public routes per-IP via a token bucket (CI4's `Services::throttler()`), applied per-route in `Routes.php` — currently OAuth login, `relay/light`, `events/booking`, `comments` create, `mailings/:id/test`, `push-notifications/:id/test`, and `push/subscribe`. Disabled under `ENVIRONMENT === 'testing'`.
 
 **Session revocation:** The JWT lifetime is intentionally long (180 days) and unchanged by logout. Instead, `users.session_token` is embedded in every token as a `sid` claim and checked on every request; `POST /auth/logout` clears it, instantly invalidating every token issued to that user on any device — see "Authentication" in `server/CLAUDE.md` for the full mechanism.
 

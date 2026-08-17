@@ -161,6 +161,7 @@ Roles are managed entirely through data, not code — `/admin/roles` lets an adm
 | `EVENTS_REFUND` | Forced refund of a paid registration (stricter than `EVENTS_STATISTIC` — moves real money) |
 | `EVENTS_USERS` | `GET /events/members/:id` — viewing the registered-members list for a single event. Distinct from `EVENTS_STATISTIC` (the aggregated registrations/statistics table for an event) and from `USERS_MANAGE` (the site-wide member directory) — a role can be given visibility into one event's attendees without also getting the admin member list or role management. |
 | `PIPELINE_MANAGE` | Reserved for the observatory pipeline-management section (in development — no endpoint checks it yet) |
+| `PUSH_MANAGE` | All `/push-notifications*` endpoints (admin CRUD push-кампаний, тест-отправка, запуск) — не путать с user-facing `POST /push/subscribe` (public, no `isAuth` needed — a guest may opt in before logging in) / `DELETE /push/subscribe` (requires `isAuth`) |
 
 Owner overrides still apply on top of a privilege check where they always did: `DELETE /comments/:id` (own comment, or `COMMENTS_MODERATE`), `GET /members/:id/events` and `GET /events/ticket/:id` (own data, or `USERS_MANAGE`/`EVENTS_CHECKIN` respectively).
 

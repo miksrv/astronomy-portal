@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 4.9.0
+
+### Minor Changes
+
+- Added Web Push notifications: admin campaign management at `/admin/push-notifications` (draft/test/launch, mirroring the email mailing workflow, queue-drained by a new `system:send-push` cron command) plus a user-facing opt-in — a `/profile` toggle and a dismissible site-wide banner shown on `/stargazing` pages that guests can subscribe from before ever logging in, with the subscription automatically claimed by their account on login and every browser/device counted separately
+- Fixed `PhotoLightbox` showing a blank/black slide (or briefly, a broken-image icon) while the full-size image loads: the already-loaded preview is now shown behind the full image, which cross-fades in once ready, wired up on the astrophoto detail and stargazing event pages
+- Switched `PhotoGallery`'s image rendering from a plain `<img>` to `next/image`, so galleries get automatic AVIF/WebP conversion and on-demand resizing, with aspect-ratio wrapper styles added so fill-mode image rows no longer collapse
+- Removed outdated stargazing planning docs (old refactor notes, migration prep instructions, and planned feature specs no longer tracked in-repo)
+
 ## 4.8.0
 
 ### Minor Changes
