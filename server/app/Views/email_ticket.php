@@ -10,12 +10,18 @@
 ob_start();
 ?>
 
-<p>Спасибо за регистрацию на астровыезд, в этом письме вы найдёте основную информацию. Ваш билет с QR-кодом — ниже. Покажите его при входе на мероприятие.</p>
+<p>Спасибо за регистрацию на астровыезд, в этом письме вы найдёте основную информацию. Ваш билет с QR-кодом — ниже. Покажите его при входе на мероприятие. Если билет не отображается в письме, он всегда доступен в вашем <a href="https://astro.miksoft.pro/profile" target="_blank">личном кабинете</a>.</p>
 
 <h2><?= htmlspecialchars($eventTitle ?? '', ENT_QUOTES, 'UTF-8') ?></h2>
 
 <?php if (!empty($dateTimeValue)): ?>
 <p>Дата и время (Оренбургское время): <?= htmlspecialchars($dateTimeValue, ENT_QUOTES, 'UTF-8') ?></p>
+<?php if (!empty($gatheringLine)): ?>
+<p>Сбор участников на площадке: <?= htmlspecialchars($gatheringLine, ENT_QUOTES, 'UTF-8') ?></p>
+<?php endif; ?>
+<?php if (!empty($endTimeValue)): ?>
+<p>Окончание мероприятия: <?= htmlspecialchars($endTimeValue, ENT_QUOTES, 'UTF-8') ?></p>
+<?php endif; ?>
 <?php endif; ?>
 
 <?php

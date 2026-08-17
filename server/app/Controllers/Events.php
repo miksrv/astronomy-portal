@@ -495,13 +495,26 @@ class Events extends ResourceController
             $ticketPath = $ticketDir . '/ticket_' . $booking->id . '_' . uniqid() . '.png';
             file_put_contents($ticketPath, (new TicketLibrary())->renderPng($data));
 
-            $rawEvent  = $event->toRawArray();
-            $shortDate = '';
+            $rawEvent      = $event->toRawArray();
+            $shortDate     = '';
+            $gatheringLine = '';
+            $endTimeValue  = '';
 
             if (!empty($rawEvent['date'])) {
-                $shortDate = Time::parse($rawEvent['date'], 'UTC', 'ru')
+                $startTime = Time::parse($rawEvent['date'], 'UTC', 'ru')->setTimezone('Asia/Yekaterinburg');
+                $shortDate = $startTime->toLocalizedString('d MMMM');
+
+                // Gathering window: a 1.5h window ending 30 minutes before the
+                // event starts, e.g. event at 21:30 -> gathering 19:30-21:00.
+                $gatheringStart = $startTime->modify('-2 hours')->toLocalizedString('HH:mm');
+                $gatheringEnd   = $startTime->modify('-30 minutes')->toLocalizedString('HH:mm');
+                $gatheringLine  = 'с ' . $gatheringStart . ' до ' . $gatheringEnd;
+            }
+
+            if (!empty($rawEvent['end_date'])) {
+                $endTimeValue = Time::parse($rawEvent['end_date'], 'UTC', 'ru')
                     ->setTimezone('Asia/Yekaterinburg')
-                    ->toLocalizedString('d MMMM');
+                    ->toLocalizedString('HH:mm');
             }
 
             $subject = 'Ваш билет на астровыезд' . ($shortDate !== '' ? ' (' . $shortDate . ')' : '');
@@ -510,13 +523,15 @@ class Events extends ResourceController
             $mapLinks      = $this->buildEventMapLinks($event);
 
             $message = view('email_ticket', [
-                'subject'       => $subject,
-                'eventTitle'    => $event->title_ru,
-                'dateTimeValue' => $dateTimeValue,
-                'locationValue' => trim((string) ($event->location ?? '')),
-                'addressValue'  => trim((string) ($event->address ?? '')),
-                'yandexMapLink' => $mapLinks['yandex'],
-                'googleMapLink' => $mapLinks['google'],
+                'subject'        => $subject,
+                'eventTitle'     => $event->title_ru,
+                'dateTimeValue'  => $dateTimeValue,
+                'gatheringLine'  => $gatheringLine,
+                'endTimeValue'   => $endTimeValue,
+                'locationValue'  => trim((string) ($event->location ?? '')),
+                'addressValue'   => trim((string) ($event->address ?? '')),
+                'yandexMapLink'  => $mapLinks['yandex'],
+                'googleMapLink'  => $mapLinks['google'],
             ]);
 
             // Same .ics content the "Add to calendar" button builds client-side
