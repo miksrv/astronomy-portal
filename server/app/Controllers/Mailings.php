@@ -515,7 +515,7 @@ class Mailings extends ResourceController
             $imageUrl = $apiUrl . '/' . $mailing->image;
         }
 
-        return view('email_newsletter', [
+        return view('email_ticket', [
             'subject'        => $mailing->subject,
             'content'        => $mailing->content,
             'imageUrl'       => $imageUrl,
