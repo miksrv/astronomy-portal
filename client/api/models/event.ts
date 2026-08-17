@@ -14,6 +14,8 @@ export type Event = {
     /** Minimum recommended age in years. Undefined/null means no restriction. */
     minAge?: number
     content?: string
+    /** Short, plain-text (markdown-stripped) preview of `content` — present only in the events list/archive response, not on a single event. */
+    excerpt?: string
     coverFileName?: string
     coverFileExt?: string
     date?: DateTime
@@ -26,6 +28,12 @@ export type Event = {
         childrenAges?: number[]
     }
     bookedId?: string
+    /**
+     * Whether the current viewer has a booking for this event. Present on a
+     * single event (`show`/`upcoming`) *and* on every item of the list
+     * response (`eventGetList`) as long as the request was authenticated —
+     * omitted entirely for a guest, never sent for someone else's viewpoint.
+     */
     registered?: boolean
     /**
      * Booking lifecycle: 'pending' holds the seat until payment, 'confirmed'
@@ -33,6 +41,12 @@ export type Event = {
      * around (not deleted) so it can be retried instead of re-filling the form.
      */
     bookingStatus?: 'pending' | 'confirmed' | 'failed'
+    /**
+     * Whether the current viewer already left a review for this event.
+     * Same viewer-scoped availability rule as `registered` — present in the
+     * list response only for an authenticated request, omitted for guests.
+     */
+    hasReviewed?: boolean
     /** Present only while a paid booking awaits payment — drives the countdown + "return to payment". */
     payment?: {
         orderId: string

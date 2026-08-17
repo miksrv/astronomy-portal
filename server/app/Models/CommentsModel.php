@@ -212,6 +212,34 @@ class CommentsModel extends ApplicationBaseModel
     }
 
     /**
+     * Bulk version of hasReviewed() scoped to entity_type='event' — returns the subset of
+     * $eventIds the user has already left a (non-deleted) review for. Used by Events::list() to
+     * attach a per-event `hasReviewed` flag to a whole page of events in one query instead of one
+     * query per event.
+     *
+     * @param string        $userId   The user's ID.
+     * @param array<string> $eventIds Candidate event ids to check.
+     * @return array<string> The subset of $eventIds the user has reviewed.
+     */
+    public function getReviewedEventIds(string $userId, array $eventIds): array
+    {
+        if (empty($eventIds)) {
+            return [];
+        }
+
+        $rows = $this->db->table('comments')
+            ->select('entity_id')
+            ->where('user_id', $userId)
+            ->where('entity_type', 'event')
+            ->whereIn('entity_id', $eventIds)
+            ->where('deleted_at IS NULL')
+            ->get()
+            ->getResultArray();
+
+        return array_column($rows, 'entity_id');
+    }
+
+    /**
      * Normalise raw DB rows into the camelCase API shape with an embedded author object.
      *
      * @param array  $rows       Raw result rows from the query builder.

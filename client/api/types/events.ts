@@ -1,5 +1,16 @@
 import { ApiModel, ApiType } from '@/api'
 
+export interface ReqList {
+    /**
+     * Narrows the list to events the given user attended — the profile
+     * history section passes its own id here. The API only honours this
+     * when it matches the caller's own session id; anyone else's id is
+     * silently ignored (falls back to the plain public list) rather than
+     * rejected, so it can't be used to probe another user's history.
+     */
+    userId?: string
+}
+
 export interface ResList {
     items?: ApiModel.Event[]
 }

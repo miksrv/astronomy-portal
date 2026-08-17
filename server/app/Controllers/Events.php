@@ -10,8 +10,8 @@ use App\Libraries\CalendarLibrary;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\PaymentLibrary;
 use App\Libraries\SessionLibrary;
-use App\Libraries\TelegramLibrary;
 use App\Libraries\TicketLibrary;
+use App\Models\CommentsModel;
 use App\Models\EmailQueueModel;
 use App\Models\EventsPhotosModel;
 use App\Models\EventsUsersModel;
@@ -23,8 +23,6 @@ use CodeIgniter\I18n\Time;
 use CodeIgniter\Files\File;
 use Config\Database;
 use Config\Services;
-
-//use Longman\TelegramBot\Exception\TelegramException;
 
 use ReflectionException;
 use Exception;
@@ -498,13 +496,26 @@ class Events extends ResourceController
             $ticketPath = $ticketDir . '/ticket_' . $booking->id . '_' . uniqid() . '.png';
             file_put_contents($ticketPath, (new TicketLibrary())->renderPng($data));
 
-            $rawEvent  = $event->toRawArray();
-            $shortDate = '';
+            $rawEvent      = $event->toRawArray();
+            $shortDate     = '';
+            $gatheringLine = '';
+            $endTimeValue  = '';
 
             if (!empty($rawEvent['date'])) {
-                $shortDate = Time::parse($rawEvent['date'], 'UTC', 'ru')
+                $startTime = Time::parse($rawEvent['date'], 'UTC', 'ru')->setTimezone('Asia/Yekaterinburg');
+                $shortDate = $startTime->toLocalizedString('d MMMM');
+
+                // Gathering window: a 1.5h window ending 30 minutes before the
+                // event starts, e.g. event at 21:30 -> gathering 19:30-21:00.
+                $gatheringStart = $startTime->modify('-2 hours')->toLocalizedString('HH:mm');
+                $gatheringEnd   = $startTime->modify('-30 minutes')->toLocalizedString('HH:mm');
+                $gatheringLine  = 'с ' . $gatheringStart . ' до ' . $gatheringEnd;
+            }
+
+            if (!empty($rawEvent['end_date'])) {
+                $endTimeValue = Time::parse($rawEvent['end_date'], 'UTC', 'ru')
                     ->setTimezone('Asia/Yekaterinburg')
-                    ->toLocalizedString('d MMMM');
+                    ->toLocalizedString('HH:mm');
             }
 
             $subject = 'Ваш билет на астровыезд' . ($shortDate !== '' ? ' (' . $shortDate . ')' : '');
@@ -513,13 +524,15 @@ class Events extends ResourceController
             $mapLinks      = $this->buildEventMapLinks($event);
 
             $message = view('email_ticket', [
-                'subject'       => $subject,
-                'eventTitle'    => $event->title_ru,
-                'dateTimeValue' => $dateTimeValue,
-                'locationValue' => trim((string) ($event->location ?? '')),
-                'addressValue'  => trim((string) ($event->address ?? '')),
-                'yandexMapLink' => $mapLinks['yandex'],
-                'googleMapLink' => $mapLinks['google'],
+                'subject'        => $subject,
+                'eventTitle'     => $event->title_ru,
+                'dateTimeValue'  => $dateTimeValue,
+                'gatheringLine'  => $gatheringLine,
+                'endTimeValue'   => $endTimeValue,
+                'locationValue'  => trim((string) ($event->location ?? '')),
+                'addressValue'   => trim((string) ($event->address ?? '')),
+                'yandexMapLink'  => $mapLinks['yandex'],
+                'googleMapLink'  => $mapLinks['google'],
             ]);
 
             // Same .ics content the "Add to calendar" button builds client-side
@@ -623,34 +636,6 @@ class Events extends ResourceController
     }
 
     /**
-     * Alerts the admin via Telegram when an automatic refund fails during
-     * user-initiated cancellation. The booking is still cancelled either way
-     * (see {@see cancel()}) — this is what keeps a stuck refund from being
-     * visible only in the server log.
-     */
-    private function notifyRefundFailure(PaymentEntity $payment, EventEntity $event): void
-    {
-        try {
-            helper('locale');
-
-            $title      = getLocalizedString('ru', $event->title_en, $event->title_ru);
-            $safeTitle  = htmlspecialchars($title, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            $amountRub  = number_format($payment->amount / 100, 2, '.', ' ');
-
-            $message = "⚠️ <b>ОШИБКА АВТОМАТИЧЕСКОГО ВОЗВРАТА</b>\n" .
-                "<b>{$safeTitle}</b>\n" .
-                "🔹Платёж: <code>{$payment->id}</code> (заказ {$payment->order_id})\n" .
-                "🔹Сумма: <b>{$amountRub} ₽</b>\n" .
-                "🔹Ошибка: <code>{$payment->error_code}</code> {$payment->error_message}\n" .
-                "Бронирование отменено, деньги не возвращены — требуется возврат вручную.";
-
-            (new TelegramLibrary())->sendMessage($message);
-        } catch (\Throwable $e) {
-            log_message('error', 'Refund-failure Telegram alert failed: {msg}', ['msg' => $e->getMessage()]);
-        }
-    }
-
-    /**
      * Retrieves a list of past events with localized details and returns them in a structured response.
      *
      * This method fetches the list of past events using the specified locale, which is obtained from the
@@ -662,10 +647,25 @@ class Events extends ResourceController
     public function list(): ResponseInterface
     {
         $locale = $this->request->getLocale();
+        $userId = $this->request->getGet('userId', FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+        $userId = $userId !== '' ? $userId : null;
+
+        $sessionUserId = $this->session->isAuth ? $this->session->user->id : null;
+
+        // A `userId` that isn't the caller's own id is silently ignored — never
+        // used to filter, never used to attach the viewer-scoped fields below.
+        // Honouring an arbitrary id here (or even 403-ing on a mismatch) would
+        // let anyone probe "was user X at event Y" / "did user X review it" for
+        // any id; the only supported use is a user filtering their own history
+        // (the profile page), which is why the check is an exact match against
+        // the current session rather than a permission.
+        $isOwnUserId = $userId !== null && $sessionUserId !== null && $userId === $sessionUserId;
 
         try {
-            // Fetch data from models
-            $result = $this->model->getPastEventsList($locale);
+            // Fetch data from models — filtered to $userId's own bookings only
+            // when it's genuinely their own id; otherwise behaves exactly like
+            // the plain, unfiltered call.
+            $result = $this->model->getPastEventsList($locale, null, $isOwnUserId ? $userId : null);
 
             $eventUsersModel = new EventsUsersModel();
             $usersData = $eventUsersModel->getUsersCountGroupedByEventId();
@@ -684,6 +684,38 @@ class Events extends ResourceController
                         'adults'   => $item->total_adults ?? 0,
                         'children' => $item->total_children ?? 0
                     ];
+                }
+            }
+
+            // Viewer-scoped "did I attend this event / did I already review
+            // it" flags — attached for an authenticated session as long as it
+            // isn't being asked to look through someone else's `userId` (see
+            // above). This runs for a plain request too (not just the
+            // self-filtered one), so the same cards on /stargazing and
+            // /stargazing/history pick up a "Посещено"/review badge for any
+            // event the logged-in viewer personally attended, not only inside
+            // their filtered profile history.
+            if ($sessionUserId !== null && ($userId === null || $isOwnUserId)) {
+                $eventIds = array_map(static fn ($event) => $event->id, $result);
+
+                $bookingsByEventId = [];
+                foreach ($eventUsersModel->getBookingsForUserByEventIds($sessionUserId, $eventIds) as $booking) {
+                    $bookingsByEventId[$booking->event_id] = $booking;
+                }
+
+                $reviewedEventIds = array_flip((new CommentsModel())->getReviewedEventIds($sessionUserId, $eventIds));
+
+                foreach ($result as $event) {
+                    if (isset($bookingsByEventId[$event->id])) {
+                        $booking = $bookingsByEventId[$event->id];
+                        $event->registered    = true;
+                        $event->bookedId      = $booking->id;
+                        $event->bookingStatus = $booking->status;
+                    } else {
+                        $event->registered = false;
+                    }
+
+                    $event->hasReviewed = isset($reviewedEventIds[$event->id]);
                 }
             }
 
@@ -1007,9 +1039,9 @@ class Events extends ResourceController
      * money back — e.g. a force-majeure no-show.
      *
      * Unlike the automatic refund inside {@see cancel()} (fire-and-forget,
-     * alerted via Telegram on failure since nobody is watching the
-     * response), this call is synchronous and admin-initiated: the caller
-     * sees the bank's result immediately, so no separate alert is sent here.
+     * only logged on failure since nobody is watching the response), this
+     * call is synchronous and admin-initiated: the caller sees the bank's
+     * result immediately.
      */
     public function refundRegistrationPayment($id = null): ResponseInterface
     {
@@ -1609,10 +1641,6 @@ class Events extends ResourceController
                             'id'      => $payment->id,
                             'eventId' => $input['eventId'],
                         ]);
-
-                        // Re-fetch: refund() persisted error_code/error_message
-                        // on the row, but didn't mutate this in-memory entity.
-                        $this->notifyRefundFailure($paymentsModel->find($payment->id) ?? $payment, $event);
                     }
                 } elseif ($payment && in_array($payment->status, ['new', 'pending'], true)) {
                     $paymentsModel->update($payment->id, ['status' => 'canceled']);
@@ -2271,14 +2299,6 @@ class Events extends ResourceController
                     'id'        => $payment->id,
                     'bookingId' => $payment->entity_id,
                 ]);
-
-                $event = $this->model->find($booking->event_id);
-
-                if ($event) {
-                    // Re-fetch: refund() persisted error_code/error_message
-                    // on the row, but didn't mutate this in-memory entity.
-                    $this->notifyRefundFailure((new PaymentsModel())->find($payment->id) ?? $freshPayment, $event);
-                }
             }
 
             return;

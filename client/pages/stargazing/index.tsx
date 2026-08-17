@@ -150,7 +150,16 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
 
             {pastEvents.length > 0 && (
                 <>
-                    <h2>{t('pages.stargazing.past-events', 'Прошедшие астровыезды')}</h2>
+                    <h2>
+                        {t('pages.stargazing.past-events', 'Прошедшие астровыезды')}
+
+                        <Link
+                            href={'/stargazing/history'}
+                            className={styles.showAllEvents}
+                        >
+                            {t('pages.stargazing.past-events-show-all', 'Смотреть все')}
+                        </Link>
+                    </h2>
 
                     <EventsList events={pastEvents} />
                 </>

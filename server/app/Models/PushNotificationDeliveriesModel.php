@@ -12,6 +12,12 @@ use App\Entities\PushNotificationDeliveryEntity;
  * devices gets several rows for the same campaign. Mirrors
  * MailingEmailsModel. Uses UUID primary keys generated via the beforeInsert
  * callback; no soft deletes.
+ *
+ * `subscription_id` is nullable with an ON DELETE SET NULL FK to
+ * push_subscriptions (see FixPushNotificationDeliveriesSubscriptionCascade)
+ * — a row must survive as a permanent send-audit record (status intact)
+ * even after SendPushNotifications hard-deletes the subscription it
+ * targeted, the same way a mailing_emails row survives an unsubscribe.
  */
 class PushNotificationDeliveriesModel extends ApplicationBaseModel
 {

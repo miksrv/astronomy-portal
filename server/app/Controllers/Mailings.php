@@ -485,7 +485,14 @@ class Mailings extends ResourceController
 
             return $this->respond(['success' => true]);
         } catch (Exception $e) {
-            log_message('error', '{exception}', ['exception' => $e]);
+            // EmailLibrary::send() already wrote the full SMTP debug dump
+            // (headers/subject/body) to the dedicated email-*.log — keep the
+            // shared app log to a short line. Requires
+            // Config\Logger::$threshold >= 5 in production to appear at all.
+            log_message('warning', 'Failed to send test email for mailing ID {id} to {email}', [
+                'id'    => $mailing->id,
+                'email' => $this->session->user->email,
+            ]);
 
             return $this->failServerError(lang('Mailings.testEmailFailed'));
         }

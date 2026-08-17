@@ -51,6 +51,17 @@ final class PushNotificationDeliveryEntityTest extends CIUnitTestCase
         $this->assertEmpty($entity->subscription_id);
     }
 
+    public function testNewInstanceDefaultSubscriptionIdIsRealNullNotEmptyString(): void
+    {
+        // 'subscription_id' is cast '?string' (nullable), not plain
+        // 'string' - the FK is ON DELETE SET NULL (see
+        // FixPushNotificationDeliveriesSubscriptionCascade), so a delivery
+        // row must be able to hold a real null once its subscription is
+        // hard-deleted, and must read back as null, not ''.
+        $entity = new PushNotificationDeliveryEntity();
+        $this->assertNull($entity->subscription_id);
+    }
+
     public function testNewInstanceDefaultErrorMessageIsEmpty(): void
     {
         $entity = new PushNotificationDeliveryEntity();
@@ -61,6 +72,15 @@ final class PushNotificationDeliveryEntityTest extends CIUnitTestCase
     {
         $entity = new PushNotificationDeliveryEntity();
         $this->assertNull($entity->sent_at);
+    }
+
+    public function testNewInstanceDefaultUserIdIsRealNullNotEmptyString(): void
+    {
+        // 'user_id' is cast '?string' (nullable), not plain 'string' - a
+        // delivery to an anonymous/guest subscription legitimately has no
+        // owning user and must read back as real null, not ''.
+        $entity = new PushNotificationDeliveryEntity();
+        $this->assertNull($entity->user_id);
     }
 
     // --- Attribute assignment ---

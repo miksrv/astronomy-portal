@@ -44,7 +44,7 @@ POST   /photos/:id/upload           → Photos::upload
 PATCH  /photos/:id                  → Photos::update
 DELETE /photos/:id                  → Photos::delete
 
-GET    /events                      → Events::list
+GET    /events                      → Events::list   (optional `?userId=` narrows to that user's own attended events — only honoured when it matches the caller's own session, otherwise silently ignored)
 GET    /events/upcoming             → Events::upcoming
 GET    /events/upcoming/registered  → Events::upcomingRegistered
 GET    /events/photos               → Events::photos
@@ -129,7 +129,7 @@ All controllers extend `ResourceController` and use the `ResponseTrait`.
 | `Categories.php` | Lists photo/object categories (read-only, locale-aware) |
 | `Comments.php` | CRUD for user comments/reviews on events and photos; soft-delete, auth required for write |
 | `Equipment.php` | Lists observatory equipment (read-only) |
-| `Events.php` | Full CRUD for stargazing events; booking, cancellation, check-in, ticket/QR generation, Alfa-Bank payment flow, photo uploads, Telegram notifications |
+| `Events.php` | Full CRUD for stargazing events; booking, cancellation, check-in, ticket/QR generation, Alfa-Bank payment flow, photo uploads |
 | `Files.php` | Serves raw files (FITS thumbnails, etc.) associated with astronomical objects |
 | `Mailings.php` | Admin mailing campaign CRUD; audience targeting, test send and bulk send via `EmailLibrary`/`EmailQueueModel` |
 | `Members.php` | Admin-only list of registered users and their event history |
@@ -175,9 +175,9 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 | `MailingsModel.php` | `mailings` | yes | Email campaign records (subject, content, status, send counts) |
 | `MailingEmailsModel.php` | `mailing_emails` | no | Individual recipient entries per mailing |
 | `MailingUnsubscribesModel.php` | `mailing_unsubscribes` | no | Unsubscribe log (email + optional user_id) |
-| `PushSubscriptionsModel.php` | `push_subscriptions` | no | `PushSubscriptionEntity`; one row per browser/device opted into push; unique `endpoint`; `upsertByEndpoint()` refreshes keys instead of duplicating; `user_id` is nullable — a guest may subscribe before logging in, `upsertByEndpoint()` claims the row for a user once they do (and never downgrades an already-claimed row back to anonymous) |
+| `PushSubscriptionsModel.php` | `push_subscriptions` | no | `PushSubscriptionEntity`; one row per browser/device opted into push; unique `endpoint`; `upsertByEndpoint()` refreshes keys instead of duplicating; `user_id` is nullable — a guest may subscribe before logging in, `upsertByEndpoint()` claims the row for a user once they do (and never downgrades an already-claimed row back to anonymous); `findAnonymous()`/`countAnonymous()` surface still-unclaimed rows so an "all" campaign reaches them directly (there's no `user_id` to join through) |
 | `PushNotificationsModel.php` | `push_notifications` | yes | `PushNotificationEntity`; browser push campaign records (title/body/icon/url/status/audience/counts) — mirrors `MailingsModel` |
-| `PushNotificationDeliveriesModel.php` | `push_notification_deliveries` | no | `PushNotificationDeliveryEntity`; one row per (notification, subscription) pair — mirrors `MailingEmailsModel` but keyed by subscription, not user |
+| `PushNotificationDeliveriesModel.php` | `push_notification_deliveries` | no | `PushNotificationDeliveryEntity`; one row per (notification, subscription) pair — mirrors `MailingEmailsModel` but keyed by subscription, not user; `subscription_id` FK is `SET NULL` (not `CASCADE`), so the row survives as a permanent send-audit record if the subscription is later hard-deleted |
 | `PaymentsModel.php` | `payments` | yes | Alfa-Bank payment records for event tickets; statuses include refunding |
 | `EmailQueueModel.php` | `email_queue` | no | Queued transactional/mailing emails for async sending |
 | `MagicLinkTokensModel.php` | `magic_link_tokens` | no | Single-use passwordless login tokens (SHA-256 hash only, raw token never persisted); rows double as the rate-limit ledger — see `isRateLimited()` |
@@ -236,6 +236,7 @@ Listed in execution order. Tables created unless noted as ALTER.
 | `2026-08-16-100001_AddPushNotifications` | `push_notifications` — FEAT-13; mirrors `mailings` (title/body/icon/url/status/audience/counts) |
 | `2026-08-16-100002_AddPushNotificationDeliveries` | `push_notification_deliveries` — FEAT-13; mirrors `mailing_emails`, keyed by `subscription_id` rather than user |
 | `2026-08-17-100000_AllowAnonymousPushSubscriptions` | ALTER `push_subscriptions` — `user_id` becomes nullable, so a guest can subscribe before logging in (FK left untouched — NULL is exempt from the CASCADE) |
+| `2026-08-17-110000_FixPushNotificationDeliveriesSubscriptionCascade` | ALTER `push_notification_deliveries` — `subscription_id` becomes nullable and its FK to `push_subscriptions` switches from `CASCADE` to `SET NULL`, so a delivery row survives (as a permanent send-audit record, `status` intact) when `system:send-push` hard-deletes an expired subscription, instead of being cascade-deleted along with it |
 
 ---
 
@@ -287,7 +288,6 @@ Listed in execution order. Tables created unless noted as ALTER.
 | `SessionLibrary` | JWT validation, populates `$this->session->user` and `->isAuth` |
 | `LocaleLibrary` | Sets CI4 locale from request header or user preference |
 | `EmailLibrary` | Wraps CodeIgniter email service for mailing campaigns |
-| `TelegramLibrary` | Sends Telegram notifications for event bookings |
 | `RelayLibrary` | HTTP communication with Arduino relay board |
 | `PhotoUploadLibrary` | Handles photo file validation, resizing, and storage |
 | `PhotosLibrary` | Helper utilities for photo data aggregation |

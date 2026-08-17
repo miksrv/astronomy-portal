@@ -9,8 +9,7 @@
  *   php -r "require 'vendor/autoload.php'; print_r(\Minishlink\WebPush\VAPID::createVapidKeys());"
  *
  * and store them in .env — see server/app/Config/Push.php. Regenerating the
- * keys invalidates every existing push_subscriptions row (see FEAT-13 notes
- * in features/web-push-notifications.md), so this is a one-time setup step,
+ * keys invalidates every existing push_subscriptions row, so this is a one-time setup step,
  * not a routine credential rotation.
  */
 

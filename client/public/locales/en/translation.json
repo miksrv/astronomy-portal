@@ -275,6 +275,10 @@
                     "confirm": "Issue refund",
                     "done": "Done"
                 },
+                "event-row": {
+                    "reviewed": "Review",
+                    "no-review": "No review"
+                },
                 "event-ticket": {
                     "error": "Failed to load the ticket",
                     "download": "Download ticket",
@@ -521,8 +525,6 @@
         },
         "profile": {
             "history-empty": "You haven't attended any events yet",
-            "history-item-title": "Stargazing trip - {{title}}",
-            "history-visited": "Attended",
             "reviews-empty": "You haven't left any reviews yet",
             "field-sex-male": "Male",
             "field-sex-female": "Female",
@@ -543,6 +545,7 @@
             "push-toggle-label": "Browser push notifications",
             "push-toggle-note": "Get notified about upcoming stargazing trips right in your browser",
             "push-blocked": "Notifications are blocked in your browser settings. Allow them to enable this option.",
+            "history-visited": "Attended",
             "title": "My account",
             "upcoming-event-title": "Upcoming event",
             "no-upcoming-event": "You have no upcoming events",
@@ -587,7 +590,6 @@
             "event-weather-label": "Weather",
             "event-weather-history-link": "See weather",
             "event-weather-forecast-link": "See forecast",
-            "views-label": "Views",
             "program-arrival-title": "Arrival at the site",
             "program-arrival-desc": "Arrive by car 15-20 minutes before the start and take a comfortable spot in the designated area of the field.",
             "program-lecture-title": "Astronomy lecture",
@@ -663,6 +665,7 @@
             "hero-cta-telegram": "Subscribe on Telegram",
             "program-title": "How the evening unfolds",
             "past-events": "Past stargazing trips",
+            "past-events-show-all": "View all",
             "archive-link": "All past stargazing trips",
             "registrations-status-canceled": "Canceled",
             "registrations-status-confirmed": "Confirmed",
@@ -789,7 +792,7 @@
         },
         "stargazing-history": {
             "title": "Stargazing trip archive",
-            "description": "A list of all past stargazing trips in Orenburg - photos, dates, participants and impressions from each event."
+            "description": "The stargazing trip archive is a chronicle of every trip organized by the “Look at the Stars” project under the open sky in Orenburg and the surrounding countryside. It brings together photos, dates, and details of every trip where we look at the stars together through a telescope. Each archive entry lists the number of participants and the impressions they shared. Take a look through the archive to see how our community of astronomy enthusiasts has grown year by year."
         },
         "payment": {
             "leave-confirm": "The payment check hasn't finished yet. Leave the page?",

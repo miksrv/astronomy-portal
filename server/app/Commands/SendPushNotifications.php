@@ -10,9 +10,8 @@
  *   * * * * * cd /path/to/server && php spark system:send-push >> /dev/null 2>&1
  *
  * Unlike SendEmail, there is no day/hour rate-limit check here — push
- * services don't throttle by sender reputation the way SMTP providers do
- * (see FEAT-13 in features/web-push-notifications.md). Still batched to
- * bound per-run work.
+ * services don't throttle by sender reputation the way SMTP providers do.
+ * Still batched to bound per-run work.
  */
 
 namespace App\Commands;
@@ -90,11 +89,11 @@ class SendPushNotifications extends BaseCommand
             } catch (WebPushExpiredSubscriptionException $e) {
                 log_message('info', 'Push subscription expired, removing: {exception}', ['exception' => $e]);
 
-                // Mark the delivery rejected *before* removing the
-                // subscription — push_notification_deliveries has an
-                // ON DELETE CASCADE FK to push_subscriptions, so deleting
-                // the subscription first would cascade-delete this very
-                // delivery row and turn the update below into a no-op.
+                // Mark the delivery rejected, then remove the subscription.
+                // push_notification_deliveries.subscription_id is
+                // ON DELETE SET NULL (not CASCADE), so this row survives the
+                // subscription's removal as a permanent audit record instead
+                // of disappearing along with it.
                 $deliveriesModel->update($delivery->id, [
                     'status'        => PushNotificationDeliveryEntity::STATUS_REJECTED,
                     'error_message' => substr($e->getMessage(), 0, 500),
