@@ -1,10 +1,19 @@
 # CHANGELOG
 
+## 4.9.0
+
+### Minor Changes
+
+- Added Web Push notifications: admin campaign management at `/admin/push-notifications` (draft/test/launch, mirroring the email mailing workflow, queue-drained by a new `system:send-push` cron command) plus a user-facing opt-in — a `/profile` toggle and a dismissible site-wide banner shown on `/stargazing` pages that guests can subscribe from before ever logging in, with the subscription automatically claimed by their account on login and every browser/device counted separately
+- Fixed `PhotoLightbox` showing a blank/black slide (or briefly, a broken-image icon) while the full-size image loads: the already-loaded preview is now shown behind the full image, which cross-fades in once ready, wired up on the astrophoto detail and stargazing event pages
+- Switched `PhotoGallery`'s image rendering from a plain `<img>` to `next/image`, so galleries get automatic AVIF/WebP conversion and on-demand resizing, with aspect-ratio wrapper styles added so fill-mode image rows no longer collapse
+- Removed outdated stargazing planning docs (old refactor notes, migration prep instructions, and planned feature specs no longer tracked in-repo)
+
 ## 4.8.0
 
 ### Minor Changes
 
-``- Full access-control refactor: replaced the fixed `admin`/`moderator`/`security` role ENUM with a privilege-based system (`App\Enums\Permission`) — every backend check now tests a specific privilege instead of a hardcoded role name, mirrored on the frontend via `hasPermission()`/`hasAnyPermission()`
+- Full access-control refactor: replaced the fixed `admin`/`moderator`/`security` role ENUM with a privilege-based system (`App\Enums\Permission`) — every backend check now tests a specific privilege instead of a hardcoded role name, mirrored on the frontend via `hasPermission()`/`hasAnyPermission()`
 - Added admin-editable roles as named bundles of privileges (a user can hold several at once) with a new `/admin/roles` management page and the ability to assign roles to a user from `/admin/users`, including a reserved, single-assignment "Разработчик" role that alone may grant the `users.manage` privilege
 - Event photo galleries can now be grouped by photographer: uploads accept a free-text photographer credit, photos carry an EXIF-derived (`DateTimeOriginal`) capture date used for chronological ordering (falling back to upload time when absent), and the event page shows a client-side filter chip row ("Все" + one per photographer) whenever an event has more than one contributor
 - Replaced the single-file hidden-input uploader with a batch upload dialog (`EventPhotoUploadDialog`): drag-and-drop or click-to-browse for up to hundreds of files at once, a bounded-concurrency upload queue with an overall progress bar, a non-cumulative "current file" status line alongside a cumulative error list, a Cancel action that aborts in-flight/pending uploads, and a "retry failed only" action once a batch settles — the dialog and the page itself cannot be closed/left while a batch is uploading (new shared `useNavigationGuard` hook)
@@ -12,7 +21,7 @@
 - Replaced the event photo gallery's up-to-500-at-once fetch with real server-side pagination (`limit`/`offset`/`photographer` on `GET /events/photos`, mirroring the comments API): the event page now prefetches only the first 15 photos during SSR, "Смотреть все" loads everything remaining in a single request instead of growing the grid while scrolling, and the distinct photographer list for the filter chips is bundled into the same response rather than a separate endpoint; also fixed `react-photo-album` to actually render photos during SSR (`defaultContainerWidth`), so the gallery is no longer invisible until client-side hydration
 - Fixed `PhotoLightbox` showing a blank/black slide (or, briefly, a broken-image icon) while the full-size image loads: the already-loaded thumbnail is now shown as a blurred backdrop underneath, with the full image cross-fading in on load, wired up on the stargazing event and astrophoto detail pages
 - Switched `PhotoGallery`'s image rendering from a plain `<img>` to `next/image` (via `react-photo-album`'s `render.image` slot), so every gallery on the site now gets automatic AVIF/WebP conversion and on-demand resizing through `/_next/image` instead of serving the backend's fixed-size preview as-is
-``
+
 ## 4.7.5
 
 ### Patch Changes

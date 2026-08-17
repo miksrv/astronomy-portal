@@ -4,11 +4,14 @@ import dayjs from 'dayjs'
 
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import Script from 'next/script'
 import { appWithTranslation, useTranslation } from 'next-i18next/pages'
 
 import { SITE_LINK, wrapper } from '@/api'
 import { useAuthSession } from '@/api/useAuthSession'
+import { usePushClaim } from '@/api/usePushClaim'
+import { PushSubscribeBanner } from '@/components/common'
 
 import i18Config from '../next-i18next.config'
 
@@ -27,9 +30,31 @@ const AuthSessionSync = () => {
     return null
 }
 
+// Claims any pre-existing browser push subscription for the account right
+// after login/registration (see usePushClaim). Same rationale as
+// AuthSessionSync — must run on every route, not just ones whose layout
+// happens to mount something push-related.
+const PushClaimSync = () => {
+    usePushClaim()
+    return null
+}
+
 const App = ({ Component, pageProps }: AppProps) => {
     const { i18n } = useTranslation()
     const { store } = wrapper.useWrappedStore(pageProps)
+    const { pathname } = useRouter()
+
+    // Mounted here (not inside AppLayout) deliberately: every page wraps
+    // itself in its own <AppLayout> instance (see AppLayoutProps usage
+    // across pages/), so navigating between two /stargazing pages swaps
+    // `Component` and unmounts/remounts the whole AppLayout tree - which
+    // would reset the banner's dismissed/subscribed state and its entrance
+    // delay on every in-section navigation. This component tree, unlike
+    // AppLayout, persists across route changes (only `Component` changes),
+    // so the same <PushSubscribeBanner> instance survives navigating
+    // between /stargazing pages and only unmounts once the visitor leaves
+    // the section entirely.
+    const isStargazingSection = pathname === '/stargazing' || pathname.startsWith('/stargazing/')
 
     // dayjs.locale() mutates a global singleton and must not be called during
     // the render phase — doing so can trigger "Cannot update a component while
@@ -117,6 +142,8 @@ const App = ({ Component, pageProps }: AppProps) => {
 
             <Provider store={store}>
                 <AuthSessionSync />
+                <PushClaimSync />
+                {isStargazingSection && <PushSubscribeBanner />}
                 <Component {...pageProps} />
             </Provider>
 

@@ -79,6 +79,20 @@ POST   /mailings/:id/test           → Mailings::test           [rate-limited: 
 POST   /mailings/:id/send           → Mailings::send
 POST   /mailings/:id/cancel         → Mailings::cancel          (only from draft/sending; mid-send also cancels queued mailing_emails rows)
 
+GET    /push/vapid-key              → PushSubscriptions::vapidKey   (public)
+POST   /push/subscribe              → PushSubscriptions::subscribe  (public — a guest may subscribe before logging in; user_id is null until claimed on login) [rate-limited: push_subscribe, 10/60s]
+DELETE /push/subscribe              → PushSubscriptions::unsubscribe (isAuth only; own endpoint only)
+
+GET    /push-notifications          → PushNotifications::list
+POST   /push-notifications          → PushNotifications::create
+GET    /push-notifications/audiences → PushNotifications::audiences (push.manage privilege; declared before (:alphanum))
+GET    /push-notifications/:id      → PushNotifications::show
+PATCH  /push-notifications/:id      → PushNotifications::update
+DELETE /push-notifications/:id      → PushNotifications::delete
+POST   /push-notifications/:id/upload → PushNotifications::upload
+POST   /push-notifications/:id/test  → PushNotifications::test   (synchronous — sends to the admin's own subscriptions only) [rate-limited: push_notifications_test, 5/60s]
+POST   /push-notifications/:id/send  → PushNotifications::send   (enqueues push_notification_deliveries, one row per subscription)
+
 GET   /members                      → Members::list
 GET   /members/:id/events           → Members::events
 PATCH /members/:id/roles            → Members::updateRoles     (replaces a user's full set of assigned roles)
@@ -119,6 +133,8 @@ All controllers extend `ResourceController` and use the `ResponseTrait`.
 | `Files.php` | Serves raw files (FITS thumbnails, etc.) associated with astronomical objects |
 | `Mailings.php` | Admin mailing campaign CRUD; audience targeting, test send and bulk send via `EmailLibrary`/`EmailQueueModel` |
 | `Members.php` | Admin-only list of registered users and their event history |
+| `PushSubscriptions.php` | User-facing Web Push opt-in/opt-out (`GET /push/vapid-key`, `POST`/`DELETE /push/subscribe`) — no privilege check; `subscribe()` is fully public (rate-limited) so guests can opt in from the site-wide stargazing banner, `unsubscribe()` still requires `isAuth` |
+| `PushNotifications.php` | Admin push notification campaign CRUD; mirrors `Mailings.php` (audience targeting, test send via `WebPushLibrary`, bulk send via `PushNotificationDeliveriesModel`) — `push.manage` privilege |
 | `Objects.php` | CRUD for astronomical objects catalog (locale-aware titles/descriptions) |
 | `Photos.php` | CRUD for astrophoto archive; image upload via `PhotoUploadLibrary` |
 | `Relay.php` | Observatory power relay control (list state, toggle light with cooldown guard) |
@@ -159,6 +175,9 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 | `MailingsModel.php` | `mailings` | yes | Email campaign records (subject, content, status, send counts) |
 | `MailingEmailsModel.php` | `mailing_emails` | no | Individual recipient entries per mailing |
 | `MailingUnsubscribesModel.php` | `mailing_unsubscribes` | no | Unsubscribe log (email + optional user_id) |
+| `PushSubscriptionsModel.php` | `push_subscriptions` | no | `PushSubscriptionEntity`; one row per browser/device opted into push; unique `endpoint`; `upsertByEndpoint()` refreshes keys instead of duplicating; `user_id` is nullable — a guest may subscribe before logging in, `upsertByEndpoint()` claims the row for a user once they do (and never downgrades an already-claimed row back to anonymous) |
+| `PushNotificationsModel.php` | `push_notifications` | yes | `PushNotificationEntity`; browser push campaign records (title/body/icon/url/status/audience/counts) — mirrors `MailingsModel` |
+| `PushNotificationDeliveriesModel.php` | `push_notification_deliveries` | no | `PushNotificationDeliveryEntity`; one row per (notification, subscription) pair — mirrors `MailingEmailsModel` but keyed by subscription, not user |
 | `PaymentsModel.php` | `payments` | yes | Alfa-Bank payment records for event tickets; statuses include refunding |
 | `EmailQueueModel.php` | `email_queue` | no | Queued transactional/mailing emails for async sending |
 | `MagicLinkTokensModel.php` | `magic_link_tokens` | no | Single-use passwordless login tokens (SHA-256 hash only, raw token never persisted); rows double as the rate-limit ledger — see `isRateLimited()` |
@@ -212,6 +231,11 @@ Listed in execution order. Tables created unless noted as ALTER.
 | `2026-08-13-100000_AddMailingsCanceledStatus` | ALTER `mailings` and `mailing_emails` — adds a `canceled` status |
 | `2026-08-13-100001_AddRolesTable` | `user_roles` — seeds 3 starter roles (Разработчик/Команда/Охрана) preserving the legacy `users.role` ENUM's behaviour; role id 1 ("Разработчик") is reserved/hardcoded, see `RolesModel::DEVELOPER_ROLE_ID` |
 | `2026-08-13-100002_AddUsersRolesColumn` | ALTER `users` — adds `roles JSON` (array of `roles.id`), backfilled from the legacy `role` column, which is left in place for now as a rollback safety net |
+| `2026-08-14-100000_AddEventPhotosGroupingFields` | ALTER `events_photos` — adds grouping fields |
+| `2026-08-16-100000_AddPushSubscriptions` | `push_subscriptions` — FEAT-13 Web Push; one row per browser/device, unique `endpoint`, FK to `users` (CASCADE) |
+| `2026-08-16-100001_AddPushNotifications` | `push_notifications` — FEAT-13; mirrors `mailings` (title/body/icon/url/status/audience/counts) |
+| `2026-08-16-100002_AddPushNotificationDeliveries` | `push_notification_deliveries` — FEAT-13; mirrors `mailing_emails`, keyed by `subscription_id` rather than user |
+| `2026-08-17-100000_AllowAnonymousPushSubscriptions` | ALTER `push_subscriptions` — `user_id` becomes nullable, so a guest can subscribe before logging in (FK left untouched — NULL is exempt from the CASCADE) |
 
 ---
 
@@ -254,7 +278,7 @@ Listed in execution order. Tables created unless noted as ALTER.
 
 ### Language Files
 - Located in `app/Language/en/` and `app/Language/ru/`.
-- Files: `App.php`, `Auth.php`, `Categories.php`, `Comments.php`, `Events.php`, `General.php`, `Mailings.php`, `Members.php`, `Objects.php`, `Photos.php`, `Roles.php`, `Validation.php`.
+- Files: `App.php`, `Auth.php`, `Categories.php`, `Comments.php`, `Events.php`, `General.php`, `Mailings.php`, `Members.php`, `Objects.php`, `Photos.php`, `PushNotifications.php`, `Roles.php`, `Validation.php`.
 - Load with: `lang('Events.someKey')` after `LocaleLibrary` sets the locale.
 
 ### Libraries (`app/Libraries/`)
@@ -274,12 +298,22 @@ Listed in execution order. Tables created unless noted as ALTER.
 | `PaymentGatewayInterface` | Contract a new payment provider must implement |
 | `AlfaBankClient` | Current `PaymentGatewayInterface` implementation; test/production environment switch |
 | `TicketLibrary` | Renders event ticket PNGs (static background asset + QR code) for check-in |
+| `WebPushLibrary` | Thin wrapper around `Minishlink\WebPush\WebPush` (VAPID keys from `Config\Push`); throws `WebPushExpiredSubscriptionException` on HTTP 404/410 |
 
 ### Filters (`app/Filters/`)
 | Filter | Purpose |
 |---|---|
 | `RateLimitFilter` | Per-IP token-bucket throttling for abuse-prone public routes. Registered as alias `ratelimit` in `Config/Filters.php`; applied per-route via `['filter' => 'ratelimit:<bucket>,<capacity>,<seconds>']` (see route table above for current buckets). Disabled when `ENVIRONMENT === 'testing'` since the `file` cache backend is shared across test cases. Uses CI4's built-in `Services::throttler()`. |
 | `CorsFilter` | Legacy/unused — superseded by CI4's built-in `Cors` filter (`Config\Cors`); left in place as a removal marker only. |
+
+### CLI Commands (`app/Commands/`), cron-registered
+| Command | Group | Purpose |
+|---|---|---|
+| `system:send-email` | system | Drains the mailing queue (`mailing_emails`) and the transactional email outbox (`email_queue`), subject to `Config\MailingLimits` day/hour caps |
+| `system:send-push` | system | Drains the Web Push delivery queue (`push_notification_deliveries`), batch size 50, no rate-limit cap (push has no SMTP-style provider reputation limit) — deletes the `push_subscriptions` row on a 404/410 (`WebPushExpiredSubscriptionException`) |
+| `fits:recalculate` | — | Recalculates FITS filter aggregates (no HTTP endpoint) |
+
+Both `send-email` and `send-push` are registered for the same `* * * * *` cron cadence on the hosting cron (outside this repo).
 
 ### UUIDs / IDs
 - Most models use `$useAutoIncrement = false` with string/UUID PKs generated in `beforeInsert` callbacks.

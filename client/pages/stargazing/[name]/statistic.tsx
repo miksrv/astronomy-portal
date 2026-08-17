@@ -4,9 +4,11 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, wrapper } from '@/api'
+import { useAppSelector } from '@/api/store'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { EventRegistrationsTable, EventStatistic, EventStatisticRefreshInfo } from '@/components/pages/stargazing'
 import { requirePermissionSSR } from '@/utils/adminAuth'
+import { hasPermission } from '@/utils/permissions'
 
 interface StargazingStatisticPageProps {
     eventId: string
@@ -15,6 +17,8 @@ interface StargazingStatisticPageProps {
 
 const StargazingStatisticPage: NextPage<StargazingStatisticPageProps> = ({ eventId, eventTitle }) => {
     const { t } = useTranslation()
+    const user = useAppSelector((state) => state.auth.user)
+    const canViewUsers = hasPermission(user, ApiModel.Permission.EVENTS_USERS)
 
     const title = `${t('menu.stargazing', 'Астровыезды')} - ${eventTitle} - ${t('pages.stargazing.statistic-title', 'Статистика')}`
     const heading = `${eventTitle} - ${t('pages.stargazing.statistic-title', 'Статистика')}`
@@ -44,7 +48,7 @@ const StargazingStatisticPage: NextPage<StargazingStatisticPageProps> = ({ event
 
             <EventStatistic eventId={eventId} />
 
-            <EventRegistrationsTable eventId={eventId} />
+            {canViewUsers && <EventRegistrationsTable eventId={eventId} />}
 
             <AppFooter />
         </AppLayout>

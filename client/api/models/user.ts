@@ -31,6 +31,8 @@ export interface AdminUserItem {
     activityAt?: string
     createdAt: string
     eventsCount: number
+    pushEnabled: boolean
+    pushSubscriptionCount: number
 }
 
 export interface AdminUserEvent {

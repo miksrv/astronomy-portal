@@ -68,6 +68,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
             permissions: [ApiModel.Permission.MAILINGS_MANAGE]
         },
         {
+            href: '/admin/push-notifications',
+            label: t('components.common.app-layout.app-header.push-notifications', 'Push-уведомления'),
+            permissions: [ApiModel.Permission.PUSH_MANAGE]
+        },
+        {
             href: '/admin/users',
             label: t('menu.users', 'Пользователи'),
             permissions: [ApiModel.Permission.USERS_MANAGE]

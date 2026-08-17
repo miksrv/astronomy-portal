@@ -39,7 +39,9 @@ class RelayLibrary {
      */
     public function getList(string $locale = 'ru'): array {
         $client   = Services::curlrequest();
-        $response = $client->get(getenv('app.observatory.controller') . 'pstat.xml');
+        $response = $client->get(getenv('app.observatory.controller') . 'pstat.xml', [
+            'auth' => [getenv('app.observatory.controller.user'), getenv('app.observatory.controller.password')],
+        ]);
 
         $xmlDocument = simplexml_load_string($response->getBody(), "SimpleXMLElement", LIBXML_NOCDATA);
         $jsonObject  = json_encode($xmlDocument);
@@ -72,7 +74,9 @@ class RelayLibrary {
         $action = $state === 0 ? 'f' : 'n'; // f - 'off', n - 'on'
         $format = "rb{$relayId}{$action}.cgi";
 
-        return $client->get(getenv('app.observatory.controller') . $format);
+        return $client->get(getenv('app.observatory.controller') . $format, [
+            'auth' => [getenv('app.observatory.controller.user'), getenv('app.observatory.controller.password')],
+        ]);
     }
 
     /**

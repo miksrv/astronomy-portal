@@ -38,6 +38,8 @@ app.latitude  = 51.7727
 app.longitude = 55.0988
 
 app.observatory.controller = http://localhost:8081/
+app.observatory.controller.user = admin
+app.observatory.controller.password = admin
 app.observatory.webcam_1 = http://localhost:8081/
 app.observatory.webcam_2 = http://localhost:8081/
 
@@ -126,6 +128,14 @@ smtp.user = ''
 smtp.pass = ''
 smtp.crypto = 'ssl'
 smtp.senderName = ''
+
+#--------------------------------------------------------------------
+# WEB PUSH (VAPID)
+#--------------------------------------------------------------------
+
+push.vapidPublicKey  = ""
+push.vapidPrivateKey = ""
+push.vapidSubject    = ""
 
 #--------------------------------------------------------------------
 # CONTENT SECURITY POLICY

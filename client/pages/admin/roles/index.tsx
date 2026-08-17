@@ -113,6 +113,10 @@ const RolesPage: NextPage<object> = () => {
                 [ApiModel.Permission.PIPELINE_MANAGE]: t(
                     'pages.roles.permission-pipeline-manage',
                     'Управление pipeline обсерватории'
+                ),
+                [ApiModel.Permission.PUSH_MANAGE]: t(
+                    'pages.roles.permission-push-manage',
+                    'Управление push-уведомлениями'
                 )
             }
 

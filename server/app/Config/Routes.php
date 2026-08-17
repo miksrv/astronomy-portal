@@ -150,6 +150,30 @@ $routes->group('mailings', static function ($routes) {
     $routes->options('(:any)', static function () {});
 });
 
+/** Push Subscriptions Controller (user-facing opt-in/out) **/
+$routes->group('push', static function ($routes) {
+    $routes->get('vapid-key', 'PushSubscriptions::vapidKey');
+    $routes->post('subscribe', 'PushSubscriptions::subscribe', ['filter' => 'ratelimit:push_subscribe,10,60']);
+    $routes->delete('subscribe', 'PushSubscriptions::unsubscribe');
+    $routes->options('/', static function () {});
+    $routes->options('(:any)', static function () {});
+});
+
+/** Push Notifications Controller (admin campaigns) **/
+$routes->group('push-notifications', static function ($routes) {
+    $routes->get('/', 'PushNotifications::list');
+    $routes->post('/', 'PushNotifications::create');
+    $routes->get('audiences', 'PushNotifications::audiences'); // before (:alphanum)
+    $routes->get('(:alphanum)', 'PushNotifications::show/$1');
+    $routes->patch('(:alphanum)', 'PushNotifications::update/$1');
+    $routes->delete('(:alphanum)', 'PushNotifications::delete/$1');
+    $routes->post('(:alphanum)/upload', 'PushNotifications::upload/$1');
+    $routes->post('(:alphanum)/test', 'PushNotifications::test/$1', ['filter' => 'ratelimit:push_notifications_test,5,60']);
+    $routes->post('(:alphanum)/send', 'PushNotifications::send/$1');
+    $routes->options('/', static function () {});
+    $routes->options('(:any)', static function () {});
+});
+
 /** Members Controller **/
 $routes->group('members', static function ($routes) {
     $routes->get('/', 'Members::list');

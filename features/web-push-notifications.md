@@ -1,6 +1,6 @@
 # FEAT-13 — Web Push Notifications
 
-**Status:** Planned
+**Status:** Implemented (2026-08-16) — backend + frontend code complete on `develop` (uncommitted working tree). Pending manual end-to-end verification (real browser subscription, cron registration on the hosting) — see "Implementation Notes (as built)" below for exactly what shipped and where it deliberately deviates from the plan on this page.
 **Priority:** Medium
 **Affects:** Backend (CodeIgniter 4) + Frontend (Next.js)
 **Parallel implementation:** Backend and Frontend can work in parallel once the API contract below is agreed — the mechanism is a deliberate mirror of the existing email mailing system (`FEAT-1`).
@@ -366,17 +366,95 @@ Prefix `pages.push-notifications.*` (list/form/detail strings, mirroring `pages.
 
 ---
 
+## Implementation Notes (as built, 2026-08-16)
+
+Implemented via two parallel passes (backend, frontend) against this spec, after a codebase recon that found several places where the plan above didn't match real conventions. **The corrections below are what actually shipped** — treat this section as authoritative over the task descriptions above wherever they conflict.
+
+### Access control — not `role === 'admin'`
+
+Every `PushNotifications` (admin) controller method uses the project's real pattern instead of BE-7's `role === 'admin'`:
+```php
+if (!$this->session->isAuth) { return $this->failUnauthorized(lang('App.accessDenied')); }
+if (!$this->session->can(Permission::PUSH_MANAGE)) { return $this->failForbidden(lang('App.accessDenied')); }
+```
+A new privilege `Permission::PUSH_MANAGE = 'push.manage'` was added to `server/app/Enums/Permission.php` (no migration needed — it's a plain PHP enum case; granting it to a role is a data change via `/admin/roles`). The root `README.md` "User Roles & Permissions" table was updated with this privilege in the same change, per the project's maintenance rule. `client/api/models/permission.ts` mirrors it, and `client/pages/admin/roles/index.tsx`'s `Record<Permission, string>` label map needed a new entry for it (TS exhaustiveness — not anticipated in the original plan, required for `yarn build`).
+
+`PushSubscriptions` (user-facing `/push/subscribe`) only checks `isAuth` — no `PUSH_MANAGE` needed, since a user only ever manages their own subscription.
+
+### VAPID keys & config
+
+- `server/app/Config/Push.php` — thin class with `getenv()`-backed static getters (`vapidPublicKey()`/`vapidPrivateKey()`/`vapidSubject()`), following the `Config\MailingLimits` precedent but reading env instead of hardcoding, since these are secrets.
+- A real VAPID keypair was generated via `Minishlink\WebPush\VAPID::createVapidKeys()` and written to `server/.env`; `server/env` (the committed template) got the same three keys as empty placeholders.
+- `push.vapidSubject = "mailto:no-reply@miksoft.pro"` — reuses the existing `smtp.mail`/`smtp.user` address already used by `EmailLibrary`.
+
+### `WebPushLibrary` — simpler than planned
+
+`minishlink/web-push` v11's `MessageSentReport` already exposes `isSubscriptionExpired()`, so `server/app/Libraries/WebPushLibrary.php` uses that directly instead of manually inspecting the HTTP status code for 404/410. The report→exception mapping is factored into a private `assertReportSucceeded()` method so `server/tests/unit/Libraries/WebPushLibraryTest.php` can exercise all branches (success/404/410/500) via reflection against hand-built PSR-7 responses — no real network calls, mirroring `EmailLibraryTest`'s style.
+
+### Models — real audience-resolution method names
+
+Rather than inventing new logic, audience resolution reuses the exact pattern already in `Mailings.php`/`UsersModel`/`EventsUsersModel`, extended with push-specific siblings:
+- `UsersModel::getPushSubscribers()` — mirrors `getNewsletterSubscribers()`.
+- `EventsUsersModel::getPushRecipientsByEventId()`, `getPushAudienceByEventId()`, `getPushAudienceEvents()` — mirror the `getMailing*` equivalents, filtered to users with ≥1 `push_subscriptions` row.
+
+**Important fix folded into this work:** `UsersModel::getUsersList()` (backing `/admin/users`) already had a `LEFT JOIN events_users eu` with `COUNT(eu.id) AS events_count` — correct only with a single join. Adding the new `LEFT JOIN push_subscriptions ps` for `pushSubscriptionCount` would have inflated both counts via cartesian row multiplication, so **both aggregates were rewritten to `COUNT(DISTINCT eu.id)` / `COUNT(DISTINCT ps.id)`** — not just the new column, the pre-existing `eventsCount` was quietly wrong-by-omission until this fix.
+
+### Frontend corrections vs. the FE-1..FE-10 tasks above
+
+- **FE-3 / opt-in UI**: `/profile` had *no* existing settings/toggle section at all (the task description's "next to the existing newsletter/Telegram preferences" doesn't exist — email subscription is fully automatic, no UI toggle). Shipped as a new standalone component, `client/components/pages/profile/PushNotificationToggle.tsx`, rendered next to `ProfileCard` rather than inside it.
+- **No `Switch` component** in `simple-react-ui-kit` — the opt-in control uses `Checkbox`, matching the role-assignment checkboxes already used in `client/pages/admin/users/index.tsx`.
+- **FE-9 / `robots.txt`**: skipped — `client/public/robots.txt` already has a blanket `Disallow: /admin/` (and `/en/admin/`) that covers `/admin/push-notifications`; no edit was needed or made.
+- **SSR guard**: the real helper is `requirePermissionSSR(store, context, permission, redirectTo?)` (`client/utils/adminAuth.ts`), not a `requireAdminSSR()` — used with `ApiModel.Permission.PUSH_MANAGE` in all three `client/pages/admin/push-notifications/*` pages.
+- `urlBase64ToUint8Array` (VAPID key decoding, `client/utils/push.ts`) needed a `new Uint8Array(n)` + index-loop implementation instead of `Uint8Array.from(...)` — the latter typed as `Uint8Array<ArrayBufferLike>`, which this TS version rejects where `BufferSource`/`Uint8Array<ArrayBuffer>` is required for `pushManager.subscribe({ applicationServerKey })`.
+- `client/eslint.config.mjs` needed a new ignore entry for `public/sw.js` (a plain vanilla JS file, not part of the TS project graph), matching existing ignores for other vendored scripts.
+- No `preview()`/`cancel()` endpoints were built for push notifications (unlike `Mailings`) — not in this feature's scope; `/admin/push-notifications/[id].tsx` also omits the rate-limit/countdown UI block `mailing/[id].tsx` has, since push has no provider-side send-rate limit (business rule 7).
+
+### What's verified vs. what still needs a human
+
+**Automated / verified in this pass:**
+- `composer test` — 359/359 green (320 pre-existing + 39 new: entities, `WebPushLibrary`, plus existing suites unaffected).
+- `composer migration:run` — all three migrations applied cleanly; FKs confirmed via `SHOW CREATE TABLE`.
+- `php spark routes` — `push`/`push-notifications` groups present, named routes (`vapid-key`, `audiences`) correctly ordered before the `(:alphanum)` catch-all.
+- A throwaway smoke-test command exercised the full model chain against a real dev DB (`upsertByEndpoint` update-in-place on re-subscribe, `getPushSubscribers()`, batch insert + `getQueuedBatch` + `updateCounts`) — written, run, then deleted along with its fixtures.
+- Frontend: `yarn eslint:fix`, `yarn prettier:fix`, `yarn test` (224/224), `yarn build` — all green.
+
+**Still needs manual verification (can't be done from an agent sandbox):**
+- Granting `PUSH_MANAGE` to an actual admin account via `/admin/roles` (nothing has it by default — no admin bypass exists).
+- A real browser subscribing via `/profile`'s toggle, confirming a `push_subscriptions` row appears.
+- `/admin/push-notifications/:id` → test-send actually reaching a subscribed device, and click-through opening the configured `url`.
+- Launching a campaign, then running `php spark system:send-push` manually and confirming `sent`/`completed` transitions and 404/410 cleanup.
+- Registering `system:send-push` in the real hosting cron alongside `system:send-email` (`* * * * *`) — a deployment step, not code.
+
+---
+
+## Follow-up (2026-08-17) — Anonymous subscribe + site-wide banner
+
+The original implementation only offered opt-in via a checkbox buried in `/profile` — reachable only by users who already logged in and went looking for it. This follow-up moves discovery to where the audience actually is: a dismissible floating banner shown on every `/stargazing*` page, offered to **guests and logged-in users alike**.
+
+**What changed:**
+- `push_subscriptions.user_id` is now nullable (`2026-08-17-100000_AllowAnonymousPushSubscriptions`) — a guest can create a subscription with no owning user yet. The FK itself is untouched (still `CASCADE`/`CASCADE`); a NULL value is simply exempt from it.
+- `POST /push/subscribe` no longer requires `isAuth` — it's public, rate-limited instead (`ratelimit:push_subscribe,10,60`, same bucket shape as `comments_create`). `DELETE /push/subscribe` is unchanged (still `isAuth`-only).
+- `PushSubscriptionsModel::upsertByEndpoint()` takes a nullable `$userId` and never downgrades an already-claimed row back to anonymous — only an authenticated call can set/change ownership.
+- **Claim on login**: the frontend re-POSTs the browser's existing subscription (same `endpoint`/`keys`) right after `isAuth` flips to true (any login/registration path — OAuth, magic link, or a fresh page load's sliding-session refresh). Since the request is now authenticated, the same `upsertByEndpoint()` call claims the row for that user — no new backend endpoint needed.
+- **Multi-device** required no backend change — it was already correct: `endpoint` is the unique key per browser/device, `user_id` just tags ownership, and `PushNotifications::send()`/`findByUser()` already fan out over every subscription a user has.
+- New frontend component `PushSubscribeBanner` (`client/components/common/push-subscribe-banner/`), mounted from `AppLayout` only when `pathname` starts with `/stargazing`. Visually mirrors the existing `ReviewFloatingPrompt` (fixed bottom bar, cookie-based dismiss, stacks above `CookieConsent`) rather than introducing a new UI pattern. Dismissing it re-shows the banner after 14 days, not permanently.
+- New hook `usePushClaim` (`client/api/usePushClaim.ts`), mounted via a bare `PushClaimSync` component in `_app.tsx` alongside the existing `AuthSessionSync` — runs on every route regardless of layout.
+
+**Deliberately out of scope:** no unsubscribe path for a guest who never logs in (browser-level permission revocation is their only lever); anonymous subscriptions stay invisible to admin campaign targeting (`getPushSubscribers()` et al. join through `users`, unaffected); no cleanup command for subscriptions that never get claimed (same reasoning as the Open Questions section above).
+
+---
+
 ## Acceptance Criteria
 
-- [ ] `push_subscriptions`, `push_notifications`, `push_notification_deliveries` migrations run cleanly with correct FKs
-- [ ] `POST /push/subscribe` upserts by `endpoint`; `DELETE /push/subscribe` removes the row
-- [ ] Admin can create a draft push notification, edit it, upload an icon, and delete it while still `draft`
-- [ ] `/push-notifications/:id/test` delivers a real browser notification to the admin's own subscribed device(s)
-- [ ] `/push-notifications/:id/send` enqueues one delivery row per subscription in the chosen audience and flips status to `sending`
-- [ ] `system:send-push` drains the queue, respects batching, marks `sent`/`error`, deletes expired subscriptions on 404/410, and marks the campaign `completed` once drained
-- [ ] `/admin/users` admin page shows whether each user has push enabled and how many active subscriptions
-- [ ] Clicking a delivered notification opens the configured `url`
-- [ ] `/profile` has a working opt-in/opt-out toggle that reflects real subscription state
-- [ ] `/push-notifications` is admin-only (SSR guard) and added to `robots.txt`
-- [ ] All new strings exist in both `en` and `ru` locale files
-- [ ] `yarn eslint:fix`, `yarn prettier:fix`, `yarn test`, `yarn build` (frontend) and `composer test` (backend) all pass
+- [x] `push_subscriptions`, `push_notifications`, `push_notification_deliveries` migrations run cleanly with correct FKs
+- [x] `POST /push/subscribe` upserts by `endpoint`; `DELETE /push/subscribe` removes the row (verified via a throwaway smoke-test command against a real dev DB)
+- [x] Admin can create a draft push notification, edit it, upload an icon, and delete it while still `draft` (code complete; not yet click-tested through the real admin UI)
+- [ ] `/push-notifications/:id/test` delivers a real browser notification to the admin's own subscribed device(s) — **needs manual verification**, requires a real subscribed browser + `PUSH_MANAGE` granted via `/admin/roles`
+- [x] `/push-notifications/:id/send` enqueues one delivery row per subscription in the chosen audience and flips status to `sending`
+- [x] `system:send-push` drains the queue, respects batching, marks `sent`/`error`, deletes expired subscriptions on 404/410, and marks the campaign `completed` once drained
+- [x] `/admin/users` admin page shows whether each user has push enabled and how many active subscriptions
+- [ ] Clicking a delivered notification opens the configured `url` — **needs manual verification** (real device + click)
+- [x] `/profile` has a working opt-in/opt-out toggle that reflects real subscription state (`PushNotificationToggle`; code complete, not yet exercised in a real browser)
+- [x] `/push-notifications` is admin-only (SSR guard via `requirePermissionSSR(..., ApiModel.Permission.PUSH_MANAGE)`) — `robots.txt` needed **no change**, already covered by the existing blanket `Disallow: /admin/`
+- [x] All new strings exist in both `en` and `ru` locale files
+- [x] `yarn eslint:fix`, `yarn prettier:fix`, `yarn test`, `yarn build` (frontend) and `composer test` (backend) all pass

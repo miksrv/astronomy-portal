@@ -63,3 +63,14 @@ export const REVIEWS_PAGE_SIZE = 10
 // Number of event gallery photos fetched per page (SSR-prefetched first page,
 // then loaded further via the "Смотреть все"/scroll flow on the event page).
 export const PHOTOS_PAGE_SIZE = 15
+
+// Cookie name + duration for remembering that a visitor closed the site-wide
+// "enable push notifications" banner shown on /stargazing pages, mirroring
+// REVIEW_PROMPT_DISMISS_COOKIE_PREFIX's mechanics — dismissing it isn't
+// permanent, the banner reappears after this many seconds.
+export const PUSH_PROMPT_DISMISS_COOKIE = 'pushPromptDismissed'
+export const PUSH_PROMPT_DISMISS_DURATION = 14 * 24 * 60 * 60 // seconds (14 days)
+
+// How long the push banner waits after mount before sliding in, so it
+// doesn't flash in instantly on page load.
+export const PUSH_PROMPT_APPEAR_DELAY = 4000 // ms

@@ -358,6 +358,76 @@ class EventsUsersModel extends ApplicationBaseModel
     }
 
     /**
+     * Returns users registered for an event who also have at least one
+     * active Web Push subscription, for use as push notification recipients.
+     *
+     * Mirrors getMailingRecipientsByEventId(), but the eligibility gate is
+     * "has a push_subscriptions row" rather than the newsletter opt-out
+     * setting — push opt-in is independent of subscribe_newsletter (see
+     * root CLAUDE.md's FEAT-13 note).
+     *
+     * @return array Rows with id (user id).
+     */
+    public function getPushRecipientsByEventId(string $eventId): array
+    {
+        return $this->db->table('events_users eu')
+            ->select('DISTINCT u.id', false)
+            ->join('users u', 'eu.user_id = u.id')
+            ->join('push_subscriptions ps', 'ps.user_id = u.id')
+            ->where('eu.event_id', $eventId)
+            ->where('eu.deleted_at IS NULL')
+            ->whereIn('eu.status', ['pending', 'confirmed'])
+            ->where('u.deleted_at IS NULL')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Returns event title and count of registered users with at least one
+     * active push subscription for a specific event.
+     *
+     * @return array|null Row with title_ru, title_en, user_count or null if not found.
+     */
+    public function getPushAudienceByEventId(string $eventId): ?array
+    {
+        return $this->db->table('events e')
+            ->select('e.title_ru, e.title_en, COUNT(DISTINCT eu.user_id) as user_count')
+            ->join('events_users eu', 'eu.event_id = e.id')
+            ->join('users u', 'eu.user_id = u.id')
+            ->join('push_subscriptions ps', 'ps.user_id = u.id')
+            ->where('e.id', $eventId)
+            ->where('eu.deleted_at IS NULL')
+            ->whereIn('eu.status', ['pending', 'confirmed'])
+            ->where('u.deleted_at IS NULL')
+            ->get()
+            ->getRowArray() ?: null;
+    }
+
+    /**
+     * Returns all events with at least one registered user who has an
+     * active push subscription, ordered newest first; used for push
+     * notification audience selection.
+     *
+     * @return array Rows with event_id, title_ru, title_en, user_count.
+     */
+    public function getPushAudienceEvents(): array
+    {
+        return $this->db->table('events e')
+            ->select('e.id as event_id, e.title_ru, e.title_en, COUNT(DISTINCT eu.user_id) as user_count')
+            ->join('events_users eu', 'eu.event_id = e.id')
+            ->join('users u', 'eu.user_id = u.id')
+            ->join('push_subscriptions ps', 'ps.user_id = u.id')
+            ->where('eu.deleted_at IS NULL')
+            ->whereIn('eu.status', ['pending', 'confirmed'])
+            ->where('u.deleted_at IS NULL')
+            ->groupBy('e.id')
+            ->having('user_count >', 0)
+            ->orderBy('e.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
      * Marks pending bookings whose payment hold has expired as 'failed',
      * freeing their seats (excluded from capacity/audience/statistics
      * queries). The row is kept — not soft-deleted — so a later booking

@@ -36,4 +36,10 @@ enum Permission: string
     // endpoint checks it yet, but the role/assignment can be set up ahead of
     // the feature shipping.
     case PIPELINE_MANAGE       = 'pipeline.manage';
+    // All admin `/push-notifications*` endpoints (CRUD on push campaigns,
+    // test-send, launch) — distinct from the user-facing POST/DELETE
+    // /push/subscribe, which only requires isAuth (any authenticated user
+    // may opt in/out of push on their own devices, same as EVENTS_USERS vs
+    // USERS_MANAGE above).
+    case PUSH_MANAGE           = 'push.manage';
 }
