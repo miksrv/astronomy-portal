@@ -121,10 +121,12 @@ class EventsModel extends ApplicationBaseModel
     /**
      * Retrieves a list of past events or a single event by ID, localised to the given locale.
      *
-     * When $eventId is provided, returns details for that specific event (including content
-     * and registration window fields). Otherwise returns all events whose local (Orenburg)
-     * calendar date is before today — i.e. events archive at the start of the day *after*
-     * their date, not at their exact time — ordered newest first.
+     * When $eventId is provided, returns details for that specific event (including the full
+     * content and registration window fields). Otherwise returns all events whose local
+     * (Orenburg) calendar date is before today — i.e. events archive at the start of the day
+     * *after* their date, not at their exact time — ordered newest first; each gets a short
+     * plain-text `excerpt` (see `excerptFromMarkdown()`) instead of the full `content`, so the
+     * archive list can preview the announcement without shipping every event's full markdown.
      *
      * @param string   $locale  Locale code for title/content selection ('ru' or 'en'). Default is 'ru'.
      * @param int|null $eventId Optional event ID. When set, retrieves that specific event only.
@@ -134,9 +136,9 @@ class EventsModel extends ApplicationBaseModel
     {
         helper('locale');
 
-        $eventsQuery = $this->select('id, title_en, title_ru, date, cover_file_name, cover_file_ext, max_tickets, views' . (
+        $eventsQuery = $this->select('id, title_en, title_ru, date, cover_file_name, cover_file_ext, max_tickets, views, location, content_en, content_ru' . (
             $eventId !== null
-                ? ', content_en, content_ru, end_date, requires_registration, registration_start, registration_end, ticket_price, location, address, latitude, longitude, min_age'
+                ? ', end_date, requires_registration, registration_start, registration_end, ticket_price, address, latitude, longitude, min_age'
                 : '')
         );
 
@@ -155,14 +157,66 @@ class EventsModel extends ApplicationBaseModel
         foreach ($events as $event) {
             $event->title = getLocalizedString($locale, $event->title_en, $event->title_ru);
 
+            $content = getLocalizedString($locale, $event->content_en, $event->content_ru);
+
             if ($eventId !== null) {
-                $event->content = getLocalizedString($locale, $event->content_en, $event->content_ru);
+                $event->content = $content;
+            } else {
+                $event->excerpt = $this->excerptFromMarkdown($content);
             }
 
             unset($event->title_en, $event->title_ru, $event->content_en, $event->content_ru);
         }
 
         return $events;
+    }
+
+    /**
+     * Reduces a markdown event description down to a short, plain-text preview for list/archive
+     * cards — strips the most common markdown syntax (headings, emphasis, links, images, code,
+     * blockquotes, list bullets) rather than showing raw markdown characters, then truncates to
+     * $maxLength on a whole-word boundary with a trailing ellipsis.
+     *
+     * @param string $markdown  Localised, unrendered markdown content.
+     * @param int    $maxLength Maximum length of the returned excerpt, in characters.
+     * @return string|null The plain-text excerpt, or null if there's no content to preview.
+     */
+    private function excerptFromMarkdown(string $markdown, int $maxLength = 240): ?string
+    {
+        $text = trim($markdown);
+
+        if ($text === '') {
+            return null;
+        }
+
+        $text = preg_replace('/```.*?```/s', ' ', $text) ?? $text;         // fenced code blocks
+        $text = preg_replace('/`([^`]+)`/', '$1', $text) ?? $text;         // inline code
+        $text = preg_replace('/!\[([^\]]*)]\([^)]*\)/', '$1', $text) ?? $text; // images -> alt text
+        $text = preg_replace('/\[([^\]]*)]\([^)]*\)/', '$1', $text) ?? $text;  // links -> label
+        $text = preg_replace('/^#{1,6}\s*/m', '', $text) ?? $text;         // headings
+        $text = preg_replace('/(\*\*|__)(.*?)\1/', '$2', $text) ?? $text;  // bold
+        $text = preg_replace('/(\*|_)(.*?)\1/', '$2', $text) ?? $text;     // italic
+        $text = preg_replace('/^>\s?/m', '', $text) ?? $text;              // blockquotes
+        $text = preg_replace('/^[-*+]\s+/m', '', $text) ?? $text;          // list bullets
+        $text = trim(preg_replace('/\s+/', ' ', $text) ?? $text);          // collapse whitespace
+
+        if ($text === '') {
+            return null;
+        }
+
+        if (mb_strlen($text) <= $maxLength) {
+            return $text;
+        }
+
+        // Cut on the last whole word within the limit so the excerpt doesn't end mid-word.
+        $truncated = mb_substr($text, 0, $maxLength);
+        $lastSpace = mb_strrpos($truncated, ' ');
+
+        if ($lastSpace !== false) {
+            $truncated = mb_substr($truncated, 0, $lastSpace);
+        }
+
+        return rtrim($truncated) . '…';
     }
 
     /**
