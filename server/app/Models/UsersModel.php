@@ -141,6 +141,28 @@ class UsersModel extends ApplicationBaseModel
     }
 
     /**
+     * Retrieves all users who have at least one active Web Push subscription.
+     *
+     * Unlike getNewsletterSubscribers(), push opt-in is independent of the
+     * settings.subscribe_newsletter flag — a user's push_subscriptions rows
+     * are the only source of truth for "has push enabled" (see root
+     * CLAUDE.md's FEAT-13 note). DISTINCT/groupBy guards against double
+     * counting a user with more than one subscribed device.
+     *
+     * @return array Array of plain objects with id, email, and locale fields.
+     */
+    public function getPushSubscribers(): array
+    {
+        return $this->db->table($this->table . ' u')
+            ->select('DISTINCT u.id, u.email, u.locale', false)
+            ->join('push_subscriptions ps', 'ps.user_id = u.id')
+            ->where('u.deleted_at IS NULL')
+            ->groupBy('u.id')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
      * Updates the user's last-activity timestamp.
      *
      * Debounced: the update is skipped if activity was already recorded within the
@@ -195,16 +217,26 @@ class UsersModel extends ApplicationBaseModel
             'createdAt'   => 'u.created_at',
             // Use the aggregate expression directly — ordering by alias is unreliable
             // in MySQL/MariaDB when the query builder wraps it in backticks.
-            'eventsCount' => 'COUNT(eu.id)',
+            'eventsCount' => 'COUNT(DISTINCT eu.id)',
         ];
 
         $orderColumn    = $sortColumnMap[$sortBy] ?? 'u.created_at';
         $orderDirection = strtoupper($sortDir) === 'ASC' ? 'ASC' : 'DESC';
 
+        // The push_subscriptions join is a second one-to-many fan-out on top
+        // of events_users — without DISTINCT on both COUNTs, the two joins
+        // form a cartesian product that inflates both counts (e.g. a user
+        // with 2 events and 2 push subscriptions would otherwise show 4 of
+        // each). COUNT(DISTINCT ...) keeps each count accurate regardless of
+        // how many rows the other join contributes.
         $builder = $this->db->table('users u')
-            ->select('u.id, u.name, u.avatar, u.roles, u.auth_type, u.locale, u.sex, u.birthday, u.activity_at, u.created_at, COUNT(eu.id) AS events_count')
+            ->select(
+                'u.id, u.name, u.avatar, u.roles, u.auth_type, u.locale, u.sex, u.birthday, u.activity_at, u.created_at, ' .
+                'COUNT(DISTINCT eu.id) AS events_count, COUNT(DISTINCT ps.id) AS push_subscription_count'
+            )
             ->join('events_users eu', 'eu.user_id = u.id AND eu.deleted_at IS NULL', 'left')
             ->join('events e', 'e.id = eu.event_id AND e.deleted_at IS NULL', 'left')
+            ->join('push_subscriptions ps', 'ps.user_id = u.id', 'left')
             ->where('u.deleted_at IS NULL')
             ->groupBy('u.id')
             ->orderBy($orderColumn, $orderDirection)
@@ -280,17 +312,19 @@ class UsersModel extends ApplicationBaseModel
             }
 
             $items[] = [
-                'id'          => $user->id,
-                'name'        => $user->name,
-                'avatar'      => $user->avatar,
-                'roles'       => $userRoles,
-                'authType'    => $user->auth_type,
-                'locale'      => $user->locale,
-                'sex'         => $user->sex,
-                'age'         => $age,
-                'activityAt'  => $user->activity_at,
-                'createdAt'   => $user->created_at,
-                'eventsCount' => (int) $user->events_count,
+                'id'                    => $user->id,
+                'name'                  => $user->name,
+                'avatar'                => $user->avatar,
+                'roles'                 => $userRoles,
+                'authType'              => $user->auth_type,
+                'locale'                => $user->locale,
+                'sex'                   => $user->sex,
+                'age'                   => $age,
+                'activityAt'            => $user->activity_at,
+                'createdAt'             => $user->created_at,
+                'eventsCount'           => (int) $user->events_count,
+                'pushEnabled'           => (int) $user->push_subscription_count > 0,
+                'pushSubscriptionCount' => (int) $user->push_subscription_count,
             ];
         }
 
