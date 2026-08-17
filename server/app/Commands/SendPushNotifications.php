@@ -89,11 +89,11 @@ class SendPushNotifications extends BaseCommand
             } catch (WebPushExpiredSubscriptionException $e) {
                 log_message('info', 'Push subscription expired, removing: {exception}', ['exception' => $e]);
 
-                // Mark the delivery rejected *before* removing the
-                // subscription — push_notification_deliveries has an
-                // ON DELETE CASCADE FK to push_subscriptions, so deleting
-                // the subscription first would cascade-delete this very
-                // delivery row and turn the update below into a no-op.
+                // Mark the delivery rejected, then remove the subscription.
+                // push_notification_deliveries.subscription_id is
+                // ON DELETE SET NULL (not CASCADE), so this row survives the
+                // subscription's removal as a permanent audit record instead
+                // of disappearing along with it.
                 $deliveriesModel->update($delivery->id, [
                     'status'        => PushNotificationDeliveryEntity::STATUS_REJECTED,
                     'error_message' => substr($e->getMessage(), 0, 500),
