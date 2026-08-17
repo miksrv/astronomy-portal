@@ -300,16 +300,27 @@
                 <!-- FOOTER -->
                 <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="footer">
                     <tr>
-                        <td style="border-radius: 0 0 8px 8px; padding: 24px; text-align: center;">
-                            <p style="color: #656d76; font-size: 12px; margin: 0 0 8px; font-family: Helvetica, Arial, sans-serif;">
-                                <a href="https://astro.miksoft.pro" target="_blank" style="color: #3b82f6; text-decoration: underline; font-family: Helvetica, Arial, sans-serif;">смотриназвезды.рф</a>
-                                &nbsp;&bull;&nbsp;
-                                <span style="color: #656d76;">51.7&deg;N, 55.0&deg;E</span>
+                        <td style="border-radius: 0 0 8px 8px; padding: 0px; text-align: center;">
+                            <p style="color: #656d76; font-size: 12px; margin: 0 0 0px; font-family: Helvetica, Arial, sans-serif;">
+                                <a href="https://astro.miksoft.pro" target="_blank" style="color: #24292f; text-decoration: none; font-family: Helvetica, Arial, sans-serif; font-weight: bold; letter-spacing: 0.5px;">СМОТРИ НА ЗВЁЗДЫ</a>
+                                <br>
+                                <span style="color: #656d76;">Галактика &laquo;Млечный Путь&raquo;, Планета Земля &mdash; 51.7&deg;N, 55.0&deg;E</span>
                             </p>
                             <hr style="border: none; border-top: 1px solid #e1e4e8; margin: 12px 0;">
+                            <p style="color: #656d76; font-size: 12px; margin: 0 0 2px; font-family: Helvetica, Arial, sans-serif;">
+                                <a href="https://astro.miksoft.pro" target="_blank" style="color: #3b82f6; text-decoration: underline; font-family: Helvetica, Arial, sans-serif;">Сайт</a>
+                                &nbsp;&bull;&nbsp;
+                                <a href="https://t.me/look_at_stars" target="_blank" style="color: #3b82f6; text-decoration: underline; font-family: Helvetica, Arial, sans-serif;">Telegram</a>
+                                &nbsp;&bull;&nbsp;
+                                <a href="mailto:orenburgmedia@yandex.ru" style="color: #3b82f6; text-decoration: underline; font-family: Helvetica, Arial, sans-serif;">Контакты</a>
+                                &nbsp;&bull;&nbsp;
+                                <a href="https://astro.miksoft.pro/privacy" target="_blank" style="color: #3b82f6; text-decoration: underline; font-family: Helvetica, Arial, sans-serif;">Политика конфиденциальности</a>
+                            </p>
                             <p style="color: #656d76; font-size: 12px; margin: 0; font-family: Helvetica, Arial, sans-serif;">
+                                Вы получили это письмо, потому что подписались на рассылку проекта &laquo;Смотри на звёзды&raquo;.
+                                <br>
                                 <a href="<?= htmlspecialchars($unsubscribeUrl ?? '#', ENT_QUOTES, 'UTF-8') ?>"
-                                   style="color: #3b82f6; text-decoration: underline; font-family: Helvetica, Arial, sans-serif;">Отписаться от рассылки</a>
+                                   style="color: #656d76; text-decoration: underline; font-family: Helvetica, Arial, sans-serif;">Отписаться от рассылки</a>
                             </p>
                         </td>
                     </tr>

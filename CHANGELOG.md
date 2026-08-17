@@ -8,6 +8,7 @@
 - Fixed `push_notification_deliveries` rows silently disappearing (instead of staying `rejected`) when `system:send-push` removed an expired subscription — the FK was `ON DELETE CASCADE`, so the delivery record vanished along with it, undercounting the campaign's `error_count`; switched to `ON DELETE SET NULL` so the delivery row now survives as a permanent record
 - Fixed failed email sends dumping their full SMTP debug output (headers, subject, body) into the shared app log — `system:send-email` and `Mailings::test()` now log a short `warning`-level line with the recipient and mailing/queue ID instead; the full debug dump still goes to the dedicated `email-*.log`
 - Removed the unused `longman/telegram-bot` dependency and its `TelegramLibrary` wrapper — the only real caller was an admin alert on failed auto-refunds during event cancellation, which is now just logged (as it already was alongside the alert) instead of also pinging Telegram; added `guzzlehttp/guzzle` as a direct dependency since it was actually needed at runtime as the PSR-18 HTTP client for `minishlink/web-push`, previously pulled in only transitively through the removed package
+- Reworked the `email_newsletter` footer: the site link is now a bold "СМОТРИ НА ЗВЁЗДЫ" title over a "Галактика «Млечный Путь», Планета Земля — 51.7°N, 55.0°E" tagline, followed by a Сайт/Telegram/Контакты/Политика конфиденциальности link row and a subscription-reason line above the (now grey, matching the rest of the footer) unsubscribe link
 
 ## 4.9.0
 
