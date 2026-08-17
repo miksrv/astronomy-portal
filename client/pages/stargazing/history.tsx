@@ -22,15 +22,16 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
     const user = useAppSelector((state) => state.auth?.user)
 
     const title = t('pages.stargazing-history.title', 'Архив астровыездов')
+    const description = t(
+        'pages.stargazing-history.description',
+        'Архив астровыездов — это летопись всех выездов проекта «Смотри на звёзды» под открытое небо в Оренбурге и его окрестностях. Здесь собраны фотографии, даты и подробности каждого мероприятия, где мы вместе смотрим на звёзды в телескоп. У каждой записи архива указано число участников и оставленные ими впечатления. Загляните в архив, чтобы увидеть, как год за годом растёт наше сообщество любителей астрономии.'
+    )
 
     return (
         <AppLayout
             canonical={'stargazing/history'}
             title={title}
-            description={t(
-                'pages.stargazing-history.description',
-                'Список всех прошедших астровыездов в Оренбурге — фотографии, даты, участники и впечатления с каждого мероприятия.'
-            )}
+            description={description}
             openGraph={{
                 images: [
                     {
@@ -55,6 +56,8 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
                     />
                 )}
             </AppToolbar>
+
+            {description}
 
             <EventsList
                 events={events}

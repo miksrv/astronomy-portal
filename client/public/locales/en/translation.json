@@ -276,7 +276,7 @@
                     "done": "Done"
                 },
                 "event-row": {
-                    "reviewed": "Review left",
+                    "reviewed": "Review",
                     "no-review": "No review"
                 },
                 "event-ticket": {
@@ -665,6 +665,7 @@
             "hero-cta-telegram": "Subscribe on Telegram",
             "program-title": "How the evening unfolds",
             "past-events": "Past stargazing trips",
+            "past-events-show-all": "View all",
             "archive-link": "All past stargazing trips",
             "registrations-status-canceled": "Canceled",
             "registrations-status-confirmed": "Confirmed",
@@ -791,7 +792,7 @@
         },
         "stargazing-history": {
             "title": "Stargazing trip archive",
-            "description": "A list of all past stargazing trips in Orenburg - photos, dates, participants and impressions from each event."
+            "description": "The stargazing trip archive is a chronicle of every trip organized by the “Look at the Stars” project under the open sky in Orenburg and the surrounding countryside. It brings together photos, dates, and details of every trip where we look at the stars together through a telescope. Each archive entry lists the number of participants and the impressions they shared. Take a look through the archive to see how our community of astronomy enthusiasts has grown year by year."
         },
         "payment": {
             "leave-confirm": "The payment check hasn't finished yet. Leave the page?",
