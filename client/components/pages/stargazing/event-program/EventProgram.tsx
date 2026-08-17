@@ -51,10 +51,7 @@ export const EventProgram: React.FC = () => {
     return (
         <div className={styles.grid}>
             {steps.map((step, index) => (
-                <article
-                    key={step.title}
-                    className={styles.card}
-                >
+                <article key={step.title}>
                     <div className={styles.imageWrapper}>
                         <Image
                             className={styles.image}

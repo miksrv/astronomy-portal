@@ -54,12 +54,41 @@ export const EventRow: React.FC<EventRowProps> = ({
 
     const dateLabel = t('pages.stargazing.event-date-label', 'Дата')
     const attendedLabel = t('pages.profile.history-visited', 'Посещено')
-    const reviewedLabel = t('components.pages.stargazing.event-row.reviewed', 'Отзыв оставлен')
-    const noReviewLabel = t('components.pages.stargazing.event-row.no-review', 'Нет отзыва')
+    const reviewedLabel = t('components.pages.stargazing.event-row.reviewed', 'Отзыв')
+    const noReviewLabel = t('components.pages.stargazing.event-row.no-review', 'Без отзыва')
     const viewsCount = views || 0
     const membersCountValue = membersCount || 0
 
     const formattedDate = formatDate(date, 'D MMMM YYYY')
+
+    const statsBadges = (attended || hasReviewed) && (
+        <div className={styles.stats}>
+            {attended && (
+                <Badge
+                    className={styles.greenBadge}
+                    icon={'CheckCircle'}
+                    label={attendedLabel}
+                    size={'small'}
+                />
+            )}
+            {hasReviewed && (
+                <Badge
+                    className={styles.greenBadge}
+                    icon={'StarFilled'}
+                    label={reviewedLabel}
+                    size={'small'}
+                />
+            )}
+            {attended && !hasReviewed && (
+                <Badge
+                    className={styles.redBadge}
+                    icon={'StarEmpty'}
+                    label={noReviewLabel}
+                    size={'small'}
+                />
+            )}
+        </div>
+    )
 
     return (
         <Container className={styles.eventRow}>
@@ -97,7 +126,11 @@ export const EventRow: React.FC<EventRowProps> = ({
                 )}
 
                 <div className={styles.content}>
-                    <div className={styles.title}>{title}</div>
+                    <div className={styles.titleRow}>
+                        <div className={styles.title}>{title}</div>
+
+                        {statsBadges}
+                    </div>
 
                     <div className={styles.metaRow}>
                         {location && (
@@ -159,35 +192,6 @@ export const EventRow: React.FC<EventRowProps> = ({
                     {excerpt && <div className={styles.excerpt}>{excerpt}</div>}
                 </div>
             </Link>
-
-            {(attended || hasReviewed) && (
-                <div className={styles.stats}>
-                    {attended && (
-                        <Badge
-                            className={styles.greenBadge}
-                            icon={'CheckCircle'}
-                            label={attendedLabel}
-                            size={'small'}
-                        />
-                    )}
-                    {hasReviewed && (
-                        <Badge
-                            className={styles.greenBadge}
-                            icon={'StarFilled'}
-                            label={reviewedLabel}
-                            size={'small'}
-                        />
-                    )}
-                    {attended && !hasReviewed && (
-                        <Badge
-                            className={styles.redBadge}
-                            icon={'StarEmpty'}
-                            label={noReviewLabel}
-                            size={'small'}
-                        />
-                    )}
-                </div>
-            )}
 
             <Icon
                 className={styles.chevron}

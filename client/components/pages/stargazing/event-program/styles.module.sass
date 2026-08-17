@@ -12,17 +12,13 @@
     @media only screen and (max-width: 480px)
         grid-template-columns: 1fr
 
-.card
-    display: flex
-    flex-direction: column
-    gap: 4px
-
 .imageWrapper
     position: relative
     width: 100%
     aspect-ratio: 4 / 3
     border-radius: var(--border-radius)
     overflow: hidden
+    margin-bottom: 4px
 
 .image
     object-fit: cover
@@ -30,22 +26,22 @@
 .number
     position: absolute
     top: 10px
-    left: 10px
+    right: 10px
     z-index: 1
     display: flex
     align-items: center
     justify-content: center
-    width: 28px
-    height: 28px
+    width: 34px
+    height: 34px
     border-radius: 50%
-    font-size: 14px
+    font-size: 18px
     font-weight: 600
     color: #fff
     background: var(--color-primary)
 
 .title
     margin: 0
-    font-size: 16px
+    font-size: 14px
     font-weight: 600
     color: #fff
 
