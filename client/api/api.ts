@@ -460,6 +460,85 @@ export const API = createApi({
             query: () => 'mailings/audiences'
         }),
 
+        /* Push Subscriptions Controller (user-facing) */
+        pushGetVapidKey: builder.query<ApiType.Push.ResVapidKey, void>({
+            query: () => 'push/vapid-key'
+        }),
+        pushSubscribe: builder.mutation<void, ApiType.Push.ReqPushSubscribe>({
+            query: (body) => ({
+                body,
+                method: 'POST',
+                url: 'push/subscribe'
+            })
+        }),
+        pushUnsubscribe: builder.mutation<void, ApiType.Push.ReqPushUnsubscribe>({
+            query: (body) => ({
+                body,
+                method: 'DELETE',
+                url: 'push/subscribe'
+            })
+        }),
+
+        /* Push Notifications Controller (admin) */
+        pushNotificationGetList: builder.query<ApiType.Push.ResPushList, void>({
+            providesTags: () => [{ id: 'LIST', type: 'PushNotifications' }],
+            query: () => 'push-notifications'
+        }),
+        pushNotificationGetItem: builder.query<ApiModel.PushNotification, string>({
+            providesTags: (res, err, id) => [{ id, type: 'PushNotifications' }],
+            query: (id) => `push-notifications/${id}`
+        }),
+        pushNotificationCreate: builder.mutation<ApiModel.PushNotification, ApiModel.CreatePushNotificationRequest>({
+            invalidatesTags: () => [{ type: 'PushNotifications' }],
+            query: (body) => ({
+                body,
+                method: 'POST',
+                url: 'push-notifications'
+            })
+        }),
+        pushNotificationUpdate: builder.mutation<
+            ApiModel.PushNotification,
+            ApiModel.UpdatePushNotificationRequest & { id: string }
+        >({
+            invalidatesTags: (res, err, { id }) => [{ type: 'PushNotifications' }, { id, type: 'PushNotifications' }],
+            query: ({ id, ...body }) => ({
+                body,
+                method: 'PATCH',
+                url: `push-notifications/${id}`
+            })
+        }),
+        pushNotificationDelete: builder.mutation<void, string>({
+            invalidatesTags: () => [{ type: 'PushNotifications' }],
+            query: (id) => ({
+                method: 'DELETE',
+                url: `push-notifications/${id}`
+            })
+        }),
+        pushNotificationUploadIcon: builder.mutation<ApiType.Push.ResPushUpload, ApiType.Push.ReqPushUpload>({
+            invalidatesTags: (res, err, { id }) => [{ id, type: 'PushNotifications' }],
+            query: ({ id, formData }) => ({
+                body: formData,
+                method: 'POST',
+                url: `push-notifications/${id}/upload`
+            })
+        }),
+        pushNotificationGetAudiences: builder.query<ApiType.Push.ResPushAudiences, void>({
+            query: () => 'push-notifications/audiences'
+        }),
+        pushNotificationTestSend: builder.mutation<ApiType.Push.ResPushTestSend, string>({
+            query: (id) => ({
+                method: 'POST',
+                url: `push-notifications/${id}/test`
+            })
+        }),
+        pushNotificationLaunch: builder.mutation<ApiType.Push.ResPushLaunch, string>({
+            invalidatesTags: (res, err, id) => [{ type: 'PushNotifications' }, { id, type: 'PushNotifications' }],
+            query: (id) => ({
+                method: 'POST',
+                url: `push-notifications/${id}/send`
+            })
+        }),
+
         /* Members Controller */
         usersGetList: builder.query<ApiType.Users.UsersListResponse, ApiType.Users.UsersListRequest>({
             providesTags: () => [{ id: 'LIST', type: 'Users' }],
@@ -538,6 +617,7 @@ export const API = createApi({
         'Relay',
         'Mailings',
         'Users',
-        'Roles'
+        'Roles',
+        'PushNotifications'
     ]
 })
