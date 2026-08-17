@@ -71,7 +71,10 @@ export default defineConfig([
             // JS Project Files
             '**/d3.min.js',
             '**/d3.geo.projection.min.js',
-            '**/celestial.min.js'
+            '**/celestial.min.js',
+
+            // Service worker (plain JS, served as a static asset, not part of the TS project)
+            '**/public/sw.js'
         ],
     },
 

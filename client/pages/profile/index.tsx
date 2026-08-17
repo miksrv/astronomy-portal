@@ -10,7 +10,7 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 import { API, setLocale, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
-import { EventHistorySection, MyReviewsSection, ProfileCard } from '@/components/pages/profile'
+import { EventHistorySection, MyReviewsSection, ProfileCard, PushNotificationToggle } from '@/components/pages/profile'
 import { EventUpcoming } from '@/components/pages/stargazing'
 
 type ProfilePageProps = object
@@ -40,6 +40,8 @@ const ProfilePage: NextPage<ProfilePageProps> = () => {
                 user={user}
                 isOnboarding={isOnboarding}
             />
+
+            <PushNotificationToggle />
 
             <h2 id={'upcoming-event'}>{t('pages.profile.upcoming-event-title', 'Предстоящее мероприятие')}</h2>
             {upcomingEvent ? (
