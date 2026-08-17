@@ -1,14 +1,11 @@
 import React from 'react'
 import dayjs from 'dayjs'
-import { Badge, cn, Container, Icon } from 'simple-react-ui-kit'
+import { Container } from 'simple-react-ui-kit'
 
-import Image from 'next/image'
-import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API } from '@/api'
-import { hosts } from '@/api/constants'
-import { formatDate } from '@/utils/dates'
+import { EventRow } from '@/components/pages/stargazing'
 
 import { EventHistorySectionSkeleton } from './EventHistorySectionSkeleton'
 
@@ -36,7 +33,7 @@ export const EventHistorySection: React.FC<EventHistorySectionProps> = ({ userId
     }
 
     return (
-        <>
+        <div className={styles.historyList}>
             {data.items.map((event) => {
                 const itemTitle = t('pages.profile.history-item-title', 'Астровыезд - {{title}}', {
                     title: event.title
@@ -48,60 +45,22 @@ export const EventHistorySection: React.FC<EventHistorySectionProps> = ({ userId
                 const isPastEvent = dayjs.utc(event.date).local().diff(dayjs()) <= 0
 
                 return (
-                    <Link
+                    <EventRow
                         key={event.id}
-                        href={`/stargazing/${event.id}`}
-                        title={itemTitle}
-                        className={styles.historyCard}
-                    >
-                        <div
-                            className={cn(
-                                styles.historyThumbnail,
-                                !event.coverFileName && styles.historyThumbnailEmpty
-                            )}
-                        >
-                            {event.coverFileName ? (
-                                <Image
-                                    alt={itemTitle}
-                                    quality={70}
-                                    width={120}
-                                    height={90}
-                                    src={`${hosts.stargazing}${event.id}/${event.coverFileName}_preview.${event.coverFileExt}`}
-                                />
-                            ) : (
-                                <Icon
-                                    name={'Moon'}
-                                    aria-hidden
-                                />
-                            )}
-                        </div>
-
-                        <div className={styles.historyContent}>
-                            <div className={styles.historyTitle}>{event.title}</div>
-                            <div className={styles.historyMeta}>
-                                {formatDate(event.date, 'D MMMM YYYY, dd • HH:mm')}
-                            </div>
-                            {event.location && <div className={styles.historyLocation}>{event.location}</div>}
-                        </div>
-
-                        <div className={styles.historyStatus}>
-                            {isPastEvent && (
-                                <Badge
-                                    className={styles.historyVisitedBadge}
-                                    icon={'CheckCircle'}
-                                    label={t('pages.profile.history-visited', 'Посещено')}
-                                    size={'small'}
-                                />
-                            )}
-                            <Icon
-                                className={styles.historyChevron}
-                                name={'KeyboardRight'}
-                                aria-hidden
-                            />
-                        </div>
-                    </Link>
+                        variant={'personal'}
+                        id={event.id}
+                        title={event.title}
+                        linkTitle={itemTitle}
+                        date={event.date}
+                        location={event.location}
+                        coverFileName={event.coverFileName}
+                        coverFileExt={event.coverFileExt}
+                        adults={event.adults}
+                        childrenCount={event.children}
+                        visited={isPastEvent}
+                    />
                 )
             })}
-        </>
+        </div>
     )
 }

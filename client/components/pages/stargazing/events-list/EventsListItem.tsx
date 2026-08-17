@@ -1,17 +1,11 @@
 import React from 'react'
-import { Container } from 'simple-react-ui-kit'
 
-import Image from 'next/image'
-import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel, useAppSelector } from '@/api'
-import { hosts } from '@/api/constants'
 import { hasPermission } from '@/utils/permissions'
 
-import { EventMetaRow } from '../event-meta-row'
-
-import styles from './styles.module.sass'
+import { EventRow } from '../event-row'
 
 interface EventsListItemProps {
     event: ApiModel.Event
@@ -29,42 +23,18 @@ export const EventsListItem: React.FC<EventsListItemProps> = ({ event }) => {
     })
 
     return (
-        <Container className={styles.eventListItem}>
-            <div className={styles.photoSection}>
-                <Link
-                    href={`/stargazing/${event.id}`}
-                    title={itemTitle}
-                >
-                    {event.coverFileName && (
-                        <Image
-                            className={styles.photo}
-                            alt={itemTitle}
-                            quality={70}
-                            height={240}
-                            width={370}
-                            src={`${hosts.stargazing}${event.id}/${event.coverFileName}_preview.${event.coverFileExt}`}
-                        />
-                    )}
-                </Link>
-            </div>
-
-            <div className={styles.bottomPanel}>
-                <h3 className={styles.title}>
-                    <Link
-                        href={`/stargazing/${event.id}`}
-                        title={itemTitle}
-                    >
-                        {event.title}
-                    </Link>
-                </h3>
-
-                <EventMetaRow
-                    date={event?.date?.date}
-                    views={event?.views}
-                    membersCount={event?.members?.total || event?.availableTickets}
-                    statisticHref={canViewStatistic ? `/stargazing/${event.id}/statistic` : undefined}
-                />
-            </div>
-        </Container>
+        <EventRow
+            id={event.id}
+            title={event.title}
+            linkTitle={itemTitle}
+            date={event?.date?.date}
+            location={event.location}
+            excerpt={event.excerpt}
+            coverFileName={event.coverFileName}
+            coverFileExt={event.coverFileExt}
+            views={event?.views}
+            membersCount={event?.members?.total || event?.availableTickets}
+            statisticHref={canViewStatistic ? `/stargazing/${event.id}/statistic` : undefined}
+        />
     )
 }
