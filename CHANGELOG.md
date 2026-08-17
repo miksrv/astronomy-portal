@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 4.9.1
+
+### Patch Changes
+
+- Push notifications with the "all" audience now also reach anonymous (not-logged-in) subscribers, not just account-claimed ones; fixed `.htaccess` incorrectly caching dynamic API responses
+
 ## 4.9.0
 
 ### Minor Changes

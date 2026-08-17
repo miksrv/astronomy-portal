@@ -134,9 +134,14 @@ class PushNotifications extends ResourceController
                 $row              = $eventsUsersModel->getPushAudienceByEventId($audienceEventId);
                 $audienceCount    = (int) ($row['user_count'] ?? 0);
             } else {
-                $usersModel    = new UsersModel();
-                $subscribers   = $usersModel->getPushSubscribers();
-                $audienceCount = count($subscribers);
+                $usersModel         = new UsersModel();
+                $subscriptionsModel = new PushSubscriptionsModel();
+
+                // "All" reaches both claimed accounts and guests who
+                // subscribed but never logged in (their push_subscriptions
+                // row has no user_id to join through) - count both so the
+                // admin sees the true total that will actually be sent to.
+                $audienceCount = count($usersModel->getPushSubscribers()) + $subscriptionsModel->countAnonymous();
             }
 
             return $this->respond([
@@ -447,8 +452,13 @@ class PushNotifications extends ResourceController
         }
 
         try {
-            $usersModel      = new UsersModel();
-            $subscriberCount = count($usersModel->getPushSubscribers());
+            $usersModel         = new UsersModel();
+            $subscriptionsModel = new PushSubscriptionsModel();
+
+            // "All" reaches both claimed accounts and guests who subscribed
+            // but never logged in - see send()'s "all" branch and
+            // PushSubscriptionsModel::findAnonymous().
+            $subscriberCount = count($usersModel->getPushSubscribers()) + $subscriptionsModel->countAnonymous();
 
             $items = [
                 [
@@ -569,8 +579,9 @@ class PushNotifications extends ResourceController
             $usersModel = new UsersModel();
 
             $audienceType = $notification->audience_type ?? 'all';
+            $isEvent      = $audienceType === 'event' && !empty($notification->audience_event_id);
 
-            if ($audienceType === 'event' && !empty($notification->audience_event_id)) {
+            if ($isEvent) {
                 $eventsUsersModel = new EventsUsersModel();
                 $users            = $eventsUsersModel->getPushRecipientsByEventId($notification->audience_event_id);
             } else {
@@ -592,6 +603,26 @@ class PushNotifications extends ResourceController
                         'notification_id' => $id,
                         'subscription_id' => $subscription->id,
                         'user_id'         => $user['id'],
+                        'status'          => 'queued',
+                        'created_at'      => $now,
+                        'updated_at'      => $now,
+                    ];
+                }
+            }
+
+            // "All" also reaches guests who subscribed but never logged in —
+            // their push_subscriptions row has no user_id, so
+            // getPushSubscribers() (which joins through users) never surfaces
+            // them; add their devices directly instead. Never applies to an
+            // "event" audience — event registration itself requires an
+            // account, so an anonymous subscription can't belong to one.
+            if (!$isEvent) {
+                foreach ($subscriptionsModel->findAnonymous() as $subscription) {
+                    $insertBatch[] = [
+                        'id'              => uniqid(),
+                        'notification_id' => $id,
+                        'subscription_id' => $subscription->id,
+                        'user_id'         => null,
                         'status'          => 'queued',
                         'created_at'      => $now,
                         'updated_at'      => $now,

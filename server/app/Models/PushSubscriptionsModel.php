@@ -121,6 +121,30 @@ class PushSubscriptionsModel extends ApplicationBaseModel
     }
 
     /**
+     * Returns every subscription row with no owning user — a guest opted
+     * into push (see PushSubscriptions::subscribe()) but hasn't logged in
+     * since to claim it. An "all" audience campaign reaches these devices
+     * directly (there's no user_id to join through, unlike
+     * UsersModel::getPushSubscribers()); an "event" audience never does —
+     * event registration itself requires an account, so an anonymous
+     * subscription can never belong to one.
+     *
+     * @return PushSubscriptionEntity[]
+     */
+    public function findAnonymous(): array
+    {
+        return $this->where('user_id', null)->findAll();
+    }
+
+    /**
+     * Counts subscription rows with no owning user. See findAnonymous().
+     */
+    public function countAnonymous(): int
+    {
+        return $this->where('user_id', null)->countAllResults();
+    }
+
+    /**
      * Deletes a subscription by its (owning user, endpoint) pair. Hard
      * delete — this table has no soft-deletes, an unsubscribed endpoint
      * carries no audit value. Scoped to $userId so one user can never

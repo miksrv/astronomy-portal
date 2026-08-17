@@ -31,7 +31,11 @@ class PushNotificationDeliveryEntity extends Entity
         'id'              => 'string',
         'notification_id' => 'string',
         'subscription_id' => 'string',
-        'user_id'         => 'string',
+        // Nullable cast — a delivery to an anonymous/guest subscription (see
+        // PushNotifications::send()'s "all" audience branch) legitimately has
+        // no owning user. A plain 'string' cast would silently turn that
+        // null into '', same pitfall as PushSubscriptionEntity::user_id.
+        'user_id'         => '?string',
         'status'          => 'string',
         'error_message'   => 'string',
         'sent_at'         => 'datetime',

@@ -63,6 +63,15 @@ final class PushNotificationDeliveryEntityTest extends CIUnitTestCase
         $this->assertNull($entity->sent_at);
     }
 
+    public function testNewInstanceDefaultUserIdIsRealNullNotEmptyString(): void
+    {
+        // 'user_id' is cast '?string' (nullable), not plain 'string' - a
+        // delivery to an anonymous/guest subscription legitimately has no
+        // owning user and must read back as real null, not ''.
+        $entity = new PushNotificationDeliveryEntity();
+        $this->assertNull($entity->user_id);
+    }
+
     // --- Attribute assignment ---
 
     public function testSettingStatusToSentStoresValue(): void
