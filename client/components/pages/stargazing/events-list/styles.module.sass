@@ -1,4 +1,65 @@
+@use '../../../../styles/variables' as variables
+
 .eventsList
     display: flex
     flex-direction: column
     gap: 10px
+
+.eventsTimeline
+    position: relative
+    display: flex
+    flex-direction: column
+    gap: 28px
+
+    // Continuous line running behind every year marker and its cards —
+    // drawn once on the whole timeline rather than per-group, so it
+    // reads as one unbroken thread through the archive.
+    &::before
+        content: ''
+        position: absolute
+        top: 7px
+        bottom: 7px
+        left: 5px
+        width: 2px
+        background: var(--color-primary)
+        opacity: 0.35
+        border-radius: 1px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        gap: 20px
+
+.yearGroup
+    position: relative
+    display: flex
+    flex-direction: column
+    gap: 12px
+
+.yearHeader
+    position: relative
+    z-index: 1
+    display: flex
+    align-items: center
+    gap: 12px
+
+.yearDot
+    flex-shrink: 0
+    width: 12px
+    height: 12px
+    border-radius: 50%
+    background: var(--color-primary)
+    box-shadow: 0 0 0 4px var(--body-background)
+
+.yearLabel
+    font-size: 20px
+    font-weight: 700
+    line-height: 1
+    color: var(--text-color-primary)
+
+.yearEvents
+    display: flex
+    flex-direction: column
+    gap: 10px
+    margin-left: 26px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        margin-left: 18px

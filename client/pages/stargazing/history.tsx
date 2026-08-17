@@ -56,7 +56,10 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
                 )}
             </AppToolbar>
 
-            <EventsList events={events} />
+            <EventsList
+                events={events}
+                groupByYear
+            />
 
             <AppFooter />
         </AppLayout>
