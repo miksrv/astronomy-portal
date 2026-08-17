@@ -14,6 +14,8 @@ export type Event = {
     /** Minimum recommended age in years. Undefined/null means no restriction. */
     minAge?: number
     content?: string
+    /** Short, plain-text (markdown-stripped) preview of `content` — present only in the events list/archive response, not on a single event. */
+    excerpt?: string
     coverFileName?: string
     coverFileExt?: string
     date?: DateTime

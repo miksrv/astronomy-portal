@@ -355,6 +355,9 @@
                 },
                 "events-list": {
                     "item-title": "Stargazing trip - {{title}}"
+                },
+                "event-row": {
+                    "guests": "Adults: {{adults}}, children: {{children}}"
                 }
             }
         },

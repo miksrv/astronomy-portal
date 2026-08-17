@@ -359,6 +359,9 @@
                 },
                 "events-list": {
                     "item-title": "Астровыезд - {{title}}"
+                },
+                "event-row": {
+                    "guests": "Взрослых: {{adults}}, детей: {{children}}"
                 }
             }
         },
