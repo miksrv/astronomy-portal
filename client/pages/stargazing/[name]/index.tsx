@@ -115,6 +115,9 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
         ? buildEventJsonLd(event, reviewsData ? { items: reviewsData.items, total: reviewsData.total } : undefined)
         : null
 
+    // Rich, unique per-photo text - used as the `<img alt>` on both the
+    // gallery thumbnails and the lightbox (accessibility/SEO), independent of
+    // whatever's shown in the lightbox's on-screen caption below.
     const getPhotoCaption = (photo: ApiModel.EventPhoto, index: number): string =>
         photo.photographer
             ? t('pages.stargazing.photo-caption-with-photographer', '{{eventTitle}} — фото от {{photographer}}', {
@@ -312,11 +315,12 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 
             <PhotoLightbox
                 photos={photos.map((photo, index) => ({
+                    alt: getPhotoCaption(photo, index),
                     height: photo.height,
                     preview: createPreviewPhotoUrl(photo),
                     src: createFullPhotoUrl(photo),
-                    width: photo.width,
-                    title: getPhotoCaption(photo, index)
+                    title,
+                    width: photo.width
                 }))}
                 photoIndex={photoIndex}
                 showLightbox={showLightbox}
