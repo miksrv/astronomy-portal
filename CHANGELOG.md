@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 4.9.2
+
+### Patch Changes
+
+- Updated the stargazing event program copy to recommend arriving an hour to ninety minutes before the start time shown on the ticket, instead of 15-20 minutes before
+- Hero event photo thumbnails on the homepage now link to their specific `/stargazing/{eventId}` page instead of the generic `/stargazing` list
+- Added optional `alt` support to `PhotoLightbox`, decoupled from the on-screen `title` caption, and used it on stargazing event photos so each image gets richer, unique alt text for accessibility/SEO without changing the short caption shown in the UI
+
 ## 4.9.1
 
 ### Patch Changes
