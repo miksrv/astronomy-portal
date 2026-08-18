@@ -19,7 +19,7 @@ export const EventProgram: React.FC = () => {
             title: t('pages.stargazing.program-arrival-title', 'Прибытие на место'),
             description: t(
                 'pages.stargazing.program-arrival-desc',
-                'Приезжайте на машине за 15–20 минут до начала и занимайте удобное место на поляне в отведенных местах.'
+                'Приезжайте на машине за час-полтора до начала (время в билете) и занимайте удобное место на поляне.'
             )
         },
         {
