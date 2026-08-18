@@ -17,6 +17,12 @@ type Photo = {
     // Already-loaded (thumbnail/preview) image URL - shown blurred behind the
     // full-size image while it loads, instead of a blank/black slide.
     preview?: string
+    // `<img alt>` text - falls back to `title` when omitted. Kept separate so
+    // callers can show a short, repeated `title` in the on-screen caption
+    // while still giving each image a unique, SEO/accessibility-relevant
+    // `alt` (the caption overlay itself is a JS-rendered runtime element that
+    // crawlers don't index, unlike `alt`).
+    alt?: string
 }
 
 interface PhotoLightboxProps {
@@ -49,7 +55,7 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
             slides={photos?.map(
                 (photo) =>
                     ({
-                        alt: photo?.title,
+                        alt: photo?.alt ?? photo?.title,
                         height: photo?.height,
                         // Custom field (not part of the library's Slide type, picked up by
                         // `ImageSlide`) - already-loaded thumbnail shown behind the full

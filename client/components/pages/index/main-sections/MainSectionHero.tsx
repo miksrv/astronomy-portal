@@ -65,7 +65,7 @@ export const MainSectionHero: React.FC<MainSectionHeroProps> = ({ photos }) => {
                                 return (
                                     <Link
                                         key={`${photo.eventId}-${photo.name}`}
-                                        href={'/stargazing'}
+                                        href={`/stargazing/${photo.eventId}`}
                                         title={alt}
                                         className={styles.photoThumb}
                                     >
