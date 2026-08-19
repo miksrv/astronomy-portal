@@ -1,13 +1,15 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { Button, Container, Dialog, Input, Message, Select, TextArea } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 
-import { API, ApiModel, HOST_IMG, wrapper } from '@/api'
+import { API, ApiModel, ApiType, HOST_IMG, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { useCampaignForm } from '@/hooks/useCampaignForm'
 import { requirePermissionSSR } from '@/utils/adminAuth'
+import { getErrorMessage } from '@/utils/errors'
 
 import styles from './styles.module.sass'
 
@@ -17,119 +19,67 @@ const MailingFormPage: NextPage<object> = () => {
 
     const { id } = router.query as { id?: string }
 
-    const { data: mailingData, isLoading: mailingLoading } = API.useMailingGetItemQuery(id!, {
-        skip: !id
-    })
-
-    const { data: audiencesData, isLoading: audiencesLoading } = API.useMailingGetAudiencesQuery()
-
-    const [createMailing, { isLoading: createLoading, isSuccess: createSuccess, error: createError }] =
-        API.useMailingCreateMutation()
-
-    const [updateMailing, { isLoading: updateLoading, isSuccess: updateSuccess, error: updateError }] =
-        API.useMailingUpdateMutation()
-
-    const [uploadImage, { isLoading: uploadLoading }] = API.useMailingUploadImageMutation()
-
-    const [testSend, { isLoading: testLoading, isSuccess: testSuccess, error: testError }] =
-        API.useMailingTestSendMutation()
-
-    const [launchMailing, { isLoading: launchLoading }] = API.useMailingLaunchMutation()
-
     const [subject, setSubject] = useState('')
     const [content, setContent] = useState('')
-    const [audienceValue, setAudienceValue] = useState<string>('all')
-    const [imageUrl, setImageUrl] = useState<string | undefined>()
-    const [showConfirm, setShowConfirm] = useState(false)
-    const [savedId, setSavedId] = useState<string | undefined>(id)
 
-    const fileInputRef = useRef<HTMLInputElement>(null)
-
-    useEffect(() => {
-        if (mailingData) {
-            setSubject(mailingData.subject)
-            setContent(mailingData.content)
-            setImageUrl(mailingData.image ? `${HOST_IMG}${mailingData.image}` : undefined)
-
-            if (mailingData.audienceType === 'event' && mailingData.audienceEventId) {
-                setAudienceValue(`event_${mailingData.audienceEventId}`)
-            } else {
-                setAudienceValue('all')
-            }
-        }
-    }, [mailingData])
+    const {
+        audiencesData,
+        audiencesLoading,
+        audienceValue,
+        setAudienceValue,
+        mediaUrl: imageUrl,
+        showConfirm,
+        setShowConfirm,
+        currentId,
+        isDraft,
+        isBusy,
+        createLoading,
+        updateLoading,
+        createSuccess,
+        updateSuccess,
+        saveError,
+        uploadLoading,
+        testLoading,
+        testSuccess,
+        testError,
+        launchLoading,
+        launchError,
+        handleSaveDraft,
+        handleFileChange: handleImageChange,
+        handleTestSend,
+        handleLaunchConfirm
+    } = useCampaignForm<
+        ApiModel.Mailing,
+        ApiModel.CreateMailingRequest,
+        ApiModel.UpdateMailingRequest,
+        ApiType.Mailings.ResMailingUpload
+    >({
+        id,
+        redirectPath: '/admin/mailing',
+        useGetItemQuery: API.useMailingGetItemQuery,
+        useGetAudiencesQuery: API.useMailingGetAudiencesQuery,
+        useCreateMutation: API.useMailingCreateMutation,
+        useUpdateMutation: API.useMailingUpdateMutation,
+        useUploadMutation: API.useMailingUploadImageMutation,
+        useTestSendMutation: API.useMailingTestSendMutation,
+        useLaunchMutation: API.useMailingLaunchMutation,
+        onItemLoaded: (item) => {
+            setSubject(item.subject)
+            setContent(item.content)
+        },
+        uploadFieldName: 'upload',
+        getMediaUrl: (item) => (item.image ? `${HOST_IMG}${item.image}` : undefined),
+        getUploadedUrl: (data) => `${HOST_IMG}${data.image}`,
+        buildCreatePayload: (audience) => ({ content, subject, ...audience }),
+        buildUpdatePayload: (audience) => ({ content, subject, ...audience })
+    })
 
     const isValid = subject.trim() !== '' && content.trim() !== ''
-
-    const parseAudienceValue = (value: string) => {
-        if (value.startsWith('event_')) {
-            return { audienceEventId: value.slice('event_'.length), audienceType: 'event' as const }
-        }
-        return { audienceEventId: null, audienceType: 'all' as const }
-    }
-
-    const handleSaveDraft = async () => {
-        const audience = parseAudienceValue(audienceValue)
-
-        if (savedId ?? id) {
-            await updateMailing({ content, id: (savedId ?? id)!, subject, ...audience })
-        } else {
-            const result = await createMailing({ content, subject, ...audience })
-
-            if ('data' in result && result.data) {
-                setSavedId(result.data.id)
-            }
-        }
-    }
-
-    const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        const currentId = savedId ?? id
-
-        if (!file || !currentId) {
-            return
-        }
-
-        const formData = new FormData()
-        formData.append('upload', file)
-
-        const result = await uploadImage({ formData, id: currentId })
-
-        if ('data' in result && result.data) {
-            setImageUrl(`${HOST_IMG}${result.data.image}`)
-        }
-    }
-
-    const handleTestSend = async () => {
-        const currentId = savedId ?? id
-
-        if (!currentId) {
-            return
-        }
-
-        await testSend(currentId)
-    }
-
-    const handleLaunchConfirm = async () => {
-        const currentId = savedId ?? id
-
-        if (!currentId) {
-            return
-        }
-
-        setShowConfirm(false)
-        await launchMailing(currentId)
-        await router.push('/admin/mailing')
-    }
 
     const isEditing = Boolean(id)
     const pageTitle = isEditing
         ? t('pages.mailing.edit-campaign', 'Редактировать рассылку')
         : t('pages.mailing.create', 'Новая рассылка')
-    const isBusy = mailingLoading || createLoading || updateLoading || launchLoading
-    const isDraft = !mailingData || mailingData.status === 'draft'
-
-    const saveError = createError ?? updateError
 
     return (
         <AppLayout
@@ -163,6 +113,16 @@ const MailingFormPage: NextPage<object> = () => {
                         {testSuccess
                             ? t('pages.mailing.test-send-success', 'Тестовое письмо отправлено')
                             : t('pages.mailing.test-send-error', 'Ошибка отправки теста')}
+                    </Message>
+                )}
+
+                {Boolean(launchError) && (
+                    <Message
+                        style={{ marginBottom: '10px' }}
+                        type={'error'}
+                    >
+                        {getErrorMessage(launchError) ??
+                            t('pages.mailing.launch-error', 'Не удалось запустить рассылку')}
                     </Message>
                 )}
 
@@ -206,11 +166,10 @@ const MailingFormPage: NextPage<object> = () => {
                 <div className={styles.formGroup}>
                     <label>{t('pages.mailing.field-attachment', 'Прикрепить изображение')}</label>
                     <input
-                        ref={fileInputRef}
                         type={'file'}
                         accept={'image/*'}
                         onChange={handleImageChange}
-                        disabled={uploadLoading || isBusy || !(savedId ?? id)}
+                        disabled={uploadLoading || isBusy || !currentId}
                         style={{ marginTop: '4px' }}
                     />
                     {uploadLoading && <span>{t('pages.mailing.uploading', 'Загрузка...')}</span>}
@@ -223,7 +182,7 @@ const MailingFormPage: NextPage<object> = () => {
                             />
                         </div>
                     )}
-                    {!(savedId ?? id) && (
+                    {!currentId && (
                         <small style={{ color: '#888' }}>
                             {t('pages.mailing.save-first-hint', 'Сначала сохраните черновик для загрузки изображения')}
                         </small>
@@ -243,7 +202,7 @@ const MailingFormPage: NextPage<object> = () => {
                         mode={'secondary'}
                         label={t('pages.mailing.test-send', 'Отправить тест')}
                         onClick={handleTestSend}
-                        disabled={isBusy || testLoading || !(savedId ?? id)}
+                        disabled={isBusy || testLoading || !currentId}
                         loading={testLoading}
                     />
 
@@ -251,7 +210,7 @@ const MailingFormPage: NextPage<object> = () => {
                         mode={'primary'}
                         label={t('pages.mailing.launch', 'Запустить рассылку')}
                         onClick={() => setShowConfirm(true)}
-                        disabled={!isValid || isBusy || !(savedId ?? id)}
+                        disabled={!isValid || isBusy || !currentId}
                     />
                 </div>
             </Container>

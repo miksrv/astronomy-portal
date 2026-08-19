@@ -1,12 +1,13 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { Button, Container, Dialog, Input, Message, Select, TextArea } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 
-import { API, ApiModel, HOST_IMG, wrapper } from '@/api'
+import { API, ApiModel, ApiType, HOST_IMG, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
+import { useCampaignForm } from '@/hooks/useCampaignForm'
 import { requirePermissionSSR } from '@/utils/adminAuth'
 import { getErrorMessage } from '@/utils/errors'
 
@@ -18,132 +19,69 @@ const PushNotificationFormPage: NextPage<object> = () => {
 
     const { id } = router.query as { id?: string }
 
-    const { data: pushData, isLoading: pushLoading } = API.usePushNotificationGetItemQuery(id!, {
-        skip: !id
-    })
-
-    const { data: audiencesData, isLoading: audiencesLoading } = API.usePushNotificationGetAudiencesQuery()
-
-    const [createPushNotification, { isLoading: createLoading, isSuccess: createSuccess, error: createError }] =
-        API.usePushNotificationCreateMutation()
-
-    const [updatePushNotification, { isLoading: updateLoading, isSuccess: updateSuccess, error: updateError }] =
-        API.usePushNotificationUpdateMutation()
-
-    const [uploadIcon, { isLoading: uploadLoading }] = API.usePushNotificationUploadIconMutation()
-
-    const [testSend, { isLoading: testLoading, isSuccess: testSuccess, error: testError }] =
-        API.usePushNotificationTestSendMutation()
-
-    const [launchPushNotification, { isLoading: launchLoading, error: launchError }] =
-        API.usePushNotificationLaunchMutation()
-
     const [title, setTitle] = useState('')
     const [body, setBody] = useState('')
     const [url, setUrl] = useState('')
-    const [audienceValue, setAudienceValue] = useState<string>('all')
-    const [iconUrl, setIconUrl] = useState<string | undefined>()
-    const [showConfirm, setShowConfirm] = useState(false)
-    const [savedId, setSavedId] = useState<string | undefined>(id)
 
-    const fileInputRef = useRef<HTMLInputElement>(null)
-
-    useEffect(() => {
-        if (pushData) {
-            setTitle(pushData.title)
-            setBody(pushData.body)
-            setUrl(pushData.url ?? '')
-            setIconUrl(pushData.icon ? `${HOST_IMG}${pushData.icon}` : undefined)
-
-            if (pushData.audienceType === 'event' && pushData.audienceEventId) {
-                setAudienceValue(`event_${pushData.audienceEventId}`)
-            } else {
-                setAudienceValue('all')
-            }
-        }
-    }, [pushData])
+    const {
+        audiencesData,
+        audiencesLoading,
+        audienceValue,
+        setAudienceValue,
+        mediaUrl: iconUrl,
+        showConfirm,
+        setShowConfirm,
+        currentId,
+        isDraft,
+        isBusy,
+        createLoading,
+        updateLoading,
+        createSuccess,
+        updateSuccess,
+        saveError,
+        uploadLoading,
+        testLoading,
+        testSuccess,
+        testError,
+        launchLoading,
+        launchError,
+        handleSaveDraft,
+        handleFileChange: handleIconChange,
+        handleTestSend,
+        handleLaunchConfirm
+    } = useCampaignForm<
+        ApiModel.PushNotification,
+        ApiModel.CreatePushNotificationRequest,
+        ApiModel.UpdatePushNotificationRequest,
+        ApiType.Push.ResPushUpload
+    >({
+        id,
+        redirectPath: '/admin/push-notifications',
+        useGetItemQuery: API.usePushNotificationGetItemQuery,
+        useGetAudiencesQuery: API.usePushNotificationGetAudiencesQuery,
+        useCreateMutation: API.usePushNotificationCreateMutation,
+        useUpdateMutation: API.usePushNotificationUpdateMutation,
+        useUploadMutation: API.usePushNotificationUploadIconMutation,
+        useTestSendMutation: API.usePushNotificationTestSendMutation,
+        useLaunchMutation: API.usePushNotificationLaunchMutation,
+        onItemLoaded: (item) => {
+            setTitle(item.title)
+            setBody(item.body)
+            setUrl(item.url ?? '')
+        },
+        uploadFieldName: 'image',
+        getMediaUrl: (item) => (item.icon ? `${HOST_IMG}${item.icon}` : undefined),
+        getUploadedUrl: (data) => `${HOST_IMG}${data.icon}`,
+        buildCreatePayload: (audience) => ({ body, title, url: url.trim() || undefined, ...audience }),
+        buildUpdatePayload: (audience) => ({ body, title, url: url.trim() || undefined, ...audience })
+    })
 
     const isValid = title.trim() !== '' && body.trim() !== ''
-
-    const parseAudienceValue = (value: string) => {
-        if (value.startsWith('event_')) {
-            return { audienceEventId: value.slice('event_'.length), audienceType: 'event' as const }
-        }
-        return { audienceEventId: null, audienceType: 'all' as const }
-    }
-
-    const handleSaveDraft = async () => {
-        const audience = parseAudienceValue(audienceValue)
-        const trimmedUrl = url.trim() || undefined
-
-        if (savedId ?? id) {
-            await updatePushNotification({ body, id: (savedId ?? id)!, title, url: trimmedUrl, ...audience })
-        } else {
-            const result = await createPushNotification({ body, title, url: trimmedUrl, ...audience })
-
-            if ('data' in result && result.data) {
-                setSavedId(result.data.id)
-            }
-        }
-    }
-
-    const handleIconChange = async (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        const currentId = savedId ?? id
-
-        if (!file || !currentId) {
-            return
-        }
-
-        const formData = new FormData()
-        formData.append('image', file)
-
-        const result = await uploadIcon({ formData, id: currentId })
-
-        if ('data' in result && result.data) {
-            setIconUrl(`${HOST_IMG}${result.data.icon}`)
-        }
-    }
-
-    const handleTestSend = async () => {
-        const currentId = savedId ?? id
-
-        if (!currentId) {
-            return
-        }
-
-        await testSend(currentId)
-    }
-
-    const handleLaunchConfirm = async () => {
-        const currentId = savedId ?? id
-
-        if (!currentId) {
-            return
-        }
-
-        setShowConfirm(false)
-
-        const result = await launchPushNotification(currentId)
-
-        if ('error' in result) {
-            // Stay on the page instead of redirecting - a failed launch must
-            // never look like it succeeded. The error Message below (driven
-            // by `launchError`) surfaces what actually went wrong.
-            return
-        }
-
-        await router.push('/admin/push-notifications')
-    }
 
     const isEditing = Boolean(id)
     const pageTitle = isEditing
         ? t('pages.push-notifications.edit-campaign', 'Редактировать уведомление')
         : t('pages.push-notifications.create', 'Новое уведомление')
-    const isBusy = pushLoading || createLoading || updateLoading || launchLoading
-    const isDraft = !pushData || pushData.status === 'draft'
-
-    const saveError = createError ?? updateError
 
     return (
         <AppLayout
@@ -182,7 +120,7 @@ const PushNotificationFormPage: NextPage<object> = () => {
                     </Message>
                 )}
 
-                {launchError && (
+                {Boolean(launchError) && (
                     <Message
                         style={{ marginBottom: '10px' }}
                         type={'error'}
@@ -241,11 +179,10 @@ const PushNotificationFormPage: NextPage<object> = () => {
                 <div className={styles.formGroup}>
                     <label>{t('pages.push-notifications.field-icon', 'Иконка уведомления')}</label>
                     <input
-                        ref={fileInputRef}
                         type={'file'}
                         accept={'image/*'}
                         onChange={handleIconChange}
-                        disabled={uploadLoading || isBusy || !(savedId ?? id)}
+                        disabled={uploadLoading || isBusy || !currentId}
                         style={{ marginTop: '4px' }}
                     />
                     {uploadLoading && <span>{t('pages.push-notifications.uploading', 'Загрузка...')}</span>}
@@ -258,7 +195,7 @@ const PushNotificationFormPage: NextPage<object> = () => {
                             />
                         </div>
                     )}
-                    {!(savedId ?? id) && (
+                    {!currentId && (
                         <small style={{ color: '#888' }}>
                             {t(
                                 'pages.push-notifications.save-first-hint',
@@ -281,7 +218,7 @@ const PushNotificationFormPage: NextPage<object> = () => {
                         mode={'secondary'}
                         label={t('pages.push-notifications.test-send', 'Отправить тест')}
                         onClick={handleTestSend}
-                        disabled={isBusy || testLoading || !(savedId ?? id)}
+                        disabled={isBusy || testLoading || !currentId}
                         loading={testLoading}
                     />
 
@@ -289,7 +226,7 @@ const PushNotificationFormPage: NextPage<object> = () => {
                         mode={'primary'}
                         label={t('pages.push-notifications.launch', 'Запустить рассылку')}
                         onClick={() => setShowConfirm(true)}
-                        disabled={!isValid || isBusy || !(savedId ?? id)}
+                        disabled={!isValid || isBusy || !currentId}
                     />
                 </div>
             </Container>
