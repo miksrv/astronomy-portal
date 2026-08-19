@@ -56,7 +56,6 @@ $routes->group('relay', static function ($routes) {
 $routes->group('files', static function ($routes) {
     $routes->get('(:any)', 'Files::show/$1');
     // $routes->post('update', 'Files::update');
-    // $routes->post('image', 'Files::image');
     $routes->options('(:any)', static function () {});
 });
 

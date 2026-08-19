@@ -135,8 +135,6 @@ nb-configuration.xml
 # writable/*/index.html above.
 /public/astrophotos/*
 !/public/astrophotos/.htaccess
-/public/fits/*
-!/public/fits/.htaccess
 /public/starmaps/*
 !/public/starmaps/.htaccess
 /public/temp/*
