@@ -7,7 +7,7 @@ type: project
 Next.js 16 pages dir (NOT app dir), React 19, TypeScript 6.0 strict mode, Redux Toolkit + RTK Query, next-redux-wrapper for SSR hydration, next-i18next v16 for i18n (ru/en), Sass modules, echarts-for-react for charts, embla-carousel, yet-another-react-lightbox, simple-react-ui-kit component library.
 
 **Why:** Understanding this helps avoid framework-wrong suggestions (e.g. no app-dir conventions, no server components).
-**How to apply:** All pages use getServerSideProps + wrapper.getServerSideProps. State is managed via Redux store with HYDRATE. Styling is Sass modules. No Tailwind. Only one test file exists (coordinates.test.ts).
+**How to apply:** Most pages use getServerSideProps + wrapper.getServerSideProps, but fully static pages (no per-request data) use wrapper.getStaticProps with revalidate:86400 instead — see [[static-pages-use-getstaticprops-via-wrapper]] (confirmed 2026-08-14: about, privacy, 404, observatory/history, stargazing faq/howto/rules/where are on getStaticProps; ~31 other pages still on getServerSideProps). State is managed via Redux store with HYDRATE. Styling is Sass modules. No Tailwind. Test coverage has grown well beyond the single coordinates.test.ts — most client/utils/*.ts files now have a matching .test.ts.
 
 ## i18n setup details
 

@@ -1,6 +1,6 @@
 ---
 name: security_audit_2026-08-18
-description: PII/access-control audit findings from 2026-08-18 (Comments IDOR, tracked prod env file) — status as of that date, verify before reuse
+description: PII/access-control audit findings from 2026-08-18 — Comments IDOR fixed same day (commit bc802b9), tracked prod env file still open, verify before reuse
 type: project
 ---
 
@@ -9,16 +9,19 @@ findings, everything else in `Events.php`/`Mailings.php`/`Members.php`/`Auth.php
 clean (permission checks correctly gate email/phone/payment fields; `Comments.php`'s
 truncateAuthorName() correctly limits public author exposure to "Имя Ф.").
 
-**Finding 1 — `GET /comments?userId=` IDOR (medium/high).** `Comments::index()`
-(`server/app/Controllers/Comments.php`) only checks `$this->session->isAuth` before calling
-`CommentsModel::getByUser($userId, ...)` — it never checks `$userId === $this->session->user->id`.
-Any authenticated user can pass an arbitrary `userId` and get that user's full review history:
-review content, star rating, and which events they attended (join to `events`), i.e. an IDOR
-leaking behavioral/opinion data (not email/phone directly, but attendance + private review text).
-Contrast with `Events::list()`'s `userId` handling in the same codebase (`server/app/Controllers/Events.php`
-around line 662), which explicitly documents *why* it only honours `userId === session user id` and
-silently ignores any other value — `Comments::index()` is the one place that pattern wasn't applied.
-Fix: mirror `Events::list()`'s guard (`$userId === $sessionUserId` or 403).
+**Finding 1 — `GET /comments?userId=` IDOR (medium/high) — FIXED same day, commit `bc802b9`.**
+`Comments::index()` (`server/app/Controllers/Comments.php`) only checked `$this->session->isAuth`
+before calling `CommentsModel::getByUser($userId, ...)` — it never checked
+`$userId === $this->session->user->id`. Any authenticated user could pass an arbitrary `userId`
+and get that user's full review history: review content, star rating, and which events they
+attended (join to `events`), i.e. an IDOR leaking behavioral/opinion data (not email/phone
+directly, but attendance + private review text). Contrast with `Events::list()`'s `userId`
+handling in the same codebase (`server/app/Controllers/Events.php` around line 662), which
+explicitly documents *why* it only honours `userId === session user id` and silently ignores any
+other value — `Comments::index()` was the one place that pattern wasn't applied. Fixed by adding
+`if ($userId !== $this->session->user->id) { return $this->failForbidden(...); }` right after the
+auth check — unlike `Events::list()` this branch has no unfiltered fallback to degrade to, so a
+mismatched `userId` is rejected outright (403) rather than silently ignored.
 
 **Finding 2 — tracked `server/env` (no dot) deployed to production with `CI_ENVIRONMENT = development`.**
 `server/env` is committed to git (not gitignored — only `server/.env` is, per `server/.gitignore:44`)
@@ -37,6 +40,8 @@ phone numbers/payment ids) to anonymous visitors.
 **How to apply:** before trusting `ENVIRONMENT` on this project again, ask the user whether the VPS
 does a rename step, and check whether `server/env`'s `CI_ENVIRONMENT` line has been fixed to
 `production`. Don't assume either way from a stale read of this memory — re-check the file.
+Still open as of 2026-08-18 (re-verified): `server/env` line 12 is `CI_ENVIRONMENT = development`,
+line 13 has `production` commented out.
 
 **Confirmed clean (as of this audit):**
 - `Events::registrations()` (email + payment status) — gated by `EVENTS_STATISTIC` AND `EVENTS_USERS` both.
