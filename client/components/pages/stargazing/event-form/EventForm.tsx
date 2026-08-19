@@ -26,6 +26,35 @@ const toCoordinate = (value: string | undefined, fallback: number): number => {
     return Number.isFinite(parsed) ? parsed : fallback
 }
 
+// All four fields are `datetime-local` values ("YYYY-MM-DDTHH:mm") entered and
+// compared as raw Orenburg wall-clock strings — no timezone conversion needed
+// here since lexical order matches chronological order for that format, and
+// both sides of every comparison are the same "Orenburg local" convention the
+// backend's parseOrenburgDateTime() applies. Mirrors the checks Events::create()/
+// update() enforce server-side (see Events.invalidRegistrationWindow/
+// invalidEventEndDate) so a bad date combination is caught immediately instead
+// of round-tripping to a 400 (or, if the front-end guard is ever the only line
+// of defense, silently saving something the booking-status UI can't render —
+// see the 2026-08-19 incident where registrationEnd fell after the event's
+// own date and the "registration closed" panel simply never appeared).
+const validateEventDates = (data: EventFormType): Record<string, string> => {
+    const errors: Record<string, string> = {}
+
+    if (data.endDate && data.date && data.endDate <= data.date) {
+        errors.endDate = 'Время окончания мероприятия должно быть позже времени начала'
+    }
+
+    if (data.requiresRegistration ?? true) {
+        if (data.registrationStart && data.registrationEnd && data.registrationStart >= data.registrationEnd) {
+            errors.registrationEnd = 'Регистрация должна открываться раньше, чем закрываться'
+        } else if (data.registrationEnd && data.date && data.registrationEnd > data.date) {
+            errors.registrationEnd = 'Регистрация должна закрываться не позднее даты и времени проведения мероприятия'
+        }
+    }
+
+    return errors
+}
+
 export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onSubmit, onCancel }) => {
     // Prefill sensible defaults for a brand-new event. In edit mode the effect
     // below overwrites these with the existing event's values.
@@ -36,6 +65,8 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
         longitude: String(DEFAULT_EVENT_COORDINATES.longitude)
     })
 
+    const [dateErrors, setDateErrors] = useState<Record<string, string>>({})
+
     const [isGeocoding, setIsGeocoding] = useState(false)
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,6 +74,14 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
     }
 
     const handleSubmit = () => {
+        const errors = validateEventDates(formData)
+
+        setDateErrors(errors)
+
+        if (Object.keys(errors).length > 0) {
+            return
+        }
+
         onSubmit?.(formData)
     }
 
@@ -152,9 +191,16 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
                         type={'datetime-local'}
                         label={'Дата и время окончания'}
                         value={formData.endDate}
-                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                        onChange={(e) => {
+                            setFormData({ ...formData, endDate: e.target.value })
+                            setDateErrors({ ...dateErrors, endDate: '' })
+                        }}
                     />
-                    <small className={styles.hint}>необязательно, по Оренбургскому времени</small>
+                    {dateErrors.endDate ? (
+                        <small className={styles.hintError}>{dateErrors.endDate}</small>
+                    ) : (
+                        <small className={styles.hint}>необязательно, по Оренбургскому времени</small>
+                    )}
                 </div>
 
                 <div className={styles.fieldWithHint}>
@@ -186,28 +232,35 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, onS
                     type={'datetime-local'}
                     label={'Дата начала регистрации'}
                     value={formData.registrationStart}
-                    onChange={(e) =>
+                    onChange={(e) => {
                         setFormData({
                             ...formData,
                             registrationStart: e.target.value
                         })
-                    }
+                        setDateErrors({ ...dateErrors, registrationEnd: '' })
+                    }}
                 />
 
-                <Input
-                    required={formData.requiresRegistration ?? true}
-                    disabled={disabled || !(formData.requiresRegistration ?? true)}
-                    className={styles.formElement}
-                    type={'datetime-local'}
-                    label={'Дата завершения регистрации'}
-                    value={formData.registrationEnd}
-                    onChange={(e) =>
-                        setFormData({
-                            ...formData,
-                            registrationEnd: e.target.value
-                        })
-                    }
-                />
+                <div className={styles.fieldWithHint}>
+                    <Input
+                        required={formData.requiresRegistration ?? true}
+                        disabled={disabled || !(formData.requiresRegistration ?? true)}
+                        className={styles.formElement}
+                        type={'datetime-local'}
+                        label={'Дата завершения регистрации'}
+                        value={formData.registrationEnd}
+                        onChange={(e) => {
+                            setFormData({
+                                ...formData,
+                                registrationEnd: e.target.value
+                            })
+                            setDateErrors({ ...dateErrors, registrationEnd: '' })
+                        }}
+                    />
+                    {dateErrors.registrationEnd && (
+                        <small className={styles.hintError}>{dateErrors.registrationEnd}</small>
+                    )}
+                </div>
             </div>
 
             <div className={styles.locationSection}>

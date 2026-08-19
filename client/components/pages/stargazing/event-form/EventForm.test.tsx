@@ -111,4 +111,60 @@ describe('EventForm', () => {
         expect((dateInputs[2] as HTMLInputElement).value).toBe('2026-08-01T05:00')
         expect((dateInputs[3] as HTMLInputElement).value).toBe('2026-08-14T05:00')
     })
+
+    // Regression coverage for the 2026-08-19 incident: registrationEnd was set
+    // later than the event's own date, which the booking-status UI had no
+    // state for (see EventUpcoming.tsx) — caught here before it ever reaches
+    // the backend's identical Events.invalidRegistrationWindow check.
+    it('blocks submit and shows an error when registrationEnd is later than the event date', () => {
+        const onSubmit = jest.fn()
+        const { container } = render(<EventForm onSubmit={onSubmit} />)
+
+        // datetime-local inputs order: [0] event date, [1] event end date, [2] registration start, [3] registration end
+        const dateInputs = container.querySelectorAll('input[type="datetime-local"]')
+
+        fireEvent.change(dateInputs[0], { target: { value: '2026-08-19T22:00' } })
+        fireEvent.change(dateInputs[2], { target: { value: '2026-08-16T12:00' } })
+        fireEvent.change(dateInputs[3], { target: { value: '2026-08-20T00:00' } })
+
+        fireEvent.click(screen.getByText('Сохранить'))
+
+        expect(onSubmit).not.toHaveBeenCalled()
+        expect(screen.getByText(/закрываться не позднее даты и времени проведения/)).toBeDefined()
+    })
+
+    it('blocks submit and shows an error when registrationStart is not before registrationEnd', () => {
+        const onSubmit = jest.fn()
+        const { container } = render(<EventForm onSubmit={onSubmit} />)
+
+        const dateInputs = container.querySelectorAll('input[type="datetime-local"]')
+
+        fireEvent.change(dateInputs[0], { target: { value: '2026-08-19T22:00' } })
+        fireEvent.change(dateInputs[2], { target: { value: '2026-08-19T21:00' } })
+        fireEvent.change(dateInputs[3], { target: { value: '2026-08-19T20:00' } })
+
+        fireEvent.click(screen.getByText('Сохранить'))
+
+        expect(onSubmit).not.toHaveBeenCalled()
+        expect(screen.getByText(/должна открываться раньше, чем закрываться/)).toBeDefined()
+    })
+
+    it('allows submit once the registration window is fixed', () => {
+        const onSubmit = jest.fn()
+        const { container } = render(<EventForm onSubmit={onSubmit} />)
+
+        const dateInputs = container.querySelectorAll('input[type="datetime-local"]')
+
+        fireEvent.change(dateInputs[0], { target: { value: '2026-08-19T22:00' } })
+        fireEvent.change(dateInputs[2], { target: { value: '2026-08-16T12:00' } })
+        fireEvent.change(dateInputs[3], { target: { value: '2026-08-20T00:00' } })
+
+        fireEvent.click(screen.getByText('Сохранить'))
+        expect(onSubmit).not.toHaveBeenCalled()
+
+        fireEvent.change(dateInputs[3], { target: { value: '2026-08-19T21:00' } })
+        fireEvent.click(screen.getByText('Сохранить'))
+
+        expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ registrationEnd: '2026-08-19T21:00' }))
+    })
 })

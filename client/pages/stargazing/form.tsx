@@ -9,6 +9,7 @@ import { API, ApiModel, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { EventForm, EventFormType } from '@/components/pages/stargazing'
 import { requirePermissionSSR } from '@/utils/adminAuth'
+import { getErrorMessage } from '@/utils/errors'
 
 const StargazingFormPage: NextPage<object> = () => {
     const router = useRouter()
@@ -109,7 +110,12 @@ const StargazingFormPage: NextPage<object> = () => {
                     style={{ marginBottom: '10px' }}
                     type={createError || patchError ? 'error' : 'success'}
                 >
-                    {(createError || patchError) && <div>{t('pages.stargazing.save-error', 'Ошибка сохранения')}</div>}
+                    {(createError || patchError) && (
+                        <div>
+                            {getErrorMessage(createError || patchError) ||
+                                t('pages.stargazing.save-error', 'Ошибка сохранения')}
+                        </div>
+                    )}
                     {isSuccess && <div>{t('pages.stargazing.save-success', 'Астровыезд сохранен')}</div>}
                 </Message>
             )}
