@@ -4,14 +4,14 @@ import { Container } from 'simple-react-ui-kit'
 import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { setLocale, SITE_LINK, wrapper } from '@/api'
+import { SITE_LINK, wrapper } from '@/api'
 import { PhotoGallery, PhotoLightbox, StaticInfoPageLayout } from '@/components/common'
 import photoSidewalk1 from '@/public/photos/sidewalk-asrtronomy-1.jpeg'
 import photoSidewalk2 from '@/public/photos/sidewalk-asrtronomy-2.jpeg'
 import photoSidewalk3 from '@/public/photos/sidewalk-asrtronomy-3.jpeg'
 import photoSidewalk4 from '@/public/photos/sidewalk-asrtronomy-4.jpeg'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 const gallerySidewalk = [photoSidewalk1, photoSidewalk2, photoSidewalk3, photoSidewalk4]
 
@@ -179,10 +179,7 @@ const StargazingWherePage: NextPage<object> = () => {
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
         async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<object>> => {
-            const locale = context.locale ?? 'ru'
-            const translations = await serverSideTranslations(locale, ['translation', 'stargazing-where'])
-
-            store.dispatch(setLocale(locale))
+            const { translations } = await initSSRLocale(store, context, ['translation', 'stargazing-where'])
 
             return {
                 props: {

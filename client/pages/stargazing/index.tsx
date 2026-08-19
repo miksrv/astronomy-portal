@@ -5,10 +5,9 @@ import { Button, Icon } from 'simple-react-ui-kit'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, wrapper } from '@/api'
+import { API, ApiModel, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, BreadcrumbJsonLd, PrevNextNav } from '@/components/common'
 import {
@@ -20,9 +19,9 @@ import {
     ReviewsWidget
 } from '@/components/pages/stargazing'
 import type { InfoCardItem } from '@/components/pages/stargazing/info-cards'
-import { DEFAULT_LOCALE } from '@/utils/constants'
 import { getSecondsUntilUTCDate } from '@/utils/dates'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 import styles from './index.module.sass'
 
@@ -181,11 +180,8 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<StargazingPageProps>> => {
-            const locale = context.locale ?? DEFAULT_LOCALE
-            const translations = await serverSideTranslations(locale)
+            const { translations } = await initSSRLocale(store, context)
             const token = await getCookie('token', { req: context.req, res: context.res })
-
-            store.dispatch(setLocale(locale))
 
             if (token) {
                 store.dispatch(setSSRToken(token))

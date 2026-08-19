@@ -4,10 +4,9 @@ import { Button, Container } from 'simple-react-ui-kit'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { Trans, useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, SITE_LINK, wrapper } from '@/api'
+import { API, ApiModel, SITE_LINK, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable, PhotoGallery, PhotoLightbox } from '@/components/common'
 import photoObservatory1 from '@/public/photos/observatory-1.jpeg'
 import photoObservatory2 from '@/public/photos/observatory-2.jpeg'
@@ -20,6 +19,7 @@ import photoObservatory9 from '@/public/photos/observatory-9.jpeg'
 import photoObservatory10 from '@/public/photos/observatory-10.jpeg'
 import photoObservatory11 from '@/public/photos/observatory-11.jpeg'
 import photoObservatory12 from '@/public/photos/observatory-12.jpeg'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 import styles from './styles.module.sass'
 
@@ -302,10 +302,7 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<ObservatoryOverviewPageProps>> => {
-            const locale = context.locale ?? 'ru'
-            const translations = await serverSideTranslations(locale, ['translation', 'observatory-overview'])
-
-            store.dispatch(setLocale(locale))
+            const { translations } = await initSSRLocale(store, context, ['translation', 'observatory-overview'])
 
             const { data: photos } = await store.dispatch(
                 API.endpoints?.photosGetList.initiate({

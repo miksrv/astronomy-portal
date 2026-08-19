@@ -3,15 +3,14 @@ import { Button } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, SITE_LINK, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable } from '@/components/common'
 import { PhotoCloud, PhotoHeader } from '@/components/pages/photos'
-import { DEFAULT_LOCALE } from '@/utils/constants'
 import { hasPermission } from '@/utils/permissions'
 import { createLargePhotoUrl, createPhotoTitle, normalizeAndFilterObjects } from '@/utils/photos'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 interface PhotoItemPageProps {
     photoId: string
@@ -165,11 +164,8 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<PhotoItemPageProps>> => {
-            const locale = context.locale ?? DEFAULT_LOCALE
+            const { translations } = await initSSRLocale(store, context)
             const photoId = context.params?.name
-            const translations = await serverSideTranslations(locale)
-
-            store.dispatch(setLocale(locale))
 
             if (typeof photoId !== 'string') {
                 return { notFound: true }

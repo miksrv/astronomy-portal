@@ -5,12 +5,11 @@ import { Button, Container, Message, Spinner } from 'simple-react-ui-kit'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, setLocale, wrapper } from '@/api'
+import { API, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppLayout } from '@/components/common'
-import { DEFAULT_LOCALE } from '@/utils/constants'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 const UnsubscribePage: NextPage = () => {
     const { t } = useTranslation()
@@ -78,12 +77,9 @@ const UnsubscribePage: NextPage = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? DEFAULT_LOCALE
-            const translations = await serverSideTranslations(locale)
+            const { translations } = await initSSRLocale(store, context)
             const token = await getCookie('token', { req: context.req, res: context.res })
             const mail = context.query.mail
-
-            store.dispatch(setLocale(locale))
 
             if (!mail) {
                 return { redirect: { destination: '/', permanent: false } }

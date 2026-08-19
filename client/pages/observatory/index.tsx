@@ -3,12 +3,11 @@ import React from 'react'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, setLocale, wrapper } from '@/api'
+import { API, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { AstronomyCalc, Calendar, Camera, RelayList, TelescopeWorkdays, Weather } from '@/components/pages/observatory'
-import { DEFAULT_LOCALE } from '@/utils/constants'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 import styles from './styles.module.sass'
 
@@ -94,10 +93,7 @@ const ObservatoryPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? DEFAULT_LOCALE
-            const translations = await serverSideTranslations(locale)
-
-            store.dispatch(setLocale(locale))
+            const { translations } = await initSSRLocale(store, context)
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 

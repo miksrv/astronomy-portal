@@ -29,18 +29,24 @@ export function proxy(request: NextRequest) {
         return NextResponse.next()
     }
 
-    const pathLocale = LOCALES.find((locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`))
-    const currentLocale = pathLocale ?? DEFAULT_LOCALE
+    // `request.nextUrl.pathname` is always already locale-stripped by Next's
+    // own i18n routing (it never contains the `/en` prefix, even when the
+    // request URL has one) — the actually detected locale lives on
+    // `request.nextUrl.locale`. Deriving it by hand from `pathname` (the old
+    // approach here) silently always resolved to `DEFAULT_LOCALE`, which for
+    // e.g. `/en/objects` made this redirect to `/en/objects` — itself — an
+    // infinite loop.
+    const currentLocale = request.nextUrl.locale || DEFAULT_LOCALE
 
     if (currentLocale === cookieLocale) {
         return NextResponse.next()
     }
 
-    const pathWithoutLocale = pathLocale ? pathname.slice(`/${pathLocale}`.length) || '/' : pathname
-    const targetPathname = cookieLocale === DEFAULT_LOCALE ? pathWithoutLocale : `/${cookieLocale}${pathWithoutLocale}`
-
     const url = request.nextUrl.clone()
-    url.pathname = targetPathname
+    // Setting `.locale` (rather than hand-building `pathname`) lets Next's
+    // own `NextURL` add/remove the `/en` prefix correctly when the redirect
+    // response formats the `Location` header.
+    url.locale = cookieLocale
 
     return NextResponse.redirect(url, 307)
 }

@@ -6,19 +6,19 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
 import { EventItemData, EventPhotoFilter, EventReviews } from '@/components/pages/stargazing'
-import { DEFAULT_LOCALE, PHOTOS_PAGE_SIZE, REVIEWS_PAGE_SIZE } from '@/utils/constants'
+import { PHOTOS_PAGE_SIZE, REVIEWS_PAGE_SIZE } from '@/utils/constants'
 import { formatDate } from '@/utils/dates'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
 import { hasAnyPermission, hasPermission } from '@/utils/permissions'
+import { initSSRLocale } from '@/utils/ssrLocale'
 import { removeMarkdown, sliceText } from '@/utils/strings'
 
 import styles from '../styles.module.sass'
@@ -357,15 +357,12 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<StargazingItemPageProps>> => {
-            const locale = context.locale ?? DEFAULT_LOCALE
-            const translations = await serverSideTranslations(locale)
+            const { translations } = await initSSRLocale(store, context)
             const eventId = context.params?.name
 
             if (typeof eventId !== 'string') {
                 return { notFound: true }
             }
-
-            store.dispatch(setLocale(locale))
 
             const token = await getCookie('token', { req: context.req, res: context.res })
 

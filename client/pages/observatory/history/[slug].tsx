@@ -7,13 +7,13 @@ import path from 'path'
 import { GetStaticPathsResult, GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { JsonLdScript } from 'next-seo'
 
-import { setLocale, SITE_LINK, wrapper } from '@/api'
+import { SITE_LINK, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
 import { GalleryBlock, HistoryChapter, HistoryChapterMeta } from '@/data/history'
 import { formatYearMonth } from '@/utils/dates'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 import styles from './styles.module.sass'
 
@@ -242,7 +242,6 @@ export const getStaticProps = wrapper.getStaticProps(
                 return { notFound: true }
             }
 
-            const locale = context.locale ?? 'ru'
             const slug = context.params?.slug
 
             if (typeof slug !== 'string') {
@@ -254,8 +253,7 @@ export const getStaticProps = wrapper.getStaticProps(
                 return { notFound: true }
             }
 
-            const translations = await serverSideTranslations(locale)
-            store.dispatch(setLocale(locale))
+            const { translations } = await initSSRLocale(store, context)
 
             const HOST_IMG = process.env.NEXT_PUBLIC_IMG_HOST || 'http://localhost:8080/'
             const rawChapter: HistoryChapter = JSON.parse(fs.readFileSync(chapterPath, 'utf-8'))

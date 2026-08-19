@@ -4,10 +4,10 @@ import { cn, Icon } from 'simple-react-ui-kit'
 import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { setLocale, wrapper } from '@/api'
+import { wrapper } from '@/api'
 import { StaticInfoPageLayout } from '@/components/common'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 import styles from './faq.module.sass'
 
@@ -407,10 +407,7 @@ const StargazingFAQPage: NextPage<object> = () => {
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
         async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<object>> => {
-            const locale = context.locale ?? 'ru'
-            const translations = await serverSideTranslations(locale, ['translation', 'stargazing-faq'])
-
-            store.dispatch(setLocale(locale))
+            const { translations } = await initSSRLocale(store, context, ['translation', 'stargazing-faq'])
 
             return {
                 props: {

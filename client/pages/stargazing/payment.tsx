@@ -6,13 +6,13 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { generateNextSeo } from 'next-seo/pages'
 
-import { API, ApiType, setLocale, SITE_LINK, wrapper } from '@/api'
+import { API, ApiType, SITE_LINK, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { useEventBookingSubmit } from '@/components/pages/stargazing/event-upcoming/useEventBookingSubmit'
-import { DEFAULT_LOCALE, STARGAZING_RETRY_STORAGE_KEY } from '@/utils/constants'
+import { STARGAZING_RETRY_STORAGE_KEY } from '@/utils/constants'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 const POLL_INTERVAL_MS = 3000
 const MAX_POLL_ATTEMPTS = 5
@@ -315,11 +315,8 @@ const StargazingPaymentPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? DEFAULT_LOCALE
-            const translations = await serverSideTranslations(locale)
+            const { translations } = await initSSRLocale(store, context)
             const token = await getCookie('token', { req: context.req, res: context.res })
-
-            store.dispatch(setLocale(locale))
 
             if (token) {
                 store.dispatch(setSSRToken(token))

@@ -4,10 +4,9 @@ import { Container, Icon } from 'simple-react-ui-kit'
 import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { JsonLdScript } from 'next-seo'
 
-import { setLocale, SITE_LINK, wrapper } from '@/api'
+import { SITE_LINK, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
 import { ProjectTeam } from '@/components/pages/about'
 import donators from '@/public/data/list_donators.json'
@@ -31,7 +30,7 @@ import photoStargazing5 from '@/public/photos/stargazing-5.jpeg'
 import photoStargazing6 from '@/public/photos/stargazing-6.jpeg'
 import photoStargazing7 from '@/public/photos/stargazing-7.jpeg'
 import photoStargazing8 from '@/public/photos/stargazing-8.jpeg'
-import { DEFAULT_LOCALE } from '@/utils/constants'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 const galleryAboutMe = [photoAboutMe1, photoAboutMe2, photoAboutMe3, photoAboutMe4]
 
@@ -374,10 +373,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
         async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<AboutPageProps>> => {
-            const locale = context.locale ?? DEFAULT_LOCALE
-            const translations = await serverSideTranslations(locale)
-
-            store.dispatch(setLocale(locale))
+            const { translations } = await initSSRLocale(store, context)
 
             return {
                 props: {

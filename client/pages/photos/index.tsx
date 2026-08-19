@@ -5,14 +5,13 @@ import { Button, Input, Select } from 'simple-react-ui-kit'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { PhotoGrid } from '@/components/pages/photos'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
-import { DEFAULT_LOCALE } from '@/utils/constants'
 import { hasPermission } from '@/utils/permissions'
+import { initSSRLocale } from '@/utils/ssrLocale'
 import { formatObjectName } from '@/utils/strings'
 
 interface PhotosPageProps {
@@ -173,11 +172,8 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<PhotosPageProps>> => {
-            const locale = context.locale ?? DEFAULT_LOCALE
+            const { translations } = await initSSRLocale(store, context)
             const search = (context.query.search as string) || ''
-            const translations = await serverSideTranslations(locale)
-
-            store.dispatch(setLocale(locale))
 
             const { data: photos } = await store.dispatch(API.endpoints?.photosGetList.initiate())
 
