@@ -14,9 +14,18 @@ interface ReviewFormProps {
     entityType: ApiModel.CommentEntityType
     entityId: string
     onSuccess?: () => void
+    /**
+     * Lets a caller that renders the review list (e.g. `EventReviews`) show
+     * the new review optimistically instead of waiting out the round-trip.
+     * Called synchronously once validation passes, with `run` wrapping the
+     * actual submit (mutation + local state) - the caller must `await run()`
+     * itself, inside a transition, for `useOptimistic`'s pending state to
+     * last until it settles. Falls back to running inline when omitted.
+     */
+    onOptimisticSubmit?: (content: string, rating: number, run: () => Promise<void>) => void
 }
 
-export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, onSuccess }) => {
+export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, onSuccess, onOptimisticSubmit }) => {
     const { t } = useTranslation()
 
     const [rating, setRating] = useState<number>(0)
@@ -68,32 +77,40 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
         setFieldErrors({})
         setSubmitSuccess(false)
 
-        try {
-            await createComment({
-                content: trimmedContent,
-                entityId,
-                entityType,
-                rating: rating > 0 ? rating : undefined
-            }).unwrap()
+        const run = async () => {
+            try {
+                await createComment({
+                    content: trimmedContent,
+                    entityId,
+                    entityType,
+                    rating: rating > 0 ? rating : undefined
+                }).unwrap()
 
-            setContent('')
-            setRating(0)
-            setHoverRating(0)
-            setSubmitSuccess(true)
-            onSuccess?.()
-        } catch (error) {
-            const messages = (error as ApiType.ResError)?.messages
+                setContent('')
+                setRating(0)
+                setHoverRating(0)
+                setSubmitSuccess(true)
+                onSuccess?.()
+            } catch (error) {
+                const messages = (error as ApiType.ResError)?.messages
 
-            if (messages && typeof messages === 'object') {
-                setFieldErrors(messages)
-            } else {
-                setFieldErrors({
-                    _general: t(
-                        'components.common.review-form.error',
-                        'Не удалось отправить отзыв. Попробуйте ещё раз.'
-                    )
-                })
+                if (messages && typeof messages === 'object') {
+                    setFieldErrors(messages)
+                } else {
+                    setFieldErrors({
+                        _general: t(
+                            'components.common.review-form.error',
+                            'Не удалось отправить отзыв. Попробуйте ещё раз.'
+                        )
+                    })
+                }
             }
+        }
+
+        if (onOptimisticSubmit) {
+            onOptimisticSubmit(trimmedContent, rating, run)
+        } else {
+            await run()
         }
     }
 

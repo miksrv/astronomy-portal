@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { startTransition, useEffect, useOptimistic, useRef, useState } from 'react'
 import { Container } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
-import { API, ApiModel, useAppSelector } from '@/api'
+import { API, ApiModel, useAppDispatch, useAppSelector } from '@/api'
 import { ReviewCard } from '@/components/common/review-card/ReviewCard'
 import { ReviewForm } from '@/components/common/review-form/ReviewForm'
 import { REVIEW_INLINE_FORM_ID, REVIEWS_PAGE_SIZE } from '@/utils/constants'
@@ -18,8 +18,13 @@ interface EventReviewsProps {
     eventId: string
 }
 
+/** A review not yet confirmed by the server - rendered instantly via `useOptimistic`. */
+type OptimisticReview = ApiModel.Comment & { pending?: boolean }
+
 export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
     const { t } = useTranslation()
+
+    const dispatch = useAppDispatch()
 
     const isAuth = useAppSelector((state) => state.auth.isAuth)
     const user = useAppSelector((state) => state.auth.user)
@@ -47,6 +52,15 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
 
     const items = data?.items ?? []
     const hasMore = items.length < (data?.total ?? 0)
+
+    // Shows the just-submitted review at the top instantly instead of a
+    // generic skeleton placeholder. `items` (the real, server-confirmed list)
+    // is always the base value here - the optimistic entry only survives for
+    // the lifetime of the transition in `handleOptimisticSubmit` below.
+    const [optimisticItems, addOptimisticReview] = useOptimistic<OptimisticReview[], OptimisticReview>(
+        items,
+        (state, review) => [review, ...state]
+    )
 
     // Once the post-submit refetch (triggered by `handleReviewSuccess` below)
     // has landed, `justPosted` has done its job - hasReviewed now covers
@@ -100,23 +114,56 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
         setOffset(0)
     }
 
-    // While the post-submit refetch is in flight, show a single-card skeleton
-    // above the (still-stale) list as a placeholder for the incoming review -
-    // takes priority over the initial-load / load-more skeletons below, which
-    // would otherwise also match during this same window.
-    const isPostingRefresh = justPosted && isFetching
-
     // Only the very first page fetch (no items yet) shows the full-list
     // skeleton; a fetch triggered by the sentinel while items are already on
     // screen gets the smaller "loading more" skeleton instead.
-    const isInitialLoading = isFetching && items.length === 0 && !isPostingRefresh
-    const isLoadingMore = isFetching && items.length > 0 && !isPostingRefresh
+    const isInitialLoading = isFetching && items.length === 0
+    const isLoadingMore = isFetching && items.length > 0
 
-    const canDeleteReview = (review: ApiModel.Comment): boolean => {
-        if (!user) {
+    const canDeleteReview = (review: OptimisticReview): boolean => {
+        if (!user || review.pending) {
             return false
         }
         return user.id === review.author.id || hasPermission(user, ApiModel.Permission.COMMENTS_MODERATE)
+    }
+
+    // Renders the submitted review immediately (see `optimisticItems` above)
+    // instead of the earlier generic skeleton placeholder. `addOptimisticReview`
+    // must run in the same transition as the actual submit (`run`, from
+    // ReviewForm) - once that settles, React reverts to `items` above, which
+    // by then has the real, server-confirmed review thanks to the explicit
+    // refetch below.
+    const handleOptimisticSubmit = (content: string, rating: number, run: () => Promise<void>) => {
+        startTransition(async () => {
+            addOptimisticReview({
+                id: `optimistic-${Date.now()}`,
+                content,
+                rating: rating > 0 ? rating : undefined,
+                createdAt: new Date().toISOString(),
+                entityId: eventId,
+                entityType: 'event',
+                author: {
+                    id: user?.id ?? '',
+                    name: user?.name ?? '',
+                    avatar: user?.avatar
+                },
+                pending: true
+            })
+
+            await run()
+
+            // `commentsCreate` invalidates the entity's Comments tag, but that
+            // background refetch isn't awaited by the mutation itself - force
+            // and await it explicitly so this transition doesn't end (and the
+            // optimistic review with it) before the real list actually
+            // contains the new review.
+            await dispatch(
+                API.endpoints.commentsGetList.initiate(
+                    { entityId: eventId, entityType: 'event', limit: REVIEWS_PAGE_SIZE, offset: 0 },
+                    { forceRefetch: true }
+                )
+            ).unwrap()
+        })
     }
 
     return (
@@ -131,6 +178,7 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
                             entityType={'event'}
                             entityId={eventId}
                             onSuccess={handleReviewSuccess}
+                            onOptimisticSubmit={handleOptimisticSubmit}
                         />
                     </div>
                 )}
@@ -154,19 +202,14 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
 
                 {showTopSection && <hr className={styles.divider} />}
 
-                {isPostingRefresh && (
-                    <div className={styles.postingSkeleton}>
-                        <EventReviewsSkeleton count={1} />
-                    </div>
-                )}
-
-                {items.length > 0 ? (
+                {optimisticItems.length > 0 ? (
                     <ul className={styles.list}>
-                        {items.map((review) => (
+                        {optimisticItems.map((review) => (
                             <li key={review.id}>
                                 <ReviewCard
                                     review={review}
                                     canDelete={canDeleteReview(review)}
+                                    pending={review.pending}
                                     onDelete={(id) => {
                                         void deleteComment(id)
                                     }}
@@ -176,7 +219,7 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
                     </ul>
                 ) : isInitialLoading ? (
                     <EventReviewsSkeleton />
-                ) : isPostingRefresh ? null : (
+                ) : (
                     <p className={styles.empty}>
                         {t('components.common.reviews-section.empty', 'Отзывов пока нет. Будьте первым!')}
                     </p>

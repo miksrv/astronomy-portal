@@ -16,13 +16,16 @@ interface ReviewCardProps {
     canDelete?: boolean
     className?: string
     onDelete?: (id: string) => void
+    /** Set while this review is an optimistic entry still in flight - hides
+     * the (not-yet-real) date/delete action and shows a "sending" label. */
+    pending?: boolean
 }
 
-export const ReviewCard: React.FC<ReviewCardProps> = ({ review, canDelete, className, onDelete }) => {
+export const ReviewCard: React.FC<ReviewCardProps> = ({ review, canDelete, className, onDelete, pending }) => {
     const { t } = useTranslation()
 
     return (
-        <article className={cn(styles.card, className)}>
+        <article className={cn(styles.card, pending && styles.cardPending, className)}>
             <header className={styles.header}>
                 <UserAvatar
                     src={
@@ -38,13 +41,19 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review, canDelete, class
                     {review.rating !== undefined && <StarRating rating={review.rating} />}
                 </div>
                 <div className={styles.headerAside}>
-                    <time
-                        className={styles.date}
-                        dateTime={review.createdAt}
-                    >
-                        {formatDate(review.createdAt)}
-                    </time>
-                    {canDelete && onDelete && (
+                    {pending ? (
+                        <span className={styles.pendingLabel}>
+                            {t('components.common.review-card.pending', 'Отправка…')}
+                        </span>
+                    ) : (
+                        <time
+                            className={styles.date}
+                            dateTime={review.createdAt}
+                        >
+                            {formatDate(review.createdAt)}
+                        </time>
+                    )}
+                    {canDelete && onDelete && !pending && (
                         <Button
                             size={'small'}
                             mode={'secondary'}

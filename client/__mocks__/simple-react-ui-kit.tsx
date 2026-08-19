@@ -31,6 +31,22 @@ export const Input: React.FC<{
     </div>
 )
 
+export const TextArea: React.FC<{
+    rows?: number
+    autoResize?: boolean
+    disabled?: boolean
+    value?: string
+    maxLength?: number
+    placeholder?: string
+    error?: string
+    onChange?: React.ChangeEventHandler<HTMLTextAreaElement>
+}> = ({ error, autoResize: _autoResize, ...props }) => (
+    <div>
+        <textarea {...props} />
+        {error && <span>{error}</span>}
+    </div>
+)
+
 export const Message: React.FC<{
     type?: string
     title?: string
