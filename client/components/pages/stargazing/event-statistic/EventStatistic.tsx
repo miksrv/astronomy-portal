@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react'
 import { EChartsOption } from 'echarts'
-import ReactECharts from 'echarts-for-react'
+import type { EChartsReactProps } from 'echarts-for-react'
 import { Container, Skeleton } from 'simple-react-ui-kit'
 
+import dynamic from 'next/dynamic'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API } from '@/api'
@@ -17,6 +18,10 @@ import {
 } from '@/utils/eventRegistrations'
 
 import styles from './styles.module.sass'
+
+const ReactECharts = dynamic<EChartsReactProps>(() => import('echarts-for-react'), {
+    ssr: false
+})
 
 interface EventStatisticProps {
     eventId: string

@@ -4,9 +4,10 @@ import { AstroTime, Observer } from 'astronomy-engine'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
-import ReactECharts, { EChartsOption } from 'echarts-for-react'
+import type { EChartsOption, EChartsReactProps } from 'echarts-for-react'
 import { Container } from 'simple-react-ui-kit'
 
+import dynamic from 'next/dynamic'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
@@ -15,6 +16,10 @@ import { formatDate } from '@/utils/dates'
 import { formatObjectName } from '@/utils/strings'
 
 import styles from './styles.module.sass'
+
+const ReactECharts = dynamic<EChartsReactProps>(() => import('echarts-for-react'), {
+    ssr: false
+})
 
 const LAT = parseFloat(process.env.NEXT_PUBLIC_LAT ?? '51.7')
 const LON = parseFloat(process.env.NEXT_PUBLIC_LON ?? '55.2')
