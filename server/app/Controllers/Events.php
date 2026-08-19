@@ -812,13 +812,20 @@ class Events extends ResourceController
             // The exact address and coordinates are only shown once the viewer
             // has a booking for the event — same rule as Events::upcoming().
             // `location` (general venue name) stays public. Past events have
-            // nothing left to protect, so they're exempt.
+            // nothing left to protect, so they're exempt. Staff who can edit
+            // the event are exempt too — otherwise EVENTS_UPDATE staff editing
+            // an event they haven't personally booked would see the address
+            // field silently blank out on /stargazing/form (nothing wrong on
+            // save, since the omitted field is just left unchanged there, but
+            // confusing/misleading to look at while editing).
             if ($event->requiresRegistration && $this->model->isUpcoming($event)) {
+                $canEditEvent = $this->session->isAuth && $this->session->can(Permission::EVENTS_UPDATE);
+
                 $hasBooking = $this->session->isAuth && $this->session->user->id
                     ? $eventUsersModel->where(['event_id' => $id, 'user_id' => $this->session->user->id])->first()
                     : false;
 
-                if (!$hasBooking) {
+                if (!$canEditEvent && !$hasBooking) {
                     unset($event->address, $event->latitude, $event->longitude);
                 }
             }

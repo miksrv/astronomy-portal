@@ -1,17 +1,32 @@
 import React from 'react'
 
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 
 import { EventForm } from './EventForm'
 
 jest.mock('@/api', () => ({}))
 jest.mock('@/api/constants', () => ({ hosts: { stargazing: '' } }))
 
-// The Jest CJS build of the kit does not expose TextArea/Checkbox; provide light stand-ins.
+// The Jest CJS build of the kit does not expose TextArea/Checkbox/Popout/Calendar/
+// Select/Icon; provide light stand-ins. Popout renders its trigger and content
+// unconditionally (no open/closed state) so tests can interact with the date
+// picker's calendar/time controls without simulating a click-to-open first.
 jest.mock('simple-react-ui-kit', () => {
     return {
-        Button: ({ label, onClick }: { label?: string; onClick?: () => void }) => (
-            <button onClick={onClick}>{label}</button>
+        Button: ({ label, onClick, disabled }: { label?: string; onClick?: () => void; disabled?: boolean }) => (
+            <button
+                onClick={onClick}
+                disabled={disabled}
+            >
+                {label}
+            </button>
+        ),
+        Calendar: ({ onDateSelect }: { onDateSelect?: (date: string) => void }) => (
+            <input
+                aria-label={'calendar'}
+                type={'text'}
+                onChange={(e) => onDateSelect?.(e.target.value)}
+            />
         ),
         Checkbox: ({
             label,
@@ -31,16 +46,26 @@ jest.mock('simple-react-ui-kit', () => {
                 />
             </label>
         ),
-        Container: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+        Container: ({ title, children }: { title?: string; children?: React.ReactNode }) => (
+            <section>
+                {title && <h2>{title}</h2>}
+                {children}
+            </section>
+        ),
+        Icon: () => null,
         Input: ({
             label,
             type,
             value,
+            error,
+            disabled,
             onChange
         }: {
             label?: string
             type?: string
             value?: string
+            error?: string
+            disabled?: boolean
             onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
         }) => (
             <label>
@@ -48,13 +73,74 @@ jest.mock('simple-react-ui-kit', () => {
                 <input
                     type={type}
                     value={value ?? ''}
+                    disabled={disabled}
                     onChange={onChange}
                 />
+                {error && <span role={'alert'}>{error}</span>}
             </label>
         ),
-        TextArea: () => null
+        // Popout is not given a forwardRef stand-in here: DateTimePicker only
+        // calls `ref.current?.close()` from its own "Готово" button, which no
+        // test below relies on, so the resulting "cannot be given a ref"
+        // console warning is harmless noise, not a real defect.
+        Popout: ({ trigger, children }: { trigger?: React.ReactNode; children?: React.ReactNode }) => (
+            <div>
+                {trigger}
+                <div>{children}</div>
+            </div>
+        ),
+        Select: ({
+            label,
+            options,
+            value,
+            disabled,
+            onSelect
+        }: {
+            label?: string
+            options?: Array<{ key: string; value: string }>
+            value?: string
+            disabled?: boolean
+            onSelect?: (selected?: Array<{ key: string; value: string }>) => void
+        }) => (
+            <label>
+                {label}
+                <select
+                    disabled={disabled}
+                    value={value ?? ''}
+                    onChange={(e) =>
+                        onSelect?.(e.target.value ? [{ key: e.target.value, value: e.target.value }] : undefined)
+                    }
+                >
+                    <option value={''} />
+                    {options?.map((option) => (
+                        <option
+                            key={option.key}
+                            value={option.key}
+                        >
+                            {option.value}
+                        </option>
+                    ))}
+                </select>
+            </label>
+        ),
+        TextArea: ({ error }: { error?: string }) => (error ? <span role={'alert'}>{error}</span> : null)
     }
 })
+
+// Drives one DateTimePicker instance (identified by its `testId`) through the
+// mocked Calendar + hour/minute Selects — the calendar must be set first,
+// since the real component only commits an hour/minute change once a date
+// already exists (see DateTimePicker.tsx).
+const setDateTime = (testId: string, date: string, hour: string, minute: string) => {
+    const calendarInput = within(screen.getByTestId(`${testId}-calendar`)).getByLabelText('calendar')
+    fireEvent.change(calendarInput, { target: { value: date } })
+
+    const hourSelect = within(screen.getByTestId(`${testId}-hour`)).getByRole('combobox')
+    fireEvent.change(hourSelect, { target: { value: hour } })
+
+    const minuteSelect = within(screen.getByTestId(`${testId}-minute`)).getByRole('combobox')
+    fireEvent.change(minuteSelect, { target: { value: minute } })
+}
 
 describe('EventForm', () => {
     it('renders the adult ticket price field', () => {
@@ -90,8 +176,8 @@ describe('EventForm', () => {
         expect((numberInputs[1] as HTMLInputElement).value).toBe('750')
     })
 
-    it('prefills date fields with a datetime-local-compatible value (YYYY-MM-DDTHH:mm) when editing an event', () => {
-        const { container } = render(
+    it('prefills the date picker triggers with a formatted value when editing an event', () => {
+        render(
             <EventForm
                 initialData={{
                     id: 'event-1',
@@ -104,12 +190,9 @@ describe('EventForm', () => {
             />
         )
 
-        // datetime-local inputs order: [0] event date, [1] event end date, [2] registration start, [3] registration end
-        const dateInputs = container.querySelectorAll('input[type="datetime-local"]')
-
-        expect((dateInputs[0] as HTMLInputElement).value).toBe('2026-08-15T20:00')
-        expect((dateInputs[2] as HTMLInputElement).value).toBe('2026-08-01T05:00')
-        expect((dateInputs[3] as HTMLInputElement).value).toBe('2026-08-14T05:00')
+        expect(screen.getByTestId('date-trigger').textContent).toContain('15.08.2026, 20:00')
+        expect(screen.getByTestId('registration-start-trigger').textContent).toContain('01.08.2026, 05:00')
+        expect(screen.getByTestId('registration-end-trigger').textContent).toContain('14.08.2026, 05:00')
     })
 
     // Regression coverage for the 2026-08-19 incident: registrationEnd was set
@@ -118,14 +201,11 @@ describe('EventForm', () => {
     // the backend's identical Events.invalidRegistrationWindow check.
     it('blocks submit and shows an error when registrationEnd is later than the event date', () => {
         const onSubmit = jest.fn()
-        const { container } = render(<EventForm onSubmit={onSubmit} />)
+        render(<EventForm onSubmit={onSubmit} />)
 
-        // datetime-local inputs order: [0] event date, [1] event end date, [2] registration start, [3] registration end
-        const dateInputs = container.querySelectorAll('input[type="datetime-local"]')
-
-        fireEvent.change(dateInputs[0], { target: { value: '2026-08-19T22:00' } })
-        fireEvent.change(dateInputs[2], { target: { value: '2026-08-16T12:00' } })
-        fireEvent.change(dateInputs[3], { target: { value: '2026-08-20T00:00' } })
+        setDateTime('date', '2026-08-19', '22', '00')
+        setDateTime('registration-start', '2026-08-16', '12', '00')
+        setDateTime('registration-end', '2026-08-20', '00', '00')
 
         fireEvent.click(screen.getByText('Сохранить'))
 
@@ -135,13 +215,11 @@ describe('EventForm', () => {
 
     it('blocks submit and shows an error when registrationStart is not before registrationEnd', () => {
         const onSubmit = jest.fn()
-        const { container } = render(<EventForm onSubmit={onSubmit} />)
+        render(<EventForm onSubmit={onSubmit} />)
 
-        const dateInputs = container.querySelectorAll('input[type="datetime-local"]')
-
-        fireEvent.change(dateInputs[0], { target: { value: '2026-08-19T22:00' } })
-        fireEvent.change(dateInputs[2], { target: { value: '2026-08-19T21:00' } })
-        fireEvent.change(dateInputs[3], { target: { value: '2026-08-19T20:00' } })
+        setDateTime('date', '2026-08-19', '22', '00')
+        setDateTime('registration-start', '2026-08-19', '21', '00')
+        setDateTime('registration-end', '2026-08-19', '20', '00')
 
         fireEvent.click(screen.getByText('Сохранить'))
 
@@ -151,20 +229,27 @@ describe('EventForm', () => {
 
     it('allows submit once the registration window is fixed', () => {
         const onSubmit = jest.fn()
-        const { container } = render(<EventForm onSubmit={onSubmit} />)
+        render(<EventForm onSubmit={onSubmit} />)
 
-        const dateInputs = container.querySelectorAll('input[type="datetime-local"]')
-
-        fireEvent.change(dateInputs[0], { target: { value: '2026-08-19T22:00' } })
-        fireEvent.change(dateInputs[2], { target: { value: '2026-08-16T12:00' } })
-        fireEvent.change(dateInputs[3], { target: { value: '2026-08-20T00:00' } })
+        setDateTime('date', '2026-08-19', '22', '00')
+        setDateTime('registration-start', '2026-08-16', '12', '00')
+        setDateTime('registration-end', '2026-08-20', '00', '00')
 
         fireEvent.click(screen.getByText('Сохранить'))
         expect(onSubmit).not.toHaveBeenCalled()
 
-        fireEvent.change(dateInputs[3], { target: { value: '2026-08-19T21:00' } })
+        setDateTime('registration-end', '2026-08-19', '21', '00')
         fireEvent.click(screen.getByText('Сохранить'))
 
         expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ registrationEnd: '2026-08-19T21:00' }))
+    })
+
+    // Regression coverage: a create/patch mutation's validation error must
+    // surface next to the field it belongs to, not just in a generic banner
+    // the admin has to cross-reference with the network tab.
+    it('shows a server validation error next to the field it belongs to', () => {
+        render(<EventForm error={{ messages: { title: 'Слишком длинный заголовок' } }} />)
+
+        expect(screen.getByText('Слишком длинный заголовок')).toBeDefined()
     })
 })

@@ -274,7 +274,7 @@ Listed in execution order. Tables created unless noted as ALTER.
 
 ### Event Location & Map
 - `events` columns: `location` (venue name), `address` (free-text), `latitude`/`longitude` (`DECIMAL(10,7)`, default the observatory's usual field), `min_age` (nullable), `end_date` (nullable).
-- `address`/`latitude`/`longitude` (not `location`, `min_age`, or `end_date`) are stripped from the API response until the viewer has a booking for an *upcoming* event that `requires_registration` — see `EventsModel::isUpcoming()` and the gating in `Events::show()`/`Events::upcoming()`. `location` (the general venue name) is always public. Past events and no-registration events are never gated.
+- `address`/`latitude`/`longitude` (not `location`, `min_age`, or `end_date`) are stripped from the API response until the viewer has a booking for an *upcoming* event that `requires_registration` — see `EventsModel::isUpcoming()` and the gating in `Events::show()`/`Events::upcoming()`. `location` (the general venue name) is always public. Past events and no-registration events are never gated. `Events::show()` also exempts a viewer holding `EVENTS_UPDATE` (staff editing the event on `/stargazing/form`), regardless of their own booking status — `Events::upcoming()` (the public homepage widget) has no such exemption since it's never used for editing.
 - No `yandex_map_link`/`google_map_link` columns anymore — the frontend generates map links on the fly from coordinates (`client/utils/maps.ts`).
 
 ### Language Files

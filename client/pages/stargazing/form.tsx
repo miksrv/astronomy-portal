@@ -123,6 +123,7 @@ const StargazingFormPage: NextPage<object> = () => {
             <EventForm
                 disabled={isLoading || isSuccess}
                 initialData={eventData}
+                error={createError || patchError}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
             />
