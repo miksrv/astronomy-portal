@@ -54,14 +54,10 @@ const nextConfig = {
     },
     output: 'standalone',
     reactStrictMode: true,
-    transpilePackages: [
-        '/scripts/d3.min.js',
-        '/scripts/d3.geo.projection.min.js',
-        '/scripts/celestial.min.js',
-        '@/components/celestial-map',
-        'echarts-for-react',
-        'echarts'
-    ]
+    // d3/celestial.min.js are plain <Script src="/scripts/..."> tags loaded in pages/_app.tsx -
+    // static public assets, never bundled by webpack/Turbopack, so they don't belong here.
+    // Only actual npm packages that ship untranspiled ESM need to be listed.
+    transpilePackages: ['echarts-for-react', 'echarts']
 }
 
 module.exports = nextConfig
