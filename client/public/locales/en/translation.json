@@ -35,7 +35,10 @@
                 "email-submit": "Sign in",
                 "divider": "or",
                 "consent": "By signing in, you agree to the processing of your personal data and to receiving e-mails about upcoming stargazing events. Learn more in the",
-                "privacy-link": "Privacy Policy"
+                "privacy-link": "Privacy Policy",
+                "vk-login": "Sign in with VK",
+                "google-login": "Sign in with Google",
+                "yandex-login": "Sign in with Yandex"
             },
             "object-photos-table": {
                 "photo": "Photo",

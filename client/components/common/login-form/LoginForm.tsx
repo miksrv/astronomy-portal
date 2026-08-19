@@ -155,6 +155,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
                     mode={'outline'}
                     disabled={isLoading}
                     onClick={() => handleLoginServiceButton('vk')}
+                    aria-label={t('components.common.login-form.vk-login', 'Войти через VK')}
                 >
                     <Image
                         src={vkLogo.src}
@@ -169,6 +170,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
                         mode={'outline'}
                         disabled={isLoading}
                         onClick={() => handleLoginServiceButton('google')}
+                        aria-label={t('components.common.login-form.google-login', 'Войти через Google')}
                     >
                         <Image
                             src={googleLogo.src}
@@ -183,6 +185,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
                     mode={'outline'}
                     disabled={isLoading}
                     onClick={() => handleLoginServiceButton('yandex')}
+                    aria-label={t('components.common.login-form.yandex-login', 'Войти через Яндекс')}
                 >
                     <Image
                         src={yandexLogo.src}
