@@ -20,7 +20,7 @@ import { requirePermissionSSR } from '@/utils/adminAuth'
 import { DEVELOPER_ROLE_ID } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/errors'
 
-import styles from './styles.module.sass'
+import styles from './roles.module.sass'
 
 const RolesPage: NextPage<object> = () => {
     const { t } = useTranslation()

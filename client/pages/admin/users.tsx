@@ -32,7 +32,7 @@ import { getErrorMessage } from '@/utils/errors'
 import { minutesAgo } from '@/utils/helpers'
 import { hasPermission } from '@/utils/permissions'
 
-import styles from './styles.module.sass'
+import styles from './users.module.sass'
 
 const LIMIT = 50
 const DEFAULT_SORT_BY: ApiType.Users.UsersSortBy = 'createdAt'
