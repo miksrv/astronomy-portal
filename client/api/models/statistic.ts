@@ -1,5 +1,5 @@
 // TODO Refactor this file to use the new API
-export type Telescope = {
+export interface Telescope {
     telescope_date: string
     total_exposure: number
     frames_count: number
@@ -13,7 +13,7 @@ export type Telescope = {
 //     wind_speed: number
 // }
 
-export type Statistic = {
+export interface Statistic {
     frames?: number
     exposure?: number
     fileSize?: number

@@ -67,7 +67,7 @@ const HistoryChapterPage: NextPage<HistoryChapterPageProps> = ({ chapter, prevCh
     }, [chapter])
 
     const handlePhotoClick = (sectionIndex: number, blockIndex: number, photoIdx: number) => {
-        setPhotoIndex(galleryOffsets[sectionIndex][blockIndex] + photoIdx)
+        setPhotoIndex((galleryOffsets[sectionIndex]?.[blockIndex] ?? 0) + photoIdx)
         setShowLightbox(true)
     }
 
@@ -263,9 +263,10 @@ export const getStaticProps = wrapper.getStaticProps(
 
             const manifest: HistoryChapterMeta[] = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8'))
             const currentIndex = manifest.findIndex((c) => c.slug === slug)
-            const prevChapter = currentIndex > 0 ? applyHostMeta(HOST_IMG, manifest[currentIndex - 1]) : null
-            const nextChapter =
-                currentIndex < manifest.length - 1 ? applyHostMeta(HOST_IMG, manifest[currentIndex + 1]) : null
+            const prevChapterMeta = currentIndex > 0 ? manifest[currentIndex - 1] : undefined
+            const nextChapterMeta = currentIndex < manifest.length - 1 ? manifest[currentIndex + 1] : undefined
+            const prevChapter = prevChapterMeta ? applyHostMeta(HOST_IMG, prevChapterMeta) : null
+            const nextChapter = nextChapterMeta ? applyHostMeta(HOST_IMG, nextChapterMeta) : null
 
             return {
                 props: { ...translations, chapter, prevChapter, nextChapter }

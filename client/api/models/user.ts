@@ -1,7 +1,7 @@
 import { Permission } from './permission'
 import { Role } from './role'
 
-export type User = {
+export interface User {
     id: string
     name: string
     email: string

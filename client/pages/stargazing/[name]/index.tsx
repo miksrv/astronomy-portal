@@ -247,21 +247,18 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 {t('pages.stargazing.photos-from-stargazing', 'Фотографии с мероприятия')}
 
                 {hasMorePhotos && (
-                    <a
-                        role={'button'}
-                        tabIndex={0}
+                    <Button
+                        mode={'link'}
                         className={styles.showMorePhotos}
                         onClick={handleShowAllPhotos}
-                        onKeyDown={(event) => {
-                            if (event.key === 'Enter' || event.key === ' ') {
-                                handleShowAllPhotos()
-                            }
-                        }}
-                    >
-                        {isLoadingAllPhotos
-                            ? t('pages.stargazing.photos-loading-more', 'Загрузка ещё фотографий…')
-                            : t('pages.stargazing.photos-show-all', 'Смотреть все ({{total}})', { total: totalPhotos })}
-                    </a>
+                        label={
+                            isLoadingAllPhotos
+                                ? t('pages.stargazing.photos-loading-more', 'Загрузка ещё фотографий…')
+                                : t('pages.stargazing.photos-show-all', 'Смотреть все ({{total}})', {
+                                      total: totalPhotos
+                                  })
+                        }
+                    />
                 )}
             </h2>
 

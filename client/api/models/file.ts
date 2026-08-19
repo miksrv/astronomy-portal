@@ -1,6 +1,6 @@
 import { ApiModel, ApiType } from '@/api'
 
-export type File = {
+export interface File {
     filter: ApiModel.FilterTypes
     fileName?: string
     exposure?: number

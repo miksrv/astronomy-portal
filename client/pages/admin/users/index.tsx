@@ -48,10 +48,10 @@ const parseRoleIdsParam = (value: string): number[] =>
 
 const authTypeBadgeClass = (authType: ApiModel.UserAuthType): string => {
     const map: Record<ApiModel.UserAuthType, string> = {
-        google: styles.badgeGoogle,
-        yandex: styles.badgeYandex,
-        vk: styles.badgeVk,
-        native: styles.badgeDefault
+        google: styles.badgeGoogle ?? '',
+        yandex: styles.badgeYandex ?? '',
+        vk: styles.badgeVk ?? '',
+        native: styles.badgeDefault ?? ''
     }
 
     return map[authType] ?? styles.badgeDefault
@@ -246,6 +246,10 @@ const UsersPage: NextPage<object> = () => {
             formatter: (_data, row, i) => {
                 const item = row[i]
 
+                if (!item) {
+                    return null
+                }
+
                 return (
                     <div className={styles.userCell}>
                         <UserAvatar
@@ -265,6 +269,10 @@ const UsersPage: NextPage<object> = () => {
             header: t('users.columnRole', 'Роль'),
             formatter: (_data, row, i) => {
                 const item = row[i]
+
+                if (!item) {
+                    return null
+                }
 
                 const badges =
                     item.roles.length > 0 ? (
@@ -318,6 +326,10 @@ const UsersPage: NextPage<object> = () => {
             formatter: (_data, row, i) => {
                 const item = row[i]
 
+                if (!item) {
+                    return null
+                }
+
                 return item.pushEnabled ? (
                     <Badge
                         label={`${t('users.pushOn', 'Вкл')} (${item.pushSubscriptionCount})`}
@@ -336,7 +348,11 @@ const UsersPage: NextPage<object> = () => {
         {
             accessor: 'age',
             header: t('users.columnAge', 'Пол / Возраст'),
-            formatter: (_data, row, i) => sexAgeLabel(row[i])
+            formatter: (_data, row, i) => {
+                const item = row[i]
+
+                return item ? sexAgeLabel(item) : '—'
+            }
         },
         {
             accessor: 'eventsCount',
@@ -347,8 +363,14 @@ const UsersPage: NextPage<object> = () => {
                 <button
                     className={styles.eventsCountButton}
                     onClick={() => {
-                        setEventsUserId(row[i].id)
-                        setEventsUserName(row[i].name)
+                        const item = row[i]
+
+                        if (!item) {
+                            return
+                        }
+
+                        setEventsUserId(item.id)
+                        setEventsUserName(item.name)
                     }}
                 >
                     {data as number}

@@ -154,7 +154,13 @@ describe('EventForm', () => {
 
         // number inputs order: [0] tickets count, [1] ticket price
         const numberInputs = container.querySelectorAll('input[type="number"]')
-        fireEvent.change(numberInputs[1], { target: { value: '750' } })
+        const ticketPriceInput = numberInputs[1]
+
+        if (!ticketPriceInput) {
+            throw new Error('Ticket price input not found')
+        }
+
+        fireEvent.change(ticketPriceInput, { target: { value: '750' } })
 
         fireEvent.click(screen.getByText('Сохранить'))
 

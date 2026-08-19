@@ -28,21 +28,27 @@ export const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, 
             {
                 accessor: 'photo',
                 className: styles.cellPhoto,
-                formatter: (data, row, i) =>
-                    data && (
-                        <Link
-                            href={`/photos/${row[i].id}`}
-                            title={createPhotoTitle(row[i] as ApiModel.Photo, t)}
-                            className={currentPhotoId === row[i].id ? styles.active : ''}
-                        >
-                            <Image
-                                src={data as string}
-                                width={106}
-                                height={24}
-                                alt={''}
-                            />
-                        </Link>
-                    ),
+                formatter: (data, row, i) => {
+                    const item = row[i]
+
+                    return (
+                        data &&
+                        item && (
+                            <Link
+                                href={`/photos/${item.id}`}
+                                title={createPhotoTitle(item as ApiModel.Photo, t)}
+                                className={currentPhotoId === item.id ? styles.active : ''}
+                            >
+                                <Image
+                                    src={data as string}
+                                    width={106}
+                                    height={24}
+                                    alt={''}
+                                />
+                            </Link>
+                        )
+                    )
+                },
                 header: t('components.common.object-photos-table.photo', 'Фотография'),
                 isSortable: true
             },

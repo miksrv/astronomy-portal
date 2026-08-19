@@ -276,9 +276,11 @@ const StarMapRender: React.FC<StarMapProps> = ({
             }
 
             // For non-settings mode (object detail pages), center on the single object
-            if (!showSettings && objects?.length === 1) {
-                localConfig.follow = [objects[0].ra || 0, objects[0].dec || 0]
-                localConfig.center = [objects[0].ra || 0, objects[0].dec || 0, 1]
+            const singleObject = !showSettings && objects?.length === 1 ? objects[0] : undefined
+
+            if (singleObject) {
+                localConfig.follow = [singleObject.ra || 0, singleObject.dec || 0]
+                localConfig.center = [singleObject.ra || 0, singleObject.dec || 0, 1]
             }
 
             Celestial.clear()

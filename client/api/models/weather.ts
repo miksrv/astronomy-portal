@@ -1,4 +1,4 @@
-export type Weather = {
+export interface Weather {
     temperature?: number
     feelsLike?: number
     pressure?: number

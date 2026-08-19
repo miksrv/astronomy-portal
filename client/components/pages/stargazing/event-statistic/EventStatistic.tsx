@@ -144,7 +144,8 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
             }
 
             for (const age of item.childrenAges ?? []) {
-                counts[getChildAgeGroup(age)] += 1
+                const group = getChildAgeGroup(age)
+                counts[group] = (counts[group] ?? 0) + 1
             }
         }
 
@@ -348,7 +349,7 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
         },
         xAxis: {
             type: 'category',
-            data: AGE_GROUP_ORDER.map((k) => AGE_GROUP_LABELS[k]),
+            data: AGE_GROUP_ORDER.map((k) => AGE_GROUP_LABELS[k] ?? ''),
             axisLabel: {
                 show: true,
                 color: CHART_COLORS.textSecondary,
@@ -404,7 +405,7 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
         },
         xAxis: {
             type: 'category',
-            data: CHILD_AGE_GROUP_ORDER.map((k) => CHILD_AGE_GROUP_LABELS[k]),
+            data: CHILD_AGE_GROUP_ORDER.map((k) => CHILD_AGE_GROUP_LABELS[k] ?? ''),
             axisLabel: {
                 show: true,
                 color: CHART_COLORS.textSecondary,

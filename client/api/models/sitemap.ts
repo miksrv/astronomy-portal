@@ -1,6 +1,6 @@
 import { DateTime } from '@/api/types'
 
-export type SiteMap = {
+export interface SiteMap {
     id: string
     updated?: DateTime
 }

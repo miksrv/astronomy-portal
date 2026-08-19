@@ -30,7 +30,7 @@ export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosL
             formatter: (data, row, i) => (
                 <Link
                     href={`/objects/${data as string}`}
-                    title={`${row[i].title}`}
+                    title={`${row[i]?.title ?? ''}`}
                     className={styles.objectLink}
                 >
                     {formatObjectName(data as string)}
@@ -45,8 +45,8 @@ export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosL
             formatter: (data, row, i) =>
                 data && (
                     <Link
-                        key={row[i].photoId}
-                        href={`/photos/${row[i].photoId}`}
+                        key={row[i]?.photoId}
+                        href={`/photos/${row[i]?.photoId}`}
                         title={t('components.pages.objects.objects-table.view-photo', 'Просмотр фото')}
                     >
                         <Image

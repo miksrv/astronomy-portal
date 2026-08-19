@@ -265,13 +265,14 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
                 }
 
                 const index = nextItemIndexRef.current
+                const item = queueItems[index]
 
-                if (index >= queueItems.length) {
+                if (!item) {
                     return
                 }
 
                 nextItemIndexRef.current += 1
-                await processItem(queueItems[index])
+                await processItem(item)
             }
         }
 

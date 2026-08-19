@@ -70,7 +70,7 @@ export const ReviewFloatingPrompt: React.FC<ReviewFloatingPromptProps> = ({ even
             return
         }
 
-        const observer = new IntersectionObserver(([entry]) => setInlineFormVisible(entry.isIntersecting))
+        const observer = new IntersectionObserver(([entry]) => setInlineFormVisible(entry?.isIntersecting ?? false))
 
         observer.observe(inlineForm)
 

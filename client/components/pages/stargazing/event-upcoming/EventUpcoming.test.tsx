@@ -154,7 +154,13 @@ describe('EventUpcoming', () => {
 
         fireEvent.click(screen.getByText('Отменить бронирование'))
         const confirmButtons = screen.getAllByText('Отменить бронирование')
-        fireEvent.click(confirmButtons[confirmButtons.length - 1])
+        const confirmButton = confirmButtons[confirmButtons.length - 1]
+
+        if (!confirmButton) {
+            throw new Error('Confirm button not found')
+        }
+
+        fireEvent.click(confirmButton)
 
         await waitFor(() => {
             expect(mockCancelMutate).toHaveBeenCalledWith({ eventId: 'event-1' })
@@ -228,7 +234,13 @@ describe('EventUpcoming', () => {
 
         fireEvent.click(screen.getByText('Отменить бронирование'))
         const confirmButtons = screen.getAllByText('Отменить бронирование')
-        fireEvent.click(confirmButtons[confirmButtons.length - 1])
+        const confirmButton = confirmButtons[confirmButtons.length - 1]
+
+        if (!confirmButton) {
+            throw new Error('Confirm button not found')
+        }
+
+        fireEvent.click(confirmButton)
 
         await waitFor(() => {
             expect(mockCancelMutate).toHaveBeenCalled()
@@ -319,7 +331,13 @@ describe('EventUpcoming', () => {
         expect(screen.getByText('Удалить астровыезд?')).toBeDefined()
 
         const confirmButtons = screen.getAllByText('Удалить')
-        fireEvent.click(confirmButtons[confirmButtons.length - 1])
+        const confirmButton = confirmButtons[confirmButtons.length - 1]
+
+        if (!confirmButton) {
+            throw new Error('Confirm button not found')
+        }
+
+        fireEvent.click(confirmButton)
 
         await waitFor(() => {
             expect(mockDeleteMutate).toHaveBeenCalledWith('event-1')
@@ -360,7 +378,13 @@ describe('EventUpcoming', () => {
 
         fireEvent.click(screen.getByTitle('Удалить'))
         const confirmButtons = screen.getAllByText('Удалить')
-        fireEvent.click(confirmButtons[confirmButtons.length - 1])
+        const confirmButton = confirmButtons[confirmButtons.length - 1]
+
+        if (!confirmButton) {
+            throw new Error('Confirm button not found')
+        }
+
+        fireEvent.click(confirmButton)
 
         await waitFor(() => {
             expect(mockDeleteMutate).toHaveBeenCalledWith('event-1')

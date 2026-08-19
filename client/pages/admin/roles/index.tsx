@@ -199,30 +199,46 @@ const RolesPage: NextPage<object> = () => {
         {
             accessor: 'name',
             header: t('pages.roles.column-name', 'Название'),
-            formatter: (_data, row, i) => (
-                <button
-                    className={styles.roleNameButton}
-                    onClick={() => openEdit(row[i])}
-                >
-                    {row[i].name}
-                </button>
-            )
+            formatter: (_data, row, i) => {
+                const item = row[i]
+
+                if (!item) {
+                    return null
+                }
+
+                return (
+                    <button
+                        className={styles.roleNameButton}
+                        onClick={() => openEdit(item)}
+                    >
+                        {item.name}
+                    </button>
+                )
+            }
         },
         {
             accessor: 'permissions',
             header: t('pages.roles.column-permissions', 'Привилегии'),
-            formatter: (_data, row, i) => (
-                <div className={styles.permissionsCell}>
-                    {row[i].permissions.map((permission) => (
-                        <Badge
-                            key={permission}
-                            label={permissionLabel(permission)}
-                            size={'small'}
-                            className={styles.badgeDefault}
-                        />
-                    ))}
-                </div>
-            )
+            formatter: (_data, row, i) => {
+                const item = row[i]
+
+                if (!item) {
+                    return null
+                }
+
+                return (
+                    <div className={styles.permissionsCell}>
+                        {item.permissions.map((permission) => (
+                            <Badge
+                                key={permission}
+                                label={permissionLabel(permission)}
+                                size={'small'}
+                                className={styles.badgeDefault}
+                            />
+                        ))}
+                    </div>
+                )
+            }
         },
         {
             accessor: 'usersCount',

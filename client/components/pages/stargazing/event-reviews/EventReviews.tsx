@@ -72,7 +72,7 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
         }
 
         const observer = new IntersectionObserver(([entry]) => {
-            if (entry.isIntersecting) {
+            if (entry?.isIntersecting) {
                 setOffset(items.length)
             }
         })

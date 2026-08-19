@@ -52,13 +52,15 @@ export const QrScannerRender: React.FC<QrScannerRenderProps> = ({ onScanSuccess,
                 return
             }
 
-            if (!cameras || !cameras.length) {
+            const camera = cameras?.[0]
+
+            if (!camera) {
                 onScanFailure(t('pages.checkin.no-cameras', 'Камеры не найдены'))
 
                 return
             }
 
-            await scanner.start(cameras[0].id, { fps: 10, qrbox: 250 }, handleScan, () => {})
+            await scanner.start(camera.id, { fps: 10, qrbox: 250 }, handleScan, () => {})
         }
 
         startScanner().catch((err: Error) => {
