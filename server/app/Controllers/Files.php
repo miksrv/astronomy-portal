@@ -4,8 +4,6 @@ namespace App\Controllers;
 
 use App\Models\ObjectFitsFilesModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
-use CodeIgniter\API\ResponseTrait;
 use Exception;
 
 /**
@@ -18,10 +16,8 @@ use Exception;
  * @method ResponseInterface show($id = null) Retrieves and returns files associated with a specific object.
  * @method ResponseInterface updates() Updates file information based on provided JSON input.
  */
-class Files extends ResourceController
+class Files extends BaseApiController
 {
-    use ResponseTrait;
-
     private ObjectFitsFilesModel $filesModel;
 
     public function __construct() {
@@ -48,7 +44,7 @@ class Files extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('Objects.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -61,11 +57,11 @@ class Files extends ResourceController
         $input  = json_decode($this->request->getJSON(true));
 
         if (!$apiKey || $apiKey !== getenv('app.fitsApiKey')) {
-            return $this->failUnauthorized('Invalid API key');
+            return $this->respondUnauthorized(lang('FilesController.invalidApiKey'));
         }
 
         if (!isset($input->DEC) || !isset($input->RA)) {
-            return $this->fail('No RA or DEC coordinates');
+            return $this->respondError(lang('FilesController.missingCoordinates'), 400);
         }
 
         $maxLength = ['COMMENT' => 500, 'OBSERVER' => 100, 'INSTRUME' => 100, 'TELESCOP' => 100];
@@ -160,7 +156,7 @@ class Files extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError();
+            return $this->respondServerError();
         }
     }
 

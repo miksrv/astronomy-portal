@@ -15,7 +15,6 @@ use App\Models\PushNotificationsModel;
 use App\Models\PushSubscriptionsModel;
 use App\Models\UsersModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\I18n\Time;
 use Config\Database;
 use Config\Services;
@@ -31,7 +30,7 @@ use Exception;
  * "recipient" is a push_subscriptions row rather than a user (see
  * PushNotificationDeliveriesModel doc-block).
  */
-class PushNotifications extends ResourceController
+class PushNotifications extends BaseApiController
 {
     private SessionLibrary $session;
     protected $model;
@@ -51,11 +50,11 @@ class PushNotifications extends ResourceController
     public function list(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::PUSH_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         try {
@@ -81,7 +80,7 @@ class PushNotifications extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -92,18 +91,18 @@ class PushNotifications extends ResourceController
     public function show($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::PUSH_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         try {
             $notification = $this->model->find($id);
 
             if (!$notification) {
-                return $this->failNotFound();
+                return $this->respondNotFound(lang('PushNotifications.notFound'));
             }
 
             // Resolve audience label and count
@@ -167,7 +166,7 @@ class PushNotifications extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -178,11 +177,11 @@ class PushNotifications extends ResourceController
     public function create(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::PUSH_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $input = $this->request->getJSON(true);
@@ -198,14 +197,14 @@ class PushNotifications extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         $audienceType    = $input['audienceType'] ?? 'all';
         $audienceEventId = $input['audienceEventId'] ?? null;
 
         if ($audienceType === 'event' && empty($audienceEventId)) {
-            return $this->failValidationErrors([
+            return $this->respondValidationErrors([
                 'audienceEventId' => lang('PushNotifications.audienceEventIdRequired'),
             ]);
         }
@@ -234,7 +233,7 @@ class PushNotifications extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -245,21 +244,21 @@ class PushNotifications extends ResourceController
     public function update($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::PUSH_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $notification = $this->model->find($id);
 
         if (!$notification) {
-            return $this->failNotFound();
+            return $this->respondNotFound(lang('PushNotifications.notFound'));
         }
 
         if ($notification->status !== PushNotificationEntity::STATUS_DRAFT) {
-            return $this->failForbidden(lang('PushNotifications.onlyDraftEditable'));
+            return $this->respondConflict(lang('PushNotifications.onlyDraftEditable'));
         }
 
         $input = $this->request->getJSON(true);
@@ -275,7 +274,7 @@ class PushNotifications extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         // Validate audience combination when audienceType is being set
@@ -284,7 +283,7 @@ class PushNotifications extends ResourceController
             $audienceEventId = $input['audienceEventId'] ?? null;
 
             if ($audienceType === 'event' && empty($audienceEventId)) {
-                return $this->failValidationErrors([
+                return $this->respondValidationErrors([
                     'audienceEventId' => lang('PushNotifications.audienceEventIdRequired'),
                 ]);
             }
@@ -325,7 +324,7 @@ class PushNotifications extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -336,21 +335,21 @@ class PushNotifications extends ResourceController
     public function delete($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::PUSH_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $notification = $this->model->find($id);
 
         if (!$notification) {
-            return $this->failNotFound();
+            return $this->respondNotFound(lang('PushNotifications.notFound'));
         }
 
         if ($notification->status !== PushNotificationEntity::STATUS_DRAFT) {
-            return $this->failForbidden(lang('PushNotifications.onlyDraftDeletable'));
+            return $this->respondConflict(lang('PushNotifications.onlyDraftDeletable'));
         }
 
         try {
@@ -373,7 +372,7 @@ class PushNotifications extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -384,29 +383,29 @@ class PushNotifications extends ResourceController
     public function upload($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::PUSH_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $notification = $this->model->find($id);
 
         if (!$notification) {
-            return $this->failNotFound();
+            return $this->respondNotFound(lang('PushNotifications.notFound'));
         }
 
         $file = $this->request->getFile('image');
 
         if (!$file || !$file->isValid()) {
-            return $this->failValidationErrors(lang('General.fileUploadFailed'));
+            return $this->respondValidationErrors(['image' => lang('General.fileUploadFailed')]);
         }
 
         $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
         if (!in_array($file->getMimeType(), $allowedMimes, true)) {
-            return $this->failValidationErrors(lang('General.invalidFileType'));
+            return $this->respondValidationErrors(['image' => lang('General.invalidFileType')]);
         }
 
         try {
@@ -429,7 +428,7 @@ class PushNotifications extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -444,11 +443,11 @@ class PushNotifications extends ResourceController
     public function audiences(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::PUSH_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         try {
@@ -487,7 +486,7 @@ class PushNotifications extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -499,24 +498,24 @@ class PushNotifications extends ResourceController
     public function test($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::PUSH_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $notification = $this->model->find($id);
 
         if (!$notification) {
-            return $this->failNotFound();
+            return $this->respondNotFound(lang('PushNotifications.notFound'));
         }
 
         $subscriptionsModel = new PushSubscriptionsModel();
         $subscriptions      = $subscriptionsModel->findByUser($this->session->user->id);
 
         if (empty($subscriptions)) {
-            return $this->failValidationErrors(['general' => lang('PushNotifications.noAdminSubscription')]);
+            return $this->respondConflict(lang('PushNotifications.noAdminSubscription'));
         }
 
         $payload = [
@@ -558,21 +557,21 @@ class PushNotifications extends ResourceController
     public function send($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::PUSH_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $notification = $this->model->find($id);
 
         if (!$notification) {
-            return $this->failNotFound();
+            return $this->respondNotFound(lang('PushNotifications.notFound'));
         }
 
         if ($notification->status !== PushNotificationEntity::STATUS_DRAFT) {
-            return $this->failForbidden(lang('PushNotifications.onlyDraftLaunchable'));
+            return $this->respondConflict(lang('PushNotifications.onlyDraftLaunchable'));
         }
 
         try {
@@ -657,14 +656,14 @@ class PushNotifications extends ResourceController
             $db->transComplete();
 
             if ($db->transStatus() === false) {
-                return $this->failServerError(lang('General.serverError'));
+                return $this->respondServerError(lang('General.serverError'));
             }
 
             return $this->respond(['queued' => $count]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 }

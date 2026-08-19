@@ -6,9 +6,8 @@ use App\Models\PhotosModel;
 use App\Models\ObjectsModel;
 use App\Models\EventsModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
 
-class Sitemap extends ResourceController
+class Sitemap extends BaseApiController
 {
     /**
      * @return ResponseInterface

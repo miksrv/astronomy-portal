@@ -9,18 +9,14 @@ use App\Models\ObjectsModel;
 use App\Models\ObjectFitsFiltersModel;
 use App\Models\ObjectCategoryModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
-use CodeIgniter\API\ResponseTrait;
 use Config\Services;
 use Exception;
 
 // TODO: Добавить локали для всех мотодов в этом классе
 // TODO: $objectsModel вынести в $this->model, в конструктор класса
 // TODO: Исправить |is_unique[objects.catalog_name,catalog_name,{id}] для метода update
-class Objects extends ResourceController
+class Objects extends BaseApiController
 {
-    use ResponseTrait;
-
     private SessionLibrary $session;
 
     public function __construct()
@@ -71,7 +67,7 @@ class Objects extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -101,11 +97,11 @@ class Objects extends ResourceController
                 return $this->respond($result[0]);
             }
 
-            return $this->failValidationErrors(lang('Objects.notFound'));
+            return $this->respondNotFound(lang('Objects.notFound'));
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -117,11 +113,11 @@ class Objects extends ResourceController
     public function create(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::OBJECTS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $input = $this->request->getJSON(true);
@@ -136,7 +132,7 @@ class Objects extends ResourceController
         ];
 
         if (!$this->validate($rules)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         // Map 'name' input field to 'catalog_name' DB column
@@ -168,7 +164,7 @@ class Objects extends ResourceController
         // Check uniqueness after mapping
         $objectsModel = new ObjectsModel();
         if ($objectsModel->where('catalog_name', $input['catalog_name'])->withDeleted()->first()) {
-            return $this->failValidationErrors(['name' => lang('Objects.nameAlreadyExists')]);
+            return $this->respondValidationErrors(['name' => lang('Objects.nameAlreadyExists')], null, 409);
         }
 
         try {
@@ -182,7 +178,7 @@ class Objects extends ResourceController
         } catch (Exception $e) {
             log_message('error', $e->getMessage(), ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -195,11 +191,11 @@ class Objects extends ResourceController
     public function update($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::OBJECTS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $input = $this->request->getJSON(true);
@@ -216,12 +212,12 @@ class Objects extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         // Validate the decoded fields (ensure arrays)
         if ((!empty($input) && !is_array($input['categories'])) || (!empty($input['equipment']) && !is_array($input['equipment']))) {
-            return $this->failValidationErrors(lang('General.invalidDataFormat'));
+            return $this->respondError(lang('General.invalidDataFormat'), 400);
         }
 
         // Map frontend field names to DB column names
@@ -251,7 +247,7 @@ class Objects extends ResourceController
             $objectsData  = $objectsModel->where('catalog_name', $id)->first();
 
             if (!$objectsData) {
-                return $this->failNotFound(lang('App.objectNotFound'));
+                return $this->respondNotFound(lang('App.objectNotFound'));
             }
 
             // Сохраняем категории
@@ -274,7 +270,7 @@ class Objects extends ResourceController
             return $this->respondUpdated($input);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -287,11 +283,11 @@ class Objects extends ResourceController
     public function delete($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::OBJECTS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         try {
@@ -299,14 +295,14 @@ class Objects extends ResourceController
             $objectsData  = $objectsModel->where('catalog_name', $id)->first();
 
             if (!$objectsData) {
-                return $this->failNotFound();
+                return $this->respondNotFound();
             }
 
             $objectsModel->delete($id, true);
             return $this->respondDeleted($objectsData);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
-            return $this->failServerError();
+            return $this->respondServerError();
         }
     }
 

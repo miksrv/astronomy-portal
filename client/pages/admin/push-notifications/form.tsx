@@ -104,7 +104,8 @@ const PushNotificationFormPage: NextPage<object> = () => {
                         type={saveError ? 'error' : 'success'}
                     >
                         {saveError
-                            ? t('pages.push-notifications.save-error', 'Ошибка сохранения')
+                            ? (getErrorMessage(saveError) ??
+                              t('pages.push-notifications.save-error', 'Ошибка сохранения'))
                             : t('pages.push-notifications.save-success', 'Сохранено')}
                     </Message>
                 )}

@@ -5,6 +5,7 @@ import Image from 'next/image'
 
 import { API, ApiModel } from '@/api'
 import { getFilterColor } from '@/utils/colors'
+import { getFieldErrors } from '@/utils/errors'
 import { createLargePhotoUrl } from '@/utils/photos'
 import { formatObjectName } from '@/utils/strings'
 
@@ -24,14 +25,21 @@ const equipmentPresets = [
 interface AstroPhotoFormProps {
     disabled?: boolean
     initialData?: AstroPhotoFormType
+    /** RTK Query error from the create/patch mutation — shown inline next to the field it belongs to. */
+    error?: unknown
     onSubmit?: (formData?: AstroPhotoFormType) => void
     onCancel?: () => void
 }
 
-export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initialData, onSubmit, onCancel }) => {
+export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initialData, error, onSubmit, onCancel }) => {
     const [selectedFilter, setSelectedFilter] = useState<ApiModel.FilterTypes>()
     const [addedFilters, setAddedFilters] = useState<ApiModel.FilterTypes[]>([])
     const [formData, setFormData] = useState<AstroPhotoFormType>({})
+
+    // Server-side validation errors (field name -> message), shown next to the
+    // matching input so a save failure doesn't send the admin to the network
+    // tab to figure out what went wrong.
+    const fieldErrors = getFieldErrors(error)
 
     const { data: objectsListData, isLoading: objectsListLoading } = API.useObjectsGetListQuery()
 
@@ -119,6 +127,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                 placeholder={'Выберите одну или несколько категорий'}
                 loading={categoriesListLoading}
                 value={formData.categories}
+                error={fieldErrors.categories}
                 options={categoriesListData?.items?.map((item) => ({
                     key: item.id,
                     value: item.title
@@ -142,6 +151,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                 placeholder={'Выберите объекты, которые есть на фотографии'}
                 loading={objectsListLoading}
                 value={formData.objects}
+                error={fieldErrors.objects}
                 options={objectsListData?.items?.map((item) => ({
                     key: item.name,
                     value: formatObjectName(item.name)
@@ -164,6 +174,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                 placeholder={'Выберите астрономическое оборудование'}
                 loading={equipmentListLoading}
                 value={formData.equipments}
+                error={fieldErrors.equipments}
                 options={equipmentListData?.items?.map((item) => ({
                     key: item.id,
                     value: [item.brand, item.model].filter(Boolean).join(' ')
@@ -186,6 +197,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                 type={'date'}
                 label={'Дата обработки'}
                 value={formData.date}
+                error={fieldErrors.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
             />
 
@@ -195,6 +207,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                     placeholder={'Добавить фильтр'}
                     value={selectedFilter}
                     className={styles.filtersDropdown}
+                    error={fieldErrors.filters}
                     onSelect={(value) => setSelectedFilter(value?.[0]?.key)}
                     options={availableFilters?.map((filter) => ({
                         key: filter,

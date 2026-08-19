@@ -9,6 +9,7 @@ import { API, ApiModel, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { AstroPhotoForm, AstroPhotoFormType } from '@/components/pages/photos'
 import { requirePermissionSSR } from '@/utils/adminAuth'
+import { getErrorMessage } from '@/utils/errors'
 
 // TODO: Добавить проерку на редактирование фото - сохранять только если есть изменения
 const PhotoFormPage: NextPage<object> = () => {
@@ -114,7 +115,9 @@ const PhotoFormPage: NextPage<object> = () => {
                     style={{ marginBottom: '10px' }}
                     type={createError || updateError ? 'error' : 'success'}
                 >
-                    {(createError || updateError) && <div>{'Ошибка сохранения'}</div>}
+                    {(createError || updateError) && (
+                        <div>{getErrorMessage(createError || updateError) ?? 'Ошибка сохранения'}</div>
+                    )}
                     {(createSuccess || updateSuccess) && <div>{'Фотография сохранена'}</div>}
                     {uploadSuccess && <div>{'Фотография загружена'}</div>}
                 </Message>
@@ -123,6 +126,7 @@ const PhotoFormPage: NextPage<object> = () => {
             <AstroPhotoForm
                 disabled={photoLoading || createLoading || updateLoading || uploadLoading}
                 initialData={photoData}
+                error={createError || updateError}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
             />

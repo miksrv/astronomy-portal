@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { Button, TextArea } from 'simple-react-ui-kit'
+import { Button, Message, TextArea } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
-import { API, ApiModel, ApiType } from '@/api'
+import { API, ApiModel } from '@/api'
+import { useApiFormError } from '@/hooks/useApiFormError'
 
 import styles from './styles.module.sass'
 
@@ -31,10 +32,16 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
     const [rating, setRating] = useState<number>(0)
     const [hoverRating, setHoverRating] = useState<number>(0)
     const [content, setContent] = useState<string>('')
-    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
+    const [submitError, setSubmitError] = useState<unknown>(undefined)
     const [submitSuccess, setSubmitSuccess] = useState(false)
 
     const [createComment, { isLoading }] = API.useCommentsCreateMutation()
+
+    const { message: apiErrorMessage, fieldErrors: apiFieldErrors } = useApiFormError(submitError)
+
+    const ratingError = validationErrors.rating || apiFieldErrors.rating
+    const contentError = validationErrors.content || apiFieldErrors.content
 
     const validate = (trimmedContent: string): Record<string, string> => {
         const errors: Record<string, string> = {}
@@ -66,15 +73,16 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
         e.preventDefault()
 
         const trimmedContent = content.trim()
-        const validationErrors = validate(trimmedContent)
+        const errors = validate(trimmedContent)
 
-        if (Object.keys(validationErrors).length > 0) {
-            setFieldErrors(validationErrors)
+        if (Object.keys(errors).length > 0) {
+            setValidationErrors(errors)
             setSubmitSuccess(false)
             return
         }
 
-        setFieldErrors({})
+        setValidationErrors({})
+        setSubmitError(undefined)
         setSubmitSuccess(false)
 
         const run = async () => {
@@ -92,18 +100,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
                 setSubmitSuccess(true)
                 onSuccess?.()
             } catch (error) {
-                const messages = (error as ApiType.ResError)?.messages
-
-                if (messages && typeof messages === 'object') {
-                    setFieldErrors(messages)
-                } else {
-                    setFieldErrors({
-                        _general: t(
-                            'components.common.review-form.error',
-                            'Не удалось отправить отзыв. Попробуйте ещё раз.'
-                        )
-                    })
-                }
+                setSubmitError(error)
             }
         }
 
@@ -140,7 +137,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
                                 aria-pressed={rating === value}
                                 onClick={() => {
                                     setRating(value)
-                                    setFieldErrors(({ rating: _rating, ...rest }) => rest)
+                                    setValidationErrors(({ rating: _rating, ...rest }) => rest)
                                     setSubmitSuccess(false)
                                 }}
                                 onMouseEnter={() => setHoverRating(value)}
@@ -153,7 +150,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
                 </div>
             </div>
 
-            {fieldErrors.rating && <span className={styles.fieldError}>{fieldErrors.rating}</span>}
+            {ratingError && <span className={styles.fieldError}>{ratingError}</span>}
 
             <TextArea
                 rows={4}
@@ -162,23 +159,23 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
                 value={content}
                 maxLength={MAX_CONTENT_LENGTH}
                 placeholder={t('components.common.review-form.placeholder', 'Поделитесь впечатлениями...')}
-                error={fieldErrors.content}
+                error={contentError}
                 onChange={(e) => {
                     setContent(e.target.value)
-                    setFieldErrors(({ content: _content, ...rest }) => rest)
+                    setValidationErrors(({ content: _content, ...rest }) => rest)
                     setSubmitSuccess(false)
                 }}
             />
 
-            {(fieldErrors._general || submitSuccess) && (
-                <>
-                    {fieldErrors._general && <p className={styles.fieldError}>{fieldErrors._general}</p>}
-                    {submitSuccess && (
-                        <p className={styles.success}>
-                            {t('components.common.review-form.success', 'Отзыв опубликован!')}
-                        </p>
-                    )}
-                </>
+            {!!submitError && (
+                <Message type={'error'}>
+                    {apiErrorMessage ||
+                        t('components.common.review-form.error', 'Не удалось отправить отзыв. Попробуйте ещё раз.')}
+                </Message>
+            )}
+
+            {submitSuccess && (
+                <p className={styles.success}>{t('components.common.review-form.success', 'Отзыв опубликован!')}</p>
             )}
 
             <Button

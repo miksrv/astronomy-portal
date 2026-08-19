@@ -15,7 +15,6 @@ use CodeIgniter\I18n\Time;
 use CodeIgniter\Files\File;
 use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
 use Config\Services;
 use Exception;
 use ReflectionException;
@@ -41,7 +40,7 @@ define('AUTH_TYPE_EMAIL', 'email');
  * @method ResponseInterface _serviceAuth(string $authType, object | null $serviceProfile) Handles the service authentication.
  * @method ResponseInterface responseAuth() Returns the authentication response.
  */
-class Auth extends ResourceController
+class Auth extends BaseApiController
 {
     private SessionLibrary $session;
 
@@ -67,7 +66,7 @@ class Auth extends ResourceController
     public function logout(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         (new UsersModel())->update($this->session->user->id, ['session_token' => null]);
@@ -83,7 +82,7 @@ class Auth extends ResourceController
     public function google(): ResponseInterface
     {
         if ($this->session->isAuth) {
-            return $this->failForbidden(lang('Auth.alreadyAuthorized'));
+            return $this->respondConflict(lang('Auth.alreadyAuthorized'));
         }
 
         $serviceClient = new GoogleClient(
@@ -117,7 +116,7 @@ class Auth extends ResourceController
     public function yandex(): ResponseInterface
     {
         if ($this->session->isAuth) {
-            return $this->failForbidden(lang('Auth.alreadyAuthorized'));
+            return $this->respondConflict(lang('Auth.alreadyAuthorized'));
         }
 
         $serviceClient = new YandexClient(
@@ -150,7 +149,7 @@ class Auth extends ResourceController
     public function vk(): ResponseInterface
     {
         if ($this->session->isAuth) {
-            return $this->failForbidden(lang('Auth.alreadyAuthorized'));
+            return $this->respondConflict(lang('Auth.alreadyAuthorized'));
         }
 
         $serviceClient = new VkClient(
@@ -192,7 +191,7 @@ class Auth extends ResourceController
     public function requestMagicLink(): ResponseInterface
     {
         if ($this->session->isAuth) {
-            return $this->failForbidden(lang('Auth.alreadyAuthorized'));
+            return $this->respondConflict(lang('Auth.alreadyAuthorized'));
         }
 
         $input = $this->request->getJSON(true);
@@ -202,7 +201,7 @@ class Auth extends ResourceController
         ];
 
         if (!$this->validateRequest($input, $rules)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         $email      = strtolower(trim($input['email']));
@@ -247,20 +246,20 @@ class Auth extends ResourceController
     public function verifyMagicLink(): ResponseInterface
     {
         if ($this->session->isAuth) {
-            return $this->failForbidden(lang('Auth.alreadyAuthorized'));
+            return $this->respondConflict(lang('Auth.alreadyAuthorized'));
         }
 
         $input = $this->request->getJSON(true);
         $token = $input['token'] ?? null;
 
         if (empty($token)) {
-            return $this->failValidationErrors(lang('Auth.magicLinkInvalidOrExpired'));
+            return $this->respondUnauthorized(lang('Auth.magicLinkInvalidOrExpired'));
         }
 
         $claim = (new MagicLinkTokensModel())->consumeToken($token);
 
         if (!$claim) {
-            return $this->failValidationErrors(lang('Auth.magicLinkInvalidOrExpired'));
+            return $this->respondUnauthorized(lang('Auth.magicLinkInvalidOrExpired'));
         }
 
         [$userData, $isNewUser] = (new UsersModel())->findOrCreateByEmail($claim['email'], AUTH_TYPE_EMAIL);
@@ -329,13 +328,18 @@ class Auth extends ResourceController
     protected function _serviceAuth(string $authType, object | null $serviceProfile): ResponseInterface
     {
         if (empty($serviceProfile)) {
-            log_message('error', '[Auth] Service {type} returned empty profile (null)', ['type' => $authType]);
-            return $this->failValidationErrors(lang('Auth.authServiceEmptyData'));
+            // Reachable through a normal login attempt - not just a bug/direct
+            // API call - e.g. the OAuth code was already used or expired (page
+            // refresh, browser back button after login) or the provider had a
+            // transient error. Worth a real log line, but the user gets a
+            // plain-language retry prompt, not the internal "empty profile".
+            log_message('warning', '[Auth] Service {type} returned empty profile (null)', ['type' => $authType]);
+            return $this->respondError(lang('Auth.oauthLoginFailed'));
         }
 
         if (empty($serviceProfile->email)) {
-            log_message('error', '[Auth] Service {type} profile has no email address', ['type' => $authType]);
-            return $this->failValidationErrors(lang('Auth.authServiceEmptyData'));
+            log_message('warning', '[Auth] Service {type} profile has no email address', ['type' => $authType]);
+            return $this->respondError(lang('Auth.oauthEmailMissing'));
         }
 
         // Successful authorization, look for a user with the same email in the database
@@ -461,7 +465,7 @@ class Auth extends ResourceController
     public function updateProfile(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized('Unauthorized');
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         $input = $this->request->getJSON(true);
@@ -474,7 +478,7 @@ class Auth extends ResourceController
         ];
 
         if (!$this->validateRequest($input, $rules)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         $userModel = new UsersModel();
@@ -496,7 +500,7 @@ class Auth extends ResourceController
         $updated = $userModel->update($this->session->user->id, $updateData);
 
         if (!$updated) {
-            return $this->fail(lang('App.profileUpdateFailed'));
+            return $this->respondServerError(lang('App.profileUpdateFailed'));
         }
 
         return $this->respondUpdated();

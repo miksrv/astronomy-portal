@@ -13,15 +13,11 @@ use App\Models\PhotosObjectModel;
 use App\Models\PhotosEquipmentsModel;
 use App\Models\PhotosFiltersModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
-use CodeIgniter\API\ResponseTrait;
 use Exception;
 
 // TODO: Добавить проверку на существование categories, objects, equipment и filters при создании и редактировании
-class Photos extends ResourceController
+class Photos extends BaseApiController
 {
-    use ResponseTrait;
-
     private SessionLibrary $session;
 
     public function __construct()
@@ -68,7 +64,7 @@ class Photos extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -102,11 +98,11 @@ class Photos extends ResourceController
                 return $this->respond($result[0]);
             }
 
-            return $this->failNotFound();
+            return $this->respondNotFound();
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -144,22 +140,22 @@ class Photos extends ResourceController
     public function upload($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::PHOTOS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $fileUpload = $this->request->getFile('file');
 
         if (!$fileUpload || !$fileUpload->isValid()) {
-            return $this->failValidationErrors(lang('General.fileUploadFailed'));
+            return $this->respondError(lang('General.fileUploadFailed'), 400);
         }
 
         $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         if (!in_array($fileUpload->getMimeType(), $allowedMimes, true)) {
-            return $this->failValidationErrors(lang('General.invalidFileType'));
+            return $this->respondError(lang('General.invalidFileType'), 400);
         }
 
         $photoUploadLibrary = new PhotoUploadLibrary();
@@ -169,7 +165,7 @@ class Photos extends ResourceController
         $photoObjects = $photosObjectModel->where('photo_id', $id)->findAll();
 
         if (!$photoData || !$photoObjects) {
-            return $this->failValidationErrors(lang('Photos.invalidPhotoId'));
+            return $this->respondNotFound(lang('Photos.invalidPhotoId'));
         }
 
         $photo = new \App\Entities\PhotoEntity();
@@ -194,7 +190,7 @@ class Photos extends ResourceController
             return $this->respondCreated($photo);
         } catch (\Exception $e) {
             log_message('error', $e->getMessage());
-            return $this->failServerError(lang('General.couldNotSaveData'));
+            return $this->respondServerError(lang('General.couldNotSaveData'));
         }
     }
 
@@ -207,11 +203,11 @@ class Photos extends ResourceController
     public function delete($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::PHOTOS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         try {
@@ -223,11 +219,11 @@ class Photos extends ResourceController
                 return $this->respondDeleted($photoData);
             }
 
-            return $this->failNotFound();
+            return $this->respondNotFound();
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError();
+            return $this->respondServerError();
         }
     }
 
@@ -240,11 +236,11 @@ class Photos extends ResourceController
     protected function save($id = null)
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::PHOTOS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         // Get the uploaded file and post data
@@ -262,13 +258,13 @@ class Photos extends ResourceController
         // Validate input data
         $this->validator = \Config\Services::validation()->setRules($rules);
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         // Validate the decoded fields (ensure arrays)
         if (!is_array($input['categories']) || !is_array($input['objects']) ||
             !is_array($input['equipments']) || !is_array($input['filters'])) {
-            return $this->failValidationErrors(lang('General.invalidDataFormat'));
+            return $this->respondError(lang('General.invalidDataFormat'), 400);
         }
 
         // Insert into database
@@ -348,7 +344,7 @@ class Photos extends ResourceController
             return $isUpdate ? $this->respondUpdated($photo) : $this->respondCreated($photo);
         } catch (\Exception $e) {
             log_message('error', $e->getMessage());
-            return $this->failServerError(lang('General.couldNotSaveData'));
+            return $this->respondServerError(lang('General.couldNotSaveData'));
         }
     }
 }

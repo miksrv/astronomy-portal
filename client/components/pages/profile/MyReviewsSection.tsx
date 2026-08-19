@@ -1,5 +1,5 @@
-import React from 'react'
-import { Button, Container } from 'simple-react-ui-kit'
+import React, { useState } from 'react'
+import { Button, Container, Message } from 'simple-react-ui-kit'
 
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
@@ -7,6 +7,7 @@ import { useTranslation } from 'next-i18next/pages'
 import { API } from '@/api'
 import { StarRating } from '@/components/common/review-card/StarRating'
 import { formatDate } from '@/utils/dates'
+import { getErrorMessage } from '@/utils/errors'
 
 import { MyReviewsSectionSkeleton } from './MyReviewsSectionSkeleton'
 
@@ -20,7 +21,27 @@ export const MyReviewsSection: React.FC<MyReviewsSectionProps> = ({ userId }) =>
     const { t } = useTranslation()
 
     const { data, isLoading } = API.useCommentsGetListQuery({ userId: userId! }, { skip: !userId })
-    const [deleteComment] = API.useCommentsDeleteMutation()
+    const [deleteComment, { isLoading: isDeleting }] = API.useCommentsDeleteMutation()
+
+    // The mutation hook's `isLoading`/`error` reflect only the most recently
+    // triggered call, so track which row is in flight (and its error)
+    // ourselves to keep concurrent per-row delete buttons from stepping on
+    // each other's state.
+    const [deletingId, setDeletingId] = useState<string | undefined>(undefined)
+    const [deleteError, setDeleteError] = useState<{ id: string; error: unknown } | undefined>(undefined)
+
+    const handleDelete = async (id: string) => {
+        setDeletingId(id)
+        setDeleteError(undefined)
+
+        try {
+            await deleteComment(id).unwrap()
+        } catch (error) {
+            setDeleteError({ error, id })
+        } finally {
+            setDeletingId(undefined)
+        }
+    }
 
     if (isLoading) {
         return (
@@ -74,13 +95,21 @@ export const MyReviewsSection: React.FC<MyReviewsSectionProps> = ({ userId }) =>
                                 size={'small'}
                                 mode={'secondary'}
                                 label={t('components.common.review-card.delete', 'Удалить')}
+                                loading={isDeleting && deletingId === review.id}
+                                disabled={isDeleting}
                                 onClick={() => {
-                                    void deleteComment(review.id)
+                                    void handleDelete(review.id)
                                 }}
                                 className={styles.reviewDeleteButton}
                             />
                         </div>
                         <p className={styles.reviewContent}>{review.content}</p>
+                        {deleteError?.id === review.id && (
+                            <Message type={'error'}>
+                                {getErrorMessage(deleteError.error) ||
+                                    t('pages.profile.review-delete-error', 'Не удалось удалить отзыв')}
+                            </Message>
+                        )}
                     </div>
                 )
             })}

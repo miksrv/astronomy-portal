@@ -100,7 +100,7 @@ const MailingFormPage: NextPage<object> = () => {
                         type={saveError ? 'error' : 'success'}
                     >
                         {saveError
-                            ? t('pages.mailing.save-error', 'Ошибка сохранения')
+                            ? (getErrorMessage(saveError) ?? t('pages.mailing.save-error', 'Ошибка сохранения'))
                             : t('pages.mailing.save-success', 'Сохранено')}
                     </Message>
                 )}

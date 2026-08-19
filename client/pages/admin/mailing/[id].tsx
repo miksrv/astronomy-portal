@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Container, Dialog } from 'simple-react-ui-kit'
+import { Button, Container, Dialog, Message } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
@@ -10,6 +10,7 @@ import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { MailingPreview } from '@/components/pages/mailing'
 import { requirePermissionSSR } from '@/utils/adminAuth'
 import { formatDate } from '@/utils/dates'
+import { getErrorMessage } from '@/utils/errors'
 
 import styles from './styles.module.sass'
 
@@ -19,7 +20,7 @@ const MailingStatsPage: NextPage<object> = () => {
 
     const { id } = router.query as { id: string }
 
-    const { data, isLoading, isError } = API.useMailingGetItemQuery(id, {
+    const { data, isLoading, isError, error } = API.useMailingGetItemQuery(id, {
         pollingInterval: undefined,
         skip: !id
     })
@@ -130,6 +131,12 @@ const MailingStatsPage: NextPage<object> = () => {
             </AppToolbar>
 
             <Container>
+                {!isLoading && isError && (
+                    <Message type={'error'}>
+                        {getErrorMessage(error) ?? t('pages.mailing.load-error', 'Не удалось загрузить рассылку')}
+                    </Message>
+                )}
+
                 {!isLoading && !isError && data && (
                     <>
                         <div className={styles.statsHeader}>

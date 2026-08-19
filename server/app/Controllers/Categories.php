@@ -6,8 +6,6 @@ use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
 use App\Models\CategoryModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
-use CodeIgniter\API\ResponseTrait;
 use Exception;
 
 /**
@@ -16,10 +14,8 @@ use Exception;
  *
  * @method ResponseInterface list() Retrieves a list of categories
  */
-class Categories extends ResourceController
+class Categories extends BaseApiController
 {
-    use ResponseTrait;
-
     private SessionLibrary $session;
 
     public function __construct()
@@ -62,7 +58,7 @@ class Categories extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 }

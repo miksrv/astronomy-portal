@@ -4,9 +4,10 @@ import { Button, Container, Input, Message, Select } from 'simple-react-ui-kit'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 
-import { API, ApiModel, ApiType, HOST_IMG } from '@/api'
+import { API, ApiModel, HOST_IMG } from '@/api'
 import { PhoneInput } from '@/components/common/phone-input'
 import { UserAvatar } from '@/components/ui/user-avatar'
+import { useApiFormError } from '@/hooks/useApiFormError'
 import useLocalStorage from '@/hooks/useLocalStorage'
 import { LOCAL_STORAGE } from '@/utils/constants'
 
@@ -28,9 +29,11 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
     const [birthday, setBirthday] = useState<string>(user?.birthday ?? '')
     const [sex, setSex] = useState<'m' | 'f' | undefined>(user?.sex)
     const [saveSuccess, setSaveSuccess] = useState<boolean>(false)
-    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+    const [submitError, setSubmitError] = useState<unknown>(undefined)
 
     const [updateProfile, { isLoading }] = API.useAuthUpdateProfileMutation()
+
+    const { message: apiErrorMessage, fieldErrors } = useApiFormError(submitError)
 
     // `user` is still undefined on the very first render (it's populated a tick
     // later by useAuthSession's login() dispatch), so the useState initializers
@@ -68,7 +71,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
 
     const handleSave = async () => {
         setSaveSuccess(false)
-        setFieldErrors({})
+        setSubmitError(undefined)
 
         try {
             await updateProfile({
@@ -85,10 +88,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
 
             setSaveSuccess(true)
         } catch (err) {
-            const messages = (err as ApiType.ResError)?.messages
-            if (messages) {
-                setFieldErrors(messages)
-            }
+            setSubmitError(err)
         }
     }
 
@@ -205,7 +205,11 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
                         <Message type={'success'}>{t('pages.profile.save-success', 'Профиль обновлён')}</Message>
                     )}
 
-                    {fieldErrors['general'] && <Message type={'error'}>{fieldErrors['general']}</Message>}
+                    {!!submitError && (
+                        <Message type={'error'}>
+                            {apiErrorMessage || t('pages.profile.save-error', 'Не удалось сохранить профиль')}
+                        </Message>
+                    )}
                 </div>
             </div>
         </Container>

@@ -18,7 +18,6 @@ use App\Models\EventsUsersModel;
 use App\Models\PaymentsModel;
 use App\Models\UsersModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Files\File;
 use Config\Database;
@@ -42,7 +41,7 @@ use Exception;
  * @method ResponseInterface delete(int|null $id) Deletes an event by its ID.
  * @method ResponseInterface statistic($id = null) Returns aggregated statistics for an event.
  */
-class Events extends ResourceController
+class Events extends BaseApiController
 {
     // Default venue coordinates, used when a new event is created without an
     // explicit pin (matches the `events` table column defaults).
@@ -147,7 +146,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -157,7 +156,7 @@ class Events extends ResourceController
     public function upcomingRegistered(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized('Unauthorized');
+            return $this->respondUnauthorized();
         }
 
         $locale = $this->request->getLocale();
@@ -240,19 +239,19 @@ class Events extends ResourceController
     public function checkin($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized();
         }
 
         try {
             if (empty($id)) {
-                return $this->failValidationErrors(lang('Events.invalidQrCode'));
+                return $this->respondError(lang('Events.invalidQrCode'));
             }
 
             $eventUsersModel  = new EventsUsersModel();
             $bookedEventsData = $eventUsersModel->where(['id' => $id])->first();
 
             if (empty($bookedEventsData)) {
-                return $this->failValidationErrors(lang('Events.invalidQrCode'));
+                return $this->respondError(lang('Events.invalidQrCode'));
             }
 
             $isStaff = $this->session->can(Permission::EVENTS_CHECKIN);
@@ -262,7 +261,7 @@ class Events extends ResourceController
             // hand back the event id so the frontend can redirect them there.
             if (!$isStaff) {
                 if ($bookedEventsData->user_id !== $this->session->user->id) {
-                    return $this->failForbidden(lang('App.accessDenied'));
+                    return $this->respondForbidden();
                 }
 
                 return $this->respond(['eventId' => $bookedEventsData->event_id]);
@@ -272,19 +271,19 @@ class Events extends ResourceController
             $eventData = $this->model->getUpcomingEvent($locale);
 
             if (empty($eventData)) {
-                return $this->failValidationErrors(lang('Events.noUpcomingEvents'));
+                return $this->respondConflict(lang('Events.noUpcomingEvents'));
             }
 
             // The QR must belong to the currently upcoming event — not to a
             // different (past, future, or already-superseded) one.
             if ($bookedEventsData->event_id !== $eventData->id) {
-                return $this->failValidationErrors(lang('Events.invalidQrCode'));
+                return $this->respondError(lang('Events.invalidQrCode'));
             }
 
             // Only a paid/confirmed booking is a valid entry ticket — a
             // still-pending (unpaid) or failed booking must not check in.
             if ($bookedEventsData->status !== 'confirmed') {
-                return $this->failValidationErrors(lang('Events.bookingNotConfirmed'));
+                return $this->respondConflict(lang('Events.bookingNotConfirmed'));
             }
 
             $response = [];
@@ -312,7 +311,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -327,11 +326,11 @@ class Events extends ResourceController
     public function ticket($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized();
         }
 
         if (empty($id)) {
-            return $this->failValidationErrors(lang('Events.invalidQrCode'));
+            return $this->respondError(lang('Events.invalidQrCode'));
         }
 
         try {
@@ -339,25 +338,25 @@ class Events extends ResourceController
             $booking         = $eventUsersModel->find($id);
 
             if (empty($booking)) {
-                return $this->failNotFound(lang('Events.notFound'));
+                return $this->respondNotFound(lang('Events.notFound'));
             }
 
             $isStaff = $this->session->can(Permission::EVENTS_CHECKIN);
 
             if (!$isStaff && $booking->user_id !== $this->session->user->id) {
-                return $this->failForbidden(lang('App.accessDenied'));
+                return $this->respondForbidden();
             }
 
             // A pending (unpaid) or failed booking is not a valid ticket —
             // it must not render a scannable QR that would pass check-in.
             if ($booking->status !== 'confirmed') {
-                return $this->failValidationErrors(lang('Events.bookingNotConfirmed'));
+                return $this->respondConflict(lang('Events.bookingNotConfirmed'));
             }
 
             $event = $this->model->find($booking->event_id);
 
             if (empty($event)) {
-                return $this->failNotFound(lang('Events.notFound'));
+                return $this->respondNotFound(lang('Events.notFound'));
             }
 
             // Guest name: the booking owner (resolve from DB when staff views someone else's ticket).
@@ -378,7 +377,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -727,7 +726,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -776,7 +775,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -802,7 +801,7 @@ class Events extends ResourceController
             $result = $this->model->getPastEventsList($locale, $id);
 
             if (empty($result)) {
-                return $this->failNotFound();
+                return $this->respondNotFound();
             }
 
             $event = $result[0];
@@ -847,7 +846,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -860,11 +859,11 @@ class Events extends ResourceController
     public function members($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized();
         }
 
         if (!$this->session->can(Permission::EVENTS_USERS)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden();
         }
 
         try {
@@ -875,7 +874,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -891,16 +890,16 @@ class Events extends ResourceController
     public function statistic($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized();
         }
 
         if (!$this->session->can(Permission::EVENTS_STATISTIC)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden();
         }
 
         try {
             if (empty($id)) {
-                return $this->failValidationErrors(lang('App.validationError'));
+                return $this->respondInvalidRequest('statistic() called without an event id');
             }
 
             $eventUsersModel = new EventsUsersModel();
@@ -910,7 +909,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -927,16 +926,16 @@ class Events extends ResourceController
     public function registrations($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized();
         }
 
         if (!$this->session->can(Permission::EVENTS_STATISTIC) || !$this->session->can(Permission::EVENTS_USERS)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden();
         }
 
         try {
             if (empty($id)) {
-                return $this->failValidationErrors(lang('App.validationError'));
+                return $this->respondInvalidRequest('registrations() called without an event id');
             }
 
             $rows = (new EventsUsersModel())->getRegistrationsByEventId($id);
@@ -963,7 +962,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -983,33 +982,33 @@ class Events extends ResourceController
     public function verifyRegistrationPayment($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized();
         }
 
         if (!$this->session->can(Permission::EVENTS_STATISTIC)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden();
         }
 
         try {
             if (empty($id)) {
-                return $this->failValidationErrors(lang('App.validationError'));
+                return $this->respondInvalidRequest('verifyRegistrationPayment() called without a registration id');
             }
 
             $eventUsersModel = new EventsUsersModel();
             $booking         = $eventUsersModel->withDeleted()->find($id);
 
             if ($booking === null) {
-                return $this->failNotFound(lang('Events.notRegistered'));
+                return $this->respondNotFound(lang('Events.notRegistered'));
             }
 
             if (empty($booking->payment_id)) {
-                return $this->fail(lang('Events.noPaymentLinked'), 400);
+                return $this->respondConflict(lang('Events.noPaymentLinked'));
             }
 
             $payment = (new PaymentsModel())->find($booking->payment_id);
 
             if ($payment === null) {
-                return $this->failNotFound(lang('Events.paymentNotFound'));
+                return $this->respondNotFound(lang('Events.paymentNotFound'));
             }
 
             $paymentLibrary = new PaymentLibrary();
@@ -1033,7 +1032,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -1053,41 +1052,41 @@ class Events extends ResourceController
     public function refundRegistrationPayment($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized();
         }
 
         // Stricter than verifyRegistrationPayment() (events.statistic) — this
         // action moves real money and cannot be undone, so it needs its own
         // dedicated privilege rather than reusing a broader one.
         if (!$this->session->can(Permission::EVENTS_REFUND)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden();
         }
 
         try {
             if (empty($id)) {
-                return $this->failValidationErrors(lang('App.validationError'));
+                return $this->respondInvalidRequest('refundRegistrationPayment() called without a registration id');
             }
 
             $eventUsersModel = new EventsUsersModel();
             $booking         = $eventUsersModel->withDeleted()->find($id);
 
             if ($booking === null) {
-                return $this->failNotFound(lang('Events.notRegistered'));
+                return $this->respondNotFound(lang('Events.notRegistered'));
             }
 
             if ($booking->deleted_at !== null) {
-                return $this->fail(lang('Events.refundAlreadyCanceled'), 400);
+                return $this->respondConflict(lang('Events.refundAlreadyCanceled'));
             }
 
             if (empty($booking->payment_id)) {
-                return $this->fail(lang('Events.noPaymentLinked'), 400);
+                return $this->respondConflict(lang('Events.noPaymentLinked'));
             }
 
             $paymentsModel = new PaymentsModel();
             $payment       = $paymentsModel->find($booking->payment_id);
 
             if ($payment === null) {
-                return $this->failNotFound(lang('Events.paymentNotFound'));
+                return $this->respondNotFound(lang('Events.paymentNotFound'));
             }
 
             // Idempotent: money is already back, just make sure the booking
@@ -1106,7 +1105,7 @@ class Events extends ResourceController
             }
 
             if ($payment->status !== 'paid') {
-                return $this->fail(lang('Events.refundNotPaid'), 400);
+                return $this->respondConflict(lang('Events.refundNotPaid'));
             }
 
             // No row lock here on purpose: unlike cancel() (which frees the
@@ -1128,9 +1127,8 @@ class Events extends ResourceController
                 // the row but didn't mutate this in-memory entity.
                 $refreshedPayment = $paymentsModel->find($payment->id);
 
-                return $this->fail(
-                    lang('Events.refundFailed', [$refreshedPayment->error_message ?? '']),
-                    502
+                return $this->respondServerError(
+                    lang('Events.refundFailed', [$refreshedPayment->error_message ?? ''])
                 );
             }
 
@@ -1152,7 +1150,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -1204,11 +1202,11 @@ class Events extends ResourceController
      */
     public function create(): ResponseInterface {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized();
         }
 
         if (!$this->session->can(Permission::EVENTS_CREATE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden();
         }
 
         $input = $this->request->getPost();
@@ -1220,7 +1218,7 @@ class Events extends ResourceController
             $requiresRegistration = filter_var($input['requiresRegistration'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 
             if ($requiresRegistration === null) {
-                return $this->failValidationErrors(['error' => lang('Events.invalidRequiresRegistrationValue')]);
+                return $this->respondValidationErrors(['requiresRegistration' => lang('Events.invalidRequiresRegistrationValue')]);
             }
         }
 
@@ -1243,17 +1241,17 @@ class Events extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$file || !$file->isValid()) {
-            return $this->failValidationErrors(lang('General.fileUploadFailed'));
+            return $this->respondValidationErrors(['upload' => lang('General.fileUploadFailed')]);
         }
 
         $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         if (!in_array($file->getMimeType(), $allowedMimes, true)) {
-            return $this->failValidationErrors(lang('General.invalidFileType'));
+            return $this->respondValidationErrors(['upload' => lang('General.invalidFileType')]);
         }
 
         // Check input data validation rules
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         // Parse and validate the dates before touching the filesystem, so a
@@ -1262,7 +1260,7 @@ class Events extends ResourceController
         $eventDateUtc = $this->parseOrenburgDateTime($input['date']);
 
         if ($eventDateUtc === null) {
-            return $this->failValidationErrors(['error' => lang('Events.invalidDateFormat')]);
+            return $this->respondValidationErrors(['date' => lang('Events.invalidDateFormat')]);
         }
 
         $eventEndDateUtc = null;
@@ -1271,11 +1269,11 @@ class Events extends ResourceController
             $eventEndDateUtc = $this->parseOrenburgDateTime($input['endDate']);
 
             if ($eventEndDateUtc === null) {
-                return $this->failValidationErrors(['error' => lang('Events.invalidDateFormat')]);
+                return $this->respondValidationErrors(['endDate' => lang('Events.invalidDateFormat')]);
             }
 
             if ($eventEndDateUtc <= $eventDateUtc) {
-                return $this->failValidationErrors(['error' => lang('Events.invalidEventEndDate')]);
+                return $this->respondValidationErrors(['endDate' => lang('Events.invalidEventEndDate')]);
             }
         }
 
@@ -1287,11 +1285,17 @@ class Events extends ResourceController
             $registrationEndUtc   = $this->parseOrenburgDateTime($input['registrationEnd']);
 
             if ($registrationStartUtc === null || $registrationEndUtc === null) {
-                return $this->failValidationErrors(['error' => lang('Events.invalidDateFormat')]);
+                return $this->respondValidationErrors([
+                    'registrationStart' => lang('Events.invalidDateFormat'),
+                    'registrationEnd'   => lang('Events.invalidDateFormat'),
+                ]);
             }
 
             if ($registrationStartUtc >= $registrationEndUtc || $registrationEndUtc > $eventDateUtc) {
-                return $this->failValidationErrors(['error' => lang('Events.invalidRegistrationWindow')]);
+                return $this->respondValidationErrors([
+                    'registrationStart' => lang('Events.invalidRegistrationWindow'),
+                    'registrationEnd'   => lang('Events.invalidRegistrationWindow'),
+                ]);
             }
         }
 
@@ -1343,14 +1347,14 @@ class Events extends ResourceController
             return $this->respondCreated($event);
         } catch (\Exception $e) {
             log_message('error', $e->getMessage());
-            return $this->failServerError(lang('General.couldNotSaveData'));
+            return $this->respondServerError(lang('General.couldNotSaveData'));
         }
     }
 
     public function booking(): ResponseInterface {
         // Check that user is auth
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized();
+            return $this->respondUnauthorized();
         }
 
         $input = $this->request->getJSON(true);
@@ -1366,18 +1370,18 @@ class Events extends ResourceController
 
         // Check input data validation rules
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         try {
             $event = $this->model->find($input['eventId']);
             // Check that event with ID is exists
             if (!$event) {
-                return $this->failValidationErrors(['error' => lang('Events.notExists')]);
+                return $this->respondNotFound(lang('Events.notExists'));
             }
 
             if (!$event->requiresRegistration) {
-                return $this->failValidationErrors(['error' => lang('Events.registrationNotRequired')]);
+                return $this->respondConflict(lang('Events.registrationNotRequired'));
             }
 
             $eventUsersModel = new EventsUsersModel();
@@ -1394,7 +1398,7 @@ class Events extends ResourceController
             $timeDiffEnd   = $currentTime->difference($event->registration_end);
 
             if ($timeDiffStart->getSeconds() >= 0 || $timeDiffEnd->getSeconds() <= 0) {
-                return $this->failValidationErrors(['error' => lang('Events.registrationClosed')]);
+                return $this->respondConflict(lang('Events.registrationClosed'));
             }
 
             // Release seats held by expired, unpaid reservations before counting.
@@ -1453,7 +1457,7 @@ class Events extends ResourceController
             if ($existingBooking && $existingBooking->status !== 'failed') {
                 $db->transComplete();
 
-                return $this->failValidationErrors(['error' => lang('Events.alreadyRegistered')]);
+                return $this->respondConflict(lang('Events.alreadyRegistered'));
             }
 
             // Check available tickets (adults occupy the bookable slots; a
@@ -1469,7 +1473,7 @@ class Events extends ResourceController
             if ($currentTickets >= (int) $event->max_tickets) {
                 $db->transComplete();
 
-                return $this->failValidationErrors(['error' => lang('Events.noTicketsAvailable')]);
+                return $this->respondConflict(lang('Events.noTicketsAvailable'));
             }
 
             $bookingFields = [
@@ -1497,7 +1501,7 @@ class Events extends ResourceController
             $db->transComplete();
 
             if ($db->transStatus() === false || !$booking) {
-                return $this->failServerError(lang('General.serverError'));
+                return $this->respondServerError();
             }
 
             // Free event — confirm the booking immediately, no payment required.
@@ -1539,7 +1543,7 @@ class Events extends ResourceController
                 // keep the row (status = 'failed') so a retry resurrects it.
                 $eventUsersModel->update($bookingId, ['status' => 'failed']);
 
-                return $this->failServerError(lang('Events.paymentFailed'));
+                return $this->respondServerError(lang('Events.paymentFailed'));
             }
 
             $eventUsersModel->update($bookingId, ['payment_id' => $payment->id]);
@@ -1555,14 +1559,14 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
     public function cancel(): ResponseInterface {
         // Check that user is auth
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized();
+            return $this->respondUnauthorized();
         }
 
         $input = $this->request->getJSON(true);
@@ -1572,14 +1576,14 @@ class Events extends ResourceController
 
         // Check input data validation rules
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         try {
             $event = $this->model->find($input['eventId']);
             // Check that event with ID is exists
             if (!$event) {
-                return $this->failValidationErrors(['error' => lang('Events.notExists')]);
+                return $this->respondNotFound(lang('Events.notExists'));
             }
 
             $eventUsersModel  = new EventsUsersModel();
@@ -1587,7 +1591,7 @@ class Events extends ResourceController
 
             // Check that user not already registered at this event
             if (empty($userRegistration)) {
-                return $this->failValidationErrors(['error' => lang('Events.notRegistered')]);
+                return $this->respondNotFound(lang('Events.notRegistered'));
             }
 
             // The registration window only protects confirmed seats. An unpaid
@@ -1600,7 +1604,7 @@ class Events extends ResourceController
                 $timeDiffEnd   = $currentTime->difference($event->registration_end);
 
                 if ($timeDiffStart->getSeconds() >= 0 || $timeDiffEnd->getSeconds() <= 0) {
-                    return $this->failValidationErrors(['error' => lang('Events.registrationClosed')]);
+                    return $this->respondConflict(lang('Events.registrationClosed'));
                 }
             }
 
@@ -1636,7 +1640,7 @@ class Events extends ResourceController
             $db->transComplete();
 
             if ($db->transStatus() === false) {
-                return $this->failServerError(lang('General.serverError'));
+                return $this->respondServerError();
             }
 
             // Settle the linked payment now that the seat is safely released:
@@ -1671,7 +1675,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -1684,26 +1688,26 @@ class Events extends ResourceController
     public function upload($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized();
         }
 
         if (!$this->session->can(Permission::EVENTS_GALLERY_UPLOAD)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden();
         }
 
         $photo = $this->request->getFile('photo');
         if (!$photo || !$photo->isValid()) {
-            return $this->failValidationErrors(lang('General.fileUploadFailed'));
+            return $this->respondValidationErrors(['photo' => lang('General.fileUploadFailed')]);
         }
 
         $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         if (!in_array($photo->getMimeType(), $allowedMimes, true)) {
-            return $this->failValidationErrors(lang('General.invalidFileType'));
+            return $this->respondValidationErrors(['photo' => lang('General.invalidFileType')]);
         }
 
         $eventData = $this->model->find($id);
         if (!$eventData || !$eventData->id) {
-            return $this->failValidationErrors(lang('Events.notFound'));
+            return $this->respondNotFound(lang('Events.notFound'));
         }
 
         try {
@@ -1767,7 +1771,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -1784,28 +1788,28 @@ class Events extends ResourceController
     public function cover($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized();
         }
 
         if (!$this->session->can(Permission::EVENTS_UPDATE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden();
         }
 
         $event = $this->model->find($id);
 
         if (!$event) {
-            return $this->failNotFound();
+            return $this->respondNotFound();
         }
 
         $file = $this->request->getFile('upload');
 
         if (!$file || !$file->isValid()) {
-            return $this->failValidationErrors(lang('General.fileUploadFailed'));
+            return $this->respondValidationErrors(['upload' => lang('General.fileUploadFailed')]);
         }
 
         $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         if (!in_array($file->getMimeType(), $allowedMimes, true)) {
-            return $this->failValidationErrors(lang('General.invalidFileType'));
+            return $this->respondValidationErrors(['upload' => lang('General.invalidFileType')]);
         }
 
         try {
@@ -1838,28 +1842,28 @@ class Events extends ResourceController
             ]);
         } catch (Exception $e) {
             log_message('error', $e->getMessage());
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
     public function delete($id = null): ResponseInterface {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized();
         }
 
         if (!$this->session->can(Permission::EVENTS_DELETE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden();
         }
 
         try {
             $eventData = $this->model->find($id);
 
             if (!$eventData) {
-                return $this->failNotFound();
+                return $this->respondNotFound();
             }
 
             if (!$this->model->isUpcoming($eventData)) {
-                return $this->failValidationErrors(['error' => lang('Events.cannotDeletePastEvent')]);
+                return $this->respondConflict(lang('Events.cannotDeletePastEvent'));
             }
 
             $hasRegistrations = (new EventsUsersModel())
@@ -1868,7 +1872,7 @@ class Events extends ResourceController
                 ->countAllResults() > 0;
 
             if ($hasRegistrations) {
-                return $this->failValidationErrors(['error' => lang('Events.hasRegistrations')]);
+                return $this->respondConflict(lang('Events.hasRegistrations'));
             }
 
             $this->model->delete($id);
@@ -1883,7 +1887,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -1896,17 +1900,17 @@ class Events extends ResourceController
     public function update($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized();
         }
 
         if (!$this->session->can(Permission::EVENTS_UPDATE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden();
         }
 
         $eventData = $this->model->find($id);
 
         if (!$eventData) {
-            return $this->failNotFound();
+            return $this->respondNotFound();
         }
 
         $input = $this->request->getJSON(true);
@@ -1931,7 +1935,7 @@ class Events extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         // Effective "requires registration" for this update: the incoming
@@ -1942,7 +1946,7 @@ class Events extends ResourceController
             $requiresRegistration = filter_var($input['requiresRegistration'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 
             if ($requiresRegistration === null) {
-                return $this->failValidationErrors(['error' => lang('Events.invalidRequiresRegistrationValue')]);
+                return $this->respondValidationErrors(['requiresRegistration' => lang('Events.invalidRequiresRegistrationValue')]);
             }
         }
 
@@ -1953,7 +1957,7 @@ class Events extends ResourceController
                 ->countAllResults() > 0;
 
             if ($hasActiveBookings) {
-                return $this->failValidationErrors(['error' => lang('Events.cannotDisableRegistrationWithBookings')]);
+                return $this->respondConflict(lang('Events.cannotDisableRegistrationWithBookings'));
             }
         }
 
@@ -1986,17 +1990,24 @@ class Events extends ResourceController
                 : $rawEvent['registration_end'];
 
             if ($eventDateUtc === null || $registrationStartUtc === null || $registrationEndUtc === null) {
-                return $this->failValidationErrors(['error' => lang('Events.invalidDateFormat')]);
+                return $this->respondValidationErrors([
+                    'date'              => lang('Events.invalidDateFormat'),
+                    'registrationStart' => lang('Events.invalidDateFormat'),
+                    'registrationEnd'   => lang('Events.invalidDateFormat'),
+                ]);
             }
 
             if ($registrationStartUtc >= $registrationEndUtc || $registrationEndUtc > $eventDateUtc) {
-                return $this->failValidationErrors(['error' => lang('Events.invalidRegistrationWindow')]);
+                return $this->respondValidationErrors([
+                    'registrationStart' => lang('Events.invalidRegistrationWindow'),
+                    'registrationEnd'   => lang('Events.invalidRegistrationWindow'),
+                ]);
             }
         } elseif (isset($input['date'])) {
             $eventDateUtc = $this->parseOrenburgDateTime($input['date']);
 
             if ($eventDateUtc === null) {
-                return $this->failValidationErrors(['error' => lang('Events.invalidDateFormat')]);
+                return $this->respondValidationErrors(['date' => lang('Events.invalidDateFormat')]);
             }
         }
 
@@ -2006,13 +2017,13 @@ class Events extends ResourceController
             $eventEndDateUtc = $this->parseOrenburgDateTime($input['endDate']);
 
             if ($eventEndDateUtc === null) {
-                return $this->failValidationErrors(['error' => lang('Events.invalidDateFormat')]);
+                return $this->respondValidationErrors(['endDate' => lang('Events.invalidDateFormat')]);
             }
 
             $effectiveEventDateUtc = $eventDateUtc ?? $eventData->toRawArray()['date'];
 
             if ($eventEndDateUtc <= $effectiveEventDateUtc) {
-                return $this->failValidationErrors(['error' => lang('Events.invalidEventEndDate')]);
+                return $this->respondValidationErrors(['endDate' => lang('Events.invalidEventEndDate')]);
             }
         }
 
@@ -2089,7 +2100,7 @@ class Events extends ResourceController
             return $this->respondUpdated($this->model->find($id));
         } catch (Exception $e) {
             log_message('error', $e->getMessage());
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -2103,7 +2114,7 @@ class Events extends ResourceController
     public function paymentStatus(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized();
+            return $this->respondUnauthorized();
         }
 
         $input = $this->request->getJSON(true);
@@ -2112,7 +2123,7 @@ class Events extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         try {
@@ -2120,7 +2131,7 @@ class Events extends ResourceController
             $payment        = $paymentLibrary->findByOrderId($input['orderId']);
 
             if ($payment === null) {
-                return $this->failNotFound(lang('Events.paymentNotFound'));
+                return $this->respondNotFound(lang('Events.paymentNotFound'));
             }
 
             // Only the booking owner may query its payment status. Fail
@@ -2128,13 +2139,13 @@ class Events extends ResourceController
             // without its own ownership check added here, this must not
             // silently let it through unchecked.
             if ($payment->entity_type !== 'event_booking') {
-                return $this->failNotFound(lang('Events.paymentNotFound'));
+                return $this->respondNotFound(lang('Events.paymentNotFound'));
             }
 
             $booking = (new EventsUsersModel())->withDeleted()->find($payment->entity_id);
 
             if ($booking === null || $booking->user_id !== $this->session->user->id) {
-                return $this->failForbidden(lang('App.accessDenied'));
+                return $this->respondForbidden();
             }
 
             $status = $paymentLibrary->getVerifiedStatus($payment);
@@ -2160,7 +2171,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -2186,7 +2197,7 @@ class Events extends ResourceController
         if (!$paymentLibrary->verifyCallbackParams($params)) {
             log_message('error', 'Payment callback rejected: invalid signature');
 
-            return $this->failValidationErrors(lang('Events.paymentInvalidCallback'));
+            return $this->respondError(lang('Events.paymentInvalidCallback'));
         }
 
         try {
@@ -2200,7 +2211,7 @@ class Events extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 

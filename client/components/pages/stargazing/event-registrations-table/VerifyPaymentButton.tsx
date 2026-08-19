@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button } from 'simple-react-ui-kit'
+import { Button, Message } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
@@ -31,7 +31,7 @@ export const VerifyPaymentButton: React.FC<VerifyPaymentButtonProps> = ({ eventI
             </Button>
 
             {data && <div className={styles.verifyResult}>{data.message}</div>}
-            {error && <div className={styles.verifyError}>{getErrorMessage(error)}</div>}
+            {error && <Message type={'error'}>{getErrorMessage(error)}</Message>}
         </div>
     )
 }

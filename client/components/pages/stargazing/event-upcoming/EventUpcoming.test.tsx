@@ -362,7 +362,7 @@ describe('EventUpcoming', () => {
             })
         )
         const rejectedPromise = Promise.reject({
-            messages: { error: 'Нельзя удалить мероприятие, на которое уже есть регистрации.' }
+            message: 'Нельзя удалить мероприятие, на которое уже есть регистрации.'
         })
         rejectedPromise.catch(() => {})
         mockDeleteMutate.mockReturnValue({ unwrap: () => rejectedPromise })
@@ -370,7 +370,7 @@ describe('EventUpcoming', () => {
             mockDeleteMutate,
             {
                 isLoading: false,
-                error: { messages: { error: 'Нельзя удалить мероприятие, на которое уже есть регистрации.' } }
+                error: { message: 'Нельзя удалить мероприятие, на которое уже есть регистрации.' }
             }
         ])
 

@@ -6,16 +6,17 @@ describe('getErrorMessage', () => {
         expect(getErrorMessage(undefined)).toBeUndefined()
     })
 
-    it('returns messages.error when present', () => {
-        expect(getErrorMessage({ messages: { error: 'Something went wrong' } })).toBe('Something went wrong')
+    it('returns the message field', () => {
+        expect(getErrorMessage({ message: 'Something went wrong' })).toBe('Something went wrong')
     })
 
-    it('falls back to first value when no error key', () => {
-        expect(getErrorMessage({ messages: { name: 'Name is required' } })).toBe('Name is required')
-    })
-
-    it('returns undefined for empty messages', () => {
-        expect(getErrorMessage({ messages: {} })).toBeUndefined()
+    it('returns the message field even when field errors are also present', () => {
+        expect(
+            getErrorMessage({
+                message: 'Проверьте правильность заполнения полей.',
+                errors: { name: 'Обязательное поле' }
+            })
+        ).toBe('Проверьте правильность заполнения полей.')
     })
 })
 
@@ -28,20 +29,13 @@ describe('getFieldErrors', () => {
     it('returns the per-field messages, keyed by field name', () => {
         expect(
             getFieldErrors({
-                messages: { title: 'Обязательное поле', tickets: 'Должно быть больше 0' }
+                message: 'Проверьте правильность заполнения полей.',
+                errors: { title: 'Обязательное поле', tickets: 'Должно быть больше 0' }
             })
         ).toEqual({ title: 'Обязательное поле', tickets: 'Должно быть больше 0' })
     })
 
-    it('excludes the generic "error" key, which has no single field to attach to', () => {
-        expect(
-            getFieldErrors({
-                messages: { error: 'Некорректная дата', registrationEnd: 'ignored-by-this-case' }
-            })
-        ).toEqual({ registrationEnd: 'ignored-by-this-case' })
-    })
-
-    it('returns an empty object when there are no messages', () => {
-        expect(getFieldErrors({ messages: {} })).toEqual({})
+    it('returns an empty object when there are no field errors', () => {
+        expect(getFieldErrors({ message: 'Некорректная дата' })).toEqual({})
     })
 })

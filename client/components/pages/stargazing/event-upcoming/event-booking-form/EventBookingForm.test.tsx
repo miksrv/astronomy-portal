@@ -66,7 +66,7 @@ describe('EventBookingForm', () => {
             {
                 ...defaultMutationState,
                 isError: true,
-                error: { messages: { error: 'Ошибка регистрации' } }
+                error: { message: 'Ошибка регистрации' }
             }
         ])
 

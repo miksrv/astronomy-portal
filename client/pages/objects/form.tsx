@@ -9,6 +9,7 @@ import { API, ApiModel, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { AstroObjectForm, AstroObjectFormType } from '@/components/pages/objects'
 import { requirePermissionSSR } from '@/utils/adminAuth'
+import { getErrorMessage } from '@/utils/errors'
 import { formatObjectName } from '@/utils/strings'
 
 // TODO: Добавить обработку ошибки, когда пытаемся отредактировать объект, которого нет
@@ -85,7 +86,9 @@ const ObjectFormPage: NextPage<object> = () => {
                     style={{ marginBottom: '10px' }}
                     type={createError || updateError ? 'error' : 'success'}
                 >
-                    {(createError || updateError) && <div>{'Ошибка сохранения'}</div>}
+                    {(createError || updateError) && (
+                        <div>{getErrorMessage(createError || updateError) ?? 'Ошибка сохранения'}</div>
+                    )}
                     {updateSuccess && <div>{'Данные сохранены'}</div>}
                 </Message>
             )}
@@ -93,6 +96,7 @@ const ObjectFormPage: NextPage<object> = () => {
             <AstroObjectForm
                 disabled={objectLoading || createLoading || updateLoading}
                 initialData={objectData}
+                error={createError || updateError}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
             />

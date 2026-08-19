@@ -239,27 +239,29 @@ type MyComponentProps = { ... }
 
 ### RTK Query error shape
 
-`baseQueryWithErrorTransform` in `client/api/api.ts` unwraps the raw `FetchBaseQueryError.data` into the error itself, so by the time an error reaches a component (via `.unwrap()` rejection or a mutation hook's `error` field), its shape is already flat — matching `ApiType.ResError`:
+`baseQueryWithErrorTransform` in `client/api/api.ts` unwraps the raw `FetchBaseQueryError.data` into the error itself (restoring the transport-level HTTP `status`, which would otherwise be lost), so by the time an error reaches a component (via `.unwrap()` rejection or a mutation hook's `error` field), its shape is already flat — matching `ApiType.ResError`:
 
 ```ts
 {
     status?: number,
-    code?: number,
-    messages: Record<string, string>
+    message: string,
+    errors?: Record<string, string>
 }
 ```
 
-Always read `error.messages`, not `error.data.messages` — there is no `.data` wrapper at this point.
+`message` is always present — it's the text for a generic `<Message type="error">` block. `errors` is present only when the failure is tied to specific form fields (validation), keyed by field name — pass `fieldErrors.someField` to that `Input`'s `error` prop.
+
+Always read `error.message`/`error.errors`, not `error.data.messages` — there is no `.data` wrapper, and the old `messages`/generic-`'error'`-key convention no longer exists.
 
 ```ts
 // Correct
-const msg = getErrorMessage(error) // client/utils/errors.ts — messages.error, falling back to the first value
+const { message, fieldErrors } = useApiFormError(error) // client/hooks/useApiFormError.ts
 
 // Wrong
-const msg = (error as { data?: { messages?: Record<string, string> } })?.data?.messages
+const msg = (error as { data?: { messages?: Record<string, string> } })?.data?.messages?.error
 ```
 
-Prefer the shared `getErrorMessage(error)` helper (`client/utils/errors.ts`) over inlining `error.messages.error` in new code, so error-shape fixes only need to happen in one place.
+Prefer the shared `useApiFormError(error)` hook (`client/hooks/useApiFormError.ts`, built on `getErrorMessage`/`getFieldErrors` from `client/utils/errors.ts`) over inlining `error.message`/`error.errors` parsing in new code, so error-shape fixes only need to happen in one place. Every form that submits to a mutation should use it rather than re-implementing its own parsing.
 
 ---
 

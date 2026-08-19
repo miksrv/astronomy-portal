@@ -5,6 +5,7 @@ import { useTranslation } from 'next-i18next/pages'
 
 import { ApiType, useAppSelector } from '@/api'
 import { PhoneInput } from '@/components/common/phone-input'
+import { useApiFormError } from '@/hooks/useApiFormError'
 
 import { useEventBookingSubmit } from '../useEventBookingSubmit'
 
@@ -55,8 +56,7 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({
 
     const { submit, isLoading, isSuccess, isError, error } = useEventBookingSubmit()
 
-    const findError = (field: keyof ApiType.Events.ReqRegistration) =>
-        ((error as ApiType.ResError)?.messages?.[field as never] as string | undefined) || undefined
+    const { message: errorMessage, fieldErrors } = useApiFormError(error)
 
     const handleChange = ({ target: { name, value } }: React.ChangeEvent<HTMLInputElement>) =>
         setFormState((prev) => ({ ...prev, [name]: value }))
@@ -124,7 +124,7 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({
                     type={'error'}
                     title={t('components.pages.stargazing.event-upcoming.booking-form-error-title', 'Ошибка')}
                 >
-                    {(error as ApiType.ResError)?.messages?.error ||
+                    {errorMessage ||
                         t(
                             'components.pages.stargazing.event-upcoming.booking-form-error-default',
                             'При регистрации были допущены ошибки, проверьте правильность заполнения полей'
@@ -155,7 +155,7 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({
                         'Укажите ваше имя'
                     )}
                     value={formState.name || ''}
-                    error={findError('name')}
+                    error={fieldErrors.name}
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
                 />
@@ -169,7 +169,7 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({
                         'Укажите ваш номер телефона'
                     )}
                     value={formState.phone || ''}
-                    error={findError('phone')}
+                    error={fieldErrors.phone}
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
                 />

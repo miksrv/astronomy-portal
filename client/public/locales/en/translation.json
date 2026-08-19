@@ -445,6 +445,7 @@
             "telegram": "Project Telegram"
         },
         "mailing": {
+            "load-error": "Failed to load the mailing",
             "preview-error": "Failed to load the email preview",
             "preview-title": "Email preview",
             "title": "Newsletters",
@@ -549,6 +550,7 @@
             "save": "Save",
             "onboarding-skip": "Skip",
             "save-success": "Profile updated",
+            "save-error": "Failed to save profile",
             "push-error-no-key": "Failed to get the push notification key, please try again later",
             "push-error-generic": "Failed to update push notification settings",
             "push-toggle-label": "Browser push notifications",
@@ -559,7 +561,8 @@
             "upcoming-event-title": "Upcoming event",
             "no-upcoming-event": "You have no upcoming events",
             "history-title": "Event history",
-            "reviews-title": "My reviews"
+            "reviews-title": "My reviews",
+            "review-delete-error": "Failed to delete the review"
         },
         "checkin": {
             "duplicate-qr": "This QR code has already been checked!",
@@ -684,6 +687,7 @@
         },
         "push-notifications": {
             "title": "Push notifications",
+            "load-error": "Failed to load the push notification",
             "status-completed": "Completed",
             "status-draft": "Draft",
             "status-paused": "Paused",
@@ -762,6 +766,7 @@
             "title": "Sign in to the site",
             "notification_error": "Error",
             "magic-link-error": "This sign-in link is invalid or has expired",
+            "oauth-error": "Failed to sign in with the selected service",
             "go-to-home-page": "Go to the home page"
         },
         "index": {

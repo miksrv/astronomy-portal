@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Dialog } from 'simple-react-ui-kit'
+import { Button, Dialog, Message } from 'simple-react-ui-kit'
 
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
@@ -56,13 +56,13 @@ export const EventDeleteDialog: React.FC<EventDeleteDialogProps> = ({ eventId, o
                 </p>
 
                 {error && (
-                    <p className={styles.notifyText}>
+                    <Message type={'error'}>
                         {getErrorMessage(error) ||
                             t(
                                 'components.pages.stargazing.event-delete-dialog.error',
                                 'Не удалось удалить астровыезд. Попробуйте позже.'
                             )}
-                    </p>
+                    </Message>
                 )}
             </div>
             <div className={styles.confirmationFooter}>

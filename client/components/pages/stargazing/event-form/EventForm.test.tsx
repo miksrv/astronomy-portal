@@ -255,7 +255,9 @@ describe('EventForm', () => {
     // surface next to the field it belongs to, not just in a generic banner
     // the admin has to cross-reference with the network tab.
     it('shows a server validation error next to the field it belongs to', () => {
-        render(<EventForm error={{ messages: { title: 'Слишком длинный заголовок' } }} />)
+        render(
+            <EventForm error={{ message: 'Проверьте поля формы', errors: { title: 'Слишком длинный заголовок' } }} />
+        )
 
         expect(screen.getByText('Слишком длинный заголовок')).toBeDefined()
     })

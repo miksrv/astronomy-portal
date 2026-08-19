@@ -176,7 +176,8 @@ const AuthPage: NextPage<AuthPageProps> = () => {
                                 {token
                                     ? getErrorMessage(magicError) ||
                                       t('pages.auth.magic-link-error', 'Ссылка для входа недействительна или истекла')
-                                    : (error as string)}
+                                    : getErrorMessage(error) ||
+                                      t('pages.auth.oauth-error', 'Не удалось войти через выбранный сервис')}
                             </Message>
                         )}
                         {showSpinner && (

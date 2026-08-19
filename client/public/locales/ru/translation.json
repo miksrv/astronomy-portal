@@ -449,6 +449,7 @@
             "telegram": "Телеграм проекта"
         },
         "mailing": {
+            "load-error": "Не удалось загрузить рассылку",
             "preview-error": "Не удалось загрузить превью письма",
             "preview-title": "Превью письма",
             "title": "Рассылки",
@@ -553,6 +554,7 @@
             "save": "Сохранить",
             "onboarding-skip": "Пропустить",
             "save-success": "Профиль обновлён",
+            "save-error": "Не удалось сохранить профиль",
             "push-error-no-key": "Не удалось получить ключ для push-уведомлений, попробуйте позже",
             "push-error-generic": "Не удалось включить push-уведомления",
             "push-toggle-label": "Push-уведомления в браузере",
@@ -563,7 +565,8 @@
             "upcoming-event-title": "Предстоящее мероприятие",
             "no-upcoming-event": "У вас нет предстоящих мероприятий",
             "history-title": "История мероприятий",
-            "reviews-title": "Мои отзывы"
+            "reviews-title": "Мои отзывы",
+            "review-delete-error": "Не удалось удалить отзыв"
         },
         "checkin": {
             "duplicate-qr": "Этот QR код уже был проверен ранее!",
@@ -696,6 +699,7 @@
         },
         "push-notifications": {
             "title": "Push-уведомления",
+            "load-error": "Не удалось загрузить уведомление",
             "status-completed": "Завершена",
             "status-draft": "Черновик",
             "status-paused": "Приостановлена",
@@ -776,6 +780,7 @@
             "title": "Авторизация на сайте",
             "notification_error": "Ошибка",
             "magic-link-error": "Ссылка для входа недействительна или истекла",
+            "oauth-error": "Не удалось войти через выбранный сервис",
             "go-to-home-page": "Перейти на главную страницу"
         },
         "index": {

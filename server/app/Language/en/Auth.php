@@ -2,7 +2,8 @@
 
 return [
     'alreadyAuthorized'         => 'Already authorized',
-    'authServiceEmptyData'      => 'Auth service empty data',
+    'oauthLoginFailed'          => 'Could not sign in with this service. Please try again.',
+    'oauthEmailMissing'         => "The authentication service didn't provide an email address. Please check its permissions and try again.",
     'magicLinkInvalidOrExpired' => 'This login link is invalid or has expired. Please request a new one.',
     'magicLinkEmailSubject'     => 'Sign in to Look at the Stars',
     'magicLinkEmailTitle'       => 'Sign in',

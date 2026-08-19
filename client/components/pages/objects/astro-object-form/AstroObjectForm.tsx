@@ -3,6 +3,7 @@ import { Button, Container, Input, Select, TextArea } from 'simple-react-ui-kit'
 
 import { API, ApiModel } from '@/api'
 import { StarMap } from '@/components/common'
+import { getFieldErrors } from '@/utils/errors'
 
 import styles from './styles.module.sass'
 
@@ -13,15 +14,28 @@ export type AstroObjectFormType = Partial<Omit<ApiModel.Object, 'updated' | 'sta
 interface AstroObjectFormProps {
     disabled?: boolean
     initialData?: AstroObjectFormType
+    /** RTK Query error from the create/patch mutation — shown inline next to the field it belongs to. */
+    error?: unknown
     onSubmit?: (formData?: AstroObjectFormType) => void
     onCancel?: () => void
 }
 
 // TODO: При window resize нужно перестраивать карту под новое разрешение
-export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, initialData, onSubmit, onCancel }) => {
+export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
+    disabled,
+    initialData,
+    error,
+    onSubmit,
+    onCancel
+}) => {
     const [formData, setFormData] = useState<AstroObjectFormType>({})
 
     const { data: categoriesListData, isLoading: categoriesListLoading } = API.useCategoriesGetListQuery()
+
+    // Server-side validation errors (field name -> message), shown next to the
+    // matching input so a save failure doesn't send the admin to the network
+    // tab to figure out what went wrong.
+    const fieldErrors = getFieldErrors(error)
 
     const handleSubmit = () => {
         const canvasImage = document?.getElementById('celestial-map')?.getElementsByTagName('canvas')?.[0]?.toDataURL()
@@ -69,6 +83,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, init
                         className={styles.formElement}
                         label={'Имя объекта в каталогах'}
                         value={formData?.name}
+                        error={fieldErrors.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     />
 
@@ -79,6 +94,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, init
                         className={styles.formElement}
                         label={'Название объекта'}
                         value={formData?.title}
+                        error={fieldErrors.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     />
 
@@ -88,6 +104,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, init
                         className={styles.formElement}
                         label={'Ссылка на FITS файлы'}
                         value={formData?.fitsCloudLink}
+                        error={fieldErrors.fitsCloudLink}
                         onChange={(e) =>
                             setFormData({
                                 ...formData,
@@ -104,6 +121,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, init
                         label={'RA'}
                         type={'number'}
                         value={formData?.ra}
+                        error={fieldErrors.ra}
                         onChange={(e) =>
                             setFormData({
                                 ...formData,
@@ -120,6 +138,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, init
                         label={'DEC'}
                         type={'number'}
                         value={formData?.dec}
+                        error={fieldErrors.dec}
                         onChange={(e) =>
                             setFormData({
                                 ...formData,
@@ -150,6 +169,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({ disabled, init
                 className={styles.formElement}
                 label={'Описание объекта'}
                 value={formData?.description}
+                error={fieldErrors.description}
                 autoResize={true}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />

@@ -17,10 +17,19 @@ export * as Weather from './weather'
 
 export type Locale = 'en' | 'ru'
 
+/**
+ * The API's error envelope (see server/app/Controllers/BaseApiController.php).
+ * `message` is always present — it's what a generic error <Message> block should
+ * show. `errors` is present only when the failure is tied to specific form
+ * fields (validation), keyed by field name. `status` is the transport-level
+ * HTTP status code, restored by `baseQueryWithErrorTransform` in `client/api/api.ts`
+ * after it unwraps `FetchBaseQueryError.data` — read it instead of duplicating
+ * the status code inside the response body.
+ */
 export interface ResError {
     status?: number
-    code?: number
-    messages: Record<string, string>
+    message: string
+    errors?: Record<string, string>
 }
 
 export type DateTime = {
