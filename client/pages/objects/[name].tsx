@@ -9,6 +9,7 @@ import { JsonLdScript } from 'next-seo'
 import { API, ApiModel, HOST_IMG, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable, VisibilityChart } from '@/components/common'
 import { ObjectDescription, ObjectFilesTable, ObjectHeader, ObjectsCloud } from '@/components/pages/objects'
+import { DEFAULT_LOCALE } from '@/utils/constants'
 import { hasPermission } from '@/utils/permissions'
 import { removeMarkdown, sliceText } from '@/utils/strings'
 
@@ -145,7 +146,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<ObjectItemPageProps>> => {
-            const locale = context.locale ?? 'en'
+            const locale = context.locale ?? DEFAULT_LOCALE
             const objectName = context.params?.name
             const translations = await serverSideTranslations(locale)
 

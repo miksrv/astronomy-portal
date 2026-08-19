@@ -9,6 +9,7 @@ import { JsonLdScript } from 'next-seo'
 import { API, ApiModel, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable } from '@/components/common'
 import { PhotoCloud, PhotoHeader } from '@/components/pages/photos'
+import { DEFAULT_LOCALE } from '@/utils/constants'
 import { hasPermission } from '@/utils/permissions'
 import { createLargePhotoUrl, createPhotoTitle, normalizeAndFilterObjects } from '@/utils/photos'
 
@@ -164,7 +165,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<PhotoItemPageProps>> => {
-            const locale = context.locale ?? 'en'
+            const locale = context.locale ?? DEFAULT_LOCALE
             const photoId = context.params?.name
             const translations = await serverSideTranslations(locale)
 

@@ -13,7 +13,7 @@ import { API, ApiType, setLocale, SITE_LINK } from '@/api'
 import { login } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector, wrapper } from '@/api/store'
 import useLocalStorage from '@/hooks/useLocalStorage'
-import { LOCAL_STORAGE } from '@/utils/constants'
+import { DEFAULT_LOCALE, LOCAL_STORAGE } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/errors'
 import * as LocalStorage from '@/utils/localstorage'
 
@@ -203,7 +203,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<AuthPageProps>> => {
-            const locale = (context.locale ?? 'en') as ApiType.Locale
+            const locale = (context.locale ?? DEFAULT_LOCALE) as ApiType.Locale
             const translations = await serverSideTranslations(locale)
 
             store.dispatch(setLocale(locale))

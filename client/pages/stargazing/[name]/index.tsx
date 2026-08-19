@@ -14,7 +14,7 @@ import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
 import { EventItemData, EventPhotoFilter, EventReviews } from '@/components/pages/stargazing'
-import { PHOTOS_PAGE_SIZE, REVIEWS_PAGE_SIZE } from '@/utils/constants'
+import { DEFAULT_LOCALE, PHOTOS_PAGE_SIZE, REVIEWS_PAGE_SIZE } from '@/utils/constants'
 import { formatDate } from '@/utils/dates'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
@@ -357,7 +357,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<StargazingItemPageProps>> => {
-            const locale = context.locale ?? 'en'
+            const locale = context.locale ?? DEFAULT_LOCALE
             const translations = await serverSideTranslations(locale)
             const eventId = context.params?.name
 

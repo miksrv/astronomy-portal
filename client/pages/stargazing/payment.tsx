@@ -12,7 +12,7 @@ import { generateNextSeo } from 'next-seo/pages'
 import { API, ApiType, setLocale, SITE_LINK, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { useEventBookingSubmit } from '@/components/pages/stargazing/event-upcoming/useEventBookingSubmit'
-import { STARGAZING_RETRY_STORAGE_KEY } from '@/utils/constants'
+import { DEFAULT_LOCALE, STARGAZING_RETRY_STORAGE_KEY } from '@/utils/constants'
 
 const POLL_INTERVAL_MS = 3000
 const MAX_POLL_ATTEMPTS = 5
@@ -315,7 +315,7 @@ const StargazingPaymentPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? 'en'
+            const locale = context.locale ?? DEFAULT_LOCALE
             const translations = await serverSideTranslations(locale)
             const token = await getCookie('token', { req: context.req, res: context.res })
 

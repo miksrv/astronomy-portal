@@ -10,6 +10,7 @@ import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { EventsList } from '@/components/pages/stargazing'
+import { DEFAULT_LOCALE } from '@/utils/constants'
 import { hasPermission } from '@/utils/permissions'
 
 interface StargazingHistoryPageProps {
@@ -72,7 +73,7 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<StargazingHistoryPageProps>> => {
-            const locale = context.locale ?? 'en'
+            const locale = context.locale ?? DEFAULT_LOCALE
             const translations = await serverSideTranslations(locale)
             const token = await getCookie('token', { req: context.req, res: context.res })
 

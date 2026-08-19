@@ -10,6 +10,7 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 import { API, setLocale, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppLayout } from '@/components/common'
+import { DEFAULT_LOCALE } from '@/utils/constants'
 
 const UnsubscribePage: NextPage = () => {
     const { t } = useTranslation()
@@ -77,7 +78,7 @@ const UnsubscribePage: NextPage = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? 'en'
+            const locale = context.locale ?? DEFAULT_LOCALE
             const translations = await serverSideTranslations(locale)
             const token = await getCookie('token', { req: context.req, res: context.res })
             const mail = context.query.mail

@@ -8,6 +8,7 @@ import { JsonLdScript } from 'next-seo'
 import { API, ApiModel, setLocale, SITE_LINK, wrapper } from '@/api'
 import { AppLayout } from '@/components/common'
 import { MainSectionCommunity, MainSectionHero, MainSectionObservatory } from '@/components/pages/index'
+import { DEFAULT_LOCALE } from '@/utils/constants'
 
 interface HomePageProps {
     photosList: ApiModel.Photo[]
@@ -83,7 +84,7 @@ const HomePage: NextPage<HomePageProps> = ({ photosList, eventPhotos }) => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<HomePageProps>> => {
-            const locale = context.locale ?? 'en'
+            const locale = context.locale ?? DEFAULT_LOCALE
             const translations = await serverSideTranslations(locale)
 
             store.dispatch(setLocale(locale))

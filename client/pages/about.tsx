@@ -31,6 +31,7 @@ import photoStargazing5 from '@/public/photos/stargazing-5.jpeg'
 import photoStargazing6 from '@/public/photos/stargazing-6.jpeg'
 import photoStargazing7 from '@/public/photos/stargazing-7.jpeg'
 import photoStargazing8 from '@/public/photos/stargazing-8.jpeg'
+import { DEFAULT_LOCALE } from '@/utils/constants'
 
 const galleryAboutMe = [photoAboutMe1, photoAboutMe2, photoAboutMe3, photoAboutMe4]
 
@@ -373,7 +374,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
         async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<AboutPageProps>> => {
-            const locale = context.locale ?? 'en'
+            const locale = context.locale ?? DEFAULT_LOCALE
             const translations = await serverSideTranslations(locale)
 
             store.dispatch(setLocale(locale))

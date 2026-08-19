@@ -366,6 +366,10 @@
             }
         },
         "ui": {
+            "carousel": {
+                "next": "Next slide",
+                "prev": "Previous slide"
+            },
             "show-more": {
                 "show-less": "Show less",
                 "show-more": "Show more"

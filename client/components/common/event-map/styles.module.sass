@@ -9,11 +9,19 @@
 
 .mapContainer
     width: 100%
+    // Reserves space before Leaflet mounts (see the `loading` fallback in
+    // EventMap.tsx) — matches the default `height` prop in EventMapRender, so
+    // there's no layout shift once the map itself renders in non-fill mode.
+    min-height: 260px
     border-radius: var(--border-radius)
 
 .mapContainerFill
     flex: 1 1 auto
     height: 0
+    // A smaller floor than `.mapContainer` — this variant's real height comes
+    // from the parent flex layout, not a fixed prop, so a large min-height
+    // would fight that instead of just preventing a full collapse to 0.
+    min-height: 120px
 
 .externalLinks
     display: flex

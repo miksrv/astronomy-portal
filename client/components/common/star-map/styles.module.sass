@@ -1,5 +1,10 @@
 .starMap
     position: relative
+    // Reserves space before Celestial.js mounts and sets its own inline height
+    // (see the `loading` fallback in StarMap.tsx) — without it the map's
+    // container collapses to 0 height until then, shifting the rest of the
+    // page's layout once it appears.
+    min-height: 220px
 
     :global(#celestial-zoomin), :global(#celestial-zoomout)
         position: absolute

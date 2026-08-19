@@ -12,6 +12,7 @@ import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { EventHistorySection, MyReviewsSection, ProfileCard, PushNotificationToggle } from '@/components/pages/profile'
 import { EventUpcoming } from '@/components/pages/stargazing'
+import { DEFAULT_LOCALE } from '@/utils/constants'
 
 type ProfilePageProps = object
 
@@ -69,7 +70,7 @@ const ProfilePage: NextPage<ProfilePageProps> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<ProfilePageProps>> => {
-            const locale = context.locale ?? 'en'
+            const locale = context.locale ?? DEFAULT_LOCALE
             const translations = await serverSideTranslations(locale)
 
             store.dispatch(setLocale(locale))

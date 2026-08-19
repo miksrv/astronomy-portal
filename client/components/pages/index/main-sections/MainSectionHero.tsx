@@ -74,6 +74,9 @@ export const MainSectionHero: React.FC<MainSectionHeroProps> = ({ photos }) => {
                                             alt={alt}
                                             fill={true}
                                             style={{ objectFit: 'cover' }}
+                                            // First thumbnail is the likely LCP element on the
+                                            // homepage hero — the rest stay lazy.
+                                            priority={index === 0}
                                         />
                                     </Link>
                                 )

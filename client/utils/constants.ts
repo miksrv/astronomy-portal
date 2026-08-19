@@ -28,6 +28,13 @@ export const HOST_IMG = process.env.NEXT_PUBLIC_IMG_HOST || HOST_API
 
 export const HOST_METEO_API = process.env.NEXT_PUBLIC_METEO_API_HOST || 'https://api.meteo.miksoft.pro'
 
+// Fallback locale for `getServerSideProps` when `context.locale` is missing —
+// must match `defaultLocale` in `next-i18next.config.js` ('ru'), not the
+// library-typical 'en', or an SSR request that somehow arrives without a
+// resolved locale would render the wrong language relative to the rest of
+// the app's default.
+export const DEFAULT_LOCALE = 'ru'
+
 // Approximate number of stargazing participants from the years before the
 // registration system existed. Added on top of the registered count so the
 // landing page and the /stargazing section show the same total.

@@ -20,6 +20,7 @@ import {
     ReviewsWidget
 } from '@/components/pages/stargazing'
 import type { InfoCardItem } from '@/components/pages/stargazing/info-cards'
+import { DEFAULT_LOCALE } from '@/utils/constants'
 import { getSecondsUntilUTCDate } from '@/utils/dates'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
 
@@ -180,7 +181,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<StargazingPageProps>> => {
-            const locale = context.locale ?? 'en'
+            const locale = context.locale ?? DEFAULT_LOCALE
             const translations = await serverSideTranslations(locale)
             const token = await getCookie('token', { req: context.req, res: context.res })
 

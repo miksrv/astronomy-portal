@@ -8,6 +8,7 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 import { API, setLocale, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { AstronomyCalc, Calendar, Camera, RelayList, TelescopeWorkdays, Weather } from '@/components/pages/observatory'
+import { DEFAULT_LOCALE } from '@/utils/constants'
 
 import styles from './styles.module.sass'
 
@@ -93,7 +94,7 @@ const ObservatoryPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? 'en'
+            const locale = context.locale ?? DEFAULT_LOCALE
             const translations = await serverSideTranslations(locale)
 
             store.dispatch(setLocale(locale))

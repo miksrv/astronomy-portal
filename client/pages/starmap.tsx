@@ -6,6 +6,7 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 
 import { API, setLocale, wrapper } from '@/api'
 import { AppLayout, BreadcrumbJsonLd, StarMap } from '@/components/common'
+import { DEFAULT_LOCALE } from '@/utils/constants'
 
 const CelestialPage: NextPage<object> = () => {
     const { t } = useTranslation()
@@ -58,7 +59,7 @@ const CelestialPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? 'en'
+            const locale = context.locale ?? DEFAULT_LOCALE
             const translations = await serverSideTranslations(locale)
 
             store.dispatch(setLocale(locale))

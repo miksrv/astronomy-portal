@@ -10,6 +10,7 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 import { APIMeteo, setLocale, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { WidgetChart } from '@/components/pages/observatory'
+import { DEFAULT_LOCALE } from '@/utils/constants'
 import { getDateTimeFormat } from '@/utils/dates'
 
 const HistoryPage: NextPage<object> = () => {
@@ -95,7 +96,7 @@ const HistoryPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? 'en'
+            const locale = context.locale ?? DEFAULT_LOCALE
             const translations = await serverSideTranslations(locale)
 
             store.dispatch(setLocale(locale))

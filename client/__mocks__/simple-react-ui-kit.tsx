@@ -69,3 +69,5 @@ export const Dialog: React.FC<{
     ) : null
 
 export const Icon: React.FC<{ name?: string; className?: string }> = ({ name }) => <span>{name}</span>
+
+export const Skeleton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) => <div {...props} />

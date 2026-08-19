@@ -26,7 +26,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({ src, name, size = 'mediu
         return (
             <Image
                 src={src}
-                alt={''}
+                alt={name || ''}
                 width={px}
                 height={px}
                 className={rootClass}

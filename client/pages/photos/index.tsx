@@ -11,6 +11,7 @@ import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { PhotoGrid } from '@/components/pages/photos'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
+import { DEFAULT_LOCALE } from '@/utils/constants'
 import { hasPermission } from '@/utils/permissions'
 import { formatObjectName } from '@/utils/strings'
 
@@ -172,7 +173,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<PhotosPageProps>> => {
-            const locale = context.locale ?? 'en'
+            const locale = context.locale ?? DEFAULT_LOCALE
             const search = (context.query.search as string) || ''
             const translations = await serverSideTranslations(locale)
 

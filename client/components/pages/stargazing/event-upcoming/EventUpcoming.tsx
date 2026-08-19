@@ -413,6 +413,9 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
                                     alt={`${t('components.pages.stargazing.event-upcoming.stargazing', 'Астровыезды')}: ${event?.title}`}
                                     width={1024}
                                     height={768}
+                                    // Cover of the hero widget — the likely LCP element on
+                                    // the /stargazing and /profile pages it's rendered on.
+                                    priority
                                 />
 
                                 {canModerate && (

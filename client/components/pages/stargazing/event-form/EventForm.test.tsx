@@ -8,7 +8,7 @@ jest.mock('@/api', () => ({}))
 jest.mock('@/api/constants', () => ({ hosts: { stargazing: '' } }))
 
 // The Jest CJS build of the kit does not expose TextArea/Checkbox/Popout/Calendar/
-// Select/Icon; provide light stand-ins. Popout renders its trigger and content
+// Select/Icon/Skeleton; provide light stand-ins. Popout renders its trigger and content
 // unconditionally (no open/closed state) so tests can interact with the date
 // picker's calendar/time controls without simulating a click-to-open first.
 jest.mock('simple-react-ui-kit', () => {
@@ -123,6 +123,7 @@ jest.mock('simple-react-ui-kit', () => {
                 </select>
             </label>
         ),
+        Skeleton: () => null,
         TextArea: ({ error }: { error?: string }) => (error ? <span role={'alert'}>{error}</span> : null)
     }
 })
