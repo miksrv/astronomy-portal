@@ -36,11 +36,17 @@ class Comments extends ResourceController
 
     /**
      * GET /comments?entityType=event&entityId=:id&limit=20&offset=0
+     * GET /comments?userId=:id
      *
      * Returns a slice of visible comments for the specified entity, newest first, with
      * author info, plus the real total count so clients can tell whether more remain
      * (the caller already knows what `limit`/`offset` it asked for, so the response
      * doesn't echo those back). Public endpoint — no authentication required.
+     *
+     * The `userId` form instead returns the caller's own review history (profile page).
+     * It only ever honours the caller's own id — auth is required and a `userId` that
+     * doesn't match the session user is rejected outright, since (unlike Events::list())
+     * this branch has no unfiltered fallback to silently degrade to.
      *
      * @return ResponseInterface
      */
@@ -51,6 +57,10 @@ class Comments extends ResourceController
         if (!empty($userId)) {
             if (!$this->session->isAuth) {
                 return $this->failUnauthorized(lang('App.accessDenied'));
+            }
+
+            if ($userId !== $this->session->user->id) {
+                return $this->failForbidden(lang('App.accessDenied'));
             }
 
             try {
