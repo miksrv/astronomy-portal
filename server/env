@@ -32,7 +32,7 @@ app.fitsApiKey = ''
 app.telegramBotKey = ''
 app.telegramChatID = ''
 
-app.appTimezone = Asia/Yekaterinburg
+app.appTimezone = UTC
 app.timezone  = 5
 app.latitude  = 51.7727
 app.longitude = 55.0988

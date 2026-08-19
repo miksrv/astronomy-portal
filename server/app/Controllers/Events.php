@@ -121,7 +121,7 @@ class Events extends ResourceController
                         // diff (absolute timestamps) is timezone-proof.
                         $expiresInSeconds = max(
                             0,
-                            Time::parse((string) $payment->expires_at)->getTimestamp() - Time::now()->getTimestamp()
+                            Time::parse((string) $payment->expires_at, 'UTC')->getTimestamp() - Time::now('UTC')->getTimestamp()
                         );
 
                         $eventData->payment = [
@@ -199,7 +199,7 @@ class Events extends ResourceController
             if ($payment && $payment->status === 'pending') {
                 $expiresInSeconds = max(
                     0,
-                    Time::parse((string) $payment->expires_at)->getTimestamp() - Time::now()->getTimestamp()
+                    Time::parse((string) $payment->expires_at, 'UTC')->getTimestamp() - Time::now('UTC')->getTimestamp()
                 );
 
                 $event->payment = [
@@ -291,7 +291,7 @@ class Events extends ResourceController
 
             if (empty($bookedEventsData->checkin_at)) {
                 $eventUsersModel->update($id, [
-                    'checkin_at'         => new Time('now'),
+                    'checkin_at'         => new Time('now', 'UTC'),
                     'checkin_by_user_id' => $this->session->user->id
                 ]);
             } else {
@@ -1375,8 +1375,14 @@ class Events extends ResourceController
 
             $eventUsersModel = new EventsUsersModel();
 
-            // Check registration start and end dates
-            $currentTime   = new Time('now');
+            // Check registration start and end dates. Timezone is explicit here
+            // (rather than relying on the ambient app.appTimezone default)
+            // because registration_start/registration_end are always stored as
+            // true UTC instants (see parseOrenburgDateTime()) — see the 2026-08-19
+            // incident postmortem where a misconfigured non-UTC default caused
+            // EventEntity's automatic 'datetime' cast to reinterpret an already-UTC
+            // value in the wrong zone, closing registration ~5 hours early.
+            $currentTime   = new Time('now', 'UTC');
             $timeDiffStart = $currentTime->difference($event->registration_start);
             $timeDiffEnd   = $currentTime->difference($event->registration_end);
 
@@ -1581,7 +1587,8 @@ class Events extends ResourceController
             // pending hold must always be cancellable — otherwise a stuck
             // payment can never be released once registration closes.
             if ($userRegistration->status === 'confirmed') {
-                $currentTime   = new Time('now');
+                // Explicit UTC — see the identical comment in booking() above.
+                $currentTime   = new Time('now', 'UTC');
                 $timeDiffStart = $currentTime->difference($event->registration_start);
                 $timeDiffEnd   = $currentTime->difference($event->registration_end);
 

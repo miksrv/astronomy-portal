@@ -32,6 +32,14 @@
     <env name="database.tests.database" value=":memory:"/>
     <env name="database.tests.DBDriver" value="SQLite3"/>
     <env name="database.tests.DBPrefix" value=""/>
+    <!-- Pin the ambient PHP timezone to UTC regardless of any local .env
+         override — dates in this app are stored as UTC instants (see
+         Events::parseOrenburgDateTime()) and rely on date_default_timezone_get()
+         (driven by app.appTimezone) matching that. A non-UTC ambient default
+         caused a production incident (2026-08-19) where EventEntity's
+         'datetime' cast silently reinterpreted an already-UTC
+         registration_end value in the wrong zone. -->
+    <env name="app.appTimezone" value="UTC"/>
   </php>
   <source>
     <include>
