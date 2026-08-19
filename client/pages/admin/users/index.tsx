@@ -24,6 +24,7 @@ import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import UserEventsDialog from '@/components/pages/users/UserEventsDialog'
 import { Pagination } from '@/components/ui/pagination'
 import { UserAvatar } from '@/components/ui/user-avatar'
+import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { requirePermissionSSR } from '@/utils/adminAuth'
 import { DEVELOPER_ROLE_ID } from '@/utils/constants'
 import { formatDate } from '@/utils/dates'
@@ -68,7 +69,7 @@ const UsersPage: NextPage<object> = () => {
     const [tableHeight, setTableHeight] = useState<number | undefined>()
 
     const [search, setSearch] = useState<string>((router.query.search as string) || '')
-    const [debouncedSearch, setDebouncedSearch] = useState<string>((router.query.search as string) || '')
+    const [debouncedSearch] = useDebouncedValue(search, 400)
     const [roleFilterIds, setRoleFilterIds] = useState<number[]>(
         parseRoleIdsParam((router.query.roleIds as string) || '')
     )
@@ -125,15 +126,10 @@ const UsersPage: NextPage<object> = () => {
         return () => window.removeEventListener('resize', calculateTableHeight)
     }, [data])
 
-    // Debounce search input — reset page on search change
+    // Reset to the first page whenever the (debounced) search term changes
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(search)
-            setPage(1)
-        }, 400)
-
-        return () => clearTimeout(timer)
-    }, [search])
+        setPage(1)
+    }, [debouncedSearch])
 
     // Sync all state → URL (shallow, no SSR re-fetch)
     useEffect(() => {

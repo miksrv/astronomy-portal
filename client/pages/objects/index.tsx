@@ -10,6 +10,7 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { ObjectsTable } from '@/components/pages/objects'
+import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { hasPermission } from '@/utils/permissions'
 import { formatObjectName } from '@/utils/strings'
 
@@ -27,7 +28,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, categoriesList, objec
     const user = useAppSelector((state) => state.auth?.user)
 
     const [searchFilter, setSearchFilter] = useState<string | undefined>(search || undefined)
-    const [debouncedSearchFilter, setDebouncedSearchFilter] = useState<string | undefined>(search || undefined)
+    const [debouncedSearchFilter, setDebouncedSearchFilter] = useDebouncedValue(searchFilter, 400)
     const [categoryFilter, setCategoryFilter] = useState<number | undefined>()
     const [toolbarHeight, setToolbarHeight] = useState<number>(0)
     const [footerHeight, setFooterHeight] = useState<number>(0)
@@ -95,14 +96,6 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, categoriesList, objec
         setSearchFilter(querySearch)
         setDebouncedSearchFilter(querySearch)
     }, [router.query.search])
-
-    // Debounce the search input before syncing it to the URL - avoids pushing
-    // a history entry on every keystroke.
-    useEffect(() => {
-        const timer = setTimeout(() => setDebouncedSearchFilter(searchFilter), 400)
-
-        return () => clearTimeout(timer)
-    }, [searchFilter])
 
     // Sync filters to the URL (shallow - filtering is client-side, no need to
     // re-run getServerSideProps). Keeps ?search= functional for direct links

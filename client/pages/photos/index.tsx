@@ -10,6 +10,7 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { PhotoGrid } from '@/components/pages/photos'
+import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { hasPermission } from '@/utils/permissions'
 import { formatObjectName } from '@/utils/strings'
 
@@ -26,7 +27,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
     const user = useAppSelector((state) => state.auth?.user)
 
     const [searchFilter, setSearchFilter] = useState<string | undefined>(search || undefined)
-    const [debouncedSearchFilter, setDebouncedSearchFilter] = useState<string | undefined>(search || undefined)
+    const [debouncedSearchFilter, setDebouncedSearchFilter] = useDebouncedValue(searchFilter, 400)
     const [categoryFilter, setCategoryFilter] = useState<number | undefined>()
 
     const filteredCategoriesList = useMemo(
@@ -73,14 +74,6 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
         setSearchFilter(querySearch)
         setDebouncedSearchFilter(querySearch)
     }, [router.query.search])
-
-    // Debounce the search input before syncing it to the URL - avoids pushing
-    // a history entry on every keystroke.
-    useEffect(() => {
-        const timer = setTimeout(() => setDebouncedSearchFilter(searchFilter), 400)
-
-        return () => clearTimeout(timer)
-    }, [searchFilter])
 
     // Sync filters to the URL (shallow - filtering is client-side, no need to
     // re-run getServerSideProps).
