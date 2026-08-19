@@ -26,6 +26,8 @@ export const HOST_API = process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:80
 
 export const HOST_IMG = process.env.NEXT_PUBLIC_IMG_HOST || HOST_API
 
+export const HOST_METEO_API = process.env.NEXT_PUBLIC_METEO_API_HOST || 'https://api.meteo.miksoft.pro'
+
 // Approximate number of stargazing participants from the years before the
 // registration system existed. Added on top of the registered count so the
 // landing page and the /stargazing section show the same total.

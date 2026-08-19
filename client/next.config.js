@@ -35,11 +35,16 @@ const nextConfig = {
                 port: '',
                 protocol: 'https'
             },
-            {
-                hostname: 'localhost',
-                port: '8080',
-                protocol: 'http'
-            }
+            // Local backend (composer serve) - dev-only, kept out of production builds.
+            ...(process.env.NODE_ENV !== 'production'
+                ? [
+                      {
+                          hostname: 'localhost',
+                          port: '8080',
+                          protocol: 'http'
+                      }
+                  ]
+                : [])
         ],
         // unoptimized - When true, the source image will be served as-is instead of changing quality,
         // size, or format. Defaults to false.
