@@ -23,8 +23,14 @@ const defaultMutationState = {
 
 beforeEach(() => {
     jest.clearAllMocks()
+    // jest.clearAllMocks() clears call history but NOT a previously configured
+    // mockResolvedValue — without resetting it here, a later test would silently
+    // inherit e.g. the paid-booking test's payment-redirect response.
+    mockMutate.mockReset().mockResolvedValue({})
     ;(API.useEventsRegistrationPostMutation as jest.Mock).mockReturnValue([mockMutate, defaultMutationState])
-    ;(useAppSelector as jest.Mock).mockReturnValue({ name: 'Test User', phone: '' })
+    // A valid phone is required by the migrated form's zod schema — tests that
+    // submit the form need a passing default so submission isn't blocked by validation.
+    ;(useAppSelector as jest.Mock).mockReturnValue({ name: 'Test User', phone: '+7 999 123-45-67' })
 })
 
 describe('EventBookingForm', () => {

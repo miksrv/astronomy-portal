@@ -1,11 +1,15 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form'
 import { Button, Input, Message, Select } from 'simple-react-ui-kit'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiType, useAppSelector } from '@/api'
 import { PhoneInput } from '@/components/common/phone-input'
 import { useApiFormError } from '@/hooks/useApiFormError'
+import { useSyncApiFieldErrors } from '@/hooks/useSyncApiFieldErrors'
 
 import { useEventBookingSubmit } from '../useEventBookingSubmit'
 
@@ -23,12 +27,16 @@ interface EventBookingFormProps {
     onPaymentRedirect?: (formUrl: string) => void
 }
 
-type EventBookingFormState = {
-    name?: string
-    phone?: string
-    adults?: string
-    children?: string
-    childrenAges?: number[]
+// After stripping everything but digits, a real phone number falls in this
+// range — matches what PhoneInput's own sanitizer lets the field contain.
+const PHONE_DIGITS_PATTERN = /^\d{10,15}$/
+
+interface EventBookingFormValues {
+    name: string
+    phone: string
+    adults: string
+    children: string
+    childrenAges: Array<{ age?: number }>
 }
 
 export const EventBookingForm: React.FC<EventBookingFormProps> = ({
@@ -46,37 +54,149 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({
     const [submitted, setSubmitted] = useState<boolean>(false)
     const [paymentRedirect, setPaymentRedirect] = useState<boolean>(false)
     const [bookingId, setBookingId] = useState<string>()
-    const [formState, setFormState] = useState<EventBookingFormState>({
-        adults: '1',
-        children: '0',
-        childrenAges: [],
-        name: user?.name || '',
-        phone: user?.phone || ''
-    })
 
     const { submit, isLoading, isSuccess, isError, error } = useEventBookingSubmit()
 
     const { message: errorMessage, fieldErrors } = useApiFormError(error)
 
-    const handleChange = ({ target: { name, value } }: React.ChangeEvent<HTMLInputElement>) =>
-        setFormState((prev) => ({ ...prev, [name]: value }))
+    const bookingSchema = useMemo(
+        () =>
+            z
+                .object({
+                    name: z
+                        .string()
+                        .trim()
+                        .min(
+                            1,
+                            t(
+                                'components.pages.stargazing.event-upcoming.booking-form-name-required',
+                                'Введите ваше имя'
+                            )
+                        ),
+                    phone: z
+                        .string()
+                        .trim()
+                        .min(
+                            1,
+                            t(
+                                'components.pages.stargazing.event-upcoming.booking-form-phone-required',
+                                'Введите номер телефона'
+                            )
+                        )
+                        .refine(
+                            (value) => PHONE_DIGITS_PATTERN.test(value.replace(/\D/g, '')),
+                            t(
+                                'components.pages.stargazing.event-upcoming.booking-form-phone-invalid',
+                                'Введите корректный номер телефона'
+                            )
+                        ),
+                    adults: z.string(),
+                    children: z.string(),
+                    childrenAges: z.array(z.object({ age: z.number().optional() }))
+                })
+                .superRefine((values, ctx) => {
+                    const childrenCount = Number(values.children || 0)
 
-    const handleKeyDown = (e: { key: string }) => e.key === 'Enter' && void handleSubmit()
+                    if (childrenCount === 0) {
+                        return
+                    }
 
-    const handleSubmit = useCallback(async () => {
+                    // Normally kept in sync by the effect below that grows/shrinks
+                    // `childrenAges` to match the selected count — a length mismatch
+                    // here means that sync hasn't happened yet (e.g. submit fired in
+                    // the same tick as changing the children count). Flag the whole
+                    // array rather than guessing which per-child selects to blame.
+                    if (values.childrenAges.length !== childrenCount) {
+                        ctx.addIssue({
+                            code: z.ZodIssueCode.custom,
+                            message: t(
+                                'components.pages.stargazing.event-upcoming.booking-form-children-ages-required',
+                                'Укажите возраст каждого ребенка'
+                            ),
+                            path: ['childrenAges']
+                        })
+                        return
+                    }
+
+                    // Otherwise flag each child's own select individually, so it
+                    // highlights in place instead of a single message for the group.
+                    values.childrenAges.forEach((item, index) => {
+                        if (typeof item.age !== 'number') {
+                            ctx.addIssue({
+                                code: z.ZodIssueCode.custom,
+                                message: t(
+                                    'components.pages.stargazing.event-upcoming.booking-form-child-age-required',
+                                    'Укажите возраст'
+                                ),
+                                path: ['childrenAges', index, 'age']
+                            })
+                        }
+                    })
+                }),
+        [t]
+    )
+
+    const {
+        control,
+        handleSubmit,
+        setError,
+        formState: { errors: formErrors, isSubmitting }
+    } = useForm<EventBookingFormValues>({
+        resolver: zodResolver(bookingSchema),
+        defaultValues: {
+            name: user?.name || '',
+            phone: user?.phone || '',
+            adults: '1',
+            children: '0',
+            childrenAges: []
+        }
+    })
+
+    useSyncApiFieldErrors(fieldErrors, setError)
+
+    const {
+        fields: childrenAgeFields,
+        append: appendChildrenAge,
+        remove: removeChildrenAge
+    } = useFieldArray({ control, name: 'childrenAges' })
+
+    const childrenValue = useWatch({ control, name: 'children' })
+    const adultsValue = useWatch({ control, name: 'adults' })
+
+    // Keeps the childrenAges field array's length in sync with the selected
+    // number of children, so there's always exactly one age selector per child.
+    useEffect(() => {
+        const target = Number(childrenValue || 0)
+
+        if (childrenAgeFields.length < target) {
+            for (let i = childrenAgeFields.length; i < target; i++) {
+                appendChildrenAge({ age: undefined })
+            }
+        } else if (childrenAgeFields.length > target) {
+            for (let i = childrenAgeFields.length - 1; i >= target; i--) {
+                removeChildrenAge(i)
+            }
+        }
+    }, [childrenValue, childrenAgeFields.length, appendChildrenAge, removeChildrenAge])
+
+    const onValid = async (values: EventBookingFormValues) => {
         if (!eventId) {
             return
         }
 
         setSubmitted(true)
 
+        const childrenAges = values.childrenAges
+            .map((item) => item.age)
+            .filter((age): age is number => typeof age === 'number')
+
         const request: ApiType.Events.ReqRegistration = {
-            adults: Number(formState.adults || 1),
-            children: Number(formState.children || 1),
-            childrenAges: formState.childrenAges?.length ? formState.childrenAges : undefined,
-            eventId: eventId,
-            name: formState.name,
-            phone: formState.phone?.length ? formState.phone : undefined
+            adults: Number(values.adults || 1),
+            children: Number(values.children || 1),
+            childrenAges: childrenAges.length ? childrenAges : undefined,
+            eventId,
+            name: values.name,
+            phone: values.phone?.length ? values.phone : undefined
         }
 
         const result = await submit(request)
@@ -94,31 +214,24 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({
         if (result?.bookingId) {
             setBookingId(result.bookingId)
         }
-    }, [formState, eventId, submit])
-
-    useEffect(() => {
-        if (
-            formState.childrenAges?.length &&
-            (Number(formState.children) > formState.childrenAges.length ||
-                formState.childrenAges.length > Number(formState.children))
-        ) {
-            setFormState({
-                ...formState,
-                childrenAges: formState.childrenAges.slice(0, Number(formState.children))
-            })
-        }
-    }, [formState?.children])
+    }
 
     useEffect(() => {
         // For paid events the user is redirected to the bank; confirmation
-        // happens on return, so don't mark as registered here.
+        // happens on return, so don't mark as registered here. `submitted` is
+        // included so this still fires if `isSuccess` flips true before the
+        // (now async, resolver-gated) submit handler finishes setting it.
         if (isSuccess && submitted && !paymentRedirect) {
             onSuccessSubmit?.(bookingId)
         }
-    }, [isSuccess, bookingId])
+    }, [isSuccess, submitted, paymentRedirect, bookingId])
 
     return (
-        <div className={styles.form}>
+        <form
+            className={styles.form}
+            onSubmit={handleSubmit(onValid)}
+            noValidate={true}
+        >
             {isError && (
                 <Message
                     type={'error'}
@@ -145,111 +258,138 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({
             )}
 
             <div className={styles.identityFields}>
-                <Input
-                    className={styles.field}
-                    required={true}
-                    label={t('components.pages.stargazing.event-upcoming.booking-form-name-label', 'Ваше имя')}
+                <Controller
                     name={'name'}
-                    placeholder={t(
-                        'components.pages.stargazing.event-upcoming.booking-form-name-placeholder',
-                        'Укажите ваше имя'
+                    control={control}
+                    render={({ field, fieldState }) => (
+                        <Input
+                            {...field}
+                            className={styles.field}
+                            required={true}
+                            label={t('components.pages.stargazing.event-upcoming.booking-form-name-label', 'Ваше имя')}
+                            placeholder={t(
+                                'components.pages.stargazing.event-upcoming.booking-form-name-placeholder',
+                                'Укажите ваше имя'
+                            )}
+                            error={fieldState.error?.message}
+                        />
                     )}
-                    value={formState.name || ''}
-                    error={fieldErrors.name}
-                    onChange={handleChange}
-                    onKeyDown={handleKeyDown}
                 />
 
-                <PhoneInput
-                    className={styles.field}
-                    label={t('components.pages.stargazing.event-upcoming.booking-form-phone-label', 'Номер телефона')}
+                <Controller
                     name={'phone'}
-                    placeholder={t(
-                        'components.pages.stargazing.event-upcoming.booking-form-phone-placeholder',
-                        'Укажите ваш номер телефона'
+                    control={control}
+                    render={({ field, fieldState }) => (
+                        <PhoneInput
+                            {...field}
+                            className={styles.field}
+                            required={true}
+                            label={t(
+                                'components.pages.stargazing.event-upcoming.booking-form-phone-label',
+                                'Номер телефона'
+                            )}
+                            placeholder={t(
+                                'components.pages.stargazing.event-upcoming.booking-form-phone-placeholder',
+                                'Укажите ваш номер телефона'
+                            )}
+                            error={fieldState.error?.message}
+                        />
                     )}
-                    value={formState.phone || ''}
-                    error={fieldErrors.phone}
-                    onChange={handleChange}
-                    onKeyDown={handleKeyDown}
                 />
             </div>
 
             <div className={styles.countPeopleContainer}>
-                <Select<string>
-                    className={styles.countPeopleField}
-                    label={t('components.pages.stargazing.event-upcoming.booking-form-adults-label', 'Взрослых')}
-                    options={[...Array(5)].map((_, value) => ({
-                        key: String(value + 1),
-                        value: String(value + 1)
-                    }))}
-                    value={formState.adults || ''}
-                    onSelect={(option) => {
-                        setFormState({
-                            ...formState,
-                            adults: option?.[0]?.value || ''
-                        })
-                    }}
+                <Controller
+                    name={'adults'}
+                    control={control}
+                    render={({ field }) => (
+                        <Select<string>
+                            className={styles.countPeopleField}
+                            label={t(
+                                'components.pages.stargazing.event-upcoming.booking-form-adults-label',
+                                'Взрослых'
+                            )}
+                            options={[...Array(5)].map((_, value) => ({
+                                key: String(value + 1),
+                                value: String(value + 1)
+                            }))}
+                            value={field.value}
+                            onSelect={(option) => field.onChange(option?.[0]?.value || '')}
+                        />
+                    )}
                 />
 
-                <Select<string>
-                    className={styles.countPeopleField}
-                    label={t('components.pages.stargazing.event-upcoming.booking-form-children-label', 'Детей')}
-                    options={[...Array(6)].map((_, value) => ({
-                        key: String(value),
-                        value: String(value)
-                    }))}
-                    value={String(formState.children) || ''}
-                    onSelect={(option) => {
-                        setFormState({
-                            ...formState,
-                            children: option?.[0]?.value
-                        })
-                    }}
+                <Controller
+                    name={'children'}
+                    control={control}
+                    render={({ field }) => (
+                        <Select<string>
+                            className={styles.countPeopleField}
+                            label={t('components.pages.stargazing.event-upcoming.booking-form-children-label', 'Детей')}
+                            options={[...Array(6)].map((_, value) => ({
+                                key: String(value),
+                                value: String(value)
+                            }))}
+                            value={field.value}
+                            onSelect={(option) => field.onChange(option?.[0]?.value || '')}
+                        />
+                    )}
                 />
             </div>
 
-            {formState.children &&
-                Number(formState.children) > 0 &&
-                Array.from({ length: Number(formState.children) }, (_, index) => (
-                    <div
-                        key={index}
-                        className={styles.childrenAges}
-                    >
-                        <label>
-                            {t(
-                                'components.pages.stargazing.event-upcoming.booking-form-child-age-label',
-                                'Возраст ребенка {{index}}',
-                                { index: index + 1 }
-                            )}
-                        </label>
-                        <Select<string>
-                            placeholder={t(
-                                'components.pages.stargazing.event-upcoming.booking-form-child-age-placeholder',
-                                'Выберите возраст'
-                            )}
-                            options={[...Array(13)].map((_, age) => ({
-                                key: String(age + 5),
-                                value: t(
-                                    'components.pages.stargazing.event-upcoming.booking-form-child-age-option',
-                                    '{{age}} лет',
-                                    { age: age + 5 }
-                                )
-                            }))}
-                            value={String(formState?.childrenAges?.[index]) || ''}
-                            onSelect={(option) => {
-                                const newAges = [...(formState?.childrenAges ?? [])]
+            {childrenAgeFields.map((fieldItem, index) => (
+                <div
+                    key={fieldItem.id}
+                    className={styles.childrenAges}
+                >
+                    <label>
+                        {t(
+                            'components.pages.stargazing.event-upcoming.booking-form-child-age-label',
+                            'Возраст ребенка {{index}}',
+                            { index: index + 1 }
+                        )}
+                    </label>
+                    <Controller
+                        name={`childrenAges.${index}.age` as const}
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <Select<string>
+                                placeholder={t(
+                                    'components.pages.stargazing.event-upcoming.booking-form-child-age-placeholder',
+                                    'Выберите возраст'
+                                )}
+                                options={[...Array(13)].map((_, age) => ({
+                                    key: String(age + 5),
+                                    value: t(
+                                        'components.pages.stargazing.event-upcoming.booking-form-child-age-option',
+                                        '{{age}} лет',
+                                        { age: age + 5 }
+                                    )
+                                }))}
+                                value={field.value !== undefined ? String(field.value) : ''}
+                                // Just highlight this select in red — the message is
+                                // redundant here, the "Возраст ребенка N" label above
+                                // already says exactly what's missing. The installed
+                                // kit's `error` prop is typed as `string`, but at
+                                // runtime it only needs to be truthy: the kit renders
+                                // `{error}` as a plain JSX child, and React silently
+                                // drops a boolean child, so `true` gives the red
+                                // border with no rendered text. Cast to satisfy the
+                                // (stricter-than-reality) type.
+                                error={!!fieldState.error as unknown as string}
+                                onSelect={(option) => {
+                                    const key = option?.[0]?.key
+                                    field.onChange(key !== undefined ? Number(key) : undefined)
+                                }}
+                            />
+                        )}
+                    />
+                </div>
+            ))}
 
-                                newAges[index] = Number(option?.[0]?.key)
-
-                                setFormState({
-                                    ...formState,
-                                    childrenAges: newAges
-                                })
-                            }}
-                        />
-                    </div>
-                ))}
+            {formErrors.childrenAges?.message && (
+                <p className={styles.childrenAgesError}>{formErrors.childrenAges.message}</p>
+            )}
 
             {isPaid && (
                 <div
@@ -260,9 +400,9 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({
                         {t(
                             'components.pages.stargazing.event-upcoming.booking-form-price-summary',
                             '{{adults}} взрослых × {{price}} ₽ = ',
-                            { adults: Number(formState.adults || 1), price: ticketPrice }
+                            { adults: Number(adultsValue || 1), price: ticketPrice }
                         )}
-                        <strong>{`${Number(formState.adults || 1) * (ticketPrice || 0)} ₽`}</strong>
+                        <strong>{`${Number(adultsValue || 1) * (ticketPrice || 0)} ₽`}</strong>
                     </div>
                     <div className={styles.priceNote}>
                         {t(
@@ -274,15 +414,15 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({
             )}
 
             <Button
+                type={'submit'}
                 className={styles.submitButton}
-                onClick={handleSubmit}
-                disabled={isLoading || isSuccess || Number(formState?.children) !== formState?.childrenAges?.length}
-                loading={isLoading}
+                disabled={isSubmitting || isLoading || isSuccess}
+                loading={isSubmitting || isLoading}
             >
                 {isPaid
                     ? t('components.pages.stargazing.event-upcoming.booking-form-submit-pay', 'Перейти к оплате')
                     : t('components.pages.stargazing.event-upcoming.booking-form-submit-book', 'Забронировать')}
             </Button>
-        </div>
+        </form>
     )
 }
