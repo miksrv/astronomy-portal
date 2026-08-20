@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## 4.10.0
+
+### Minor Changes
+
+- Migrated forms to `react-hook-form` + Zod validation
+- Unified API error contract (`{message, errors?}`)
+- Added global toast notifications (`SnackbarStack`)
+- Added `DateTimeInput` and reworked the event form
+- Extracted `useCampaignForm` for admin mailing/push forms
+- Added optimistic UI (reviews, relay light)
+- Fixed a production UTC/timezone bug that closed registration early
+- Hardened backend security (comments IDOR, `.htaccess`, removed legacy FITS code)
+- Fixed SSR/client-only issues (ECharts, QR scanner, Redux HYDRATE, locale)
+- Enabled `noUncheckedIndexedAccess` + `jsx-a11y`, added ARIA labels to OAuth buttons
+- Polished loading/accessibility (skeletons, LCP, default locale)
+- Flattened `/admin/*` and `/profile` routes
+- Reworked event page navigation and layout (`EventPrevNextNav`, etc.)
+- Unified button UI and bumped dependencies
+- Added `useDebouncedValue` and other housekeeping
+
+
 ## 4.9.2
 
 ### Patch Changes
