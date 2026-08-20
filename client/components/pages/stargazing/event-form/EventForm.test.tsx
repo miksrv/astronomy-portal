@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 
 import { EventForm } from './EventForm'
 
@@ -79,7 +79,7 @@ jest.mock('simple-react-ui-kit', () => {
                 {error && <span role={'alert'}>{error}</span>}
             </label>
         ),
-        // Popout is not given a forwardRef stand-in here: DateTimePicker only
+        // Popout is not given a forwardRef stand-in here: DateTimeInput only
         // calls `ref.current?.close()` from its own "Готово" button, which no
         // test below relies on, so the resulting "cannot be given a ref"
         // console warning is harmless noise, not a real defect.
@@ -128,10 +128,10 @@ jest.mock('simple-react-ui-kit', () => {
     }
 })
 
-// Drives one DateTimePicker instance (identified by its `testId`) through the
+// Drives one DateTimeInput instance (identified by its `testId`) through the
 // mocked Calendar + hour/minute Selects — the calendar must be set first,
 // since the real component only commits an hour/minute change once a date
-// already exists (see DateTimePicker.tsx).
+// already exists (see DateTimeInput.tsx).
 const setDateTime = (testId: string, date: string, hour: string, minute: string) => {
     const calendarInput = within(screen.getByTestId(`${testId}-calendar`)).getByLabelText('calendar')
     fireEvent.change(calendarInput, { target: { value: date } })
@@ -149,7 +149,7 @@ describe('EventForm', () => {
         expect(screen.getByText(/Цена билета за взрослого/)).toBeDefined()
     })
 
-    it('submits the entered ticket price', () => {
+    it('submits the entered ticket price', async () => {
         const onSubmit = jest.fn()
         const { container } = render(<EventForm onSubmit={onSubmit} />)
 
@@ -165,7 +165,11 @@ describe('EventForm', () => {
 
         fireEvent.click(screen.getByText('Сохранить'))
 
-        expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ ticketPrice: '750' }))
+        // react-hook-form's zod resolver validates asynchronously, so the
+        // submit handler resolves a tick after the click event.
+        await waitFor(() => {
+            expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ ticketPrice: '750' }))
+        })
     })
 
     it('prefills the ticket price from initialData when editing an event', () => {
@@ -206,7 +210,7 @@ describe('EventForm', () => {
     // later than the event's own date, which the booking-status UI had no
     // state for (see EventUpcoming.tsx) — caught here before it ever reaches
     // the backend's identical Events.invalidRegistrationWindow check.
-    it('blocks submit and shows an error when registrationEnd is later than the event date', () => {
+    it('blocks submit and shows an error when registrationEnd is later than the event date', async () => {
         const onSubmit = jest.fn()
         render(<EventForm onSubmit={onSubmit} />)
 
@@ -216,11 +220,13 @@ describe('EventForm', () => {
 
         fireEvent.click(screen.getByText('Сохранить'))
 
+        await waitFor(() => {
+            expect(screen.getByText(/закрываться не позднее даты и времени проведения/)).toBeDefined()
+        })
         expect(onSubmit).not.toHaveBeenCalled()
-        expect(screen.getByText(/закрываться не позднее даты и времени проведения/)).toBeDefined()
     })
 
-    it('blocks submit and shows an error when registrationStart is not before registrationEnd', () => {
+    it('blocks submit and shows an error when registrationStart is not before registrationEnd', async () => {
         const onSubmit = jest.fn()
         render(<EventForm onSubmit={onSubmit} />)
 
@@ -230,11 +236,13 @@ describe('EventForm', () => {
 
         fireEvent.click(screen.getByText('Сохранить'))
 
+        await waitFor(() => {
+            expect(screen.getByText(/должна открываться раньше, чем закрываться/)).toBeDefined()
+        })
         expect(onSubmit).not.toHaveBeenCalled()
-        expect(screen.getByText(/должна открываться раньше, чем закрываться/)).toBeDefined()
     })
 
-    it('allows submit once the registration window is fixed', () => {
+    it('allows submit once the registration window is fixed', async () => {
         const onSubmit = jest.fn()
         render(<EventForm onSubmit={onSubmit} />)
 
@@ -243,12 +251,18 @@ describe('EventForm', () => {
         setDateTime('registration-end', '2026-08-20', '00', '00')
 
         fireEvent.click(screen.getByText('Сохранить'))
+
+        await waitFor(() => {
+            expect(screen.getByText(/должна закрываться не позднее/)).toBeDefined()
+        })
         expect(onSubmit).not.toHaveBeenCalled()
 
         setDateTime('registration-end', '2026-08-19', '21', '00')
         fireEvent.click(screen.getByText('Сохранить'))
 
-        expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ registrationEnd: '2026-08-19T21:00' }))
+        await waitFor(() => {
+            expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ registrationEnd: '2026-08-19T21:00' }))
+        })
     })
 
     // Regression coverage: a create/patch mutation's validation error must
