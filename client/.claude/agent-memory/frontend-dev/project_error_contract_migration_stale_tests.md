@@ -2,7 +2,7 @@
 name: project_error_contract_migration_stale_tests
 description: RTK Query error contract was migrated to {status, message, errors} but some test files still mock the old {messages:{field:...}} shape, causing unrelated test failures
 metadata:
-  type: project
+    type: project
 ---
 
 The API error contract was migrated (`client/utils/errors.ts`, `client/hooks/useApiFormError.ts`,
@@ -12,6 +12,7 @@ The API error contract was migrated (`client/utils/errors.ts`, `client/hooks/use
 
 At least two test files were not updated to match and fail as a result, unrelated to any specific
 feature change:
+
 - `client/components/pages/stargazing/event-upcoming/EventUpcoming.test.tsx` (mocks
   `error: { messages: { error: '...' } }` for the delete-event flow)
 - `client/components/pages/stargazing/event-form/EventForm.test.tsx` (mocks
