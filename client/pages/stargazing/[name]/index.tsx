@@ -248,7 +248,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 
                 {hasMorePhotos && (
                     <Button
-                        mode={'link'}
+                        unstyled
                         className={styles.showMorePhotos}
                         onClick={handleShowAllPhotos}
                         label={

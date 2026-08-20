@@ -52,7 +52,7 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
                         icon={'PlusCircle'}
                         mode={'primary'}
                         size={'medium'}
-                        label={t('pages.stargazing.create-stargazing_button', 'Добавить астровыезд')}
+                        label={t('pages.stargazing.create_button', 'Добавить')}
                         link={'/stargazing/form'}
                     />
                 )}

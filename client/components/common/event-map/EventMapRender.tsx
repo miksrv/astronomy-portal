@@ -100,7 +100,7 @@ export const EventMapRender: React.FC<EventMapRenderProps> = ({
                 center={[latitude, longitude]}
                 zoom={zoom}
                 scrollWheelZoom={editable}
-                style={fillHeight ? { width: '100%' } : { height, width: '100%' }}
+                style={fillHeight ? { width: '100%' } : { height, minHeight: height, width: '100%' }}
                 className={cn(styles.mapContainer, fillHeight && styles.mapContainerFill)}
                 attributionControl={false}
             >

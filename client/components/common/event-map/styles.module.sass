@@ -12,6 +12,9 @@
     // Reserves space before Leaflet mounts (see the `loading` fallback in
     // EventMap.tsx) — matches the default `height` prop in EventMapRender, so
     // there's no layout shift once the map itself renders in non-fill mode.
+    // A caller-supplied `height` overrides this via an inline `minHeight`
+    // style (higher specificity than this class), so a smaller custom height
+    // isn't clamped back up to 260px.
     min-height: 260px
     border-radius: var(--border-radius)
 

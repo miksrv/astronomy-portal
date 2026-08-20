@@ -688,7 +688,7 @@
             "save-error": "Save error",
             "save-success": "Stargazing trip saved",
             "title": "Stargazing trips",
-            "create-stargazing_button": "Add stargazing trip",
+            "create_button": "Add",
             "howto_link": "How stargazing trips work",
             "howto_card_desc": "The evening's program, telescopes and lectures",
             "rules_link": "Rules of conduct on stargazing trips",
