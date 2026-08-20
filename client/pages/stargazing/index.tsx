@@ -9,7 +9,7 @@ import { JsonLdScript } from 'next-seo'
 
 import { API, ApiModel, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
-import { AppFooter, AppLayout, BreadcrumbJsonLd, PrevNextNav } from '@/components/common'
+import { AppFooter, AppLayout, BreadcrumbJsonLd } from '@/components/common'
 import {
     EventImportant,
     EventProgram,
@@ -165,12 +165,14 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
                 </>
             )}
 
-            <PrevNextNav
-                next={{
-                    href: '/stargazing/history',
-                    title: t('pages.stargazing.archive-link', 'Все прошлые астровыезды')
-                }}
-            />
+            <div className={styles.archiveLink}>
+                <Button
+                    mode={'secondary'}
+                    icon={'KeyboardRight'}
+                    label={t('pages.stargazing.archive-link', 'Все прошлые астровыезды')}
+                    link={'/stargazing/history'}
+                />
+            </div>
 
             <AppFooter />
         </AppLayout>

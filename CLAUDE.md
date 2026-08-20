@@ -89,7 +89,7 @@ docker-compose up     # Start MariaDB at localhost:3308 (db: db, user: user, pas
 
 **Components:** Organized as `client/components/common/`, `client/components/pages/` (about, index, objects, observatory, photos, profile, stargazing, users), `client/components/ui/` (breadcrumbs, carousel, counter, pagination, show-more, user-avatar), and `client/components/icons/`.
 
-Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, `app-toolbar/`, `login-form/`, `moon-phase-icon/`, `object-photos-table/`, `photo-filter-list/`, `photo-gallery/`, `photo-lightbox/`, `prev-next-nav/`, `star-map/`, `visibility-chart/`, plus reviews:
+Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, `app-toolbar/`, `login-form/`, `moon-phase-icon/`, `object-photos-table/`, `photo-filter-list/`, `photo-gallery/`, `photo-lightbox/`, `star-map/`, `visibility-chart/`, plus reviews:
 - `review-card/` — displays a single review with author avatar, star rating, text, date, delete button
 - `review-form/` — form to submit a review (star selector + TextArea + submit); shows API validation errors inline
 

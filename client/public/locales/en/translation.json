@@ -292,6 +292,9 @@
                     "upload-more": "Upload more",
                     "retry-failed": "Retry failed"
                 },
+                "event-prev-next-nav": {
+                    "label": "Event navigation"
+                },
                 "event-refund-dialog": {
                     "title": "Issue a refund?",
                     "text": "The payment will be fully refunded to the card it was made from (usually within 1–10 business days), and the registration will be cancelled. This action cannot be undone.",

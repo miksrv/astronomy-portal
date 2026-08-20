@@ -11,10 +11,9 @@ import { JsonLdScript } from 'next-seo'
 import { API, ApiModel, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
-import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
-import { EventItemData, EventPhotoFilter, EventReviews } from '@/components/pages/stargazing'
+import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
+import { EventItemData, EventPhotoFilter, EventPrevNextNav, EventReviews } from '@/components/pages/stargazing'
 import { PHOTOS_PAGE_SIZE, REVIEWS_PAGE_SIZE } from '@/utils/constants'
-import { formatDate } from '@/utils/dates'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
 import { hasAnyPermission, hasPermission } from '@/utils/permissions'
@@ -328,25 +327,9 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 
             <EventReviews eventId={eventId} />
 
-            <PrevNextNav
-                prev={
-                    adjacentEvents?.previousEvent
-                        ? {
-                              href: `/stargazing/${adjacentEvents.previousEvent.id}`,
-                              title: adjacentEvents.previousEvent.title,
-                              subtitle: formatDate(adjacentEvents.previousEvent.date?.date, 'D MMMM YYYY')
-                          }
-                        : null
-                }
-                next={
-                    adjacentEvents?.nextEvent
-                        ? {
-                              href: `/stargazing/${adjacentEvents.nextEvent.id}`,
-                              title: adjacentEvents.nextEvent.title,
-                              subtitle: formatDate(adjacentEvents.nextEvent.date?.date, 'D MMMM YYYY')
-                          }
-                        : null
-                }
+            <EventPrevNextNav
+                prevEvent={adjacentEvents?.previousEvent}
+                nextEvent={adjacentEvents?.nextEvent}
             />
 
             <AppFooter />

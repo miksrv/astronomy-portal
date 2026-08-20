@@ -197,6 +197,7 @@ Import via `import { ApiModel } from '@/api'`.
 | `EventInfoPanel`     | Sidebar block on the event page: date/time/location/members/age/views + live weather + `EventMap` |
 | `EventItemData`      | Detail block rendering the event cover image + `EventInfoPanel` + description                     |
 | `EventPhotoUploader` | Drag-and-drop photo upload for a specific event                                                   |
+| `EventPrevNextNav`   | Prev/next links to adjacent events (by date) on the event detail page, with cover thumbnail       |
 | `EventReviews`       | Reviews section for an event page: shows `ReviewForm` (if eligible) + list of `ReviewCard`s       |
 | `EventUpcoming`      | Hero widget for the next upcoming event with registration/cancellation dialog                     |
 | `EventsList`         | List/grid of all events with status indicators                                                    |
