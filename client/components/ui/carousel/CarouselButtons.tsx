@@ -1,6 +1,6 @@
 import React, { PropsWithChildren, useCallback, useEffect, useState } from 'react'
 import { EmblaCarouselType } from 'embla-carousel'
-import { cn, Icon } from 'simple-react-ui-kit'
+import { Button, cn, Icon } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
@@ -62,9 +62,9 @@ export const PrevButton: React.FC<PropType> = ({ children, ...restProps }) => {
     const { t } = useTranslation()
 
     return (
-        <button
+        <Button
+            unstyled
             className={cn(styles.arrowButton, styles.arrowButtonLeft)}
-            type={'button'}
             aria-label={t('components.ui.carousel.prev', 'Предыдущий слайд')}
             {...restProps}
         >
@@ -72,7 +72,7 @@ export const PrevButton: React.FC<PropType> = ({ children, ...restProps }) => {
                 <Icon name={'KeyboardLeft'} />
                 {children}
             </span>
-        </button>
+        </Button>
     )
 }
 
@@ -80,9 +80,9 @@ export const NextButton: React.FC<PropType> = ({ children, ...restProps }) => {
     const { t } = useTranslation()
 
     return (
-        <button
+        <Button
+            unstyled
             className={cn(styles.arrowButton, styles.arrowButtonRight)}
-            type={'button'}
             aria-label={t('components.ui.carousel.next', 'Следующий слайд')}
             {...restProps}
         >
@@ -90,6 +90,6 @@ export const NextButton: React.FC<PropType> = ({ children, ...restProps }) => {
                 <Icon name={'KeyboardRight'} />
                 {children}
             </span>
-        </button>
+        </Button>
     )
 }

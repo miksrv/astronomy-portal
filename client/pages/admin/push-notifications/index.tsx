@@ -153,7 +153,7 @@ const PushNotificationListPage: NextPage<object> = () => {
                 currentPage={pageTitle}
             >
                 <Button
-                    mode={'secondary'}
+                    mode={'primary'}
                     icon={'PlusCircle'}
                     link={'/admin/push-notifications/form'}
                     label={t('pages.push-notifications.create', 'Новое уведомление')}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { getCookie, setCookie } from 'cookies-next'
-import { Icon } from 'simple-react-ui-kit'
+import { Button, Icon } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
@@ -136,14 +136,13 @@ export const ReviewFloatingPrompt: React.FC<ReviewFloatingPromptProps> = ({ even
             }
         >
             {!justSubmitted && (
-                <button
-                    type={'button'}
+                <Button
+                    unstyled
+                    icon={'Close'}
                     className={styles.floatingClose}
                     aria-label={t('components.common.review-form.floating-close', 'Закрыть напоминание об отзыве')}
                     onClick={handleClose}
-                >
-                    <Icon name={'Close'} />
-                </button>
+                />
             )}
 
             {justSubmitted ? (

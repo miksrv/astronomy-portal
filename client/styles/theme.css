@@ -96,6 +96,9 @@
     --button-secondary-background: #2f314d;
     --button-secondary-background-hover: #37395b;
     --button-secondary-background-active: #292b43;
+    --button-secondary-color: var(--text-color-secondary);
+    --button-secondary-color-hover: var(--text-color-secondary-hover);
+    --button-secondary-color-active: var(--text-color-secondary-active);
 
     /* Popout */
     --popout-shadow: 0 0 2px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.08);

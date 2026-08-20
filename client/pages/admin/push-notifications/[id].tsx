@@ -73,7 +73,7 @@ const PushNotificationStatsPage: NextPage<object> = () => {
                 ]}
             >
                 <Button
-                    mode={'secondary'}
+                    mode={'primary'}
                     label={t('pages.push-notifications.test-send', 'Отправить тест')}
                     onClick={handleTestSend}
                     loading={testLoading}

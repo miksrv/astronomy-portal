@@ -275,7 +275,7 @@ const RolesPage: NextPage<object> = () => {
             >
                 <Button
                     icon={'PlusCircle'}
-                    mode={'secondary'}
+                    mode={'primary'}
                     label={t('pages.roles.create-button', 'Добавить роль')}
                     onClick={openCreate}
                 />

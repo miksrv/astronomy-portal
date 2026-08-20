@@ -209,18 +209,18 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                         {hasPermission(user, ApiModel.Permission.EVENTS_GALLERY_UPLOAD) && (
                             <Button
                                 disabled={isUploadDialogOpen}
-                                icon={'Download'}
-                                mode={'secondary'}
+                                icon={'Photo'}
+                                mode={'primary'}
                                 onClick={handleUploadPhotoClick}
                             >
-                                {t('pages.stargazing.upload-photos-button', 'Загрузить фотографии')}
+                                {t('pages.stargazing.upload-photos-button', 'Фото')}
                             </Button>
                         )}
 
                         {hasPermission(user, ApiModel.Permission.EVENTS_UPDATE) && (
                             <Button
                                 icon={'Pencil'}
-                                mode={'secondary'}
+                                mode={'primary'}
                                 label={t('common.edit', 'Редактировать')}
                                 disabled={!eventId}
                                 onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
@@ -230,7 +230,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                         {hasPermission(user, ApiModel.Permission.EVENTS_STATISTIC) && (
                             <Button
                                 icon={'BarChart'}
-                                mode={'secondary'}
+                                mode={'primary'}
                                 onClick={() => router.push(`/stargazing/${eventId}/statistic`)}
                             />
                         )}

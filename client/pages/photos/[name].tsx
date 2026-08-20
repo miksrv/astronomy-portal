@@ -115,7 +115,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                     <>
                         <Button
                             icon={'Pencil'}
-                            mode={'secondary'}
+                            mode={'primary'}
                             label={t('common.edit', 'Редактировать')}
                             disabled={!photoId}
                             link={`/photos/form/?id=${photoId}`}
@@ -123,7 +123,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
 
                         <Button
                             icon={'PlusCircle'}
-                            mode={'secondary'}
+                            mode={'primary'}
                             label={t('common.add', 'Добавить')}
                             link={'/photos/form'}
                         />

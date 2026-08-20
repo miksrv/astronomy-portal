@@ -677,7 +677,7 @@
             "reviews": "Participant reviews",
             "photo-caption-with-photographer": "{{eventTitle}} — photo by {{photographer}}",
             "photo-caption": "{{eventTitle}} (Photo #{{number}})",
-            "upload-photos-button": "Upload photos",
+            "upload-photos-button": "Photos",
             "photos-from-stargazing": "Photos from the event",
             "photos-loading-more": "Loading more photos…",
             "photos-show-all": "View all ({{total}})",

@@ -50,7 +50,8 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
                 {hasPermission(user, ApiModel.Permission.EVENTS_CREATE) && (
                     <Button
                         icon={'PlusCircle'}
-                        mode={'secondary'}
+                        mode={'primary'}
+                        size={'medium'}
                         label={t('pages.stargazing.create-stargazing_button', 'Добавить астровыезд')}
                         link={'/stargazing/form'}
                     />

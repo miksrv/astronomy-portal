@@ -155,7 +155,7 @@ const MailingListPage: NextPage<object> = () => {
                 currentPage={pageTitle}
             >
                 <Button
-                    mode={'secondary'}
+                    mode={'primary'}
                     icon={'PlusCircle'}
                     link={'/admin/mailing/form'}
                     label={t('pages.mailing.create', 'Новая рассылка')}

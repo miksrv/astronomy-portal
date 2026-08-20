@@ -179,7 +179,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, categoriesList, objec
                 {hasPermission(user, ApiModel.Permission.OBJECTS_MANAGE) && (
                     <Button
                         icon={'PlusCircle'}
-                        mode={'secondary'}
+                        mode={'primary'}
                         label={t('pages.objects.create_button', 'Добавить')}
                         link={'/objects/form'}
                     />

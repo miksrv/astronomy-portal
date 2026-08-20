@@ -155,7 +155,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
                 {hasPermission(user, ApiModel.Permission.PHOTOS_MANAGE) && (
                     <Button
                         icon={'PlusCircle'}
-                        mode={'secondary'}
+                        mode={'primary'}
                         label={t('pages.photos.create_button', 'Добавить')}
                         link={'/photos/form'}
                     />
