@@ -1,0 +1,51 @@
+@use '../../../styles/variables' as variables
+
+.stack
+    position: fixed
+    bottom: 20px
+    right: 20px
+    left: 20px
+    z-index: 710
+    display: flex
+    flex-direction: column
+    align-items: flex-end
+    gap: 10px
+    pointer-events: none
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        left: 12px
+        right: 12px
+        bottom: 12px
+
+.entry
+    width: 100%
+    max-width: 420px
+    pointer-events: auto
+    animation: snackbar-in 0.2s ease-out
+    transition: opacity 0.2s ease-in, transform 0.2s ease-in
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        max-width: 100%
+
+.closing
+    opacity: 0
+    transform: translateY(8px)
+
+.entryContent
+    display: flex
+    align-items: flex-start
+    justify-content: space-between
+    gap: 10px
+
+@keyframes snackbar-in
+    from
+        opacity: 0
+        transform: translateY(8px)
+    to
+        opacity: 1
+        transform: translateY(0)
+
+@media (prefers-reduced-motion: reduce)
+    .entry
+        animation: none
+        transition: none
