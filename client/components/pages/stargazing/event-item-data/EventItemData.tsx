@@ -1,46 +1,265 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import Markdown from 'react-markdown'
-import { Container, ContainerProps } from 'simple-react-ui-kit'
+import dayjs from 'dayjs'
+import { Container, ContainerProps, Icon, IconTypes } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
+import Link from 'next/link'
+import { useTranslation } from 'next-i18next/pages'
 
-import { ApiModel } from '@/api'
+import { APIMeteo, ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
+import { EventMap } from '@/components/common/event-map'
 import { ShowMore } from '@/components/ui'
+import { formatUTCDate } from '@/utils/dates'
 
-import { EventInfoPanel } from '../event-info-panel'
+import { averageOf, formatTemperature, getCloudsDescription } from './utils'
 
 import styles from './styles.module.sass'
+
+const WEATHER_HISTORY_LINK = 'https://meteo.miksoft.pro/history'
+const WEATHER_FORECAST_LINK = 'https://meteo.miksoft.pro/forecast'
+const WEATHER_AVERAGE_WINDOW_HOURS = 3
 
 interface EventItemDataProps extends ContainerProps {
     title?: string
     event?: ApiModel.Event
 }
 
-export const EventItemData: React.FC<EventItemDataProps> = ({ title, event, ...props }) => (
-    <>
-        <div className={styles.grid}>
-            <Container
-                {...props}
-                className={styles.media}
-            >
-                <Image
-                    style={{}}
-                    width={1200}
-                    height={630}
-                    src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
-                    alt={title || ''}
-                    priority
-                />
-            </Container>
+interface InfoRow {
+    icon: IconTypes
+    label: string
+    value: React.ReactNode
+}
 
-            <Container {...props}>
-                <EventInfoPanel event={event} />
-            </Container>
-        </div>
+export const EventItemData: React.FC<EventItemDataProps> = ({ title, event, ...props }) => {
+    const { t } = useTranslation()
 
-        <Container className={styles.content}>
-            <ShowMore content={<Markdown>{event?.content}</Markdown>} />
-        </Container>
-    </>
-)
+    const eventDate = event?.date?.date
+    const isEventPast = !!eventDate && dayjs.utc(eventDate).isBefore(dayjs.utc())
+
+    const { data: weatherHistory, isFetching: isHistoryLoading } = APIMeteo.useGetHistoryQuery(
+        {
+            start_date: dayjs(eventDate).format('YYYY-MM-DD'),
+            end_date: dayjs(eventDate).format('YYYY-MM-DD')
+        },
+        { skip: !eventDate || !isEventPast }
+    )
+
+    const { data: weatherForecast, isFetching: isForecastLoading } = APIMeteo.useGetForecastDailyQuery(undefined, {
+        skip: !eventDate || isEventPast
+    })
+
+    const isWeatherLoading = isEventPast ? isHistoryLoading : isForecastLoading
+
+    const averageWeather = useMemo(() => {
+        if (!eventDate) {
+            return undefined
+        }
+
+        if (isEventPast) {
+            if (!weatherHistory?.length) {
+                return undefined
+            }
+
+            const windowStart = dayjs(eventDate)
+            const windowEnd = windowStart.add(WEATHER_AVERAGE_WINDOW_HOURS, 'hour')
+
+            const relevant = weatherHistory.filter(
+                (item) => item.date && !dayjs(item.date).isBefore(windowStart) && !dayjs(item.date).isAfter(windowEnd)
+            )
+
+            if (!relevant.length) {
+                return undefined
+            }
+
+            return {
+                temperature: averageOf(relevant, 'temperature'),
+                clouds: averageOf(relevant, 'clouds')
+            }
+        }
+
+        const forecastDay = weatherForecast?.find((item) => item.date && dayjs(item.date).isSame(eventDate, 'day'))
+
+        if (!forecastDay) {
+            return undefined
+        }
+
+        return {
+            temperature: forecastDay.temperature,
+            clouds: forecastDay.clouds
+        }
+    }, [eventDate, isEventPast, weatherHistory, weatherForecast])
+
+    const weatherLink = useMemo(() => {
+        if (!isEventPast) {
+            return WEATHER_FORECAST_LINK
+        }
+
+        if (!eventDate) {
+            return WEATHER_HISTORY_LINK
+        }
+
+        const startDate = dayjs(eventDate).format('YYYY-MM-DD')
+        const endDate = dayjs(eventDate).add(1, 'day').format('YYYY-MM-DD')
+
+        return `${WEATHER_HISTORY_LINK}?end_date=${endDate}&start_date=${startDate}`
+    }, [eventDate, isEventPast])
+
+    const weatherText = useMemo(() => {
+        if (isWeatherLoading) {
+            return t('pages.stargazing.event-weather-loading', 'Загрузка...')
+        }
+
+        if (!averageWeather || averageWeather.clouds === undefined) {
+            return t('pages.stargazing.event-weather-unavailable', 'Пока нет данных')
+        }
+
+        const temperature = formatTemperature(averageWeather.temperature)
+
+        return [getCloudsDescription(averageWeather.clouds, t), temperature].filter(Boolean).join(', ')
+    }, [averageWeather, isWeatherLoading, t])
+
+    const membersCount = event?.members?.total || event?.availableTickets
+
+    const formattedDate = formatUTCDate(eventDate, 'dddd, D MMMM YYYY')
+    const capitalizedDate = formattedDate
+        ? `${formattedDate.charAt(0).toUpperCase()}${formattedDate.slice(1)}`
+        : formattedDate
+
+    // `latitude`/`longitude`/`address` are stripped server-side until the
+    // viewer has a booking for an upcoming event that requires registration
+    // — see Events::show()/upcoming() on the backend. `location` is public.
+    const preciseLocation =
+        event?.latitude !== undefined && event?.longitude !== undefined
+            ? { latitude: event.latitude, longitude: event.longitude }
+            : undefined
+    const isLocationPending = !preciseLocation && !!event?.requiresRegistration && !event?.registered
+
+    const locationValue = isLocationPending ? (
+        t('pages.stargazing.event-location-hidden', 'Будет доступно после регистрации')
+    ) : (
+        <>
+            {event?.location || t('pages.stargazing.event-location-fallback', 'Загородная обсерватория')}
+            {event?.address && <span className={styles.addressText}>{event.address}</span>}
+        </>
+    )
+
+    const ageValue = event?.minAge
+        ? t('pages.stargazing.event-age-value', 'Для людей старше {{age}}+', { age: event.minAge })
+        : t('pages.stargazing.event-age-any', 'Для всех возрастов')
+
+    const rows: InfoRow[] = [
+        {
+            icon: 'Calendar',
+            label: t('pages.stargazing.event-date-label', 'Дата (GMT+5)'),
+            value: capitalizedDate
+        },
+        {
+            icon: 'Time',
+            label: t('pages.stargazing.event-time-label', 'Время (GMT+5)'),
+            value: event?.endDate?.date
+                ? `${formatUTCDate(eventDate, 'HH:mm')} — ${formatUTCDate(event.endDate.date, 'HH:mm')}`
+                : formatUTCDate(eventDate, 'HH:mm')
+        },
+        ...(isEventPast
+            ? [
+                  {
+                      icon: 'Users' as IconTypes,
+                      label: t('pages.stargazing.members-label', 'Участники'),
+                      value:
+                          membersCount !== undefined
+                              ? t('pages.stargazing.members-count', '{{count}} человек', { count: membersCount })
+                              : '—'
+                  }
+              ]
+            : []),
+        {
+            icon: 'Tag',
+            label: t('pages.stargazing.event-age-label', 'Возраст'),
+            value: ageValue
+        },
+        {
+            icon: 'PinDrop',
+            label: t('pages.stargazing.event-location-label', 'Место'),
+            value: locationValue
+        }
+    ]
+
+    return (
+        <>
+            <div className={styles.grid}>
+                <Container
+                    {...props}
+                    className={styles.media}
+                >
+                    <Image
+                        style={{}}
+                        width={1200}
+                        height={630}
+                        src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
+                        alt={title || ''}
+                        priority
+                    />
+                </Container>
+
+                <Container {...props}>
+                    <div className={styles.infoContainer}>
+                        <ul className={styles.list}>
+                            {rows.map((row) => (
+                                <li
+                                    key={row.label}
+                                    className={styles.row}
+                                >
+                                    <span className={styles.rowLabel}>
+                                        <Icon
+                                            name={row.icon}
+                                            aria-hidden
+                                        />
+                                        {row.label}
+                                    </span>
+                                    <span className={styles.rowValue}>{row.value}</span>
+                                </li>
+                            ))}
+
+                            <li className={styles.row}>
+                                <span className={styles.rowLabel}>
+                                    <Icon
+                                        name={'Cloud'}
+                                        aria-hidden
+                                    />
+                                    {t('pages.stargazing.event-weather-label', 'Погода')}
+                                </span>
+                                <span className={styles.rowValue}>
+                                    {weatherText}
+                                    <Link
+                                        className={styles.weatherLink}
+                                        href={weatherLink}
+                                        target={'_blank'}
+                                        rel={'noopener noreferrer'}
+                                    >
+                                        {isEventPast
+                                            ? t('pages.stargazing.event-weather-history-link', 'Смотреть погоду')
+                                            : t('pages.stargazing.event-weather-forecast-link', 'Смотреть прогноз')}
+                                    </Link>
+                                </span>
+                            </li>
+                        </ul>
+
+                        {preciseLocation && (
+                            <EventMap
+                                latitude={preciseLocation.latitude}
+                                longitude={preciseLocation.longitude}
+                                height={140}
+                            />
+                        )}
+                    </div>
+                </Container>
+            </div>
+
+            <Container className={styles.content}>
+                <ShowMore content={<Markdown>{event?.content}</Markdown>} />
+            </Container>
+        </>
+    )
+}
