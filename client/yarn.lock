@@ -1043,6 +1043,90 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@hookform/resolvers@npm:^5.9.1":
+  version: 5.9.1
+  resolution: "@hookform/resolvers@npm:5.9.1"
+  dependencies:
+    "@standard-schema/utils": "npm:^0.3.0"
+  peerDependencies:
+    "@sinclair/typebox": ">=0.25.24"
+    "@standard-schema/spec": ^1.0.0
+    "@typeschema/main": ">=0.13.7"
+    "@vinejs/vine": ^2.0.0 || ^3.0.0 || ^4.0.0
+    ajv: ^8.12.0
+    ajv-errors: ^3.0.0
+    ajv-formats: ^2.1.1
+    arktype: ^2.0.0
+    ata-validator: ^1.2.0
+    class-transformer: ">=0.4.0"
+    class-validator: ">=0.12.0"
+    computed-types: ^1.0.0
+    effect: ^3.10.3
+    fluentvalidation-ts: ^3.0.0
+    fp-ts: ^2.7.0
+    io-ts: ^2.0.0
+    joi: ^17.0.0 || ^18.0.0
+    nope-validator: ">=0.12.0"
+    react-hook-form: ^7.55.0
+    superstruct: ">=0.12.0"
+    typanion: ^3.3.2
+    valibot: ">=0.31.0 || ^1.0.0-beta.4 || ^1.0.0-rc"
+    vest: ">=6.0.0"
+    yup: ^1.0.0
+    zod: ^3.25.0 || ^4.0.0
+  peerDependenciesMeta:
+    "@sinclair/typebox":
+      optional: true
+    "@standard-schema/spec":
+      optional: true
+    "@typeschema/main":
+      optional: true
+    "@vinejs/vine":
+      optional: true
+    ajv:
+      optional: true
+    ajv-errors:
+      optional: true
+    ajv-formats:
+      optional: true
+    arktype:
+      optional: true
+    ata-validator:
+      optional: true
+    class-transformer:
+      optional: true
+    class-validator:
+      optional: true
+    computed-types:
+      optional: true
+    effect:
+      optional: true
+    fluentvalidation-ts:
+      optional: true
+    fp-ts:
+      optional: true
+    io-ts:
+      optional: true
+    joi:
+      optional: true
+    nope-validator:
+      optional: true
+    superstruct:
+      optional: true
+    typanion:
+      optional: true
+    valibot:
+      optional: true
+    vest:
+      optional: true
+    yup:
+      optional: true
+    zod:
+      optional: true
+  checksum: 10c0/08d4e1455a072bea182468d878527e2e99c6d079fe56ffc5297e03a8219fe7544db092afcdf7a950e5421390d4dae3a21398c8ccd0b2c8639d0e0ff9e21410c2
+  languageName: node
+  linkType: hard
+
 "@humanfs/core@npm:^0.19.1":
   version: 0.19.1
   resolution: "@humanfs/core@npm:0.19.1"
@@ -3339,6 +3423,7 @@ __metadata:
   dependencies:
     "@eslint/compat": "npm:^2.1.0"
     "@eslint/js": "npm:^10.0.1"
+    "@hookform/resolvers": "npm:^5.9.1"
     "@next/eslint-plugin-next": "npm:^16.3.0"
     "@reduxjs/toolkit": "npm:^2.12.0"
     "@testing-library/dom": "npm:^10.4.1"
@@ -3389,6 +3474,7 @@ __metadata:
     prettier: "npm:^3.9.6"
     react: "npm:19.2.8"
     react-dom: "npm:19.2.8"
+    react-hook-form: "npm:^7.85.0"
     react-i18next: "npm:^17.0.11"
     react-leaflet: "npm:^5.0.0"
     react-markdown: "npm:^10.1.0"
@@ -3404,6 +3490,7 @@ __metadata:
     typescript-eslint: "npm:^8.67.0"
     whatwg-fetch: "npm:^3.6.20"
     yet-another-react-lightbox: "npm:^3.32.2"
+    zod: "npm:^4.4.3"
   languageName: unknown
   linkType: soft
 
@@ -8521,6 +8608,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-hook-form@npm:^7.85.0":
+  version: 7.85.0
+  resolution: "react-hook-form@npm:7.85.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17 || ^18 || ^19
+  checksum: 10c0/53e81f4116129efa8e08c620cd334f74541174a82f3e4ce7a8839193c69a561b9bed070b4a46f24654c4860c474ddbb504d2ad402297708c8c2b80f1f6116d59
+  languageName: node
+  linkType: hard
+
 "react-i18next@npm:^17.0.11":
   version: 17.0.11
   resolution: "react-i18next@npm:17.0.11"
@@ -10737,6 +10833,13 @@ __metadata:
   version: 4.1.12
   resolution: "zod@npm:4.1.12"
   checksum: 10c0/b64c1feb19e99d77075261eaf613e0b2be4dfcd3551eff65ad8b4f2a079b61e379854d066f7d447491fcf193f45babd8095551a9d47973d30b46b6d8e2c46774
+  languageName: node
+  linkType: hard
+
+"zod@npm:^4.4.3":
+  version: 4.4.3
+  resolution: "zod@npm:4.4.3"
+  checksum: 10c0/7ea31b558e88f9faf44f31dd185e2e1cbf51fed3081787fb96cc2534749b50c0acfc6da7f0922a7353ed092dd358c7d50c28ea96c94d04af64191bd33152eca3
   languageName: node
   linkType: hard
 

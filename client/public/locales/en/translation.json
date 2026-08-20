@@ -28,6 +28,8 @@
                 "google-maps": "Google Maps"
             },
             "login-form": {
+                "email-required": "Enter your email",
+                "email-invalid": "Enter a valid email",
                 "magic-link-sent": "A sign-in link has been sent to {{email}}.",
                 "magic-link-instructions": "Follow the link in the email — it's valid for 5 minutes. If you don't see it, check your Spam folder.",
                 "auth-description": "Sign in with a link sent to your email, or use one of the services below",
@@ -63,9 +65,9 @@
                 "content-required": "Please write a review",
                 "content-too-short": "The review must be at least {{min}} characters long",
                 "content-too-long": "The review must not exceed {{max}} characters",
-                "error": "Couldn't submit the review. Please try again.",
                 "rating-label": "Rating",
                 "placeholder": "Share your impressions...",
+                "error": "Couldn't submit the review. Please try again.",
                 "success": "Review published!",
                 "submit": "Submit review",
                 "not-eligible-title": "Only participants can leave a review",
@@ -143,6 +145,15 @@
                 }
             },
             "objects": {
+                "astro-object-form": {
+                    "categories-required": "Select at least one category",
+                    "name-required": "Enter the catalog name of the object",
+                    "title-required": "Enter the object's title",
+                    "ra-required": "Enter the RA value",
+                    "ra-range": "RA must be between 0 and 360",
+                    "dec-required": "Enter the DEC value",
+                    "dec-range": "DEC must be between -90 and 90"
+                },
                 "object-files-table": {
                     "date": "Date",
                     "moon-phase": "Moon phase",
@@ -227,6 +238,15 @@
                 }
             },
             "photos": {
+                "astro-photo-form": {
+                    "frames-required": "Enter the number of frames (a whole number greater than zero)",
+                    "exposure-required": "Enter the exposure in minutes (a number greater than zero)",
+                    "categories-required": "Select at least one category",
+                    "objects-required": "Select at least one object",
+                    "equipments-required": "Select at least one piece of equipment",
+                    "date-required": "Enter the processing date",
+                    "filters-required": "Add at least one filter"
+                },
                 "photo-grid": {
                     "no-results": "No results found for your search",
                     "exposure": "Exposure",
@@ -295,6 +315,11 @@
                     "confirm-cancel-refund-text": "The ticket payment will be automatically refunded to the card used for payment within 1-10 business days.",
                     "cancel": "Cancel",
                     "cancel-booking": "Cancel booking",
+                    "booking-form-name-required": "Enter your name",
+                    "booking-form-phone-required": "Enter a phone number",
+                    "booking-form-phone-invalid": "Enter a valid phone number",
+                    "booking-form-children-ages-required": "Specify each child's age",
+                    "booking-form-child-age-required": "Specify age",
                     "booking-form-error-title": "Error",
                     "booking-form-error-default": "There were errors during registration, please check that the fields are filled in correctly",
                     "booking-form-success-title": "Success!",
@@ -445,7 +470,6 @@
             "telegram": "Project Telegram"
         },
         "mailing": {
-            "load-error": "Failed to load the mailing",
             "preview-error": "Failed to load the email preview",
             "preview-title": "Email preview",
             "title": "Newsletters",
@@ -455,6 +479,7 @@
             "status-paused": "Paused",
             "status-sending": "Sending",
             "cancel-mailing": "Cancel newsletter",
+            "load-error": "Failed to load the mailing",
             "detail-subject": "Subject",
             "detail-audience": "Audience",
             "detail-sent-at": "Sent date",
@@ -536,6 +561,10 @@
         "profile": {
             "history-empty": "You haven't attended any events yet",
             "reviews-empty": "You haven't left any reviews yet",
+            "review-delete-error": "Failed to delete the review",
+            "name-required": "Enter your name",
+            "phone-invalid": "Enter a valid phone number",
+            "birthday-future": "Birth date cannot be in the future",
             "field-sex-male": "Male",
             "field-sex-female": "Female",
             "avatar-note": "Your avatar is linked to your sign-in service",
@@ -546,6 +575,7 @@
             "email-note": "Email cannot be changed",
             "field-phone": "Phone",
             "field-birthday": "Date of birth",
+            "birthday-placeholder": "Select a date",
             "field-sex": "Gender",
             "save": "Save",
             "onboarding-skip": "Skip",
@@ -561,8 +591,7 @@
             "upcoming-event-title": "Upcoming event",
             "no-upcoming-event": "You have no upcoming events",
             "history-title": "Event history",
-            "reviews-title": "My reviews",
-            "review-delete-error": "Failed to delete the review"
+            "reviews-title": "My reviews"
         },
         "checkin": {
             "duplicate-qr": "This QR code has already been checked!",
@@ -687,7 +716,6 @@
         },
         "push-notifications": {
             "title": "Push notifications",
-            "load-error": "Failed to load the push notification",
             "status-completed": "Completed",
             "status-draft": "Draft",
             "status-paused": "Paused",
@@ -695,6 +723,7 @@
             "test-send": "Send test",
             "test-send-success": "Test notification sent",
             "test-send-error": "Failed to send test notification",
+            "load-error": "Failed to load the push notification",
             "detail-title": "Title",
             "detail-audience": "Audience",
             "detail-sent-at": "Sent at",

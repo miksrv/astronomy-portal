@@ -28,6 +28,8 @@
                 "google-maps": "Google Карты"
             },
             "login-form": {
+                "email-required": "Введите email",
+                "email-invalid": "Введите корректный email",
                 "magic-link-sent": "Письмо со ссылкой для входа отправлено на {{email}}.",
                 "magic-link-instructions": "Перейдите по ссылке из письма — она действует 5 минут. Если письма нет, проверьте папку «Спам».",
                 "auth-description": "Войдите по ссылке из письма или через сервис",
@@ -63,9 +65,9 @@
                 "content-required": "Пожалуйста, напишите отзыв",
                 "content-too-short": "Отзыв должен содержать не менее {{min}} символов",
                 "content-too-long": "Отзыв не должен превышать {{max}} символов",
-                "error": "Не удалось отправить отзыв. Попробуйте ещё раз.",
                 "rating-label": "Оценка",
                 "placeholder": "Поделитесь впечатлениями...",
+                "error": "Не удалось отправить отзыв. Попробуйте ещё раз.",
                 "success": "Отзыв опубликован!",
                 "submit": "Отправить отзыв",
                 "not-eligible-title": "Отзыв могут оставить только участники",
@@ -143,6 +145,15 @@
                 }
             },
             "objects": {
+                "astro-object-form": {
+                    "categories-required": "Выберите хотя бы одну категорию",
+                    "name-required": "Введите имя объекта в каталогах",
+                    "title-required": "Введите название объекта",
+                    "ra-required": "Введите значение RA",
+                    "ra-range": "RA должно быть в диапазоне от 0 до 360",
+                    "dec-required": "Введите значение DEC",
+                    "dec-range": "DEC должно быть в диапазоне от -90 до 90"
+                },
                 "object-files-table": {
                     "date": "Дата",
                     "moon-phase": "Фаза Луны",
@@ -229,6 +240,15 @@
                 }
             },
             "photos": {
+                "astro-photo-form": {
+                    "frames-required": "Введите количество кадров (целое число больше нуля)",
+                    "exposure-required": "Введите выдержку в минутах (число больше нуля)",
+                    "categories-required": "Выберите хотя бы одну категорию",
+                    "objects-required": "Выберите хотя бы один объект",
+                    "equipments-required": "Выберите хотя бы одно оборудование",
+                    "date-required": "Укажите дату обработки",
+                    "filters-required": "Добавьте хотя бы один фильтр"
+                },
                 "photo-grid": {
                     "no-results": "По вашему запросу ничего не найдено",
                     "exposure": "Выдержка",
@@ -299,6 +319,11 @@
                     "confirm-cancel-refund-text": "Оплата за билет будет автоматически возвращена на карту, с которой производилась оплата, в течение 1–10 рабочих дней.",
                     "cancel": "Отмена",
                     "cancel-booking": "Отменить бронирование",
+                    "booking-form-name-required": "Введите ваше имя",
+                    "booking-form-phone-required": "Введите номер телефона",
+                    "booking-form-phone-invalid": "Введите корректный номер телефона",
+                    "booking-form-children-ages-required": "Укажите возраст каждого ребенка",
+                    "booking-form-child-age-required": "Укажите возраст",
                     "booking-form-error-title": "Ошибка",
                     "booking-form-error-default": "При регистрации были допущены ошибки, проверьте правильность заполнения полей",
                     "booking-form-success-title": "Успешно!",
@@ -449,7 +474,6 @@
             "telegram": "Телеграм проекта"
         },
         "mailing": {
-            "load-error": "Не удалось загрузить рассылку",
             "preview-error": "Не удалось загрузить превью письма",
             "preview-title": "Превью письма",
             "title": "Рассылки",
@@ -459,6 +483,7 @@
             "status-paused": "Приостановлена",
             "status-sending": "Отправляется",
             "cancel-mailing": "Отменить рассылку",
+            "load-error": "Не удалось загрузить рассылку",
             "detail-subject": "Тема",
             "detail-audience": "Аудитория",
             "detail-sent-at": "Дата отправки",
@@ -540,6 +565,10 @@
         "profile": {
             "history-empty": "Вы ещё не посещали мероприятий",
             "reviews-empty": "Вы ещё не оставляли отзывов",
+            "review-delete-error": "Не удалось удалить отзыв",
+            "name-required": "Введите имя",
+            "phone-invalid": "Введите корректный номер телефона",
+            "birthday-future": "Дата рождения не может быть в будущем",
             "field-sex-male": "Мужской",
             "field-sex-female": "Женский",
             "avatar-note": "Аватар привязан к сервису авторизации",
@@ -550,6 +579,7 @@
             "email-note": "Email не может быть изменён",
             "field-phone": "Телефон",
             "field-birthday": "Дата рождения",
+            "birthday-placeholder": "Выберите дату",
             "field-sex": "Пол",
             "save": "Сохранить",
             "onboarding-skip": "Пропустить",
@@ -565,8 +595,7 @@
             "upcoming-event-title": "Предстоящее мероприятие",
             "no-upcoming-event": "У вас нет предстоящих мероприятий",
             "history-title": "История мероприятий",
-            "reviews-title": "Мои отзывы",
-            "review-delete-error": "Не удалось удалить отзыв"
+            "reviews-title": "Мои отзывы"
         },
         "checkin": {
             "duplicate-qr": "Этот QR код уже был проверен ранее!",
@@ -699,7 +728,6 @@
         },
         "push-notifications": {
             "title": "Push-уведомления",
-            "load-error": "Не удалось загрузить уведомление",
             "status-completed": "Завершена",
             "status-draft": "Черновик",
             "status-paused": "Приостановлена",
@@ -707,6 +735,7 @@
             "test-send": "Отправить тест",
             "test-send-success": "Тестовое уведомление отправлено",
             "test-send-error": "Ошибка отправки теста",
+            "load-error": "Не удалось загрузить уведомление",
             "detail-title": "Заголовок",
             "detail-audience": "Аудитория",
             "detail-sent-at": "Дата отправки",
