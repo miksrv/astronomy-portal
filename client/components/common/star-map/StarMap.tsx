@@ -1,4 +1,5 @@
 import React from 'react'
+import { Skeleton } from 'simple-react-ui-kit'
 import { PartialDeep } from 'type-fest'
 
 import dynamic from 'next/dynamic'
@@ -6,8 +7,17 @@ import dynamic from 'next/dynamic'
 import { ApiModel } from '@/api'
 import { customConfig } from '@/components/common/star-map/config'
 
+import styles from './styles.module.sass'
+
 const StarMapRender = dynamic(() => import('./StarMapRender'), {
-    ssr: false
+    ssr: false,
+    // Celestial.js only sets the map's real height once it mounts and measures
+    // its container — without this, the map's spot in the layout is blank
+    // (0-height, since `.starMap` had no height of its own before the CSS fix
+    // below) until then, causing a layout shift. `.starMap`'s `min-height`
+    // covers the reserved space; this just fills it with something while the
+    // client-only bundle loads.
+    loading: () => <Skeleton className={styles.starMap} />
 })
 
 export type StarMapObject = Pick<ApiModel.Object, 'name' | 'ra' | 'dec'>

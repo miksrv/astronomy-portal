@@ -318,11 +318,20 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
                             <StatusRegistrationOpensIn secondsUntilStart={secondsUntilRegistrationStart} />
                         )}
 
-                        {/* If registration has ended AND the user is not registered — otherwise a
+                        {/* If registration has started but is no longer available AND there are
+                            still seats AND the user is not registered — otherwise a
                             confirmed/pending booking whose event still lies ahead (registration
                             windows commonly close before the event itself) would show this
-                            "closed" panel alongside their ticket/map. */}
-                        {secondsUntilRegistrationEnd <= 0 && !registered && <StatusRegistrationClosed />}
+                            "closed" panel alongside their ticket/map. Deliberately keyed off
+                            `registrationAvailable` rather than `secondsUntilRegistrationEnd <= 0`
+                            alone: registrationEnd isn't guaranteed to fall before the event's own
+                            start/end, and registrationAvailable already accounts for the event
+                            having begun even while registrationEnd is still technically ahead —
+                            without this, that combination showed no status at all. */}
+                        {secondsUntilRegistrationStart < 0 &&
+                            !registrationAvailable &&
+                            event?.availableTickets !== 0 &&
+                            !registered && <StatusRegistrationClosed />}
 
                         {/* If registration is available */}
                         {registrationAvailable ? (
@@ -404,6 +413,9 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
                                     alt={`${t('components.pages.stargazing.event-upcoming.stargazing', 'Астровыезды')}: ${event?.title}`}
                                     width={1024}
                                     height={768}
+                                    // Cover of the hero widget — the likely LCP element on
+                                    // the /stargazing and /profile pages it's rendered on.
+                                    priority
                                 />
 
                                 {canModerate && (

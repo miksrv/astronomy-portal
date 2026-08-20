@@ -9,7 +9,7 @@ export enum EquipmentType {
     Filter = 'filter'
 }
 
-export type Equipment = {
+export interface Equipment {
     id: number
     type?: EquipmentType
     brand?: string

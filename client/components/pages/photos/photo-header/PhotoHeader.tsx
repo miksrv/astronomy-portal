@@ -104,6 +104,8 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                             alt={photoTitle || ''}
                             src={imageSource}
                             fill={true}
+                            // The main photo on the detail page — the likely LCP element.
+                            priority
                         />
                     ) : (
                         <Skeleton style={{ width: '100%', height: '100%' }} />

@@ -9,8 +9,6 @@ use App\Libraries\SessionLibrary;
 use App\Models\ObservatorySettingsModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
-use CodeIgniter\RESTful\ResourceController;
-use CodeIgniter\API\ResponseTrait;
 use Exception;
 
 // The time during which the user cannot turn on the light from the moment it was last turned on
@@ -33,10 +31,8 @@ define('LIGHT_SWITCH_NAME', 'LED Flat Panel');
  * @method int _userTurnLightCooldown() Returns the cooldown time remaining before the user can turn on the light relay again.
  * @method void _checkUserLightAndTurn(array $relayStates) Checks and manages the state of the light relay based on user actions and cooldown.
  */
-class Relay extends ResourceController
+class Relay extends BaseApiController
 {
-    use ResponseTrait;
-
     private ObservatorySettingsModel $settingsModel;
 
     private RelayLibrary $relayLibrary;
@@ -79,7 +75,7 @@ class Relay extends ResourceController
         } catch (Exception $e) {
             log_message('error', $e);
 
-            return $this->fail('Relay state errors');
+            return $this->respondServerError(lang('Relay.listFailed'));
         }
     }
 
@@ -94,23 +90,22 @@ class Relay extends ResourceController
         $inputJSON = $this->request->getJSON();
 
         if (empty($inputJSON)) {
-            return $this->failValidationErrors('Invalid request format');
+            return $this->respondInvalidRequest('set() called with an empty/missing JSON body');
         }
 
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized('Ошибка прав доступа');
+            return $this->respondUnauthorized(lang('Relay.accessDenied'));
         }
 
         if (!$this->session->can(Permission::RELAY_CONTROL)) {
-            return $this->failForbidden('Ошибка прав доступа');
+            return $this->respondForbidden(lang('Relay.accessDenied'));
         }
 
         $index = $inputJSON->id ?? null;
         $state = $inputJSON->state ?? null;
 
         if (is_null($index) || is_null($state)) {
-            log_message('error', '[' .  __METHOD__ . '] Empty device (' . $index . ') or status (' . $state . ')');
-            $this->fail('Relay set status errors');
+            return $this->respondInvalidRequest("set() called with a missing id ($index) or state ($state)");
         }
 
         log_message('info', '[' .  __METHOD__ . '] Set device (' . $index . ') status (' . $state . ')');
@@ -124,7 +119,7 @@ class Relay extends ResourceController
                 'result' => $response->getStatusCode() === 200
             ]);
         } catch (Exception $e) {
-            return $this->fail('Relay set status errors');
+            return $this->respondServerError(lang('Relay.setFailed'));
         }
     }
 
@@ -144,7 +139,7 @@ class Relay extends ResourceController
         $userCanTurnLight = $this->_userCanTurnLight($this->relayLibrary->getList());
 
         if (!$lightRelayIndex || !$userCanTurnLight) {
-            return $this->fail('Relay set status errors');
+            return $this->respondConflict(lang('Relay.lightUnavailable'));
         }
 
         try {
@@ -160,7 +155,7 @@ class Relay extends ResourceController
                 'result' => $response->getStatusCode() === 200
             ]);
         } catch (Exception $e) {
-            return $this->fail('Relay set status errors');
+            return $this->respondServerError(lang('Relay.setFailed'));
         }
     }
 

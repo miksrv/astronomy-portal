@@ -4,10 +4,10 @@ import { Container } from 'simple-react-ui-kit'
 import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { setLocale, SITE_LINK, wrapper } from '@/api'
+import { SITE_LINK, wrapper } from '@/api'
 import { StaticInfoPageLayout } from '@/components/common'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 const PrivacyPolicyPage: NextPage<object> = () => {
     const { t } = useTranslation()
@@ -294,10 +294,7 @@ const PrivacyPolicyPage: NextPage<object> = () => {
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
         async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<object>> => {
-            const locale = context.locale ?? 'ru'
-            const translations = await serverSideTranslations(locale, ['translation'])
-
-            store.dispatch(setLocale(locale))
+            const { translations } = await initSSRLocale(store, context, ['translation'])
 
             return {
                 props: {

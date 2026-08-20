@@ -14,7 +14,6 @@ use App\Models\MailingsModel;
 use App\Models\MailingUnsubscribesModel;
 use App\Models\UsersModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\I18n\Time;
 use Config\MailingLimits;
 use Config\Services;
@@ -26,7 +25,7 @@ use Exception;
  *
  * Manages email newsletter campaigns. All endpoints except unsubscribe require ADMIN role.
  */
-class Mailings extends ResourceController
+class Mailings extends BaseApiController
 {
     private SessionLibrary $session;
     protected $model;
@@ -46,11 +45,11 @@ class Mailings extends ResourceController
     public function list(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         try {
@@ -76,7 +75,7 @@ class Mailings extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -87,18 +86,18 @@ class Mailings extends ResourceController
     public function show($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         try {
             $mailing = $this->model->find($id);
 
             if (!$mailing) {
-                return $this->failNotFound();
+                return $this->respondNotFound();
             }
 
             $mailingEmailsModel = new MailingEmailsModel();
@@ -153,7 +152,7 @@ class Mailings extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -164,11 +163,11 @@ class Mailings extends ResourceController
     public function create(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $input = $this->request->getJSON(true);
@@ -183,14 +182,14 @@ class Mailings extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         $audienceType    = $input['audienceType'] ?? 'all';
         $audienceEventId = $input['audienceEventId'] ?? null;
 
         if ($audienceType === 'event' && empty($audienceEventId)) {
-            return $this->failValidationErrors([
+            return $this->respondValidationErrors([
                 'audienceEventId' => lang('Mailings.audienceEventIdRequired'),
             ]);
         }
@@ -218,7 +217,7 @@ class Mailings extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -229,21 +228,21 @@ class Mailings extends ResourceController
     public function update($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $mailing = $this->model->find($id);
 
         if (!$mailing) {
-            return $this->failNotFound();
+            return $this->respondNotFound();
         }
 
         if ($mailing->status !== MailingEntity::STATUS_DRAFT) {
-            return $this->failForbidden(lang('Mailings.onlyDraftEditable'));
+            return $this->respondConflict(lang('Mailings.onlyDraftEditable'));
         }
 
         $input = $this->request->getJSON(true);
@@ -258,7 +257,7 @@ class Mailings extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         // Validate audience combination when audienceType is being set
@@ -267,7 +266,7 @@ class Mailings extends ResourceController
             $audienceEventId = $input['audienceEventId'] ?? null;
 
             if ($audienceType === 'event' && empty($audienceEventId)) {
-                return $this->failValidationErrors([
+                return $this->respondValidationErrors([
                     'audienceEventId' => lang('Mailings.audienceEventIdRequired'),
                 ]);
             }
@@ -304,7 +303,7 @@ class Mailings extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -315,21 +314,21 @@ class Mailings extends ResourceController
     public function delete($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $mailing = $this->model->find($id);
 
         if (!$mailing) {
-            return $this->failNotFound();
+            return $this->respondNotFound();
         }
 
         if ($mailing->status !== MailingEntity::STATUS_DRAFT) {
-            return $this->failForbidden(lang('Mailings.onlyDraftDeletable'));
+            return $this->respondConflict(lang('Mailings.onlyDraftDeletable'));
         }
 
         try {
@@ -352,7 +351,7 @@ class Mailings extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -363,29 +362,29 @@ class Mailings extends ResourceController
     public function upload($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $mailing = $this->model->find($id);
 
         if (!$mailing) {
-            return $this->failNotFound();
+            return $this->respondNotFound();
         }
 
         $file = $this->request->getFile('image') ?? $this->request->getFile('upload');
 
         if (!$file || !$file->isValid()) {
-            return $this->failValidationErrors(lang('General.fileUploadFailed'));
+            return $this->respondError(lang('General.fileUploadFailed'), 400);
         }
 
         $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
         if (!in_array($file->getMimeType(), $allowedMimes, true)) {
-            return $this->failValidationErrors(lang('General.invalidFileType'));
+            return $this->respondError(lang('General.invalidFileType'), 400);
         }
 
         try {
@@ -408,7 +407,7 @@ class Mailings extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -421,17 +420,17 @@ class Mailings extends ResourceController
     public function preview($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $mailing = $this->model->find($id);
 
         if (!$mailing) {
-            return $this->failNotFound();
+            return $this->respondNotFound();
         }
 
         try {
@@ -443,7 +442,7 @@ class Mailings extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -454,21 +453,21 @@ class Mailings extends ResourceController
     public function test($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $mailing = $this->model->find($id);
 
         if (!$mailing) {
-            return $this->failNotFound();
+            return $this->respondNotFound();
         }
 
         if (empty($this->session->user->email)) {
-            return $this->failValidationErrors(lang('Mailings.noAdminEmail'));
+            return $this->respondError(lang('Mailings.noAdminEmail'), 400);
         }
 
         try {
@@ -494,7 +493,7 @@ class Mailings extends ResourceController
                 'email' => $this->session->user->email,
             ]);
 
-            return $this->failServerError(lang('Mailings.testEmailFailed'));
+            return $this->respondServerError(lang('Mailings.testEmailFailed'));
         }
     }
 
@@ -531,21 +530,21 @@ class Mailings extends ResourceController
     public function send($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $mailing = $this->model->find($id);
 
         if (!$mailing) {
-            return $this->failNotFound();
+            return $this->respondNotFound();
         }
 
         if ($mailing->status !== MailingEntity::STATUS_DRAFT) {
-            return $this->failForbidden(lang('Mailings.onlyDraftLaunchable'));
+            return $this->respondConflict(lang('Mailings.onlyDraftLaunchable'));
         }
 
         try {
@@ -597,7 +596,7 @@ class Mailings extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -616,17 +615,17 @@ class Mailings extends ResourceController
     public function cancel($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $mailing = $this->model->find($id);
 
         if (!$mailing) {
-            return $this->failNotFound();
+            return $this->respondNotFound();
         }
 
         if ($mailing->status === MailingEntity::STATUS_CANCELED) {
@@ -634,7 +633,7 @@ class Mailings extends ResourceController
         }
 
         if (!in_array($mailing->status, [MailingEntity::STATUS_DRAFT, MailingEntity::STATUS_SENDING], true)) {
-            return $this->failForbidden(lang('Mailings.onlyDraftOrSendingCancelable'));
+            return $this->respondConflict(lang('Mailings.onlyDraftOrSendingCancelable'));
         }
 
         try {
@@ -652,7 +651,7 @@ class Mailings extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -666,11 +665,11 @@ class Mailings extends ResourceController
     public function audiences(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::MAILINGS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         try {
@@ -706,7 +705,7 @@ class Mailings extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -720,7 +719,7 @@ class Mailings extends ResourceController
         $mailId = $this->request->getGet('mail', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
         if (empty($mailId)) {
-            return $this->failValidationErrors(lang('Mailings.missingMailParam'));
+            return $this->respondInvalidRequest('unsubscribe() called without the mail query parameter');
         }
 
         try {
@@ -728,7 +727,7 @@ class Mailings extends ResourceController
             $mailingEmail       = $mailingEmailsModel->find($mailId);
 
             if (!$mailingEmail) {
-                return $this->failNotFound(lang('Mailings.unsubscribeLinkNotFound'));
+                return $this->respondNotFound(lang('Mailings.unsubscribeLinkNotFound'));
             }
 
             $usersModel = new UsersModel();
@@ -760,7 +759,7 @@ class Mailings extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 }

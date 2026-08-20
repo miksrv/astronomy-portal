@@ -1,6 +1,6 @@
 import { ApiModel, ApiType } from '@/api'
 
-export type Photo = {
+export interface Photo {
     id: string
     date?: string
     objects?: string[]

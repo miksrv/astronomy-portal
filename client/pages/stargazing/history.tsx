@@ -4,13 +4,13 @@ import { Button } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { EventsList } from '@/components/pages/stargazing'
 import { hasPermission } from '@/utils/permissions'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 interface StargazingHistoryPageProps {
     events: ApiModel.Event[]
@@ -50,8 +50,9 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
                 {hasPermission(user, ApiModel.Permission.EVENTS_CREATE) && (
                     <Button
                         icon={'PlusCircle'}
-                        mode={'secondary'}
-                        label={t('pages.stargazing.create-stargazing_button', 'Добавить астровыезд')}
+                        mode={'primary'}
+                        size={'medium'}
+                        label={t('pages.stargazing.create_button', 'Добавить')}
                         link={'/stargazing/form'}
                     />
                 )}
@@ -72,11 +73,8 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<StargazingHistoryPageProps>> => {
-            const locale = context.locale ?? 'en'
-            const translations = await serverSideTranslations(locale)
+            const { translations } = await initSSRLocale(store, context)
             const token = await getCookie('token', { req: context.req, res: context.res })
-
-            store.dispatch(setLocale(locale))
 
             if (token) {
                 store.dispatch(setSSRToken(token))

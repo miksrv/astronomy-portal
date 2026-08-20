@@ -82,7 +82,6 @@ defined('EXIT__AUTO_MAX')      || define('EXIT__AUTO_MAX', 125);    // highest a
 defined('FITS_FILE_SIZE') || define('FITS_FILE_SIZE', 32.78592);
 
 defined('UPLOAD_PHOTOS') || define('UPLOAD_PHOTOS', FCPATH . 'astrophotos/');
-defined('UPLOAD_POST') || define('UPLOAD_POST', FCPATH . 'posts/');
 defined('UPLOAD_TEMP') || define('UPLOAD_TEMP', FCPATH . 'temp/');
 defined('UPLOAD_STAR_MAPS') || define('UPLOAD_STAR_MAPS', FCPATH . 'starmaps/');
 defined('UPLOAD_USERS') || define('UPLOAD_USERS', FCPATH . 'users/');

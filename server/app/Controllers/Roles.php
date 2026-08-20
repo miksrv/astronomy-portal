@@ -8,8 +8,6 @@ use App\Libraries\SessionLibrary;
 use App\Models\RolesModel;
 use App\Models\UsersModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
-use CodeIgniter\API\ResponseTrait;
 use Config\Services;
 use Exception;
 
@@ -27,10 +25,8 @@ use Exception;
  * holding USERS_MANAGE could grant itself (or anyone) arbitrary further
  * privileges via this very controller.
  */
-class Roles extends ResourceController
+class Roles extends BaseApiController
 {
-    use ResponseTrait;
-
     private SessionLibrary $session;
 
     public function __construct()
@@ -46,11 +42,11 @@ class Roles extends ResourceController
     public function list(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::USERS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         try {
@@ -69,7 +65,7 @@ class Roles extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -82,11 +78,11 @@ class Roles extends ResourceController
     public function permissions(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::USERS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $items = array_map(static fn (Permission $permission) => $permission->value, Permission::cases());
@@ -100,17 +96,17 @@ class Roles extends ResourceController
     public function show($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::USERS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $role = (new RolesModel())->find($id);
 
         if (!$role) {
-            return $this->failNotFound();
+            return $this->respondNotFound();
         }
 
         return $this->respond($role);
@@ -122,11 +118,11 @@ class Roles extends ResourceController
     public function create(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::USERS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $input = $this->request->getJSON(true);
@@ -139,13 +135,13 @@ class Roles extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         $permissions = $this->_sanitizePermissions($input['permissions'] ?? []);
 
         if ($permissions === null) {
-            return $this->failValidationErrors(lang('General.invalidDataFormat'));
+            return $this->respondValidationErrors(['permissions' => lang('General.invalidDataFormat')]);
         }
 
         // USERS_MANAGE is hardcoded to the single reserved developer role
@@ -153,7 +149,7 @@ class Roles extends ResourceController
         // role would let that role's holders manage roles/users themselves,
         // including granting USERS_MANAGE further, i.e. privilege escalation.
         if (in_array(Permission::USERS_MANAGE->value, $permissions, true)) {
-            return $this->failValidationErrors(['error' => lang('Roles.usersManageReserved')]);
+            return $this->respondValidationErrors(['permissions' => lang('Roles.usersManageReserved')]);
         }
 
         try {
@@ -169,7 +165,7 @@ class Roles extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -179,18 +175,18 @@ class Roles extends ResourceController
     public function update($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::USERS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $rolesModel = new RolesModel();
         $role       = $rolesModel->find($id);
 
         if (!$role) {
-            return $this->failNotFound();
+            return $this->respondNotFound();
         }
 
         $input = $this->request->getJSON(true);
@@ -203,7 +199,7 @@ class Roles extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         $updateData = [];
@@ -216,7 +212,7 @@ class Roles extends ResourceController
             $permissions = $this->_sanitizePermissions($input['permissions'] ?? []);
 
             if ($permissions === null) {
-                return $this->failValidationErrors(lang('General.invalidDataFormat'));
+                return $this->respondValidationErrors(['permissions' => lang('General.invalidDataFormat')]);
             }
 
             $isDeveloperRole = (int) $id === RolesModel::DEVELOPER_ROLE_ID;
@@ -227,11 +223,11 @@ class Roles extends ResourceController
             // and stripping it from the developer role would leave nobody
             // able to manage roles/users at all.
             if ($hasUsersManage && !$isDeveloperRole) {
-                return $this->failValidationErrors(['error' => lang('Roles.usersManageReserved')]);
+                return $this->respondValidationErrors(['permissions' => lang('Roles.usersManageReserved')]);
             }
 
             if ($isDeveloperRole && !$hasUsersManage) {
-                return $this->failValidationErrors(['error' => lang('Roles.developerRoleRequiresUsersManage')]);
+                return $this->respondValidationErrors(['permissions' => lang('Roles.developerRoleRequiresUsersManage')]);
             }
 
             $updateData['permissions'] = json_encode($permissions);
@@ -246,7 +242,7 @@ class Roles extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -260,22 +256,22 @@ class Roles extends ResourceController
     public function delete($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::USERS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         $rolesModel = new RolesModel();
         $role       = $rolesModel->find($id);
 
         if (!$role) {
-            return $this->failNotFound();
+            return $this->respondNotFound();
         }
 
         if ((int) $id === RolesModel::DEVELOPER_ROLE_ID) {
-            return $this->failValidationErrors(['error' => lang('Roles.cannotDeleteDeveloperRole')]);
+            return $this->respondConflict(lang('Roles.cannotDeleteDeveloperRole'));
         }
 
         try {
@@ -286,7 +282,7 @@ class Roles extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 

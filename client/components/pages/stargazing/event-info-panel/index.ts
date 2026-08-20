@@ -1,1 +1,0 @@
-export { EventInfoPanel } from './EventInfoPanel'

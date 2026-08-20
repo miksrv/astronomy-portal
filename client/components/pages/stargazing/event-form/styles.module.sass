@@ -1,8 +1,18 @@
 @use '../../../../styles/mixins'
 @use '../../../../styles/variables' as variables
 
+.formSections
+    display: flex
+    flex-direction: column
+    gap: 15px
+
 .formElement
     margin-bottom: 10px
+
+.divider
+    margin: 15px 0
+    border: none
+    border-top: 1px solid var(--input-border-color)
 
 .sections
     display: flex

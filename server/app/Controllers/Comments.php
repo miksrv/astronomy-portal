@@ -7,7 +7,6 @@ use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
 use App\Models\CommentsModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
 use Config\Services;
 use Exception;
 
@@ -20,7 +19,7 @@ use Exception;
  * @method ResponseInterface create()  Post a new comment/review (auth required).
  * @method ResponseInterface delete($id) Soft-delete a comment (auth required; own or admin/moderator).
  */
-class Comments extends ResourceController
+class Comments extends BaseApiController
 {
     private SessionLibrary $session;
 
@@ -36,11 +35,17 @@ class Comments extends ResourceController
 
     /**
      * GET /comments?entityType=event&entityId=:id&limit=20&offset=0
+     * GET /comments?userId=:id
      *
      * Returns a slice of visible comments for the specified entity, newest first, with
      * author info, plus the real total count so clients can tell whether more remain
      * (the caller already knows what `limit`/`offset` it asked for, so the response
      * doesn't echo those back). Public endpoint — no authentication required.
+     *
+     * The `userId` form instead returns the caller's own review history (profile page).
+     * It only ever honours the caller's own id — auth is required and a `userId` that
+     * doesn't match the session user is rejected outright, since (unlike Events::list())
+     * this branch has no unfiltered fallback to silently degrade to.
      *
      * @return ResponseInterface
      */
@@ -50,7 +55,11 @@ class Comments extends ResourceController
 
         if (!empty($userId)) {
             if (!$this->session->isAuth) {
-                return $this->failUnauthorized(lang('App.accessDenied'));
+                return $this->respondUnauthorized(lang('App.accessDenied'));
+            }
+
+            if ($userId !== $this->session->user->id) {
+                return $this->respondForbidden(lang('App.accessDenied'));
             }
 
             try {
@@ -63,7 +72,7 @@ class Comments extends ResourceController
             } catch (Exception $e) {
                 log_message('error', '{exception}', ['exception' => $e]);
 
-                return $this->failServerError(lang('General.serverError'));
+                return $this->respondServerError(lang('General.serverError'));
             }
         }
 
@@ -73,11 +82,11 @@ class Comments extends ResourceController
         $offset     = $this->request->getGet('offset', FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
 
         if (empty($entityType) || empty($entityId)) {
-            return $this->failValidationErrors(['error' => 'entityType and entityId are required.']);
+            return $this->respondInvalidRequest('index() called without entityType/entityId query params');
         }
 
         if (!in_array($entityType, ['event', 'photo'], true)) {
-            return $this->failValidationErrors(['error' => 'entityType must be one of: event, photo.']);
+            return $this->respondInvalidRequest("index() called with an unsupported entityType ($entityType)");
         }
 
         $limit  = $limit ?: 20;
@@ -103,7 +112,7 @@ class Comments extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -121,11 +130,11 @@ class Comments extends ResourceController
         $limit      = $this->request->getGet('limit', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 50]]);
 
         if (empty($entityType)) {
-            return $this->failValidationErrors(['error' => 'entityType is required.']);
+            return $this->respondInvalidRequest('random() called without the entityType query param');
         }
 
         if (!in_array($entityType, ['event', 'photo'], true)) {
-            return $this->failValidationErrors(['error' => 'entityType must be one of: event, photo.']);
+            return $this->respondInvalidRequest("random() called with an unsupported entityType ($entityType)");
         }
 
         $limit = $limit ?: 5;
@@ -137,7 +146,7 @@ class Comments extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -155,7 +164,7 @@ class Comments extends ResourceController
     public function create(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         $input = $this->request->getJSON(true);
@@ -173,7 +182,7 @@ class Comments extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         $entityType = $input['entityType'];
@@ -183,12 +192,12 @@ class Comments extends ResourceController
         try {
             if ($entityType === 'event') {
                 if (!$this->model->canReviewEvent($userId, $entityId)) {
-                    return $this->failForbidden(lang('Comments.commentNotEligible'));
+                    return $this->respondForbidden(lang('Comments.commentNotEligible'));
                 }
             }
 
             if ($this->model->hasReviewed($userId, $entityType, $entityId)) {
-                return $this->fail(lang('Comments.commentAlreadyExists'), 422);
+                return $this->respondConflict(lang('Comments.commentAlreadyExists'));
             }
 
             $data = [
@@ -207,7 +216,7 @@ class Comments extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -223,14 +232,14 @@ class Comments extends ResourceController
     public function delete($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         try {
             $comment = $this->model->find($id);
 
             if (!$comment) {
-                return $this->failNotFound(lang('Comments.commentNotFound'));
+                return $this->respondNotFound(lang('Comments.commentNotFound'));
             }
 
             $userId       = $this->session->user->id;
@@ -238,7 +247,7 @@ class Comments extends ResourceController
             $isPrivileged = $this->session->can(Permission::COMMENTS_MODERATE);
 
             if (!$isOwner && !$isPrivileged) {
-                return $this->failForbidden(lang('App.accessDenied'));
+                return $this->respondForbidden(lang('App.accessDenied'));
             }
 
             $this->model->delete($id);
@@ -247,7 +256,7 @@ class Comments extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 }

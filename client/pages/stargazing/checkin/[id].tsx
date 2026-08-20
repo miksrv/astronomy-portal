@@ -5,12 +5,12 @@ import { Container, Spinner } from 'simple-react-ui-kit'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, setLocale, wrapper } from '@/api'
+import { API, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppLayout, AppToolbar } from '@/components/common'
 import { CheckinResult, CheckinResultStatus } from '@/components/pages/stargazing'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 /**
  * Landing page for a ticket's QR code (`/stargazing/checkin/:id`), opened by
@@ -92,11 +92,8 @@ const CheckinIdPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? 'en'
-            const translations = await serverSideTranslations(locale)
+            const { translations } = await initSSRLocale(store, context)
             const token = await getCookie('token', { req: context.req, res: context.res })
-
-            store.dispatch(setLocale(locale))
 
             if (token) {
                 store.dispatch(setSSRToken(token))

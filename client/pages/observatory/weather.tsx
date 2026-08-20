@@ -5,12 +5,12 @@ import { Container } from 'simple-react-ui-kit'
 import type { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { APIMeteo, setLocale, wrapper } from '@/api'
+import { APIMeteo, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { WidgetChart } from '@/components/pages/observatory'
 import { getDateTimeFormat } from '@/utils/dates'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 const HistoryPage: NextPage<object> = () => {
     const { i18n, t } = useTranslation()
@@ -95,10 +95,7 @@ const HistoryPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? 'en'
-            const translations = await serverSideTranslations(locale)
-
-            store.dispatch(setLocale(locale))
+            const { translations } = await initSSRLocale(store, context)
 
             return {
                 props: {

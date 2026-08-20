@@ -9,12 +9,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { setLocale, wrapper } from '@/api'
+import { wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { HistoryChapterMeta } from '@/data/history'
 import { formatYearMonth } from '@/utils/dates'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 import styles from './styles.module.sass'
 
@@ -92,10 +92,7 @@ export const getStaticProps = wrapper.getStaticProps(
                 return { notFound: true }
             }
 
-            const locale = context.locale ?? 'ru'
-            const translations = await serverSideTranslations(locale)
-
-            store.dispatch(setLocale(locale))
+            const { translations } = await initSSRLocale(store, context)
 
             const HOST_IMG = process.env.NEXT_PUBLIC_IMG_HOST || 'http://localhost:8080/'
             const raw: HistoryChapterMeta[] = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8'))

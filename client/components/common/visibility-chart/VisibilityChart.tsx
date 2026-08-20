@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react'
 import * as Astronomy from 'astronomy-engine'
-import { AstroTime, Observer } from 'astronomy-engine'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
-import ReactECharts, { EChartsOption } from 'echarts-for-react'
+import type { EChartsOption, EChartsReactProps } from 'echarts-for-react'
 import { Container } from 'simple-react-ui-kit'
 
+import dynamic from 'next/dynamic'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
@@ -14,10 +14,14 @@ import { CHART_COLORS, getBaseChartConfig } from '@/utils/charts'
 import { formatDate } from '@/utils/dates'
 import { formatObjectName } from '@/utils/strings'
 
+import { LAT, LON } from './constants'
+import { makeSunEvents } from './utils'
+
 import styles from './styles.module.sass'
 
-const LAT = parseFloat(process.env.NEXT_PUBLIC_LAT ?? '51.7')
-const LON = parseFloat(process.env.NEXT_PUBLIC_LON ?? '55.2')
+const ReactECharts = dynamic<EChartsReactProps>(() => import('echarts-for-react'), {
+    ssr: false
+})
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -230,26 +234,4 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = 
             />
         </Container>
     )
-}
-
-/**
- * Calculates various sun events (rise, set, and twilight phases) for a given observer and time.
- *
- * @param {Observer} observer - The observer's location.
- * @param {AstroTime} time - The time at which to calculate the sun events.
- * @returns {Object} An object containing the times of various sun events.
- */
-const makeSunEvents = (observer: Observer, time: AstroTime) => {
-    const sun = Astronomy.Body.Sun
-
-    return {
-        rise: Astronomy.SearchRiseSet(sun, observer, 1, time, 1),
-        set: Astronomy.SearchRiseSet(sun, observer, -1, time, 1),
-        civilDawn: Astronomy.SearchAltitude(sun, observer, 1, time, 1, -6),
-        nauticalDawn: Astronomy.SearchAltitude(sun, observer, 1, time, 1, -12),
-        astroDawn: Astronomy.SearchAltitude(sun, observer, 1, time, 1, -18),
-        astroDusk: Astronomy.SearchAltitude(sun, observer, -1, time, 1, -18),
-        nauticalDusk: Astronomy.SearchAltitude(sun, observer, -1, time, 1, -12),
-        civilDusk: Astronomy.SearchAltitude(sun, observer, -1, time, 1, -6)
-    }
 }

@@ -1,0 +1,88 @@
+@use '../../../../styles/variables' as variables
+
+.nav
+    display: flex
+    gap: 16px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column
+
+.link
+    display: flex
+    align-items: center
+    gap: 12px
+    flex: 1
+    min-width: 0
+    padding: 12px 16px
+    border-radius: var(--border-radius)
+    background: var(--container-background-color)
+    box-shadow: var(--container-shadow)
+    color: inherit
+    text-decoration: none
+    transition: box-shadow 0.25s ease
+
+    &:hover
+        box-shadow: 0 0 0 2px var(--color-primary), var(--container-shadow)
+
+        .thumbnailImage
+            transform: scale(1.05)
+
+        .title
+            color: var(--color-primary)
+
+.linkNext
+    justify-content: flex-end
+
+.thumbnail
+    position: relative
+    flex-shrink: 0
+    height: 46px
+    border-radius: var(--border-radius)
+    overflow: hidden
+    display: flex
+    align-items: center
+    justify-content: center
+    background: var(--table-header-background)
+
+.thumbnailImage
+    height: 100%
+    width: auto
+    display: block
+    font-size: 0
+    transition: transform 0.35s ease
+
+.thumbnailEmpty
+    width: 46px
+
+    svg
+        width: 20px
+        height: 20px
+        fill: var(--text-color-secondary)
+
+.body
+    min-width: 0
+    text-align: left
+
+.linkNext .body
+    text-align: right
+
+.title
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+    font-weight: 500
+    color: var(--text-color-primary)
+    transition: color 0.25s ease
+
+.date
+    font-size: var(--font-size-small)
+    color: var(--text-color-secondary)
+
+.arrow
+    flex-shrink: 0
+    width: 28px
+    height: 28px
+    fill: var(--text-color-secondary)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        display: none

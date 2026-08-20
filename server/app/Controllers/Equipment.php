@@ -4,8 +4,6 @@ namespace App\Controllers;
 
 use App\Models\ObservatoryEquipmentModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
-use CodeIgniter\API\ResponseTrait;
 use Exception;
 
 /**
@@ -15,10 +13,8 @@ use Exception;
  *
  * @package App\Controllers
  */
-class Equipment extends ResourceController
+class Equipment extends BaseApiController
 {
-    use ResponseTrait;
-
     /**
      * Retrieves a list of observatory equipment.
      *
@@ -51,7 +47,7 @@ class Equipment extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError();
         }
     }
 }

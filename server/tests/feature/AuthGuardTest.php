@@ -22,7 +22,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->post('objects', []);
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testPatchObjectWithoutTokenReturns401(): void
@@ -30,7 +30,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->patch('objects/M31', []);
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testDeleteObjectWithoutTokenReturns401(): void
@@ -38,7 +38,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->delete('objects/M31');
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     // --- Photos endpoints ---
@@ -48,7 +48,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->post('photos', []);
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     // --- Mailings endpoints ---
@@ -58,7 +58,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->get('mailings');
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     // --- Photos endpoints (write operations) ---
@@ -68,7 +68,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->patch('photos/abc123', []);
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testDeletePhotoWithoutTokenReturns401(): void
@@ -76,7 +76,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->delete('photos/abc123');
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     // --- Events endpoints ---
@@ -86,7 +86,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->get('events/members/abc123');
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testPostEventsWithoutTokenReturns401(): void
@@ -94,7 +94,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->post('events', []);
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testPatchEventWithoutTokenReturns401(): void
@@ -102,7 +102,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->patch('events/abc123', []);
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testDeleteEventWithoutTokenReturns401(): void
@@ -110,7 +110,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->delete('events/abc123');
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     // --- Comments endpoints ---
@@ -120,7 +120,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->post('comments', []);
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testDeleteCommentWithoutTokenReturns401(): void
@@ -128,7 +128,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->delete('comments/abc123');
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     // --- Members endpoints ---
@@ -138,7 +138,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->get('members');
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testGetMemberEventsWithoutTokenReturns401(): void
@@ -146,7 +146,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->get('members/abc123/events');
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     // --- Mailings write endpoints ---
@@ -156,7 +156,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->get('mailings/abc123/preview');
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testPostMailingsWithoutTokenReturns401(): void
@@ -164,7 +164,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->post('mailings', []);
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testDeleteMailingWithoutTokenReturns401(): void
@@ -172,7 +172,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->delete('mailings/abc123');
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     // --- Roles endpoints ---
@@ -182,7 +182,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->get('roles');
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testGetRolePermissionsWithoutTokenReturns401(): void
@@ -190,7 +190,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->get('roles/permissions');
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testPostRolesWithoutTokenReturns401(): void
@@ -198,7 +198,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->post('roles', []);
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testPatchRoleWithoutTokenReturns401(): void
@@ -206,7 +206,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->patch('roles/1', []);
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testDeleteRoleWithoutTokenReturns401(): void
@@ -214,7 +214,7 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->delete('roles/1');
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 
     public function testPatchMemberRolesWithoutTokenReturns401(): void
@@ -222,6 +222,6 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->patch('members/abc123/roles', []);
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
-        $this->assertArrayHasKey('messages', $json);
+        $this->assertArrayHasKey('message', $json);
     }
 }

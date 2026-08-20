@@ -34,7 +34,13 @@ const rawBaseQuery = fetchBaseQuery({
 const baseQueryWithErrorTransform = (async (args, api, extraOptions) => {
     const result = await rawBaseQuery(args, api, extraOptions)
     if (result.error && 'data' in result.error) {
-        return { ...result, error: (result.error as FetchBaseQueryError).data }
+        const rawError = result.error as FetchBaseQueryError
+        const body = typeof rawError.data === 'object' && rawError.data != null ? rawError.data : {}
+        // fetchBaseQuery discards the transport-level HTTP status once we replace
+        // `error` with just its `.data` below, so carry it forward explicitly -
+        // the response body itself no longer repeats it (see ApiType.ResError).
+        const status = typeof rawError.status === 'number' ? rawError.status : undefined
+        return { ...result, error: { ...body, status } }
     }
     return result
 }) as BaseQueryFn<string | FetchArgs, unknown, ApiType.ResError>

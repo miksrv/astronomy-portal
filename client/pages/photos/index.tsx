@@ -5,12 +5,13 @@ import { Button, Input, Select } from 'simple-react-ui-kit'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { PhotoGrid } from '@/components/pages/photos'
+import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { hasPermission } from '@/utils/permissions'
+import { initSSRLocale } from '@/utils/ssrLocale'
 import { formatObjectName } from '@/utils/strings'
 
 interface PhotosPageProps {
@@ -26,7 +27,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
     const user = useAppSelector((state) => state.auth?.user)
 
     const [searchFilter, setSearchFilter] = useState<string | undefined>(search || undefined)
-    const [debouncedSearchFilter, setDebouncedSearchFilter] = useState<string | undefined>(search || undefined)
+    const [debouncedSearchFilter, setDebouncedSearchFilter] = useDebouncedValue(searchFilter, 400)
     const [categoryFilter, setCategoryFilter] = useState<number | undefined>()
 
     const filteredCategoriesList = useMemo(
@@ -73,14 +74,6 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
         setSearchFilter(querySearch)
         setDebouncedSearchFilter(querySearch)
     }, [router.query.search])
-
-    // Debounce the search input before syncing it to the URL - avoids pushing
-    // a history entry on every keystroke.
-    useEffect(() => {
-        const timer = setTimeout(() => setDebouncedSearchFilter(searchFilter), 400)
-
-        return () => clearTimeout(timer)
-    }, [searchFilter])
 
     // Sync filters to the URL (shallow - filtering is client-side, no need to
     // re-run getServerSideProps).
@@ -162,7 +155,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
                 {hasPermission(user, ApiModel.Permission.PHOTOS_MANAGE) && (
                     <Button
                         icon={'PlusCircle'}
-                        mode={'secondary'}
+                        mode={'primary'}
                         label={t('pages.photos.create_button', 'Добавить')}
                         link={'/photos/form'}
                     />
@@ -179,11 +172,8 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<PhotosPageProps>> => {
-            const locale = context.locale ?? 'en'
+            const { translations } = await initSSRLocale(store, context)
             const search = (context.query.search as string) || ''
-            const translations = await serverSideTranslations(locale)
-
-            store.dispatch(setLocale(locale))
 
             const { data: photos } = await store.dispatch(API.endpoints?.photosGetList.initiate())
 

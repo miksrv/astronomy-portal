@@ -119,13 +119,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
                     />
                 </Link>
 
-                <button
+                <Button
+                    unstyled
+                    icon={'Menu'}
                     className={styles.hamburgerButton}
                     onClick={onMenuClick}
                     aria-label={'Toggle Sidebar'}
-                >
-                    <Icon name={'Menu'} />
-                </button>
+                />
 
                 <Menu className={styles.appMenu} />
 

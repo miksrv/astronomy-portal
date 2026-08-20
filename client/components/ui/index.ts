@@ -1,5 +1,6 @@
 export { type BreadcrumbLink, Breadcrumbs, type BreadcrumbsProps } from './breadcrumbs'
 export { Carousel } from './carousel'
 export { Counter } from './counter'
+export { DateTimeInput, type DateTimeInputProps } from './date-time-input'
 export { ShowMore } from './show-more'
 export { UserAvatar } from './user-avatar'

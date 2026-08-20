@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Dialog } from 'simple-react-ui-kit'
+import { Button, Dialog, Message } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
@@ -71,13 +71,13 @@ export const RefundRegistrationDialog: React.FC<RefundRegistrationDialogProps> =
                 {data && <p className={styles.notifySuccess}>{data.message}</p>}
 
                 {error && (
-                    <p className={styles.notifyText}>
+                    <Message type={'error'}>
                         {getErrorMessage(error) ||
                             t(
                                 'components.pages.stargazing.event-refund-dialog.error',
                                 'Не удалось выполнить возврат. Попробуйте позже.'
                             )}
-                    </p>
+                    </Message>
                 )}
             </div>
             <div className={styles.confirmationFooter}>

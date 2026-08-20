@@ -120,7 +120,9 @@ export const getHumanTimeFromSec = (sec: number, t: TFunction): string => {
 }
 
 export const formatYearMonth = (date: string, locale: string): string => {
-    const [year, month] = date.split('-').map(Number)
+    const [yearStr, monthStr] = date.split('-')
+    const year = Number(yearStr)
+    const month = Number(monthStr)
     const d = new Date(year, month - 1)
     const monthName = new Intl.DateTimeFormat(locale, { month: 'long' }).format(d)
     return `${monthName.charAt(0).toUpperCase()}${monthName.slice(1)} ${year}`

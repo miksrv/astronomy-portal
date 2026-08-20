@@ -28,12 +28,17 @@
                 "google-maps": "Google Карты"
             },
             "login-form": {
+                "email-required": "Введите email",
+                "email-invalid": "Введите корректный email",
                 "magic-link-sent": "Письмо со ссылкой для входа отправлено на {{email}}.",
                 "magic-link-instructions": "Перейдите по ссылке из письма — она действует 5 минут. Если письма нет, проверьте папку «Спам».",
                 "auth-description": "Войдите по ссылке из письма или через сервис",
                 "email-placeholder": "Ваш email",
                 "email-submit": "Войти",
                 "divider": "или",
+                "vk-login": "Войти через VK",
+                "google-login": "Войти через Google",
+                "yandex-login": "Войти через Яндекс",
                 "consent": "Авторизуясь, вы соглашаетесь на обработку персональных данных и получение писем о ближайших астровыездах. Подробнее — в",
                 "privacy-link": "Политике конфиденциальности"
             },
@@ -52,6 +57,7 @@
                 "subscribe": "Подписаться"
             },
             "review-card": {
+                "pending": "Отправка…",
                 "delete": "Удалить"
             },
             "review-form": {
@@ -59,9 +65,9 @@
                 "content-required": "Пожалуйста, напишите отзыв",
                 "content-too-short": "Отзыв должен содержать не менее {{min}} символов",
                 "content-too-long": "Отзыв не должен превышать {{max}} символов",
-                "error": "Не удалось отправить отзыв. Попробуйте ещё раз.",
                 "rating-label": "Оценка",
                 "placeholder": "Поделитесь впечатлениями...",
+                "error": "Не удалось отправить отзыв. Попробуйте ещё раз.",
                 "success": "Отзыв опубликован!",
                 "submit": "Отправить отзыв",
                 "not-eligible-title": "Отзыв могут оставить только участники",
@@ -139,6 +145,15 @@
                 }
             },
             "objects": {
+                "astro-object-form": {
+                    "categories-required": "Выберите хотя бы одну категорию",
+                    "name-required": "Введите имя объекта в каталогах",
+                    "title-required": "Введите название объекта",
+                    "ra-required": "Введите значение RA",
+                    "ra-range": "RA должно быть в диапазоне от 0 до 360",
+                    "dec-required": "Введите значение DEC",
+                    "dec-range": "DEC должно быть в диапазоне от -90 до 90"
+                },
                 "object-files-table": {
                     "date": "Дата",
                     "moon-phase": "Фаза Луны",
@@ -225,6 +240,15 @@
                 }
             },
             "photos": {
+                "astro-photo-form": {
+                    "frames-required": "Введите количество кадров (целое число больше нуля)",
+                    "exposure-required": "Введите выдержку в минутах (число больше нуля)",
+                    "categories-required": "Выберите хотя бы одну категорию",
+                    "objects-required": "Выберите хотя бы один объект",
+                    "equipments-required": "Выберите хотя бы одно оборудование",
+                    "date-required": "Укажите дату обработки",
+                    "filters-required": "Добавьте хотя бы один фильтр"
+                },
                 "photo-grid": {
                     "no-results": "По вашему запросу ничего не найдено",
                     "exposure": "Выдержка",
@@ -272,6 +296,9 @@
                     "upload-more": "Загрузить ещё",
                     "retry-failed": "Повторить неудачные"
                 },
+                "event-prev-next-nav": {
+                    "label": "Навигация по мероприятиям"
+                },
                 "event-refund-dialog": {
                     "title": "Оформить возврат?",
                     "text": "Оплата будет полностью возвращена на карту, с которой производился платёж (обычно в течение 1–10 рабочих дней), а регистрация — аннулирована. Действие необратимо.",
@@ -295,6 +322,11 @@
                     "confirm-cancel-refund-text": "Оплата за билет будет автоматически возвращена на карту, с которой производилась оплата, в течение 1–10 рабочих дней.",
                     "cancel": "Отмена",
                     "cancel-booking": "Отменить бронирование",
+                    "booking-form-name-required": "Введите ваше имя",
+                    "booking-form-phone-required": "Введите номер телефона",
+                    "booking-form-phone-invalid": "Введите корректный номер телефона",
+                    "booking-form-children-ages-required": "Укажите возраст каждого ребенка",
+                    "booking-form-child-age-required": "Укажите возраст",
                     "booking-form-error-title": "Ошибка",
                     "booking-form-error-default": "При регистрации были допущены ошибки, проверьте правильность заполнения полей",
                     "booking-form-success-title": "Успешно!",
@@ -367,6 +399,10 @@
             }
         },
         "ui": {
+            "carousel": {
+                "prev": "Предыдущий слайд",
+                "next": "Следующий слайд"
+            },
             "show-more": {
                 "show-less": "Показать меньше",
                 "show-more": "Показать больше"
@@ -450,6 +486,7 @@
             "status-paused": "Приостановлена",
             "status-sending": "Отправляется",
             "cancel-mailing": "Отменить рассылку",
+            "load-error": "Не удалось загрузить рассылку",
             "detail-subject": "Тема",
             "detail-audience": "Аудитория",
             "detail-sent-at": "Дата отправки",
@@ -475,6 +512,7 @@
             "save-success": "Сохранено",
             "test-send-success": "Тестовое письмо отправлено",
             "test-send-error": "Ошибка отправки теста",
+            "launch-error": "Не удалось запустить рассылку",
             "field-audience": "Аудитория",
             "field-subject": "Тема письма",
             "field-content": "Содержимое письма",
@@ -530,6 +568,10 @@
         "profile": {
             "history-empty": "Вы ещё не посещали мероприятий",
             "reviews-empty": "Вы ещё не оставляли отзывов",
+            "review-delete-error": "Не удалось удалить отзыв",
+            "name-required": "Введите имя",
+            "phone-invalid": "Введите корректный номер телефона",
+            "birthday-future": "Дата рождения не может быть в будущем",
             "field-sex-male": "Мужской",
             "field-sex-female": "Женский",
             "avatar-note": "Аватар привязан к сервису авторизации",
@@ -540,10 +582,12 @@
             "email-note": "Email не может быть изменён",
             "field-phone": "Телефон",
             "field-birthday": "Дата рождения",
+            "birthday-placeholder": "Выберите дату",
             "field-sex": "Пол",
             "save": "Сохранить",
             "onboarding-skip": "Пропустить",
             "save-success": "Профиль обновлён",
+            "save-error": "Не удалось сохранить профиль",
             "push-error-no-key": "Не удалось получить ключ для push-уведомлений, попробуйте позже",
             "push-error-generic": "Не удалось включить push-уведомления",
             "push-toggle-label": "Push-уведомления в браузере",
@@ -648,7 +692,7 @@
             "reviews": "Отзывы участников",
             "photo-caption-with-photographer": "{{eventTitle}} — фото от {{photographer}}",
             "photo-caption": "{{eventTitle}} (Фото №{{number}})",
-            "upload-photos-button": "Загрузить фотографии",
+            "upload-photos-button": "Фото",
             "photos-from-stargazing": "Фотографии с мероприятия",
             "photos-loading-more": "Загрузка ещё фотографий…",
             "photos-show-all": "Смотреть все ({{total}})",
@@ -659,7 +703,7 @@
             "save-error": "Ошибка сохранения",
             "save-success": "Астровыезд сохранен",
             "title": "Астровыезды",
-            "create-stargazing_button": "Добавить астровыезд",
+            "create_button": "Добавить",
             "howto_link": "Как проходят астровыезды",
             "howto_card_desc": "Программа вечера, телескопы и лекции",
             "rules_link": "Правила поведения на астровыездах",
@@ -678,7 +722,6 @@
             "program-title": "Как проходит вечер",
             "past-events": "Прошедшие астровыезды",
             "past-events-show-all": "Смотреть все",
-            "archive-link": "Все прошлые астровыезды",
             "registrations-status-canceled": "Отменена",
             "registrations-status-confirmed": "Подтверждена",
             "registrations-status-failed": "Не оплачена",
@@ -694,6 +737,7 @@
             "test-send": "Отправить тест",
             "test-send-success": "Тестовое уведомление отправлено",
             "test-send-error": "Ошибка отправки теста",
+            "load-error": "Не удалось загрузить уведомление",
             "detail-title": "Заголовок",
             "detail-audience": "Аудитория",
             "detail-sent-at": "Дата отправки",
@@ -767,6 +811,7 @@
             "title": "Авторизация на сайте",
             "notification_error": "Ошибка",
             "magic-link-error": "Ссылка для входа недействительна или истекла",
+            "oauth-error": "Не удалось войти через выбранный сервис",
             "go-to-home-page": "Перейти на главную страницу"
         },
         "index": {

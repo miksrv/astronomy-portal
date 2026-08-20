@@ -1,0 +1,19 @@
+# Prevent execution of scripts uploaded to this directory (defense-in-depth:
+# every upload handler already validates the real MIME type of a file before
+# it lands here, but this stops any future/forgotten upload path from being
+# able to turn into remote code execution). Static assets (images, PDFs,
+# ICS files, etc.) are still served normally.
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<FilesMatch "\.(php[3457]?|phtml|pht|phar|cgi|pl|py|sh)$">
+    <IfModule authz_core_module>
+        Require all denied
+    </IfModule>
+    <IfModule !authz_core_module>
+        Deny from all
+    </IfModule>
+</FilesMatch>

@@ -1,5 +1,4 @@
-import React from 'react'
-import { Message } from 'simple-react-ui-kit'
+import React, { useEffect } from 'react'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
@@ -8,10 +7,13 @@ import { useTranslation } from 'next-i18next/pages'
 import { API, ApiModel, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { EventForm, EventFormType } from '@/components/pages/stargazing'
+import useSnackbar from '@/hooks/useSnackbar'
 import { requirePermissionSSR } from '@/utils/adminAuth'
+import { getErrorMessage, getFieldErrors } from '@/utils/errors'
 
 const StargazingFormPage: NextPage<object> = () => {
     const router = useRouter()
+    const snackbar = useSnackbar()
 
     const { id: rawId } = router.query
     const id = typeof rawId === 'string' ? rawId : undefined
@@ -82,6 +84,19 @@ const StargazingFormPage: NextPage<object> = () => {
 
     const isLoading = eventLoading || createLoading || patchLoading || coverLoading
     const isSuccess = createSuccess || patchSuccess
+    const saveError = createError || patchError
+
+    // A field-tied error is already surfaced inline on the field itself
+    // (plus a scroll to it - see EventForm) - a toast on top would just be
+    // noise. Only a message with no specific field needs its own, since
+    // there's nothing to scroll to.
+    useEffect(() => {
+        if (saveError && Object.keys(getFieldErrors(saveError)).length === 0) {
+            snackbar.push(getErrorMessage(saveError) ?? t('pages.stargazing.save-error', 'Ошибка сохранения'), {
+                type: 'error'
+            })
+        }
+    }, [saveError])
 
     const currentPageTitle = isEditMode
         ? t('pages.stargazing.edit-event', 'Редактирование астровыезда')
@@ -104,19 +119,10 @@ const StargazingFormPage: NextPage<object> = () => {
                 ]}
             />
 
-            {(createError || patchError || isSuccess) && (
-                <Message
-                    style={{ marginBottom: '10px' }}
-                    type={createError || patchError ? 'error' : 'success'}
-                >
-                    {(createError || patchError) && <div>{t('pages.stargazing.save-error', 'Ошибка сохранения')}</div>}
-                    {isSuccess && <div>{t('pages.stargazing.save-success', 'Астровыезд сохранен')}</div>}
-                </Message>
-            )}
-
             <EventForm
                 disabled={isLoading || isSuccess}
                 initialData={eventData}
+                error={saveError}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
             />

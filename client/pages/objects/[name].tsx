@@ -3,13 +3,13 @@ import { Button } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, HOST_IMG, setLocale, SITE_LINK, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, HOST_IMG, SITE_LINK, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable, VisibilityChart } from '@/components/common'
 import { ObjectDescription, ObjectFilesTable, ObjectHeader, ObjectsCloud } from '@/components/pages/objects'
 import { hasPermission } from '@/utils/permissions'
+import { initSSRLocale } from '@/utils/ssrLocale'
 import { removeMarkdown, sliceText } from '@/utils/strings'
 
 interface ObjectItemPageProps {
@@ -98,7 +98,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                     <>
                         <Button
                             icon={'Pencil'}
-                            mode={'secondary'}
+                            mode={'primary'}
                             label={t('common.edit', 'Редактировать')}
                             disabled={!objectName}
                             link={`/objects/form/?id=${objectName}`}
@@ -106,7 +106,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 
                         <Button
                             icon={'PlusCircle'}
-                            mode={'secondary'}
+                            mode={'primary'}
                             label={t('common.add', 'Добавить')}
                             link={'/objects/form'}
                         />
@@ -145,11 +145,8 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<ObjectItemPageProps>> => {
-            const locale = context.locale ?? 'en'
+            const { translations } = await initSSRLocale(store, context)
             const objectName = context.params?.name
-            const translations = await serverSideTranslations(locale)
-
-            store.dispatch(setLocale(locale))
 
             if (typeof objectName !== 'string') {
                 return { notFound: true }

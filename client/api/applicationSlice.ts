@@ -6,10 +6,21 @@ import * as LocalStorage from '@/utils/localstorage'
 
 import i18Config from '../next-i18next.config'
 
+export type SnackbarType = 'info' | 'success' | 'warning' | 'error'
+
+export interface SnackbarItem {
+    id: string
+    type: SnackbarType
+    message: string
+    /** Auto-dismiss delay in ms; `SnackbarStack` falls back to a type-based default when omitted. */
+    duration?: number
+}
+
 interface ApplicationSliceProps {
     showOverlay?: boolean
     showAuthDialog?: boolean
     locale?: ApiType.Locale | string
+    snackbars: SnackbarItem[]
 }
 
 export const getStorageLocale = (): string | undefined =>
@@ -20,7 +31,8 @@ export const getStorageLocale = (): string | undefined =>
 const initialState: ApplicationSliceProps = {
     locale: getStorageLocale(),
     showOverlay: false,
-    showAuthDialog: false
+    showAuthDialog: false,
+    snackbars: []
 }
 
 const applicationSlice = createSlice({
@@ -37,10 +49,16 @@ const applicationSlice = createSlice({
         openAuthDialog: (state) => {
             state.showOverlay = true
             state.showAuthDialog = true
+        },
+        pushSnackbar: (state, { payload }: PayloadAction<SnackbarItem>) => {
+            state.snackbars.push(payload)
+        },
+        dismissSnackbar: (state, { payload }: PayloadAction<string>) => {
+            state.snackbars = state.snackbars.filter((item) => item.id !== payload)
         }
     }
 })
 
-export const { setLocale, closeAuthDialog, openAuthDialog } = applicationSlice.actions
+export const { setLocale, closeAuthDialog, openAuthDialog, pushSnackbar, dismissSnackbar } = applicationSlice.actions
 
 export default applicationSlice.reducer

@@ -1,0 +1,103 @@
+.wrapper
+    display: flex
+    flex-direction: column
+    width: 100%
+
+// The kit's own `.popout` rule hardcodes `display: inline-block; width:
+// fit-content` (it's normally used for compact icon-trigger menus) — that
+// collapses the wrapper to the trigger button's shrink-to-fit content width,
+// which also makes the button's own `width: 100%` (below) resolve against
+// that shrunk width instead of the field's full width. `!important` because
+// it's overriding a same-specificity single-class selector from a
+// third-party stylesheet whose load order relative to ours isn't guaranteed.
+.popout
+    display: block !important
+    width: 100% !important
+
+.label
+    display: block
+    margin-bottom: 4px
+    font-size: 13px
+    color: var(--input-label-color)
+
+.required
+    margin-left: 3px
+    color: var(--color-red)
+
+.trigger
+    display: flex
+    align-items: center
+    gap: 8px
+    width: 100%
+    height: var(--size-control-medium, 36px)
+    padding: 0 12px
+    border: var(--input-border)
+    border-radius: var(--border-radius)
+    background-color: var(--input-background-color)
+    color: var(--text-color-primary)
+    font-family: var(--font-family)
+    font-size: var(--font-size)
+    cursor: pointer
+    text-align: left
+
+    &:hover:not(:disabled)
+        border-color: var(--input-border-focus-color)
+
+    &:focus-visible
+        outline: none
+        border-color: var(--input-border-focus-color)
+
+    &:disabled
+        opacity: 0.5
+        cursor: not-allowed
+
+.triggerError
+    border-color: var(--color-red)
+
+.triggerIcon
+    flex-shrink: 0
+    width: 16px
+    height: 16px
+    fill: var(--text-color-secondary)
+
+.triggerValue
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.triggerPlaceholder
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+    color: var(--text-color-secondary)
+
+.panel
+    display: flex
+    flex-direction: column
+    gap: 10px
+    padding: 10px
+    min-width: 280px
+
+.timeRow
+    display: flex
+    gap: 10px
+
+.timeSelect
+    flex: 1
+
+.doneButton
+    width: 100%
+
+.hint
+    display: block
+    margin-top: 4px
+    font-size: 12px
+    line-height: 1.3
+    color: var(--text-color-secondary)
+
+.errorHint
+    display: block
+    margin-top: 4px
+    font-size: 12px
+    line-height: 1.3
+    color: var(--color-red)

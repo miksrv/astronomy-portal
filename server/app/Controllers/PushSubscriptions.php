@@ -6,7 +6,6 @@ use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
 use App\Models\PushSubscriptionsModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
 use Config\Push;
 use Config\Services;
 use Exception;
@@ -22,7 +21,7 @@ use Exception;
  * before ever logging in (rate-limited instead, see Routes.php). unsubscribe()
  * still requires isAuth and only ever touches the caller's own rows.
  */
-class PushSubscriptions extends ResourceController
+class PushSubscriptions extends BaseApiController
 {
     private SessionLibrary $session;
     protected $model;
@@ -74,7 +73,7 @@ class PushSubscriptions extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         try {
@@ -89,7 +88,7 @@ class PushSubscriptions extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -102,7 +101,7 @@ class PushSubscriptions extends ResourceController
     public function unsubscribe(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         $input = $this->request->getJSON(true);
@@ -114,7 +113,7 @@ class PushSubscriptions extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$this->validator->run($input)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            return $this->respondValidationErrors($this->validator->getErrors());
         }
 
         try {
@@ -124,7 +123,7 @@ class PushSubscriptions extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 }

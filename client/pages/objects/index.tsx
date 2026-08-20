@@ -5,12 +5,13 @@ import { Button, Input, Select } from 'simple-react-ui-kit'
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { ObjectsTable } from '@/components/pages/objects'
+import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { hasPermission } from '@/utils/permissions'
+import { initSSRLocale } from '@/utils/ssrLocale'
 import { formatObjectName } from '@/utils/strings'
 
 interface ObjectsPageProps {
@@ -27,7 +28,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, categoriesList, objec
     const user = useAppSelector((state) => state.auth?.user)
 
     const [searchFilter, setSearchFilter] = useState<string | undefined>(search || undefined)
-    const [debouncedSearchFilter, setDebouncedSearchFilter] = useState<string | undefined>(search || undefined)
+    const [debouncedSearchFilter, setDebouncedSearchFilter] = useDebouncedValue(searchFilter, 400)
     const [categoryFilter, setCategoryFilter] = useState<number | undefined>()
     const [toolbarHeight, setToolbarHeight] = useState<number>(0)
     const [footerHeight, setFooterHeight] = useState<number>(0)
@@ -95,14 +96,6 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, categoriesList, objec
         setSearchFilter(querySearch)
         setDebouncedSearchFilter(querySearch)
     }, [router.query.search])
-
-    // Debounce the search input before syncing it to the URL - avoids pushing
-    // a history entry on every keystroke.
-    useEffect(() => {
-        const timer = setTimeout(() => setDebouncedSearchFilter(searchFilter), 400)
-
-        return () => clearTimeout(timer)
-    }, [searchFilter])
 
     // Sync filters to the URL (shallow - filtering is client-side, no need to
     // re-run getServerSideProps). Keeps ?search= functional for direct links
@@ -186,7 +179,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, categoriesList, objec
                 {hasPermission(user, ApiModel.Permission.OBJECTS_MANAGE) && (
                     <Button
                         icon={'PlusCircle'}
-                        mode={'secondary'}
+                        mode={'primary'}
                         label={t('pages.objects.create_button', 'Добавить')}
                         link={'/objects/form'}
                     />
@@ -207,11 +200,8 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, categoriesList, objec
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<ObjectsPageProps>> => {
-            const locale = context.locale ?? 'en'
+            const { translations } = await initSSRLocale(store, context)
             const search = (context.query.search as string) || ''
-            const translations = await serverSideTranslations(locale)
-
-            store.dispatch(setLocale(locale))
 
             // Fetch a bounded set of photos — used only for object cover image thumbnails
             const { data: photos } = await store.dispatch(API.endpoints?.photosGetList.initiate())

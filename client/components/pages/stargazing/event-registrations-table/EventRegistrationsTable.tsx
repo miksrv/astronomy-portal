@@ -21,11 +21,11 @@ import { truncateOrderId } from './utils'
 import styles from './styles.module.sass'
 
 const STATUS_BADGE_CLASS: Record<CombinedStatus, string> = {
-    canceled: styles.badgeCanceled,
-    confirmed: styles.badgeConfirmed,
-    failed: styles.badgeFailed,
-    pending: styles.badgePending,
-    refunded: styles.badgeRefunded
+    canceled: styles.badgeCanceled ?? '',
+    confirmed: styles.badgeConfirmed ?? '',
+    failed: styles.badgeFailed ?? '',
+    pending: styles.badgePending ?? '',
+    refunded: styles.badgeRefunded ?? ''
 }
 
 export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = ({ eventId }) => {
@@ -65,12 +65,20 @@ export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = (
     const columns: Array<TableColumnProps<RegistrationRow>> = [
         {
             accessor: 'name',
-            formatter: (_value, row, i) => (
-                <div className={styles.participant}>
-                    <div className={styles.participantName}>{row[i].name}</div>
-                    <div className={styles.participantEmail}>{row[i].email}</div>
-                </div>
-            ),
+            formatter: (_value, row, i) => {
+                const item = row[i]
+
+                if (!item) {
+                    return null
+                }
+
+                return (
+                    <div className={styles.participant}>
+                        <div className={styles.participantName}>{item.name}</div>
+                        <div className={styles.participantEmail}>{item.email}</div>
+                    </div>
+                )
+            },
             header: t('pages.stargazing.registrations-column-participant', 'Участник'),
             isSortable: true
         },
@@ -83,13 +91,23 @@ export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = (
         },
         {
             accessor: 'adults',
-            formatter: (_value, row, i) => `${row[i].adults} / ${row[i].children}`,
+            formatter: (_value, row, i) => {
+                const item = row[i]
+
+                return item ? `${item.adults} / ${item.children}` : ''
+            },
             header: t('pages.stargazing.registrations-column-members', 'Взрослые / Дети')
         },
         {
             accessor: 'displayStatus',
             formatter: (_value, row, i) => {
-                const status = getCombinedStatus(row[i])
+                const item = row[i]
+
+                if (!item) {
+                    return null
+                }
+
+                const status = getCombinedStatus(item)
 
                 return (
                     <Badge
@@ -123,12 +141,16 @@ export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = (
                   },
                   {
                       accessor: 'id',
-                      formatter: (_value, row, i) => (
-                          <RegistrationActions
-                              eventId={eventId}
-                              registration={row[i]}
-                          />
-                      ),
+                      formatter: (_value, row, i) => {
+                          const item = row[i]
+
+                          return item ? (
+                              <RegistrationActions
+                                  eventId={eventId}
+                                  registration={item}
+                              />
+                          ) : null
+                      },
                       header: t('pages.stargazing.registrations-column-action', 'Действие')
                   }
               ] as Array<TableColumnProps<RegistrationRow>>)

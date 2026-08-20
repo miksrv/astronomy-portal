@@ -2,10 +2,10 @@ import React, { useMemo } from 'react'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 
-import { API, setLocale, wrapper } from '@/api'
+import { API, wrapper } from '@/api'
 import { AppLayout, BreadcrumbJsonLd, StarMap } from '@/components/common'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 const CelestialPage: NextPage<object> = () => {
     const { t } = useTranslation()
@@ -58,10 +58,7 @@ const CelestialPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const locale = context.locale ?? 'en'
-            const translations = await serverSideTranslations(locale)
-
-            store.dispatch(setLocale(locale))
+            const { translations } = await initSSRLocale(store, context)
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 

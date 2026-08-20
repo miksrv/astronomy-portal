@@ -13,11 +13,11 @@ import { formatDate } from '@/utils/dates'
 import styles from './styles.module.sass'
 
 const statusColorMap: Record<ApiModel.MailingStatus, string> = {
-    canceled: styles.statusCanceled,
-    completed: styles.statusCompleted,
-    draft: styles.statusDraft,
-    paused: styles.statusPaused,
-    sending: styles.statusSending
+    canceled: styles.statusCanceled ?? '',
+    completed: styles.statusCompleted ?? '',
+    draft: styles.statusDraft ?? '',
+    paused: styles.statusPaused ?? '',
+    sending: styles.statusSending ?? ''
 }
 
 const MailingListPage: NextPage<object> = () => {
@@ -57,7 +57,11 @@ const MailingListPage: NextPage<object> = () => {
             accessor: 'subject',
             className: styles.subjectCell,
             header: t('pages.mailing.col-subject', 'Тема'),
-            formatter: (_data, row, i) => <Link href={`/admin/mailing/${row[i].id}`}>{row[i].subject}</Link>,
+            formatter: (_data, row, i) => {
+                const item = row[i]
+
+                return item ? <Link href={`/admin/mailing/${item.id}`}>{item.subject}</Link> : null
+            },
             isSortable: true
         },
         {
@@ -94,6 +98,10 @@ const MailingListPage: NextPage<object> = () => {
             formatter: (_data, row, i) => {
                 const item = row[i]
 
+                if (!item) {
+                    return undefined
+                }
+
                 return item.sentAt
                     ? formatDate(item.sentAt.date, 'DD.MM.YYYY, HH:mm')
                     : formatDate(item.createdAt.date, 'DD.MM.YYYY, HH:mm')
@@ -103,28 +111,36 @@ const MailingListPage: NextPage<object> = () => {
         {
             accessor: 'id',
             header: '',
-            formatter: (_data, row, i) => (
-                <div className={styles.actionsCell}>
-                    {row[i].status === 'draft' && (
-                        <>
-                            <Link href={`/admin/mailing/form?id=${row[i].id}`}>
+            formatter: (_data, row, i) => {
+                const item = row[i]
+
+                if (!item) {
+                    return null
+                }
+
+                return (
+                    <div className={styles.actionsCell}>
+                        {item.status === 'draft' && (
+                            <>
+                                <Link href={`/admin/mailing/form?id=${item.id}`}>
+                                    <Button
+                                        size={'small'}
+                                        icon={'Pencil'}
+                                        mode={'secondary'}
+                                    />
+                                </Link>
                                 <Button
                                     size={'small'}
-                                    icon={'Pencil'}
-                                    mode={'secondary'}
+                                    icon={'Close'}
+                                    variant={'negative'}
+                                    mode={'primary'}
+                                    onClick={() => setConfirmDeleteId(item.id)}
                                 />
-                            </Link>
-                            <Button
-                                size={'small'}
-                                icon={'Close'}
-                                variant={'negative'}
-                                mode={'primary'}
-                                onClick={() => setConfirmDeleteId(row[i].id)}
-                            />
-                        </>
-                    )}
-                </div>
-            )
+                            </>
+                        )}
+                    </div>
+                )
+            }
         }
     ]
 
@@ -139,7 +155,7 @@ const MailingListPage: NextPage<object> = () => {
                 currentPage={pageTitle}
             >
                 <Button
-                    mode={'secondary'}
+                    mode={'primary'}
                     icon={'PlusCircle'}
                     link={'/admin/mailing/form'}
                     label={t('pages.mailing.create', 'Новая рассылка')}

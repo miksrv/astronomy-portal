@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { startTransition, useEffect, useOptimistic, useRef, useState } from 'react'
 import { Button, cn, Container, Message, Spinner } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
@@ -45,6 +45,10 @@ export const RelayList: React.FC = () => {
 
     const [setLightOn, { isLoading: lightLoading }] = API.useRelayToggleLightMutation()
 
+    // Instant feedback on click instead of waiting out the round-trip - reverts
+    // on its own once the transition below settles (see handleLightClick).
+    const [optimisticLightOn, setOptimisticLightOn] = useOptimistic(relayList?.items?.[1]?.state === 1)
+
     const user = useAppSelector((state) => state.auth.user)
 
     const handleSetRelay = async (relay: ApiType.Relay.ReqRelaySet) => {
@@ -69,6 +73,26 @@ export const RelayList: React.FC = () => {
             // Revert optimistic update if the request fails
             patchResult.undo()
         }
+    }
+
+    const handleLightClick = () => {
+        if (countdownTimer !== 0) {
+            return
+        }
+
+        startTransition(async () => {
+            setOptimisticLightOn(true)
+
+            await setLightOn()
+
+            // `relayToggleLight` invalidates the Relay tag, but that background
+            // refetch isn't awaited by the mutation trigger itself - force and
+            // await it explicitly so this transition (and the optimistic value
+            // with it) doesn't end before `relayGetState` actually reflects the
+            // new state, which would otherwise flash the button back to "off"
+            // for a moment.
+            await dispatch(API.endpoints.relayGetState.initiate(undefined, { forceRefetch: true })).unwrap()
+        })
     }
 
     const tick = () => {
@@ -121,12 +145,7 @@ export const RelayList: React.FC = () => {
                 {!!relayList?.items?.length && (
                     <div className={styles.item}>
                         <div className={styles.name}>
-                            <span
-                                className={cn(
-                                    styles.ledIndicator,
-                                    relayList?.items?.[1]?.state ? styles.on : styles.off
-                                )}
-                            />
+                            <span className={cn(styles.ledIndicator, optimisticLightOn ? styles.on : styles.off)} />
                             {t('components.pages.observatory.relay-list.lightning', 'Освещение')}
                         </div>
                         <div className={styles.description}>
@@ -147,23 +166,19 @@ export const RelayList: React.FC = () => {
                         <Button
                             size={'small'}
                             loading={(isLoading && relayLoading === 1) || lightLoading}
-                            className={cn(styles.switchButton, relayList?.items?.[1]?.state ? styles.on : styles.off)}
+                            className={cn(styles.switchButton, optimisticLightOn ? styles.on : styles.off)}
                             disabled={
                                 loaderSet ||
                                 lightLoading ||
                                 relayLoading === 1 ||
                                 !relayList?.light.enable ||
                                 countdownTimer > 0 ||
-                                relayList?.items?.[1]?.state === 1
+                                optimisticLightOn
                             }
-                            onClick={async () => {
-                                if (countdownTimer === 0) {
-                                    await setLightOn()
-                                }
-                            }}
+                            onClick={handleLightClick}
                         >
                             {!(isLoading && relayLoading === 1) && !lightLoading
-                                ? relayList?.items?.[1]?.state
+                                ? optimisticLightOn
                                     ? 'on'
                                     : 'off'
                                 : ''}

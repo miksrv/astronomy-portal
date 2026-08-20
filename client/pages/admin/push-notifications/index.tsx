@@ -13,10 +13,10 @@ import { formatDate } from '@/utils/dates'
 import styles from './styles.module.sass'
 
 const statusColorMap: Record<ApiModel.PushNotificationStatus, string> = {
-    completed: styles.statusCompleted,
-    draft: styles.statusDraft,
-    paused: styles.statusPaused,
-    sending: styles.statusSending
+    completed: styles.statusCompleted ?? '',
+    draft: styles.statusDraft ?? '',
+    paused: styles.statusPaused ?? '',
+    sending: styles.statusSending ?? ''
 }
 
 const PushNotificationListPage: NextPage<object> = () => {
@@ -55,7 +55,11 @@ const PushNotificationListPage: NextPage<object> = () => {
             accessor: 'title',
             className: styles.titleCell,
             header: t('pages.push-notifications.col-title', 'Заголовок'),
-            formatter: (_data, row, i) => <Link href={`/admin/push-notifications/${row[i].id}`}>{row[i].title}</Link>,
+            formatter: (_data, row, i) => {
+                const item = row[i]
+
+                return item ? <Link href={`/admin/push-notifications/${item.id}`}>{item.title}</Link> : null
+            },
             isSortable: true
         },
         {
@@ -92,6 +96,10 @@ const PushNotificationListPage: NextPage<object> = () => {
             formatter: (_data, row, i) => {
                 const item = row[i]
 
+                if (!item) {
+                    return undefined
+                }
+
                 return item.sentAt
                     ? formatDate(item.sentAt.date, 'DD.MM.YYYY, HH:mm')
                     : formatDate(item.createdAt.date, 'DD.MM.YYYY, HH:mm')
@@ -101,28 +109,36 @@ const PushNotificationListPage: NextPage<object> = () => {
         {
             accessor: 'id',
             header: '',
-            formatter: (_data, row, i) => (
-                <div className={styles.actionsCell}>
-                    {row[i].status === 'draft' && (
-                        <>
-                            <Link href={`/admin/push-notifications/form?id=${row[i].id}`}>
+            formatter: (_data, row, i) => {
+                const item = row[i]
+
+                if (!item) {
+                    return null
+                }
+
+                return (
+                    <div className={styles.actionsCell}>
+                        {item.status === 'draft' && (
+                            <>
+                                <Link href={`/admin/push-notifications/form?id=${item.id}`}>
+                                    <Button
+                                        size={'small'}
+                                        icon={'Pencil'}
+                                        mode={'secondary'}
+                                    />
+                                </Link>
                                 <Button
                                     size={'small'}
-                                    icon={'Pencil'}
-                                    mode={'secondary'}
+                                    icon={'Close'}
+                                    variant={'negative'}
+                                    mode={'primary'}
+                                    onClick={() => setConfirmDeleteId(item.id)}
                                 />
-                            </Link>
-                            <Button
-                                size={'small'}
-                                icon={'Close'}
-                                variant={'negative'}
-                                mode={'primary'}
-                                onClick={() => setConfirmDeleteId(row[i].id)}
-                            />
-                        </>
-                    )}
-                </div>
-            )
+                            </>
+                        )}
+                    </div>
+                )
+            }
         }
     ]
 
@@ -137,7 +153,7 @@ const PushNotificationListPage: NextPage<object> = () => {
                 currentPage={pageTitle}
             >
                 <Button
-                    mode={'secondary'}
+                    mode={'primary'}
                     icon={'PlusCircle'}
                     link={'/admin/push-notifications/form'}
                     label={t('pages.push-notifications.create', 'Новое уведомление')}

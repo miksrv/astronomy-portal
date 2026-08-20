@@ -41,7 +41,7 @@ export const Counter: React.FC<CounterProps> = ({ end, duration = 2000, classNam
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if (entry.isIntersecting) {
+                if (entry?.isIntersecting) {
                     setHasStarted(true)
                     observer.disconnect()
                 }

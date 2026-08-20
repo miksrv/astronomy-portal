@@ -4,26 +4,20 @@ namespace App\Controllers;
 
 use App\Models\ObjectFitsFilesModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
-use CodeIgniter\API\ResponseTrait;
-use Config\Services;
 use Exception;
 
 /**
  * Class Files
  *
- * This controller handles file operations such as showing, updating, and uploading images.
+ * This controller handles file operations such as showing and updating FITS file metadata.
  *
  * @package App\Controllers
  *
  * @method ResponseInterface show($id = null) Retrieves and returns files associated with a specific object.
  * @method ResponseInterface updates() Updates file information based on provided JSON input.
- * @method ResponseInterface image() Handles image file uploads and generates thumbnails.
  */
-class Files extends ResourceController
+class Files extends BaseApiController
 {
-    use ResponseTrait;
-
     private ObjectFitsFilesModel $filesModel;
 
     public function __construct() {
@@ -50,7 +44,7 @@ class Files extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('Objects.serverError'));
+            return $this->respondServerError();
         }
     }
 
@@ -63,11 +57,11 @@ class Files extends ResourceController
         $input  = json_decode($this->request->getJSON(true));
 
         if (!$apiKey || $apiKey !== getenv('app.fitsApiKey')) {
-            return $this->failUnauthorized('Invalid API key');
+            return $this->respondUnauthorized(lang('FilesController.invalidApiKey'));
         }
 
         if (!isset($input->DEC) || !isset($input->RA)) {
-            return $this->fail('No RA or DEC coordinates');
+            return $this->respondError(lang('FilesController.missingCoordinates'), 400);
         }
 
         $maxLength = ['COMMENT' => 500, 'OBSERVER' => 100, 'INSTRUME' => 100, 'TELESCOP' => 100];
@@ -162,61 +156,8 @@ class Files extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError();
+            return $this->respondServerError();
         }
     }
 
-    /**
-     * @return ResponseInterface
-     */
-    public function image(): ResponseInterface
-    {
-        $apiKey = $this->request->getGet('key', FILTER_SANITIZE_SPECIAL_CHARS) ?? '';
-        $files  = $this->request->getFiles();
-
-        if (!$apiKey || $apiKey !== getenv('app.fitsApiKey')) {
-            log_message('error', 'Invalid API key');
-
-            return $this->failUnauthorized('Invalid API key');
-        }
-
-        if (!$files)  {
-            log_message('error', 'No files to download');
-
-            return $this->fail('Files not found');
-        }
-
-        try {
-            foreach ($files as $key => $file)  {
-                $dirName = UPLOAD_FITS . $key . '/';
-
-                if (file_exists($dirName . $file->getClientName())) {
-                    return $this->failResourceExists();
-                }
-
-                if (!is_dir($dirName)) {
-                    mkdir($dirName,0777, true);
-                }
-
-                if (!$file->hasMoved()) {
-                    $file->move($dirName, $file->getClientName());
-
-                    $fileInfo = pathinfo($dirName . $file->getName());
-
-                    Services::image('gd')
-                        ->withFile($dirName . $file->getName())
-                        ->resize(24, 24, true, 'height')
-                        ->save($dirName . $fileInfo['filename'] . '_thumb.' . $fileInfo['extension']);
-
-                    return $this->respondCreated($fileInfo);
-                }
-            }
-        } catch (Exception $e) {
-            log_message('error', '{exception}', ['exception' => $e]);
-
-            return $this->failServerError();
-        }
-
-        return $this->failServerError();
-    }
 }

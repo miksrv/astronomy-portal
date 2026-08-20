@@ -35,11 +35,16 @@ const nextConfig = {
                 port: '',
                 protocol: 'https'
             },
-            {
-                hostname: 'localhost',
-                port: '8080',
-                protocol: 'http'
-            }
+            // Local backend (composer serve) - dev-only, kept out of production builds.
+            ...(process.env.NODE_ENV !== 'production'
+                ? [
+                      {
+                          hostname: 'localhost',
+                          port: '8080',
+                          protocol: 'http'
+                      }
+                  ]
+                : [])
         ],
         // unoptimized - When true, the source image will be served as-is instead of changing quality,
         // size, or format. Defaults to false.
@@ -54,14 +59,10 @@ const nextConfig = {
     },
     output: 'standalone',
     reactStrictMode: true,
-    transpilePackages: [
-        '/scripts/d3.min.js',
-        '/scripts/d3.geo.projection.min.js',
-        '/scripts/celestial.min.js',
-        '@/components/celestial-map',
-        'echarts-for-react',
-        'echarts'
-    ]
+    // d3/celestial.min.js are plain <Script src="/scripts/..."> tags loaded in pages/_app.tsx -
+    // static public assets, never bundled by webpack/Turbopack, so they don't belong here.
+    // Only actual npm packages that ship untranspiled ESM need to be listed.
+    transpilePackages: ['echarts-for-react', 'echarts']
 }
 
 module.exports = nextConfig

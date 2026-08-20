@@ -111,7 +111,7 @@ describe('photos', () => {
             const newer: ApiModel.Photo = { ...basePhoto, id: 'new', date: '2024-06-01', objects: ['NGC_1234'] }
             const result = normalizeAndFilterObjects([older, newer])
             expect(result).toHaveLength(1)
-            expect(result[0].id).toBe('new')
+            expect(result[0]?.id).toBe('new')
         })
 
         it('keeps the older photo when dates are same or older arrives second', () => {
@@ -119,7 +119,7 @@ describe('photos', () => {
             const second: ApiModel.Photo = { ...basePhoto, id: 'second', date: '2023-01-01', objects: ['NGC_1234'] }
             const result = normalizeAndFilterObjects([first, second])
             expect(result).toHaveLength(1)
-            expect(result[0].id).toBe('first')
+            expect(result[0]?.id).toBe('first')
         })
 
         it('handles photos without objects gracefully', () => {

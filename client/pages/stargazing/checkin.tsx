@@ -1,13 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Html5Qrcode } from 'html5-qrcode'
-import { Container, Spinner } from 'simple-react-ui-kit'
+import React, { useEffect, useState } from 'react'
+import { Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, ApiType, wrapper } from '@/api'
 import { AppLayout, AppToolbar } from '@/components/common'
-import { CheckinResult, CheckinResultStatus } from '@/components/pages/stargazing'
+import { CheckinResult, CheckinResultStatus, QrScanner } from '@/components/pages/stargazing'
 import { requirePermissionSSR } from '@/utils/adminAuth'
 import { getErrorMessage } from '@/utils/errors'
 import { extractBookingIdFromScan } from '@/utils/strings'
@@ -27,34 +26,9 @@ const CheckinPage: NextPage<object> = () => {
     const [message, setMessage] = useState<string>('')
     const [scanning, setScanning] = useState<boolean>(true)
 
-    const scannerRef = useRef<Html5Qrcode | null>(null)
-
     const [checkin, { data, error, isError, isSuccess }] = API.useEventGetCheckinMutation()
 
-    const startScanner = async () => {
-        const scanner = new Html5Qrcode('qr-reader')
-        scannerRef.current = scanner
-
-        const cameras = await Html5Qrcode.getCameras()
-
-        if (!cameras || !cameras.length) {
-            setStatus(ScannerStatusEnum.ERROR)
-            setMessage(t('pages.checkin.no-cameras', 'Камеры не найдены'))
-        }
-
-        await scanner.start(cameras[0].id, { fps: 10, qrbox: 250 }, handleScan, () => {})
-    }
-
-    const stopScanner = async () => {
-        if (scannerRef.current) {
-            await scannerRef.current.stop()
-            scannerRef.current.clear()
-            scannerRef.current = null
-        }
-    }
-
-    const handleScan = async (decodedText: string) => {
-        await stopScanner()
+    const handleScanSuccess = async (decodedText: string) => {
         const code = extractBookingIdFromScan(decodedText)
 
         if (code.length !== 13) {
@@ -70,32 +44,18 @@ const CheckinPage: NextPage<object> = () => {
         setScanning(false)
     }
 
-    const handleContinue = async () => {
+    const handleScanFailure = (errorMessage: string) => {
+        setStatus(ScannerStatusEnum.ERROR)
+        setMessage(errorMessage)
+        setScanning(false)
+    }
+
+    const handleContinue = () => {
         setStatus(ScannerStatusEnum.IDLE)
         setMessage('')
         setParticipant(undefined)
         setScanning(true)
-        await startScanner()
     }
-
-    useEffect(() => {
-        let cancelled = false
-
-        if (scanning) {
-            startScanner().catch((err: Error) => {
-                if (!cancelled) {
-                    setStatus(ScannerStatusEnum.ERROR)
-                    setMessage(err.message)
-                    setScanning(false)
-                }
-            })
-        }
-
-        return () => {
-            cancelled = true
-            void stopScanner()
-        }
-    }, [scanning])
 
     useEffect(() => {
         if (isError) {
@@ -129,12 +89,10 @@ const CheckinPage: NextPage<object> = () => {
 
             <Container>
                 {scanning && (
-                    <div
-                        id={'qr-reader'}
-                        className={'qrCodeScanner'}
-                    >
-                        <Spinner />
-                    </div>
+                    <QrScanner
+                        onScanSuccess={handleScanSuccess}
+                        onScanFailure={handleScanFailure}
+                    />
                 )}
 
                 {!scanning && (

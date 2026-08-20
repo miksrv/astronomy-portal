@@ -6,19 +6,18 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
-import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
-import { EventItemData, EventPhotoFilter, EventReviews } from '@/components/pages/stargazing'
+import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
+import { EventItemData, EventPhotoFilter, EventPrevNextNav, EventReviews } from '@/components/pages/stargazing'
 import { PHOTOS_PAGE_SIZE, REVIEWS_PAGE_SIZE } from '@/utils/constants'
-import { formatDate } from '@/utils/dates'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
 import { createFullPhotoUrl, createPreviewPhotoUrl } from '@/utils/eventPhotos'
 import { hasAnyPermission, hasPermission } from '@/utils/permissions'
+import { initSSRLocale } from '@/utils/ssrLocale'
 import { removeMarkdown, sliceText } from '@/utils/strings'
 
 import styles from '../styles.module.sass'
@@ -209,18 +208,18 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                         {hasPermission(user, ApiModel.Permission.EVENTS_GALLERY_UPLOAD) && (
                             <Button
                                 disabled={isUploadDialogOpen}
-                                icon={'Download'}
-                                mode={'secondary'}
+                                icon={'Photo'}
+                                mode={'primary'}
                                 onClick={handleUploadPhotoClick}
                             >
-                                {t('pages.stargazing.upload-photos-button', 'Загрузить фотографии')}
+                                {t('pages.stargazing.upload-photos-button', 'Фото')}
                             </Button>
                         )}
 
                         {hasPermission(user, ApiModel.Permission.EVENTS_UPDATE) && (
                             <Button
                                 icon={'Pencil'}
-                                mode={'secondary'}
+                                mode={'primary'}
                                 label={t('common.edit', 'Редактировать')}
                                 disabled={!eventId}
                                 onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
@@ -230,7 +229,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                         {hasPermission(user, ApiModel.Permission.EVENTS_STATISTIC) && (
                             <Button
                                 icon={'BarChart'}
-                                mode={'secondary'}
+                                mode={'primary'}
                                 onClick={() => router.push(`/stargazing/${eventId}/statistic`)}
                             />
                         )}
@@ -247,21 +246,18 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 {t('pages.stargazing.photos-from-stargazing', 'Фотографии с мероприятия')}
 
                 {hasMorePhotos && (
-                    <a
-                        role={'button'}
-                        tabIndex={0}
+                    <Button
+                        unstyled
                         className={styles.showMorePhotos}
                         onClick={handleShowAllPhotos}
-                        onKeyDown={(event) => {
-                            if (event.key === 'Enter' || event.key === ' ') {
-                                handleShowAllPhotos()
-                            }
-                        }}
-                    >
-                        {isLoadingAllPhotos
-                            ? t('pages.stargazing.photos-loading-more', 'Загрузка ещё фотографий…')
-                            : t('pages.stargazing.photos-show-all', 'Смотреть все ({{total}})', { total: totalPhotos })}
-                    </a>
+                        label={
+                            isLoadingAllPhotos
+                                ? t('pages.stargazing.photos-loading-more', 'Загрузка ещё фотографий…')
+                                : t('pages.stargazing.photos-show-all', 'Смотреть все ({{total}})', {
+                                      total: totalPhotos
+                                  })
+                        }
+                    />
                 )}
             </h2>
 
@@ -331,25 +327,9 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 
             <EventReviews eventId={eventId} />
 
-            <PrevNextNav
-                prev={
-                    adjacentEvents?.previousEvent
-                        ? {
-                              href: `/stargazing/${adjacentEvents.previousEvent.id}`,
-                              title: adjacentEvents.previousEvent.title,
-                              subtitle: formatDate(adjacentEvents.previousEvent.date?.date, 'D MMMM YYYY')
-                          }
-                        : null
-                }
-                next={
-                    adjacentEvents?.nextEvent
-                        ? {
-                              href: `/stargazing/${adjacentEvents.nextEvent.id}`,
-                              title: adjacentEvents.nextEvent.title,
-                              subtitle: formatDate(adjacentEvents.nextEvent.date?.date, 'D MMMM YYYY')
-                          }
-                        : null
-                }
+            <EventPrevNextNav
+                prevEvent={adjacentEvents?.previousEvent}
+                nextEvent={adjacentEvents?.nextEvent}
             />
 
             <AppFooter />
@@ -360,15 +340,12 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<StargazingItemPageProps>> => {
-            const locale = context.locale ?? 'en'
-            const translations = await serverSideTranslations(locale)
+            const { translations } = await initSSRLocale(store, context)
             const eventId = context.params?.name
 
             if (typeof eventId !== 'string') {
                 return { notFound: true }
             }
-
-            store.dispatch(setLocale(locale))
 
             const token = await getCookie('token', { req: context.req, res: context.res })
 

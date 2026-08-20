@@ -30,7 +30,7 @@ const UserEventsDialog: React.FC<UserEventsDialogProps> = ({ userId, userName, o
             header: t('users.eventsColumnEvent', 'Мероприятие'),
             formatter: (data, row, i) => (
                 <Link
-                    href={`/stargazing/${row[i].id}`}
+                    href={`/stargazing/${row[i]?.id}`}
                     target={'_blank'}
                     rel={'noopener noreferrer'}
                 >

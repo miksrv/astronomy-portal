@@ -2,6 +2,7 @@
 
 namespace Config;
 
+use App\Libraries\ApiExceptionHandler;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Debug\ExceptionHandler;
 use CodeIgniter\Debug\ExceptionHandlerInterface;
@@ -101,6 +102,16 @@ class Exceptions extends BaseConfig
      */
     public function handler(int $statusCode, Throwable $exception): ExceptionHandlerInterface
     {
+        // This backend only ever serves JSON to the Next.js frontend — any
+        // exception that escapes a controller over HTTP is normalized to
+        // the API's {message} error envelope (see BaseApiController and
+        // ApiExceptionHandler) rather than CodeIgniter's default HTML/
+        // debug-trace views. CLI commands (cron jobs, `spark ...`) have no
+        // JSON consumer, so they keep the default handler.
+        if (! is_cli()) {
+            return new ApiExceptionHandler();
+        }
+
         return new ExceptionHandler($this);
     }
 }

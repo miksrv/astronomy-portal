@@ -106,4 +106,56 @@ final class EventEntityTest extends CIUnitTestCase
         $this->assertSame(5, $entity->views);
         $this->assertIsInt($entity->views);
     }
+
+    // --- Timezone handling ---
+    // Regression tests for the 2026-08-19 production incident: registration
+    // closed ~5 hours early because a misconfigured non-UTC app.appTimezone
+    // caused the ambient PHP default timezone to drift away from UTC. `date`,
+    // `end_date`, `registration_start` and `registration_end` are always
+    // stored in the DB as true UTC instants (see Events::parseOrenburgDateTime()),
+    // but CI4's built-in 'datetime' cast (DatetimeCast::get()) has no way to
+    // pin a timezone per-field — it always parses raw strings using whatever
+    // date_default_timezone_get() currently returns. That default must
+    // therefore be UTC (app.appTimezone) for these fields to round-trip to
+    // the correct instant; if it drifts, a value that is actually already UTC
+    // gets silently reinterpreted in the wrong zone.
+
+    public function testRegistrationEndCastPreservesUtcInstantWhenAmbientTimezoneIsUtc(): void
+    {
+        $this->assertSame(
+            'UTC',
+            date_default_timezone_get(),
+            'The test suite must run with the ambient PHP timezone pinned to UTC ' .
+            '(see phpunit.xml.dist app.appTimezone) — otherwise this test cannot ' .
+            'actually exercise the invariant it is guarding.'
+        );
+
+        $entity = new EventEntity();
+        // 21:30 Orenburg (UTC+5) on 2026-08-19, already converted to UTC on write.
+        $entity->registration_end = '2026-08-19 16:30:00';
+
+        $this->assertSame('2026-08-19 16:30:00', $entity->registration_end->toDateTimeString());
+        $this->assertSame(
+            (new \CodeIgniter\I18n\Time('2026-08-19 16:30:00', 'UTC'))->getTimestamp(),
+            $entity->registration_end->getTimestamp(),
+            'A registration_end value that is already a UTC instant must not be ' .
+            'shifted by the cast — this is exactly what broke in production.'
+        );
+    }
+
+    public function testDateAndEndDateCastPreserveUtcInstant(): void
+    {
+        $entity            = new EventEntity();
+        $entity->date      = '2026-08-19 12:00:00';
+        $entity->endDate   = '2026-08-19 18:00:00';
+
+        $this->assertSame(
+            (new \CodeIgniter\I18n\Time('2026-08-19 12:00:00', 'UTC'))->getTimestamp(),
+            $entity->date->getTimestamp()
+        );
+        $this->assertSame(
+            (new \CodeIgniter\I18n\Time('2026-08-19 18:00:00', 'UTC'))->getTimestamp(),
+            $entity->endDate->getTimestamp()
+        );
+    }
 }

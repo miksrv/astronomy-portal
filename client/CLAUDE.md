@@ -197,6 +197,7 @@ Import via `import { ApiModel } from '@/api'`.
 | `EventInfoPanel`     | Sidebar block on the event page: date/time/location/members/age/views + live weather + `EventMap` |
 | `EventItemData`      | Detail block rendering the event cover image + `EventInfoPanel` + description                     |
 | `EventPhotoUploader` | Drag-and-drop photo upload for a specific event                                                   |
+| `EventPrevNextNav`   | Prev/next links to adjacent events (by date) on the event detail page, with cover thumbnail       |
 | `EventReviews`       | Reviews section for an event page: shows `ReviewForm` (if eligible) + list of `ReviewCard`s       |
 | `EventUpcoming`      | Hero widget for the next upcoming event with registration/cancellation dialog                     |
 | `EventsList`         | List/grid of all events with status indicators                                                    |
@@ -237,29 +238,43 @@ type MyComponentProps = { ... }
 | Card/section wrappers | `<Container>` |
 | Alert/info messages   | `<Message>`   |
 
+### Split non-JSX logic out of the component file
+
+Each component lives in `component-name/ComponentName.tsx`. When that file accumulates non-JSX logic above/outside the component, pull it into sibling files in the same directory — the goal is a `.tsx` file that reads mostly as markup and wiring, not helper code:
+
+| What                                                                             | Goes to        |
+| -------------------------------------------------------------------------------- | -------------- |
+| Pure helper functions (formatters, parsers, calculators, converters, validators) | `utils.ts`     |
+| Grouped constants — alias/lookup maps, config objects, options lists             | `constants.ts` |
+| Validation schema (e.g. `zod`)                                                   | `schema.ts`    |
+
+Keep in the `.tsx` file: the component itself, its props `interface`, small component-local types, and any single trivial one-off constant not worth a whole file. Only split out a file when there's enough there to justify it — don't create an empty-feeling `utils.ts` for one two-line helper. Existing examples: `client/components/pages/stargazing/event-item-data/` (`utils.ts`), `client/components/pages/stargazing/event-form/` (`utils.ts` + `constants.ts` + `schema.ts`).
+
 ### RTK Query error shape
 
-`baseQueryWithErrorTransform` in `client/api/api.ts` unwraps the raw `FetchBaseQueryError.data` into the error itself, so by the time an error reaches a component (via `.unwrap()` rejection or a mutation hook's `error` field), its shape is already flat — matching `ApiType.ResError`:
+`baseQueryWithErrorTransform` in `client/api/api.ts` unwraps the raw `FetchBaseQueryError.data` into the error itself (restoring the transport-level HTTP `status`, which would otherwise be lost), so by the time an error reaches a component (via `.unwrap()` rejection or a mutation hook's `error` field), its shape is already flat — matching `ApiType.ResError`:
 
 ```ts
 {
     status?: number,
-    code?: number,
-    messages: Record<string, string>
+    message: string,
+    errors?: Record<string, string>
 }
 ```
 
-Always read `error.messages`, not `error.data.messages` — there is no `.data` wrapper at this point.
+`message` is always present — it's the text for a generic `<Message type="error">` block. `errors` is present only when the failure is tied to specific form fields (validation), keyed by field name — pass `fieldErrors.someField` to that `Input`'s `error` prop.
+
+Always read `error.message`/`error.errors`, not `error.data.messages` — there is no `.data` wrapper, and the old `messages`/generic-`'error'`-key convention no longer exists.
 
 ```ts
 // Correct
-const msg = getErrorMessage(error) // client/utils/errors.ts — messages.error, falling back to the first value
+const { message, fieldErrors } = useApiFormError(error) // client/hooks/useApiFormError.ts
 
 // Wrong
-const msg = (error as { data?: { messages?: Record<string, string> } })?.data?.messages
+const msg = (error as { data?: { messages?: Record<string, string> } })?.data?.messages?.error
 ```
 
-Prefer the shared `getErrorMessage(error)` helper (`client/utils/errors.ts`) over inlining `error.messages.error` in new code, so error-shape fixes only need to happen in one place.
+Prefer the shared `useApiFormError(error)` hook (`client/hooks/useApiFormError.ts`, built on `getErrorMessage`/`getFieldErrors` from `client/utils/errors.ts`) over inlining `error.message`/`error.errors` parsing in new code, so error-shape fixes only need to happen in one place. Every form that submits to a mutation should use it rather than re-implementing its own parsing.
 
 ---
 

@@ -1,9 +1,7 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
 import { createWrapper, HYDRATE } from 'next-redux-wrapper'
-// AnyAction is needed here because the HYDRATE handler directly accesses action.payload
-// properties at runtime; UnknownAction breaks configureStore's Reducer type compatibility.
-import { AnyAction, combineReducers, configureStore } from '@reduxjs/toolkit'
+import { combineReducers, configureStore, UnknownAction } from '@reduxjs/toolkit'
 
 import { APIMeteo } from '@/api/apiMeteo'
 
@@ -22,7 +20,7 @@ const combinedReducer = combineReducers({
 // 2. Process HYDRATE separately
 type RootReducerState = ReturnType<typeof combinedReducer>
 
-const rootReducer = (state: RootReducerState | undefined, action: AnyAction) => {
+const rootReducer = (state: RootReducerState | undefined, action: UnknownAction) => {
     if (action.type === HYDRATE) {
         // next-redux-wrapper guarantees payload matches RootReducerState; any is needed
         // because spreading Partial<CombinedState> makes queries optional, breaking configureStore.
@@ -47,11 +45,24 @@ const rootReducer = (state: RootReducerState | undefined, action: AnyAction) => 
             application:
                 payload.application ?? state?.application ?? combinedReducer(undefined, { type: '' }).application,
 
-            // DO NOT touch auth if there is nothing in payload
-            auth:
-                payload.auth?.token || payload.auth?.isAuth
-                    ? payload.auth
-                    : (state?.auth ?? combinedReducer(undefined, { type: '' }).auth),
+            // DO NOT touch auth if there is nothing in payload. Every page's
+            // getServerSideProps only ever calls setSSRToken() - to forward the
+            // visitor's existing session cookie so SSR-issued API calls carry it -
+            // it never performs a real login server-side, so `payload.auth.token`
+            // being set is NOT a signal that the user's identity/auth status has
+            // changed. Wholesale-replacing `auth` with `payload.auth` whenever a
+            // token was present used to wipe `isAuth`/`user` back to "logged out"
+            // on every client-side navigation to one of those pages, even while
+            // already authenticated - the header would flash/stick on "Войти"
+            // until useAuthSession's re-check caught up (a full reload masked it,
+            // since there was no prior authenticated state to clobber). Merge only
+            // the fields SSR actually provided instead of trusting the whole object.
+            auth: {
+                ...(state?.auth ?? combinedReducer(undefined, { type: '' }).auth),
+                ...(payload.auth?.token ? { token: payload.auth.token } : {}),
+                ...(payload.auth?.isAuth !== undefined ? { isAuth: payload.auth.isAuth } : {}),
+                ...(payload.auth?.user !== undefined ? { user: payload.auth.user } : {})
+            },
 
             [API.reducerPath]: hydratedApiSlices[API.reducerPath],
             [APIMeteo.reducerPath]: hydratedApiSlices[APIMeteo.reducerPath]

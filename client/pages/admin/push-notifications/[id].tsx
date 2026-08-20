@@ -19,7 +19,7 @@ const PushNotificationStatsPage: NextPage<object> = () => {
 
     const { id } = router.query as { id: string }
 
-    const { data, isLoading, isError } = API.usePushNotificationGetItemQuery(id, {
+    const { data, isLoading, isError, error } = API.usePushNotificationGetItemQuery(id, {
         pollingInterval: undefined,
         skip: !id
     })
@@ -73,7 +73,7 @@ const PushNotificationStatsPage: NextPage<object> = () => {
                 ]}
             >
                 <Button
-                    mode={'secondary'}
+                    mode={'primary'}
                     label={t('pages.push-notifications.test-send', 'Отправить тест')}
                     onClick={handleTestSend}
                     loading={testLoading}
@@ -90,6 +90,13 @@ const PushNotificationStatsPage: NextPage<object> = () => {
                             ? t('pages.push-notifications.test-send-success', 'Тестовое уведомление отправлено')
                             : (getErrorMessage(testError) ??
                               t('pages.push-notifications.test-send-error', 'Ошибка отправки теста'))}
+                    </Message>
+                )}
+
+                {!isLoading && isError && (
+                    <Message type={'error'}>
+                        {getErrorMessage(error) ??
+                            t('pages.push-notifications.load-error', 'Не удалось загрузить уведомление')}
                     </Message>
                 )}
 

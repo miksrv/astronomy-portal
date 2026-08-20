@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react'
 import { EChartsOption } from 'echarts'
-import ReactECharts from 'echarts-for-react'
+import type { EChartsReactProps } from 'echarts-for-react'
 
+import dynamic from 'next/dynamic'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
@@ -13,6 +14,10 @@ import { round } from '@/utils/helpers'
 import { ChartTypes } from './types'
 
 import styles from './styles.module.sass'
+
+const ReactECharts = dynamic<EChartsReactProps>(() => import('echarts-for-react'), {
+    ssr: false
+})
 
 interface ChartProps {
     type: ChartTypes

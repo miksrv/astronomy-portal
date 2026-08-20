@@ -8,7 +8,6 @@ use App\Libraries\SessionLibrary;
 use App\Models\RolesModel;
 use App\Models\UsersModel;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
 use Config\Services;
 use Exception;
 
@@ -20,7 +19,7 @@ use Exception;
  * the users.manage privilege; events() also allows a user to fetch their own
  * event history.
  */
-class Members extends ResourceController
+class Members extends BaseApiController
 {
     private SessionLibrary $session;
 
@@ -41,11 +40,11 @@ class Members extends ResourceController
     public function list(): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::USERS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         try {
@@ -67,7 +66,7 @@ class Members extends ResourceController
             $roleIds = $this->_parseRoleIds($roleIdsParam);
 
             if ($roleIds === null) {
-                return $this->failValidationErrors(lang('General.invalidDataFormat'));
+                return $this->respondValidationErrors(['roleIds' => lang('General.invalidDataFormat')]);
             }
 
             if (!in_array($sortBy, $validSortBy, true)) {
@@ -85,7 +84,7 @@ class Members extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -97,17 +96,17 @@ class Members extends ResourceController
     public function events(string $id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         $canManageUsers = $this->session->can(Permission::USERS_MANAGE);
 
         if (!$canManageUsers && $this->session->user->id !== $id) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         if (empty($id)) {
-            return $this->failValidationErrors(lang('Members.notFound'));
+            return $this->respondInvalidRequest('events() called without a user id');
         }
 
         try {
@@ -115,7 +114,7 @@ class Members extends ResourceController
             $user       = $usersModel->find($id);
 
             if (!$user) {
-                return $this->failNotFound(lang('Members.notFound'));
+                return $this->respondNotFound(lang('Members.notFound'));
             }
 
             $locale = $this->session->user->locale ?? 'ru';
@@ -125,7 +124,7 @@ class Members extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 
@@ -136,15 +135,15 @@ class Members extends ResourceController
     public function updateRoles(string $id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
-            return $this->failUnauthorized(lang('App.accessDenied'));
+            return $this->respondUnauthorized(lang('App.accessDenied'));
         }
 
         if (!$this->session->can(Permission::USERS_MANAGE)) {
-            return $this->failForbidden(lang('App.accessDenied'));
+            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         if (empty($id)) {
-            return $this->failValidationErrors(lang('Members.notFound'));
+            return $this->respondInvalidRequest('updateRoles() called without a user id');
         }
 
         $input = $this->request->getJSON(true);
@@ -161,7 +160,7 @@ class Members extends ResourceController
         $this->validator = Services::Validation()->setRules($rules);
 
         if (!$this->validator->run($input) || !array_key_exists('roleIds', $input) || !is_array($input['roleIds'])) {
-            return $this->failValidationErrors(lang('General.invalidDataFormat'));
+            return $this->respondValidationErrors(['roleIds' => lang('General.invalidDataFormat')]);
         }
 
         $roleIds = array_values(array_unique(array_map('intval', $input['roleIds'])));
@@ -171,20 +170,20 @@ class Members extends ResourceController
             $user       = $usersModel->find($id);
 
             if (!$user) {
-                return $this->failNotFound(lang('Members.notFound'));
+                return $this->respondNotFound(lang('Members.notFound'));
             }
 
             $rolesModel = new RolesModel();
 
             if (!$rolesModel->idsExist($roleIds)) {
-                return $this->failValidationErrors(['error' => lang('Members.invalidRoleIds')]);
+                return $this->respondValidationErrors(['roleIds' => lang('Members.invalidRoleIds')]);
             }
 
             if (
                 in_array(RolesModel::DEVELOPER_ROLE_ID, $roleIds, true)
                 && $usersModel->isRoleAssignedToOtherUser(RolesModel::DEVELOPER_ROLE_ID, $id)
             ) {
-                return $this->failValidationErrors(['error' => lang('Members.developerRoleAlreadyAssigned')]);
+                return $this->respondValidationErrors(['roleIds' => lang('Members.developerRoleAlreadyAssigned')], null, 409);
             }
 
             $usersModel->updateRoles($id, $roleIds);
@@ -193,7 +192,7 @@ class Members extends ResourceController
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
-            return $this->failServerError(lang('General.serverError'));
+            return $this->respondServerError(lang('General.serverError'));
         }
     }
 

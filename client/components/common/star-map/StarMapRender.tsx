@@ -22,69 +22,17 @@ import {
 import { StarMapProps } from './StarMap'
 import StarMapSettingsForm from './StarMapSettingsForm'
 import { PendingPopup, PopupState, SkyPoint, StarMapSettings } from './types'
-import { clampPopupPosition, createObjectsJSON, findHitPoint, loadStarMapSettings, saveStarMapSettings } from './utils'
+import {
+    buildLiveSettingsPatch,
+    buildVisualConfig,
+    clampPopupPosition,
+    createObjectsJSON,
+    findHitPoint,
+    loadStarMapSettings,
+    saveStarMapSettings
+} from './utils'
 
 import styles from './styles.module.sass'
-
-/**
- * Full snapshot of the settings-panel-driven Celestial config. Used only to build the
- * config object passed to `Celestial.display()` (initial mount / objects / zoom / language
- * change) — never to `Celestial.apply()`, see `buildLiveSettingsPatch` below for why.
- */
-const buildVisualConfig = (settings: StarMapSettings) => ({
-    stars: {
-        ...defaultConfig.stars,
-        ...customConfig.stars,
-        show: settings.starsShow,
-        limit: settings.starsLimit
-    },
-    dsos: { ...defaultConfig.dsos, show: settings.dsosShow },
-    constellations: {
-        ...customConfig.constellations,
-        names: settings.constellationNames,
-        lines: settings.constellationLines,
-        bounds: settings.constellationBounds
-    },
-    lines: {
-        graticule: { ...customConfig.lines.graticule, show: settings.graticule },
-        equatorial: { ...defaultConfig.lines.equatorial, show: settings.equatorial },
-        ecliptic: { ...defaultConfig.lines.ecliptic, show: settings.ecliptic },
-        galactic: { ...defaultConfig.lines.galactic, show: settings.galactic },
-        supergalactic: defaultConfig.lines.supergalactic
-    },
-    mw: { ...defaultConfig.mw, show: settings.milkyWay },
-    planets: { ...defaultConfig.planets, show: settings.planetsShow }
-})
-
-/**
- * Minimal patch for `Celestial.apply()` — only the leaf fields the settings panel can
- * actually toggle. `Celestial.apply()` merges each top-level group (stars/dsos/constellations/...)
- * one level deep against its already-resolved internal state, it does not re-run the
- * defaults/normalization pass that `Celestial.display()` does on mount. Static fields like
- * `constellations.namesType` start out symbolic ('iau') and get resolved once at mount to the
- * actual GeoJSON property key ('name'). Re-sending the raw 'iau' on every apply() call (as the
- * old shared buildVisualConfig did) reverted that resolution, so constellation labels rendered
- * as literal "undefined" (`feature.properties['iau']` doesn't exist) once names were toggled
- * back on. Omitting namesType/designationType/propernameType/etc. here lets Celestial keep
- * whatever it already resolved.
- */
-const buildLiveSettingsPatch = (settings: StarMapSettings) => ({
-    stars: { show: settings.starsShow, limit: settings.starsLimit },
-    dsos: { show: settings.dsosShow },
-    constellations: {
-        names: settings.constellationNames,
-        lines: settings.constellationLines,
-        bounds: settings.constellationBounds
-    },
-    lines: {
-        graticule: { ...customConfig.lines.graticule, show: settings.graticule },
-        equatorial: { ...defaultConfig.lines.equatorial, show: settings.equatorial },
-        ecliptic: { ...defaultConfig.lines.ecliptic, show: settings.ecliptic },
-        galactic: { ...defaultConfig.lines.galactic, show: settings.galactic }
-    },
-    mw: { show: settings.milkyWay },
-    planets: { show: settings.planetsShow }
-})
 
 const StarMapRender: React.FC<StarMapProps> = ({
     objects,
@@ -276,9 +224,11 @@ const StarMapRender: React.FC<StarMapProps> = ({
             }
 
             // For non-settings mode (object detail pages), center on the single object
-            if (!showSettings && objects?.length === 1) {
-                localConfig.follow = [objects[0].ra || 0, objects[0].dec || 0]
-                localConfig.center = [objects[0].ra || 0, objects[0].dec || 0, 1]
+            const singleObject = !showSettings && objects?.length === 1 ? objects[0] : undefined
+
+            if (singleObject) {
+                localConfig.follow = [singleObject.ra || 0, singleObject.dec || 0]
+                localConfig.center = [singleObject.ra || 0, singleObject.dec || 0, 1]
             }
 
             Celestial.clear()

@@ -129,11 +129,19 @@ nb-configuration.xml
 /.phpunit.*.cache
 
 # Madeline Telegram session
-/public/astrophotos/
-/public/posts/
-/public/fits/
-/public/starmaps/
-/public/temp/
-/public/users/
-/public/stargazing/
-/public/attachments/
+#
+# Contents are ignored, but a checked-in .htaccess (blocking script execution
+# — see each directory) is deliberately kept tracked, same pattern as
+# writable/*/index.html above.
+/public/astrophotos/*
+!/public/astrophotos/.htaccess
+/public/starmaps/*
+!/public/starmaps/.htaccess
+/public/temp/*
+!/public/temp/.htaccess
+/public/users/*
+!/public/users/.htaccess
+/public/stargazing/*
+!/public/stargazing/.htaccess
+/public/attachments/*
+!/public/attachments/.htaccess

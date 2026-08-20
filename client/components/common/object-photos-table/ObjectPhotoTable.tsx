@@ -9,7 +9,9 @@ import { ApiModel } from '@/api'
 import { getFilterColor } from '@/utils/colors'
 import { formatDate } from '@/utils/dates'
 import { formatSecondsToExposure } from '@/utils/helpers'
-import { createPhotoTitle, createSmallPhotoUrl } from '@/utils/photos'
+import { createPhotoTitle } from '@/utils/photos'
+
+import { FlattenedPhoto, flattenPhotos } from './utils'
 
 import styles from './styles.module.sass'
 
@@ -28,21 +30,27 @@ export const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, 
             {
                 accessor: 'photo',
                 className: styles.cellPhoto,
-                formatter: (data, row, i) =>
-                    data && (
-                        <Link
-                            href={`/photos/${row[i].id}`}
-                            title={createPhotoTitle(row[i] as ApiModel.Photo, t)}
-                            className={currentPhotoId === row[i].id ? styles.active : ''}
-                        >
-                            <Image
-                                src={data as string}
-                                width={106}
-                                height={24}
-                                alt={''}
-                            />
-                        </Link>
-                    ),
+                formatter: (data, row, i) => {
+                    const item = row[i]
+
+                    return (
+                        data &&
+                        item && (
+                            <Link
+                                href={`/photos/${item.id}`}
+                                title={createPhotoTitle(item as ApiModel.Photo, t)}
+                                className={currentPhotoId === item.id ? styles.active : ''}
+                            >
+                                <Image
+                                    src={data as string}
+                                    width={106}
+                                    height={24}
+                                    alt={''}
+                                />
+                            </Link>
+                        )
+                    )
+                },
                 header: t('components.common.object-photos-table.photo', 'Фотография'),
                 isSortable: true
             },
@@ -159,41 +167,3 @@ export const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, 
         </Container>
     )
 }
-
-type FlattenedPhoto = {
-    id?: string
-    photo?: string
-    objects?: string[]
-    date?: string
-    frames?: number
-    exposure?: number
-    lFilterExposure?: number
-    rFilterExposure?: number
-    gFilterExposure?: number
-    bFilterExposure?: number
-    hFilterExposure?: number
-    oFilterExposure?: number
-    sFilterExposure?: number
-    nFilterExposure?: number
-}
-
-const flattenPhotos = (photosList?: ApiModel.Photo[]): FlattenedPhoto[] =>
-    photosList?.map(
-        (photo) =>
-            ({
-                id: photo.id,
-                photo: createSmallPhotoUrl(photo),
-                objects: photo.objects,
-                date: photo.date,
-                frames: photo.statistic?.frames || 0,
-                exposure: photo.statistic?.exposure || 0,
-                lFilterExposure: photo.filters?.L?.exposure || 0,
-                rFilterExposure: photo.filters?.R?.exposure || 0,
-                gFilterExposure: photo.filters?.G?.exposure || 0,
-                bFilterExposure: photo.filters?.B?.exposure || 0,
-                hFilterExposure: photo.filters?.H?.exposure || 0,
-                oFilterExposure: photo.filters?.O?.exposure || 0,
-                sFilterExposure: photo.filters?.S?.exposure || 0,
-                nFilterExposure: photo.filters?.N?.exposure || 0
-            }) as FlattenedPhoto
-    ) || []

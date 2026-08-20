@@ -2,12 +2,12 @@ import React, { useEffect } from 'react'
 
 import type { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, setLocale, SITE_LINK, wrapper } from '@/api'
+import { API, ApiModel, SITE_LINK, wrapper } from '@/api'
 import { AppLayout } from '@/components/common'
 import { MainSectionCommunity, MainSectionHero, MainSectionObservatory } from '@/components/pages/index'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 interface HomePageProps {
     photosList: ApiModel.Photo[]
@@ -83,10 +83,7 @@ const HomePage: NextPage<HomePageProps> = ({ photosList, eventPhotos }) => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<HomePageProps>> => {
-            const locale = context.locale ?? 'en'
-            const translations = await serverSideTranslations(locale)
-
-            store.dispatch(setLocale(locale))
+            const { translations } = await initSSRLocale(store, context)
 
             const { data: photos } = await store.dispatch(
                 API.endpoints?.photosGetList.initiate({

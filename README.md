@@ -153,7 +153,7 @@ Roles are managed entirely through data, not code — `/admin/roles` lets an adm
 | `USERS_MANAGE` | Admin member list (`/admin/users`), viewing another user's event history, and all of `/roles*` (creating/editing roles and assigning them to users). **Reserved** — see "The reserved developer role" below; not a privilege any admin-created role can be granted. |
 | `COMMENTS_MODERATE` | Deleting any comment/review (not just your own) |
 | `EVENTS_CREATE` | Creating a new stargazing event |
-| `EVENTS_UPDATE` | Editing an event and replacing its cover image |
+| `EVENTS_UPDATE` | Editing an event and replacing its cover image. Also exempts the viewer from the address/coordinates gating on `GET /events/:id` (see "Event Location & Map" below) so the edit form always shows the real saved values, not just for a viewer with their own booking |
 | `EVENTS_DELETE` | Deleting an event |
 | `EVENTS_GALLERY_UPLOAD` | Uploading photos to an event's gallery after the fact |
 | `EVENTS_CHECKIN` | QR check-in and viewing any attendee's ticket |

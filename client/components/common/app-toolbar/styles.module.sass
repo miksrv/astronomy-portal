@@ -20,14 +20,12 @@
         flex-shrink: 0
 
         @media only screen and (max-width: variables.$mobileMaxWidth)
-            flex-direction: column
             width: 100%
+            flex-wrap: wrap
+            justify-content: flex-start
 
             & > div
                 width: 100%
-
-            & > button
-                margin-right: auto
 
     .toolbarTitle
         position: relative

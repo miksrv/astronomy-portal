@@ -59,7 +59,7 @@ export const extractBookingIdFromScan = (text: string): string => {
     try {
         const segments = new URL(trimmed).pathname.split('/').filter(Boolean)
 
-        return segments.length ? segments[segments.length - 1] : trimmed
+        return segments.length ? (segments[segments.length - 1] ?? trimmed) : trimmed
     } catch {
         return trimmed
     }

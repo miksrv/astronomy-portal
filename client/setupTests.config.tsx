@@ -18,12 +18,13 @@ jest.mock('next/image', () => ({
 
     // Next.js static image imports resolve to an object ({ src, height, width });
     // normalize it to the string the real component would render.
-    default: ({ src, ...props }: ClassAttributes<HTMLImageElement> & { src?: unknown }) => {
+    default: ({ src, alt, ...props }: ClassAttributes<HTMLImageElement> & { src?: unknown; alt?: string }) => {
         const resolvedSrc = src && typeof src === 'object' ? (src as { src?: string }).src : src
 
         return (
             <img
                 src={resolvedSrc as string}
+                alt={alt ?? ''}
                 {...props}
             />
         )

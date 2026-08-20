@@ -7,6 +7,7 @@ import nextPlugin from '@next/eslint-plugin-next'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
 import importPlugin from 'eslint-plugin-import'
 import simpleImportSortPlugin from 'eslint-plugin-simple-import-sort'
+import jsxA11yPlugin from 'eslint-plugin-jsx-a11y'
 import prettierPlugin from 'eslint-plugin-prettier'
 import prettierConfig from 'eslint-config-prettier'
 
@@ -23,7 +24,6 @@ export default defineConfig([
             ['prettier']: prettierPlugin,
             ['simple-import-sort']: simpleImportSortPlugin,
             ['next']: nextPlugin,
-            // ['jsx-a11y']: jsxA11yPlugin,
             // ['unicorn']: unicornPlugin,
         },
         extends: [prettierConfig],
@@ -80,6 +80,7 @@ export default defineConfig([
 
     // extends ...
     tseslint.configs.recommended,
+    jsxA11yPlugin.flatConfigs.recommended,
 
     {
         languageOptions: {

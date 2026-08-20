@@ -7,13 +7,13 @@ import path from 'path'
 import { GetStaticPathsResult, GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { JsonLdScript } from 'next-seo'
 
-import { setLocale, SITE_LINK, wrapper } from '@/api'
-import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox, PrevNextNav } from '@/components/common'
+import { SITE_LINK, wrapper } from '@/api'
+import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
 import { GalleryBlock, HistoryChapter, HistoryChapterMeta } from '@/data/history'
 import { formatYearMonth } from '@/utils/dates'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 import styles from './styles.module.sass'
 
@@ -21,11 +21,9 @@ const SECTION_ENABLED = false
 
 interface HistoryChapterPageProps {
     chapter: HistoryChapter
-    prevChapter: HistoryChapterMeta | null
-    nextChapter: HistoryChapterMeta | null
 }
 
-const HistoryChapterPage: NextPage<HistoryChapterPageProps> = ({ chapter, prevChapter, nextChapter }) => {
+const HistoryChapterPage: NextPage<HistoryChapterPageProps> = ({ chapter }) => {
     const { t } = useTranslation()
     const { locale } = useRouter()
 
@@ -67,7 +65,7 @@ const HistoryChapterPage: NextPage<HistoryChapterPageProps> = ({ chapter, prevCh
     }, [chapter])
 
     const handlePhotoClick = (sectionIndex: number, blockIndex: number, photoIdx: number) => {
-        setPhotoIndex(galleryOffsets[sectionIndex][blockIndex] + photoIdx)
+        setPhotoIndex((galleryOffsets[sectionIndex]?.[blockIndex] ?? 0) + photoIdx)
         setShowLightbox(true)
     }
 
@@ -168,27 +166,6 @@ const HistoryChapterPage: NextPage<HistoryChapterPageProps> = ({ chapter, prevCh
                 </React.Fragment>
             ))}
 
-            <PrevNextNav
-                prev={
-                    prevChapter
-                        ? {
-                              href: `/observatory/history/${prevChapter.slug}`,
-                              title: localize(prevChapter.title, prevChapter.title_en),
-                              subtitle: formatYearMonth(prevChapter.date, locale ?? 'ru')
-                          }
-                        : null
-                }
-                next={
-                    nextChapter
-                        ? {
-                              href: `/observatory/history/${nextChapter.slug}`,
-                              title: localize(nextChapter.title, nextChapter.title_en),
-                              subtitle: formatYearMonth(nextChapter.date, locale ?? 'ru')
-                          }
-                        : null
-                }
-            />
-
             <PhotoLightbox
                 photos={allGalleryPhotos}
                 photoIndex={photoIndex}
@@ -218,11 +195,6 @@ const applyHost = (hostImg: string, raw: HistoryChapter): HistoryChapter => ({
     }))
 })
 
-const applyHostMeta = (hostImg: string, meta: HistoryChapterMeta): HistoryChapterMeta => ({
-    ...meta,
-    coverPhoto: `${hostImg}${meta.coverPhoto}`
-})
-
 export const getStaticPaths = async (): Promise<GetStaticPathsResult> => {
     if (!SECTION_ENABLED) {
         return { paths: [], fallback: false }
@@ -242,7 +214,6 @@ export const getStaticProps = wrapper.getStaticProps(
                 return { notFound: true }
             }
 
-            const locale = context.locale ?? 'ru'
             const slug = context.params?.slug
 
             if (typeof slug !== 'string') {
@@ -254,21 +225,14 @@ export const getStaticProps = wrapper.getStaticProps(
                 return { notFound: true }
             }
 
-            const translations = await serverSideTranslations(locale)
-            store.dispatch(setLocale(locale))
+            const { translations } = await initSSRLocale(store, context)
 
             const HOST_IMG = process.env.NEXT_PUBLIC_IMG_HOST || 'http://localhost:8080/'
             const rawChapter: HistoryChapter = JSON.parse(fs.readFileSync(chapterPath, 'utf-8'))
             const chapter = applyHost(HOST_IMG, rawChapter)
 
-            const manifest: HistoryChapterMeta[] = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8'))
-            const currentIndex = manifest.findIndex((c) => c.slug === slug)
-            const prevChapter = currentIndex > 0 ? applyHostMeta(HOST_IMG, manifest[currentIndex - 1]) : null
-            const nextChapter =
-                currentIndex < manifest.length - 1 ? applyHostMeta(HOST_IMG, manifest[currentIndex + 1]) : null
-
             return {
-                props: { ...translations, chapter, prevChapter, nextChapter }
+                props: { ...translations, chapter }
             }
         }
 )

@@ -10,7 +10,9 @@ CodeIgniter 4.6 REST API backend, PHP 8.2, MySQL/MariaDB. Located at `server/`.
 - `firebase/php-jwt ^6.10` — JWT auth (HS256)
 - PHPUnit 11.5 (dev)
 
-**Auth pattern:** Stateless JWT in `Authorization` header. `SessionLibrary` reads and validates the token on every request constructor. Token payload contains only `email`; `UsersModel::findUserByEmailAddress()` is called per request to hydrate the full user. Three OAuth providers: Google, Yandex, VK. `Services::getSecretKey()` now throws RuntimeException if `auth.token.secret` env var is empty.
+**Auth pattern:** Stateless JWT in `Authorization` header. `SessionLibrary` reads and validates the token on every request constructor. Token payload (`generateAuthToken()` in `app/Helpers/auth_helper.php`) contains `email`, `sid` (the user's `session_token`, embedded specifically to enable revocation — see below), `iat`, `exp`. Permissions are NOT baked into the token: `SessionLibrary::loadPermissions()` re-reads `$user->roles` → `RolesModel::getPermissionsForIds()` on every request, so a role/privilege change takes effect instantly without waiting for the JWT to expire. Three OAuth providers (Google, Yandex, VK) plus a fourth passwordless path: `POST /auth/magic-link` + `/auth/magic-link/verify` (`MagicLinkTokensModel`), auth_type `email`. `Services::getSecretKey()` throws RuntimeException if `auth.token.secret` env var is empty.
+
+**Session revocation:** JWT lifetime is a long-lived 180 days and is NOT shortened by logout. Instead `users.session_token` (the `sid` claim above) is checked on every request; `POST /auth/logout` regenerates/clears it, which instantly invalidates every previously-issued token for that user across all devices. Do not assume "logout" means the old token stops validating on its own — it only stops validating because `sid` no longer matches.
 
 **Auth guard order (post-audit):** In every controller method: check `!$session->isAuth` → `failUnauthorized()`, then check role → `failForbidden()`, THEN validate input, THEN query DB. Never validate before auth.
 

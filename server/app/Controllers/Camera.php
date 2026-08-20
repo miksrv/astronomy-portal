@@ -4,8 +4,6 @@ namespace App\Controllers;
 
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\RESTful\ResourceController;
-use CodeIgniter\API\ResponseTrait;
 
 /**
  * Class Camera
@@ -13,10 +11,8 @@ use CodeIgniter\API\ResponseTrait;
  *
  * @method ResponseInterface show($id = null) Camera image by id
  */
-class Camera extends ResourceController
+class Camera extends BaseApiController
 {
-    use ResponseTrait;
-
     const CACHE_TIME = 2;
 
     /**

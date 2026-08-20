@@ -2,7 +2,7 @@ import { DateTime } from '@/api/types'
 
 import { User } from './user'
 
-export type Event = {
+export interface Event {
     id: string
     title: string
     /** Venue name, e.g. "Загородная обсерватория «Смотри на звёзды»". Hidden pre-registration — see `address`. */
@@ -66,7 +66,7 @@ export type Event = {
     views?: number
 }
 
-export type EventPhoto = {
+export interface EventPhoto {
     eventId: string
     name: string
     ext: string
@@ -78,7 +78,7 @@ export type EventPhoto = {
     takenAt?: string
 }
 
-export type EventUser = User & {
+export interface EventUser extends User {
     eventId: string
     name: string
     ext: string

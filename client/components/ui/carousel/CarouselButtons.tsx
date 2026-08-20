@@ -1,6 +1,8 @@
 import React, { PropsWithChildren, useCallback, useEffect, useState } from 'react'
 import { EmblaCarouselType } from 'embla-carousel'
-import { cn, Icon } from 'simple-react-ui-kit'
+import { Button, cn, Icon } from 'simple-react-ui-kit'
+
+import { useTranslation } from 'next-i18next/pages'
 
 import styles from './styles.module.sass'
 
@@ -56,28 +58,38 @@ type PropType = PropsWithChildren<
     React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>
 >
 
-export const PrevButton: React.FC<PropType> = ({ children, ...restProps }) => (
-    <button
-        className={cn(styles.arrowButton, styles.arrowButtonLeft)}
-        type={'button'}
-        {...restProps}
-    >
-        <span>
-            <Icon name={'KeyboardLeft'} />
-            {children}
-        </span>
-    </button>
-)
+export const PrevButton: React.FC<PropType> = ({ children, ...restProps }) => {
+    const { t } = useTranslation()
 
-export const NextButton: React.FC<PropType> = ({ children, ...restProps }) => (
-    <button
-        className={cn(styles.arrowButton, styles.arrowButtonRight)}
-        type={'button'}
-        {...restProps}
-    >
-        <span>
-            <Icon name={'KeyboardRight'} />
-            {children}
-        </span>
-    </button>
-)
+    return (
+        <Button
+            unstyled
+            className={cn(styles.arrowButton, styles.arrowButtonLeft)}
+            aria-label={t('components.ui.carousel.prev', 'Предыдущий слайд')}
+            {...restProps}
+        >
+            <span>
+                <Icon name={'KeyboardLeft'} />
+                {children}
+            </span>
+        </Button>
+    )
+}
+
+export const NextButton: React.FC<PropType> = ({ children, ...restProps }) => {
+    const { t } = useTranslation()
+
+    return (
+        <Button
+            unstyled
+            className={cn(styles.arrowButton, styles.arrowButtonRight)}
+            aria-label={t('components.ui.carousel.next', 'Следующий слайд')}
+            {...restProps}
+        >
+            <span>
+                <Icon name={'KeyboardRight'} />
+                {children}
+            </span>
+        </Button>
+    )
+}

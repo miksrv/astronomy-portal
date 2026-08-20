@@ -1,11 +1,12 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { ApiModel, ApiType } from '@/api'
+import { HOST_METEO_API } from '@/utils/constants'
 import { encodeQueryData } from '@/utils/helpers'
 
 export const APIMeteo = createApi({
     baseQuery: fetchBaseQuery({
-        baseUrl: 'https://api.meteo.miksoft.pro'
+        baseUrl: HOST_METEO_API
     }),
     endpoints: (builder) => ({
         getCurrent: builder.query<ApiModel.Weather, void>({

@@ -6,16 +6,16 @@ import { useRouter } from 'next/dist/client/router'
 import Head from 'next/head'
 import { useSearchParams } from 'next/navigation'
 import { useTranslation } from 'next-i18next/pages'
-import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations'
 import { generateNextSeo } from 'next-seo/pages'
 
-import { API, ApiType, setLocale, SITE_LINK } from '@/api'
+import { API, ApiType, SITE_LINK } from '@/api'
 import { login } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector, wrapper } from '@/api/store'
 import useLocalStorage from '@/hooks/useLocalStorage'
 import { LOCAL_STORAGE } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/errors'
 import * as LocalStorage from '@/utils/localstorage'
+import { initSSRLocale } from '@/utils/ssrLocale'
 
 type AuthPageProps = object
 
@@ -176,7 +176,8 @@ const AuthPage: NextPage<AuthPageProps> = () => {
                                 {token
                                     ? getErrorMessage(magicError) ||
                                       t('pages.auth.magic-link-error', 'Ссылка для входа недействительна или истекла')
-                                    : (error as string)}
+                                    : getErrorMessage(error) ||
+                                      t('pages.auth.oauth-error', 'Не удалось войти через выбранный сервис')}
                             </Message>
                         )}
                         {showSpinner && (
@@ -203,10 +204,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<AuthPageProps>> => {
-            const locale = (context.locale ?? 'en') as ApiType.Locale
-            const translations = await serverSideTranslations(locale)
-
-            store.dispatch(setLocale(locale))
+            const { translations } = await initSSRLocale(store, context)
 
             return {
                 props: {
