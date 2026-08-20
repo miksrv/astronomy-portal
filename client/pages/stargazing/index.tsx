@@ -165,15 +165,6 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
                 </>
             )}
 
-            <div className={styles.archiveLink}>
-                <Button
-                    mode={'secondary'}
-                    icon={'KeyboardRight'}
-                    label={t('pages.stargazing.archive-link', 'Все прошлые астровыезды')}
-                    link={'/stargazing/history'}
-                />
-            </div>
-
             <AppFooter />
         </AppLayout>
     )

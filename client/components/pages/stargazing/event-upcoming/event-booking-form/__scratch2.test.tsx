@@ -1,6 +1,6 @@
-import 'whatwg-fetch'
 import React from 'react'
 import { Provider } from 'react-redux'
+
 import { configureStore } from '@reduxjs/toolkit'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 
@@ -8,6 +8,8 @@ import { API } from '@/api'
 import applicationSlice from '@/api/applicationSlice'
 import authSlice from '@/api/authSlice'
 import { EventBookingForm } from '@/components/pages/stargazing/event-upcoming/event-booking-form'
+
+import 'whatwg-fetch'
 
 // Real store + real API slice, only the network layer is stubbed - to observe
 // the true timing of isSuccess vs paymentRedirect across the actual RTK Query

@@ -242,11 +242,11 @@ type MyComponentProps = { ... }
 
 Each component lives in `component-name/ComponentName.tsx`. When that file accumulates non-JSX logic above/outside the component, pull it into sibling files in the same directory — the goal is a `.tsx` file that reads mostly as markup and wiring, not helper code:
 
-| What                                                          | Goes to        |
-| -------------------------------------------------------------- | -------------- |
+| What                                                                             | Goes to        |
+| -------------------------------------------------------------------------------- | -------------- |
 | Pure helper functions (formatters, parsers, calculators, converters, validators) | `utils.ts`     |
-| Grouped constants — alias/lookup maps, config objects, options lists            | `constants.ts` |
-| Validation schema (e.g. `zod`)                                                  | `schema.ts`    |
+| Grouped constants — alias/lookup maps, config objects, options lists             | `constants.ts` |
+| Validation schema (e.g. `zod`)                                                   | `schema.ts`    |
 
 Keep in the `.tsx` file: the component itself, its props `interface`, small component-local types, and any single trivial one-off constant not worth a whole file. Only split out a file when there's enough there to justify it — don't create an empty-feeling `utils.ts` for one two-line helper. Existing examples: `client/components/pages/stargazing/event-item-data/` (`utils.ts`), `client/components/pages/stargazing/event-form/` (`utils.ts` + `constants.ts` + `schema.ts`).
 
