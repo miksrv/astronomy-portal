@@ -11,6 +11,7 @@ import { closeAuthDialog } from '@/api/applicationSlice'
 
 import { CookieConsent } from '../cookie-consent'
 import { LoginForm } from '../login-form'
+import { SnackbarStack } from '../snackbar-stack'
 
 import { AppHeader } from './app-header'
 import { Menu } from './Menu'
@@ -138,6 +139,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, noTopMargin, ch
             </Dialog>
 
             <CookieConsent />
+
+            <SnackbarStack />
         </div>
     )
 }

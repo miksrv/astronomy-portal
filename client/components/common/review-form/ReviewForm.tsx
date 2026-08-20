@@ -1,10 +1,14 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { Button, Message, TextArea } from 'simple-react-ui-kit'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel } from '@/api'
-import { useApiFormError } from '@/hooks/useApiFormError'
+import useApiFormError from '@/hooks/useApiFormError'
+import useSyncApiFieldErrors from '@/hooks/useSyncApiFieldErrors'
 
 import styles from './styles.module.sass'
 
@@ -26,76 +30,107 @@ interface ReviewFormProps {
     onOptimisticSubmit?: (content: string, rating: number, run: () => Promise<void>) => void
 }
 
+interface ReviewFormValues {
+    rating: number
+    content: string
+}
+
 export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, onSuccess, onOptimisticSubmit }) => {
     const { t } = useTranslation()
 
-    const [rating, setRating] = useState<number>(0)
     const [hoverRating, setHoverRating] = useState<number>(0)
-    const [content, setContent] = useState<string>('')
-    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
     const [submitError, setSubmitError] = useState<unknown>(undefined)
     const [submitSuccess, setSubmitSuccess] = useState(false)
 
     const [createComment, { isLoading }] = API.useCommentsCreateMutation()
 
+    // Same rules as the old hand-rolled `validate()`: a rating is only
+    // mandatory for event reviews, and content must be non-empty, then
+    // within [MIN_CONTENT_LENGTH, MAX_CONTENT_LENGTH] once trimmed.
+    // `superRefine` (rather than chained `.min()`s) mirrors the original
+    // if/else-if branching exactly, so an empty string always reports
+    // "required" rather than also tripping the "too short" check.
+    const reviewSchema = useMemo(
+        () =>
+            z.object({
+                rating: z.number().superRefine((value, ctx) => {
+                    if (entityType === 'event' && value === 0) {
+                        ctx.addIssue({
+                            code: z.ZodIssueCode.custom,
+                            message: t('components.common.review-form.rating-required', 'Пожалуйста, выберите оценку')
+                        })
+                    }
+                }),
+                content: z
+                    .string()
+                    .trim()
+                    .superRefine((value, ctx) => {
+                        if (!value) {
+                            ctx.addIssue({
+                                code: z.ZodIssueCode.custom,
+                                message: t(
+                                    'components.common.review-form.content-required',
+                                    'Пожалуйста, напишите отзыв'
+                                )
+                            })
+                        } else if (value.length < MIN_CONTENT_LENGTH) {
+                            ctx.addIssue({
+                                code: z.ZodIssueCode.custom,
+                                message: t(
+                                    'components.common.review-form.content-too-short',
+                                    'Отзыв должен содержать не менее {{min}} символов',
+                                    { min: MIN_CONTENT_LENGTH }
+                                )
+                            })
+                        } else if (value.length > MAX_CONTENT_LENGTH) {
+                            ctx.addIssue({
+                                code: z.ZodIssueCode.custom,
+                                message: t(
+                                    'components.common.review-form.content-too-long',
+                                    'Отзыв не должен превышать {{max}} символов',
+                                    { max: MAX_CONTENT_LENGTH }
+                                )
+                            })
+                        }
+                    })
+            }),
+        [t, entityType]
+    )
+
+    const {
+        control,
+        handleSubmit,
+        setError,
+        reset,
+        formState: { errors: formErrors, isSubmitting }
+    } = useForm<ReviewFormValues>({
+        resolver: zodResolver(reviewSchema),
+        // Deliberately left at the RHF default (validate on submit, then
+        // re-validate a field live once it has an error) rather than
+        // `onChange` - the old hand-rolled `validate()` only ever ran at
+        // submit time too, and with two independent fields `onChange` mode
+        // would silently disable/clear an untouched sibling field's error
+        // (e.g. a never-clicked rating) without ever surfacing it to the user.
+        defaultValues: { rating: 0, content: '' }
+    })
+
     const { message: apiErrorMessage, fieldErrors: apiFieldErrors } = useApiFormError(submitError)
+    useSyncApiFieldErrors(apiFieldErrors, setError)
 
-    const ratingError = validationErrors.rating || apiFieldErrors.rating
-    const contentError = validationErrors.content || apiFieldErrors.content
-
-    const validate = (trimmedContent: string): Record<string, string> => {
-        const errors: Record<string, string> = {}
-
-        if (entityType === 'event' && rating === 0) {
-            errors.rating = t('components.common.review-form.rating-required', 'Пожалуйста, выберите оценку')
-        }
-
-        if (!trimmedContent) {
-            errors.content = t('components.common.review-form.content-required', 'Пожалуйста, напишите отзыв')
-        } else if (trimmedContent.length < MIN_CONTENT_LENGTH) {
-            errors.content = t(
-                'components.common.review-form.content-too-short',
-                'Отзыв должен содержать не менее {{min}} символов',
-                { min: MIN_CONTENT_LENGTH }
-            )
-        } else if (trimmedContent.length > MAX_CONTENT_LENGTH) {
-            errors.content = t(
-                'components.common.review-form.content-too-long',
-                'Отзыв не должен превышать {{max}} символов',
-                { max: MAX_CONTENT_LENGTH }
-            )
-        }
-
-        return errors
-    }
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-
-        const trimmedContent = content.trim()
-        const errors = validate(trimmedContent)
-
-        if (Object.keys(errors).length > 0) {
-            setValidationErrors(errors)
-            setSubmitSuccess(false)
-            return
-        }
-
-        setValidationErrors({})
+    const onValid = async ({ rating, content }: ReviewFormValues) => {
         setSubmitError(undefined)
         setSubmitSuccess(false)
 
         const run = async () => {
             try {
                 await createComment({
-                    content: trimmedContent,
+                    content,
                     entityId,
                     entityType,
                     rating: rating > 0 ? rating : undefined
                 }).unwrap()
 
-                setContent('')
-                setRating(0)
+                reset({ rating: 0, content: '' })
                 setHoverRating(0)
                 setSubmitSuccess(true)
                 onSuccess?.()
@@ -105,66 +140,81 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
         }
 
         if (onOptimisticSubmit) {
-            onOptimisticSubmit(trimmedContent, rating, run)
+            onOptimisticSubmit(content, rating, run)
         } else {
             await run()
         }
     }
 
-    const activeRating = hoverRating || rating
+    const disabled = isLoading || isSubmitting
 
     return (
         <form
             className={styles.form}
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onValid)}
+            noValidate={true}
         >
             <div className={styles.ratingGroup}>
                 <span className={styles.ratingLabel}>{t('components.common.review-form.rating-label', 'Оценка')}</span>
-                <div
-                    className={styles.stars}
-                    role={'group'}
-                    aria-label={t('components.common.review-form.rating-label', 'Оценка')}
-                >
-                    {Array.from({ length: 5 }, (_, i) => {
-                        const value = i + 1
+                <Controller
+                    name={'rating'}
+                    control={control}
+                    render={({ field }) => {
+                        const activeRating = hoverRating || field.value
+
                         return (
-                            <button
-                                key={value}
-                                type={'button'}
-                                disabled={isLoading}
-                                className={value <= activeRating ? styles.starFilled : styles.starEmpty}
-                                aria-label={`${value} star${value !== 1 ? 's' : ''}`}
-                                aria-pressed={rating === value}
-                                onClick={() => {
-                                    setRating(value)
-                                    setValidationErrors(({ rating: _rating, ...rest }) => rest)
-                                    setSubmitSuccess(false)
-                                }}
-                                onMouseEnter={() => setHoverRating(value)}
-                                onMouseLeave={() => setHoverRating(0)}
+                            <div
+                                className={styles.stars}
+                                role={'group'}
+                                aria-label={t('components.common.review-form.rating-label', 'Оценка')}
                             >
-                                {value <= activeRating ? '★' : '☆'}
-                            </button>
+                                {Array.from({ length: 5 }, (_, i) => {
+                                    const value = i + 1
+                                    return (
+                                        <button
+                                            key={value}
+                                            type={'button'}
+                                            disabled={disabled}
+                                            className={value <= activeRating ? styles.starFilled : styles.starEmpty}
+                                            aria-label={`${value} star${value !== 1 ? 's' : ''}`}
+                                            aria-pressed={field.value === value}
+                                            onClick={() => {
+                                                field.onChange(value)
+                                                setSubmitSuccess(false)
+                                            }}
+                                            onMouseEnter={() => setHoverRating(value)}
+                                            onMouseLeave={() => setHoverRating(0)}
+                                        >
+                                            {value <= activeRating ? '★' : '☆'}
+                                        </button>
+                                    )
+                                })}
+                            </div>
                         )
-                    })}
-                </div>
+                    }}
+                />
             </div>
 
-            {ratingError && <span className={styles.fieldError}>{ratingError}</span>}
+            {formErrors.rating?.message && <span className={styles.fieldError}>{formErrors.rating.message}</span>}
 
-            <TextArea
-                rows={4}
-                autoResize={true}
-                disabled={isLoading}
-                value={content}
-                maxLength={MAX_CONTENT_LENGTH}
-                placeholder={t('components.common.review-form.placeholder', 'Поделитесь впечатлениями...')}
-                error={contentError}
-                onChange={(e) => {
-                    setContent(e.target.value)
-                    setValidationErrors(({ content: _content, ...rest }) => rest)
-                    setSubmitSuccess(false)
-                }}
+            <Controller
+                name={'content'}
+                control={control}
+                render={({ field }) => (
+                    <TextArea
+                        {...field}
+                        rows={4}
+                        autoResize={true}
+                        disabled={disabled}
+                        maxLength={MAX_CONTENT_LENGTH}
+                        placeholder={t('components.common.review-form.placeholder', 'Поделитесь впечатлениями...')}
+                        error={formErrors.content?.message}
+                        onChange={(e) => {
+                            field.onChange(e)
+                            setSubmitSuccess(false)
+                        }}
+                    />
+                )}
             />
 
             {!!submitError && (
@@ -182,9 +232,9 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
                 type={'submit'}
                 mode={'primary'}
                 size={'medium'}
-                disabled={isLoading}
+                disabled={disabled}
                 label={
-                    isLoading
+                    disabled
                         ? t('common.loading', 'Загрузка...')
                         : t('components.common.review-form.submit', 'Отправить отзыв')
                 }
