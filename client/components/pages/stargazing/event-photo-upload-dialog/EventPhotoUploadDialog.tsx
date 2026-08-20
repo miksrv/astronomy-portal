@@ -8,14 +8,10 @@ import { API, ApiModel } from '@/api'
 import { useNavigationGuard } from '@/hooks/useNavigationGuard'
 import { getErrorMessage } from '@/utils/errors'
 
-import styles from './styles.module.sass'
+import { ACCEPTED_TYPES, ACCEPTED_TYPES_ATTR, UPLOAD_CONCURRENCY } from './constants'
+import { fileKey, isAbortError, makeItemId } from './utils'
 
-const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-const ACCEPTED_TYPES_ATTR = ACCEPTED_TYPES.join(',')
-// Concurrent upload requests in flight at once - a middle ground between
-// one-at-a-time (slow for large batches) and firing every file at once
-// (risks overwhelming the server/connection on a big gallery dump).
-const UPLOAD_CONCURRENCY = 4
+import styles from './styles.module.sass'
 
 type QueueItemStatus = 'pending' | 'uploading' | 'done' | 'error' | 'canceled'
 
@@ -27,12 +23,6 @@ interface QueueItem {
 }
 
 type DialogPhase = 'idle' | 'uploading' | 'done'
-
-const isAbortError = (error: unknown): boolean => (error as { name?: string } | undefined)?.name === 'AbortError'
-
-const makeItemId = (file: File, index: number): string => `${file.name}-${file.size}-${file.lastModified}-${index}`
-
-const fileKey = (file: File): string => `${file.name}-${file.size}-${file.lastModified}`
 
 export interface EventPhotoUploadDialogProps {
     eventId?: string

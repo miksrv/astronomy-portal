@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Button, Message, TextArea } from 'simple-react-ui-kit'
-import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import { useTranslation } from 'next-i18next/pages'
@@ -10,10 +9,10 @@ import { API, ApiModel } from '@/api'
 import useApiFormError from '@/hooks/useApiFormError'
 import useSyncApiFieldErrors from '@/hooks/useSyncApiFieldErrors'
 
-import styles from './styles.module.sass'
+import { MAX_CONTENT_LENGTH } from './constants'
+import { createReviewSchema } from './schema'
 
-const MIN_CONTENT_LENGTH = 10
-const MAX_CONTENT_LENGTH = 1000
+import styles from './styles.module.sass'
 
 interface ReviewFormProps {
     entityType: ApiModel.CommentEntityType
@@ -44,58 +43,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
 
     const [createComment, { isLoading }] = API.useCommentsCreateMutation()
 
-    // Same rules as the old hand-rolled `validate()`: a rating is only
-    // mandatory for event reviews, and content must be non-empty, then
-    // within [MIN_CONTENT_LENGTH, MAX_CONTENT_LENGTH] once trimmed.
-    // `superRefine` (rather than chained `.min()`s) mirrors the original
-    // if/else-if branching exactly, so an empty string always reports
-    // "required" rather than also tripping the "too short" check.
-    const reviewSchema = useMemo(
-        () =>
-            z.object({
-                rating: z.number().superRefine((value, ctx) => {
-                    if (entityType === 'event' && value === 0) {
-                        ctx.addIssue({
-                            code: z.ZodIssueCode.custom,
-                            message: t('components.common.review-form.rating-required', 'Пожалуйста, выберите оценку')
-                        })
-                    }
-                }),
-                content: z
-                    .string()
-                    .trim()
-                    .superRefine((value, ctx) => {
-                        if (!value) {
-                            ctx.addIssue({
-                                code: z.ZodIssueCode.custom,
-                                message: t(
-                                    'components.common.review-form.content-required',
-                                    'Пожалуйста, напишите отзыв'
-                                )
-                            })
-                        } else if (value.length < MIN_CONTENT_LENGTH) {
-                            ctx.addIssue({
-                                code: z.ZodIssueCode.custom,
-                                message: t(
-                                    'components.common.review-form.content-too-short',
-                                    'Отзыв должен содержать не менее {{min}} символов',
-                                    { min: MIN_CONTENT_LENGTH }
-                                )
-                            })
-                        } else if (value.length > MAX_CONTENT_LENGTH) {
-                            ctx.addIssue({
-                                code: z.ZodIssueCode.custom,
-                                message: t(
-                                    'components.common.review-form.content-too-long',
-                                    'Отзыв не должен превышать {{max}} символов',
-                                    { max: MAX_CONTENT_LENGTH }
-                                )
-                            })
-                        }
-                    })
-            }),
-        [t, entityType]
-    )
+    const reviewSchema = useMemo(() => createReviewSchema(t, entityType), [t, entityType])
 
     const {
         control,

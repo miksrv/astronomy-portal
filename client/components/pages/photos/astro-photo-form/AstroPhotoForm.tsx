@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Controller, FieldErrors, useFieldArray, useForm } from 'react-hook-form'
 import { Button, Container, Input, Select } from 'simple-react-ui-kit'
-import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import Image from 'next/image'
@@ -17,20 +16,14 @@ import { flattenFieldErrorPaths, scrollToFirstFieldError } from '@/utils/formErr
 import { createLargePhotoUrl } from '@/utils/photos'
 import { formatObjectName } from '@/utils/strings'
 
+import { equipmentPresets, FILTER_KEYS } from './constants'
+import { createPhotoSchema } from './schema'
+
 import styles from './styles.module.sass'
 
 export type AstroPhotoFormType = Partial<ApiModel.Photo> & {
     upload?: File
 }
-
-// Preset equipment sets
-const equipmentPresets = [
-    { name: 'HEQ5 + ASI1600', equipments: [1, 5, 7, 10, 12, 14, 15, 17] },
-    { name: 'EQ6 + ASI6200', equipments: [2, 5, 8, 11, 13, 14, 16, 18] },
-    { name: 'Dob + Canon', equipments: [4, 9] }
-]
-
-const FILTER_KEYS = Object.keys(ApiModel.filters) as ApiModel.FilterTypes[]
 
 interface AstroPhotoFormProps {
     disabled?: boolean
@@ -71,50 +64,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
 
     const { data: equipmentListData, isLoading: equipmentListLoading } = API.useEquipmentsGetListQuery()
 
-    const photoSchema = useMemo(() => {
-        const framesMessage = t(
-            'components.pages.photos.astro-photo-form.frames-required',
-            'Введите количество кадров (целое число больше нуля)'
-        )
-        const exposureMessage = t(
-            'components.pages.photos.astro-photo-form.exposure-required',
-            'Введите выдержку в минутах (число больше нуля)'
-        )
-
-        const filterItemSchema = z.object({
-            filter: z.enum(FILTER_KEYS as [ApiModel.FilterTypes, ...ApiModel.FilterTypes[]]),
-            frames: z.number({ error: framesMessage }).int(framesMessage).positive(framesMessage),
-            exposure: z.number({ error: exposureMessage }).positive(exposureMessage)
-        })
-
-        return z.object({
-            categories: z
-                .array(z.number())
-                .min(
-                    1,
-                    t('components.pages.photos.astro-photo-form.categories-required', 'Выберите хотя бы одну категорию')
-                ),
-            objects: z
-                .array(z.string())
-                .min(1, t('components.pages.photos.astro-photo-form.objects-required', 'Выберите хотя бы один объект')),
-            equipments: z
-                .array(z.number())
-                .min(
-                    1,
-                    t(
-                        'components.pages.photos.astro-photo-form.equipments-required',
-                        'Выберите хотя бы одно оборудование'
-                    )
-                ),
-            date: z
-                .string()
-                .min(1, t('components.pages.photos.astro-photo-form.date-required', 'Укажите дату обработки')),
-            filters: z
-                .array(filterItemSchema)
-                .min(1, t('components.pages.photos.astro-photo-form.filters-required', 'Добавьте хотя бы один фильтр')),
-            upload: z.instanceof(File).optional()
-        })
-    }, [t])
+    const photoSchema = useMemo(() => createPhotoSchema(t), [t])
 
     const {
         control,

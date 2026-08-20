@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Controller, FieldErrors, useForm } from 'react-hook-form'
 import dayjs from 'dayjs'
 import { Button, Container, Input, Message, Select } from 'simple-react-ui-kit'
-import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import { useRouter } from 'next/router'
@@ -21,40 +20,14 @@ import { LOCAL_STORAGE } from '@/utils/constants'
 import { getErrorMessage, getFieldErrors } from '@/utils/errors'
 import { flattenFieldErrorPaths, scrollToFirstFieldError } from '@/utils/formErrorScroll'
 
+import { buildProfileSchema, ProfileFormValues } from './schema'
+
 import styles from './styles.module.sass'
 
 interface ProfileCardProps {
     user?: ApiModel.User
     isOnboarding?: boolean
 }
-
-// Loose on purpose (international formats vary a lot, and PhoneInput already
-// strips anything but digits/+/-/()/spaces as the user types) - just enough
-// digits to reject stray/incomplete input, not a strict phone format check.
-const PHONE_MIN_DIGITS = 6
-
-const countDigits = (value: string): number => (value.match(/\d/g) ?? []).length
-
-const buildProfileSchema = (t: (key: string, fallback: string) => string) => {
-    return z.object({
-        name: z.string().trim().min(1, t('pages.profile.name-required', 'Введите имя')),
-        phone: z
-            .string()
-            .trim()
-            .refine((value) => value === '' || countDigits(value) >= PHONE_MIN_DIGITS, {
-                message: t('pages.profile.phone-invalid', 'Введите корректный номер телефона')
-            }),
-        birthday: z
-            .string()
-            .trim()
-            .refine((value) => value === '' || value <= new Date().toISOString().slice(0, 10), {
-                message: t('pages.profile.birthday-future', 'Дата рождения не может быть в будущем')
-            }),
-        sex: z.enum(['m', 'f']).optional()
-    })
-}
-
-type ProfileFormValues = z.infer<ReturnType<typeof buildProfileSchema>>
 
 export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) => {
     const { t, i18n } = useTranslation()

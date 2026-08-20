@@ -3,10 +3,12 @@ import React from 'react'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel, useAppSelector } from '@/api'
-import { formatDate, getSecondsUntilUTCDate } from '@/utils/dates'
+import { getSecondsUntilUTCDate } from '@/utils/dates'
 import { hasPermission } from '@/utils/permissions'
 
 import { EventRow } from '../event-row'
+
+import { EventsYearGroup, groupEventsByYear } from './utils'
 
 import styles from './styles.module.sass'
 
@@ -14,30 +16,6 @@ interface EventsListProps {
     events?: ApiModel.Event[]
     /** Group events into per-year sections with a timeline marker. Assumes `events` is already sorted newest-first. */
     groupByYear?: boolean
-}
-
-interface EventsYearGroup {
-    year: string
-    events: ApiModel.Event[]
-}
-
-// Adjacent events sharing a year are merged into one group, relying on the
-// API's newest-first ordering — no sorting/re-grouping by value is needed.
-const groupEventsByYear = (events: ApiModel.Event[]): EventsYearGroup[] => {
-    const groups: EventsYearGroup[] = []
-
-    events.forEach((event) => {
-        const year = formatDate(event.date?.date, 'YYYY') || '—'
-        const lastGroup = groups[groups.length - 1]
-
-        if (lastGroup?.year === year) {
-            lastGroup.events.push(event)
-        } else {
-            groups.push({ year, events: [event] })
-        }
-    })
-
-    return groups
 }
 
 export const EventsList: React.FC<EventsListProps> = ({ events, groupByYear = false }) => {
@@ -81,7 +59,7 @@ export const EventsList: React.FC<EventsListProps> = ({ events, groupByYear = fa
         return <div className={styles.eventsList}>{events?.map(renderEventRow)}</div>
     }
 
-    const groups = groupEventsByYear(events || [])
+    const groups: EventsYearGroup[] = groupEventsByYear(events || [])
 
     return (
         <div className={styles.eventsTimeline}>

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo } from 'react'
 import { Controller, FieldErrors, useForm, useWatch } from 'react-hook-form'
 import { Button, Container, Input, Select, TextArea } from 'simple-react-ui-kit'
-import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import { useTranslation } from 'next-i18next/pages'
@@ -12,6 +11,8 @@ import useApiFormError from '@/hooks/useApiFormError'
 import useScrollToApiFieldErrors from '@/hooks/useScrollToApiFieldErrors'
 import useSyncApiFieldErrors from '@/hooks/useSyncApiFieldErrors'
 import { flattenFieldErrorPaths, scrollToFirstFieldError } from '@/utils/formErrorScroll'
+
+import { buildObjectSchema } from './schema'
 
 import styles from './styles.module.sass'
 
@@ -27,13 +28,6 @@ interface AstroObjectFormProps {
     onSubmit?: (formData?: AstroObjectFormType) => void
     onCancel?: () => void
 }
-
-// RA/DEC are stored in degrees (see `utils/coordinates.ts`), so RA is validated
-// against a full 0-360 turn and DEC against the -90..90 range of a sphere.
-const RA_MIN = 0
-const RA_MAX = 360
-const DEC_MIN = -90
-const DEC_MAX = 90
 
 interface AstroObjectFormValues {
     categories: number[]
@@ -61,70 +55,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
 
     const { data: categoriesListData, isLoading: categoriesListLoading } = API.useCategoriesGetListQuery()
 
-    const objectSchema = useMemo(
-        () =>
-            z.object({
-                categories: z
-                    .array(z.number())
-                    .min(
-                        1,
-                        t(
-                            'components.pages.objects.astro-object-form.categories-required',
-                            'Выберите хотя бы одну категорию'
-                        )
-                    ),
-                name: z
-                    .string()
-                    .trim()
-                    .min(
-                        1,
-                        t('components.pages.objects.astro-object-form.name-required', 'Введите имя объекта в каталогах')
-                    ),
-                title: z
-                    .string()
-                    .trim()
-                    .min(1, t('components.pages.objects.astro-object-form.title-required', 'Введите название объекта')),
-                fitsCloudLink: z.string().trim(),
-                ra: z
-                    .number({
-                        error: t('components.pages.objects.astro-object-form.ra-required', 'Введите значение RA')
-                    })
-                    .min(
-                        RA_MIN,
-                        t(
-                            'components.pages.objects.astro-object-form.ra-range',
-                            'RA должно быть в диапазоне от 0 до 360'
-                        )
-                    )
-                    .max(
-                        RA_MAX,
-                        t(
-                            'components.pages.objects.astro-object-form.ra-range',
-                            'RA должно быть в диапазоне от 0 до 360'
-                        )
-                    ),
-                dec: z
-                    .number({
-                        error: t('components.pages.objects.astro-object-form.dec-required', 'Введите значение DEC')
-                    })
-                    .min(
-                        DEC_MIN,
-                        t(
-                            'components.pages.objects.astro-object-form.dec-range',
-                            'DEC должно быть в диапазоне от -90 до 90'
-                        )
-                    )
-                    .max(
-                        DEC_MAX,
-                        t(
-                            'components.pages.objects.astro-object-form.dec-range',
-                            'DEC должно быть в диапазоне от -90 до 90'
-                        )
-                    ),
-                description: z.string().trim()
-            }),
-        [t]
-    )
+    const objectSchema = useMemo(() => buildObjectSchema(t), [t])
 
     const {
         control,

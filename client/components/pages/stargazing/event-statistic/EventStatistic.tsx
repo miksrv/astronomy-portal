@@ -17,6 +17,9 @@ import {
     STATUS_ORDER
 } from '@/utils/eventRegistrations'
 
+import { AGE_GROUP_LABELS, AGE_GROUP_ORDER, CHILD_AGE_GROUP_LABELS, CHILD_AGE_GROUP_ORDER } from './constants'
+import { getChildAgeGroup } from './utils'
+
 import styles from './styles.module.sass'
 
 const ReactECharts = dynamic<EChartsReactProps>(() => import('echarts-for-react'), {
@@ -25,50 +28,6 @@ const ReactECharts = dynamic<EChartsReactProps>(() => import('echarts-for-react'
 
 interface EventStatisticProps {
     eventId: string
-}
-
-const AGE_GROUP_LABELS: Record<string, string> = {
-    '18to25': '18–25',
-    '26to35': '26–35',
-    '36to50': '36–50',
-    over50: '50+',
-    under18: 'до 18'
-}
-
-const AGE_GROUP_ORDER = ['under18', '18to25', '26to35', '36to50', 'over50']
-
-// Children's ages are entered per-child at booking time (`EventBookingForm`'s
-// age selector only offers 5–17), so these buckets are sized for that range
-// (2-year steps, with the last one widened to 15–17 to cover the remainder)
-// rather than mirroring the adult under18/18to25/... groups above.
-const CHILD_AGE_GROUP_LABELS: Record<string, string> = {
-    '11to12': '11–12',
-    '13to14': '13–14',
-    '15to17': '15–17',
-    '5to6': '5–6',
-    '7to8': '7–8',
-    '9to10': '9–10'
-}
-
-const CHILD_AGE_GROUP_ORDER = ['5to6', '7to8', '9to10', '11to12', '13to14', '15to17']
-
-const getChildAgeGroup = (age: number): string => {
-    if (age <= 6) {
-        return '5to6'
-    }
-    if (age <= 8) {
-        return '7to8'
-    }
-    if (age <= 10) {
-        return '9to10'
-    }
-    if (age <= 12) {
-        return '11to12'
-    }
-    if (age <= 14) {
-        return '13to14'
-    }
-    return '15to17'
 }
 
 export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {

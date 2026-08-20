@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { Button, Input, Message } from 'simple-react-ui-kit'
-import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import Image from 'next/image'
@@ -18,13 +17,13 @@ import vkLogo from '@/public/images/vk-logo.png'
 import yandexLogo from '@/public/images/yandex-logo.png'
 import { AUTH_GOOGLE_ENABLED, LOCAL_STORAGE } from '@/utils/constants'
 
+import { createMagicLinkSchema } from './schema'
+
 import styles from './styles.module.sass'
 
 interface LoginFormProps {
     onError?: (error?: ApiType.ResError) => void
 }
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 interface MagicLinkFormValues {
     email: string
@@ -42,17 +41,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
     const [requestMagicLink, { data: magicLinkData, error: magicLinkError, isLoading: isMagicLinkLoading }] =
         API.useAuthRequestMagicLinkMutation()
 
-    const magicLinkSchema = useMemo(
-        () =>
-            z.object({
-                email: z
-                    .string()
-                    .trim()
-                    .min(1, t('components.common.login-form.email-required', 'Введите email'))
-                    .regex(EMAIL_PATTERN, t('components.common.login-form.email-invalid', 'Введите корректный email'))
-            }),
-        [t]
-    )
+    const magicLinkSchema = useMemo(() => createMagicLinkSchema(t), [t])
 
     const {
         control,
