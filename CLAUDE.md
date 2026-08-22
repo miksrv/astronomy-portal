@@ -8,9 +8,9 @@ A DIY amateur observatory web application with remote monitoring, equipment cont
 
 **Current version:** 4.6.3 (see `CHANGELOG.md` for history)
 
-**Feature specs:** `ROADMAP.md` gives a high-level list of planned/in-flight features; each one is detailed in its own file under `features/` (e.g. `features/stargazing-waitlist.md`).
+**Feature specs:** `ROADMAP.md` gives a high-level list of planned/in-flight features; each one is detailed in its own file under `features/` (e.g. `features/admin-dashboard.md`).
 
-**Known gap — sold-out event UI:** the "Места закончились" panel in `EventUpcoming` (`client/components/pages/stargazing/event-upcoming/`) currently only shows the "what you can do" info card. It deliberately omits a "Уведомить меня" (notify-me) waitlist opt-in button, since that requires the FEAT-17 waitlist backend (new `events_waitlist` table + endpoints — see `features/stargazing-waitlist.md`) which hasn't been built yet. Wire the button up once FEAT-17 lands.
+**Known gap — sold-out event UI:** the "Места закончились" panel in `EventUpcoming` (`client/components/pages/stargazing/event-upcoming/`) currently only shows the "what you can do" info card, with no waitlist/notify-me opt-in — there is no waitlist backend (no `events_waitlist` table or endpoints). Revisit if a waitlist feature is planned again.
 
 ### Domain rule: subscription = authentication
 
@@ -93,7 +93,7 @@ Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, 
 - `review-card/` — displays a single review with author avatar, star rating, text, date, delete button
 - `review-form/` — form to submit a review (star selector + TextArea + submit); shows API validation errors inline
 
-**Utils:** `client/utils/` — coordinates.ts (celestial math), charts.ts, colors.ts, dates.ts, errors.ts, helpers.ts, moon.ts, pagination.ts, photos.ts, strings.ts, eventPhotos.ts, localstorage.ts, constants.ts. Most have a corresponding `.test.ts`.
+**Utils:** `client/utils/` — coordinates.ts (celestial math), charts.ts, colors.ts, dates.ts, errors.ts, helpers.ts, moon.ts, pagination.ts, photos.ts, strings.ts, eventMedia.ts, localstorage.ts, constants.ts. Most have a corresponding `.test.ts`.
 
 **Path alias:** `@/*` maps to the `client/` root (e.g., `@/api/models/photo`).
 
@@ -131,7 +131,8 @@ Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, 
 - `GET|POST|PATCH|DELETE /objects`, `/objects/:any` — astronomical objects CRUD
 - `GET /fits/:any` — FITS file data (`Fits::show`)
 - `GET|POST|PATCH|DELETE /photos`, `/photos/:any` + `POST /photos/:any/upload` — astrophoto CRUD + upload
-- `GET|POST|PATCH|DELETE /events` + `upcoming`, `upcoming/registered`, `photos`, `:id/statistic`, `members/:id`, `checkin/:id`, `ticket/:id`, `:id/cover`, `booking`, `cancel`, `payment/status`, `payment/callback`, `upload/:id` — stargazing events, ticketing and payment (Alfa-Bank)
+- `GET|POST|PATCH|DELETE /events` + `upcoming`, `upcoming/registered`, `media`, `:id/statistic`, `members/:id`, `checkin/:id`, `ticket/:id`, `:id/cover`, `booking`, `cancel`, `payment/status`, `payment/callback` — stargazing events, ticketing and payment (Alfa-Bank)
+- `POST /events/media/init/:id` → `POST /events/media/chunk/:sessionId` (repeated) → `POST /events/media/finalize/:sessionId`, plus `DELETE /events/media/:sessionId` — chunked gallery upload for photos **and** videos, replacing the old single-request `POST /events/upload/:id` (there is no practical file-size ceiling as a result; `MEDIA_UPLOAD_MAX_SIZE` is a 2GB anti-abuse guard only)
 - `GET|POST|PATCH|DELETE /mailings`, `/mailings/:id` + `unsubscribe`, `audiences`, `:id/upload`, `:id/test`, `:id/send` — email mailing campaigns
 - `GET /push/vapid-key`, `POST /push/subscribe` (public, rate-limited — a guest may opt in before logging in), `DELETE /push/subscribe` (auth required) — Web Push opt-in/opt-out
 - `GET|POST|PATCH|DELETE /push-notifications`, `/push-notifications/:id` + `audiences`, `:id/upload`, `:id/test` (rate-limited), `:id/send` — admin Web Push campaigns (mirrors `/mailings`)
@@ -144,7 +145,7 @@ Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, 
 
 **Controllers** (`server/app/Controllers/`): Auth, Camera, Categories, Comments, Equipment, Events, Files, Mailings, Members, Objects, Photos, Relay, Sitemap, Statistic.
 
-**Models:** `server/app/Models/ApplicationBaseModel.php` is the shared base; all models extend it. Entity classes in `server/app/Entities/` map to DB rows. Models cover: Users, Photos, PhotosAuthor, PhotosCategory, PhotosEquipments, PhotosFilters, PhotosObject, Objects, ObjectCategory, ObjectFitsFiles, ObjectFitsFilters, ObservatoryEquipment, ObservatorySettings, Events, EventsPhotos, EventsUsers, Category, Comments, Mailings, MailingEmails, MailingUnsubscribes, Payments, EmailQueue, MagicLinkTokens.
+**Models:** `server/app/Models/ApplicationBaseModel.php` is the shared base; all models extend it. Entity classes in `server/app/Entities/` map to DB rows. Models cover: Users, Photos, PhotosAuthor, PhotosCategory, PhotosEquipments, PhotosFilters, PhotosObject, Objects, ObjectCategory, ObjectFitsFiles, ObjectFitsFilters, ObservatoryEquipment, ObservatorySettings, Events, EventsMedia, EventsMediaUploads, EventsUsers, Category, Comments, Mailings, MailingEmails, MailingUnsubscribes, Payments, EmailQueue, MagicLinkTokens.
 
 **Backend conventions:**
 - API responses use **camelCase** field names (e.g. `createdAt`, not `created_at`) — format in model, not controller
