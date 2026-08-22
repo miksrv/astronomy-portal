@@ -10,18 +10,13 @@ Each feature is described in detail in the `features/` directory.
 
 | ID      | Title                              | Status    | Spec                                                         |
 |---------|------------------------------------|-----------|--------------------------------------------------------------|
-| FEAT-4  | Photo Likes / Favourites           | Planned   | —                                                            |
-| FEAT-7  | Object Observation History         | Planned   | —                                                            |
-| FEAT-8  | Photo Comments                     | Planned   | —                                                            |
 | FEAT-9  | "What's Visible Tonight" Planner   | Planned   | —                                                            |
-| FEAT-11 | OpenGraph Meta for Photos/Objects  | Planned   | —                                                            |
-| FEAT-12 | Object Catalog Filters & Sorting   | Planned   | —                                                            |
-| **Stargazing UX improvements** ||||
-| FEAT-17 | Event Waitlist System              | Planned   | [features/stargazing-waitlist.md](features/stargazing-waitlist.md) |
-| FEAT-18 | Event Reminder Emails (24h Before) | Planned   | [features/stargazing-event-reminders.md](features/stargazing-event-reminders.md) |
-| FEAT-19 | i18n Fixes in EventBookingForm     | Planned   | [features/stargazing-i18n-booking-form.md](features/stargazing-i18n-booking-form.md) |
 | **Core UX** ||||
-| FEAT-25 | Admin / Moderator Dashboard        | Planned   | [features/admin-dashboard.md](features/admin-dashboard.md)   |
+| FEAT-25 | Admin Dashboard (`/admin`)         | Planned   | [features/admin-dashboard.md](features/admin-dashboard.md)   |
+| **Stargazing UX improvements** ||||
+| FEAT-26 | Event Gallery Video Uploads (Chunked Media Upload) | In review | [features/stargazing-event-video-uploads.md](features/stargazing-event-video-uploads.md) |
+| **Star Atlas / SEO** ||||
+| FEAT-27 | Star Atlas Upgrade (`/starmap` Planetarium Mode) | Planned | [features/star-atlas-upgrade.md](features/star-atlas-upgrade.md) |
 
 ---
 
