@@ -1,436 +1,166 @@
-# FEAT-25 — Admin / Moderator Dashboard
+# FEAT-25 — Admin Dashboard (`/admin`)
 
-**Status:** Planned  
-**Priority:** High  
-**Affects:** Backend (CodeIgniter 4) + Frontend (Next.js)  
-**Parallel implementation:** Backend and Frontend can work in parallel once the API contract is agreed.
+**Status:** Planned
+**Priority:** Medium
+**Affects:** Backend (CodeIgniter 4) + Frontend (Next.js)
+**Parallel implementation:** Backend and Frontend can work in parallel once the `/admin/overview` response shape is agreed.
 
 ---
 
 ## Overview
 
-A dedicated dashboard page at `/dashboard` for users with role `ADMIN` or `MODERATOR`. The page shows aggregated statistics, near-real-time registration activity during open registration periods, recent reviews, and charts — all styled consistently with the existing observatory charts (`echarts-for-react`, dark theme).
+There is currently no landing page for the `/admin/*` section — `client/pages/admin/` only has `mailing/`, `push-notifications/`, `roles.tsx`, and `users.tsx`; the admin dropdown in `AppHeader` links straight into whichever of those a user is permitted to see, with no overview in between. Add `client/pages/admin/index.tsx` (route `/admin`) as that overview: quick links to every admin section the current user can reach, plus a handful of at-a-glance stats for the sections they manage.
 
-**Key feature:** when a stargazing event has open registration, the dashboard shows a live registration feed (polled every 10–15 seconds via RTK Query) — new registrations appear automatically without page reload.
+This supersedes the earlier draft of this spec, which predated the 4.8.0 privilege-based access-control refactor (it was written against a fixed `admin`/`moderator` role ENUM that no longer exists) and assumed a live-polling registration feed that doesn't fit the domain: stargazing events run about 3 times a year (see "Domain rule: subscription = authentication" in `CLAUDE.md`), so there is no real-time volume to poll for.
 
 ---
 
 ## Business Rules
 
-1. Accessible to roles: `ADMIN`, `MODERATOR`. `SECURITY` role does not have access.
-2. SSR auth guard: redirect to `/` if no token or insufficient role.
-3. All data is fetched via API — no SSR data prefetch for the live sections (to enable polling).
-4. **Polling:** RTK Query `pollingInterval: 12000` (12 seconds) on the live registration feed endpoint. Other sections use standard one-time fetch.
-5. Charts use `echarts-for-react` with the same dark theme config as `client/components/pages/observatory/widget-chart/Chart.tsx` — same colors, same font sizes, same grid/tooltip style.
-6. The dashboard is linked in the admin user dropdown menu (`AppHeader`).
+1. **No new "dashboard" privilege and no admin bypass** — same rule as everywhere else in the app (see "Maintenance rule: roles & permissions table" in `CLAUDE.md`). `/admin` is visible to a user who holds **at least one** of the privileges already used by the existing `/admin/*` pages (`objects.manage`, `photos.manage`, `mailings.manage`, `push.manage`, `users.manage`, `events.create`, `events.update`, `events.delete`, `events.checkin`, `events.statistic`, `events.refund`, `events.users`). A user with none of these is redirected to `/`.
+2. This permission list already exists once, inline, as `AppHeader`'s `adminLinks` array (`client/components/common/app-layout/app-header/AppHeader.tsx`) — it must be extracted to one shared module and imported by both `AppHeader` (dropdown visibility) and the new page (SSR guard + tile list), not duplicated a second time.
+3. Each quick-link tile and each stats widget is shown **independently**, gated by the specific privilege it needs — mirrors how `Events::statistic()`, `Mailings::list()`, etc. each check their own privilege inline. A user with only `events.checkin` sees a "Чек-ин" tile and nothing else; they never even issue the requests backing the other widgets.
+4. Stats are a plain snapshot fetched once on page load (standard RTK Query, no polling) — no live feed. If real-time visibility into registrations is wanted later during an open-registration window, that's a separate, smaller feature scoped on its own rather than bundled here.
+5. No new aggregate table or cron job. Every number either already exists behind an endpoint the frontend can call directly, or is a cheap `COUNT`/`AVG` added to a model that already queries the same table.
 
 ---
 
 ## Backend Tasks
 
-### BE-1 — New Controller: `Dashboard`
+### BE-1 — Add `total` to `GET /members`
 
-**File:** `server/app/Controllers/Dashboard.php`
+**File:** `server/app/Controllers/Members.php` (`list()`), `server/app/Models/UsersModel.php`
 
-Auth guard: `isAuth` + `role` in `['admin', 'moderator']`.
+`Members::list()` currently returns `{ items }` only (paginated, no count of the unfiltered total). Add a `total` field (count of all non-deleted users, ignoring `search`/`roleIds` filters) so the dashboard's "Всего пользователей" tile doesn't need its own endpoint. Same `Permission::USERS_MANAGE` guard as today.
 
----
+### BE-2 — `CommentsModel::getAggregateStats(string $entityType): array`
 
-### BE-2 — `GET /dashboard/stats`
-
-Aggregated totals. No polling needed — fetch once on page load.
-
-**Response:**
-```json
-{
-  "totalUsers": 1240,
-  "newUsersThisMonth": 38,
-  "totalEvents": 87,
-  "totalRegistrations": 4320,
-  "averageRating": 4.7,
-  "totalReviews": 312
-}
-```
-
-**SQL hints:**
-- `totalUsers`: `SELECT COUNT(*) FROM users WHERE deleted_at IS NULL`
-- `newUsersThisMonth`: `WHERE created_at >= DATE_FORMAT(NOW(), '%Y-%m-01')`
-- `totalRegistrations`: `SELECT COUNT(*) FROM events_users WHERE deleted_at IS NULL`
-- `averageRating`: `SELECT AVG(rating) FROM comments WHERE deleted_at IS NULL AND status = 'visible' AND entity_type = 'event'` — available after FEAT-24; return `null` until then
-
----
-
-### BE-3 — `GET /dashboard/registrations/chart`
-
-Data for the "Registrations per event" bar chart. Returns the last 12 events with their registration counts, sorted by event date ASC.
-
-**Response:**
-```json
-{
-  "items": [
-    { "eventId": "...", "title": "Персеиды 2024", "date": "2024-08-07", "registrations": 142, "checkins": 98 }
-  ]
-}
-```
-
----
-
-### BE-4 — `GET /dashboard/users/chart`
-
-Data for the "New users per month" line chart. Returns counts grouped by month for the last 12 months.
-
-**Response:**
-```json
-{
-  "items": [
-    { "month": "2024-09", "count": 24 },
-    { "month": "2024-10", "count": 31 }
-  ]
-}
-```
-
-**SQL:**
-```sql
-SELECT DATE_FORMAT(created_at, '%Y-%m') AS month, COUNT(*) AS count
-FROM users
-WHERE deleted_at IS NULL AND created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
-GROUP BY month
-ORDER BY month ASC
-```
-
----
-
-### BE-5 — `GET /dashboard/live`
-
-The **polled** endpoint. Returns current registration state for the active (upcoming) event.  
-Returns `null` if there is no event with open registration right now.
-
-**"Open registration" condition:**
-```sql
-registration_start < NOW() AND registration_end > NOW() AND date > NOW()
-```
-
-**Response:**
-```json
-{
-  "event": {
-    "id": "...",
-    "title": "Персеиды — Время метеоров",
-    "date": "2025-08-07T18:30:00Z",
-    "maxTickets": 200,
-    "availableTickets": 47,
-    "totalAdults": 141,
-    "totalChildren": 12,
-    "totalRegistrations": 98
-  },
-  "recentRegistrations": [
-    {
-      "userId": "...",
-      "userName": "Иван П.",
-      "userAvatar": "abc.jpg",
-      "adults": 2,
-      "children": 1,
-      "registeredAt": "2025-07-20T14:23:00Z",
-      "isReturning": true
-    }
-  ]
-}
-```
-
-**`isReturning`:** `true` if user has attended at least one previous event (`COUNT(events_users) > 1` for this user, excluding current event).
-
-**`recentRegistrations`:** last 20 registrations for the active event, sorted by `created_at DESC`.
-
-**Note:** `totalAdults`, `totalChildren` are computed from `SUM` on active `events_users` rows.
-
----
-
-### BE-6 — `GET /dashboard/reviews/recent`
-
-Last 10 visible reviews across all events. For the reviews feed section.
-
-**Response:**
-```json
-{
-  "items": [
-    {
-      "id": "...",
-      "content": "Было круто!",
-      "rating": 5,
-      "createdAt": "...",
-      "entityType": "event",
-      "entityId": "...",
-      "entityTitle": "Персеиды 2025",
-      "author": { "id": "...", "name": "Мария С.", "avatar": "..." }
-    }
-  ]
-}
-```
-
----
-
-### BE-7 — Routes
+**File:** `server/app/Models/CommentsModel.php`
 
 ```php
-$routes->group('dashboard', static function ($routes) {
-    $routes->get('stats',                  'Dashboard::stats');
-    $routes->get('registrations/chart',    'Dashboard::registrationsChart');
-    $routes->get('users/chart',            'Dashboard::usersChart');
-    $routes->get('live',                   'Dashboard::live');
-    $routes->get('reviews/recent',         'Dashboard::recentReviews');
-    $routes->options('(:any)',             static function () {});
-});
+public function getAggregateStats(string $entityType): array
+{
+    $row = $this->select('AVG(rating) as average_rating, COUNT(*) as total')
+        ->where(['entity_type' => $entityType, 'status' => 'visible'])
+        ->where('rating IS NOT NULL')
+        ->first();
+
+    return [
+        'averageRating' => $row->average_rating !== null ? round((float) $row->average_rating, 1) : null,
+        'total'         => (int) $row->total,
+    ];
+}
 ```
+
+No aggregate like this exists yet anywhere in the codebase — this is new, not gated behind any other unbuilt feature.
+
+### BE-3 — New `Dashboard` controller
+
+**File:** `server/app/Controllers/Dashboard.php`
+**Route:** `GET /admin/overview` (`server/app/Config/Routes.php`, mirrors the existing `/admin/*`-ish grouping used by `Mailings`/`Roles`)
+
+One endpoint, one response, each top-level key present only if the session holds the privilege it depends on — same inline-check style as every other controller, just checking several privileges in one action instead of one per route:
+
+```php
+public function overview(): ResponseInterface
+{
+    if (!$this->session->isAuth) {
+        return $this->respondUnauthorized(lang('App.accessDenied'));
+    }
+
+    $data = [];
+
+    if ($this->session->can(Permission::EVENTS_STATISTIC)) {
+        $eventsModel      = new EventsModel();
+        $eventsUsersModel = new EventsUsersModel();
+        $data['events'] = [
+            'conductedCount'    => $eventsModel->getConductedCount(),
+            'totalParticipants' => $eventsUsersModel->getTotalParticipants(),
+            'upcomingCount'     => $eventsModel->where('date >', date('Y-m-d H:i:s'))->countAllResults(),
+        ];
+    }
+
+    if ($this->session->can(Permission::MAILINGS_MANAGE)) {
+        $mailingsModel = new MailingsModel();
+        $data['mailings'] = [
+            'totalCampaigns' => $mailingsModel->countAllResults(),
+            'sendingCount'   => $mailingsModel->where('status', 'sending')->countAllResults(),
+        ];
+    }
+
+    if ($this->session->can(Permission::PUSH_MANAGE)) {
+        $pushModel = new PushNotificationsModel();
+        $data['pushNotifications'] = [
+            'totalCampaigns' => $pushModel->countAllResults(),
+            'sendingCount'   => $pushModel->where('status', 'sending')->countAllResults(),
+        ];
+    }
+
+    if ($this->session->can(Permission::USERS_MANAGE)) {
+        $usersModel = new UsersModel();
+        $data['users'] = [
+            'total'         => $usersModel->countAllResults(),
+            'newThisMonth'  => $usersModel->where('created_at >=', date('Y-m-01'))->countAllResults(),
+        ];
+    }
+
+    if ($this->session->can(Permission::COMMENTS_MODERATE)) {
+        $data['reviews'] = (new CommentsModel())->getAggregateStats('event');
+    }
+
+    return $this->respond($data);
+}
+```
+
+If `$data` ends up empty (a token that passed `isAuth` but somehow holds none of the checked privileges — shouldn't happen given rule 1, but the endpoint doesn't assume it), just return the empty object; the frontend already won't render anything for it since it gates each widget by permission independently, not by response-key presence.
+
+### BE-4 — Language files
+
+Only reuses the existing `App.accessDenied` key — no new lang strings needed.
 
 ---
 
 ## Frontend Tasks
 
-### FE-1 — New page: `client/pages/dashboard/index.tsx`
+### FE-1 — Extract the shared admin-links list
 
-**SSR auth guard:** redirect to `/` if role is not `ADMIN` or `MODERATOR`.
+**New file:** `client/utils/adminNav.ts` (or alongside `client/utils/permissions.ts`)
 
-**Layout:**
-```
-AppLayout (noindex, nofollow)
-  AppToolbar (title="Дашборд")
-  [Stats Row]                  ← 6 stat cards in a grid
-  [Live Registration Feed]     ← shown only when active registration exists
-  [Charts Row]                 ← registrations per event + new users per month
-  [Recent Reviews]             ← last 10 reviews with delete action
-  AppFooter
-```
+Move `AppHeader`'s `adminLinks` array (href, label key, required permissions) out into an exported constant. `AppHeader` imports it for the dropdown; the new `/admin` page imports the same constant for its SSR guard and its tile grid. No behavior change for the existing dropdown.
 
----
+### FE-2 — `client/pages/admin/index.tsx`
 
-### FE-2 — Stats Row
+- SSR (`getServerSideProps`): same auth-guard pattern as `/admin/mailing`, `/admin/users`, etc. — redirect to `/` if no token, or if `hasAnyPermission(user, ADMIN_LINKS.flatMap(l => l.permissions))` is false.
+- Renders a tile grid from `ADMIN_LINKS`, filtered the same way `AppHeader` already filters them (`item.permissions.some((p) => userPermissions.includes(p))`) — one `Container`/card per section, icon + title + short description, linking to its existing page.
+- Above or beside the tile grid, one small stats widget per section the user can see, each independently gated by `hasPermission()`:
+  - **Мероприятия** (`events.statistic`): conducted count, total participants, upcoming count.
+  - **Рассылки** (`mailings.manage`): total campaigns, currently sending.
+  - **Push-уведомления** (`push.manage`): total campaigns, currently sending.
+  - **Пользователи** (`users.manage`): total users, new this month.
+  - **Отзывы** (`comments.moderate`): average rating, total reviews.
+- New RTK Query endpoint `dashboardGetOverview` (`GET /admin/overview`) in `client/api/api.ts`; add `client/api/types/dashboard.ts` for the response shape. Skip the query entirely (`skip: true`) if the signed-in user holds none of the privileges the endpoint's sections depend on, rather than firing it and rendering nothing.
 
-**File:** `client/components/pages/dashboard/StatsRow.tsx`
+### FE-3 — Admin dropdown gets an "Обзор" entry
 
-6 cards in a CSS grid (3 columns desktop, 2 tablet, 1 mobile):
+Add `/admin` as the first item in `AppHeader`'s admin dropdown (visible under the same combined condition as the rest of the dropdown, i.e. whenever any admin link is visible), so there's a way back to the overview from any admin subpage.
 
-| Icon | Label | Value |
-|------|-------|-------|
-| `Users` | Всего пользователей | `totalUsers` |
-| `UserPlus` | Новых за месяц | `newUsersThisMonth` |
-| `Calendar` | Мероприятий | `totalEvents` |
-| `Ticket` | Всего регистраций | `totalRegistrations` |
-| `Star` | Средний рейтинг | `averageRating ?? '—'` |
-| `Chat` | Отзывов | `totalReviews` |
+### FE-4 — i18n
 
-Each card: icon + label text + large bold number. Same `<Container>` style as the rest of the project.
+New keys under `pages.admin.index` (RU + EN, both locale files) for tile labels/descriptions and stat labels — no hardcoded strings, per the frontend coding conventions.
 
----
+### FE-5 — Run after changes
 
-### FE-3 — Live Registration Feed
-
-**File:** `client/components/pages/dashboard/LiveFeed.tsx`
-
-Shown only when `dashboardLive.data?.event` is not null.
-
-**Top summary bar:**
-```
-[Event title]   Мест осталось: 47 / 200   Взрослых: 141   Детей: 12   Всего: 153
-```
-
-**Recent registrations list** (last 20, newest on top):
-
-Each row:
-```
-[UserAvatar 32px]  [Иван П.]  [Взрослых: 2, Детей: 1]  [3 мин назад]  [Badge: Впервые / Постоянный]
-```
-
-- "Впервые" badge (blue) when `isReturning === false`
-- "Постоянный" badge (green) when `isReturning === true`
-- New rows animate in from top (CSS transition) when polled data changes
-
-**RTK Query polling config:**
-```typescript
-const { data } = API.useDashboardGetLiveQuery(undefined, {
-    pollingInterval: 12000,
-    skipPollingIfUnfocused: true  // pause polling when tab is not active
-})
-```
-
----
-
-### FE-4 — Charts
-
-**File:** `client/components/pages/dashboard/DashboardCharts.tsx`
-
-Two charts side by side (stacked on mobile), using `echarts-for-react` with the same dark theme as the observatory `Chart.tsx`:
-- Same `backgroundColor: '#2c2d2e'`
-- Same `borderColor: '#444546'`, `textPrimaryColor: '#e1e3e6'`
-- Same grid, tooltip, legend config
-
-#### Chart A — "Регистрации по мероприятиям" (Bar chart)
-
-- X axis: event short titles (truncated to 12 chars), rotated 30°
-- Y axis: number of registrations
-- Two bar series: "Зарегистрировано" (blue) + "Пришло" (green, `checkins`)
-- Last 12 events
-
-```typescript
-const chartOption: EChartsOption = {
-    backgroundColor: '#2c2d2e',
-    // ... same grid/tooltip/legend config as Chart.tsx
-    xAxis: { type: 'category', data: items.map(i => truncate(i.title, 12)) },
-    yAxis: { type: 'value' },
-    series: [
-        { name: 'Зарегистрировано', type: 'bar', data: items.map(i => i.registrations), color: '#4a90d9' },
-        { name: 'Пришло', type: 'bar', data: items.map(i => i.checkins), color: '#52c41a' }
-    ]
-}
-```
-
-#### Chart B — "Новые пользователи по месяцам" (Line chart)
-
-- X axis: month labels ("Сен 2024", "Окт 2024", …)
-- Y axis: number of new users
-- One line series with area fill
-- Last 12 months
-
----
-
-### FE-5 — Recent Reviews feed
-
-**File:** `client/components/pages/dashboard/RecentReviews.tsx`
-
-List of last 10 reviews. Each item:
-- Author avatar + name
-- Entity link (event title → `/stargazing/:id`)
-- Rating stars
-- Review text (truncated to 120 chars, expandable)
-- Date
-- "Скрыть" button (sets `status = 'hidden'`, calls `DELETE /comments/:id`)
-
----
-
-### FE-6 — RTK Query endpoints
-
-```typescript
-dashboardGetStats: builder.query<ApiType.Dashboard.Stats, void>({
-    query: () => 'dashboard/stats'
-}),
-dashboardGetLive: builder.query<ApiType.Dashboard.LiveData | null, void>({
-    query: () => 'dashboard/live'
-}),
-dashboardGetRegistrationsChart: builder.query<ApiType.Dashboard.RegistrationsChart, void>({
-    query: () => 'dashboard/registrations/chart'
-}),
-dashboardGetUsersChart: builder.query<ApiType.Dashboard.UsersChart, void>({
-    query: () => 'dashboard/users/chart'
-}),
-dashboardGetRecentReviews: builder.query<{ items: ApiModel.Comment[] }, void>({
-    providesTags: ['Comments'],
-    query: () => 'dashboard/reviews/recent'
-}),
-```
-
-### FE-7 — TypeScript types
-
-**File:** `client/api/types/dashboard.ts`
-
-```typescript
-export interface Stats {
-    totalUsers: number
-    newUsersThisMonth: number
-    totalEvents: number
-    totalRegistrations: number
-    averageRating: number | null
-    totalReviews: number
-}
-
-export interface LiveRegistration {
-    userId: string
-    userName: string
-    userAvatar?: string
-    adults: number
-    children: number
-    registeredAt: string
-    isReturning: boolean
-}
-
-export interface LiveData {
-    event: {
-        id: string
-        title: string
-        date: string
-        maxTickets: number
-        availableTickets: number
-        totalAdults: number
-        totalChildren: number
-        totalRegistrations: number
-    }
-    recentRegistrations: LiveRegistration[]
-}
-
-export interface RegistrationsChart {
-    items: { eventId: string; title: string; date: string; registrations: number; checkins: number }[]
-}
-
-export interface UsersChart {
-    items: { month: string; count: number }[]
-}
-```
-
-Export via `client/api/types/index.ts`:
-```typescript
-export * as Dashboard from './dashboard'
-```
-
-### FE-8 — Add Dashboard link in AppHeader
-
-In the admin dropdown, add "Дашборд" → `/dashboard` link. Visible to `ADMIN` and `MODERATOR` roles.
-
-### FE-9 — robots.txt
-
-Add `/dashboard` to `Disallow` in `client/public/robots.txt`.
-
-### FE-10 — i18n keys
-
-Key prefix: `pages.dashboard.*`
-
-```json
-{
-  "title": "Дашборд",
-  "stats.total-users": "Всего пользователей",
-  "stats.new-users": "Новых за месяц",
-  "stats.total-events": "Мероприятий",
-  "stats.total-registrations": "Регистраций",
-  "stats.avg-rating": "Средний рейтинг",
-  "stats.total-reviews": "Отзывов",
-  "live.title": "Регистрация идёт",
-  "live.seats-left": "Мест осталось",
-  "live.adults": "Взрослых",
-  "live.children": "Детей",
-  "live.total": "Всего",
-  "live.first-time": "Впервые",
-  "live.returning": "Постоянный",
-  "charts.registrations-title": "Регистрации по мероприятиям",
-  "charts.users-title": "Новые пользователи по месяцам",
-  "charts.registered": "Зарегистрировано",
-  "charts.checkins": "Пришло",
-  "reviews.title": "Последние отзывы",
-  "reviews.hide": "Скрыть"
-}
+```bash
+yarn eslint:fix && yarn prettier:fix && yarn test
 ```
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] `/dashboard` is accessible only to ADMIN and MODERATOR roles; others redirect to `/`
-- [ ] Stats row shows correct aggregated counts
-- [ ] Live feed section is hidden when no active registration; shown when registration is open
-- [ ] Live feed polls every 12 seconds and shows new registrations without page reload
-- [ ] `isReturning` badge correctly distinguishes first-time vs returning participants
-- [ ] Bar chart shows last 12 events with registrations vs checkins
-- [ ] Line chart shows new users per month for last 12 months
-- [ ] Both charts use the same dark theme as the observatory `Chart.tsx`
-- [ ] Recent reviews feed shows last 10 reviews with delete/hide action
-- [ ] "Дашборд" link is visible in the header dropdown for ADMIN and MODERATOR
-- [ ] `/dashboard` is added to `robots.txt` Disallow
-- [ ] Polling pauses when browser tab is not active (`skipPollingIfUnfocused: true`)
-- [ ] All strings use i18n keys (works in EN and RU)
-- [ ] `yarn eslint:fix`, `yarn prettier:fix`, `yarn test`, `yarn build` all pass
+- [ ] `/admin` redirects guests and users with none of the admin privileges to `/`
+- [ ] The tile grid shows exactly the sections the signed-in user is permitted to open — verified for at least two different privilege combinations (e.g. `events.checkin` only vs. `users.manage` only)
+- [ ] Each stats widget is requested and rendered only when the user holds its specific privilege; no 403s occur for widgets a user can't see (because they're never requested)
+- [ ] `GET /members` gains `total` without changing its existing paginated `items` shape or breaking `/admin/users`
+- [ ] `AppHeader`'s admin dropdown and `/admin`'s tile grid share one source of truth for the link list — no second copy of the permission-to-route mapping
+- [ ] README's "User Roles & Permissions" tables are updated if any privilege's usage surface changed (it shouldn't — this feature reuses existing privileges only)
