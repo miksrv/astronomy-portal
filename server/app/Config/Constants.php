@@ -95,6 +95,15 @@ defined('PHOTO_PREVIEW_HEIGHT') || define('PHOTO_PREVIEW_HEIGHT', 282); // 500
 defined('AVATAR_WIDTH') || define('AVATAR_WIDTH', 400);
 defined('AVATAR_HEIGHT') || define('AVATAR_HEIGHT', 400);
 
+// FEAT-26: chunked event-gallery media (photo/video) uploads.
+// MEDIA_UPLOAD_CHUNK_SIZE is server-authoritative — the client never
+// hardcodes it, it reads it back from Events::mediaInit()'s response.
+// MEDIA_UPLOAD_MAX_SIZE is a generous safety ceiling against disk-space
+// abuse only (the endpoint is already privilege-gated to trusted
+// uploaders) - not surfaced anywhere in the UI.
+defined('MEDIA_UPLOAD_CHUNK_SIZE') || define('MEDIA_UPLOAD_CHUNK_SIZE', 12 * 1024 * 1024);
+defined('MEDIA_UPLOAD_MAX_SIZE')   || define('MEDIA_UPLOAD_MAX_SIZE', 2 * 1024 * 1024 * 1024);
+
 // Relative uploads path for web
 defined('PATH_PHOTOS') || define('PATH_PHOTOS', 'astrophotos/');
 defined('PATH_STAR_MAPS') || define('PATH_STAR_MAPS', 'starmaps/');

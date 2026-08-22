@@ -106,7 +106,7 @@ $routes->group('events', static function ($routes) {
     $routes->get('/', 'Events::list');
     $routes->get('upcoming', 'Events::upcoming');
     $routes->get('upcoming/registered', 'Events::upcomingRegistered');
-    $routes->get('photos', 'Events::photos');
+    $routes->get('media', 'Events::media'); // was: get('photos', 'Events::photos') — FEAT-26
     $routes->get('(:alphanum)/statistic', 'Events::statistic/$1');
     $routes->get('(:alphanum)/registrations', 'Events::registrations/$1');
     $routes->get('(:alphanum)', 'Events::show/$1');
@@ -116,6 +116,12 @@ $routes->group('events', static function ($routes) {
 
     $routes->post('/', 'Events::create');
     $routes->patch('(:alphanum)', 'Events::update/$1');
+    // Declared before delete('(:alphanum)', ...) below — a two-segment
+    // literal+placeholder path never actually collides with a single-segment
+    // (:alphanum) route, but keeping the more specific route first matches
+    // the ordering convention used for the GET routes above and avoids any
+    // ambiguity if the placeholder definitions ever change.
+    $routes->delete('media/(:alphanum)', 'Events::mediaCancel/$1');
     $routes->delete('(:alphanum)', 'Events::delete/$1');
     $routes->post('(:alphanum)/cover', 'Events::cover/$1');
 
@@ -125,7 +131,12 @@ $routes->group('events', static function ($routes) {
     $routes->match(['get', 'post'], 'payment/callback', 'Events::paymentCallback');
     $routes->post('registrations/(:alphanum)/verify-payment', 'Events::verifyRegistrationPayment/$1');
     $routes->post('registrations/(:alphanum)/refund', 'Events::refundRegistrationPayment/$1');
-    $routes->post('upload/(:alphanum)', 'Events::upload/$1');
+    // FEAT-26 chunked media upload — replaces the old single-request
+    // post('upload/(:alphanum)', 'Events::upload/$1'). No rate limit on the
+    // chunk endpoint: chunks are many-per-upload by definition.
+    $routes->post('media/init/(:alphanum)', 'Events::mediaInit/$1');
+    $routes->post('media/chunk/(:alphanum)', 'Events::mediaChunk/$1');
+    $routes->post('media/finalize/(:alphanum)', 'Events::mediaFinalize/$1');
     $routes->options('/', static function () {});
     $routes->options('(:any)', static function () {});
 });
