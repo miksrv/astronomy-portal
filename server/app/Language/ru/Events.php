@@ -33,6 +33,10 @@ return [
     'refundSuccess'      => 'Возврат выполнен, регистрация аннулирована.',
     'refundFailed'       => 'Банк отклонил возврат: {0}',
 
+    // FEAT-26 — загрузка видео/фото в галерею события чанками.
+    'uploadSessionNotActive' => 'Эта сессия загрузки больше не активна.',
+    'missingUploadChunks'    => 'Загрузка не завершена — отсутствуют части: {0}. Попробуйте ещё раз.',
+
     // Ticket (rendered onto the PNG ticket image)
     'ticketHeading'           => 'Билет на астровыезд',
     'ticketParticipantsLabel' => 'Участников',
