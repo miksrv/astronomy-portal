@@ -1,0 +1,107 @@
+.content
+    display: flex
+    flex-direction: column
+    gap: 14px
+
+.dropZone
+    position: relative
+    border: 2px dashed var(--input-border-color)
+    border-radius: var(--border-radius)
+    padding: 28px 16px
+    text-align: center
+    cursor: pointer
+    color: var(--text-color-secondary)
+    transition: border-color 0.15s ease, background-color 0.15s ease
+
+    &:hover
+        border-color: var(--color-primary)
+        color: var(--text-color-primary)
+
+    &.dropZoneActive
+        border-color: var(--color-primary)
+        background: var(--dropdown-background-color-hover)
+
+    p
+        margin: 0
+        pointer-events: none
+
+.hiddenInput
+    display: none
+
+.selectedFilesList
+    margin: 0
+    padding: 0
+    list-style: none
+    max-height: 160px
+    overflow-y: auto
+    display: flex
+    flex-direction: column
+    gap: 4px
+
+    li
+        display: flex
+        align-items: center
+        justify-content: space-between
+        gap: 8px
+        font-size: 13px
+        color: var(--text-color-secondary)
+        padding: 4px 8px
+        border-radius: var(--border-radius)
+        background: var(--dropdown-background-color-hover)
+
+.selectedFileInfo
+    display: flex
+    flex-direction: column
+    gap: 2px
+    overflow: hidden
+
+.selectedFileName
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.selectedFileError
+    font-size: 11px
+    color: var(--color-red)
+
+.selectedFileUnsupported
+    background: var(--color-red-background)
+
+.removeFileButton
+    border: none
+    background: none
+    cursor: pointer
+    color: var(--text-color-secondary)
+    flex-shrink: 0
+
+    &:hover
+        color: var(--color-red)
+
+.progressLabel
+    margin: 0
+    font-size: 13px
+    color: var(--text-color-secondary)
+
+.statusText
+    margin: 0
+    font-size: 13px
+    color: var(--text-color-primary)
+    min-height: 18px
+
+.errorList
+    margin: 0
+    padding: 0
+    list-style: none
+    max-height: 160px
+    overflow-y: auto
+    display: flex
+    flex-direction: column
+    gap: 2px
+    font-size: 12px
+    color: var(--color-red)
+
+.footer
+    display: flex
+    gap: 10px
+    justify-content: flex-end
+    flex-wrap: wrap
