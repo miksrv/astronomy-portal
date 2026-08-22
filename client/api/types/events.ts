@@ -17,7 +17,7 @@ export interface ResList {
 
 export type ResItem = ApiModel.Event
 
-export type ResPhoto = ApiModel.EventPhoto
+export type ResMedia = ApiModel.EventMedia
 
 export type ResCheckin = Pick<ApiModel.Event, 'members'> & {
     checkin?: ApiType.DateTime
@@ -53,8 +53,8 @@ export type EventFormType = Partial<
     upload?: File
 }
 
-/* Photo List */
-export interface ReqPhotoList {
+/* Media List */
+export interface ReqMediaList {
     eventId?: string
     limit?: number
     /** Number of rows to skip, for pagination — mirrors the comments API. */
@@ -64,10 +64,10 @@ export interface ReqPhotoList {
     photographer?: string
 }
 
-export interface ResPhotoList {
+export interface ResMediaList {
     /** Total matching rows, ignoring pagination — same shape as the comments list response. */
     total?: number
-    items?: ApiModel.EventPhoto[]
+    items?: ApiModel.EventMedia[]
     /**
      * Every distinct photographer credit for the event, regardless of this
      * request's own `limit`/`offset`/`photographer` filter — used for the
@@ -76,9 +76,50 @@ export interface ResPhotoList {
     photographers?: string[]
 }
 
-export interface ReqUploadPhoto {
-    formData?: FormData
-    eventId?: string
+/* Chunked media upload (FEAT-26) — replaces the old single-request ReqUploadPhoto */
+
+export interface ReqMediaUploadInit {
+    eventId: string
+    fileName: string
+    mimeType: string
+    totalSize: number
+    mediaType: ApiModel.EventMediaType
+}
+
+export interface ResMediaUploadInit {
+    sessionId: string
+    /** Server-authoritative chunk size in bytes — the client must slice the file with this, never a hardcoded value. */
+    chunkSize: number
+}
+
+export interface ReqMediaUploadChunk {
+    sessionId: string
+    /** `chunkIndex` (number) + `chunk` (Blob), built by `chunkedUpload.ts`. */
+    formData: FormData
+}
+
+export interface ResMediaUploadChunk {
+    /** Chunk indices the server has received so far for this session. */
+    receivedChunks: number[]
+    receivedBytes: number
+}
+
+export interface ReqMediaUploadFinalize {
+    /** Not sent to the server — only used locally to invalidate the right `EventMedia`/`Events` cache tags once this resolves. */
+    eventId: string
+    sessionId: string
+    /** `photographerName?`, `takenAt?` (photo) or `duration`/`width`/`height` + `poster` (video), built by `chunkedUpload.ts`. */
+    formData: FormData
+}
+
+export type ResMediaUploadFinalize = ApiModel.EventMedia
+
+export interface ReqMediaUploadCancel {
+    sessionId: string
+}
+
+export interface ResMediaUploadCancel {
+    status: 'aborted'
 }
 
 /* Registration */

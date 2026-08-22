@@ -55,7 +55,7 @@ export interface Event {
         expiresInSeconds: number
     }
     canceled?: boolean
-    photos?: EventPhoto[]
+    photos?: EventMedia[]
     /** False for events that never went through online booking (sidewalk astronomy, legacy archive imports) — no registration window applies. */
     requiresRegistration?: boolean
     registrationStart?: DateTime
@@ -66,15 +66,34 @@ export interface Event {
     views?: number
 }
 
-export interface EventPhoto {
+/** `'photo' | 'video'` discriminator for a gallery media item — see `EventMedia`. */
+export type EventMediaType = 'photo' | 'video'
+
+/**
+ * A single item in an event's gallery feed — a photo or a video, both
+ * uploaded through the same chunked-upload flow and stored in one
+ * chronological, photographer-filterable feed (FEAT-26). Renamed from
+ * `EventPhoto`: only `mediaType` and `duration` are genuinely video-specific,
+ * everything else (dimensions, photographer credit, `takenAt`) is shared.
+ */
+export interface EventMedia {
     eventId: string
     name: string
+    /**
+     * File extension of the underlying stored file. For a video, the
+     * `_preview` thumbnail is always `.jpg` regardless of this value (a
+     * poster frame is always a captured JPEG still) — see
+     * `client/utils/eventMedia.ts`.
+     */
     ext: string
     width: number
     height: number
+    mediaType: EventMediaType
+    /** Video length in seconds. Video-only, `undefined` for a photo. */
+    duration?: number
     /** Free-text photographer credit, entered at upload time. */
     photographer?: string
-    /** ISO datetime the photo was taken (from EXIF `DateTimeOriginal`), used for chronological ordering. */
+    /** ISO datetime the photo was taken (from EXIF `DateTimeOriginal`), used for chronological ordering. Photo-only. */
     takenAt?: string
 }
 
