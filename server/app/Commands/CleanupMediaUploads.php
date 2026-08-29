@@ -51,6 +51,11 @@ class CleanupMediaUploads extends BaseCommand
             try {
                 $this->removeDirectory(UPLOAD_EVENTS . $session->event_id . '/tmp/' . $session->id . '/');
 
+                // Also take away the shared per-event tmp/ parent once it's
+                // empty — rmdir() refuses a non-empty directory, so a still-
+                // active session's chunks keep it alive.
+                @rmdir(UPLOAD_EVENTS . $session->event_id . '/tmp');
+
                 // Hard delete — events_media_uploads has no soft-deletes,
                 // an abandoned session carries no audit value once purged.
                 $uploadsModel->delete($session->id);

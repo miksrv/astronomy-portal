@@ -1712,6 +1712,19 @@ class Events extends BaseApiController
     }
 
     /**
+     * Removes a session's temp chunk directory, then the shared per-event
+     * `tmp/` parent if this was its last session — rmdir() refuses to remove
+     * a non-empty directory, so a concurrently uploading session keeps the
+     * parent alive and only the truly last cleanup takes it away.
+     */
+    private function removeSessionTmpDir(string $eventId, string $sessionId): void
+    {
+        $this->removeDirectory($this->mediaUploadTmpDir($eventId, $sessionId));
+
+        @rmdir(UPLOAD_EVENTS . $eventId . '/tmp');
+    }
+
+    /**
      * Scans a session's temp chunk directory and returns which chunk
      * indices are currently on disk plus their combined byte size.
      * Recomputed from disk (rather than an incrementing counter) so a
@@ -2155,7 +2168,7 @@ class Events extends BaseApiController
 
             (new EventsMediaModel())->insert($mediaEntity);
 
-            $this->removeDirectory($tmpDir);
+            $this->removeSessionTmpDir($uploadSession->event_id, $uploadSession->id);
 
             $uploadsModel->update($uploadSession->id, ['status' => EventMediaUploadEntity::STATUS_COMPLETED]);
 
@@ -2212,7 +2225,7 @@ class Events extends BaseApiController
         }
 
         try {
-            $this->removeDirectory($this->mediaUploadTmpDir($uploadSession->event_id, $uploadSession->id));
+            $this->removeSessionTmpDir($uploadSession->event_id, $uploadSession->id);
 
             $uploadsModel->delete($uploadSession->id);
 

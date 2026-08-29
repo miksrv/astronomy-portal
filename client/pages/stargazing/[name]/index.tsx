@@ -215,7 +215,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                                 mode={'primary'}
                                 onClick={handleUploadMediaClick}
                             >
-                                {t('pages.stargazing.upload-photos-button', 'Фото')}
+                                {t('pages.stargazing.upload-media-button', 'Медиа')}
                             </Button>
                         )}
 

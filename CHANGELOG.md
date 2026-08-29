@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 4.11.0
+
+### Minor Changes
+
+- Stargazing event galleries now support video alongside photos: media is uploaded through a new chunked upload flow (removing the old single-request size limit), with video tiles in the gallery and playback in the lightbox
+
 ## 4.10.0
 
 ### Minor Changes

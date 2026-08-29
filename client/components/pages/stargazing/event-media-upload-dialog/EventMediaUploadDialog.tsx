@@ -39,9 +39,10 @@ export interface EventMediaUploadDialogProps {
     eventId?: string
     /**
      * Distinct photographer credits already used for this event, sourced from
-     * the dedicated `events/:id/photographers` endpoint - independent of
-     * which page of the (server-paginated) gallery happens to be loaded, so
-     * suggestions aren't missing anyone whose media is past the first page.
+     * the `photographers` field of the `GET /events/media` response —
+     * independent of which page of the (server-paginated) gallery happens to
+     * be loaded, so suggestions aren't missing anyone whose media is past the
+     * first page.
      */
     photographers?: string[]
     open: boolean

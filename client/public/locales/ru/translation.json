@@ -695,7 +695,7 @@
             "reviews": "Отзывы участников",
             "photo-caption-with-photographer": "{{eventTitle}} — фото от {{photographer}}",
             "photo-caption": "{{eventTitle}} (Фото №{{number}})",
-            "upload-photos-button": "Фото",
+            "upload-media-button": "Медиа",
             "photos-from-stargazing": "Фотографии с мероприятия",
             "photos-loading-more": "Загрузка ещё фотографий…",
             "photos-show-all": "Смотреть все ({{total}})",
