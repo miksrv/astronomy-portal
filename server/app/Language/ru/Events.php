@@ -36,6 +36,8 @@ return [
     // FEAT-26 — загрузка видео/фото в галерею события чанками.
     'uploadSessionNotActive' => 'Эта сессия загрузки больше не активна.',
     'missingUploadChunks'    => 'Загрузка не завершена — отсутствуют части: {0}. Попробуйте ещё раз.',
+    'invalidChunkIndex'      => 'Неверный номер части: в этой загрузке части от 0 до {0}.',
+    'invalidChunkSize'       => 'Неверный размер части: ожидалось {0} байт, получено {1}.',
 
     // Ticket (rendered onto the PNG ticket image)
     'ticketHeading'           => 'Билет на астровыезд',

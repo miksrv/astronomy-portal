@@ -155,7 +155,7 @@ Roles are managed entirely through data, not code — `/admin/roles` lets an adm
 | `EVENTS_CREATE` | Creating a new stargazing event |
 | `EVENTS_UPDATE` | Editing an event and replacing its cover image. Also exempts the viewer from the address/coordinates gating on `GET /events/:id` (see "Event Location & Map" below) so the edit form always shows the real saved values, not just for a viewer with their own booking |
 | `EVENTS_DELETE` | Deleting an event |
-| `EVENTS_GALLERY_UPLOAD` | Uploading photos to an event's gallery after the fact |
+| `EVENTS_GALLERY_UPLOAD` | Uploading media — photos **and** videos — to an event's gallery after the fact, across the whole chunked upload flow (`POST /events/media/init/:id`, `POST /events/media/chunk/:sessionId`, `POST /events/media/finalize/:sessionId`, `DELETE /events/media/:sessionId`) |
 | `EVENTS_CHECKIN` | QR check-in and viewing any attendee's ticket |
 | `EVENTS_STATISTIC` | Event statistics, the registrations table, and re-verifying a registration's payment |
 | `EVENTS_REFUND` | Forced refund of a paid registration (stricter than `EVENTS_STATISTIC` — moves real money) |

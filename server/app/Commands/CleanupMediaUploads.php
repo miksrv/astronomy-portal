@@ -17,6 +17,11 @@
  * Add to cron (runs every minute, alongside system:send-email/send-push -
  * cheap no-op when there is nothing stale):
  *   * * * * * cd /path/to/server && php spark media:cleanup-uploads >> /dev/null 2>&1
+ *
+ * NOTE: the hosting crontab lives outside this repo, so registering that
+ * line is a manual deployment step and is NOT done yet - see "CLI Commands"
+ * in server/CLAUDE.md. Until it is, only an explicit Events::mediaCancel()
+ * cleans a session's temp chunks up; abandoned ones stay on disk.
  */
 
 namespace App\Commands;

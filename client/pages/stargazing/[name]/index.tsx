@@ -116,12 +116,23 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 
     // Rich, unique per-item text - used as the `<img alt>` on both the
     // gallery thumbnails and the lightbox (accessibility/SEO), independent of
-    // whatever's shown in the lightbox's on-screen caption below. Text stays
-    // photo-worded even for a video item (existing i18n keys) - there's no
-    // separate wording for "видео от {{photographer}}" yet, and the caption
-    // is still accurate enough (it's this event's gallery content either way).
-    const getMediaCaption = (media: ApiModel.EventMedia, index: number): string =>
-        media.photographer
+    // whatever's shown in the lightbox's on-screen caption below. Worded per
+    // media type: telling a screen-reader user a video is a "фото" misstates
+    // what the item actually is.
+    const getMediaCaption = (media: ApiModel.EventMedia, index: number): string => {
+        if (media.mediaType === 'video') {
+            return media.photographer
+                ? t('pages.stargazing.video-caption-with-author', '{{eventTitle}} — видео от {{author}}', {
+                      author: media.photographer,
+                      eventTitle: title
+                  })
+                : t('pages.stargazing.video-caption', '{{eventTitle}} (Видео №{{number}})', {
+                      eventTitle: title,
+                      number: index + 1
+                  })
+        }
+
+        return media.photographer
             ? t('pages.stargazing.photo-caption-with-photographer', '{{eventTitle}} — фото от {{photographer}}', {
                   eventTitle: title,
                   photographer: media.photographer
@@ -130,6 +141,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                   eventTitle: title,
                   number: index + 1
               })
+    }
 
     const adjacentEvents = useMemo(() => {
         const sortedEvents = [...(eventsList || [])].sort((a, b) => {

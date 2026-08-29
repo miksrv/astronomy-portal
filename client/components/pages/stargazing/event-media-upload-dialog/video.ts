@@ -2,6 +2,30 @@
 // render its poster frame before the file is treated as unreadable.
 const METADATA_TIMEOUT_MS = 30_000
 
+/**
+ * Why the browser couldn't produce a video's metadata/poster. A stable code
+ * rather than a message: the failure is rendered to the user through the
+ * dialog's `getErrorMessage`, and only the component has `t()` - a message
+ * baked in here would be shown untranslated to an English-locale visitor.
+ */
+export type VideoMetadataErrorCode =
+    /** The container/codec couldn't be decoded at all (or took too long to). */
+    | 'decode'
+    /** Decoded, but the reported dimensions/duration are unusable. */
+    | 'metadata'
+    /** Decoded, but the poster frame couldn't be captured/encoded. */
+    | 'poster'
+
+export class VideoMetadataError extends Error {
+    public readonly code: VideoMetadataErrorCode
+
+    public constructor(code: VideoMetadataErrorCode) {
+        super(`Video metadata extraction failed: ${code}`)
+        this.name = 'VideoMetadataError'
+        this.code = code
+    }
+}
+
 export interface VideoMetadata {
     width: number
     height: number
@@ -33,7 +57,7 @@ export const extractVideoMetadata = (file: File): Promise<VideoMetadata> => {
         // hang with no way out: Cancel only flips a flag that's checked
         // *between* awaits, so it can't unstick an await that never resolves.
         const timeoutId = setTimeout(() => {
-            reject(new Error('Не удалось прочитать видеофайл'))
+            reject(new VideoMetadataError('decode'))
         }, METADATA_TIMEOUT_MS)
 
         const video = document.createElement('video')
@@ -41,18 +65,18 @@ export const extractVideoMetadata = (file: File): Promise<VideoMetadata> => {
         video.muted = true
         video.playsInline = true
 
-        const fail = (error: Error) => {
+        const fail = (error: VideoMetadataError) => {
             clearTimeout(timeoutId)
             reject(error)
         }
 
-        video.onerror = () => fail(new Error('Не удалось прочитать видеофайл'))
+        video.onerror = () => fail(new VideoMetadataError('decode'))
 
         video.onloadedmetadata = () => {
             const { videoWidth, videoHeight, duration } = video
 
             if (!videoWidth || !videoHeight || !Number.isFinite(duration) || duration <= 0) {
-                fail(new Error('Не удалось определить параметры видео'))
+                fail(new VideoMetadataError('metadata'))
                 return
             }
 
@@ -65,7 +89,7 @@ export const extractVideoMetadata = (file: File): Promise<VideoMetadata> => {
                     const context = canvas.getContext('2d')
 
                     if (!context) {
-                        fail(new Error('Не удалось создать превью видео'))
+                        fail(new VideoMetadataError('poster'))
                         return
                     }
 
@@ -74,7 +98,7 @@ export const extractVideoMetadata = (file: File): Promise<VideoMetadata> => {
                     canvas.toBlob(
                         (blob) => {
                             if (!blob) {
-                                fail(new Error('Не удалось создать превью видео'))
+                                fail(new VideoMetadataError('poster'))
                                 return
                             }
 
@@ -89,12 +113,12 @@ export const extractVideoMetadata = (file: File): Promise<VideoMetadata> => {
                         'image/jpeg',
                         0.85
                     )
-                } catch (error) {
-                    fail(error as Error)
+                } catch {
+                    fail(new VideoMetadataError('poster'))
                 }
             }
 
-            video.onerror = () => fail(new Error('Не удалось прочитать видеофайл'))
+            video.onerror = () => fail(new VideoMetadataError('decode'))
             video.currentTime = Math.min(1, duration / 2)
         }
 

@@ -11,7 +11,7 @@ import { getErrorMessage } from '@/utils/errors'
 import { uploadMediaInChunks } from './chunkedUpload'
 import { ACCEPTED_TYPES_ATTR, UPLOAD_CONCURRENCY } from './constants'
 import { fileKey, getMediaType, isAbortError, isUnsupportedVideo, makeItemId } from './utils'
-import { extractVideoMetadata } from './video'
+import { extractVideoMetadata, VideoMetadataError } from './video'
 
 import styles from './styles.module.sass'
 
@@ -116,6 +116,30 @@ export const EventMediaUploadDialog: React.FC<EventMediaUploadDialogProps> = ({
     )
 
     const photographerSuggestions = photographers ?? []
+
+    /** Turns a `VideoMetadataError` code into a message in the visitor's own locale. */
+    const videoErrorMessage = (error: unknown): string => {
+        const code = error instanceof VideoMetadataError ? error.code : 'decode'
+
+        if (code === 'metadata') {
+            return t(
+                'components.pages.stargazing.event-media-upload-dialog.video-error-metadata',
+                'Не удалось определить параметры видео'
+            )
+        }
+
+        if (code === 'poster') {
+            return t(
+                'components.pages.stargazing.event-media-upload-dialog.video-error-poster',
+                'Не удалось создать превью видео'
+            )
+        }
+
+        return t(
+            'components.pages.stargazing.event-media-upload-dialog.video-error-decode',
+            'Не удалось прочитать видеофайл'
+        )
+    }
 
     const total = items.length
     const processedCount = items.filter((item) => item.status !== 'pending' && item.status !== 'uploading').length
@@ -267,7 +291,11 @@ export const EventMediaUploadDialog: React.FC<EventMediaUploadDialogProps> = ({
             try {
                 videoMeta = await extractVideoMetadata(item.file)
             } catch (error) {
-                updateItem(item.id, { error, status: 'error' })
+                // `video.ts` reports a stable code instead of a message, so
+                // the wording is localized here (it has no `t()` of its own)
+                // and handed on in the `{ message }` shape `getErrorMessage`
+                // reads, exactly like an API error.
+                updateItem(item.id, { error: { message: videoErrorMessage(error) }, status: 'error' })
                 setStatusText(
                     t(
                         'components.pages.stargazing.event-media-upload-dialog.status-error',

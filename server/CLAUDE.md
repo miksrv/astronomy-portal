@@ -313,7 +313,7 @@ Listed in execution order. Tables created unless noted as ALTER.
 | `RateLimitFilter` | Per-IP token-bucket throttling for abuse-prone public routes. Registered as alias `ratelimit` in `Config/Filters.php`; applied per-route via `['filter' => 'ratelimit:<bucket>,<capacity>,<seconds>']` (see route table above for current buckets). Disabled when `ENVIRONMENT === 'testing'` since the `file` cache backend is shared across test cases. Uses CI4's built-in `Services::throttler()`. |
 | `CorsFilter` | Legacy/unused — superseded by CI4's built-in `Cors` filter (`Config\Cors`); left in place as a removal marker only. |
 
-### CLI Commands (`app/Commands/`), cron-registered
+### CLI Commands (`app/Commands/`)
 | Command | Group | Purpose |
 |---|---|---|
 | `system:send-email` | system | Drains the mailing queue (`mailing_emails`) and the transactional email outbox (`email_queue`), subject to `Config\MailingLimits` day/hour caps |
@@ -321,7 +321,15 @@ Listed in execution order. Tables created unless noted as ALTER.
 | `media:cleanup-uploads` | system | Purges abandoned chunked-upload sessions (`events_media_uploads` still `uploading`/`finalizing` after 24h) and their `UPLOAD_EVENTS/{eventId}/tmp/{sessionId}/` chunk directories |
 | `fits:recalculate` | — | Recalculates FITS filter aggregates (no HTTP endpoint) |
 
-Both `send-email` and `send-push` are registered for the same `* * * * *` cron cadence on the hosting cron (outside this repo).
+`send-email` and `send-push` are registered for the same `* * * * *` cron cadence on the hosting cron (outside this repo).
+
+**`media:cleanup-uploads` is not registered on the hosting cron yet** — it ships with FEAT-26 but has to be added to the host's crontab by hand as a deployment step, since the crontab lives outside this repo. Until that is done, an abandoned chunked upload's temp chunk directory (`UPLOAD_EVENTS/{eventId}/tmp/{sessionId}/`) is only removed when the uploader explicitly cancels; a session abandoned outright (tab closed, network dropped) keeps its parts on disk indefinitely. The line to add, alongside the two above:
+
+```
+* * * * * cd /path/to/server && php spark media:cleanup-uploads >> /dev/null 2>&1
+```
+
+Remove this note once the entry is live on the host.
 
 ### UUIDs / IDs
 - Most models use `$useAutoIncrement = false` with string/UUID PKs generated in `beforeInsert` callbacks.

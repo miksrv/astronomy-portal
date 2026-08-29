@@ -1,6 +1,6 @@
 import { API, ApiModel } from '@/api'
 
-import { isAbortError } from './utils'
+import { getFileMimeType, isAbortError } from './utils'
 
 export interface ChunkedUploadMeta {
     photographerName?: string
@@ -67,7 +67,7 @@ export const uploadMediaInChunks = async (
         eventId,
         fileName: file.name,
         mediaType,
-        mimeType: file.type,
+        mimeType: getFileMimeType(file),
         totalSize: file.size
     })
     registerAbort(() => initRequest.abort())

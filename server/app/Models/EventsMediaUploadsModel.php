@@ -60,6 +60,27 @@ class EventsMediaUploadsModel extends ApplicationBaseModel
     protected $afterDelete    = [];
 
     /**
+     * Atomically claims a session for finalization: flips 'uploading' ->
+     * 'finalizing' only if it is still 'uploading', in a single UPDATE, so
+     * two overlapping finalize requests (a duplicate from a flaky client)
+     * can never both proceed to assemble the file and insert a gallery row.
+     * The loser sees the session as no longer active, exactly like a call
+     * against an already-completed session.
+     *
+     * @param string $sessionId The events_media_uploads row id.
+     * @return bool True if this caller won the claim.
+     */
+    public function claimForFinalize(string $sessionId): bool
+    {
+        $this->builder()
+            ->where('id', $sessionId)
+            ->where('status', EventMediaUploadEntity::STATUS_UPLOADING)
+            ->update(['status' => EventMediaUploadEntity::STATUS_FINALIZING]);
+
+        return $this->db->affectedRows() === 1;
+    }
+
+    /**
      * Returns every upload session stuck in an in-progress status
      * ('uploading' or 'finalizing') whose row is older than $hours — an
      * abandoned session (tab closed, network dropped for good) that

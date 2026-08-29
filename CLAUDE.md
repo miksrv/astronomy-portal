@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A DIY amateur observatory web application with remote monitoring, equipment control, weather data, astrophoto archive, stargazing events, and email mailings. The project is a monorepo with three subsystems: a Next.js frontend (`client/`), a CodeIgniter 4 PHP backend (`server/`), and Arduino firmware (`firmware/`).
 
-**Current version:** 4.6.3 (see `CHANGELOG.md` for history)
+**Current version:** 4.11.0 (see `CHANGELOG.md` for history)
 
 **Feature specs:** `ROADMAP.md` gives a high-level list of planned/in-flight features; each one is detailed in its own file under `features/` (e.g. `features/admin-dashboard.md`).
 

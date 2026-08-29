@@ -8,9 +8,10 @@ import styles from './styles.module.sass'
 export interface EventMediaFilterProps {
     /**
      * Distinct photographer credits for the event, independent of which page
-     * of the (server-paginated) gallery happens to be loaded — sourced from
-     * the dedicated `events/:id/photographers` endpoint, not derived from
-     * whatever media items are currently on screen.
+     * of the (server-paginated) gallery happens to be loaded — the
+     * `photographers` field `GET /events/media` returns alongside the items,
+     * which the backend builds from the event's whole gallery rather than
+     * from the media items currently on screen.
      */
     photographers?: string[]
     selected?: string
