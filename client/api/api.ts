@@ -126,14 +126,14 @@ export const API = createApi({
             providesTags: (result, error, id) => [{ id, type: 'Events' }],
             query: (id) => `events/${id}`
         }),
-        eventGetPhotoList: builder.query<ApiType.Events.ResPhotoList, ApiType.Events.ReqPhotoList>({
-            providesTags: (result, error, arg) => [{ id: arg.eventId ?? 'LIST', type: 'EventPhotos' }],
+        eventGetMediaList: builder.query<ApiType.Events.ResMediaList, ApiType.Events.ReqMediaList>({
+            providesTags: (result, error, arg) => [{ id: arg.eventId ?? 'LIST', type: 'EventMedia' }],
             // A plain, one-shot query - the event page fetches either a small
             // first page or (once "Смотреть все" is clicked) everything in a
             // single request, never grows an existing page incrementally, so
             // each distinct set of args (including `limit`) is just its own
             // cache entry.
-            query: (params) => `events/photos${encodeQueryData(params)}`
+            query: (params) => `events/media${encodeQueryData(params)}`
         }),
         eventGetUsersList: builder.query<ApiType.Events.ResUsersList, string>({
             providesTags: (result, error, arg) => [{ id: arg, type: 'EventUsers' }],
@@ -183,15 +183,48 @@ export const API = createApi({
                 url: `events/ticket/${bookingId}`
             })
         }),
-        eventPhotoUploadPost: builder.mutation<ApiType.Events.ResPhoto, ApiType.Events.ReqUploadPhoto>({
+        // Chunked media upload (FEAT-26) - replaces the old single-request
+        // eventPhotoUploadPost. Only `finalize` produces a complete gallery
+        // item, so only it invalidates the `Events`/`EventMedia` tags - init,
+        // chunk and cancel just manage the in-progress upload session and
+        // publish nothing for the UI to react to.
+        eventMediaUploadInit: builder.mutation<ApiType.Events.ResMediaUploadInit, ApiType.Events.ReqMediaUploadInit>({
+            query: ({ eventId, ...body }) => ({
+                body,
+                method: 'POST',
+                url: `events/media/init/${eventId}`
+            })
+        }),
+        eventMediaUploadChunk: builder.mutation<ApiType.Events.ResMediaUploadChunk, ApiType.Events.ReqMediaUploadChunk>(
+            {
+                query: ({ sessionId, formData }) => ({
+                    body: formData,
+                    method: 'POST',
+                    url: `events/media/chunk/${sessionId}`
+                })
+            }
+        ),
+        eventMediaUploadFinalize: builder.mutation<
+            ApiType.Events.ResMediaUploadFinalize,
+            ApiType.Events.ReqMediaUploadFinalize
+        >({
             invalidatesTags: (res, err, arg) => [
                 { id: arg.eventId, type: 'Events' },
-                { id: arg.eventId, type: 'EventPhotos' }
+                { id: arg.eventId, type: 'EventMedia' }
             ],
-            query: (data) => ({
-                body: data.formData,
+            query: ({ sessionId, formData }) => ({
+                body: formData,
                 method: 'POST',
-                url: `events/upload/${data.eventId}`
+                url: `events/media/finalize/${sessionId}`
+            })
+        }),
+        eventMediaUploadCancel: builder.mutation<
+            ApiType.Events.ResMediaUploadCancel,
+            ApiType.Events.ReqMediaUploadCancel
+        >({
+            query: ({ sessionId }) => ({
+                method: 'DELETE',
+                url: `events/media/${sessionId}`
             })
         }),
         eventGetList: builder.query<ApiType.Events.ResList, ApiType.Events.ReqList | void>({
@@ -618,7 +651,7 @@ export const API = createApi({
         'Files',
         'Objects',
         'Events',
-        'EventPhotos',
+        'EventMedia',
         'EventUsers',
         'Photos',
         'Statistic',

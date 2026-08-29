@@ -8,8 +8,10 @@ import { API, ApiModel } from '@/api'
 import { useNavigationGuard } from '@/hooks/useNavigationGuard'
 import { getErrorMessage } from '@/utils/errors'
 
-import { ACCEPTED_TYPES, ACCEPTED_TYPES_ATTR, UPLOAD_CONCURRENCY } from './constants'
-import { fileKey, isAbortError, makeItemId } from './utils'
+import { uploadMediaInChunks } from './chunkedUpload'
+import { ACCEPTED_TYPES_ATTR, UPLOAD_CONCURRENCY } from './constants'
+import { fileKey, getMediaType, isAbortError, isUnsupportedVideo, makeItemId } from './utils'
+import { extractVideoMetadata, VideoMetadataError } from './video'
 
 import styles from './styles.module.sass'
 
@@ -20,45 +22,64 @@ interface QueueItem {
     file: File
     status: QueueItemStatus
     error?: unknown
+    /**
+     * 0..1 fraction of this item's own chunk-upload progress - only
+     * meaningful while `status === 'uploading'`; drives the overall Progress
+     * bar so a single large video doesn't sit at the same percentage for the
+     * whole time it takes to send its chunks.
+     */
+    progress?: number
+    /** True once this item's upload has moved past its chunks into the (potentially slow) server-side finalize/assembly step. */
+    finalizing?: boolean
 }
 
 type DialogPhase = 'idle' | 'uploading' | 'done'
 
-export interface EventPhotoUploadDialogProps {
+export interface EventMediaUploadDialogProps {
     eventId?: string
     /**
      * Distinct photographer credits already used for this event, sourced from
-     * the dedicated `events/:id/photographers` endpoint - independent of
-     * which page of the (server-paginated) gallery happens to be loaded, so
-     * suggestions aren't missing anyone whose photos are past the first page.
+     * the `photographers` field of the `GET /events/media` response —
+     * independent of which page of the (server-paginated) gallery happens to
+     * be loaded, so suggestions aren't missing anyone whose media is past the
+     * first page.
      */
     photographers?: string[]
     open: boolean
     onClose: () => void
-    onUploadPhoto?: (photo: ApiModel.EventPhoto) => void
+    onUploadMedia?: (media: ApiModel.EventMedia) => void
 }
 
 /**
- * Batch photo upload for an event gallery. Owns the whole upload lifecycle:
- * picking/dropping files, an optional photographer credit applied to the
- * whole batch, a bounded-concurrency upload queue with best-effort per-file
- * EXIF `DateTimeOriginal` extraction (a missing/unreadable tag just means
- * `takenAt` is omitted - it is never treated as an upload failure), and a
- * final summary with a "retry failed only" action. Supports running a second
- * batch (e.g. a different photographer) in the same dialog session without
- * closing/reopening it.
+ * Batch photo/video upload for an event gallery. Owns the whole upload
+ * lifecycle: picking/dropping files, an optional photographer credit applied
+ * to the whole batch, a bounded-concurrency upload queue with best-effort
+ * per-file EXIF `DateTimeOriginal` extraction for photos (a missing/unreadable
+ * tag just means `takenAt` is omitted - never an upload failure) and required
+ * client-side metadata/poster extraction for videos (a failure here IS a
+ * per-file error - see `video.ts`), each file uploaded via the chunked
+ * init/chunk/finalize protocol (`chunkedUpload.ts`), and a final summary with
+ * a "retry failed only" action. Supports running a second batch (e.g. a
+ * different photographer) in the same dialog session without closing/
+ * reopening it.
+ *
+ * A `.mov` (`video/quicktime`) file is accepted into the selected-files list
+ * (so the picker/drop doesn't just silently ignore it) but shown with an
+ * inline "export to MP4" error and excluded from the upload queue - there is
+ * no server-side transcoding, so it would look broken to most visitors.
  *
  * The dialog cannot be closed - no close button, overlay click and Escape
  * are both inert - while the queue is active, and leaving the page is
  * blocked the same way via `useNavigationGuard`: losing the tab mid-batch
- * would silently abandon whichever files hadn't finished yet.
+ * would silently abandon whichever files hadn't finished yet (and leave a
+ * dangling upload session, until the 24h server-side cleanup sweep).
  */
-export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
+export const EventMediaUploadDialog: React.FC<EventMediaUploadDialogProps> = ({
     eventId,
     photographers,
     open,
     onClose,
-    onUploadPhoto
+    onUploadMedia
 }) => {
     const { t } = useTranslation()
 
@@ -70,8 +91,8 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
     const [isDragOver, setIsDragOver] = useState<boolean>(false)
 
     const fileInputRef = useRef<HTMLInputElement>(null)
-    // Flipped by Cancel - checked between files (and before/after the async EXIF
-    // read) so the queue stops dispatching new requests as soon as possible.
+    // Flipped by Cancel - checked between files (and before/after each async
+    // step) so the queue stops dispatching new requests as soon as possible.
     const cancelRequestedRef = useRef<boolean>(false)
     // In-flight requests, keyed by queue item id, so Cancel can abort exactly
     // the ones still running.
@@ -81,17 +102,44 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
     const batchPhotographerRef = useRef<string>('')
     const nextItemIndexRef = useRef<number>(0)
 
-    const [handleUploadPhoto] = API.useEventPhotoUploadPostMutation()
+    const [initMedia] = API.useEventMediaUploadInitMutation()
+    const [uploadChunk] = API.useEventMediaUploadChunkMutation()
+    const [finalizeMedia] = API.useEventMediaUploadFinalizeMutation()
+    const [cancelMedia] = API.useEventMediaUploadCancelMutation()
 
     useNavigationGuard(
         phase === 'uploading',
         t(
-            'components.pages.stargazing.event-photo-upload-dialog.leave-confirm',
-            'Загрузка фотографий ещё не завершена. Уйти со страницы?'
+            'components.pages.stargazing.event-media-upload-dialog.leave-confirm',
+            'Загрузка ещё не завершена. Уйти со страницы?'
         )
     )
 
     const photographerSuggestions = photographers ?? []
+
+    /** Turns a `VideoMetadataError` code into a message in the visitor's own locale. */
+    const videoErrorMessage = (error: unknown): string => {
+        const code = error instanceof VideoMetadataError ? error.code : 'decode'
+
+        if (code === 'metadata') {
+            return t(
+                'components.pages.stargazing.event-media-upload-dialog.video-error-metadata',
+                'Не удалось определить параметры видео'
+            )
+        }
+
+        if (code === 'poster') {
+            return t(
+                'components.pages.stargazing.event-media-upload-dialog.video-error-poster',
+                'Не удалось создать превью видео'
+            )
+        }
+
+        return t(
+            'components.pages.stargazing.event-media-upload-dialog.video-error-decode',
+            'Не удалось прочитать видеофайл'
+        )
+    }
 
     const total = items.length
     const processedCount = items.filter((item) => item.status !== 'pending' && item.status !== 'uploading').length
@@ -99,7 +147,30 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
     const failedItems = items.filter((item) => item.status === 'error')
     const retryableItems = items.filter((item) => item.status === 'error' || item.status === 'canceled')
     const wasCanceled = items.some((item) => item.status === 'canceled')
-    const progress = total > 0 ? Math.round((processedCount / total) * 100) : 0
+    const unsupportedSelectedFiles = selectedFiles.filter(isUnsupportedVideo)
+    const uploadableSelectedFiles = selectedFiles.filter((file) => !isUnsupportedVideo(file))
+
+    // Weighted so a single large video's chunk progress moves the bar
+    // continuously instead of it sitting frozen at "0 of 1" for the whole
+    // upload - pending items count as 0, an in-progress item counts as its
+    // own 0..1 chunk fraction, everything finished (done/error/canceled)
+    // counts as a full 1.
+    const progress =
+        total > 0
+            ? Math.round(
+                  (items.reduce((sum, item) => {
+                      if (item.status === 'uploading') {
+                          return sum + (item.progress ?? 0)
+                      }
+                      if (item.status === 'pending') {
+                          return sum
+                      }
+                      return sum + 1
+                  }, 0) /
+                      total) *
+                      100
+              )
+            : 0
 
     const resetState = () => {
         setPhase('idle')
@@ -122,11 +193,15 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
     }
 
     const addFiles = (newFiles: File[]) => {
-        const imagesOnly = newFiles.filter((file) => ACCEPTED_TYPES.includes(file.type))
+        // Unlike a genuinely unrecognized file type (silently dropped, as
+        // before), a `.mov` is deliberately let through here so it can be
+        // shown in the list with its own inline "export to MP4" error -
+        // see `isUnsupportedVideo`.
+        const acceptable = newFiles.filter((file) => !!getMediaType(file) || isUnsupportedVideo(file))
 
         setSelectedFiles((prev) => {
             const existingKeys = new Set(prev.map(fileKey))
-            const additions = imagesOnly.filter((file) => !existingKeys.has(fileKey(file)))
+            const additions = acceptable.filter((file) => !existingKeys.has(fileKey(file)))
             return [...prev, ...additions]
         })
     }
@@ -176,25 +251,60 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
             return
         }
 
-        updateItem(item.id, { status: 'uploading' })
+        updateItem(item.id, { status: 'uploading', progress: 0, finalizing: false })
         setStatusText(
-            t('components.pages.stargazing.event-photo-upload-dialog.status-uploading', 'Загружается {{name}}…', {
+            t('components.pages.stargazing.event-media-upload-dialog.status-uploading', 'Загружается {{name}}…', {
                 name: item.file.name
             })
         )
 
+        const mediaType = getMediaType(item.file)
+
+        // Defensive only - addFiles/startUpload never let an unsupported or
+        // unrecognized file type reach the queue in the first place.
+        if (!mediaType) {
+            updateItem(item.id, {
+                error: {
+                    message: t('components.pages.stargazing.event-media-upload-dialog.file-error', 'ошибка загрузки')
+                },
+                status: 'error'
+            })
+            return
+        }
+
         let takenAt: string | undefined
+        let videoMeta: { width: number; height: number; duration: number; poster: Blob } | undefined
 
-        try {
-            const exifData = await parseExif(item.file, ['DateTimeOriginal'])
-            const takenAtDate = exifData?.DateTimeOriginal
+        if (mediaType === 'photo') {
+            try {
+                const exifData = await parseExif(item.file, ['DateTimeOriginal'])
+                const takenAtDate = exifData?.DateTimeOriginal
 
-            if (takenAtDate instanceof Date && !Number.isNaN(takenAtDate.getTime())) {
-                takenAt = takenAtDate.toISOString()
+                if (takenAtDate instanceof Date && !Number.isNaN(takenAtDate.getTime())) {
+                    takenAt = takenAtDate.toISOString()
+                }
+            } catch {
+                // A missing/unreadable EXIF tag isn't an upload error - `takenAt`
+                // is simply omitted and the backend falls back to its own ordering.
             }
-        } catch {
-            // A missing/unreadable EXIF tag isn't an upload error - `takenAt` is
-            // simply omitted and the backend falls back to its own ordering.
+        } else {
+            try {
+                videoMeta = await extractVideoMetadata(item.file)
+            } catch (error) {
+                // `video.ts` reports a stable code instead of a message, so
+                // the wording is localized here (it has no `t()` of its own)
+                // and handed on in the `{ message }` shape `getErrorMessage`
+                // reads, exactly like an API error.
+                updateItem(item.id, { error: { message: videoErrorMessage(error) }, status: 'error' })
+                setStatusText(
+                    t(
+                        'components.pages.stargazing.event-media-upload-dialog.status-error',
+                        '{{name}} — ошибка загрузки',
+                        { name: item.file.name }
+                    )
+                )
+                return
+            }
         }
 
         if (cancelRequestedRef.current) {
@@ -202,44 +312,53 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
             return
         }
 
-        const formData = new FormData()
-        formData.append('photo', item.file)
+        const result = await uploadMediaInChunks(
+            { cancelMedia, finalizeMedia, initMedia, uploadChunk },
+            {
+                eventId: eventId ?? '',
+                file: item.file,
+                isCanceled: () => cancelRequestedRef.current,
+                mediaType,
+                meta: {
+                    duration: videoMeta?.duration,
+                    height: videoMeta?.height,
+                    photographerName: batchPhotographerRef.current || undefined,
+                    poster: videoMeta?.poster,
+                    takenAt,
+                    width: videoMeta?.width
+                },
+                onPhaseChange: (uploadPhase) => updateItem(item.id, { finalizing: uploadPhase === 'finalizing' }),
+                onProgress: (fraction) => updateItem(item.id, { progress: fraction }),
+                registerAbort: (abort) => abortMapRef.current.set(item.id, abort),
+                clearAbort: () => abortMapRef.current.delete(item.id)
+            }
+        )
 
-        if (batchPhotographerRef.current) {
-            formData.append('photographerName', batchPhotographerRef.current)
+        if (result.status === 'canceled') {
+            updateItem(item.id, { status: 'canceled' })
+            return
         }
 
-        if (takenAt) {
-            formData.append('takenAt', takenAt)
-        }
-
-        const request = handleUploadPhoto({ eventId, formData })
-        abortMapRef.current.set(item.id, () => request.abort())
-
-        const result = await request
-
-        abortMapRef.current.delete(item.id)
-
-        if ('error' in result) {
-            if (isAbortError(result.error)) {
-                updateItem(item.id, { status: 'canceled' })
-            } else {
-                updateItem(item.id, { status: 'error', error: result.error })
+        if (result.status === 'error') {
+            if (!isAbortError(result.error)) {
+                updateItem(item.id, { error: result.error, status: 'error' })
                 setStatusText(
                     t(
-                        'components.pages.stargazing.event-photo-upload-dialog.status-error',
+                        'components.pages.stargazing.event-media-upload-dialog.status-error',
                         '{{name}} — ошибка загрузки',
                         { name: item.file.name }
                     )
                 )
+            } else {
+                updateItem(item.id, { status: 'canceled' })
             }
             return
         }
 
-        updateItem(item.id, { status: 'done' })
-        onUploadPhoto?.(result.data)
+        updateItem(item.id, { progress: 1, status: 'done' })
+        onUploadMedia?.(result.media)
         setStatusText(
-            t('components.pages.stargazing.event-photo-upload-dialog.status-done', '{{name}} загружен ✓', {
+            t('components.pages.stargazing.event-media-upload-dialog.status-done', '{{name}} загружен ✓', {
                 name: item.file.name
             })
         )
@@ -274,11 +393,11 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
     }
 
     const startUpload = () => {
-        if (!selectedFiles.length) {
+        if (!uploadableSelectedFiles.length) {
             return
         }
 
-        const newItems: QueueItem[] = selectedFiles.map((file, index) => ({
+        const newItems: QueueItem[] = uploadableSelectedFiles.map((file, index) => ({
             id: makeItemId(file, index),
             file,
             status: 'pending'
@@ -300,10 +419,20 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
         }
 
         const retryIds = new Set(retryableItems.map((item) => item.id))
-        const retryQueue = retryableItems.map((item) => ({ ...item, status: 'pending' as const, error: undefined }))
+        const retryQueue = retryableItems.map((item) => ({
+            ...item,
+            error: undefined,
+            finalizing: false,
+            progress: 0,
+            status: 'pending' as const
+        }))
 
         setItems((prev) =>
-            prev.map((item) => (retryIds.has(item.id) ? { ...item, status: 'pending', error: undefined } : item))
+            prev.map((item) =>
+                retryIds.has(item.id)
+                    ? { ...item, error: undefined, finalizing: false, progress: 0, status: 'pending' }
+                    : item
+            )
         )
         cancelRequestedRef.current = false
         abortMapRef.current.clear()
@@ -325,9 +454,11 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
         setStatusText('')
     }
 
+    const currentFinalizingItem = items.find((item) => item.status === 'uploading' && item.finalizing)
+
     return (
         <Dialog
-            title={t('components.pages.stargazing.event-photo-upload-dialog.title', 'Загрузка фотографий')}
+            title={t('components.pages.stargazing.event-media-upload-dialog.title', 'Загрузка фото и видео')}
             open={open}
             showCloseButton={phase !== 'uploading'}
             onCloseDialog={phase !== 'uploading' ? handleClose : undefined}
@@ -337,14 +468,14 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
                     <>
                         <Input
                             placeholder={t(
-                                'components.pages.stargazing.event-photo-upload-dialog.photographer-placeholder',
-                                'Имя фотографа (необязательно)'
+                                'components.pages.stargazing.event-media-upload-dialog.photographer-placeholder',
+                                'Имя автора (необязательно)'
                             )}
                             value={photographerName}
-                            list={'event-photo-upload-photographer-suggestions'}
+                            list={'event-media-upload-photographer-suggestions'}
                             onChange={(event) => setPhotographerName(event.target.value)}
                         />
-                        <datalist id={'event-photo-upload-photographer-suggestions'}>
+                        <datalist id={'event-media-upload-photographer-suggestions'}>
                             {photographerSuggestions.map((name) => (
                                 <option
                                     key={name}
@@ -369,8 +500,8 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
                         >
                             <p>
                                 {t(
-                                    'components.pages.stargazing.event-photo-upload-dialog.drop-zone-text',
-                                    'Перетащите фотографии сюда или нажмите, чтобы выбрать файлы'
+                                    'components.pages.stargazing.event-media-upload-dialog.drop-zone-text',
+                                    'Перетащите фото и видео сюда или нажмите, чтобы выбрать файлы'
                                 )}
                             </p>
                             <input
@@ -383,21 +514,47 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
                             />
                         </div>
 
+                        {!!unsupportedSelectedFiles.length && (
+                            <Message type={'warning'}>
+                                {t(
+                                    'components.pages.stargazing.event-media-upload-dialog.unsupported-video-warning',
+                                    'Файлы в формате .mov не будут загружены — экспортируйте их в MP4'
+                                )}
+                            </Message>
+                        )}
+
                         {!!selectedFiles.length && (
                             <ul className={styles.selectedFilesList}>
-                                {selectedFiles.map((file, index) => (
-                                    <li key={fileKey(file)}>
-                                        <span className={styles.selectedFileName}>{file.name}</span>
-                                        <button
-                                            type={'button'}
-                                            className={styles.removeFileButton}
-                                            aria-label={t('common.delete', 'Удалить')}
-                                            onClick={() => handleRemoveSelectedFile(index)}
+                                {selectedFiles.map((file, index) => {
+                                    const unsupported = isUnsupportedVideo(file)
+
+                                    return (
+                                        <li
+                                            key={fileKey(file)}
+                                            className={cn(unsupported && styles.selectedFileUnsupported)}
                                         >
-                                            {'✕'}
-                                        </button>
-                                    </li>
-                                ))}
+                                            <span className={styles.selectedFileInfo}>
+                                                <span className={styles.selectedFileName}>{file.name}</span>
+                                                {unsupported && (
+                                                    <span className={styles.selectedFileError}>
+                                                        {t(
+                                                            'components.pages.stargazing.event-media-upload-dialog.unsupported-video-format',
+                                                            'Формат .mov не поддерживается — экспортируйте видео в MP4'
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </span>
+                                            <button
+                                                type={'button'}
+                                                className={styles.removeFileButton}
+                                                aria-label={t('common.delete', 'Удалить')}
+                                                onClick={() => handleRemoveSelectedFile(index)}
+                                            >
+                                                {'✕'}
+                                            </button>
+                                        </li>
+                                    )
+                                })}
                             </ul>
                         )}
 
@@ -410,11 +567,11 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
                             </Button>
                             <Button
                                 mode={'primary'}
-                                disabled={!selectedFiles.length}
+                                disabled={!uploadableSelectedFiles.length}
                                 onClick={startUpload}
                             >
                                 {t(
-                                    'components.pages.stargazing.event-photo-upload-dialog.start-upload',
+                                    'components.pages.stargazing.event-media-upload-dialog.start-upload',
                                     'Начать загрузку'
                                 )}
                             </Button>
@@ -427,12 +584,20 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
                         <Progress value={progress} />
                         <p className={styles.progressLabel}>
                             {t(
-                                'components.pages.stargazing.event-photo-upload-dialog.progress-label',
+                                'components.pages.stargazing.event-media-upload-dialog.progress-label',
                                 'Загружено {{done}} из {{total}}',
                                 { done: processedCount, total }
                             )}
                         </p>
-                        <p className={styles.statusText}>{statusText}</p>
+                        <p className={styles.statusText}>
+                            {currentFinalizingItem
+                                ? t(
+                                      'components.pages.stargazing.event-media-upload-dialog.status-finalizing',
+                                      'Собираем файл {{name}}…',
+                                      { name: currentFinalizingItem.file.name }
+                                  )
+                                : statusText}
+                        </p>
 
                         {!!failedItems.length && (
                             <ul className={styles.errorList}>
@@ -442,7 +607,7 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
                                         {' — '}
                                         {getErrorMessage(item.error) ||
                                             t(
-                                                'components.pages.stargazing.event-photo-upload-dialog.file-error',
+                                                'components.pages.stargazing.event-media-upload-dialog.file-error',
                                                 'ошибка загрузки'
                                             )}
                                     </li>
@@ -466,8 +631,8 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
                         {!failedItems.length && !wasCanceled && (
                             <Message type={'success'}>
                                 {t(
-                                    'components.pages.stargazing.event-photo-upload-dialog.summary-success',
-                                    'Все фотографии успешно загружены ({{count}})',
+                                    'components.pages.stargazing.event-media-upload-dialog.summary-success',
+                                    'Все файлы успешно загружены ({{count}})',
                                     { count: successCount }
                                 )}
                             </Message>
@@ -477,12 +642,12 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
                             <Message type={failedItems.length ? 'warning' : 'info'}>
                                 {wasCanceled && !failedItems.length
                                     ? t(
-                                          'components.pages.stargazing.event-photo-upload-dialog.summary-canceled',
+                                          'components.pages.stargazing.event-media-upload-dialog.summary-canceled',
                                           'Загрузка отменена. Загружено {{success}} из {{total}}.',
                                           { success: successCount, total }
                                       )
                                     : t(
-                                          'components.pages.stargazing.event-photo-upload-dialog.summary-partial',
+                                          'components.pages.stargazing.event-media-upload-dialog.summary-partial',
                                           'Загружено {{success}} из {{total}}, не удалось загрузить: {{failed}}',
                                           { success: successCount, total, failed: retryableItems.length }
                                       )}
@@ -497,7 +662,7 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
                                         {' — '}
                                         {getErrorMessage(item.error) ||
                                             t(
-                                                'components.pages.stargazing.event-photo-upload-dialog.file-error',
+                                                'components.pages.stargazing.event-media-upload-dialog.file-error',
                                                 'ошибка загрузки'
                                             )}
                                     </li>
@@ -511,7 +676,7 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
                                 onClick={startNewBatch}
                             >
                                 {t(
-                                    'components.pages.stargazing.event-photo-upload-dialog.upload-more',
+                                    'components.pages.stargazing.event-media-upload-dialog.upload-more',
                                     'Загрузить ещё'
                                 )}
                             </Button>
@@ -522,7 +687,7 @@ export const EventPhotoUploadDialog: React.FC<EventPhotoUploadDialogProps> = ({
                                     onClick={retryFailed}
                                 >
                                     {t(
-                                        'components.pages.stargazing.event-photo-upload-dialog.retry-failed',
+                                        'components.pages.stargazing.event-media-upload-dialog.retry-failed',
                                         'Повторить неудачные'
                                     )}
                                 </Button>

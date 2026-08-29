@@ -1,1 +1,1 @@
-export { PhotoGallery } from './PhotoGallery'
+export { type GalleryPhoto, PhotoGallery } from './PhotoGallery'

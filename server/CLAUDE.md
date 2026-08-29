@@ -47,7 +47,7 @@ DELETE /photos/:id                  → Photos::delete
 GET    /events                      → Events::list   (optional `?userId=` narrows to that user's own attended events — only honoured when it matches the caller's own session, otherwise silently ignored)
 GET    /events/upcoming             → Events::upcoming
 GET    /events/upcoming/registered  → Events::upcomingRegistered
-GET    /events/photos               → Events::photos
+GET    /events/media                → Events::media   (one chronological feed of both photos and videos; `mediaType`/`duration` per item)
 GET    /events/:id/statistic        → Events::statistic
 GET    /events/:id/registrations    → Events::registrations
 GET    /events/:id                  → Events::show
@@ -64,7 +64,10 @@ POST   /events/payment/status       → Events::paymentStatus
 GET|POST /events/payment/callback   → Events::paymentCallback   (Alfa-Bank server-to-server callback; HMAC-verified)
 POST   /events/registrations/:id/verify-payment → Events::verifyRegistrationPayment
 POST   /events/registrations/:id/refund → Events::refundRegistrationPayment (events.refund privilege — forced refund + cancellation)
-POST   /events/upload/:id           → Events::upload
+POST   /events/media/init/:id       → Events::mediaInit      (opens a chunked upload session; returns `sessionId` + server-authoritative `chunkSize`)
+POST   /events/media/chunk/:sessionId → Events::mediaChunk   (one chunk; idempotent per index, returns every index on disk)
+POST   /events/media/finalize/:sessionId → Events::mediaFinalize (assembles chunks, runs the photo pipeline or stores the video + client poster, inserts the `events_media` row)
+DELETE /events/media/:sessionId     → Events::mediaCancel    (declared before DELETE /events/:id)
 
 GET    /mailings                    → Mailings::list
 POST   /mailings                    → Mailings::create
@@ -129,7 +132,7 @@ All controllers extend `ResourceController` and use the `ResponseTrait`.
 | `Categories.php` | Lists photo/object categories (read-only, locale-aware) |
 | `Comments.php` | CRUD for user comments/reviews on events and photos; soft-delete, auth required for write |
 | `Equipment.php` | Lists observatory equipment (read-only) |
-| `Events.php` | Full CRUD for stargazing events; booking, cancellation, check-in, ticket/QR generation, Alfa-Bank payment flow, photo uploads |
+| `Events.php` | Full CRUD for stargazing events; booking, cancellation, check-in, ticket/QR generation, Alfa-Bank payment flow, chunked gallery media (photo/video) uploads |
 | `Files.php` | Serves raw files (FITS thumbnails, etc.) associated with astronomical objects |
 | `Mailings.php` | Admin mailing campaign CRUD; audience targeting, test send and bulk send via `EmailLibrary`/`EmailQueueModel` |
 | `Members.php` | Admin-only list of registered users and their event history |
@@ -156,7 +159,8 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 | `UsersModel.php` | `users` | yes | `UserEntity`; `roles` is a JSON array of `user_roles.id` values (see `RolesModel`) — a user can hold several roles; UUID PKs; `session_token` powers logout revocation — see Authentication below |
 | `RolesModel.php` | `user_roles` | no | `RoleEntity`; `permissions` is a JSON array of `App\Enums\Permission` values; `getPermissionsForIds()` resolves a user's effective privileges (union across all their roles); `countUsersPerRole()` powers the "assigned to N users" delete warning (single query for all roles, not one per role); `idsExist()` validates role ids before they're persisted onto a user; `DEVELOPER_ROLE_ID` (= 1, "Разработчик") is the one hardcoded role — see "The reserved developer role" in the root README |
 | `EventsModel.php` | `events` | yes | `EventEntity`; bilingual fields (`title_en/ru`, `content_en/ru`) |
-| `EventsPhotosModel.php` | `events_photos` | yes | Pivot: photos uploaded to a specific event |
+| `EventsMediaModel.php` | `events_media` | yes | `EventMediaEntity`; photos **and** videos uploaded to a specific event, one chronological feed (`media_type` discriminator, `duration` for video); a video's poster frame reuses the `{file_name}_preview.jpg` convention |
+| `EventsMediaUploadsModel.php` | `events_media_uploads` | no | `EventMediaUploadEntity`; ephemeral bookkeeping for an in-progress chunked upload (never displayed) — removed outright by `Events::mediaCancel()` or swept by `media:cleanup-uploads` via `getStaleSessions()` |
 | `EventsUsersModel.php` | `events_users` | yes | Pivot: user bookings/check-ins for events |
 | `ObjectsModel.php` | `objects` | yes | `ObjectEntity`; PK is `catalog_name` (string, e.g. `M31`) |
 | `ObjectCategoryModel.php` | `objects_categories` | no | Pivot: object ↔ category |
@@ -237,6 +241,8 @@ Listed in execution order. Tables created unless noted as ALTER.
 | `2026-08-16-100002_AddPushNotificationDeliveries` | `push_notification_deliveries` — FEAT-13; mirrors `mailing_emails`, keyed by `subscription_id` rather than user |
 | `2026-08-17-100000_AllowAnonymousPushSubscriptions` | ALTER `push_subscriptions` — `user_id` becomes nullable, so a guest can subscribe before logging in (FK left untouched — NULL is exempt from the CASCADE) |
 | `2026-08-17-110000_FixPushNotificationDeliveriesSubscriptionCascade` | ALTER `push_notification_deliveries` — `subscription_id` becomes nullable and its FK to `push_subscriptions` switches from `CASCADE` to `SET NULL`, so a delivery row survives (as a permanent send-audit record, `status` intact) when `system:send-push` hard-deletes an expired subscription, instead of being cascade-deleted along with it |
+| `2026-08-21-100000_RenameEventsPhotosToEventsMedia` | RENAME `events_photos` → `events_media`; `image_width`/`image_height` → `width`/`height`, `file_size` INT → BIGINT UNSIGNED (a video may reach the 2GB ceiling), + `media_type ENUM('photo','video')` and `duration SMALLINT UNSIGNED NULL`; the index is renamed with a raw `ALTER TABLE ... RENAME INDEX` since MySQL's `RENAME TABLE` preserves index names verbatim |
+| `2026-08-21-100001_AddEventsMediaUploads` | `events_media_uploads` — FEAT-26 chunked-upload session bookkeeping (event/user FK CASCADE, `total_size`/`chunk_size`/`received_bytes`, `status ENUM('uploading','finalizing','completed','aborted')`) |
 
 ---
 
@@ -307,14 +313,23 @@ Listed in execution order. Tables created unless noted as ALTER.
 | `RateLimitFilter` | Per-IP token-bucket throttling for abuse-prone public routes. Registered as alias `ratelimit` in `Config/Filters.php`; applied per-route via `['filter' => 'ratelimit:<bucket>,<capacity>,<seconds>']` (see route table above for current buckets). Disabled when `ENVIRONMENT === 'testing'` since the `file` cache backend is shared across test cases. Uses CI4's built-in `Services::throttler()`. |
 | `CorsFilter` | Legacy/unused — superseded by CI4's built-in `Cors` filter (`Config\Cors`); left in place as a removal marker only. |
 
-### CLI Commands (`app/Commands/`), cron-registered
+### CLI Commands (`app/Commands/`)
 | Command | Group | Purpose |
 |---|---|---|
 | `system:send-email` | system | Drains the mailing queue (`mailing_emails`) and the transactional email outbox (`email_queue`), subject to `Config\MailingLimits` day/hour caps |
 | `system:send-push` | system | Drains the Web Push delivery queue (`push_notification_deliveries`), batch size 50, no rate-limit cap (push has no SMTP-style provider reputation limit) — deletes the `push_subscriptions` row on a 404/410 (`WebPushExpiredSubscriptionException`) |
+| `media:cleanup-uploads` | system | Purges abandoned chunked-upload sessions (`events_media_uploads` still `uploading`/`finalizing` after 24h) and their `UPLOAD_EVENTS/{eventId}/tmp/{sessionId}/` chunk directories |
 | `fits:recalculate` | — | Recalculates FITS filter aggregates (no HTTP endpoint) |
 
-Both `send-email` and `send-push` are registered for the same `* * * * *` cron cadence on the hosting cron (outside this repo).
+`send-email` and `send-push` are registered for the same `* * * * *` cron cadence on the hosting cron (outside this repo).
+
+**`media:cleanup-uploads` is not registered on the hosting cron yet** — it ships with FEAT-26 but has to be added to the host's crontab by hand as a deployment step, since the crontab lives outside this repo. Until that is done, an abandoned chunked upload's temp chunk directory (`UPLOAD_EVENTS/{eventId}/tmp/{sessionId}/`) is only removed when the uploader explicitly cancels; a session abandoned outright (tab closed, network dropped) keeps its parts on disk indefinitely. The line to add, alongside the two above:
+
+```
+* * * * * cd /path/to/server && php spark media:cleanup-uploads >> /dev/null 2>&1
+```
+
+Remove this note once the entry is live on the host.
 
 ### UUIDs / IDs
 - Most models use `$useAutoIncrement = false` with string/UUID PKs generated in `beforeInsert` callbacks.

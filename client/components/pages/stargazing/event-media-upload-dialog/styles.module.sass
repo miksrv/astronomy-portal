@@ -49,10 +49,23 @@
         border-radius: var(--border-radius)
         background: var(--dropdown-background-color-hover)
 
+.selectedFileInfo
+    display: flex
+    flex-direction: column
+    gap: 2px
+    overflow: hidden
+
 .selectedFileName
     overflow: hidden
     text-overflow: ellipsis
     white-space: nowrap
+
+.selectedFileError
+    font-size: 11px
+    color: var(--color-red)
+
+.selectedFileUnsupported
+    background: var(--color-red-background)
 
 .removeFileButton
     border: none

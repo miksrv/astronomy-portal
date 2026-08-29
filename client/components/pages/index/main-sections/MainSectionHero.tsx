@@ -6,12 +6,15 @@ import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
-import { createPreviewPhotoUrl } from '@/utils/eventPhotos'
+import { createPreviewMediaUrl } from '@/utils/eventMedia'
 
 import styles from './styles.module.sass'
 
 interface MainSectionHeroProps {
-    photos?: ApiModel.EventPhoto[]
+    // A random sample from the unified photo+video gallery feed - shown as
+    // plain decorative thumbnails (each item's poster image), no video-only
+    // chrome here since this is just a linked preview grid, not the gallery itself.
+    photos?: ApiModel.EventMedia[]
 }
 
 export const MainSectionHero: React.FC<MainSectionHeroProps> = ({ photos }) => {
@@ -70,7 +73,7 @@ export const MainSectionHero: React.FC<MainSectionHeroProps> = ({ photos }) => {
                                         className={styles.photoThumb}
                                     >
                                         <Image
-                                            src={createPreviewPhotoUrl(photo)}
+                                            src={createPreviewMediaUrl(photo)}
                                             alt={alt}
                                             fill={true}
                                             style={{ objectFit: 'cover' }}

@@ -3,7 +3,8 @@
 namespace App\Controllers;
 
 use App\Entities\EventEntity;
-use App\Entities\EventPhotoEntity;
+use App\Entities\EventMediaEntity;
+use App\Entities\EventMediaUploadEntity;
 use App\Entities\PaymentEntity;
 use App\Enums\Permission;
 use App\Libraries\CalendarLibrary;
@@ -13,7 +14,8 @@ use App\Libraries\SessionLibrary;
 use App\Libraries\TicketLibrary;
 use App\Models\CommentsModel;
 use App\Models\EmailQueueModel;
-use App\Models\EventsPhotosModel;
+use App\Models\EventsMediaModel;
+use App\Models\EventsMediaUploadsModel;
 use App\Models\EventsUsersModel;
 use App\Models\PaymentsModel;
 use App\Models\UsersModel;
@@ -23,7 +25,6 @@ use CodeIgniter\Files\File;
 use Config\Database;
 use Config\Services;
 
-use ReflectionException;
 use Exception;
 
 /**
@@ -37,7 +38,10 @@ use Exception;
  * @method ResponseInterface create() Creates a new event with the provided details.
  * @method ResponseInterface booking() Books a user for an event.
  * @method ResponseInterface cancel() Cancels a user's booking for an event.
- * @method ResponseInterface upload(int|null $id) Uploads a photo for a specific event by its ID.
+ * @method ResponseInterface mediaInit(string|null $id) Starts a chunked media (photo/video) upload session for an event.
+ * @method ResponseInterface mediaChunk(string|null $sessionId) Receives one chunk of an in-progress upload session.
+ * @method ResponseInterface mediaFinalize(string|null $sessionId) Assembles chunks and saves the finished media into the event gallery.
+ * @method ResponseInterface mediaCancel(string|null $sessionId) Cancels an in-progress chunked upload session.
  * @method ResponseInterface delete(int|null $id) Deletes an event by its ID.
  * @method ResponseInterface statistic($id = null) Returns aggregated statistics for an event.
  */
@@ -47,6 +51,24 @@ class Events extends BaseApiController
     // explicit pin (matches the `events` table column defaults).
     private const DEFAULT_LATITUDE  = 51.8250225;
     private const DEFAULT_LONGITUDE = 55.7107200;
+
+    // FEAT-26 — allowed mime types per media kind for the chunked gallery
+    // upload (mediaInit() validates against these; a video/quicktime .mov
+    // file lands in neither list, see Business Rule 2 in the feature spec).
+    private const ALLOWED_PHOTO_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    private const ALLOWED_VIDEO_MIME_TYPES = ['video/mp4', 'video/webm'];
+
+    // The final file's extension is derived from the upload session's
+    // server-validated mime_type, never trusted from the client's original
+    // file name (see BE-5's "don't trust the client filename" note).
+    private const MIME_EXTENSIONS = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/webp' => 'webp',
+        'image/gif'  => 'gif',
+        'video/mp4'  => 'mp4',
+        'video/webm' => 'webm',
+    ];
 
     private SessionLibrary $session;
 
@@ -746,7 +768,7 @@ class Events extends BaseApiController
      *
      * @return ResponseInterface Returns a JSON response with the total count, this page's items, and the event's distinct photographers, or an error message on failure.
      */
-    public function photos(): ResponseInterface
+    public function media(): ResponseInterface
     {
         $limit        = $this->request->getGet('limit', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         $offset       = $this->request->getGet('offset', FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
@@ -755,17 +777,17 @@ class Events extends BaseApiController
         $photographer = $this->request->getGet('photographer', FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
 
         try {
-            $eventPhotosModel = new EventsPhotosModel();
+            $eventMediaModel = new EventsMediaModel();
 
             // Fetch this page plus the true total (ignoring pagination) so the
             // client knows whether more pages remain.
-            $result = $eventPhotosModel->getPhotoList($event, $limit, $offset, $order, $photographer);
-            $total  = $eventPhotosModel->countPhotoList($event, $photographer);
+            $result = $eventMediaModel->getMediaList($event, $limit, $offset, $order, $photographer);
+            $total  = $eventMediaModel->countMediaList($event, $photographer);
 
             // Always the event's *full* photographer list, never narrowed by
             // $photographer - otherwise selecting one photographer would wipe
             // out the other filter chips.
-            $photographers = $event ? $eventPhotosModel->getDistinctPhotographers($event) : [];
+            $photographers = $event ? $eventMediaModel->getDistinctPhotographers($event) : [];
 
             return $this->respond([
                 'total'         => $total,
@@ -1680,12 +1702,148 @@ class Events extends BaseApiController
     }
 
     /**
-     * Uploading a photo by place ID
-     * @param null $id
-     * @return ResponseInterface
-     * @throws ReflectionException
+     * Returns the temp directory a chunked upload session's parts are
+     * written to (one `{index}.part` file per received chunk), per the
+     * layout described in the feature spec: UPLOAD_EVENTS/{eventId}/tmp/{sessionId}/.
      */
-    public function upload($id = null): ResponseInterface
+    private function mediaUploadTmpDir(string $eventId, string $sessionId): string
+    {
+        return UPLOAD_EVENTS . $eventId . '/tmp/' . $sessionId . '/';
+    }
+
+    /**
+     * Removes a session's temp chunk directory, then the shared per-event
+     * `tmp/` parent if this was its last session — rmdir() refuses to remove
+     * a non-empty directory, so a concurrently uploading session keeps the
+     * parent alive and only the truly last cleanup takes it away.
+     */
+    private function removeSessionTmpDir(string $eventId, string $sessionId): void
+    {
+        $this->removeDirectory($this->mediaUploadTmpDir($eventId, $sessionId));
+
+        @rmdir(UPLOAD_EVENTS . $eventId . '/tmp');
+    }
+
+    /**
+     * How many `{index}.part` files a session is expected to produce, derived
+     * from its own declared total_size/chunk_size. Both mediaChunk() (to
+     * reject an out-of-range index) and mediaFinalize() (to know which
+     * indices must be present) validate against this.
+     */
+    private function expectedChunkCount(EventMediaUploadEntity $uploadSession): int
+    {
+        return max(1, (int) ceil($uploadSession->total_size / $uploadSession->chunk_size));
+    }
+
+    /**
+     * Scans a session's temp chunk directory and returns which chunk
+     * indices are currently on disk plus their combined byte size.
+     * Recomputed from disk (rather than an incrementing counter) so a
+     * retried chunk — mediaChunk() overwrites `{index}.part` idempotently —
+     * never gets double-counted.
+     *
+     * @return array{indices: int[], bytes: int}
+     */
+    private function scanReceivedChunks(string $tmpDir): array
+    {
+        $indices = [];
+        $bytes   = 0;
+
+        foreach (glob($tmpDir . '*.part') ?: [] as $partFile) {
+            $indices[] = (int) pathinfo($partFile, PATHINFO_FILENAME);
+            $bytes    += filesize($partFile);
+        }
+
+        sort($indices);
+
+        return ['indices' => $indices, 'bytes' => $bytes];
+    }
+
+    /**
+     * Concatenates chunk part files 0..$totalChunks-1 (in order) into
+     * $destPath using streamed copies rather than file_get_contents() —
+     * required since an assembled video can be close to MEDIA_UPLOAD_MAX_SIZE
+     * (up to 2GB), far larger than is safe to hold in memory at once.
+     *
+     * @throws Exception if a part file can't be read, or the destination can't be written.
+     */
+    private function assembleChunks(string $tmpDir, int $totalChunks, string $destPath): void
+    {
+        $out = fopen($destPath, 'wb');
+
+        if ($out === false) {
+            throw new Exception('Could not open destination file for writing: ' . $destPath);
+        }
+
+        try {
+            for ($i = 0; $i < $totalChunks; $i++) {
+                $partPath = $tmpDir . $i . '.part';
+                $in       = fopen($partPath, 'rb');
+
+                if ($in === false) {
+                    throw new Exception('Could not open chunk part for reading: ' . $partPath);
+                }
+
+                stream_copy_to_stream($in, $out);
+                fclose($in);
+            }
+        } finally {
+            fclose($out);
+        }
+    }
+
+    /**
+     * Removes files mediaFinalize() generated outside the temp chunk
+     * directory (the assembled media, its poster/preview) when the upload
+     * fails before the gallery row is committed. Without it a GD, poster or
+     * insert failure would leave publicly served orphans behind in the
+     * event directory, one more per retry.
+     *
+     * @param string[] $paths Absolute paths recorded as they were created.
+     */
+    private function discardGeneratedFiles(array $paths): void
+    {
+        foreach ($paths as $path) {
+            if (is_file($path)) {
+                @unlink($path);
+            }
+        }
+    }
+
+    /**
+     * Recursively deletes a temp chunk directory and everything in it.
+     * Used after a successful finalize and by mediaCancel()/
+     * media:cleanup-uploads for an aborted/abandoned session.
+     */
+    private function removeDirectory(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        foreach (glob(rtrim($dir, '/') . '/*') ?: [] as $path) {
+            is_dir($path) ? $this->removeDirectory($path . '/') : @unlink($path);
+        }
+
+        @rmdir($dir);
+    }
+
+    /**
+     * Starts a chunked media (photo or video) upload session for an event
+     * (BE-3). Body (JSON): { fileName, mimeType, totalSize, mediaType }.
+     *
+     * Validates the declared mimeType against the allowed set for the
+     * declared mediaType — this is where a video/quicktime (.mov) file gets
+     * rejected, per Business Rule 2 — and totalSize against the
+     * MEDIA_UPLOAD_MAX_SIZE safety ceiling. On success, creates the
+     * events_media_uploads bookkeeping row and its temp chunk directory.
+     *
+     * chunkSize is always server-authoritative (MEDIA_UPLOAD_CHUNK_SIZE) so
+     * the client never has to hardcode it.
+     *
+     * @param string|null $id The event ID chunks will be attached to.
+     */
+    public function mediaInit($id = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
             return $this->respondUnauthorized();
@@ -1695,79 +1853,505 @@ class Events extends BaseApiController
             return $this->respondForbidden();
         }
 
-        $photo = $this->request->getFile('photo');
-        if (!$photo || !$photo->isValid()) {
-            return $this->respondValidationErrors(['photo' => lang('General.fileUploadFailed')]);
-        }
-
-        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-        if (!in_array($photo->getMimeType(), $allowedMimes, true)) {
-            return $this->respondValidationErrors(['photo' => lang('General.invalidFileType')]);
-        }
-
         $eventData = $this->model->find($id);
+
         if (!$eventData || !$eventData->id) {
             return $this->respondNotFound(lang('Events.notFound'));
         }
 
+        $input = $this->request->getJSON(true);
+        $rules = [
+            'fileName'  => 'required|string|max_length[255]',
+            'mimeType'  => 'required|string|max_length[100]',
+            'totalSize' => 'required|integer|greater_than[0]',
+            'mediaType' => 'required|in_list[photo,video]',
+        ];
+
+        $this->validator = Services::Validation()->setRules($rules);
+
+        if (!$this->validator->run($input)) {
+            return $this->respondValidationErrors($this->validator->getErrors());
+        }
+
+        $mediaType = $input['mediaType'];
+        $mimeType  = $input['mimeType'];
+        $totalSize = (int) $input['totalSize'];
+
+        $allowedMimes = $mediaType === 'video' ? self::ALLOWED_VIDEO_MIME_TYPES : self::ALLOWED_PHOTO_MIME_TYPES;
+
+        if (!in_array($mimeType, $allowedMimes, true)) {
+            // A video/quicktime (.mov) upload lands here for mediaType=video.
+            // General.invalidFileType is fine for photos, but the video case
+            // gets its own message pointing the uploader at MP4/WebM instead
+            // of a generic "invalid file type" (Business Rule 2).
+            return $this->respondValidationErrors([
+                'mimeType' => $mediaType === 'video'
+                    ? lang('General.unsupportedVideoFormat')
+                    : lang('General.invalidFileType'),
+            ]);
+        }
+
+        if ($totalSize > MEDIA_UPLOAD_MAX_SIZE) {
+            return $this->respondValidationErrors(['totalSize' => lang('General.fileTooLarge')]);
+        }
+
         try {
-            $eventDir = UPLOAD_EVENTS . $eventData->id . '/';
-            $newName  = $photo->getRandomName();
-            $photo->move($eventDir, $newName, true);
+            $session = new EventMediaUploadEntity([
+                'event_id'           => $eventData->id,
+                'user_id'            => $this->session->user->id,
+                'media_type'         => $mediaType,
+                'original_file_name' => $input['fileName'],
+                'mime_type'          => $mimeType,
+                'total_size'         => $totalSize,
+                'chunk_size'         => MEDIA_UPLOAD_CHUNK_SIZE,
+            ]);
 
-            $file = new File($eventDir . $newName);
-            $name = pathinfo($file, PATHINFO_FILENAME);
-            $ext  = $file->getExtension();
+            $uploadsModel = new EventsMediaUploadsModel();
+            $uploadsModel->insert($session);
 
-            $imageService = Services::image('gd');
-            $imageService->withFile($file->getRealPath())->reorient(true)->save(); // перезаписываем с ориентацией
+            // The `generateId` beforeInsert callback assigns the PK on the
+            // array CI4 passes to the query builder, not on the entity object
+            // itself - so `$session->id` is still null here. getInsertID() is
+            // the only place the generated id is readable, same as
+            // Mailings::create()/PushNotifications::create() do.
+            $sessionId = $uploadsModel->getInsertID();
 
-            list($width, $height) = getimagesize($file->getRealPath());
+            mkdir($this->mediaUploadTmpDir($eventData->id, $sessionId), 0755, true);
 
-            // Масштабирование большого изображения, если превышает лимит
-            if ($width > PHOTO_MAX_WIDTH || $height > PHOTO_MAX_HEIGHT) {
-                $imageService->withFile($file->getRealPath())
-                    ->resize(PHOTO_MAX_WIDTH, PHOTO_MAX_HEIGHT, true)
-                    ->save($eventDir . $name . '.' . $ext);
+            return $this->respondCreated([
+                'sessionId' => $sessionId,
+                'chunkSize' => MEDIA_UPLOAD_CHUNK_SIZE,
+            ]);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
 
-                list($width, $height) = getimagesize($file->getRealPath());
+            return $this->respondServerError();
+        }
+    }
+
+    /**
+     * Receives one chunk of an in-progress chunked upload (BE-4). Multipart
+     * body: chunkIndex (int) + chunk (binary). Writing is idempotent — a
+     * retried chunk simply overwrites the previous attempt at the same
+     * index — so the client can safely re-send a dropped chunk without any
+     * server-side deduplication. Returns every chunk index currently on
+     * disk (not just the one just received) so the client can detect a gap
+     * without waiting for finalize to reject it.
+     *
+     * @param string|null $sessionId The events_media_uploads session id.
+     */
+    public function mediaChunk($sessionId = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->respondUnauthorized();
+        }
+
+        if (!$this->session->can(Permission::EVENTS_GALLERY_UPLOAD)) {
+            return $this->respondForbidden();
+        }
+
+        $uploadsModel  = new EventsMediaUploadsModel();
+        $uploadSession = $uploadsModel->find($sessionId);
+
+        if (!$uploadSession) {
+            return $this->respondNotFound();
+        }
+
+        if ($uploadSession->user_id !== $this->session->user->id) {
+            return $this->respondForbidden();
+        }
+
+        if ($uploadSession->status !== EventMediaUploadEntity::STATUS_UPLOADING) {
+            return $this->respondConflict(lang('Events.uploadSessionNotActive'));
+        }
+
+        $chunkIndex = $this->request->getPost('chunkIndex');
+
+        if (!is_numeric($chunkIndex) || (int) $chunkIndex < 0) {
+            return $this->respondInvalidRequest('mediaChunk: missing/invalid chunkIndex for session ' . $sessionId);
+        }
+
+        $chunkIndex  = (int) $chunkIndex;
+        $totalChunks = $this->expectedChunkCount($uploadSession);
+
+        // The session's declared shape (total_size / chunk_size) has to be
+        // enforced here, not just at finalize: without it a caller could
+        // write arbitrary out-of-range `{index}.part` files into the temp
+        // directory - finalize ignores the extra indices, so they would
+        // simply sit on disk and MEDIA_UPLOAD_MAX_SIZE would stop bounding
+        // what a single session can cost in disk space.
+        if ($chunkIndex >= $totalChunks) {
+            return $this->respondValidationErrors([
+                'chunkIndex' => lang('Events.invalidChunkIndex', [$totalChunks - 1]),
+            ]);
+        }
+
+        $chunkFile = $this->request->getFile('chunk');
+
+        if (!$chunkFile || !$chunkFile->isValid()) {
+            return $this->respondValidationErrors(['chunk' => lang('General.fileUploadFailed')]);
+        }
+
+        // Same reasoning for the size: every chunk but the last must be
+        // exactly chunk_size bytes, the last one carries the remainder. The
+        // client slices on the very chunkSize this server handed it back
+        // from mediaInit(), so an exact match is safe to require.
+        $expectedSize = $chunkIndex === $totalChunks - 1
+            ? $uploadSession->total_size - ($chunkIndex * $uploadSession->chunk_size)
+            : $uploadSession->chunk_size;
+
+        if ($chunkFile->getSize() !== $expectedSize) {
+            return $this->respondValidationErrors([
+                'chunk' => lang('Events.invalidChunkSize', [$expectedSize, $chunkFile->getSize()]),
+            ]);
+        }
+
+        try {
+            $tmpDir = $this->mediaUploadTmpDir($uploadSession->event_id, $uploadSession->id);
+
+            if (!is_dir($tmpDir)) {
+                mkdir($tmpDir, 0755, true);
             }
 
-            // Масштабирование превь изображения
-            $imageService->withFile($file->getRealPath())
-                ->reorient(true)
-                ->resize(PHOTO_PREVIEW_WIDTH, PHOTO_PREVIEW_HEIGHT, true)
-                ->save($eventDir . $name . '_preview.' . $ext);
+            // move() with overwrite=true is what makes a retried chunk safe.
+            $chunkFile->move($tmpDir, ((int) $chunkIndex) . '.part', true);
 
-            $photographerName = trim((string) ($this->request->getPost('photographerName') ?? ''));
-            $photographerName = $photographerName !== '' ? $photographerName : null;
+            $received = $this->scanReceivedChunks($tmpDir);
 
+            $uploadsModel->update($uploadSession->id, ['received_bytes' => $received['bytes']]);
+
+            return $this->respond([
+                'receivedChunks' => $received['indices'],
+                'receivedBytes'  => $received['bytes'],
+            ]);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->respondServerError();
+        }
+    }
+
+    /**
+     * Assembles all received chunks and saves the finished media into the
+     * event gallery (BE-5). Multipart body: optional photographerName,
+     * optional takenAt (photo only) — a video instead requires duration,
+     * width, height and a poster file (the client-extracted frame, see
+     * Business Rule 4).
+     *
+     * @param string|null $sessionId The events_media_uploads session id.
+     */
+    public function mediaFinalize($sessionId = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->respondUnauthorized();
+        }
+
+        if (!$this->session->can(Permission::EVENTS_GALLERY_UPLOAD)) {
+            return $this->respondForbidden();
+        }
+
+        $uploadsModel  = new EventsMediaUploadsModel();
+        $uploadSession = $uploadsModel->find($sessionId);
+
+        if (!$uploadSession) {
+            return $this->respondNotFound();
+        }
+
+        if ($uploadSession->user_id !== $this->session->user->id) {
+            return $this->respondForbidden();
+        }
+
+        if ($uploadSession->status !== EventMediaUploadEntity::STATUS_UPLOADING) {
+            return $this->respondConflict(lang('Events.uploadSessionNotActive'));
+        }
+
+        $eventData = $this->model->find($uploadSession->event_id);
+
+        if (!$eventData || !$eventData->id) {
+            return $this->respondNotFound(lang('Events.notFound'));
+        }
+
+        $tmpDir      = $this->mediaUploadTmpDir($uploadSession->event_id, $uploadSession->id);
+        $totalChunks = $this->expectedChunkCount($uploadSession);
+        $received    = $this->scanReceivedChunks($tmpDir);
+        $missing     = array_values(array_diff(range(0, $totalChunks - 1), $received['indices']));
+
+        if (!empty($missing)) {
+            // Names the missing index(es) so the client can re-send just
+            // those chunks and retry finalize, rather than restarting the
+            // whole upload (BE-5, step 1).
+            return $this->respondValidationErrors([
+                'chunks' => lang('Events.missingUploadChunks', [implode(', ', $missing)]),
+            ]);
+        }
+
+        $isVideo = $uploadSession->media_type === 'video';
+
+        $photographerName = trim((string) ($this->request->getPost('photographerName') ?? ''));
+        $photographerName = $photographerName !== '' ? $photographerName : null;
+
+        $takenAt    = null;
+        $duration   = null;
+        $width      = null;
+        $height     = null;
+        $posterFile = null;
+
+        if ($isVideo) {
+            $duration   = $this->request->getPost('duration');
+            $width      = $this->request->getPost('width');
+            $height     = $this->request->getPost('height');
+            $posterFile = $this->request->getFile('poster');
+
+            $errors = [];
+
+            if (!is_numeric($duration) || (int) $duration < 0) {
+                $errors['duration'] = lang('General.invalidDataFormat');
+            }
+
+            if (!is_numeric($width) || (int) $width <= 0) {
+                $errors['width'] = lang('General.invalidDataFormat');
+            }
+
+            if (!is_numeric($height) || (int) $height <= 0) {
+                $errors['height'] = lang('General.invalidDataFormat');
+            }
+
+            if (!$posterFile || !$posterFile->isValid()) {
+                $errors['poster'] = lang('General.fileUploadFailed');
+            } elseif ($posterFile->getMimeType() !== 'image/jpeg') {
+                // Sniffed, not taken from the request's declared type: the
+                // poster is produced client-side by canvas.toBlob(...,
+                // 'image/jpeg') and is served from the gallery as
+                // {file_name}_preview.jpg regardless, so anything that isn't
+                // actually a JPEG here is a hand-crafted request.
+                $errors['poster'] = lang('General.invalidFileType');
+            }
+
+            if (!empty($errors)) {
+                return $this->respondValidationErrors($errors);
+            }
+
+            $duration = (int) $duration;
+            $width    = (int) $width;
+            $height   = (int) $height;
+        } else {
             $takenAt = $this->parseTakenAt($this->request->getPost('takenAt'));
+        }
 
-            // Сохраняем в базу
-            $photoEntity = new EventPhotoEntity([
+        // Claiming the session is a conditional UPDATE, not a plain one: the
+        // status check above is a read, so two overlapping finalize calls
+        // (e.g. a duplicate request from a flaky client) would both have
+        // seen 'uploading' and both gone on to assemble their own randomly
+        // named file and insert their own gallery row. Only the request
+        // whose `UPDATE ... WHERE status = 'uploading'` actually matched a
+        // row continues; the loser gets the same 409 as any other call
+        // against an inactive session. Reverted back to 'uploading' below on
+        // failure so the client can simply retry.
+        if (!$uploadsModel->claimForFinalize($uploadSession->id)) {
+            return $this->respondConflict(lang('Events.uploadSessionNotActive'));
+        }
+
+        // Everything written outside the temp chunk directory during
+        // assembly, so a failure *after* a file already exists doesn't leave
+        // an orphan behind in the publicly served event directory (each
+        // retry would otherwise add another). Cleared once the gallery row
+        // is committed — from that point the files belong to a real media
+        // item and must survive.
+        $generatedPaths = [];
+
+        try {
+            $eventDir = UPLOAD_EVENTS . $eventData->id . '/';
+
+            if (!is_dir($eventDir)) {
+                mkdir($eventDir, 0755, true);
+            }
+
+            $ext = self::MIME_EXTENSIONS[$uploadSession->mime_type] ?? null;
+
+            if (!$ext) {
+                // Can only happen if a session's mime_type predates a change
+                // to the allow-list — mediaInit() already rejects anything
+                // outside MIME_EXTENSIONS today.
+                throw new Exception('Unknown mime type for upload session ' . $uploadSession->id . ': ' . $uploadSession->mime_type);
+            }
+
+            // The final file's name is generated server-side (never the
+            // client's original file name) - same random-name convention
+            // UploadedFile::getRandomName() uses elsewhere in this codebase.
+            $name      = date('YmdHis') . '_' . bin2hex(random_bytes(10));
+            $finalPath = $eventDir . $name . '.' . $ext;
+
+            $this->assembleChunks($tmpDir, $totalChunks, $finalPath);
+            $generatedPaths[] = $finalPath;
+
+            $assembledSize = filesize($finalPath);
+
+            if ($assembledSize !== (int) $uploadSession->total_size) {
+                // Shouldn't happen once every chunk index is confirmed
+                // present, but guards against a truncated/corrupted part
+                // file - treat it like a missing-chunks response so the
+                // client's recovery path (re-send chunks, retry finalize)
+                // is identical either way, rather than a bare 500.
+                $this->discardGeneratedFiles($generatedPaths);
+                $uploadsModel->update($uploadSession->id, ['status' => EventMediaUploadEntity::STATUS_UPLOADING]);
+
+                return $this->respondValidationErrors([
+                    'chunks' => lang('Events.missingUploadChunks', [implode(', ', range(0, $totalChunks - 1))]),
+                ]);
+            }
+
+            $file = new File($finalPath);
+
+            // Everything validated so far - mediaInit()'s allow-list, the
+            // extension above - rests on the mimeType the *client* declared,
+            // which says nothing about the bytes that actually arrived.
+            // Sniff the assembled file and treat the sniffed type as the
+            // authoritative one, so arbitrary or corrupt content can't be
+            // published into the gallery behind an .mp4/.jpg extension.
+            $detectedMime = $file->getMimeType();
+            $allowedMimes = $isVideo ? self::ALLOWED_VIDEO_MIME_TYPES : self::ALLOWED_PHOTO_MIME_TYPES;
+
+            if (!in_array($detectedMime, $allowedMimes, true)) {
+                $this->discardGeneratedFiles($generatedPaths);
+                $uploadsModel->update($uploadSession->id, ['status' => EventMediaUploadEntity::STATUS_UPLOADING]);
+
+                return $this->respondValidationErrors([
+                    'file' => $isVideo ? lang('General.unsupportedVideoFormat') : lang('General.invalidFileType'),
+                ]);
+            }
+
+            // A file whose real type simply differs from the declared one
+            // (a .webp saved with a .jpg name, say) is still perfectly
+            // acceptable content - it just has to be stored, and served,
+            // under the extension its actual bytes call for.
+            if ($detectedMime !== $uploadSession->mime_type) {
+                $correctedPath = $eventDir . $name . '.' . self::MIME_EXTENSIONS[$detectedMime];
+
+                rename($finalPath, $correctedPath);
+
+                $ext            = self::MIME_EXTENSIONS[$detectedMime];
+                $finalPath      = $correctedPath;
+                $generatedPaths = [$correctedPath];
+                $file           = new File($finalPath);
+            }
+
+            if ($isVideo) {
+                // No server-side transcoding/frame-extraction is possible on
+                // this host (Business Rule 4) - the assembled file is stored
+                // exactly as uploaded, and the client-extracted poster frame
+                // is saved as {file_name}_preview.jpg regardless of the
+                // video's own extension (a poster is always a JPEG still).
+                $posterFile->move($eventDir, $name . '_preview.jpg', true);
+                $generatedPaths[] = $eventDir . $name . '_preview.jpg';
+            } else {
+                // Same GD orient/resize/preview pipeline the old
+                // single-request upload() used - unchanged.
+                $imageService = Services::image('gd');
+                $imageService->withFile($file->getRealPath())->reorient(true)->save(); // перезаписываем с ориентацией
+
+                [$width, $height] = getimagesize($file->getRealPath());
+
+                // Масштабирование большого изображения, если превышает лимит
+                if ($width > PHOTO_MAX_WIDTH || $height > PHOTO_MAX_HEIGHT) {
+                    $imageService->withFile($file->getRealPath())
+                        ->resize(PHOTO_MAX_WIDTH, PHOTO_MAX_HEIGHT, true)
+                        ->save($finalPath);
+
+                    [$width, $height] = getimagesize($file->getRealPath());
+                }
+
+                // Масштабирование превь изображения
+                $imageService->withFile($file->getRealPath())
+                    ->reorient(true)
+                    ->resize(PHOTO_PREVIEW_WIDTH, PHOTO_PREVIEW_HEIGHT, true)
+                    ->save($eventDir . $name . '_preview.' . $ext);
+
+                $generatedPaths[] = $eventDir . $name . '_preview.' . $ext;
+            }
+
+            $mediaEntity = new EventMediaEntity([
                 'event_id'          => $eventData->id,
                 'user_id'           => $this->session->user?->id,
+                'media_type'        => $uploadSession->media_type,
                 'photographer_name' => $photographerName,
                 'taken_at'          => $takenAt,
                 'file_name'         => $name,
                 'file_ext'          => $ext,
-                'file_size'         => $file->getSize(),
-                'image_width'       => $width,
-                'image_height'      => $height,
+                'file_size'         => filesize($finalPath),
+                'width'             => $width,
+                'height'            => $height,
+                'duration'          => $duration,
             ]);
 
-            (new EventsPhotosModel())->insert($photoEntity);
+            (new EventsMediaModel())->insert($mediaEntity);
+
+            // Committed: from here the generated files back a real gallery
+            // row, so a later failure must never take them away again.
+            $generatedPaths = [];
+
+            $this->removeSessionTmpDir($uploadSession->event_id, $uploadSession->id);
+
+            $uploadsModel->update($uploadSession->id, ['status' => EventMediaUploadEntity::STATUS_COMPLETED]);
 
             return $this->respondCreated((object)[
+                'eventId'      => $mediaEntity->event_id,
                 'name'         => $name,
                 'ext'          => $ext,
                 'width'        => $width,
                 'height'       => $height,
-                'photographer' => $photoEntity->photographer,
-                'takenAt'      => $photoEntity->takenAt,
-                'eventId'      => $photoEntity->event_id,
+                'photographer' => $mediaEntity->photographer,
+                'takenAt'      => $mediaEntity->takenAt,
+                'mediaType'    => $mediaEntity->mediaType,
+                'duration'     => $mediaEntity->duration,
             ]);
+        } catch (Exception $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            $this->discardGeneratedFiles($generatedPaths);
+            $uploadsModel->update($uploadSession->id, ['status' => EventMediaUploadEntity::STATUS_UPLOADING]);
+
+            return $this->respondServerError();
+        }
+    }
+
+    /**
+     * Cancels an in-progress chunked upload (BE-6): deletes its temp chunk
+     * directory and the events_media_uploads row outright. Unlike finished
+     * gallery content, an aborted session has no soft-delete/audit value -
+     * an explicit cancel is cleaned up immediately here rather than waiting
+     * for the 24h media:cleanup-uploads sweep, which exists only to catch
+     * sessions abandoned without an explicit cancel (tab closed, network
+     * dropped for good).
+     *
+     * @param string|null $sessionId The events_media_uploads session id.
+     */
+    public function mediaCancel($sessionId = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->respondUnauthorized();
+        }
+
+        if (!$this->session->can(Permission::EVENTS_GALLERY_UPLOAD)) {
+            return $this->respondForbidden();
+        }
+
+        $uploadsModel  = new EventsMediaUploadsModel();
+        $uploadSession = $uploadsModel->find($sessionId);
+
+        if (!$uploadSession) {
+            return $this->respondNotFound();
+        }
+
+        if ($uploadSession->user_id !== $this->session->user->id) {
+            return $this->respondForbidden();
+        }
+
+        try {
+            $this->removeSessionTmpDir($uploadSession->event_id, $uploadSession->id);
+
+            $uploadsModel->delete($uploadSession->id);
+
+            return $this->respond(['status' => 'aborted']);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
@@ -1877,11 +2461,11 @@ class Events extends BaseApiController
 
             $this->model->delete($id);
 
-            // The events -> events_photos foreign key is CASCADE, but that
+            // The events -> events_media foreign key is CASCADE, but that
             // only fires on a hard DELETE — this is a soft delete, so the
-            // photos must be soft-deleted explicitly or they would keep
-            // being served forever by GET /events/photos.
-            (new EventsPhotosModel())->where('event_id', $id)->delete();
+            // media must be soft-deleted explicitly or it would keep being
+            // served forever by GET /events/media.
+            (new EventsMediaModel())->where('event_id', $id)->delete();
 
             return $this->respondDeleted($eventData);
         } catch (Exception $e) {

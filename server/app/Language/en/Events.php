@@ -33,6 +33,12 @@ return [
     'refundSuccess'      => 'Refund completed — the registration has been cancelled.',
     'refundFailed'       => 'The bank declined the refund: {0}',
 
+    // FEAT-26 — chunked event-gallery media (photo/video) uploads.
+    'uploadSessionNotActive' => 'This upload session is no longer active.',
+    'missingUploadChunks'    => 'Upload incomplete — missing chunk(s): {0}. Please retry.',
+    'invalidChunkIndex'      => 'Invalid chunk index: this upload has chunks 0 through {0}.',
+    'invalidChunkSize'       => 'Invalid chunk size: expected {0} bytes, received {1}.',
+
     // Ticket (rendered onto the PNG ticket image)
     'ticketHeading'           => 'Stargazing event ticket',
     'ticketParticipantsLabel' => 'Participants',

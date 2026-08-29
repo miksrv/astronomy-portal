@@ -5,12 +5,13 @@ import { useTranslation } from 'next-i18next/pages'
 
 import styles from './styles.module.sass'
 
-export interface EventPhotoFilterProps {
+export interface EventMediaFilterProps {
     /**
      * Distinct photographer credits for the event, independent of which page
-     * of the (server-paginated) gallery happens to be loaded — sourced from
-     * the dedicated `events/:id/photographers` endpoint, not derived from
-     * whatever photos are currently on screen.
+     * of the (server-paginated) gallery happens to be loaded — the
+     * `photographers` field `GET /events/media` returns alongside the items,
+     * which the backend builds from the event's whole gallery rather than
+     * from the media items currently on screen.
      */
     photographers?: string[]
     selected?: string
@@ -18,12 +19,12 @@ export interface EventPhotoFilterProps {
 }
 
 /**
- * Chip-style filter for the event gallery, letting visitors narrow the photo
- * grid down to a single photographer's shots. Renders nothing when there are
- * fewer than two distinct photographers, since there would be nothing
- * meaningful to filter.
+ * Chip-style filter for the event gallery, letting visitors narrow the
+ * photo/video grid down to a single photographer's/videographer's
+ * contributions. Renders nothing when there are fewer than two distinct
+ * photographer credits, since there would be nothing meaningful to filter.
  */
-export const EventPhotoFilter: React.FC<EventPhotoFilterProps> = ({ photographers, selected, onChange }) => {
+export const EventMediaFilter: React.FC<EventMediaFilterProps> = ({ photographers, selected, onChange }) => {
     const { t } = useTranslation()
 
     if (!photographers || photographers.length < 2) {
@@ -38,7 +39,7 @@ export const EventPhotoFilter: React.FC<EventPhotoFilterProps> = ({ photographer
                     className={cn(styles.filterItem, !selected && styles.active)}
                     onClick={() => onChange(undefined)}
                 >
-                    {t('components.pages.stargazing.event-photo-filter.all', 'Все')}
+                    {t('components.pages.stargazing.event-media-filter.all', 'Все')}
                 </button>
             </li>
             {photographers.map((name) => (

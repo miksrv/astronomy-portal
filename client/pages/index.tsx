@@ -11,7 +11,7 @@ import { initSSRLocale } from '@/utils/ssrLocale'
 
 interface HomePageProps {
     photosList: ApiModel.Photo[]
-    eventPhotos: ApiModel.EventPhoto[]
+    eventPhotos: ApiModel.EventMedia[]
 }
 
 const HomePage: NextPage<HomePageProps> = ({ photosList, eventPhotos }) => {
@@ -93,7 +93,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
             )
 
             const { data: eventPhotosData } = await store.dispatch(
-                API.endpoints?.eventGetPhotoList.initiate({
+                API.endpoints?.eventGetMediaList.initiate({
                     limit: 4,
                     order: 'rand'
                 })
