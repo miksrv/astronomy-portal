@@ -1,0 +1,35 @@
+// /starmap page layout. The map fills the viewport below the header (minus the fixed
+// cookie banner while it is up — CookieConsent publishes its height as a CSS variable,
+// so the map's bottom controls never end up under the banner).
+//
+// The SEO intro (StarMapIntro) is ONE element rendered before the map in the DOM — a
+// single server-rendered <h1> either way. Desktop: it floats over the map's top-right
+// corner (positioned by its own styles), so the map keeps the whole height. Mobile: the
+// top of the map is taken by the status chip, zoom rail and hide-UI toggle, so the intro
+// is laid out as a bar under the map instead (order: 2) and the map area gives up the
+// bar's height.
+.page
+    position: relative
+    display: flex
+    flex-direction: column
+    height: calc(100vh - var(--header-height) - var(--cookie-consent-height, 0px))
+    overflow: hidden
+
+.mapArea
+    position: relative
+    flex: 1 1 auto
+    min-height: 0
+
+@media (max-width: 768px)
+    .page
+        // Expanded intro content extends the page below the fold (page scrolls), instead
+        // of squeezing the map inside a fixed-height column
+        height: auto
+        overflow: visible
+
+    .mapArea
+        flex: none
+        // 52px = collapsed intro bar height, must match .introSummary in
+        // components/pages/starmap/star-map-intro/styles.module.sass
+        height: calc(100vh - var(--header-height) - var(--cookie-consent-height, 0px) - 52px)
+        overflow: hidden
