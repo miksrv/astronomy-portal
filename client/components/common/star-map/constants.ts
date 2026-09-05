@@ -16,11 +16,24 @@ export const STARMAP_STORAGE_KEY = 'astro_starmap_settings'
 
 export const MOBILE_MAX_WIDTH = 768
 
+// How long after a live-clock tick the popup's redraw-driven auto-hide stays suppressed —
+// long enough to outlast horizon mode's short zenith-follow rotation the tick triggers.
+export const LIVE_TICK_HIDE_GRACE_MS = 1500
+
+// Zoom step of the map rail's +/− buttons — the same factors d3-celestial's own
+// #celestial-zoomin/#celestial-zoomout controls use (zoomBy(1.25) / zoomBy(0.8)).
+export const ZOOM_STEP_IN = 1.25
+export const ZOOM_STEP_OUT = 0.8
+
 export const DEFAULT_STARMAP_SETTINGS: StarMapSettings = {
+    viewMode: 'sky',
+    atmosphere: true,
     starsShow: true,
     starsLimit: 6,
     dsosShow: false,
+    dsosFull: false,
     customObjectsShow: true,
+    meteorShowersShow: false,
     constellationNames: true,
     constellationLines: true,
     constellationBounds: false,
@@ -30,7 +43,9 @@ export const DEFAULT_STARMAP_SETTINGS: StarMapSettings = {
     galactic: false,
     milkyWay: true,
     planetsShow: true,
-    center: [0, 20, 0]
+    center: [0, 20, 0],
+    // The observatory's coordinates — same fallback as defaultConfig.geopos
+    geopos: [51.82, 55.17]
 }
 
 export const STARS_LIMIT_OPTIONS = Array.from({ length: 6 }, (_, i) => ({
