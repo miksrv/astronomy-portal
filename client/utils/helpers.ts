@@ -1,5 +1,7 @@
 import dayjs, { Dayjs } from 'dayjs'
 
+import { SITE_LINK } from './constants'
+
 type QueryParamValue = string | number | boolean | undefined | null
 
 export const encodeQueryData = (data: object | void | undefined): string => {
@@ -75,3 +77,11 @@ export const dateAddMonth = (date: string | Date | Dayjs, monthCount: number): D
  */
 export const round = (value?: number, digits: number = 4): number | undefined =>
     value ? Number(value.toFixed(digits)) : undefined
+
+/**
+ * Absolute locale-aware page URL: SITE_LINK + 'en/' prefix for English + path.
+ * The single source of the locale-prefix rule — used by AppLayout (canonical/og:url),
+ * BreadcrumbJsonLd and page-level JSON-LD blocks; must stay consistent between them.
+ */
+export const createPageUrl = (language?: string, path: string = ''): string =>
+    `${SITE_LINK ?? ''}${language === 'en' ? 'en/' : ''}${path.replace(/^\//, '')}`

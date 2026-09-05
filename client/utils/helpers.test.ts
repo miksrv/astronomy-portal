@@ -1,6 +1,28 @@
-import { formatSecondsToExposure, getTimeFromSec } from './helpers'
+import { SITE_LINK } from './constants'
+import { createPageUrl, formatSecondsToExposure, getTimeFromSec } from './helpers'
 
 describe('helpers', () => {
+    describe('createPageUrl', () => {
+        const base = SITE_LINK ?? ''
+
+        it('prepends the en/ prefix for English', () => {
+            expect(createPageUrl('en', 'starmap')).toBe(`${base}en/starmap`)
+        })
+
+        it('uses no prefix for Russian (default locale)', () => {
+            expect(createPageUrl('ru', 'starmap')).toBe(`${base}starmap`)
+        })
+
+        it('strips a leading slash from the path', () => {
+            expect(createPageUrl('ru', '/starmap')).toBe(`${base}starmap`)
+        })
+
+        it('returns the locale root when no path is given', () => {
+            expect(createPageUrl('en')).toBe(`${base}en/`)
+            expect(createPageUrl('ru')).toBe(base)
+        })
+    })
+
     describe('formatSecondsToExposure', () => {
         it('returns "0" for 0 seconds', () => {
             expect(formatSecondsToExposure(0)).toBe('0')
