@@ -1,0 +1,160 @@
+// One element, two layouts (see pages/starmap.module.sass):
+//  - mobile (≤768px): a full-width collapsed bar laid out UNDER the map (order: 2 in the
+//    page's flex column), expanding into the page flow;
+//  - desktop: a floating glass card in the map's top-right corner, next to the 28px
+//    hide-UI toggle, expanding downwards/leftwards over the map like a FAQ block.
+.intro
+    width: 100%
+    order: 2
+    max-width: 1100px
+    margin: 0 auto
+
+.introSummary
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 12px
+    // Collapsed bar height on mobile — pages/starmap.module.sass subtracts the same
+    // 52px from the map area so map + bar fill the viewport without scrolling
+    height: 52px
+    padding: 0 16px
+    cursor: pointer
+    // Hide the native disclosure triangle — .introHint's chevron replaces it
+    list-style: none
+
+    &::-webkit-details-marker
+        display: none
+
+    h1
+        margin: 0
+        font-size: 16px
+        font-weight: 600
+        overflow: hidden
+        text-overflow: ellipsis
+        white-space: nowrap
+
+.introHint
+    flex-shrink: 0
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    font-size: 13px
+    color: var(--color-main)
+
+.chevron
+    flex-shrink: 0
+    width: 18px
+    height: 18px
+    fill: currentColor
+    transition: transform 0.25s ease
+
+.intro[open] .chevron
+    transform: rotate(180deg)
+
+.introContent
+    display: grid
+    grid-template-columns: 1fr 320px
+    gap: 24px
+    align-items: start
+    padding: 4px 16px 24px
+
+    @media (max-width: 768px)
+        grid-template-columns: 1fr
+        gap: 16px
+
+.introText
+    p
+        margin: 0 0 10px
+        color: var(--text-color-secondary)
+        line-height: 1.55
+
+.featuredCard
+    display: flex
+    flex-direction: column
+    gap: 8px
+    padding: 12px
+    border-radius: 12px
+    background-color: var(--container-background-color)
+    text-decoration: none
+    color: var(--text-color-primary)
+    transition: transform 0.15s ease, box-shadow 0.15s ease
+
+    &:hover
+        transform: translateY(-2px)
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35)
+
+.featuredTitle
+    font-size: 13px
+    font-weight: 600
+
+.featuredImage
+    position: relative
+    width: 100%
+    aspect-ratio: 16 / 10
+    border-radius: 8px
+    overflow: hidden
+
+.featuredLink
+    font-size: 13px
+    color: var(--color-main)
+
+// Desktop: floating card over the map
+@media (min-width: 769px)
+    .intro
+        position: absolute
+        // The map's top-right corner belongs to this card (the hide-UI toggle lives in
+        // the left rail); the top-center geolocation nudge hugs its content and stays clear
+        top: 10px
+        right: 10px
+        // Above the rail/chip/eye (7), below the object popup (10)
+        z-index: 8
+        // Collapsed width keeps the card clear of the horizon dome's upper-right edge
+        width: 300px
+        max-width: calc(100% - 20px)
+        margin: 0
+        border-radius: 12px
+        // Same glass surface as the map's control rail (.mapRail in star-map styles)
+        background-color: color-mix(in srgb, var(--container-background-color) 88%, transparent)
+        backdrop-filter: blur(6px)
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35)
+        overflow: hidden
+        transition: width 0.15s ease
+
+        &[open]
+            width: 420px
+
+    // Screenshot mode (hide-UI): hidden like every other overlay. Client-side toggle
+    // only — the server HTML always ships the heading visible.
+    .introHidden
+        visibility: hidden
+
+    .introSummary
+        height: 28px
+        padding: 0 6px 0 12px
+        gap: 8px
+        border-radius: 12px
+        transition: background-color 0.15s ease
+
+        &:hover
+            background-color: color-mix(in srgb, var(--button-secondary-background-hover) 60%, transparent)
+
+        h1
+            font-size: 13px
+            font-weight: 600
+
+    .introHint
+        gap: 0
+        // The heading itself is the affordance here — keep only the chevron
+        span
+            display: none
+
+    .introContent
+        grid-template-columns: 1fr
+        gap: 12px
+        padding: 4px 12px 12px
+        max-height: 60vh
+        overflow-y: auto
+        font-size: 13px
+
+    .introText p
+        line-height: 1.5
