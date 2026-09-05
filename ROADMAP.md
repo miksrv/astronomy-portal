@@ -16,7 +16,7 @@ Each feature is described in detail in the `features/` directory.
 | **Stargazing UX improvements** ||||
 | FEAT-26 | Event Gallery Video Uploads (Chunked Media Upload) | In review | [features/stargazing-event-video-uploads.md](features/stargazing-event-video-uploads.md) |
 | **Star Atlas / SEO** ||||
-| FEAT-27 | Star Atlas Upgrade (`/starmap` Planetarium Mode) | Planned | [features/star-atlas-upgrade.md](features/star-atlas-upgrade.md) |
+| FEAT-27 | Star Atlas Upgrade (`/starmap` Planetarium Mode) | In progress (frontend done incl. UX pass: status chip, docked sidebar, quick bar, atmosphere/tonight/time steps, static city picker; BE-1 geocode proxy + og:image asset deferred) | [features/star-atlas-upgrade.md](features/star-atlas-upgrade.md) |
 
 ---
 
