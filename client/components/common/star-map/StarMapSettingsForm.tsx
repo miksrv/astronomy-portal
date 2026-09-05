@@ -1,30 +1,64 @@
 import React from 'react'
-import { Checkbox, Container, Select } from 'simple-react-ui-kit'
+import { Button, Checkbox, Container, Select } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
 import { STARS_LIMIT_OPTIONS } from './constants'
-import { StarMapSettings as StarMapSettingsType } from './types'
+import { StarMapSettings as StarMapSettingsType, StarMapViewMode } from './types'
 
 import styles from './styles.module.sass'
 
 interface StarMapSettingsFormProps {
     settings: StarMapSettingsType
     onChange: (settings: StarMapSettingsType) => void
+    /** Location & date/time control (FE-2), rendered inside the panel below the view-mode toggle */
+    locationControl?: React.ReactNode
 }
 
-const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onChange }) => {
+const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onChange, locationControl }) => {
     const { t } = useTranslation()
 
     const update = <K extends keyof StarMapSettingsType>(key: K, value: StarMapSettingsType[K]) => {
         onChange({ ...settings, [key]: value })
     }
 
+    const viewModes: Array<{ mode: StarMapViewMode; label: string }> = [
+        { mode: 'sky', label: t('components.common.star-map.settings.view-mode-sky', 'Карта неба') },
+        { mode: 'horizon', label: t('components.common.star-map.settings.view-mode-horizon', 'Небо сейчас') }
+    ]
+
     return (
         <Container className={styles.settingsPanel}>
             <div className={styles.settingsTitle}>
                 {t('components.common.star-map.settings.title', 'Настройки карты')}
             </div>
+
+            <div className={styles.settingsGroup}>
+                <div className={styles.settingsGroupTitle}>
+                    {t('components.common.star-map.settings.view-mode', 'Режим просмотра')}
+                </div>
+                <div className={styles.viewModeToggle}>
+                    {viewModes.map(({ mode, label }) => (
+                        <Button
+                            key={mode}
+                            size={'small'}
+                            mode={settings.viewMode === mode ? 'primary' : 'secondary'}
+                            onClick={() => settings.viewMode !== mode && update('viewMode', mode)}
+                        >
+                            {label}
+                        </Button>
+                    ))}
+                </div>
+                {settings.viewMode === 'horizon' && (
+                    <Checkbox
+                        label={t('components.common.star-map.settings.atmosphere', 'Атмосфера')}
+                        checked={settings.atmosphere}
+                        onChange={(e) => update('atmosphere', e.target.checked)}
+                    />
+                )}
+            </div>
+
+            {locationControl}
 
             <div className={styles.settingsGroup}>
                 <div className={styles.settingsGroupTitle}>
@@ -55,14 +89,26 @@ const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onC
                     {t('components.common.star-map.settings.objects', 'Объекты')}
                 </div>
                 <Checkbox
-                    label={t('components.common.star-map.settings.show-dso', 'Deep Sky Objects')}
+                    label={t('components.common.star-map.settings.show-dso', 'Объекты глубокого космоса')}
                     checked={settings.dsosShow}
                     onChange={(e) => update('dsosShow', e.target.checked)}
                 />
+                {settings.dsosShow && (
+                    <Checkbox
+                        label={t('components.common.star-map.settings.show-dso-full', 'Больше объектов')}
+                        checked={settings.dsosFull}
+                        onChange={(e) => update('dsosFull', e.target.checked)}
+                    />
+                )}
                 <Checkbox
                     label={t('components.common.star-map.settings.show-custom-objects', 'Мои объекты')}
                     checked={settings.customObjectsShow}
                     onChange={(e) => update('customObjectsShow', e.target.checked)}
+                />
+                <Checkbox
+                    label={t('components.common.star-map.settings.meteor-showers', 'Радианты метеорных потоков')}
+                    checked={settings.meteorShowersShow}
+                    onChange={(e) => update('meteorShowersShow', e.target.checked)}
                 />
             </div>
 
