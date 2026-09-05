@@ -3,8 +3,8 @@ import React from 'react'
 import Head from 'next/head'
 import { useTranslation } from 'next-i18next/pages'
 
-import { SITE_LINK } from '@/api'
 import { BreadcrumbLink } from '@/components/ui'
+import { createPageUrl } from '@/utils/helpers'
 
 interface BreadcrumbJsonLdProps {
     links?: BreadcrumbLink[]
@@ -27,18 +27,15 @@ export const BreadcrumbJsonLd: React.FC<BreadcrumbJsonLdProps> = ({ links, curre
         return null
     }
 
-    const localePrefix = i18n.language === 'en' ? 'en/' : ''
-    const baseUrl = `${SITE_LINK ?? ''}${localePrefix}`
-
     const breadcrumbItems: Array<{ name: string; item?: string }> = [
-        { name: t('common.look-at-the-stars', 'Смотри на звёзды'), item: baseUrl }
+        { name: t('common.look-at-the-stars', 'Смотри на звёзды'), item: createPageUrl(i18n.language) }
     ]
 
     if (links?.length) {
         for (const { link, text } of links) {
             breadcrumbItems.push({
                 name: text,
-                item: `${baseUrl}${link.replace(/^\//, '')}`
+                item: createPageUrl(i18n.language, link)
             })
         }
     }
@@ -62,7 +59,9 @@ export const BreadcrumbJsonLd: React.FC<BreadcrumbJsonLdProps> = ({ links, curre
         <Head>
             <script
                 type={'application/ld+json'}
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+                // '<' is escaped so content (e.g. an admin-authored page title) can never
+                // close the script tag and break out into markup.
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, '\\u003c') }}
             />
         </Head>
     )
