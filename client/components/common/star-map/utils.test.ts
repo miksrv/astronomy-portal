@@ -1,5 +1,7 @@
 import {
     DEFAULT_STARMAP_SETTINGS,
+    HORIZON_FIT_FRACTION,
+    INITIAL_HORIZON_ZOOM,
     POINT_RADIUS,
     POPUP_ARROW_MARGIN,
     POPUP_ARROW_SIZE,
@@ -7,6 +9,7 @@ import {
     POPUP_OFFSET,
     POPUP_WIDTH
 } from './constants'
+import { computeHorizonTargetRadius } from './horizonOverlay'
 import { StarMapSettings } from './types'
 import {
     buildLiveSettingsPatch,
@@ -14,6 +17,8 @@ import {
     buildVisualConfig,
     clampPopupPosition,
     computeHorizonCanvasLayout,
+    computeHorizonCoverZoom,
+    computeHorizonStartZoom,
     getPopupArrowTop
 } from './utils'
 
@@ -24,21 +29,70 @@ const makeSettings = (overrides: Partial<StarMapSettings> = {}): StarMapSettings
 
 describe('star-map utils', () => {
     describe('computeHorizonCanvasLayout', () => {
-        it('landscape: dome diameter = height, padding fills the remaining width', () => {
-            expect(computeHorizonCanvasLayout(1160, 699)).toStrictEqual({ width: 699, backgroundWidth: 461 })
+        it('landscape: dome diameter = the fitted height, padding fills the remaining width', () => {
+            expect(computeHorizonCanvasLayout(1160, 699)).toStrictEqual({
+                width: Math.round(699 * HORIZON_FIT_FRACTION),
+                backgroundWidth: 1160 - Math.round(699 * HORIZON_FIT_FRACTION)
+            })
         })
 
-        it('portrait: dome diameter = width, padding fills the remaining height', () => {
-            expect(computeHorizonCanvasLayout(390, 700)).toStrictEqual({ width: 390, backgroundWidth: 310 })
+        it('portrait: dome diameter = the fitted width, padding fills the remaining height', () => {
+            expect(computeHorizonCanvasLayout(390, 700)).toStrictEqual({
+                width: Math.round(390 * HORIZON_FIT_FRACTION),
+                backgroundWidth: 700 - Math.round(390 * HORIZON_FIT_FRACTION)
+            })
         })
 
-        it('square container needs no padding', () => {
-            expect(computeHorizonCanvasLayout(700, 700)).toStrictEqual({ width: 700, backgroundWidth: 0 })
+        it('leaves a margin even in a square container — the dome must not touch the edges', () => {
+            const { width, backgroundWidth } = computeHorizonCanvasLayout(700, 700)
+
+            expect(width).toBe(Math.round(700 * HORIZON_FIT_FRACTION))
+            expect(width).toBeLessThan(700)
+            expect(width + backgroundWidth).toBe(700)
+        })
+
+        it('the whole-sky dome is exactly the base scale, so it is also the zoom-out limit', () => {
+            const container = { width: 1160, height: 699 }
+            const { width } = computeHorizonCanvasLayout(container.width, container.height)
+
+            // The projection width is the dome's diameter at zoom factor 1 — Celestial's
+            // minimum — and computeHorizonTargetRadius is what a fit-to-view asks for
+            expect(width / 2).toBeCloseTo(computeHorizonTargetRadius(container), 0)
         })
 
         it('never produces a zero or negative projection width', () => {
             expect(computeHorizonCanvasLayout(0, 0).width).toBe(1)
             expect(computeHorizonCanvasLayout(0, 0).backgroundWidth).toBe(0)
+        })
+    })
+
+    describe('computeHorizonStartZoom', () => {
+        it('opens closer than the floor, by exactly the configured multiple', () => {
+            expect(computeHorizonStartZoom(1160, 786)).toBeCloseTo(
+                computeHorizonCoverZoom(1160, 786) * INITIAL_HORIZON_ZOOM,
+                6
+            )
+            expect(computeHorizonStartZoom(1160, 786)).toBeGreaterThan(computeHorizonCoverZoom(1160, 786))
+        })
+
+        it('never opens below the floor — that would leave dead space around the sky', () => {
+            expect(INITIAL_HORIZON_ZOOM).toBeGreaterThanOrEqual(1)
+        })
+    })
+
+    describe('computeHorizonCoverZoom', () => {
+        it('is the factor whose dome radius reaches the container corner', () => {
+            const [width, height] = [1160, 786]
+            const domeRadius = computeHorizonCanvasLayout(width, height).width / 2
+
+            expect(domeRadius * computeHorizonCoverZoom(width, height)).toBeCloseTo(Math.hypot(width, height) / 2, 6)
+        })
+
+        it("always zooms in relative to the fitted dome — never below Celestial's own floor", () => {
+            expect(computeHorizonCoverZoom(1160, 786)).toBeGreaterThan(1)
+            expect(computeHorizonCoverZoom(390, 584)).toBeGreaterThan(1)
+            // Even a square container: the corner is further out than the fitted dome's rim
+            expect(computeHorizonCoverZoom(700, 700)).toBeGreaterThan(1)
         })
     })
 

@@ -3,7 +3,7 @@ import { RefObject, useCallback, useEffect, useMemo, useRef } from 'react'
 import { customConfig, defaultConfig } from './config'
 import { LIVE_TICK_HIDE_GRACE_MS, ZOOM_STEP_IN, ZOOM_STEP_OUT } from './constants'
 import { detachCelestialZoom, MAX_VIEW_RESTORE_ATTEMPTS } from './horizonNavigation'
-import { fitHorizonToView, measureHorizonCircle, ViewportSize } from './horizonOverlay'
+import { fitHorizonToView, ViewportSize } from './horizonOverlay'
 import { centerMatches, DOME_VIEW, HorizonView, isDomeView, viewToCenter } from './horizonView'
 import { horizontalToEquatorial } from './objectInfo'
 import { StarMapObject, StarMapProps } from './StarMap'
@@ -14,6 +14,8 @@ import {
     buildSkyviewPatch,
     buildVisualConfig,
     computeHorizonCanvasLayout,
+    computeHorizonCoverZoom,
+    computeHorizonStartZoom,
     createObjectsJSON
 } from './utils'
 
@@ -265,42 +267,83 @@ export const useCelestialDisplay = ({
     }, [settingsRef, dateRef, viewRef])
 
     /**
+     * How far horizon mode may be zoomed *out*, as a Celestial zoom factor — the floor the
+     * wheel, the pinch and the toolbar's "−" are clamped to, so the sky is never a bubble
+     * with dead space around it.
+     *
+     * The airy projection's visible disc is exactly the projection width at zoom factor 1
+     * (that is what computeHorizonCanvasLayout sizes), and every projected distance scales
+     * linearly with the factor — so the disc's radius on screen is
+     * `(projectionWidth / 2) * factor`, no measuring needed. Two floors follow from that:
+     *
+     * - the whole-sky dome fits the frame at factor 1, which is also Celestial's own
+     *   minimum — nothing to add;
+     * - a look-around is centered on a direction, not the zenith, so the whole disc sits in
+     *   the frame instead of surrounding it: there the sky has to *cover* the viewport, i.e.
+     *   the disc's radius must reach the frame's corner.
+     */
+    const horizonMinZoomFactor = useCallback((): number => {
+        const viewport = readViewport()
+
+        // Non-fitContainer embeds size the canvas themselves — no floor beyond Celestial's
+        if (!viewport || viewport.width <= 0 || viewport.height <= 0 || isDomeView(viewRef.current)) {
+            return 1
+        }
+
+        return computeHorizonCoverZoom(viewport.width, viewport.height)
+    }, [readViewport, viewRef])
+
+    /**
+     * The zoom the mode opens with: the cover floor tightened by INITIAL_HORIZON_ZOOM (the
+     * knob for "how close does /starmap start"). Applied once per display() — a rebuild
+     * drops back to the projection's base scale, so something has to set it — and only for
+     * a look-around; the whole-sky dome opens at the fitted base scale instead.
+     */
+    const applyStartupZoom = useCallback(() => {
+        const viewport = readViewport()
+
+        if (!viewport || isDomeView(viewRef.current)) {
+            return
+        }
+
+        try {
+            const current = readZoomFactor()
+            const target = computeHorizonStartZoom(viewport.width, viewport.height)
+
+            if (current != null && Math.abs(target / current - 1) > 0.001) {
+                Celestial.zoomBy(target / current)
+            }
+        } catch (error) {
+            console.warn(error)
+        }
+    }, [readViewport, viewRef])
+
+    /**
      * Leaving the whole-sky dome for a look-around: make sure the sky covers the frame.
      *
      * The dome zoom is chosen so the entire 90°-radius hemisphere fits *inside* the
      * viewport (that is the point of the dome view). Looked at from the side, that same
      * scale leaves the sky sitting in the middle of the canvas as a bubble, with the
-     * projection's clip edge in plain sight. Zooming so the hemisphere's radius reaches the
-     * frame's corner fills it — and it only ever zooms in, so a visitor who deliberately
-     * zoomed out further is left alone.
+     * projection's clip edge in plain sight — so the view is zoomed up to the look-around
+     * floor (horizonMinZoomFactor). It only ever zooms in; a visitor already above the
+     * floor is left alone.
      */
     const ensureLookAroundZoom = useCallback(() => {
         if (settingsRef.current.viewMode !== 'horizon') {
             return
         }
 
-        const canvas: HTMLCanvasElement | undefined = Celestial.context?.canvas
-        const viewport = readViewport() ?? canvas?.getBoundingClientRect()
-
-        if (!viewport || viewport.width <= 0 || viewport.height <= 0) {
-            return
-        }
-
         try {
-            const circle = measureHorizonCircle(
-                settingsRef.current.geopos,
-                dateRef.current ?? nowRef.current,
-                viewRef.current
-            )
-            const needed = Math.hypot(viewport.width, viewport.height) / 2
+            const current = readZoomFactor()
+            const minimum = horizonMinZoomFactor()
 
-            if (circle && circle.radius > 0 && circle.radius < needed) {
-                Celestial.zoomBy(needed / circle.radius)
+            if (current != null && current < minimum) {
+                Celestial.zoomBy(minimum / current)
             }
         } catch (error) {
             console.warn(error)
         }
-    }, [settingsRef, dateRef, viewRef, readViewport])
+    }, [settingsRef, horizonMinZoomFactor])
 
     // At most one restore in flight, plus a bail-out counter — see
     // MAX_VIEW_RESTORE_ATTEMPTS for why a plain time-based cooldown is not enough.
@@ -458,9 +501,10 @@ export const useCelestialDisplay = ({
                     if (isDomeView(viewRef.current)) {
                         fitHorizonToView(settingsRef.current.geopos, dateRef.current ?? new Date(), readViewport())
                     } else if (!permalinkZoomRef.current) {
-                        // A shared look-around without a zoom of its own: fill the frame
+                        // A look-around with no zoom of its own (the opening view, or a
+                        // permalink that only shares a direction): open at the startup zoom
                         // rather than leaving the sky as a bubble in the middle
-                        ensureLookAroundZoom()
+                        applyStartupZoom()
                     }
 
                     // skyview() above re-read the date and redrew — point the map back at
@@ -694,17 +738,39 @@ export const useCelestialDisplay = ({
 
     useLiveClock(Boolean(showSettings) && date == null, handleLiveTick)
 
-    const zoomBy = useCallback((factor: number) => {
-        if (!initializedRef.current) {
-            return
-        }
+    // Every zoom gesture funnels through here — the toolbar's +/−, the wheel and the
+    // pinch — so horizon mode's zoom-out floor (horizonMinZoomFactor) is enforced in one
+    // place. A zoom-out that would take the sky below the floor is shortened to land
+    // exactly on it; one made from below the floor (a resize can leave the view there) is
+    // dropped rather than turned into a surprise zoom-in.
+    const zoomBy = useCallback(
+        (factor: number) => {
+            if (!initializedRef.current) {
+                return
+            }
 
-        try {
-            Celestial.zoomBy(factor)
-        } catch (error) {
-            console.warn(error)
-        }
-    }, [])
+            let applied = factor
+
+            if (showSettings && settingsRef.current.viewMode === 'horizon' && factor < 1) {
+                const current = readZoomFactor()
+
+                if (current != null) {
+                    applied = Math.max(factor, Math.min(1, horizonMinZoomFactor() / current))
+                }
+            }
+
+            if (Math.abs(applied - 1) < 0.001) {
+                return
+            }
+
+            try {
+                Celestial.zoomBy(applied)
+            } catch (error) {
+                console.warn(error)
+            }
+        },
+        [showSettings, settingsRef, horizonMinZoomFactor]
+    )
 
     const zoomIn = useCallback(() => zoomBy(ZOOM_STEP_IN), [zoomBy])
     const zoomOut = useCallback(() => zoomBy(ZOOM_STEP_OUT), [zoomBy])

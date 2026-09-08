@@ -25,6 +25,32 @@ export const LIVE_TICK_HIDE_GRACE_MS = 1500
 export const ZOOM_STEP_IN = 1.25
 export const ZOOM_STEP_OUT = 0.8
 
+/**
+ * Fraction of the visible area's smaller side the whole-sky dome is scaled to in horizon
+ * mode — the rest is margin, so the horizon circle, its ground silhouette and the compass
+ * labels are all inside the frame.
+ *
+ * It is used twice, and that is the point: it is the projection's *base* width
+ * (computeHorizonCanvasLayout) as well as the fit-to-view target
+ * (computeHorizonTargetRadius). d3-celestial clamps zooming out at the base scale, so
+ * making the base scale the fitted dome is what stops "Небо сейчас" from ever being zoomed
+ * out past the whole sky — there is simply nothing below that level to zoom to.
+ */
+export const HORIZON_FIT_FRACTION = 0.88
+
+/**
+ * How close horizon mode opens, as a multiple of the "sky covers the frame" floor
+ * (computeHorizonCoverZoom). 1 is the floor itself — the widest possible look-around,
+ * roughly a 100° field of view, which reads as a fisheye; larger values open closer.
+ *
+ * This is the knob for the opening zoom. Celestial's own `zoomlevel` is not: in horizon
+ * mode it is the projection's base scale, which also defines the zoom-out floor and the
+ * fitted dome (see HORIZON_FIT_FRACTION), so raising it would take the whole-sky view out
+ * of the frame again. Only the opening view uses this — leaving the dome by dragging still
+ * lands exactly on the floor, so the map never zooms in behind the visitor's back.
+ */
+export const INITIAL_HORIZON_ZOOM = 1.5
+
 export const DEFAULT_STARMAP_SETTINGS: StarMapSettings = {
     viewMode: 'sky',
     atmosphere: true,

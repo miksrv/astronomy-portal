@@ -1,3 +1,4 @@
+import { HORIZON_FIT_FRACTION } from './constants'
 import {
     buildTreeOutline,
     collectVisibleRuns,
@@ -6,11 +7,28 @@ import {
     computeHorizonTargetRadius,
     GROUND_GRADIENT_SPAN,
     hillHeightDeg,
-    HORIZON_FIT_FRACTION,
+    MAX_SAMPLE_DISTANCE_DEG,
     seededRandom
 } from './horizonOverlay'
+import { angularDistanceDeg, DOME_VIEW } from './horizonView'
 
 describe('star-map horizonOverlay', () => {
+    describe('MAX_SAMPLE_DISTANCE_DEG', () => {
+        it('admits the whole silhouette as seen from the whole-sky dome', () => {
+            // The ground fill traces the silhouette, and from DOME_VIEW its far side sits
+            // ~89.5° away — a tighter margin dropped it and left the dome a bare circle
+            for (let azimuth = 0; azimuth < 360; azimuth += 3) {
+                expect(angularDistanceDeg(DOME_VIEW, { azimuth, altitude: hillHeightDeg(azimuth) })).toBeLessThan(
+                    MAX_SAMPLE_DISTANCE_DEG
+                )
+            }
+        })
+
+        it('stays inside the projection\u2019s 90° clip', () => {
+            expect(MAX_SAMPLE_DISTANCE_DEG).toBeLessThan(90)
+        })
+    })
+
     describe('computeHorizonTargetRadius', () => {
         it('fits the dome to the smaller side of the visible area, leaving a label margin', () => {
             // Landscape: the canvas may be far wider than tall — height is the limit

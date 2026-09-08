@@ -1,7 +1,7 @@
 import { RefObject, useCallback, useRef, useState } from 'react'
 
 import { DEFAULT_STARMAP_SETTINGS } from './constants'
-import { clampView, DOME_VIEW, HorizonView } from './horizonView'
+import { clampView, HorizonView, INITIAL_VIEW } from './horizonView'
 import { decodePermalinkFromLocation, PermalinkState } from './permalink'
 import { StarMapSettings } from './types'
 import { StarMapLocationState, useStarMapLocation } from './useStarMapLocation'
@@ -72,7 +72,7 @@ export const useStarMapSettings = ({ showSettings }: UseStarMapSettingsOptions):
     const centerRef = useRef<[number, number, number]>(
         permalink.center ?? (showSettings ? loadStarMapSettings().center : DEFAULT_STARMAP_SETTINGS.center)
     )
-    const viewRef = useRef<HorizonView>(clampView(permalink.view ?? DOME_VIEW))
+    const viewRef = useRef<HorizonView>(clampView(permalink.view ?? INITIAL_VIEW))
     const permalinkZoomRef = useRef<number | null>(permalink.zoom ?? null)
 
     // Mirrors for callbacks registered once with Celestial (drawCustomLayers / canvas handlers),

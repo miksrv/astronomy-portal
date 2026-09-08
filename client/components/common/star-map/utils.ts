@@ -3,6 +3,8 @@ import { formatObjectName } from '@/utils/strings'
 import { customConfig, defaultConfig } from './config'
 import {
     DEFAULT_STARMAP_SETTINGS,
+    HORIZON_FIT_FRACTION,
+    INITIAL_HORIZON_ZOOM,
     POINT_RADIUS,
     POPUP_ARROW_MARGIN,
     POPUP_ARROW_SIZE,
@@ -158,20 +160,46 @@ export type HorizonCanvasLayout = {
 /**
  * Canvas geometry for horizon mode in a fitContainer box. The airy projection is a 1:1
  * dome whose base scale is derived from the projection `width`, and Celestial's minimum
- * zoom is exactly that base — the dome can never be zoomed *out* below it. So the
- * projection width is the container's smaller side (the dome fits the visible area), and
+ * zoom is exactly that base — the dome can never be zoomed *out* below it. That clamp is
+ * used as the feature: the projection width is HORIZON_FIT_FRACTION of the container's
+ * smaller side, i.e. the fitted whole-sky dome *with* its label margin, so the fully
+ * visible sky circle is also the furthest the visitor can zoom out. (Taking the smaller
+ * side itself, as this did before, left the dome touching — and in practice cropped by —
+ * the top and bottom edges, with no way to zoom out any further.)
+ *
  * `background.width` — which d3-celestial adds to the canvas width on top of the
  * projection width, centering the projection in the wider canvas — pads the canvas up to
- * the larger side. The result is a square canvas of the larger side: on landscape it
- * spans the full width and overflows vertically, on portrait it spans the full height and
- * overflows horizontally; `.starMapFit` centers and crops the overflow either way.
+ * the container's larger side. The result is a square canvas of the larger side: on
+ * landscape it spans the full width and overflows vertically, on portrait it spans the
+ * full height and overflows horizontally; `.starMapFit` centers and crops the overflow
+ * either way.
  */
 export const computeHorizonCanvasLayout = (containerWidth: number, containerHeight: number): HorizonCanvasLayout => {
-    const width = Math.max(1, Math.round(Math.min(containerWidth, containerHeight)))
+    const smallest = Math.max(1, Math.round(Math.min(containerWidth, containerHeight)))
     const largest = Math.max(1, Math.round(Math.max(containerWidth, containerHeight)))
+    const width = Math.max(1, Math.round(smallest * HORIZON_FIT_FRACTION))
 
     return { width, backgroundWidth: Math.max(0, largest - width) }
 }
+
+/**
+ * Zoom factor at which the sky covers the whole visible area — horizon mode's zoom-out
+ * floor for a look-around view.
+ *
+ * The airy projection's visible disc has a radius of `width / 2` at zoom factor 1 (the
+ * layout above sizes it) and scales linearly with the factor, and the disc is centered on
+ * the container, so covering the container means reaching its corner: `hypot(w, h) / 2`.
+ *
+ * The whole-sky dome deliberately does *not* use this — it is fitted *inside* the frame,
+ * corners and all, which is factor 1. A look-around is centered on a direction instead of
+ * the zenith, so without this floor the sky shrinks into a bubble with dead space around it.
+ */
+export const computeHorizonCoverZoom = (containerWidth: number, containerHeight: number): number =>
+    Math.hypot(containerWidth, containerHeight) / computeHorizonCanvasLayout(containerWidth, containerHeight).width
+
+/** Zoom factor horizon mode opens with — the cover floor, tightened by INITIAL_HORIZON_ZOOM. */
+export const computeHorizonStartZoom = (containerWidth: number, containerHeight: number): number =>
+    computeHorizonCoverZoom(containerWidth, containerHeight) * INITIAL_HORIZON_ZOOM
 
 export const buildVisualConfig = (settings: StarMapSettings) => {
     const horizonMode = settings.viewMode === 'horizon'

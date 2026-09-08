@@ -4,6 +4,7 @@ import {
     clampView,
     DOME_VIEW,
     HorizonView,
+    INITIAL_VIEW,
     isDomeView,
     MAX_VIEW_ALTITUDE,
     MIN_VIEW_ALTITUDE,
@@ -94,6 +95,20 @@ describe('star-map horizonView', () => {
         it('recognizes the whole-sky view, not a look-around', () => {
             expect(isDomeView(DOME_VIEW)).toBe(true)
             expect(isDomeView({ azimuth: 180, altitude: 60 })).toBe(false)
+        })
+    })
+
+    describe('INITIAL_VIEW', () => {
+        it('opens on a look-around facing south, not on the whole-sky dome', () => {
+            expect(INITIAL_VIEW.azimuth).toBe(180)
+            expect(isDomeView(INITIAL_VIEW)).toBe(false)
+            // Well clear of both stops, so the opening view is never a clamped edge case
+            expect(INITIAL_VIEW.altitude).toBeGreaterThan(MIN_VIEW_ALTITUDE)
+            expect(INITIAL_VIEW.altitude).toBeLessThan(MAX_VIEW_ALTITUDE)
+        })
+
+        it('survives clamping unchanged — it is what the map actually opens with', () => {
+            expect(clampView(INITIAL_VIEW)).toStrictEqual(INITIAL_VIEW)
         })
     })
 

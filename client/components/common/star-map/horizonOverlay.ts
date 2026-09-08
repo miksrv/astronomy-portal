@@ -1,4 +1,5 @@
 import { FONT } from './config'
+import { HORIZON_FIT_FRACTION } from './constants'
 import { angularDistanceDeg, computeZenith, DOME_VIEW, HorizonView } from './horizonView'
 import { horizontalToEquatorial } from './objectInfo'
 
@@ -191,9 +192,6 @@ const buildGeometry = (geopos: [number, number], date: Date): HorizonGeometry =>
  */
 export type ViewportSize = { width: number; height: number }
 
-/** Fraction of the visible area's smaller side the horizon circle is scaled to — the rest is label margin. */
-export const HORIZON_FIT_FRACTION = 0.88
-
 /**
  * Radius (px) the horizon circle should have to fit the visible area: the fraction of the
  * smaller side. The canvas itself may be larger than what the user sees (in fitContainer
@@ -385,8 +383,16 @@ const drawGroundBand = (context: CanvasRenderingContext2D, edge: ScreenPoint[], 
  * How far from the view center a silhouette sample may sit and still be drawn. The
  * projection clips at exactly 90°; a hair inside that keeps the samples off the border,
  * where the airy radius runs away and Celestial's own clip test flips about.
+ *
+ * It has to clear the whole-sky dome's silhouette, or that view loses its ground. The dome
+ * looks 0.1° off the zenith (DOME_VIEW), so on the far side of the sky every altitude is
+ * that much further away: the lowest hill (0.6°) sits ~89.5° out and a tree's roots ~89.9°,
+ * while the horizon line itself reaches 90.05° — outside the projection, which is fine,
+ * since the ground is filled from the silhouette outward and never needs it. A 1° margin
+ * rejected all of them and left the dome a bare circle. projectSample's finite-check is the
+ * real safety net; this only keeps samples off the clip border itself.
  */
-export const MAX_SAMPLE_DISTANCE_DEG = 89
+export const MAX_SAMPLE_DISTANCE_DEG = 89.95
 
 /**
  * Project one silhouette sample to screen, or null when it is outside the projection.
@@ -453,7 +459,10 @@ export const drawHorizonOverlay = ({ geopos, date, view, labels }: HorizonOverla
     const upperScreen = upper.map((sample) => projectSample(sample, view))
     const lowerScreen = lower.map((sample) => projectSample(sample, view))
 
-    const runs = collectVisibleRuns(upperScreen.map((point, index) => Boolean(point && lowerScreen[index])))
+    // The ground fill only traces the silhouette — it extends radially away from the zenith
+    // from there, so a horizon sample that failed to project costs nothing. Only the
+    // fallback band (drawn when the zenith itself doesn't project) needs both rows.
+    const runs = collectVisibleRuns(upperScreen.map((point, index) => Boolean(point && (circle || lowerScreen[index]))))
     const edges = runs.map((run) => run.map((index) => upperScreen[index] as ScreenPoint))
 
     // Fill the ground: from the silhouette down past the horizon, out to the canvas edges

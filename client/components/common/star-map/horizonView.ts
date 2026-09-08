@@ -30,11 +30,26 @@ export type HorizonView = {
 }
 
 /**
- * Looking straight up: the whole-sky dome the mode opens with. Facing south, because that
- * is what puts north at the top and east on the left — the orientation every printed star
- * chart (and today's map) uses.
+ * Looking straight up: the whole-sky dome, reached from the rail's "fit view" (the mode
+ * itself opens on INITIAL_VIEW below). Facing south, because that is what puts north at the
+ * top and east on the left — the orientation every printed star chart (and today's map) uses.
  */
 export const DOME_VIEW: HorizonView = { azimuth: 180, altitude: 89.9 }
+
+/**
+ * The view horizon mode opens with: facing south, a third of the way up the sky —
+ * Stellarium's landing shot. Deliberately *not* the whole-sky dome: looking straight up
+ * puts the horizon all the way around the disc's rim, so the map reads as a bare circle
+ * floating in the frame, with the ground reduced to a thin ring. A look-around fills the
+ * frame with sky and puts the ground, treeline and compass where a visitor expects them —
+ * along the bottom.
+ *
+ * The altitude is paired with INITIAL_HORIZON_ZOOM: the opening zoom narrows the field of
+ * view, and looking too high then pushes the ground off the bottom edge (at 1.5× the frame
+ * spans roughly ±35°, so 45° left only a sliver of ground in the corner). Raise one and the
+ * other has to come down. The whole-sky dome stays one tap away on the rail's "fit view".
+ */
+export const INITIAL_VIEW: HorizonView = { azimuth: 180, altitude: 30 }
 
 /**
  * Altitude limits. The top stops just short of the zenith, where "towards the zenith" — and
