@@ -691,13 +691,13 @@
 .settingsPanel
     // Inside the docked sidebar the aside is the surface: the kit Container keeps
     // only its padding/typography — no own radius, shadow or background on desktop
-    padding: 12px
+    padding: 12px !important
     display: flex
     flex-direction: column
     gap: 10px
-    border-radius: 0
-    box-shadow: none
-    background: transparent
+    border-radius: 0 !important
+    box-shadow: none !important
+    background: transparent !important
 
     // Kit checkboxes restyled as iOS-like switches (mockup): the aria-hidden span is
     // the checkbox's visual box — turn it into a track + ::after thumb, label text
@@ -742,17 +742,14 @@
                 transform: translateX(14px)
                 background-color: #fff
 
-.settingsTitle
-    font-weight: 600
-    font-size: 14px
-    margin-bottom: 2px
-
 .settingsGroup
     display: flex
     flex-direction: column
     gap: 6px
     padding-top: 8px
-    border-top: 1px solid color-mix(in srgb, var(--input-border-color) 60%, transparent)
+
+    &:not(:first-child)
+        border-top: 1px solid color-mix(in srgb, var(--input-border-color) 60%, transparent)
 
 .settingsGroupTitle
     display: flex

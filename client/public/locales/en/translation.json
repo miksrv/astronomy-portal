@@ -138,7 +138,6 @@
                 },
                 "settings": {
                     "title": "Map settings",
-                    "view-mode": "View mode",
                     "view-mode-sky": "Sky chart",
                     "view-mode-horizon": "Sky right now",
                     "atmosphere": "Atmosphere",

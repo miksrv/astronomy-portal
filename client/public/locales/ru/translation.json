@@ -138,7 +138,6 @@
                 },
                 "settings": {
                     "title": "Настройки карты",
-                    "view-mode": "Режим просмотра",
                     "view-mode-sky": "Карта неба",
                     "view-mode-horizon": "Небо сейчас",
                     "atmosphere": "Атмосфера",

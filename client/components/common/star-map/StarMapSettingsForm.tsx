@@ -29,14 +29,9 @@ const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onC
 
     return (
         <Container className={styles.settingsPanel}>
-            <div className={styles.settingsTitle}>
-                {t('components.common.star-map.settings.title', 'Настройки карты')}
-            </div>
-
+            {/* No panel title and no heading over the mode toggle: the panel is opened from
+                a labelled button and the two mode buttons name themselves. */}
             <div className={styles.settingsGroup}>
-                <div className={styles.settingsGroupTitle}>
-                    {t('components.common.star-map.settings.view-mode', 'Режим просмотра')}
-                </div>
                 <div className={styles.viewModeToggle}>
                     {viewModes.map(({ mode, label }) => (
                         <Button
