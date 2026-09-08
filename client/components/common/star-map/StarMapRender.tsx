@@ -235,7 +235,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
         >
             {showSettings && (
                 // One rail for every map action. Desktop: a single vertical glass column in
-                // the top-left corner (view controls, divider, panels). Mobile: the wrapper
+                // the top-left corner (view controls, then panels). Mobile: the wrapper
                 // is display:contents, so the view controls stay a small top-left rail while
                 // the panel buttons become the bottom action bar. In hide-UI mode the rail
                 // collapses to its single "show UI" toggle (.mapRailHidden).
@@ -262,15 +262,21 @@ const StarMapRender: React.FC<StarMapProps> = ({
                         >
                             <ZoomOutIcon />
                         </Button>
-                        <Button
-                            mode={'secondary'}
-                            title={t('components.common.star-map.toolbar.fit-view', 'Вписать вид')}
-                            aria-label={t('components.common.star-map.toolbar.fit-view', 'Вписать вид')}
-                            className={styles.railButton}
-                            onClick={fitView}
-                        >
-                            <FitViewIcon />
-                        </Button>
+                        {/* Sky mode only: there "fit view" resets a zoom the visitor can
+                            otherwise only undo by hand. Horizon mode opens at its own fitted
+                            zoom and cannot be zoomed out past it, and the whole-sky dome is
+                            reached by simply looking up — so the button has nothing to fix. */}
+                        {!isHorizon && (
+                            <Button
+                                mode={'secondary'}
+                                title={t('components.common.star-map.toolbar.fit-view', 'Вписать вид')}
+                                aria-label={t('components.common.star-map.toolbar.fit-view', 'Вписать вид')}
+                                className={styles.railButton}
+                                onClick={fitView}
+                            >
+                                <FitViewIcon />
+                            </Button>
+                        )}
                         {/* Screenshot mode toggle — the only rail button left visible while the
                             UI is hidden (see .mapRailHidden), otherwise there is no way back */}
                         <Button
@@ -295,8 +301,6 @@ const StarMapRender: React.FC<StarMapProps> = ({
                             onClick={() => setUiHidden((prev) => !prev)}
                         />
                     </div>
-
-                    <div className={styles.railDivider} />
 
                     <div className={styles.mapToolbar}>
                         <Button

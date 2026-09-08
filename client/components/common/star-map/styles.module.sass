@@ -30,8 +30,8 @@
         top: 40px
 
     // One glass rail in the top-left corner holding every map action (settings page
-    // only): the view controls (zoom in/out, fit view), a divider, then the panel
-    // buttons. Replaces Celestial's own #celestial-zoomin/#celestial-zoomout inputs,
+    // only): the view controls (zoom in/out, and "fit view" in sky mode) followed by the
+    // panel buttons. Replaces Celestial's own #celestial-zoomin/#celestial-zoomout inputs,
     // which are switched off for this page via `controls: false` (see buildVisualConfig).
     .mapRail
         position: absolute
@@ -52,17 +52,15 @@
         flex-direction: column
         gap: 4px
 
-    .railDivider
-        height: 1px
-        margin: 0 2px
-        background-color: color-mix(in srgb, var(--input-border-color) 80%, transparent)
-
-    // Icon-only 28px square, same footprint as .toolbarButton but never turned into the
-    // labelled bottom-bar button on mobile (the view controls stay a rail there)
+    // Icon-only square, same footprint as .toolbarButton but never turned into the
+    // labelled bottom-bar button on mobile (the view controls stay a rail there).
+    // Sized from the kit's own control height: `.button.medium` sets that height and
+    // outranks a single class here, so a smaller value would only squash the width and
+    // leave the button a tall rectangle.
     .railButton
-        height: 28px
-        width: 28px
-        min-width: 28px
+        height: var(--size-control-small) !important
+        width: var(--size-control-small)
+        min-width: var(--size-control-small)
         padding: 0
         justify-content: center
         color: var(--text-color-secondary)
@@ -84,9 +82,9 @@
         gap: 4px
 
     .toolbarButton
-        height: 28px
-        width: 28px
-        min-width: 28px
+        height: var(--size-control-small) !important
+        width: var(--size-control-small)
+        min-width: var(--size-control-small)
         padding: 0
         justify-content: center
 
@@ -145,7 +143,7 @@
     // Screenshot mode (hide-UI): the rail stays mounted but only the toggle itself is
     // shown, so there is always a way back; every other overlay is unmounted by React
     .mapRailHidden
-        .railDivider, .mapToolbar, .railButton:not(.railToggleUi)
+        .mapToolbar, .railButton:not(.railToggleUi)
             display: none
 
     // Always-visible "place · moment" caption (StarMapStatusChip). Bottom-right on
@@ -515,9 +513,6 @@
         // The rail dissolves: its two groups position themselves against #celestial-map
         .mapRail
             display: contents
-
-        .railDivider
-            display: none
 
         // Small vertical rail where Celestial's own zoom buttons used to sit; the status
         // chip starts right of it (see .statusChip below)
