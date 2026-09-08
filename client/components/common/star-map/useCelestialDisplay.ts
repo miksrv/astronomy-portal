@@ -215,6 +215,40 @@ export const useCelestialDisplay = ({
     }, [fitContainer, settingsRef, containerRef])
 
     /**
+     * Refresh Celestial's own idea of where the zenith is — what its daylight pass (the
+     * "Атмосфера" toggle) measures the Sun against.
+     *
+     * The bundled library keeps the zenith in a private variable that only its internal
+     * `l()` routine writes, and `skyview()` calls that routine **only** when
+     * `follow === 'zenith'`. Horizon mode deliberately sets `follow: 'center'` (it drives
+     * the center itself, see buildVisualConfig), so the zenith stayed at its initial
+     * `[0, 0]` forever: the daylight pass then measured the Sun against a point on the
+     * celestial equator, read the result as "Sun far below the horizon" (over 108°) and
+     * painted nothing — at noon as much as at midnight, with the toggle on or off.
+     *
+     * `Celestial.date()` is the one public entry that runs the same routine, and with
+     * `follow: 'center'` it recomputes the zenith and redraws without re-centering the map.
+     * It reads the observer position from the hidden form, which `skyview()` has just
+     * written — so this must be called *after* the skyview patch, never before.
+     */
+    const syncCelestialZenith = useCallback(
+        (when: Date) => {
+            if (settingsRef.current.viewMode !== 'horizon') {
+                return
+            }
+
+            try {
+                // Same offset buildSkyviewPatch passes, so Celestial's date bookkeeping
+                // stays consistent with the instant the rest of the map is drawn for
+                Celestial.date(when, -when.getTimezoneOffset())
+            } catch (error) {
+                console.warn(error)
+            }
+        },
+        [settingsRef]
+    )
+
+    /**
      * Point the map where the visitor is looking. Horizon mode never lets Celestial choose
      * the center: `viewToCenter` turns the azimuth/altitude into an equatorial center plus
      * the roll that keeps the zenith straight up — which is what keeps the horizon
@@ -507,6 +541,9 @@ export const useCelestialDisplay = ({
                         applyStartupZoom()
                     }
 
+                    // The daylight pass needs Celestial's own zenith for this instant
+                    syncCelestialZenith(dateRef.current ?? new Date())
+
                     // skyview() above re-read the date and redrew — point the map back at
                     // the visitor's direction for that instant
                     applyHorizonView()
@@ -703,12 +740,13 @@ export const useCelestialDisplay = ({
 
         try {
             Celestial.skyview(buildSkyviewPatch(date ?? nowRef.current, [observerLat, observerLon]))
+            syncCelestialZenith(date ?? nowRef.current)
             // The visitor keeps looking the same way; where that points in the sky doesn't
             applyHorizonView()
         } catch (error) {
             console.warn(error)
         }
-    }, [showSettings, observerLat, observerLon, date, applyHorizonView])
+    }, [showSettings, observerLat, observerLon, date, applyHorizonView, syncCelestialZenith])
 
     // "Now" mode keeps up with real time: once a minute advance nowRef and hand the new
     // instant to Celestial. Date-only skyview() leaves the location alone and just redraws
@@ -730,11 +768,12 @@ export const useCelestialDisplay = ({
 
         try {
             Celestial.skyview(buildSkyviewPatch(nowRef.current))
+            syncCelestialZenith(nowRef.current)
             applyHorizonView()
         } catch (error) {
             console.warn(error)
         }
-    }, [dateRef, extendAutoHideGrace, applyHorizonView])
+    }, [dateRef, extendAutoHideGrace, applyHorizonView, syncCelestialZenith])
 
     useLiveClock(Boolean(showSettings) && date == null, handleLiveTick)
 

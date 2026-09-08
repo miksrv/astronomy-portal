@@ -31,6 +31,29 @@ export interface DateTimeInputProps {
     maxDate?: string
     /** Locale for month/day names in the calendar (default: 'ru'). */
     locale?: 'ru' | 'en'
+    /** Caption over the hour select (default: 'Часы'). Set it on a localized page. */
+    hourLabel?: string
+    /** Caption over the minute select (default: 'Минуты'). Set it on a localized page. */
+    minuteLabel?: string
+    /** Caption of the button that closes the popout (default: 'Готово'). */
+    doneLabel?: string
+    /**
+     * Where the hour/minute row sits inside the popout — `'below'` the calendar (default)
+     * or `'above'` it. Neither the kit's `Popout` nor its `Select` flips upward when it
+     * runs out of room, so in a tall popout anchored low on the screen (e.g. the star
+     * map's settings sidebar) the hour list opens past the bottom edge and cannot be
+     * reached. `'above'` lifts the selects to the top of the panel, where the calendar's
+     * own height is the room their lists open into.
+     */
+    timePosition?: 'below' | 'above'
+    /**
+     * Render the popout in a portal with fixed positioning — needed inside a scrolling or
+     * clipping container (e.g. the star map's settings sidebar), where the popout would
+     * otherwise be cut off or scroll away from its trigger.
+     */
+    portal?: boolean
+    /** Called when the popout opens/closes, e.g. to resolve something lazily on open. */
+    onOpenChange?: (isOpen: boolean) => void
     /** Additional class name for the outer wrapper. */
     className?: string
     /** Stable prefix for `data-testid` hooks on the trigger/calendar/time controls. */
@@ -72,9 +95,15 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     minDate,
     maxDate,
     locale = 'ru',
+    hourLabel = 'Часы',
+    minuteLabel = 'Минуты',
+    doneLabel = 'Готово',
+    timePosition = 'below',
+    portal,
     className,
     testId,
-    onChange
+    onChange,
+    onOpenChange
 }) => {
     // Typed structurally (rather than importing `PopoutHandleProps`) so this
     // file only needs one import statement from 'simple-react-ui-kit' — a
@@ -97,6 +126,14 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     const hourPart = isValid ? parsed!.format('HH') : undefined
     const minutePart = isValid ? parsed!.format('mm') : undefined
 
+    // With no value yet the hour/minute selects used to render empty *and* disabled, which
+    // reads as a broken control — especially on the star map, which opens with no fixed
+    // moment at all. They now stand at 00:00 on today's date and are usable straight away:
+    // touching either one commits that moment, and picking a day afterwards keeps the time.
+    const effectiveDate = datePart ?? dayjs().format('YYYY-MM-DD')
+    const effectiveHour = hourPart ?? '00'
+    const effectiveMinute = minutePart ?? '00'
+
     const commit = (nextDate?: string, nextHour?: string, nextMinute?: string) => {
         if (!nextDate) {
             return
@@ -106,6 +143,33 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     }
 
     const resolvedPlaceholder = placeholder ?? (showTime ? 'Выберите дату и время' : 'Выберите дату')
+
+    const timeControls = (
+        <div className={styles.timeRow}>
+            <div
+                className={styles.timeSelect}
+                data-testid={testId && `${testId}-hour`}
+            >
+                <Select<string>
+                    label={hourLabel}
+                    options={HOUR_OPTIONS}
+                    value={effectiveHour}
+                    onSelect={(selected) => commit(effectiveDate, selected?.[0]?.key, effectiveMinute)}
+                />
+            </div>
+            <div
+                className={styles.timeSelect}
+                data-testid={testId && `${testId}-minute`}
+            >
+                <Select<string>
+                    label={minuteLabel}
+                    options={MINUTE_OPTIONS}
+                    value={effectiveMinute}
+                    onSelect={(selected) => commit(effectiveDate, effectiveHour, selected?.[0]?.key)}
+                />
+            </div>
+        </div>
+    )
 
     return (
         <div className={[styles.wrapper, className].filter(Boolean).join(' ')}>
@@ -120,7 +184,9 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 ref={popoutRef}
                 disabled={disabled}
                 position={'left'}
+                portal={portal}
                 className={styles.popout}
+                onOpenChange={onOpenChange}
                 trigger={
                     <button
                         type={'button'}
@@ -141,6 +207,8 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 }
             >
                 <div className={styles.panel}>
+                    {showTime && timePosition === 'above' && timeControls}
+
                     <div data-testid={testId && `${testId}-calendar`}>
                         <Calendar
                             locale={locale}
@@ -149,7 +217,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                             maxDate={maxDate}
                             datePeriod={[datePart, datePart]}
                             onDateSelect={(date) => {
-                                commit(date, hourPart, minutePart)
+                                commit(date, effectiveHour, effectiveMinute)
 
                                 if (!showTime) {
                                     popoutRef.current?.close()
@@ -158,42 +226,15 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                         />
                     </div>
 
-                    {showTime && (
-                        <>
-                            <div className={styles.timeRow}>
-                                <div
-                                    className={styles.timeSelect}
-                                    data-testid={testId && `${testId}-hour`}
-                                >
-                                    <Select<string>
-                                        label={'Часы'}
-                                        disabled={!datePart}
-                                        options={HOUR_OPTIONS}
-                                        value={hourPart}
-                                        onSelect={(selected) => commit(datePart, selected?.[0]?.key, minutePart)}
-                                    />
-                                </div>
-                                <div
-                                    className={styles.timeSelect}
-                                    data-testid={testId && `${testId}-minute`}
-                                >
-                                    <Select<string>
-                                        label={'Минуты'}
-                                        disabled={!datePart}
-                                        options={MINUTE_OPTIONS}
-                                        value={minutePart}
-                                        onSelect={(selected) => commit(datePart, hourPart, selected?.[0]?.key)}
-                                    />
-                                </div>
-                            </div>
+                    {showTime && timePosition === 'below' && timeControls}
 
-                            <Button
-                                mode={'primary'}
-                                label={'Готово'}
-                                className={styles.doneButton}
-                                onClick={() => popoutRef.current?.close()}
-                            />
-                        </>
+                    {showTime && (
+                        <Button
+                            mode={'primary'}
+                            label={doneLabel}
+                            className={styles.doneButton}
+                            onClick={() => popoutRef.current?.close()}
+                        />
                     )}
                 </div>
             </Popout>

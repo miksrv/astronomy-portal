@@ -3,7 +3,10 @@ import { Button, cn, Input, Spinner } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
+import { DateTimeInput } from '@/components/ui/date-time-input'
+
 import { City, findNearestCity, getCityDisplayName, loadCities, matchCities } from './cities'
+import { MOBILE_MAX_WIDTH } from './constants'
 import { findTonightMoment } from './nightPreset'
 import { stepDate, TimeStep, TimeStepDirection } from './timeStep'
 import { dateToWallClock, formatUtcOffset, ResolvedTimeZone, wallClockToDate } from './timezone'
@@ -53,6 +56,22 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
     const [cityQuery, setCityQuery] = useState<string>('')
     const [cityListOpen, setCityListOpen] = useState(false)
     const cityListId = useId()
+
+    // The date popout has to escape the desktop sidebar's own scroll box, which clips it —
+    // that is what `portal` (fixed positioning) is for. On the mobile bottom sheet the same
+    // portal would open below the fold with no way to reach it, while the sheet's own
+    // scrolling reaches an in-flow popout just fine, so it is desktop-only.
+    const [isDesktop, setIsDesktop] = useState<boolean>(false)
+
+    useEffect(() => {
+        const query = window.matchMedia(`(min-width: ${MOBILE_MAX_WIDTH + 1}px)`)
+        const sync = () => setIsDesktop(query.matches)
+
+        sync()
+        query.addEventListener('change', sync)
+
+        return () => query.removeEventListener('change', sync)
+    }, [])
 
     const ensureCities = () => {
         if (cities) {
@@ -348,13 +367,23 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
                 {t('components.common.star-map.location.my-location', 'Моё местоположение')}
             </Button>
 
-            <Input
-                size={'small'}
-                type={'datetime-local'}
+            {/* Same picker as the event form (calendar + hour/minute selects) instead of a
+                native datetime-local, which renders differently in every browser and is
+                awkward on mobile. `portal` because the sidebar scrolls and would clip the
+                popout; the zone is resolved as the popout opens, so the value the visitor
+                sees is already the place's local time. */}
+            <DateTimeInput
                 label={t('components.common.star-map.location.datetime', 'Дата и время (местное для точки)')}
+                placeholder={t('components.common.star-map.location.datetime-placeholder', 'Выберите дату и время')}
+                hourLabel={t('components.common.star-map.location.hours', 'Часы')}
+                minuteLabel={t('components.common.star-map.location.minutes', 'Минуты')}
+                doneLabel={t('components.common.star-map.location.done', 'Готово')}
+                locale={i18n?.language === 'en' ? 'en' : 'ru'}
+                portal={isDesktop}
+                timePosition={'above'}
                 value={dateDraft}
-                onFocus={() => void onEnsureTimeZone()}
-                onChange={(event) => void commitDate(event.target.value)}
+                onOpenChange={(isOpen) => isOpen && void onEnsureTimeZone()}
+                onChange={(value) => void commitDate(value)}
             />
 
             <div
