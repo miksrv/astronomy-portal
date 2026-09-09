@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import dayjs from 'dayjs'
-import { Button, Calendar, Icon, Popout, Select } from 'simple-react-ui-kit'
+import { Button, Calendar, Icon, InputProps, Popout, Select } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
@@ -13,6 +13,11 @@ export interface DateTimeInputProps {
     /** `'datetime'` (default) shows the calendar plus hour/minute selects; `'date'` is
      * calendar-only and commits as soon as a day is picked. */
     mode?: 'date' | 'datetime'
+    /** Height/typography of the field, same three steps as `Input`/`Select`/`Button`
+     * (default: `'medium'`) — so a date field lines up with the controls around it.
+     * Only the trigger is affected; the popout's calendar and time controls keep
+     * their own comfortable size, which is also what a touch target needs. */
+    size?: InputProps['size']
     /** Marks the field as required (adds a visual asterisk, matches `Input`). */
     required?: boolean
     /** Disables the trigger and every control inside the popout. */
@@ -87,6 +92,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     label,
     value,
     mode = 'datetime',
+    size = 'medium',
     required,
     disabled,
     error,
@@ -172,7 +178,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     )
 
     return (
-        <div className={[styles.wrapper, className].filter(Boolean).join(' ')}>
+        <div className={[styles.wrapper, styles[size], className].filter(Boolean).join(' ')}>
             {label && (
                 <span className={styles.label}>
                     {label}

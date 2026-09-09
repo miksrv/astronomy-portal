@@ -82,7 +82,6 @@
                     "latitude": "Широта",
                     "longitude": "Долгота",
                     "my-location": "Моё местоположение",
-                    "datetime": "Дата и время (местное для точки)",
                     "datetime-placeholder": "Выберите дату и время",
                     "hours": "Часы",
                     "minutes": "Минуты",

@@ -233,7 +233,7 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
                 popout; the zone is resolved as the popout opens, so the value the visitor
                 sees is already the place's local time. */}
             <DateTimeInput
-                label={t('components.common.star-map.location.datetime', 'Дата и время (местное для точки)')}
+                size={'small'}
                 placeholder={t('components.common.star-map.location.datetime-placeholder', 'Выберите дату и время')}
                 hourLabel={t('components.common.star-map.location.hours', 'Часы')}
                 minuteLabel={t('components.common.star-map.location.minutes', 'Минуты')}

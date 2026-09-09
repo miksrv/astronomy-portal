@@ -82,7 +82,6 @@
                     "latitude": "Latitude",
                     "longitude": "Longitude",
                     "my-location": "My location",
-                    "datetime": "Date & time (local to the place)",
                     "datetime-placeholder": "Pick a date and time",
                     "hours": "Hours",
                     "minutes": "Minutes",

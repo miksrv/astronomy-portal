@@ -29,8 +29,6 @@
     align-items: center
     gap: 8px
     width: 100%
-    height: var(--size-control-medium, 36px)
-    padding: 0 12px
     border: var(--input-border)
     border-radius: var(--border-radius)
     background-color: var(--input-background-color)
@@ -50,6 +48,27 @@
     &:disabled
         opacity: 0.5
         cursor: not-allowed
+
+// Height/padding/type scale per `size`, copied from the kit's own Input so the trigger
+// matches an `<Input size={...}>` standing next to it (the kit reads the same variables).
+.small
+    .label
+        font-size: var(--font-size-small)
+
+    .trigger
+        height: var(--size-control-small, var(--size-small))
+        padding: 0 8px
+        font-size: var(--font-size-small)
+
+.medium
+    .trigger
+        height: var(--size-control-medium, var(--size-medium))
+        padding: 0 12px
+
+.large
+    .trigger
+        height: var(--size-control-large, var(--size-large))
+        padding: 0 16px
 
 .triggerError
     border-color: var(--color-red)
