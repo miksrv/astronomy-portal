@@ -771,57 +771,6 @@
     display: flex
     gap: 6px
 
-// City picker (static catalog, see cities.ts): the result list renders in flow right
-// under the input — an absolute dropdown would fight the sidebar's own scroll and the
-// mobile bottom sheet. Top-level (not under .starMap): the sidebar lives outside
-// #celestial-map, so the nested .searchResult styles don't reach it.
-.cityResults
-    list-style: none
-    margin: 0
-    padding: 0
-    max-height: 200px
-    overflow-y: auto
-    display: flex
-    flex-direction: column
-    gap: 2px
-
-.cityResult
-    display: flex
-    align-items: center
-    gap: 8px
-    width: 100%
-    padding: 5px 8px
-    border-radius: var(--border-radius)
-    text-align: left
-    font-size: 13px
-    color: var(--text-color)
-    cursor: pointer
-
-    &:hover
-        background-color: var(--button-secondary-background-hover)
-
-.cityResultActive
-    background-color: var(--button-secondary-background-active)
-
-.cityResultName
-    overflow: hidden
-    text-overflow: ellipsis
-    white-space: nowrap
-
-.cityResultCountry
-    margin-left: auto
-    font-size: 11px
-    color: var(--text-color-secondary)
-    white-space: nowrap
-
-.cityStatus
-    display: flex
-    align-items: center
-    gap: 6px
-    min-height: 16px
-    font-size: 11px
-    color: var(--text-color-secondary)
-
 // ±1 h / ±1 d steppers under the datetime field — four equal cells in one row;
 // nowrap + zero min-width keep the short labels from wrapping in the 280px sidebar
 .timeStepRow

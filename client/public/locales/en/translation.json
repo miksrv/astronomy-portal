@@ -79,9 +79,6 @@
             "star-map": {
                 "location": {
                     "title": "Place & time",
-                    "city": "City",
-                    "city-placeholder": "Moscow, Saint Petersburg…",
-                    "city-no-results": "No matching city",
                     "latitude": "Latitude",
                     "longitude": "Longitude",
                     "my-location": "My location",

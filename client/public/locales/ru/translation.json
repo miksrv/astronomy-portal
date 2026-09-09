@@ -79,9 +79,6 @@
             "star-map": {
                 "location": {
                     "title": "Место и время",
-                    "city": "Город",
-                    "city-placeholder": "Москва, Санкт-Петербург…",
-                    "city-no-results": "Город не найден",
                     "latitude": "Широта",
                     "longitude": "Долгота",
                     "my-location": "Моё местоположение",

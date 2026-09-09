@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { Button, cn, Icon, Spinner } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
-import { City, findNearestCity, getCityDisplayName, loadCities } from './cities'
 import { formatGeopos, formatLocalClock, formatLocalDate, formatLocalDateTime } from './statusChip'
 import { formatUtcOffset, ResolvedTimeZone } from './timezone'
 import { useLiveClock } from './useLiveClock'
@@ -42,30 +41,9 @@ const StarMapStatusChip: React.FC<StarMapStatusChipProps> = ({
     onResetToNow,
     onOpenSettings
 }) => {
-    const { t, i18n } = useTranslation()
+    const { t } = useTranslation()
 
     const frozen = date != null
-
-    // Label the position with the nearest catalog city when one is within 25 km — a
-    // name reads far better than coordinates in a screenshot caption. The catalog is
-    // small (~15 KB) and loads after the first paint, never blocking the map.
-    const [cities, setCities] = useState<City[] | null>(null)
-
-    useEffect(() => {
-        let cancelled = false
-
-        void loadCities().then((list) => {
-            if (!cancelled) {
-                setCities(list)
-            }
-        })
-
-        return () => {
-            cancelled = true
-        }
-    }, [])
-
-    const nearestCity = useMemo(() => (cities ? findNearestCity(geopos, cities) : null), [cities, geopos])
 
     // Live wall clock for the "now" state — re-rendered by the shared minute tick,
     // paused while the tab is hidden, caught up on return
@@ -101,14 +79,13 @@ const StarMapStatusChip: React.FC<StarMapStatusChipProps> = ({
         timeLabel = `${formatLocalDateTime(date, zone)} ${formatUtcOffset(zone, date)}`
     }
 
-    const actionTitle = frozen
+    const title = frozen
         ? t('components.common.star-map.location.reset-to-now', 'Вернуться к «сейчас»')
         : t('components.common.star-map.status.change-place-time', 'Изменить место и время')
 
-    const coordinates = formatGeopos(geopos, hemisphereLetters)
-    const placeLabel = nearestCity ? getCityDisplayName(nearestCity, i18n?.language) : coordinates
-    // With a city name shown, the exact coordinates stay one hover away
-    const title = nearestCity ? `${actionTitle} · ${coordinates}` : actionTitle
+    // TODO: подписывать место названием города, когда вернётся выбор города в
+    // StarMapLocationControl — до тех пор чип показывает только координаты
+    const placeLabel = formatGeopos(geopos, hemisphereLetters)
 
     return (
         <Button

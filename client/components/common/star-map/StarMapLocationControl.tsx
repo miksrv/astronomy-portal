@@ -1,16 +1,14 @@
-import React, { useEffect, useId, useMemo, useState } from 'react'
-import { Button, cn, Input, Spinner } from 'simple-react-ui-kit'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Button, Input, Spinner } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
 import { DateTimeInput } from '@/components/ui/date-time-input'
 
-import { City, findNearestCity, getCityDisplayName, loadCities, matchCities } from './cities'
 import { MOBILE_MAX_WIDTH } from './constants'
 import { findTonightMoment } from './nightPreset'
 import { stepDate, TimeStep, TimeStepDirection } from './timeStep'
 import { dateToWallClock, formatUtcOffset, ResolvedTimeZone, wallClockToDate } from './timezone'
-import { useListNavigation } from './useListNavigation'
 
 import styles from './styles.module.sass'
 
@@ -49,14 +47,6 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
     const [lonDraft, setLonDraft] = useState<string>(String(geopos[1]))
     const [dateDraft, setDateDraft] = useState<string>('')
 
-    // City picker (static catalog, Business Rule 4): the list loads on first focus; the
-    // field mirrors the nearest catalog city of the current position once the list is in,
-    // so a manual/geolocated position outside any city leaves it blank
-    const [cities, setCities] = useState<City[] | null>(null)
-    const [cityQuery, setCityQuery] = useState<string>('')
-    const [cityListOpen, setCityListOpen] = useState(false)
-    const cityListId = useId()
-
     // The date popout has to escape the desktop sidebar's own scroll box, which clips it —
     // that is what `portal` (fixed positioning) is for. On the mobile bottom sheet the same
     // portal would open below the fold with no way to reach it, while the sheet's own
@@ -73,76 +63,10 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
         return () => query.removeEventListener('change', sync)
     }, [])
 
-    const ensureCities = () => {
-        if (cities) {
-            return
-        }
-
-        void loadCities().then((list) => setCities((current) => current ?? list))
-    }
-
     useEffect(() => {
         setLatDraft(String(geopos[0]))
         setLonDraft(String(geopos[1]))
     }, [geopos])
-
-    // Mirror the nearest catalog city into the field whenever the position changes or
-    // the catalog arrives — but never while the list is open, i.e. while the user is
-    // typing; closing the list (blur/Escape/select) re-syncs, which also discards an
-    // abandoned partial query
-    useEffect(() => {
-        if (!cities || cityListOpen) {
-            return
-        }
-
-        const nearest = findNearestCity(geopos, cities)
-        setCityQuery(nearest ? getCityDisplayName(nearest, i18n?.language) : '')
-    }, [geopos, cities, cityListOpen, i18n?.language])
-
-    const cityResults = useMemo(
-        () => (cities && cityListOpen ? matchCities(cities, cityQuery) : []),
-        [cities, cityListOpen, cityQuery]
-    )
-    const {
-        activeIndex: activeCityIndex,
-        setActiveIndex: setActiveCityIndex,
-        reset: resetActiveCity,
-        handleKeyDown: handleCityListKeyDown
-    } = useListNavigation(cityResults.length)
-
-    const cityQueryLongEnough = cityQuery.trim().length >= 2
-
-    const selectCity = (city: City) => {
-        setCityQuery(getCityDisplayName(city, i18n?.language))
-        setCityListOpen(false)
-        resetActiveCity()
-
-        if (city.lat !== geopos[0] || city.lon !== geopos[1]) {
-            onGeoposChange([city.lat, city.lon])
-        }
-    }
-
-    const handleCityKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Escape') {
-            setCityListOpen(false)
-            return
-        }
-
-        if (!cityResults.length || handleCityListKeyDown(event)) {
-            return
-        }
-
-        if (event.key === 'Enter') {
-            event.preventDefault()
-            const chosen = cityResults[activeCityIndex] ?? cityResults[0]
-
-            if (chosen) {
-                selectCity(chosen)
-            }
-        }
-    }
-
-    const activeCityId = cityResults[activeCityIndex] ? `${cityListId}-${cityResults[activeCityIndex]!.id}` : undefined
 
     // The draft shows the selected moment in the place's local time (Business Rule 12).
     // While the zone is still resolving the field stays empty (a hint below says why);
@@ -266,75 +190,11 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
                 {t('components.common.star-map.location.title', 'Место и время')}
             </div>
 
-            <Input
-                size={'small'}
-                icon={'Search'}
-                label={t('components.common.star-map.location.city', 'Город')}
-                placeholder={t('components.common.star-map.location.city-placeholder', 'Москва, Санкт-Петербург…')}
-                value={cityQuery}
-                role={'combobox'}
-                aria-autocomplete={'list'}
-                aria-expanded={cityListOpen && cityResults.length > 0}
-                aria-controls={cityListId}
-                aria-activedescendant={cityListOpen ? activeCityId : undefined}
-                autoComplete={'off'}
-                onFocus={() => {
-                    ensureCities()
-                    setCityListOpen(true)
-                }}
-                onBlur={() => setCityListOpen(false)}
-                onChange={(event) => {
-                    ensureCities()
-                    setCityQuery(event.target.value)
-                    setCityListOpen(true)
-                    resetActiveCity()
-                }}
-                onKeyDown={handleCityKeyDown}
-            />
-
-            {cityListOpen && cityQueryLongEnough && !cities && (
-                <div className={styles.cityStatus}>
-                    <Spinner className={styles.timezoneSpinner} />
-                </div>
-            )}
-
-            {cityListOpen && cityQueryLongEnough && cities && !cityResults.length && (
-                <div className={styles.cityStatus}>
-                    {t('components.common.star-map.location.city-no-results', 'Город не найден')}
-                </div>
-            )}
-
-            {cityListOpen && cityResults.length > 0 && (
-                <ul
-                    id={cityListId}
-                    role={'listbox'}
-                    className={styles.cityResults}
-                    // Keep focus in the input so blur doesn't close the list before the click lands
-                    onMouseDown={(event) => event.preventDefault()}
-                >
-                    {cityResults.map((city, index) => (
-                        <li
-                            key={city.id}
-                            id={`${cityListId}-${city.id}`}
-                            role={'option'}
-                            aria-selected={index === activeCityIndex}
-                        >
-                            <Button
-                                unstyled={true}
-                                tabIndex={-1}
-                                className={cn(styles.cityResult, index === activeCityIndex && styles.cityResultActive)}
-                                onMouseEnter={() => setActiveCityIndex(index)}
-                                onClick={() => selectCity(city)}
-                            >
-                                <span className={styles.cityResultName}>
-                                    {getCityDisplayName(city, i18n?.language)}
-                                </span>
-                                <span className={styles.cityResultCountry}>{city.country}</span>
-                            </Button>
-                        </li>
-                    ))}
-                </ul>
-            )}
+            {/* TODO: вернуть выбор города. Раньше здесь стоял комбобокс по статическому
+                каталогу `public/data/cities.json` (модуль cities.ts) — и каталог, и модуль
+                удалены вместе с ним; см. BE-1 в features/star-atlas-upgrade.md. Пока место
+                задаётся координатами и кнопкой «Моё местоположение», а StarMapStatusChip
+                показывает координаты вместо названия города. */}
 
             <div className={styles.locationRow}>
                 <Input
