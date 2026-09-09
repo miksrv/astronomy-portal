@@ -8,6 +8,7 @@ import NextNProgress from 'nextjs-progressbar'
 
 import { SITE_LINK, useAppDispatch, useAppSelector } from '@/api'
 import { closeAuthDialog } from '@/api/applicationSlice'
+import { createPageUrl } from '@/utils/helpers'
 
 import { CookieConsent } from '../cookie-consent'
 import { LoginForm } from '../login-form'
@@ -33,8 +34,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, noTopMargin, ch
 
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
 
-    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
-    const pageUrl = canonicalUrl + (props?.canonical ?? '')
+    const pageUrl = createPageUrl(i18n.language, props?.canonical ?? '')
 
     const handleCloseOverlay = () => {
         setSidebarOpen(false)

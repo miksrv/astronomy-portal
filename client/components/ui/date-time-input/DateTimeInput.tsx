@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import dayjs from 'dayjs'
-import { Button, Calendar, Icon, Popout, Select } from 'simple-react-ui-kit'
+import { Button, Calendar, Icon, InputProps, Popout, Select } from 'simple-react-ui-kit'
 
 import styles from './styles.module.sass'
 
@@ -13,6 +13,11 @@ export interface DateTimeInputProps {
     /** `'datetime'` (default) shows the calendar plus hour/minute selects; `'date'` is
      * calendar-only and commits as soon as a day is picked. */
     mode?: 'date' | 'datetime'
+    /** Height/typography of the field, same three steps as `Input`/`Select`/`Button`
+     * (default: `'medium'`) — so a date field lines up with the controls around it.
+     * Only the trigger is affected; the popout's calendar and time controls keep
+     * their own comfortable size, which is also what a touch target needs. */
+    size?: InputProps['size']
     /** Marks the field as required (adds a visual asterisk, matches `Input`). */
     required?: boolean
     /** Disables the trigger and every control inside the popout. */
@@ -31,6 +36,40 @@ export interface DateTimeInputProps {
     maxDate?: string
     /** Locale for month/day names in the calendar (default: 'ru'). */
     locale?: 'ru' | 'en'
+    /** Caption over the hour select (default: 'Часы'). Set it on a localized page. */
+    hourLabel?: string
+    /** Caption over the minute select (default: 'Минуты'). Set it on a localized page. */
+    minuteLabel?: string
+    /** Caption of the button that closes the popout (default: 'Готово'). */
+    doneLabel?: string
+    /** Adds a "now" button to the popout footer, next to the closing one. */
+    showNowButton?: boolean
+    /** Caption of the "now" button (default: 'Сейчас'). */
+    nowLabel?: string
+    /**
+     * What the "now" button does. By default it commits the current moment through
+     * `onChange`, which is what a plain form field wants. A caller whose empty value
+     * already *means* "now" (the star map: no date = live sky) passes its own handler
+     * to clear the value instead of freezing it at this minute.
+     */
+    onNow?: () => void
+    /**
+     * Where the hour/minute row sits inside the popout — `'below'` the calendar (default)
+     * or `'above'` it. Neither the kit's `Popout` nor its `Select` flips upward when it
+     * runs out of room, so in a tall popout anchored low on the screen (e.g. the star
+     * map's settings sidebar) the hour list opens past the bottom edge and cannot be
+     * reached. `'above'` lifts the selects to the top of the panel, where the calendar's
+     * own height is the room their lists open into.
+     */
+    timePosition?: 'below' | 'above'
+    /**
+     * Render the popout in a portal with fixed positioning — needed inside a scrolling or
+     * clipping container (e.g. the star map's settings sidebar), where the popout would
+     * otherwise be cut off or scroll away from its trigger.
+     */
+    portal?: boolean
+    /** Called when the popout opens/closes, e.g. to resolve something lazily on open. */
+    onOpenChange?: (isOpen: boolean) => void
     /** Additional class name for the outer wrapper. */
     className?: string
     /** Stable prefix for `data-testid` hooks on the trigger/calendar/time controls. */
@@ -64,6 +103,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     label,
     value,
     mode = 'datetime',
+    size = 'medium',
     required,
     disabled,
     error,
@@ -72,9 +112,18 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     minDate,
     maxDate,
     locale = 'ru',
+    hourLabel = 'Часы',
+    minuteLabel = 'Минуты',
+    doneLabel = 'Готово',
+    showNowButton,
+    nowLabel = 'Сейчас',
+    timePosition = 'below',
+    portal,
     className,
     testId,
-    onChange
+    onChange,
+    onNow,
+    onOpenChange
 }) => {
     // Typed structurally (rather than importing `PopoutHandleProps`) so this
     // file only needs one import statement from 'simple-react-ui-kit' — a
@@ -97,6 +146,14 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     const hourPart = isValid ? parsed!.format('HH') : undefined
     const minutePart = isValid ? parsed!.format('mm') : undefined
 
+    // With no value yet the hour/minute selects used to render empty *and* disabled, which
+    // reads as a broken control — especially on the star map, which opens with no fixed
+    // moment at all. They now stand at 00:00 on today's date and are usable straight away:
+    // touching either one commits that moment, and picking a day afterwards keeps the time.
+    const effectiveDate = datePart ?? dayjs().format('YYYY-MM-DD')
+    const effectiveHour = hourPart ?? '00'
+    const effectiveMinute = minutePart ?? '00'
+
     const commit = (nextDate?: string, nextHour?: string, nextMinute?: string) => {
         if (!nextDate) {
             return
@@ -107,8 +164,51 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
 
     const resolvedPlaceholder = placeholder ?? (showTime ? 'Выберите дату и время' : 'Выберите дату')
 
+    const handleNow = () => {
+        if (onNow) {
+            onNow()
+        } else {
+            const now = dayjs()
+
+            onChange?.(now.format(showTime ? 'YYYY-MM-DDTHH:mm' : 'YYYY-MM-DD'))
+        }
+
+        // In `mode="date"` there is no "Done" step — a picked day is already a complete
+        // value and closes the popout, so "now" behaves the same way.
+        if (!showTime) {
+            popoutRef.current?.close()
+        }
+    }
+
+    const timeControls = (
+        <div className={styles.timeRow}>
+            <div
+                className={styles.timeSelect}
+                data-testid={testId && `${testId}-hour`}
+            >
+                <Select<string>
+                    label={hourLabel}
+                    options={HOUR_OPTIONS}
+                    value={effectiveHour}
+                    onSelect={(selected) => commit(effectiveDate, selected?.[0]?.key, effectiveMinute)}
+                />
+            </div>
+            <div
+                className={styles.timeSelect}
+                data-testid={testId && `${testId}-minute`}
+            >
+                <Select<string>
+                    label={minuteLabel}
+                    options={MINUTE_OPTIONS}
+                    value={effectiveMinute}
+                    onSelect={(selected) => commit(effectiveDate, effectiveHour, selected?.[0]?.key)}
+                />
+            </div>
+        </div>
+    )
+
     return (
-        <div className={[styles.wrapper, className].filter(Boolean).join(' ')}>
+        <div className={[styles.wrapper, styles[size], className].filter(Boolean).join(' ')}>
             {label && (
                 <span className={styles.label}>
                     {label}
@@ -120,7 +220,9 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 ref={popoutRef}
                 disabled={disabled}
                 position={'left'}
+                portal={portal}
                 className={styles.popout}
+                onOpenChange={onOpenChange}
                 trigger={
                     <button
                         type={'button'}
@@ -141,6 +243,8 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 }
             >
                 <div className={styles.panel}>
+                    {showTime && timePosition === 'above' && timeControls}
+
                     <div data-testid={testId && `${testId}-calendar`}>
                         <Calendar
                             locale={locale}
@@ -149,7 +253,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                             maxDate={maxDate}
                             datePeriod={[datePart, datePart]}
                             onDateSelect={(date) => {
-                                commit(date, hourPart, minutePart)
+                                commit(date, effectiveHour, effectiveMinute)
 
                                 if (!showTime) {
                                     popoutRef.current?.close()
@@ -158,42 +262,29 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                         />
                     </div>
 
-                    {showTime && (
-                        <>
-                            <div className={styles.timeRow}>
-                                <div
-                                    className={styles.timeSelect}
-                                    data-testid={testId && `${testId}-hour`}
-                                >
-                                    <Select<string>
-                                        label={'Часы'}
-                                        disabled={!datePart}
-                                        options={HOUR_OPTIONS}
-                                        value={hourPart}
-                                        onSelect={(selected) => commit(datePart, selected?.[0]?.key, minutePart)}
-                                    />
-                                </div>
-                                <div
-                                    className={styles.timeSelect}
-                                    data-testid={testId && `${testId}-minute`}
-                                >
-                                    <Select<string>
-                                        label={'Минуты'}
-                                        disabled={!datePart}
-                                        options={MINUTE_OPTIONS}
-                                        value={minutePart}
-                                        onSelect={(selected) => commit(datePart, hourPart, selected?.[0]?.key)}
-                                    />
-                                </div>
-                            </div>
+                    {showTime && timePosition === 'below' && timeControls}
 
-                            <Button
-                                mode={'primary'}
-                                label={'Готово'}
-                                className={styles.doneButton}
-                                onClick={() => popoutRef.current?.close()}
-                            />
-                        </>
+                    {(showNowButton || showTime) && (
+                        <div className={styles.footer}>
+                            {showNowButton && (
+                                <Button
+                                    mode={'outline'}
+                                    label={nowLabel}
+                                    className={styles.footerButton}
+                                    disabled={disabled}
+                                    onClick={handleNow}
+                                />
+                            )}
+
+                            {showTime && (
+                                <Button
+                                    mode={'primary'}
+                                    label={doneLabel}
+                                    className={styles.footerButton}
+                                    onClick={() => popoutRef.current?.close()}
+                                />
+                            )}
+                        </div>
                     )}
                 </div>
             </Popout>

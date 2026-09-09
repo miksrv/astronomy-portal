@@ -1,36 +1,36 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Button, cn, Container, Skeleton } from 'simple-react-ui-kit'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { Button, cn, Container, Icon, Skeleton } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API } from '@/api'
+import { FitViewIcon, HorizonIcon, ZoomInIcon, ZoomOutIcon } from '@/components/icons'
 import { createMediumPhotoUrl } from '@/utils/photos'
 
-import { customConfig, defaultConfig } from './config'
-import {
-    DEFAULT_STARMAP_SETTINGS,
-    MOBILE_MAX_WIDTH,
-    POINT_RADIUS,
-    POPUP_ARROW_SIZE,
-    POPUP_HEIGHT,
-    POPUP_WIDTH,
-    stylePoint,
-    styleText
-} from './constants'
+import { MOBILE_MAX_WIDTH, POPUP_ARROW_SIZE, POPUP_HEIGHT, POPUP_WIDTH } from './constants'
 import { StarMapProps } from './StarMap'
+import StarMapGeoNudge from './StarMapGeoNudge'
+import StarMapLinkPanel from './StarMapLinkPanel'
+import StarMapLocationControl from './StarMapLocationControl'
+import StarMapObjectInfo from './StarMapObjectInfo'
+import StarMapQuickBar from './StarMapQuickBar'
+import StarMapSearch from './StarMapSearch'
 import StarMapSettingsForm from './StarMapSettingsForm'
-import { PendingPopup, PopupState, SkyPoint, StarMapSettings } from './types'
-import {
-    buildLiveSettingsPatch,
-    buildVisualConfig,
-    clampPopupPosition,
-    createObjectsJSON,
-    findHitPoint,
-    loadStarMapSettings,
-    saveStarMapSettings
-} from './utils'
+import StarMapStatusChip from './StarMapStatusChip'
+import { stepTimeRate, TIME_RATE_MIN } from './timeFlow'
+import { useBodyLabels } from './useBodyLabels'
+import { useCanvasInteraction } from './useCanvasInteraction'
+import { useCelestialDisplay } from './useCelestialDisplay'
+import { useCustomLayers } from './useCustomLayers'
+import { useGeoNudge } from './useGeoNudge'
+import { useHorizonNavigation } from './useHorizonNavigation'
+import { useMeteorShowersLayer } from './useMeteorShowersLayer'
+import { usePermalinkSync } from './usePermalinkSync'
+import { useStarMapPopup } from './useStarMapPopup'
+import { useStarMapSettings } from './useStarMapSettings'
+import { getPopupArrowTop } from './utils'
 
 import styles from './styles.module.sass'
 
@@ -41,22 +41,33 @@ const StarMapRender: React.FC<StarMapProps> = ({
     className,
     config,
     showSettings,
-    fitContainer
+    fitContainer,
+    onUiHiddenChange
 }) => {
-    const { i18n } = useTranslation()
+    const { t, i18n } = useTranslation()
+    const bodyLabels = useBodyLabels()
 
-    const [popup, setPopup] = useState<PopupState>({
-        visible: false,
-        x: 0,
-        y: 0,
-        arrowOffset: 0,
-        placement: 'below'
-    })
+    const ref = useRef<HTMLDivElement>(null)
 
-    // Settings state — only loaded from localStorage when showSettings is enabled
-    const [settings, setSettings] = useState<StarMapSettings>(() =>
-        showSettings ? loadStarMapSettings() : DEFAULT_STARMAP_SETTINGS
-    )
+    const {
+        settings,
+        settingsRef,
+        centerRef,
+        viewRef,
+        permalinkZoomRef,
+        location,
+        date,
+        dateRef,
+        handleSettingsChange
+    } = useStarMapSettings({ showSettings })
+
+    // Seconds of sky per real second (timeFlow.ts). Above real time the animated flow in
+    // useCelestialDisplay drives the clock; the mirror ref keeps the handlers below free of
+    // the state's render-time snapshot.
+    const [timeRate, setTimeRate] = useState<number>(TIME_RATE_MIN)
+    const timeRateRef = useRef<number>(TIME_RATE_MIN)
+    timeRateRef.current = timeRate
+
     const [settingsOpen, setSettingsOpen] = useState<boolean>(() => {
         if (!showSettings) {
             return false
@@ -64,408 +75,403 @@ const StarMapRender: React.FC<StarMapProps> = ({
         // On desktop — open by default; on mobile — closed
         return typeof window !== 'undefined' && window.innerWidth > MOBILE_MAX_WIDTH
     })
+    const [searchOpen, setSearchOpen] = useState(false)
+    // "Hide UI" (screenshot mode): hides every overlay control, leaving only the sky
+    // and a single restore button — the map itself stays fully interactive
+    const [uiHidden, setUiHidden] = useState(false)
+
+    // Let page-level overlays outside this element (the /starmap intro card) follow the toggle
+    useEffect(() => {
+        onUiHiddenChange?.(uiHidden)
+    }, [uiHidden, onUiHiddenChange])
+
+    const {
+        popup,
+        popupRef,
+        hidePopup,
+        openPendingPopup,
+        scheduleAutoHideAfterRedraw,
+        extendAutoHideGrace,
+        clearPopupTimers
+    } = useStarMapPopup({ containerRef: ref, settingsRef })
 
     const getPhotoData = API.usePhotosGetListQuery({ object: popup?.object, limit: 1 }, { skip: !popup?.object })
 
-    const ref = useRef<HTMLDivElement>(null)
-    const hideTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined)
-    const showPopupTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined)
-    const rafRef = useRef<number>(0)
-    const suppressHideUntilRef = useRef<number>(0)
-    const pendingPopupRef = useRef<PendingPopup | null>(null)
-    // Center is stored in a ref (not state) so that drag/zoom never triggers a full Celestial rebuild.
-    // It is only read once on initial mount to restore the saved position.
-    const centerRef = useRef<[number, number, number]>(
-        showSettings ? loadStarMapSettings().center : DEFAULT_STARMAP_SETTINGS.center
+    const {
+        initializedRef,
+        nowRef,
+        resolveDate,
+        drawCustomLayersRef,
+        zoomIn,
+        zoomOut,
+        zoomBy,
+        applyHorizonView,
+        measureViewScale,
+        ensureLookAroundZoom,
+        fitView
+    } = useCelestialDisplay({
+        containerRef: ref,
+        objects,
+        zoom,
+        config,
+        language: i18n?.language,
+        showSettings,
+        fitContainer,
+        settings,
+        settingsRef,
+        centerRef,
+        viewRef,
+        permalinkZoomRef,
+        date,
+        dateRef,
+        timeRate,
+        onRedraw: scheduleAutoHideAfterRedraw,
+        clearPopupTimers,
+        extendAutoHideGrace
+    })
+
+    // Horizon mode: looking around the local sky instead of Celestial's free equatorial
+    // trackball, so the ground and the horizon always stay in the horizontal plane
+    useHorizonNavigation({
+        containerRef: ref,
+        enabled: Boolean(showSettings) && interactive !== false && settings.viewMode === 'horizon',
+        viewRef,
+        applyView: applyHorizonView,
+        measureScale: measureViewScale,
+        onLeaveDome: ensureLookAroundZoom,
+        zoomBy
+    })
+
+    /**
+     * Speed the flow up or slow it back down. A flow started from a picked moment takes that
+     * moment as its starting point and then owns the clock: the map is no longer pinned to a
+     * fixed instant (so the permalink stops advertising one), it is running from it.
+     */
+    const changeTimeRate = useCallback(
+        (factor: number) => {
+            const next = stepTimeRate(timeRateRef.current, factor)
+
+            if (next === timeRateRef.current) {
+                return
+            }
+
+            if (next > TIME_RATE_MIN && dateRef.current) {
+                nowRef.current = dateRef.current
+                location.setDate(null)
+            }
+
+            // Slowing all the way back to real time pins the moment the flow reached, the
+            // same as the pause does. Letting the live tick take over instead would snap the
+            // sky back to the real "now" and silently throw away the travelling.
+            if (next === TIME_RATE_MIN) {
+                location.setDate(nowRef.current)
+            }
+
+            timeRateRef.current = next
+            setTimeRate(next)
+        },
+        [dateRef, nowRef, location]
     )
-    // Mirrors `settings` for callbacks registered once with Celestial (handleRedraw), which
-    // otherwise would only ever see the settings snapshot captured at registration time.
-    const settingsRef = useRef<StarMapSettings>(settings)
-    settingsRef.current = settings
 
-    const objectsJSON = useMemo(() => createObjectsJSON(objects), [objects])
+    /** Pause: freeze the sky at the moment the flow reached and reset the speed to real time. */
+    const pauseTimeFlow = useCallback(() => {
+        const stopAt = timeRateRef.current > TIME_RATE_MIN ? nowRef.current : (dateRef.current ?? new Date())
 
-    const hidePopup = useCallback(() => {
-        setPopup((prev) => ({ ...prev, visible: false }))
-    }, [])
+        timeRateRef.current = TIME_RATE_MIN
+        setTimeRate(TIME_RATE_MIN)
+        location.setDate(stopAt)
+    }, [dateRef, nowRef, location])
 
-    const showPendingPopup = useCallback(() => {
-        const pending = pendingPopupRef.current
-        if (!pending) {
-            return
-        }
+    /**
+     * Picking a moment by hand (or clearing it back to the live sky) ends any running flow —
+     * the visitor asked for that instant, not for a clock still running away from it.
+     */
+    const selectDate = useCallback(
+        (next: Date | null) => {
+            timeRateRef.current = TIME_RATE_MIN
+            setTimeRate(TIME_RATE_MIN)
+            location.setDate(next)
+        },
+        [location]
+    )
 
-        pendingPopupRef.current = null
+    const { showersRef } = useMeteorShowersLayer({
+        showSettings,
+        enabled: settings.meteorShowersShow,
+        initializedRef
+    })
 
-        const screenCoords = Celestial.mapProjection([pending.ra, pending.dec])
-        if (!screenCoords) {
-            return
-        }
+    useCustomLayers({
+        drawCustomLayersRef,
+        showSettings,
+        settingsRef,
+        viewRef,
+        showersRef,
+        dateRef,
+        nowRef,
+        language: i18n?.language
+    })
 
-        const containerWidth = ref.current?.offsetWidth ?? 0
-        const containerHeight = ref.current?.offsetHeight ?? 0
+    const { linkCopied, manualLinkUrl, closeManualLink, handleCopyLink } = usePermalinkSync({
+        showSettings,
+        settings,
+        settingsRef,
+        centerRef,
+        viewRef,
+        date,
+        dateRef,
+        initializedRef
+    })
 
-        // `screenCoords` is relative to the <canvas> element's own top-left corner. The
-        // popup/arrow, however, are positioned relative to #celestial-map (the containing
-        // block for their `position: absolute`) — normally the same origin, but fitContainer
-        // mode centers a taller/shorter canvas inside #celestial-map via CSS transform, so the
-        // two origins can differ. Re-anchor to #celestial-map's origin before clamping.
-        const canvas: HTMLCanvasElement | undefined = Celestial.context?.canvas
-        const canvasRect = canvas?.getBoundingClientRect()
-        const containerRect = ref.current?.getBoundingClientRect()
-        const offsetX = canvasRect && containerRect ? canvasRect.left - containerRect.left : 0
-        const offsetY = canvasRect && containerRect ? canvasRect.top - containerRect.top : 0
+    // Horizon-mode geolocation nudge (Business Rule 3): the browser prompt fires only from
+    // its explicit button, never from the mode switch itself
+    const geoNudge = useGeoNudge({
+        enabled: Boolean(showSettings),
+        settings,
+        requestBrowserLocation: location.requestBrowserLocation,
+        onGeoposChange: (geopos) => handleSettingsChange({ ...settings, geopos })
+    })
 
-        const { x, y, arrowOffset, placement } = clampPopupPosition(
-            screenCoords[0] + offsetX,
-            screenCoords[1] + offsetY,
-            containerWidth,
-            containerHeight
-        )
+    const isHorizon = settings.viewMode === 'horizon'
+    const toggleViewMode = () => handleSettingsChange({ ...settings, viewMode: isHorizon ? 'sky' : 'horizon' })
+    const viewModeLabel = isHorizon
+        ? t('components.common.star-map.toolbar.sky-map', 'Карта неба')
+        : t('components.common.star-map.toolbar.sky-above', 'Небо над вами')
+    // The 54px FAB circle fits only a very short caption; the full label stays in title/aria
+    const viewModeShortLabel = isHorizon
+        ? t('components.common.star-map.toolbar.sky-map-short', 'Карта')
+        : t('components.common.star-map.toolbar.sky-above-short', 'Над вами')
 
-        setPopup({
-            visible: true,
-            x,
-            y,
-            arrowOffset,
-            placement,
-            name: pending.name,
-            object: pending.object
-        })
-    }, [])
+    const { selectSearchItem } = useCanvasInteraction({
+        interactive,
+        showSettings,
+        objects,
+        settingsRef,
+        showersRef,
+        bodyLabels,
+        language: i18n?.language,
+        resolveDate,
+        hidePopup,
+        openPendingPopup
+    })
 
-    const handleSettingsChange = useCallback((newSettings: StarMapSettings) => {
-        // Persist the current map center alongside the settings change
-        const currentCenter = Celestial.rotate?.() as [number, number, number] | undefined
-        if (currentCenter) {
-            centerRef.current = currentCenter
-            newSettings = { ...newSettings, center: currentCenter }
-        }
-        setSettings(newSettings)
-        saveStarMapSettings(newSettings)
-    }, [])
-
-    const handleCallback = (error: unknown) => {
-        if (error) {
-            console.warn(error)
-            return null
-        }
-
-        const skyPoint = Celestial.getData(objectsJSON, defaultConfig.transform)
-
-        Celestial.container
-            .selectAll('.sky-points')
-            .data(skyPoint.features)
-            .enter()
-            .append('path')
-            .attr('class', 'sky-points')
-        Celestial.redraw()
-    }
-
-    const handleRedraw = () => {
-        if (showSettings && !settingsRef.current.customObjectsShow) {
-            return
-        }
-
-        Celestial.container.selectAll('.sky-points').each((point: SkyPoint) => {
-            if (Celestial.clip(point.geometry.coordinates)) {
-                const pointCoords = Celestial.mapProjection(point.geometry.coordinates)
-
-                Celestial.setStyle(stylePoint)
-                Celestial.context.beginPath()
-                Celestial.context.arc(pointCoords[0], pointCoords[1], POINT_RADIUS, 0, 2 * Math.PI)
-                Celestial.context.closePath()
-                Celestial.context.stroke()
-                Celestial.context.fill()
-                Celestial.setTextStyle(styleText)
-                Celestial.context.fillText(
-                    point.properties.name,
-                    pointCoords[0] + POINT_RADIUS - 1,
-                    pointCoords[1] - POINT_RADIUS + 1
-                )
-            }
-        })
-    }
-
-    const initializedRef = useRef<boolean>(false)
-    // Last width handed to Celestial.resize() when fitContainer is enabled — avoids
-    // redundant resize() calls on every ResizeObserver tick.
-    const lastFitWidthRef = useRef<number>(0)
-
-    // Single combined effect: initialise Celestial and (re-)display with objects.
-    useEffect(() => {
-        const localConfig = {
-            ...customConfig,
-            ...config,
-            zoomlevel: zoom || customConfig.zoomlevel,
-            lang: i18n?.language || customConfig.lang
-        }
-
-        // Apply user settings (initial snapshot) when the settings panel is enabled.
-        // Later toggles are applied live via Celestial.apply() — see the effect below —
-        // so this branch only runs again on mount or when objects/zoom/language change.
-        if (showSettings) {
-            Object.assign(localConfig, buildVisualConfig(settingsRef.current))
-            localConfig.center = centerRef.current
-            localConfig.follow = [centerRef.current[0], centerRef.current[1]]
-        }
-
-        const initCelestial = () => {
-            if (ref.current) {
-                localConfig.width = ref.current.offsetWidth
-            }
-
-            if (localConfig.width <= 0 && ref.current) {
-                return false
-            }
-
-            if (fitContainer) {
-                lastFitWidthRef.current = localConfig.width
-            }
-
-            // For non-settings mode (object detail pages), center on the single object
-            const singleObject = !showSettings && objects?.length === 1 ? objects[0] : undefined
-
-            if (singleObject) {
-                localConfig.follow = [singleObject.ra || 0, singleObject.dec || 0]
-                localConfig.center = [singleObject.ra || 0, singleObject.dec || 0, 1]
-            }
-
-            Celestial.clear()
-
-            // Always add the layer if there are objects — visibility of the layer itself
-            // is toggled live inside handleRedraw via settingsRef, so this doesn't need to
-            // depend on `settings.customObjectsShow` (which would force this effect to rebuild
-            // the whole map on every panel toggle).
-            if (objects?.length) {
-                Celestial.add(
-                    {
-                        callback: handleCallback,
-                        redraw: handleRedraw,
-                        type: 'Point'
-                    },
-                    [objectsJSON]
-                )
-            }
-
-            Celestial.display(localConfig)
-
-            if (!initializedRef.current) {
-                initializedRef.current = true
-                Celestial.addCallback(() => {
-                    if (Date.now() < suppressHideUntilRef.current) {
-                        return
-                    }
-
-                    clearTimeout(hideTimeoutRef.current)
-                    hideTimeoutRef.current = setTimeout(hidePopup, 200)
-                })
-            }
-
-            return true
-        }
-
-        if (!initCelestial()) {
-            const frameId = requestAnimationFrame(() => {
-                initCelestial()
-            })
-
-            return () => {
-                cancelAnimationFrame(frameId)
-                clearTimeout(hideTimeoutRef.current)
-                clearTimeout(showPopupTimeoutRef.current)
-            }
-        }
-
-        return () => {
-            clearTimeout(hideTimeoutRef.current)
-            clearTimeout(showPopupTimeoutRef.current)
-        }
-    }, [objects, zoom, i18n?.language])
-
-    // Keep the map fitted to its container on resize. Celestial has its own window-resize
-    // listener, but it's a no-op once an explicit numeric width has been set (its getWidth()
-    // just echoes back cfg.width), so fitContainer mode has to drive resizing itself via the
-    // public Celestial.resize() API.
-    useEffect(() => {
-        if (!fitContainer || !ref.current) {
-            return
-        }
-
-        const container = ref.current
-
-        const handleResize = () => {
-            if (!initializedRef.current) {
-                return
-            }
-
-            const width = container.offsetWidth
-
-            if (width > 0 && Math.round(width) !== Math.round(lastFitWidthRef.current)) {
-                lastFitWidthRef.current = width
-                Celestial.resize({ width })
-            }
-        }
-
-        const observer = new ResizeObserver(handleResize)
-        observer.observe(container)
-
-        return () => observer.disconnect()
-    }, [fitContainer])
-
-    // Apply settings-panel toggles live via Celestial.apply(), which merges the partial
-    // config and redraws in place — no Celestial.clear()/display() rebuild, so the map
-    // doesn't blink on every checkbox change. Skips the very first run since the initial
-    // values are already applied by the mount pass of the effect above.
-    const settingsAppliedOnceRef = useRef(false)
-    useEffect(() => {
-        if (!showSettings) {
-            return
-        }
-
-        if (!settingsAppliedOnceRef.current) {
-            settingsAppliedOnceRef.current = true
-            return
-        }
-
-        Celestial.apply(buildLiveSettingsPatch(settings))
-    }, [showSettings, settings])
-
-    // Periodically save center position to localStorage when user drags/zooms the map.
-    // Uses a ref (not state) to avoid triggering Celestial rebuilds.
-    useEffect(() => {
-        if (!showSettings) {
-            return
-        }
-
-        const saveCenterToStorage = () => {
-            const currentCenter = Celestial.rotate()
-            if (!currentCenter) {
-                return
-            }
-
-            const center = currentCenter as [number, number, number]
-            const prev = centerRef.current
-
-            if (prev[0] === center[0] && prev[1] === center[1] && prev[2] === center[2]) {
-                return
-            }
-
-            centerRef.current = center
-            saveStarMapSettings({ ...settings, center })
-        }
-
-        const intervalId = setInterval(saveCenterToStorage, 3000)
-
-        return () => {
-            clearInterval(intervalId)
-        }
-    }, [showSettings, settings])
-
-    // Canvas mouse/click interaction
-    useEffect(() => {
-        const canvas = Celestial.context.canvas
-        if (!canvas) {
-            return
-        }
-
-        const handleMouseMove = (e: MouseEvent) => {
-            if (!interactive) {
-                return
-            }
-
-            cancelAnimationFrame(rafRef.current)
-            rafRef.current = requestAnimationFrame(() => {
-                const rect = canvas.getBoundingClientRect()
-                const x = e.clientX - rect.left
-                const y = e.clientY - rect.top
-
-                const hit = findHitPoint(x, y)
-                canvas.style.cursor = hit ? 'pointer' : 'default'
-            })
-        }
-
-        const handleClick = (e: MouseEvent) => {
-            if (!interactive) {
-                return
-            }
-
-            const rect = canvas.getBoundingClientRect()
-            const x = e.clientX - rect.left
-            const y = e.clientY - rect.top
-
-            const hit = findHitPoint(x, y)
-
-            if (hit) {
-                const [ra, dec] = hit.point.geometry.coordinates
-
-                hidePopup()
-
-                pendingPopupRef.current = {
-                    name: hit.point.properties.name,
-                    object: hit.point.id,
-                    ra: Number(ra),
-                    dec: Number(dec)
+    // Docked settings sidebar (settings-page mode only). It lives OUTSIDE #celestial-map so
+    // it takes real layout width and the map shrinks next to it, instead of covering the
+    // sky as an overlay; the fitContainer ResizeObserver in useCelestialDisplay picks up
+    // the width change. On mobile the same element is turned into a bottom sheet by CSS.
+    const settingsSidebar = showSettings && !uiHidden && settingsOpen && (
+        <aside className={styles.settingsSidebar}>
+            <StarMapSettingsForm
+                settings={settings}
+                onChange={handleSettingsChange}
+                locationControl={
+                    <StarMapLocationControl
+                        geopos={settings.geopos}
+                        date={location.date}
+                        timeZone={location.timeZone}
+                        timeZonePending={location.timeZonePending}
+                        geolocationPending={location.geolocationPending}
+                        timeRate={timeRate}
+                        resolveDate={resolveDate}
+                        onGeoposChange={(geopos) => handleSettingsChange({ ...settings, geopos })}
+                        onDateChange={selectDate}
+                        onTimeRateChange={changeTimeRate}
+                        onTimeFlowPause={pauseTimeFlow}
+                        onEnsureTimeZone={location.ensureTimeZone}
+                        onRequestBrowserLocation={location.requestBrowserLocation}
+                    />
                 }
+            />
+        </aside>
+    )
 
-                suppressHideUntilRef.current = Date.now() + 60_000
-
-                const duration: number = Celestial.rotate({ center: [ra, dec, 0] }) || 0
-
-                const buffer = 300
-                suppressHideUntilRef.current = Date.now() + duration + buffer
-
-                clearTimeout(showPopupTimeoutRef.current)
-                showPopupTimeoutRef.current = setTimeout(showPendingPopup, duration + 100)
-            } else {
-                hidePopup()
-            }
-        }
-
-        canvas.addEventListener('mousemove', handleMouseMove)
-        canvas.addEventListener('click', handleClick)
-
-        return () => {
-            cancelAnimationFrame(rafRef.current)
-            canvas.removeEventListener('mousemove', handleMouseMove)
-            canvas.removeEventListener('click', handleClick)
-        }
-    }, [objects, interactive])
-
-    // Close popup on Escape key
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && popup.visible) {
-                hidePopup()
-            }
-        }
-
-        document.addEventListener('keydown', handleKeyDown)
-
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown)
-        }
-    }, [popup.visible])
-
-    return (
+    // Without the settings UI (object/photo pages) the map is rendered exactly as before:
+    // #celestial-map is the root and receives the caller's className directly.
+    const map = (
         <div
             ref={ref}
             id={'celestial-map'}
-            className={cn(styles.starMap, fitContainer && styles.starMapFit, className)}
+            className={cn(
+                styles.starMap,
+                fitContainer && styles.starMapFit,
+                showSettings && settings.viewMode === 'horizon' && styles.starMapHorizon,
+                uiHidden && styles.uiHidden,
+                !showSettings && className
+            )}
         >
             {showSettings && (
-                <Button
-                    icon={'Settings'}
-                    mode={'secondary'}
-                    className={cn(styles.settingsButton, settingsOpen && styles.settingsButtonActive)}
-                    onClick={() => setSettingsOpen((prev) => !prev)}
+                // One rail for every map action. Desktop: a single vertical glass column in
+                // the top-left corner (view controls, then panels). Mobile: the wrapper
+                // is display:contents, so the view controls stay a small top-left rail while
+                // the panel buttons become the bottom action bar. In hide-UI mode the rail
+                // collapses to its single "show UI" toggle (.mapRailHidden).
+                <div className={cn(styles.mapRail, uiHidden && styles.mapRailHidden)}>
+                    <div
+                        className={styles.viewControls}
+                        role={'group'}
+                    >
+                        <Button
+                            mode={'secondary'}
+                            title={t('components.common.star-map.toolbar.zoom-in', 'Приблизить')}
+                            aria-label={t('components.common.star-map.toolbar.zoom-in', 'Приблизить')}
+                            className={styles.railButton}
+                            onClick={zoomIn}
+                        >
+                            <ZoomInIcon />
+                        </Button>
+                        <Button
+                            mode={'secondary'}
+                            title={t('components.common.star-map.toolbar.zoom-out', 'Отдалить')}
+                            aria-label={t('components.common.star-map.toolbar.zoom-out', 'Отдалить')}
+                            className={styles.railButton}
+                            onClick={zoomOut}
+                        >
+                            <ZoomOutIcon />
+                        </Button>
+                        {/* Sky mode only: there "fit view" resets a zoom the visitor can
+                            otherwise only undo by hand. Horizon mode opens at its own fitted
+                            zoom and cannot be zoomed out past it, and the whole-sky dome is
+                            reached by simply looking up — so the button has nothing to fix. */}
+                        {!isHorizon && (
+                            <Button
+                                mode={'secondary'}
+                                title={t('components.common.star-map.toolbar.fit-view', 'Вписать вид')}
+                                aria-label={t('components.common.star-map.toolbar.fit-view', 'Вписать вид')}
+                                className={styles.railButton}
+                                onClick={fitView}
+                            >
+                                <FitViewIcon />
+                            </Button>
+                        )}
+                        {/* Screenshot mode toggle — the only rail button left visible while the
+                            UI is hidden (see .mapRailHidden), otherwise there is no way back */}
+                        <Button
+                            icon={'Eye'}
+                            mode={'secondary'}
+                            title={
+                                uiHidden
+                                    ? t('components.common.star-map.show-ui', 'Показать интерфейс')
+                                    : t('components.common.star-map.hide-ui', 'Скрыть интерфейс')
+                            }
+                            aria-label={
+                                uiHidden
+                                    ? t('components.common.star-map.show-ui', 'Показать интерфейс')
+                                    : t('components.common.star-map.hide-ui', 'Скрыть интерфейс')
+                            }
+                            aria-pressed={uiHidden}
+                            className={cn(
+                                styles.railButton,
+                                styles.railToggleUi,
+                                uiHidden && styles.toolbarButtonActive
+                            )}
+                            onClick={() => setUiHidden((prev) => !prev)}
+                        />
+                    </div>
+
+                    <div className={styles.mapToolbar}>
+                        <Button
+                            icon={'Settings'}
+                            mode={'secondary'}
+                            title={t('components.common.star-map.settings.title', 'Настройки карты')}
+                            className={cn(styles.toolbarButton, settingsOpen && styles.toolbarButtonActive)}
+                            onClick={() => setSettingsOpen((prev) => !prev)}
+                        >
+                            <span className={styles.toolbarLabel}>
+                                {t('components.common.star-map.toolbar.settings', 'Настройки')}
+                            </span>
+                        </Button>
+                        <Button
+                            icon={'Search'}
+                            mode={'secondary'}
+                            title={t('components.common.star-map.search.title', 'Поиск по небу')}
+                            className={cn(styles.toolbarButton, searchOpen && styles.toolbarButtonActive)}
+                            onClick={() => setSearchOpen((prev) => !prev)}
+                        >
+                            <span className={styles.toolbarLabel}>
+                                {t('components.common.star-map.toolbar.search', 'Поиск')}
+                            </span>
+                        </Button>
+                        {/* Mobile-only raised FAB (hidden by CSS on desktop, where the mode toggle
+                        lives in the sidebar and the quick bar): sky map ↔ the sky above you */}
+                        <Button
+                            mode={'primary'}
+                            title={viewModeLabel}
+                            aria-label={viewModeLabel}
+                            aria-pressed={isHorizon}
+                            className={cn(styles.toolbarButton, styles.toolbarFabButton)}
+                            onClick={toggleViewMode}
+                        >
+                            {isHorizon ? <Icon name={'Map'} /> : <HorizonIcon />}
+                            <span className={styles.toolbarLabel}>{viewModeShortLabel}</span>
+                        </Button>
+                        <Button
+                            icon={linkCopied ? 'CheckCircle' : 'Link'}
+                            mode={'secondary'}
+                            title={
+                                linkCopied
+                                    ? t('components.common.star-map.link-copied', 'Ссылка скопирована')
+                                    : t('components.common.star-map.copy-link', 'Скопировать ссылку')
+                            }
+                            className={styles.toolbarButton}
+                            onClick={handleCopyLink}
+                        >
+                            <span className={styles.toolbarLabel}>
+                                {linkCopied
+                                    ? t('components.common.star-map.link-copied-short', 'Готово')
+                                    : t('components.common.star-map.toolbar.link', 'Ссылка')}
+                            </span>
+                        </Button>
+                    </div>
+                </div>
+            )}
+
+            {showSettings && !uiHidden && (
+                <StarMapQuickBar
+                    settings={settings}
+                    onChange={handleSettingsChange}
+                    sheetOpen={settingsOpen || searchOpen || Boolean(manualLinkUrl)}
                 />
             )}
 
-            {showSettings && settingsOpen && (
-                <StarMapSettingsForm
-                    settings={settings}
-                    onChange={handleSettingsChange}
+            {showSettings && !uiHidden && (
+                <StarMapGeoNudge
+                    status={geoNudge.status}
+                    geolocationPending={location.geolocationPending}
+                    onLocate={() => void geoNudge.locate()}
+                    onDismiss={geoNudge.dismiss}
+                />
+            )}
+
+            {showSettings && (
+                <StarMapStatusChip
+                    geopos={settings.geopos}
+                    date={date}
+                    timeZone={location.timeZone}
+                    timeZonePending={location.timeZonePending}
+                    timeRate={timeRate}
+                    resolveDate={resolveDate}
+                    onResetToNow={() => selectDate(null)}
+                    onOpenSettings={() => setSettingsOpen(true)}
+                />
+            )}
+
+            {showSettings && !uiHidden && (
+                <StarMapSearch
+                    open={searchOpen}
+                    objects={objects}
+                    dsoCatalogFile={settings.dsosFull ? 'dsos.6.json' : 'dsos.bright.json'}
+                    onSelect={(item) => {
+                        setSearchOpen(false)
+                        selectSearchItem(item)
+                    }}
+                    onClose={() => setSearchOpen(false)}
+                />
+            )}
+
+            {showSettings && !uiHidden && (
+                <StarMapLinkPanel
+                    url={manualLinkUrl}
+                    onClose={closeManualLink}
                 />
             )}
 
@@ -473,22 +479,39 @@ const StarMapRender: React.FC<StarMapProps> = ({
                 className={cn(
                     styles.popupArrow,
                     popup.placement === 'above' ? styles.popupArrowDown : styles.popupArrowUp,
-                    popup.visible && styles.popupArrowVisible
+                    popup.visible && popup.positioned && styles.popupArrowVisible
                 )}
                 style={{
                     left: popup.x + popup.arrowOffset - POPUP_ARROW_SIZE,
-                    top: popup.placement === 'above' ? popup.y + POPUP_HEIGHT : popup.y - POPUP_ARROW_SIZE
+                    top: getPopupArrowTop(popup.y, popup.height, popup.placement)
                 }}
             />
 
             <Container
-                className={cn(styles.popup, popup.visible && styles.popupVisible)}
+                ref={popupRef}
+                className={cn(
+                    styles.popup,
+                    popup.info && styles.popupInfo,
+                    popup.visible && popup.positioned && styles.popupVisible
+                )}
                 style={{
                     left: popup.x,
                     top: popup.y
                 }}
             >
-                {getPhotoData.isFetching || getPhotoData.isLoading ? (
+                <Button
+                    icon={'Close'}
+                    mode={'secondary'}
+                    title={t('components.common.star-map.close', 'Закрыть')}
+                    className={styles.popupClose}
+                    onClick={hidePopup}
+                />
+                {popup.info ? (
+                    <StarMapObjectInfo
+                        info={popup.info}
+                        date={popup.infoDate ?? new Date()}
+                    />
+                ) : getPhotoData.isFetching || getPhotoData.isLoading ? (
                     <Skeleton style={{ width: '100%', height: '100%' }} />
                 ) : (
                     <>
@@ -515,6 +538,17 @@ const StarMapRender: React.FC<StarMapProps> = ({
                     </>
                 )}
             </Container>
+        </div>
+    )
+
+    if (!showSettings) {
+        return map
+    }
+
+    return (
+        <div className={cn(styles.starMapShell, fitContainer && styles.starMapShellFit, className)}>
+            {settingsSidebar}
+            {map}
         </div>
     )
 }
