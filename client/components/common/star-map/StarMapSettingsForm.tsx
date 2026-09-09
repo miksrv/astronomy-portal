@@ -37,7 +37,7 @@ const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onC
                         <Button
                             key={mode}
                             size={'small'}
-                            mode={settings.viewMode === mode ? 'primary' : 'secondary'}
+                            mode={settings.viewMode === mode ? 'primary' : 'outline'}
                             onClick={() => settings.viewMode !== mode && update('viewMode', mode)}
                         >
                             {label}
