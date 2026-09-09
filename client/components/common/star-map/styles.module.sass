@@ -760,6 +760,23 @@
     text-transform: uppercase
     letter-spacing: 0.5px
 
+// A caption and its control on one line — the sidebar is 280px wide, so a stacked
+// label costs a whole row for two words. The control keeps a floor wide enough for
+// its value plus the chevron; the caption takes whatever is left.
+.settingsRow
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 8px
+
+.settingsRowLabel
+    font-size: 13px
+    color: var(--input-label-color)
+
+.settingsRowControl
+    flex: 0 0 auto
+    min-width: 84px
+
 .viewModeToggle
     display: flex
     gap: 4px

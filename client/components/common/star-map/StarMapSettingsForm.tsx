@@ -22,6 +22,8 @@ const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onC
         onChange({ ...settings, [key]: value })
     }
 
+    const starMagnitudeLabel = t('components.common.star-map.settings.star-magnitude', 'Макс. величина')
+
     const viewModes: Array<{ mode: StarMapViewMode; label: string }> = [
         { mode: 'sky', label: t('components.common.star-map.settings.view-mode-sky', 'Карта неба') },
         { mode: 'horizon', label: t('components.common.star-map.settings.view-mode-horizon', 'Небо сейчас') }
@@ -64,18 +66,25 @@ const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onC
                     checked={settings.starsShow}
                     onChange={(e) => update('starsShow', e.target.checked)}
                 />
+                {/* The kit's Select stacks its own label above the field, which in a 280px
+                    sidebar spends a whole row on two words; the caption goes beside it
+                    instead, and `aria-label` carries the same text for assistive tech. */}
                 {settings.starsShow && (
-                    <Select
-                        size={'small'}
-                        label={t('components.common.star-map.settings.star-magnitude', 'Макс. звёздная величина')}
-                        options={STARS_LIMIT_OPTIONS}
-                        value={settings.starsLimit}
-                        onSelect={(selected) => {
-                            if (selected?.[0]) {
-                                update('starsLimit', selected[0].key)
-                            }
-                        }}
-                    />
+                    <div className={styles.settingsRow}>
+                        <span className={styles.settingsRowLabel}>{starMagnitudeLabel}</span>
+                        <Select
+                            size={'small'}
+                            aria-label={starMagnitudeLabel}
+                            className={styles.settingsRowControl}
+                            options={STARS_LIMIT_OPTIONS}
+                            value={settings.starsLimit}
+                            onSelect={(selected) => {
+                                if (selected?.[0]) {
+                                    update('starsLimit', selected[0].key)
+                                }
+                            }}
+                        />
+                    </div>
                 )}
             </div>
 
@@ -96,7 +105,7 @@ const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onC
                     />
                 )}
                 <Checkbox
-                    label={t('components.common.star-map.settings.show-custom-objects', 'Мои объекты')}
+                    label={t('components.common.star-map.settings.show-custom-objects', 'Объекты обсерватории')}
                     checked={settings.customObjectsShow}
                     onChange={(e) => update('customObjectsShow', e.target.checked)}
                 />
