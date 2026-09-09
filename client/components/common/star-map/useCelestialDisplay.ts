@@ -1,12 +1,20 @@
 import { RefObject, useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { customConfig, defaultConfig } from './config'
-import { LIVE_TICK_HIDE_GRACE_MS, ZOOM_STEP_IN, ZOOM_STEP_OUT } from './constants'
+import {
+    LIVE_TICK_HIDE_GRACE_MS,
+    MAX_REDRAW_INTERVAL_MS,
+    MIN_REDRAW_INTERVAL_MS,
+    REDRAW_HEADROOM,
+    ZOOM_STEP_IN,
+    ZOOM_STEP_OUT
+} from './constants'
 import { detachCelestialZoom, MAX_VIEW_RESTORE_ATTEMPTS } from './horizonNavigation'
 import { fitHorizonToView, ViewportSize } from './horizonOverlay'
 import { centerMatches, DOME_VIEW, HorizonView, isDomeView, viewToCenter } from './horizonView'
 import { horizontalToEquatorial } from './objectInfo'
 import { StarMapObject, StarMapProps } from './StarMap'
+import { advanceClock, TIME_RATE_MIN } from './timeFlow'
 import { StarMapSettings } from './types'
 import { useLiveClock } from './useLiveClock'
 import {
@@ -70,6 +78,11 @@ export interface UseCelestialDisplayOptions {
     permalinkZoomRef: RefObject<number | null>
     date: Date | null
     dateRef: RefObject<Date | null>
+    /**
+     * Seconds of sky per real second (see timeFlow.ts). `1` is the ordinary once-a-minute
+     * "now" tick; anything above it runs the animated flow.
+     */
+    timeRate: number
     /** Popup auto-hide hook, called at the very end of every Celestial redraw */
     onRedraw: () => void
     /** Clears the popup's show/hide timers when the display effect tears down */
@@ -132,6 +145,7 @@ export const useCelestialDisplay = ({
     permalinkZoomRef,
     date,
     dateRef,
+    timeRate,
     onRedraw,
     clearPopupTimers,
     extendAutoHideGrace
@@ -775,7 +789,68 @@ export const useCelestialDisplay = ({
         }
     }, [dateRef, extendAutoHideGrace, applyHorizonView, syncCelestialZenith])
 
-    useLiveClock(Boolean(showSettings) && date == null, handleLiveTick)
+    useLiveClock(Boolean(showSettings) && date == null && timeRate <= TIME_RATE_MIN, handleLiveTick)
+
+    /**
+     * Animated time flow (the ×2/×8 buttons): the simulated clock lives in `nowRef` and the
+     * canvas is redrawn straight from this loop — no React state is touched per frame, so
+     * the settings panel and the rest of the tree never re-render at animation rate. The
+     * two places that show the moment poll `resolveDate()` on their own once-a-second tick.
+     *
+     * The clock advances every frame but the sky is redrawn only as often as the device can
+     * afford: a full skyview() costs ~20 ms on a desktop and several times that on a phone,
+     * so the next redraw is held off for twice the last one's duration (never more than
+     * MAX_REDRAW_INTERVAL_MS). Frame rate therefore changes the smoothness, never the speed
+     * of time — the elapsed real milliseconds are what gets multiplied.
+     */
+    useEffect(() => {
+        if (!showSettings || timeRate <= TIME_RATE_MIN) {
+            return
+        }
+
+        let frameId = requestAnimationFrame(step)
+        let previousFrameMs = performance.now()
+        let lastRedrawMs = 0
+        let redrawInterval = MIN_REDRAW_INTERVAL_MS
+
+        function step(frameMs: number) {
+            frameId = requestAnimationFrame(step)
+
+            if (!initializedRef.current) {
+                previousFrameMs = frameMs
+                return
+            }
+
+            nowRef.current = advanceClock(nowRef.current, frameMs - previousFrameMs, timeRate)
+            previousFrameMs = frameMs
+
+            if (frameMs - lastRedrawMs < redrawInterval) {
+                return
+            }
+
+            lastRedrawMs = frameMs
+
+            // A redraw a second is still a redraw the popup's auto-hide would react to
+            extendAutoHideGrace(Date.now() + LIVE_TICK_HIDE_GRACE_MS)
+
+            const startedAt = performance.now()
+
+            try {
+                Celestial.skyview(buildSkyviewPatch(nowRef.current))
+                syncCelestialZenith(nowRef.current)
+                applyHorizonView()
+            } catch (error) {
+                console.warn(error)
+            }
+
+            redrawInterval = Math.min(
+                MAX_REDRAW_INTERVAL_MS,
+                Math.max(MIN_REDRAW_INTERVAL_MS, (performance.now() - startedAt) * REDRAW_HEADROOM)
+            )
+        }
+
+        return () => cancelAnimationFrame(frameId)
+    }, [showSettings, timeRate, extendAutoHideGrace, applyHorizonView, syncCelestialZenith])
 
     // Every zoom gesture funnels through here — the toolbar's +/−, the wheel and the
     // pinch — so horizon mode's zoom-out floor (horizonMinZoomFactor) is enforced in one

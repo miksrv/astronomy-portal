@@ -3,12 +3,13 @@ import { Button, Input, Spinner } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
+import { FastForwardIcon, PauseIcon, RewindIcon, SlowDownIcon, SpeedUpIcon } from '@/components/icons'
 import { DateTimeInput } from '@/components/ui/date-time-input'
 
-import { MOBILE_MAX_WIDTH } from './constants'
+import { MOBILE_MAX_WIDTH, TIME_FLOW_DISPLAY_INTERVAL_MS } from './constants'
 import { findTonightMoment } from './nightPreset'
-import { stepDate, TimeStep, TimeStepDirection } from './timeStep'
-import { dateToWallClock, formatUtcOffset, ResolvedTimeZone, wallClockToDate } from './timezone'
+import { formatTimeRate, TIME_RATE_MAX, TIME_RATE_MIN } from './timeFlow'
+import { dateToWallClock, ResolvedTimeZone, wallClockToDate } from './timezone'
 import { useLiveClock } from './useLiveClock'
 
 import styles from './styles.module.sass'
@@ -20,8 +21,16 @@ interface StarMapLocationControlProps {
     /** True while the timezone of the current geopos is still being resolved */
     timeZonePending: boolean
     geolocationPending: boolean
+    /** Seconds of sky per real second; `1` is real time (see timeFlow.ts) */
+    timeRate: number
+    /** The instant the map is currently drawn for — polled while the flow runs */
+    resolveDate: () => Date
     onGeoposChange: (geopos: [number, number]) => void
     onDateChange: (date: Date | null) => void
+    /** Multiply the flow rate by the given factor (the ÷8 / ÷2 / ×2 / ×8 buttons) */
+    onTimeRateChange: (factor: number) => void
+    /** Freeze the sky at the moment the flow reached and go back to real time */
+    onTimeFlowPause: () => void
     /** Lazily resolves (and caches) the timezone of the current geopos */
     onEnsureTimeZone: () => Promise<ResolvedTimeZone | null>
     onRequestBrowserLocation: () => Promise<[number, number] | null>
@@ -36,8 +45,12 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
     timeZone,
     timeZonePending,
     geolocationPending,
+    timeRate,
+    resolveDate,
     onGeoposChange,
     onDateChange,
+    onTimeRateChange,
+    onTimeFlowPause,
     onEnsureTimeZone,
     onRequestBrowserLocation
 }) => {
@@ -70,9 +83,16 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
     }, [geopos])
 
     // With no moment picked the map is live, and the field says so by standing at the
-    // place's current time (advanced by the shared minute tick) rather than empty.
+    // place's current time rather than empty. While the flow runs the same field follows
+    // the simulated clock — polled once a second, never per animation frame, so the panel
+    // stays out of the redraw loop (the canvas is driven straight from useCelestialDisplay).
+    const flowing = timeRate > TIME_RATE_MIN
     const [now, setNow] = useState<Date>(() => new Date())
-    useLiveClock(date == null, () => setNow(new Date()))
+    useLiveClock(
+        date == null,
+        () => setNow(flowing ? resolveDate() : new Date()),
+        flowing ? TIME_FLOW_DISPLAY_INTERVAL_MS : undefined
+    )
 
     // Resolving the zone costs a ~516 KB polygons fetch, which is why it is lazy — but
     // this control only exists while the settings panel is open, i.e. after the visitor
@@ -141,42 +161,39 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
         }
     }
 
-    // Steps start from the selected moment, or from the real "now" when the map is live;
-    // either way the result is a frozen moment (chip shows it, "back to now" reappears).
-    // A day step keeps the place's wall-clock time, so it needs the zone first.
-    const handleStep = async (step: TimeStep, direction: TimeStepDirection) => {
-        const base = date ?? new Date()
-        const zone = step === 'day' ? (timeZone ?? (await onEnsureTimeZone())) : timeZone
-
-        onDateChange(stepDate(base, step, direction, zone))
-    }
-
-    const timeSteps: Array<{ step: TimeStep; direction: TimeStepDirection; label: string; title: string }> = [
+    const rateSteps: Array<{ factor: number; icon: React.ReactNode; title: string }> = [
         {
-            step: 'day',
-            direction: -1,
-            label: t('components.common.star-map.location.step-day-back', '−1 д'),
-            title: t('components.common.star-map.location.step-day-back-title', 'На день раньше')
+            factor: 0.125,
+            icon: <RewindIcon />,
+            title: t('components.common.star-map.location.rate-slower-8', 'Замедлить в 8 раз')
         },
         {
-            step: 'hour',
-            direction: -1,
-            label: t('components.common.star-map.location.step-hour-back', '−1 ч'),
-            title: t('components.common.star-map.location.step-hour-back-title', 'На час раньше')
+            factor: 0.5,
+            icon: <SlowDownIcon />,
+            title: t('components.common.star-map.location.rate-slower-2', 'Замедлить в 2 раза')
         },
         {
-            step: 'hour',
-            direction: 1,
-            label: t('components.common.star-map.location.step-hour-forward', '+1 ч'),
-            title: t('components.common.star-map.location.step-hour-forward-title', 'На час позже')
+            factor: 2,
+            icon: <SpeedUpIcon />,
+            title: t('components.common.star-map.location.rate-faster-2', 'Ускорить в 2 раза')
         },
         {
-            step: 'day',
-            direction: 1,
-            label: t('components.common.star-map.location.step-day-forward', '+1 д'),
-            title: t('components.common.star-map.location.step-day-forward-title', 'На день позже')
+            factor: 8,
+            icon: <FastForwardIcon />,
+            title: t('components.common.star-map.location.rate-faster-8', 'Ускорить в 8 раз')
         }
     ]
+
+    const rateLabel = formatTimeRate(timeRate, {
+        minute: t('components.common.star-map.location.rate-minutes', 'мин/с'),
+        hour: t('components.common.star-map.location.rate-hours', 'ч/с'),
+        day: t('components.common.star-map.location.rate-days', 'сут/с')
+    })
+
+    const pauseTitle = t(
+        'components.common.star-map.location.rate-pause',
+        'Пауза: остановить время и сбросить скорость'
+    )
 
     const handleMyLocation = async () => {
         const position = await onRequestBrowserLocation()
@@ -260,24 +277,49 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
                 onChange={(value) => void commitDate(value)}
             />
 
+            {/* Time flow, the way a phone planetarium does it: the buttons multiply the speed
+                of the clock, the middle one stops it. Slowing down bottoms out at real time —
+                there is no reverse and no slow motion, only undoing an acceleration. */}
             <div
-                className={styles.timeStepRow}
+                className={styles.timeFlowRow}
                 role={'group'}
-                aria-label={t('components.common.star-map.location.step-group', 'Сдвинуть время')}
+                aria-label={t('components.common.star-map.location.rate-group', 'Течение времени')}
             >
-                {timeSteps.map(({ step, direction, label, title }) => (
-                    <Button
-                        key={`${step}_${direction}`}
-                        size={'small'}
-                        mode={'secondary'}
-                        title={title}
-                        aria-label={title}
-                        onClick={() => void handleStep(step, direction)}
-                    >
-                        {label}
-                    </Button>
+                {rateSteps.map(({ factor, icon, title }, index) => (
+                    <React.Fragment key={title}>
+                        {index === 2 && (
+                            <Button
+                                size={'small'}
+                                mode={'secondary'}
+                                title={pauseTitle}
+                                aria-label={pauseTitle}
+                                onClick={onTimeFlowPause}
+                            >
+                                <PauseIcon />
+                            </Button>
+                        )}
+
+                        <Button
+                            size={'small'}
+                            mode={'secondary'}
+                            title={title}
+                            aria-label={title}
+                            disabled={factor < 1 ? !flowing : timeRate >= TIME_RATE_MAX}
+                            onClick={() => onTimeRateChange(factor)}
+                        >
+                            {icon}
+                        </Button>
+                    </React.Fragment>
                 ))}
             </div>
+
+            {flowing && (
+                <div className={styles.timezoneHint}>
+                    {t('components.common.star-map.location.rate-current', 'Скорость времени')}
+                    {': '}
+                    {rateLabel}
+                </div>
+            )}
 
             <Button
                 size={'small'}
@@ -301,15 +343,6 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
                 <div className={styles.timezoneHint}>
                     <Spinner className={styles.timezoneSpinner} />
                     {t('components.common.star-map.location.timezone-pending', 'Определяем часовой пояс…')}
-                </div>
-            )}
-
-            {date && timeZone && (
-                <div className={styles.timezoneHint}>
-                    {t('components.common.star-map.location.local-time', 'Местное время')}
-                    {': '}
-                    {formatUtcOffset(timeZone, date)}
-                    {timeZone.zoneName ? ` · ${timeZone.zoneName}` : ''}
                 </div>
             )}
 

@@ -3,8 +3,9 @@ import React from 'react'
 /**
  * Compact 24×24 line icons for the star map's quick layer bar — layers the kit's icon
  * set has no glyph for (constellation lines/names, graticule, deep-sky, Milky Way,
- * meteor radiants, horizon view, atmosphere) and for the map rail's view controls (zoom
- * in/out, fit view). Same footprint as a kit `Icon`: `currentColor`,
+ * meteor radiants, horizon view, atmosphere), for the map rail's view controls (zoom
+ * in/out, fit view) and for the settings panel's time-flow transport (rewind, slow down,
+ * pause, speed up, fast forward). Same footprint as a kit `Icon`: `currentColor`,
  * sized by the parent, decorative (`aria-hidden`).
  */
 
@@ -233,5 +234,56 @@ export const FitViewIcon: React.FC<LayerIconProps> = (props) => (
             r={4.5}
         />
         <path d={'M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3'} />
+    </Svg>
+)
+
+/**
+ * Transport controls for the time flow, read the way a player's are: one triangle is the
+ * small step, two the big one, left slows the clock down and right speeds it up. Solid
+ * shapes (the outline `Svg` default is overridden per path) so they read at 18px.
+ */
+const Solid: React.FC<{ d: string }> = ({ d }) => (
+    <path
+        d={d}
+        fill={'currentColor'}
+        stroke={'none'}
+    />
+)
+
+/** ◀◀ — slow the flow down by the big step */
+export const RewindIcon: React.FC<LayerIconProps> = (props) => (
+    <Svg {...props}>
+        <Solid d={'M20.5 5.5 12.5 12l8 6.5Z'} />
+        <Solid d={'M11.5 5.5 3.5 12l8 6.5Z'} />
+    </Svg>
+)
+
+/** ◀ — slow the flow down by the small step */
+export const SlowDownIcon: React.FC<LayerIconProps> = (props) => (
+    <Svg {...props}>
+        <Solid d={'M16 5.5 6.5 12l9.5 6.5Z'} />
+    </Svg>
+)
+
+/** ▮▮ — stop the flow */
+export const PauseIcon: React.FC<LayerIconProps> = (props) => (
+    <Svg {...props}>
+        <Solid d={'M8 5h2.6a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z'} />
+        <Solid d={'M13.4 5H16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-2.6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z'} />
+    </Svg>
+)
+
+/** ▶ — speed the flow up by the small step */
+export const SpeedUpIcon: React.FC<LayerIconProps> = (props) => (
+    <Svg {...props}>
+        <Solid d={'M8 5.5 17.5 12 8 18.5Z'} />
+    </Svg>
+)
+
+/** ▶▶ — speed the flow up by the big step */
+export const FastForwardIcon: React.FC<LayerIconProps> = (props) => (
+    <Svg {...props}>
+        <Solid d={'M3.5 5.5 11.5 12l-8 6.5Z'} />
+        <Solid d={'M12.5 5.5 20.5 12l-8 6.5Z'} />
     </Svg>
 )

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Button, cn, Container, Icon, Skeleton } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
@@ -19,6 +19,7 @@ import StarMapQuickBar from './StarMapQuickBar'
 import StarMapSearch from './StarMapSearch'
 import StarMapSettingsForm from './StarMapSettingsForm'
 import StarMapStatusChip from './StarMapStatusChip'
+import { stepTimeRate, TIME_RATE_MIN } from './timeFlow'
 import { useBodyLabels } from './useBodyLabels'
 import { useCanvasInteraction } from './useCanvasInteraction'
 import { useCelestialDisplay } from './useCelestialDisplay'
@@ -59,6 +60,13 @@ const StarMapRender: React.FC<StarMapProps> = ({
         dateRef,
         handleSettingsChange
     } = useStarMapSettings({ showSettings })
+
+    // Seconds of sky per real second (timeFlow.ts). Above real time the animated flow in
+    // useCelestialDisplay drives the clock; the mirror ref keeps the handlers below free of
+    // the state's render-time snapshot.
+    const [timeRate, setTimeRate] = useState<number>(TIME_RATE_MIN)
+    const timeRateRef = useRef<number>(TIME_RATE_MIN)
+    timeRateRef.current = timeRate
 
     const [settingsOpen, setSettingsOpen] = useState<boolean>(() => {
         if (!showSettings) {
@@ -116,6 +124,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
         permalinkZoomRef,
         date,
         dateRef,
+        timeRate,
         onRedraw: scheduleAutoHideAfterRedraw,
         clearPopupTimers,
         extendAutoHideGrace
@@ -132,6 +141,59 @@ const StarMapRender: React.FC<StarMapProps> = ({
         onLeaveDome: ensureLookAroundZoom,
         zoomBy
     })
+
+    /**
+     * Speed the flow up or slow it back down. A flow started from a picked moment takes that
+     * moment as its starting point and then owns the clock: the map is no longer pinned to a
+     * fixed instant (so the permalink stops advertising one), it is running from it.
+     */
+    const changeTimeRate = useCallback(
+        (factor: number) => {
+            const next = stepTimeRate(timeRateRef.current, factor)
+
+            if (next === timeRateRef.current) {
+                return
+            }
+
+            if (next > TIME_RATE_MIN && dateRef.current) {
+                nowRef.current = dateRef.current
+                location.setDate(null)
+            }
+
+            // Slowing all the way back to real time pins the moment the flow reached, the
+            // same as the pause does. Letting the live tick take over instead would snap the
+            // sky back to the real "now" and silently throw away the travelling.
+            if (next === TIME_RATE_MIN) {
+                location.setDate(nowRef.current)
+            }
+
+            timeRateRef.current = next
+            setTimeRate(next)
+        },
+        [dateRef, nowRef, location]
+    )
+
+    /** Pause: freeze the sky at the moment the flow reached and reset the speed to real time. */
+    const pauseTimeFlow = useCallback(() => {
+        const stopAt = timeRateRef.current > TIME_RATE_MIN ? nowRef.current : (dateRef.current ?? new Date())
+
+        timeRateRef.current = TIME_RATE_MIN
+        setTimeRate(TIME_RATE_MIN)
+        location.setDate(stopAt)
+    }, [dateRef, nowRef, location])
+
+    /**
+     * Picking a moment by hand (or clearing it back to the live sky) ends any running flow —
+     * the visitor asked for that instant, not for a clock still running away from it.
+     */
+    const selectDate = useCallback(
+        (next: Date | null) => {
+            timeRateRef.current = TIME_RATE_MIN
+            setTimeRate(TIME_RATE_MIN)
+            location.setDate(next)
+        },
+        [location]
+    )
 
     const { showersRef } = useMeteorShowersLayer({
         showSettings,
@@ -209,8 +271,12 @@ const StarMapRender: React.FC<StarMapProps> = ({
                         timeZone={location.timeZone}
                         timeZonePending={location.timeZonePending}
                         geolocationPending={location.geolocationPending}
+                        timeRate={timeRate}
+                        resolveDate={resolveDate}
                         onGeoposChange={(geopos) => handleSettingsChange({ ...settings, geopos })}
-                        onDateChange={location.setDate}
+                        onDateChange={selectDate}
+                        onTimeRateChange={changeTimeRate}
+                        onTimeFlowPause={pauseTimeFlow}
                         onEnsureTimeZone={location.ensureTimeZone}
                         onRequestBrowserLocation={location.requestBrowserLocation}
                     />
@@ -382,7 +448,9 @@ const StarMapRender: React.FC<StarMapProps> = ({
                     date={date}
                     timeZone={location.timeZone}
                     timeZonePending={location.timeZonePending}
-                    onResetToNow={() => location.setDate(null)}
+                    timeRate={timeRate}
+                    resolveDate={resolveDate}
+                    onResetToNow={() => selectDate(null)}
                     onOpenSettings={() => setSettingsOpen(true)}
                 />
             )}
