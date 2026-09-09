@@ -86,6 +86,7 @@
                     "hours": "Hours",
                     "minutes": "Minutes",
                     "done": "Done",
+                    "now": "Now",
                     "timezone-pending": "Resolving the time zone…",
                     "timezone-unknown": "Time zone unknown, time is shown in UTC",
                     "local-time": "Local time",

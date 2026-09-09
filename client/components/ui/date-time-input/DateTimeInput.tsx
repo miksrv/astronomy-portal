@@ -42,6 +42,17 @@ export interface DateTimeInputProps {
     minuteLabel?: string
     /** Caption of the button that closes the popout (default: 'Готово'). */
     doneLabel?: string
+    /** Adds a "now" button to the popout footer, next to the closing one. */
+    showNowButton?: boolean
+    /** Caption of the "now" button (default: 'Сейчас'). */
+    nowLabel?: string
+    /**
+     * What the "now" button does. By default it commits the current moment through
+     * `onChange`, which is what a plain form field wants. A caller whose empty value
+     * already *means* "now" (the star map: no date = live sky) passes its own handler
+     * to clear the value instead of freezing it at this minute.
+     */
+    onNow?: () => void
     /**
      * Where the hour/minute row sits inside the popout — `'below'` the calendar (default)
      * or `'above'` it. Neither the kit's `Popout` nor its `Select` flips upward when it
@@ -104,11 +115,14 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     hourLabel = 'Часы',
     minuteLabel = 'Минуты',
     doneLabel = 'Готово',
+    showNowButton,
+    nowLabel = 'Сейчас',
     timePosition = 'below',
     portal,
     className,
     testId,
     onChange,
+    onNow,
     onOpenChange
 }) => {
     // Typed structurally (rather than importing `PopoutHandleProps`) so this
@@ -149,6 +163,22 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     }
 
     const resolvedPlaceholder = placeholder ?? (showTime ? 'Выберите дату и время' : 'Выберите дату')
+
+    const handleNow = () => {
+        if (onNow) {
+            onNow()
+        } else {
+            const now = dayjs()
+
+            onChange?.(now.format(showTime ? 'YYYY-MM-DDTHH:mm' : 'YYYY-MM-DD'))
+        }
+
+        // In `mode="date"` there is no "Done" step — a picked day is already a complete
+        // value and closes the popout, so "now" behaves the same way.
+        if (!showTime) {
+            popoutRef.current?.close()
+        }
+    }
 
     const timeControls = (
         <div className={styles.timeRow}>
@@ -234,13 +264,27 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
 
                     {showTime && timePosition === 'below' && timeControls}
 
-                    {showTime && (
-                        <Button
-                            mode={'primary'}
-                            label={doneLabel}
-                            className={styles.doneButton}
-                            onClick={() => popoutRef.current?.close()}
-                        />
+                    {(showNowButton || showTime) && (
+                        <div className={styles.footer}>
+                            {showNowButton && (
+                                <Button
+                                    mode={'outline'}
+                                    label={nowLabel}
+                                    className={styles.footerButton}
+                                    disabled={disabled}
+                                    onClick={handleNow}
+                                />
+                            )}
+
+                            {showTime && (
+                                <Button
+                                    mode={'primary'}
+                                    label={doneLabel}
+                                    className={styles.footerButton}
+                                    onClick={() => popoutRef.current?.close()}
+                                />
+                            )}
+                        </div>
                     )}
                 </div>
             </Popout>

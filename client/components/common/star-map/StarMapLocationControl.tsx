@@ -9,6 +9,7 @@ import { MOBILE_MAX_WIDTH } from './constants'
 import { findTonightMoment } from './nightPreset'
 import { stepDate, TimeStep, TimeStepDirection } from './timeStep'
 import { dateToWallClock, formatUtcOffset, ResolvedTimeZone, wallClockToDate } from './timezone'
+import { useLiveClock } from './useLiveClock'
 
 import styles from './styles.module.sass'
 
@@ -68,24 +69,32 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
         setLonDraft(String(geopos[1]))
     }, [geopos])
 
-    // The draft shows the selected moment in the place's local time (Business Rule 12).
-    // While the zone is still resolving the field stays empty (a hint below says why);
-    // if resolution failed for good, fall back to UTC — the same zone commitDate() uses.
+    // With no moment picked the map is live, and the field says so by standing at the
+    // place's current time (advanced by the shared minute tick) rather than empty.
+    const [now, setNow] = useState<Date>(() => new Date())
+    useLiveClock(date == null, () => setNow(new Date()))
+
+    // Resolving the zone costs a ~516 KB polygons fetch, which is why it is lazy — but
+    // this control only exists while the settings panel is open, i.e. after the visitor
+    // deliberately opened the place/time UI, and every field in it is stated in the
+    // place's local time (Business Rule 12). So resolve on mount, and again whenever the
+    // place changes (`onEnsureTimeZone` is keyed on the geopos).
     useEffect(() => {
-        if (!date) {
-            setDateDraft('')
-            return
-        }
+        void onEnsureTimeZone()
+    }, [onEnsureTimeZone])
 
+    // The draft shows the moment in the place's local time (Business Rule 12).
+    useEffect(() => {
         if (timeZone) {
-            setDateDraft(dateToWallClock(date, timeZone))
+            setDateDraft(dateToWallClock(date ?? now, timeZone))
             return
         }
 
-        if (!timeZonePending) {
-            setDateDraft(dateToWallClock(date, { utcOffset: 0 }))
-        }
-    }, [date, timeZone, timeZonePending])
+        // No zone yet: a picked moment falls back to UTC once resolution has definitively
+        // failed — the same zone commitDate() commits in — while the live "now" simply
+        // waits for the zone, since a UTC clock standing in for the local one reads as a bug.
+        setDateDraft(date && !timeZonePending ? dateToWallClock(date, { utcOffset: 0 }) : '')
+    }, [date, now, timeZone, timeZonePending])
 
     const commitGeopos = () => {
         const lat = Number(latDraft.replace(',', '.'))
@@ -238,6 +247,11 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
                 hourLabel={t('components.common.star-map.location.hours', 'Часы')}
                 minuteLabel={t('components.common.star-map.location.minutes', 'Минуты')}
                 doneLabel={t('components.common.star-map.location.done', 'Готово')}
+                showNowButton={true}
+                nowLabel={t('components.common.star-map.location.now', 'Сейчас')}
+                // An empty date already means "live now" here, so the button clears the
+                // selection instead of freezing the map at the current minute
+                onNow={() => onDateChange(null)}
                 locale={i18n?.language === 'en' ? 'en' : 'ru'}
                 portal={isDesktop}
                 timePosition={'above'}
