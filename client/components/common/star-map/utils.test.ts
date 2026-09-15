@@ -19,7 +19,8 @@ import {
     computeHorizonCanvasLayout,
     computeHorizonCoverZoom,
     computeHorizonStartZoom,
-    getPopupArrowTop
+    getPopupArrowTop,
+    sanitizeStarMapSettings
 } from './utils'
 
 const makeSettings = (overrides: Partial<StarMapSettings> = {}): StarMapSettings => ({
@@ -164,10 +165,25 @@ describe('star-map utils', () => {
     })
 
     describe('buildSkyviewPatch', () => {
-        it('pins the timezone to the browser offset of the given instant, in minutes', () => {
+        // The browser offset is whatever the test machine's zone says — pin it to a fake
+        // "UTC-7 in winter, UTC-6 in summer" so the expectations are concrete numbers
+        const offsetByMonth = (date: Date) => (date.getUTCMonth() >= 3 && date.getUTCMonth() <= 9 ? 360 : 420)
+        let spy: jest.SpyInstance<number, []>
+
+        beforeEach(() => {
+            spy = jest.spyOn(Date.prototype, 'getTimezoneOffset').mockImplementation(function (this: Date) {
+                return offsetByMonth(this)
+            })
+        })
+
+        afterEach(() => {
+            spy.mockRestore()
+        })
+
+        it('pins the timezone to the browser offset of the given instant, in Celestial minutes (east-positive)', () => {
             const date = new Date('2026-09-01T18:00:00Z')
 
-            expect(buildSkyviewPatch(date)).toStrictEqual({ date, timezone: -date.getTimezoneOffset() })
+            expect(buildSkyviewPatch(date)).toStrictEqual({ date, timezone: -360 })
         })
 
         it('includes the location only when one is given', () => {
@@ -181,8 +197,78 @@ describe('star-map utils', () => {
             const winter = new Date('2026-01-15T12:00:00Z')
             const summer = new Date('2026-07-15T12:00:00Z')
 
-            expect(buildSkyviewPatch(winter).timezone).toBe(-winter.getTimezoneOffset())
-            expect(buildSkyviewPatch(summer).timezone).toBe(-summer.getTimezoneOffset())
+            expect(buildSkyviewPatch(winter).timezone).toBe(-420)
+            expect(buildSkyviewPatch(summer).timezone).toBe(-360)
+        })
+    })
+
+    describe('sanitizeStarMapSettings', () => {
+        it('returns the defaults for anything that is not an object', () => {
+            expect(sanitizeStarMapSettings(null)).toStrictEqual(DEFAULT_STARMAP_SETTINGS)
+            expect(sanitizeStarMapSettings('{}')).toStrictEqual(DEFAULT_STARMAP_SETTINGS)
+            expect(sanitizeStarMapSettings([1, 2])).toStrictEqual(DEFAULT_STARMAP_SETTINGS)
+            expect(sanitizeStarMapSettings(42)).toStrictEqual(DEFAULT_STARMAP_SETTINGS)
+        })
+
+        it('keeps a valid stored blob as is', () => {
+            const stored: StarMapSettings = {
+                ...DEFAULT_STARMAP_SETTINGS,
+                viewMode: 'horizon',
+                starsLimit: 4,
+                dsosShow: true,
+                geopos: [55.75, 37.62],
+                center: [120, -15, 90]
+            }
+
+            expect(sanitizeStarMapSettings(stored)).toStrictEqual(stored)
+        })
+
+        it('falls back per field, keeping the valid neighbours of a poisoned one', () => {
+            const settings = sanitizeStarMapSettings({
+                viewMode: 'planetarium',
+                starsLimit: '6',
+                dsosShow: 'yes',
+                milkyWay: false,
+                geopos: [999, 55.17],
+                center: [0, 20],
+                planetsShow: 0
+            })
+
+            expect(settings.viewMode).toBe('sky')
+            expect(settings.starsLimit).toBe(DEFAULT_STARMAP_SETTINGS.starsLimit)
+            expect(settings.dsosShow).toBe(DEFAULT_STARMAP_SETTINGS.dsosShow)
+            expect(settings.planetsShow).toBe(DEFAULT_STARMAP_SETTINGS.planetsShow)
+            expect(settings.geopos).toStrictEqual(DEFAULT_STARMAP_SETTINGS.geopos)
+            expect(settings.center).toStrictEqual(DEFAULT_STARMAP_SETTINGS.center)
+            // The one valid override survives
+            expect(settings.milkyWay).toBe(false)
+        })
+
+        it('rejects non-finite numbers and out-of-range values that would poison the astronomy math', () => {
+            expect(sanitizeStarMapSettings({ geopos: [NaN, 0] }).geopos).toStrictEqual(DEFAULT_STARMAP_SETTINGS.geopos)
+            expect(sanitizeStarMapSettings({ geopos: [0, null] }).geopos).toStrictEqual(DEFAULT_STARMAP_SETTINGS.geopos)
+            expect(sanitizeStarMapSettings({ geopos: [45, 181] }).geopos).toStrictEqual(DEFAULT_STARMAP_SETTINGS.geopos)
+            expect(sanitizeStarMapSettings({ geopos: '51.8,55.2' }).geopos).toStrictEqual(
+                DEFAULT_STARMAP_SETTINGS.geopos
+            )
+            expect(sanitizeStarMapSettings({ center: [1, 2, Infinity] }).center).toStrictEqual(
+                DEFAULT_STARMAP_SETTINGS.center
+            )
+            expect(sanitizeStarMapSettings({ center: [1, 2, 3, 4] }).center).toStrictEqual(
+                DEFAULT_STARMAP_SETTINGS.center
+            )
+            expect(sanitizeStarMapSettings({ starsLimit: 0 }).starsLimit).toBe(DEFAULT_STARMAP_SETTINGS.starsLimit)
+            expect(sanitizeStarMapSettings({ starsLimit: 7 }).starsLimit).toBe(DEFAULT_STARMAP_SETTINGS.starsLimit)
+            expect(sanitizeStarMapSettings({ starsLimit: 1 }).starsLimit).toBe(1)
+        })
+
+        it('drops unknown keys and never lets a stored blob throw later', () => {
+            const settings = sanitizeStarMapSettings({ __proto__: { evil: true }, legacyKey: 1, viewMode: 'sky' })
+
+            expect(settings).toStrictEqual(DEFAULT_STARMAP_SETTINGS)
+            expect('legacyKey' in settings).toBe(false)
+            // The defaults object itself is never handed out to be mutated
+            expect(settings).not.toBe(DEFAULT_STARMAP_SETTINGS)
         })
     })
 

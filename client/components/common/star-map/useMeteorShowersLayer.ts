@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef, useState } from 'react'
+import { RefObject, useEffect, useRef } from 'react'
 
 import { loadMeteorShowers, MeteorShower } from './meteorShowers'
 
@@ -11,48 +11,49 @@ export interface UseMeteorShowersLayerOptions {
 }
 
 export interface MeteorShowersLayerController {
-    meteorShowers: MeteorShower[] | null
-    /** Mirror of `meteorShowers` for callbacks registered once with Celestial */
+    /** The catalog once loaded; read at draw/hit-test time by the once-registered Celestial callbacks */
     showersRef: RefObject<MeteorShower[] | null>
 }
 
 /**
  * Meteor showers layer (FE-9): the catalog is fetched only when the layer is first
  * switched on (Business Rule 11), then drawn by the custom-layers drawer on every redraw.
+ * Nothing in the render tree depends on the catalog, so it lives in a ref: the one redraw
+ * needed is the one that first paints the radiants, once the file arrives. Toggling the
+ * layer on/off later is redrawn by the settings patch (useCelestialDisplay) like any
+ * other checkbox.
  */
 export const useMeteorShowersLayer = ({
     showSettings,
     enabled,
     initializedRef
 }: UseMeteorShowersLayerOptions): MeteorShowersLayerController => {
-    const [meteorShowers, setMeteorShowers] = useState<MeteorShower[] | null>(null)
-
-    const showersRef = useRef<MeteorShower[] | null>(meteorShowers)
-    showersRef.current = meteorShowers
+    const showersRef = useRef<MeteorShower[] | null>(null)
 
     useEffect(() => {
-        if (!showSettings || !enabled || meteorShowers) {
+        if (!showSettings || !enabled || showersRef.current) {
             return
         }
 
         let cancelled = false
 
+        // loadMeteorShowers caches its promise, so a StrictMode re-run costs nothing
         void loadMeteorShowers().then((list) => {
-            if (!cancelled) {
-                setMeteorShowers(list)
+            if (cancelled) {
+                return
+            }
+
+            showersRef.current = list
+
+            if (initializedRef.current) {
+                Celestial.redraw()
             }
         })
 
         return () => {
             cancelled = true
         }
-    }, [showSettings, enabled, meteorShowers])
+    }, [showSettings, enabled, initializedRef])
 
-    useEffect(() => {
-        if (showSettings && initializedRef.current) {
-            Celestial.redraw()
-        }
-    }, [showSettings, meteorShowers, enabled])
-
-    return { meteorShowers, showersRef }
+    return { showersRef }
 }

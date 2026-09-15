@@ -1,5 +1,6 @@
-import { RefObject, useCallback, useRef, useState } from 'react'
+import { RefObject, useCallback, useLayoutEffect, useRef, useState } from 'react'
 
+import { readCenter } from './celestialApi'
 import { DEFAULT_STARMAP_SETTINGS } from './constants'
 import { clampView, HorizonView, INITIAL_VIEW } from './horizonView'
 import { decodePermalinkFromLocation, PermalinkState } from './permalink'
@@ -13,8 +14,6 @@ export interface UseStarMapSettingsOptions {
 }
 
 export interface StarMapSettingsController {
-    /** Permalink parameters read once on mount (empty when the panel is disabled) */
-    permalink: PermalinkState
     settings: StarMapSettings
     /** Mirror of `settings` for callbacks registered once with Celestial */
     settingsRef: RefObject<StarMapSettings>
@@ -34,13 +33,21 @@ export interface StarMapSettingsController {
     date: Date | null
     /** Mirror of `date` for callbacks registered once with Celestial */
     dateRef: RefObject<Date | null>
+    /** Replace the whole settings object (the settings form hands back a complete one) */
     handleSettingsChange: (newSettings: StarMapSettings) => void
+    /**
+     * Merge a partial change into the *current* settings. Safe from callbacks whose
+     * closure may be stale (a geolocation that resolves seconds later, a toolbar toggle):
+     * the base is `settingsRef`, not the render that created the callback, so toggles made
+     * in between are kept.
+     */
+    updateSettings: (patch: Partial<StarMapSettings>) => void
 }
 
 /**
  * Settings state of the star map: localStorage-backed settings overridden by the
- * shareable permalink, the observer location/time state and the settings-change handler
- * (which also persists the current center). Geolocation is never requested from here: the
+ * shareable permalink, the observer location/time state and the settings-change handlers
+ * (which also persist the current center). Geolocation is never requested from here: the
  * browser prompt only ever fires from an explicit button (useGeoNudge / the location control).
  */
 export const useStarMapSettings = ({ showSettings }: UseStarMapSettingsOptions): StarMapSettingsController => {
@@ -50,7 +57,7 @@ export const useStarMapSettings = ({ showSettings }: UseStarMapSettingsOptions):
 
     // Settings state — only loaded from localStorage when showSettings is enabled;
     // permalink parameters win over the visitor's own saved settings
-    const [settings, setSettings] = useState<StarMapSettings>(() => {
+    const [settings, setSettingsState] = useState<StarMapSettings>(() => {
         if (!showSettings) {
             return DEFAULT_STARMAP_SETTINGS
         }
@@ -63,9 +70,26 @@ export const useStarMapSettings = ({ showSettings }: UseStarMapSettingsOptions):
         }
     })
 
+    // Mirror for callbacks registered once with Celestial (drawCustomLayers / canvas
+    // handlers), which otherwise would only ever see the snapshot captured at registration
+    // time. Written by the setter, not during render: the ref is then current for anything
+    // that runs before the next render, including a second update in the same task.
+    const settingsRef = useRef<StarMapSettings>(settings)
+
+    const setSettings = useCallback((next: StarMapSettings) => {
+        settingsRef.current = next
+        setSettingsState(next)
+    }, [])
+
     // Location & time state (FE-2): date === null means "now" and is never persisted
     const location = useStarMapLocation(settings.geopos, { initialDate: permalink.date ?? null })
     const { date } = location
+
+    const dateRef = useRef<Date | null>(date)
+
+    useLayoutEffect(() => {
+        dateRef.current = date
+    }, [date])
 
     // Center is stored in a ref (not state) so that drag/zoom never triggers a full Celestial rebuild.
     // It is only read once on initial mount to restore the saved position.
@@ -75,30 +99,31 @@ export const useStarMapSettings = ({ showSettings }: UseStarMapSettingsOptions):
     const viewRef = useRef<HorizonView>(clampView(permalink.view ?? INITIAL_VIEW))
     const permalinkZoomRef = useRef<number | null>(permalink.zoom ?? null)
 
-    // Mirrors for callbacks registered once with Celestial (drawCustomLayers / canvas handlers),
-    // which otherwise would only ever see the snapshot captured at registration time.
-    const settingsRef = useRef<StarMapSettings>(settings)
-    settingsRef.current = settings
-    const dateRef = useRef<Date | null>(date)
-    dateRef.current = date
+    const handleSettingsChange = useCallback(
+        (newSettings: StarMapSettings) => {
+            // Persist the current map center alongside the settings change (sky mode only —
+            // in horizon mode the "center" is the zenith, not a user-chosen position)
+            if (settingsRef.current.viewMode === 'sky') {
+                const currentCenter = readCenter()
 
-    const handleSettingsChange = useCallback((newSettings: StarMapSettings) => {
-        // Persist the current map center alongside the settings change (sky mode only —
-        // in horizon mode the "center" is the zenith, not a user-chosen position)
-        if (settingsRef.current.viewMode === 'sky') {
-            const currentCenter = Celestial.rotate?.() as [number, number, number] | undefined
-            if (currentCenter) {
-                centerRef.current = currentCenter
-                newSettings = { ...newSettings, center: currentCenter }
+                if (currentCenter) {
+                    centerRef.current = currentCenter
+                    newSettings = { ...newSettings, center: currentCenter }
+                }
             }
-        }
 
-        setSettings(newSettings)
-        saveStarMapSettings(newSettings)
-    }, [])
+            setSettings(newSettings)
+            saveStarMapSettings(newSettings)
+        },
+        [setSettings]
+    )
+
+    const updateSettings = useCallback(
+        (patch: Partial<StarMapSettings>) => handleSettingsChange({ ...settingsRef.current, ...patch }),
+        [handleSettingsChange]
+    )
 
     return {
-        permalink,
         settings,
         settingsRef,
         centerRef,
@@ -107,6 +132,7 @@ export const useStarMapSettings = ({ showSettings }: UseStarMapSettingsOptions):
         location,
         date,
         dateRef,
-        handleSettingsChange
+        handleSettingsChange,
+        updateSettings
     }
 }

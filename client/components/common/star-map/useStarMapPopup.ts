@@ -49,8 +49,11 @@ export const useStarMapPopup = ({ containerRef, settingsRef }: UseStarMapPopupOp
     const suppressHideUntilRef = useRef<number>(0)
     const pendingPopupRef = useRef<PendingPopup | null>(null)
 
+    // Returns the previous state object when already hidden: this runs from the redraw
+    // auto-hide timer after every pan/zoom, and a fresh object there would re-render the
+    // whole map component for nothing.
     const hidePopup = useCallback(() => {
-        setPopup((prev) => ({ ...prev, visible: false }))
+        setPopup((prev) => (prev.visible ? { ...prev, visible: false } : prev))
     }, [])
 
     const showPendingPopup = useCallback(() => {
@@ -187,7 +190,6 @@ export const useStarMapPopup = ({ containerRef, settingsRef }: UseStarMapPopupOp
             hidePopup()
 
             pendingPopupRef.current = pending
-            suppressHideUntilRef.current = Date.now() + 60_000
 
             const duration: number =
                 settingsRef.current.viewMode === 'horizon'
@@ -195,6 +197,10 @@ export const useStarMapPopup = ({ containerRef, settingsRef }: UseStarMapPopupOp
                     : Celestial.rotate({ center: [pending.ra, pending.dec, 0] }) || 0
 
             const buffer = 300
+
+            // A target that is already centered makes rotate() redraw synchronously, which
+            // has just armed the auto-hide — drop it; the grace only covers redraws from here on
+            clearTimeout(hideTimeoutRef.current)
             suppressHideUntilRef.current = Date.now() + duration + buffer
 
             clearTimeout(showPopupTimeoutRef.current)

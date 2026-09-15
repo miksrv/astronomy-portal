@@ -1,9 +1,10 @@
-import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
+import { RefObject, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { useRouter } from 'next/router'
 
 import { copyTextToClipboard } from '@/utils/clipboard'
 
+import { readCenter, readZoomFactor } from './celestialApi'
 import { HorizonView } from './horizonView'
 import { buildPermalinkUrl, encodePermalink } from './permalink'
 import { StarMapSettings } from './types'
@@ -49,9 +50,13 @@ export const usePermalinkSync = ({
 }: UsePermalinkSyncOptions): PermalinkSyncController => {
     const router = useRouter()
     // Mirror: syncUrl is registered in effects/intervals created once per deps change, so
-    // it must always call the current router rather than the one captured at creation.
+    // it must always call the current router rather than the one captured at creation
+    // (every shallow replace below yields a new router object). Written after commit.
     const routerRef = useRef(router)
-    routerRef.current = router
+
+    useLayoutEffect(() => {
+        routerRef.current = router
+    }, [router])
 
     const [linkCopied, setLinkCopied] = useState(false)
     // Permalink shown for manual copying when clipboard access is unavailable (null = hidden)
@@ -65,27 +70,13 @@ export const usePermalinkSync = ({
         // Sky mode shares the equatorial center it is pointed at; horizon mode's center is
         // derived from the place and the instant, so it shares the view direction instead
         const isSky = settingsRef.current.viewMode === 'sky'
-        const center = isSky ? (Celestial.rotate?.() as [number, number, number] | undefined) : undefined
-        const view = isSky ? undefined : viewRef.current
-
-        let zoomFactor: number | null = null
-
-        try {
-            const factor = Celestial.zoomBy?.()
-
-            if (typeof factor === 'number' && Number.isFinite(factor)) {
-                zoomFactor = factor
-            }
-        } catch {
-            zoomFactor = null
-        }
 
         return encodePermalink({
             settings: settingsRef.current,
             date: dateRef.current,
-            center: center ?? null,
-            view: view ?? null,
-            zoom: zoomFactor
+            center: isSky ? (readCenter() ?? null) : null,
+            view: isSky ? null : viewRef.current,
+            zoom: readZoomFactor()
         })
     }, [settingsRef, dateRef, viewRef])
 
@@ -138,12 +129,12 @@ export const usePermalinkSync = ({
                 return
             }
 
-            const currentCenter = Celestial.rotate()
-            if (!currentCenter) {
+            const center = readCenter()
+
+            if (!center) {
                 return
             }
 
-            const center = currentCenter as [number, number, number]
             const prev = centerRef.current
 
             if (prev[0] === center[0] && prev[1] === center[1] && prev[2] === center[2]) {

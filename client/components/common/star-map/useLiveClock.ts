@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 
 /** How often the live ("now") sky advances — a minute is well below what the eye notices */
 export const LIVE_CLOCK_INTERVAL_MS = 60_000
@@ -18,7 +18,11 @@ export const useLiveClock = (
     intervalMs: number = LIVE_CLOCK_INTERVAL_MS
 ): void => {
     const onTickRef = useRef(onTick)
-    onTickRef.current = onTick
+
+    // Published after commit (not during render, which StrictMode may run twice and discard)
+    useLayoutEffect(() => {
+        onTickRef.current = onTick
+    }, [onTick])
 
     useEffect(() => {
         if (!enabled) {

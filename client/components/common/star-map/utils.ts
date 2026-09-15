@@ -112,7 +112,58 @@ export const createObjectsJSON = (objects?: StarMapObject[]): GeoJSON | undefine
     }
 }
 
-/** Load star map settings from localStorage, falling back to defaults. */
+const isFiniteNumber = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value)
+
+const isGeopos = (value: unknown): value is [number, number] =>
+    Array.isArray(value) &&
+    value.length === 2 &&
+    isFiniteNumber(value[0]) &&
+    isFiniteNumber(value[1]) &&
+    Math.abs(value[0]) <= 90 &&
+    Math.abs(value[1]) <= 180
+
+const isCenter = (value: unknown): value is [number, number, number] =>
+    Array.isArray(value) && value.length === 3 && value.every(isFiniteNumber)
+
+/**
+ * Coerce whatever was stored (an older schema, a hand-edited blob, garbage) into valid
+ * settings, field by field: a field that fails its check falls back to its default while
+ * the others are kept. The result is what every consumer — Celestial's config, the
+ * astronomy math, the permalink — can take at face value without re-validating.
+ */
+export const sanitizeStarMapSettings = (stored: unknown): StarMapSettings => {
+    const source: Record<string, unknown> =
+        stored && typeof stored === 'object' && !Array.isArray(stored) ? (stored as Record<string, unknown>) : {}
+    const settings: StarMapSettings = { ...DEFAULT_STARMAP_SETTINGS }
+
+    // Every boolean switch: only a real boolean overrides the default
+    for (const [key, fallback] of Object.entries(DEFAULT_STARMAP_SETTINGS)) {
+        if (typeof fallback === 'boolean' && typeof source[key] === 'boolean') {
+            ;(settings as unknown as Record<string, boolean>)[key] = source[key]
+        }
+    }
+
+    if (source.viewMode === 'sky' || source.viewMode === 'horizon') {
+        settings.viewMode = source.viewMode
+    }
+
+    // The stars limit is a magnitude the settings form offers as 1..6
+    if (isFiniteNumber(source.starsLimit) && source.starsLimit >= 1 && source.starsLimit <= 6) {
+        settings.starsLimit = source.starsLimit
+    }
+
+    if (isGeopos(source.geopos)) {
+        settings.geopos = [source.geopos[0], source.geopos[1]]
+    }
+
+    if (isCenter(source.center)) {
+        settings.center = [source.center[0], source.center[1], source.center[2]]
+    }
+
+    return settings
+}
+
+/** Load star map settings from localStorage, falling back to defaults (per field — see sanitizeStarMapSettings). */
 export const loadStarMapSettings = (): StarMapSettings => {
     if (typeof window === 'undefined') {
         return DEFAULT_STARMAP_SETTINGS
@@ -121,7 +172,7 @@ export const loadStarMapSettings = (): StarMapSettings => {
     try {
         const raw = localStorage.getItem(STARMAP_STORAGE_KEY)
         if (raw) {
-            return { ...DEFAULT_STARMAP_SETTINGS, ...JSON.parse(raw) }
+            return sanitizeStarMapSettings(JSON.parse(raw))
         }
     } catch {
         // Ignore corrupted data
@@ -201,6 +252,9 @@ export const computeHorizonCoverZoom = (containerWidth: number, containerHeight:
 export const computeHorizonStartZoom = (containerWidth: number, containerHeight: number): number =>
     computeHorizonCoverZoom(containerWidth, containerHeight) * INITIAL_HORIZON_ZOOM
 
+/** Data file of the DSO layer: the curated bright list, or the full 6th-magnitude catalog when opted in. */
+export const dsoCatalogFile = (settings: Pick<StarMapSettings, 'dsosFull'>): string =>
+    settings.dsosFull ? 'dsos.6.json' : 'dsos.bright.json'
 export const buildVisualConfig = (settings: StarMapSettings) => {
     const horizonMode = settings.viewMode === 'horizon'
 
@@ -265,7 +319,7 @@ export const buildVisualConfig = (settings: StarMapSettings) => {
             show: settings.dsosShow,
             // Full catalog is opt-in and lazy: the file is only fetched when the map is
             // (re)built with it enabled (Business Rule 5)
-            data: settings.dsosFull ? 'dsos.6.json' : 'dsos.bright.json'
+            data: dsoCatalogFile(settings)
         },
         constellations: {
             ...customConfig.constellations,
