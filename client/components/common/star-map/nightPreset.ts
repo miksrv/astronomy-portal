@@ -7,7 +7,7 @@ import * as Astronomy from 'astronomy-engine'
  */
 
 /** Sun altitudes tried in order: astronomical dusk, then nautical, then civil (white nights) */
-export const NIGHT_SUN_ALTITUDES = [-18, -12, -6] as const
+const NIGHT_SUN_ALTITUDES = [-18, -12, -6] as const
 
 /** How far ahead a dusk is searched for each altitude, in days */
 const SEARCH_LIMIT_DAYS = 2

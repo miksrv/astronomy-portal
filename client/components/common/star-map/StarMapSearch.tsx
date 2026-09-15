@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
-import { Button, cn, Container, Input, Spinner } from 'simple-react-ui-kit'
+import { cn, Container, Input, Spinner } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
@@ -7,6 +7,7 @@ import { loadConstellations, loadDsoCatalog, loadDsoNames, loadStarCatalog, load
 import { KindIcon } from './kindIcons'
 import { buildSearchIndex, matchSearchItems, SearchItem } from './searchIndex'
 import { StarMapObject } from './StarMap'
+import { useBodyLabels } from './useBodyLabels'
 import { useKindLabels } from './useKindLabels'
 import { useListNavigation } from './useListNavigation'
 
@@ -24,6 +25,7 @@ interface StarMapSearchProps {
 const StarMapSearch: React.FC<StarMapSearchProps> = ({ open, objects, dsoCatalogFile, onSelect, onClose }) => {
     const { t, i18n } = useTranslation()
     const kindLabels = useKindLabels()
+    const bodyLabels = useBodyLabels()
 
     const [query, setQuery] = useState('')
     const [items, setItems] = useState<SearchItem[] | null>(null)
@@ -44,34 +46,32 @@ const StarMapSearch: React.FC<StarMapSearchProps> = ({ open, objects, dsoCatalog
             loadConstellations(),
             loadStarCatalog(),
             loadDsoCatalog(dsoCatalogFile)
-        ]).then(([starNames, dsoNames, constellations, starPositions, dsoPositions]) => {
-            if (cancelled) {
-                return
-            }
+        ])
+            .then(([starNames, dsoNames, constellations, starPositions, dsoPositions]) => {
+                if (cancelled) {
+                    return
+                }
 
-            setItems(
-                buildSearchIndex({
-                    language: i18n?.language,
-                    portalObjects: objects,
-                    starNames,
-                    dsoNames,
-                    constellations,
-                    starPositions,
-                    dsoPositions,
-                    bodyLabels: {
-                        Sun: t('components.common.star-map.bodies.sun', 'Солнце'),
-                        Moon: t('components.common.star-map.bodies.moon', 'Луна'),
-                        Mercury: t('components.common.star-map.bodies.mercury', 'Меркурий'),
-                        Venus: t('components.common.star-map.bodies.venus', 'Венера'),
-                        Mars: t('components.common.star-map.bodies.mars', 'Марс'),
-                        Jupiter: t('components.common.star-map.bodies.jupiter', 'Юпитер'),
-                        Saturn: t('components.common.star-map.bodies.saturn', 'Сатурн'),
-                        Uranus: t('components.common.star-map.bodies.uranus', 'Уран'),
-                        Neptune: t('components.common.star-map.bodies.neptune', 'Нептун')
-                    }
-                })
-            )
-        })
+                setItems(
+                    buildSearchIndex({
+                        language: i18n?.language,
+                        portalObjects: objects,
+                        starNames,
+                        dsoNames,
+                        constellations,
+                        starPositions,
+                        dsoPositions,
+                        bodyLabels
+                    })
+                )
+            })
+            // A failed catalog fetch must not leave the "loading" spinner up forever — an
+            // empty index shows "nothing found" instead, and the next open retries
+            .catch(() => {
+                if (!cancelled) {
+                    setItems([])
+                }
+            })
 
         return () => {
             cancelled = true
@@ -180,32 +180,28 @@ const StarMapSearch: React.FC<StarMapSearchProps> = ({ open, objects, dsoCatalog
                     // Keep focus in the input so a blur doesn't race the click on a result
                     onMouseDown={(event) => event.preventDefault()}
                 >
+                    {/* The option itself takes the pointer — a button nested inside an option is
+                        invalid ARIA. Keyboard selection (↑/↓/Enter) stays on the combobox input. */}
                     {results.map((item, index) => (
+                        // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- combobox pattern: the input owns the keyboard
                         <li
                             key={`${item.kind}_${item.id}`}
                             id={optionId(item)}
                             role={'option'}
                             aria-selected={index === activeIndex}
+                            className={cn(styles.searchResult, index === activeIndex && styles.searchResultActive)}
+                            onMouseEnter={() => setActiveIndex(index)}
+                            onClick={() => onSelect(item)}
                         >
-                            <Button
-                                unstyled={true}
-                                tabIndex={-1}
-                                className={cn(styles.searchResult, index === activeIndex && styles.searchResultActive)}
-                                onMouseEnter={() => setActiveIndex(index)}
-                                onClick={() => onSelect(item)}
-                            >
-                                <KindIcon
-                                    kind={item.kind}
-                                    className={styles.searchResultIcon}
-                                />
-                                <span className={styles.searchResultText}>
-                                    <span className={styles.searchResultName}>{item.name}</span>
-                                    <span className={styles.searchResultKind}>{kindLabels[item.kind]}</span>
-                                </span>
-                                {item.secondary && (
-                                    <span className={styles.searchResultSecondary}>{item.secondary}</span>
-                                )}
-                            </Button>
+                            <KindIcon
+                                kind={item.kind}
+                                className={styles.searchResultIcon}
+                            />
+                            <span className={styles.searchResultText}>
+                                <span className={styles.searchResultName}>{item.name}</span>
+                                <span className={styles.searchResultKind}>{kindLabels[item.kind]}</span>
+                            </span>
+                            {item.secondary && <span className={styles.searchResultSecondary}>{item.secondary}</span>}
                         </li>
                     ))}
                 </ul>

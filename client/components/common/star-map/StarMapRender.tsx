@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useId, useRef, useState } from 'react'
 import { Button, cn, Container, Icon, Skeleton } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
@@ -19,7 +19,6 @@ import StarMapQuickBar from './StarMapQuickBar'
 import StarMapSearch from './StarMapSearch'
 import StarMapSettingsForm from './StarMapSettingsForm'
 import StarMapStatusChip from './StarMapStatusChip'
-import { stepTimeRate, TIME_RATE_MIN } from './timeFlow'
 import { useBodyLabels } from './useBodyLabels'
 import { useCanvasInteraction } from './useCanvasInteraction'
 import { useCelestialDisplay } from './useCelestialDisplay'
@@ -30,7 +29,8 @@ import { useMeteorShowersLayer } from './useMeteorShowersLayer'
 import { usePermalinkSync } from './usePermalinkSync'
 import { useStarMapPopup } from './useStarMapPopup'
 import { useStarMapSettings } from './useStarMapSettings'
-import { getPopupArrowTop } from './utils'
+import { useTimeFlow } from './useTimeFlow'
+import { dsoCatalogFile, getPopupArrowTop } from './utils'
 
 import styles from './styles.module.sass'
 
@@ -58,15 +58,16 @@ const StarMapRender: React.FC<StarMapProps> = ({
         location,
         date,
         dateRef,
-        handleSettingsChange
+        handleSettingsChange,
+        updateSettings
     } = useStarMapSettings({ showSettings })
 
-    // Seconds of sky per real second (timeFlow.ts). Above real time the animated flow in
-    // useCelestialDisplay drives the clock; the mirror ref keeps the handlers below free of
-    // the state's render-time snapshot.
-    const [timeRate, setTimeRate] = useState<number>(TIME_RATE_MIN)
-    const timeRateRef = useRef<number>(TIME_RATE_MIN)
-    timeRateRef.current = timeRate
+    // The time model: the map's clock and how fast it runs (the ×2/×8 buttons). Above real
+    // time the animated flow in useCelestialDisplay advances the clock frame by frame.
+    const { timeRate, nowRef, resolveDate, changeTimeRate, pauseTimeFlow, selectDate } = useTimeFlow({
+        dateRef,
+        setDate: location.setDate
+    })
 
     const [settingsOpen, setSettingsOpen] = useState<boolean>(() => {
         if (!showSettings) {
@@ -99,8 +100,6 @@ const StarMapRender: React.FC<StarMapProps> = ({
 
     const {
         initializedRef,
-        nowRef,
-        resolveDate,
         drawCustomLayersRef,
         zoomIn,
         zoomOut,
@@ -124,6 +123,8 @@ const StarMapRender: React.FC<StarMapProps> = ({
         permalinkZoomRef,
         date,
         dateRef,
+        nowRef,
+        resolveDate,
         timeRate,
         onRedraw: scheduleAutoHideAfterRedraw,
         clearPopupTimers,
@@ -142,59 +143,6 @@ const StarMapRender: React.FC<StarMapProps> = ({
         zoomBy
     })
 
-    /**
-     * Speed the flow up or slow it back down. A flow started from a picked moment takes that
-     * moment as its starting point and then owns the clock: the map is no longer pinned to a
-     * fixed instant (so the permalink stops advertising one), it is running from it.
-     */
-    const changeTimeRate = useCallback(
-        (factor: number) => {
-            const next = stepTimeRate(timeRateRef.current, factor)
-
-            if (next === timeRateRef.current) {
-                return
-            }
-
-            if (next > TIME_RATE_MIN && dateRef.current) {
-                nowRef.current = dateRef.current
-                location.setDate(null)
-            }
-
-            // Slowing all the way back to real time pins the moment the flow reached, the
-            // same as the pause does. Letting the live tick take over instead would snap the
-            // sky back to the real "now" and silently throw away the travelling.
-            if (next === TIME_RATE_MIN) {
-                location.setDate(nowRef.current)
-            }
-
-            timeRateRef.current = next
-            setTimeRate(next)
-        },
-        [dateRef, nowRef, location]
-    )
-
-    /** Pause: freeze the sky at the moment the flow reached and reset the speed to real time. */
-    const pauseTimeFlow = useCallback(() => {
-        const stopAt = timeRateRef.current > TIME_RATE_MIN ? nowRef.current : (dateRef.current ?? new Date())
-
-        timeRateRef.current = TIME_RATE_MIN
-        setTimeRate(TIME_RATE_MIN)
-        location.setDate(stopAt)
-    }, [dateRef, nowRef, location])
-
-    /**
-     * Picking a moment by hand (or clearing it back to the live sky) ends any running flow —
-     * the visitor asked for that instant, not for a clock still running away from it.
-     */
-    const selectDate = useCallback(
-        (next: Date | null) => {
-            timeRateRef.current = TIME_RATE_MIN
-            setTimeRate(TIME_RATE_MIN)
-            location.setDate(next)
-        },
-        [location]
-    )
-
     const { showersRef } = useMeteorShowersLayer({
         showSettings,
         enabled: settings.meteorShowersShow,
@@ -207,8 +155,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
         settingsRef,
         viewRef,
         showersRef,
-        dateRef,
-        nowRef,
+        resolveDate,
         language: i18n?.language
     })
 
@@ -229,11 +176,11 @@ const StarMapRender: React.FC<StarMapProps> = ({
         enabled: Boolean(showSettings),
         settings,
         requestBrowserLocation: location.requestBrowserLocation,
-        onGeoposChange: (geopos) => handleSettingsChange({ ...settings, geopos })
+        onGeoposChange: (geopos) => updateSettings({ geopos })
     })
 
     const isHorizon = settings.viewMode === 'horizon'
-    const toggleViewMode = () => handleSettingsChange({ ...settings, viewMode: isHorizon ? 'sky' : 'horizon' })
+    const toggleViewMode = () => updateSettings({ viewMode: isHorizon ? 'sky' : 'horizon' })
     const viewModeLabel = isHorizon
         ? t('components.common.star-map.toolbar.sky-map', 'Карта неба')
         : t('components.common.star-map.toolbar.sky-above', 'Небо над вами')
@@ -243,6 +190,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
         : t('components.common.star-map.toolbar.sky-above-short', 'Над вами')
 
     const { selectSearchItem } = useCanvasInteraction({
+        containerRef: ref,
         interactive,
         showSettings,
         objects,
@@ -255,12 +203,30 @@ const StarMapRender: React.FC<StarMapProps> = ({
         openPendingPopup
     })
 
+    // A bottom sheet (settings / search / manual link) is open — on mobile it covers the
+    // lower half of the map, where the popup would otherwise show through
+    const sheetOpen = settingsOpen || searchOpen || Boolean(manualLinkUrl)
+
+    // Targets for the toolbar buttons' aria-controls (their visible captions are hidden on desktop)
+    const panelIdBase = useId()
+    const settingsPanelId = `${panelIdBase}-settings`
+    const searchPanelId = `${panelIdBase}-search`
+
+    const settingsTitle = t('components.common.star-map.settings.title', 'Настройки карты')
+    const searchTitle = t('components.common.star-map.search.title', 'Поиск по небу')
+    const linkTitle = linkCopied
+        ? t('components.common.star-map.link-copied', 'Ссылка скопирована')
+        : t('components.common.star-map.copy-link', 'Скопировать ссылку')
+
     // Docked settings sidebar (settings-page mode only). It lives OUTSIDE #celestial-map so
     // it takes real layout width and the map shrinks next to it, instead of covering the
     // sky as an overlay; the fitContainer ResizeObserver in useCelestialDisplay picks up
     // the width change. On mobile the same element is turned into a bottom sheet by CSS.
     const settingsSidebar = showSettings && !uiHidden && settingsOpen && (
-        <aside className={styles.settingsSidebar}>
+        <aside
+            id={settingsPanelId}
+            className={styles.settingsSidebar}
+        >
             <StarMapSettingsForm
                 settings={settings}
                 onChange={handleSettingsChange}
@@ -273,7 +239,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
                         geolocationPending={location.geolocationPending}
                         timeRate={timeRate}
                         resolveDate={resolveDate}
-                        onGeoposChange={(geopos) => handleSettingsChange({ ...settings, geopos })}
+                        onGeoposChange={(geopos) => updateSettings({ geopos })}
                         onDateChange={selectDate}
                         onTimeRateChange={changeTimeRate}
                         onTimeFlowPause={pauseTimeFlow}
@@ -296,6 +262,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
                 fitContainer && styles.starMapFit,
                 showSettings && settings.viewMode === 'horizon' && styles.starMapHorizon,
                 uiHidden && styles.uiHidden,
+                showSettings && sheetOpen && styles.starMapSheetOpen,
                 !showSettings && className
             )}
         >
@@ -372,7 +339,10 @@ const StarMapRender: React.FC<StarMapProps> = ({
                         <Button
                             icon={'Settings'}
                             mode={'secondary'}
-                            title={t('components.common.star-map.settings.title', 'Настройки карты')}
+                            title={settingsTitle}
+                            aria-label={settingsTitle}
+                            aria-expanded={settingsOpen}
+                            aria-controls={settingsPanelId}
                             className={cn(styles.toolbarButton, settingsOpen && styles.toolbarButtonActive)}
                             onClick={() => setSettingsOpen((prev) => !prev)}
                         >
@@ -383,7 +353,10 @@ const StarMapRender: React.FC<StarMapProps> = ({
                         <Button
                             icon={'Search'}
                             mode={'secondary'}
-                            title={t('components.common.star-map.search.title', 'Поиск по небу')}
+                            title={searchTitle}
+                            aria-label={searchTitle}
+                            aria-expanded={searchOpen}
+                            aria-controls={searchPanelId}
                             className={cn(styles.toolbarButton, searchOpen && styles.toolbarButtonActive)}
                             onClick={() => setSearchOpen((prev) => !prev)}
                         >
@@ -407,11 +380,8 @@ const StarMapRender: React.FC<StarMapProps> = ({
                         <Button
                             icon={linkCopied ? 'CheckCircle' : 'Link'}
                             mode={'secondary'}
-                            title={
-                                linkCopied
-                                    ? t('components.common.star-map.link-copied', 'Ссылка скопирована')
-                                    : t('components.common.star-map.copy-link', 'Скопировать ссылку')
-                            }
+                            title={linkTitle}
+                            aria-label={linkTitle}
                             className={styles.toolbarButton}
                             onClick={handleCopyLink}
                         >
@@ -429,7 +399,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
                 <StarMapQuickBar
                     settings={settings}
                     onChange={handleSettingsChange}
-                    sheetOpen={settingsOpen || searchOpen || Boolean(manualLinkUrl)}
+                    sheetOpen={sheetOpen}
                 />
             )}
 
@@ -456,16 +426,23 @@ const StarMapRender: React.FC<StarMapProps> = ({
             )}
 
             {showSettings && !uiHidden && (
-                <StarMapSearch
-                    open={searchOpen}
-                    objects={objects}
-                    dsoCatalogFile={settings.dsosFull ? 'dsos.6.json' : 'dsos.bright.json'}
-                    onSelect={(item) => {
-                        setSearchOpen(false)
-                        selectSearchItem(item)
-                    }}
-                    onClose={() => setSearchOpen(false)}
-                />
+                // display:contents — a box-less wrapper that only lends the search panel
+                // the id the toolbar button's aria-controls points at
+                <div
+                    id={searchPanelId}
+                    style={{ display: 'contents' }}
+                >
+                    <StarMapSearch
+                        open={searchOpen}
+                        objects={objects}
+                        dsoCatalogFile={dsoCatalogFile(settings)}
+                        onSelect={(item) => {
+                            setSearchOpen(false)
+                            selectSearchItem(item)
+                        }}
+                        onClose={() => setSearchOpen(false)}
+                    />
+                </div>
             )}
 
             {showSettings && !uiHidden && (

@@ -4,7 +4,7 @@ import Head from 'next/head'
 import { useTranslation } from 'next-i18next/pages'
 
 import { BreadcrumbLink } from '@/components/ui'
-import { createPageUrl } from '@/utils/helpers'
+import { createPageUrl, toJsonLd } from '@/utils/helpers'
 
 interface BreadcrumbJsonLdProps {
     links?: BreadcrumbLink[]
@@ -59,9 +59,7 @@ export const BreadcrumbJsonLd: React.FC<BreadcrumbJsonLdProps> = ({ links, curre
         <Head>
             <script
                 type={'application/ld+json'}
-                // '<' is escaped so content (e.g. an admin-authored page title) can never
-                // close the script tag and break out into markup.
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, '\\u003c') }}
+                dangerouslySetInnerHTML={{ __html: toJsonLd(breadcrumbJsonLd) }}
             />
         </Head>
     )

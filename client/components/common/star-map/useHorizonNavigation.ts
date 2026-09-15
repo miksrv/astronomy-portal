@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef } from 'react'
+import { RefObject, useEffect } from 'react'
 
 import {
     FALLBACK_DEGREES_PER_PIXEL,
@@ -46,17 +46,8 @@ export const useHorizonNavigation = ({
     onLeaveDome,
     zoomBy
 }: UseHorizonNavigationOptions): void => {
-    // Mirrors, so the listeners (registered once per enabled-state change) always call the
-    // current callbacks instead of the ones captured at registration time
-    const applyViewRef = useRef(applyView)
-    applyViewRef.current = applyView
-    const measureScaleRef = useRef(measureScale)
-    measureScaleRef.current = measureScale
-    const zoomByRef = useRef(zoomBy)
-    zoomByRef.current = zoomBy
-    const onLeaveDomeRef = useRef(onLeaveDome)
-    onLeaveDomeRef.current = onLeaveDome
-
+    // The callbacks are identity-stable (useCallback over refs in useCelestialDisplay), so
+    // they are plain effect dependencies: the listeners re-register only if one ever changes
     useEffect(() => {
         const container = containerRef.current
 
@@ -92,10 +83,10 @@ export const useHorizonNavigation = ({
 
                 viewRef.current = pendingView
                 pendingView = null
-                applyViewRef.current()
+                applyView()
 
                 if (leavingDome) {
-                    onLeaveDomeRef.current()
+                    onLeaveDome()
                 }
             }
 
@@ -105,7 +96,7 @@ export const useHorizonNavigation = ({
             }
 
             if (pendingZoom !== 1) {
-                zoomByRef.current(pendingZoom)
+                zoomBy(pendingZoom)
                 pendingZoom = 1
             }
         }
@@ -123,7 +114,7 @@ export const useHorizonNavigation = ({
         const beginDrag = (position: PointerPosition) => {
             dragStart = { ...position }
             dragStartView = viewRef.current
-            dragScale = measureScaleRef.current() ?? FALLBACK_DEGREES_PER_PIXEL
+            dragScale = measureScale() ?? FALLBACK_DEGREES_PER_PIXEL
         }
 
         const handlePointerDown = (event: PointerEvent) => {
@@ -221,5 +212,5 @@ export const useHorizonNavigation = ({
             window.removeEventListener('pointerup', endPointer)
             container.removeEventListener('wheel', handleWheel)
         }
-    }, [enabled, containerRef, viewRef])
+    }, [enabled, containerRef, viewRef, applyView, measureScale, onLeaveDome, zoomBy])
 }

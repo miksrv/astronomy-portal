@@ -1,13 +1,6 @@
 import { formatObjectName } from '@/utils/strings'
 
-import {
-    CatalogPosition,
-    ConstellationEntry,
-    DsoNamesMap,
-    getDsoDisplayName,
-    getStarDisplayName,
-    StarNamesMap
-} from './catalogs'
+import { CatalogPosition, ConstellationEntry, DsoNamesMap, getStarDisplayName, StarNamesMap } from './catalogs'
 import { CelestialObjectKind } from './objectInfo'
 import { StarMapObject } from './StarMap'
 
@@ -36,8 +29,32 @@ export type SearchItem = {
     magnitude?: number
 }
 
-const toKeywords = (...values: Array<string | undefined>): string[] =>
-    values.filter((value): value is string => Boolean(value && value.trim())).map((value) => value.toLowerCase())
+/**
+ * Case-fold a name or query for matching. `ё` is folded to `е` on both sides: Russian
+ * catalog names spell it either way ("Волопас"/"Тёльца"…) and most keyboards type `е`.
+ */
+const normalizeForSearch = (value: string): string => value.trim().toLowerCase().replace(/ё/g, 'е')
+
+/**
+ * Lowercased match targets. Designations are also added without their inner spaces
+ * ("M 31" → "m31") so the query can be typed either way.
+ */
+const toKeywords = (...values: Array<string | undefined>): string[] => {
+    const keywords = new Set<string>()
+
+    for (const value of values) {
+        const normalized = value && normalizeForSearch(value)
+
+        if (!normalized) {
+            continue
+        }
+
+        keywords.add(normalized)
+        keywords.add(normalized.replace(/\s+/g, ''))
+    }
+
+    return [...keywords]
+}
 
 export type SearchIndexInput = {
     language?: string
@@ -126,13 +143,18 @@ export const buildSearchIndex = (input: SearchIndexInput): SearchItem[] => {
 
     for (const position of input.dsoPositions) {
         const entry = input.dsoNames[position.id]
+        // Proper name first, then the popular designation (Messier/Caldwell), then the id —
+        // "Галактика Андромеды" with "M 31 · NGC 224" underneath
+        const properName = (language === 'ru' ? entry?.ru : undefined) || entry?.name
+        const name = properName || position.desig || position.id
+        const secondary = [position.desig, position.id].filter((value) => value && value !== name).join(' · ')
 
         items.push({
             kind: 'dso',
             id: position.id,
-            name: getDsoDisplayName(position.id, input.dsoNames, language),
-            secondary: entry?.name || entry?.ru ? position.id : undefined,
-            keywords: toKeywords(entry?.name, entry?.ru, position.id),
+            name,
+            secondary: secondary || undefined,
+            keywords: toKeywords(entry?.name, entry?.ru, position.desig, position.id),
             ra: position.ra,
             dec: position.dec,
             magnitude: position.mag
@@ -142,20 +164,28 @@ export const buildSearchIndex = (input: SearchIndexInput): SearchItem[] => {
     return items
 }
 
-/** Case-insensitive substring match with a light ranking: prefix matches first, then shorter names. */
+/**
+ * Case-insensitive (and ё/е-insensitive) substring match with a light ranking: prefix
+ * matches first, then shorter names. Spaces in the query are optional ("m31" and "M 31"
+ * find the same object).
+ */
 export const matchSearchItems = (items: SearchItem[], query: string, limit: number = 8): SearchItem[] => {
-    const needle = query.trim().toLowerCase()
+    const needle = normalizeForSearch(query)
+    const compactNeedle = needle.replace(/\s+/g, '')
 
-    if (needle.length < 2) {
+    if (compactNeedle.length < 2) {
         return []
     }
 
-    const matched = items.filter((item) => item.keywords.some((keyword) => keyword.includes(needle)))
+    const includes = (keyword: string) => keyword.includes(needle) || keyword.includes(compactNeedle)
+    const startsWith = (keyword: string) => keyword.startsWith(needle) || keyword.startsWith(compactNeedle)
+
+    const matched = items.filter((item) => item.keywords.some(includes))
 
     return matched
         .sort((a, b) => {
-            const aPrefix = a.keywords.some((keyword) => keyword.startsWith(needle)) ? 0 : 1
-            const bPrefix = b.keywords.some((keyword) => keyword.startsWith(needle)) ? 0 : 1
+            const aPrefix = a.keywords.some(startsWith) ? 0 : 1
+            const bPrefix = b.keywords.some(startsWith) ? 0 : 1
 
             return aPrefix - bPrefix || a.name.length - b.name.length
         })

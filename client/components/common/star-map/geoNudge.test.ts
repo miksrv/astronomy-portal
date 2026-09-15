@@ -4,6 +4,10 @@ import { isDefaultGeopos, loadGeoNudgeDismissed, saveGeoNudgeDismissed, shouldSh
 describe('star-map geolocation nudge', () => {
     const defaultGeopos = DEFAULT_STARMAP_SETTINGS.geopos
 
+    afterEach(() => {
+        localStorage.clear()
+    })
+
     it('recognises the observatory fallback position, tolerating float noise', () => {
         expect(isDefaultGeopos(defaultGeopos)).toBe(true)
         expect(isDefaultGeopos([defaultGeopos[0] + 1e-9, defaultGeopos[1] - 1e-9])).toBe(true)
@@ -36,14 +40,10 @@ describe('star-map geolocation nudge', () => {
     })
 
     it('persists the dismissal in localStorage and reads it back', () => {
-        localStorage.clear()
-
         expect(loadGeoNudgeDismissed()).toBe(false)
 
         saveGeoNudgeDismissed()
 
         expect(loadGeoNudgeDismissed()).toBe(true)
-
-        localStorage.clear()
     })
 })

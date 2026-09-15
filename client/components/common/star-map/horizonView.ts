@@ -1,4 +1,5 @@
-import { horizontalToEquatorial } from './objectInfo'
+import { DEG, normalizeDegrees, shortestAngleDeg } from './angles'
+import { createHorizontalToEquatorial, horizontalToEquatorial, horizontalToVector } from './objectInfo'
 
 /**
  * The horizon-mode view direction and the math that keeps it level (FE-3 of
@@ -18,8 +19,6 @@ import { horizontalToEquatorial } from './objectInfo'
  * Everything here is pure: no Celestial calls, no DOM. See useHorizonNavigation for the
  * gestures and useCelestialDisplay for where the result is applied.
  */
-
-const DEG = Math.PI / 180
 
 /** Where the visitor is looking, in the local horizontal frame (degrees). */
 export type HorizonView = {
@@ -70,19 +69,17 @@ export const MAX_VIEW_ALTITUDE = 89.9
  * hundredth of a degree away it converges immediately, and that is also far inside the
  * rounding of everything this is used for.
  */
-export const ZENITH_ALTITUDE = 89.99
+const ZENITH_ALTITUDE = 89.99
+
+/** The zenith as a horizontal unit vector — place- and time-independent, converted per call */
+const ZENITH_VECTOR = horizontalToVector(0, ZENITH_ALTITUDE)
 
 /** The zenith's J2000 [ra, dec] for an observer and instant. */
 export const computeZenith = (geopos: [number, number], date: Date): [number, number] =>
     horizontalToEquatorial(0, ZENITH_ALTITUDE, geopos, date)
 
-/**
- * Wrap an azimuth to [0, 360). Values already in range are returned untouched — the modulo
- * dance would otherwise nudge them by a float epsilon, which is visible when a permalink is
- * decoded and re-encoded.
- */
-export const normalizeAzimuth = (azimuth: number): number =>
-    azimuth >= 0 && azimuth < 360 ? azimuth : ((azimuth % 360) + 360) % 360
+/** Wrap an azimuth to [0, 360) (in-range values come back untouched — see normalizeDegrees). */
+export const normalizeAzimuth = normalizeDegrees
 
 export const clampView = ({ azimuth, altitude }: HorizonView): HorizonView => ({
     azimuth: normalizeAzimuth(azimuth),
@@ -159,15 +156,13 @@ const ROLL_SIGN = -1
 const NORTH_POLE: Vector = [0, 0, 1]
 
 /**
- * Roll (degrees) that puts the zenith straight up on screen for the given view: the
- * parallactic angle at the view direction, measured between "towards the pole" and "towards
- * the zenith". Computed as an angle between tangent vectors in the same J2000 frame the map
- * and the rest of the overlay use, so no sidereal-time bookkeeping is needed.
+ * Roll (degrees) that puts the zenith straight up on screen for a view centered on `center`
+ * (J2000 unit vector): the parallactic angle at the view direction, measured between
+ * "towards the pole" and "towards the zenith". Computed as an angle between tangent vectors
+ * in the same J2000 frame the map and the rest of the overlay use, so no sidereal-time
+ * bookkeeping is needed.
  */
-export const viewRoll = (view: HorizonView, geopos: [number, number], date: Date): number => {
-    const center = toVector(horizontalToEquatorial(view.azimuth, view.altitude, geopos, date))
-    const zenith = toVector(computeZenith(geopos, date))
-
+const rollForCenter = (center: Vector, zenith: Vector): number => {
     const towardsPole = tangentTowards(center, NORTH_POLE)
     const towardsZenith = tangentTowards(center, zenith)
 
@@ -183,19 +178,19 @@ export const viewRoll = (view: HorizonView, geopos: [number, number], date: Date
 
 /** The equatorial center + roll to hand to `Celestial.rotate()` for a view. */
 export const viewToCenter = (view: HorizonView, geopos: [number, number], date: Date): [number, number, number] => {
-    const [ra, dec] = horizontalToEquatorial(view.azimuth, view.altitude, geopos, date)
+    // One HOR→EQJ rotation serves both the view direction and the zenith
+    const convert = createHorizontalToEquatorial(geopos, date)
+    const [ra, dec] = convert(horizontalToVector(view.azimuth, view.altitude))
 
-    return [ra, dec, viewRoll(view, geopos, date)]
+    return [ra, dec, rollForCenter(toVector([ra, dec]), toVector(convert(ZENITH_VECTOR)))]
 }
+
+/** Roll (degrees) that puts the zenith straight up on screen for the given view — see rollForCenter. */
+export const viewRoll = (view: HorizonView, geopos: [number, number], date: Date): number =>
+    viewToCenter(view, geopos, date)[2]
 
 /** Angular tolerance (degrees) for deciding the map is already pointed where it was asked to. */
-export const CENTER_TOLERANCE_DEG = 0.05
-
-const shortestAngleDeg = (delta: number): number => {
-    const wrapped = ((delta % 360) + 360) % 360
-
-    return wrapped > 180 ? 360 - wrapped : wrapped
-}
+const CENTER_TOLERANCE_DEG = 0.05
 
 /**
  * Whether the map's live center (as reported by `Celestial.rotate()`) is the one that was

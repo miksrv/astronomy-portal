@@ -1,3 +1,5 @@
+import { fetchJson } from './catalogs'
+
 /**
  * Timezone resolution for the star map's location/time controls (Business Rule 12 of
  * features/star-atlas-upgrade.md): the wall-clock time a user picks is local to the
@@ -152,6 +154,9 @@ export const resolveTimeZone = (
 
 const dtfCache: Record<string, Intl.DateTimeFormat> = {}
 
+/** Two-digit zero-padded field of a wall-clock string */
+const pad = (n: number): string => String(n).padStart(2, '0')
+
 /**
  * The zone's UTC offset in minutes at a specific instant (DST-aware), via Intl.
  * Returns null when the runtime doesn't know the zone name.
@@ -232,7 +237,6 @@ export const dateToWallClock = (date: Date, timeZone: ResolvedTimeZone): string 
     const intlOffset = timeZone.zoneName ? getZoneOffsetMinutes(date, timeZone.zoneName) : null
     const offset = intlOffset ?? timeZone.utcOffset * 60
     const shifted = new Date(date.getTime() + offset * 60_000)
-    const pad = (n: number) => String(n).padStart(2, '0')
 
     return (
         `${shifted.getUTCFullYear()}-${pad(shifted.getUTCMonth() + 1)}-${pad(shifted.getUTCDate())}` +
@@ -247,7 +251,6 @@ export const formatUtcOffset = (timeZone: ResolvedTimeZone, date: Date = new Dat
     const minutes = intlOffset ?? timeZone.utcOffset * 60
     const sign = minutes < 0 ? '-' : '+'
     const abs = Math.abs(minutes)
-    const pad = (n: number) => String(n).padStart(2, '0')
 
     return `UTC${sign}${pad(Math.floor(abs / 60))}:${pad(abs % 60)}`
 }
@@ -257,9 +260,8 @@ export const formatUtcOffset = (timeZone: ResolvedTimeZone, date: Date = new Dat
 let timezonesPromise: Promise<TimezonePolygon[]> | null = null
 
 export const loadTimezonePolygons = (): Promise<TimezonePolygon[]> => {
-    timezonesPromise ??= fetch('/data/timezones.json')
-        .then((response) => response.json())
-        .then((topology: TimezoneTopology) => decodeTimezonePolygons(topology))
+    timezonesPromise ??= fetchJson<TimezoneTopology>('/data/timezones.json')
+        .then(decodeTimezonePolygons)
         .catch((error) => {
             timezonesPromise = null
             console.error(error)

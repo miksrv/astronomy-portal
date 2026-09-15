@@ -8,6 +8,7 @@ import { formatDEC, formatRA } from '@/utils/coordinates'
 
 import { KindIcon } from './kindIcons'
 import { azimuthToCompassKey, ObjectInfoData } from './objectInfo'
+import { useCompassLabels } from './useCompassLabels'
 import { useKindLabels } from './useKindLabels'
 
 import styles from './styles.module.sass'
@@ -21,9 +22,10 @@ interface StarMapObjectInfoProps {
 const formatDegrees = (value: number): string => `${value.toFixed(1)}°`
 
 const StarMapObjectInfo: React.FC<StarMapObjectInfoProps> = ({ info, date }) => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     const kindLabels = useKindLabels()
+    const compassLabels = useCompassLabels()
 
     const rows: Array<{ label: string; value: React.ReactNode }> = []
 
@@ -37,11 +39,7 @@ const StarMapObjectInfo: React.FC<StarMapObjectInfoProps> = ({ info, date }) => 
     }
 
     // e.g. '182.1° (Ю)' — the compass point makes the direction readable at a glance
-    // (the keys already exist for the horizon-mode compass labels)
-    const compassLabel = t(
-        `components.common.star-map.compass.${azimuthToCompassKey(info.azimuth)}`,
-        azimuthToCompassKey(info.azimuth).toUpperCase()
-    )
+    const compassLabel = compassLabels[azimuthToCompassKey(info.azimuth)]
 
     rows.push(
         { label: 'RA', value: formatRA(info.ra) },
@@ -75,7 +73,7 @@ const StarMapObjectInfo: React.FC<StarMapObjectInfoProps> = ({ info, date }) => 
         if (info.moonDistanceKm) {
             rows.push({
                 label: t('components.common.star-map.info.distance', 'Расстояние'),
-                value: `${Math.round(info.moonDistanceKm).toLocaleString('ru-RU')} ${t(
+                value: `${Math.round(info.moonDistanceKm).toLocaleString(i18n?.language)} ${t(
                     'components.common.star-map.info.km',
                     'км'
                 )}`
@@ -134,8 +132,27 @@ const StarMapObjectInfo: React.FC<StarMapObjectInfoProps> = ({ info, date }) => 
         }
     }
 
+    // Kind · designation · radiant status. The Sun and the Moon are named by their kind
+    // ("Луна · Луна" otherwise), so the kind is dropped when it repeats the name.
+    const kindLine = [
+        kindLabels[info.kind] !== info.name ? kindLabels[info.kind] : undefined,
+        info.designation,
+        info.kind === 'radiant'
+            ? info.isActive
+                ? t('components.common.star-map.info.active-now', 'активен')
+                : t('components.common.star-map.info.inactive', 'не активен')
+            : undefined
+    ]
+        .filter(Boolean)
+        .join(' · ')
+
+    // The popup container itself lives in StarMapRender; this content announces itself
+    // when it changes (the map click that opens it moves no focus)
     return (
-        <div className={styles.infoPanel}>
+        <div
+            className={styles.infoPanel}
+            aria-live={'polite'}
+        >
             <div className={styles.infoPanelHeader}>
                 <KindIcon
                     kind={info.kind}
@@ -143,17 +160,8 @@ const StarMapObjectInfo: React.FC<StarMapObjectInfoProps> = ({ info, date }) => 
                     className={styles.infoPanelIcon}
                 />
                 <div>
-                    <div className={styles.infoPanelName}>{info.name}</div>
-                    <div className={styles.infoPanelKind}>
-                        {kindLabels[info.kind]}
-                        {info.designation ? ` · ${info.designation}` : ''}
-                        {info.kind === 'radiant' &&
-                            ` · ${
-                                info.isActive
-                                    ? t('components.common.star-map.info.active-now', 'активен')
-                                    : t('components.common.star-map.info.inactive', 'не активен')
-                            }`}
-                    </div>
+                    <h3 className={styles.infoPanelName}>{info.name}</h3>
+                    {kindLine && <div className={styles.infoPanelKind}>{kindLine}</div>}
                 </div>
             </div>
 
@@ -169,4 +177,6 @@ const StarMapObjectInfo: React.FC<StarMapObjectInfoProps> = ({ info, date }) => 
     )
 }
 
-export default StarMapObjectInfo
+// `info` is a fresh object per click and `date` a Date instance — the memo saves the
+// re-renders in between (live clock, settings changes) while the same popup stays open
+export default React.memo(StarMapObjectInfo)

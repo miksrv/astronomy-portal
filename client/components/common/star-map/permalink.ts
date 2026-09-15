@@ -1,3 +1,4 @@
+import { toCelestialLon } from './angles'
 import { HorizonView, isDomeView, MAX_VIEW_ALTITUDE, MIN_VIEW_ALTITUDE, normalizeAzimuth } from './horizonView'
 import { StarMapSettings, StarMapViewMode } from './types'
 
@@ -21,7 +22,17 @@ export type PermalinkState = {
     view?: HorizonView
 }
 
+// Not utils/helpers' round: that one returns `number | undefined` for an absent value, while every input here is a finite number
 const round = (value: number, digits: number): number => Number(value.toFixed(digits))
+
+/**
+ * Years a shared moment may fall in. astronomy-engine's ephemerides are only fitted for a
+ * few centuries around now and extrapolate garbage beyond, and timezone.ts derives offsets
+ * via Date.UTC, which reads a year below 100 as 19xx — so anything outside is dropped, not
+ * clamped (a clamped date would silently show a different sky than the sender meant).
+ */
+const MIN_PERMALINK_YEAR = 1900
+const MAX_PERMALINK_YEAR = 2200
 
 /** Build the query parameters describing the current view. Only meaningful values are included. */
 export const encodePermalink = (state: {
@@ -97,22 +108,20 @@ export const decodePermalink = (query: Record<string, string | string[] | undefi
 
     if (typeof query.dt === 'string') {
         const date = new Date(query.dt)
+        const year = date.getUTCFullYear()
 
-        if (!Number.isNaN(date.getTime())) {
+        if (!Number.isNaN(date.getTime()) && year >= MIN_PERMALINK_YEAR && year <= MAX_PERMALINK_YEAR) {
             state.date = date
         }
     }
 
     if (typeof query.c === 'string') {
-        const [ra, dec, orientation] = query.c.split(',').map((part) => Number(part))
+        const [ra, dec, roll] = query.c.split(',').map(parseNumber)
 
-        if (
-            ra !== undefined &&
-            dec !== undefined &&
-            orientation !== undefined &&
-            [ra, dec, orientation].every((part) => Number.isFinite(part))
-        ) {
-            state.center = [ra, dec, orientation]
+        // Declination outside ±90 or a non-finite part means a mangled link — the whole
+        // center is ignored rather than clamped to something the sender never saw
+        if (ra != null && dec != null && roll != null && Math.abs(dec) <= 90) {
+            state.center = [toCelestialLon(ra), dec, roll]
         }
     }
 

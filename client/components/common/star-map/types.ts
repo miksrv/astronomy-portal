@@ -1,3 +1,5 @@
+import type { ObjectInfoData } from './objectInfo'
+
 export type GeoJSONFeature = {
     type: 'Feature'
     id: string
@@ -46,7 +48,7 @@ export type PopupState = {
     object?: string
     name?: string
     /** Astronomy info panel content (FE-8) — set instead of `object` for built-in objects */
-    info?: import('./objectInfo').ObjectInfoData
+    info?: ObjectInfoData
     /** The moment `info` was computed for */
     infoDate?: Date
 }
@@ -57,13 +59,8 @@ export type PendingPopup = {
     object: string
     ra: number
     dec: number
-    info?: import('./objectInfo').ObjectInfoData
+    info?: ObjectInfoData
     infoDate?: Date
-}
-
-export type SkyPoint = {
-    geometry: { coordinates: string }
-    properties: { name: string }
 }
 
 export type HitResult = {

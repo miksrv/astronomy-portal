@@ -11,8 +11,7 @@ export const defaultConfig = {
         stroke: '#000000', // Outline
         width: 1.5
     },
-    // ecliptic, galactic, supergalactic
-    center: [10.68, 41.267, 0], // Initial center coordinates in set transform
+    center: [10.68, 41.267, 0], // Initial center coordinates [longitude, latitude, orientation] in set transform
     constellations: {
         boundStyle: {
             dash: [2, 4],
@@ -34,12 +33,9 @@ export const defaultConfig = {
             ]
         }, // ranked constellations
         names: true, // Show constellation names
-        // Type of name Latin (iau, default),
-        // 3 letter designation (desig) or other language (see list below)
-        namesType: 'iau'
+        namesType: 'iau' // Type of name: Latin (iau, default), 3 letter designation (desig) or a language code
     },
     controls: true, // Display zoom controls
-    // otherwise center
     datapath: '/data',
     daylight: {
         //Show day sky as a gradient, if location is set and map projection is hemispheric
@@ -51,7 +47,6 @@ export const defaultConfig = {
         exponent: 2.4, // Scale exponent for DSO size, larger = more non-linear
         limit: 6, // Show only DSOs brighter than limit magnitude
         nameLimit: 6, // Show only names for DSOs brighter than namelimit
-        // (see list below for languages codes available for dsos)
         nameStyle: {
             align: 'left',
             baseline: 'alphabetic',
@@ -63,7 +58,7 @@ export const defaultConfig = {
         show: true, // Show Deep Space Objects
         size: null, // Optional seperate scale size for DSOs, null = stars.size
         style: { fill: '#cccccc', opacity: 1, stroke: '#cccccc', width: 2 }, // Default style for dsos
-        // opt. number indicates limit magnitude
+        // DSO symbol styles, 'stroke'-parameter present = outline
         symbols: {
             bn: {
                 fill: '#ff00cc',
@@ -81,7 +76,6 @@ export const defaultConfig = {
             en: { fill: '#ff00cc', shape: 'square' }, // Emission nebula
             g: { fill: '#ff0000', shape: 'ellipse' }, // Generic galaxy
             gc: { fill: '#ff9900', shape: 'circle' }, // Globular cluster
-            //DSO symbol styles, 'stroke'-parameter present = outline
             gg: { fill: '#ff0000', shape: 'circle' }, // Galaxy cluster
             i: { fill: '#ff0000', shape: 'ellipse' }, // Irregular galaxy
             oc: {
@@ -97,7 +91,7 @@ export const defaultConfig = {
                 stroke: '#cccccc',
                 width: 1.5
             }, // Generic marker
-            rn: { fill: '#00ooff', shape: 'square' }, // Reflection nebula
+            rn: { fill: '#0000ff', shape: 'square' }, // Reflection nebula
             s: { fill: '#ff0000', shape: 'ellipse' }, // Spiral galaxy
             s0: { fill: '#ff0000', shape: 'ellipse' }, // Lenticular galaxy
             sd: { fill: '#ff0000', shape: 'ellipse' }, // Dwarf galaxy
@@ -110,15 +104,13 @@ export const defaultConfig = {
             snr: { fill: '#ff00cc', shape: 'diamond' } // Supernova remnant
         }
     },
-    // overrides center
-    follow: [10.68, 41.267], // on which coordinates to center the map, default: zenith, if location enabled,
-    form: false, // Display form for interactive settings. Needs a div with
-    geopos: [51.82, 55.17], // optional initial geographic position [lat,lon] in degrees,
+    follow: [10.68, 41.267], // on which coordinates to center the map (overrides center), default: zenith, if location enabled
+    form: false, // Display form for interactive settings. Needs a div with id="celestial-form", created automatically if not present
+    geopos: [51.82, 55.17], // optional initial geographic position [lat,lon] in degrees
     horizon: {
         fill: '#000', // Area below horizon
         opacity: 0.5,
-        //Show horizon marker, if location is set and map projection is all-sky
-        show: false,
+        show: false, // Show horizon marker, if location is set and map projection is all-sky
         stroke: '#cccccc', // Line
         width: 1.0
     },
@@ -151,14 +143,11 @@ export const defaultConfig = {
             width: 1.3
         }
     },
-    // id="celestial-form", created automatically if not present
-    location: false, // Display location settings. Deprecated, use formFields below
+    location: false, // Display location settings. Deprecated, use formFields
     mw: {
         show: true, // Show Milky Way as filled multi-polygon outlines
         style: { fill: '#ffffff', opacity: 0.15 } // Style for MW layers
     },
-    // [longitude, latitude, orientation] all in degrees
-    // null = default center [0,0,0]
     orientationfixed: true, // Keep orientation angle the same as center[2]
     planets: {
         nameStyle: {
@@ -167,11 +156,9 @@ export const defaultConfig = {
             fill: '#00ccff',
             font: `14px ${FONT}`
         },
-        // 'letter': 1 or 2 letters S Me V L Ma J S U N
         names: true, // Show name in nameType language next to symbol
-        namesType: 'desig', // Language of planet name (see list below of language codes available for planets),
-        //Show planet locations, if date-time is set
-        show: true,
+        namesType: 'desig', // Language of planet name, or 'letter': 1 or 2 letters S Me V L Ma J S U N
+        show: true, // Show planet locations, if date-time is set
         symbolStyle: {
             align: 'center',
             baseline: 'middle',
@@ -181,7 +168,8 @@ export const defaultConfig = {
         // Type of planet symbol: 'symbol' graphic planet sign,
         // 'disk' filled circle scaled by magnitude
         symbolType: 'symbol',
-        // Font styles for planetary symbols
+        // Character and color for each symbol in 'which' below (simple circle: \u25cf),
+        // optional size override for Sun & Moon
         symbols: {
             cer: { fill: '#cccccc', letter: 'C', symbol: '\u26b3' },
             eri: { fill: '#eeeeee', letter: 'E', symbol: '\u26aa' },
@@ -193,8 +181,6 @@ export const defaultConfig = {
             nep: { fill: '#6666ff', letter: 'N', symbol: '\u2646' },
             plu: { fill: '#aaaaaa', letter: 'P', symbol: '\u2647' },
             sat: { fill: '#ffdd66', letter: 'Sa', symbol: '\u2644' },
-            // Character and color for each symbol in 'which' above
-            // (simple circle: \u25cf), optional size override for Sun & Moon
             sol: { fill: '#ffff00', letter: 'Su', size: '', symbol: '\u2609' },
             ter: { fill: '#00ccff', letter: 'T', symbol: '\u2295' },
             ura: { fill: '#66ccff', letter: 'U', symbol: '\u2645' },
@@ -203,14 +189,12 @@ export const defaultConfig = {
         },
         // List of all objects to show
         which: ['sol', 'mer', 'ven', 'ter', 'lun', 'mar', 'jup', 'sat', 'ura', 'nep']
-        // or desig = 3-letter designation
     },
-    // height is determined by projection
+    // Height is determined by the projection.
     // Mercator — классическая цилиндрическая проекция, хорошо масштабируется по высоте.
     // Equirectangular — простая прямоугольная проекция, легко растягивается на всю высоту.
     // Cylindrical Equal Area — также хорошо подходит для заполнения пространства.
-    projection: 'mercator', // Map projection used: see below
-    // projection: 'aitoff', // Map projection used: see below
+    projection: 'mercator', // Map projection used
     projectionRatio: null, // Optional override for default projection ratio
     stars: {
         colors: true, // Show stars in spectral colors, if not use default color
@@ -223,13 +207,11 @@ export const defaultConfig = {
             fill: '#ddddbb',
             font: `10px ${FONT}`
         },
-        // i.e. whichever of the previous applies first; may vary with culture setting
         designationType: 'desig', // Which kind of name is displayed as designation (fieldname in starnames.json)
         exponent: -0.28, // Scale exponent for star size, larger = more linear
         limit: 6, // Show only stars brighter than limit magnitude
         propername: true, // Show proper name (if present)
         propernameLimit: 3, // Show proper names for stars brighter than propernameLimit
-        // (see list below of languages codes available for stars)
         propernameStyle: {
             align: 'right',
             baseline: 'bottom',
@@ -240,81 +222,55 @@ export const defaultConfig = {
         show: true, // Show stars
         size: 4, // Maximum size (radius) of star circle in pixels
         style: { fill: '#ffffff', opacity: 1 } // Default style for stars
-        // number indicates limit magnitude
     },
-    transform: 'equatorial', // Coordinate transformation: equatorial (default),
+    transform: 'equatorial', // Coordinate transformation: equatorial (default), ecliptic, galactic, supergalactic
     zoomextend: 10, // maximum zoom level
     zoomlevel: 5 // initial zoom level 0...zoomextend; 0|null = default, 1 = 100%, 0 < x <= zoomextend
 }
 
+/**
+ * The portal's own look on top of defaultConfig: only the fields that differ are listed.
+ * Groups given here without a spread (dsos, horizon, lines) are deliberately sparse — d3-celestial
+ * fills the missing keys from its own defaults at display time.
+ */
 export const customConfig = {
     ...defaultConfig,
     adaptable: false,
-    background: defaultConfig.background,
     center: [0, 20, 0],
     constellations: {
-        boundStyle: {
-            dash: [2, 4],
-            opacity: 0.8,
-            stroke: '#cccc00',
-            width: 0.5
-        },
-        bounds: true,
+        ...defaultConfig.constellations,
         lineStyle: { opacity: 0.6, stroke: '#a9efad', width: 1 },
-        lines: true,
         nameStyle: {
             align: 'center',
             baseline: 'middle',
             fill: '#6f6ebb', // matches --color-primary
             font: `13px ${FONT}`
-        },
-        names: true,
-        namesType: 'iau'
-    },
-    datapath: defaultConfig.datapath,
-    daylight: {
-        show: false
+        }
     },
     dsos: {
         show: false
     },
     follow: [0, 0],
-    form: false,
-    geopos: defaultConfig.geopos,
     horizon: {
         show: false
     },
-    // mw: {
-    //     show: false
-    // },
-    // planets: {
-    //     show: false
-    // },
-    // interactive: false,
     lang: 'en',
     lines: {
         graticule: {
             lat: { fill: '#eee', font: `10px ${FONT}`, pos: [0] },
-            lon: { fill: '#eee', font: `10px ${FONT}`, pos: [0] }, // hor
+            lon: { fill: '#eee', font: `10px ${FONT}`, pos: [0] },
             opacity: 0.5,
             show: true,
             stroke: '#cccccc',
             width: 0.6
-        } // vert
+        }
     },
-    // projection: 'aitoff',
-    // projectionRatio: null,
     stars: {
         ...defaultConfig.stars,
-        designationType: 'desig',
         propernameStyle: {
             ...defaultConfig.stars.propernameStyle,
-            // fill: '#ffffff',
             font: `11px ${FONT}`
         },
         size: 8
-    },
-    transform: 'equatorial',
-    width: 0,
-    zoomlevel: 5
+    }
 }

@@ -1,4 +1,4 @@
-import { matchSearchItems, SearchItem } from './searchIndex'
+import { buildSearchIndex, matchSearchItems, SearchItem } from './searchIndex'
 
 const ITEMS: SearchItem[] = [
     { kind: 'star', id: '91262', name: 'Вега', keywords: ['vega', 'вега', 'α lyr'], ra: 279.23, dec: 38.78 },
@@ -24,9 +24,68 @@ const ITEMS: SearchItem[] = [
 ]
 
 describe('star-map search', () => {
+    describe('buildSearchIndex', () => {
+        const dsoNames = { 'NGC 224': { name: 'Andromeda Galaxy', ru: 'Галактика Андромеды' } }
+        const dsoPositions = [
+            { id: 'NGC 224', ra: 10.68, dec: 41.27, mag: 3.4, desig: 'M 31' },
+            { id: 'NGC 6121', ra: 245.9, dec: -26.53, mag: 5.9, desig: 'M 4' },
+            { id: 'Cr 399', ra: 297.5, dec: 20.1, mag: 3.6 }
+        ]
+        const input = {
+            language: 'ru',
+            starNames: {},
+            dsoNames,
+            constellations: [],
+            starPositions: [],
+            dsoPositions,
+            bodyLabels: {}
+        }
+
+        it('names DSOs by proper name, then designation, then id', () => {
+            const items = buildSearchIndex(input)
+
+            expect(items.map((item) => [item.name, item.secondary])).toStrictEqual([
+                ['Галактика Андромеды', 'M 31 · NGC 224'],
+                ['M 4', 'NGC 6121'],
+                ['Cr 399', undefined]
+            ])
+        })
+
+        it('finds Messier objects with or without the space in the designation', () => {
+            const items = buildSearchIndex(input)
+
+            expect(matchSearchItems(items, 'M 31').map((item) => item.id)).toStrictEqual(['NGC 224'])
+            expect(matchSearchItems(items, 'm31').map((item) => item.id)).toStrictEqual(['NGC 224'])
+            expect(matchSearchItems(items, 'ngc224').map((item) => item.id)).toStrictEqual(['NGC 224'])
+        })
+    })
+
     it('matches case-insensitively in both languages', () => {
         expect(matchSearchItems(ITEMS, 'ВЕГА').map((i) => i.id)).toContain('91262')
         expect(matchSearchItems(ITEMS, 'vega').map((i) => i.id)).toContain('91262')
+    })
+
+    it('treats ё and е as the same letter, in the query and in the names', () => {
+        const items = buildSearchIndex({
+            language: 'ru',
+            starNames: {},
+            dsoNames: {},
+            constellations: [
+                { id: 'Tau', name: 'Taurus', ru: 'Телец', coordinates: [66, 16] },
+                { id: 'Aql', name: 'Aquila', ru: 'Орёл', coordinates: [297, 3] }
+            ],
+            starPositions: [],
+            dsoPositions: [],
+            bodyLabels: {}
+        })
+
+        // Name spelled with ё, query typed with е
+        expect(matchSearchItems(items, 'орел').map((item) => item.id)).toStrictEqual(['Aql'])
+        // ...and the other way round
+        expect(matchSearchItems(items, 'Орёл').map((item) => item.id)).toStrictEqual(['Aql'])
+        expect(matchSearchItems(items, 'телёц').map((item) => item.id)).toStrictEqual(['Tau'])
+        // The display name keeps its original spelling
+        expect(matchSearchItems(items, 'орел')[0]?.name).toBe('Орёл')
     })
 
     it('matches by catalog designation substring', () => {

@@ -1,12 +1,11 @@
-import { RefObject, useMemo, useRef } from 'react'
-
-import { useTranslation } from 'next-i18next/pages'
+import { RefObject, useCallback, useLayoutEffect } from 'react'
 
 import { POINT_RADIUS, stylePoint, styleText } from './constants'
 import { drawHorizonOverlay } from './horizonOverlay'
 import { HorizonView } from './horizonView'
 import { drawMeteorRadiants, MeteorShower } from './meteorShowers'
-import { SkyPoint, StarMapSettings } from './types'
+import { HitResult, StarMapSettings } from './types'
+import { useCompassLabels } from './useCompassLabels'
 
 export interface UseCustomLayersOptions {
     /** Slot read by Celestial's end-of-redraw callback (see useCelestialDisplay) */
@@ -16,16 +15,16 @@ export interface UseCustomLayersOptions {
     /** Horizon mode: the direction the visitor is looking (see useHorizonNavigation) */
     viewRef: RefObject<HorizonView>
     showersRef: RefObject<MeteorShower[] | null>
-    dateRef: RefObject<Date | null>
-    nowRef: RefObject<Date>
+    /** The moment the map is currently computed for (useCelestialDisplay) */
+    resolveDate: () => Date
     language?: string
 }
 
 /**
  * The portal's own layers drawn on top of Celestial's output: the portal objects
  * (`.sky-points`), meteor shower radiants (FE-9) and the horizon-mode ground/compass
- * overlay (FE-3). Publishes the drawer into `drawCustomLayersRef` on every render so the
- * once-registered redraw callback always draws with the current props/settings.
+ * overlay (FE-3). Publishes the drawer into `drawCustomLayersRef` so the once-registered
+ * redraw callback always draws with the current props/settings.
  */
 export const useCustomLayers = ({
     drawCustomLayersRef,
@@ -33,76 +32,59 @@ export const useCustomLayers = ({
     settingsRef,
     viewRef,
     showersRef,
-    dateRef,
-    nowRef,
+    resolveDate,
     language
 }: UseCustomLayersOptions): void => {
-    const { t } = useTranslation()
+    const compassLabels = useCompassLabels()
 
-    const languageRef = useRef(language)
-    languageRef.current = language
+    const drawCustomLayersInner = useCallback(
+        (currentSettings: StarMapSettings) => {
+            if (!showSettings || currentSettings.customObjectsShow) {
+                Celestial.container.selectAll('.sky-points').each((point: HitResult['point']) => {
+                    if (Celestial.clip(point.geometry.coordinates)) {
+                        const pointCoords = Celestial.mapProjection(point.geometry.coordinates)
 
-    const compassLabels = useMemo(
-        () => ({
-            n: t('components.common.star-map.compass.n', 'С'),
-            ne: t('components.common.star-map.compass.ne', 'СВ'),
-            e: t('components.common.star-map.compass.e', 'В'),
-            se: t('components.common.star-map.compass.se', 'ЮВ'),
-            s: t('components.common.star-map.compass.s', 'Ю'),
-            sw: t('components.common.star-map.compass.sw', 'ЮЗ'),
-            w: t('components.common.star-map.compass.w', 'З'),
-            nw: t('components.common.star-map.compass.nw', 'СЗ')
-        }),
-        [t]
+                        Celestial.setStyle(stylePoint)
+                        Celestial.context.beginPath()
+                        Celestial.context.arc(pointCoords[0], pointCoords[1], POINT_RADIUS, 0, 2 * Math.PI)
+                        Celestial.context.closePath()
+                        Celestial.context.stroke()
+                        Celestial.context.fill()
+                        Celestial.setTextStyle(styleText)
+                        Celestial.context.fillText(
+                            point.properties.name,
+                            pointCoords[0] + POINT_RADIUS - 1,
+                            pointCoords[1] - POINT_RADIUS + 1
+                        )
+                    }
+                })
+            }
+
+            if (showSettings && currentSettings.meteorShowersShow && showersRef.current?.length) {
+                drawMeteorRadiants({
+                    showers: showersRef.current,
+                    date: resolveDate(),
+                    language
+                })
+            }
+
+            if (showSettings && currentSettings.viewMode === 'horizon') {
+                drawHorizonOverlay({
+                    geopos: currentSettings.geopos,
+                    date: resolveDate(),
+                    view: viewRef.current,
+                    labels: compassLabels
+                })
+            }
+        },
+        [showSettings, showersRef, viewRef, resolveDate, language, compassLabels]
     )
-    const compassLabelsRef = useRef(compassLabels)
-    compassLabelsRef.current = compassLabels
-
-    const drawCustomLayersInner = (currentSettings: StarMapSettings) => {
-        if (!showSettings || currentSettings.customObjectsShow) {
-            Celestial.container.selectAll('.sky-points').each((point: SkyPoint) => {
-                if (Celestial.clip(point.geometry.coordinates)) {
-                    const pointCoords = Celestial.mapProjection(point.geometry.coordinates)
-
-                    Celestial.setStyle(stylePoint)
-                    Celestial.context.beginPath()
-                    Celestial.context.arc(pointCoords[0], pointCoords[1], POINT_RADIUS, 0, 2 * Math.PI)
-                    Celestial.context.closePath()
-                    Celestial.context.stroke()
-                    Celestial.context.fill()
-                    Celestial.setTextStyle(styleText)
-                    Celestial.context.fillText(
-                        point.properties.name,
-                        pointCoords[0] + POINT_RADIUS - 1,
-                        pointCoords[1] - POINT_RADIUS + 1
-                    )
-                }
-            })
-        }
-
-        if (showSettings && currentSettings.meteorShowersShow && showersRef.current?.length) {
-            drawMeteorRadiants({
-                showers: showersRef.current,
-                date: dateRef.current ?? nowRef.current,
-                language: languageRef.current
-            })
-        }
-
-        if (showSettings && currentSettings.viewMode === 'horizon') {
-            drawHorizonOverlay({
-                geopos: currentSettings.geopos,
-                date: dateRef.current ?? nowRef.current,
-                view: viewRef.current,
-                labels: compassLabelsRef.current
-            })
-        }
-    }
 
     // Drawn from Celestial's end-of-redraw callback (addCallback), NOT from the layer's
     // own redraw hook: the built-in redraw cycle paints the daylight gradient and the
     // horizon fill AFTER user layers, which would bury everything drawn here under the
     // day-sky overlay in horizon mode. The addCallback runs at the very end.
-    const drawCustomLayers = () => {
+    const drawCustomLayers = useCallback(() => {
         const currentSettings = settingsRef.current
 
         // Celestial's own redraw leaves the context in whatever state its last layer
@@ -118,9 +100,11 @@ export const useCustomLayers = ({
         } finally {
             context.restore()
         }
-    }
+    }, [settingsRef, drawCustomLayersInner])
 
-    // Kept in a ref so the addCallback closure (registered once) always draws with
-    // the current props/objects.
-    drawCustomLayersRef.current = drawCustomLayers
+    // Published before the display effect can redraw (layout effects run first), and
+    // after commit rather than during render, which StrictMode may run twice and discard
+    useLayoutEffect(() => {
+        drawCustomLayersRef.current = drawCustomLayers
+    }, [drawCustomLayersRef, drawCustomLayers])
 }

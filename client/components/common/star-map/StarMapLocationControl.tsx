@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Button, Input, Spinner } from 'simple-react-ui-kit'
+import { Button, cn, Input, Spinner } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
@@ -60,6 +60,8 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
     const [latDraft, setLatDraft] = useState<string>(String(geopos[0]))
     const [lonDraft, setLonDraft] = useState<string>(String(geopos[1]))
     const [dateDraft, setDateDraft] = useState<string>('')
+    // "My location" failed (denied, unavailable, timed out) — shown inline until the next success
+    const [locationFailed, setLocationFailed] = useState<boolean>(false)
 
     // The date popout has to escape the desktop sidebar's own scroll box, which clips it —
     // that is what `portal` (fixed positioning) is for. On the mobile bottom sheet the same
@@ -198,6 +200,8 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
     const handleMyLocation = async () => {
         const position = await onRequestBrowserLocation()
 
+        setLocationFailed(position == null)
+
         if (position) {
             onGeoposChange(position)
         }
@@ -211,16 +215,17 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
     }
 
     return (
-        <div className={styles.settingsGroup}>
-            <div className={styles.settingsGroupTitle}>
+        <fieldset className={styles.settingsGroup}>
+            <legend className={styles.settingsGroupTitle}>
                 {t('components.common.star-map.location.title', 'Место и время')}
-            </div>
+            </legend>
 
-            {/* TODO: вернуть выбор города. Раньше здесь стоял комбобокс по статическому
-                каталогу `public/data/cities.json` (модуль cities.ts) — и каталог, и модуль
-                удалены вместе с ним; см. BE-1 в features/star-atlas-upgrade.md. Пока место
-                задаётся координатами и кнопкой «Моё местоположение», а StarMapStatusChip
-                показывает координаты вместо названия города. */}
+            {/* TODO: bring the city picker back. A combobox over the static catalog
+                `public/data/cities.json` (module cities.ts) used to sit here — both the
+                catalog and the module were removed with it; see BE-1 in
+                features/star-atlas-upgrade.md. Until then the place is set by coordinates
+                and the "My location" button, and StarMapStatusChip shows coordinates
+                instead of a city name. */}
 
             <div className={styles.locationRow}>
                 <Input
@@ -252,6 +257,18 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
             >
                 {t('components.common.star-map.location.my-location', 'Моё местоположение')}
             </Button>
+
+            {locationFailed && (
+                <div
+                    className={cn(styles.timezoneHint, styles.hintError)}
+                    role={'alert'}
+                >
+                    {t(
+                        'components.common.star-map.location.geolocation-failed',
+                        'Не удалось определить местоположение'
+                    )}
+                </div>
+            )}
 
             {/* Same picker as the event form (calendar + hour/minute selects) instead of a
                 native datetime-local, which renders differently in every browser and is
@@ -326,18 +343,21 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
                 mode={'secondary'}
                 icon={'Moon'}
                 disabled={!tonightAvailable}
-                title={
-                    tonightAvailable
-                        ? undefined
-                        : t(
-                              'components.common.star-map.location.tonight-unavailable',
-                              'Ночь не наступает в выбранном месте'
-                          )
-                }
                 onClick={handleTonight}
             >
                 {t('components.common.star-map.location.tonight', 'Сегодня ночью')}
             </Button>
+
+            {/* Why the button is off — as a visible line, not a tooltip on a disabled control
+                (which neither touch nor a screen reader ever reaches) */}
+            {!tonightAvailable && (
+                <div className={styles.timezoneHint}>
+                    {t(
+                        'components.common.star-map.location.tonight-unavailable',
+                        'Ночь не наступает в выбранном месте'
+                    )}
+                </div>
+            )}
 
             {date && timeZonePending && !timeZone && (
                 <div className={styles.timezoneHint}>
@@ -365,7 +385,7 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
                     {t('components.common.star-map.location.reset-to-now', 'Вернуться к «сейчас»')}
                 </Button>
             )}
-        </div>
+        </fieldset>
     )
 }
 

@@ -4,9 +4,11 @@ import {
     azimuthToCompassKey,
     computeBodyInfo,
     computeFixedObjectInfo,
+    createHorizontalToEquatorial,
     equatorialToHorizontal,
     getBodyPositions,
-    horizontalToEquatorial
+    horizontalToEquatorial,
+    horizontalToVector
 } from './objectInfo'
 
 // Fixed inputs so results are deterministic
@@ -48,13 +50,43 @@ describe('star-map objectInfo', () => {
             expect(Math.abs(back.altitude - 30)).toBeLessThan(0.3)
         })
 
-        it('returns RA in the [-180, 180) range d3-celestial data uses', () => {
+        it('returns RA in the (-180, 180] range d3-celestial data uses', () => {
             for (const azimuth of [0, 90, 180, 270]) {
                 const [ra] = horizontalToEquatorial(azimuth, 0, GEOPOS, DATE)
 
-                expect(ra).toBeGreaterThanOrEqual(-180)
-                expect(ra).toBeLessThan(180)
+                expect(ra).toBeGreaterThan(-180)
+                expect(ra).toBeLessThanOrEqual(180)
             }
+        })
+    })
+
+    describe('createHorizontalToEquatorial', () => {
+        it('converts precomputed horizontal vectors exactly like the single-point call', () => {
+            const convert = createHorizontalToEquatorial(GEOPOS, DATE)
+
+            for (const [azimuth, altitude] of [
+                [0, 0.05],
+                [47, 3.2],
+                [180, 30],
+                [270, 89.99],
+                [359, 1]
+            ] as Array<[number, number]>) {
+                const [ra, dec] = horizontalToEquatorial(azimuth, altitude, GEOPOS, DATE)
+                const [batchRa, batchDec] = convert(horizontalToVector(azimuth, altitude))
+
+                expect(batchRa).toBeCloseTo(ra, 9)
+                expect(batchDec).toBeCloseTo(dec, 9)
+            }
+        })
+
+        it('depends on the place and instant only through the converter, not the vectors', () => {
+            const vector = horizontalToVector(120, 40)
+            const here = createHorizontalToEquatorial(GEOPOS, DATE)(vector)
+            const later = createHorizontalToEquatorial(GEOPOS, new Date(DATE.getTime() + 6 * 3_600_000))(vector)
+
+            // Six hours later the same direction points ~90° further along in RA
+            expect(Math.abs(here[0] - later[0])).toBeGreaterThan(60)
+            expect(here[1]).not.toBeCloseTo(later[1], 1)
         })
     })
 

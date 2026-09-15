@@ -1,9 +1,11 @@
 import React from 'react'
-import { Icon } from 'simple-react-ui-kit'
+import { cn, Icon } from 'simple-react-ui-kit'
 
 import { ConstellationLinesIcon, DeepSkyIcon, PlanetIcon, RadiantIcon, StarIcon } from '@/components/icons'
 
 import { SearchItemKind } from './searchIndex'
+
+import styles from './styles.module.sass'
 
 interface KindIconProps {
     kind: SearchItemKind
@@ -43,11 +45,12 @@ export const KindIcon: React.FC<KindIconProps> = ({ kind, size = 16, className }
         }
     })()
 
+    // Only the size is per-instance; the layout lives in the .kindIcon class
     return (
         <span
-            className={className}
+            className={cn(styles.kindIcon, className)}
             aria-hidden={'true'}
-            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: size }}
+            style={{ fontSize: size }}
         >
             {glyph}
         </span>

@@ -1,3 +1,5 @@
+import * as Astronomy from 'astronomy-engine'
+
 import { HORIZON_FIT_FRACTION } from './constants'
 import {
     buildTreeOutline,
@@ -5,12 +7,38 @@ import {
     COMPASS_POINTS,
     computeGroundGradientRadii,
     computeHorizonTargetRadius,
+    getHorizonGeometry,
     GROUND_GRADIENT_SPAN,
     hillHeightDeg,
     MAX_SAMPLE_DISTANCE_DEG,
     seededRandom
 } from './horizonOverlay'
 import { angularDistanceDeg, DOME_VIEW } from './horizonView'
+
+/**
+ * The conversion the overlay used before the rotation was hoisted out of the per-sample
+ * loop: a full VectorFromHorizon + Rotation_HOR_EQJ per point. Kept here as the reference
+ * the batched geometry must agree with.
+ */
+const referenceHorizontalToEquatorial = (
+    azimuth: number,
+    altitude: number,
+    geopos: [number, number],
+    date: Date
+): [number, number] => {
+    const time = Astronomy.MakeTime(date)
+    const observer = new Astronomy.Observer(geopos[0], geopos[1], 0)
+    const vector = Astronomy.VectorFromHorizon(new Astronomy.Spherical(altitude, azimuth, 1), time, 'normal')
+    const rotation = Astronomy.Rotation_HOR_EQJ(time, observer)
+    const equatorial = Astronomy.EquatorFromVector(Astronomy.RotateVector(rotation, vector))
+
+    let ra = equatorial.ra * 15
+    if (ra > 180) {
+        ra -= 360
+    }
+
+    return [ra, equatorial.dec]
+}
 
 describe('star-map horizonOverlay', () => {
     describe('MAX_SAMPLE_DISTANCE_DEG', () => {
@@ -135,6 +163,69 @@ describe('star-map horizonOverlay', () => {
             expect(inner).toBeLessThan(300)
             // The corner of a HORIZON_FIT_FRACTION-fitted square viewport sits at r * √2 / fraction
             expect(outer).toBeGreaterThan((300 * Math.SQRT2) / HORIZON_FIT_FRACTION - 300)
+        })
+    })
+
+    describe('getHorizonGeometry', () => {
+        const GEOPOS: [number, number] = [51.82, 55.17]
+        const DATE = new Date('2026-08-28T20:00:00Z')
+
+        it('pins every sample to the same equatorial position as the per-point conversion', () => {
+            const { upper, lower, trees, compass } = getHorizonGeometry(GEOPOS, DATE)
+            const samples = [...upper, ...lower, ...trees.flat(), ...compass.map((point) => point.sample)]
+
+            expect(samples.length).toBeGreaterThan(600)
+
+            for (const sample of samples) {
+                const [ra, dec] = referenceHorizontalToEquatorial(sample.azimuth, sample.altitude, GEOPOS, DATE)
+
+                expect(Math.abs(sample.eq[0] - ra)).toBeLessThan(1e-6)
+                expect(Math.abs(sample.eq[1] - dec)).toBeLessThan(1e-6)
+            }
+        })
+
+        it('re-pins the samples when the date or the place changes, and keeps the silhouette itself', () => {
+            const first = getHorizonGeometry(GEOPOS, DATE)
+            const firstEq = first.upper.map((sample) => [...sample.eq])
+            const later = getHorizonGeometry(GEOPOS, new Date(DATE.getTime() + 3_600_000))
+
+            // The geometry (azimuth/altitude and the trig cached on it) is static and reused
+            expect(later.upper).toBe(first.upper)
+            expect(later.upper.map((sample) => [sample.azimuth, sample.altitude])).toStrictEqual(
+                first.upper.map((sample) => [sample.azimuth, sample.altitude])
+            )
+            // ...only the equatorial coordinates move — by about an hour of sidereal time
+            expect(later.upper.map((sample) => [...sample.eq])).not.toStrictEqual(firstEq)
+
+            const [ra, dec] = referenceHorizontalToEquatorial(
+                later.upper[10]?.azimuth ?? 0,
+                later.upper[10]?.altitude ?? 0,
+                GEOPOS,
+                new Date(DATE.getTime() + 3_600_000)
+            )
+
+            expect(later.upper[10]?.eq[0]).toBeCloseTo(ra, 6)
+            expect(later.upper[10]?.eq[1]).toBeCloseTo(dec, 6)
+        })
+
+        it('caches the altitude trig on the samples', () => {
+            const { upper } = getHorizonGeometry(GEOPOS, DATE)
+
+            for (const sample of upper.slice(0, 20)) {
+                expect(sample.sinAlt).toBeCloseTo(Math.sin((sample.altitude * Math.PI) / 180), 12)
+                expect(sample.cosAlt).toBeCloseTo(Math.cos((sample.altitude * Math.PI) / 180), 12)
+            }
+        })
+
+        it('marks only N/E/S/W as cardinal labels', () => {
+            const { compass } = getHorizonGeometry(GEOPOS, DATE)
+
+            expect(compass.filter((point) => point.isCardinal).map((point) => point.key)).toStrictEqual([
+                'n',
+                'e',
+                's',
+                'w'
+            ])
         })
     })
 

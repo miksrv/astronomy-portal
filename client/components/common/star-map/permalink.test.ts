@@ -50,6 +50,45 @@ describe('star-map permalink', () => {
         expect(decoded.zoom).toBeUndefined()
     })
 
+    it('ignores a center with an impossible declination or a non-finite part instead of clamping it', () => {
+        expect(decodePermalink({ c: '1e300,5000,7' }).center).toBeUndefined()
+        expect(decodePermalink({ c: '10,91,0' }).center).toBeUndefined()
+        expect(decodePermalink({ c: '10,20,Infinity' }).center).toBeUndefined()
+        expect(decodePermalink({ c: '10,20,' }).center).toBeUndefined()
+        expect(decodePermalink({ c: '10,20,0' }).center).toStrictEqual([10, 20, 0])
+    })
+
+    it('wraps the center RA into the (-180, 180] range the map uses', () => {
+        expect(decodePermalink({ c: '400,20,0' }).center).toStrictEqual([40, 20, 0])
+        expect(decodePermalink({ c: '270,20,0' }).center).toStrictEqual([-90, 20, 0])
+        expect(decodePermalink({ c: '-90,20,0' }).center).toStrictEqual([-90, 20, 0])
+    })
+
+    it('drops a moment outside the years the astronomy is valid for', () => {
+        // Year 50: astronomy-engine extrapolates, and Date.UTC would read it as 1950
+        expect(decodePermalink({ dt: '0050-01-01' }).date).toBeUndefined()
+        expect(decodePermalink({ dt: '1899-12-31T23:59:59Z' }).date).toBeUndefined()
+        expect(decodePermalink({ dt: '2201-01-01T00:00:00Z' }).date).toBeUndefined()
+        expect(decodePermalink({ dt: '1900-01-01T00:00:00Z' }).date?.toISOString()).toBe('1900-01-01T00:00:00.000Z')
+        expect(decodePermalink({ dt: '2200-12-31T00:00:00Z' }).date?.toISOString()).toBe('2200-12-31T00:00:00.000Z')
+    })
+
+    it('ignores repeated (array-valued) parameters rather than reading the first one', () => {
+        const decoded = decodePermalink({
+            view: ['sky', 'horizon'],
+            lat: ['51.82', '10'],
+            lon: '55.17',
+            dt: ['2026-08-28T16:00:00Z'],
+            c: ['10,20,0'],
+            z: ['2'],
+            atm: ['0'],
+            az: ['90'],
+            alt: '30'
+        })
+
+        expect(decoded).toStrictEqual({})
+    })
+
     it('shares where the visitor is looking in horizon mode, and only when it is not the dome', () => {
         const settings = { viewMode: 'horizon' as const, geopos: [51.82, 55.17] as [number, number], atmosphere: true }
 

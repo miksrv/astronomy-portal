@@ -22,9 +22,18 @@ import { BodyPosition, computeBodyInfo, computeFixedObjectInfo, getBodyPositions
 import { SearchItem } from './searchIndex'
 import { StarMapObject } from './StarMap'
 import { PendingPopup, StarMapSettings } from './types'
-import { findHitPoint } from './utils'
+import { dsoCatalogFile, findHitPoint } from './utils'
+
+/**
+ * A press that travels further than this before release is a drag, not a click. Horizon
+ * mode detaches d3-zoom, so the browser synthesizes a `click` at the release point of every
+ * look-around drag — without the threshold it would open a random popup or close the open one.
+ */
+const CLICK_MOVE_TOLERANCE_PX = 4
 
 export interface UseCanvasInteractionOptions {
+    /** The #celestial-map element — listeners live here, Celestial re-creates the canvas on rebuilds */
+    containerRef: RefObject<HTMLDivElement | null>
     interactive?: boolean
     showSettings?: boolean
     objects?: StarMapObject[]
@@ -48,8 +57,14 @@ export interface CanvasInteractionController {
  * Mouse interaction with the Celestial canvas: hover cursor (pointer over anything
  * clickable, grab/grabbing for panning), clicks on the portal's own objects and on
  * d3-celestial's built-in stars/planets/DSOs/radiants (FE-8), and jumping to a search hit.
+ *
+ * Listeners are attached to the map container, not the canvas: Celestial re-creates the
+ * canvas on every rebuild, and the first layout may not have a canvas at all yet (zero
+ * width defers display()). Events are acted on only when they come from the canvas, so
+ * the overlay controls on top of the map are unaffected.
  */
 export const useCanvasInteraction = ({
+    containerRef,
     interactive,
     showSettings,
     objects,
@@ -61,20 +76,16 @@ export const useCanvasInteraction = ({
     hidePopup,
     openPendingPopup
 }: UseCanvasInteractionOptions): CanvasInteractionController => {
-    // Mirrors for the canvas handlers, registered once per effect run
-    const bodyLabelsRef = useRef(bodyLabels)
-    bodyLabelsRef.current = bodyLabels
-    const languageRef = useRef(language)
-    languageRef.current = language
-
     const rafRef = useRef<number>(0)
 
-    // Solar-system positions for the selected moment, cached by place + instant: the hover
-    // check runs every mouse-move frame and must not re-run the ephemeris each time.
+    // Solar-system positions for the selected moment, cached by place + minute: the hover
+    // check runs every mouse-move frame and must not re-run the ephemeris each time — and
+    // during the time flow the instant changes every frame, while a minute of motion is
+    // far below the hit radius.
     const bodiesCacheRef = useRef<{ key: string; bodies: BodyPosition[] }>({ key: '', bodies: [] })
 
     const getBodies = useCallback((geopos: [number, number], when: Date): BodyPosition[] => {
-        const key = `${geopos[0]}_${geopos[1]}_${when.getTime()}`
+        const key = `${geopos[0]}_${geopos[1]}_${Math.floor(when.getTime() / 60_000)}`
 
         if (bodiesCacheRef.current.key !== key) {
             bodiesCacheRef.current = { key, bodies: getBodyPositions(geopos, when) }
@@ -126,7 +137,7 @@ export const useCanvasInteraction = ({
             })
         }
 
-        const dsoFile = currentSettings.dsosFull ? 'dsos.6.json' : 'dsos.bright.json'
+        const dsoFile = dsoCatalogFile(currentSettings)
 
         if (currentSettings.dsosShow && hoverDsosRef.current?.file !== dsoFile && loading.dsoFile !== dsoFile) {
             loading.dsoFile = dsoFile
@@ -140,7 +151,7 @@ export const useCanvasInteraction = ({
     /** Synchronous, cheap variant of the built-in hit-test for the hover cursor. */
     const findHoverHit = useCallback(
         (x: number, y: number) => {
-            const currentFile = settingsRef.current.dsosFull ? 'dsos.6.json' : 'dsos.bright.json'
+            const currentFile = dsoCatalogFile(settingsRef.current)
             const dsos = hoverDsosRef.current?.file === currentFile ? hoverDsosRef.current.items : []
 
             return findBuiltinHit(x, y, buildHitOptions(hoverStarsRef.current ?? [], dsos))
@@ -159,9 +170,7 @@ export const useCanvasInteraction = ({
             // downloaded the same files); empty arrays when the layer is off.
             const [stars, dsos] = await Promise.all([
                 currentSettings.starsShow ? loadStarCatalog() : Promise.resolve([]),
-                currentSettings.dsosShow
-                    ? loadDsoCatalog(currentSettings.dsosFull ? 'dsos.6.json' : 'dsos.bright.json')
-                    : Promise.resolve([])
+                currentSettings.dsosShow ? loadDsoCatalog(dsoCatalogFile(currentSettings)) : Promise.resolve([])
             ])
 
             const hit = findBuiltinHit(x, y, buildHitOptions(stars, dsos))
@@ -175,12 +184,12 @@ export const useCanvasInteraction = ({
             let displayName: string
 
             if (hit.kind === 'sun' || hit.kind === 'moon' || hit.kind === 'planet') {
-                displayName = bodyLabelsRef.current[hit.id] ?? hit.id
+                displayName = bodyLabels[hit.id] ?? hit.id
                 info = computeBodyInfo(hit.id as Body, displayName, geopos, when)
             } else if (hit.kind === 'radiant') {
                 const shower = showersRef.current?.find((item) => item.id === hit.id)
 
-                displayName = shower ? getShowerDisplayName(shower, languageRef.current) : hit.id
+                displayName = shower ? getShowerDisplayName(shower, language) : hit.id
                 info = {
                     ...computeFixedObjectInfo(
                         { kind: 'radiant', name: displayName, designation: hit.id, ra: hit.ra, dec: hit.dec },
@@ -195,7 +204,7 @@ export const useCanvasInteraction = ({
             } else if (hit.kind === 'star') {
                 const names = await loadStarNames()
 
-                displayName = getStarDisplayName(hit.id, names, languageRef.current)
+                displayName = getStarDisplayName(hit.id, names, language)
                 info = computeFixedObjectInfo(
                     {
                         kind: 'star',
@@ -211,7 +220,7 @@ export const useCanvasInteraction = ({
             } else {
                 const names = await loadDsoNames()
 
-                displayName = getDsoDisplayName(hit.id, names, languageRef.current)
+                displayName = getDsoDisplayName(hit.id, names, language)
                 info = computeFixedObjectInfo(
                     { kind: 'dso', name: displayName, magnitude: hit.magnitude, ra: hit.ra, dec: hit.dec },
                     geopos,
@@ -221,7 +230,7 @@ export const useCanvasInteraction = ({
 
             openPendingPopup({ name: displayName, object: '', ra: hit.ra, dec: hit.dec, info, infoDate: when })
         },
-        [buildHitOptions, hidePopup, openPendingPopup, resolveDate, settingsRef, showersRef]
+        [buildHitOptions, hidePopup, openPendingPopup, resolveDate, settingsRef, showersRef, bodyLabels, language]
     )
 
     // Canvas mouse/click interaction. Cursor: grab over empty sky (the map pans on drag),
@@ -229,17 +238,36 @@ export const useCanvasInteraction = ({
     const draggingRef = useRef(false)
 
     useEffect(() => {
-        const canvas: HTMLCanvasElement | undefined = Celestial.context?.canvas
-        if (!canvas) {
+        const container = containerRef.current
+
+        if (!container) {
             return
         }
 
-        canvas.style.cursor = interactive ? 'grab' : 'default'
+        const isCanvasEvent = (event: Event): event is Event & { target: HTMLCanvasElement } =>
+            event.target instanceof HTMLCanvasElement
+
+        const restingCursor = interactive ? 'grab' : 'default'
+
+        // The canvas that exists right now (there may be none yet — see the hook doc); the
+        // handlers below always style the canvas the event actually came from
+        const currentCanvas = (): HTMLCanvasElement | undefined => Celestial.context?.canvas
+
+        const canvasNow = currentCanvas()
+
+        if (canvasNow) {
+            canvasNow.style.cursor = restingCursor
+        }
+
+        // Where the primary button went down, to tell a click from a drag's release
+        let pressedAt: { x: number; y: number } | null = null
 
         const handleMouseMove = (e: MouseEvent) => {
-            if (!interactive) {
+            if (!interactive || !isCanvasEvent(e)) {
                 return
             }
+
+            const canvas = e.target
 
             cancelAnimationFrame(rafRef.current)
             rafRef.current = requestAnimationFrame(() => {
@@ -266,12 +294,13 @@ export const useCanvasInteraction = ({
         // on window-level mouseup (the pointer may leave the canvas mid-drag), so the
         // release is tracked on window too.
         const handleMouseDown = (e: MouseEvent) => {
-            if (!interactive || e.button !== 0) {
+            if (!interactive || e.button !== 0 || !isCanvasEvent(e)) {
                 return
             }
 
+            pressedAt = { x: e.clientX, y: e.clientY }
             draggingRef.current = true
-            canvas.style.cursor = 'grabbing'
+            e.target.style.cursor = 'grabbing'
         }
 
         const handleMouseUp = () => {
@@ -280,16 +309,29 @@ export const useCanvasInteraction = ({
             }
 
             draggingRef.current = false
+
             // The next mousemove re-evaluates hover; until then assume empty sky
-            canvas.style.cursor = interactive ? 'grab' : 'default'
+            const canvas = currentCanvas()
+
+            if (canvas) {
+                canvas.style.cursor = restingCursor
+            }
         }
 
         const handleClick = (e: MouseEvent) => {
-            if (!interactive) {
+            if (!interactive || !isCanvasEvent(e)) {
                 return
             }
 
-            const rect = canvas.getBoundingClientRect()
+            const moved = pressedAt ? Math.hypot(e.clientX - pressedAt.x, e.clientY - pressedAt.y) : 0
+
+            pressedAt = null
+
+            if (moved > CLICK_MOVE_TOLERANCE_PX) {
+                return
+            }
+
+            const rect = e.target.getBoundingClientRect()
             const x = e.clientX - rect.left
             const y = e.clientY - rect.top
 
@@ -311,21 +353,28 @@ export const useCanvasInteraction = ({
             }
         }
 
-        canvas.addEventListener('mousemove', handleMouseMove)
-        canvas.addEventListener('mousedown', handleMouseDown)
-        canvas.addEventListener('click', handleClick)
+        container.addEventListener('mousemove', handleMouseMove)
+        container.addEventListener('mousedown', handleMouseDown)
+        container.addEventListener('click', handleClick)
         window.addEventListener('mouseup', handleMouseUp)
 
         return () => {
             cancelAnimationFrame(rafRef.current)
             draggingRef.current = false
-            canvas.style.cursor = ''
-            canvas.removeEventListener('mousemove', handleMouseMove)
-            canvas.removeEventListener('mousedown', handleMouseDown)
-            canvas.removeEventListener('click', handleClick)
+
+            const canvas = currentCanvas()
+
+            if (canvas) {
+                canvas.style.cursor = ''
+            }
+
+            container.removeEventListener('mousemove', handleMouseMove)
+            container.removeEventListener('mousedown', handleMouseDown)
+            container.removeEventListener('click', handleClick)
             window.removeEventListener('mouseup', handleMouseUp)
         }
     }, [
+        containerRef,
         objects,
         interactive,
         showSettings,

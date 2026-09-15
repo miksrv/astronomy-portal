@@ -27,6 +27,24 @@ describe('star-map catalogs', () => {
             expect(positions.map((position) => position.mag)).toStrictEqual([undefined, undefined])
         })
 
+        it('keeps the popular designation only when it differs from the id', () => {
+            const positions = parseCatalogPositions({
+                features: [
+                    {
+                        id: 'NGC 224',
+                        properties: { mag: 3.4, desig: 'M 31' },
+                        geometry: { coordinates: [10.68, 41.27] }
+                    },
+                    { id: 'M 45', properties: { mag: 1.2, desig: 'M 45' }, geometry: { coordinates: [56.75, 24.12] } }
+                ]
+            })
+
+            expect(positions).toStrictEqual([
+                { id: 'NGC 224', ra: 10.68, dec: 41.27, mag: 3.4, desig: 'M 31' },
+                { id: 'M 45', ra: 56.75, dec: 24.12, mag: 1.2 }
+            ])
+        })
+
         it('skips features without an id or coordinates', () => {
             const positions = parseCatalogPositions({
                 features: [

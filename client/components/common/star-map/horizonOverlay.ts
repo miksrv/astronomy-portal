@@ -1,7 +1,10 @@
+import type { Vector } from 'astronomy-engine'
+
+import { DEG } from './angles'
 import { FONT } from './config'
 import { HORIZON_FIT_FRACTION } from './constants'
-import { angularDistanceDeg, computeZenith, DOME_VIEW, HorizonView } from './horizonView'
-import { horizontalToEquatorial } from './objectInfo'
+import { computeZenith, DOME_VIEW, HorizonView } from './horizonView'
+import { createHorizontalToEquatorial, horizontalToEquatorial, horizontalToVector } from './objectInfo'
 
 /**
  * Horizon-mode overlay (FE-3 of features/star-atlas-upgrade.md): the opaque ground below
@@ -18,14 +21,16 @@ import { horizontalToEquatorial } from './objectInfo'
  *
  * Celestial.mapProjection() expects equatorial coordinates (the map has no horizontal
  * transform), so each azimuth/altitude sample is converted to J2000 RA/Dec for the
- * current date + location first. Those conversions only change when the date/location
- * change — they're cached; projection to screen happens per redraw.
+ * current date + location first. The silhouette itself never changes: its horizontal
+ * unit vectors are built once per page load, and a date/location change only re-runs the
+ * cheap rotation of those vectors (createHorizontalToEquatorial) — cheap enough for the
+ * time flow, which changes the date on every frame. Projection to screen happens per redraw.
  */
 
 /** Sampling step along the horizon, degrees of azimuth */
 const AZIMUTH_STEP = 3
 
-export const COMPASS_POINTS: Array<{ azimuth: number; key: string }> = [
+const COMPASS_POINTS: Array<{ azimuth: number; key: string }> = [
     { azimuth: 0, key: 'n' },
     { azimuth: 45, key: 'ne' },
     { azimuth: 90, key: 'e' },
@@ -36,14 +41,15 @@ export const COMPASS_POINTS: Array<{ azimuth: number; key: string }> = [
     { azimuth: 315, key: 'nw' }
 ]
 
-const DEG = Math.PI / 180
+/** The four labels drawn large and gold; the intercardinals are small and muted */
+const CARDINAL_KEYS = new Set(['n', 'e', 's', 'w'])
 
 /**
  * Deterministic, smooth pseudo-terrain height (degrees above the horizon) for an
  * azimuth: a few overlapping sine "hills" plus a high-frequency treeline jitter.
  * Same profile for every visitor — it's a stylized silhouette, not data.
  */
-export const hillHeightDeg = (azimuthDeg: number): number => {
+const hillHeightDeg = (azimuthDeg: number): number => {
     const a = azimuthDeg * DEG
 
     const hills = 3.2 + Math.sin(a * 2 + 0.8) * 1.8 + Math.sin(a * 5 + 2.4) * 1.1 + Math.sin(a * 9 + 1.1) * 0.7
@@ -60,7 +66,7 @@ export const hillHeightDeg = (azimuthDeg: number): number => {
 const GROUND_BASE_ALT = 0.05
 
 /** Deterministic pseudo-random [0..1) from a numeric seed — same "forest" for every visitor */
-export const seededRandom = (seed: number): number => {
+const seededRandom = (seed: number): number => {
     const value = Math.sin(seed * 127.1 + 311.7) * 43758.5453
     return value - Math.floor(value)
 }
@@ -76,7 +82,7 @@ const COMPASS_CLEARANCE = 5
  * rounded deciduous canopy, sized/shaped deterministically from the seed (Stellarium-like
  * stylized treeline, not real vegetation — Business Rule 9).
  */
-export const buildTreeOutline = (azimuth: number, base: number, seed: number): Array<[number, number]> => {
+const buildTreeOutline = (azimuth: number, base: number, seed: number): Array<[number, number]> => {
     const isConifer = seededRandom(seed + 1) < 0.65
     const height = 1.6 + seededRandom(seed + 2) * 2.2
     const halfWidth = 0.5 + seededRandom(seed + 3) * 0.7
@@ -112,10 +118,18 @@ export const buildTreeOutline = (azimuth: number, base: number, seed: number): A
 
 /**
  * One point of the silhouette: its horizontal position (which decides whether it is inside
- * the projection at all, whatever the view direction) and the equatorial coordinates
- * Celestial.mapProjection needs.
+ * the projection at all, whatever the view direction) — with the sine/cosine of its
+ * altitude and its unit vector precomputed, since neither ever changes — and the
+ * equatorial coordinates Celestial.mapProjection needs, refreshed per date/location.
  */
-export type HorizonSample = HorizonView & { eq: [number, number] }
+export type HorizonSample = HorizonView & {
+    sinAlt: number
+    cosAlt: number
+    /** Horizontal unit vector (horizontalToVector) — the input of the per-frame conversion */
+    vector: Vector
+    /** J2000 [ra, dec] for the geometry's current date/location */
+    eq: [number, number]
+}
 
 type HorizonGeometry = {
     /** Samples along the silhouette's top edge */
@@ -125,25 +139,30 @@ type HorizonGeometry = {
     /** Tree silhouettes, each a vertex loop */
     trees: HorizonSample[][]
     /** Compass label anchors, just above the silhouette */
-    compass: Array<{ key: string; sample: HorizonSample }>
+    compass: Array<{ key: string; isCardinal: boolean; sample: HorizonSample }>
+    /** Every sample of the above, flat, for the per-frame refresh */
+    all: HorizonSample[]
+    /** `${lat}_${lon}_${time}` the `eq` fields were last computed for */
+    key: string
 }
 
-let cachedKey = ''
-let cachedGeometry: HorizonGeometry | null = null
+const createSample = (azimuth: number, altitude: number): HorizonSample => ({
+    azimuth,
+    altitude,
+    sinAlt: Math.sin(altitude * DEG),
+    cosAlt: Math.cos(altitude * DEG),
+    vector: horizontalToVector(azimuth, altitude),
+    eq: [0, 0]
+})
 
-const buildGeometry = (geopos: [number, number], date: Date): HorizonGeometry => {
-    const sample = (azimuth: number, altitude: number): HorizonSample => ({
-        azimuth,
-        altitude,
-        eq: horizontalToEquatorial(azimuth, altitude, geopos, date)
-    })
-
+/** The silhouette in horizontal coordinates — built once, it depends on nothing that changes. */
+const buildGeometry = (): HorizonGeometry => {
     const upper: HorizonSample[] = []
     const lower: HorizonSample[] = []
 
     for (let azimuth = 0; azimuth <= 360; azimuth += AZIMUTH_STEP) {
-        upper.push(sample(azimuth, hillHeightDeg(azimuth)))
-        lower.push(sample(azimuth, GROUND_BASE_ALT))
+        upper.push(createSample(azimuth, hillHeightDeg(azimuth)))
+        lower.push(createSample(azimuth, GROUND_BASE_ALT))
     }
 
     // Stylized treeline along the hills: deterministic slots with random gaps, kept
@@ -171,7 +190,7 @@ const buildGeometry = (geopos: [number, number], date: Date): HorizonGeometry =>
         const base = Math.max(0.2, hillHeightDeg(azimuth) - 0.25)
 
         trees.push(
-            buildTreeOutline(azimuth, base, seed).map(([treeAzimuth, altitude]) => sample(treeAzimuth, altitude))
+            buildTreeOutline(azimuth, base, seed).map(([treeAzimuth, altitude]) => createSample(treeAzimuth, altitude))
         )
     }
 
@@ -179,17 +198,46 @@ const buildGeometry = (geopos: [number, number], date: Date): HorizonGeometry =>
     // anything below the horizon is outside the airy projection's clip circle
     const compass = COMPASS_POINTS.map(({ azimuth, key }) => ({
         key,
-        sample: sample(azimuth, hillHeightDeg(azimuth) + 2.5)
+        isCardinal: CARDINAL_KEYS.has(key),
+        sample: createSample(azimuth, hillHeightDeg(azimuth) + 2.5)
     }))
 
-    return { upper, lower, trees, compass }
+    return {
+        upper,
+        lower,
+        trees,
+        compass,
+        all: [...upper, ...lower, ...trees.flat(), ...compass.map((point) => point.sample)],
+        key: ''
+    }
 }
 
+let geometry: HorizonGeometry | null = null
+
 /**
- * Scale the view so the whole horizon circle (with a small margin for the compass
- * labels) fits the canvas. Call right after Celestial.display() in horizon mode —
- * `follow: 'zenith'` centers the view but keeps whatever zoom the config had.
+ * The silhouette with its equatorial coordinates pinned to the given place and instant.
+ * The horizontal geometry is built on first use; a new date/location only re-runs the
+ * rotation of the precomputed vectors.
  */
+const getHorizonGeometry = (geopos: [number, number], date: Date): HorizonGeometry => {
+    geometry ??= buildGeometry()
+
+    const key = `${geopos[0].toFixed(4)}_${geopos[1].toFixed(4)}_${date.getTime()}`
+
+    if (key !== geometry.key) {
+        const convert = createHorizontalToEquatorial(geopos, date)
+
+        for (const sample of geometry.all) {
+            sample.eq = convert(sample.vector)
+        }
+
+        geometry.key = key
+    }
+
+    return geometry
+}
+
+/** Visible area (px) the whole-sky dome is fitted into */
 export type ViewportSize = { width: number; height: number }
 
 /**
@@ -202,7 +250,7 @@ export const computeHorizonTargetRadius = (viewport: ViewportSize): number =>
     (Math.min(viewport.width, viewport.height) / 2) * HORIZON_FIT_FRACTION
 
 /** The horizon circle in screen space: where the zenith projects, and the circle's radius in px. */
-export type HorizonCircle = { center: [number, number]; radius: number }
+type HorizonCircle = { center: [number, number]; radius: number }
 
 /**
  * Measure the horizon on the current projection: the zenith's pixel position and how far
@@ -214,7 +262,7 @@ export type HorizonCircle = { center: [number, number]; radius: number }
  * whereas the north point is far outside it as soon as the visitor looks south — where the
  * airy radius runs away and the measurement would be meaningless.
  */
-export const measureHorizonCircle = (geopos: [number, number], date: Date, view: HorizonView): HorizonCircle | null => {
+const measureHorizonCircle = (geopos: [number, number], date: Date, view: HorizonView): HorizonCircle | null => {
     const zenithPx = Celestial.mapProjection(computeZenith(geopos, date))
     const horizonPx = Celestial.mapProjection(horizontalToEquatorial(view.azimuth, 0, geopos, date))
 
@@ -227,6 +275,11 @@ export const measureHorizonCircle = (geopos: [number, number], date: Date, view:
     return Number.isFinite(radius) && radius > 0 ? { center: [zenithPx[0], zenithPx[1]], radius } : null
 }
 
+/**
+ * Scale the view so the whole horizon circle (with a small margin for the compass
+ * labels) fits the canvas. Call right after Celestial.display() in horizon mode —
+ * `follow: 'zenith'` centers the view but keeps whatever zoom the config had.
+ */
 export const fitHorizonToView = (geopos: [number, number], date: Date, viewport?: ViewportSize): void => {
     const canvas: HTMLCanvasElement | undefined = Celestial.context?.canvas
 
@@ -276,9 +329,9 @@ const TREE_COLOR = 'rgba(38, 33, 27, 1)'
  * inside the horizon (so the hills band is already at the near tone) out to past the
  * canvas corner of a fitted dome (HORIZON_FIT_FRACTION leaves the corner at ~1.6 r).
  */
-export const GROUND_GRADIENT_SPAN: [number, number] = [0.98, 1.9]
+const GROUND_GRADIENT_SPAN: [number, number] = [0.98, 1.9]
 
-export const computeGroundGradientRadii = (horizonRadius: number): [number, number] => [
+const computeGroundGradientRadii = (horizonRadius: number): [number, number] => [
     horizonRadius * GROUND_GRADIENT_SPAN[0],
     horizonRadius * GROUND_GRADIENT_SPAN[1]
 ]
@@ -288,7 +341,7 @@ export const computeGroundGradientRadii = (horizonRadius: number): [number, numb
  * point's distance from the zenith — large enough that the ground always runs off the
  * canvas, whatever the zoom.
  */
-export const GROUND_EXTENT_FACTOR = 40
+const GROUND_EXTENT_FACTOR = 40
 
 /**
  * Contiguous runs of projectable samples along the horizon, as index lists. Azimuth 0 and
@@ -296,7 +349,7 @@ export const GROUND_EXTENT_FACTOR = 40
  * that starts at index 0 — they're merged, otherwise the ground would show a seam due
  * north. Runs shorter than two points can't form a polygon and are dropped.
  */
-export const collectVisibleRuns = (visible: readonly boolean[]): number[][] => {
+const collectVisibleRuns = (visible: readonly boolean[]): number[][] => {
     const runs: number[][] = []
     let run: number[] = []
 
@@ -344,7 +397,7 @@ const tracePolyline = (context: CanvasRenderingContext2D, points: ScreenPoint[])
  * the canvas. With the whole horizon visible the two loops form a ring that covers
  * everything outside the sky dome; with only part of it visible, a wedge under that part.
  */
-export const drawGroundSector = (context: CanvasRenderingContext2D, edge: ScreenPoint[], center: ScreenPoint): void => {
+const drawGroundSector = (context: CanvasRenderingContext2D, edge: ScreenPoint[], center: ScreenPoint): void => {
     if (edge.length < 2) {
         return
     }
@@ -392,7 +445,24 @@ const drawGroundBand = (context: CanvasRenderingContext2D, edge: ScreenPoint[], 
  * rejected all of them and left the dome a bare circle. projectSample's finite-check is the
  * real safety net; this only keeps samples off the clip border itself.
  */
-export const MAX_SAMPLE_DISTANCE_DEG = 89.95
+const MAX_SAMPLE_DISTANCE_DEG = 89.95
+
+/** The view direction with its altitude's sine/cosine hoisted out of the per-sample distance check */
+type ViewTrig = { azimuth: number; sinAlt: number; cosAlt: number }
+
+const toViewTrig = (view: HorizonView): ViewTrig => ({
+    azimuth: view.azimuth,
+    sinAlt: Math.sin(view.altitude * DEG),
+    cosAlt: Math.cos(view.altitude * DEG)
+})
+
+/** Angular distance (degrees) from the view direction to a sample — angularDistanceDeg with the trig precomputed */
+const sampleDistanceDeg = (view: ViewTrig, sample: HorizonSample): number => {
+    const cosine =
+        view.sinAlt * sample.sinAlt + view.cosAlt * sample.cosAlt * Math.cos((view.azimuth - sample.azimuth) * DEG)
+
+    return Math.acos(Math.min(1, Math.max(-1, cosine))) / DEG
+}
 
 /**
  * Project one silhouette sample to screen, or null when it is outside the projection.
@@ -403,8 +473,8 @@ export const MAX_SAMPLE_DISTANCE_DEG = 89.95
  * horizon mode re-points the map itself and Celestial's config lags a redraw behind, so its
  * verdict would reject a wedge of perfectly visible horizon and leave a hole in the ground.
  */
-export const projectSample = (sample: HorizonSample, view: HorizonView): ScreenPoint | null => {
-    if (angularDistanceDeg(view, sample) > MAX_SAMPLE_DISTANCE_DEG) {
+const projectSample = (sample: HorizonSample, view: ViewTrig): ScreenPoint | null => {
+    if (sampleDistanceDeg(view, sample) > MAX_SAMPLE_DISTANCE_DEG) {
         return null
     }
 
@@ -445,24 +515,21 @@ export type HorizonOverlayOptions = {
 
 /** Draw the ground (fill, silhouette, treeline) and the compass labels. Call from a Celestial redraw callback. */
 export const drawHorizonOverlay = ({ geopos, date, view, labels }: HorizonOverlayOptions): void => {
-    const key = `${geopos[0].toFixed(4)}_${geopos[1].toFixed(4)}_${date.getTime()}`
-
-    if (key !== cachedKey || !cachedGeometry) {
-        cachedKey = key
-        cachedGeometry = buildGeometry(geopos, date)
-    }
-
-    const { upper, lower, trees, compass } = cachedGeometry
+    const { upper, lower, trees, compass } = getHorizonGeometry(geopos, date)
     const context = Celestial.context
     const circle = measureHorizonCircle(geopos, date, view)
+    const viewTrig = toViewTrig(view)
 
-    const upperScreen = upper.map((sample) => projectSample(sample, view))
-    const lowerScreen = lower.map((sample) => projectSample(sample, view))
+    const upperScreen = upper.map((sample) => projectSample(sample, viewTrig))
 
     // The ground fill only traces the silhouette — it extends radially away from the zenith
     // from there, so a horizon sample that failed to project costs nothing. Only the
     // fallback band (drawn when the zenith itself doesn't project) needs both rows.
-    const runs = collectVisibleRuns(upperScreen.map((point, index) => Boolean(point && (circle || lowerScreen[index]))))
+    const lowerScreen = circle ? null : lower.map((sample) => projectSample(sample, viewTrig))
+
+    const runs = collectVisibleRuns(
+        upperScreen.map((point, index) => Boolean(point && (!lowerScreen || lowerScreen[index])))
+    )
     const edges = runs.map((run) => run.map((index) => upperScreen[index] as ScreenPoint))
 
     // Fill the ground: from the silhouette down past the horizon, out to the canvas edges
@@ -475,7 +542,9 @@ export const drawHorizonOverlay = ({ geopos, date, view, labels }: HorizonOverla
             drawGroundBand(
                 context,
                 edge,
-                (runs[index] as number[]).map((sample) => lowerScreen[sample] as ScreenPoint)
+                (runs[index] as number[]).map(
+                    (sample) => (lowerScreen as Array<ScreenPoint | null>)[sample] as ScreenPoint
+                )
             )
         }
     })
@@ -499,7 +568,7 @@ export const drawHorizonOverlay = ({ geopos, date, view, labels }: HorizonOverla
     context.beginPath()
 
     for (const tree of trees) {
-        const screen = tree.map((sample) => projectSample(sample, view))
+        const screen = tree.map((sample) => projectSample(sample, viewTrig))
 
         if (screen.some((point) => !point)) {
             continue
@@ -513,14 +582,12 @@ export const drawHorizonOverlay = ({ geopos, date, view, labels }: HorizonOverla
     context.fill()
 
     // Compass labels just above the silhouette
-    for (const { key: pointKey, sample } of compass) {
-        const screen = projectSample(sample, view)
+    for (const { key: pointKey, isCardinal, sample } of compass) {
+        const screen = projectSample(sample, viewTrig)
 
         if (!screen) {
             continue
         }
-
-        const isCardinal = ['n', 'e', 's', 'w'].includes(pointKey)
 
         Celestial.setTextStyle({
             font: `${isCardinal ? 'bold 14px' : '11px'} ${FONT}`,
@@ -530,4 +597,17 @@ export const drawHorizonOverlay = ({ geopos, date, view, labels }: HorizonOverla
         })
         context.fillText(labels[pointKey] ?? pointKey.toUpperCase(), screen[0], screen[1])
     }
+}
+
+// exported for tests
+export {
+    buildTreeOutline,
+    collectVisibleRuns,
+    COMPASS_POINTS,
+    computeGroundGradientRadii,
+    getHorizonGeometry,
+    GROUND_GRADIENT_SPAN,
+    hillHeightDeg,
+    MAX_SAMPLE_DISTANCE_DEG,
+    seededRandom
 }

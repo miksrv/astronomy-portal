@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useId } from 'react'
 import { Button, Checkbox, Container, Select } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
@@ -17,6 +17,7 @@ interface StarMapSettingsFormProps {
 
 const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onChange, locationControl }) => {
     const { t } = useTranslation()
+    const starMagnitudeLabelId = useId()
 
     const update = <K extends keyof StarMapSettingsType>(key: K, value: StarMapSettingsType[K]) => {
         onChange({ ...settings, [key]: value })
@@ -24,9 +25,10 @@ const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onC
 
     const starMagnitudeLabel = t('components.common.star-map.settings.star-magnitude', 'Макс. величина')
 
+    // The two modes are named the same everywhere (toolbar FAB, quick bar, this toggle)
     const viewModes: Array<{ mode: StarMapViewMode; label: string }> = [
-        { mode: 'sky', label: t('components.common.star-map.settings.view-mode-sky', 'Карта неба') },
-        { mode: 'horizon', label: t('components.common.star-map.settings.view-mode-horizon', 'Небо сейчас') }
+        { mode: 'sky', label: t('components.common.star-map.toolbar.sky-map', 'Карта неба') },
+        { mode: 'horizon', label: t('components.common.star-map.toolbar.sky-above', 'Небо над вами') }
     ]
 
     return (
@@ -34,12 +36,17 @@ const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onC
             {/* No panel title and no heading over the mode toggle: the panel is opened from
                 a labelled button and the two mode buttons name themselves. */}
             <div className={styles.settingsGroup}>
-                <div className={styles.viewModeToggle}>
+                <div
+                    className={styles.viewModeToggle}
+                    role={'group'}
+                    aria-label={t('components.common.star-map.settings.view-mode', 'Режим просмотра')}
+                >
                     {viewModes.map(({ mode, label }) => (
                         <Button
                             key={mode}
                             size={'small'}
                             mode={settings.viewMode === mode ? 'primary' : 'outline'}
+                            aria-pressed={settings.viewMode === mode}
                             onClick={() => settings.viewMode !== mode && update('viewMode', mode)}
                         >
                             {label}
@@ -57,24 +64,32 @@ const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onC
 
             {locationControl}
 
-            <div className={styles.settingsGroup}>
-                <div className={styles.settingsGroupTitle}>
+            <fieldset className={styles.settingsGroup}>
+                <legend className={styles.settingsGroupTitle}>
                     {t('components.common.star-map.settings.stars', 'Звёзды')}
-                </div>
+                </legend>
                 <Checkbox
                     label={t('components.common.star-map.settings.show-stars', 'Показать звёзды')}
                     checked={settings.starsShow}
                     onChange={(e) => update('starsShow', e.target.checked)}
                 />
-                {/* The kit's Select stacks its own label above the field, which in a 280px
-                    sidebar spends a whole row on two words; the caption goes beside it
-                    instead, and `aria-label` carries the same text for assistive tech. */}
+                {/* The kit's Select stacks its own `label` above the field, which in a 280px
+                    sidebar spends a whole row on two words, so the caption sits beside it.
+                    The kit spreads extra props onto the Select's outer div (not the combobox),
+                    so that div becomes a labelled group — the only association reachable
+                    from outside; a bare `aria-label` there would name nothing. */}
                 {settings.starsShow && (
                     <div className={styles.settingsRow}>
-                        <span className={styles.settingsRowLabel}>{starMagnitudeLabel}</span>
+                        <span
+                            id={starMagnitudeLabelId}
+                            className={styles.settingsRowLabel}
+                        >
+                            {starMagnitudeLabel}
+                        </span>
                         <Select
                             size={'small'}
-                            aria-label={starMagnitudeLabel}
+                            role={'group'}
+                            aria-labelledby={starMagnitudeLabelId}
                             className={styles.settingsRowControl}
                             options={STARS_LIMIT_OPTIONS}
                             value={settings.starsLimit}
@@ -86,12 +101,12 @@ const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onC
                         />
                     </div>
                 )}
-            </div>
+            </fieldset>
 
-            <div className={styles.settingsGroup}>
-                <div className={styles.settingsGroupTitle}>
+            <fieldset className={styles.settingsGroup}>
+                <legend className={styles.settingsGroupTitle}>
                     {t('components.common.star-map.settings.objects', 'Объекты')}
-                </div>
+                </legend>
                 <Checkbox
                     label={t('components.common.star-map.settings.show-dso', 'Объекты глубокого космоса')}
                     checked={settings.dsosShow}
@@ -114,12 +129,12 @@ const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onC
                     checked={settings.meteorShowersShow}
                     onChange={(e) => update('meteorShowersShow', e.target.checked)}
                 />
-            </div>
+            </fieldset>
 
-            <div className={styles.settingsGroup}>
-                <div className={styles.settingsGroupTitle}>
+            <fieldset className={styles.settingsGroup}>
+                <legend className={styles.settingsGroupTitle}>
                     {t('components.common.star-map.settings.constellations', 'Созвездия')}
-                </div>
+                </legend>
                 <Checkbox
                     label={t('components.common.star-map.settings.constellation-names', 'Названия')}
                     checked={settings.constellationNames}
@@ -135,12 +150,12 @@ const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onC
                     checked={settings.constellationBounds}
                     onChange={(e) => update('constellationBounds', e.target.checked)}
                 />
-            </div>
+            </fieldset>
 
-            <div className={styles.settingsGroup}>
-                <div className={styles.settingsGroupTitle}>
+            <fieldset className={styles.settingsGroup}>
+                <legend className={styles.settingsGroupTitle}>
                     {t('components.common.star-map.settings.grid-and-lines', 'Сетка и линии')}
-                </div>
+                </legend>
                 <Checkbox
                     label={t('components.common.star-map.settings.graticule', 'Координатная сетка')}
                     checked={settings.graticule}
@@ -161,7 +176,7 @@ const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onC
                     checked={settings.galactic}
                     onChange={(e) => update('galactic', e.target.checked)}
                 />
-            </div>
+            </fieldset>
 
             <div className={styles.settingsGroup}>
                 <Checkbox
@@ -179,4 +194,8 @@ const StarMapSettingsForm: React.FC<StarMapSettingsFormProps> = ({ settings, onC
     )
 }
 
-export default StarMapSettingsForm
+// `settings` is replaced wholesale on every change and the handler is stable upstream, so a
+// shallow compare skips the re-render on every unrelated map state change. Note that a JSX
+// `locationControl` is a fresh element each parent render — the memo only pays off while
+// the parent keeps it referentially stable (or omits it).
+export default React.memo(StarMapSettingsForm)

@@ -7,6 +7,7 @@ import { TIME_FLOW_DISPLAY_INTERVAL_MS } from './constants'
 import { formatGeopos, formatLocalClock, formatLocalDate, formatLocalDateTime } from './statusChip'
 import { formatTimeRate, TIME_RATE_MIN } from './timeFlow'
 import { formatUtcOffset, ResolvedTimeZone } from './timezone'
+import { useCompassLabels } from './useCompassLabels'
 import { useLiveClock } from './useLiveClock'
 
 import styles from './styles.module.sass'
@@ -50,6 +51,7 @@ const StarMapStatusChip: React.FC<StarMapStatusChipProps> = ({
     onOpenSettings
 }) => {
     const { t } = useTranslation()
+    const compassLabels = useCompassLabels()
 
     const frozen = date != null
     const flowing = timeRate > TIME_RATE_MIN
@@ -65,14 +67,7 @@ const StarMapStatusChip: React.FC<StarMapStatusChipProps> = ({
         flowing ? TIME_FLOW_DISPLAY_INTERVAL_MS : undefined
     )
 
-    const hemisphereLetters = {
-        n: t('components.common.star-map.compass.n', 'С'),
-        s: t('components.common.star-map.compass.s', 'Ю'),
-        e: t('components.common.star-map.compass.e', 'В'),
-        w: t('components.common.star-map.compass.w', 'З')
-    }
-
-    const nowLabel = t('components.common.star-map.status.now', 'Сейчас')
+    const nowLabel = t('components.common.star-map.location.now', 'Сейчас')
 
     let timeLabel: React.ReactNode
 
@@ -110,16 +105,17 @@ const StarMapStatusChip: React.FC<StarMapStatusChipProps> = ({
             ? t('components.common.star-map.location.reset-to-now', 'Вернуться к «сейчас»')
             : t('components.common.star-map.status.change-place-time', 'Изменить место и время')
 
-    // TODO: подписывать место названием города, когда вернётся выбор города в
-    // StarMapLocationControl — до тех пор чип показывает только координаты
-    const placeLabel = formatGeopos(geopos, hemisphereLetters)
+    // TODO: label the place with the city name once the city picker returns to
+    // StarMapLocationControl — until then the chip shows coordinates only
+    const placeLabel = formatGeopos(geopos, compassLabels)
 
+    // No aria-label: the visible "place · time" text is the button's name, the title
+    // (what a click does) is the tooltip
     return (
         <Button
             unstyled={true}
             icon={'Position'}
             title={title}
-            aria-label={title}
             className={cn(styles.statusChip, (frozen || flowing) && styles.statusChipFrozen)}
             onClick={frozen || flowing ? onResetToNow : onOpenSettings}
         >

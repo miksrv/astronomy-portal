@@ -93,8 +93,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, noTopMargin, ch
                 })}
             </Head>
 
+            {/* showOnShallow=false: a shallow route change never hits the server, so the bar
+                would be pure noise. It also silences the flicker on pages that mirror their
+                client-side state into the URL - the star map writes a permalink on every
+                pan/zoom/setting change (usePermalinkSync), and the objects/photos/admin-users
+                filters do the same on every keystroke. */}
             <NextNProgress
                 color={'#6f6ebb'}
+                showOnShallow={false}
                 options={{ showSpinner: false }}
             />
 

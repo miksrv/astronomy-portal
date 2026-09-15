@@ -46,12 +46,19 @@ describe('star-map timezone', () => {
     })
 
     describe('resolveTimeZone (real polygons)', () => {
-        it('resolves Moscow to UTC+3', () => {
-            expect(resolveTimeZone(55.75, 37.62, polygons).utcOffset).toBe(3)
+        // Pinned instants: Russia has had no DST since 2014, so summer and winter must agree —
+        // and the pinned dates keep the test from depending on "now"
+        const WINTER = new Date('2026-01-15T12:00:00Z')
+        const SUMMER = new Date('2026-07-15T12:00:00Z')
+
+        it('resolves Moscow to UTC+3 (Intl, not the stale +4 stored in the polygon)', () => {
+            expect(resolveTimeZone(55.75, 37.62, polygons, WINTER).utcOffset).toBe(3)
+            expect(resolveTimeZone(55.75, 37.62, polygons, SUMMER).utcOffset).toBe(3)
         })
 
         it('resolves Orenburg to UTC+5', () => {
-            expect(resolveTimeZone(51.77, 55.1, polygons).utcOffset).toBe(5)
+            expect(resolveTimeZone(51.77, 55.1, polygons, WINTER).utcOffset).toBe(5)
+            expect(resolveTimeZone(51.77, 55.1, polygons, SUMMER).utcOffset).toBe(5)
         })
 
         it('resolves New York with an IANA name and a DST-aware offset', () => {

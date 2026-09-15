@@ -49,7 +49,8 @@ type ConstellationFeature = {
     geometry?: { coordinates?: number[] }
 }
 
-const fetchJson = async <T>(url: string): Promise<T> => {
+/** GET a JSON asset, rejecting on a non-2xx status (a bare `fetch` only rejects on network failure). */
+export const fetchJson = async <T>(url: string): Promise<T> => {
     const response = await fetch(url)
 
     if (!response.ok) {
@@ -122,12 +123,14 @@ export type CatalogPosition = {
     ra: number
     dec: number
     mag?: number
+    /** Popular designation of a DSO when it differs from the id, e.g. "M 31" for NGC 224 */
+    desig?: string
 }
 
 type CatalogFeature = {
     id?: string | number
     /** dsos.6.json (and a few dsos.bright.json entries) store mag as a string, e.g. "1.2" */
-    properties?: { mag?: number | string }
+    properties?: { mag?: number | string; desig?: string }
     geometry?: { coordinates?: number[] }
 }
 
@@ -143,8 +146,15 @@ export const parseCatalogPositions = (collection: { features?: CatalogFeature[] 
             // Coerce the mixed number/string mag to a real number; absent or
             // non-numeric values become undefined so consumers can rely on the type
             const magnitude = Number(feature.properties?.mag)
+            const id = String(feature.id)
+            const desig = feature.properties?.desig
+            const position: CatalogPosition = { id, ra, dec, mag: Number.isFinite(magnitude) ? magnitude : undefined }
 
-            return { id: String(feature.id), ra, dec, mag: Number.isFinite(magnitude) ? magnitude : undefined }
+            if (desig && desig !== id) {
+                position.desig = desig
+            }
+
+            return position
         })
         .filter((entry): entry is CatalogPosition => entry != null)
 

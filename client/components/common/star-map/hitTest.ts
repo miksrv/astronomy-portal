@@ -1,3 +1,4 @@
+import { toCelestialLon } from './angles'
 import { CatalogPosition } from './catalogs'
 import { MeteorShower } from './meteorShowers'
 import { BodyPosition, CelestialObjectKind } from './objectInfo'
@@ -51,7 +52,7 @@ const scanPositions = <T extends { ra: number; dec: number }>(
     let best: { item: T; distance: number } | null = null
 
     for (const item of items) {
-        const coordinates: [number, number] = [item.ra > 180 ? item.ra - 360 : item.ra, item.dec]
+        const coordinates: [number, number] = [toCelestialLon(item.ra), item.dec]
 
         if (!Celestial.clip(coordinates)) {
             continue
@@ -122,7 +123,7 @@ export const findBuiltinHit = (x: number, y: number, options: BuiltinHitOptions)
     }
 
     if (options.starsVisible) {
-        const visibleStars = options.stars.filter((star) => (star.mag ?? 99) <= options.starsLimit)
+        const visibleStars = filterByMagnitude(options.stars, options.starsLimit)
         const star = scanPositions(visibleStars, x, y, HIT_RADIUS.star)
 
         if (star) {

@@ -1,5 +1,6 @@
 import { RefObject, useCallback, useEffect, useMemo, useRef } from 'react'
 
+import { readZoomFactor, withoutAnimations } from './celestialApi'
 import { customConfig, defaultConfig } from './config'
 import {
     LIVE_TICK_HIDE_GRACE_MS,
@@ -9,58 +10,21 @@ import {
     ZOOM_STEP_IN,
     ZOOM_STEP_OUT
 } from './constants'
-import { detachCelestialZoom, MAX_VIEW_RESTORE_ATTEMPTS } from './horizonNavigation'
+import { detachCelestialZoom } from './horizonNavigation'
 import { fitHorizonToView, ViewportSize } from './horizonOverlay'
-import { centerMatches, DOME_VIEW, HorizonView, isDomeView, viewToCenter } from './horizonView'
-import { horizontalToEquatorial } from './objectInfo'
+import { DOME_VIEW, HorizonView, isDomeView, viewToCenter } from './horizonView'
 import { StarMapObject, StarMapProps } from './StarMap'
 import { advanceClock, TIME_RATE_MIN } from './timeFlow'
 import { StarMapSettings } from './types'
+import { useHorizonViewControl } from './useHorizonViewControl'
 import { useLiveClock } from './useLiveClock'
 import {
     buildLiveSettingsPatch,
     buildSkyviewPatch,
     buildVisualConfig,
     computeHorizonCanvasLayout,
-    computeHorizonCoverZoom,
-    computeHorizonStartZoom,
     createObjectsJSON
 } from './utils'
-
-/** Current zoom factor relative to the config's base zoomlevel (Celestial.zoomBy() getter), or null. */
-const readZoomFactor = (): number | null => {
-    try {
-        const factor = Celestial.zoomBy?.()
-
-        return typeof factor === 'number' && Number.isFinite(factor) && factor > 0 ? factor : null
-    } catch {
-        return null
-    }
-}
-
-/**
- * Run zoom/rotate calls with Celestial's transitions switched off. `disableAnimations`
- * is one of Celestial's own config flags (honoured by zoomBy/rotate), so it can be toggled
- * through the public apply() API — each apply() redraws once, which is fine for the
- * one-off resize path this is used on.
- *
- * `keepDisabled` is what the flag is restored to: horizon mode runs with animations off
- * permanently (buildVisualConfig), so restoring `false` there would quietly re-enable them.
- */
-const withoutAnimations = (run: () => void, keepDisabled = false): void => {
-    try {
-        Celestial.apply({ disableAnimations: true })
-        run()
-    } catch (error) {
-        console.warn(error)
-    } finally {
-        try {
-            Celestial.apply({ disableAnimations: keepDisabled })
-        } catch (error) {
-            console.warn(error)
-        }
-    }
-}
 
 export interface UseCelestialDisplayOptions {
     containerRef: RefObject<HTMLDivElement | null>
@@ -79,6 +43,13 @@ export interface UseCelestialDisplayOptions {
     date: Date | null
     dateRef: RefObject<Date | null>
     /**
+     * The map's clock (useTimeFlow): advanced here — set to the real now on every live tick
+     * and rebuild, stepped by the simulated rate on every frame while the flow runs
+     */
+    nowRef: RefObject<Date>
+    /** The moment the map is currently computed for: the selected date, else `nowRef` */
+    resolveDate: () => Date
+    /**
      * Seconds of sky per real second (see timeFlow.ts). `1` is the ordinary once-a-minute
      * "now" tick; anything above it runs the animated flow.
      */
@@ -95,15 +66,8 @@ export interface CelestialDisplayController {
     /** True once Celestial.display() has run and the addCallback is registered */
     initializedRef: RefObject<boolean>
     /**
-     * "Now" captured when the map is (re)computed — keeps redraw-time astronomy stable
-     * between skyview updates instead of drifting every animation frame
-     */
-    nowRef: RefObject<Date>
-    /** The moment the map is currently computed for: the selected date, else the captured "now" */
-    resolveDate: () => Date
-    /**
-     * Drawn from Celestial's end-of-redraw callback (registered once); assign the current
-     * custom-layer drawer here every render (see useCustomLayers).
+     * Drawn from Celestial's end-of-redraw callback (registered once per display); the
+     * custom-layer drawer is published here by useCustomLayers.
      */
     drawCustomLayersRef: RefObject<() => void>
     /** Toolbar rail: zoom by the same step Celestial's built-in +/− controls use */
@@ -127,8 +91,9 @@ export interface CelestialDisplayController {
 
 /**
  * Owns the Celestial instance lifecycle: initial display and full rebuilds, fitting to the
- * container, live-patching settings via Celestial.apply(), date/location updates via
- * Celestial.skyview(), and the once-a-minute "now" tick.
+ * container, live-patching settings via Celestial.apply(), showing a place/moment via
+ * Celestial.skyview()/date(), the once-a-minute "now" tick and the animated time flow.
+ * Horizon-mode pointing, measuring and zoom floors live in useHorizonViewControl.
  */
 export const useCelestialDisplay = ({
     containerRef,
@@ -145,41 +110,17 @@ export const useCelestialDisplay = ({
     permalinkZoomRef,
     date,
     dateRef,
+    nowRef,
+    resolveDate,
     timeRate,
     onRedraw,
     clearPopupTimers,
     extendAutoHideGrace
 }: UseCelestialDisplayOptions): CelestialDisplayController => {
-    // "Now" captured when the map is (re)computed — keeps redraw-time astronomy stable
-    // between skyview updates instead of drifting every animation frame
-    const nowRef = useRef<Date>(new Date())
-
-    const resolveDate = useCallback((): Date => dateRef.current ?? nowRef.current, [dateRef])
-
     const objectsJSON = useMemo(() => createObjectsJSON(objects), [objects])
 
-    const handleCallback = (error: unknown) => {
-        if (error) {
-            console.warn(error)
-            return null
-        }
-
-        if (objectsJSON) {
-            const skyPoint = Celestial.getData(objectsJSON, defaultConfig.transform)
-
-            Celestial.container
-                .selectAll('.sky-points')
-                .data(skyPoint.features)
-                .enter()
-                .append('path')
-                .attr('class', 'sky-points')
-        }
-
-        Celestial.redraw()
-    }
-
-    // Kept in a ref so the addCallback closure (registered once) always draws with
-    // the current props/objects. Filled by useCustomLayers on every render.
+    // Slot for the custom-layer drawer (filled by useCustomLayers), read by the
+    // once-per-display addCallback closure so it always draws with the current props.
     const drawCustomLayersRef = useRef<() => void>(() => undefined)
 
     const initializedRef = useRef<boolean>(false)
@@ -200,6 +141,8 @@ export const useCelestialDisplay = ({
 
         return { width: container.offsetWidth, height: container.offsetHeight }
     }, [fitContainer, containerRef])
+
+    const horizon = useHorizonViewControl({ settingsRef, viewRef, initializedRef, resolveDate, readViewport })
 
     // Sky mode on a portrait screen (mobile): mercator's fixed aspect ratio leaves the
     // canvas as a letterboxed band in the middle of the viewport — widen it until its
@@ -229,219 +172,50 @@ export const useCelestialDisplay = ({
     }, [fitContainer, settingsRef, containerRef])
 
     /**
-     * Refresh Celestial's own idea of where the zenith is — what its daylight pass (the
-     * "Атмосфера" toggle) measures the Sun against.
+     * Show the sky for an instant (and, when the place changed, a location) — the one path
+     * every "the moment moved" case goes through: a rebuild, a picked date, the live tick
+     * and each time-flow frame.
      *
-     * The bundled library keeps the zenith in a private variable that only its internal
-     * `l()` routine writes, and `skyview()` calls that routine **only** when
-     * `follow === 'zenith'`. Horizon mode deliberately sets `follow: 'center'` (it drives
-     * the center itself, see buildVisualConfig), so the zenith stayed at its initial
-     * `[0, 0]` forever: the daylight pass then measured the Sun against a point on the
-     * celestial equator, read the result as "Sun far below the horizon" (over 108°) and
-     * painted nothing — at noon as much as at midnight, with the toggle on or off.
-     *
-     * `Celestial.date()` is the one public entry that runs the same routine, and with
-     * `follow: 'center'` it recomputes the zenith and redraws without re-centering the map.
-     * It reads the observer position from the hidden form, which `skyview()` has just
-     * written — so this must be called *after* the skyview patch, never before.
+     * Sky mode is a single `skyview()` (one redraw). Horizon mode needs Celestial's zenith
+     * for the instant as well, and `Celestial.date()` stores the instant *and* recomputes
+     * the zenith in one redraw — so it stands in for the date skyview() instead of following
+     * it; the second redraw re-points the map, because the equatorial direction of a fixed
+     * azimuth/altitude drifts with the sky. A place change still has to reach the hidden
+     * form through skyview() first: `date()` reads the observer position from there.
+     * Two redraws per frame, and the horizon safety net knows they are ours.
      */
-    const syncCelestialZenith = useCallback(
-        (when: Date) => {
-            if (settingsRef.current.viewMode !== 'horizon') {
-                return
-            }
+    const showMoment = useCallback(
+        (when: Date, location?: [number, number]) => {
+            horizon.withOwnUpdate(() => {
+                try {
+                    if (settingsRef.current.viewMode !== 'horizon') {
+                        Celestial.skyview(buildSkyviewPatch(when, location))
+                        return
+                    }
 
-            try {
-                // Same offset buildSkyviewPatch passes, so Celestial's date bookkeeping
-                // stays consistent with the instant the rest of the map is drawn for
-                Celestial.date(when, -when.getTimezoneOffset())
-            } catch (error) {
-                console.warn(error)
-            }
-        },
-        [settingsRef]
-    )
+                    if (location) {
+                        Celestial.skyview(buildSkyviewPatch(when, location))
+                    }
 
-    /**
-     * Point the map where the visitor is looking. Horizon mode never lets Celestial choose
-     * the center: `viewToCenter` turns the azimuth/altitude into an equatorial center plus
-     * the roll that keeps the zenith straight up — which is what keeps the horizon
-     * horizontal and the ground at the bottom (see horizonView.ts).
-     */
-    const applyHorizonView = useCallback(() => {
-        if (settingsRef.current.viewMode !== 'horizon') {
-            return
-        }
-
-        try {
-            Celestial.rotate({
-                center: viewToCenter(viewRef.current, settingsRef.current.geopos, dateRef.current ?? nowRef.current)
+                    horizon.syncCelestialZenith(when)
+                    horizon.applyHorizonView()
+                } catch (error) {
+                    console.warn(error)
+                }
             })
-        } catch (error) {
-            console.warn(error)
-        }
-    }, [settingsRef, dateRef, viewRef])
-
-    /**
-     * Degrees of sky per pixel across the view center — the drag scale, so a look-around
-     * gesture moves the sky with the pointer at any zoom level. Measured on the live
-     * projection (one degree of altitude below the center, which is always inside the map:
-     * MIN_VIEW_ALTITUDE keeps the view at least a degree above the horizon).
-     */
-    const measureViewScale = useCallback((): number | null => {
-        if (!initializedRef.current || settingsRef.current.viewMode !== 'horizon') {
-            return null
-        }
-
-        const view = viewRef.current
-        const geopos = settingsRef.current.geopos
-        const when = dateRef.current ?? nowRef.current
-
-        try {
-            const center = Celestial.mapProjection(horizontalToEquatorial(view.azimuth, view.altitude, geopos, when))
-            const below = Celestial.mapProjection(horizontalToEquatorial(view.azimuth, view.altitude - 1, geopos, when))
-
-            if (!center || !below) {
-                return null
-            }
-
-            const pixels = Math.hypot(center[0] - below[0], center[1] - below[1])
-
-            return pixels > 0.5 ? 1 / pixels : null
-        } catch (error) {
-            console.warn(error)
-            return null
-        }
-    }, [settingsRef, dateRef, viewRef])
-
-    /**
-     * How far horizon mode may be zoomed *out*, as a Celestial zoom factor — the floor the
-     * wheel, the pinch and the toolbar's "−" are clamped to, so the sky is never a bubble
-     * with dead space around it.
-     *
-     * The airy projection's visible disc is exactly the projection width at zoom factor 1
-     * (that is what computeHorizonCanvasLayout sizes), and every projected distance scales
-     * linearly with the factor — so the disc's radius on screen is
-     * `(projectionWidth / 2) * factor`, no measuring needed. Two floors follow from that:
-     *
-     * - the whole-sky dome fits the frame at factor 1, which is also Celestial's own
-     *   minimum — nothing to add;
-     * - a look-around is centered on a direction, not the zenith, so the whole disc sits in
-     *   the frame instead of surrounding it: there the sky has to *cover* the viewport, i.e.
-     *   the disc's radius must reach the frame's corner.
-     */
-    const horizonMinZoomFactor = useCallback((): number => {
-        const viewport = readViewport()
-
-        // Non-fitContainer embeds size the canvas themselves — no floor beyond Celestial's
-        if (!viewport || viewport.width <= 0 || viewport.height <= 0 || isDomeView(viewRef.current)) {
-            return 1
-        }
-
-        return computeHorizonCoverZoom(viewport.width, viewport.height)
-    }, [readViewport, viewRef])
-
-    /**
-     * The zoom the mode opens with: the cover floor tightened by INITIAL_HORIZON_ZOOM (the
-     * knob for "how close does /starmap start"). Applied once per display() — a rebuild
-     * drops back to the projection's base scale, so something has to set it — and only for
-     * a look-around; the whole-sky dome opens at the fitted base scale instead.
-     */
-    const applyStartupZoom = useCallback(() => {
-        const viewport = readViewport()
-
-        if (!viewport || isDomeView(viewRef.current)) {
-            return
-        }
-
-        try {
-            const current = readZoomFactor()
-            const target = computeHorizonStartZoom(viewport.width, viewport.height)
-
-            if (current != null && Math.abs(target / current - 1) > 0.001) {
-                Celestial.zoomBy(target / current)
-            }
-        } catch (error) {
-            console.warn(error)
-        }
-    }, [readViewport, viewRef])
-
-    /**
-     * Leaving the whole-sky dome for a look-around: make sure the sky covers the frame.
-     *
-     * The dome zoom is chosen so the entire 90°-radius hemisphere fits *inside* the
-     * viewport (that is the point of the dome view). Looked at from the side, that same
-     * scale leaves the sky sitting in the middle of the canvas as a bubble, with the
-     * projection's clip edge in plain sight — so the view is zoomed up to the look-around
-     * floor (horizonMinZoomFactor). It only ever zooms in; a visitor already above the
-     * floor is left alone.
-     */
-    const ensureLookAroundZoom = useCallback(() => {
-        if (settingsRef.current.viewMode !== 'horizon') {
-            return
-        }
-
-        try {
-            const current = readZoomFactor()
-            const minimum = horizonMinZoomFactor()
-
-            if (current != null && current < minimum) {
-                Celestial.zoomBy(minimum / current)
-            }
-        } catch (error) {
-            console.warn(error)
-        }
-    }, [settingsRef, horizonMinZoomFactor])
-
-    // At most one restore in flight, plus a bail-out counter — see
-    // MAX_VIEW_RESTORE_ATTEMPTS for why a plain time-based cooldown is not enough.
-    const viewRestorePendingRef = useRef<boolean>(false)
-    const viewRestoreAttemptsRef = useRef<number>(0)
-
-    // Safety net for anything that re-centers the map behind our back — Celestial's own
-    // zenith follow-up after display(), a projection rebuild, a stray rotate. Horizon mode
-    // has exactly one valid center at any moment, so a redraw that shows a different one is
-    // put back. rotate() redraws, so it must not be called from inside a redraw: the restore
-    // is deferred to the next task, the redraw it causes finds the center already in place,
-    // and the check settles. The counter bounds the (never observed) case of Celestial
-    // insisting on a center of its own.
-    const restoreHorizonView = useCallback(() => {
-        if (settingsRef.current.viewMode !== 'horizon' || viewRestorePendingRef.current) {
-            return
-        }
-
-        const current = Celestial.rotate?.() as [number, number, number] | undefined
-
-        if (!current) {
-            return
-        }
-
-        const wanted = viewToCenter(viewRef.current, settingsRef.current.geopos, dateRef.current ?? nowRef.current)
-
-        if (centerMatches(current, wanted)) {
-            // Pointed where it should be — the mechanism works, reset the bail-out
-            viewRestoreAttemptsRef.current = 0
-            return
-        }
-
-        if (viewRestoreAttemptsRef.current >= MAX_VIEW_RESTORE_ATTEMPTS) {
-            return
-        }
-
-        viewRestoreAttemptsRef.current += 1
-        viewRestorePendingRef.current = true
-
-        setTimeout(() => {
-            viewRestorePendingRef.current = false
-            applyHorizonView()
-        }, 0)
-    }, [settingsRef, dateRef, viewRef, applyHorizonView])
+        },
+        [horizon, settingsRef]
+    )
 
     // Single combined effect: initialise Celestial and (re-)display with objects.
     // viewMode and dsosFull changes rebuild the map: they change the projection/follow
     // target and the DSO data file — things Celestial.apply() can't live-patch.
     useEffect(() => {
         const ref = containerRef
+
+        // The instant this (re)build is computed for — refreshed again right before
+        // display() in case the init had to wait for the container's first layout
+        nowRef.current = new Date()
 
         const localConfig = {
             ...customConfig,
@@ -462,12 +236,26 @@ export const useCelestialDisplay = ({
             } else {
                 // Horizon mode points itself: the config center is the visitor's view
                 // direction (the whole-sky dome unless a permalink says otherwise)
-                localConfig.center = viewToCenter(
-                    viewRef.current,
-                    settingsRef.current.geopos,
-                    dateRef.current ?? new Date()
-                )
+                localConfig.center = viewToCenter(viewRef.current, settingsRef.current.geopos, resolveDate())
             }
+        }
+
+        // Load callback of the (otherwise inert) data layer registered below: binds the
+        // portal objects' GeoJSON into Celestial.container so findHitPoint can hit-test
+        // them, then redraws so the addCallback paints them.
+        const bindPortalObjects = () => {
+            if (objectsJSON) {
+                const skyPoint = Celestial.getData(objectsJSON, defaultConfig.transform)
+
+                Celestial.container
+                    .selectAll('.sky-points')
+                    .data(skyPoint.features)
+                    .enter()
+                    .append('path')
+                    .attr('class', 'sky-points')
+            }
+
+            Celestial.redraw()
         }
 
         const initCelestial = () => {
@@ -508,20 +296,13 @@ export const useCelestialDisplay = ({
 
             Celestial.clear()
 
-            // The layer registration only matters for its load callback (it binds the
-            // portal objects' GeoJSON into Celestial.container for hit-testing) — the
-            // actual drawing happens in drawCustomLayers via addCallback below, at the
-            // END of Celestial's redraw cycle (its own layer-redraw hook runs before the
-            // daylight/horizon fills, which would paint over everything in horizon mode).
+            // The layer registration only matters for its load callback (see
+            // bindPortalObjects) — the actual drawing happens in drawCustomLayers via
+            // addCallback below, at the END of Celestial's redraw cycle (its own
+            // layer-redraw hook runs before the daylight/horizon fills, which would paint
+            // over everything in horizon mode).
             if (objects?.length || showSettings) {
-                Celestial.add(
-                    {
-                        callback: handleCallback,
-                        redraw: () => undefined,
-                        type: 'Point'
-                    },
-                    objectsJSON ? [objectsJSON] : []
-                )
+                Celestial.add({ callback: bindPortalObjects, redraw: () => undefined, type: 'Point' })
             }
 
             nowRef.current = new Date()
@@ -531,36 +312,24 @@ export const useCelestialDisplay = ({
             // landscape/desktop, where the canvas already overflows the container)
             fillContainerHeight()
 
-            // Re-apply the selected moment after a rebuild — Celestial.display always
-            // starts at "now" (safe here: location:true guarantees the hidden form exists)
-            if (showSettings && dateRef.current) {
-                try {
-                    Celestial.skyview(buildSkyviewPatch(dateRef.current))
-                } catch (error) {
-                    console.warn(error)
-                }
-            }
-
             if (showSettings && settingsRef.current.viewMode === 'horizon') {
                 try {
                     // Fit the whole horizon circle (plus label margin) into the visible
                     // area — only meaningful for the whole-sky view; a permalink that shares
                     // a look-around direction brings its own zoom instead
                     if (isDomeView(viewRef.current)) {
-                        fitHorizonToView(settingsRef.current.geopos, dateRef.current ?? new Date(), readViewport())
+                        fitHorizonToView(settingsRef.current.geopos, resolveDate(), readViewport())
                     } else if (!permalinkZoomRef.current) {
                         // A look-around with no zoom of its own (the opening view, or a
                         // permalink that only shares a direction): open at the startup zoom
                         // rather than leaving the sky as a bubble in the middle
-                        applyStartupZoom()
+                        horizon.applyStartupZoom()
                     }
 
-                    // The daylight pass needs Celestial's own zenith for this instant
-                    syncCelestialZenith(dateRef.current ?? new Date())
-
-                    // skyview() above re-read the date and redrew — point the map back at
-                    // the visitor's direction for that instant
-                    applyHorizonView()
+                    // display() always starts at "now" with a zenith of its own: hand it
+                    // the instant (a selected date or the captured now) and its zenith,
+                    // then point the map back at the visitor's direction for that instant
+                    showMoment(resolveDate())
 
                     // Take over navigation: Celestial re-attaches its free equatorial
                     // trackball on every display(), and it would drag the zenith off the
@@ -573,14 +342,18 @@ export const useCelestialDisplay = ({
                 } catch (error) {
                     console.warn(error)
                 }
+            } else if (showSettings && dateRef.current) {
+                // Re-apply the selected moment after a rebuild — display() always starts
+                // at "now" (safe here: location:true guarantees the hidden form exists)
+                showMoment(dateRef.current)
             }
 
             // Restore the permalink's zoom once, after the first display
             if (permalinkZoomRef.current) {
                 try {
-                    const current = Celestial.zoomBy?.()
+                    const current = readZoomFactor()
 
-                    if (typeof current === 'number' && current > 0) {
+                    if (current != null) {
                         Celestial.zoomBy(permalinkZoomRef.current / current)
                     }
                 } catch (error) {
@@ -597,12 +370,35 @@ export const useCelestialDisplay = ({
                     // where custom drawing lands on top of the daylight/horizon fills
                     drawCustomLayersRef.current()
 
-                    restoreHorizonView()
+                    horizon.restoreHorizonView()
                     onRedraw()
                 })
             }
 
             return true
+        }
+
+        // Undo what display() wired up globally: the end-of-redraw callback (a single
+        // slot — a stale one would keep drawing a torn-down map's layers) and Celestial's
+        // own window-resize listener, which would otherwise resize a detached canvas.
+        const teardown = () => {
+            clearPopupTimers()
+
+            if (!initializedRef.current) {
+                return
+            }
+
+            initializedRef.current = false
+
+            try {
+                Celestial.addCallback(null)
+
+                if (typeof d3 !== 'undefined') {
+                    d3.select(window).on('resize', null)
+                }
+            } catch (error) {
+                console.warn(error)
+            }
         }
 
         if (!initCelestial()) {
@@ -612,13 +408,11 @@ export const useCelestialDisplay = ({
 
             return () => {
                 cancelAnimationFrame(frameId)
-                clearPopupTimers()
+                teardown()
             }
         }
 
-        return () => {
-            clearPopupTimers()
-        }
+        return teardown
     }, [objects, zoom, language, settings.viewMode, settings.dsosFull])
 
     // Keep the map fitted to its container on resize. Celestial has its own window-resize
@@ -632,7 +426,7 @@ export const useCelestialDisplay = ({
 
         const container = containerRef.current
 
-        const handleResize = () => {
+        const applyResize = () => {
             if (!initializedRef.current) {
                 return
             }
@@ -659,32 +453,35 @@ export const useCelestialDisplay = ({
             // so any size change re-lays the canvas out — see computeHorizonCanvasLayout.
             // The padding goes through apply() (a one-level merge into `background`), the
             // projection width through resize(); each redraws once, then the view is
-            // restored without the zoom animation.
+            // restored. Animations are already off in this mode's config, so nothing to
+            // toggle.
             if (horizonMode) {
                 const layout = computeHorizonCanvasLayout(width, height)
                 const zoomFactor = readZoomFactor()
 
-                withoutAnimations(() => {
-                    Celestial.apply({ background: { width: layout.backgroundWidth } })
-                    Celestial.resize({ width: layout.width })
+                horizon.withOwnUpdate(() =>
+                    withoutAnimations(() => {
+                        Celestial.apply({ background: { width: layout.backgroundWidth } })
+                        Celestial.resize({ width: layout.width })
 
-                    if (isDomeView(viewRef.current)) {
-                        // Whole-sky view: re-fit the dome to the new area
-                        fitHorizonToView(settingsRef.current.geopos, dateRef.current ?? new Date(), readViewport())
-                    } else if (zoomFactor != null) {
-                        // Looking around: resize() drops back to the base zoom level, so the
-                        // visitor's own zoom is measured before and re-applied after
-                        const current = readZoomFactor()
+                        if (isDomeView(viewRef.current)) {
+                            // Whole-sky view: re-fit the dome to the new area
+                            fitHorizonToView(settingsRef.current.geopos, resolveDate(), readViewport())
+                        } else if (zoomFactor != null) {
+                            // Looking around: resize() drops back to the base zoom level, so the
+                            // visitor's own zoom is measured before and re-applied after
+                            const current = readZoomFactor()
 
-                        if (current != null && Math.abs(zoomFactor / current - 1) > 0.001) {
-                            Celestial.zoomBy(zoomFactor / current)
+                            if (current != null && Math.abs(zoomFactor / current - 1) > 0.001) {
+                                Celestial.zoomBy(zoomFactor / current)
+                            }
                         }
-                    }
 
-                    // resize() rebuilds the projection from the config center — re-assert
-                    // the view direction and its roll
-                    applyHorizonView()
-                }, true)
+                        // resize() rebuilds the projection from the config center — re-assert
+                        // the view direction and its roll
+                        horizon.applyHorizonView()
+                    }, true)
+                )
 
                 return
             }
@@ -699,9 +496,8 @@ export const useCelestialDisplay = ({
             // Celestial.resize() rebuilds the projection at the config's base zoomlevel,
             // discarding the current zoom. A resize now also happens on every settings-
             // sidebar toggle (the docked sidebar changes the map's width), so the view
-            // must survive it: sky mode restores the user's zoom factor, horizon mode
-            // re-fits the dome to the new area. Both without the zoom animation — a
-            // sidebar toggle should feel like a reflow, not a 1–2 s zoom flight.
+            // must survive it: the user's zoom factor is restored, without the zoom
+            // animation — a sidebar toggle should feel like a reflow, not a 1–2 s zoom flight.
             const zoomFactor = readZoomFactor()
 
             Celestial.resize({ width })
@@ -714,11 +510,28 @@ export const useCelestialDisplay = ({
             })
         }
 
-        const observer = new ResizeObserver(handleResize)
+        // One layout pass per animation frame, latest size wins: a live drag-resize (or the
+        // sidebar sliding open) reports many sizes in quick succession, and each pass is
+        // several synchronous full redraws. Deferring out of the observer callback also
+        // keeps resize()'s own canvas size change from re-entering the observer loop.
+        let frameId = 0
+
+        const observer = new ResizeObserver(() => {
+            if (!frameId) {
+                frameId = requestAnimationFrame(() => {
+                    frameId = 0
+                    applyResize()
+                })
+            }
+        })
+
         observer.observe(container)
 
-        return () => observer.disconnect()
-    }, [fitContainer, fillContainerHeight, readViewport])
+        return () => {
+            cancelAnimationFrame(frameId)
+            observer.disconnect()
+        }
+    }, [fitContainer, showSettings, fillContainerHeight, readViewport, resolveDate, horizon])
 
     // Apply settings-panel toggles live via Celestial.apply(), which merges the partial
     // config and redraws in place — no Celestial.clear()/display() rebuild, so the map
@@ -736,38 +549,35 @@ export const useCelestialDisplay = ({
         Celestial.apply(buildLiveSettingsPatch(settings))
     }, [showSettings, settings])
 
-    // Live date/location updates (FE-2): patch the running map via Celestial.skyview()
-    // instead of rebuilding it. The initial values are already in the display config.
-    // Same StrictMode-safe principle as the settings patch above: remember the last
-    // applied place+moment key (seeded with the mount values, which display() already
-    // used) and only call skyview() when it actually changes.
+    // Live date/location updates (FE-2): patch the running map instead of rebuilding it.
+    // The initial values are already in the display config. Same StrictMode-safe principle
+    // as the settings patch above: remember the last applied place+moment key (seeded with
+    // the mount values, which display() already used) and only act when it actually
+    // changes. The place is only sent along when it changed — a date pick alone must not
+    // pay for a location patch.
     const [observerLat, observerLon] = settings.geopos
     const skyviewKey = `${observerLat}_${observerLon}_${date?.getTime() ?? 'now'}`
     const appliedSkyviewKeyRef = useRef(skyviewKey)
+    const appliedGeoposRef = useRef<[number, number]>([observerLat, observerLon])
     useEffect(() => {
         if (!showSettings || !initializedRef.current || appliedSkyviewKeyRef.current === skyviewKey) {
             return
         }
 
+        const [appliedLat, appliedLon] = appliedGeoposRef.current
+        const placeChanged = appliedLat !== observerLat || appliedLon !== observerLon
+
         appliedSkyviewKeyRef.current = skyviewKey
+        appliedGeoposRef.current = [observerLat, observerLon]
         nowRef.current = new Date()
 
-        try {
-            Celestial.skyview(buildSkyviewPatch(date ?? nowRef.current, [observerLat, observerLon]))
-            syncCelestialZenith(date ?? nowRef.current)
-            // The visitor keeps looking the same way; where that points in the sky doesn't
-            applyHorizonView()
-        } catch (error) {
-            console.warn(error)
-        }
-    }, [showSettings, observerLat, observerLon, date, applyHorizonView, syncCelestialZenith])
+        showMoment(date ?? nowRef.current, placeChanged ? [observerLat, observerLon] : undefined)
+    }, [showSettings, observerLat, observerLon, date, nowRef, showMoment])
 
     // "Now" mode keeps up with real time: once a minute advance nowRef and hand the new
-    // instant to Celestial. Date-only skyview() leaves the location alone and just redraws
-    // (the visitor's center is untouched); horizon mode then re-points the map, because the
-    // equatorial direction of a fixed azimuth/altitude drifts with the sky. Sun/Moon/planet
-    // hit-testing and the horizon overlay key their caches by the instant, so they refresh
-    // on their own.
+    // instant to Celestial (the visitor's center is untouched in sky mode; horizon mode
+    // re-points the map — see showMoment). Sun/Moon/planet hit-testing and the horizon
+    // overlay key their caches by the instant, so they refresh on their own.
     const handleLiveTick = useCallback(() => {
         if (!initializedRef.current || dateRef.current) {
             return
@@ -775,19 +585,11 @@ export const useCelestialDisplay = ({
 
         nowRef.current = new Date()
 
-        // The redraw(s) this triggers would otherwise arm the popup's auto-hide timer in
+        // The redraws this triggers would otherwise arm the popup's auto-hide timer in
         // the addCallback — an open info panel must not vanish by itself once a minute.
-        // The grace covers horizon mode's short zenith-follow rotation as well.
         extendAutoHideGrace(Date.now() + LIVE_TICK_HIDE_GRACE_MS)
-
-        try {
-            Celestial.skyview(buildSkyviewPatch(nowRef.current))
-            syncCelestialZenith(nowRef.current)
-            applyHorizonView()
-        } catch (error) {
-            console.warn(error)
-        }
-    }, [dateRef, extendAutoHideGrace, applyHorizonView, syncCelestialZenith])
+        showMoment(nowRef.current)
+    }, [dateRef, nowRef, extendAutoHideGrace, showMoment])
 
     useLiveClock(Boolean(showSettings) && date == null && timeRate <= TIME_RATE_MIN, handleLiveTick)
 
@@ -835,13 +637,7 @@ export const useCelestialDisplay = ({
 
             const startedAt = performance.now()
 
-            try {
-                Celestial.skyview(buildSkyviewPatch(nowRef.current))
-                syncCelestialZenith(nowRef.current)
-                applyHorizonView()
-            } catch (error) {
-                console.warn(error)
-            }
+            showMoment(nowRef.current)
 
             redrawInterval = Math.min(
                 MAX_REDRAW_INTERVAL_MS,
@@ -850,7 +646,7 @@ export const useCelestialDisplay = ({
         }
 
         return () => cancelAnimationFrame(frameId)
-    }, [showSettings, timeRate, extendAutoHideGrace, applyHorizonView, syncCelestialZenith])
+    }, [showSettings, timeRate, nowRef, extendAutoHideGrace, showMoment])
 
     // Every zoom gesture funnels through here — the toolbar's +/−, the wheel and the
     // pinch — so horizon mode's zoom-out floor (horizonMinZoomFactor) is enforced in one
@@ -869,7 +665,7 @@ export const useCelestialDisplay = ({
                 const current = readZoomFactor()
 
                 if (current != null) {
-                    applied = Math.max(factor, Math.min(1, horizonMinZoomFactor() / current))
+                    applied = Math.max(factor, Math.min(1, horizon.horizonMinZoomFactor() / current))
                 }
             }
 
@@ -883,7 +679,7 @@ export const useCelestialDisplay = ({
                 console.warn(error)
             }
         },
-        [showSettings, settingsRef, horizonMinZoomFactor]
+        [showSettings, settingsRef, horizon]
     )
 
     const zoomIn = useCallback(() => zoomBy(ZOOM_STEP_IN), [zoomBy])
@@ -898,15 +694,14 @@ export const useCelestialDisplay = ({
         }
 
         const current = settingsRef.current
-        const when = dateRef.current ?? new Date()
 
         if (current.viewMode === 'horizon') {
             // Also the way back out of a look-around: straight up, whole sky, north up
             viewRef.current = DOME_VIEW
 
             withoutAnimations(() => {
-                Celestial.rotate({ center: viewToCenter(DOME_VIEW, current.geopos, when) })
-                fitHorizonToView(current.geopos, when, readViewport())
+                horizon.applyHorizonView()
+                fitHorizonToView(current.geopos, resolveDate(), readViewport())
             }, true)
 
             return
@@ -919,19 +714,17 @@ export const useCelestialDisplay = ({
                 Celestial.zoomBy(1 / zoomFactor)
             }
         })
-    }, [settingsRef, dateRef, viewRef, readViewport])
+    }, [settingsRef, viewRef, readViewport, resolveDate, horizon])
 
     return {
         initializedRef,
-        nowRef,
-        resolveDate,
         drawCustomLayersRef,
         zoomIn,
         zoomOut,
         zoomBy,
-        applyHorizonView,
-        measureViewScale,
-        ensureLookAroundZoom,
+        applyHorizonView: horizon.applyHorizonView,
+        measureViewScale: horizon.measureViewScale,
+        ensureLookAroundZoom: horizon.ensureLookAroundZoom,
         fitView
     }
 }

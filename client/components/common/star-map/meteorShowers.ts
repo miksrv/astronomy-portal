@@ -1,3 +1,7 @@
+import { toCelestialLon } from './angles'
+import { fetchJson } from './catalogs'
+import { FONT } from './config'
+
 /**
  * Meteor shower radiants (FE-9 of features/star-atlas-upgrade.md): a small static
  * catalog of the major annual showers per the IMO working list — radiant coordinates
@@ -81,7 +85,7 @@ export const drawMeteorRadiants = (options: { showers: MeteorShower[]; date: Dat
     const context = Celestial.context
 
     for (const shower of active) {
-        const coordinates: [number, number] = [shower.ra > 180 ? shower.ra - 360 : shower.ra, shower.dec]
+        const coordinates: [number, number] = [toCelestialLon(shower.ra), shower.dec]
 
         if (!Celestial.clip(coordinates)) {
             continue
@@ -113,7 +117,7 @@ export const drawMeteorRadiants = (options: { showers: MeteorShower[]; date: Dat
         }
 
         Celestial.setTextStyle({
-            font: `${isPeak ? 'bold ' : ''}11px -apple-system, system-ui, sans-serif`,
+            font: `${isPeak ? 'bold ' : ''}11px ${FONT}`,
             fill: color,
             align: 'left',
             baseline: 'bottom'
@@ -125,13 +129,11 @@ export const drawMeteorRadiants = (options: { showers: MeteorShower[]; date: Dat
 let showersPromise: Promise<MeteorShower[]> | null = null
 
 export const loadMeteorShowers = (): Promise<MeteorShower[]> => {
-    showersPromise ??= fetch('/data/meteor-showers.json')
-        .then((response) => response.json() as Promise<MeteorShower[]>)
-        .catch((error) => {
-            showersPromise = null
-            console.error(error)
-            return []
-        })
+    showersPromise ??= fetchJson<MeteorShower[]>('/data/meteor-showers.json').catch((error) => {
+        showersPromise = null
+        console.error(error)
+        return []
+    })
 
     return showersPromise
 }

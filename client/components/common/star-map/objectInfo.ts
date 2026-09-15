@@ -3,6 +3,8 @@ import SunCalc from 'suncalc'
 
 import { getMoonIllumination, getMoonPhase } from '@/utils/moon'
 
+import { normalizeDegrees, toCelestialLon } from './angles'
+
 /**
  * Astronomy data for the click-to-inspect info panel (FE-8 of
  * features/star-atlas-upgrade.md). Everything here is computed independently of
@@ -44,7 +46,8 @@ export type ObjectInfoData = {
     isActive?: boolean
 }
 
-const normalizeRa = (raDegrees: number): number => ((raDegrees % 360) + 360) % 360
+/** RA in degrees wrapped to [0, 360) — the range ObjectInfoData and BodyPosition promise. */
+const normalizeRa = normalizeDegrees
 
 const COMPASS_KEYS = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'] as const
 
@@ -52,7 +55,7 @@ export type CompassKey = (typeof COMPASS_KEYS)[number]
 
 /** Nearest compass point for an azimuth (degrees from north, eastward) — e.g. 182° → 's'. */
 export const azimuthToCompassKey = (azimuth: number): CompassKey =>
-    COMPASS_KEYS[Math.round((((azimuth % 360) + 360) % 360) / 45) % COMPASS_KEYS.length] as CompassKey
+    COMPASS_KEYS[Math.round(normalizeDegrees(azimuth) / 45) % COMPASS_KEYS.length] as CompassKey
 
 /**
  * J2000 RA/Dec (degrees) → altitude/azimuth (degrees) for an observer and instant.
@@ -75,29 +78,54 @@ export const equatorialToHorizontal = (
 }
 
 /**
- * Azimuth/altitude (degrees) → J2000 RA/Dec (degrees, RA in [-180, 180) as the
+ * A vector's time stamp is carried along by astronomy-engine but never read by the
+ * HOR→EQJ path (the rotation matrix owns the instant), so horizontal unit vectors can be
+ * stamped with any epoch and reused for every instant.
+ */
+const VECTOR_EPOCH = new Astronomy.AstroTime(0)
+
+/**
+ * Unit vector of a horizontal direction (degrees), refraction reversed — the part of a
+ * horizontal → equatorial conversion that depends on neither the place nor the instant.
+ * Precompute it once per sample and hand it to the converter from
+ * createHorizontalToEquatorial for every frame.
+ */
+export const horizontalToVector = (azimuth: number, altitude: number): Astronomy.Vector =>
+    Astronomy.VectorFromHorizon(new Astronomy.Spherical(altitude, azimuth, 1), VECTOR_EPOCH, 'normal')
+
+/**
+ * Converter from horizontal unit vectors (horizontalToVector) to J2000 [ra, dec] in
+ * degrees, RA in the (-180, 180] range the d3-celestial data files use, for one place and
+ * instant. The HOR→EQJ rotation — the expensive part — is computed once here; each
+ * conversion is then a matrix product plus a cartesian → spherical step, which is what
+ * lets the ground silhouette (~900 points) be re-pinned to the sky on every time-flow frame.
+ */
+export const createHorizontalToEquatorial = (
+    geopos: [number, number],
+    date: Date
+): ((vector: Astronomy.Vector) => [number, number]) => {
+    const observer = new Astronomy.Observer(geopos[0], geopos[1], 0)
+    const rotation = Astronomy.Rotation_HOR_EQJ(Astronomy.MakeTime(date), observer)
+
+    return (vector) => {
+        const equatorial = Astronomy.EquatorFromVector(Astronomy.RotateVector(rotation, vector))
+
+        return [toCelestialLon(equatorial.ra * 15), equatorial.dec]
+    }
+}
+
+/**
+ * Azimuth/altitude (degrees) → J2000 RA/Dec (degrees, RA in (-180, 180] as the
  * d3-celestial data files use). Used to pin compass labels and the ground silhouette
  * to the horizon — Celestial.mapProjection() expects equatorial coordinates.
+ * Single-point convenience over createHorizontalToEquatorial.
  */
 export const horizontalToEquatorial = (
     azimuth: number,
     altitude: number,
     geopos: [number, number],
     date: Date
-): [number, number] => {
-    const time = Astronomy.MakeTime(date)
-    const observer = new Astronomy.Observer(geopos[0], geopos[1], 0)
-    const vector = Astronomy.VectorFromHorizon(new Astronomy.Spherical(altitude, azimuth, 1), time, 'normal')
-    const rotation = Astronomy.Rotation_HOR_EQJ(time, observer)
-    const equatorial = Astronomy.EquatorFromVector(Astronomy.RotateVector(rotation, vector))
-
-    let ra = equatorial.ra * 15
-    if (ra > 180) {
-        ra -= 360
-    }
-
-    return [ra, equatorial.dec]
-}
+): [number, number] => createHorizontalToEquatorial(geopos, date)(horizontalToVector(azimuth, altitude))
 
 const PLANET_BODIES = [
     Astronomy.Body.Mercury,
