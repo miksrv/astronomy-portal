@@ -1,15 +1,15 @@
 import React, { useEffect, useId, useRef, useState } from 'react'
-import { Button, cn, Container, Icon, Skeleton } from 'simple-react-ui-kit'
+import { Button, cn, Container, Skeleton } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API } from '@/api'
-import { FitViewIcon, HorizonIcon, ZoomInIcon, ZoomOutIcon } from '@/components/icons'
+import { FitViewIcon, ZoomInIcon, ZoomOutIcon } from '@/components/icons'
 import { createMediumPhotoUrl } from '@/utils/photos'
 
-import { MOBILE_MAX_WIDTH, POPUP_ARROW_SIZE, POPUP_HEIGHT, POPUP_WIDTH } from './constants'
+import { POPUP_ARROW_SIZE, POPUP_HEIGHT, POPUP_WIDTH } from './constants'
 import { StarMapProps } from './StarMap'
 import StarMapGeoNudge from './StarMapGeoNudge'
 import StarMapLinkPanel from './StarMapLinkPanel'
@@ -69,13 +69,8 @@ const StarMapRender: React.FC<StarMapProps> = ({
         setDate: location.setDate
     })
 
-    const [settingsOpen, setSettingsOpen] = useState<boolean>(() => {
-        if (!showSettings) {
-            return false
-        }
-        // On desktop — open by default; on mobile — closed
-        return typeof window !== 'undefined' && window.innerWidth > MOBILE_MAX_WIDTH
-    })
+    // Closed on every screen: the map is what a visitor comes for, the panel is one tap away
+    const [settingsOpen, setSettingsOpen] = useState(false)
     const [searchOpen, setSearchOpen] = useState(false)
     // "Hide UI" (screenshot mode): hides every overlay control, leaving only the sky
     // and a single restore button — the map itself stays fully interactive
@@ -180,14 +175,6 @@ const StarMapRender: React.FC<StarMapProps> = ({
     })
 
     const isHorizon = settings.viewMode === 'horizon'
-    const toggleViewMode = () => updateSettings({ viewMode: isHorizon ? 'sky' : 'horizon' })
-    const viewModeLabel = isHorizon
-        ? t('components.common.star-map.toolbar.sky-map', 'Карта неба')
-        : t('components.common.star-map.toolbar.sky-above', 'Небо над вами')
-    // The 54px FAB circle fits only a very short caption; the full label stays in title/aria
-    const viewModeShortLabel = isHorizon
-        ? t('components.common.star-map.toolbar.sky-map-short', 'Карта')
-        : t('components.common.star-map.toolbar.sky-above-short', 'Над вами')
 
     const { selectSearchItem } = useCanvasInteraction({
         containerRef: ref,
@@ -207,7 +194,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
     // lower half of the map, where the popup would otherwise show through
     const sheetOpen = settingsOpen || searchOpen || Boolean(manualLinkUrl)
 
-    // Targets for the toolbar buttons' aria-controls (their visible captions are hidden on desktop)
+    // Targets for the icon-only toolbar buttons' aria-controls
     const panelIdBase = useId()
     const settingsPanelId = `${panelIdBase}-settings`
     const searchPanelId = `${panelIdBase}-search`
@@ -267,11 +254,10 @@ const StarMapRender: React.FC<StarMapProps> = ({
             )}
         >
             {showSettings && (
-                // One rail for every map action. Desktop: a single vertical glass column in
-                // the top-left corner (view controls, then panels). Mobile: the wrapper
-                // is display:contents, so the view controls stay a small top-left rail while
-                // the panel buttons become the bottom action bar. In hide-UI mode the rail
-                // collapses to its single "show UI" toggle (.mapRailHidden).
+                // One rail for every map action, on every screen: a single vertical glass
+                // column in the top-left corner (view controls, then the panel buttons).
+                // Mobile only grows the buttons to a 40px thumb target. In hide-UI mode the
+                // rail collapses to its single "show UI" toggle (.mapRailHidden).
                 <div className={cn(styles.mapRail, uiHidden && styles.mapRailHidden)}>
                     <div
                         className={styles.viewControls}
@@ -335,6 +321,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
                         />
                     </div>
 
+                    {/* Panels: settings, sky search, permalink */}
                     <div className={styles.mapToolbar}>
                         <Button
                             icon={'Settings'}
@@ -345,11 +332,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
                             aria-controls={settingsPanelId}
                             className={cn(styles.toolbarButton, settingsOpen && styles.toolbarButtonActive)}
                             onClick={() => setSettingsOpen((prev) => !prev)}
-                        >
-                            <span className={styles.toolbarLabel}>
-                                {t('components.common.star-map.toolbar.settings', 'Настройки')}
-                            </span>
-                        </Button>
+                        />
                         <Button
                             icon={'Search'}
                             mode={'secondary'}
@@ -359,24 +342,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
                             aria-controls={searchPanelId}
                             className={cn(styles.toolbarButton, searchOpen && styles.toolbarButtonActive)}
                             onClick={() => setSearchOpen((prev) => !prev)}
-                        >
-                            <span className={styles.toolbarLabel}>
-                                {t('components.common.star-map.toolbar.search', 'Поиск')}
-                            </span>
-                        </Button>
-                        {/* Mobile-only raised FAB (hidden by CSS on desktop, where the mode toggle
-                        lives in the sidebar and the quick bar): sky map ↔ the sky above you */}
-                        <Button
-                            mode={'primary'}
-                            title={viewModeLabel}
-                            aria-label={viewModeLabel}
-                            aria-pressed={isHorizon}
-                            className={cn(styles.toolbarButton, styles.toolbarFabButton)}
-                            onClick={toggleViewMode}
-                        >
-                            {isHorizon ? <Icon name={'Map'} /> : <HorizonIcon />}
-                            <span className={styles.toolbarLabel}>{viewModeShortLabel}</span>
-                        </Button>
+                        />
                         <Button
                             icon={linkCopied ? 'CheckCircle' : 'Link'}
                             mode={'secondary'}
@@ -384,13 +350,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
                             aria-label={linkTitle}
                             className={styles.toolbarButton}
                             onClick={handleCopyLink}
-                        >
-                            <span className={styles.toolbarLabel}>
-                                {linkCopied
-                                    ? t('components.common.star-map.link-copied-short', 'Готово')
-                                    : t('components.common.star-map.toolbar.link', 'Ссылка')}
-                            </span>
-                        </Button>
+                        />
                     </div>
                 </div>
             )}

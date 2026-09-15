@@ -60,8 +60,9 @@ const CelestialPage: NextPage<object> = () => {
                 />
             </Head>
             {/* One flex column sized to the viewport (see starmap.module.sass). The intro is
-                rendered BEFORE the map so crawlers meet the H1 + copy first; on desktop it
-                floats over the map's top-right corner, on mobile it is laid out under it. */}
+                rendered BEFORE the map so crawlers meet the H1 + copy first; it floats over
+                the map's top-right corner, and is hidden on mobile where the map takes the
+                whole screen. */}
             <div className={styles.page}>
                 <StarMapIntro
                     title={title}

@@ -52,11 +52,9 @@
         flex-direction: column
         gap: 4px
 
-    // Icon-only square, same footprint as .toolbarButton but never turned into the
-    // labelled bottom-bar button on mobile (the view controls stay a rail there).
-    // Sized from the kit's own control height: `.button.medium` sets that height and
-    // outranks a single class here, so a smaller value would only squash the width and
-    // leave the button a tall rectangle.
+    // Icon-only square. Sized from the kit's own control height: `.button.medium` sets
+    // that height and outranks a single class here, so a smaller value would only squash
+    // the width and leave the button a tall rectangle.
     .railButton
         height: var(--size-control-small) !important
         width: var(--size-control-small)
@@ -74,8 +72,8 @@
             height: 18px
             margin-right: 0
 
-    // Panel buttons (settings/search/link, plus the mobile-only "Now"): a plain column
-    // inside the rail on desktop, the bottom action bar on mobile (designer's mockup)
+    // Panel buttons (settings/search/link): the second group of the rail, same column
+    // on every screen — mobile only enlarges the buttons (see the mobile block below)
     .mapToolbar
         display: flex
         flex-direction: column
@@ -88,8 +86,8 @@
         padding: 0
         justify-content: center
 
-        // The kit Button drops its icon sizing once it has children (the mobile label),
-        // letting flex squeeze the svg — pin the icon size explicitly
+        // The kit Button drops its icon sizing once it has children (the quick bar passes
+        // its glyphs as children), letting flex squeeze the svg — pin the size explicitly
         svg
             width: 18px
             min-width: 18px
@@ -99,13 +97,6 @@
     .toolbarButtonActive
         background-color: var(--button-secondary-background-active) !important
 
-    // Text under the icons — mobile only, the desktop rail is icon-only
-    .toolbarLabel
-        display: none
-
-    // View-mode FAB is mobile-only: on desktop the mode toggle lives in the sidebar/quick bar
-    .toolbarFabButton
-        display: none
 
     // Geolocation nudge card (StarMapGeoNudge): top-center of the map on desktop, under
     // the status chip on mobile. Same glass surface as the rail.
@@ -510,78 +501,17 @@
             margin: 0
             text-align: right
 
-    // Mobile (mockup): bottom action bar, panels and popup become bottom sheets
+    // Mobile: the rail stays exactly where it is on desktop (only its buttons grow to a
+    // thumb target); the panels and the popup become bottom sheets
     @media (max-width: 768px)
-        // The rail dissolves: its two groups position themselves against #celestial-map
-        .mapRail
-            display: contents
-
-        // Small vertical rail where Celestial's own zoom buttons used to sit; the status
-        // chip starts right of it (see .statusChip below)
-        .viewControls
-            position: absolute
-            top: 10px
-            left: 10px
-            z-index: starmap.$z-controls
-            padding: 4px
-            border-radius: 10px
-            +starmap.glass
-
         // Thumb-sized targets: the kit's small control is 26px, well under the 40px a
         // touch UI needs. Real boxes rather than an invisible ::before halo, because the
         // 4px gaps between neighbours leave no room for one without overlapping hits.
         // The rail grows with them, which is what $rail-width-mobile accounts for.
-        .railButton
+        .railButton, .toolbarButton
             height: 40px !important
             width: 40px
             min-width: 40px
-
-        .mapToolbar
-            position: absolute
-            bottom: 0
-            left: 0
-            right: 0
-            z-index: starmap.$z-controls
-            flex-direction: row
-            align-items: stretch
-            gap: 0
-            padding: 6px 8px calc(6px + env(safe-area-inset-bottom))
-            border-radius: 12px 12px 0 0
-            +starmap.glass($shadow: 0 -2px 12px rgba(0, 0, 0, 0.4))
-
-        .toolbarButton
-            flex: 1
-            flex-direction: column
-            gap: 2px
-            height: auto
-            width: auto
-            min-width: 0
-            padding: 4px 2px
-            background-color: transparent
-
-        .toolbarLabel
-            display: block
-            font-size: 10px
-            line-height: 1.2
-
-        // Raised primary circle in the middle of the bar (mockup's FAB): sky map ↔ sky above
-        .toolbarFabButton
-            display: flex
-            flex: 0 0 auto
-            align-self: center
-            width: 54px
-            min-width: 54px
-            height: 54px
-            min-height: 54px
-            border-radius: 50%
-            margin-top: -24px
-            background-color: var(--color-main)
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45)
-
-            svg
-                width: 20px
-                min-width: 20px
-                height: 20px
 
         // Under the status chip, right of the view-controls rail; text and buttons stack
         .geoNudge
@@ -608,12 +538,12 @@
             max-width: none
             justify-content: center
 
-        // Horizontally scrollable strip right above the action bar; hidden while a
-        // bottom sheet (settings/search/link) occupies the same spot
+        // Horizontally scrollable strip along the bottom edge; hidden while a bottom
+        // sheet (settings/search/link) occupies the same spot
         .quickBar
             left: 8px
             right: 8px
-            bottom: calc(#{starmap.$action-bar-height} + env(safe-area-inset-bottom))
+            bottom: starmap.$mobile-bottom-inset
             transform: none
             justify-content: flex-start
             overflow-x: auto
@@ -634,29 +564,31 @@
         .quickBarSheetOpen
             display: none
 
-        .searchPanel
+        // Full-width bottom sheets, with the same inset on every side as the strip
+        // below them
+        .searchPanel, .linkPanel
             top: auto
             left: 8px
             right: 8px
-            bottom: starmap.$action-bar-height
+            bottom: starmap.$mobile-bottom-inset
             width: auto
             max-width: none
 
-        .linkPanel
-            top: auto
-            left: 8px
-            right: 8px
-            bottom: starmap.$action-bar-height
-            width: auto
-            max-width: none
+        // Keeps the search input visible above the fold of the sheet, and the sheet itself
+        // clear of the rail, which paints over it (see $rail-bottom-mobile)
+        .searchResults
+            max-height: 180px
 
-        // The popup docks as a bottom card above the toolbar; !important beats the
-        // JS-computed inline left/top used for the anchored desktop placement
+        // The popup docks as a full-width bottom card on the same inset as the sheets,
+        // covering the quick-bar strip while it is up (it is the topmost layer anyway) —
+        // stacked above the strip instead, a tall info card would reach the rail;
+        // !important beats the JS-computed inline left/top used for the anchored desktop
+        // placement
         .popup
             left: 8px !important
             right: 8px
             top: auto !important
-            bottom: starmap.$action-bar-height + 4px
+            bottom: starmap.$mobile-bottom-inset
             width: auto
 
         .popupInfo
@@ -676,9 +608,9 @@
             bottom: -12px
             left: -12px
 
-        // A bottom sheet (settings/search/link, z 6) and the object popup (z 10) dock to
-        // the same spot above the action bar; StarMapRender adds this class to
-        // #celestial-map while a sheet is open so the popup can't paint over it
+        // A bottom sheet (settings/search/link, z 6) and the object popup (z 10) overlap
+        // in the lower half of the map; StarMapRender adds this class to #celestial-map
+        // while a sheet is open so the popup can't paint over it
         &.starMapSheetOpen
             .popup, .popupArrow
                 visibility: hidden
@@ -870,8 +802,10 @@
         flex: none
         left: 8px
         right: 8px
-        bottom: starmap.$action-bar-height
-        max-height: 55%
+        bottom: starmap.$mobile-bottom-inset
+        // Stops short of the rail, which paints above the sheet — the form scrolls inside
+        // anyway, and this keeps every rail button reachable while the sheet is open
+        max-height: calc(100% - #{starmap.$rail-bottom-mobile} - 8px)
         z-index: starmap.$z-sidebar
         border-right: none
         border-radius: 12px

@@ -149,20 +149,6 @@
                     "atmosphere": "Atmosphere: daylight and twilight sky",
                     "title": "Quick layer toggles"
                 },
-                "toolbar": {
-                    "sky-map": "Sky chart",
-                    "sky-above": "Sky above you",
-                    "sky-map-short": "Map",
-                    "sky-above-short": "Above you",
-                    "zoom-in": "Zoom in",
-                    "zoom-out": "Zoom out",
-                    "fit-view": "Fit view",
-                    "settings": "Settings",
-                    "search": "Search",
-                    "link": "Link"
-                },
-                "show-ui": "Show UI",
-                "hide-ui": "Hide UI",
                 "settings": {
                     "title": "Map settings",
                     "star-magnitude": "Max. magnitude",
@@ -196,7 +182,15 @@
                 },
                 "link-copied": "Link copied",
                 "copy-link": "Copy link",
-                "link-copied-short": "Copied",
+                "toolbar": {
+                    "zoom-in": "Zoom in",
+                    "zoom-out": "Zoom out",
+                    "fit-view": "Fit view",
+                    "sky-map": "Sky chart",
+                    "sky-above": "Sky above you"
+                },
+                "show-ui": "Show UI",
+                "hide-ui": "Hide UI",
                 "status": {
                     "change-place-time": "Change place & time"
                 },

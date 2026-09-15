@@ -1,7 +1,7 @@
 // Tokens and mixins shared by the three star map stylesheets —
 // components/common/star-map/styles.module.sass, components/pages/starmap/star-map-intro/
 // styles.module.sass and pages/starmap.module.sass — so the numbers they must agree on
-// (bar heights, rail width, stacking order) live in one place instead of being repeated
+// (bottom insets, rail width, stacking order) live in one place instead of being repeated
 // as literals that can drift apart.
 
 // Translucent panel surface of every floating map control (rail, status chip, quick bar,
@@ -13,8 +13,16 @@
     @if $shadow
         box-shadow: $shadow
 
-// Mobile bottom action bar (.mapToolbar): the sheets, quick bar and popup dock above it
-$action-bar-height: 70px
+// Mobile: everything docking to the map's bottom edge (the quick-bar strip, the
+// settings/search/link sheets and the object popup, which cover it while they are up)
+// shares this inset, which also clears the iOS home indicator
+$mobile-bottom-inset: calc(8px + env(safe-area-inset-bottom))
+
+// Distance from the map's top edge to the bottom of the mobile rail, at its tallest (sky
+// mode: 10px offset + 4px padding + 7 × 40px buttons + 6 × 4px gaps + 4px padding). The
+// bottom sheets are full-width, and the rail paints above them, so their height is capped
+// to stop short of this line.
+$rail-bottom-mobile: 322px
 
 // Left edge for overlays sitting right of the top-left rail (search/link panels on
 // desktop; status chip and geolocation nudge on mobile, where the rail buttons are
@@ -22,14 +30,10 @@ $action-bar-height: 70px
 $rail-width: 54px
 $rail-width-mobile: 66px
 
-// Collapsed StarMapIntro bar on mobile — pages/starmap.module.sass subtracts the same
-// height from the map area so map + bar fill the viewport without scrolling
-$intro-bar-height: 52px
-
 // Stacking order of everything floating over #celestial-map
 // Docked settings sidebar / mobile bottom sheet
 $z-sidebar: 6
-// Rail, view controls, action bar, status chip, quick bar
+// Rail, view controls, status chip, quick bar
 $z-controls: 7
 // Search/link panels, geolocation nudge, intro card
 $z-panel: 8

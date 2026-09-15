@@ -1,112 +1,15 @@
 @use '../../../../styles/starmap-mixins' as starmap
 
-// One element, two layouts (see pages/starmap.module.sass):
-//  - mobile (≤768px): a full-width collapsed bar laid out UNDER the map (order: 2 in the
-//    page's flex column), expanding into the page flow;
-//  - desktop: a floating glass card in the map's top-right corner, next to the 28px
-//    hide-UI toggle, expanding downwards/leftwards over the map like a FAQ block.
+// Desktop-only floating glass card in the map's top-right corner, expanding
+// downwards/leftwards over the map like a FAQ block. On mobile (≤768px) the map owns the
+// whole screen, so the card is hidden: the H1 and the copy stay in the server-rendered
+// DOM (see StarMapIntro.tsx), they just aren't painted at phone widths.
 .intro
-    width: 100%
-    order: 2
-    max-width: 1100px
-    margin: 0 auto
+    display: none
 
-.introSummary
-    display: flex
-    align-items: center
-    justify-content: space-between
-    gap: 12px
-    // Collapsed bar height on mobile — pages/starmap.module.sass subtracts the same
-    // height from the map area so map + bar fill the viewport without scrolling
-    height: starmap.$intro-bar-height
-    padding: 0 16px
-    cursor: pointer
-    // Hide the native disclosure triangle — .introHint's chevron replaces it
-    list-style: none
-
-    &::-webkit-details-marker
-        display: none
-
-    // The H1 is the page's title — on a 390px bar it wraps onto a second line instead
-    // of being cut with an ellipsis (two 14px lines still fit the 52px bar)
-    h1
-        margin: 0
-        font-size: 14px
-        font-weight: 600
-        line-height: 1.25
-        overflow: hidden
-        display: -webkit-box
-        -webkit-line-clamp: 2
-        -webkit-box-orient: vertical
-
-.introHint
-    flex-shrink: 0
-    display: inline-flex
-    align-items: center
-    gap: 6px
-    font-size: 13px
-    color: var(--color-main)
-
-.chevron
-    flex-shrink: 0
-    width: 18px
-    height: 18px
-    fill: currentColor
-    transition: transform 0.25s ease
-
-.intro[open] .chevron
-    transform: rotate(180deg)
-
-.introContent
-    display: grid
-    grid-template-columns: 1fr 320px
-    gap: 24px
-    align-items: start
-    padding: 4px 16px 24px
-
-    @media (max-width: 768px)
-        grid-template-columns: 1fr
-        gap: 16px
-
-.introText
-    p
-        margin: 0 0 10px
-        color: var(--text-color-secondary)
-        line-height: 1.55
-
-.featuredCard
-    display: flex
-    flex-direction: column
-    gap: 8px
-    padding: 12px
-    border-radius: 12px
-    background-color: var(--container-background-color)
-    text-decoration: none
-    color: var(--text-color-primary)
-    transition: transform 0.15s ease, box-shadow 0.15s ease
-
-    &:hover
-        transform: translateY(-2px)
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35)
-
-.featuredTitle
-    font-size: 13px
-    font-weight: 600
-
-.featuredImage
-    position: relative
-    width: 100%
-    aspect-ratio: 16 / 10
-    border-radius: 8px
-    overflow: hidden
-
-.featuredLink
-    font-size: 13px
-    color: var(--color-main)
-
-// Desktop: floating card over the map
 @media (min-width: 769px)
     .intro
+        display: block
         position: absolute
         // The map's top-right corner belongs to this card (the hide-UI toggle lives in
         // the left rail); the top-center geolocation nudge hugs its content and stays clear
@@ -117,7 +20,6 @@
         // Collapsed width keeps the card clear of the horizon dome's upper-right edge
         width: 300px
         max-width: calc(100% - 20px)
-        margin: 0
         border-radius: 12px
         // Same glass surface as the map's control rail (.mapRail in star-map styles)
         +starmap.glass
@@ -133,35 +35,96 @@
         visibility: hidden
 
     .introSummary
+        display: flex
+        align-items: center
+        justify-content: space-between
         height: 28px
         padding: 0 6px 0 12px
         gap: 8px
         border-radius: 12px
+        cursor: pointer
+        // Hide the native disclosure triangle — .introHint's chevron replaces it
+        list-style: none
         transition: background-color 0.15s ease
+
+        &::-webkit-details-marker
+            display: none
 
         &:hover
             background-color: color-mix(in srgb, var(--button-secondary-background-hover) 60%, transparent)
 
+        // The page's H1, kept to one line inside the collapsed card
         h1
-            display: block
+            margin: 0
             font-size: 13px
             font-weight: 600
+            line-height: 1.25
+            overflow: hidden
             text-overflow: ellipsis
             white-space: nowrap
 
     .introHint
-        gap: 0
+        flex-shrink: 0
+        display: inline-flex
+        align-items: center
+        color: var(--color-main)
+
         // The heading itself is the affordance here — keep only the chevron
         span
             display: none
 
+    .chevron
+        flex-shrink: 0
+        width: 18px
+        height: 18px
+        fill: currentColor
+        transition: transform 0.25s ease
+
+    .intro[open] .chevron
+        transform: rotate(180deg)
+
     .introContent
+        display: grid
         grid-template-columns: 1fr
         gap: 12px
+        align-items: start
         padding: 4px 12px 12px
         max-height: 60vh
         overflow-y: auto
         font-size: 13px
 
-    .introText p
-        line-height: 1.5
+    .introText
+        p
+            margin: 0 0 10px
+            color: var(--text-color-secondary)
+            line-height: 1.5
+
+    .featuredCard
+        display: flex
+        flex-direction: column
+        gap: 8px
+        padding: 12px
+        border-radius: 12px
+        background-color: var(--container-background-color)
+        text-decoration: none
+        color: var(--text-color-primary)
+        transition: transform 0.15s ease, box-shadow 0.15s ease
+
+        &:hover
+            transform: translateY(-2px)
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35)
+
+    .featuredTitle
+        font-size: 13px
+        font-weight: 600
+
+    .featuredImage
+        position: relative
+        width: 100%
+        aspect-ratio: 16 / 10
+        border-radius: 8px
+        overflow: hidden
+
+    .featuredLink
+        font-size: 13px
+        color: var(--color-main)

@@ -11,9 +11,6 @@ import { formatObjectName } from '@/utils/strings'
 
 import styles from './styles.module.sass'
 
-/** Matches the desktop breakpoint of the star map styles (MOBILE_MAX_WIDTH = 768) */
-const DESKTOP_MEDIA_QUERY = '(min-width: 769px)'
-
 interface StarMapIntroProps {
     /** The page's H1 — passed in so the page <title> and the heading never diverge */
     title: string
@@ -24,11 +21,9 @@ interface StarMapIntroProps {
 /**
  * Crawlable intro of the star map page (FE-7 of features/star-atlas-upgrade.md), a
  * collapsed <details> so the map keeps the whole viewport: only the H1 is visible until
- * the visitor expands it. The copy stays in the server-rendered DOM — a legitimate,
- * fully-indexed pattern (unlike display:none-style hidden text, which search engines
- * treat as cloaking). On desktop it floats over the map's top-right corner as a glass
- * card (FAQ-style accordion); on mobile it is a bar under the map — one element, one H1,
- * see pages/starmap.module.sass.
+ * the visitor expands it. A glass card floating over the map's top-right corner, opening
+ * downwards like a FAQ block. Desktop only — on a phone the map needs every pixel, so the
+ * card is hidden by CSS (the markup, H1 included, stays server-rendered either way).
  */
 const StarMapIntro: React.FC<StarMapIntroProps> = ({ title, hidden }) => {
     const { t } = useTranslation()
@@ -40,9 +35,7 @@ const StarMapIntro: React.FC<StarMapIntroProps> = ({ title, hidden }) => {
 
     const detailsRef = useRef<HTMLDetailsElement>(null)
 
-    // Desktop card closes like a popover: Escape, or a click/tap anywhere outside it.
-    // Not on mobile — there the expanded copy is below the map in the page flow and a tap
-    // on the map while reading should not fold it away.
+    // The card closes like a popover: Escape, or a click/tap anywhere outside it
     useEffect(() => {
         const details = detailsRef.current
 
@@ -50,16 +43,14 @@ const StarMapIntro: React.FC<StarMapIntroProps> = ({ title, hidden }) => {
             return
         }
 
-        const isDesktop = () => window.matchMedia(DESKTOP_MEDIA_QUERY).matches
-
         const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape' && details.open && isDesktop()) {
+            if (event.key === 'Escape' && details.open) {
                 details.open = false
             }
         }
 
         const handlePointerDown = (event: PointerEvent) => {
-            if (details.open && isDesktop() && !details.contains(event.target as Node)) {
+            if (details.open && !details.contains(event.target as Node)) {
                 details.open = false
             }
         }
