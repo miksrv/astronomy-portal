@@ -9,7 +9,10 @@ import React from 'react'
  * sized by the parent, decorative (`aria-hidden`).
  */
 
-type LayerIconProps = React.SVGProps<SVGSVGElement>
+// Plain SVG props — an interface (project convention for component props) rather than
+// the type alias the lint rule would prefer for a member-less extension
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface LayerIconProps extends React.SVGProps<SVGSVGElement> {}
 
 const Svg: React.FC<LayerIconProps> = ({ children, ...props }) => (
     <svg
@@ -242,7 +245,12 @@ export const FitViewIcon: React.FC<LayerIconProps> = (props) => (
  * small step, two the big one, left slows the clock down and right speeds it up. Solid
  * shapes (the outline `Svg` default is overridden per path) so they read at 18px.
  */
-const Solid: React.FC<{ d: string }> = ({ d }) => (
+interface SolidProps {
+    /** Path data of the filled glyph */
+    d: string
+}
+
+const Solid: React.FC<SolidProps> = ({ d }) => (
     <path
         d={d}
         fill={'currentColor'}

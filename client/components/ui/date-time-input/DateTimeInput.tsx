@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useCallback, useId, useRef, useState } from 'react'
 import dayjs from 'dayjs'
 import { Button, Calendar, Icon, InputProps, Popout, Select } from 'simple-react-ui-kit'
 
@@ -131,6 +131,23 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     // this project's import-sort/no-duplicate-imports combination.
     const popoutRef = useRef<{ close: () => void }>(null)
 
+    // Mirrors the popout's open state for the trigger's aria-expanded
+    const [isOpen, setIsOpen] = useState(false)
+
+    // Ties the caption and the shown value to the trigger: with `label` the button is
+    // announced as "<label> <value>", otherwise its visible text alone names it
+    const labelId = useId()
+    const valueId = useId()
+
+    // The Popout re-fires onOpenChange whenever the handler identity changes — keep it stable
+    const handleOpenChange = useCallback(
+        (open: boolean) => {
+            setIsOpen(open)
+            onOpenChange?.(open)
+        },
+        [onOpenChange]
+    )
+
     // `error` can be a message string (border + text below) or a bare `true`
     // (border only, e.g. for a field validated as part of a group where the
     // message is shown once elsewhere) — only a non-empty string renders the text.
@@ -210,7 +227,10 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     return (
         <div className={[styles.wrapper, styles[size], className].filter(Boolean).join(' ')}>
             {label && (
-                <span className={styles.label}>
+                <span
+                    id={labelId}
+                    className={styles.label}
+                >
                     {label}
                     {required && <span className={styles.required}>*</span>}
                 </span>
@@ -222,19 +242,29 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 position={'left'}
                 portal={portal}
                 className={styles.popout}
-                onOpenChange={onOpenChange}
+                onOpenChange={handleOpenChange}
                 trigger={
+                    // Deliberately a native <button>, not the kit Button: the form test suites
+                    // (EventForm, AstroPhotoForm) stub the kit module with a Button that renders
+                    // only `label` — no children, no data-testid — and assert on this trigger's
+                    // test id and text. Clicking is handled by the Popout's wrapper span anyway.
                     <button
                         type={'button'}
                         data-testid={testId && `${testId}-trigger`}
                         className={[styles.trigger, hasError && styles.triggerError].filter(Boolean).join(' ')}
                         disabled={disabled}
+                        aria-haspopup={'dialog'}
+                        aria-expanded={isOpen}
+                        aria-labelledby={label ? `${labelId} ${valueId}` : undefined}
                     >
                         <Icon
                             name={'Calendar'}
                             className={styles.triggerIcon}
                         />
-                        <span className={isValid ? styles.triggerValue : styles.triggerPlaceholder}>
+                        <span
+                            id={valueId}
+                            className={isValid ? styles.triggerValue : styles.triggerPlaceholder}
+                        >
                             {isValid
                                 ? parsed!.format(showTime ? 'DD.MM.YYYY, HH:mm' : 'DD.MM.YYYY')
                                 : resolvedPlaceholder}
