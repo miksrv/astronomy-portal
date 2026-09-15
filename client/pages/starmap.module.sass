@@ -1,3 +1,5 @@
+@use '../styles/starmap-mixins' as starmap
+
 // /starmap page layout. The map fills the viewport below the header (minus the fixed
 // cookie banner while it is up — CookieConsent publishes its height as a CSS variable,
 // so the map's bottom controls never end up under the banner).
@@ -29,7 +31,7 @@
 
     .mapArea
         flex: none
-        // 52px = collapsed intro bar height, must match .introSummary in
-        // components/pages/starmap/star-map-intro/styles.module.sass
-        height: calc(100vh - var(--header-height) - var(--cookie-consent-height, 0px) - 52px)
+        // Minus the collapsed intro bar (.introSummary in
+        // components/pages/starmap/star-map-intro/styles.module.sass)
+        height: calc(100vh - var(--header-height) - var(--cookie-consent-height, 0px) - #{starmap.$intro-bar-height})
         overflow: hidden

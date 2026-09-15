@@ -1,0 +1,40 @@
+// Tokens and mixins shared by the three star map stylesheets —
+// components/common/star-map/styles.module.sass, components/pages/starmap/star-map-intro/
+// styles.module.sass and pages/starmap.module.sass — so the numbers they must agree on
+// (bar heights, rail width, stacking order) live in one place instead of being repeated
+// as literals that can drift apart.
+
+// Translucent panel surface of every floating map control (rail, status chip, quick bar,
+// side panels, bottom sheets, intro card). Pass `$shadow: null` to leave the box-shadow
+// alone — a kit Container keeps its own that way.
+=glass($opacity: 88%, $blur: 6px, $shadow: 0 2px 10px rgba(0, 0, 0, 0.35))
+    background-color: color-mix(in srgb, var(--container-background-color) $opacity, transparent)
+    backdrop-filter: blur($blur)
+    @if $shadow
+        box-shadow: $shadow
+
+// Mobile bottom action bar (.mapToolbar): the sheets, quick bar and popup dock above it
+$action-bar-height: 70px
+
+// Left edge for overlays sitting right of the top-left rail (search/link panels on
+// desktop; status chip and geolocation nudge on mobile, where the rail buttons are
+// enlarged to thumb size — see the mobile block in star-map/styles.module.sass)
+$rail-width: 54px
+$rail-width-mobile: 66px
+
+// Collapsed StarMapIntro bar on mobile — pages/starmap.module.sass subtracts the same
+// height from the map area so map + bar fill the viewport without scrolling
+$intro-bar-height: 52px
+
+// Stacking order of everything floating over #celestial-map
+// Docked settings sidebar / mobile bottom sheet
+$z-sidebar: 6
+// Rail, view controls, action bar, status chip, quick bar
+$z-controls: 7
+// Search/link panels, geolocation nudge, intro card
+$z-panel: 8
+$z-popup-arrow: 9
+// Object/photo popup and the photo caption overlay inside it
+$z-popup: 10
+$z-popup-link: 11
+$z-popup-close: 12

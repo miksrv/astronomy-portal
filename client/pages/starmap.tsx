@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Head from 'next/head'
@@ -7,7 +7,7 @@ import { useTranslation } from 'next-i18next/pages'
 import { API, wrapper } from '@/api'
 import { AppLayout, BreadcrumbJsonLd, StarMap } from '@/components/common'
 import { StarMapIntro } from '@/components/pages/starmap'
-import { createPageUrl } from '@/utils/helpers'
+import { createPageUrl, toJsonLd } from '@/utils/helpers'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
 import styles from './starmap.module.sass'
@@ -26,9 +26,6 @@ const CelestialPage: NextPage<object> = () => {
         'pages.star-map.description',
         'Бесплатная интерактивная карта звёздного неба онлайн: звёзды, созвездия, планеты, туманности и галактики. Настраивайте слои карты и исследуйте небо в реальном времени.'
     )
-
-    // Memoize objects array to avoid triggering StarMapRender rebuild on unrelated re-renders
-    const starMapObjects = useMemo(() => data?.items, [data?.items])
 
     const pageUrl = createPageUrl(i18n.language, 'starmap')
 
@@ -59,8 +56,7 @@ const CelestialPage: NextPage<object> = () => {
             <Head>
                 <script
                     type={'application/ld+json'}
-                    // '<' is escaped so translated strings can never close the script tag
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationJsonLd).replace(/</g, '\\u003c') }}
+                    dangerouslySetInnerHTML={{ __html: toJsonLd(webApplicationJsonLd) }}
                 />
             </Head>
             {/* One flex column sized to the viewport (see starmap.module.sass). The intro is
@@ -72,8 +68,9 @@ const CelestialPage: NextPage<object> = () => {
                     hidden={uiHidden}
                 />
                 <div className={styles.mapArea}>
+                    {/* data.items is referentially stable between refetches (RTK Query), so no memo is needed */}
                     <StarMap
-                        objects={starMapObjects}
+                        objects={data?.items}
                         interactive={true}
                         showSettings={true}
                         fitContainer={true}

@@ -77,41 +77,43 @@
                 "floating-close": "Dismiss the review reminder"
             },
             "star-map": {
+                "geo-nudge": {
+                    "failed": "Could not determine your location, showing the sky over the observatory",
+                    "ok": "OK",
+                    "question": "Show the sky above you?",
+                    "locate": "Use my location",
+                    "later": "Later"
+                },
+                "copy-link-manual": "Automatic copy failed. Copy the link manually:",
+                "close": "Close",
                 "location": {
+                    "rate-slower-8": "Slow down 8×",
+                    "rate-slower-2": "Slow down 2×",
+                    "rate-faster-2": "Speed up 2×",
+                    "rate-faster-8": "Speed up 8×",
+                    "rate-minutes": "min/s",
+                    "rate-hours": "h/s",
+                    "rate-days": "d/s",
+                    "rate-pause": "Pause: stop time and reset the speed",
                     "title": "Place & time",
                     "latitude": "Latitude",
                     "longitude": "Longitude",
                     "my-location": "My location",
+                    "geolocation-failed": "Could not determine your location",
                     "datetime-placeholder": "Pick a date and time",
                     "hours": "Hours",
                     "minutes": "Minutes",
                     "done": "Done",
                     "now": "Now",
                     "rate-group": "Time flow",
-                    "rate-slower-8": "Slow down 8×",
-                    "rate-slower-2": "Slow down 2×",
-                    "rate-faster-2": "Speed up 2×",
-                    "rate-faster-8": "Speed up 8×",
-                    "rate-pause": "Pause: stop time and reset the speed",
                     "rate-current": "Time speed",
-                    "rate-minutes": "min/s",
-                    "rate-hours": "h/s",
-                    "rate-days": "d/s",
+                    "tonight": "Tonight",
+                    "tonight-unavailable": "Night never falls at the selected place",
                     "timezone-pending": "Resolving the time zone…",
                     "timezone-unknown": "Time zone unknown, time is shown in UTC",
-                    "reset-to-now": "Back to \"now\"",
-                    "tonight": "Tonight",
-                    "tonight-unavailable": "Night never falls at the selected place"
+                    "reset-to-now": "Back to \"now\""
                 },
                 "info": {
-                    "kind-star": "Star",
-                    "kind-dso": "Deep sky object",
-                    "kind-planet": "Planet",
-                    "kind-sun": "Sun",
-                    "kind-moon": "Moon",
-                    "kind-radiant": "Meteor shower radiant",
-                    "kind-constellation": "Constellation",
-                    "kind-portal": "Portal astrophoto",
                     "magnitude": "Magnitude",
                     "altitude": "Altitude",
                     "azimuth": "Azimuth",
@@ -125,26 +127,49 @@
                     "active-period": "Activity",
                     "peak": "Peak",
                     "active-now": "active",
-                    "inactive": "not active"
+                    "inactive": "not active",
+                    "kind-star": "Star",
+                    "kind-dso": "Deep sky object",
+                    "kind-planet": "Planet",
+                    "kind-sun": "Sun",
+                    "kind-moon": "Moon",
+                    "kind-radiant": "Meteor shower radiant",
+                    "kind-constellation": "Constellation",
+                    "kind-portal": "Portal astrophoto"
                 },
-                "compass": {
-                    "n": "N",
-                    "ne": "NE",
-                    "e": "E",
-                    "se": "SE",
-                    "s": "S",
-                    "sw": "SW",
-                    "w": "W",
-                    "nw": "NW"
+                "quick-bar": {
+                    "constellation-lines": "Constellation lines",
+                    "constellation-names": "Constellation names",
+                    "graticule": "Coordinate grid",
+                    "dsos": "Deep sky objects",
+                    "planets": "Planets, Sun and Moon",
+                    "milky-way": "Milky Way",
+                    "meteor-showers": "Meteor shower radiants",
+                    "horizon-mode": "Sky above you: horizon view",
+                    "atmosphere": "Atmosphere: daylight and twilight sky",
+                    "title": "Quick layer toggles"
                 },
+                "toolbar": {
+                    "sky-map": "Sky chart",
+                    "sky-above": "Sky above you",
+                    "sky-map-short": "Map",
+                    "sky-above-short": "Above you",
+                    "zoom-in": "Zoom in",
+                    "zoom-out": "Zoom out",
+                    "fit-view": "Fit view",
+                    "settings": "Settings",
+                    "search": "Search",
+                    "link": "Link"
+                },
+                "show-ui": "Show UI",
+                "hide-ui": "Hide UI",
                 "settings": {
                     "title": "Map settings",
-                    "view-mode-sky": "Sky chart",
-                    "view-mode-horizon": "Sky right now",
+                    "star-magnitude": "Max. magnitude",
+                    "view-mode": "View mode",
                     "atmosphere": "Atmosphere",
                     "stars": "Stars",
                     "show-stars": "Show stars",
-                    "star-magnitude": "Max. magnitude",
                     "objects": "Objects",
                     "show-dso": "Deep Sky Objects",
                     "show-dso-full": "More objects",
@@ -166,12 +191,15 @@
                     "title": "Sky search",
                     "placeholder": "Star, constellation, planet…",
                     "loading": "Loading catalogs…",
-                    "no-results": "Nothing found",
-                    "hint": "Type the name of a star, constellation, planet or object"
+                    "hint": "Type the name of a star, constellation, planet or object",
+                    "no-results": "Nothing found"
                 },
                 "link-copied": "Link copied",
                 "copy-link": "Copy link",
-                "copy-link-manual": "Automatic copy failed. Copy the link manually:",
+                "link-copied-short": "Copied",
+                "status": {
+                    "change-place-time": "Change place & time"
+                },
                 "bodies": {
                     "sun": "Sun",
                     "moon": "Moon",
@@ -183,45 +211,16 @@
                     "uranus": "Uranus",
                     "neptune": "Neptune"
                 },
-                "toolbar": {
-                    "settings": "Settings",
-                    "search": "Search",
-                    "link": "Link",
-                    "zoom-in": "Zoom in",
-                    "zoom-out": "Zoom out",
-                    "fit-view": "Fit view",
-                    "sky-above": "Sky above you",
-                    "sky-map": "Sky map",
-                    "sky-above-short": "Above you",
-                    "sky-map-short": "Map"
-                },
-                "quick-bar": {
-                    "title": "Quick layer toggles",
-                    "constellation-lines": "Constellation lines",
-                    "constellation-names": "Constellation names",
-                    "graticule": "Coordinate grid",
-                    "dsos": "Deep sky objects",
-                    "planets": "Planets, Sun and Moon",
-                    "milky-way": "Milky Way",
-                    "meteor-showers": "Meteor shower radiants",
-                    "horizon-mode": "Sky now: horizon view",
-                    "atmosphere": "Atmosphere: daylight and twilight sky"
-                },
-                "geo-nudge": {
-                    "question": "Show the sky above you?",
-                    "locate": "Use my location",
-                    "later": "Later",
-                    "failed": "Could not determine your location, showing the sky over the observatory",
-                    "ok": "OK"
-                },
-                "status": {
-                    "now": "Now",
-                    "change-place-time": "Change place & time"
-                },
-                "link-copied-short": "Copied",
-                "hide-ui": "Hide UI",
-                "show-ui": "Show UI",
-                "close": "Close"
+                "compass": {
+                    "n": "N",
+                    "ne": "NE",
+                    "e": "E",
+                    "se": "SE",
+                    "s": "S",
+                    "sw": "SW",
+                    "w": "W",
+                    "nw": "NW"
+                }
             },
             "visibility-chart": {
                 "height": "Height",
@@ -848,6 +847,15 @@
             "registrations-status-pending": "Awaiting payment",
             "registrations-status-refunded": "Refunded"
         },
+        "star-map": {
+            "about-map": "About the map",
+            "intro-tool": "An interactive star atlas, free and running right in your browser: stars down to the sixth magnitude, constellations with lines and boundaries, the planets of the Solar System, the Moon and the Sun, plus deep-sky objects — galaxies, nebulae and star clusters.",
+            "intro-features": "Customize the map layers — the coordinate grid, the ecliptic, the Milky Way, constellation names — and click the objects marked on the map to open their astrophotos captured by our amateur observatory.",
+            "our-object": "Our object",
+            "view-on-portal": "View on the portal",
+            "title": "Online Star Map",
+            "description": "Free interactive online star map: stars, constellations, planets, nebulae and galaxies. Customize map layers and explore the night sky in real time."
+        },
         "push-notifications": {
             "title": "Push notifications",
             "status-completed": "Completed",
@@ -985,15 +993,6 @@
             "retry-error-title": "Failed to create a new attempt",
             "retry-error": "Failed to create a new payment attempt. Please try again later.",
             "retry": "Try again"
-        },
-        "star-map": {
-            "title": "Online Star Map",
-            "description": "Free interactive online star map: stars, constellations, planets, nebulae and galaxies. Customize map layers and explore the night sky in real time.",
-            "intro-tool": "An interactive star atlas, free and running right in your browser: stars down to the sixth magnitude, constellations with lines and boundaries, the planets of the Solar System, the Moon and the Sun, plus deep-sky objects — galaxies, nebulae and star clusters.",
-            "intro-features": "Customize the map layers — the coordinate grid, the ecliptic, the Milky Way, constellation names — and click the objects marked on the map to open their astrophotos captured by our amateur observatory.",
-            "our-object": "Our object",
-            "view-on-portal": "View on the portal",
-            "about-map": "About the map"
         },
         "unsubscribe": {
             "title": "Unsubscribe from newsletter",
