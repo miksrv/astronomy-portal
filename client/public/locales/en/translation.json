@@ -845,8 +845,6 @@
             "about-map": "About the map",
             "intro-tool": "An interactive star atlas, free and running right in your browser: stars down to the sixth magnitude, constellations with lines and boundaries, the planets of the Solar System, the Moon and the Sun, plus deep-sky objects — galaxies, nebulae and star clusters.",
             "intro-features": "Customize the map layers — the coordinate grid, the ecliptic, the Milky Way, constellation names — and click the objects marked on the map to open their astrophotos captured by our amateur observatory.",
-            "our-object": "Our object",
-            "view-on-portal": "View on the portal",
             "title": "Online Star Map",
             "description": "Free interactive online star map: stars, constellations, planets, nebulae and galaxies. Customize map layers and explore the night sky in real time."
         },

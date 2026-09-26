@@ -1,13 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { cn, Icon } from 'simple-react-ui-kit'
 
-import Image from 'next/image'
-import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
-
-import { API } from '@/api'
-import { createMediumPhotoUrl } from '@/utils/photos'
-import { formatObjectName } from '@/utils/strings'
 
 import styles from './styles.module.sass'
 
@@ -27,11 +21,6 @@ interface StarMapIntroProps {
  */
 const StarMapIntro: React.FC<StarMapIntroProps> = ({ title, hidden }) => {
     const { t } = useTranslation()
-
-    const { data } = API.usePhotosGetListQuery({ limit: 1, order: 'rand' })
-
-    const photo = data?.items?.[0]
-    const objectName = photo?.objects?.[0]
 
     const detailsRef = useRef<HTMLDetailsElement>(null)
 
@@ -98,32 +87,6 @@ const StarMapIntro: React.FC<StarMapIntroProps> = ({ title, hidden }) => {
                         )}
                     </p>
                 </div>
-
-                {photo && objectName && (
-                    <Link
-                        href={`/objects/${objectName}`}
-                        className={styles.featuredCard}
-                        title={formatObjectName(objectName)}
-                    >
-                        <div className={styles.featuredTitle}>
-                            {t('pages.star-map.our-object', 'Наш объект')}
-                            {': '}
-                            {formatObjectName(objectName)}
-                        </div>
-                        <div className={styles.featuredImage}>
-                            <Image
-                                src={createMediumPhotoUrl(photo)}
-                                alt={formatObjectName(objectName)}
-                                fill={true}
-                                sizes={'320px'}
-                                style={{ objectFit: 'cover' }}
-                            />
-                        </div>
-                        <span className={styles.featuredLink}>
-                            {t('pages.star-map.view-on-portal', 'Смотреть на портале')} →
-                        </span>
-                    </Link>
-                )}
             </div>
         </details>
     )
