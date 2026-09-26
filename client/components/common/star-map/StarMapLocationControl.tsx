@@ -308,8 +308,7 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
                             <Button
                                 size={'small'}
                                 mode={'secondary'}
-                                title={pauseTitle}
-                                aria-label={pauseTitle}
+                                tooltip={pauseTitle}
                                 onClick={onTimeFlowPause}
                             >
                                 <PauseIcon />
@@ -319,8 +318,7 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
                         <Button
                             size={'small'}
                             mode={'secondary'}
-                            title={title}
-                            aria-label={title}
+                            tooltip={title}
                             disabled={factor < 1 ? !flowing : timeRate >= TIME_RATE_MAX}
                             onClick={() => onTimeRateChange(factor)}
                         >

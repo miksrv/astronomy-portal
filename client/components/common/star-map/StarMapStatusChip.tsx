@@ -109,13 +109,13 @@ const StarMapStatusChip: React.FC<StarMapStatusChipProps> = ({
     // StarMapLocationControl — until then the chip shows coordinates only
     const placeLabel = formatGeopos(geopos, compassLabels)
 
-    // No aria-label: the visible "place · time" text is the button's name, the title
-    // (what a click does) is the tooltip
+    // No aria-label: the visible "place · time" text is the button's name, the tooltip
+    // (what a click does) stays a description
     return (
         <Button
             unstyled={true}
             icon={'Position'}
-            title={title}
+            tooltip={title}
             className={cn(styles.statusChip, (frozen || flowing) && styles.statusChipFrozen)}
             onClick={frozen || flowing ? onResetToNow : onOpenSettings}
         >

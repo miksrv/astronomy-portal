@@ -113,8 +113,7 @@ const StarMapQuickBar: React.FC<StarMapQuickBarProps> = ({ settings, onChange, s
                 size={'small'}
                 mode={'secondary'}
                 icon={key === 'planets' ? 'Sun' : undefined}
-                title={labels[key]}
-                aria-label={labels[key]}
+                tooltip={labels[key]}
                 aria-pressed={active}
                 disabled={!enabled}
                 className={cn(styles.toolbarButton, styles.quickBarButton, active && styles.toolbarButtonActive)}

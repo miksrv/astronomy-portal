@@ -265,8 +265,10 @@ const StarMapRender: React.FC<StarMapProps> = ({
                     >
                         <Button
                             mode={'secondary'}
-                            title={t('components.common.star-map.toolbar.zoom-in', 'Приблизить')}
-                            aria-label={t('components.common.star-map.toolbar.zoom-in', 'Приблизить')}
+                            tooltip={{
+                                content: t('components.common.star-map.toolbar.zoom-in', 'Приблизить'),
+                                placement: 'right'
+                            }}
                             className={styles.railButton}
                             onClick={zoomIn}
                         >
@@ -274,8 +276,10 @@ const StarMapRender: React.FC<StarMapProps> = ({
                         </Button>
                         <Button
                             mode={'secondary'}
-                            title={t('components.common.star-map.toolbar.zoom-out', 'Отдалить')}
-                            aria-label={t('components.common.star-map.toolbar.zoom-out', 'Отдалить')}
+                            tooltip={{
+                                content: t('components.common.star-map.toolbar.zoom-out', 'Отдалить'),
+                                placement: 'right'
+                            }}
                             className={styles.railButton}
                             onClick={zoomOut}
                         >
@@ -288,8 +292,10 @@ const StarMapRender: React.FC<StarMapProps> = ({
                         {!isHorizon && (
                             <Button
                                 mode={'secondary'}
-                                title={t('components.common.star-map.toolbar.fit-view', 'Вписать вид')}
-                                aria-label={t('components.common.star-map.toolbar.fit-view', 'Вписать вид')}
+                                tooltip={{
+                                    content: t('components.common.star-map.toolbar.fit-view', 'Вписать вид'),
+                                    placement: 'right'
+                                }}
                                 className={styles.railButton}
                                 onClick={fitView}
                             >
@@ -301,16 +307,12 @@ const StarMapRender: React.FC<StarMapProps> = ({
                         <Button
                             icon={'Eye'}
                             mode={'secondary'}
-                            title={
-                                uiHidden
+                            tooltip={{
+                                content: uiHidden
                                     ? t('components.common.star-map.show-ui', 'Показать интерфейс')
-                                    : t('components.common.star-map.hide-ui', 'Скрыть интерфейс')
-                            }
-                            aria-label={
-                                uiHidden
-                                    ? t('components.common.star-map.show-ui', 'Показать интерфейс')
-                                    : t('components.common.star-map.hide-ui', 'Скрыть интерфейс')
-                            }
+                                    : t('components.common.star-map.hide-ui', 'Скрыть интерфейс'),
+                                placement: 'right'
+                            }}
                             aria-pressed={uiHidden}
                             className={cn(
                                 styles.railButton,
@@ -326,8 +328,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
                         <Button
                             icon={'Settings'}
                             mode={'secondary'}
-                            title={settingsTitle}
-                            aria-label={settingsTitle}
+                            tooltip={{ content: settingsTitle, placement: 'right' }}
                             aria-expanded={settingsOpen}
                             aria-controls={settingsPanelId}
                             className={cn(styles.toolbarButton, settingsOpen && styles.toolbarButtonActive)}
@@ -336,8 +337,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
                         <Button
                             icon={'Search'}
                             mode={'secondary'}
-                            title={searchTitle}
-                            aria-label={searchTitle}
+                            tooltip={{ content: searchTitle, placement: 'right' }}
                             aria-expanded={searchOpen}
                             aria-controls={searchPanelId}
                             className={cn(styles.toolbarButton, searchOpen && styles.toolbarButtonActive)}
@@ -346,8 +346,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
                         <Button
                             icon={linkCopied ? 'CheckCircle' : 'Link'}
                             mode={'secondary'}
-                            title={linkTitle}
-                            aria-label={linkTitle}
+                            tooltip={{ content: linkTitle, placement: 'right' }}
                             className={styles.toolbarButton}
                             onClick={handleCopyLink}
                         />
@@ -439,7 +438,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
                 <Button
                     icon={'Close'}
                     mode={'secondary'}
-                    title={t('components.common.star-map.close', 'Закрыть')}
+                    tooltip={t('components.common.star-map.close', 'Закрыть')}
                     className={styles.popupClose}
                     onClick={hidePopup}
                 />
