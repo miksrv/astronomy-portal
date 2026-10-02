@@ -1,0 +1,18 @@
+[
+    { "id": "QUA", "name": "Quadrantids", "nameRu": "Квадрантиды", "ra": 230, "dec": 49, "activeFrom": "12-28", "activeTo": "01-12", "peak": "01-03", "zhr": 110 },
+    { "id": "LYR", "name": "Lyrids", "nameRu": "Лириды", "ra": 271, "dec": 34, "activeFrom": "04-14", "activeTo": "04-30", "peak": "04-22", "zhr": 18 },
+    { "id": "ETA", "name": "Eta Aquariids", "nameRu": "Эта-Аквариды", "ra": 338, "dec": -1, "activeFrom": "04-19", "activeTo": "05-28", "peak": "05-06", "zhr": 50 },
+    { "id": "JBO", "name": "June Bootids", "nameRu": "Июньские Боотиды", "ra": 224, "dec": 48, "activeFrom": "06-22", "activeTo": "07-02", "peak": "06-27", "zhr": 2 },
+    { "id": "CAP", "name": "Alpha Capricornids", "nameRu": "Альфа-Каприкорниды", "ra": 307, "dec": -10, "activeFrom": "07-03", "activeTo": "08-15", "peak": "07-30", "zhr": 5 },
+    { "id": "SDA", "name": "Southern Delta Aquariids", "nameRu": "Южные дельта-Аквариды", "ra": 340, "dec": -16, "activeFrom": "07-12", "activeTo": "08-23", "peak": "07-30", "zhr": 25 },
+    { "id": "PER", "name": "Perseids", "nameRu": "Персеиды", "ra": 48, "dec": 58, "activeFrom": "07-17", "activeTo": "08-24", "peak": "08-12", "zhr": 100 },
+    { "id": "AUR", "name": "Aurigids", "nameRu": "Ауригиды", "ra": 91, "dec": 39, "activeFrom": "08-28", "activeTo": "09-05", "peak": "09-01", "zhr": 6 },
+    { "id": "SPE", "name": "September Epsilon Perseids", "nameRu": "Сентябрьские эпсилон-Персеиды", "ra": 48, "dec": 40, "activeFrom": "09-05", "activeTo": "09-21", "peak": "09-09", "zhr": 8 },
+    { "id": "DRA", "name": "Draconids", "nameRu": "Дракониды", "ra": 262, "dec": 54, "activeFrom": "10-06", "activeTo": "10-10", "peak": "10-08", "zhr": 10 },
+    { "id": "STA", "name": "Southern Taurids", "nameRu": "Южные Тауриды", "ra": 32, "dec": 9, "activeFrom": "09-10", "activeTo": "11-20", "peak": "10-10", "zhr": 5 },
+    { "id": "ORI", "name": "Orionids", "nameRu": "Ориониды", "ra": 95, "dec": 16, "activeFrom": "10-02", "activeTo": "11-07", "peak": "10-21", "zhr": 20 },
+    { "id": "NTA", "name": "Northern Taurids", "nameRu": "Северные Тауриды", "ra": 58, "dec": 22, "activeFrom": "10-20", "activeTo": "12-10", "peak": "11-12", "zhr": 5 },
+    { "id": "LEO", "name": "Leonids", "nameRu": "Леониды", "ra": 152, "dec": 22, "activeFrom": "11-06", "activeTo": "11-30", "peak": "11-17", "zhr": 10 },
+    { "id": "GEM", "name": "Geminids", "nameRu": "Геминиды", "ra": 112, "dec": 33, "activeFrom": "12-04", "activeTo": "12-17", "peak": "12-14", "zhr": 150 },
+    { "id": "URS", "name": "Ursids", "nameRu": "Урсиды", "ra": 217, "dec": 76, "activeFrom": "12-17", "activeTo": "12-26", "peak": "12-22", "zhr": 10 }
+]

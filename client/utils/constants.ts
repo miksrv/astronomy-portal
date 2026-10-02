@@ -11,7 +11,9 @@ export const LOCAL_STORAGE = {
     AUTH_TOKEN: 'token',
     COOKIE_CONSENT: 'cookieConsent',
     LOCALE: 'locale',
-    RETURN_PATH: 'returnPath'
+    RETURN_PATH: 'returnPath',
+    // "Later"/"OK" on the star map's geolocation nudge — never nag the visitor again
+    STARMAP_GEO_NUDGE_DISMISSED: 'starmapGeoNudgeDismissed'
 }
 
 // sessionStorage key: the last submitted event-registration form data, saved
@@ -54,6 +56,10 @@ export const AUTH_GOOGLE_ENABLED = false
 // read its rendered height and avoid overlapping it.
 export const COOKIE_CONSENT_BANNER_ID = 'cookie-consent-banner'
 export const COOKIE_CONSENT_DISMISSED_EVENT = 'cookie-consent:dismissed'
+// CSS custom property on <html> holding the banner's rendered height while it is
+// visible (0px otherwise), so viewport-sized layouts (e.g. the full-screen /starmap)
+// can shrink out from under it purely in CSS: `calc(100vh - var(--cookie-consent-height, 0px))`.
+export const COOKIE_CONSENT_HEIGHT_CSS_VAR = '--cookie-consent-height'
 
 // Cookie name prefix (per event id) used to remember that a user closed the
 // floating "leave a review" reminder, and how long that dismissal lasts

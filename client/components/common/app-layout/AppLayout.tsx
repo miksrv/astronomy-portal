@@ -8,6 +8,7 @@ import NextNProgress from 'nextjs-progressbar'
 
 import { SITE_LINK, useAppDispatch, useAppSelector } from '@/api'
 import { closeAuthDialog } from '@/api/applicationSlice'
+import { createPageUrl } from '@/utils/helpers'
 
 import { CookieConsent } from '../cookie-consent'
 import { LoginForm } from '../login-form'
@@ -33,8 +34,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, noTopMargin, ch
 
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
 
-    const canonicalUrl = SITE_LINK + (i18n.language === 'en' ? 'en/' : '')
-    const pageUrl = canonicalUrl + (props?.canonical ?? '')
+    const pageUrl = createPageUrl(i18n.language, props?.canonical ?? '')
 
     const handleCloseOverlay = () => {
         setSidebarOpen(false)
@@ -93,8 +93,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, noTopMargin, ch
                 })}
             </Head>
 
+            {/* showOnShallow=false: a shallow route change never hits the server, so the bar
+                would be pure noise. It also silences the flicker on pages that mirror their
+                client-side state into the URL - the star map writes a permalink on every
+                pan/zoom/setting change (usePermalinkSync), and the objects/photos/admin-users
+                filters do the same on every keystroke. */}
             <NextNProgress
                 color={'#6f6ebb'}
+                showOnShallow={false}
                 options={{ showSpinner: false }}
             />
 

@@ -1,24 +1,13 @@
-import React from 'react'
-import { Skeleton } from 'simple-react-ui-kit'
+import React, { useEffect, useState } from 'react'
+import { cn, Skeleton } from 'simple-react-ui-kit'
 import { PartialDeep } from 'type-fest'
-
-import dynamic from 'next/dynamic'
 
 import { ApiModel } from '@/api'
 import { customConfig } from '@/components/common/star-map/config'
 
-import styles from './styles.module.sass'
+import { useCelestialScripts } from './useCelestialScripts'
 
-const StarMapRender = dynamic(() => import('./StarMapRender'), {
-    ssr: false,
-    // Celestial.js only sets the map's real height once it mounts and measures
-    // its container — without this, the map's spot in the layout is blank
-    // (0-height, since `.starMap` had no height of its own before the CSS fix
-    // below) until then, causing a layout shift. `.starMap`'s `min-height`
-    // covers the reserved space; this just fills it with something while the
-    // client-only bundle loads.
-    loading: () => <Skeleton className={styles.starMap} />
-})
+import styles from './styles.module.sass'
 
 export type StarMapObject = Pick<ApiModel.Object, 'name' | 'ra' | 'dec'>
 
@@ -42,6 +31,45 @@ export interface StarMapProps {
      * own wrapper, see `pages/starmap.tsx`.
      */
     fitContainer?: boolean
+    /**
+     * Reports the map's hide-UI (screenshot mode) toggle, so page-level overlays rendered
+     * outside the map element (the `/starmap` SEO intro card) can hide along with the
+     * map's own controls.
+     */
+    onUiHiddenChange?: (hidden: boolean) => void
 }
 
-export const StarMap: React.FC<StarMapProps> = ({ ...props }) => <StarMapRender {...props} />
+export const StarMap: React.FC<StarMapProps> = ({ ...props }) => {
+    // StarMapRender assumes the Celestial global exists at mount, so it can only
+    // render once the vendor scripts are ready.
+    const celestialReady = useCelestialScripts()
+
+    // The client-only chunk is imported manually (instead of next/dynamic) so it
+    // downloads in parallel with the vendor scripts, and both waiting phases share
+    // one identically-sized skeleton — no placeholder size jump between them.
+    // Effect-only state keeps SSR rendering the skeleton, same as ssr: false did.
+    const [StarMapRender, setStarMapRender] = useState<React.ComponentType<StarMapProps> | null>(null)
+
+    useEffect(() => {
+        let mounted = true
+
+        void import('./StarMapRender').then((module) => {
+            if (mounted) {
+                setStarMapRender(() => module.default)
+            }
+        })
+
+        return () => {
+            mounted = false
+        }
+    }, [])
+
+    return celestialReady && StarMapRender ? (
+        <StarMapRender {...props} />
+    ) : (
+        // Celestial.js only sets the map's real height once it mounts and measures
+        // its container — `.starMap`'s `min-height` covers the reserved space; the
+        // skeleton just fills it while the scripts + client-only chunk load.
+        <Skeleton className={cn(styles.starMap, props.className)} />
+    )
+}

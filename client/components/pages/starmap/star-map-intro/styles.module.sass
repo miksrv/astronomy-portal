@@ -1,0 +1,100 @@
+@use '../../../../styles/starmap-mixins' as starmap
+
+// Desktop-only floating glass card in the map's top-right corner, expanding
+// downwards/leftwards over the map like a FAQ block. On mobile (≤768px) the map owns the
+// whole screen, so the card is hidden: the H1 and the copy stay in the server-rendered
+// DOM (see StarMapIntro.tsx), they just aren't painted at phone widths.
+.intro
+    display: none
+
+@media (min-width: 769px)
+    .intro
+        display: block
+        position: absolute
+        // The map's top-right corner belongs to this card (the hide-UI toggle lives in
+        // the left rail); the top-center geolocation nudge hugs its content and stays clear
+        top: 10px
+        right: 10px
+        // Above the rail/chip/eye, below the object popup
+        z-index: starmap.$z-panel
+        // Collapsed width keeps the card clear of the horizon dome's upper-right edge
+        width: 300px
+        max-width: calc(100% - 20px)
+        border-radius: 12px
+        // Same glass surface as the map's control rail (.mapRail in star-map styles)
+        +starmap.glass
+        overflow: hidden
+        transition: width 0.15s ease
+
+        &[open]
+            width: 420px
+
+    // Screenshot mode (hide-UI): hidden like every other overlay. Client-side toggle
+    // only — the server HTML always ships the heading visible.
+    .introHidden
+        visibility: hidden
+
+    .introSummary
+        display: flex
+        align-items: center
+        justify-content: space-between
+        height: 28px
+        padding: 0 6px 0 12px
+        gap: 8px
+        border-radius: 12px
+        cursor: pointer
+        // Hide the native disclosure triangle — .introHint's chevron replaces it
+        list-style: none
+        transition: background-color 0.15s ease
+
+        &::-webkit-details-marker
+            display: none
+
+        &:hover
+            background-color: color-mix(in srgb, var(--button-secondary-background-hover) 60%, transparent)
+
+        // The page's H1, kept to one line inside the collapsed card
+        h1
+            margin: 0
+            font-size: 13px
+            font-weight: 600
+            line-height: 1.25
+            overflow: hidden
+            text-overflow: ellipsis
+            white-space: nowrap
+
+    .introHint
+        flex-shrink: 0
+        display: inline-flex
+        align-items: center
+        color: var(--color-main)
+
+        // The heading itself is the affordance here — keep only the chevron
+        span
+            display: none
+
+    .chevron
+        flex-shrink: 0
+        width: 18px
+        height: 18px
+        fill: currentColor
+        transition: transform 0.25s ease
+
+    .intro[open] .chevron
+        transform: rotate(180deg)
+
+    .introContent
+        display: grid
+        grid-template-columns: 1fr
+        gap: 12px
+        align-items: start
+        padding: 4px 12px 12px
+        max-height: 60vh
+        overflow-y: auto
+        font-size: 13px
+
+    .introText
+        p
+            margin: 0 0 10px
+            color: var(--text-color-secondary)
+            line-height: 1.5
