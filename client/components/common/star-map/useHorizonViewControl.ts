@@ -3,8 +3,8 @@ import { RefObject, useCallback, useMemo, useRef } from 'react'
 import { readCenter, readZoomFactor } from './celestialApi'
 import { MAX_VIEW_RESTORE_ATTEMPTS } from './horizonNavigation'
 import { ViewportSize } from './horizonOverlay'
-import { centerMatches, HorizonView, isDomeView, viewToCenter } from './horizonView'
-import { horizontalToEquatorial } from './objectInfo'
+import { centerMatches, clampView, HorizonView, isDomeView, viewToCenter } from './horizonView'
+import { equatorialToHorizontal, horizontalToEquatorial } from './objectInfo'
 import { StarMapSettings } from './types'
 import { computeHorizonCoverZoom, computeHorizonStartZoom } from './utils'
 
@@ -31,6 +31,8 @@ export interface HorizonViewControl {
     applyStartupZoom: () => void
     /** Leaving the whole-sky dome: zoom in far enough that the sky covers the frame */
     ensureLookAroundZoom: () => void
+    /** Turn the view towards a J2000 RA/Dec (a search hit); no-op outside horizon mode */
+    lookAt: (ra: number, dec: number) => void
     /** End-of-redraw safety net against a center Celestial picked on its own */
     restoreHorizonView: () => void
     /** Hand Celestial the instant (and, in horizon mode, its zenith) — one redraw */
@@ -218,6 +220,33 @@ export const useHorizonViewControl = ({
         }
     }, [isHorizon, horizonMinZoomFactor])
 
+    /**
+     * Turn to face a sky position — horizon mode's counterpart of sky mode's
+     * `Celestial.rotate({ center })`. The target's azimuth/altitude for the current place and
+     * instant becomes the view, so it lands in the middle of the frame with the horizon still
+     * level. A target below the horizon (or too close to the zenith) is clamped by
+     * clampView: the view then faces its azimuth as low (or as high) as it goes. Horizon mode
+     * runs with Celestial's animations disabled, so the turn is instant.
+     */
+    const lookAt = useCallback(
+        (ra: number, dec: number) => {
+            if (!initializedRef.current || !isHorizon()) {
+                return
+            }
+
+            const { azimuth, altitude } = equatorialToHorizontal(ra, dec, settingsRef.current.geopos, resolveDate())
+            const leavingDome = isDomeView(viewRef.current)
+
+            viewRef.current = clampView({ azimuth, altitude })
+            applyHorizonView()
+
+            if (leavingDome && !isDomeView(viewRef.current)) {
+                ensureLookAroundZoom()
+            }
+        },
+        [initializedRef, isHorizon, settingsRef, viewRef, resolveDate, applyHorizonView, ensureLookAroundZoom]
+    )
+
     // True while one of our own updates is running: those redraw with a center that is
     // about to be (or has just been) set for the current instant, so the safety net below
     // must not read them as Celestial wandering off.
@@ -288,6 +317,7 @@ export const useHorizonViewControl = ({
             horizonMinZoomFactor,
             applyStartupZoom,
             ensureLookAroundZoom,
+            lookAt,
             restoreHorizonView,
             syncCelestialZenith,
             withOwnUpdate
@@ -298,6 +328,7 @@ export const useHorizonViewControl = ({
             horizonMinZoomFactor,
             applyStartupZoom,
             ensureLookAroundZoom,
+            lookAt,
             restoreHorizonView,
             syncCelestialZenith,
             withOwnUpdate

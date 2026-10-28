@@ -46,6 +46,8 @@ export interface UseCanvasInteractionOptions {
     resolveDate: () => Date
     hidePopup: () => void
     openPendingPopup: (pending: PendingPopup) => void
+    /** Horizon mode: turn the view towards a J2000 RA/Dec (no-op in sky mode) */
+    lookAt: (ra: number, dec: number) => void
 }
 
 export interface CanvasInteractionController {
@@ -74,7 +76,8 @@ export const useCanvasInteraction = ({
     language,
     resolveDate,
     hidePopup,
-    openPendingPopup
+    openPendingPopup,
+    lookAt
 }: UseCanvasInteractionOptions): CanvasInteractionController => {
     const rafRef = useRef<number>(0)
 
@@ -391,9 +394,12 @@ export const useCanvasInteraction = ({
             const when = resolveDate()
             const geopos = settingsRef.current.geopos
 
+            // Sky mode flies to the target inside openPendingPopup; horizon mode is locked to a
+            // level view, so it turns to face the target first (the popup then opens in place)
             if (item.kind === 'sun' || item.kind === 'moon' || item.kind === 'planet') {
                 const info = computeBodyInfo(item.id as Body, item.name, geopos, when)
 
+                lookAt(info.ra, info.dec)
                 openPendingPopup({ name: item.name, object: '', ra: info.ra, dec: info.dec, info, infoDate: when })
                 return
             }
@@ -402,15 +408,16 @@ export const useCanvasInteraction = ({
                 return
             }
 
+            lookAt(item.ra, item.dec)
+
             if (item.kind === 'portal') {
                 openPendingPopup({ name: item.name, object: item.id, ra: item.ra, dec: item.dec })
                 return
             }
 
             if (item.kind === 'constellation') {
-                // Horizon mode is locked to the zenith — re-centering on the constellation
-                // would tip the whole dome over (the ground with it), so the hit is simply
-                // ignored there: the dome already shows the entire visible sky.
+                // No popup for a constellation — just bring it into view (horizon mode
+                // has already turned towards it above)
                 if (settingsRef.current.viewMode === 'sky') {
                     Celestial.rotate({ center: [item.ra, item.dec, 0] })
                 }
@@ -433,7 +440,7 @@ export const useCanvasInteraction = ({
 
             openPendingPopup({ name: item.name, object: '', ra: item.ra, dec: item.dec, info, infoDate: when })
         },
-        [openPendingPopup, resolveDate, settingsRef]
+        [openPendingPopup, lookAt, resolveDate, settingsRef]
     )
 
     return { selectSearchItem }

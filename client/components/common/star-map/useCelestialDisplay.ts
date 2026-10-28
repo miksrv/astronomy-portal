@@ -81,6 +81,8 @@ export interface CelestialDisplayController {
     measureViewScale: () => number | null
     /** Horizon mode: zoom in far enough that a look-around view fills the frame */
     ensureLookAroundZoom: () => void
+    /** Horizon mode: turn the view towards a J2000 RA/Dec (search hits) */
+    lookAt: (ra: number, dec: number) => void
     /**
      * Toolbar rail "fit view": horizon mode re-centers on the zenith and fits the whole
      * dome into the canvas (same as after the first display); sky mode resets the zoom to
@@ -725,6 +727,7 @@ export const useCelestialDisplay = ({
         applyHorizonView: horizon.applyHorizonView,
         measureViewScale: horizon.measureViewScale,
         ensureLookAroundZoom: horizon.ensureLookAroundZoom,
+        lookAt: horizon.lookAt,
         fitView
     }
 }

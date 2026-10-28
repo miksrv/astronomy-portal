@@ -102,6 +102,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
         applyHorizonView,
         measureViewScale,
         ensureLookAroundZoom,
+        lookAt,
         fitView
     } = useCelestialDisplay({
         containerRef: ref,
@@ -187,7 +188,8 @@ const StarMapRender: React.FC<StarMapProps> = ({
         language: i18n?.language,
         resolveDate,
         hidePopup,
-        openPendingPopup
+        openPendingPopup,
+        lookAt
     })
 
     // A bottom sheet (settings / search / manual link) is open — on mobile it covers the

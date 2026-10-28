@@ -180,10 +180,11 @@ export const useStarMapPopup = ({ containerRef, settingsRef }: UseStarMapPopupOp
     /**
      * Center the map on the target and open its popup once the rotation settles.
      *
-     * Horizon mode is the exception: its center is locked to the zenith (that is what keeps
-     * the ground and the horizon level — see horizonNavigation.ts), so flying to the object
-     * would tip the whole dome over. There the popup simply opens where the object already
-     * is; the fitted dome shows the entire visible sky anyway.
+     * Horizon mode is the exception: its center is derived from the view direction (that is
+     * what keeps the ground and the horizon level — see horizonView.ts), so a plain
+     * equatorial fly-to would tip the horizon over. There the popup simply opens where the
+     * object already is — a search hit turns the view to face it first (useHorizonViewControl
+     * lookAt), a canvas click is on something already in view.
      */
     const openPendingPopup = useCallback(
         (pending: PendingPopup) => {
