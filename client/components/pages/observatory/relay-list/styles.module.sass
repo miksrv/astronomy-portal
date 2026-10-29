@@ -1,15 +1,17 @@
+@use '../../../../styles/variables' as variables
+
 .relayListContainer
     display: flex
     flex-direction: column
-    justify-content: space-between
+    gap: var(--space-1)
     height: 100%
     min-height: 230px
 
     .loader
+        display: flex
         justify-content: center
         align-items: center
         height: 100%
-        display: flex
 
         svg
             width: 32px
@@ -17,35 +19,36 @@
 
     .item
         display: flex
+        align-items: center
         justify-content: space-between
-        margin: 0
-
-        button
-            height: 24px
-            min-height: 24px
-            line-height: 0
-            text-transform: uppercase
-            padding: 0
+        gap: var(--space-3)
+        min-height: 44px
+        margin: 0 calc(-1 * var(--space-2))
+        padding: 0 var(--space-2)
+        border-radius: var(--radius-md)
 
         &:hover
-            background-color: #373737
+            background-color: var(--surface-2)
 
     .name
-        line-height: 9px
-        padding-top: 8px
-        margin-bottom: 0
+        display: flex
+        align-items: center
+        gap: var(--space-2)
+        min-width: 0
 
     .description
-        padding-top: 3px
+        flex: 1
+        text-align: right
         color: var(--text-color-secondary)
+        font-size: var(--font-size-secondary)
 
     .ledIndicator
-        margin-right: 5px
+        flex: none
         display: inline-block
-        background-color: var(--color-primary-background)
         width: 8px
         height: 8px
         border-radius: 50%
+        background-color: var(--text-color-disabled)
 
         &.on
             background-color: var(--color-green)
@@ -53,26 +56,25 @@
         &.off
             background-color: var(--color-red)
 
+    // Switch: outline button tinted with the state it shows
     .switchButton
-        background: transparent !important
-        color: var(--text-color-secondary)
-        border: 1px solid var(--text-color-primary)
-        padding: 5px 10px
-        width: 50px
+        min-width: 56px
         text-transform: uppercase
 
-        &.off
-            color: var(--color-primary) !important
-            border: 1px solid var(--color-primary) !important
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            min-width: 64px
+            min-height: 44px
 
-            &:hover, &:active, &:focus
-                background: rgba(221, 145, 36, 0.18) !important
-                color: var(--text-color-primary) !important
+        &.off
+            color: var(--color-main)
+            border-color: var(--color-main)
+
+            &:hover:not(:disabled)
+                background: var(--color-main-background)
 
         &.on
-            color: var(--color-green) !important
-            border: 1px solid var(--color-green) !important
+            color: var(--color-green)
+            border-color: var(--color-green)
 
-            &:hover, &:active, &:focus
-                background: rgba(46, 140, 71, 0.18) !important
-                color: var(--text-color-primary) !important
+            &:hover:not(:disabled)
+                background: var(--color-green-background)

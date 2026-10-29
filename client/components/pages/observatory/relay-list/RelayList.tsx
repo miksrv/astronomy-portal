@@ -145,7 +145,10 @@ export const RelayList: React.FC = () => {
                 {!!relayList?.items?.length && (
                     <div className={styles.item}>
                         <div className={styles.name}>
-                            <span className={cn(styles.ledIndicator, optimisticLightOn ? styles.on : styles.off)} />
+                            <span
+                                className={cn(styles.ledIndicator, optimisticLightOn ? styles.on : styles.off)}
+                                aria-hidden={'true'}
+                            />
                             {t('components.pages.observatory.relay-list.lightning', 'Освещение')}
                         </div>
                         <div className={styles.description}>
@@ -164,7 +167,10 @@ export const RelayList: React.FC = () => {
                             )}
                         </div>
                         <Button
-                            size={'small'}
+                            // Not a switch: the light can only be turned on, it goes off by timer
+                            aria-pressed={optimisticLightOn}
+                            aria-label={t('components.pages.observatory.relay-list.lightning', 'Освещение')}
+                            mode={'outline'}
                             loading={(isLoading && relayLoading === 1) || lightLoading}
                             className={cn(styles.switchButton, optimisticLightOn ? styles.on : styles.off)}
                             disabled={
@@ -202,10 +208,17 @@ interface RelayListItemProps {
 export const RelayListItem: React.FC<RelayListItemProps> = ({ id, name, state, loading, isAdmin, handleClick }) => (
     <div className={styles.item}>
         <div className={styles.name}>
-            <span className={cn(styles.ledIndicator, state ? styles.on : styles.off)} />
+            <span
+                className={cn(styles.ledIndicator, state ? styles.on : styles.off)}
+                aria-hidden={'true'}
+            />
             {name}
         </div>
         <Button
+            role={'switch'}
+            aria-checked={state}
+            aria-label={name}
+            mode={'outline'}
             loading={loading}
             className={cn(styles.switchButton, state ? styles.on : styles.off)}
             disabled={loading || !isAdmin}

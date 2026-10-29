@@ -12,6 +12,8 @@ import { WidgetChart } from '@/components/pages/observatory'
 import { getDateTimeFormat } from '@/utils/dates'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
+import styles from './styles.module.sass'
+
 const HistoryPage: NextPage<object> = () => {
     const { i18n, t } = useTranslation()
 
@@ -52,9 +54,9 @@ const HistoryPage: NextPage<object> = () => {
                 ]}
             />
 
-            <div>
+            <p className={styles.text}>
                 {t(
-                    'pages.observatory-weather.description',
+                    'pages.observatory-weather.text',
                     'Следите за погодными условиями в режиме реального времени с метеостанции, установленной на самодельной астрономической обсерватории в пригороде Оренбурга. Графики отображают температуру, влажность, облачность и скорость ветра. Для полного доступа к данным и истории наблюдений переходите на сайт метеостанции:'
                 )}{' '}
                 <Link
@@ -65,9 +67,12 @@ const HistoryPage: NextPage<object> = () => {
                     {'meteo.miksoft.pro'}
                 </Link>
                 {'.'}
-            </div>
+            </p>
 
-            <Container>
+            <Container
+                className={styles.chart}
+                title={t('components.pages.observatory.widget-chart.temperature', 'Температура')}
+            >
                 <WidgetChart
                     fullWidth={true}
                     type={'temperature'}
@@ -77,7 +82,10 @@ const HistoryPage: NextPage<object> = () => {
                 />
             </Container>
 
-            <Container>
+            <Container
+                className={styles.chart}
+                title={`${t('components.pages.observatory.widget-chart.clouds', 'Облачность')} / ${t('components.pages.observatory.widget-chart.wind-speed', 'Скорость ветра')}`}
+            >
                 <WidgetChart
                     fullWidth={true}
                     type={'clouds'}

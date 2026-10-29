@@ -30,24 +30,25 @@ export const TelescopeWorkdays: React.FC<TelescopeWorkdaysProps> = ({ loading, e
             accessor: 'telescope_date',
             header: t('components.common.object-photos-table.date', 'Дата'),
             formatter: (date) => (
-                <span className={styles.date}>
+                <span className={styles.dateCell}>
                     <MoonPhaseIcon date={date as string} />
                     {formatDate(date as string, 'D MMMM YYYY')}
                 </span>
             ),
-            isSortable: true,
-            className: styles.date
+            isSortable: true
         },
         {
             accessor: 'frames_count',
             header: t('components.pages.index.main-sections.frames', 'Кадров'),
-            formatter: (frames) => frames,
+            formatter: (frames) => <span className={styles.num}>{frames as number}</span>,
             isSortable: true
         },
         {
             accessor: 'total_exposure',
             header: t('components.common.object-photos-table.exposure', 'Выдержка'),
-            formatter: (exposure) => getTimeFromSec((exposure as number) || 0, true),
+            formatter: (exposure) => (
+                <span className={styles.num}>{getTimeFromSec((exposure as number) || 0, true)}</span>
+            ),
             isSortable: true
         },
         {
@@ -75,9 +76,8 @@ export const TelescopeWorkdays: React.FC<TelescopeWorkdaysProps> = ({ loading, e
                 columns={columns}
                 loading={loading}
                 data={eventsTelescope || []}
-                className={styles.objectsListTable}
+                maxHeight={260}
                 stickyHeader={true}
-                verticalBorder={true}
             />
         </Container>
     )

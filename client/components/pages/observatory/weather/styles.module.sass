@@ -1,62 +1,81 @@
-.weather
-    margin-bottom: 10px
+@use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
 
+.weather
     .toolbar
         display: flex
+        align-items: baseline
         justify-content: space-between
+        gap: var(--space-3)
+        width: 100%
+        flex-wrap: wrap
 
         .title
+            +type.titleBlock
             margin: 0
 
     .update
-        margin: 2px 0 5px 0
-        font-size: 11px
-        color: var(--text-color-secondary)
+        +type.caption
+        margin: calc(-1 * var(--space-1)) 0 var(--space-4)
 
         strong
-            margin: 0 4px
-
-    .grid
-        display: flex
-        flex-wrap: wrap
-
-        .column
-            padding: 1px 0 !important
-
-        .key
-            flex-basis: 50%
-            width: 50%
-            color: var(--text-color-secondary)
-
-        .val
+            font-weight: var(--font-weight-medium)
             color: var(--text-color-primary)
 
+    .grid
+        display: grid
+        grid-template-columns: repeat(3, 1fr)
+        gap: var(--space-4)
+        margin: 0
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            grid-template-columns: repeat(2, 1fr)
+
+        .key
+            min-width: 0
+
+        .label
+            +type.caption
+            display: flex
+            align-items: center
+            gap: var(--space-1)
+
+        .val
+            +type.stat
+            margin: var(--space-1) 0 0
+            color: var(--text-color-primary)
+
+        .unit
+            +type.secondary
+            font-weight: var(--font-weight-normal)
+
+    // Status dot; the state is also spelled out for screen readers
     .weatherCondition
         display: inline-block
+        flex: none
         width: 8px
         height: 8px
-        background-color: var(--color-primary-background)
-        margin-right: 5px
+        border-radius: 50%
+        background-color: var(--text-color-disabled)
 
         &.good
             background-color: var(--color-green)
 
         &.warning
-            background-color: var(--color-primary)
+            background-color: var(--color-orange)
 
         &.danger
             background-color: var(--color-red)
 
     .weatherState
-        color: var(--color-primary-background)
-        margin-left: 2px
+        margin-left: var(--space-1)
         text-transform: lowercase
 
         &.good
             color: var(--color-green)
 
         &.warning
-            color: var(--color-primary)
+            color: var(--color-orange)
 
         &.danger
             color: var(--color-red)

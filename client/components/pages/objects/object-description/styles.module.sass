@@ -1,6 +1,7 @@
-.objectDescription
-    p:first-of-type
-        margin-top: 0
+@use '../../../../styles/typography' as type
 
-    p:last-of-type
-        margin-bottom: 0
+// Long-form text on the page background (DESIGN.md → Prose)
+.objectDescription
+    +type.prose
+    // ShowMore fades the text into the colour of its card: here that is the page
+    --container-background-color: var(--body-background)

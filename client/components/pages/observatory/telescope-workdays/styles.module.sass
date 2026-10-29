@@ -1,26 +1,26 @@
 .tableContainer
-    max-height: 190px
-    overflow-y: auto
-    padding: 2px !important
+    padding: var(--space-1)
+    overflow-x: auto
 
-.date
-    font-weight: 400
+.dateCell
+    display: inline-flex
+    align-items: center
+    gap: var(--space-2)
+    white-space: nowrap
 
-    span
-        float: none
-        display: inline-block
-        vertical-align: middle
-        margin-top: -4px
+.num
+    font-variant-numeric: tabular-nums
 
+// Object chips (kit-like chip: surface-2, hairline, sm radius)
 .link
-    background: var(--modal-background)
-    border-radius: var(--border-radius)
-    border: 1px solid #757575
-    padding: 2px  4px
-    margin-right: 5px
+    display: inline-block
+    margin: 2px var(--space-1) 2px 0
+    padding: 0 var(--space-2)
+    border: 1px solid var(--border)
+    border-radius: var(--radius-sm)
+    background: var(--surface-2)
+    font-size: var(--font-size-secondary)
+    line-height: 22px
 
-    &:hover, &:active, &:focus
-        background: var(--dropdown-background-color-hover)
-
-    &:last-of-type
-        margin-right: 0
+    &:hover
+        background: var(--surface-3)

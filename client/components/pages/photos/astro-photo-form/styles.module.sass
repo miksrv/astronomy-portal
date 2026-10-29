@@ -1,59 +1,115 @@
+@use '../../../../styles/variables' as variables
 @use '../../../../styles/mixins'
+@use '../../../../styles/typography' as type
+
+// Two columns of fields on wide screens (DESIGN.md → Forms)
+.form
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))
+    gap: var(--space-4)
+    align-items: start
+
+.fullRow
+    grid-column: 1 / -1
 
 .formElement
-    margin-bottom: 10px
+    margin: 0
 
 .formLabel
-    color: var(--input-label-color)
-    margin-bottom: 10px
+    +type.secondary
+    font-weight: var(--font-weight-medium)
     display: block
+    margin-bottom: var(--space-1)
 
 .addFilter
     display: flex
-    justify-content: space-between
     align-items: flex-end
+    gap: var(--space-2)
 
     .filtersDropdown
         flex: 1
-        margin-right: 10px
 
 .filterList
-    margin-top: 10px
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
 
-    .filterItem
-        display: flex
-        justify-content: flex-start
-        align-items: center
-        padding: 5px 5px 5px 0
-        border-radius: var(--border-radius)
+    &:empty
+        display: none
 
-        label
-            display: block
-            min-width: 40px
-            text-align: center
-            font-weight: 600
+.filterItem
+    display: grid
+    grid-template-columns: 32px 1fr 1fr auto
+    align-items: start
+    gap: var(--space-2)
 
-        & > div
-            flex: 1
-            margin-right: 5px
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: 32px 1fr auto
 
-        &:not(:last-child)
-            margin-bottom: 5px
+        // Second field wraps under the first, the remove button stays top-right
+        & > div:nth-of-type(2)
+            grid-column: 2 / 3
+
+        & > button
+            grid-column: 3
+            grid-row: 1
+
+// Filter colour comes from utils/colors, text over it is white
+.filterChip
+    +type.caption
+    margin-top: var(--space-2)
+    padding: 4px 0
+    border-radius: var(--radius-sm)
+    color: #fff
+    font-weight: var(--font-weight-semibold)
+    text-align: center
 
 .imageSection
-    flex-basis: 100%
-    width: 100%
-    margin-top: 10px
     position: relative
+    aspect-ratio: 16 / 9
+    max-height: 420px
+    overflow: hidden
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
 
     .image
         object-fit: cover
-        height: 500px !important
-        position: relative !important
 
-.footer
-    +mixins.form-footer
+.fileInput
+    +type.body
+    max-width: 100%
+
+    &::file-selector-button
+        margin-right: var(--space-3)
+        padding: 0 var(--space-3)
+        height: 36px
+        border: 1px solid var(--border-strong)
+        border-radius: var(--radius-md)
+        background: var(--surface-2)
+        color: var(--text-color-primary)
+        font: inherit
+        cursor: pointer
+
+    &:focus-visible
+        outline: var(--focus-outline)
 
 .presets
     display: flex
-    margin-bottom: 10px
+    flex-wrap: wrap
+    gap: var(--space-1) var(--space-2)
+    margin-top: calc(var(--space-2) * -1)
+
+// Actions: cancel first, primary last, right-aligned
+.footer
+    grid-column: 1 / -1
+    display: flex
+    justify-content: flex-end
+    gap: var(--space-2)
+    padding-top: var(--space-4)
+    border-top: 1px solid var(--border)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column-reverse
+
+        & > *
+            width: 100%

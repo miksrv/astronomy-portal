@@ -30,9 +30,9 @@ const ObservatoryPage: NextPage<object> = () => {
             openGraph={{
                 images: [
                     {
-                        height: 854,
-                        url: '/screenshots/observatory.jpg',
-                        width: 1280
+                        height: 1024,
+                        url: '/images/index-observatory.png',
+                        width: 1536
                     }
                 ]
             }}
@@ -42,7 +42,7 @@ const ObservatoryPage: NextPage<object> = () => {
                 currentPage={title}
             />
 
-            <div>
+            <p className={styles.text}>
                 {t(
                     'pages.observatory.text',
                     'Наблюдение за Вселенной начинается здесь - в режиме реального времени вы можете увидеть текущие погодные условия, трансляцию с камер, статус оборудования и расписание съёмки. Обсерватория работает в полуавтоматическом режиме, позволяя вести съёмку deep-sky объектов удалённо. Здесь реализована система интеллектуального управления, анализирующая погодные условия и автоматически принимающая решение о начале работы. Подробнее об оборудовании и принципе работы можно узнать на отдельной странице:'
@@ -54,16 +54,14 @@ const ObservatoryPage: NextPage<object> = () => {
                     {observatoryLink}
                 </Link>
                 {'.'}
-            </div>
+            </p>
 
             <div className={styles.observatoryGrid}>
-                <div>
+                <div className={styles.stack}>
                     <Weather />
                     <AstronomyCalc />
                 </div>
-                <div>
-                    <RelayList />
-                </div>
+                <RelayList />
             </div>
 
             <div className={styles.observatoryGrid}>
@@ -78,10 +76,12 @@ const ObservatoryPage: NextPage<object> = () => {
                 />
             </div>
 
-            <TelescopeWorkdays
-                eventsTelescope={data?.items}
-                loading={isLoading}
-            />
+            <div className={styles.block}>
+                <TelescopeWorkdays
+                    eventsTelescope={data?.items}
+                    loading={isLoading}
+                />
+            </div>
 
             <Calendar eventsTelescope={data?.items} />
 

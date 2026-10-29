@@ -6,7 +6,13 @@ import dynamic from 'next/dynamic'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
-import { CHART_COLORS, getBaseChartConfig } from '@/utils/charts'
+import {
+    CHART_AXIS_POINTER_STYLE,
+    CHART_COLORS,
+    CHART_TOOLTIP_STYLE,
+    getBaseChartConfig,
+    WEATHER_SERIES_COLORS
+} from '@/utils/charts'
 import { getSensorColor } from '@/utils/colors'
 import { formatDateFromUnixUTC } from '@/utils/dates'
 import { round } from '@/utils/helpers'
@@ -34,9 +40,12 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
         ...getBaseChartConfig(),
         tooltip: {
             trigger: 'axis',
+            // Replaces the base tooltip as a whole, so it re-applies the shared crosshair style
             axisPointer: {
                 type: 'cross',
+                ...CHART_AXIS_POINTER_STYLE,
                 label: {
+                    ...CHART_AXIS_POINTER_STYLE.label,
                     formatter: function (params) {
                         if (params?.axisDimension === 'x') {
                             return formatDateFromUnixUTC(
@@ -52,8 +61,7 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
                     }
                 }
             },
-            backgroundColor: CHART_COLORS.background,
-            borderColor: CHART_COLORS.border,
+            ...CHART_TOOLTIP_STYLE,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             formatter: (params: any) => {
                 // An array of strings that will be concatenated and returned as the contents of the tooltip
@@ -90,7 +98,7 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
                 show: true,
                 hideOverlap: true,
                 color: CHART_COLORS.textSecondary,
-                fontSize: '11px',
+                fontSize: 12,
                 formatter: (value: number) =>
                     formatDateFromUnixUTC(
                         value,
@@ -130,7 +138,7 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
                 show: true,
                 formatter: '{value}%',
                 color: CHART_COLORS.textSecondary,
-                fontSize: '11px'
+                fontSize: 12
             },
             splitLine: {
                 show: true,
@@ -142,6 +150,9 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
         }
     }
 
+    const getSeriesColor = (source: keyof ApiModel.Weather): string[] =>
+        WEATHER_SERIES_COLORS[source] ?? getSensorColor(source)
+
     const getChartLineConfig = (source: keyof ApiModel.Weather, name?: string, axis?: number, area?: boolean) => ({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...(baseConfig.series as any)[0],
@@ -149,15 +160,15 @@ export const Chart: React.FC<ChartProps> = ({ type, data, height, dateFormat }) 
         name: name ?? '',
         yAxisIndex: axis ?? 0,
         lineStyle: {
-            color: getSensorColor(source)[0],
-            width: 1
+            color: getSeriesColor(source)[0],
+            width: 1.5
         },
         itemStyle: {
-            color: getSensorColor(source)[0]
+            color: getSeriesColor(source)[0]
         },
         areaStyle: area
             ? {
-                  color: getSensorColor(source)[1]
+                  color: getSeriesColor(source)[1]
               }
             : undefined
     })

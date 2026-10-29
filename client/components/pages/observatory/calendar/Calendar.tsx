@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import dayjs from 'dayjs'
 import { Button, Container } from 'simple-react-ui-kit'
+
+import { useTranslation } from 'next-i18next/pages'
 
 import { APIMeteo } from '@/api'
 import { formatDate } from '@/utils/dates'
@@ -16,8 +18,13 @@ interface CalendarProps {
 }
 
 export const Calendar: React.FC<CalendarProps> = ({ eventsTelescope }) => {
+    const { t, i18n } = useTranslation()
     const [calendarDate, setCalendarDate] = useState<Date>(new Date())
-    const daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС']
+    // Short weekday names in the current language, week starts on Monday
+    const daysOfWeek = useMemo(
+        () => [1, 2, 3, 4, 5, 6, 0].map((day) => dayjs().day(day).locale(i18n.language).format('dd')),
+        [i18n.language]
+    )
 
     const { data: weatherData } = APIMeteo.useGetHistoryQuery({
         end_date: dayjs(calendarDate).isSame(dayjs(), 'month')
@@ -32,12 +39,19 @@ export const Calendar: React.FC<CalendarProps> = ({ eventsTelescope }) => {
                 <Button
                     mode={'secondary'}
                     icon={'KeyboardLeft'}
+                    aria-label={t('components.pages.observatory.calendar.previous-month', 'Предыдущий месяц')}
                     onClick={() => setCalendarDate(dateExtractMonth(calendarDate, 1))}
                 />
-                <span className={styles.currentMonth}>{formatDate(calendarDate, 'MMMM YYYY')}</span>
+                <span
+                    className={styles.currentMonth}
+                    aria-live={'polite'}
+                >
+                    {formatDate(calendarDate, 'MMMM YYYY')}
+                </span>
                 <Button
                     mode={'secondary'}
                     icon={'KeyboardRight'}
+                    aria-label={t('components.pages.observatory.calendar.next-month', 'Следующий месяц')}
                     onClick={() => setCalendarDate(dateAddMonth(calendarDate, 1))}
                 />
             </div>

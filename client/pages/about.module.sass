@@ -1,0 +1,37 @@
+@use '../styles/typography' as type
+
+// Long text of the page: prose on the full content width, like the galleries,
+// the team carousel and the donators box (the div children)
+.prose
+    +type.prose
+    margin: 0 0 var(--space-4)
+
+    > div
+        margin: var(--space-4) 0
+
+.lead
+    +type.lead
+
+// Donators: a multi-column list in a box that scrolls down. The height limit
+// sits on the wrapper: on the multi-column list itself it would add overflow
+// columns to the side (a horizontal scroll) instead
+.donatorsScroll
+    max-height: 400px
+    overflow-y: auto
+    padding-right: var(--space-2)
+
+.donators
+    columns: 3 200px
+    column-gap: var(--space-6)
+    margin: 0
+    padding: 0
+    list-style: none
+    +type.body
+
+    li
+        break-inside: avoid
+        margin: 0
+        padding: var(--space-1) 0
+
+.donatorNote
+    +type.caption

@@ -54,7 +54,7 @@ export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosL
                             src={data as string}
                             width={106}
                             height={24}
-                            alt={''}
+                            alt={`${t('common.photo', 'Фото')} ${row[i]?.title || formatObjectName(row[i]?.name)}`}
                         />
                     </Link>
                 ),

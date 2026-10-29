@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { Container, Icon } from 'simple-react-ui-kit'
+import { Icon } from 'simple-react-ui-kit'
 
 import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
@@ -31,6 +31,8 @@ import photoStargazing6 from '@/public/photos/stargazing-6.jpeg'
 import photoStargazing7 from '@/public/photos/stargazing-7.jpeg'
 import photoStargazing8 from '@/public/photos/stargazing-8.jpeg'
 import { initSSRLocale } from '@/utils/ssrLocale'
+
+import styles from './about.module.sass'
 
 const galleryAboutMe = [photoAboutMe1, photoAboutMe2, photoAboutMe3, photoAboutMe4]
 
@@ -104,7 +106,8 @@ const AboutPage: NextPage<AboutPageProps> = () => {
     return (
         <AppLayout
             canonical={'about'}
-            title={title}
+            noBrandSuffix={true}
+            title={t('pages.about.seo-title', 'О проекте «Смотри на звёзды»: команда и обсерватория')}
             description={t(
                 'pages.about.description',
                 'Узнайте больше о проекте «Смотри на звёзды», нашей команде и самодельной астрономической обсерватории. Присоединяйтесь к нам и откройте для себя красоту космоса!'
@@ -128,12 +131,11 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 currentPage={title}
             />
 
-            <Container>
-                <p style={{ marginTop: 0 }}>
-                    {t('pages.about.my-name', 'Меня зовут')}
+            <div className={styles.prose}>
+                <p className={styles.lead}>
+                    {t('pages.about.my-name', 'Меня зовут')}{' '}
                     <Link
                         href={'https://miksoft.pro'}
-                        style={{ marginLeft: '5px' }}
                         title={t('pages.about.misha', 'Миша')}
                         target={'_blank'}
                     >
@@ -151,7 +153,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                         handlePhotoClick(index)
                     }}
                 />
-            </Container>
+            </div>
 
             <Link
                 href={'https://t.me/look_at_stars'}
@@ -166,20 +168,20 @@ const AboutPage: NextPage<AboutPageProps> = () => {
 
             <h2>{t('pages.about.team-title', 'Наша команда')}</h2>
 
-            <Container>
-                <p style={{ marginTop: 0 }}>
+            <div className={styles.prose}>
+                <p>
                     {t(
                         'pages.about.team-description',
                         'Мы работаем в самых разных сферах, но всех нас объединяет одно - любовь к звёздам и ночному небу. С 2016 года мы популяризируем астрономию, организовываем астровыезды в Оренбургской области и вечера тротуарной астрономии в Оренбурге. Вместе мы смотрим на звёзды, делимся знаниями и вдохновляем других.'
                     )}
                 </p>
                 <ProjectTeam />
-            </Container>
+            </div>
 
             <h2>{t('pages.about.project-title', 'Астрономический проект «Смотри на звёзды»')}</h2>
 
-            <Container>
-                <p style={{ marginTop: 0 }}>
+            <div className={styles.prose}>
+                <p>
                     {t(
                         'pages.about.project-description',
                         'В 2016 году в Оренбургской области мы запустили проект «Смотри на звёзды», чтобы сделать астрономию доступной для всех. С тех пор каждый сезон мы устраиваем бесплатные лекции под открытым небом, организуем поездки за город с телескопами и проводим неформальные вечера тротуарной астрономии.'
@@ -189,10 +191,9 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     {t(
                         'pages.about.project-goal',
                         'Главная цель проекта - показать величие и красоту Вселенной, вдохновить людей на изучение космоса. Мы охватываем не только Оренбургскую область, но и соседние регионы, выезжая в места, где ночное небо особенно яркое. Узнать больше о наших текущих и прошедших мероприятиях можно на странице'
-                    )}
+                    )}{' '}
                     <Link
                         href={'/stargazing'}
-                        style={{ marginLeft: '5px' }}
                         title={t('menu.stargazing', 'Астровыезды')}
                     >
                         {t('menu.stargazing', 'Астровыезды')}
@@ -200,10 +201,9 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     {t(
                         'pages.about.project-sidewalk',
                         ', а для тех, кто хочет увидеть звёзды в черте города, мы подготовили раздел'
-                    )}
+                    )}{' '}
                     <Link
                         href={'/stargazing/where'}
-                        style={{ marginLeft: '5px' }}
                         title={t('pages.about.project-sidewalk-link', 'Где в Оренбурге посмотреть в телескоп')}
                     >
                         {t('pages.about.project-sidewalk-link', 'Где в Оренбурге посмотреть в телескоп')}
@@ -228,22 +228,22 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                         'Одной из важнейших составляющих проекта являются лекции, которые проводят опытные астрономы-любители. Мы рассказываем о научных открытиях, истории астрономии и её современных достижениях. Лекции проходят в лёгком формате, где сложные вещи объясняются простым и понятным языком. Это помогает слушателям не только расширить кругозор, но и вдохновляет на самостоятельное изучение астрономии.'
                     )}
                 </p>
-                <p style={{ marginBottom: 0 }}>
+                <p>
                     {t(
                         'pages.about.project-sidewalk-astronomy',
                         'Особое внимание мы уделяем вечерам тротуарной астрономии. Эти встречи под открытым небом проходят в самых доступных местах города. На таких мероприятиях любой желающий может подойти, посмотреть в телескоп и узнать больше о том, что скрывает звёздное небо.'
                     )}
                 </p>
-            </Container>
+            </div>
 
             <h2>{t('pages.about.observatory-title', 'Самодельная астрономическая обсерватория')}</h2>
 
-            <Container>
-                <p style={{ marginTop: 0 }}>
+            <div className={styles.prose}>
+                <p>
                     {t(
                         'pages.about.observatory-intro',
                         'Этот проект - один из самых значимых этапов моей жизни. Наша самодельная астрономическая обсерватория - уникальное явление для Оренбургской области. Она работает автономно и позволяет получать снимки объектов дальнего космоса, делая астрономию доступной для всех. Более подробно о работе и оборудовании обсерватории можно узнать в разделе - '
-                    )}
+                    )}{' '}
                     <Link
                         href={'/objects'}
                         title={t('pages.about.observatory-intro-link', 'астрономическая обсерватория в Оренбурге')}
@@ -262,10 +262,9 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     {t(
                         'pages.about.observatory-work-1.text',
                         'Обсерватория открыта для всех желающих. Каждый может воспользоваться её возможностями, чтобы получить изображения космических объектов. Более того, на сайте доступен раздел'
-                    )}
+                    )}{' '}
                     <Link
                         href={'/objects'}
-                        style={{ marginLeft: '5px' }}
                         title={t('pages.about.observatory-work-1.objects', 'Объекты')}
                     >
                         {t('pages.about.observatory-work-1.objects', 'Объекты')}
@@ -279,10 +278,9 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                     {t(
                         'pages.about.observatory-photos-1',
                         'Скоро мы запустим бесплатный сервис управления телескопом, чтобы ещё больше людей могли приобщиться к красоте ночного неба. Не забудьте заглянуть в раздел'
-                    )}
+                    )}{' '}
                     <Link
                         href={'/photos'}
-                        style={{ marginLeft: '5px' }}
                         title={t('pages.about.astrophoto', 'Астрофото')}
                     >
                         {t('pages.about.astrophoto', 'Астрофото')}
@@ -292,18 +290,21 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                         ', где собраны снимки, полученные с помощью обсерватории и на наших астровыездах. Эти фотографии обработаны мной и моими друзьями и являются отражением нашей страсти к космосу.'
                     )}
                 </p>
-                <p style={{ marginBottom: 0 }}>
+                <p>
                     {t(
                         'pages.about.observatory-conclusion',
                         'Этот проект - наш вклад в популяризацию астрономии. Мы искренне надеемся, что он вдохновит и вас открыть для себя Вселенную!'
                     )}
                 </p>
-            </Container>
+            </div>
 
             <h2>{t('pages.about.your-help-title', 'Ваша помощь')}</h2>
 
-            <Container id={'your-help'}>
-                <p style={{ marginTop: 0 }}>
+            <div
+                id={'your-help'}
+                className={styles.prose}
+            >
+                <p>
                     {t(
                         'pages.about.your-help-intro',
                         'Развитие проекта «Смотри на звёзды» во многом стало возможным благодаря поддержке программы социальных инвестиций «Родные города» компании «Газпром нефть» и содействию команды информационного агентства «Оренбург Медиа».'
@@ -315,42 +316,23 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                         'Наш проект самодельной обсерватории также нашёл отклик у множества неравнодушных участников. У нас масштабные планы по развитию этого направления, и ваша поддержка играет ключевую роль. Мы благодарны каждому, кто помогает советами, консультациями и рекомендациями. Если мы кого-то случайно не упомянули в списке благодарностей, напишите нам - это очень важно.'
                     )}
                 </p>
-                <ul
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        flexWrap: 'wrap',
-                        height: '400px',
-                        overflow: 'auto'
-                    }}
-                >
-                    {sortedDonators.map((item, i) => (
-                        <li
-                            key={`donater-${item?.name}-${i}`}
-                            style={{ width: '100%' }}
-                        >
-                            <span>{item.name}</span>
-                            {item.tooltip && (
-                                <span
-                                    style={{
-                                        fontSize: '12px',
-                                        color: '#888',
-                                        marginLeft: '5px'
-                                    }}
-                                >
-                                    ({item.tooltip})
-                                </span>
-                            )}
-                        </li>
-                    ))}
-                </ul>
-                <p style={{ margin: 0 }}>
+                <div className={styles.donatorsScroll}>
+                    <ul className={styles.donators}>
+                        {sortedDonators.map((item, i) => (
+                            <li key={`donater-${item?.name}-${i}`}>
+                                {item.name}
+                                {item.tooltip && <span className={styles.donatorNote}>{` (${item.tooltip})`}</span>}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+                <p>
                     {t(
                         'pages.about.your-help-conclusion',
                         'Благодаря вашей помощи космос действительно становится ближе!'
                     )}
                 </p>
-            </Container>
+            </div>
 
             <PhotoLightbox
                 photos={allPhotos.map((image) => ({

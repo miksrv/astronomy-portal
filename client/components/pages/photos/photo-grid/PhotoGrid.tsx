@@ -20,7 +20,7 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({ photosList }) => {
     return (
         <div className={styles.photoGrid}>
             {photosList && !photosList.length && (
-                <div className={'notFoundContainer'}>
+                <div className={styles.empty}>
                     {t('components.pages.photos.photo-grid.no-results', 'По вашему запросу ничего не найдено')}
                 </div>
             )}
@@ -37,21 +37,22 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({ photosList }) => {
                         src={createMediumPhotoUrl(photo)}
                         alt={createPhotoTitle(photo, t)}
                         fill={true}
+                        sizes={'(max-width: 768px) 100vw, 280px'}
                     />
                     <div className={styles.description}>
-                        <h4>{createPhotoTitle(photo, t)}</h4>
+                        <h3 className={styles.title}>{createPhotoTitle(photo, t)}</h3>
                         <div className={styles.info}>
-                            <div>
+                            <span>
                                 {t('components.pages.photos.photo-grid.exposure', 'Выдержка')}:{' '}
                                 {getTimeFromSec(photo?.statistic?.exposure || 0, true)}
-                            </div>
-                            <div>
+                            </span>
+                            <span>
                                 {t('components.pages.photos.photo-grid.frames', 'Кадров')}:{' '}
                                 {photo?.statistic?.frames || 0}
-                            </div>
-                            <div>
+                            </span>
+                            <span>
                                 {t('components.pages.photos.photo-grid.views', 'Просмотров')}: {photo?.views || 0}
-                            </div>
+                            </span>
                         </div>
                     </div>
                 </Link>

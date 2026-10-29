@@ -28,99 +28,77 @@ export const AstronomyCalc: React.FC = () => {
 
     const { sunAltitude, sunAzimuth, moonAltitude, moonAzimuth, sunTimes, moonTimes, currentDate } = astroData
 
+    const time = (date?: Date | null) => formatDate(date ?? undefined, 'H:mm') ?? '—'
+
     return (
         <Container className={styles.astronomyCalc}>
-            <div className={styles.container}>
-                <strong>
-                    <Image
-                        src={'/images/sun.png'}
-                        className={styles.icon}
-                        alt={''}
-                        width={16}
-                        height={16}
-                    />
-                    {t('components.pages.observatory.astronomy-calc.sun', 'Солнце')}
-                </strong>
-                <div className={styles.parameters}>
-                    <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.dawn', 'Восход')}
-                        {':'}
-                        <span className={styles.val}>
-                            {'↑'}
-                            {formatDate(sunTimes.dawn, 'H:mm')}
-                        </span>
-                    </div>
-                    <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.sunset', 'Закат')}
-                        {':'}
-                        <span className={styles.val}>
-                            {'↓'}
-                            {formatDate(sunTimes.dusk, 'H:mm')}
-                        </span>
-                    </div>
-                </div>
-                <div className={styles.parameters}>
-                    <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.height', 'Высота')}
-                        {':'}
-                        <span className={styles.val}>
-                            {sunAltitude}
-                            {'°'}
-                        </span>
-                    </div>
-                    <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.azimuth', 'Азимут')}
-                        {':'}
-                        <span className={styles.val}>
-                            {sunAzimuth}
-                            {'°'}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <div className={styles.container}>
-                <strong>
-                    <MoonPhaseIcon date={currentDate.toDateString()} />{' '}
-                    {t('components.pages.observatory.astronomy-calc.moon', 'Луна')}
-                </strong>
-                <div className={styles.parameters}>
-                    <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.dawn', 'Восход')}
-                        {':'}
-                        <span className={styles.val}>
-                            {'↑'}
-                            {formatDate(moonTimes.rise, 'H:mm')}
-                        </span>
-                    </div>
-                    <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.sunset', 'Закат')}
-                        {':'}
-                        <span className={styles.val}>
-                            {'↓'}
-                            {formatDate(moonTimes.set, 'H:mm')}
-                        </span>
-                    </div>
-                </div>
-                <div className={styles.parameters}>
-                    <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.height', 'Высота')}
-                        {':'}
-                        <span className={styles.val}>
-                            {moonAltitude}
-                            {'°'}
-                        </span>
-                    </div>
-                    <div className={styles.key}>
-                        {t('components.pages.observatory.astronomy-calc.azimuth', 'Азимут')}
-                        {':'}
-                        <span className={styles.val}>
-                            {moonAzimuth}
-                            {'°'}
-                        </span>
-                    </div>
-                </div>
-            </div>
+            <AstroBody
+                title={
+                    <>
+                        <Image
+                            src={'/images/sun.png'}
+                            className={styles.icon}
+                            alt={''}
+                            width={16}
+                            height={16}
+                        />
+                        {t('components.pages.observatory.astronomy-calc.sun', 'Солнце')}
+                    </>
+                }
+                rise={time(sunTimes.sunrise)}
+                set={time(sunTimes.sunset)}
+                altitude={sunAltitude}
+                azimuth={sunAzimuth}
+            />
+            <AstroBody
+                title={
+                    <>
+                        <MoonPhaseIcon date={currentDate.toDateString()} />
+                        {t('components.pages.observatory.astronomy-calc.moon', 'Луна')}
+                    </>
+                }
+                rise={time(moonTimes.rise)}
+                set={time(moonTimes.set)}
+                altitude={moonAltitude}
+                azimuth={moonAzimuth}
+            />
         </Container>
+    )
+}
+
+interface AstroBodyProps {
+    title: React.ReactNode
+    rise: string
+    set: string
+    altitude: string
+    azimuth: string
+}
+
+// One celestial body: rise / set times and the current position in the sky
+const AstroBody: React.FC<AstroBodyProps> = ({ title, rise, set, altitude, azimuth }) => {
+    const { t } = useTranslation()
+
+    const rows = [
+        { label: t('components.pages.observatory.astronomy-calc.dawn', 'Восход'), value: `↑ ${rise}` },
+        { label: t('components.pages.observatory.astronomy-calc.sunset', 'Закат'), value: `↓ ${set}` },
+        { label: t('components.pages.observatory.astronomy-calc.height', 'Высота'), value: `${altitude}°` },
+        { label: t('components.pages.observatory.astronomy-calc.azimuth', 'Азимут'), value: `${azimuth}°` }
+    ]
+
+    return (
+        <div className={styles.body}>
+            <h3 className={styles.name}>{title}</h3>
+            <dl className={styles.parameters}>
+                {rows.map(({ label, value }) => (
+                    <div
+                        key={label}
+                        className={styles.key}
+                    >
+                        <dt>{label}</dt>
+                        <dd className={styles.val}>{value}</dd>
+                    </div>
+                ))}
+            </dl>
+        </div>
     )
 }

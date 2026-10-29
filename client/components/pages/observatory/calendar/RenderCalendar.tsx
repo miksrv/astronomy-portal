@@ -1,7 +1,7 @@
 import React from 'react'
 import dayjs, { Dayjs } from 'dayjs'
 import { cn, Icon } from 'simple-react-ui-kit'
-import SunCalc from 'suncalc'
+import * as SunCalc from 'suncalc'
 
 import Image from 'next/image'
 
@@ -10,10 +10,9 @@ import { MoonPhaseIcon } from '@/components/common'
 import SunIcon from '@/public/images/sun.png'
 import { formatDate } from '@/utils/dates'
 
-import styles from './styles.module.sass'
+import { LAT, LON } from '../astronomy-calc/constants'
 
-const LAT = process.env.NEXT_PUBLIC_LAT ?? 51.7
-const LON = process.env.NEXT_PUBLIC_LON ?? 55.2
+import styles from './styles.module.sass'
 
 interface RenderCalendarProps {
     calendarDate: Date | Dayjs
@@ -60,8 +59,12 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
             .add(d - 1, 'days')
 
         const currentDay: boolean = isCurrentMonth && d === parseInt(formatDate(calendarDate, 'DD')!)
-        const moonTimes = SunCalc.getMoonTimes(currentDayDate, LAT, LON)
-        const sunTimes = SunCalc.getTimes(currentDayDate, LAT, LON)
+        const dayDate = currentDayDate.toDate()
+        // Sun and Moon rise/set within the visitor's civil day: without the offset suncalc 2
+        // picks the solar day nearest local midnight, the previous day east of UTC+4
+        const utcOffset = -dayDate.getTimezoneOffset()
+        const moonTimes = SunCalc.getMoonTimes(dayDate, LAT, LON, utcOffset)
+        const sunTimes = SunCalc.getTimes(dayDate, LAT, LON, 0, utcOffset)
 
         const itemWeatherEvent = eventsWeather?.filter((item) => currentDayDate.isSame(item.date, 'day'))?.pop()
 
@@ -74,13 +77,7 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
                 key={`day${d}`}
                 className={cn(styles.calendarDay, currentDay ? styles.currentDay : undefined)}
             >
-                <div
-                    className={cn(styles.dayNumber, getWeatherClass(itemWeatherEvent?.clouds))}
-                    // role='button'
-                    // tabIndex={0}
-                    // onKeyUp={() => {}}
-                    // onClick={(e) => console.warn('onDayClick', e, d)}
-                >
+                <div className={cn(styles.dayNumber, getWeatherClass(itemWeatherEvent?.clouds))}>
                     {d < 10 ? `0${d}` : d}
                 </div>
                 <div className={styles.mobileMoonIcon}>
@@ -102,32 +99,32 @@ const RenderCalendar: React.FC<RenderCalendarProps> = (props) => {
                         width={16}
                         height={16}
                     />
-                    {sunTimes.dawn && <span className={styles.rise}>{formatDate(sunTimes.dawn, 'H:mm')}</span>}
+                    {sunTimes.sunrise && <span className={styles.rise}>{formatDate(sunTimes.sunrise, 'H:mm')}</span>}
 
-                    {sunTimes.dusk && <span className={styles.set}>{formatDate(sunTimes.dusk, 'H:mm')}</span>}
+                    {sunTimes.sunset && <span className={styles.set}>{formatDate(sunTimes.sunset, 'H:mm')}</span>}
                 </div>
                 {itemWeatherEvent && (
                     <div className={styles.weatherEvent}>
                         {itemWeatherEvent.clouds != null && (
                             <span>
-                                <Icon
-                                    name={'Cloud'}
-                                    style={{ marginRight: 5 }}
-                                />
+                                <Icon name={'Cloud'} />
                                 {Math.round(itemWeatherEvent?.clouds ?? 0)}
                             </span>
                         )}
                         <span>
-                            <Icon
-                                name={'Thermometer'}
-                                style={{ marginRight: 0 }}
-                            />
+                            <Icon name={'Thermometer'} />
                             {itemWeatherEvent.temperature}
                         </span>
                         <span>
                             <Icon name={'Wind'} />
                             {itemWeatherEvent.windSpeed}
                         </span>
+                    </div>
+                )}
+                {itemAstroEvents && (
+                    <div className={styles.mobileTelescope}>
+                        <Icon name={'StarEmpty'} />
+                        {itemAstroEvents.catalog_items.length}
                     </div>
                 )}
                 {itemAstroEvents && (
