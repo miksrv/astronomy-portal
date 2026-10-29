@@ -1,8 +1,8 @@
 @use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
 
 .breadcrumbs
     margin: 0
-    padding-left: 16px
 
     .fullTrail
         display: flex
@@ -14,32 +14,39 @@
             display: none
 
     li
-        font-size: var(--font-size-small)
-        color: var(--text-color-secondary)
+        +type.caption
         white-space: nowrap
         line-height: normal
 
         a
             white-space: nowrap
+            color: var(--text-color-secondary)
+            border-radius: var(--radius-xs)
+
+            &:hover
+                color: var(--text-color-primary)
 
         &:not(:last-of-type)
             &:after
                 content: '/'
                 user-select: none
-                margin-left: 8px
-                margin-right: 8px
+                margin: 0 var(--space-2)
+                color: var(--text-color-disabled)
 
         &.currentPage
+            min-width: 0
             text-overflow: ellipsis
             overflow: hidden
 
+    // Phone: only "← parent". A 44px hit area that does not add height to the header
     .parentLink
+        +type.caption
         display: none
         align-items: center
-        gap: 6px
-        font-size: var(--font-size-small)
+        gap: var(--space-1)
+        min-height: 44px
+        margin: -13px 0
         color: var(--link-color)
-        text-decoration: none
         white-space: nowrap
 
         &:hover

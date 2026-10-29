@@ -1,0 +1,116 @@
+// Text roles (DESIGN.md → Type scale). A role carries size, weight, line
+// height and tracking together, so one level looks the same on every page:
+//     @use '../../../styles/typography' as type
+//     .title
+//         +type.titleBlock
+// Sizes are tokens from styles/theme.css; they step down on phones by themselves.
+
+// The home and stargazing hero only
+=titleDisplay
+    font-size: var(--font-size-display)
+    font-weight: 700
+    line-height: 1.1
+    letter-spacing: -0.02em
+
+// Every page h1 (AppToolbar, auth/payment/unsubscribe, the star map intro)
+=titlePage
+    font-size: var(--font-size-title-page)
+    font-weight: var(--font-weight-semibold)
+    line-height: 1.2
+    letter-spacing: -0.01em
+    text-wrap: balance
+
+// A number that is the point of its block: stats, counters, weather values
+=stat
+    font-size: var(--font-size-stat)
+    font-weight: var(--font-weight-semibold)
+    line-height: 1.1
+    font-variant-numeric: tabular-nums
+
+// The first paragraph of a page or a hero
+=lead
+    font-size: var(--font-size-lead)
+    font-weight: var(--font-weight-normal)
+    line-height: 1.55
+
+// Section h2
+=titleSection
+    font-size: var(--font-size-title-section)
+    font-weight: var(--font-weight-semibold)
+    line-height: 1.3
+    letter-spacing: -0.01em
+
+// Block and card titles, h3
+=titleBlock
+    font-size: var(--font-size-large)
+    font-weight: var(--font-weight-semibold)
+    line-height: 1.3
+
+// UI text, controls, card text
+=body
+    font-size: var(--font-size)
+    font-weight: var(--font-weight-normal)
+    line-height: var(--line-height)
+
+// Bylines, values of a card, meta lines
+=secondary
+    font-size: var(--font-size-secondary)
+    line-height: 1.45
+    color: var(--text-color-secondary)
+
+// Breadcrumbs, captions, counters
+=caption
+    font-size: var(--font-size-small)
+    line-height: 1.4
+    color: var(--text-color-secondary)
+
+// Labels over groups: hero eyebrows, menu titles, table group headers.
+// Uppercase is visual only: keep the source text in normal case, screen
+// readers may spell out literal all-caps text letter by letter.
+=overline
+    font-size: var(--font-size-small)
+    font-weight: var(--font-weight-semibold)
+    line-height: 1.4
+    letter-spacing: 0.08em
+    text-transform: uppercase
+
+// Credits and badges over photos, map labels
+=micro
+    font-size: var(--font-size-micro)
+    line-height: 1.35
+
+// Long-form text: FAQ, rules, event and object descriptions
+=prose
+    font-size: var(--font-size-prose)
+    line-height: 1.7
+
+    p, ul, ol, blockquote
+        margin: 0 0 var(--space-4)
+
+    h2
+        +titleSection
+        margin: var(--space-8) 0 var(--space-3)
+
+    h3
+        +titleBlock
+        margin: var(--space-6) 0 var(--space-2)
+
+    // A subheading right under a section heading: the h2 already spaces it
+    h2 + h3
+        margin-top: 0
+
+    ul, ol
+        padding-left: var(--space-6)
+
+    li + li
+        margin-top: var(--space-1)
+
+    img
+        max-width: 100%
+        border-radius: var(--radius-lg)
+
+    > :first-child
+        margin-top: 0
+
+    > :last-child
+        margin-bottom: 0

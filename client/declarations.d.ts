@@ -5,7 +5,6 @@ declare module '*.sass' {
 
 declare module 'd3-celestial'
 declare module 'd3-geo-projection'
-declare module 'suncalc'
 
 declare let Celestial: any
 declare let d3: any

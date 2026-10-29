@@ -1,21 +1,24 @@
 .odometer
     display: flex
-    gap: 5px
+    gap: var(--space-1)
+    overflow: hidden
     font-family: "Courier New", Courier, monospace
     font-size: 2rem
     font-weight: bold
-    overflow: hidden
 
 .digit
     position: relative
-    height: 1em
-    overflow: hidden
     display: flex
     flex-direction: column
-    transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)
+    height: 1em
+    overflow: hidden
+    transition: transform var(--duration-slow) var(--ease)
+
+    @media (prefers-reduced-motion: reduce)
+        transition: none
 
 .item
-    height: 1em
     display: flex
     align-items: center
     justify-content: center
+    height: 1em

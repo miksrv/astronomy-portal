@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 
+import { prefersReducedMotion } from '@/utils/helpers'
+
 interface CounterProps {
     end: number
     duration?: number
@@ -33,6 +35,12 @@ export const Counter: React.FC<CounterProps> = ({ end, duration = 2000, classNam
         }
 
         if (hasStarted) {
+            // No count-up animation for visitors who asked for less motion
+            if (prefersReducedMotion()) {
+                setCount(end)
+                return
+            }
+
             startTime.current = null
             requestAnimationFrame(step)
         }

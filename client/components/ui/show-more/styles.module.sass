@@ -1,29 +1,50 @@
 .showMore
+    // Collapsed: the first two or three paragraphs, a third to a half of a screen — enough
+    // to tell what the text is about without pushing what follows far down
     .content
-        max-height: 75px
+        max-height: 240px
         overflow: hidden
-        position: relative
-        transition: max-height 500ms ease
+        transition: max-height var(--duration-slow) var(--ease)
+        // Fades the clipped text out on whatever background the block sits on
+        mask-image: linear-gradient(to bottom, #000 40%, transparent 100%)
 
-        &::before
-            content: ""
-            position: absolute
-            left: 0
-            right: 0
-            bottom: 0
-            height: 75px
-            opacity: 1
-            background: linear-gradient(to bottom, color-mix(in srgb, var(--container-background-color), transparent 100%) 0%, var(--container-background-color) 100%)
-            transition: opacity 500ms ease
-            pointer-events: none
+        @media (prefers-reduced-motion: reduce)
+            transition: none
 
-    .showMoreButton
-        width: 100%
-        margin-top: 10px
+    // Expanded: the component sets the measured full height inline, so the transition runs
+    // to the real height of the text
+    &.expanded .content
+        mask-image: none
 
-    &.expanded
-        .content
-            max-height: 1000px
+    // A text shorter than the clamp: nothing is hidden, so nothing fades. The clamp itself
+    // stays, so a resize that makes the text taller is still measured as an overflow
+    &.fits .content
+        mask-image: none
 
-            &::before
-                opacity: 0
+// Text with a chevron in the link colour, flush left with the text: no button chrome.
+// Scoped under `.showMore` to outweigh the kit's `.unstyled { color: inherit }`, which has
+// the same specificity and loads later
+.showMore .readMore
+    display: inline-flex
+    align-items: center
+    gap: var(--space-1)
+    margin-top: var(--space-2)
+    font-size: var(--font-size)
+    font-weight: var(--font-weight-semibold)
+    color: var(--color-main)
+    cursor: pointer
+
+    svg
+        width: 18px
+        height: 18px
+        fill: currentColor
+        transition: transform var(--duration-slow) var(--ease)
+
+        @media (prefers-reduced-motion: reduce)
+            transition: none
+
+    &:hover
+        color: var(--color-main-hover)
+
+.expanded .readMore svg
+    transform: rotate(180deg)
