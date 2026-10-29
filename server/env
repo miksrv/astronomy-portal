@@ -29,9 +29,6 @@ app.baseURL = 'http://localhost:8080/'
 # and their image preview (see project https://github.com/miksrv/astronomy-fits-parser)
 app.fitsApiKey = ''
 
-app.telegramBotKey = ''
-app.telegramChatID = ''
-
 app.appTimezone = UTC
 app.timezone  = 5
 app.latitude  = 51.7727

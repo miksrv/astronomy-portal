@@ -77,15 +77,6 @@ $routes->group('objects', static function ($routes) {
     $routes->options('(:any)', static function () {});
 });
 
-/** Objects Controller **/
-$routes->group('fits', static function ($routes) {
-    $routes->get('(:any)', 'Fits::show/$1');
-    // $routes->post('update', 'Fits::update');
-    // $routes->post('image', 'Fits::image');
-    $routes->options('(:any)', static function () {});
-});
-
-
 /** Photos Controller **/
 $routes->group('photos', static function ($routes) {
     $routes->get('/', 'Photos::list');

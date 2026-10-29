@@ -1812,8 +1812,7 @@ class Events extends BaseApiController
 
     /**
      * Recursively deletes a temp chunk directory and everything in it.
-     * Used after a successful finalize and by mediaCancel()/
-     * media:cleanup-uploads for an aborted/abandoned session.
+     * Used after a successful finalize and by mediaCancel().
      */
     private function removeDirectory(string $dir): void
     {
@@ -2318,10 +2317,7 @@ class Events extends BaseApiController
      * Cancels an in-progress chunked upload (BE-6): deletes its temp chunk
      * directory and the events_media_uploads row outright. Unlike finished
      * gallery content, an aborted session has no soft-delete/audit value -
-     * an explicit cancel is cleaned up immediately here rather than waiting
-     * for the 24h media:cleanup-uploads sweep, which exists only to catch
-     * sessions abandoned without an explicit cancel (tab closed, network
-     * dropped for good).
+     * an explicit cancel is cleaned up immediately here.
      *
      * @param string|null $sessionId The events_media_uploads session id.
      */
