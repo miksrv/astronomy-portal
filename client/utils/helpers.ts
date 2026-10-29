@@ -1,5 +1,7 @@
 import dayjs, { Dayjs } from 'dayjs'
 
+import { SITE_LINK } from './constants'
+
 type QueryParamValue = string | number | boolean | undefined | null
 
 export const encodeQueryData = (data: object | void | undefined): string => {
@@ -71,7 +73,29 @@ export const dateAddMonth = (date: string | Date | Dayjs, monthCount: number): D
  *
  * @param value - The number to be rounded.
  * @param digits - The number of digits to round to. Defaults to 4.
- * @returns The rounded number or undefined if the value is undefined.
+ * @returns The rounded number, or undefined when there is no value (undefined/null/NaN). Zero is a value.
  */
-export const round = (value?: number, digits: number = 4): number | undefined =>
-    value ? Number(value.toFixed(digits)) : undefined
+export const round = (value?: number | null, digits: number = 4): number | undefined =>
+    value == null || Number.isNaN(value) ? undefined : Number(value.toFixed(digits))
+
+/** SITE_LINK with exactly one trailing slash (or '' when unset), whatever the env var says */
+const siteBase = (): string => {
+    const base = SITE_LINK ?? ''
+
+    return base && !base.endsWith('/') ? `${base}/` : base
+}
+
+/**
+ * Absolute locale-aware page URL: SITE_LINK + 'en/' prefix for English + path.
+ * The single source of the locale-prefix rule — used by AppLayout (canonical/og:url),
+ * BreadcrumbJsonLd and page-level JSON-LD blocks; must stay consistent between them.
+ */
+export const createPageUrl = (language?: string, path: string = ''): string =>
+    `${siteBase()}${language === 'en' ? 'en/' : ''}${path.replace(/^\//, '')}`
+
+/**
+ * Serialize a JSON-LD object for a `<script type="application/ld+json">` body: '<' is
+ * escaped so no string inside (a translated title, an admin-authored page name) can ever
+ * close the script tag and break out into markup.
+ */
+export const toJsonLd = (data: object): string => JSON.stringify(data).replace(/</g, '\\u003c')

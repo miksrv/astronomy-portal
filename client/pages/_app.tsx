@@ -68,19 +68,6 @@ const App = ({ Component, pageProps }: AppProps) => {
 
     return (
         <>
-            <Script
-                src='/scripts/d3.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/d3.geo.projection.min.js'
-                strategy='beforeInteractive'
-            />
-            <Script
-                src='/scripts/celestial.min.js'
-                strategy='beforeInteractive'
-            />
-
             <Head>
                 <meta
                     name={'mobile-web-app-capable'}
