@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Container, Skeleton } from 'simple-react-ui-kit'
+import { Skeleton } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -88,10 +88,10 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
     }, [props?.fileName])
 
     return (
-        <Container className={styles.photoContainer}>
+        <div className={styles.photoContainer}>
             <div className={styles.imageSection}>
                 <button
-                    tabIndex={0}
+                    type={'button'}
                     className={styles.lightboxTrigger}
                     onClick={() => setShowLightbox(true)}
                     style={{
@@ -171,7 +171,7 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                     {props.fileSize ? humanizeFileSize(props.fileSize) : '---'}
                 </div>
 
-                {objectsData?.length && (
+                {!!objectsData?.length && (
                     <div className={styles.item}>
                         <span className={styles.key}>
                             {t('components.pages.photos.photo-header.objects-on-photo', 'Объекты на фото')}
@@ -216,6 +216,7 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
 
                 <Link
                     className={styles.fullPhotoButton}
+                    rel={'noopener'}
                     href={`${hosts.photo}${props.dirName}/${props.fileName}.${props?.fileExt}`}
                     title={t(
                         'components.pages.photos.photo-header.open-full-size',
@@ -245,6 +246,6 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                 showLightbox={showLightbox}
                 onCloseLightBox={() => setShowLightbox(false)}
             />
-        </Container>
+        </div>
     )
 }

@@ -1,36 +1,38 @@
-@use '../../../../styles/mixins'
 @use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
 
+// A list row is a card with its own link: photo, date, title, meta
 .eventRow
     display: flex
     align-items: center
-    gap: 16px
-    padding: 12px !important
-    border-radius: var(--border-radius)
-    background: var(--container-background-color)
-    transition: box-shadow 0.25s ease
+    gap: var(--space-4)
+    padding: var(--space-3)
+    transition: box-shadow var(--duration-base) var(--ease)
 
     &:hover
-        box-shadow: 0 0 0 2px var(--color-primary), var(--container-shadow)
+        box-shadow: 0 0 0 1px var(--color-main)
 
         .thumbnail img
             transform: scale(1.05)
 
         .title
-            color: var(--color-primary)
+            color: var(--color-main)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-wrap: wrap
-        gap: 10px 12px
+        gap: var(--space-2) var(--space-3)
 
 .primaryLink
     display: flex
     align-items: stretch
-    gap: 16px
+    gap: var(--space-4)
     flex: 1
     min-width: 0
     color: inherit
-    text-decoration: none
+    border-radius: var(--radius-md)
+
+    &:hover
+        color: inherit
 
 .thumbnail
     position: relative
@@ -38,19 +40,19 @@
     align-self: center
     width: 140px
     height: 100px
-    border-radius: var(--border-radius)
+    border-radius: var(--radius-lg)
     overflow: hidden
     display: flex
     align-items: center
     justify-content: center
-    background: var(--table-header-background)
+    background: var(--surface-2)
 
     img
         width: 100%
         height: 100%
         object-fit: cover
         font-size: 0
-        transition: transform 0.35s ease
+        transition: transform var(--duration-slow) var(--ease)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         width: 96px
@@ -68,28 +70,25 @@
     align-items: center
     justify-content: center
     align-self: stretch
-    margin: 4px 0
+    margin: var(--space-1) 0
     flex-shrink: 0
     width: 80px
     text-align: center
     line-height: 1.15
-    border-right: 1px solid var(--input-border-color)
-    padding-right: 16px
+    border-right: 1px solid var(--border)
+    padding-right: var(--space-4)
 
     .dateMonth
-        text-transform: uppercase
-        font-size: 12px
-        color: var(--color-primary)
-        font-weight: 600
+        +type.overline
+        color: var(--color-main)
 
     .dateDay
+        +type.stat
         font-size: 24px
-        font-weight: 700
         color: var(--text-color-primary)
 
     .dateYear
-        font-size: 12px
-        color: var(--text-color-secondary)
+        +type.caption
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         display: none
@@ -98,14 +97,14 @@
     display: flex
     flex-direction: column
     justify-content: center
-    gap: 4px
+    gap: var(--space-1)
     flex: 1
     min-width: 0
 
 .titleRow
     display: flex
     align-items: center
-    gap: 8px
+    gap: var(--space-2)
     min-width: 0
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
@@ -115,24 +114,23 @@
     overflow: hidden
     text-overflow: ellipsis
     white-space: nowrap
-    font-weight: 500
+    font-weight: var(--font-weight-medium)
     color: var(--text-color-primary)
-    transition: color 0.25s ease
+    transition: color var(--duration-base) var(--ease)
     flex: 1
     min-width: 0
 
 .metaRow
+    +type.secondary
     display: flex
     align-items: center
-    gap: 6px
+    gap: var(--space-2)
     min-width: 0
-    font-size: 13px
-    color: var(--text-color-secondary)
 
 .location
     display: flex
     align-items: center
-    gap: 4px
+    gap: var(--space-1)
     min-width: 0
     overflow: hidden
     text-overflow: ellipsis
@@ -146,14 +144,14 @@
 
 .metaDivider
     flex-shrink: 0
+    color: var(--text-color-disabled)
 
 .metaStat
     display: flex
     align-items: center
-    gap: 4px
+    gap: var(--space-1)
     flex-shrink: 0
     color: inherit
-    text-decoration: none
 
     svg
         width: 14px
@@ -168,9 +166,7 @@
             fill: var(--link-color)
 
 .excerpt
-    font-size: 13px
-    line-height: 1.4
-    color: var(--text-color-secondary)
+    +type.secondary
     display: -webkit-box
     -webkit-box-orient: vertical
     -webkit-line-clamp: 2
@@ -179,26 +175,31 @@
     @media only screen and (max-width: variables.$mobileMaxWidth)
         display: none
 
+// Badges are laid out by the parent now (the kit Badge has no outer margin)
 .stats
     display: flex
     align-items: center
     justify-content: flex-end
     flex-wrap: wrap
-    gap: 4px
+    gap: var(--space-1)
     flex-shrink: 0
     margin-left: auto
-    font-size: 12px
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-basis: 100%
         justify-content: flex-start
         margin-left: 0
 
+// Status colours: attended / reviewed (green), attended without a review (red)
 .greenBadge
-    +mixins.status-badge(var(--color-green-background), var(--color-green), true)
+    background: var(--color-green-background)
+    border-color: transparent
+    color: var(--color-green)
 
 .redBadge
-    +mixins.status-badge(var(--color-red-background), var(--color-red), true)
+    background: var(--color-red-background)
+    border-color: transparent
+    color: var(--color-red)
 
 .chevron
     flex-shrink: 0
@@ -208,3 +209,12 @@
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         display: none
+
+@media (prefers-reduced-motion: reduce)
+    .eventRow,
+    .thumbnail img,
+    .title
+        transition: none
+
+    .eventRow:hover .thumbnail img
+        transform: none

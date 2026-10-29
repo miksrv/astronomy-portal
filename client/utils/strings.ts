@@ -113,6 +113,24 @@ export const removeMarkdown = (text?: string): string => {
     return result
 }
 
+/** Below this length the lead section is too thin for a search snippet on its own */
+const MIN_LEAD_LENGTH = 100
+
+/**
+ * Builds a meta description from a Markdown article: the plain text of its lead — everything
+ * before the first heading — cut to `length`. Without it a snippet runs straight from the
+ * intro into a section heading ("…созвездии Пегаса. История..."). When the lead is missing or
+ * too short, the whole text is used instead.
+ * @param {string} text - The Markdown text.
+ * @param {number} [length=160] - The maximum length of the description.
+ * @returns {string} The plain-text description.
+ */
+export const createSeoDescription = (text?: string, length: number = 160): string => {
+    const lead = removeMarkdown(text?.split(/^#{1,6}\s/m)[0])
+
+    return sliceText(lead.length >= MIN_LEAD_LENGTH ? lead : removeMarkdown(text), length)
+}
+
 /**
  * Same as removeMarkdown(), but paragraph breaks (blank lines) in the source
  * survive as a blank line in the output instead of being collapsed into a

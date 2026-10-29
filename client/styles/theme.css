@@ -1,130 +1,103 @@
+/*
+ * Project design tokens (see DESIGN.md).
+ *
+ * `simple-react-ui-kit/theme.css` is imported first (pages/_app.tsx) and
+ * defines every token the kit components use. The site is dark-only:
+ * `data-theme="dark"` is set on <html> in pages/_document.tsx, so the kit's
+ * dark layer is always on. This file keeps only what differs from the kit
+ * plus tokens the kit does not know about. Do not duplicate kit defaults.
+ *
+ *   1. Project primitives (layout, type scale)
+ *   2. Night palette: colour overrides of the kit's dark theme
+ *   3. Project aliases
+ */
+
+/* ------------------------------------------------------------------ */
+/* 1. Project primitives                                               */
+/* ------------------------------------------------------------------ */
 :root {
-    /* Element Heights for `size` props */
-    --size-small: 32px;
-    --size-medium: 38px;
-    --size-large: 38px;
-
-    /* Optional per-group size overrides (fallback to --size-* if not set) */
-    /* --size-control-small / --size-control-medium / --size-control-large  → input, select, button, textarea */
-    /* --size-badge-small   / --size-badge-medium   / --size-badge-large    → badge */
-    /* --size-table-small   / --size-table-medium   / --size-table-large    → table rows */
-    /* Form controls: Input, Select, Button, TextArea */
-    --size-control-small: 26px;
-    --size-control-medium: 36px;
-    --size-control-large: 36px;
-    /* Badge */
-    --size-badge-small: 20px;
-    --size-badge-medium: 24px;
-    --size-badge-large: 28px;
-    /* Table row heights */
-    --size-table-small: 32px;
-    --size-table-medium: 38px;
-    --size-table-large: 38px;
-
-    /* Primary Colors */
-    --color-contrast: #ffffff;
-    --color-primary: #6f6ebb;
-    --color-primary-hover: #7675c4;
-    --color-primary-active: #6667b6;
-    --color-primary-background: #1e1c38;
-
-    --color-green: #4bb34b;
-    --color-green-hover: #48ac4a;
-    --color-green-active: #45a64a;
-    --color-green-background: #2e3e2b;
-
-    --color-orange: #f8a01c;
-    --color-orange-hover: #ee9a1d;
-    --color-orange-active: #e4941f;
-    --color-orange-background: #5e5443;
-
-    --color-red: #e64646;
-    --color-red-hover: #dd4446;
-    --color-red-active: #d44245;
-    --color-red-background: #522e2e;
-
-    --color-main: #2688eb;
-    --color-main-hover: #2483e4;
-    --color-main-active: #237edd;
-    --color-main-background: #3c4957;
-
-    /* Text and Typography */
-    --font-size: 15px;
-    --font-size-small: 13px;
-    --font-family:
-        -apple-system, BlinkMacSystemFont, 'Segoe UI (Custom)', Roboto, 'Helvetica Neue', 'Open Sans (Custom)',
-        system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
-    --text-color-primary: #ffffff;
-    --text-color-secondary: #bdbdbd;
-    --text-color-secondary-hover: #7b7d7f;
-    --text-color-secondary-active: #656769;
-
-    /* Layout and Containers */
-    --border-radius: 8px;
-    --body-background: #111318;
-    --modal-background: #1c1f2a;
-    --overlay-background: rgba(0, 0, 0, 0.6);
-    --container-shadow: inset 0 0 0 1px rgb(35 38 58 / 0.73);
-    --container-background-color: #1c1f2a;
-    --container-error-background-color: #ffe9e9;
-    --container-error-color: var(--color-red);
-    --container-success-background-color: #e8f9e8;
-    --container-success-color: var(--color-green);
-
-    /* Input Fields and Dropdowns */
-    --dropdown-background-color: #151720;
-    --dropdown-background-color-hover: #252840;
-    --dropdown-badge-background-color: #505050;
-    --input-background-color: #151720;
-    --input-label-color: #969a9f;
-    --input-border: 0.5px solid var(--input-border-color);
-    --input-border-color: #2a2e45;
-    --input-border-focus-color: var(--color-primary);
-
-    /* Buttons */
-    --button-font-weight: 300;
-    --button-default-color: var(--text-color-primary);
-    --button-default-background: transparent;
-    --button-default-background-hover: rgba(255, 255, 255, 0.04);
-    --button-default-background-active: rgba(255, 255, 255, 0.08);
-
-    --button-primary-color: #ffffff;
-    --button-primary-background: #2e336a;
-    --button-primary-background-hover: #363c78;
-    --button-primary-background-active: #282d60;
-
-    --button-secondary-background: #2f314d;
-    --button-secondary-background-hover: #37395b;
-    --button-secondary-background-active: #292b43;
-    --button-secondary-color: var(--text-color-secondary);
-    --button-secondary-color-hover: var(--text-color-secondary-hover);
-    --button-secondary-color-active: var(--text-color-secondary-active);
-
-    /* Popout */
-    --popout-shadow: 0 0 2px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.08);
-
-    /* Table */
-    --table-header-background: #151720;
-    --table-header-background-hover: #1e2235;
-    --table-border-color: #2d2e34;
-    --table-row-box-shadow: inset 0 -1px #2d2e34;
-
-    /* Skeleton */
-    --skeleton-background-animation: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.05),
-        transparent
-    );
-
-    /** CUSTOM **/
-    --container-margin-top: 24px;
     --letter-spacing: 0.00938em;
+
+    /* Layout */
     --width-max: 1127px;
     --width-menu: 280px;
     --header-height: 50px;
+    --container-margin-top: var(--space-6);
 
-    --link-color: var(--color-primary);
-    --link-color-hover: var(--color-primary-hover);
-    --link-color-active: var(--color-primary-active);
+    /* Spacing above the kit's 4…24px: the air between page sections */
+    --space-8: 32px;
+    --space-10: 40px;
+
+    /* Type scale (DESIGN.md → Type scale). The kit gives 12 / 14 / 16px
+       (--font-size-small / --font-size / --font-size-large); the project
+       adds the rest. Components use a role from styles/typography.sass. */
+    --font-size-micro: 11px;
+    --font-size-secondary: 13px;
+    --font-size-prose: 16px;
+    --font-size-title-section: 18px;
+    --font-size-lead: 18px;
+    --font-size-stat: 22px;
+    --font-size-title-page: 26px;
+    --font-size-display: 40px;
+}
+
+/* Phones ($mobileMaxWidth, 768px) */
+@media only screen and (max-width: 768px) {
+    :root {
+        --font-size-lead: 16px;
+        --font-size-title-page: 22px;
+        --font-size-display: 30px;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. Night palette                                                     */
+/*    Deep navy surfaces and a periwinkle brand instead of the kit's    */
+/*    neutral greys and blue: the look of the night sky.                */
+/* ------------------------------------------------------------------ */
+:root[data-theme='dark'] {
+    --body-background: #111318;
+    --surface-1: #1c1f2a;
+    --surface-2: #242838;
+    --surface-3: #2d3246;
+
+    --border: #2a2e42;
+    --border-strong: #3a3f58;
+
+    --text-color-primary: #e8e9f0;
+    --text-color-secondary: #a3a7b6;
+    --text-color-secondary-hover: #c2c5d1;
+    --text-color-disabled: #6c7086;
+
+    /* Brand: periwinkle, readable as text on every surface */
+    --color-main: #8d8cf0;
+    --color-main-hover: #a2a1f5;
+    --color-main-active: #7c7be2;
+    --color-main-background: #262648;
+
+    --link-color: var(--color-main);
+    --link-color-hover: var(--color-main-hover);
+    --link-color-active: var(--color-main-active);
+
+    /* Primary action: a filled indigo button with white text */
+    --button-primary-color: #ffffff;
+    --button-primary-background: #4b4fb8;
+    --button-primary-background-hover: #5559c6;
+    --button-primary-background-active: #4246a6;
+
+    /* Fields sit a step below the card they are in */
+    --input-background-color: #151720;
+    --input-disabled-background-color: var(--surface-2);
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. Project aliases                                                   */
+/*    Declared on `:root, [data-theme]` like the kit's component layer, */
+/*    so they resolve inside a themed subtree too.                      */
+/* ------------------------------------------------------------------ */
+:root,
+[data-theme] {
+    /* Dark translucent pill over photos (credits, durations, counters) */
+    --overlay-pill-background: rgba(0, 0, 0, 0.6);
+    --overlay-pill-color: #ffffff;
 }

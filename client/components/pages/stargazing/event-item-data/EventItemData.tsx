@@ -189,19 +189,15 @@ export const EventItemData: React.FC<EventItemDataProps> = ({ title, event, ...p
     return (
         <>
             <div className={styles.grid}>
-                <Container
-                    {...props}
-                    className={styles.media}
-                >
+                <div className={styles.media}>
                     <Image
-                        style={{}}
                         width={1200}
                         height={630}
                         src={`${hosts.stargazing}${event?.id}/${event?.coverFileName}.${event?.coverFileExt}`}
                         alt={title || ''}
                         priority
                     />
-                </Container>
+                </div>
 
                 <Container {...props}>
                     <div className={styles.infoContainer}>
@@ -257,9 +253,14 @@ export const EventItemData: React.FC<EventItemDataProps> = ({ title, event, ...p
                 </Container>
             </div>
 
-            <Container className={styles.content}>
-                <ShowMore content={<Markdown>{event?.content}</Markdown>} />
-            </Container>
+            <div className={styles.content}>
+                {/* An upcoming event's text is what sells it — shown whole; a past event's
+                    page is about its photos and reviews, so its text is clamped */}
+                <ShowMore
+                    content={<Markdown>{event?.content}</Markdown>}
+                    collapsible={isEventPast}
+                />
+            </div>
         </>
     )
 }

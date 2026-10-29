@@ -350,7 +350,7 @@ const StargazingFAQPage: NextPage<object> = () => {
                 }
             ]}
         >
-            <div>
+            <p className={styles.intro}>
                 {description}
                 <Link
                     href={'https://t.me/look_at_stars'}
@@ -362,7 +362,7 @@ const StargazingFAQPage: NextPage<object> = () => {
                     {t('common.look-at-the-stars', 'Смотри на звёзды')}
                 </Link>
                 {'.'}
-            </div>
+            </p>
 
             <div className={styles.faqList}>
                 {faqItems.map((item, idx) => {
@@ -375,8 +375,10 @@ const StargazingFAQPage: NextPage<object> = () => {
                             className={cn(styles.faqItem, isOpen && styles.open)}
                         >
                             <button
+                                type={'button'}
                                 className={styles.faqQuestion}
                                 onClick={() => toggleItem(idx)}
+                                id={`faq-question-${idx}`}
                                 aria-expanded={isOpen}
                                 aria-controls={`faq-answer-${idx}`}
                             >
@@ -384,6 +386,7 @@ const StargazingFAQPage: NextPage<object> = () => {
                                 <Icon
                                     name={'KeyboardDown'}
                                     className={styles.chevron}
+                                    aria-hidden
                                 />
                             </button>
 
@@ -391,6 +394,9 @@ const StargazingFAQPage: NextPage<object> = () => {
                                 id={`faq-answer-${idx}`}
                                 className={styles.faqAnswer}
                                 role={'region'}
+                                aria-labelledby={`faq-question-${idx}`}
+                                // Collapsed answers stay out of the tab order and the a11y tree
+                                inert={!isOpen}
                             >
                                 <div>
                                     <div className={styles.faqAnswerContent}>{item.answer}</div>

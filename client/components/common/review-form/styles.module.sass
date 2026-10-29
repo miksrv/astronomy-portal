@@ -1,24 +1,20 @@
 @use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
 
 .form
     display: flex
     flex-direction: column
-    gap: 12px
-
-.title
-    margin: 0
-    font-size: 16px
-    font-weight: 500
-    color: var(--text-color-primary)
+    gap: var(--space-3)
 
 .ratingGroup
     display: flex
     align-items: center
-    gap: 10px
+    gap: var(--space-3)
 
 .ratingLabel
-    font-size: var(--font-size)
     color: var(--text-color-secondary)
+    font-size: var(--input-label-font-size)
+    font-weight: var(--input-label-font-weight)
 
 .stars
     display: flex
@@ -26,55 +22,53 @@
 
 .starFilled,
 .starEmpty
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    width: var(--size-medium)
+    height: var(--size-medium)
+    padding: 0
     background: none
     border: none
-    padding: 2px
+    border-radius: var(--radius-md)
     cursor: pointer
     font-size: 22px
     line-height: 1
-    transition: transform 0.1s ease
+    transition: transform var(--duration-fast) var(--ease)
 
-    &:hover
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        width: var(--size-large)
+        height: var(--size-large)
+
+    &:hover:not(:disabled)
         transform: scale(1.15)
 
     &:focus-visible
-        outline: 2px solid var(--color-primary)
-        border-radius: 2px
+        outline: var(--focus-outline)
+        outline-offset: 0
+
+    &:disabled
+        cursor: default
+
+    @media (prefers-reduced-motion: reduce)
+        transition: none
+
+        &:hover:not(:disabled)
+            transform: none
 
 .starFilled
-    color: var(--color-primary)
+    color: var(--color-main)
 
 .starEmpty
-    color: var(--text-color-secondary-hover)
-
-.textarea
-    width: 100%
-    box-sizing: border-box
-    background-color: var(--input-background-color)
-    border: var(--input-border)
-    border-color: var(--input-border-color)
-    border-radius: var(--border-radius)
-    color: var(--text-color-primary)
-    font-family: var(--font-family)
-    font-size: var(--font-size)
-    padding: 8px 10px
-    resize: vertical
-    min-height: 80px
-
-    &::placeholder
-        color: var(--input-label-color)
-
-    &:focus
-        outline: none
-        border-color: var(--input-border-focus-color)
+    color: var(--text-color-disabled)
 
 .error,
 .fieldError
+    +type.caption
     margin: 0
-    font-size: var(--font-size-small)
     color: var(--color-red)
 
 .success
+    +type.caption
     margin: 0
-    font-size: var(--font-size-small)
     color: var(--color-green)

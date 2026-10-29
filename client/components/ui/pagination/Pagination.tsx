@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 import { cn, Icon } from 'simple-react-ui-kit'
 
 import Link from 'next/link'
+import { useTranslation } from 'next-i18next/pages'
 
 import { encodeQueryData } from '@/api'
 import { computePageNumbers } from '@/utils/pagination'
@@ -42,6 +43,7 @@ export const Pagination = <T,>({
     neighbours = 2,
     onChangePage
 }: PaginationProps<T>) => {
+    const { t } = useTranslation()
     const pageNeighbours = Math.max(0, Math.min(neighbours, 2))
     const totalPages = Math.ceil(totalItemsCount / perPage)
 
@@ -92,7 +94,7 @@ export const Pagination = <T,>({
     if (onChangePage) {
         return (
             <nav
-                aria-label={'Pages Pagination'}
+                aria-label={t('components.ui.pagination.label', 'Страницы')}
                 className={styles.pagination}
             >
                 {visiblePages.map((page) => (
@@ -101,6 +103,7 @@ export const Pagination = <T,>({
                         type={'button'}
                         title={getTitle(page)}
                         className={cn(styles.item, currentPage === page ? styles.active : undefined)}
+                        aria-current={currentPage === page ? 'page' : undefined}
                         onClick={() => onChangePage(getTargetPage(page))}
                     >
                         {getContent(page)}
@@ -115,7 +118,7 @@ export const Pagination = <T,>({
 
     return (
         <nav
-            aria-label={'Pages Pagination'}
+            aria-label={t('components.ui.pagination.label', 'Страницы')}
             className={styles.pagination}
         >
             {visiblePages.map((page) => {
@@ -130,6 +133,7 @@ export const Pagination = <T,>({
                         key={page}
                         scroll={!disableScroll}
                         className={cn(styles.item, currentPage === page ? styles.active : undefined)}
+                        aria-current={currentPage === page ? 'page' : undefined}
                         href={href}
                         title={getTitle(page)}
                     >

@@ -1,17 +1,17 @@
 @use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
 
 .footer
-    margin: var(--container-margin-top) 0
-    color: var(--text-color-secondary-hover)
-    font-size: var(--font-size-small)
+    +type.caption
     display: flex
     align-items: center
     justify-content: space-between
-    margin-top: 0
+    gap: var(--space-2) var(--space-4)
+    margin: var(--space-8) 0 var(--space-6)
+    color: var(--text-color-secondary)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-direction: column
-        gap: 2px
         text-align: center
 
     .copyright
@@ -20,59 +20,58 @@
         flex-wrap: wrap
         gap: 0
 
-        a
-            color: var(--text-color-secondary)
-            text-decoration: underline
-
-            &:hover
-                color: var(--text-color-primary)
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            justify-content: center
 
     .rightGroup
         display: flex
         align-items: center
         flex-wrap: wrap
         justify-content: flex-end
-        gap: 6px
+        gap: var(--space-2)
 
         @media only screen and (max-width: variables.$mobileMaxWidth)
             justify-content: center
-            row-gap: 0px
+            row-gap: 0
 
     .madeWithLove
         display: flex
         align-items: center
-        gap: 6px
+        gap: var(--space-2)
+        white-space: nowrap
+
+    .privacyLink,
+    .languageSwitcherWrap
+        display: flex
+        align-items: center
+        gap: var(--space-2)
         white-space: nowrap
 
     .privacyLink
-        display: flex
-        align-items: center
-        gap: 6px
-        white-space: nowrap
-
         @media only screen and (max-width: variables.$mobileMaxWidth)
             span
                 display: none
 
-    .languageSwitcherWrap
-        display: flex
-        align-items: center
-        gap: 6px
-        white-space: nowrap
-
     .starIcon
         width: 14px
         height: 14px
-        fill: var(--color-primary)
+        fill: var(--color-main)
         flex-shrink: 0
 
     .link
-        margin: 0 3px
+        margin: 0 var(--space-1)
         color: var(--text-color-secondary)
         text-decoration: underline
+        text-underline-offset: 2px
 
         &:hover
             color: var(--text-color-primary)
+
+        // Phone: links big enough to hit
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            display: inline-flex
+            align-items: center
+            min-height: 44px
 
         .copyrightImage
             vertical-align: middle

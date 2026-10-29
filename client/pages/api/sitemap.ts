@@ -93,7 +93,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         //     lastmod: '2025-01-01T00:00:00.000Z'
         // },
         { url: 'observatory/weather', priority: '0.5', changefreq: 'always', lastmod: today },
-        { url: 'starmap', priority: '0.6', changefreq: 'monthly', lastmod: '2025-01-01T00:00:00.000Z' }
+        { url: 'starmap', priority: '0.9', changefreq: 'monthly', lastmod: '2026-10-29T00:00:00.000Z' }
     ]
 
     // Section not yet ready for public access

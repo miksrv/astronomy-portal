@@ -1,86 +1,87 @@
 @use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
 
 .grid
     display: grid
     grid-template-columns: 3fr 2fr
-    gap: 16px
+    gap: var(--space-4)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         grid-template-columns: 1fr
-        gap: 16px
 
-.content
-    p:first-of-type
-        margin-top: 0
-
-    p:last-of-type
-        margin-bottom: 0
-
+// The cover is a photo, not a card: rounded, no frame
 .media
+    display: block
     overflow: hidden
-    padding: 1px !important
+    border-radius: var(--radius-xl)
+    background: var(--surface-2)
 
     img
         display: block
-        border-radius: var(--border-radius)
         object-fit: cover
         width: 100%
         height: 100%
+
+// The event description is a section of the page, not a card
+.content
+    +type.prose
+    margin-top: var(--space-8)
 
 .infoContainer
     height: 100%
     display: flex
     flex-direction: column
     justify-content: space-between
+    gap: var(--space-4)
 
 .list
     list-style: none
-    margin: 0 0 14px 0
+    margin: 0
     padding: 0
     display: flex
     flex-direction: column
-    gap: 8px
+    gap: var(--space-3)
 
 .row
+    +type.body
     display: flex
     align-items: flex-start
-    gap: 0
-    font-size: 14px
 
 .rowLabel
+    +type.secondary
     display: flex
     align-items: center
-    gap: 8px
+    gap: var(--space-2)
     width: 160px
     flex-shrink: 0
-    color: var(--text-color-secondary)
 
     svg
         width: 18px
         height: 18px
-        fill: var(--color-primary)
+        fill: var(--color-main)
+        flex-shrink: 0
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        width: 140px
 
 .rowValue
     display: flex
     flex: 1
     flex-direction: column
     align-items: flex-start
-    gap: 0
+    min-width: 0
     text-align: left
     color: var(--text-color-primary)
-    font-weight: 500
+    font-weight: var(--font-weight-medium)
 
 .weatherLink
-    font-weight: 400
-    font-size: 13px
-    color: var(--color-primary)
-    text-decoration: none
+    +type.secondary
+    color: var(--color-main)
 
     &:hover
-        color: var(--color-primary-hover)
+        color: var(--color-main-hover)
         text-decoration: underline
 
 .addressText
-    font-weight: 400
-    font-size: 13px
-    color: var(--text-color-secondary)
+    +type.secondary
+    font-weight: var(--font-weight-normal)

@@ -46,17 +46,6 @@ const parseRoleIdsParam = (value: string): number[] =>
         .map((part) => parseInt(part, 10))
         .filter((id) => !Number.isNaN(id))
 
-const authTypeBadgeClass = (authType: ApiModel.UserAuthType): string => {
-    const map: Record<ApiModel.UserAuthType, string> = {
-        google: styles.badgeGoogle ?? '',
-        yandex: styles.badgeYandex ?? '',
-        vk: styles.badgeVk ?? '',
-        native: styles.badgeDefault ?? ''
-    }
-
-    return map[authType] ?? styles.badgeDefault
-}
-
 const UsersPage: NextPage<object> = () => {
     const { t } = useTranslation()
     const router = useRouter()
@@ -281,14 +270,12 @@ const UsersPage: NextPage<object> = () => {
                                 key={role.id}
                                 label={role.name}
                                 size={'small'}
-                                className={styles.badgeDefault}
                             />
                         ))
                     ) : (
                         <Badge
                             label={t('users.roleUser', 'Пользователь')}
                             size={'small'}
-                            className={styles.badgeDefault}
                         />
                     )
 
@@ -296,16 +283,21 @@ const UsersPage: NextPage<object> = () => {
                 // USERS_MANAGE — everyone else sees the same badges as plain,
                 // non-interactive text (see `canManageRoles` above).
                 if (!canManageRoles) {
-                    return <div className={styles.rolesCellButton}>{badges}</div>
+                    return <div className={styles.rolesCell}>{badges}</div>
                 }
 
                 return (
-                    <button
-                        className={styles.rolesCellButton}
-                        onClick={() => openEditRoles(item)}
-                    >
+                    <div className={styles.rolesCell}>
                         {badges}
-                    </button>
+                        <Button
+                            size={'small'}
+                            mode={'link'}
+                            icon={'Pencil'}
+                            aria-label={t('users.editRolesTitle', 'Роли пользователя: {{name}}', { name: item.name })}
+                            tooltip={t('users.editRolesTitle', 'Роли пользователя: {{name}}', { name: item.name })}
+                            onClick={() => openEditRoles(item)}
+                        />
+                    </div>
                 )
             }
         },
@@ -316,7 +308,6 @@ const UsersPage: NextPage<object> = () => {
                 <Badge
                     label={authTypeLabel(data as ApiModel.UserAuthType)}
                     size={'small'}
-                    className={authTypeBadgeClass(data as ApiModel.UserAuthType)}
                 />
             )
         },
@@ -334,7 +325,7 @@ const UsersPage: NextPage<object> = () => {
                     <Badge
                         label={`${t('users.pushOn', 'Вкл')} (${item.pushSubscriptionCount})`}
                         size={'small'}
-                        className={styles.badgeDefault}
+                        className={styles.badgeOn}
                     />
                 ) : (
                     <Badge
@@ -360,8 +351,10 @@ const UsersPage: NextPage<object> = () => {
             isSortable: true,
             onChangeSort: handleSort,
             formatter: (data, row, i) => (
-                <button
-                    className={styles.eventsCountButton}
+                <Button
+                    mode={'link'}
+                    size={'small'}
+                    label={String(data as number)}
                     onClick={() => {
                         const item = row[i]
 
@@ -372,9 +365,7 @@ const UsersPage: NextPage<object> = () => {
                         setEventsUserId(item.id)
                         setEventsUserName(item.name)
                     }}
-                >
-                    {data as number}
-                </button>
+                />
             )
         },
         {
@@ -407,6 +398,7 @@ const UsersPage: NextPage<object> = () => {
                 <Input
                     clearable={true}
                     value={search}
+                    aria-label={t('users.search', 'Поиск по имени')}
                     placeholder={t('users.search', 'Поиск по имени')}
                     onChange={(e) => setSearch(e.target.value)}
                 />
@@ -425,7 +417,7 @@ const UsersPage: NextPage<object> = () => {
                 />
             </AppToolbar>
 
-            <Container style={{ padding: '2px' }}>
+            <Container className={styles.tableContainer}>
                 <Table<ApiModel.AdminUserItem>
                     className={styles.usersTable}
                     size={'small'}
@@ -480,7 +472,7 @@ const UsersPage: NextPage<object> = () => {
                     {saveRolesAttempted && saveRolesError && (
                         <Message
                             type={'error'}
-                            style={{ marginBottom: '10px' }}
+                            className={styles.dialogMessage}
                         >
                             {getErrorMessage(saveRolesError) ?? t('users.saveRolesError', 'Ошибка сохранения ролей')}
                         </Message>
@@ -498,12 +490,19 @@ const UsersPage: NextPage<object> = () => {
                         ))}
                     </div>
 
-                    <Button
-                        mode={'primary'}
-                        label={t('users.saveRoles', 'Сохранить')}
-                        loading={isSavingRoles}
-                        onClick={handleSaveRoles}
-                    />
+                    <div className={styles.dialogActions}>
+                        <Button
+                            mode={'outline'}
+                            label={t('common.cancel', 'Отмена')}
+                            onClick={closeEditRoles}
+                        />
+                        <Button
+                            mode={'primary'}
+                            label={t('users.saveRoles', 'Сохранить')}
+                            loading={isSavingRoles}
+                            onClick={handleSaveRoles}
+                        />
+                    </div>
                 </Dialog>
             )}
 

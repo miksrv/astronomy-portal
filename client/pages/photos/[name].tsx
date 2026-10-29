@@ -8,9 +8,11 @@ import { JsonLdScript } from 'next-seo'
 import { API, ApiModel, SITE_LINK, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable } from '@/components/common'
 import { PhotoCloud, PhotoHeader } from '@/components/pages/photos'
+import { formatDate, toISODateTime } from '@/utils/dates'
 import { hasPermission } from '@/utils/permissions'
 import { createLargePhotoUrl, createPhotoTitle, normalizeAndFilterObjects } from '@/utils/photos'
 import { initSSRLocale } from '@/utils/ssrLocale'
+import { formatObjectName } from '@/utils/strings'
 
 interface PhotoItemPageProps {
     photoId: string
@@ -33,6 +35,16 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
 
     const photoTitle = createPhotoTitle(photoData, t)
 
+    // The catalog names in `photoTitle` ("Фото IC 1805 от …") are not what people search for —
+    // the <title> and the image's name use the objects' own titles ("Туманность Сердце (IC 1805)")
+    const objectsTitles = photoData?.objects
+        ?.map((name) => objectsList?.find((object) => object.name === name)?.title || formatObjectName(name))
+        .join(', ')
+    const seoTitle = t('pages.photo.seo-title', '{{objects}} — астрофото от {{date}}', {
+        objects: objectsTitles,
+        date: formatDate(photoData?.date, 'DD.MM.YYYY')
+    })
+
     const user = useAppSelector((state) => state.auth?.user)
 
     const filteredPhotosList = useMemo(
@@ -49,11 +61,13 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                       '@context': 'https://schema.org',
                       '@type': 'ImageObject',
                       '@id': `${SITE_LINK}photos/${photoId}`,
-                      name: photoTitle,
+                      name: seoTitle,
                       contentUrl: createLargePhotoUrl(photoData),
+                      width: photoData.imageWidth,
+                      height: photoData.imageHeight,
                       url: `${SITE_LINK}photos/${photoId}`,
-                      datePublished: photoData.date,
-                      dateModified: photoData.updated?.date,
+                      datePublished: toISODateTime(photoData.date),
+                      dateModified: toISODateTime(photoData.updated?.date),
                       author: {
                           '@type': 'Organization',
                           name: 'Смотри на звёзды',
@@ -63,10 +77,13 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                           '@type': 'Organization',
                           name: 'Смотри на звёзды'
                       },
-                      license: 'https://creativecommons.org/licenses/by-nc/4.0/'
+                      license: 'https://creativecommons.org/licenses/by-nc/4.0/',
+                      // With `license`, makes the photo eligible for the "Licensable" badge in Google Images
+                      acquireLicensePage: `${SITE_LINK}about`,
+                      creditText: 'Смотри на звёзды'
                   }
                 : null,
-        [photoData, photoId, photoTitle]
+        [photoData, photoId, seoTitle]
     )
 
     const equipmentsDataDescription = useMemo(
@@ -81,11 +98,11 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
     return (
         <AppLayout
             canonical={`photos/${photoId}`}
-            title={photoTitle}
+            title={seoTitle}
             description={t(
                 'pages.photo.description',
-                '{{photoTitle}} - фотография астрономического объекта сделана на самодельной обсерватории, используемое оборудование: {{equipment}}.',
-                { photoTitle, equipment: equipmentsDataDescription }
+                '{{photoTitle}}: астрофотография, снятая любительской обсерваторией в Оренбурге. Оборудование: {{equipment}}.',
+                { photoTitle: objectsTitles, equipment: equipmentsDataDescription }
             )}
             openGraph={{
                 images: [
@@ -123,7 +140,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
 
                         <Button
                             icon={'PlusCircle'}
-                            mode={'primary'}
+                            mode={'secondary'}
                             label={t('common.add', 'Добавить')}
                             link={'/photos/form'}
                         />

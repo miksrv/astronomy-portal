@@ -429,7 +429,7 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
 
                 <div className={styles.footer}>
                     <Button
-                        mode={'secondary'}
+                        mode={'outline'}
                         label={'Отмена'}
                         disabled={disabled}
                         onClick={onCancel}

@@ -35,8 +35,6 @@ POST   /objects                     → Objects::create
 PATCH  /objects/:name               → Objects::update
 DELETE /objects/:name               → Objects::delete
 
-GET  /fits/:name                    → Fits::show   ⚠ controller file does not exist yet
-
 GET    /photos                      → Photos::list
 GET    /photos/:id                  → Photos::show
 POST   /photos                      → Photos::create
@@ -123,7 +121,7 @@ Routes marked `[rate-limited: bucket, capacity/window]` are throttled per-IP by 
 
 ## Controllers (`app/Controllers/`)
 
-All controllers extend `ResourceController` and use the `ResponseTrait`.
+All controllers extend `BaseApiController` (see API Responses below).
 
 | File | Description |
 |---|---|
@@ -156,11 +154,11 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 | File | Table | Soft-deletes | Notes |
 |---|---|---|---|
 | `ApplicationBaseModel.php` | — | — | Base class; adds `prepareOutput()` for stripping `hiddenFields` |
-| `UsersModel.php` | `users` | yes | `UserEntity`; `roles` is a JSON array of `user_roles.id` values (see `RolesModel`) — a user can hold several roles; UUID PKs; `session_token` powers logout revocation — see Authentication below |
+| `UsersModel.php` | `users` | yes | `UserEntity`; `roles` is a JSON array of `user_roles.id` values (see `RolesModel`) — a user can hold several roles; `session_token` powers logout revocation — see Authentication below |
 | `RolesModel.php` | `user_roles` | no | `RoleEntity`; `permissions` is a JSON array of `App\Enums\Permission` values; `getPermissionsForIds()` resolves a user's effective privileges (union across all their roles); `countUsersPerRole()` powers the "assigned to N users" delete warning (single query for all roles, not one per role); `idsExist()` validates role ids before they're persisted onto a user; `DEVELOPER_ROLE_ID` (= 1, "Разработчик") is the one hardcoded role — see "The reserved developer role" in the root README |
 | `EventsModel.php` | `events` | yes | `EventEntity`; bilingual fields (`title_en/ru`, `content_en/ru`) |
 | `EventsMediaModel.php` | `events_media` | yes | `EventMediaEntity`; photos **and** videos uploaded to a specific event, one chronological feed (`media_type` discriminator, `duration` for video); a video's poster frame reuses the `{file_name}_preview.jpg` convention |
-| `EventsMediaUploadsModel.php` | `events_media_uploads` | no | `EventMediaUploadEntity`; ephemeral bookkeeping for an in-progress chunked upload (never displayed) — removed outright by `Events::mediaCancel()` or swept by `media:cleanup-uploads` via `getStaleSessions()` |
+| `EventsMediaUploadsModel.php` | `events_media_uploads` | no | `EventMediaUploadEntity`; ephemeral bookkeeping for an in-progress chunked upload (never displayed) — `mediaFinalize()` marks it `completed` and removes the temp chunks, `mediaCancel()` deletes both; an abandoned session (no cancel) stays behind — see CLI Commands below |
 | `EventsUsersModel.php` | `events_users` | yes | Pivot: user bookings/check-ins for events |
 | `ObjectsModel.php` | `objects` | yes | `ObjectEntity`; PK is `catalog_name` (string, e.g. `M31`) |
 | `ObjectCategoryModel.php` | `objects_categories` | no | Pivot: object ↔ category |
@@ -174,7 +172,7 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 | `PhotosObjectModel.php` | `photos_objects` | no | Pivot: photo ↔ astronomical object |
 | `CategoryModel.php` | `categories` | no | Shared photo/object categories |
 | `ObservatoryEquipmentModel.php` | `observatory_equipment` | no | Equipment inventory (type, brand, model, specs) |
-| `ObservatorySettingsModel.php` | `observatory_settings` | no | Key-value store for observatory config; extends CI4 `Model` directly |
+| `ObservatorySettingsModel.php` | `observatory_settings` | no | Key-value store for observatory config |
 | `CommentsModel.php` | `comments` | yes | Comments/reviews on events and photos; `entity_type` ENUM: `event`, `photo` |
 | `MailingsModel.php` | `mailings` | yes | Email campaign records (subject, content, status, send counts) |
 | `MailingEmailsModel.php` | `mailing_emails` | no | Individual recipient entries per mailing |
@@ -190,59 +188,12 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 
 ## Migration History (`app/Database/Migrations/`)
 
-Listed in execution order. Tables created unless noted as ALTER.
+Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 
-| Migration file | Creates / Alters |
-|---|---|
-| `2024-10-22-100000_AddCategories` | `categories` |
-| `2024-10-22-100000_AddEvents` | `events` |
-| `2024-10-22-100000_AddObjects` | `objects` |
-| `2024-10-22-100000_AddUsers` | `users` |
-| `2024-10-22-111100_AddObjectsCategories` | `objects_categories` |
-| `2024-10-22-111100_AddObservatoryEquipment` | `observatory_equipment` |
-| `2024-10-22-111100_AddObservatorySettings` | `observatory_settings` |
-| `2024-10-22-111100_AddPhotos` | `photos` |
-| `2024-10-22-111100_AddPhotosAuthors` | `photos_authors` |
-| `2024-10-22-111500_AddEventsPhotos` | `events_photos` |
-| `2024-10-22-111500_AddEventsUsers` | `events_users` |
-| `2024-10-22-120000_AddObjectsFitsFiles` | `objects_fits_files` |
-| `2024-10-22-120000_AddPhotosCategories` | `photos_categories` |
-| `2024-10-22-120000_AddPhotosEquipments` | `photos_equipments` |
-| `2024-10-22-120000_AddPhotosFilters` | `photos_filters` |
-| `2024-10-22-120000_AddPhotosObjects` | `photos_objects` |
-| `2024-10-23-111100_AddObjectsFitsFilters` | `objects_fits_filters` |
-| `2025-05-01-100000_AddMailings` | `mailings` |
-| `2025-05-01-100001_AddMailingEmails` | `mailing_emails` |
-| `2025-05-01-100002_AddMailingUnsubscribes` | `mailing_unsubscribes` |
-| `2025-05-01-100003_AddUserSettings` | ALTER `users` — adds `settings JSON` column |
-| `2025-05-20-100000_AddMailingAudience` | ALTER `mailings` — adds audience-targeting columns |
-| `2026-04-16-100000_AddPhotosViews` | ALTER `photos` — adds `views INT` column |
-| `2026-04-16-110000_AddComments` | `comments` |
-| `2026-06-22-100000_AddEventTicketPrice` | ALTER `events` — adds ticket pricing columns |
-| `2026-06-22-100001_AddPayments` | `payments` |
-| `2026-06-22-100002_AddEventUserPaymentColumns` | ALTER `events_users` — adds payment status/reference columns |
-| `2026-06-24-100000_AddEmailQueue` | `email_queue` |
-| `2026-07-02-100000_AddEventUsersPaymentForeignKey` | ALTER `events_users` — FK to `payments` |
-| `2026-07-02-110000_AddEventUsersFailedStatus` | ALTER `events_users` — adds a `failed` payment status |
-| `2026-07-03-100000_AddMagicLinkTokens` | `magic_link_tokens` |
-| `2026-07-03-100001_AddUserAuthTypeEmail` | ALTER `users` — adds `email` as an auth type (alongside OAuth) |
-| `2026-07-03-100002_AddPaymentsRefundingStatus` | ALTER `payments` — adds a `refunding` status |
-| `2026-07-03-100003_AddEventUsersActiveBookingUniqueKey` | ALTER `events_users` — unique key preventing duplicate active bookings |
-| `2026-07-04-100000_AddEventRequiresRegistration` | ALTER `events` — adds `requires_registration` flag |
-| `2026-07-06-100000_AddUsersSessionToken` | ALTER `users` — adds `session_token` (logout revocation, see Authentication above) |
-| `2026-07-07-100000_ReworkEventLocationFields` | ALTER `events` — replaces bilingual venue name/manual map links with `location`/`address`/`latitude`/`longitude`/`min_age`/`end_date` |
-| `2026-07-09-100000_AddEmailQueueIcsAttachment` | ALTER `email_queue` — adds ICS calendar attachment column |
-| `2026-08-13-100000_AddMailingsCanceledStatus` | ALTER `mailings` and `mailing_emails` — adds a `canceled` status |
-| `2026-08-13-100001_AddRolesTable` | `user_roles` — seeds 3 starter roles (Разработчик/Команда/Охрана) preserving the legacy `users.role` ENUM's behaviour; role id 1 ("Разработчик") is reserved/hardcoded, see `RolesModel::DEVELOPER_ROLE_ID` |
-| `2026-08-13-100002_AddUsersRolesColumn` | ALTER `users` — adds `roles JSON` (array of `roles.id`), backfilled from the legacy `role` column, which is left in place for now as a rollback safety net |
-| `2026-08-14-100000_AddEventPhotosGroupingFields` | ALTER `events_photos` — adds grouping fields |
-| `2026-08-16-100000_AddPushSubscriptions` | `push_subscriptions` — FEAT-13 Web Push; one row per browser/device, unique `endpoint`, FK to `users` (CASCADE) |
-| `2026-08-16-100001_AddPushNotifications` | `push_notifications` — FEAT-13; mirrors `mailings` (title/body/icon/url/status/audience/counts) |
-| `2026-08-16-100002_AddPushNotificationDeliveries` | `push_notification_deliveries` — FEAT-13; mirrors `mailing_emails`, keyed by `subscription_id` rather than user |
-| `2026-08-17-100000_AllowAnonymousPushSubscriptions` | ALTER `push_subscriptions` — `user_id` becomes nullable, so a guest can subscribe before logging in (FK left untouched — NULL is exempt from the CASCADE) |
-| `2026-08-17-110000_FixPushNotificationDeliveriesSubscriptionCascade` | ALTER `push_notification_deliveries` — `subscription_id` becomes nullable and its FK to `push_subscriptions` switches from `CASCADE` to `SET NULL`, so a delivery row survives (as a permanent send-audit record, `status` intact) when `system:send-push` hard-deletes an expired subscription, instead of being cascade-deleted along with it |
-| `2026-08-21-100000_RenameEventsPhotosToEventsMedia` | RENAME `events_photos` → `events_media`; `image_width`/`image_height` → `width`/`height`, `file_size` INT → BIGINT UNSIGNED (a video may reach the 2GB ceiling), + `media_type ENUM('photo','video')` and `duration SMALLINT UNSIGNED NULL`; the index is renamed with a raw `ALTER TABLE ... RENAME INDEX` since MySQL's `RENAME TABLE` preserves index names verbatim |
-| `2026-08-21-100001_AddEventsMediaUploads` | `events_media_uploads` — FEAT-26 chunked-upload session bookkeeping (event/user FK CASCADE, `total_size`/`chunk_size`/`received_bytes`, `status ENUM('uploading','finalizing','completed','aborted')`) |
+- `2026-08-13-100001_AddRolesTable` — seeds 3 starter roles (Разработчик/Команда/Охрана); role id 1 ("Разработчик") is reserved, see `RolesModel::DEVELOPER_ROLE_ID`.
+- `2026-08-13-100002_AddUsersRolesColumn` — adds `users.roles JSON`, backfilled from the legacy `users.role` ENUM, which is left in place as a rollback safety net.
+- `2026-08-17-110000_FixPushNotificationDeliveriesSubscriptionCascade` — `push_notification_deliveries.subscription_id` FK is `SET NULL`, not `CASCADE`, so a delivery row survives when `system:send-push` deletes an expired subscription.
+- `2026-08-21-100000_RenameEventsPhotosToEventsMedia` — `events_photos` → `events_media`; the index is renamed with a raw `ALTER TABLE ... RENAME INDEX`, since `RENAME TABLE` keeps index names verbatim and Forge has no `renameIndex`.
 
 ---
 
@@ -286,7 +237,8 @@ Listed in execution order. Tables created unless noted as ALTER.
 
 ### Language Files
 - Located in `app/Language/en/` and `app/Language/ru/`.
-- Files: `App.php`, `Auth.php`, `Categories.php`, `Comments.php`, `Events.php`, `General.php`, `Mailings.php`, `Members.php`, `Objects.php`, `Photos.php`, `PushNotifications.php`, `Roles.php`, `Validation.php`.
+- Files: `App.php`, `Auth.php`, `Categories.php`, `Comments.php`, `Events.php`, `General.php`, `Mailings.php`, `FilesController.php`, `Members.php`, `Objects.php`, `Photos.php`, `PushNotifications.php`, `Relay.php`, `Roles.php`, `Validation.php` (plus `ru/Files.php`, which overrides the framework's own `Files` keys).
+- Never name a lang file after a framework one (`Files`, `Validation`, …) for a new namespace — it collides with CI4's system language files.
 - Load with: `lang('Events.someKey')` after `LocaleLibrary` sets the locale.
 
 ### Libraries (`app/Libraries/`)
@@ -298,13 +250,14 @@ Listed in execution order. Tables created unless noted as ALTER.
 | `RelayLibrary` | HTTP communication with Arduino relay board |
 | `PhotoUploadLibrary` | Handles photo file validation, resizing, and storage |
 | `PhotosLibrary` | Helper utilities for photo data aggregation |
-| `CatalogLibrary` | Utilities for FITS catalog data processing |
 | `StatisticLibrary` | Aggregation helpers for telescope statistics |
 | `GoogleClient` / `YandexClient` / `VkClient` | OAuth provider integrations |
 | `PaymentLibrary` | Gateway-agnostic payment orchestration (uses `PaymentGatewayInterface`) |
 | `PaymentGatewayInterface` | Contract a new payment provider must implement |
 | `AlfaBankClient` | Current `PaymentGatewayInterface` implementation; test/production environment switch |
 | `TicketLibrary` | Renders event ticket PNGs (static background asset + QR code) for check-in |
+| `CalendarLibrary` | Builds ICS calendar attachments for event emails |
+| `ApiExceptionHandler` | Renders uncaught exceptions in the `{message, errors?}` envelope (`Config\Exceptions::handler()`) |
 | `WebPushLibrary` | Thin wrapper around `Minishlink\WebPush\WebPush` (VAPID keys from `Config\Push`); throws `WebPushExpiredSubscriptionException` on HTTP 404/410 |
 
 ### Filters (`app/Filters/`)
@@ -318,23 +271,17 @@ Listed in execution order. Tables created unless noted as ALTER.
 |---|---|---|
 | `system:send-email` | system | Drains the mailing queue (`mailing_emails`) and the transactional email outbox (`email_queue`), subject to `Config\MailingLimits` day/hour caps |
 | `system:send-push` | system | Drains the Web Push delivery queue (`push_notification_deliveries`), batch size 50, no rate-limit cap (push has no SMTP-style provider reputation limit) — deletes the `push_subscriptions` row on a 404/410 (`WebPushExpiredSubscriptionException`) |
-| `media:cleanup-uploads` | system | Purges abandoned chunked-upload sessions (`events_media_uploads` still `uploading`/`finalizing` after 24h) and their `UPLOAD_EVENTS/{eventId}/tmp/{sessionId}/` chunk directories |
-| `fits:recalculate` | — | Recalculates FITS filter aggregates (no HTTP endpoint) |
+| `fits:recalculate` | Observatory | Recalculates FITS filter aggregates (no HTTP endpoint) |
 
 `send-email` and `send-push` are registered for the same `* * * * *` cron cadence on the hosting cron (outside this repo).
 
-**`media:cleanup-uploads` is not registered on the hosting cron yet** — it ships with FEAT-26 but has to be added to the host's crontab by hand as a deployment step, since the crontab lives outside this repo. Until that is done, an abandoned chunked upload's temp chunk directory (`UPLOAD_EVENTS/{eventId}/tmp/{sessionId}/`) is only removed when the uploader explicitly cancels; a session abandoned outright (tab closed, network dropped) keeps its parts on disk indefinitely. The line to add, alongside the two above:
+There is no automatic cleanup of abandoned chunked uploads (tab closed or network dropped without a cancel): their parts stay in `UPLOAD_EVENTS/{eventId}/tmp/{sessionId}/` and the `events_media_uploads` row stays `uploading`/`finalizing`. Uploads are rare, so these are removed by hand on the server.
 
-```
-* * * * * cd /path/to/server && php spark media:cleanup-uploads >> /dev/null 2>&1
-```
-
-Remove this note once the entry is live on the host.
-
-### UUIDs / IDs
-- Most models use `$useAutoIncrement = false` with string/UUID PKs generated in `beforeInsert` callbacks.
-- Exception: `ObservatoryEquipmentModel` uses auto-increment integer PK.
+### IDs
+- Most models use `$useAutoIncrement = false` with string `uniqid()` PKs from `ApplicationBaseModel::generateId` (`beforeInsert`).
+- Auto-increment integer PKs: `CategoryModel`, `RolesModel`, `ObservatoryEquipmentModel`.
 
 ### Testing
 - Always run `composer test` after any change.
-- Tests live in `server/tests/` and use PHPUnit 11.5.
+- Tests live in `server/tests/` and use PHPUnit 11.5 against in-memory SQLite (`phpunit.xml.dist`) — no live DB needed.
+- Layout: `tests/unit/{Entities,Helpers,Libraries,Models}`, `tests/feature` (controller guards), fixtures in `tests/_support/`.

@@ -18,8 +18,7 @@
  * field name.
  */
 
-const prefersReducedMotion = (): boolean =>
-    typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+import { prefersReducedMotion } from './helpers'
 
 /**
  * Walks a react-hook-form `errors` tree (or a plain server `fieldErrors` map)

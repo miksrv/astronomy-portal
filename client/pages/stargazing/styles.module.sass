@@ -1,13 +1,68 @@
-@use '../../styles/variables' as variables
+@use '../../styles/typography' as type
 
+// Empty gallery: one line on the page background
 .noPhotos
-    text-align: center
-    color: var(--text-color-secondary)
-    padding: 20px 0
+    +type.secondary
+    margin: 0
 
-.showMorePhotos
-    color: var(--link-color) !important
-    margin-left: auto
+// A section heading with an action on the right ("Смотреть все")
+.sectionTitle
+    display: flex
+    align-items: baseline
+    justify-content: space-between
+    gap: var(--space-4)
 
-    &:hover
-        color: var(--link-color-hover) !important
+// First paragraph of a text page
+.lead
+    +type.lead
+    margin: var(--space-4) 0 0
+
+// Long text pages (howto, rules, where): the prose role on the full content width
+.prose
+    +type.prose
+    margin-top: var(--space-4)
+
+    // The h2 of the first block follows the lead directly
+    > h2:first-child
+        margin-top: var(--space-4)
+
+    // Numbered steps: the step title is a heading inside the list item
+    li > h3
+        margin: 0 0 var(--space-1)
+
+    li > p
+        margin-bottom: var(--space-3)
+
+    li:last-child > p
+        margin-bottom: 0
+
+    ol li + li
+        margin-top: var(--space-4)
+
+// Payment result: actions in a row, stacked and full width on phones
+.paymentActions
+    display: flex
+    flex-wrap: wrap
+    gap: var(--space-3)
+    justify-content: center
+    margin-top: var(--space-4)
+
+    @media only screen and (max-width: 768px)
+        flex-direction: column-reverse
+
+        button
+            width: 100%
+            min-height: 44px
+
+.paymentMessage
+    margin-top: var(--space-4)
+
+// Check-in: centred spinner while the ticket is being checked
+.checkinLoader
+    display: flex
+    justify-content: center
+    padding: var(--space-10) 0
+
+// The heading above already carries the space
+h2 + .prose
+    margin-top: 0

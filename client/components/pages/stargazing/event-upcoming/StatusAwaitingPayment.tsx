@@ -33,7 +33,7 @@ export const StatusAwaitingPayment: React.FC<StatusAwaitingPaymentProps> = ({
 
     return (
         <div className={styles.stateCard}>
-            <div className={cn(styles.stateIcon, styles.stateIconDanger)}>
+            <div className={cn(styles.stateIcon, styles.stateIconWarning)}>
                 <Icon name={'Time'} />
             </div>
             <h3 className={styles.stateHeading}>

@@ -32,11 +32,15 @@ export const EventMediaFilter: React.FC<EventMediaFilterProps> = ({ photographer
     }
 
     return (
-        <ul className={styles.filterList}>
+        <ul
+            className={styles.filterList}
+            aria-label={t('components.pages.stargazing.event-media-filter.label', 'Фильтр по фотографу')}
+        >
             <li>
                 <button
                     type={'button'}
                     className={cn(styles.filterItem, !selected && styles.active)}
+                    aria-pressed={!selected}
                     onClick={() => onChange(undefined)}
                 >
                     {t('components.pages.stargazing.event-media-filter.all', 'Все')}
@@ -47,6 +51,7 @@ export const EventMediaFilter: React.FC<EventMediaFilterProps> = ({ photographer
                     <button
                         type={'button'}
                         className={cn(styles.filterItem, selected === name && styles.active)}
+                        aria-pressed={selected === name}
                         onClick={() => onChange(name)}
                     >
                         {name}

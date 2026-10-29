@@ -63,6 +63,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, categoriesList, objec
     )
 
     const title = t('pages.objects.title', 'Список астрономических объектов')
+    const seoTitle = t('pages.objects.seo-title', 'Каталог галактик и туманностей с астрофото')
 
     useEffect(() => {
         const updateHeights = () => {
@@ -123,11 +124,11 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, categoriesList, objec
     return (
         <AppLayout
             canonical={'objects'}
-            title={`${title}${categoryFilter ? `: ${currentCategory?.title}` : ''}`}
+            title={categoryFilter ? `${title}: ${currentCategory?.title}` : seoTitle}
             description={[
                 t(
                     'pages.objects.description',
-                    'Каталог астрономических объектов, отснятых обсерваторией: галактики, туманности, астероиды и кометы. Таблица с объектами включает информацию о суммарной выдержке, наличии обработанных фото и данных по каждому фильтру: Luminance, Red, Green, Blue, Ha, OIII, SII. Узнайте больше о каждом объекте и деталях наблюдения, проведенных обсерваторией.'
+                    'Каталог галактик, туманностей, звёздных скоплений и комет, снятых любительской обсерваторией в Оренбурге: астрофото, описания, координаты и выдержка по фильтрам.'
                 ),
                 currentCategory?.description
             ]
@@ -136,9 +137,9 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, categoriesList, objec
             openGraph={{
                 images: [
                     {
-                        height: 773,
-                        url: '/screenshots/objects.jpg',
-                        width: 1280
+                        height: 1024,
+                        url: '/images/index-hero.png',
+                        width: 1536
                     }
                 ]
             }}
@@ -161,6 +162,7 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, categoriesList, objec
                 <Input
                     clearable={true}
                     value={searchFilter}
+                    aria-label={t('pages.objects.search-by-name', 'Поиск по названию')}
                     placeholder={t('pages.objects.search-by-name', 'Поиск по названию')}
                     onChange={(e) => setSearchFilter(e.target.value)}
                 />

@@ -72,11 +72,12 @@ Amateur Astronomy Observatory Portal is a DIY platform for managing and monitori
 - **Interactive Celestial Map** — explore observed objects, constellations, stars, and their imaging history powered by Celestial.js and D3.js.
 - **Real-Time Observatory Dashboard** — monitor telescope status, weather conditions, and sensor data live.
 - **Astrophotography Archive** — FITS file management and astrophotography archive with detailed metadata, equipment info, and filters.
-- **Stargazing Events** — event management with registration, optional paid ticketing via Alfa-Bank online acquiring (adults pay, children under 18 are free), check-in via QR code, and photo upload.
+- **Stargazing Events** — event management with registration, optional paid ticketing via Alfa-Bank online acquiring (adults pay, children under 18 are free), check-in via QR code, reviews, and a photo/video gallery per event.
 - **Astronomy Calculations** — visibility charts, celestial coordinate utilities, moon phase display using `astronomy-engine` and `suncalc`.
 - **Remote Observatory Control** — manage equipment power and receive telemetry via an Arduino-based controller.
-- **OAuth Authentication** — sign in with Google, Yandex, or VK accounts.
-- **Telegram Integration** — astronomy news and expedition reports synced with a Telegram channel.
+- **Authentication** — sign in with Google, Yandex or VK, or passwordless via an emailed magic link.
+- **Mailings & Web Push** — admin email campaigns and browser push notifications about upcoming events.
+- **Role-based Admin** — admin-editable roles built from a fixed privilege catalog (see below).
 - **Multilingual UI** — i18n support via `i18next`.
 
 <p align="right">(<a href="#top">Back to top</a>)</p>
@@ -90,8 +91,8 @@ The Homemade Observatory Web Application project leverages a wide range of techn
 - [![PHP][php-badge]][php-url] Server-side scripting language (PHP 8.2) powering the CodeIgniter 4 backend API.
 - [![MySQL][mysql-badge]][mysql-url] MariaDB/MySQL database system for storing all application data.
 - [![JavaScript][js-badge]][js-url] Core language used in frontend development.
-- [![TypeScript][ts-badge]][ts-url] TypeScript extends JavaScript by adding types to the language (v5.9.3).
-- [![NextJS][nextjs-badge]][nextjs-url] React-based frontend framework for building the user interface (v16.1.6).
+- [![TypeScript][ts-badge]][ts-url] TypeScript extends JavaScript by adding types to the language (v6.0.3).
+- [![NextJS][nextjs-badge]][nextjs-url] React-based frontend framework for building the user interface (v16.4.3).
 - [![Redux][redux-badge]][redux-url] State management for the frontend via Redux Toolkit with RTK Query.
 - [![NodeJS][nodejs-badge]][nodejs-url] JavaScript runtime used for frontend development and package management (≥20.11.0).
 - [![Sass][sass-badge]][sass-url] Styling the user interface.
@@ -123,7 +124,7 @@ astronomy-portal/
 │       ├── Database/
 │       │   └── Migrations/ # Database migrations
 │       ├── Config/      # Routes, CORS, Filters, Services
-│       └── Libraries/   # JWT, Locale helpers
+│       └── Libraries/   # Auth, payments, email, push, relay, tickets…
 ├── firmware/            # Arduino firmware for observatory hardware control
 │   └── main/
 └── config/              # Docker Compose and Nginx configuration
@@ -153,7 +154,7 @@ Roles are managed entirely through data, not code — `/admin/roles` lets an adm
 | `USERS_MANAGE` | Admin member list (`/admin/users`), viewing another user's event history, and all of `/roles*` (creating/editing roles and assigning them to users). **Reserved** — see "The reserved developer role" below; not a privilege any admin-created role can be granted. |
 | `COMMENTS_MODERATE` | Deleting any comment/review (not just your own) |
 | `EVENTS_CREATE` | Creating a new stargazing event |
-| `EVENTS_UPDATE` | Editing an event and replacing its cover image. Also exempts the viewer from the address/coordinates gating on `GET /events/:id` (see "Event Location & Map" below) so the edit form always shows the real saved values, not just for a viewer with their own booking |
+| `EVENTS_UPDATE` | Editing an event and replacing its cover image. Also exempts the viewer from the address/coordinates gating on `GET /events/:id` (see "Event Location & Map" in `server/CLAUDE.md`) so the edit form always shows the real saved values, not just for a viewer with their own booking |
 | `EVENTS_DELETE` | Deleting an event |
 | `EVENTS_GALLERY_UPLOAD` | Uploading media — photos **and** videos — to an event's gallery after the fact, across the whole chunked upload flow (`POST /events/media/init/:id`, `POST /events/media/chunk/:sessionId`, `POST /events/media/finalize/:sessionId`, `DELETE /events/media/:sessionId`) |
 | `EVENTS_CHECKIN` | QR check-in and viewing any attendee's ticket |
@@ -187,8 +188,6 @@ The migration that introduced this system (`server/app/Database/Migrations/2026-
 ### Frontend
 
 `GET /auth/me` returns `roles` (role names, display-only — e.g. for the badge list in `/admin/users`) and `permissions` (the flat privilege list, the only thing ever checked). `client/utils/permissions.ts` exports `hasPermission(user, permission)` / `hasAnyPermission(user, permissions)`; every page/component gate and the `requirePermissionSSR()` SSR guard (`client/utils/adminAuth.ts`) go through these instead of comparing a role. `client/api/models/permission.ts` mirrors the backend `Permission` enum — the one remaining place the two ends duplicate each other, down from every call site duplicating a role comparison.
-
-> **Known gap:** `DELETE /events/:id` (archiving an event) has no frontend entry point — the "Архивировать" button on `/stargazing/form` was removed as misleading. The endpoint itself is untouched; it's reachable only by calling the API directly.
 
 <p align="right">(<a href="#top">Back to top</a>)</p>
 
@@ -234,13 +233,15 @@ cd server
 composer install
 
 # Copy environment file and configure it
-cp .env.example .env
+cp env .env
 
 # Run database migrations
 composer migration:run
 
 # (Optional) seed initial data
-composer seed:run
+php spark db:seed CategoriesSeeder
+php spark db:seed ObservatoryEquipmentSeeder
+php spark db:seed ObservatorySettingsSeeder
 
 # Start development server at http://localhost:8080
 composer serve
@@ -257,7 +258,7 @@ cd client
 yarn install
 
 # Copy environment file and configure it
-cp .env.example .env
+cp env .env
 
 # Start development server at http://localhost:3000
 yarn dev
@@ -282,9 +283,10 @@ yarn build
 |----------|-------------|---------|
 | `NEXT_PUBLIC_SITE_LINK` | Public URL of the frontend | `http://localhost:3000/` |
 | `NEXT_PUBLIC_API_HOST` | Backend API base URL | `http://localhost:8080/` |
-| `NEXT_PUBLIC_IMG_HOST` | Base URL for serving uploaded images | `http://localhost:8080/` |
+| `NEXT_PUBLIC_IMG_HOST` | Base URL for serving uploaded images (optional, defaults to `NEXT_PUBLIC_API_HOST`) | `http://localhost:8080/` |
 | `NEXT_PUBLIC_LAT` | Observatory latitude (for sky map) | `51.7` |
 | `NEXT_PUBLIC_LON` | Observatory longitude (for sky map) | `55.2` |
+| `NEXT_PUBLIC_THUNDERFOREST_API_KEY` | Tile API key for the event location map | — |
 
 ### Backend Environment Variables
 
@@ -297,11 +299,12 @@ yarn build
 | `app.longitude` | Observatory longitude | `55.0988` |
 | `app.fitsApiKey` | API key for FITS data source | — |
 | `app.observatory.controller` | URL of Arduino relay controller | `http://astro.myftp.org:8081/` |
+| `app.observatory.controller.user` / `.password` | Relay controller credentials | — |
 | `app.observatory.webcam_1` | Webcam 1 snapshot URL | — |
 | `app.observatory.webcam_2` | Webcam 2 snapshot URL | — |
 | `app.siteUrl` | Public frontend URL; used to build the payment return URL | `https://astro.miksoft.pro` |
-| `auth.token.secret` | JWT secret key | — |
-| `auth.token.live` | JWT lifetime in seconds | `1209600` |
+| `auth.token.secret` | JWT HS256 secret, **at least 32 bytes** | — |
+| `auth.token.live` | JWT lifetime in seconds | `15552000` |
 | `auth.google.*` | Google OAuth credentials | — |
 | `auth.yandex.*` | Yandex OAuth credentials | — |
 | `auth.vk.*` | VK OAuth credentials | — |
@@ -315,6 +318,8 @@ yarn build
 | `payment.alfabank.gatewayUrl` | Alfa-Bank REST base URL (production) | `https://payment.alfabank.ru/payment/rest/` |
 | `payment.alfabank.callbackToken` | Symmetric token for HMAC callback verification | — |
 | `payment.alfabank.test.*` | Same keys as above (`userName`/`password`/`token`/`gatewayUrl`/`callbackToken`), used when `payment.alfabank.environment = 'test'` | `gatewayUrl`: `https://alfa.rbsuat.com/payment/rest/` |
+| `smtp.*` | SMTP server for mailings, tickets and magic links (`host`/`port`/`user`/`pass`/`crypto`/`mail`/`senderName`) | — |
+| `push.vapidPublicKey` / `vapidPrivateKey` / `vapidSubject` | VAPID keys for Web Push | — |
 | `database.*.hostname` | DB host | `127.0.0.1` |
 | `database.*.port` | DB port | `3308` |
 | `database.*.database` | DB name | `db` |
@@ -328,34 +333,7 @@ yarn build
 <!-- API OVERVIEW -->
 ## API Overview
 
-All backend endpoints are defined in `server/app/Config/Routes.php`.
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/auth/me` | Current authenticated user info |
-| `GET` | `/auth/google` | OAuth via Google |
-| `GET` | `/auth/yandex` | OAuth via Yandex |
-| `GET` | `/auth/vk` | OAuth via VK |
-| `GET` | `/equipments` | Observatory equipment list |
-| `GET` | `/categories` | Photo categories list |
-| `GET\|POST\|PATCH\|DELETE` | `/objects/:name` | Astronomical objects CRUD |
-| `GET` | `/fits/:name` | FITS file data for an object |
-| `GET\|POST\|PATCH\|DELETE` | `/photos` | Astrophoto archive CRUD + upload |
-| `GET\|POST\|PATCH` | `/events` | Stargazing events management |
-| `POST` | `/events/booking` | Book a place at an event (returns a bank payment URL for paid events) |
-| `POST` | `/events/cancel` | Cancel booking (auto-refunds paid bookings) |
-| `POST` | `/events/payment/status` | Verify the payment status of an order after returning from the bank |
-| `GET\|POST` | `/events/payment/callback` | Async payment notification from the acquiring gateway (HMAC-verified) |
-| `POST` | `/events/checkin` | QR check-in |
-| `GET` | `/events/members` | Event member list |
-| `GET` | `/events/upcoming` | Upcoming events |
-| `GET` | `/relay/list` | Relay devices list |
-| `GET` | `/relay/light` | Observatory light status |
-| `PUT` | `/relay/set` | Set relay state |
-| `GET` | `/statistic/telescope` | Telescope usage statistics |
-| `GET` | `/files/:path` | File serving |
-| `GET` | `/sitemap` | Sitemap data |
-| `GET` | `/system/recalculate/fits` | Recalculate FITS filters |
+All backend endpoints are defined in `server/app/Config/Routes.php` (`composer routes` lists them); the annotated route table with privileges and rate limits is in [`server/CLAUDE.md`](server/CLAUDE.md#api-routes-appconfigroutesphp).
 
 <p align="right">(<a href="#top">Back to top</a>)</p>
 
@@ -369,6 +347,7 @@ CI/CD is handled by GitHub Actions (`.github/workflows/`). Pushing to `main` dep
 | Workflow | Trigger | Action |
 |----------|---------|--------|
 | `ui-checks.yml` | Pull Request | Lint + test + build frontend |
+| `api-checks.yml` | Pull Request | PHPUnit backend tests |
 | `ui-deploy.yml` | Push to `main` | Deploy frontend via SSH/rsync to a VPS, served with PM2 |
 | `api-deploy.yml` | Push to `main` | Deploy backend via FTP to shared PHP hosting |
 | `sonarcloud.yml` | PRs + push to `main` | SonarCloud quality gate |
@@ -396,8 +375,6 @@ cd server
 composer migration:run     # apply pending migrations
 composer migration:status  # verify what has been applied
 ```
-
-> The paid-ticketing feature adds three migrations (`2026-06-22-100000_AddEventTicketPrice`, `…_AddPayments`, `…_AddEventUserPaymentColumns`). They must be applied before paid events will work.
 
 ### Payment Acquiring (Alfa-Bank)
 

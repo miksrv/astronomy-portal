@@ -1,61 +1,40 @@
 @use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
 
+// The page header: breadcrumbs (the way back) over the h1, an optional meta
+// line under it, and page actions on the right (under the title on phones)
 .toolbarHeader
     display: flex
     justify-content: space-between
-    align-items: center
-    flex-wrap: nowrap
-    gap: 16px
+    align-items: flex-end
+    gap: var(--space-4)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-direction: column
-        align-items: self-start
-        flex-wrap: wrap
+        align-items: stretch
 
     .toolbarActions
         display: flex
-        justify-content: space-between
         align-items: center
-        gap: 10px
+        gap: var(--space-2)
         flex-shrink: 0
 
         @media only screen and (max-width: variables.$mobileMaxWidth)
-            width: 100%
             flex-wrap: wrap
-            justify-content: flex-start
 
             & > div
                 width: 100%
 
     .toolbarTitle
-        position: relative
-
-        @media only screen and (max-width: variables.$mobileMaxWidth)
-            width: 100%
-
-        .toolbarMeta
-            padding: 4px 16px 0
-            font-size: 13px
-            color: var(--text-color-secondary)
+        display: flex
+        flex-direction: column
+        gap: var(--space-1)
+        min-width: 0
 
         h1
-            padding: 4px 16px 4px
-            font-size: 20px
-            line-height: 20px
-            font-weight: 400
-            letter-spacing: 0.02em
+            +type.titlePage
+            margin: 0
+            overflow-wrap: anywhere
 
-            @media only screen and (max-width: variables.$mobileMaxWidth)
-                font-size: 22px
-                line-height: 26px
-
-        &:before
-            content: ""
-            display: inline-block
-            width: 6px
-            height: 100%
-            background: var(--color-primary)
-            border-radius: 2px
-            position: absolute
-            left: 0
-            top: 0
+        .toolbarMeta
+            +type.secondary

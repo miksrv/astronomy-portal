@@ -9,7 +9,7 @@ import {
 } from './dates'
 
 const mockT: TFunction = ((key: string, defaultValue: string, options?: { count?: number }) =>
-    defaultValue?.replace('{{count}}', String(options?.count ?? ''))) as TFunction
+    defaultValue?.replace('{{count}}', String(options?.count ?? ''))) as unknown as TFunction
 
 describe('dates', () => {
     describe('getLocalizedTimeFromSec', () => {

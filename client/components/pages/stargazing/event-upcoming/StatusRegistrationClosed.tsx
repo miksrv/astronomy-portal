@@ -1,5 +1,5 @@
 import React from 'react'
-import { cn, Icon } from 'simple-react-ui-kit'
+import { Icon } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
@@ -10,7 +10,7 @@ export const StatusRegistrationClosed: React.FC = () => {
 
     return (
         <div className={styles.stateCard}>
-            <div className={cn(styles.stateIcon, styles.stateIconDanger)}>
+            <div className={styles.stateIcon}>
                 <Icon name={'Close'} />
             </div>
             <h3 className={styles.stateHeading}>

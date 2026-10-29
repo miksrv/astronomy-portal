@@ -20,7 +20,7 @@
         // Collapsed width keeps the card clear of the horizon dome's upper-right edge
         width: 300px
         max-width: calc(100% - 20px)
-        border-radius: 12px
+        border-radius: var(--radius-lg)
         // Same glass surface as the map's control rail (.mapRail in star-map styles)
         +starmap.glass
         overflow: hidden
@@ -41,7 +41,7 @@
         height: 28px
         padding: 0 6px 0 12px
         gap: 8px
-        border-radius: 12px
+        border-radius: var(--radius-lg)
         cursor: pointer
         // Hide the native disclosure triangle — .introHint's chevron replaces it
         list-style: none
@@ -94,6 +94,12 @@
         font-size: 13px
 
     .introText
+        h2
+            margin: 14px 0 8px
+            font-size: 14px
+            font-weight: 600
+            color: var(--text-color-primary)
+
         p
             margin: 0 0 10px
             color: var(--text-color-secondary)

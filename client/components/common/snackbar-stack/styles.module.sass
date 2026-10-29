@@ -2,45 +2,52 @@
 
 .stack
     position: fixed
-    bottom: 20px
-    right: 20px
-    left: 20px
+    bottom: var(--space-5)
+    right: var(--space-5)
+    left: var(--space-5)
     z-index: 710
     display: flex
     flex-direction: column
     align-items: flex-end
-    gap: 10px
+    gap: var(--space-2)
     pointer-events: none
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        left: 12px
-        right: 12px
-        bottom: 12px
+        left: var(--space-3)
+        right: var(--space-3)
+        bottom: var(--space-3)
 
 .entry
     width: 100%
     max-width: 420px
     pointer-events: auto
-    animation: snackbar-in 0.2s ease-out
-    transition: opacity 0.2s ease-in, transform 0.2s ease-in
+    box-shadow: var(--shadow-lg)
+    border-radius: var(--message-radius)
+    animation: snackbar-in var(--duration-base) var(--ease)
+    transition: opacity var(--duration-base) var(--ease), transform var(--duration-base) var(--ease)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         max-width: 100%
 
 .closing
     opacity: 0
-    transform: translateY(8px)
+    transform: translateY(var(--space-2))
 
 .entryContent
     display: flex
     align-items: flex-start
     justify-content: space-between
-    gap: 10px
+    gap: var(--space-2)
+
+    // Close button: a 44px touch target without growing the toast
+    > button
+        flex-shrink: 0
+        margin: calc(var(--space-2) * -1) calc(var(--space-2) * -1) calc(var(--space-2) * -1) 0
 
 @keyframes snackbar-in
     from
         opacity: 0
-        transform: translateY(8px)
+        transform: translateY(var(--space-2))
     to
         opacity: 1
         transform: translateY(0)

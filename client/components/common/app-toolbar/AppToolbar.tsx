@@ -32,7 +32,6 @@ export const AppToolbar = forwardRef<HTMLDivElement, AppToolbarProps>(
                     ref={ref}
                 >
                     <div className={styles.toolbarTitle}>
-                        <h1>{title}</h1>
                         {(links || currentPage) && (
                             <Breadcrumbs
                                 links={links}
@@ -40,6 +39,7 @@ export const AppToolbar = forwardRef<HTMLDivElement, AppToolbarProps>(
                                 homePageTitle={t('common.look-at-the-stars', 'Смотри на звёзды')}
                             />
                         )}
+                        <h1>{title}</h1>
                         {afterBreadcrumbs && <div className={styles.toolbarMeta}>{afterBreadcrumbs}</div>}
                     </div>
                     {children && <div className={styles.toolbarActions}>{children}</div>}

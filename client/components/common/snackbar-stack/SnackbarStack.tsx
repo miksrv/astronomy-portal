@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Button, cn, Message } from 'simple-react-ui-kit'
 
+import { useTranslation } from 'next-i18next/pages'
+
 import { useAppDispatch, useAppSelector } from '@/api'
 import { dismissSnackbar, SnackbarItem, SnackbarType } from '@/api/applicationSlice'
 
@@ -18,6 +20,7 @@ const DEFAULT_DURATION: Record<SnackbarType, number> = {
 const CLOSE_TRANSITION_MS = 200
 
 const SnackbarEntry: React.FC<{ item: SnackbarItem }> = ({ item }) => {
+    const { t } = useTranslation()
     const dispatch = useAppDispatch()
     const [closing, setClosing] = useState(false)
 
@@ -46,7 +49,7 @@ const SnackbarEntry: React.FC<{ item: SnackbarItem }> = ({ item }) => {
                         type={'button'}
                         mode={'link'}
                         icon={'Close'}
-                        aria-label={'Закрыть уведомление'}
+                        aria-label={t('components.common.snackbar-stack.close', 'Закрыть уведомление')}
                         onClick={() => setClosing(true)}
                     />
                 </div>
@@ -62,6 +65,7 @@ const SnackbarEntry: React.FC<{ item: SnackbarItem }> = ({ item }) => {
  * visible regardless of scroll position.
  */
 export const SnackbarStack: React.FC = () => {
+    const { t } = useTranslation()
     const snackbars = useAppSelector((store) => store.application.snackbars)
 
     if (!snackbars.length) {
@@ -73,7 +77,7 @@ export const SnackbarStack: React.FC = () => {
             className={styles.stack}
             role={'region'}
             aria-live={'polite'}
-            aria-label={'Уведомления'}
+            aria-label={t('components.common.snackbar-stack.label', 'Уведомления')}
         >
             {snackbars.map((item: SnackbarItem) => (
                 <SnackbarEntry

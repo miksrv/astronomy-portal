@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { Container } from 'simple-react-ui-kit'
 
 import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
@@ -12,6 +11,8 @@ import photoSidewalk2 from '@/public/photos/sidewalk-asrtronomy-2.jpeg'
 import photoSidewalk3 from '@/public/photos/sidewalk-asrtronomy-3.jpeg'
 import photoSidewalk4 from '@/public/photos/sidewalk-asrtronomy-4.jpeg'
 import { initSSRLocale } from '@/utils/ssrLocale'
+
+import styles from './styles.module.sass'
 
 const gallerySidewalk = [photoSidewalk1, photoSidewalk2, photoSidewalk3, photoSidewalk4]
 
@@ -80,15 +81,15 @@ const StargazingWherePage: NextPage<object> = () => {
                 }
             ]}
         >
-            <div>
+            <p className={styles.lead}>
                 {tPage(
                     'intro',
                     'Тротуарная астрономия - это уникальный формат, благодаря которому космос становится ближе. Весной, летом и осенью мы выставляем телескопы прямо на тротуарах и площадях Оренбурга, чтобы любой желающий мог подойти и бесплатно взглянуть на звёзды, планеты и Луну. Это отличная возможность для жителей города познакомиться с астрономией в непринужденной и дружественной атмосфере.'
                 )}
-            </div>
+            </p>
 
-            <Container>
-                <p style={{ marginTop: 0 }}>
+            <div className={styles.prose}>
+                <p>
                     {tPage('announcement-1', 'Анонсы вечеров тротуарной астрономии мы почти всегда публикуем в нашем')}
                     <Link
                         style={{ margin: '0 5px' }}
@@ -110,11 +111,11 @@ const StargazingWherePage: NextPage<object> = () => {
                         handlePhotoClick(index)
                     }}
                 />
-            </Container>
+            </div>
 
             <h2>{tPage('what-you-can-see-title', 'Что можно увидеть в телескоп из города?')}</h2>
 
-            <Container>
+            <div className={styles.prose}>
                 <p>
                     {tPage(
                         'what-you-can-see-description',
@@ -134,17 +135,17 @@ const StargazingWherePage: NextPage<object> = () => {
                         {tPage('what-you-can-see-4', 'Парады планет, если они происходят в подходящее время года.')}
                     </li>
                 </ul>
-                <p style={{ marginBottom: 0 }}>
+                <p>
                     {tPage(
                         'what-you-can-see-conclusion',
                         'Однако городское освещение ограничивает наши возможности. Туманности, галактики, метеорные потоки и даже крупные звёздные скопления часто остаются скрытыми от взгляда.'
                     )}
                 </p>
-            </Container>
+            </div>
 
             <h2>{tPage('want-to-see-more', 'Хотите увидеть больше? Выезжайте за город!')}</h2>
 
-            <Container>
+            <div className={styles.prose}>
                 <p>
                     {tPage(
                         'want-to-see-description-1',
@@ -157,8 +158,8 @@ const StargazingWherePage: NextPage<object> = () => {
                         'Мы регулярно организуем выездные астрономические мероприятия, где можно насладиться полной палитрой космических объектов. Следите за анонсами на нашей странице «Астровыезды» или в Telegram-канале, чтобы присоединиться к одному из таких наблюдений.'
                     )}
                 </p>
-                <p style={{ marginBottom: 0 }}>{tPage('want-to-see-description-3', 'Пусть звёзды станут ближе!')}</p>
-            </Container>
+                <p>{tPage('want-to-see-description-3', 'Пусть звёзды станут ближе!')}</p>
+            </div>
 
             <PhotoLightbox
                 photos={gallerySidewalk.map((image) => ({

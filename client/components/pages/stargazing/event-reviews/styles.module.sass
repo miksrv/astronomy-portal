@@ -1,27 +1,26 @@
 @use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
 
 .formWrapper
-    margin-bottom: 20px
+    margin-bottom: var(--space-5)
 
 .infoBlock
-    margin: 0 0 15px
+    margin: 0 0 var(--space-4)
     text-align: center
 
 .infoTitle
-    margin: 0 0 4px
-    font-size: var(--font-size)
-    font-weight: 500
-    color: var(--text-color-primary)
+    +type.body
+    margin: 0 0 var(--space-1)
+    font-weight: var(--font-weight-medium)
 
 .infoText
+    +type.caption
     margin: 0
-    font-size: var(--font-size-small)
-    color: var(--text-color-secondary)
 
 .divider
-    margin: 0 0 20px
+    margin: 0 0 var(--space-5)
     border: none
-    border-top: 1px solid var(--input-border-color)
+    border-top: 1px solid var(--border)
 
 .list
     list-style: none
@@ -29,7 +28,7 @@
     padding: 0
     display: flex
     flex-direction: column
-    gap: 10px
+    gap: var(--space-3)
 
     li
         &:last-child
@@ -39,87 +38,92 @@
                 padding-bottom: 0
                 border-bottom: 0
 
+// Empty state: one line on the page background, not an empty card
 .empty
-    font-size: var(--font-size)
-    color: var(--text-color-secondary)
-    text-align: center
-    margin: 20px
+    +type.secondary
+    margin: 0
 
 .loadMoreSentinel
-    margin-top: 10px
+    margin-top: var(--space-3)
 
 .skeletonCard
     display: flex
     flex-direction: column
-    gap: 8px
-    padding-bottom: 10px
-    margin-bottom: 8px
-    border-bottom: 1px solid var(--input-border-color)
+    gap: var(--space-2)
+    padding-bottom: var(--space-3)
+    margin-bottom: var(--space-2)
+    border-bottom: 1px solid var(--border)
 
 .skeletonHeader
     display: flex
     align-items: center
-    gap: 8px
+    gap: var(--space-2)
 
 .skeletonMeta
     display: flex
     flex-direction: column
-    gap: 6px
+    gap: var(--space-1)
     flex: 1
     min-width: 0
 
+// Pinned to the bottom of the viewport; `bottom` is set inline so the panel
+// can stack above the cookie banner
 .floatingPrompt
     position: fixed
-    bottom: 0 !important
-    left: 16px
-    right: 16px
-    z-index: 690
+    left: var(--space-4)
+    right: var(--space-4)
+    z-index: var(--z-overlay)
     max-width: var(--width-max)
     margin: 0 auto
-    padding: 18px 18px 16px
-    background-color: var(--container-background-color)
-    box-shadow: var(--container-shadow), 0 -4px 16px rgba(0, 0, 0, 0.16)
-    border-radius: var(--border-radius) var(--border-radius) 0 0
-    transition: bottom 0.2s ease
+    padding: var(--space-5) var(--space-4) var(--space-4)
+    background-color: var(--surface-1)
+    box-shadow: 0 0 0 1px var(--border), var(--shadow-lg)
+    border-radius: var(--radius-xl)
+    transition: bottom var(--duration-base) var(--ease)
 
-    // On desktop, match the content column's max width, inset by 8px on
-    // each side (rather than the mobile 16px)
+    // Desktop: match the content column, inset by 8px
     @media only screen and (min-width: (variables.$mobileMaxWidth + 1))
-        left: 8px
-        right: 8px
+        left: var(--space-2)
+        right: var(--space-2)
         max-width: calc(var(--width-max) - 16px)
+
+    @media (prefers-reduced-motion: reduce)
+        transition: none
 
 .floatingClose
     position: absolute
-    top: 8px
-    right: 8px
+    top: var(--space-1)
+    right: var(--space-1)
     display: flex
     align-items: center
     justify-content: center
-    width: 28px
-    height: 28px
-    border-radius: var(--border-radius)
-    color: var(--color-contrast)
+    width: 36px
+    height: 36px
+    border-radius: var(--radius-md)
+    color: var(--text-color-secondary)
+
+    @media (pointer: coarse)
+        width: 44px
+        height: 44px
 
     svg
-        fill: var(--color-contrast)
+        fill: currentColor
 
     &:hover
-        background-color: var(--button-default-background-hover)
+        background-color: var(--surface-2)
+        color: var(--text-color-primary)
 
 .floatingTitle
-    margin: 0 0 12px
-    padding-right: 28px
-    font-size: var(--font-size)
-    font-weight: 500
-    color: var(--text-color-primary)
+    +type.titleBlock
+    margin: 0 0 var(--space-3)
+    padding-right: 36px
 
 .floatingThanks
     display: flex
     flex-direction: column
     align-items: center
-    gap: 8px
-    padding: 8px 0
+    gap: var(--space-2)
+    padding: var(--space-2) 0
     text-align: center
 
 .floatingThanksIcon
@@ -128,7 +132,5 @@
     fill: var(--color-green)
 
 .floatingThanksText
+    +type.titleBlock
     margin: 0
-    font-size: var(--font-size)
-    font-weight: 500
-    color: var(--text-color-primary)

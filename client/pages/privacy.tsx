@@ -1,5 +1,4 @@
 import React from 'react'
-import { Container } from 'simple-react-ui-kit'
 
 import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
@@ -8,6 +7,8 @@ import { useTranslation } from 'next-i18next/pages'
 import { SITE_LINK, wrapper } from '@/api'
 import { StaticInfoPageLayout } from '@/components/common'
 import { initSSRLocale } from '@/utils/ssrLocale'
+
+import styles from './privacy.module.sass'
 
 const PrivacyPolicyPage: NextPage<object> = () => {
     const { t } = useTranslation()
@@ -42,8 +43,8 @@ const PrivacyPolicyPage: NextPage<object> = () => {
             description={description}
             jsonLd={{ scriptKey: 'privacy-webpage', data: webPageSchema }}
         >
-            <Container>
-                <p style={{ marginTop: 0 }}>
+            <div className={styles.prose}>
+                <p>
                     {t(
                         'pages.privacy.intro',
                         'Настоящая Политика конфиденциальности (далее — «Политика») определяет порядок обработки и защиты персональных данных пользователей сайта проекта «Смотри на звёзды» (далее — «Сайт»), которые может получить Оператор персональных данных — Оренбург-Медиа (сетевое издание «Оренбург Медиа», далее — «Оператор»; юридический адрес: 460021, г. Оренбург, проспект Победы, д. 11, офис 402; контактный адрес: orenburgmedia@yandex.ru) — во время использования Сайта. Политика подготовлена в соответствии с Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных».'
@@ -271,13 +272,12 @@ const PrivacyPolicyPage: NextPage<object> = () => {
                 </p>
 
                 <h2>{t('pages.privacy.contacts-title', '14. Контакты')}</h2>
-                <p style={{ marginBottom: 0 }}>
+                <p>
                     {t(
                         'pages.privacy.contacts-text',
                         'По всем вопросам, связанным с обработкой персональных данных, вы можете связаться с Оператором (Оренбург-Медиа) по адресу: orenburgmedia@yandex.ru или по телефону +7 961 909 5656. Юридический адрес: 460021, г. Оренбург, проспект Победы, д. 11, офис 402.'
-                    )}
+                    )}{' '}
                     <Link
-                        style={{ marginLeft: '5px' }}
                         href={'https://t.me/look_at_stars'}
                         title={t('common.telegram', 'Телеграм')}
                         rel={'noindex nofollow'}
@@ -286,7 +286,7 @@ const PrivacyPolicyPage: NextPage<object> = () => {
                         {t('pages.privacy.telegram', 'Телеграм проекта')}
                     </Link>
                 </p>
-            </Container>
+            </div>
         </StaticInfoPageLayout>
     )
 }

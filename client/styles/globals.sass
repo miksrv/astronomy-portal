@@ -1,5 +1,5 @@
 @use 'variables' as variables
-@import theme.css
+@use 'typography' as type
 
 *, ::before, ::after
     box-sizing: border-box
@@ -8,6 +8,8 @@ html, body
     margin: 0
 
 html
+    color-scheme: dark
+    -webkit-font-smoothing: antialiased
     -moz-osx-font-smoothing: grayscale
     -webkit-text-size-adjust: 100%
     scrollbar-color: rgba(255, 255, 255, 0.15) transparent
@@ -23,7 +25,7 @@ html
 
     ::-webkit-scrollbar-thumb
         background-color: rgba(255, 255, 255, 0.15)
-        border-radius: 4px
+        border-radius: var(--radius-sm)
         border: 2px solid transparent
         background-clip: content-box
 
@@ -36,53 +38,16 @@ html
     ::-webkit-scrollbar-corner
         background: transparent
 
-h2
-    font-size: 16px
-    line-height: 16px
-    font-weight: 400
-    display: flex
-    align-items: center
-    gap: 12px
-    margin: 5px 0 0 0
-
-// Centered heading without the trailing divider line - for standalone/empty-state
-// headings that aren't a section title (e.g. an empty-state message).
-.centeredHeading
-    display: block
-    text-align: center
-
-    &::after
-        display: none
-
-dialog h2
-    border-left: none
-    padding-left: 0
-
-    &::after
-        display: none
-
-h3
-    margin: 0
-    font-size: var(--font-size)
-
 body
-    background-color: var(--body-background)
-    margin: 0
-    line-height: 1.65
-    font-size: var(--font-size)
-    letter-spacing: var(--letter-spacing)
-    font-family: var(--font-family), sans-serif
+    background: var(--body-background)
     color: var(--text-color-primary)
-    transition: background-color 0.5s ease
-
-    h1
-        font-size: 18px
-        font-weight: 600
-        margin: 0
+    font: var(--font-size) / var(--line-height) var(--font-family)
+    letter-spacing: var(--letter-spacing)
 
     a
         text-decoration: none
         color: var(--link-color)
+        transition: color var(--duration-fast) var(--ease)
 
         &:hover
             color: var(--link-color-hover)
@@ -90,33 +55,83 @@ body
         &:active
             color: var(--link-color-active)
 
+    // Keyboard focus for every link and custom control; the kit draws its own
+    // on its components
+    a:focus-visible,
+    [role='button']:focus-visible,
+    summary:focus-visible
+        outline: var(--focus-outline)
+        outline-offset: 2px
+        border-radius: var(--radius-xs)
+
+h1
+    +type.titlePage
+    margin: 0
+
+// Section heading of a page: the parts of one page are separated by air,
+// not boxes (DESIGN.md → Sections)
+h2
+    +type.titleSection
+    margin: var(--space-8) 0 var(--space-3)
+
+// The blocks of <main> are spaced by its gap (--space-4). A section heading
+// placed right in <main> takes that gap off its own margins, so it sits 32px
+// under the previous block and 12px over its content, like anywhere else
+main > h2
+    margin-top: calc(var(--space-8) - var(--space-4))
+    margin-bottom: calc(var(--space-3) - var(--space-4))
+
+h3
+    +type.titleBlock
+    margin: 0
+
+// Centered heading for standalone/empty-state messages
+.centeredHeading
+    text-align: center
+
+dialog h2
+    margin: 0
+
+.visuallyHidden
+    position: absolute
+    width: 1px
+    height: 1px
+    margin: -1px
+    padding: 0
+    overflow: hidden
+    clip: rect(0 0 0 0)
+    white-space: nowrap
+    border: 0
+
 .telegram-message
-    color: var(--color-contrast)
-    border-radius: var(--border-radius)
-    background: var(--color-primary-background)
-    transition: background-color .15s ease-out,opacity .15s ease-out
-    font-weight: 600
-    padding: 10px
+    color: var(--text-color-primary)
+    border-radius: var(--radius-lg)
+    background: var(--color-main-background)
+    transition: background-color var(--duration-fast) var(--ease)
+    font-weight: var(--font-weight-semibold)
+    padding: var(--space-3)
     display: flex
     align-items: center
+    gap: var(--space-3)
     text-decoration: none
 
-    &:hover, &:active, &:focus
-        background: var(--color-primary-active)
-        color: var(--color-contrast)
+    &:hover, &:active
+        background: var(--surface-3)
+        color: var(--text-color-primary)
 
     svg
+        flex-shrink: 0
         width: 24px
         height: 24px
-        margin: 0 10px
-        fill: var(--color-contrast)
+        fill: currentColor
 
 blockquote
-    border-left: 5px solid var(--input-label-color)
+    border-left: 3px solid var(--color-main)
     margin-left: 0
-    padding: 10px 10px 10px 20px
-    background-color: var(--button-default-background-active)
-    font-style: italic
+    margin-right: 0
+    padding: var(--space-3) var(--space-4)
+    background-color: var(--surface-2)
+    border-radius: 0 var(--radius-lg) var(--radius-lg) 0
 
     p
         margin: 0
@@ -129,61 +144,80 @@ blockquote
     display: flex
     justify-content: center
     align-items: center
-    height: 100vh
+    min-height: 100vh
+    min-height: 100dvh
+    padding: var(--space-4)
+
+    // Inside AppLayout (unsubscribe) the app bar and the top gap are already taken
+    main &
+        min-height: calc(100dvh - var(--header-height) - var(--container-margin-top))
+        padding: 0
 
     .wrapper
-        width: 500px
+        width: 100%
+        max-width: 500px
         text-align: center
 
     .header
         text-align: center
-        margin-bottom: 20px
-        font-size: 20px
+        margin-bottom: var(--space-4)
 
     .loaderWrapper
-        margin: 40px auto 20px
+        margin: var(--space-8) auto var(--space-4)
         width: 100px
 
     .description
+        margin: 0
         color: var(--text-color-secondary)
 
+    // Everything under the title (text, message, the way out) is one column
+    .header ~ *:not(.loaderWrapper)
+        margin-top: var(--space-4)
+
+// 404: a deliberate, decorative page; the title is the artwork
 .errorPage
     display: flex
     flex-direction: column
     justify-content: center
     align-items: center
+    gap: var(--space-4)
     min-height: 100vh
+    min-height: 100dvh
+    padding: var(--space-10) var(--space-4)
     text-align: center
-    padding: 40px 0
 
     $background404Image: '/images/error404_background.jpg'
 
     h1
-        font-size: 80px !important
-        line-height: 80px
+        font-size: clamp(44px, 12vw, 80px)
+        line-height: 1
         font-weight: 900
+        letter-spacing: 0
         max-width: 700px
-        margin: 0 auto 70px
+        margin: 0 auto var(--space-6)
         background: url($background404Image) no-repeat 0% 50%
         background-size: 200% auto
         animation: error404BgPan 24s ease-in-out infinite alternate
         text-transform: uppercase
         -webkit-background-clip: text
+        background-clip: text
         -webkit-text-fill-color: transparent
-
-        @media only screen and (max-width: variables.$mobileMaxWidth)
-            font-size: 60px !important
-            line-height: 60px
 
         @media (prefers-reduced-motion: reduce)
             animation: none
 
     h2
+        +type.lead
         display: block
-        font-size: 36px !important
+        margin: 0
 
         &::after
             display: none
+
+    p
+        +type.secondary
+        margin: 0
+        white-space: pre-line
 
 @keyframes error404BgPan
     0%
@@ -193,7 +227,7 @@ blockquote
         background-position: 100% 50%
 
 .notFoundContainer
-    padding: 40px
+    padding: var(--space-10)
     width: 100%
     text-align: center
 
@@ -216,37 +250,42 @@ blockquote
 // rather than relying on the base .leaflet-bar/.leaflet-control-zoom-in rules alone.
 .leaflet-control-zoom
     border: none
-    border-radius: var(--border-radius)
+    border-radius: var(--radius-md)
     overflow: hidden
-    box-shadow: none
+    box-shadow: var(--shadow-md)
 
     &.leaflet-bar
         border: none
 
+    // Solid surface: a translucent button disappears over light map tiles
     a.leaflet-control-zoom-in,
     a.leaflet-control-zoom-out
-        width: 26px
-        height: 26px
-        line-height: 26px
-        font-size: 14px
-        background-color: var(--button-secondary-background)
-        color: var(--text-color-secondary)
+        width: 32px
+        height: 32px
+        line-height: 32px
+        font-size: var(--font-size-large)
+        background-color: var(--surface-1)
+        color: var(--text-color-primary)
         border: none
         box-shadow: none
-        opacity: .8
 
         &:hover
-            background-color: var(--button-secondary-background-hover)
-            color: var(--text-color-secondary-hover)
+            background-color: var(--surface-2)
+            color: var(--text-color-primary)
 
         &:active
-            background-color: var(--button-secondary-background-active)
-            color: var(--text-color-secondary-active)
+            background-color: var(--surface-3)
 
     a.leaflet-control-zoom-in
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08)
+        border-bottom: 1px solid var(--border)
 
-// React Photo Album
-.react-photo-album
-    border-radius: var(--border-radius)
+// React Photo Album: every tile is rounded (DESIGN.md -> Photos)
+.react-photo-album--photo
+    border-radius: var(--radius-lg)
     overflow: hidden
+
+// Lightbox on the night palette
+.yarl__root
+    --yarl__color_backdrop: rgba(10, 11, 16, 0.96)
+    --yarl__color_button: rgba(255, 255, 255, 0.85)
+    --yarl__color_button_active: #fff

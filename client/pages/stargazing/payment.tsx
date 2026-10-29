@@ -14,6 +14,8 @@ import { useEventBookingSubmit } from '@/components/pages/stargazing/event-upcom
 import { STARGAZING_RETRY_STORAGE_KEY } from '@/utils/constants'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
+import styles from './styles.module.sass'
+
 const POLL_INTERVAL_MS = 3000
 const MAX_POLL_ATTEMPTS = 5
 
@@ -235,14 +237,14 @@ const StargazingPaymentPage: NextPage<object> = () => {
                                         )}
                                     </p>
                                 </Message>
-                                <br />
-                                <Button
-                                    stretched={true}
-                                    mode={'secondary'}
-                                    onClick={() => router.push('/stargazing')}
-                                >
-                                    {t('pages.payment.back-to-stargazing', 'Вернуться к астровыездам')}
-                                </Button>
+                                <div className={styles.paymentActions}>
+                                    <Button
+                                        mode={'secondary'}
+                                        onClick={() => router.push('/stargazing')}
+                                    >
+                                        {t('pages.payment.back-to-stargazing', 'Вернуться к астровыездам')}
+                                    </Button>
+                                </div>
                             </>
                         )}
 
@@ -283,11 +285,17 @@ const StargazingPaymentPage: NextPage<object> = () => {
                                     </Message>
                                 )}
 
-                                <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                                <div className={styles.paymentActions}>
+                                    <Button
+                                        mode={'outline'}
+                                        onClick={() => router.push('/stargazing')}
+                                    >
+                                        {t('pages.payment.back-to-stargazing', 'Вернуться к астровыездам')}
+                                    </Button>
+
                                     {canRetry && (
                                         <Button
                                             mode={'primary'}
-                                            variant={'positive'}
                                             loading={isRetrying}
                                             disabled={isRetrying}
                                             onClick={handleRetry}
@@ -295,13 +303,6 @@ const StargazingPaymentPage: NextPage<object> = () => {
                                             {t('pages.payment.retry', 'Попробовать снова')}
                                         </Button>
                                     )}
-
-                                    <Button
-                                        mode={'secondary'}
-                                        onClick={() => router.push('/stargazing')}
-                                    >
-                                        {t('pages.payment.back-to-stargazing', 'Вернуться к астровыездам')}
-                                    </Button>
                                 </div>
                             </>
                         )}

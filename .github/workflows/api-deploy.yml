@@ -76,17 +76,28 @@ jobs:
       - name: Enable maintenance mode
         run: ssh vps "mkdir -p /var/www/astro.miksoft.pro/.deploy-lock && touch /var/www/astro.miksoft.pro/.deploy-lock/api.lock"
 
+      # One lftp session (credentials from ~/.netrc above): each separate
+      # `lftp -e` call re-connected and re-negotiated TLS, and `rm -r` deleted
+      # app/ and vendor/ file by file before re-uploading everything.
+      # `mirror --delete` keeps app/ and vendor/ in sync instead - files removed
+      # from the repository are removed from the hosting too, with no window
+      # where the code is missing. public/ and writable/ are never deleted
+      # from: they hold user uploads and content.
       - name: Upload Folder
         run: |
-          lftp -e "rm -r app" ${{ secrets.FTP_HOSTNAME }}
-          lftp -e "rm -r vendor" ${{ secrets.FTP_HOSTNAME }}
-          lftp -e "put -O / .htaccess" ${{ secrets.FTP_HOSTNAME }} || true
-          lftp -e "put -O / spark" ${{ secrets.FTP_HOSTNAME }} || true
-          lftp -e "put -O / env" ${{ secrets.FTP_HOSTNAME }} || true
-          lftp -e "mirror --parallel=100 -R app" ${{ secrets.FTP_HOSTNAME }}
-          lftp -e "mirror --parallel=100 -R vendor" ${{ secrets.FTP_HOSTNAME }}
-          lftp -e "mirror --parallel=100 -R public" ${{ secrets.FTP_HOSTNAME }}
-          lftp -e "mirror --parallel=100 -R writable" ${{ secrets.FTP_HOSTNAME }}
+          lftp ${{ secrets.FTP_HOSTNAME }} <<'EOF'
+          set cmd:fail-exit yes
+          set net:max-retries 3
+          set net:timeout 30
+          put -O / .htaccess
+          put -O / spark
+          put -O / env
+          mirror -R --delete --parallel=10 app
+          mirror -R --delete --parallel=10 vendor
+          mirror -R --parallel=10 public
+          mirror -R --parallel=10 writable
+          bye
+          EOF
         working-directory: server
 
       # Runs even if a previous step failed, so a broken deploy never leaves

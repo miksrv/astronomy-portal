@@ -18,7 +18,7 @@ interface UserAvatarProps {
 export const UserAvatar: React.FC<UserAvatarProps> = ({ src, name, size = 'medium', className }) => {
     const [imgError, setImgError] = useState(false)
 
-    const px = size === 'small' ? 28 : size === 'large' ? 128 : 32
+    const px = size === 'small' ? 24 : size === 'large' ? 128 : 32
     const sizeClass = size === 'small' ? styles.small : size === 'large' ? styles.large : styles.medium
     const rootClass = [styles.root, sizeClass, className].filter(Boolean).join(' ')
 
@@ -39,6 +39,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({ src, name, size = 'mediu
         return (
             <div
                 className={[styles.initials, sizeClass, className].filter(Boolean).join(' ')}
+                role={'img'}
                 aria-label={name}
             >
                 {getInitials(name)}

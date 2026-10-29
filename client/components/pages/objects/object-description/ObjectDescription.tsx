@@ -1,6 +1,5 @@
 import React from 'react'
 import Markdown from 'react-markdown'
-import { Container } from 'simple-react-ui-kit'
 
 import { ShowMore } from '@/components/ui'
 
@@ -11,7 +10,7 @@ interface ObjectDescriptionProps {
 }
 
 export const ObjectDescription: React.FC<ObjectDescriptionProps> = ({ text }) => (
-    <Container className={styles.objectDescription}>
+    <section className={styles.objectDescription}>
         <ShowMore content={<Markdown>{text}</Markdown>} />
-    </Container>
+    </section>
 )

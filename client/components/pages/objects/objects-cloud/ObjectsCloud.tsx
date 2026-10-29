@@ -1,7 +1,7 @@
 import React from 'react'
-import { Container } from 'simple-react-ui-kit'
 
 import Link from 'next/link'
+import { useTranslation } from 'next-i18next/pages'
 
 import { formatObjectName } from '@/utils/strings'
 
@@ -12,21 +12,28 @@ interface ObjectsCloudProps {
     objectNamesList?: string[]
 }
 
-export const ObjectsCloud: React.FC<ObjectsCloudProps> = ({ selectedObject, objectNamesList }) => (
-    <Container className={styles.objectsCloud}>
-        <ul className={styles.objectsList}>
-            {objectNamesList?.map((item) => (
-                <li key={item}>
-                    <Link
-                        href={`/objects/${item}`}
-                        className={selectedObject === item ? styles.active : undefined}
-                        title={''}
-                    >
-                        {formatObjectName(item)}
-                    </Link>
-                    <span className={styles.divider}>{'•'}</span>
-                </li>
-            ))}
-        </ul>
-    </Container>
-)
+export const ObjectsCloud: React.FC<ObjectsCloudProps> = ({ selectedObject, objectNamesList }) => {
+    const { t } = useTranslation()
+
+    return (
+        <nav
+            className={styles.objectsCloud}
+            aria-label={t('menu.objects', 'Объекты')}
+        >
+            <ul className={styles.objectsList}>
+                {objectNamesList?.map((item) => (
+                    <li key={item}>
+                        <Link
+                            href={`/objects/${item}`}
+                            className={selectedObject === item ? styles.active : undefined}
+                            title={''}
+                        >
+                            {formatObjectName(item)}
+                        </Link>
+                        <span className={styles.divider}>{'•'}</span>
+                    </li>
+                ))}
+            </ul>
+        </nav>
+    )
+}

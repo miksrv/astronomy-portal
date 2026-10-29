@@ -13,7 +13,7 @@ final class AuthHelperTest extends CIUnitTestCase
         helper('auth');
 
         // Set test JWT secret and token TTL for generateAuthToken() tests
-        putenv('auth.token.secret=test-secret-key-for-unit-tests');
+        putenv('auth.token.secret=test-secret-key-for-unit-tests-at-least-32-bytes');
         putenv('auth.token.live=3600');
     }
 

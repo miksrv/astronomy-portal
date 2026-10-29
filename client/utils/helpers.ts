@@ -99,3 +99,7 @@ export const createPageUrl = (language?: string, path: string = ''): string =>
  * close the script tag and break out into markup.
  */
 export const toJsonLd = (data: object): string => JSON.stringify(data).replace(/</g, '\\u003c')
+
+/** The visitor asked the OS for less motion; false where matchMedia is unavailable (SSR, jsdom). */
+export const prefersReducedMotion = (): boolean =>
+    typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches

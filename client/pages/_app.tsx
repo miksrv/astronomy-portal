@@ -18,6 +18,8 @@ import i18Config from '../next-i18next.config'
 import 'dayjs/locale/ru'
 
 import 'leaflet/dist/leaflet.css'
+import 'simple-react-ui-kit/theme.css'
+import 'simple-react-ui-kit/styles.css'
 import '@/styles/theme.css'
 import '@/styles/globals.sass'
 
@@ -83,8 +85,7 @@ const App = ({ Component, pageProps }: AppProps) => {
                 />
                 <meta
                     name={'theme-color'}
-                    content={'#1b1b1b'}
-                    media={'(prefers-color-scheme: dark)'}
+                    content={'#111318'}
                 />
                 <link
                     rel={'apple-touch-icon'}
@@ -119,8 +120,12 @@ const App = ({ Component, pageProps }: AppProps) => {
                             '@context': 'https://schema.org',
                             '@type': 'Organization',
                             name: 'Смотри на звёзды',
+                            alternateName: ['Смотри на звезды', 'смотриназвёзды.рф', 'Look at the Stars'],
+                            description:
+                                'Астровыезды с телескопами, любительская обсерватория и астрофотография в Оренбурге',
                             url: SITE_LINK?.replace(/\/$/, ''),
-                            logo: `${SITE_LINK}android-chrome-192x192.png`,
+                            logo: `${SITE_LINK}android-chrome-512x512.png`,
+                            areaServed: { '@type': 'City', name: 'Оренбург' },
                             sameAs: ['https://t.me/look_at_stars']
                         })
                     }}

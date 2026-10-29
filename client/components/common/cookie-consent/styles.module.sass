@@ -1,39 +1,49 @@
 @use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
 
+// A compact card floating in the bottom-left corner instead of a full-width
+// bar: the page stays readable around it. On phones it spans the width with
+// the action under the text.
 .cookieConsent
     position: fixed
-    left: 0
-    right: 0
-    bottom: 0
-    z-index: 700
+    left: var(--space-4)
+    bottom: var(--space-4)
+    // Below the scrim and the sidebar (z-overlay), so the open menu is never covered
+    z-index: var(--z-dropdown)
     display: flex
     align-items: center
-    justify-content: center
-    gap: 16px
-    padding: 14px 24px
-    background-color: var(--container-background-color)
-    box-shadow: var(--container-shadow), 0 -4px 16px rgba(0, 0, 0, 0.16)
-    color: var(--text-color-secondary)
-    font-size: var(--font-size-small)
+    gap: var(--space-4)
+    width: calc(100% - var(--space-8))
+    max-width: 560px
+    padding: var(--space-3) var(--space-4)
+    background-color: var(--surface-1)
+    border-radius: var(--radius-xl)
+    box-shadow: 0 0 0 1px var(--border), var(--shadow-lg)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
+        left: var(--space-3)
+        bottom: var(--space-3)
+        width: calc(100% - var(--space-6))
         flex-direction: column
-        gap: 12px
-        padding: 12px 16px
-        text-align: center
+        align-items: stretch
+        gap: var(--space-3)
 
     .text
+        +type.caption
         margin: 0
-        max-width: var(--width-max)
 
     .link
-        margin-left: 5px
-        color: var(--text-color-secondary)
+        margin-left: var(--space-1)
+        color: var(--text-color-primary)
         text-decoration: underline
+        text-underline-offset: 2px
 
         &:hover
-            color: var(--text-color-primary)
+            color: var(--color-main-hover)
 
     .button
         flex-shrink: 0
         white-space: nowrap
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            min-height: var(--size-large)

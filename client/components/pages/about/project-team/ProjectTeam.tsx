@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import Image, { StaticImageData } from 'next/image'
 import { useTranslation } from 'next-i18next/pages'
@@ -11,6 +11,7 @@ import photoSergey from '@/public/photos/team-Sergey.jpg'
 import photoTanya from '@/public/photos/team-Tanya.jpg'
 import photoVladimir from '@/public/photos/team-Vladimir.jpg'
 import photoZhenya from '@/public/photos/team-Zhenya.jpg'
+import { prefersReducedMotion } from '@/utils/helpers'
 
 import styles from './styles.module.sass'
 
@@ -21,6 +22,13 @@ type TeamMemberType = {
 
 export const ProjectTeam: React.FC = () => {
     const { t } = useTranslation()
+
+    // The slow auto-scroll is motion: off for visitors who ask for less of it
+    const [autoScroll, setAutoScroll] = useState<boolean>(false)
+
+    useEffect(() => {
+        setAutoScroll(!prefersReducedMotion())
+    }, [])
 
     const teamList: TeamMemberType[] = [
         {
@@ -56,14 +64,14 @@ export const ProjectTeam: React.FC = () => {
     return (
         <Carousel
             options={{ dragFree: true, loop: true }}
-            autoScroll={true}
+            autoScroll={autoScroll}
+            slideSize={'190px'}
             className={styles.carousel}
         >
             {teamList?.map((item) => (
                 <div
                     key={item.name}
                     className={styles.item}
-                    role={'listitem'}
                 >
                     <Image
                         className={styles.photo}

@@ -147,14 +147,14 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
             title={tPage('title', 'Обсерватория в Оренбурге')}
             description={tPage(
                 'description',
-                'Самодельная астрономическая обсерватория расположена в пригороде Оренбурга, всего в 15 км от города. Благодаря своему удалению от городской застройки, обсерватория находится в зоне с уровнем светового загрязнения 5 класса по шкале Бортля, что делает её не плохим местом в пригорде для наблюдений за ночным небом.'
+                'Самодельная астрономическая обсерватория расположена в пригороде Оренбурга, всего в 15 км от города. Благодаря своему удалению от городской застройки, обсерватория находится в зоне с уровнем светового загрязнения 5 класса по шкале Бортля, что делает её неплохим местом в пригороде для наблюдений за ночным небом.'
             )}
             openGraph={{
                 images: [
                     {
-                        height: 854,
-                        url: '/screenshots/observatory.jpg',
-                        width: 1280
+                        height: 1024,
+                        url: '/images/index-observatory.png',
+                        width: 1536
                     }
                 ]
             }}
@@ -174,13 +174,15 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                 ]}
             />
 
-            {tPage(
-                'description',
-                'Самодельная астрономическая обсерватория расположена в пригороде Оренбурга, всего в 15 км от города. Благодаря своему удалению от городской застройки, обсерватория находится в зоне с уровнем светового загрязнения 5 класса по шкале Бортля, что делает её не плохим местом в пригорде для наблюдений за ночным небом.'
-            )}
+            <p className={styles.lead}>
+                {tPage(
+                    'description',
+                    'Самодельная астрономическая обсерватория расположена в пригороде Оренбурга, всего в 15 км от города. Благодаря своему удалению от городской застройки, обсерватория находится в зоне с уровнем светового загрязнения 5 класса по шкале Бортля, что делает её неплохим местом в пригороде для наблюдений за ночным небом.'
+                )}
+            </p>
 
-            <Container>
-                <p style={{ marginTop: 0 }}>
+            <div className={styles.prose}>
+                <p>
                     {tPage(
                         'description-1',
                         'Основное направление деятельности обсерватории - фотографирование объектов глубокого космоса (deep-sky), таких как туманности, галактики и звёздные скопления. Оборудование и технологии, используемые в обсерватории, позволяют получать высококачественные изображения, которые могут использоваться как для научных исследований, так и для образовательных целей.'
@@ -206,28 +208,28 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                         'Обсерватория открыта для сотрудничества с астрономами-любителями, исследователями и образовательными учреждениями. Мы рады предоставить доступ к нашим данным для научных и образовательных целей. Если вы хотите стать частью нашего сообщества или использовать наши ресурсы для своих проектов, свяжитесь с нами через форму обратной связи.'
                     )}
                 </p>
-                <p style={{ marginBottom: 0 }}>
+                <p>
                     {tPage(
                         'description-4',
                         'Оренбургская обсерватория - это уникальное сочетание современных технологий и энтузиазма астрономов-любителей. Мы стремимся сделать астрономию доступной для всех, кто интересуется загадками Вселенной. Присоединяйтесь к нам, чтобы вместе исследовать бескрайние просторы космоса!'
                     )}
                 </p>
-            </Container>
+            </div>
 
             <h2>{tPage('equipment-title', 'Оборудование обсерватории')}</h2>
 
-            <Container>
-                <p style={{ marginTop: 0 }}>
+            <div className={styles.prose}>
+                <p>
                     {tPage(
                         'equipment-description',
                         'Используемые инструменты и технологии обеспечивают высокую точность наблюдений и профессиональное качество снимков. Вот основное оборудование, которое используется в работе:'
                     )}
                 </p>
-                <ul>
+                <ul className={styles.equipmentList}>
                     {equipmentList.map((item, index: number) => (
                         <li key={index}>
-                            <h3>{item.title}</h3>
-                            <div>{item.description}</div>
+                            <h3 className={styles.equipmentTitle}>{item.title}</h3>
+                            <div className={styles.equipmentDescription}>{item.description}</div>
                         </li>
                     ))}
                 </ul>
@@ -237,11 +239,11 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                         handlePhotoClick(index)
                     }}
                 />
-            </Container>
+            </div>
 
             <h2>{tPage('photos-and-data-title', 'Фотографии и данные')}</h2>
 
-            <Container>
+            <div className={styles.prose}>
                 <p>
                     <Trans
                         ns={'observatory-overview'}
@@ -265,7 +267,9 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                         }}
                     />
                 </p>
+            </div>
 
+            <Container>
                 <ObjectPhotoTable photosList={photosList} />
 
                 <div className={styles.allPhotosButtonContainer}>

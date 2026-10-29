@@ -3,16 +3,16 @@
 namespace App\Models;
 
 use App\Entities\EventMediaUploadEntity;
-use CodeIgniter\I18n\Time;
 
 /**
  * EventsMediaUploadsModel
  *
  * Manages the `events_media_uploads` table — bookkeeping for in-progress
  * chunked event-media (photo/video) uploads (FEAT-26). Not soft-deleted:
- * this is ephemeral state, not gallery content, and is either removed
- * outright by Events::mediaCancel() or swept up by the
- * media:cleanup-uploads command once it's stale (see getStaleSessions()).
+ * this is ephemeral state, not gallery content. Events::mediaFinalize()
+ * marks a row completed and removes its temp chunks; mediaCancel() deletes
+ * both. A session abandoned without a cancel (tab closed, network dropped)
+ * is left behind and cleaned up by hand on the server.
  */
 class EventsMediaUploadsModel extends ApplicationBaseModel
 {
@@ -78,29 +78,5 @@ class EventsMediaUploadsModel extends ApplicationBaseModel
             ->update(['status' => EventMediaUploadEntity::STATUS_FINALIZING]);
 
         return $this->db->affectedRows() === 1;
-    }
-
-    /**
-     * Returns every upload session stuck in an in-progress status
-     * ('uploading' or 'finalizing') whose row is older than $hours — an
-     * abandoned session (tab closed, network dropped for good) that
-     * media:cleanup-uploads should purge along with its temp chunk
-     * directory.
-     *
-     * @param int $hours Age threshold in hours. Default 24, per Business Rule 8.
-     * @return EventMediaUploadEntity[]
-     */
-    public function getStaleSessions(int $hours = 24): array
-    {
-        $cutoff = Time::now('UTC')->subHours($hours)->format('Y-m-d H:i:s');
-
-        $rows = $this->whereIn('status', [
-            EventMediaUploadEntity::STATUS_UPLOADING,
-            EventMediaUploadEntity::STATUS_FINALIZING,
-        ])
-            ->where('created_at <', $cutoff)
-            ->findAll();
-
-        return $rows ?: [];
     }
 }

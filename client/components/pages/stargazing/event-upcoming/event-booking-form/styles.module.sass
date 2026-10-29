@@ -1,61 +1,58 @@
 @use '../../../../../styles/variables' as variables
+@use '../../../../../styles/typography' as type
 
 .form
-    margin: 10px auto 0
-
-    .field
-        margin-bottom: 5px
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+    margin: var(--space-4) 0 0
 
     .identityFields
         display: grid
         grid-template-columns: 1fr 1fr
-        gap: 15px
+        gap: var(--space-4)
 
         @media only screen and (max-width: variables.$mobileMaxWidth)
             grid-template-columns: 1fr
 
     .countPeopleContainer
         display: flex
-        justify-content: space-between
-        gap: 15px
-        margin-bottom: 5px
+        gap: var(--space-4)
 
         .countPeopleField
             width: 100%
 
     .priceContainer
-        margin-top: 10px
-        padding: 10px 12px
-        border-radius: 6px
-        background-color: rgba(255, 255, 255, 0.05)
+        padding: var(--space-3)
+        border-radius: var(--radius-lg)
+        background: var(--surface-2)
         text-align: center
 
         .priceTotal
-            font-size: 15px
+            +type.body
 
         .priceNote
-            margin-top: 4px
-            font-size: 13px
-            opacity: 0.7
+            +type.caption
+            margin-top: var(--space-1)
 
+    // The one primary action of the card; a 44px touch target on phones
     .submitButton
         width: 100%
-        margin-top: 10px
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            min-height: 44px
 
     .childrenAges
         display: flex
-        justify-content: space-between
-        align-items: center
-        gap: 15px
-        margin-bottom: 5px
+        flex-direction: column
+        gap: var(--space-1)
 
         & > label
-            width: 100%
-
-        & > div
-            width: 100%
+            font-size: var(--input-label-font-size)
+            font-weight: var(--input-label-font-weight)
+            color: var(--text-color-secondary)
 
     .childrenAgesError
-        margin: 0 0 5px
-        font-size: var(--font-size-small)
+        +type.caption
+        margin: calc(var(--space-2) * -1) 0 0
         color: var(--color-red)

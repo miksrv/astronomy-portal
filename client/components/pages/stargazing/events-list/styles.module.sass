@@ -1,19 +1,18 @@
 @use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
 
 .eventsList
     display: flex
     flex-direction: column
-    gap: 10px
+    gap: var(--space-3)
 
 .eventsTimeline
     position: relative
     display: flex
     flex-direction: column
-    gap: 28px
+    gap: var(--space-8)
 
-    // Continuous line running behind every year marker and its cards —
-    // drawn once on the whole timeline rather than per-group, so it
-    // reads as one unbroken thread through the archive.
+    // One continuous line through every year marker and its cards
     &::before
         content: ''
         position: absolute
@@ -21,45 +20,43 @@
         bottom: 7px
         left: 5px
         width: 2px
-        background: var(--color-primary)
+        background: var(--color-main)
         opacity: 0.35
-        border-radius: 1px
+        border-radius: var(--radius-xs)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        gap: 20px
+        gap: var(--space-6)
 
 .yearGroup
     position: relative
     display: flex
     flex-direction: column
-    gap: 12px
+    gap: var(--space-3)
 
 .yearHeader
     position: relative
     z-index: 1
     display: flex
     align-items: center
-    gap: 12px
+    gap: var(--space-3)
 
 .yearDot
     flex-shrink: 0
     width: 12px
     height: 12px
-    border-radius: 50%
-    background: var(--color-primary)
+    border-radius: var(--radius-full)
+    background: var(--color-main)
     box-shadow: 0 0 0 4px var(--body-background)
 
 .yearLabel
-    font-size: 20px
-    font-weight: 700
+    +type.titleSection
     line-height: 1
-    color: var(--text-color-primary)
 
 .yearEvents
     display: flex
     flex-direction: column
-    gap: 10px
-    margin-left: 26px
+    gap: var(--space-3)
+    margin-left: var(--space-6)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        margin-left: 18px
+        margin-left: var(--space-5)

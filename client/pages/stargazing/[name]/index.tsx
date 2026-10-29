@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { getCookie } from 'cookies-next'
-import { Button, Container } from 'simple-react-ui-kit'
+import { Button } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import dynamic from 'next/dynamic'
@@ -224,7 +224,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                             <Button
                                 disabled={isUploadDialogOpen}
                                 icon={'Photo'}
-                                mode={'primary'}
+                                mode={'secondary'}
                                 onClick={handleUploadMediaClick}
                             >
                                 {t('pages.stargazing.upload-media-button', 'Медиа')}
@@ -234,7 +234,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                         {hasPermission(user, ApiModel.Permission.EVENTS_UPDATE) && (
                             <Button
                                 icon={'Pencil'}
-                                mode={'primary'}
+                                mode={'secondary'}
                                 label={t('common.edit', 'Редактировать')}
                                 disabled={!eventId}
                                 onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
@@ -244,7 +244,8 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                         {hasPermission(user, ApiModel.Permission.EVENTS_STATISTIC) && (
                             <Button
                                 icon={'BarChart'}
-                                mode={'primary'}
+                                mode={'secondary'}
+                                aria-label={t('components.pages.stargazing.event-upcoming.statistic', 'Статистика')}
                                 onClick={() => router.push(`/stargazing/${eventId}/statistic`)}
                             />
                         )}
@@ -257,13 +258,13 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 event={event || undefined}
             />
 
-            <h2>
+            <h2 className={styles.sectionTitle}>
                 {t('pages.stargazing.photos-from-stargazing', 'Фотографии с мероприятия')}
 
                 {hasMoreMedia && (
                     <Button
-                        unstyled
-                        className={styles.showMorePhotos}
+                        mode={'link'}
+                        disabled={isLoadingAllMedia}
                         onClick={handleShowAllMedia}
                         label={
                             isLoadingAllMedia
@@ -298,14 +299,12 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 />
             ) : (
                 !isInitialMediaLoading && (
-                    <Container>
-                        <p className={styles.noPhotos}>
-                            {t(
-                                'pages.stargazing.no-photos',
-                                'Фотографии с этого события ещё не загружены. Загляните позже!'
-                            )}
-                        </p>
-                    </Container>
+                    <p className={styles.noPhotos}>
+                        {t(
+                            'pages.stargazing.no-photos',
+                            'Фотографии с этого события ещё не загружены. Загляните позже!'
+                        )}
+                    </p>
                 )
             )}
 

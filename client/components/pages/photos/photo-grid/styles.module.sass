@@ -1,42 +1,70 @@
 @use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
 
+// Tiles on the page background (DESIGN.md → Lists of media)
 .photoGrid
-    display: flex
-    flex-wrap: wrap
-    gap: 6px
+    display: grid
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr))
+    gap: var(--space-2)
 
-    .photoItem
-        display: block
-        flex-grow: 1
-        flex-shrink: 0
-        flex-basis: 23%
-        border-radius: var(--border-radius)
-        cursor: pointer
-        color: var(--text-main)
-        height: 200px
-        position: relative
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: 1fr
 
-        @media only screen and (max-width: variables.$mobileMaxWidth)
-            flex-basis: 100%
+.empty
+    grid-column: 1 / -1
+    padding: var(--space-10) var(--space-4)
+    text-align: center
+    color: var(--text-color-secondary)
 
-        .image
-            object-fit: cover
-            width: 100%
-            border-radius: var(--border-radius)
+.photoItem
+    display: block
+    position: relative
+    aspect-ratio: 4 / 3
+    overflow: hidden
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
+    color: #fff
 
+    .image
+        object-fit: cover
+        transition: transform var(--duration-slow) var(--ease)
+
+    // Scrim + text, always white over a photo
+    .description
+        position: absolute
+        inset: auto 0 0 0
+        padding: var(--space-6) var(--space-3) var(--space-3)
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.75))
+        opacity: 0
+        transition: opacity var(--duration-base) var(--ease)
+
+        .title
+            +type.body
+            font-weight: var(--font-weight-semibold)
+            margin: 0
+
+        .info
+            +type.micro
+            display: flex
+            flex-wrap: wrap
+            gap: 0 var(--space-3)
+            opacity: 0.85
+
+    &:hover, &:focus-visible
         .description
-            position: absolute
-            padding: 1em
-            background: #1d1d1e
-            font-size: .8em
-            width: 100%
-            bottom: 0
-            opacity: 0
+            opacity: 1
 
-            h4
-                margin: 0
+    &:hover .image
+        transform: scale(1.03)
 
-        &:hover
-            .description
-                opacity: .7
-                transition: opacity 0.3s ease-in-out
+    // Touch screens have no hover: keep the caption visible
+    @media (hover: none)
+        .description
+            opacity: 1
+
+    @media (prefers-reduced-motion: reduce)
+        .image, .description
+            transition: none
+
+        &:hover .image
+            transform: none

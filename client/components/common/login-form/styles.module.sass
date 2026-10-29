@@ -1,59 +1,66 @@
+@use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
+
 .loginForm
-    padding: 20px 0
     display: flex
-    justify-content: center
-    flex-wrap: wrap
+    flex-direction: column
+    gap: var(--space-4)
+    padding: var(--space-4) 0
 
     p
-        width: 100%
-        margin: 0 0 20px
+        margin: 0
         color: var(--text-color-primary)
         text-align: center
 
     .emailRow
         display: flex
         align-items: flex-start
-        gap: 10px
+        gap: var(--space-2)
         width: 100%
 
         > div:first-child
             flex: 1
+            min-width: 0
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            flex-direction: column
+            align-items: stretch
+
+            > button
+                min-height: var(--size-large)
 
     .divider
+        +type.secondary
         display: flex
         align-items: center
-        width: 100%
-        margin: 10px 0
-        color: var(--text-color-secondary)
-        font-size: 13px
+        gap: var(--space-3)
 
         &::before,
         &::after
             content: ''
             flex: 1
             height: 1px
-            background: var(--border-color, currentColor)
-            opacity: 0.3
-
-        span
-            margin: 0 10px
+            background: var(--border)
 
     .buttons
         display: flex
-        justify-content: space-between
-        margin-top: 10px
+        justify-content: center
+        gap: var(--space-4)
 
         button
-            width: 60px
-            height: 60px
-            margin: 0 20px
+            width: 56px
+            height: 56px
+            padding: 0
             font-size: 0
 
             img
                 margin: 0
 
     .consent
-        margin: 20px 0 0
-        font-size: 12px
-        line-height: 1.4
-        color: var(--text-color-secondary)
+        +type.caption
+        text-align: center
+
+        a
+            margin-left: var(--space-1)
+            text-decoration: underline
+            text-underline-offset: 2px

@@ -124,7 +124,11 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({ entityType, entityId, on
                                             type={'button'}
                                             disabled={disabled}
                                             className={value <= activeRating ? styles.starFilled : styles.starEmpty}
-                                            aria-label={`${value} star${value !== 1 ? 's' : ''}`}
+                                            aria-label={t(
+                                                'components.common.review-form.star',
+                                                'Оценка {{value}} из 5',
+                                                { value }
+                                            )}
                                             aria-pressed={field.value === value}
                                             onClick={() => {
                                                 field.onChange(value)

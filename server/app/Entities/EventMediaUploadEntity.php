@@ -7,8 +7,8 @@ use CodeIgniter\Entity\Entity;
 /**
  * FEAT-26 — bookkeeping row for one in-progress chunked event-media upload.
  * Purely ephemeral: never displayed to a visitor, only read/written by
- * Events::mediaInit()/mediaChunk()/mediaFinalize()/mediaCancel() and the
- * media:cleanup-uploads command. See EventsMediaUploadsModel for the table.
+ * Events::mediaInit()/mediaChunk()/mediaFinalize()/mediaCancel(). See
+ * EventsMediaUploadsModel for the table.
  */
 class EventMediaUploadEntity extends Entity
 {

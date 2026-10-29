@@ -74,7 +74,7 @@ export const CancelRegistrationDialog: React.FC<CancelRegistrationDialogProps> =
             </div>
             <div className={styles.confirmationFooter}>
                 <Button
-                    mode={'secondary'}
+                    mode={'outline'}
                     onClick={onClose}
                 >
                     {t('components.pages.stargazing.event-upcoming.cancel', 'Отмена')}

@@ -282,7 +282,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                 <div className={styles.footer}>
                     <Button
                         type={'button'}
-                        mode={'secondary'}
+                        mode={'outline'}
                         label={'Отмена'}
                         disabled={isFormDisabled}
                         onClick={onCancel}
@@ -291,7 +291,6 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                     <Button
                         type={'submit'}
                         mode={'primary'}
-                        variant={'positive'}
                         label={'Сохранить'}
                         loading={isSubmitting}
                         disabled={isFormDisabled}

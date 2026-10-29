@@ -8,9 +8,12 @@ import { JsonLdScript } from 'next-seo'
 import { API, ApiModel, HOST_IMG, SITE_LINK, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable, VisibilityChart } from '@/components/common'
 import { ObjectDescription, ObjectFilesTable, ObjectHeader, ObjectsCloud } from '@/components/pages/objects'
+import { toISODateTime } from '@/utils/dates'
+import { createPageUrl } from '@/utils/helpers'
 import { hasPermission } from '@/utils/permissions'
+import { createLargePhotoUrl } from '@/utils/photos'
 import { initSSRLocale } from '@/utils/ssrLocale'
-import { removeMarkdown, sliceText } from '@/utils/strings'
+import { createSeoDescription, formatObjectName } from '@/utils/strings'
 
 interface ObjectItemPageProps {
     objectName: string
@@ -27,7 +30,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
     categoriesList,
     photosList
 }) => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     const user = useAppSelector((state) => state.auth?.user)
 
@@ -37,16 +40,55 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 
     const allObjectsNames = useMemo(() => objectsList?.map(({ name }) => name), [objectsList])
 
+    const title = objectData?.title || formatObjectName(objectName)
+    const description = createSeoDescription(objectData?.description)
+    const pageUrl = createPageUrl(i18n.language, `objects/${objectName}`)
+
+    // People find these pages by the object's name ("туманность сердце", "ngc 7331") and
+    // mostly want to see it, so the <title> promises the photos when there are any
+    const seoTitle = photosList?.length
+        ? t('pages.object.seo-title-photos', '{{title}}: фото и описание', { title })
+        : t('pages.object.seo-title', '{{title}}: описание и координаты', { title })
+
+    // The object's own astrophotos make a far better preview / rich-result image than the
+    // generated star chart in `objectData.image`, which stays the fallback
+    const images = useMemo(
+        () =>
+            photosList?.length
+                ? photosList.slice(0, 3).map((photo) => ({
+                      url: createLargePhotoUrl(photo),
+                      width: photo.imageWidth,
+                      height: photo.imageHeight,
+                      alt: title
+                  }))
+                : [
+                      {
+                          url: objectData?.image ? `${HOST_IMG}${objectData.image}` : 'images/no-photo.png',
+                          width: 487,
+                          height: 244,
+                          alt: title
+                      }
+                  ],
+        [photosList, objectData?.image, title]
+    )
+
     const articleSchema = useMemo(
         () => ({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            '@id': `${SITE_LINK}objects/${objectName}`,
-            headline: objectData?.title || objectName,
-            description: sliceText(removeMarkdown(objectData?.description), 160),
-            image: objectData?.image ? `${HOST_IMG}${objectData.image}` : undefined,
-            url: `${SITE_LINK}objects/${objectName}`,
-            dateModified: objectData?.updated?.date,
+            '@id': pageUrl,
+            mainEntityOfPage: pageUrl,
+            headline: title,
+            description,
+            image: images.map(({ url }) => (url.startsWith('http') ? url : `${SITE_LINK}${url}`)),
+            url: pageUrl,
+            inLanguage: i18n.language === 'en' ? 'en' : 'ru',
+            dateModified: toISODateTime(objectData?.updated?.date),
+            about: {
+                '@type': 'Thing',
+                name: title,
+                alternateName: formatObjectName(objectName)
+            },
             author: {
                 '@type': 'Organization',
                 name: 'Смотри на звёзды',
@@ -62,31 +104,23 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 }
             }
         }),
-        [objectData, objectName]
+        [objectData, objectName, title, description, images, pageUrl, i18n.language]
     )
 
     return (
         <AppLayout
             canonical={`objects/${objectName}`}
-            title={objectData?.title || objectName}
-            description={sliceText(removeMarkdown(objectData?.description), 160)}
-            openGraph={{
-                images: [
-                    {
-                        height: 244,
-                        url: objectData?.image ? `${HOST_IMG}${objectData?.image}` : 'images/no-photo.png',
-                        width: 487
-                    }
-                ]
-            }}
+            title={seoTitle}
+            description={description}
+            openGraph={{ type: 'article', images }}
         >
             <JsonLdScript
                 scriptKey={'object-article'}
                 data={articleSchema}
             />
             <AppToolbar
-                title={objectData?.title || objectName}
-                currentPage={objectData?.title || objectName}
+                title={title}
+                currentPage={title}
                 links={[
                     {
                         link: '/objects',
@@ -106,7 +140,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 
                         <Button
                             icon={'PlusCircle'}
-                            mode={'primary'}
+                            mode={'secondary'}
                             label={t('common.add', 'Добавить')}
                             link={'/objects/form'}
                         />

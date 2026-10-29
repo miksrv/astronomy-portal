@@ -164,6 +164,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
     return (
         <Container>
             <form
+                className={styles.form}
                 onSubmit={handleSubmit(onValidSubmit, onInvalidSubmit)}
                 noValidate={true}
             >
@@ -228,7 +229,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                             multiple={true}
                             required={true}
                             disabled={isFormDisabled}
-                            className={styles.formElement}
+                            className={styles.fullRow}
                             label={'Оборудование'}
                             notFoundCaption={'Ничего не найдено'}
                             placeholder={'Выберите астрономическое оборудование'}
@@ -268,7 +269,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                     )}
                 />
 
-                <div className={styles.addFilter}>
+                <div className={`${styles.addFilter} ${styles.fullRow}`}>
                     <Select<ApiModel.FilterTypes>
                         data-testid={'filters'}
                         label={'Параметры съемки'}
@@ -294,14 +295,18 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                     />
                 </div>
 
-                <div className={styles.filterList}>
+                <div className={`${styles.filterList} ${styles.fullRow}`}>
                     {fields.map((field, index) => (
                         <div
                             key={field.id}
                             className={styles.filterItem}
-                            style={{ backgroundColor: getFilterColor(field.filter) }}
                         >
-                            <label>{field.filter}</label>
+                            <span
+                                className={styles.filterChip}
+                                style={{ backgroundColor: getFilterColor(field.filter) }}
+                            >
+                                {field.filter}
+                            </span>
 
                             <Controller
                                 name={`filters.${index}.frames`}
@@ -312,6 +317,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                                         disabled={isFormDisabled}
                                         type={'number'}
                                         placeholder={'Количество кадров'}
+                                        aria-label={`${field.filter}: количество кадров`}
                                         value={Number.isNaN(framesField.value) ? '' : framesField.value}
                                         error={fieldState.error?.message}
                                         onChange={(e) => framesField.onChange(parseFloat(e.target.value))}
@@ -328,6 +334,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                                         disabled={isFormDisabled}
                                         type={'number'}
                                         placeholder={'Выдержка (минут)'}
+                                        aria-label={`${field.filter}: выдержка (минут)`}
                                         value={Number.isNaN(exposureField.value) ? '' : exposureField.value}
                                         error={fieldState.error?.message}
                                         onChange={(e) => exposureField.onChange(parseFloat(e.target.value))}
@@ -347,16 +354,16 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                     ))}
                 </div>
 
-                <div className={styles.imageSection}>
-                    {!!initialData?.fileName && (
+                {!!initialData?.fileName && (
+                    <div className={`${styles.imageSection} ${styles.fullRow}`}>
                         <Image
                             className={styles.image}
                             src={createLargePhotoUrl(initialData as ApiModel.Photo)}
                             fill={true}
                             alt={''}
                         />
-                    )}
-                </div>
+                    </div>
+                )}
 
                 <Controller
                     name={'upload'}
@@ -365,7 +372,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                         // Native file inputs can't be value-controlled (setting `value` on
                         // one to anything but '' throws), so `value` is intentionally
                         // dropped from the spread and the input stays uncontrolled.
-                        <div style={{ marginTop: 15 }}>
+                        <div className={styles.fullRow}>
                             <label
                                 htmlFor={'astroPhotoUpload'}
                                 className={styles.formLabel}
@@ -378,6 +385,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                                 onChange={(e) => onChange(e.target.files?.[0])}
                                 type={'file'}
                                 disabled={isFormDisabled}
+                                className={styles.fileInput}
                                 accept={'image/png, image/gif, image/jpeg'}
                             />
                         </div>
@@ -387,7 +395,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                 <div className={styles.footer}>
                     <Button
                         type={'button'}
-                        mode={'secondary'}
+                        mode={'outline'}
                         label={'Отмена'}
                         disabled={isFormDisabled}
                         onClick={onCancel}
@@ -396,7 +404,6 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                     <Button
                         type={'submit'}
                         mode={'primary'}
-                        variant={'positive'}
                         label={'Сохранить'}
                         loading={isSubmitting}
                         disabled={isFormDisabled}
@@ -410,7 +417,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
 const EquipmentPresets: React.FC<{
     onSelect: (equipments: number[]) => void
 }> = ({ onSelect }) => (
-    <div className={styles.presets}>
+    <div className={`${styles.presets} ${styles.fullRow}`}>
         {equipmentPresets.map((preset) => (
             <Button
                 key={preset.name}

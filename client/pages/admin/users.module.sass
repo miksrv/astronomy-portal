@@ -1,7 +1,12 @@
 @use '../../styles/variables' as variables
 
+// The table is the card; the footer (count + pagination) is a second thin one under it
+.tableContainer
+    padding: 0
+    overflow: hidden
+
 .usersTable
-    border-radius: var(--border-radius) var(--border-radius) 0 0
+    border-radius: 0
 
 .selectFilter
     min-width: 200px
@@ -14,17 +19,16 @@
     justify-content: space-between
     align-items: center
     flex-wrap: wrap
-    gap: 10px
-    padding: 2px 10px 2px 20px !important
-
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        justify-content: space-between
+    gap: var(--space-3)
+    margin-top: var(--space-2)
+    padding: var(--space-2) var(--space-4)
 
 .footerCount
     display: flex
     align-items: center
-    gap: 8px
+    gap: var(--space-2)
     white-space: nowrap
+    color: var(--text-color-secondary)
 
     .loader
         width: 18px
@@ -33,56 +37,40 @@
 .userCell
     display: flex
     align-items: center
-    gap: 8px
+    gap: var(--space-2)
 
-.eventsCountButton
-    background: none
-    border: none
-    padding: 0
-    cursor: pointer
-    color: var(--link-color)
-    font-size: inherit
-    text-decoration: underline
-
-    &:hover
-        color: var(--link-color-hover)
-
-    &:active
-        color: var(--link-color-active)
-
-.rolesCellButton
+.rolesCell
     display: flex
     flex-wrap: wrap
-    gap: 4px
-    background: none
-    border: none
-    padding: 0
-    cursor: pointer
-    text-align: left
+    align-items: center
+    gap: var(--space-1)
 
 .rolesDialogList
     display: flex
     flex-direction: column
-    gap: 10px
-    margin-bottom: 16px
+    gap: var(--space-3)
+    margin-bottom: var(--space-4)
 
-// Badge color overrides for role and auth type
-.badgeDefault
-    background: #ccc !important
-    color: #333 !important
+.dialogMessage
+    margin-bottom: var(--space-4)
 
-.badgeGoogle
-    background: #db4437 !important
-    color: #fff !important
+// Dialog actions: secondary first, primary last, right-aligned
+.dialogActions
+    display: flex
+    justify-content: flex-end
+    gap: var(--space-2)
 
-.badgeYandex
-    background: #fc3f1d !important
-    color: #fff !important
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column-reverse
 
-.badgeVk
-    background: #0077ff !important
-    color: #fff !important
+        & > *
+            width: 100%
+
+// Status colours only for status (DESIGN.md → Tokens)
+.badgeOn
+    background: var(--color-green-background)
+    border-color: transparent
+    color: var(--color-green)
 
 .badgeMuted
-    background: var(--table-header-background) !important
-    color: var(--text-color-secondary) !important
+    color: var(--text-color-secondary)

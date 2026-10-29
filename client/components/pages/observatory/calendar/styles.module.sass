@@ -1,175 +1,173 @@
 @use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
 
-.eventCalendarBlock
+// Text strip inside a day cell (moon / sun times, weather, telescope work)
+%strip
     display: flex
-    padding: 1px 1px 1px 4px
-    margin-top: 3px
-    background-color: var(--table-border-color)
+    align-items: center
+    flex-wrap: wrap
+    gap: 0 var(--space-2)
+    margin-top: var(--space-1)
+    padding: 2px var(--space-1)
+    border-radius: var(--radius-sm)
+    background-color: var(--surface-2)
+    font-variant-numeric: tabular-nums
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-direction: column
+        align-items: flex-start
+        gap: 0
 
-.eventCalendarBlockBox
-    margin-right: 6px
-    white-space: nowrap
+%stripItem
     display: flex
     align-items: center
-
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        margin-right: 0
+    gap: var(--space-1)
+    white-space: nowrap
 
 .section
     display: block
     overflow: hidden
-    border-collapse: separate
-    padding: 5px !important
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        padding: var(--space-2)
+
+    .calendarToolbar
+        display: flex
+        align-items: center
+        justify-content: space-between
+        margin: 0 0 var(--space-3)
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            button
+                min-width: 44px
+                min-height: 44px
+
+    .currentMonth
+        +type.titleBlock
+        text-transform: capitalize
 
     .mobileMoonIcon
         position: absolute
-        right: -1px
-        top: 4px
+        right: var(--space-1)
+        top: var(--space-1)
 
-        @media only screen and (min-width: variables.$mobileMaxWidth)
+        @media only screen and (min-width: variables.$mobileMaxWidth + 1)
             display: none
 
     .moonEvent, .sunEvent
-        @extend .eventCalendarBlock
+        @extend %strip
+
         @media only screen and (max-width: variables.$mobileMaxWidth)
             display: none
 
         .sunIcon
-            margin-left: 1px
-            margin-right: 7px
+            margin-right: var(--space-1)
 
-        .rise
-            &:before
-                content: '↑'
-                margin-right: 5px
+        .rise::before
+            content: '↑'
+            margin-right: var(--space-1)
 
-        .set
-            &:before
-                content: '↓'
-                margin-left: 10px
-                margin-right: 5px
+        .set::before
+            content: '↓'
+            margin-right: var(--space-1)
 
-    .weatherEvent
-        @extend .eventCalendarBlock
-        background-color: var(--color-main-background)
-        padding-left: 6px
-
+    .weatherEvent, .telescopeEvent
+        @extend %strip
         span
-            @extend .eventCalendarBlockBox
+            @extend %stripItem
 
         svg
+            flex: none
             width: 14px
             height: 14px
             fill: var(--text-color-primary)
-            margin-right: 4px
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            display: none
 
     .telescopeEvent
-        @extend .eventCalendarBlock
-        background-color: var(--color-red-background)
-        padding-left: 6px
+        background-color: var(--color-main-background)
 
-        span
-            @extend .eventCalendarBlockBox
+    // Phones: a cell shows the day, the moon and whether the telescope worked
+    .mobileTelescope
+        display: none
+        align-items: center
+        gap: 2px
+        margin-top: var(--space-1)
+        color: var(--color-main)
 
         svg
-            width: 14px
-            height: 14px
-            fill: var(--text-color-primary)
-            margin-right: 4px
+            width: 12px
+            height: 12px
+            fill: var(--color-main)
 
-        i
-            color: var(--color-primary)
-
-    .calendarToolbar
-        margin: 0 0 5px
-        display: flex
-        justify-content: space-between
-
-        button
-            padding: 5px !important
-            min-height: 20px
-            height: 20px
-            width: 20px
-
-        .currentMonth
-            display: inline-block
-            margin: 0 10px
-            text-transform: capitalize
-
-        .dayStatistic
-            & > div
-                margin: 0 8px
-
-                &:last-of-type
-                    margin-right: 0
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            display: flex
 
     .dayNumber
+        +type.caption
         display: inline-block
-        border: 1px solid var(--input-border-color)
-        padding: 1px 3px
-        width: 23px
-        height: 23px
-        line-height: 20px
+        min-width: 24px
+        height: 24px
+        padding: 0 var(--space-1)
+        border: 1px solid var(--border-strong)
+        border-radius: var(--radius-sm)
+        line-height: 22px
         text-align: center
         color: var(--text-color-primary)
+        font-variant-numeric: tabular-nums
 
         &.green
             background-color: var(--color-green-background)
             border-color: var(--color-green)
 
         &.orange
-            background-color: var(--color-primary-background)
-            border-color: var(--color-primary)
+            background-color: var(--color-orange-background)
+            border-color: var(--color-orange)
 
         &.red
             background-color: var(--color-red-background)
             border-color: var(--color-red)
 
     .grid
-        margin: 0
-        padding: 0
-        display: block
-        overflow: hidden
         overflow-x: auto
 
         table
             width: 100%
             margin: 0
             padding: 0
+            table-layout: fixed
             border-spacing: 0
             border-collapse: collapse
 
             thead tr > th
-                height: 50px
-                border: 1px solid var(--table-border-color)
-                background-color: var(--table-header-background)
-                text-transform: uppercase
+                +type.caption
+                height: 36px
+                font-weight: var(--font-weight-medium)
+                border: 1px solid var(--border)
+                background-color: var(--surface-2)
+                text-transform: capitalize
 
             tbody tr > *
-                background-color: var(--container-background-color)
+                background-color: var(--surface-1)
 
                 &.calendarDay
                     position: relative
-                    border: 1px solid var(--table-border-color)
+                    box-sizing: border-box
+                    overflow: hidden
+                    border: 1px solid var(--border)
                     vertical-align: top
-                    padding: 3px
-                    width: 14.2%
-                    font-size: 12px
+                    padding: var(--space-1)
+                    width: 14.28%
+                    font-size: var(--font-size-small)
                     color: var(--text-color-secondary)
 
+                    @media only screen and (min-width: variables.$mobileMaxWidth + 1)
+                        height: 72px
+
                     &.currentDay
-                        background-color: var(--table-header-background-hover)
+                        background-color: var(--surface-2)
+                        box-shadow: inset 0 0 0 1px var(--color-main)
 
-                &.empty, &.disable
-                    cursor: not-allowed
+                &.empty
                     background-color: var(--body-background)
-
-                &.today
-                    background-color: var(--table-header-background-hover)
-
-                    .dayNumber
-                        font-weight: 900
-                        border-width: 2px

@@ -1,4 +1,5 @@
 import React from 'react'
+import { Button } from 'simple-react-ui-kit'
 
 import { GetStaticPropsResult, NextPage } from 'next'
 import Head from 'next/head'
@@ -31,6 +32,11 @@ const Error404Page: NextPage = () => {
                         'Возможно, страница, которую вы ищете, была удалена,\nпереименована или временно недоступна.'
                     )}
                 </p>
+                <Button
+                    link={'/'}
+                    mode={'primary'}
+                    label={t('common.go-to-home-page', 'На главную')}
+                />
             </div>
         </main>
     )

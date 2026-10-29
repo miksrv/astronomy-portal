@@ -1,16 +1,17 @@
 @use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
 
 // Vertical, right-aligned layout used inside the landing community section
 .statsRow
     display: flex
     flex-direction: column
-    gap: 28px
+    gap: var(--space-6)
     text-align: right
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-direction: row
         flex-wrap: wrap
-        gap: 24px
+        gap: var(--space-6)
         text-align: left
 
 // Horizontal, centered layout used as a standalone band on the /stargazing page
@@ -19,31 +20,28 @@
     flex-direction: row
     flex-wrap: wrap
     justify-content: center
-    gap: 48px
+    gap: var(--space-10)
     text-align: center
-    margin: 8px 0
+    margin: var(--space-2) 0
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        gap: 32px
+        gap: var(--space-8)
 
 .statItem
     display: flex
     flex-direction: column
 
+// Numbers over the sky photo: white, display size
 .statValue
-    font-size: 3.2rem
-    font-weight: 800
+    +type.titleDisplay
+    font-variant-numeric: tabular-nums
     color: #fff
     line-height: 1
     display: block
 
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        font-size: 2rem
-
 .statLabel
-    font-size: 11px
-    color: rgba(255, 255, 255, 0.5)
-    text-transform: uppercase
-    letter-spacing: 0.1em
-    margin-top: 4px
+    +type.overline
+    font-weight: var(--font-weight-normal)
+    color: rgba(255, 255, 255, 0.7)
+    margin-top: var(--space-1)
     display: block

@@ -1,24 +1,66 @@
 @use '../../styles/variables' as variables
+@use '../../styles/typography' as type
 
+// The blocks of a page are spaced by the gap of <main> (--space-4), so none
+// of them carries an outer margin: a margin would double the gap
+
+// Intro text of an observatory page
+.text
+    +type.prose
+    margin: 0
+
+// Two widgets side by side, stacked on phones
 .observatoryGrid
-    display: flex
-    justify-content: space-between
-    gap: 10px
-    flex-wrap: nowrap
-
-    > div
-        flex-basis: 50%
-        width: 50%
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: var(--space-4)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        flex-wrap: wrap
+        grid-template-columns: 1fr
 
-        > div
-            flex-basis: 100%
-            width: 100%
+.stack
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+    min-width: 0
+
+// Charts and tables on the page: a card each, --space-4 apart (the gap of <main>)
+.chart, .block
+    min-width: 0
 
 .allPhotosButtonContainer
+    margin-top: var(--space-4)
+
     a
         display: block
-        margin-top: 10px
+
+    button
         width: 100%
+
+// Overview: long text is prose (16px, 1.7) on the full content width, sections are bare h2 + content
+.lead
+    +type.lead
+    margin: 0 0 var(--space-6)
+    color: var(--text-color-secondary)
+
+.prose
+    +type.prose
+    margin: 0 0 var(--space-4)
+
+    > div
+        margin: var(--space-4) 0
+
+.prose .equipmentList
+    list-style: none
+    margin: 0 0 var(--space-4)
+    padding: 0
+
+    li + li
+        margin-top: var(--space-3)
+
+.equipmentTitle
+    +type.titleBlock
+    margin: 0
+
+.equipmentDescription
+    +type.secondary

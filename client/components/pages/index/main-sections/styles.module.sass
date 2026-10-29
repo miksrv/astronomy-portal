@@ -1,5 +1,5 @@
 @use '../../../../styles/variables' as variables
-@use '../../../../styles/mixins'
+@use '../../../../styles/typography' as type
 
 .section
     position: relative
@@ -32,29 +32,29 @@
         content: ''
         position: absolute
         inset: 0
-        background: linear-gradient(to bottom, rgba(17,19,24,1) 0%, rgba(17,19,24,0) 35%)
+        background: linear-gradient(to bottom, var(--body-background) 0%, transparent 35%)
 
     &::after
         content: ''
         position: absolute
         inset: 0
-        background: linear-gradient(to bottom, rgba(17,19,24,0.35) 0%, rgba(17,19,24,0.65) 55%, rgba(17,19,24,1) 100%)
+        background: linear-gradient(to bottom, color-mix(in srgb, var(--body-background) 35%, transparent) 0%, color-mix(in srgb, var(--body-background) 65%, transparent) 55%, var(--body-background) 100%)
 
 .sectionGrid
     position: relative
     z-index: 1
     display: grid
     grid-template-columns: 1fr 1fr
-    gap: 32px
+    gap: var(--space-8)
     align-items: flex-end
     max-width: var(--width-max)
     width: 100%
     margin: 0 auto
-    padding: 48px 16px 23%
+    padding: 48px var(--space-4) 23%
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         grid-template-columns: 1fr
-        padding: 28px 16px
+        padding: var(--space-8) var(--space-4)
 
 .sectionHeroGrid
     align-items: center
@@ -63,29 +63,35 @@
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         padding-top: 100px
-        padding-bottom: 32px
+        padding-bottom: var(--space-8)
 
 .sectionLabel
-    +mixins.hero-label($margin-bottom: 12px)
+    +type.overline
     display: block
+    margin: 0 0 var(--space-3)
+    color: var(--color-main)
 
 .sectionTitle
-    +mixins.hero-title($font-size: 2.4rem, $font-weight: 900, $line-height: 1.08, $margin-bottom: 16px)
-
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        font-size: 1.7rem
+    +type.titleDisplay
+    margin: 0 0 var(--space-4)
+    color: #fff
+    text-wrap: balance
 
 .sectionDesc
-    font-size: 14px
-    color: rgba(255,255,255,0.65)
-    max-width: 480px
-    line-height: 1.65
-    margin: 0 0 28px
+    +type.lead
+    max-width: 52ch
+    margin: 0 0 var(--space-6)
+    color: var(--text-color-secondary)
 
 .heroCta
     display: flex
-    gap: 12px
+    gap: var(--space-2)
     flex-wrap: wrap
+
+    // Touch targets on phones (DESIGN.md: at least 44px)
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        button
+            min-height: 44px
 
 .sectionRight
     display: flex
@@ -94,7 +100,7 @@
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         justify-content: flex-start
-        margin-top: 24px
+        margin-top: var(--space-6)
 
 .sectionRightCenter
     display: flex
@@ -107,67 +113,47 @@
 .sectionRightCenterVisible
     @media only screen and (max-width: variables.$mobileMaxWidth)
         display: flex
-        margin-top: 28px
+        margin-top: var(--space-6)
 
 .sectionRightColumn
     flex-direction: column
     align-items: flex-end
-    gap: 28px
+    gap: var(--space-6)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         align-items: flex-start
-        gap: 20px
+        gap: var(--space-5)
 
 .statsRow
     display: flex
     flex-direction: column
-    gap: 28px
+    gap: var(--space-6)
     text-align: right
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-direction: row
         flex-wrap: wrap
-        gap: 24px
+        gap: var(--space-6)
         text-align: left
 
-.statsRowHorizontal
-    display: flex
-    flex-direction: row
-    gap: 40px
-    text-align: center
-    align-items: flex-end
-    justify-content: flex-end
-
+// The number is the point of the block: the stat role at hero scale
 .statValue
-    font-size: 3.2rem
-    font-weight: 800
+    +type.stat
+    font-size: var(--font-size-display)
+    font-weight: 700
     color: #fff
-    line-height: 1
     display: block
-
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        font-size: 2rem
 
 .statLabel
-    font-size: 11px
-    color: rgba(255,255,255,0.5)
-    text-transform: uppercase
-    letter-spacing: 0.1em
-    margin-top: 4px
+    +type.caption
+    margin-top: var(--space-1)
     display: block
-
-.photoCol
-    display: flex
-    flex-direction: column
-    gap: 8px
-    height: 420px
-    width: 100%
 
 .photoGrid
     display: grid
     grid-template-columns: 1fr 1fr
     grid-template-rows: 1fr 1fr
-    gap: 8px
+    gap: var(--space-2)
     height: 420px
     width: 100%
 
@@ -177,9 +163,13 @@
 .photoRow
     display: flex
     flex-direction: row
-    gap: 8px
+    gap: var(--space-2)
     width: 240px
     height: 80px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        width: 100%
+        max-width: 320px
 
     .photoThumb
         flex: 1
@@ -187,19 +177,20 @@
 .photoThumb
     flex: 1
     position: relative
-    border-radius: var(--border-radius)
+    border-radius: var(--radius-lg)
     overflow: hidden
-    border: 1px solid rgba(255,255,255,0.08)
-    transition: border-color 0.4s ease
+    border: 1px solid var(--border)
+    transition: border-color var(--duration-slow) var(--ease)
     opacity: 0
 
     img
         object-position: top
         filter: grayscale(0.75) brightness(0.8)
-        transition: filter 0.6s ease, transform 0.6s ease
+        transition: filter var(--duration-slow) var(--ease), transform var(--duration-slow) var(--ease)
 
-    &:hover
-        border-color: rgba(255,255,255,0.25)
+    // Hover and keyboard focus reveal the photo in colour
+    &:hover, &:focus-visible
+        border-color: var(--border-strong)
 
         img
             filter: grayscale(0) brightness(1)
@@ -216,14 +207,14 @@
 :global(.animate)
     opacity: 0
     transform: translateY(24px)
-    transition: opacity 1.2s ease, transform 1.2s ease
+    transition: opacity 1.2s var(--ease), transform 1.2s var(--ease)
 
     &:global(.visible)
         opacity: 1
         transform: translateY(0)
 
         .photoThumb
-            animation: photoEnter 0.65s ease forwards
+            animation: photoEnter 0.65s var(--ease) forwards
 
         .photoThumb:nth-child(1)
             animation-delay: 0.15s
@@ -236,3 +227,18 @@
 
         .photoThumb:nth-child(4)
             animation-delay: 0.75s
+
+// No entrance animation: content is simply there
+@media (prefers-reduced-motion: reduce)
+    :global(.animate)
+        opacity: 1
+        transform: none
+        transition: none
+
+    .photoThumb
+        opacity: 1
+        animation: none !important
+        transition: none
+
+        img
+            transition: none

@@ -78,56 +78,68 @@ export const Weather: React.FC = () => {
         return 'warning'
     }, [weatherParams])
 
-    const weatherCondition = React.useMemo(() => {
-        if (weatherState === 'good') {
-            return t('components.pages.observatory.weather.safely', 'Безопасно')
-        }
-        if (weatherState === 'danger') {
-            return t('components.pages.observatory.weather.critical', 'Критическое')
-        }
-        return t('components.pages.observatory.weather.dangerous', 'Опасное')
-    }, [weatherState, t])
+    // One label per range: the overall state and each parameter's screen-reader note
+    const rangeLabels: Record<string, string> = {
+        good: t('components.pages.observatory.weather.safely', 'Безопасно'),
+        warning: t('components.pages.observatory.weather.dangerous', 'Опасное'),
+        danger: t('components.pages.observatory.weather.critical', 'Критическое')
+    }
+
+    const weatherCondition = rangeLabels[weatherState]
 
     return (
-        <Container className={styles.weather}>
-            <div className={styles.toolbar}>
-                <h4 className={styles.title}>
-                    {t('components.pages.observatory.weather.weather-conditions', 'Состояние погоды')}:{' '}
-                    <span className={cn(styles.weatherState, styles[weatherState])}>{weatherCondition}</span>
-                </h4>
-                <Link
-                    href={'/observatory/weather'}
-                    title={t(
-                        'components.pages.observatory.weather.observatory-in-orenburg-weather',
-                        'Погода в Обсерватории Оренбурга'
-                    )}
-                >
-                    {t('components.pages.observatory.weather.read-more', 'Подробнее')}
-                </Link>
-            </div>
+        <Container
+            className={styles.weather}
+            header={
+                <div className={styles.toolbar}>
+                    <h3 className={styles.title}>
+                        {t('components.pages.observatory.weather.weather-conditions', 'Состояние погоды')}:{' '}
+                        <span className={cn(styles.weatherState, styles[weatherState])}>{weatherCondition}</span>
+                    </h3>
+                    <Link
+                        href={'/observatory/weather'}
+                        title={t(
+                            'components.pages.observatory.weather.observatory-in-orenburg-weather',
+                            'Погода в Обсерватории Оренбурга'
+                        )}
+                    >
+                        {t('components.pages.observatory.weather.read-more', 'Подробнее')}
+                    </Link>
+                </div>
+            }
+        >
             <div className={styles.update}>
                 {t('components.pages.observatory.weather.updated', 'Обновлено')}:{' '}
-                <strong>
-                    {!isLoading
-                        ? formatUTCDate(data?.date)
-                        : t('components.pages.observatory.weather.loading', 'Погода загружается...')}
-                </strong>
-                {data?.date && `(${minutesAgo(data.date)})`}
+                {!isLoading ? (
+                    <>
+                        <strong>{formatUTCDate(data?.date)}</strong>
+                        {data?.date && ` (${minutesAgo(data.date)})`}
+                    </>
+                ) : (
+                    t('components.pages.observatory.weather.loading', 'Погода загружается...')
+                )}
             </div>
-            <div className={styles.grid}>
+            <dl className={styles.grid}>
                 {weatherParams.map(({ key, range }) => (
                     <div
                         key={key}
                         className={styles.key}
                     >
-                        <span className={cn(styles.weatherCondition, styles[range])} />
-                        {weatherLabels[key]}:{' '}
-                        <span className={styles.val}>
-                            {data?.[key as keyof ApiModel.Weather] ?? '?'} {weatherUnits[key]}
-                        </span>
+                        <dt className={styles.label}>
+                            <span
+                                className={cn(styles.weatherCondition, styles[range])}
+                                aria-hidden={'true'}
+                            />
+                            {weatherLabels[key]}
+                            {range && <span className={'visuallyHidden'}>{` (${rangeLabels[range]})`}</span>}
+                        </dt>
+                        <dd className={styles.val}>
+                            {data?.[key as keyof ApiModel.Weather] ?? '?'}
+                            <span className={styles.unit}>{` ${weatherUnits[key]}`}</span>
+                        </dd>
                     </div>
                 ))}
-            </div>
+            </dl>
         </Container>
     )
 }

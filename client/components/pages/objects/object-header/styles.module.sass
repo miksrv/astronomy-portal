@@ -1,35 +1,44 @@
 @use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
 
+// Parameters on the left, the object on the sky on the right
 .objectContainer
-    width: 100%
     display: flex
     flex-wrap: wrap
-    justify-content: space-between
+    gap: var(--space-4) var(--space-6)
+    align-items: flex-start
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-direction: column
-
-    .parameters
-        .item
-            display: flex
-            align-items: center
-
-            .key
-                margin-right: 5px
-                color: var(--text-color-secondary)
+        align-items: stretch
 
     .filterList
-        margin-left: 30px
+        flex: 0 0 auto
 
-        @media only screen and (max-width: variables.$mobileMaxWidth)
-            margin-top: 10px
-            margin-left: 0
+    .parameters
+        flex: 1 1 240px
+        display: flex
+        flex-direction: column
+        gap: var(--space-2)
+        min-width: 0
 
+        .item
+            +type.body
+            overflow-wrap: anywhere
+
+            .key
+                +type.secondary
+                margin-right: var(--space-1)
+
+    // The star map is the only filled block, so it carries the radius
     .starMap
-        margin-left: auto
-        object-fit: cover
-        min-width: 350px
+        flex: 0 1 380px
+        min-width: 280px
+        min-height: 200px
+        border-radius: var(--radius-lg)
+        overflow: hidden
 
         @media only screen and (max-width: variables.$mobileMaxWidth)
-            margin-top: 10px
-            margin-left: 0
+            order: -1
+            flex-basis: auto
+            min-width: 0

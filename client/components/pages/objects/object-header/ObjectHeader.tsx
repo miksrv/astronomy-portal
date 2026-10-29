@@ -55,7 +55,7 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
                     </div>
                 )}
 
-                {props?.ra && (
+                {!!props?.ra && (
                     <div className={styles.item}>
                         <span className={styles.key}>
                             {t('components.pages.objects.object-header.right-ascension', 'Прямое восхождение')}:
@@ -64,7 +64,7 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
                     </div>
                 )}
 
-                {props?.dec && (
+                {!!props?.dec && (
                     <div className={styles.item}>
                         <span className={styles.key}>
                             {t('components.pages.objects.object-header.declination', 'Склонение')}:
@@ -73,7 +73,7 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
                     </div>
                 )}
 
-                {props.statistic?.exposure && (
+                {!!props.statistic?.exposure && (
                     <div className={styles.item}>
                         <span className={styles.key}>
                             {t('components.pages.objects.object-header.total-exposure', 'Общее накопление')}:
@@ -82,7 +82,7 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
                     </div>
                 )}
 
-                {props.statistic?.frames && (
+                {!!props.statistic?.frames && (
                     <div className={styles.item}>
                         <span className={styles.key}>
                             {t('components.pages.objects.object-header.number-of-frames', 'Количество кадров')}:
@@ -100,7 +100,7 @@ export const ObjectHeader: React.FC<ObjectHeaderProps> = ({ categoriesList, ...p
                     </div>
                 )}
 
-                {props?.fitsCloudLink && (
+                {!!props?.fitsCloudLink && (
                     <div className={styles.item}>
                         <span className={styles.key}>
                             {t('components.pages.objects.object-header.link-to-fits-files', 'Ссылка на FITS файлы')}:

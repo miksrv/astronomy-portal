@@ -8,4 +8,4 @@ Fully static pages (no per-request data fetching) use `wrapper.getStaticProps` f
 
 **Why:** `getServerSideProps` renders on every request, wasting server time for pages whose content never changes between deploys. ISR (`revalidate: 86400`) refreshes them daily.
 
-**How to apply:** When a page only calls `serverSideTranslations` and `store.dispatch(setLocale(locale))` in its data-fetching function, convert it to `wrapper.getStaticProps` with `revalidate: 86400`. Import `GetStaticPropsContext` instead of `GetServerSidePropsContext`. Confirmed working — build output shows `●` (SSG) for about, faq, howto, rules, where pages.
+**How to apply:** When a page only calls `serverSideTranslations` and `store.dispatch(setLocale(locale))` in its data-fetching function, convert it to `wrapper.getStaticProps` with `revalidate: 86400`. Import `GetStaticPropsContext` instead of `GetServerSidePropsContext`. Pages on it today: about, privacy, 404, observatory/history (index + `[slug]`), stargazing faq/howto/rules/where.

@@ -1,18 +1,18 @@
 .root
-    border-radius: 50%
-    object-fit: cover
-    flex-shrink: 0
     display: block
+    flex-shrink: 0
+    border-radius: var(--radius-full)
+    object-fit: cover
 
 .initials
-    border-radius: 50%
-    flex-shrink: 0
-    background-color: var(--blue-color, #4a90d9)
-    color: #fff
     display: flex
     align-items: center
     justify-content: center
-    font-weight: 600
+    flex-shrink: 0
+    border-radius: var(--radius-full)
+    background-color: var(--color-main-background)
+    color: var(--text-color-primary)
+    font-weight: var(--font-weight-semibold)
     user-select: none
 
 .small
@@ -20,18 +20,18 @@
     height: 24px
 
     &.initials
-        font-size: 9px
+        font-size: var(--font-size-micro)
 
 .medium
     width: 32px
     height: 32px
 
     &.initials
-        font-size: 13px
+        font-size: var(--font-size-secondary)
 
 .large
     width: 128px
     height: 128px
 
     &.initials
-        font-size: 24px
+        font-size: 40px

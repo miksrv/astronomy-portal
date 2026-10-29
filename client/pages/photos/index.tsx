@@ -59,6 +59,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
     )
 
     const title = t('pages.photos.title', 'Астрофото')
+    const seoTitle = t('pages.photos.seo-title', 'Астрофото галактик и туманностей — фотографии космоса')
 
     // Derive filters from router.query (not just the initial SSR props) so
     // shallow-routed URL updates and Back/Forward navigation stay in sync.
@@ -100,11 +101,11 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
     return (
         <AppLayout
             canonical={'photos'}
-            title={`${title}${categoryFilter ? `: ${currentCategory?.title}` : ''}`}
+            title={categoryFilter ? `${title}: ${currentCategory?.title}` : seoTitle}
             description={[
                 t(
                     'pages.photos.description',
-                    'Коллекция астрофотографий галактик, звёздных скоплений, туманностей, планет и других космических объектов, запечатленных любительской обсерваторией. Найдите и отфильтруйте изображения по категориям и параметрам, чтобы увидеть уникальные снимки Вселенной с деталями по каждому фильтру и выдержке.'
+                    'Астрофотографии галактик, туманностей, звёздных скоплений и планет, снятые любительской обсерваторией в Оренбурге. Фильтры, выдержка и оборудование для каждого снимка.'
                 ),
                 currentCategory?.description
             ]
@@ -113,9 +114,9 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
             openGraph={{
                 images: [
                     {
-                        height: 755,
-                        url: '/screenshots/photos.jpg',
-                        width: 1280
+                        height: 1024,
+                        url: '/images/index-hero.png',
+                        width: 1536
                     }
                 ]
             }}
@@ -137,6 +138,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
                 <Input
                     clearable={true}
                     value={searchFilter}
+                    aria-label={t('pages.photos.search-by-object', 'Поиск по объекту')}
                     placeholder={t('pages.photos.search-by-object', 'Поиск по объекту')}
                     onChange={(e) => setSearchFilter(e.target.value)}
                 />

@@ -544,14 +544,14 @@ export const EventMediaUploadDialog: React.FC<EventMediaUploadDialogProps> = ({
                                                     </span>
                                                 )}
                                             </span>
-                                            <button
-                                                type={'button'}
+                                            <Button
                                                 className={styles.removeFileButton}
+                                                mode={'link'}
+                                                size={'small'}
+                                                icon={'Close'}
                                                 aria-label={t('common.delete', 'Удалить')}
                                                 onClick={() => handleRemoveSelectedFile(index)}
-                                            >
-                                                {'✕'}
-                                            </button>
+                                            />
                                         </li>
                                     )
                                 })}
@@ -560,7 +560,7 @@ export const EventMediaUploadDialog: React.FC<EventMediaUploadDialogProps> = ({
 
                         <div className={styles.footer}>
                             <Button
-                                mode={'secondary'}
+                                mode={'outline'}
                                 onClick={handleClose}
                             >
                                 {t('common.cancel', 'Отмена')}
@@ -617,7 +617,7 @@ export const EventMediaUploadDialog: React.FC<EventMediaUploadDialogProps> = ({
 
                         <div className={styles.footer}>
                             <Button
-                                mode={'secondary'}
+                                mode={'outline'}
                                 onClick={cancelUpload}
                             >
                                 {t('common.cancel', 'Отмена')}

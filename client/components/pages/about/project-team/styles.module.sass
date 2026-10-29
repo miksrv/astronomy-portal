@@ -1,16 +1,21 @@
+@use '../../../../styles/typography' as type
+
 .carousel
     width: 100%
-    margin-top: 10px
+    margin-top: var(--space-4)
 
     .item
         text-align: center
-        margin-bottom: 10px
-        max-width: 190px !important
+        margin-bottom: var(--space-2)
 
         .photo
             width: 160px
             height: auto
             object-fit: cover
             border-radius: 50%
-            border: 2px solid #fff
-            margin-bottom: 5px
+            border: 2px solid var(--border-strong)
+            margin-bottom: var(--space-1)
+
+        .title
+            +type.secondary
+            color: var(--text-color-primary)

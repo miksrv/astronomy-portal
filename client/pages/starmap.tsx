@@ -4,7 +4,7 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import Head from 'next/head'
 import { useTranslation } from 'next-i18next/pages'
 
-import { API, wrapper } from '@/api'
+import { API, SITE_LINK, wrapper } from '@/api'
 import { AppLayout, BreadcrumbJsonLd, StarMap } from '@/components/common'
 import { StarMapIntro } from '@/components/pages/starmap'
 import { createPageUrl, toJsonLd } from '@/utils/helpers'
@@ -22,9 +22,15 @@ const CelestialPage: NextPage<object> = () => {
     const [uiHidden, setUiHidden] = useState(false)
 
     const title = t('pages.star-map.title', 'Карта звёздного неба онлайн')
+    // The <title> carries the long-tail of the search demand ("бесплатно", "сегодня", "по дате");
+    // the H1 stays the short head term
+    const seoTitle = t(
+        'pages.star-map.seo-title',
+        'Карта звёздного неба онлайн бесплатно — небо сегодня и на любую дату'
+    )
     const description = t(
         'pages.star-map.description',
-        'Бесплатная интерактивная карта звёздного неба онлайн: звёзды, созвездия, планеты, туманности и галактики. Настраивайте слои карты и исследуйте небо в реальном времени.'
+        'Интерактивная карта звёздного неба онлайн бесплатно: небо сейчас или на любую дату и время в вашем городе. Звёзды, созвездия, планеты, Луна, туманности и галактики.'
     )
 
     const pageUrl = createPageUrl(i18n.language, 'starmap')
@@ -39,18 +45,26 @@ const CelestialPage: NextPage<object> = () => {
         operatingSystem: 'Any',
         browserRequirements: 'Requires JavaScript',
         isAccessibleForFree: true,
-        inLanguage: i18n.language === 'en' ? 'en' : 'ru'
+        screenshot: `${SITE_LINK}images/starmap.jpg`,
+        offers: { '@type': 'Offer', price: 0, priceCurrency: 'RUB' },
+        featureList: t(
+            'pages.star-map.feature-list',
+            'Небо в реальном времени, небо на любую дату и время, выбор места наблюдения, созвездия и их границы, планеты, Луна и Солнце, галактики и туманности, Млечный Путь, поиск объектов'
+        ),
+        inLanguage: i18n.language === 'en' ? 'en' : 'ru',
+        publisher: { '@type': 'Organization', name: t('common.look-at-the-stars', 'Смотри на звёзды'), url: SITE_LINK }
     }
 
     return (
         <AppLayout
             fullWidth={true}
             canonical={'starmap'}
-            title={title}
+            noBrandSuffix={true}
+            title={seoTitle}
             description={description}
-            // og:image intentionally omitted: /screenshots/starmap.jpg never existed in the
-            // repo (broken social previews). A real screenshot of the upgraded map is a
-            // content/asset task once FEAT-27's planetarium mode ships (features/star-atlas-upgrade.md, FE-7).
+            openGraph={{
+                images: [{ url: '/images/starmap.jpg', width: 1200, height: 630, alt: title }]
+            }}
         >
             <BreadcrumbJsonLd currentPage={title} />
             <Head>

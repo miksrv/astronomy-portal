@@ -1,49 +1,38 @@
-@use '../../../../styles/variables' as variables
-
 .cameraSection
-    padding: 5px !important
-    font-size: 0 !important
+    padding: 0
+    overflow: hidden
 
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        margin-bottom: 5px
-
+    // Frame keeps its 4:3 shape while the first picture loads, so the page does not jump
     .lightboxTrigger
-        border: none
-        background: none
-        padding: 0
-        margin: 0
-        display: inline-block
-        width: 100%
-        height: 100%
-        min-height: 400px
+        display: block
         position: relative
+        width: 100%
+        aspect-ratio: 4 / 3
+        margin: 0
+        padding: 0
+        border: 0
+        background: var(--surface-2)
+        cursor: zoom-in
 
-        @media only screen and (max-width: variables.$mobileMaxWidth)
-            min-height: auto
+        &:focus-visible
+            outline-offset: -2px
 
-        svg
-            position: absolute
-            width: 32px
-            height: 32px
-            z-index: 0
-            left: 47%
-            top: 47%
+    .spinner
+        position: absolute
+        top: 50%
+        left: 50%
+        width: 32px
+        height: 32px
+        margin: -16px 0 0 -16px
 
     .photoImage
-        position: relative
-        cursor: pointer
-        height: 100%
+        display: block
         width: 100%
+        height: 100%
         object-fit: cover
-        z-index: 1
 
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        .photoImage
-            height: auto
-            min-height: 300px
-
-    .progress
-        margin: -6px 0px 0px 0px !important
-
-        :global(.bar)
-            height: 2px !important
+    .error
+        position: absolute
+        left: var(--space-3)
+        right: var(--space-3)
+        bottom: var(--space-3)

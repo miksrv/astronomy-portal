@@ -1,19 +1,19 @@
 @use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
 
 .wrapper
     display: flex
     flex-direction: column
-    gap: 16px
+    gap: var(--space-4)
 
 .kpiRow
     display: flex
-    gap: 10px
+    gap: var(--space-3)
     flex-wrap: wrap
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         display: grid
         grid-template-columns: repeat(2, 1fr)
-        gap: 10px
 
 .kpiCard
     flex: 1 1 0
@@ -26,39 +26,36 @@
         min-width: 0
 
 .kpiLabel
-    font-size: var(--font-size-small)
-    color: var(--text-color-secondary)
+    +type.caption
 
+// The number is the point of the card
 .kpiValue
-    font-size: 28px
-    font-weight: 600
-    color: var(--text-color-primary)
+    +type.stat
     display: flex
     align-items: baseline
-    gap: 6px
+    gap: var(--space-2)
+    color: var(--text-color-primary)
 
 .kpiSub
-    font-size: var(--font-size-small)
-    font-weight: 400
-    color: var(--text-color-secondary)
+    +type.caption
 
 .kpiProgress
     display: flex
     flex-direction: column
-    gap: 4px
+    gap: var(--space-1)
 
 .kpiProgressTrack
     width: 100%
     height: 6px
-    border-radius: 3px
-    background: var(--input-border-color)
+    border-radius: var(--radius-full)
+    background: var(--surface-3)
     overflow: hidden
 
 .kpiProgressBar
     height: 100%
-    border-radius: 3px
+    border-radius: var(--radius-full)
     background: var(--color-green)
-    transition: width 0.3s ease
+    transition: width var(--duration-slow) var(--ease)
 
     &[data-color='orange']
         background: var(--color-orange)
@@ -66,20 +63,19 @@
     &[data-color='red']
         background: var(--color-red)
 
-.chartTitle
-    font-size: var(--font-size)
-    font-weight: 600
-    color: var(--text-color-primary)
-    margin: 0 0 12px 0
+    @media (prefers-reduced-motion: reduce)
+        transition: none
 
-// A 3-column grid (rather than flex) so a spanning cell in one row lines up
-// pixel-for-pixel with the same number of cells in the row below — flex-grow
-// ratios alone drift apart once the two rows have a different item count,
-// since each row then subtracts a different number of gaps from its width.
+.chartTitle
+    +type.titleBlock
+    margin: 0 0 var(--space-3)
+
+// A 3-column grid (not flex) so a spanning cell in one row lines up exactly
+// with the same number of cells in the next row
 .chartsRow
     display: grid
     grid-template-columns: repeat(3, 1fr)
-    gap: 16px
+    gap: var(--space-4)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         grid-template-columns: 1fr
@@ -90,3 +86,6 @@
 .chartWide
     grid-column: span 2
     min-width: 0
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-column: auto

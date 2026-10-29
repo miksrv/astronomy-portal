@@ -8,9 +8,8 @@ use CodeIgniter\Database\Migration;
  * FEAT-26 — bookkeeping table for in-progress chunked event-media (photo or
  * video) uploads. Deliberately separate from `events_media`: this table
  * tracks ephemeral, not-yet-displayed upload state (which chunks have
- * arrived so far, for which event/user), cleaned up automatically by
- * `media:cleanup-uploads` — a fundamentally different kind of data from
- * finished gallery content.
+ * arrived so far, for which event/user) — a fundamentally different kind
+ * of data from finished gallery content.
  *
  * Each row has a matching temp directory on disk holding one file per
  * received chunk (see UPLOAD_EVENTS/{eventId}/tmp/{sessionId}/{index}.part),

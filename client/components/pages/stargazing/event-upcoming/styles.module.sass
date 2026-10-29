@@ -1,28 +1,26 @@
 @use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
 
-// Background for the "blocked state" icon circle (guest login prompt, etc.)
-// — a translucent tint of the brand primary color.
-$stateIconPrimaryBackground: #7672a94f
-// Same, but for the danger variant (sold-out, payment-failed) — a translucent
-// tint of the brand red color.
-$stateIconDangerBackground: #a3464694
+$touchTarget: 44px
 
+// Empty state: one line of text in place of the card content
 .noEvent
     text-align: center
-    padding: 30px 20px
+    padding: var(--space-8) var(--space-5)
 
     p
-        color: var(--text-color-secondary)
+        +type.secondary
         margin: 0
 
 .noEventTitle
-    margin: 12px 0 4px
+    +type.titleBlock
+    margin: var(--space-3) 0 var(--space-1)
 
 .noEventImage
     width: 100%
     max-width: 400px
     height: auto
-    border-radius: 8px
+    border-radius: var(--radius-lg)
     margin: 0 auto
 
 .upcomingEvent
@@ -34,17 +32,15 @@ $stateIconDangerBackground: #a3464694
             width: 100%
             padding-left: 0
 
-    // The info column (.stargazing) is the source of truth for this block's
-    // height — it holds title/status/map/form and takes exactly as much
-    // height as that content needs. This column must never grow taller than
-    // that. .imageContent is absolutely positioned (see below) precisely so
-    // its own content (image + description) is excluded from the flex row's
-    // height calculation — it only ever fills whatever height the row ends
-    // up being, it can't stretch it.
+    // The info column (.stargazing) decides this block's height: it holds the
+    // title, status, map and form. .imageContainer must never make the row
+    // taller, so .imageContent is absolutely positioned and only fills what
+    // is left of the row.
     .imageContainer
         width: 50%
         position: relative
         overflow: hidden
+        border-radius: var(--radius-lg)
 
         .imageContent
             position: absolute
@@ -61,29 +57,25 @@ $stateIconDangerBackground: #a3464694
                 display: block
                 width: 100%
                 height: auto
+                border-radius: var(--radius-lg)
 
             .adminActions
                 position: absolute
-                top: 10px
-                left: 10px
+                top: var(--space-2)
+                left: var(--space-2)
                 z-index: 2
                 display: flex
-                gap: 8px
+                gap: var(--space-2)
 
-        // Fills whatever height is left below the cover photo. flex: 1 only
-        // distributes space inside the already-sized .imageContent — it can't
-        // grow it — and overflow: hidden clips the description instead of
-        // pushing the block taller when the text is longer than that space.
-        // The fade softens the hard cutoff.
+        // Fills the height left below the cover. overflow: hidden clips a long
+        // description instead of growing the block; the fade softens the cut.
         .imageDescription
+            +type.secondary
             flex: 1 1 auto
             position: relative
             overflow: hidden
-            margin-top: 12px
-            padding-right: 4px
-            font-size: var(--font-size-small)
-            line-height: 1.5
-            color: var(--text-color-secondary)
+            margin-top: var(--space-3)
+            padding-right: var(--space-1)
             white-space: pre-line
 
             &:after
@@ -93,12 +85,12 @@ $stateIconDangerBackground: #a3464694
                 right: 0
                 bottom: 0
                 height: 40px
-                background: linear-gradient(to bottom, color-mix(in srgb, var(--container-background-color), transparent 100%) 0%, var(--container-background-color) 100%)
+                background: linear-gradient(to bottom, transparent, var(--surface-1))
                 pointer-events: none
 
-        // Columns stack on mobile (see .stargazing's own mobile rule below), so
-        // there's no shared row height to protect and no gap to fill — revert
-        // .imageContent to normal flow so the image sizes this column itself.
+        // Columns stack on phones: there is no shared row height to protect,
+        // so the cover goes back to normal flow, cropped to a wide strip that
+        // keeps the booking block close to the top of the screen.
         @media only screen and (max-width: variables.$mobileMaxWidth)
             width: 100%
 
@@ -106,11 +98,15 @@ $stateIconDangerBackground: #a3464694
                 position: static
                 display: block
 
+            .imageWrapper .image
+                aspect-ratio: 16 / 9
+                object-fit: cover
+
             .imageDescription
                 display: none
 
     .stargazing
-        padding-left: 15px
+        padding-left: var(--space-4)
         text-align: left
         width: 50%
 
@@ -119,114 +115,90 @@ $stateIconDangerBackground: #a3464694
             padding-left: 0
 
         .title
-            margin-top: 0
-            margin-bottom: 10px
+            +type.titleSection
             display: flex
             align-items: center
-            gap: 8px
-            font-size: 22px !important
-            font-weight: 300
-            //text-transform: uppercase
-            line-height: normal
-
-            &:after
-                display: none
+            gap: var(--space-2)
+            margin: 0 0 var(--space-1)
 
             @media only screen and (max-width: variables.$mobileMaxWidth)
-                margin-top: 15px
+                margin-top: var(--space-4)
 
         .titleIcon
-            fill: var(--color-primary)
+            fill: var(--color-green)
             min-width: 24px
             width: 24px
             height: 24px
 
         .eventTitle
-            margin-top: 0
-            margin-bottom: 15px
-            font-size: 18px
-            font-weight: 300
-            color: var(--text-color-secondary)
+            +type.secondary
+            margin: 0 0 var(--space-4)
+            font-weight: var(--font-weight-normal)
 
         .notifyText
-            font-size: var(--font-size-small)
-            font-weight: 100
+            +type.caption
 
         .infoSection
             display: flex
             align-items: flex-start
-            gap: 8px
-            font-weight: 200
-            font-size: 16px
-            margin-bottom: 5px
-            margin-left: 3px
+            gap: var(--space-2)
+            margin-bottom: var(--space-2)
 
             .icon
-                fill: var(--color-primary)
+                fill: var(--color-main)
                 min-width: 18px
                 width: 18px
                 height: 18px
-                margin-top: 3px
 
             .rowLabel
+                +type.secondary
                 display: flex
                 align-items: center
-                gap: 8px
+                gap: var(--space-2)
                 width: 160px
                 flex-shrink: 0
-                font-size: 14px
-                font-weight: 400
-                color: var(--text-color-secondary)
 
-                .icon
-                    margin-top: 0
+                @media only screen and (max-width: variables.$mobileMaxWidth)
+                    width: 140px
 
             .rowValue
+                +type.body
                 display: flex
                 flex: 1
                 flex-direction: column
                 align-items: flex-start
-                gap: 0
+                min-width: 0
                 text-align: left
-                font-size: 14px
-                font-weight: 500
+                font-weight: var(--font-weight-medium)
                 color: var(--text-color-primary)
 
             .addressText
-                margin-top: 3px
-                font-size: var(--font-size-small)
-                color: var(--text-color-secondary)
+                +type.caption
+                margin-top: var(--space-1)
+                font-weight: var(--font-weight-normal)
 
-        .infoSectionNotification
-            margin-top: 15px
-            font-size: var(--font-size-small)
-            color: var(--text-color-secondary)
-
+        // "No registration needed" note
         .infoBlock
-            margin: 25px 0
+            margin: var(--space-6) 0 0
 
             h3
-                font-size: 20px
-                font-weight: 500
-                color: var(--color-red)
+                +type.titleBlock
+                margin: 0 0 var(--space-1)
 
             p
-                font-size: 13px
+                +type.secondary
                 margin: 0
 
-        // Stacked (full width) on mobile, side by side on desktop — same
-        // convention as .registeredActions below. Previously always side by
-        // side with min-width:0, which let "Отменить бронирование" get
-        // squeezed/wrapped against the other button on narrow screens.
+        // Stacked (full width) on phones, side by side on desktop
         .awaitingPaymentActions
             display: flex
             flex-direction: column
-            gap: 10px
-            margin-top: 15px
+            gap: var(--space-2)
             width: 100%
 
             > button
                 width: 100%
+                min-height: $touchTarget
 
             @media only screen and (min-width: (variables.$mobileMaxWidth + 1))
                 flex-direction: row
@@ -235,81 +207,84 @@ $stateIconDangerBackground: #a3464694
                     width: auto
                     flex: 1 1 50%
                     min-width: 0
+                    min-height: 0
 
         .verifyingPayment
-            margin: 25px 0 0
+            +type.secondary
+            margin: var(--space-6) 0 0
             display: flex
             align-items: center
-            gap: 10px
-            font-size: 13px
-            color: var(--text-color-secondary)
+            gap: var(--space-2)
 
-        // Shared card used by the "blocked"/confirmation states of the booking
-        // flow: guest login prompt, sold-out, payment-failed, registered, etc.
-        // A single flex gap spaces all direct children — no per-block margins.
+        // One card for every "blocked" or confirmation state of the booking
+        // flow: guest prompt, sold out, payment failed, registered. A single
+        // flex gap spaces the children.
         .stateCard
-            margin: 25px 0 0
+            margin: var(--space-6) 0 0
             display: flex
             flex-direction: column
             align-items: center
-            gap: 10px
+            gap: var(--space-3)
             text-align: center
 
             .stateIcon
                 display: flex
                 align-items: center
                 justify-content: center
-                width: 56px
-                height: 56px
-                border-radius: 50%
+                width: 48px
+                height: 48px
+                border-radius: var(--radius-full)
+                background: var(--surface-2)
+                color: var(--text-color-secondary)
 
                 svg
-                    width: 26px
-                    height: 26px
+                    width: 24px
+                    height: 24px
+                    fill: currentColor
 
+            // Informational: a step to take (log in, wait for opening, go to the bank)
             .stateIconPrimary
-                color: var(--color-primary)
-                background: $stateIconPrimaryBackground
+                background: var(--color-main-background)
+                color: var(--color-main)
 
-                svg
-                    fill: var(--color-primary)
+            // Status: the user has to act before a deadline
+            .stateIconWarning
+                background: var(--color-orange-background)
+                color: var(--color-orange)
 
+            // Status: something went wrong
             .stateIconDanger
+                background: var(--color-red-background)
                 color: var(--color-red)
-                background: $stateIconDangerBackground
-
-                svg
-                    fill: var(--color-red)
 
             .stateHeading
+                +type.titleBlock
                 width: 100%
                 margin: 0
-                font-size: 20px !important
-                font-weight: 500
-                color: var(--text-color-primary)
 
             .stateText
+                +type.secondary
                 width: 100%
                 margin: 0
-                font-size: 13px
-                line-height: 1.5
-                color: var(--text-color-secondary)
 
             .stateActionButton
                 display: inline-flex
 
-            // Wraps the "add to calendar" + "cancel booking" buttons: stacked
-            // (each full width) on mobile, side by side at 50/50 on desktop.
-            // :only-child covers the case where just one of the two renders
-            // (e.g. cancellation window closed) — it then takes the full row.
+                @media only screen and (max-width: variables.$mobileMaxWidth)
+                    width: 100%
+                    min-height: $touchTarget
+
+            // "Add to calendar" + "cancel booking": stacked on phones, 50/50 on
+            // desktop. :only-child covers one of the two being absent.
             .registeredActions
                 width: 100%
                 display: flex
                 flex-direction: column
-                gap: 10px
+                gap: var(--space-2)
 
                 > button
                     width: 100%
+                    min-height: $touchTarget
 
                 @media only screen and (min-width: (variables.$mobileMaxWidth + 1))
                     flex-direction: row
@@ -318,32 +293,28 @@ $stateIconDangerBackground: #a3464694
                         width: auto
                         flex: 1 1 50%
                         min-width: 0
+                        min-height: 0
 
                         &:only-child
                             flex: 1 1 100%
 
             .map
                 width: 100%
-                // Floor so the map stays usable even if the ticket column next to
-                // it (its equal-height reference on desktop) happens to be short.
+                // Floor so the map stays usable next to a short ticket column
                 min-height: 200px
 
             .ticketBlock
                 width: 100%
                 text-align: left
 
-            // 'compact' layout (profile page) split of the registered-state card:
-            // map on the left, ticket + cancel button on the right. A fixed row
-            // height keeps the single-column mobile stack close to the map's old
-            // standalone height (tiles + the Yandex/Google links row below them);
-            // on desktop the two columns sit side by side and stretch to an equal
-            // (content-driven) height via CSS Grid's default track sizing.
+            // 'compact' layout (profile page): map on the left, ticket and cancel
+            // button on the right; stacked on phones.
             .registeredSplit
                 width: 100%
                 display: grid
                 grid-template-columns: 1fr
                 grid-template-rows: 260px auto
-                gap: 16px
+                gap: var(--space-4)
 
                 @media only screen and (min-width: (variables.$mobileMaxWidth + 1))
                     grid-template-columns: 1fr 1fr
@@ -353,45 +324,49 @@ $stateIconDangerBackground: #a3464694
                 width: 100%
                 display: flex
                 flex-direction: column
-                gap: 16px
+                gap: var(--space-4)
                 text-align: left
 
-            // Overrides the shared .notifyText rule below (error hints inside a
-            // failed-payment/payment-expired card) — full width, no default <p> margin.
+            // Error hint inside a failed-payment or payment-expired card
             .notifyText
                 width: 100%
                 margin: 0
+                color: var(--color-red)
 
-        .helpCard
+        // A plate inside the card, one step above the surface
+        .helpCard,
+        .detailsCard
             width: 100%
-            padding: 14px 16px
-            border: 1px solid var(--input-border-color)
-            border-radius: var(--border-radius)
+            padding: var(--space-3) var(--space-4)
+            border-radius: var(--radius-lg)
+            background: var(--surface-2)
             text-align: left
 
             h4
-                margin: 0 0 10px
-                font-size: 14px
-                font-weight: 500
-                color: var(--text-color-primary)
+                +type.body
+                margin: 0 0 var(--space-3)
+                font-weight: var(--font-weight-semibold)
 
         .helpList
             display: flex
             flex-direction: column
-            gap: 10px
+            gap: var(--space-3)
             margin: 0
             padding: 0
             list-style: none
 
             li
+                +type.secondary
                 display: flex
                 align-items: center
-                gap: 10px
-                font-size: 13px
-                color: var(--text-color-secondary)
+                gap: var(--space-3)
 
                 a
                     color: inherit
+                    text-decoration: underline
+
+                    &:hover
+                        color: var(--text-color-primary)
 
             .helpIcon
                 display: flex
@@ -400,36 +375,22 @@ $stateIconDangerBackground: #a3464694
                 width: 24px
                 height: 24px
                 flex-shrink: 0
-                border: 1px solid var(--color-primary)
-                border-radius: 50%
-                color: var(--color-primary)
+                border-radius: var(--radius-full)
+                background: var(--surface-3)
+                color: var(--text-color-secondary)
 
                 svg
                     width: 14px
                     height: 14px
-                    fill: var(--color-primary)
-
-        .detailsCard
-            width: 100%
-            padding: 14px 16px
-            border: 1px solid var(--input-border-color)
-            border-radius: var(--border-radius)
-            text-align: left
-
-            h4
-                margin: 0 0 10px
-                font-size: 14px
-                font-weight: 500
-                color: var(--text-color-primary)
+                    fill: currentColor
 
         .detailsRow
+            +type.secondary
             display: flex
             align-items: flex-start
             justify-content: space-between
-            gap: 10px
-            padding: 4px 0
-            font-size: 13px
-            color: var(--text-color-secondary)
+            gap: var(--space-3)
+            padding: var(--space-1) 0
 
             .detailsValue
                 text-align: right
@@ -439,22 +400,22 @@ $stateIconDangerBackground: #a3464694
             width: 100%
             display: flex
             flex-direction: column
-            gap: 10px
+            gap: var(--space-2)
 
             button
                 width: 100%
 
+                @media only screen and (max-width: variables.$mobileMaxWidth)
+                    min-height: $touchTarget
+
         .subscribeSignInButton
             display: flex
-            margin: 15px auto 0
-
-.content
-    margin-top: 10px
+            margin: var(--space-4) auto 0
 
 .confirmContent
-    margin: 10px 20px
+    margin: var(--space-3) var(--space-5)
 
 .confirmationFooter
     display: flex
-    gap: 10px
-    justify-content: right
+    gap: var(--space-2)
+    justify-content: flex-end
