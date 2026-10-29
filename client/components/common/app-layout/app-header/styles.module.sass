@@ -2,58 +2,67 @@
 
 .appHeader
     position: fixed
+    top: 0
+    // Above the banners under it (z-dropdown), so submenus open over them; below the scrim
+    z-index: calc(var(--z-dropdown) + 1)
+    width: 100%
+    height: var(--header-height)
+    padding: var(--space-2) var(--space-2) 0
     color: var(--text-color-primary)
     background-color: transparent
     border-bottom: 1px solid transparent
-    height: var(--header-height)
-    width: 100%
-    padding: 10px 10px 0
-    top: 0
-    z-index: 2
-    transition: background-color 0.25s ease, border-color 0.25s ease, padding-top 0.25s ease
+    transition: background-color var(--duration-slow) var(--ease), border-color var(--duration-slow) var(--ease), padding-top var(--duration-slow) var(--ease)
 
     &.scrolled
-        background-color: var(--container-background-color)
-        border-bottom-color: var(--input-border-color)
+        background-color: var(--surface-1)
+        border-bottom-color: var(--border)
         padding-top: 0
+
+    @media (prefers-reduced-motion: reduce)
+        transition: none
 
     .wrapper
         max-width: var(--width-max)
-        margin: 0 auto
-        padding: 0 10px
         width: 100%
         height: 100%
+        margin: 0 auto
+        padding: 0 var(--space-2)
         display: flex
         align-items: center
 
         &.fullWidth
             max-width: 100%
-            margin-top: -5px
+            margin-top: calc(var(--space-1) * -1)
 
     .logoLink
-        font-size: 0
-        margin-right: 10px
         display: flex
+        margin-right: var(--space-3)
+        font-size: 0
+        border-radius: var(--radius-md)
 
         @media only screen and (max-width: variables.$mobileMaxWidth)
             display: none
 
+    // 44px touch target; the glyph itself stays quiet until hovered
     .hamburgerButton
         display: none
-        line-height: 10px
-        margin-right: 10px
-        opacity: .7
-        transition: opacity .3s
+        align-items: center
+        justify-content: center
+        width: var(--size-large)
+        height: var(--size-large)
+        margin: 0 var(--space-2) 0 calc(var(--space-2) * -1)
+        opacity: 0.8
+        transition: opacity var(--duration-fast) var(--ease)
 
         @media only screen and (max-width: variables.$mobileMaxWidth)
-            display: block
+            display: inline-flex
 
         &:hover
             opacity: 1
 
         svg
-            width: 34px
-            height: 34px
+            width: 28px
+            height: 28px
             fill: var(--text-color-primary)
 
     .appMenu
@@ -67,7 +76,7 @@
             margin: 0
 
             &:not(:last-child)
-                margin-right: 5px
+                margin-right: var(--space-1)
 
     .rightSection
         margin-left: auto
@@ -80,28 +89,26 @@
 
     &:hover
         .avatarImage
-            opacity: .6
+            opacity: 0.7
 
     .arrow
         height: 16px
         width: 16px
         fill: currentColor
-        margin-left: 5px
-        opacity: .7
+        margin-left: var(--space-1)
+        opacity: 0.7
 
 .avatarImage
     margin: 0 !important
     font-size: 0
-    transition: opacity .15s ease-out
+    transition: opacity var(--duration-fast) var(--ease)
 
 .contextListMenu
     list-style: none
     margin: 0
-    padding: 6px
+    padding: var(--space-1)
     width: max-content
     min-width: 100%
-    border-radius: var(--border-radius)
-    box-shadow: var(--container-shadow)
 
     li
         margin-bottom: 2px
@@ -110,33 +117,33 @@
             margin-bottom: 0
 
         a
-            padding: 6px 12px
-            min-height: 32px
             display: flex
             align-items: center
-            border-radius: var(--border-radius)
+            gap: var(--space-2)
+            min-height: var(--size-medium)
+            padding: var(--space-1) var(--space-3)
+            border-radius: var(--radius-md)
             color: var(--text-color-primary)
-            text-decoration: none
-            font-weight: 200
+            font-weight: var(--font-weight-normal)
             white-space: nowrap
             cursor: pointer
-            background: transparent
-            border: none
-            text-align: left
-            transition: background-color .15s ease-out, opacity .15s ease-out
+            transition: background-color var(--duration-fast) var(--ease)
 
             svg
-                fill: var(--link-color) !important
-                margin-right: 10px !important
+                fill: var(--text-color-secondary)
                 width: 20px
                 height: 20px
                 flex-shrink: 0
 
-            &:hover, &.active
-                background-color: var(--body-background)
-                color: var(--color-primary)
+            &:hover
+                background-color: var(--surface-2)
+                color: var(--text-color-primary)
+
+            &.active
+                background-color: var(--color-main-background)
+                color: var(--color-main)
 
         &.dividerItem
-            margin-top: 6px
-            padding-top: 6px
-            border-top: 1px solid var(--input-border-color)
+            margin-top: var(--space-1)
+            padding-top: var(--space-1)
+            border-top: 1px solid var(--border)

@@ -19,7 +19,8 @@ const fillContent = (value: string) =>
     fireEvent.change(screen.getByPlaceholderText('Поделитесь впечатлениями...'), { target: { value } })
 
 const clickStar = (value: number) =>
-    fireEvent.click(screen.getByRole('button', { name: `${value} star${value !== 1 ? 's' : ''}` }))
+    // The test i18n instance does not interpolate, so every star shares one label: pick by position
+    fireEvent.click(screen.getAllByRole('button', { name: /Оценка .* из 5/ })[value - 1]!)
 
 const clickSubmit = () => fireEvent.click(screen.getByRole('button', { name: 'Отправить отзыв' }))
 

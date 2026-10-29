@@ -73,7 +73,7 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = 
                 // День
                 start: startOfDay,
                 end: endOfDay,
-                color: 'rgba(255, 255, 255, .1)'
+                color: 'rgba(255, 255, 255, .08)'
             },
             {
                 // Гражданские сумерки
@@ -97,7 +97,7 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = 
                 // Текущая область времени
                 start: dayjs().subtract(interval, 'second').toDate(),
                 end: dayjs().toDate(),
-                color: 'rgba(255, 0, 0, .3)'
+                color: 'rgba(141, 140, 240, .6)' // --color-main
             }
         ].map((phase) => [
             {

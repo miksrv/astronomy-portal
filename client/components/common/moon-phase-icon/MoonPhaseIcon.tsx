@@ -29,5 +29,10 @@ export const MoonPhaseIcon: React.FC<MoonPhaseProps> = ({ date }) => {
     const phase = getMoonPhase(new Date(date))
     const moonPhaseClass = 'phase' + phases[phase.toString()]
 
-    return <span className={cn(styles.moonPhaseIcon, styles[moonPhaseClass])} />
+    return (
+        <span
+            className={cn(styles.moonPhaseIcon, styles[moonPhaseClass])}
+            aria-hidden={'true'}
+        />
+    )
 }

@@ -223,7 +223,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onError }) => {
                     'Авторизуясь, вы соглашаетесь на обработку персональных данных и получение писем о ближайших астровыездах. Подробнее — в'
                 )}
                 <Link
-                    style={{ marginLeft: '5px' }}
                     href={'/privacy'}
                     title={t('components.common.login-form.privacy-link', 'Политике конфиденциальности')}
                     target={'_blank'}

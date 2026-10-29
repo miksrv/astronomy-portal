@@ -7,10 +7,13 @@
     .mainContainer
         max-width: var(--width-max)
         margin: calc(var(--header-height) + var(--container-margin-top)) auto 0
-        padding: 0 8px
+        padding: 0 var(--space-2)
         display: flex
         flex-direction: column
-        gap: 16px
+        gap: var(--space-4)
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            padding: 0 var(--space-4)
 
         &.fullWidth
             max-width: 100%
@@ -20,101 +23,125 @@
         &.noTopMargin
             margin-top: 0
 
+    // Scrim behind the mobile sidebar and over the page while something modal is open
     .overlay
         position: fixed
-        top: 0
-        left: 0
-        min-height: 100vh
-        height: 100%
-        width: 100%
-        z-index: 500
+        inset: 0
+        z-index: var(--z-overlay)
         background: var(--overlay-background)
-        transition: opacity 167ms ease-out
+        transition: opacity var(--duration-base) var(--ease), visibility var(--duration-base)
 
         &.hidden
             opacity: 0
             visibility: hidden
-            //animation: animation-fadeOut .32s ease
 
         &.displayed
             opacity: 1
             visibility: visible
-            //animation: animation-fadeIn .32s ease
 
     .sidebar
         position: fixed
-        background-color: var(--container-background-color)
-        width: variables.$sideBarWidth
-        height: 100vh
-        z-index: 600
         top: 0
-        left: -(variables.$sideBarWidth)
-        transition: left 167ms ease-out
+        left: 0
+        z-index: var(--z-dialog)
+        width: min(var(--width-menu), 85vw)
+        height: 100vh
+        height: 100dvh
+        overflow-y: auto
+        overscroll-behavior: contain
+        background-color: var(--surface-1)
+        box-shadow: 0 0 0 1px var(--border), var(--shadow-lg)
+        transform: translateX(-100%)
+        visibility: hidden
+        transition: transform var(--duration-base) var(--ease), visibility var(--duration-base)
 
+        &:focus-visible
+            outline: none
+
+        // Visible at once when opening, so AppLayout can move focus into it in the
+        // same tick (at the start of a visibility transition it is still hidden and
+        // focus() does nothing); hidden only after the slide-out when closing
         &.opened
-            left: 0
+            transform: none
+            visibility: visible
+            transition: transform var(--duration-base) var(--ease), visibility 0s
 
-        &.closed
-            left: -(variables.$sideBarWidth)
+    @media (prefers-reduced-motion: reduce)
+        .overlay, .sidebar, .sidebar.opened
+            transition: none
 
 .menu
     list-style: none
-    padding: 8px
+    padding: var(--space-2)
     margin: 0
 
     li
-        margin-bottom: 5px
         position: relative
 
     a
-        padding: 6px 12px
         display: flex
-        min-height: 32px
         align-items: center
-        border-radius: var(--border-radius)
+        min-height: var(--size-medium)
+        padding: var(--space-1) var(--space-3)
+        border-radius: var(--radius-md)
         color: var(--text-color-primary)
-        text-decoration: none
-        font-weight: 200
-        transition: background-color .15s ease-out,opacity .15s ease-out
+        font-weight: var(--font-weight-medium)
         white-space: nowrap
+        transition: background-color var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease)
 
-        &:hover, &.active
-            background-color: var(--body-background)
-            color: var(--color-primary)
+        &:hover
+            background-color: var(--surface-2)
+            color: var(--text-color-primary)
+
+        &.active
+            background-color: var(--color-main-background)
+            color: var(--color-main)
 
         .arrow
             height: 16px
             width: 16px
             fill: currentColor
-            margin-left: 5px
+            margin-left: var(--space-1)
 
     .dropdownMenu
         position: absolute
         top: 100%
         left: 0
         z-index: 1
-        background-color: var(--container-background-color)
-        border-radius: var(--border-radius)
-        box-shadow: var(--container-shadow)
-        padding: 6px 6px 6px 6px
-        list-style: none
-        margin: 0
         width: max-content
+        min-width: 100%
+        margin: 0
+        padding: var(--space-1)
+        list-style: none
+        background-color: var(--surface-1)
+        border-radius: var(--radius-lg)
+        box-shadow: var(--popout-shadow)
 
         a
-            margin-bottom: 2px
+            font-weight: var(--font-weight-normal)
 
     &.sidebarMenu
+        padding: var(--space-3)
+
+        > li + li
+            margin-top: var(--space-1)
+
+        a
+            min-height: var(--size-large)
+
         .dropdownMenu
-            position: initial
+            position: static
             width: 100%
+            min-width: 0
+            margin: var(--space-1) 0 var(--space-2) var(--space-5)
+            padding: 0 0 0 var(--space-2)
             background-color: transparent
+            border-left: 1px solid var(--border)
+            border-radius: 0
             box-shadow: none
-            padding: 5px 0 0 27px
-            list-style: disc
 
             a
-                text-overflow: ellipsis
                 overflow: hidden
+                text-overflow: ellipsis
                 display: block
-                width: 100%
+                line-height: calc(var(--size-large) - var(--space-2))

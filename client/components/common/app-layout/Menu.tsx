@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { cn, Icon } from 'simple-react-ui-kit'
 
 import Link from 'next/link'
@@ -102,7 +102,29 @@ export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) =
         setDropdownOpen(undefined)
     }
 
+    // Escape closes an open submenu (it opens on hover and on keyboard focus)
+    useEffect(() => {
+        if (dropdownOpen === undefined) {
+            return
+        }
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setDropdownOpen(undefined)
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyDown)
+
+        return () => document.removeEventListener('keydown', handleKeyDown)
+    }, [dropdownOpen])
+
     const isActive = (link: string) => router.asPath === link || router.asPath.startsWith(`${link}/`)
+
+    // Only the link of the page itself is the current page; a section above it is just
+    // "current" (both used to say 'page' on a subpage)
+    const ariaCurrent = (link: string): 'page' | 'true' | undefined =>
+        router.asPath === link ? 'page' : isActive(link) ? 'true' : undefined
 
     return (
         <menu className={cn(className, styles.menu, sidebarMenu && styles.sidebarMenu)}>
@@ -125,8 +147,9 @@ export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) =
                         onClick={() => onClick?.()}
                         target={item.external ? '_blank' : undefined}
                         rel={item.external ? 'noopener noreferrer' : undefined}
-                        aria-haspopup={item.subMenuItems ? true : undefined}
-                        aria-expanded={item.subMenuItems ? dropdownOpen === i : undefined}
+                        aria-current={ariaCurrent(item.link)}
+                        aria-haspopup={item.subMenuItems && !sidebarMenu ? true : undefined}
+                        aria-expanded={item.subMenuItems && !sidebarMenu ? dropdownOpen === i : undefined}
                     >
                         {item.text}
                         {item.subMenuItems && !sidebarMenu ? (
@@ -154,6 +177,7 @@ export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) =
                                         className={isActive(subItem.link) ? styles.active : undefined}
                                         href={subItem.link}
                                         title={subItem.text}
+                                        aria-current={ariaCurrent(subItem.link)}
                                         onClick={() => onClick?.()}
                                         target={subItem.external ? '_blank' : undefined}
                                         rel={subItem.external ? 'noopener noreferrer' : undefined}

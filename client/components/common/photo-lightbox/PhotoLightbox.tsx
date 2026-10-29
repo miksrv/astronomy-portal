@@ -4,6 +4,8 @@ import Lightbox, { Slide } from 'yet-another-react-lightbox'
 import Captions from 'yet-another-react-lightbox/plugins/captions'
 import Zoom from 'yet-another-react-lightbox/plugins/zoom'
 
+import { useTranslation } from 'next-i18next/pages'
+
 import { ImageSlide } from './ImageSlide'
 import { VideoSlide } from './VideoSlide'
 
@@ -50,6 +52,8 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
     showLightbox,
     onCloseLightBox
 }) => {
+    const { t } = useTranslation()
+
     // const makeImageLink = (link?: string) =>
     //     link?.includes('http://') || link?.includes('https://')
     //         ? link
@@ -61,6 +65,13 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
             index={photoIndex}
             plugins={[Captions, Zoom]}
             close={onCloseLightBox}
+            labels={{
+                Close: t('components.common.photo-lightbox.close', 'Закрыть'),
+                Next: t('components.common.photo-lightbox.next', 'Следующее фото'),
+                Previous: t('components.common.photo-lightbox.previous', 'Предыдущее фото'),
+                'Zoom in': t('components.common.photo-lightbox.zoom-in', 'Увеличить'),
+                'Zoom out': t('components.common.photo-lightbox.zoom-out', 'Уменьшить')
+            }}
             render={{
                 // `Slide`'s library type only ever describes an image slide (see
                 // `SlideTypeKey`), so both the dispatch below and ImageSlide/VideoSlide

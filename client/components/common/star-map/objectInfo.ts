@@ -1,5 +1,5 @@
 import * as Astronomy from 'astronomy-engine'
-import SunCalc from 'suncalc'
+import * as SunCalc from 'suncalc'
 
 import { getMoonIllumination, getMoonPhase } from '@/utils/moon'
 
@@ -200,7 +200,7 @@ export const computeBodyInfo = (
     }
 
     if (body === Astronomy.Body.Moon) {
-        const moonTimes = SunCalc.getMoonTimes(date, lat, lon)
+        const moonTimes = SunCalc.getMoonTimes(date, lat, lon, -date.getTimezoneOffset())
 
         return {
             ...base,
@@ -213,12 +213,14 @@ export const computeBodyInfo = (
     }
 
     if (body === Astronomy.Body.Sun) {
-        const sunTimes = SunCalc.getTimes(date, lat, lon)
+        // Same civil day as the Moon's rise/set above
+        const sunTimes = SunCalc.getTimes(date, lat, lon, 0, -date.getTimezoneOffset())
 
         return {
             ...base,
-            rise: Number.isNaN(sunTimes.sunrise?.getTime()) ? undefined : sunTimes.sunrise,
-            set: Number.isNaN(sunTimes.sunset?.getTime()) ? undefined : sunTimes.sunset
+            // null during polar day/night
+            rise: sunTimes.sunrise ?? undefined,
+            set: sunTimes.sunset ?? undefined
         }
     }
 

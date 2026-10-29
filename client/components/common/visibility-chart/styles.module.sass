@@ -1,13 +1,13 @@
-@use '../../../styles/variables'
 @use '../../../styles/mixins'
+@use '../../../styles/typography' as type
 
 .container
-    padding: 2px !important
-
     .title
-        margin: 10px 10px 5px
+        +type.titleBlock
+        margin: 0 0 var(--space-1)
 
     .description
-        margin: 0 10px 10px
+        +type.secondary
+        margin: 0 0 var(--space-3)
 
 +mixins.chart-tooltip(100px)

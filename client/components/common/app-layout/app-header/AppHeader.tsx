@@ -18,10 +18,11 @@ import styles from './styles.module.sass'
 
 interface AppHeaderProps {
     fullWidth?: boolean
+    menuOpen?: boolean
     onMenuClick?: () => void
 }
 
-export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) => {
+export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, menuOpen, onMenuClick }) => {
     const { t } = useTranslation()
     const dispatch = useAppDispatch()
     const authSlice = useAppSelector((state) => state.auth)
@@ -124,7 +125,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ fullWidth, onMenuClick }) 
                     icon={'Menu'}
                     className={styles.hamburgerButton}
                     onClick={onMenuClick}
-                    aria-label={'Toggle Sidebar'}
+                    aria-label={t('components.common.app-layout.app-header.menu', 'Меню')}
+                    aria-expanded={!!menuOpen}
+                    aria-controls={'app-sidebar'}
                 />
 
                 <Menu className={styles.appMenu} />

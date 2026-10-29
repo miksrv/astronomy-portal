@@ -87,7 +87,7 @@ const renderImage = (props: RenderImageProps, context: RenderPhotoContext<Galler
 export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ defaultContainerWidth = 1200, ...props }) => (
     <RowsPhotoAlbum
         {...props}
-        spacing={5}
+        spacing={8}
         targetRowHeight={160}
         // Without an assumed width, react-photo-album renders no <img> tags at
         // all during SSR (it needs the real container width, only knowable in

@@ -1,22 +1,33 @@
+@use '../../../../styles/variables' as variables
+
 .languageSwitcher
     display: flex
     align-items: center
-    gap: 4px
+    gap: var(--space-1)
 
     .separator
-        color: var(--text-color-secondary)
+        color: var(--text-color-disabled)
 
     .langButton
         border: none
         background-color: transparent
         cursor: pointer
-        padding: 0
+        padding: 0 var(--space-1)
         font: inherit
         color: var(--text-color-secondary)
+        border-radius: var(--radius-sm)
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            min-height: 44px
 
         &:hover:not(:disabled)
             color: var(--text-color-primary)
 
+        &:focus-visible
+            outline: var(--focus-outline)
+            outline-offset: 2px
+
         &.active
             color: var(--text-color-primary)
+            font-weight: var(--font-weight-medium)
             cursor: default

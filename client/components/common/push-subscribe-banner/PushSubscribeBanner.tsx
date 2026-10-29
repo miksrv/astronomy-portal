@@ -5,7 +5,14 @@ import { Button, Icon, Message } from 'simple-react-ui-kit'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API } from '@/api'
-import { PUSH_PROMPT_APPEAR_DELAY, PUSH_PROMPT_DISMISS_COOKIE, PUSH_PROMPT_DISMISS_DURATION } from '@/utils/constants'
+import {
+    COOKIE_CONSENT_DISMISSED_EVENT,
+    LOCAL_STORAGE,
+    PUSH_PROMPT_APPEAR_DELAY,
+    PUSH_PROMPT_DISMISS_COOKIE,
+    PUSH_PROMPT_DISMISS_DURATION
+} from '@/utils/constants'
+import * as LocalStorage from '@/utils/localstorage'
 import { getCurrentPushSubscription, getPushPermissionState, subscribeToPush } from '@/utils/push'
 
 import styles from './styles.module.sass'
@@ -20,10 +27,11 @@ const SUBSCRIBED_DURATION = 3000
  * where the audience already is, instead of relying on someone finding the
  * toggle buried in /profile.
  *
- * Floats just under the fixed header, its own compact bar rather than a
- * modal or a bottom-of-viewport panel: two lines of copy on the left, the
- * "Не сейчас"/"Подписаться" actions on the right, no separate close button
- * — "Не сейчас" already dismisses it. A guest may subscribe here before
+ * A compact card floating in the bottom-right corner (full width on phones),
+ * like a toast, so it never covers the page title: two lines of copy and the
+ * "Не сейчас"/"Подписаться" actions, no separate close button — "Не сейчас"
+ * already dismisses it. It waits until the cookie consent card is closed, so
+ * a first-time visitor never gets two floating cards at once. A guest may subscribe here before
  * ever logging in — see usePushClaim for how that subscription gets linked
  * to their account once they do.
  */
@@ -37,6 +45,7 @@ export const PushSubscribeBanner: React.FC = () => {
     const [dismissed, setDismissed] = useState<boolean | null>(null)
     const [hasSubscription, setHasSubscription] = useState<boolean | null>(null)
     const [appeared, setAppeared] = useState(false)
+    const [cookieConsentClosed, setCookieConsentClosed] = useState(false)
     const [justSubscribed, setJustSubscribed] = useState(false)
     const [error, setError] = useState<string | undefined>()
 
@@ -50,6 +59,15 @@ export const PushSubscribeBanner: React.FC = () => {
         setDismissed(!!getCookie(PUSH_PROMPT_DISMISS_COOKIE))
 
         void getCurrentPushSubscription().then((current) => setHasSubscription(!!current))
+    }, [])
+
+    useEffect(() => {
+        setCookieConsentClosed(!!LocalStorage.getItem(LOCAL_STORAGE.COOKIE_CONSENT as 'COOKIE_CONSENT'))
+
+        const handleConsentClosed = () => setCookieConsentClosed(true)
+        window.addEventListener(COOKIE_CONSENT_DISMISSED_EVENT, handleConsentClosed)
+
+        return () => window.removeEventListener(COOKIE_CONSENT_DISMISSED_EVENT, handleConsentClosed)
     }, [])
 
     // Don't flash in instantly on page load.
@@ -122,6 +140,7 @@ export const PushSubscribeBanner: React.FC = () => {
         !error &&
         (!supported ||
             !appeared ||
+            !cookieConsentClosed ||
             dismissed !== false ||
             hasSubscription !== false ||
             getPushPermissionState() === 'denied')

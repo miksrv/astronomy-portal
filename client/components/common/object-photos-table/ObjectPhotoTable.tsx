@@ -45,7 +45,7 @@ export const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, 
                                     src={data as string}
                                     width={106}
                                     height={24}
-                                    alt={''}
+                                    alt={createPhotoTitle(item as ApiModel.Photo, t)}
                                 />
                             </Link>
                         )

@@ -1,17 +1,16 @@
-@use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
 
 .card
-    padding-bottom: 10px
-    margin-bottom: 4px
     display: flex
     flex-direction: column
-    gap: 4px
-    border-bottom: 1px solid var(--input-border-color)
+    gap: var(--space-2)
+    padding-bottom: var(--space-3)
+    border-bottom: 1px solid var(--border)
 
 .header
     display: flex
     align-items: center
-    gap: 8px
+    gap: var(--space-2)
 
 .meta
     display: flex
@@ -21,9 +20,8 @@
     min-width: 0
 
 .authorName
-    font-size: var(--font-size-small)
+    font-weight: var(--font-weight-medium)
     color: var(--text-color-primary)
-    font-weight: 500
     white-space: nowrap
     overflow: hidden
     text-overflow: ellipsis
@@ -31,35 +29,32 @@
 .headerAside
     display: flex
     align-items: center
-    gap: 12px
+    gap: var(--space-3)
     flex-shrink: 0
     margin-left: auto
 
 .stars
-    font-size: 13px
+    font-size: var(--font-size-secondary)
     line-height: 1
 
 .starFilled
-    color: var(--color-primary)
+    color: var(--color-main)
 
 .starEmpty
-    color: var(--text-color-secondary-hover)
+    color: var(--text-color-disabled)
 
 .content
     margin: 0
-    font-size: var(--font-size)
     color: var(--text-color-primary)
     line-height: 1.5
-    word-break: break-word
+    overflow-wrap: anywhere
 
 .date
-    font-size: var(--font-size-small)
-    color: var(--text-color-secondary)
+    +type.caption
     white-space: nowrap
 
 .pendingLabel
-    font-size: var(--font-size-small)
-    color: var(--text-color-secondary)
+    +type.caption
     font-style: italic
     white-space: nowrap
 
