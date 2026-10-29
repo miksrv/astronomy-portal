@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 4.12.1
+
+### Patch Changes
+
+- Optimized page and image delivery: photos and pages load faster, no broken pages after a release
+
 ## 4.12.0
 
 The star map is now a full online planetarium: see the sky from any place at any moment.

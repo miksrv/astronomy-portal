@@ -18,7 +18,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'yarn'
           cache-dependency-path: 'client/yarn.lock'
 
@@ -101,16 +101,19 @@ jobs:
       # If we run NextJS on a Node server using PM2
       - name: Send files
         run: |
-          ssh vps "cd /var/www/astro.miksoft.pro && rm -rf .next"
+          # Everything but .next/cache and .next/static. The optimized images in the cache do not depend on
+          # the build, and a wiped cache makes every image a slow miss after a release; images nobody
+          # requested for a month go. The previous builds' static files stay for a week: pages rendered
+          # before the release (open tabs, the crawler page cache) still load their chunks and icons
+          ssh vps "cd /var/www/astro.miksoft.pro && mkdir -p .next && find .next -mindepth 1 -maxdepth 1 ! -name cache ! -name static -exec rm -rf {} + && (find .next/static -type f -mtime +7 -delete; find .next/static -mindepth 1 -type d -empty -delete; find .next/cache/images -type f -atime +30 -delete) 2>/dev/null || true"
           rsync -avz -e ssh client/.next/standalone/ vps:/var/www/astro.miksoft.pro
           rsync -avz -e ssh client/.next/static vps:/var/www/astro.miksoft.pro/.next
           rsync -avz -e ssh client/public vps:/var/www/astro.miksoft.pro
           rsync -avz -e ssh client/ecosystem.config.js vps:/var/www/astro.miksoft.pro
 
-      # For the first launch of the application on the server:
-      # pm2 start ecosystem.config.js && pm2 save
+      # Restarting by the ecosystem file applies its env changes; pm2 save keeps the list for a reboot
       - name: Restart PM2
-        run: ssh vps "pm2 restart astro.miksoft.pro"
+        run: ssh vps "cd /var/www/astro.miksoft.pro && pm2 restart ecosystem.config.js --update-env && pm2 save"
 
       # Runs even if a previous step failed, so a broken deploy never leaves
       # the site stuck behind the maintenance page.
