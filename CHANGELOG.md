@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 4.12.0
+
+The star map is now a full online planetarium: see the sky from any place at any moment.
+
+### Minor Changes
+
+- Star map: new horizon view with ground, compass directions and atmosphere, alongside the classic chart
+- Star map: choose your location (or use your own) and any date and time, local to that place
+- Star map: time flow controls to speed up or pause the motion of the sky
+- Star map: search for stars, planets and deep-sky objects, the map turns towards the result
+- Star map: tap any object to see its altitude and azimuth, Sun and Moon rise/set, and Moon phase
+- Star map: meteor shower radiants, a "Tonight" preset and an optional full deep-sky catalog
+- Star map: "Copy link" shares the exact view, place and time you are looking at
+- Star map: full-screen layout on phones with larger controls, plus keyboard and screen reader support
+- Faster loading of pages that don't show the star map
+
 ## 4.11.0
 
 ### Minor Changes
