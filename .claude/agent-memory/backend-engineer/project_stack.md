@@ -1,59 +1,15 @@
 ---
 name: project_stack
-description: Technology stack, framework versions, key architectural decisions, and post-audit patterns for the astronomy portal backend
+description: Non-obvious CI4/model gotchas in the astronomy portal backend that the docs and code don't make obvious
 type: project
 ---
 
-CodeIgniter 4.6 REST API backend, PHP 8.2, MySQL/MariaDB. Located at `server/`.
+Stack, routes, controllers, models and conventions are documented in `server/CLAUDE.md` — read it first. These are the traps not written there:
 
-**Key dependencies:**
-- `firebase/php-jwt ^6.10` — JWT auth (HS256)
-- PHPUnit 11.5 (dev)
-
-**Auth pattern:** Stateless JWT in `Authorization` header. `SessionLibrary` reads and validates the token on every request constructor. Token payload (`generateAuthToken()` in `app/Helpers/auth_helper.php`) contains `email`, `sid` (the user's `session_token`, embedded specifically to enable revocation — see below), `iat`, `exp`. Permissions are NOT baked into the token: `SessionLibrary::loadPermissions()` re-reads `$user->roles` → `RolesModel::getPermissionsForIds()` on every request, so a role/privilege change takes effect instantly without waiting for the JWT to expire. Three OAuth providers (Google, Yandex, VK) plus a fourth passwordless path: `POST /auth/magic-link` + `/auth/magic-link/verify` (`MagicLinkTokensModel`), auth_type `email`. `Services::getSecretKey()` throws RuntimeException if `auth.token.secret` env var is empty.
-
-**Session revocation:** JWT lifetime is a long-lived 180 days and is NOT shortened by logout. Instead `users.session_token` (the `sid` claim above) is checked on every request; `POST /auth/logout` regenerates/clears it, which instantly invalidates every previously-issued token for that user across all devices. Do not assume "logout" means the old token stops validating on its own — it only stops validating because `sid` no longer matches.
-
-**Auth guard order (post-audit):** In every controller method: check `!$session->isAuth` → `failUnauthorized()`, then check role → `failForbidden()`, THEN validate input, THEN query DB. Never validate before auth.
-
-**ID strategy:** `uniqid()` used for all primary keys (users, events, photos, event_users). Not collision-safe under concurrent load.
-
-**Locale pattern:** `LocaleLibrary::init()` (static method) called in controller constructors; reads `Locale` header, sets request locale. Supported locales: `en`, `ru`. Default: `ru`. Do NOT use `new LocaleLibrary()` — use `LocaleLibrary::init()`.
-
-**Error messages:** Use `lang('App.accessDenied')`, `lang('App.objectNotFound')`, etc. Language files at `app/Language/en/App.php` and `app/Language/ru/App.php`.
-
-**CORS:** Built-in CI4 Cors filter (Config\Cors). Allowed origins: `http://localhost:3000`, `https://miksoft.pro`, `https://www.miksoft.pro`. The old custom CorsFilter.php is a stub.
-
-**Caching:** CI4 cache service. Keys: `categories_list_{locale}` (5 min), `equipment_list` (5 min), `objects_list_{locale}` (5 min).
-
-**Activity debounce:** `UsersModel::updateUserActivity()` skips the DB write if last `activity_at` was less than 5 minutes ago.
-
-**CLI commands:** `php spark fits:recalculate` — recalculates FITS filter aggregates. HTTP endpoint removed.
-
-**Upload directories (constants in `app/Config/Constants.php`):**
-- `UPLOAD_PHOTOS` = `public/astrophotos/`
-- `UPLOAD_EVENTS` = `public/stargazing/`
-- `UPLOAD_USERS` = `public/users/`
-- `UPLOAD_STAR_MAPS` = `public/starmaps/`
-
-**insertBatch caveat:** `insertBatch()` does NOT trigger `beforeInsert` callbacks (including `generateId`) and does NOT auto-populate `created_at`/`updated_at` from `useTimestamps`. Always pre-generate IDs with `uniqid()` and include timestamp columns manually in the batch array.
-
-**Entity ID caveat:** The `generateId` beforeInsert callback writes to `$data['data']['id']` (the DB insert array), but does NOT write back to the entity object. Set `$entity->id = uniqid()` manually before calling `model->save()` when you need to reference the ID after save.
-
-**SMTP / email:** EmailLibrary at `server/app/Libraries/EmailLibrary.php`. Config from `smtp.*` env vars. Uses `sendWithAttachment()` for inline image embed via CID placeholder `cid:COVER_IMAGE_CID`. Call `clear(true)` + `initialize()` before each send for sequential safety.
-
-**Newsletter system (FEAT-1, 2026-04-13):** Tables `mailings`, `mailing_emails`, `mailing_unsubscribes`. JSON column `users.settings` added. Cron command at `php spark system:send-email`. Unsubscribe gate: `users.settings.subscribe_newsletter === false` excludes users. NULL or missing key = subscribed.
-
-**Web Push system (FEAT-13, 2026-08-16):** Second announcement channel, deliberately mirrors the FEAT-1 mailing system 1-in-1 but keyed by *subscription* (device/browser) not *user* — one user can have 0..N `push_subscriptions` rows (unique `endpoint`; `PushSubscriptionsModel::upsertByEndpoint()` refreshes-in-place on re-subscribe rather than duplicating). Tables: `push_subscriptions`, `push_notifications` (mirrors `mailings`: draft/sending/completed/paused, no `canceled` — out of scope), `push_notification_deliveries` (mirrors `mailing_emails`: queued/sent/error/rejected — one row per (notification, subscription) pair, so a 2-device user gets 2 rows per campaign). New `Permission::PUSH_MANAGE` gates all `/push-notifications*` admin endpoints; user-facing `POST/DELETE /push/subscribe` + `GET /push/vapid-key` only need `isAuth` (opt-in is independent of the newsletter `subscribe_newsletter` setting — a user can have one, both, or neither). `WebPushLibrary` wraps `minishlink/web-push` v11 (`Minishlink\WebPush\WebPush::sendOneNotification()`, `MessageSentReport::isSuccess()`/`isSubscriptionExpired()` — the last one already checks for 404/410, no need to inspect the status code manually); VAPID keys live in `Config\Push` (env vars `push.vapidPublicKey/PrivateKey/Subject`) — regenerating them invalidates every existing subscription, one-time setup not a rotation. Cron command `php spark system:send-push` drains `push_notification_deliveries` (batch 50, no rate-limit unlike email — push has no SMTP-style provider reputation limit) and hard-deletes the `push_subscriptions` row on `WebPushExpiredSubscriptionException` (push_subscriptions has no soft-deletes). `UsersModel::getUsersList()` (backs `/admin/users`) now joins `push_subscriptions` alongside `events_users` — both joins are one-to-many fan-outs, so both aggregate COUNTs must use `COUNT(DISTINCT ...)` or the second join inflates the first's count via cartesian product (this bit an early version of `eventsCount` when the push join was added — watch for the same trap if a third one-to-many join is ever added here).
-
-**Model inheritance rule:** All models must extend `ApplicationBaseModel`, not `CodeIgniter\Model` directly. `ApplicationBaseModel` provides `generateId` (beforeInsert) and `prepareOutput` (afterFind / hiddenFields).
-
-**Entity datetime wire format — two distinct conventions, easy to conflate:** CI4's `Entity::__get()` mutates any attribute listed in `$dates` into a `Time` object *unconditionally*, bypassing `$casts` entirely (dates-check happens in an `if/elseif` before the cast branch — see `vendor/codeigniter4/framework/system/Entity/Entity.php`). A `Time` object (extends `DateTimeImmutable`, no custom `jsonSerialize()`) serializes over the wire as `{date, timezone_type, timezone}`, NOT a plain string. This codebase uses that shape *deliberately* for most entity datetime fields (`created_at`/`updated_at`/`deleted_at`, `events.date`/`endDate`/`registrationStart`/`registrationEnd`, etc.) — the frontend has a shared `ApiType.DateTime = {date, timezone_type, timezone}` type and unwraps `.date` where needed (e.g. `event.endDate.date` in `EventInfoPanel.tsx`). But some fields deliberately opt OUT of this and stay a plain string: they are cast `'?string'` (not `'?datetime'`) AND excluded from `$dates` — e.g. `UserEntity::birthday`, `EventPhotoEntity::taken_at`. Before adding a new datetime-ish field to an entity, check how the *frontend model* types it (`DateTime` vs plain `string`) in `client/api/models/*.ts` — that dictates whether the field belongs in `$dates` (→ `DateTime` object) or should be `'?string'`-cast and left out of `$dates` (→ plain string). Getting this wrong silently breaks the wire contract without any test catching it (PHPUnit tests only check entity-internal behavior, not the frontend's TS type expectations).
-
-**Adding an index to an existing table in a migration:** Forge's `createTable()`-time `addKey()` doesn't apply retroactively to an already-created table. The established pattern here (see `AddEventUserPaymentColumns`, `AddEventPhotosGroupingFields`) is: `$this->forge->addKey('col', false, false, 'idx_name'); $this->forge->processIndexes('table_name');` in `up()`, and `$this->forge->dropKey('table_name', 'idx_name')` in `down()`. Works for both MySQLi and SQLite (unlike raw generated-column ALTERs, which this codebase gates behind `$this->db->DBDriver !== 'MySQLi'` — see `AddEventUsersActiveBookingUniqueKey`).
-
-**EventsModel ID:** `allowCallbacks = true` but `beforeInsert = []` — ID is assigned manually in controller via `$event->id = uniqid()` before `model->save()`. This is intentional because the event upload directory must be created using the ID before the DB insert. Do NOT add `generateId` to EventsModel.
-
-**Why:** This is a personal astronomy observatory portal with event booking, astrophoto gallery, FITS file metadata ingestion, and live relay/camera control.
-
-**How to apply:** When suggesting changes, assume MySQL, CodeIgniter conventions (model callbacks, entity datamaps), and that the front-end expects camelCase-to-snake_case entity datamap translations.
+- **insertBatch skips callbacks:** `insertBatch()` does not run `beforeInsert` (so no `generateId`) and does not fill `created_at`/`updated_at`. Pre-generate IDs with `uniqid()` and add timestamp columns to the batch array yourself.
+- **Entity ID writeback:** `generateId` writes to `$data['data']['id']`, not back to the entity. Set `$entity->id = uniqid()` before `save()` if you need the ID afterwards.
+- **EventsModel ID is manual on purpose:** `beforeInsert = []`; the controller sets `$event->id` before save because the upload directory is created from it first. Do not add `generateId` there.
+- **Entity datetime wire format:** an attribute in `$dates` becomes a `Time` object (bypassing `$casts`) and serializes as `{date, timezone_type, timezone}` — the frontend's `ApiType.DateTime`. Fields the frontend types as a plain `string` (e.g. `UserEntity::birthday`, `EventMediaEntity::taken_at`) are cast `'?string'` and kept out of `$dates`. Check `client/api/models/*.ts` before adding a datetime field.
+- **Adding an index to an existing table:** `$this->forge->addKey('col', false, false, 'idx_name'); $this->forge->processIndexes('table');` in `up()`, `dropKey()` in `down()` (see `AddEventUserPaymentColumns`). Raw generated-column ALTERs are gated behind `DBDriver !== 'MySQLi'` for SQLite tests (see `AddEventUsersActiveBookingUniqueKey`).
+- **COUNT on fan-out joins:** `UsersModel::getUsersList()` joins both `events_users` and `push_subscriptions` (both one-to-many) — every aggregate there must be `COUNT(DISTINCT ...)`, or one join inflates the other.
+- **Auth guard order:** in every controller method check `isAuth` → `respondUnauthorized()`, then the privilege → `respondForbidden()`, then validate input, then query.

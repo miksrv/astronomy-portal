@@ -1,27 +1,10 @@
 # Project ROADMAP
 
-High-level overview of planned features and improvements for the Astronomy Observatory Portal.
+Planned features for the Astronomy Observatory Portal. Each one with a spec is detailed in `features/`; once shipped, the spec is deleted and the feature is recorded in `CHANGELOG.md`.
 
-Each feature is described in detail in the `features/` directory.
-
----
-
-## Planned Features
-
-| ID      | Title                              | Status    | Spec                                                         |
-|---------|------------------------------------|-----------|--------------------------------------------------------------|
-| FEAT-9  | "What's Visible Tonight" Planner   | Planned   | —                                                            |
-| **Core UX** ||||
-| FEAT-25 | Admin Dashboard (`/admin`)         | Planned   | [features/admin-dashboard.md](features/admin-dashboard.md)   |
-| **Stargazing UX improvements** ||||
-| FEAT-26 | Event Gallery Video Uploads (Chunked Media Upload) | In review | [features/stargazing-event-video-uploads.md](features/stargazing-event-video-uploads.md) |
-| **Star Atlas / SEO** ||||
-| FEAT-27 | Star Atlas Upgrade (`/starmap` Planetarium Mode) | In progress (frontend done incl. UX pass: status chip, docked sidebar, quick bar, atmosphere/tonight/time steps, static city picker; BE-1 geocode proxy + og:image asset deferred) | [features/star-atlas-upgrade.md](features/star-atlas-upgrade.md) |
-
----
-
-## Notes
-
-- Features are implemented by dedicated frontend and backend agents working in parallel where possible.
-- Each feature spec defines the full scope: database schema, API endpoints, UI pages, and acceptance criteria.
-- After implementation, completed features are moved to `CHANGELOG.md` under the appropriate version section.
+| ID      | Title                              | Status  | Spec                                                       |
+|---------|------------------------------------|---------|------------------------------------------------------------|
+| FEAT-9  | "What's Visible Tonight" Planner   | Planned | —                                                          |
+| FEAT-25 | Admin Dashboard (`/admin`)         | Planned | [features/admin-dashboard.md](features/admin-dashboard.md) |
+| FEAT-28 | Star Map Follow-ups (city search, `og:image`, intro copy) | Planned | [features/starmap-followups.md](features/starmap-followups.md) |
+| —       | Sold-out event waitlist / notify-me (the "Места закончились" panel in `EventUpcoming` has no opt-in; no backend) | Idea | — |

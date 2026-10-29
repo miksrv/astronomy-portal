@@ -1,22 +1,11 @@
 ---
 name: project-overview
-description: Core facts about the astronomy-portal frontend project architecture and tech stack
+description: Frontend framework gotchas — pages router only, next-i18next v16 /pages import subpath
 type: project
 ---
 
-Next.js 16 pages dir (NOT app dir), React 19, TypeScript 6.0 strict mode, Redux Toolkit + RTK Query, next-redux-wrapper for SSR hydration, next-i18next v16 for i18n (ru/en), Sass modules, echarts-for-react for charts, embla-carousel, yet-another-react-lightbox, simple-react-ui-kit component library.
+Stack and conventions are in the root `CLAUDE.md`, `client/CLAUDE.md` and `client/DESIGN.md`. Not written there:
 
-**Why:** Understanding this helps avoid framework-wrong suggestions (e.g. no app-dir conventions, no server components).
-**How to apply:** Most pages use getServerSideProps + wrapper.getServerSideProps, but fully static pages (no per-request data) use wrapper.getStaticProps with revalidate:86400 instead — see [[static-pages-use-getstaticprops-via-wrapper]] (confirmed 2026-08-14: about, privacy, 404, observatory/history, stargazing faq/howto/rules/where are on getStaticProps; ~31 other pages still on getServerSideProps). State is managed via Redux store with HYDRATE. Styling is Sass modules. No Tailwind. Test coverage has grown well beyond the single coordinates.test.ts — most client/utils/*.ts files now have a matching .test.ts.
-
-## i18n setup details
-
-- Config: `client/next-i18next.config.js` — `defaultLocale: 'ru'`, `locales: ['ru', 'en']`, `defaultNS: 'translation'`, `localePath: ./public/locales`
-- Translation files: `client/public/locales/{ru,en}/translation.json` — single namespace, dot-separated keys (e.g. `pages.about.title`)
-- `_app.tsx` wraps with `appWithTranslation(App, i18Config)` — the second arg is required so pages without serverSideTranslations (like /404) still get a provider
-- All pages call `serverSideTranslations(locale)` (no namespace arg needed — defaultNS is used)
-- 404 page uses `getStaticProps` with `serverSideTranslations` (not `getServerSideProps`)
-- `useTranslation`, `Trans`, `appWithTranslation` imported from `next-i18next/pages` (Pages Router path — v16 changed root export to App Router; all Pages Router imports must use `/pages` subpath)
-- `serverSideTranslations` imported from `next-i18next/pages/serverSideTranslations`
-- Key scanning: `i18next-scanner` via `yarn locales:build` — do NOT manually edit generated locale files; run scanner after adding new t() calls
-- Locale persistence: stored in localStorage key `astro` under `locale` key; re-sync redirect happens in useEffect in _app.tsx (client-only)
+- Pages router only (no app dir, no server components); SSR state goes through `next-redux-wrapper` (`wrapper.getServerSideProps`/`getStaticProps`, HYDRATE). Static pages: see [[static-pages-use-getstaticprops-via-wrapper]].
+- next-i18next v16 moved its root export to the App Router: import `useTranslation`/`Trans`/`appWithTranslation` from `next-i18next/pages` and `serverSideTranslations` from `next-i18next/pages/serverSideTranslations`.
+- `_app.tsx` passes the config as the second arg of `appWithTranslation(App, i18Config)` so pages without `serverSideTranslations` still get a provider.

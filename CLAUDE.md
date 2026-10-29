@@ -6,11 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A DIY amateur observatory web application with remote monitoring, equipment control, weather data, astrophoto archive, stargazing events, and email mailings. The project is a monorepo with three subsystems: a Next.js frontend (`client/`), a CodeIgniter 4 PHP backend (`server/`), and Arduino firmware (`firmware/`).
 
-**Current version:** 4.12.1 (see `CHANGELOG.md` for history)
+**Current version:** 4.13.0 (see `CHANGELOG.md` for history)
 
-**Feature specs:** `ROADMAP.md` gives a high-level list of planned/in-flight features; each one is detailed in its own file under `features/` (e.g. `features/admin-dashboard.md`).
-
-**Known gap — sold-out event UI:** the "Места закончились" panel in `EventUpcoming` (`client/components/pages/stargazing/event-upcoming/`) currently only shows the "what you can do" info card, with no waitlist/notify-me opt-in — there is no waitlist backend (no `events_waitlist` table or endpoints). Revisit if a waitlist feature is planned again.
+**Feature specs:** `ROADMAP.md` lists planned features; each one with a spec is detailed in `features/`. A shipped feature's spec is deleted and the feature recorded in `CHANGELOG.md`.
 
 ### Domain rule: subscription = authentication
 
@@ -31,7 +29,6 @@ yarn install
 yarn dev              # Dev server at http://localhost:3000
 yarn build            # Production build (standalone output)
 yarn test             # Run Jest tests
-yarn test:watch       # Jest in watch mode
 yarn eslint:check     # Check linting
 yarn eslint:fix       # Auto-fix lint issues
 yarn prettier:check   # Check formatting
@@ -49,7 +46,7 @@ composer migration:run       # Run pending migrations
 composer migration:rollback  # Rollback last migration
 composer migration:status    # Check migration status
 composer migration:create    # Create new migration
-composer seed:run     # Run database seeders (SettingsUserRelaySeeder)
+php spark db:seed CategoriesSeeder   # Seeders: Categories, ObservatoryEquipment, ObservatorySettings
 composer routes       # List all API routes
 ```
 
@@ -62,54 +59,22 @@ docker-compose up     # Start MariaDB at localhost:3308 (db: db, user: user, pas
 
 ## Architecture
 
+Detailed inventories live next to the code — read them instead of guessing:
+- **`client/CLAUDE.md`** — frontend conventions, API error handling, verification checklist.
+- **`client/DESIGN.md`** — design system (tokens, type roles, layout, patterns); read it before any UI change.
+- **`server/CLAUDE.md`** — full API route table, controllers, models, libraries, notable migrations, CLI commands, backend conventions.
+
 ### Frontend (`client/`)
 
-**Stack:** Next.js 16.2.6, React 19.2.6, TypeScript 6.0.3, Redux RTK 2.11.x, SASS, i18next 26.x. Package manager: Yarn 4.9.2. Node.js ≥ 20.11.0 required.
-
-**Routing:** Pages-router (`client/pages/`). Key routes:
-- `/` — main dashboard
-- `/about` — about page with donators list
-- `/auth` — authentication
-- `/profile` — user profile
-- `/objects`, `/objects/[name]`, `/objects/form` — astronomical objects catalog + create/edit form
-- `/observatory`, `/observatory/overview`, `/observatory/weather`, `/observatory/history`, `/observatory/history/[slug]` — observatory monitoring + history
-- `/photos`, `/photos/[name]`, `/photos/form` — astrophoto archive + upload/edit form
-- `/stargazing`, `/stargazing/[name]`, `/stargazing/[name]/statistic`, `/stargazing/checkin`, `/stargazing/entry`, `/stargazing/faq`, `/stargazing/form`, `/stargazing/history`, `/stargazing/howto`, `/stargazing/payment`, `/stargazing/rules`, `/stargazing/tickets`, `/stargazing/where` — stargazing events, ticket payment (Alfa-Bank) and check-in
-- `/admin/mailing`, `/admin/mailing/form`, `/admin/mailing/[id]` — email mailing campaigns (`mailings.manage` privilege)
-- `/admin/users` — users list + role assignment (`users.manage` privilege)
-- `/admin/roles` — create/edit roles and their granted privileges (`users.manage` privilege)
-- `/unsubscribe` — mailing unsubscribe landing
-- `/privacy` — privacy policy
-- `/starmap` — interactive star map
-- `/sitemap.tsx` — sitemap generation
-
-**API layer:** RTK Query in `client/api/api.ts` (main API) and `client/api/apiMeteo.ts` (weather/meteo data). Store configured in `client/api/store.ts`; shared constants in `client/api/constants.ts`. Auto-generated hooks consumed throughout. Auth state in `client/api/authSlice.ts`. App-wide state in `client/api/applicationSlice.ts`.
-
-**Data models:** TypeScript interfaces in `client/api/models/` (category, comment, equipment, event, file, filters, mailing, object, photo, relay, sitemap, statistic, user, weather). Per-endpoint request/response types in `client/api/types/` (auth, category, comments, equipment, events, files, mailings, objects, photos, relay, sitemap, statistic, users, weather).
-
-**Components:** Organized as `client/components/common/`, `client/components/pages/` (about, index, objects, observatory, photos, profile, stargazing, users), `client/components/ui/` (breadcrumbs, carousel, counter, pagination, show-more, user-avatar), and `client/components/icons/`.
-
-Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, `app-toolbar/`, `login-form/`, `moon-phase-icon/`, `object-photos-table/`, `photo-filter-list/`, `photo-gallery/`, `photo-lightbox/`, `star-map/`, `visibility-chart/`, plus reviews:
-- `review-card/` — displays a single review with author avatar, star rating, text, date, delete button
-- `review-form/` — form to submit a review (star selector + TextArea + submit); shows API validation errors inline
-
-**Utils:** `client/utils/` — coordinates.ts (celestial math), charts.ts, colors.ts, dates.ts, errors.ts, helpers.ts, moon.ts, pagination.ts, photos.ts, strings.ts, eventMedia.ts, localstorage.ts, constants.ts. Most have a corresponding `.test.ts`.
+**Stack:** Next.js 16.4.3 (pages router), React 19.3.1, TypeScript 6.0.3, Redux RTK 2.13.x (RTK Query in `client/api/`), SASS, i18next 26.x. Yarn 4.9.2, Node.js ≥ 20.11.0. Built as Next.js standalone.
 
 **Path alias:** `@/*` maps to the `client/` root (e.g., `@/api/models/photo`).
 
-**i18n:** Translation files are auto-generated via `yarn locales:build` (i18next-scanner). Locales live in `client/public/locales/{en,ru}/` — `translation.json` plus per-page namespaces (`observatory-overview`, `stargazing-faq`, `stargazing-howto`, `stargazing-rules`, `stargazing-where`). Do not manually edit generated locale files.
+**i18n:** Locales live in `client/public/locales/{en,ru}/` — `translation.json` plus per-page namespaces. `yarn locales:build` (i18next-scanner) adds new keys with the Russian default; the EN value of a new key, and both values of a changed key, are then filled in by hand.
 
-**Other notable deps:** `html5-qrcode` + `react-qr-code` (event check-in QR codes), `react-markdown` (rich text), `react-photo-album` + `yet-another-react-lightbox` (galleries), `next-seo` (SEO/JSON-LD), `dayjs` (dates), `sharp` (image processing), `cookies-next`, `leaflet` + `react-leaflet` (event location map, `client/components/common/event-map`, dynamically imported with `ssr: false`).
+**UI library:** `simple-react-ui-kit` 2.x (tokens `theme.css` + component `styles.css`, imported once in `pages/_app.tsx`). The site is dark-only (`data-theme="dark"` on `<html>`). Always prefer kit components over native HTML (`Button`, `Input`, `TextArea`, `Message`, `Table`, …); when to use `Container` and the rest of the layout rules are in `client/DESIGN.md`.
 
-**Star map:** Uses Celestial.js + D3.js loaded via `client/public/scripts/`. These are vanilla JS libraries, not npm packages.
-
-**Astronomy calculations:** `astronomy-engine` and `suncalc` packages power visibility charts and celestial coordinate utilities in `client/utils/coordinates.ts`.
-
-**Charts:** Apache ECharts via `echarts-for-react` for weather and statistics visualizations.
-
-**Carousel:** `embla-carousel-react` for photo slideshows.
-
-**UI library:** `simple-react-ui-kit` (internal component library). Always prefer its components over native HTML — use `Button` not `<button>`, `TextArea` not `<textarea>`, `Input` not `<input>`, `Container` for card sections, `Message` for alerts, `Table` for tabular data.
+**Star map:** d3-celestial + D3 are vanilla JS in `client/public/scripts/` (not npm), loaded lazily only where `<StarMap>` renders. Astronomy math uses `astronomy-engine` + `suncalc` (`client/utils/coordinates.ts`); charts use ECharts via `echarts-for-react`; the event map uses `leaflet` (dynamically imported, `ssr: false`).
 
 **Coding conventions (frontend):**
 - Component props must use `interface`, not `type` alias
@@ -118,45 +83,18 @@ Notable `common/` components: `app-layout/` (with `app-header`), `app-footer/`, 
 
 ### Backend (`server/`)
 
-**Stack:** CodeIgniter 4.6, PHP 8.2. JWT auth via `firebase/php-jwt ^6.10`. Telegram Bot via `longman/telegram-bot ^0.83.1`. Tests via PHPUnit 11.5 (with `fakerphp/faker`, `mikey179/vfsstream`).
+**Stack:** CodeIgniter 4.7, PHP 8.2 (pinned as `config.platform.php` in `composer.json`, so `composer update` never resolves packages the hosting cannot run). JWT auth via `firebase/php-jwt ^7` (requires an HS256 secret of at least 32 bytes — `auth.token.secret`). Web Push via `minishlink/web-push ^11` (+ `guzzlehttp/guzzle`), ticket QR codes via `endroid/qr-code ^6`. Tests via PHPUnit 11.5 on in-memory SQLite.
 
-**Routing:** All routes in `server/app/Config/Routes.php` (autoRoute disabled). Every route group also registers `OPTIONS (:any)` for CORS preflight. API endpoints:
-- `GET /` — health check (`{name, version, status}`)
-- `GET /camera/:num` — camera image data
-- `GET /statistic/telescope` — telescope statistics
-- `GET /auth/me`, `GET /auth/google`, `GET /auth/yandex`, `GET /auth/vk` — OAuth authentication (OAuth routes rate-limited per-IP); `POST /auth/magic-link`, `POST /auth/magic-link/verify` — passwordless email login; `POST /auth/logout` — revokes the user's session everywhere (see Rate limiting/session note below); `PATCH /auth/profile` — update profile
-- `GET /relay/list`, `GET /relay/light` (rate-limited per-IP), `PUT /relay/set` — power relay control
-- `GET /files/:any` — file serving
-- `GET /equipments`, `GET /categories` — equipment and categories
-- `GET|POST|PATCH|DELETE /objects`, `/objects/:any` — astronomical objects CRUD
-- `GET /fits/:any` — FITS file data (`Fits::show`)
-- `GET|POST|PATCH|DELETE /photos`, `/photos/:any` + `POST /photos/:any/upload` — astrophoto CRUD + upload
-- `GET|POST|PATCH|DELETE /events` + `upcoming`, `upcoming/registered`, `media`, `:id/statistic`, `members/:id`, `checkin/:id`, `ticket/:id`, `:id/cover`, `booking`, `cancel`, `payment/status`, `payment/callback` — stargazing events, ticketing and payment (Alfa-Bank)
-- `POST /events/media/init/:id` → `POST /events/media/chunk/:sessionId` (repeated) → `POST /events/media/finalize/:sessionId`, plus `DELETE /events/media/:sessionId` — chunked gallery upload for photos **and** videos, replacing the old single-request `POST /events/upload/:id` (there is no practical file-size ceiling as a result; `MEDIA_UPLOAD_MAX_SIZE` is a 2GB anti-abuse guard only)
-- `GET|POST|PATCH|DELETE /mailings`, `/mailings/:id` + `unsubscribe`, `audiences`, `:id/upload`, `:id/test`, `:id/send` — email mailing campaigns
-- `GET /push/vapid-key`, `POST /push/subscribe` (public, rate-limited — a guest may opt in before logging in), `DELETE /push/subscribe` (auth required) — Web Push opt-in/opt-out
-- `GET|POST|PATCH|DELETE /push-notifications`, `/push-notifications/:id` + `audiences`, `:id/upload`, `:id/test` (rate-limited), `:id/send` — admin Web Push campaigns (mirrors `/mailings`)
-- `GET /members`, `GET /members/:id/events` — members list and their events
-- `GET /comments?entityType=&entityId=` — list comments (adds `canReview`+`hasReviewed` for authenticated event requests)
-- `GET /comments/random?entityType=&limit=` — random comments for widget
-- `POST /comments` — create review (auth required)
-- `DELETE /comments/:id` — soft-delete review (own or admin/mod)
-- `GET /sitemap` — sitemap data
+**Routing:** all routes in `server/app/Config/Routes.php` (autoRoute disabled); every group also registers `OPTIONS (:any)` for CORS preflight. `composer routes` lists them.
 
-**Controllers** (`server/app/Controllers/`): Auth, Camera, Categories, Comments, Equipment, Events, Files, Mailings, Members, Objects, Photos, Relay, Sitemap, Statistic.
-
-**Models:** `server/app/Models/ApplicationBaseModel.php` is the shared base; all models extend it. Entity classes in `server/app/Entities/` map to DB rows. Models cover: Users, Photos, PhotosAuthor, PhotosCategory, PhotosEquipments, PhotosFilters, PhotosObject, Objects, ObjectCategory, ObjectFitsFiles, ObjectFitsFilters, ObservatoryEquipment, ObservatorySettings, Events, EventsMedia, EventsMediaUploads, EventsUsers, Category, Comments, Mailings, MailingEmails, MailingUnsubscribes, Payments, EmailQueue, MagicLinkTokens.
+**Payments:** `PaymentLibrary` + `PaymentGatewayInterface` are gateway-agnostic — adding a provider means one class implementing the interface; `AlfaBankClient` is the current one.
 
 **Backend conventions:**
 - API responses use **camelCase** field names (e.g. `createdAt`, not `created_at`) — format in model, not controller
+- Errors use the `{message, errors?}` envelope via `BaseApiController` helpers — see "API Responses" in `server/CLAUDE.md`
 - CodeIgniter 4 Query Builder does **not** have `selectRaw()` — use `select()` which accepts raw SQL expressions and aliases natively
 - `CommentsModel::getForEntity()` and `getRandom()` return author as `{ id, name, avatar }` object with name truncated to "FirstName L." for privacy
-
-**Libraries** (`server/app/Libraries/`): CatalogLibrary (FITS), EmailLibrary, GoogleClient/YandexClient/VkClient (OAuth), LocaleLibrary, PhotosLibrary, PhotoUploadLibrary, RelayLibrary (Arduino comms), SessionLibrary (JWT validation), StatisticLibrary, TelegramLibrary, TicketLibrary (event ticket generation), PaymentLibrary + `PaymentGatewayInterface` (gateway-agnostic payment orchestration — adding a new provider means adding one class implementing the interface), AlfaBankClient (current `PaymentGatewayInterface` implementation, test/production environment switch).
-
-**Migrations & seeders:** Migrations in `server/app/Database/Migrations/` (schema spans Oct 2024 → Jul 2026; latest add a per-user session-revocation token, passwordless magic-link tokens, a payment `refunding` status, a unique active-booking constraint, a per-event `requires_registration` flag, and a rework of event location — `location`/`address`/`latitude`/`longitude`/`min_age`/`end_date` replacing the bilingual venue name and manual map links). Seeders in `server/app/Database/Seeds/`: CategoriesSeeder, ObservatoryEquipmentSeeder, ObservatorySettingsSeeder. Always run migrations after pulling changes that add them.
-
-**CORS:** Configured in `server/app/Config/Cors.php`.
+- Always run migrations after pulling changes that add them
 
 **Rate limiting:** `server/app/Filters/RateLimitFilter.php` (alias `ratelimit`) throttles abuse-prone public routes per-IP via a token bucket (CI4's `Services::throttler()`), applied per-route in `Routes.php` — currently OAuth login, `relay/light`, `events/booking`, `comments` create, `mailings/:id/test`, `push-notifications/:id/test`, and `push/subscribe`. Disabled under `ENVIRONMENT === 'testing'`.
 
