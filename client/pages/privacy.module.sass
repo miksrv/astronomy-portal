@@ -1,0 +1,13 @@
+@use '../styles/typography' as type
+
+// Long-form legal text: the page background and the prose role, not a card
+.prose
+    +type.prose
+
+    // The first heading is the page's first block, the toolbar already spaces it
+    > h2:first-child
+        margin-top: 0
+
+    a
+        text-decoration: underline
+        text-underline-offset: 2px

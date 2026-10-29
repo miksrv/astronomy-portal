@@ -67,7 +67,7 @@ export const EventDeleteDialog: React.FC<EventDeleteDialogProps> = ({ eventId, o
             </div>
             <div className={styles.confirmationFooter}>
                 <Button
-                    mode={'secondary'}
+                    mode={'outline'}
                     onClick={onClose}
                 >
                     {t('common.cancel', 'Отмена')}

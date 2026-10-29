@@ -166,74 +166,78 @@ export const EventReviews: React.FC<EventReviewsProps> = ({ eventId }) => {
         })
     }
 
+    // Nothing but "no reviews yet": a single line on the page, not an empty card
+    const isEmpty = !showTopSection && !isInitialLoading && optimisticItems.length === 0
+
+    const emptyText = t('components.common.reviews-section.empty', 'Отзывов пока нет. Будьте первым!')
+
+    const reviewsContent = (
+        <>
+            {showForm && (
+                <div
+                    id={REVIEW_INLINE_FORM_ID}
+                    className={styles.formWrapper}
+                >
+                    <ReviewForm
+                        entityType={'event'}
+                        entityId={eventId}
+                        onSuccess={handleReviewSuccess}
+                        onOptimisticSubmit={handleOptimisticSubmit}
+                    />
+                </div>
+            )}
+
+            {showNotEligible && (
+                <div className={styles.infoBlock}>
+                    <p className={styles.infoTitle}>
+                        {t('components.common.review-form.not-eligible-title', 'Отзыв могут оставить только участники')}
+                    </p>
+                    <p className={styles.infoText}>
+                        {t(
+                            'components.common.review-form.not-eligible',
+                            'Оставить отзыв может любой, кто был зарегистрирован на этот астровыезд'
+                        )}
+                    </p>
+                </div>
+            )}
+
+            {showTopSection && <hr className={styles.divider} />}
+
+            {optimisticItems.length > 0 ? (
+                <ul className={styles.list}>
+                    {optimisticItems.map((review) => (
+                        <li key={review.id}>
+                            <ReviewCard
+                                review={review}
+                                canDelete={canDeleteReview(review)}
+                                pending={review.pending}
+                                onDelete={(id) => {
+                                    void deleteComment(id)
+                                }}
+                            />
+                        </li>
+                    ))}
+                </ul>
+            ) : isInitialLoading ? (
+                <EventReviewsSkeleton />
+            ) : (
+                <p className={styles.empty}>{emptyText}</p>
+            )}
+
+            {hasMore && (
+                <div
+                    ref={sentinelRef}
+                    className={styles.loadMoreSentinel}
+                >
+                    {isLoadingMore && <EventReviewsSkeleton count={2} />}
+                </div>
+            )}
+        </>
+    )
+
     return (
         <>
-            <Container>
-                {showForm && (
-                    <div
-                        id={REVIEW_INLINE_FORM_ID}
-                        className={styles.formWrapper}
-                    >
-                        <ReviewForm
-                            entityType={'event'}
-                            entityId={eventId}
-                            onSuccess={handleReviewSuccess}
-                            onOptimisticSubmit={handleOptimisticSubmit}
-                        />
-                    </div>
-                )}
-
-                {showNotEligible && (
-                    <div className={styles.infoBlock}>
-                        <p className={styles.infoTitle}>
-                            {t(
-                                'components.common.review-form.not-eligible-title',
-                                'Отзыв могут оставить только участники'
-                            )}
-                        </p>
-                        <p className={styles.infoText}>
-                            {t(
-                                'components.common.review-form.not-eligible',
-                                'Оставить отзыв может любой, кто был зарегистрирован на этот астровыезд'
-                            )}
-                        </p>
-                    </div>
-                )}
-
-                {showTopSection && <hr className={styles.divider} />}
-
-                {optimisticItems.length > 0 ? (
-                    <ul className={styles.list}>
-                        {optimisticItems.map((review) => (
-                            <li key={review.id}>
-                                <ReviewCard
-                                    review={review}
-                                    canDelete={canDeleteReview(review)}
-                                    pending={review.pending}
-                                    onDelete={(id) => {
-                                        void deleteComment(id)
-                                    }}
-                                />
-                            </li>
-                        ))}
-                    </ul>
-                ) : isInitialLoading ? (
-                    <EventReviewsSkeleton />
-                ) : (
-                    <p className={styles.empty}>
-                        {t('components.common.reviews-section.empty', 'Отзывов пока нет. Будьте первым!')}
-                    </p>
-                )}
-
-                {hasMore && (
-                    <div
-                        ref={sentinelRef}
-                        className={styles.loadMoreSentinel}
-                    >
-                        {isLoadingMore && <EventReviewsSkeleton count={2} />}
-                    </div>
-                )}
-            </Container>
+            {isEmpty ? <p className={styles.empty}>{emptyText}</p> : <Container>{reviewsContent}</Container>}
 
             <ReviewFloatingPrompt
                 eventId={eventId}

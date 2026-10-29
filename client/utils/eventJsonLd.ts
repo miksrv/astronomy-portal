@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import { ApiModel } from '@/api'
 import { hosts } from '@/api/constants'
 import { SITE_LINK } from '@/utils/constants'
+import { toISODateTime } from '@/utils/dates'
 
 import { removeMarkdown, sliceText } from './strings'
 
@@ -43,10 +44,11 @@ const buildReviewJsonLd = (comment: ApiModel.Comment) => ({
 })
 
 export const buildEventJsonLd = (event: ApiModel.Event, reviews?: EventReviewsData) => {
-    const startDate = event.date?.date
-    const endDate =
-        event.endDate?.date ??
-        (startDate ? dayjs(startDate).add(DEFAULT_EVENT_DURATION_HOURS, 'hour').toISOString() : undefined)
+    const start = event.date?.date
+    const startDate = toISODateTime(start)
+    const endDate = toISODateTime(
+        event.endDate?.date ?? (start ? dayjs.utc(start).add(DEFAULT_EVENT_DURATION_HOURS, 'hour').toDate() : undefined)
+    )
 
     const eventUrl = `${SITE_LINK}stargazing/${event.id}`
     const coverImageUrl =

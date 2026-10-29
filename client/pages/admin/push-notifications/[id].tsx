@@ -83,7 +83,7 @@ const PushNotificationStatsPage: NextPage<object> = () => {
             <Container>
                 {(testError || testSuccess) && (
                     <Message
-                        style={{ marginBottom: '10px' }}
+                        className={styles.formMessage}
                         type={testError ? 'error' : 'success'}
                     >
                         {testSuccess

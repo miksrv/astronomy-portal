@@ -1,17 +1,17 @@
 @use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
 
 .wrapper
     display: flex
     flex-direction: column
-    gap: 16px
+    gap: var(--space-4)
 
 .header
     display: flex
     align-items: center
     justify-content: space-between
     flex-wrap: wrap
-    gap: 10px
-    margin: -5px
+    gap: var(--space-3)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         flex-direction: column
@@ -22,19 +22,16 @@
     flex-direction: column
 
 .title
-    font-size: var(--font-size)
-    font-weight: 600
-    color: var(--text-color-primary)
+    +type.titleBlock
     margin: 0
 
 .subtitle
-    font-size: var(--font-size-small)
-    color: var(--text-color-secondary)
+    +type.caption
 
 .filters
     display: flex
     align-items: center
-    gap: 10px
+    gap: var(--space-3)
     flex-wrap: wrap
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
@@ -42,8 +39,9 @@
         flex-direction: column
         align-items: stretch
 
+// The table runs edge to edge of the card
 .table
-    margin: 0 -15px
+    margin: 0 calc(var(--container-padding) * -1)
 
 .search
     min-width: 260px
@@ -69,8 +67,7 @@
     color: var(--text-color-primary)
 
 .participantEmail
-    font-size: var(--font-size-small)
-    color: var(--text-color-secondary)
+    +type.caption
 
 .nowrap
     white-space: nowrap
@@ -78,48 +75,53 @@
 .actionsCell
     display: flex
     flex-wrap: wrap
-    gap: 6px
+    gap: var(--space-2)
     align-items: flex-start
 
 .verifyCell
     display: flex
     flex-direction: column
-    gap: 6px
+    gap: var(--space-2)
     align-items: flex-start
 
 .verifyResult
-    font-size: var(--font-size-small)
-    color: var(--text-color-secondary)
+    +type.caption
     max-width: 220px
 
 .confirmContent
-    margin: 10px 20px
+    margin: var(--space-3) var(--space-5)
 
 .notifySuccess
-    font-size: var(--font-size-small)
-    color: var(--color-success, #2e7d32)
+    +type.caption
+    color: var(--color-green)
 
 .confirmationFooter
     display: flex
-    gap: 10px
-    justify-content: right
+    gap: var(--space-2)
+    justify-content: flex-end
 
+// Status colours: one badge per payment status
 .badgeConfirmed
-    background: #2e7d32 !important
-    color: #fff !important
+    background: var(--color-green-background)
+    border-color: transparent
+    color: var(--color-green)
 
 .badgePending
-    background: #ff8c00 !important
-    color: #fff !important
+    background: var(--color-orange-background)
+    border-color: transparent
+    color: var(--color-orange)
 
 .badgeFailed
-    background: #ff4444 !important
-    color: #fff !important
+    background: var(--color-red-background)
+    border-color: transparent
+    color: var(--color-red)
 
+// Neutral: nothing to act on
 .badgeCanceled
-    background: #ccc !important
-    color: #333 !important
+    background: var(--surface-2)
+    color: var(--text-color-secondary)
 
 .badgeRefunded
-    background: #1976d2 !important
-    color: #fff !important
+    background: var(--color-main-background)
+    border-color: transparent
+    color: var(--color-main)

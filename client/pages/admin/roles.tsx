@@ -207,12 +207,12 @@ const RolesPage: NextPage<object> = () => {
                 }
 
                 return (
-                    <button
-                        className={styles.roleNameButton}
+                    <Button
+                        mode={'link'}
+                        size={'small'}
+                        label={item.name}
                         onClick={() => openEdit(item)}
-                    >
-                        {item.name}
-                    </button>
+                    />
                 )
             }
         },
@@ -233,7 +233,6 @@ const RolesPage: NextPage<object> = () => {
                                 key={permission}
                                 label={permissionLabel(permission)}
                                 size={'small'}
-                                className={styles.badgeDefault}
                             />
                         ))}
                     </div>
@@ -254,6 +253,8 @@ const RolesPage: NextPage<object> = () => {
                     mode={'secondary'}
                     variant={'negative'}
                     icon={'Close'}
+                    aria-label={t('common.delete', 'Удалить')}
+                    tooltip={t('common.delete', 'Удалить')}
                     onClick={() => {
                         setDeleteAttempted(false)
                         setDeletingRole(row[i])
@@ -281,7 +282,7 @@ const RolesPage: NextPage<object> = () => {
                 />
             </AppToolbar>
 
-            <Container style={{ padding: '2px' }}>
+            <Container className={styles.tableContainer}>
                 <Table<ApiModel.Role>
                     data={rolesData?.items || []}
                     columns={tableColumns}
@@ -303,7 +304,7 @@ const RolesPage: NextPage<object> = () => {
                     {saveError && (
                         <Message
                             type={'error'}
-                            style={{ marginBottom: '10px' }}
+                            className={styles.formElement}
                         >
                             {getErrorMessage(saveError) ?? t('pages.roles.save-error', 'Ошибка сохранения')}
                         </Message>
@@ -328,13 +329,20 @@ const RolesPage: NextPage<object> = () => {
                         ))}
                     </div>
 
-                    <Button
-                        mode={'primary'}
-                        label={t('pages.roles.save-button', 'Сохранить')}
-                        loading={isCreating || isUpdating}
-                        disabled={!formName.trim()}
-                        onClick={handleSave}
-                    />
+                    <div className={styles.dialogActions}>
+                        <Button
+                            mode={'outline'}
+                            label={t('common.cancel', 'Отмена')}
+                            onClick={closeForm}
+                        />
+                        <Button
+                            mode={'primary'}
+                            label={t('pages.roles.save-button', 'Сохранить')}
+                            loading={isCreating || isUpdating}
+                            disabled={!formName.trim()}
+                            onClick={handleSave}
+                        />
+                    </div>
                 </Dialog>
             )}
 
@@ -347,7 +355,7 @@ const RolesPage: NextPage<object> = () => {
                     {displayedDeleteError && (
                         <Message
                             type={'error'}
-                            style={{ marginBottom: '10px' }}
+                            className={styles.formElement}
                         >
                             {getErrorMessage(displayedDeleteError) ?? t('pages.roles.delete-error', 'Ошибка удаления')}
                         </Message>
@@ -363,12 +371,19 @@ const RolesPage: NextPage<object> = () => {
                             : t('pages.roles.delete-warning', 'Удалить роль «{{name}}»?', { name: deletingRole.name })}
                     </p>
 
-                    <Button
-                        mode={'primary'}
-                        variant={'negative'}
-                        label={t('common.delete', 'Удалить')}
-                        onClick={handleConfirmDelete}
-                    />
+                    <div className={styles.dialogActions}>
+                        <Button
+                            mode={'outline'}
+                            label={t('common.cancel', 'Отмена')}
+                            onClick={() => setDeletingRole(undefined)}
+                        />
+                        <Button
+                            mode={'primary'}
+                            variant={'negative'}
+                            label={t('common.delete', 'Удалить')}
+                            onClick={handleConfirmDelete}
+                        />
+                    </div>
                 </Dialog>
             )}
 

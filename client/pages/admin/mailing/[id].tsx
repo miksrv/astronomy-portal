@@ -285,7 +285,7 @@ const MailingStatsPage: NextPage<object> = () => {
                 </p>
                 <div className={styles.modalActions}>
                     <Button
-                        mode={'secondary'}
+                        mode={'outline'}
                         label={t('pages.mailing.cancel', 'Отмена')}
                         onClick={() => setShowCancelConfirm(false)}
                     />

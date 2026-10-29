@@ -1,5 +1,6 @@
 @use '../../styles/variables' as variables
 @use '../../styles/mixins'
+@use '../../styles/typography' as type
 
 .pageBackground
     +mixins.hero-background(100vh)
@@ -10,58 +11,76 @@
     display: flex
     flex-direction: column
     justify-content: center
-    padding-bottom: 8px
+    padding: var(--space-8) 0 var(--space-4)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         min-height: 220px
-        padding: 0 0 8px
+        padding: var(--space-6) 0 var(--space-4)
 
+// Same hero recipe as the home page: eyebrow, display title, lead, one primary action
 .heroLabel
-    +mixins.hero-label($letter-spacing: 0.14em)
+    +type.overline
+    margin: 0 0 var(--space-3)
+    color: var(--color-main)
 
 .heroTitle
-    +mixins.hero-title
+    +type.titleDisplay
+    margin: 0 0 var(--space-4)
+    color: #fff
+    text-wrap: balance
 
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        font-size: 2rem
+    span
+        display: block
 
 .heroSubtitle
-    font-size: 14px
-    color: rgba(255, 255, 255, 0.68)
-    max-width: 480px
-    line-height: 1.7
-    margin: 0 0 28px
+    +type.lead
+    max-width: 52ch
+    margin: 0 0 var(--space-6)
+    color: var(--text-color-secondary)
 
 .heroActions
     display: flex
     align-items: center
-    gap: 12px
+    gap: var(--space-3)
     flex-wrap: wrap
 
+    // Touch targets on phones (DESIGN.md: at least 44px)
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        button
+            min-height: 44px
+
+// Secondary action next to the primary one: a ghost pill over the photo
 .telegramCta
+    +type.body
     display: inline-flex
     align-items: center
-    gap: 8px
-    font-size: 13px
-    color: rgba(255, 255, 255, 0.75)
-    text-decoration: none
-    padding: 6px 14px
-    border-radius: var(--border-radius)
-    border: 1px solid rgba(255, 255, 255, 0.18)
-    transition: color 0.2s, border-color 0.2s
+    gap: var(--space-2)
+    min-height: 36px
+    padding: 0 var(--space-4)
+    border-radius: var(--radius-md)
+    border: 1px solid var(--border-strong)
+    color: var(--text-color-primary)
+    transition: border-color var(--duration-fast) var(--ease), background-color var(--duration-fast) var(--ease)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        min-height: 44px
 
     svg
-        fill: var(--color-primary)
+        fill: var(--color-main)
         width: 16px
         height: 16px
         flex-shrink: 0
 
     &:hover
-        color: #fff
-        border-color: rgba(255, 255, 255, 0.4)
+        color: var(--text-color-primary)
+        border-color: var(--color-main)
+        background: var(--surface-2)
 
+    @media (prefers-reduced-motion: reduce)
+        transition: none
+
+// "Прошедшие астровыезды" heading + "Смотреть все" on the right
 .showAllEvents
+    +type.body
     margin-left: auto
-    font-size: 14px
-    font-weight: 400
     white-space: nowrap

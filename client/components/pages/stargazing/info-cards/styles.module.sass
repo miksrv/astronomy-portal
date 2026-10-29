@@ -1,43 +1,48 @@
 @use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
 
 .grid
     display: grid
     grid-template-columns: repeat(2, 1fr)
-    gap: 12px
+    gap: var(--space-3)
     max-width: 70%
 
     @media (max-width: variables.$mobileMaxWidth)
         grid-template-columns: 1fr
         max-width: 100%
 
+// A link tile over the hero photo: dark plate, ring, brand ring on hover
 .card
     display: flex
     align-items: center
-    gap: 16px
-    padding: 12px 22px
-    border-radius: var(--border-radius)
-    background: var(--container-background-color)
-    box-shadow: var(--container-shadow)
-    text-decoration: none
+    gap: var(--space-4)
+    min-height: 44px
+    padding: var(--space-3) var(--space-4)
+    border-radius: var(--radius-lg)
+    background: var(--surface-1)
+    box-shadow: 0 0 0 1px var(--border)
     color: var(--text-color-primary)
-    transition: background .2s, box-shadow .2s
+    transition: background-color var(--duration-fast) var(--ease), box-shadow var(--duration-fast) var(--ease)
 
     &:hover
-        background: var(--dropdown-background-color-hover)
-        box-shadow: inset 0 0 0 1px var(--color-primary)
+        background: var(--surface-2)
+        box-shadow: 0 0 0 1px var(--color-main)
+        color: var(--text-color-primary)
 
 .icon
-    width: 30px
-    height: 30px
-    fill: var(--color-primary)
+    width: 28px
+    height: 28px
+    fill: var(--color-main)
     flex-shrink: 0
 
 .cardTitle
-    font-weight: 600
-    font-size: 15px
-    margin-bottom: 4px
+    +type.body
+    font-weight: var(--font-weight-semibold)
 
 .cardDesc
-    font-size: 13px
-    color: var(--text-color-secondary)
+    +type.secondary
+    margin-top: var(--space-1)
 
+@media (prefers-reduced-motion: reduce)
+    .card
+        transition: none

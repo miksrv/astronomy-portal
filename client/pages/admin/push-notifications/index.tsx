@@ -3,6 +3,7 @@ import { Badge, Button, Container, Dialog, Table, TableColumnProps } from 'simpl
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, wrapper } from '@/api'
@@ -21,6 +22,7 @@ const statusColorMap: Record<ApiModel.PushNotificationStatus, string> = {
 
 const PushNotificationListPage: NextPage<object> = () => {
     const { t } = useTranslation()
+    const router = useRouter()
 
     const { data, isLoading } = API.usePushNotificationGetListQuery()
 
@@ -120,18 +122,21 @@ const PushNotificationListPage: NextPage<object> = () => {
                     <div className={styles.actionsCell}>
                         {item.status === 'draft' && (
                             <>
-                                <Link href={`/admin/push-notifications/form?id=${item.id}`}>
-                                    <Button
-                                        size={'small'}
-                                        icon={'Pencil'}
-                                        mode={'secondary'}
-                                    />
-                                </Link>
+                                <Button
+                                    size={'small'}
+                                    icon={'Pencil'}
+                                    mode={'secondary'}
+                                    onClick={() => void router.push(`/admin/push-notifications/form?id=${item.id}`)}
+                                    aria-label={t('common.edit', 'Редактировать')}
+                                    tooltip={t('common.edit', 'Редактировать')}
+                                />
                                 <Button
                                     size={'small'}
                                     icon={'Close'}
                                     variant={'negative'}
-                                    mode={'primary'}
+                                    mode={'secondary'}
+                                    aria-label={t('common.delete', 'Удалить')}
+                                    tooltip={t('common.delete', 'Удалить')}
                                     onClick={() => setConfirmDeleteId(item.id)}
                                 />
                             </>
@@ -188,12 +193,13 @@ const PushNotificationListPage: NextPage<object> = () => {
                 </p>
                 <div className={styles.modalActions}>
                     <Button
-                        mode={'secondary'}
+                        mode={'outline'}
                         label={t('pages.push-notifications.cancel', 'Отмена')}
                         onClick={() => setConfirmDeleteId(undefined)}
                     />
                     <Button
                         mode={'primary'}
+                        variant={'negative'}
                         label={t('common.delete', 'Удалить')}
                         onClick={handleDeleteConfirm}
                         loading={deleteLoading}

@@ -186,7 +186,6 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({
                     render={({ field, fieldState }) => (
                         <Input
                             {...field}
-                            className={styles.field}
                             required={true}
                             label={t('components.pages.stargazing.event-upcoming.booking-form-name-label', 'Ваше имя')}
                             placeholder={t(
@@ -204,7 +203,6 @@ export const EventBookingForm: React.FC<EventBookingFormProps> = ({
                     render={({ field, fieldState }) => (
                         <PhoneInput
                             {...field}
-                            className={styles.field}
                             required={true}
                             label={t(
                                 'components.pages.stargazing.event-upcoming.booking-form-phone-label',

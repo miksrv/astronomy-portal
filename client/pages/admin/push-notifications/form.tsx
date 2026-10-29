@@ -100,7 +100,7 @@ const PushNotificationFormPage: NextPage<object> = () => {
             <Container className={styles.formContainer}>
                 {(saveError || createSuccess || updateSuccess) && (
                     <Message
-                        style={{ marginBottom: '10px' }}
+                        className={styles.formMessage}
                         type={saveError ? 'error' : 'success'}
                     >
                         {saveError
@@ -112,7 +112,7 @@ const PushNotificationFormPage: NextPage<object> = () => {
 
                 {(testError || testSuccess) && (
                     <Message
-                        style={{ marginBottom: '10px' }}
+                        className={styles.formMessage}
                         type={testError ? 'error' : 'success'}
                     >
                         {testSuccess
@@ -123,7 +123,7 @@ const PushNotificationFormPage: NextPage<object> = () => {
 
                 {Boolean(launchError) && (
                     <Message
-                        style={{ marginBottom: '10px' }}
+                        className={styles.formMessage}
                         type={'error'}
                     >
                         {getErrorMessage(launchError) ??
@@ -178,13 +178,15 @@ const PushNotificationFormPage: NextPage<object> = () => {
                 />
 
                 <div className={styles.formGroup}>
-                    <label>{t('pages.push-notifications.field-icon', 'Иконка уведомления')}</label>
+                    <span className={styles.fieldLabel}>
+                        {t('pages.push-notifications.field-icon', 'Иконка уведомления')}
+                    </span>
                     <input
                         type={'file'}
+                        className={styles.fileInput}
                         accept={'image/*'}
                         onChange={handleIconChange}
                         disabled={uploadLoading || isBusy || !currentId}
-                        style={{ marginTop: '4px' }}
                     />
                     {uploadLoading && <span>{t('pages.push-notifications.uploading', 'Загрузка...')}</span>}
                     {iconUrl && (
@@ -197,7 +199,7 @@ const PushNotificationFormPage: NextPage<object> = () => {
                         </div>
                     )}
                     {!currentId && (
-                        <small style={{ color: '#888' }}>
+                        <small className={styles.fieldHint}>
                             {t(
                                 'pages.push-notifications.save-first-hint',
                                 'Сначала сохраните черновик для загрузки иконки'
@@ -247,7 +249,7 @@ const PushNotificationFormPage: NextPage<object> = () => {
                 </p>
                 <div className={styles.modalActions}>
                     <Button
-                        mode={'secondary'}
+                        mode={'outline'}
                         label={t('pages.push-notifications.cancel', 'Отмена')}
                         onClick={() => setShowConfirm(false)}
                     />

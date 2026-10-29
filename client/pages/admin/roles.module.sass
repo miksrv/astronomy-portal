@@ -1,33 +1,32 @@
-.roleNameButton
-    background: none
-    border: none
+@use '../../styles/variables' as variables
+
+// The table is the card (DESIGN.md → Sections, not containers)
+.tableContainer
     padding: 0
-    cursor: pointer
-    color: var(--link-color)
-    font-size: inherit
-    text-decoration: underline
-    text-align: left
-
-    &:hover
-        color: var(--link-color-hover)
-
-    &:active
-        color: var(--link-color-active)
+    overflow: hidden
 
 .permissionsCell
     display: flex
     flex-wrap: wrap
-    gap: 4px
-
-.badgeDefault
-    background: #ccc !important
-    color: #333 !important
+    gap: var(--space-1)
 
 .formElement
-    margin-bottom: 16px
+    margin-bottom: var(--space-4)
 
 .permissionsList
     display: flex
     flex-direction: column
-    gap: 10px
-    margin-bottom: 16px
+    gap: var(--space-3)
+    margin-bottom: var(--space-4)
+
+// Dialog actions: secondary first, primary last, right-aligned
+.dialogActions
+    display: flex
+    justify-content: flex-end
+    gap: var(--space-2)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column-reverse
+
+        & > *
+            width: 100%

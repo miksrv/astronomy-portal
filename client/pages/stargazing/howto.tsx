@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { Container } from 'simple-react-ui-kit'
 
 import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
 import Link from 'next/link'
@@ -12,6 +11,8 @@ import photoStargazing2 from '@/public/photos/stargazing-5.jpeg'
 import photoStargazing3 from '@/public/photos/stargazing-9.jpeg'
 import photoStargazing4 from '@/public/photos/stargazing-10.jpeg'
 import { initSSRLocale } from '@/utils/ssrLocale'
+
+import styles from './styles.module.sass'
 
 const photosGallery = [photoStargazing1, photoStargazing2, photoStargazing3, photoStargazing4]
 
@@ -113,30 +114,30 @@ const StargazingHowToPage: NextPage<object> = () => {
                 }
             ]}
         >
-            <div>
+            <p className={styles.lead}>
                 {tPage(
                     'unique_event',
                     'Каждый астровыезд уникален, но мы придерживаемся общего сценария, чтобы сделать мероприятие интересным и удобным для всех участников.'
                 )}
-            </div>
+            </p>
 
-            <Container>
-                <h3>{tPage('event_announcement', 'Анонс мероприятия')}</h3>
-                <p style={{ margin: 0 }}>
+            <div className={styles.prose}>
+                <h2>{tPage('event_announcement', 'Анонс мероприятия')}</h2>
+                <p>
                     {tPage(
                         'event_announcement_text',
                         'Астровыезды в Оренбурге проводятся при благоприятной погоде, поэтому точная дата становится известна лишь за 2-3 дня до события. Мы заранее объявляем о готовящихся выездах в нашем Telegram-канале «Смотри на звёзды», где публикуем анонсы и важные обновления. Подписка на канал обязательна, чтобы не пропустить новый астровыезд.'
                     )}
                 </p>
-                <h3 style={{ marginTop: 10 }}>{tPage('registration', 'Регистрация на астровыезд')}</h3>
-                <p style={{ margin: 0 }}>
+                <h2>{tPage('registration', 'Регистрация на астровыезд')}</h2>
+                <p>
                     {tPage(
                         'registration_text',
                         'Для участия требуется предварительная регистрация через наш сайт - сама заявка всегда бесплатна и занимает одну минуту. Некоторые выезды платные: взрослый билет оплачивается сразу на сайте банковской картой, дети до 18 лет - всегда бесплатно, после оплаты вы получите QR-билет. Официальная оплата проходит только через сайт - мы никогда не просим перевести деньги на карту, в личных сообщениях или через третьих лиц. Если кто-то просит оплатить участие так - это мошенники, не переводите деньги и сообщите нам.'
                     )}
                 </p>
-                <h3 style={{ marginTop: 10 }}>{tPage('location', 'Место проведения')}</h3>
-                <p style={{ marginTop: 0 }}>
+                <h2>{tPage('location', 'Место проведения')}</h2>
+                <p>
                     {tPage(
                         'location_text',
                         'Астровыезды проводятся за городом, вдали от городской засветки, обычно в 40 км от Оренбурга. Точное место проведения откроется после регистрации. Добираться до поляны нужно самостоятельно, поэтому заранее уточняйте маршрут. Последний участок пути - грунтовая дорога длиной около 300 метров.'
@@ -148,47 +149,44 @@ const StargazingHowToPage: NextPage<object> = () => {
                         handlePhotoClick(index)
                     }}
                 />
-            </Container>
+            </div>
 
             <h2>{tPage('event_plan', 'План проведения астровыезда')}</h2>
 
-            <Container>
-                <ul style={{ listStyle: 'decimal', margin: 0, padding: '0 20px' }}>
-                    {planSteps.map((step, index) => (
-                        <li
-                            key={step.name}
-                            style={index < planSteps.length - 1 ? { marginBottom: '10px' } : undefined}
-                        >
+            <div className={styles.prose}>
+                <ol>
+                    {planSteps.map((step) => (
+                        <li key={step.name}>
                             <h3>{step.name}</h3>
-                            <p style={{ margin: 0 }}>{step.text}</p>
+                            <p>{step.text}</p>
                         </li>
                     ))}
-                </ul>
-            </Container>
+                </ol>
+            </div>
 
-            <Container>
-                <h3>{tPage('event_duration', 'Продолжительность мероприятия')}</h3>
-                <p style={{ margin: 0 }}>
+            <div className={styles.prose}>
+                <h2>{tPage('event_duration', 'Продолжительность мероприятия')}</h2>
+                <p>
                     {tPage(
                         'event_duration_text',
                         'Весь астровыезд занимает от 2 до 4 часов. Вы можете покинуть площадку в любое время, но многие остаются до последнего, наслаждаясь видами звёздного неба.'
                     )}
                 </p>
-                <h3 style={{ marginTop: 10 }}>{tPage('recommendations', 'Обязательные рекомендации')}</h3>
-                <p style={{ margin: 0 }}>
+                <h2>{tPage('recommendations', 'Обязательные рекомендации')}</h2>
+                <p>
                     {tPage(
                         'recommendations_text',
                         'Пожалуйста, ознакомьтесь с разделом «Правила поведения на астровыездах», чтобы мероприятие прошло комфортно и безопасно для всех.'
                     )}
                 </p>
-                <h3 style={{ marginTop: 10 }}>{tPage('thematic_evenings', 'Тематические вечера')}</h3>
-                <p style={{ marginTop: 0 }}>
+                <h2>{tPage('thematic_evenings', 'Тематические вечера')}</h2>
+                <p>
                     {tPage(
                         'thematic_evenings_text',
                         'Иногда мы проводим тротуарную астрономию прямо в городе. Подробности о таких мероприятиях читайте в разделе «Где посмотреть в телескоп в Оренбурге».'
                     )}
                 </p>
-                <p style={{ margin: 0 }}>
+                <p>
                     {tPage('faq', 'Не нашли ответа на свой вопрос? Загляните в раздел')}
                     <Link
                         href={'/stargazing/faq'}
@@ -209,7 +207,7 @@ const StargazingHowToPage: NextPage<object> = () => {
                     </Link>
                     {'.'}
                 </p>
-            </Container>
+            </div>
 
             <PhotoLightbox
                 photos={photosGallery.map((image) => ({

@@ -12,6 +12,8 @@ import { AppLayout, AppToolbar } from '@/components/common'
 import { CheckinResult, CheckinResultStatus } from '@/components/pages/stargazing'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
+import styles from '../styles.module.sass'
+
 /**
  * Landing page for a ticket's QR code (`/stargazing/checkin/:id`), opened by
  * any camera app — not just the staff scanner in {@see CheckinPage}. Always
@@ -68,7 +70,7 @@ const CheckinIdPage: NextPage<object> = () => {
 
             <Container>
                 {!showResult && (
-                    <div style={{ padding: '60px 0', textAlign: 'center' }}>
+                    <div className={styles.checkinLoader}>
                         <Spinner />
                     </div>
                 )}

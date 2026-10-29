@@ -1,18 +1,24 @@
-@use '../../styles/variables' as variables
+@use '../../styles/typography' as type
+
+// Intro under the page title
+.intro
+    +type.lead
+    margin: var(--space-4) 0 var(--space-6)
 
 .faqList
     display: flex
     flex-direction: column
-    gap: 8px
+    gap: var(--space-2)
 
 .faqItem
-    border-radius: var(--border-radius)
-    border: 1px solid var(--input-border-color)
+    border-radius: var(--radius-lg)
+    background: var(--surface-1)
+    box-shadow: 0 0 0 1px var(--border)
     overflow: hidden
-    transition: border-color 0.2s ease
+    transition: box-shadow var(--duration-base) var(--ease)
 
     &.open
-        border-color: var(--color-primary)
+        box-shadow: 0 0 0 1px var(--color-main)
 
         .chevron
             transform: rotate(180deg)
@@ -22,53 +28,66 @@
             opacity: 1
 
     .faqQuestion
+        +type.body
         width: 100%
+        min-height: 48px
         display: flex
         align-items: center
         justify-content: space-between
-        gap: 12px
-        padding: 14px 16px
-        background: var(--container-background-color)
-        text-align: left
+        gap: var(--space-3)
+        padding: var(--space-3) var(--space-4)
+        background: transparent
         border: none
+        border-radius: var(--radius-lg)
+        text-align: left
         cursor: pointer
         color: var(--text-color-primary)
-        font-size: var(--font-size)
-        font-weight: 500
-        line-height: 1.4
-        transition: background-color 0.15s ease
+        font-family: inherit
+        font-weight: var(--font-weight-medium)
+        transition: background-color var(--duration-fast) var(--ease)
 
         &:hover
-            background: var(--body-background)
+            background: var(--surface-2)
+
+        &:focus-visible
+            outline: var(--focus-outline)
+            outline-offset: -2px
 
     .chevron
         flex-shrink: 0
         width: 18px
         height: 18px
         fill: var(--text-color-secondary)
-        transition: transform 0.25s ease
+        transition: transform var(--duration-base) var(--ease)
 
     .faqAnswer
         display: grid
         grid-template-rows: 0fr
-        transition: grid-template-rows 0.25s ease, opacity 0.2s ease
         opacity: 0
+        transition: grid-template-rows var(--duration-base) var(--ease), opacity var(--duration-base) var(--ease)
 
-        // immediate grid child must have overflow:hidden and no padding
-        // so the grid can collapse it to exactly 0 height
+        // The grid child must have overflow: hidden and no padding so the row
+        // can collapse to exactly 0 height
         > div
             overflow: hidden
             min-height: 0
 
     .faqAnswerContent
-        padding: 14px 16px 16px
+        +type.prose
+        padding: var(--space-3) var(--space-4) var(--space-4)
+        border-top: 1px solid var(--border)
         color: var(--text-color-secondary)
-        line-height: 1.6
-        border-top: 1px solid var(--input-border-color)
-        background-color: var(--container-background-color)
 
         a
             color: var(--link-color)
+            text-decoration: underline
 
             &:hover
                 color: var(--link-color-hover)
+
+@media (prefers-reduced-motion: reduce)
+    .faqItem,
+    .faqItem .faqQuestion,
+    .faqItem .chevron,
+    .faqItem .faqAnswer
+        transition: none

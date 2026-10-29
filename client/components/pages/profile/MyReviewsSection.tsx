@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Button, Container, Message } from 'simple-react-ui-kit'
+import { Button, Dialog, Message } from 'simple-react-ui-kit'
 
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
@@ -28,6 +28,7 @@ export const MyReviewsSection: React.FC<MyReviewsSectionProps> = ({ userId }) =>
     // ourselves to keep concurrent per-row delete buttons from stepping on
     // each other's state.
     const [deletingId, setDeletingId] = useState<string | undefined>(undefined)
+    const [confirmId, setConfirmId] = useState<string | undefined>(undefined)
     const [deleteError, setDeleteError] = useState<{ id: string; error: unknown } | undefined>(undefined)
 
     const handleDelete = async (id: string) => {
@@ -45,22 +46,18 @@ export const MyReviewsSection: React.FC<MyReviewsSectionProps> = ({ userId }) =>
 
     if (isLoading) {
         return (
-            <Container className={styles.reviewsList}>
+            <div className={styles.reviewsList}>
                 <MyReviewsSectionSkeleton />
-            </Container>
+            </div>
         )
     }
 
     if (!data?.items?.length) {
-        return (
-            <Container>
-                <p>{t('pages.profile.reviews-empty', 'Вы ещё не оставляли отзывов')}</p>
-            </Container>
-        )
+        return <p className={styles.empty}>{t('pages.profile.reviews-empty', 'Вы ещё не оставляли отзывов')}</p>
     }
 
     return (
-        <Container className={styles.reviewsList}>
+        <div className={styles.reviewsList}>
             {data.items.map((review) => {
                 const eventHref = review.entityId ? `/stargazing/${review.entityId}` : undefined
                 const eventTitle = review.entity?.title
@@ -97,9 +94,7 @@ export const MyReviewsSection: React.FC<MyReviewsSectionProps> = ({ userId }) =>
                                 label={t('components.common.review-card.delete', 'Удалить')}
                                 loading={isDeleting && deletingId === review.id}
                                 disabled={isDeleting}
-                                onClick={() => {
-                                    void handleDelete(review.id)
-                                }}
+                                onClick={() => setConfirmId(review.id)}
                                 className={styles.reviewDeleteButton}
                             />
                         </div>
@@ -113,6 +108,34 @@ export const MyReviewsSection: React.FC<MyReviewsSectionProps> = ({ userId }) =>
                     </div>
                 )
             })}
-        </Container>
+
+            <Dialog
+                open={!!confirmId}
+                title={t('pages.profile.review-delete-confirm', 'Удалить отзыв?')}
+                onCloseDialog={() => setConfirmId(undefined)}
+            >
+                <div className={styles.deleteActions}>
+                    <Button
+                        mode={'outline'}
+                        label={t('common.cancel', 'Отмена')}
+                        onClick={() => setConfirmId(undefined)}
+                    />
+                    <Button
+                        mode={'primary'}
+                        variant={'negative'}
+                        label={t('common.delete', 'Удалить')}
+                        onClick={() => {
+                            const id = confirmId
+
+                            setConfirmId(undefined)
+
+                            if (id) {
+                                void handleDelete(id)
+                            }
+                        }}
+                    />
+                </div>
+            </Dialog>
+        </div>
     )
 }

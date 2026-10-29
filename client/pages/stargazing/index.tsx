@@ -24,6 +24,7 @@ import { buildEventJsonLd } from '@/utils/eventJsonLd'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
 import styles from './index.module.sass'
+import pageStyles from './styles.module.sass'
 
 interface StargazingPageProps {
     upcomingData: ApiModel.Event | null
@@ -69,10 +70,10 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
     return (
         <AppLayout
             canonical={'stargazing'}
-            title={title}
+            title={t('pages.stargazing.seo-title', 'Астровыезды в Оренбурге — наблюдение звёзд в телескоп')}
             description={t(
                 'pages.stargazing.description',
-                'Астровыезды в Оренбурге — поездки за город с телескопами, лекциями и наблюдением звёзд. Программа вечера, правила и запись на ближайший выезд.'
+                'Астровыезды в Оренбурге: вечер за городом с телескопами, лекцией о космосе и тёмным небом без засветки. Расписание ближайших выездов, программа, правила и запись.'
             )}
             openGraph={{
                 images: [
@@ -150,7 +151,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
 
             {pastEvents.length > 0 && (
                 <>
-                    <h2>
+                    <h2 className={pageStyles.sectionTitle}>
                         {t('pages.stargazing.past-events', 'Прошедшие астровыезды')}
 
                         <Link

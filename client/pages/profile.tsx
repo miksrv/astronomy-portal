@@ -1,6 +1,5 @@
 import React from 'react'
 import { getCookie } from 'cookies-next'
-import { Container } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useRouter } from 'next/router'
@@ -12,6 +11,8 @@ import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { EventHistorySection, MyReviewsSection, ProfileCard, PushNotificationToggle } from '@/components/pages/profile'
 import { EventUpcoming } from '@/components/pages/stargazing'
 import { initSSRLocale } from '@/utils/ssrLocale'
+
+import styles from './profile.module.sass'
 
 type ProfilePageProps = object
 
@@ -50,9 +51,9 @@ const ProfilePage: NextPage<ProfilePageProps> = () => {
                     layout={'compact'}
                 />
             ) : (
-                <Container>
-                    <p>{t('pages.profile.no-upcoming-event', 'У вас нет предстоящих мероприятий')}</p>
-                </Container>
+                <p className={styles.empty}>
+                    {t('pages.profile.no-upcoming-event', 'У вас нет предстоящих мероприятий')}
+                </p>
             )}
 
             <h2>{t('pages.profile.history-title', 'История мероприятий')}</h2>

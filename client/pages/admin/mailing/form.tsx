@@ -96,7 +96,7 @@ const MailingFormPage: NextPage<object> = () => {
             <Container className={styles.formContainer}>
                 {(saveError || createSuccess || updateSuccess) && (
                     <Message
-                        style={{ marginBottom: '10px' }}
+                        className={styles.formMessage}
                         type={saveError ? 'error' : 'success'}
                     >
                         {saveError
@@ -107,7 +107,7 @@ const MailingFormPage: NextPage<object> = () => {
 
                 {(testError || testSuccess) && (
                     <Message
-                        style={{ marginBottom: '10px' }}
+                        className={styles.formMessage}
                         type={testError ? 'error' : 'success'}
                     >
                         {testSuccess
@@ -118,7 +118,7 @@ const MailingFormPage: NextPage<object> = () => {
 
                 {Boolean(launchError) && (
                     <Message
-                        style={{ marginBottom: '10px' }}
+                        className={styles.formMessage}
                         type={'error'}
                     >
                         {getErrorMessage(launchError) ??
@@ -164,13 +164,15 @@ const MailingFormPage: NextPage<object> = () => {
                 />
 
                 <div className={styles.formGroup}>
-                    <label>{t('pages.mailing.field-attachment', 'Прикрепить изображение')}</label>
+                    <span className={styles.fieldLabel}>
+                        {t('pages.mailing.field-attachment', 'Прикрепить изображение')}
+                    </span>
                     <input
                         type={'file'}
+                        className={styles.fileInput}
                         accept={'image/*'}
                         onChange={handleImageChange}
                         disabled={uploadLoading || isBusy || !currentId}
-                        style={{ marginTop: '4px' }}
                     />
                     {uploadLoading && <span>{t('pages.mailing.uploading', 'Загрузка...')}</span>}
                     {imageUrl && (
@@ -183,7 +185,7 @@ const MailingFormPage: NextPage<object> = () => {
                         </div>
                     )}
                     {!currentId && (
-                        <small style={{ color: '#888' }}>
+                        <small className={styles.fieldHint}>
                             {t('pages.mailing.save-first-hint', 'Сначала сохраните черновик для загрузки изображения')}
                         </small>
                     )}
@@ -225,7 +227,7 @@ const MailingFormPage: NextPage<object> = () => {
                 <p>{t('pages.mailing.launch-confirm', 'Вы уверены? Письма будут отправлены участникам.')}</p>
                 <div className={styles.modalActions}>
                     <Button
-                        mode={'secondary'}
+                        mode={'outline'}
                         label={t('pages.mailing.cancel', 'Отмена')}
                         onClick={() => setShowConfirm(false)}
                     />

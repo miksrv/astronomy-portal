@@ -250,17 +250,6 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
                     </div>
 
                     <div className={styles.actionsRow}>
-                        <Button
-                            type={'submit'}
-                            mode={'primary'}
-                            size={'medium'}
-                            stretched={true}
-                            loading={isLoading || isSubmitting}
-                            disabled={isLoading || isSubmitting}
-                        >
-                            {t('pages.profile.save', 'Сохранить')}
-                        </Button>
-
                         {isOnboarding && (
                             <Button
                                 type={'button'}
@@ -272,6 +261,16 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user, isOnboarding }) 
                                 {t('pages.profile.onboarding-skip', 'Пропустить')}
                             </Button>
                         )}
+
+                        <Button
+                            type={'submit'}
+                            mode={'primary'}
+                            size={'medium'}
+                            loading={isLoading || isSubmitting}
+                            disabled={isLoading || isSubmitting}
+                        >
+                            {t('pages.profile.save', 'Сохранить')}
+                        </Button>
                     </div>
                 </form>
             </div>

@@ -1,10 +1,13 @@
-@use '../../../styles/mixins'
+@use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
 
+// The table is the card: no inner padding, the kit table scrolls sideways on phones
 .tableContainer
-    padding: 2px !important
+    padding: 0
+    overflow: hidden
 
 .mailingTable
-    border-radius: var(--border-radius) var(--border-radius) 0 0
+    border-radius: 0
 
 .subjectCell
     max-width: 200px
@@ -17,85 +20,136 @@
 
 .actionsCell
     display: flex
-    gap: 6px
+    gap: var(--space-2)
     align-items: center
     justify-content: flex-end
 
+// Status pills: the list cells (kit Badge) and the detail page (plain span).
+// Status colours only for status (DESIGN.md → Tokens)
+.statusDraft, .statusSending, .statusCompleted, .statusPaused, .statusCanceled, .limitOk, .limitHit
+    display: inline-block
+    padding: 2px var(--space-2)
+    border-radius: var(--radius-sm)
+    border-color: transparent
+    +type.caption
+    font-weight: var(--font-weight-medium)
+
 .statusDraft
-    +mixins.status-badge(var(--table-header-background), var(--text-color-secondary), true)
+    background: var(--surface-3)
+    color: var(--text-color-secondary)
 
-.statusSending
-    +mixins.status-badge(var(--color-main-background), var(--color-main), true)
+.statusSending, .statusPaused
+    background: var(--color-main-background)
+    color: var(--color-main)
 
-.statusCompleted
-    +mixins.status-badge(var(--color-green-background), var(--color-green), true)
+.statusCompleted, .limitOk
+    background: var(--color-green-background)
+    color: var(--color-green)
 
-.statusPaused
-    +mixins.status-badge(var(--color-primary-background), var(--color-primary), true)
+.statusCanceled, .limitHit
+    background: var(--color-red-background)
+    color: var(--color-red)
 
-.statusCanceled
-    +mixins.status-badge(var(--color-red-background), var(--color-red), true)
-
-// Form page styles
+// Form page (DESIGN.md → Forms): one column, at most 680px
 .formContainer
-    margin-bottom: 10px
+    max-width: 680px
+
+.formMessage
+    margin-bottom: var(--space-4)
 
 .formGroup
-    margin-bottom: 16px
+    margin-bottom: var(--space-4)
 
+.fieldLabel
+    +type.secondary
+    display: block
+    margin-bottom: var(--space-1)
+    font-weight: var(--font-weight-medium)
+
+.fileInput
+    +type.body
+    max-width: 100%
+
+    &::file-selector-button
+        margin-right: var(--space-3)
+        padding: 0 var(--space-3)
+        height: 36px
+        border: 1px solid var(--border-strong)
+        border-radius: var(--radius-md)
+        background: var(--surface-2)
+        color: var(--text-color-primary)
+        font: inherit
+        cursor: pointer
+
+    &:focus-visible
+        outline: var(--focus-outline)
+
+.fieldHint
+    +type.caption
+    display: block
+    margin-top: var(--space-1)
 
 .imagePreview
-    margin-top: 8px
+    margin-top: var(--space-2)
 
     img
         max-width: 300px
         max-height: 200px
-        border-radius: 6px
-        border: 1px solid var(--input-border-color)
+        border-radius: var(--radius-md)
+        border: 1px solid var(--border)
 
+// Actions at the end, the primary last; stacked on phones
 .formActions
     display: flex
-    gap: 10px
+    justify-content: flex-end
     flex-wrap: wrap
-    margin-top: 8px
+    gap: var(--space-2)
+    margin-top: var(--space-6)
+    padding-top: var(--space-4)
+    border-top: 1px solid var(--border)
 
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column-reverse
+
+        & > *
+            width: 100%
+
+// Detail page
 .statsHeader
     display: grid
     grid-template-columns: 1fr 1fr
-    gap: 20px
-    margin-bottom: 20px
+    gap: var(--space-6)
+    margin-bottom: var(--space-5)
     align-items: start
 
-    @media (max-width: 640px)
+    @media only screen and (max-width: variables.$mobileMaxWidth)
         grid-template-columns: 1fr
+        gap: var(--space-4)
 
 .statsGrid
     display: grid
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr))
-    gap: 16px
+    gap: var(--space-3)
 
 .statCard
     display: flex
     flex-direction: column
     align-items: center
-    padding: 16px
-    border-radius: 8px
-    background: var(--table-header-background)
-    border: 1px solid var(--table-border-color)
+    padding: var(--space-4)
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
+    border: 1px solid var(--border)
 
 .statValue
-    font-size: 28px
-    font-weight: 700
-    line-height: 1
+    +type.stat
 
 .statLabel
-    font-size: 12px
-    color: var(--input-label-color)
-    margin-top: 4px
+    +type.caption
+    margin-top: var(--space-1)
     text-align: center
 
 .statTotal
-    color: var(--text-color-secondary)
+    color: var(--text-color-primary)
 
 .statSent
     color: var(--color-green)
@@ -104,58 +158,61 @@
     color: var(--color-red)
 
 .statRemaining
-    color: var(--input-label-color)
+    color: var(--text-color-secondary)
 
 .progressBar
     width: 100%
-    height: 10px
-    background: var(--table-border-color)
-    border-radius: 5px
+    height: 8px
+    background: var(--surface-3)
+    border-radius: var(--radius-md)
     overflow: hidden
-    margin-bottom: 20px
+    margin-bottom: var(--space-5)
     display: flex
+
+.progressSent, .progressErrors
+    height: 100%
+    transition: width var(--duration-slow) var(--ease)
+
+    @media (prefers-reduced-motion: reduce)
+        transition: none
 
 .progressSent
     background: var(--color-green)
-    height: 100%
-    transition: width 0.3s ease
 
 .progressErrors
     background: var(--color-red)
-    height: 100%
-    transition: width 0.3s ease
 
 .metaGrid
     display: grid
     grid-template-columns: auto 1fr
-    gap: 4px 16px
-    font-size: 14px
+    gap: var(--space-1) var(--space-4)
     margin: 0
     padding: 0
 
     dt
-        color: var(--input-label-color)
-        font-weight: 500
-        padding: 6px 0
+        +type.secondary
+        font-weight: var(--font-weight-medium)
+        padding: var(--space-1) 0
 
     dd
+        +type.body
         margin: 0
-        padding: 6px 0
-        font-weight: 400
+        padding: var(--space-1) 0
+        overflow-wrap: anywhere
 
-// Modal styles
+// Dialog actions: secondary first, primary last
 .modalActions
     display: flex
-    gap: 10px
+    gap: var(--space-2)
     justify-content: flex-end
 
-.limitOk
-    +mixins.status-badge(var(--color-green-background), var(--color-green))
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column-reverse
 
-.limitHit
-    +mixins.status-badge(var(--color-red-background), var(--color-red))
+        & > *
+            width: 100%
 
 .countdown
     font-variant-numeric: tabular-nums
-    font-weight: 600
-    color: var(--color-primary)
+    font-weight: var(--font-weight-semibold)
+    color: var(--color-main)

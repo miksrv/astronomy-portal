@@ -69,7 +69,7 @@ describe('EventReviews', () => {
 
         const inlineForm = within(document.getElementById(REVIEW_INLINE_FORM_ID) as HTMLElement)
 
-        fireEvent.click(inlineForm.getByLabelText('5 stars'))
+        fireEvent.click(inlineForm.getAllByLabelText(/Оценка .* из 5/)[4]!)
         fireEvent.change(inlineForm.getByPlaceholderText('Поделитесь впечатлениями...'), {
             target: { value: 'Отличное мероприятие, всем рекомендую!' }
         })
@@ -101,7 +101,7 @@ describe('EventReviews', () => {
 
         const inlineForm = within(document.getElementById(REVIEW_INLINE_FORM_ID) as HTMLElement)
 
-        fireEvent.click(inlineForm.getByLabelText('5 stars'))
+        fireEvent.click(inlineForm.getAllByLabelText(/Оценка .* из 5/)[4]!)
         fireEvent.change(inlineForm.getByPlaceholderText('Поделитесь впечатлениями...'), {
             target: { value: 'Ещё один отзыв о поездке' }
         })
