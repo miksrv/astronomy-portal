@@ -1,4 +1,4 @@
-import SunCalc from 'suncalc'
+import * as SunCalc from 'suncalc'
 
 /**
  * Returns the moon phase for a given date.

@@ -1,4 +1,5 @@
 import {
+    createSeoDescription,
     extractBookingIdFromScan,
     humanizeFileSize,
     removeMarkdown,
@@ -120,6 +121,29 @@ describe('strings', () => {
 
         it('drops paragraphs that become empty after cleaning', () => {
             expect(removeMarkdownPreserveParagraphs('First.\n\n`code only`\n\nSecond.')).toBe('First.\n\nSecond.')
+        })
+    })
+
+    describe('createSeoDescription', () => {
+        const lead =
+            'NGC 7331 — огромная спиральная галактика в созвездии Пегаса, на расстоянии 50 миллионов световых лет.'
+
+        it('uses only the lead before the first heading', () => {
+            expect(createSeoDescription(`${lead}\n\n## История\n\nОткрыта Гершелем.`)).toBe(lead)
+        })
+
+        it('falls back to the whole text when the lead is too short', () => {
+            expect(createSeoDescription('Коротко.\n\n## Раздел\n\nТекст раздела.')).toBe(
+                'Коротко. Раздел Текст раздела.'
+            )
+        })
+
+        it('cuts the description to the given length', () => {
+            expect(createSeoDescription(lead, 40)).toBe('NGC 7331 — огромная спиральная...')
+        })
+
+        it('returns an empty string for no text', () => {
+            expect(createSeoDescription(undefined)).toBe('')
         })
     })
 

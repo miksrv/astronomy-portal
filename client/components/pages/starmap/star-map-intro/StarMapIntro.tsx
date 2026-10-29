@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { cn, Icon } from 'simple-react-ui-kit'
 
+import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import styles from './styles.module.sass'
@@ -85,6 +86,28 @@ const StarMapIntro: React.FC<StarMapIntroProps> = ({ title, hidden }) => {
                             'pages.star-map.intro-features',
                             'Настраивайте слои карты — координатную сетку, эклиптику, Млечный Путь, названия созвездий — а по отмеченным на карте объектам кликайте, чтобы открыть их астрофотографии, снятые нашей любительской обсерваторией.'
                         )}
+                    </p>
+                    <h2>{t('pages.star-map.intro-date-title', 'Звёздное небо на любую дату')}</h2>
+                    <p>
+                        {t(
+                            'pages.star-map.intro-date',
+                            'По умолчанию карта показывает звёздное небо сейчас — таким, каким оно видно из вашего места. Укажите дату и время, например день рождения или ночь будущего звездопада, и посмотрите, как выглядело или будет выглядеть небо в этот момент. Время можно ускорить, чтобы увидеть, как созвездия восходят и заходят в течение ночи.'
+                        )}
+                    </p>
+                    <p>
+                        {t(
+                            'pages.star-map.intro-location',
+                            'Место наблюдения определяется по геолокации или задаётся вручную, поэтому карта подходит для любого города. Поиск находит звёзды, созвездия, планеты и объекты глубокого космоса.'
+                        )}{' '}
+                        <Link
+                            href={'/stargazing'}
+                            title={t('pages.star-map.intro-stargazing-link', 'Астровыезды в Оренбурге')}
+                        >
+                            {t(
+                                'pages.star-map.intro-stargazing',
+                                'Увидеть небо в телескоп можно на наших астровыездах под Оренбургом.'
+                            )}
+                        </Link>
                     </p>
                 </div>
             </div>

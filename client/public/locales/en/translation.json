@@ -12,6 +12,7 @@
                     "mailings": "Email newsletters",
                     "push-notifications": "Push notifications",
                     "to-main-page": "Home",
+                    "menu": "Menu",
                     "sign-in": "Sign in",
                     "qrcode-check": "QR code check",
                     "logout": "Log out"
@@ -48,6 +49,13 @@
                 "frames": "Frames",
                 "exposure": "Exposure"
             },
+            "photo-lightbox": {
+                "close": "Close",
+                "next": "Next photo",
+                "previous": "Previous photo",
+                "zoom-in": "Zoom in",
+                "zoom-out": "Zoom out"
+            },
             "push-subscribe-banner": {
                 "error-generic": "Failed to enable push notifications",
                 "title": "Want to hear about upcoming stargazing trips?",
@@ -58,10 +66,12 @@
             },
             "review-card": {
                 "pending": "Sending…",
-                "delete": "Delete"
+                "delete": "Delete",
+                "rating": "Rated {{rating}} out of 5"
             },
             "review-form": {
                 "rating-label": "Rating",
+                "star": "Rate {{value}} out of 5",
                 "placeholder": "Share your impressions...",
                 "error": "Couldn't submit the review. Please try again.",
                 "success": "Review published!",
@@ -75,6 +85,10 @@
                 "floating-thanks": "Thank you for your review!",
                 "floating-title": "Leave a review about the event",
                 "floating-close": "Dismiss the review reminder"
+            },
+            "snackbar-stack": {
+                "close": "Close notification",
+                "label": "Notifications"
             },
             "star-map": {
                 "geo-nudge": {
@@ -306,16 +320,20 @@
             "observatory": {
                 "astronomy-calc": {
                     "sun": "Sun",
+                    "moon": "Moon",
                     "dawn": "Sunrise",
                     "sunset": "Sunset",
                     "height": "Altitude",
-                    "azimuth": "Azimuth",
-                    "moon": "Moon"
+                    "azimuth": "Azimuth"
+                },
+                "calendar": {
+                    "previous-month": "Previous month",
+                    "next-month": "Next month"
                 },
                 "camera": {
                     "image-from-observatory-camera": "Image from the observatory camera",
-                    "camera-not-available": "Camera unavailable",
-                    "camera-image-not-available": "Camera image unavailable"
+                    "camera-image-not-available": "Camera image unavailable",
+                    "camera-not-available": "Camera unavailable"
                 },
                 "relay-list": {
                     "error": "Failed to retrieve the relay list",
@@ -336,8 +354,8 @@
                     "unit-wind": "m/s",
                     "unit-precipitation": "mm",
                     "safely": "Safe",
-                    "critical": "Critical",
                     "dangerous": "Dangerous",
+                    "critical": "Critical",
                     "weather-conditions": "Weather conditions",
                     "observatory-in-orenburg-weather": "Weather at the Orenburg Observatory",
                     "read-more": "Learn more",
@@ -390,6 +408,7 @@
                     "error": "Failed to delete the stargazing trip. Please try again later."
                 },
                 "event-media-filter": {
+                    "label": "Filter by photographer",
                     "all": "All"
                 },
                 "event-media-upload-dialog": {
@@ -523,9 +542,12 @@
                 "prev": "Previous slide",
                 "next": "Next slide"
             },
+            "pagination": {
+                "label": "Pages"
+            },
             "show-more": {
-                "show-less": "Show less",
-                "show-more": "Show more"
+                "collapse": "Collapse",
+                "read-full": "Read more"
             }
         }
     },
@@ -657,6 +679,7 @@
                 "text": "The observatory is open to everyone. Anyone can use its capabilities to obtain images of celestial objects. Moreover, the site features a section"
             },
             "title": "About the project",
+            "seo-title": "About Look at the Stars: the team and the observatory",
             "description": "Learn more about the “Look at the Stars” project, our team and our homemade astronomical observatory. Join us and discover the beauty of space!",
             "my-name": "My name is",
             "misha": "Misha",
@@ -689,6 +712,7 @@
             "history-empty": "You haven't attended any events yet",
             "reviews-empty": "You haven't left any reviews yet",
             "review-delete-error": "Failed to delete the review",
+            "review-delete-confirm": "Delete the review?",
             "field-sex-male": "Male",
             "field-sex-female": "Female",
             "save-success": "Profile updated",
@@ -703,8 +727,8 @@
             "field-birthday": "Date of birth",
             "birthday-placeholder": "Select a date",
             "field-sex": "Gender",
-            "save": "Save",
             "onboarding-skip": "Skip",
+            "save": "Save",
             "push-error-no-key": "Failed to get the push notification key, please try again later",
             "push-error-generic": "Failed to update push notification settings",
             "push-toggle-label": "Browser push notifications",
@@ -825,7 +849,8 @@
             "faq_card_desc": "Answers to participants' common questions",
             "where_link": "Where to look through a telescope",
             "where_card_desc": "Location in the Orenburg district",
-            "description": "Stargazing trips near Orenburg: telescopes, astronomy talks and dark skies out of town. See the program, rules and book the next trip.",
+            "seo-title": "Stargazing trips in Orenburg — telescope nights",
+            "description": "Stargazing trips near Orenburg: an evening out of town with telescopes, a talk about space and dark skies free of light pollution. Upcoming dates, program, rules and booking.",
             "hero-label": "Orenburg · Stargazing",
             "hero-title-line1": "Stargazing trips",
             "text": "Imagine: a night sky free of city lights, thousands of stars overhead, and the rings of Saturn in a telescope's eyepiece. Our out-of-town stargazing trips aren't just observations - they're evenings that change the way you see the world. Join us to see the universe with your own eyes!",
@@ -845,8 +870,15 @@
             "about-map": "About the map",
             "intro-tool": "An interactive star atlas, free and running right in your browser: stars down to the sixth magnitude, constellations with lines and boundaries, the planets of the Solar System, the Moon and the Sun, plus deep-sky objects — galaxies, nebulae and star clusters.",
             "intro-features": "Customize the map layers — the coordinate grid, the ecliptic, the Milky Way, constellation names — and click the objects marked on the map to open their astrophotos captured by our amateur observatory.",
+            "intro-date-title": "The night sky on any date",
+            "intro-date": "By default the map shows the sky right now, as seen from your location. Set a date and time, such as a birthday or the night of an upcoming meteor shower, to see how the sky looked or will look at that moment. Speed up time to watch constellations rise and set through the night.",
+            "intro-location": "The observing location comes from geolocation or can be set by hand, so the map works for any city. Search finds stars, constellations, planets and deep-sky objects.",
+            "intro-stargazing-link": "Stargazing trips in Orenburg",
+            "intro-stargazing": "See the sky through a telescope on our stargazing trips near Orenburg.",
             "title": "Online Star Map",
-            "description": "Free interactive online star map: stars, constellations, planets, nebulae and galaxies. Customize map layers and explore the night sky in real time."
+            "seo-title": "Free Online Star Map — the Night Sky Tonight or on Any Date",
+            "description": "Free interactive online star map: the sky right now or on any date and time from your location. Stars, constellations, planets, the Moon, nebulae and galaxies.",
+            "feature-list": "Real-time sky, sky on any date and time, observing location, constellations and their boundaries, planets, the Moon and the Sun, galaxies and nebulae, the Milky Way, object search"
         },
         "push-notifications": {
             "title": "Push notifications",
@@ -933,12 +965,17 @@
             "go-to-home-page": "Go to the home page"
         },
         "index": {
-            "title": "Look at the Stars",
-            "description": "Look at the Stars is a unique project in the Orenburg region: telescope observations out of town, sidewalk astronomy, an observatory in the Orenburg region, and astrophotos"
+            "seo-title": "Look at the Stars — stargazing trips, observatory and astrophotos in Orenburg",
+            "description": "Stargazing trips out of town with telescopes, sidewalk astronomy, an amateur observatory and astrophotos of galaxies and nebulae — the Look at the Stars project in Orenburg."
+        },
+        "object": {
+            "seo-title-photos": "{{title}}: photos and facts",
+            "seo-title": "{{title}}: description and coordinates"
         },
         "objects": {
             "title": "List of astronomical objects",
-            "description": "A catalog of astronomical objects captured by the observatory: galaxies, nebulae, asteroids and comets. The object table includes information on total exposure, availability of processed photos, and data for each filter: Luminance, Red, Green, Blue, Ha, OIII, SII. Learn more about each object and the observation details recorded by the observatory.",
+            "seo-title": "Catalog of galaxies and nebulae with astrophotos",
+            "description": "A catalog of galaxies, nebulae, star clusters and comets captured by an amateur observatory in Orenburg: astrophotos, descriptions, coordinates and per-filter exposure.",
             "search-by-name": "Search by name",
             "filter-by-category": "Filter by category",
             "create_button": "Add"
@@ -955,14 +992,17 @@
         },
         "observatory-weather": {
             "title": "Weather at the Orenburg Observatory",
-            "description": "Current weather charts from the weather station of an amateur observatory on the outskirts of Orenburg. Temperature, humidity, cloudiness and wind speed in real time."
+            "description": "Current weather charts from the weather station of an amateur observatory on the outskirts of Orenburg. Temperature, humidity, cloudiness and wind speed in real time.",
+            "text": "Follow the weather in real time from the weather station installed at the homemade astronomical observatory on the outskirts of Orenburg. The charts show temperature, humidity, cloud cover and wind speed. For full data access and observation history, visit the weather station site:"
         },
         "photo": {
-            "description": "{{photoTitle}} - a photo of an astronomical object taken at a homemade observatory, equipment used: {{equipment}}."
+            "seo-title": "{{objects}} — astrophoto from {{date}}",
+            "description": "{{photoTitle}}: an astrophoto taken by an amateur observatory in Orenburg. Equipment: {{equipment}}."
         },
         "photos": {
             "title": "Astrophotos",
-            "description": "A collection of astrophotos of galaxies, star clusters, nebulae, planets and other celestial objects captured by an amateur observatory. Find and filter images by category and parameters to see unique images of the universe with details for each filter and exposure.",
+            "seo-title": "Astrophotos of galaxies and nebulae — deep-sky photography",
+            "description": "Astrophotos of galaxies, nebulae, star clusters and planets taken by an amateur observatory in Orenburg, with filters, exposure and equipment for every image.",
             "search-by-object": "Search by object",
             "filter-by-category": "Filter by category",
             "create_button": "Add"
@@ -1020,13 +1060,14 @@
         "frames_one": "{{count}} frame",
         "frames_other": "{{count}} frames",
         "loading": "Loading...",
+        "photo": "Photo",
         "cancel": "Cancel",
         "delete": "Delete",
         "done": "Done",
         "edit": "Edit",
+        "go-to-home-page": "Home",
         "telegram": "Telegram",
         "add": "Add",
-        "go-to-home-page": "Home",
         "day_one": "{{count}} day",
         "day_other": "{{count}} days",
         "hour_one": "{{count}} hour",
@@ -1041,7 +1082,6 @@
         "hours_other": "{{count}} hours",
         "seconds_one": "{{count}} second",
         "seconds_other": "{{count}} seconds",
-        "photo": "Photo",
         "from": "from"
     },
     "equipment": {
@@ -1071,6 +1111,7 @@
         "columnUser": "User",
         "columnRole": "Role",
         "roleUser": "User",
+        "editRolesTitle": "Roles for {{name}}",
         "columnService": "Service",
         "columnPush": "Push",
         "pushOn": "On",
@@ -1087,7 +1128,6 @@
         "paginationPage": "Page",
         "paginationNext": "Next",
         "paginationPrev": "Previous",
-        "editRolesTitle": "Roles for {{name}}",
         "saveRolesError": "Failed to save roles",
         "saveRoles": "Save"
     }

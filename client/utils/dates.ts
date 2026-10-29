@@ -38,6 +38,14 @@ export const formatDateFromUnixUTC = (timestamp?: number, format: string = DEFAU
               .format(format)
         : ''
 
+/**
+ * A UTC date from the API ("2026-08-12 17:00:00.000000") as a full ISO 8601 date-time with
+ * the Orenburg offset ("2026-08-12T22:00:00+05:00") — the form schema.org JSON-LD requires;
+ * a date-time without an offset is rejected by Google's Event rich results.
+ */
+export const toISODateTime = (date?: string | Date): string | undefined =>
+    date ? dayjs.utc(date).tz(TIME_ZONE).format() : undefined
+
 export const getSecondsUntilUTCDate = (date?: string | Date): number | undefined =>
     date ? dayjs.utc(date).tz(TIME_ZONE).diff(dayjs(), 'second') : undefined
 

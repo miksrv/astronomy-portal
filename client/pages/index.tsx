@@ -45,7 +45,10 @@ const HomePage: NextPage<HomePageProps> = ({ photosList, eventPhotos }) => {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
         name: 'Смотри на звёзды',
+        // Spellings people search the brand by (see Search Console) — helps the site name in results
+        alternateName: ['Смотри на звезды', 'смотриназвёзды.рф', 'Look at the Stars'],
         url: SITE_LINK,
+        inLanguage: ['ru', 'en'],
         potentialAction: {
             '@type': 'SearchAction',
             target: {
@@ -60,10 +63,11 @@ const HomePage: NextPage<HomePageProps> = ({ photosList, eventPhotos }) => {
         <AppLayout
             noTopMargin={true}
             canonical={''}
-            title={t('pages.index.title', 'Смотри на звёзды')}
+            noBrandSuffix={true}
+            title={t('pages.index.seo-title', 'Смотри на звёзды — астровыезды, обсерватория и астрофото в Оренбурге')}
             description={t(
                 'pages.index.description',
-                'Смотри на звёзды - уникальный проект в Оренбургской области: наблюдения в телескопы за городом, тротуарная астрономия, обсерватория в Оренбургской области и астрофотографии'
+                'Астровыезды за город с телескопами, тротуарная астрономия, любительская обсерватория и астрофото галактик и туманностей — проект «Смотри на звёзды» в Оренбурге.'
             )}
             openGraph={{
                 images: [{ url: '/images/index-hero.png', width: 1536, height: 1024 }]
