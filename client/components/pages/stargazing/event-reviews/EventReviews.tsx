@@ -1,11 +1,11 @@
 import React, { startTransition, useEffect, useOptimistic, useRef, useState } from 'react'
 import { Container } from 'simple-react-ui-kit'
 
+import dynamic from 'next/dynamic'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, useAppDispatch, useAppSelector } from '@/api'
 import { ReviewCard } from '@/components/common/review-card/ReviewCard'
-import { ReviewForm } from '@/components/common/review-form/ReviewForm'
 import { REVIEW_INLINE_FORM_ID, REVIEWS_PAGE_SIZE } from '@/utils/constants'
 import { hasPermission } from '@/utils/permissions'
 
@@ -13,6 +13,12 @@ import { EventReviewsSkeleton } from './EventReviewsSkeleton'
 import { ReviewFloatingPrompt } from './ReviewFloatingPrompt'
 
 import styles from './styles.module.sass'
+
+// Only shown to participants who haven't reviewed yet - fetched on demand, together
+// with its form validation libraries.
+const ReviewForm = dynamic(() =>
+    import('@/components/common/review-form/ReviewForm').then((module) => module.ReviewForm)
+)
 
 interface EventReviewsProps {
     eventId: string

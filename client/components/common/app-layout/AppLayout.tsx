@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { cn, Dialog } from 'simple-react-ui-kit'
 
+import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { useTranslation } from 'next-i18next/pages'
 import { generateNextSeo, NextSeoProps } from 'next-seo/pages'
@@ -11,13 +12,16 @@ import { closeAuthDialog } from '@/api/applicationSlice'
 import { createPageUrl } from '@/utils/helpers'
 
 import { CookieConsent } from '../cookie-consent'
-import { LoginForm } from '../login-form'
 import { SnackbarStack } from '../snackbar-stack'
 
 import { AppHeader } from './app-header'
 import { Menu } from './Menu'
 
 import styles from './styles.module.sass'
+
+// The auth dialog (and its form validation libraries) is opened by a minority of
+// visitors, so it's fetched on first open instead of shipping with every page.
+const LoginForm = dynamic(() => import('../login-form').then((module) => module.LoginForm), { ssr: false })
 
 export interface AppLayoutProps extends Omit<NextSeoProps, 'children' | 'titleTemplate'> {
     fullWidth?: boolean
