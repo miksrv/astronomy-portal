@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Skeleton } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
@@ -32,8 +32,6 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
 }) => {
     const { t } = useTranslation()
 
-    const [loading, setLoading] = useState<boolean>(false)
-    const [imageSource, setImageSource] = useState<string>('')
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
 
     const objectsData = useMemo(
@@ -75,18 +73,6 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
         }
     }
 
-    useEffect(() => {
-        if (props?.fileName) {
-            setLoading(true)
-            const newImage = new window.Image()
-            newImage.src = createLargePhotoUrl(props as ApiModel.Photo)
-            newImage.onload = () => {
-                setImageSource(newImage.src)
-                setLoading(false)
-            }
-        }
-    }, [props?.fileName])
-
     return (
         <div className={styles.photoContainer}>
             <div className={styles.imageSection}>
@@ -98,14 +84,20 @@ export const PhotoHeader: React.FC<ObjectHeaderProps> = ({
                         backgroundImage: `url(${createMediumPhotoUrl(props as ApiModel.Photo)})`
                     }}
                 >
-                    {!loading ? (
+                    {/* Rendered on the server and fetched through the image optimizer at the
+                        column's size - the original `_large` file is several MB. The medium
+                        photo set as the button's background shows through until it loads. */}
+                    {props?.fileName ? (
                         <Image
+                            key={props.fileName}
                             className={styles.image}
                             alt={photoTitle || ''}
-                            src={imageSource}
+                            src={createLargePhotoUrl(props as ApiModel.Photo)}
                             fill={true}
+                            // The photo column takes the content width minus the 320px parameters panel
+                            sizes={'(max-width: 768px) 100vw, 900px'}
                             // The main photo on the detail page — the likely LCP element.
-                            priority
+                            preload={true}
                         />
                     ) : (
                         <Skeleton style={{ width: '100%', height: '100%' }} />

@@ -14,7 +14,7 @@ export const MainSectionCommunity: React.FC = () => {
         <section className={styles.section}>
             <div
                 className={styles.sectionBg}
-                style={{ backgroundImage: 'url(/images/index-stargazing.png)' }}
+                style={{ backgroundImage: 'url(/images/index-stargazing.webp)' }}
             />
             <div className={styles.sectionGrid}>
                 <div className={cn(styles.sectionText, 'animate')}>

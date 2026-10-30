@@ -26,7 +26,7 @@ export const MainSectionObservatory: React.FC<MainSectionObservatoryProps> = ({ 
         <section className={styles.section}>
             <div
                 className={styles.sectionBg}
-                style={{ backgroundImage: 'url(/images/index-observatory.png)' }}
+                style={{ backgroundImage: 'url(/images/index-observatory.webp)' }}
             />
             <div className={styles.sectionGrid}>
                 <div className={cn(styles.sectionText, 'animate')}>
@@ -99,6 +99,7 @@ export const MainSectionObservatory: React.FC<MainSectionObservatoryProps> = ({ 
                                         alt={createPhotoTitle(photo, t)}
                                         fill={true}
                                         style={{ objectFit: 'cover' }}
+                                        sizes={'120px'}
                                     />
                                 </Link>
                             ))}

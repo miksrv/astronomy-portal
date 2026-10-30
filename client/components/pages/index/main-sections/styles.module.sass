@@ -181,7 +181,6 @@
     overflow: hidden
     border: 1px solid var(--border)
     transition: border-color var(--duration-slow) var(--ease)
-    opacity: 0
 
     img
         object-position: top
@@ -204,10 +203,15 @@
         opacity: 1
         transform: translateY(0)
 
+// Scroll-in entrance for sections below the fold. The hero deliberately doesn't use it:
+// hidden first-screen content would hold back LCP until the page's JS has run.
 :global(.animate)
     opacity: 0
     transform: translateY(24px)
     transition: opacity 1.2s var(--ease), transform 1.2s var(--ease)
+
+    .photoThumb
+        opacity: 0
 
     &:global(.visible)
         opacity: 1
