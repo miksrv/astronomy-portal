@@ -43,7 +43,7 @@ const Error404Page: NextPage = () => {
 }
 
 export const getStaticProps = async ({ locale }: { locale?: string }): Promise<GetStaticPropsResult<object>> => {
-    const translations = await serverSideTranslations(locale ?? 'ru')
+    const translations = await serverSideTranslations(locale ?? 'ru', ['translation'])
 
     return {
         props: {

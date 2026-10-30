@@ -10,6 +10,7 @@ import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { EventsList } from '@/components/pages/stargazing'
 import { hasPermission } from '@/utils/permissions'
+import { removeSSRQueryCache } from '@/utils/ssrCache'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
 interface StargazingHistoryPageProps {
@@ -83,6 +84,9 @@ export const getServerSideProps = wrapper.getServerSideProps(
             const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+
+            // Handed to the page as props - no need to also ship RTK Query's copy
+            removeSSRQueryCache(store, ['eventGetList'])
 
             return {
                 props: {
