@@ -1,7 +1,19 @@
+@use '../../../../styles/variables' as variables
+
 // The table is the card: no inner padding, the kit table scrolls sideways on phones
 .tableContainer
     padding: 0
     overflow: hidden
+
+// Until the client measures the toolbar and footer (see ObjectsTable), the table caps
+// itself at roughly the same viewport share via the kit's `max-height: inherit`. Without
+// it the server renders the full-length table, which then snaps shorter after hydration
+// and pulls the footer up into view (CLS). The offsets are what that measurement yields
+.unmeasured
+    max-height: calc(100vh - 202px)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        max-height: calc(100vh - 392px)
 
 .objectsListTable
     .objectLink

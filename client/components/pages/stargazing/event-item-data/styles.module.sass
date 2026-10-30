@@ -21,6 +21,12 @@
         object-fit: cover
         width: 100%
         height: 100%
+        // Reserves the cover's box before it loads: inside a grid cell `height: 100%`
+        // alone collapses to 0 until then, and everything below jumps (CLS)
+        aspect-ratio: 1200 / 630
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            height: auto
 
 // The event description is a section of the page, not a card
 .content

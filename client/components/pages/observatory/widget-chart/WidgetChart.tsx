@@ -19,7 +19,13 @@ interface WidgetProps {
 const CHART_HEIGHT = '260px'
 
 export const WidgetChart: React.FC<WidgetProps> = ({ loading, fullWidth, data, type, dateFormat }) => (
-    <div className={cn(styles.widget, fullWidth && styles.fullWidth)}>
+    <div
+        className={cn(styles.widget, fullWidth && styles.fullWidth)}
+        // Reserves the chart's height up front: the server renders neither the skeleton
+        // (the query only starts on the client) nor the client-only chart, so without
+        // it the card would grow twice on load (CLS)
+        style={{ minHeight: CHART_HEIGHT }}
+    >
         {loading ? (
             <Skeleton style={{ width: '100%', height: CHART_HEIGHT }} />
         ) : (
