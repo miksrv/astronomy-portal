@@ -10,6 +10,9 @@ import { createMediumPhotoUrl, createPhotoTitle } from '@/utils/photos'
 
 import styles from './styles.module.sass'
 
+// Cards that can land on the first screen (a full row on desktop) load eagerly
+const EAGER_PHOTOS_COUNT = 4
+
 interface PhotoGridProps {
     photosList?: ApiModel.Photo[]
 }
@@ -25,7 +28,7 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({ photosList }) => {
                 </div>
             )}
 
-            {photosList?.map((photo) => (
+            {photosList?.map((photo, index) => (
                 <Link
                     key={photo.id}
                     href={`/photos/${photo.id}`}
@@ -38,6 +41,10 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({ photosList }) => {
                         alt={createPhotoTitle(photo, t)}
                         fill={true}
                         sizes={'(max-width: 768px) 100vw, 280px'}
+                        // The first card is the LCP element, so it's also preloaded from <head>
+                        {...(index === 0
+                            ? { preload: true }
+                            : { loading: index < EAGER_PHOTOS_COUNT ? 'eager' : 'lazy' })}
                     />
                     <div className={styles.description}>
                         <h3 className={styles.title}>{createPhotoTitle(photo, t)}</h3>

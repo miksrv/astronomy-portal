@@ -19,8 +19,12 @@ import { makeSunEvents } from './utils'
 
 import styles from './styles.module.sass'
 
+const CHART_HEIGHT = '200px'
+
 const ReactECharts = dynamic<EChartsReactProps>(() => import('echarts-for-react'), {
-    ssr: false
+    ssr: false,
+    // Holds the chart's height while ECharts loads, so the content below doesn't jump (CLS)
+    loading: () => <div style={{ height: CHART_HEIGHT }} />
 })
 
 dayjs.extend(utc)
@@ -230,7 +234,7 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = 
             </div>
             <ReactECharts
                 option={options}
-                style={{ width: '100%', height: '200px' }}
+                style={{ width: '100%', height: CHART_HEIGHT }}
             />
         </Container>
     )

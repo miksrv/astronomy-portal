@@ -24,10 +24,10 @@ export const MainSectionHero: React.FC<MainSectionHeroProps> = ({ photos }) => {
         <section className={cn(styles.section, styles.sectionHero)}>
             <div
                 className={styles.sectionBg}
-                style={{ backgroundImage: 'url(/images/index-hero.png)' }}
+                style={{ backgroundImage: 'url(/images/index-hero.webp)' }}
             />
             <div className={cn(styles.sectionGrid, styles.sectionHeroGrid)}>
-                <div className={cn(styles.sectionText, 'animate')}>
+                <div className={styles.sectionText}>
                     <span className={styles.sectionLabel}>
                         {t('components.pages.index.main-sections.label-astrophoto', 'Лучший астрономический проект')}
                     </span>
@@ -53,7 +53,7 @@ export const MainSectionHero: React.FC<MainSectionHeroProps> = ({ photos }) => {
                         />
                     </div>
                 </div>
-                <div className={cn(styles.sectionRightCenter, styles.sectionRightCenterVisible, 'animate')}>
+                <div className={cn(styles.sectionRightCenter, styles.sectionRightCenterVisible)}>
                     {photos && photos.length > 0 && (
                         <div className={styles.photoGrid}>
                             {photos.slice(0, 4).map((photo, index) => {
@@ -77,9 +77,12 @@ export const MainSectionHero: React.FC<MainSectionHeroProps> = ({ photos }) => {
                                             alt={alt}
                                             fill={true}
                                             style={{ objectFit: 'cover' }}
-                                            // First thumbnail is the likely LCP element on the
-                                            // homepage hero — the rest stay lazy.
-                                            priority={index === 0}
+                                            // A 2×2 grid: half the viewport on mobile, about a quarter
+                                            // of the content width on desktop
+                                            sizes={'(max-width: 768px) 50vw, 300px'}
+                                            // All four are on the first screen; the first one is the
+                                            // likely LCP element, so it's also preloaded from <head>
+                                            {...(index === 0 ? { preload: true } : { loading: 'eager' })}
                                         />
                                     </Link>
                                 )

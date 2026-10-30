@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 4.14.0
+
+Pages open noticeably faster, especially on phones and slow connections.
+
+### Minor Changes
+
+- Faster first load on every page: about a third less code to download before the page works
+- The home page shows its first screen right away, without waiting for the entrance animation
+- Lighter background images on the home, stargazing and observatory pages
+- Astrophoto pages load a photo sized for the screen instead of the multi-megabyte original
+- Content no longer jumps while loading on the weather, objects, event and gallery pages
+- Bug fixes and optimizations
+
 ## 4.13.0
 
 A refreshed night design across the whole site, with better phone and keyboard support.

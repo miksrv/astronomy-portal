@@ -29,7 +29,7 @@ export const requirePermissionSSR = async (
     redirectTo = '/'
 ): Promise<PermissionGuardResult> => {
     const locale = context.locale ?? 'en'
-    const translations = await serverSideTranslations(locale)
+    const translations = await serverSideTranslations(locale, ['translation'])
     const token = await getCookie('token', { req: context.req, res: context.res })
 
     store.dispatch(setLocale(locale))

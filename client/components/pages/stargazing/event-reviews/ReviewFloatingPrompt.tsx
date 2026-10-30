@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { getCookie, setCookie } from 'cookies-next'
 import { Button, Icon } from 'simple-react-ui-kit'
 
+import dynamic from 'next/dynamic'
 import { useTranslation } from 'next-i18next/pages'
 
-import { ReviewForm } from '@/components/common/review-form/ReviewForm'
 import {
     COOKIE_CONSENT_BANNER_ID,
     COOKIE_CONSENT_DISMISSED_EVENT,
@@ -14,6 +14,12 @@ import {
 } from '@/utils/constants'
 
 import styles from './styles.module.sass'
+
+// Only shown to participants who haven't reviewed yet - fetched on demand, together
+// with its form validation libraries.
+const ReviewForm = dynamic(() =>
+    import('@/components/common/review-form/ReviewForm').then((module) => module.ReviewForm)
+)
 
 // Base gap (px) kept between the panel and the viewport edges; also the
 // starting point when stacking above the cookie-consent banner.

@@ -11,6 +11,7 @@ import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { ObjectsTable } from '@/components/pages/objects'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { hasPermission } from '@/utils/permissions'
+import { removeSSRQueryCache } from '@/utils/ssrCache'
 import { initSSRLocale } from '@/utils/ssrLocale'
 import { formatObjectName } from '@/utils/strings'
 
@@ -213,6 +214,9 @@ export const getServerSideProps = wrapper.getServerSideProps(
             const { data: categories } = await store.dispatch(API.endpoints?.categoriesGetList.initiate())
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+
+            // Handed to the page as props - no need to also ship RTK Query's copy
+            removeSSRQueryCache(store, ['photosGetList', 'objectsGetList', 'categoriesGetList'])
 
             return {
                 props: {

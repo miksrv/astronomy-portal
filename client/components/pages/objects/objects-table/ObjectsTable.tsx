@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Container, Table, TableColumnProps } from 'simple-react-ui-kit'
+import { cn, Container, Table, TableColumnProps } from 'simple-react-ui-kit'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -154,7 +154,7 @@ export const ObjectsTable: React.FC<ObjectsTableProps> = ({ objectsList, photosL
     }, [combinedHeight])
 
     return (
-        <Container className={styles.tableContainer}>
+        <Container className={cn(styles.tableContainer, tableHeight === undefined && styles.unmeasured)}>
             <Table<FlattenedObject>
                 className={styles.objectsListTable}
                 size={'small'}

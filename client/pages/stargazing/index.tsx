@@ -21,6 +21,7 @@ import {
 import type { InfoCardItem } from '@/components/pages/stargazing/info-cards'
 import { getSecondsUntilUTCDate } from '@/utils/dates'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
+import { removeSSRQueryCache } from '@/utils/ssrCache'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
 import styles from './index.module.sass'
@@ -186,6 +187,9 @@ export const getServerSideProps = wrapper.getServerSideProps(
             const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+
+            // Handed to the page as props - no need to also ship RTK Query's copy
+            removeSSRQueryCache(store, ['eventGetList'])
 
             // Past events: already happened, most recent first
             const pastEvents = (eventsData?.items || [])

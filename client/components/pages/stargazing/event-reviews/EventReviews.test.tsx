@@ -69,7 +69,10 @@ describe('EventReviews', () => {
 
         const inlineForm = within(document.getElementById(REVIEW_INLINE_FORM_ID) as HTMLElement)
 
-        fireEvent.click(inlineForm.getAllByLabelText(/Оценка .* из 5/)[4]!)
+        // ReviewForm is loaded via next/dynamic, so it appears a tick after the first render
+        const ratingButtons = await inlineForm.findAllByLabelText(/Оценка .* из 5/)
+
+        fireEvent.click(ratingButtons[4]!)
         fireEvent.change(inlineForm.getByPlaceholderText('Поделитесь впечатлениями...'), {
             target: { value: 'Отличное мероприятие, всем рекомендую!' }
         })
@@ -101,7 +104,10 @@ describe('EventReviews', () => {
 
         const inlineForm = within(document.getElementById(REVIEW_INLINE_FORM_ID) as HTMLElement)
 
-        fireEvent.click(inlineForm.getAllByLabelText(/Оценка .* из 5/)[4]!)
+        // ReviewForm is loaded via next/dynamic, so it appears a tick after the first render
+        const ratingButtons = await inlineForm.findAllByLabelText(/Оценка .* из 5/)
+
+        fireEvent.click(ratingButtons[4]!)
         fireEvent.change(inlineForm.getByPlaceholderText('Поделитесь впечатлениями...'), {
             target: { value: 'Ещё один отзыв о поездке' }
         })

@@ -1,6 +1,7 @@
 import React from 'react'
 import { cn, Icon } from 'simple-react-ui-kit'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
@@ -23,17 +24,22 @@ export const EventPrevNextNav: React.FC<EventPrevNextNavProps> = ({ prevEvent, n
     }
 
     // Cover width isn't known ahead of time (portrait/landscape uploads both
-    // happen) - a plain <img> sized only by CSS height lets the browser keep
-    // its real aspect ratio instead of next/image's fixed width/height box,
-    // which would otherwise crop or letterbox it.
+    // happen), so next/image gets a 0×0 intrinsic size and is sized only by the
+    // CSS height (`width: auto`) - the browser keeps the real aspect ratio
+    // instead of a fixed width/height box that would crop or letterbox it, while
+    // the image still goes through the optimizer instead of the full-size
+    // original preview (hundreds of KB for a 46px-tall thumbnail).
     const renderThumbnail = (event: ApiModel.Event) => (
         <div className={cn(styles.thumbnail, !event.coverFileName && styles.thumbnailEmpty)}>
             {event.coverFileName && event.coverFileExt ? (
-                // eslint-disable-next-line next/no-img-element -- intentional: auto width from the real image, not a fixed next/image box
-                <img
+                <Image
                     className={styles.thumbnailImage}
                     alt={event.title}
                     src={`${hosts.stargazing}${event.id}/${event.coverFileName}_preview.${event.coverFileExt}`}
+                    width={0}
+                    height={0}
+                    // 46px tall; even a wide landscape cover is at most ~2:1
+                    sizes={'96px'}
                 />
             ) : (
                 <Icon

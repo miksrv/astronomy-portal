@@ -13,6 +13,8 @@ import { getGoogleMapLink, getYandexMapLink } from '@/utils/maps'
 
 import { TILE_LAYER_ATTRIBUTION, TILE_LAYER_URL } from './constants'
 
+// Imported here, not globally in _app: only pages with a map need Leaflet's styles.
+import 'leaflet/dist/leaflet.css'
 import styles from './styles.module.sass'
 
 // Bundlers can't resolve Leaflet's default marker icon paths, so it's pointed

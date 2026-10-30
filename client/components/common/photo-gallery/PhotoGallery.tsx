@@ -1,5 +1,6 @@
 import React from 'react'
 import { Photo, RenderImageProps, RenderPhotoContext, RowsPhotoAlbum, RowsPhotoAlbumProps } from 'react-photo-album'
+import SSR from 'react-photo-album/ssr'
 
 import Image from 'next/image'
 
@@ -84,23 +85,24 @@ const renderImage = (props: RenderImageProps, context: RenderPhotoContext<Galler
     </>
 )
 
-export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ defaultContainerWidth = 1200, ...props }) => (
-    <RowsPhotoAlbum
-        {...props}
-        spacing={8}
-        targetRowHeight={160}
-        // Without an assumed width, react-photo-album renders no <img> tags at
-        // all during SSR (it needs the real container width, only knowable in
-        // the browser) - the whole gallery would otherwise be invisible to
-        // anything that doesn't run JS, and only appear after hydration for
-        // everyone else. Callers with a narrower container than the common
-        // ~1200px content width can override this.
-        defaultContainerWidth={defaultContainerWidth}
-        render={{ image: renderImage }}
-        componentsProps={{
-            button: withAspectRatio,
-            link: withAspectRatio,
-            wrapper: withAspectRatio
-        }}
-    />
+// Container widths the gallery is laid out for. The server renders one layout per
+// breakpoint and CSS shows the one matching the viewport; after hydration the album
+// keeps that same breakpoint's layout (scaled to the exact width), so the rows don't
+// get re-flowed - and the content below doesn't jump (CLS) - once JS runs.
+const GALLERY_BREAKPOINTS = [320, 600, 900, 1200] as const
+
+export const PhotoGallery: React.FC<PhotoGalleryProps> = (props) => (
+    <SSR breakpoints={GALLERY_BREAKPOINTS}>
+        <RowsPhotoAlbum
+            {...props}
+            spacing={8}
+            targetRowHeight={160}
+            render={{ image: renderImage }}
+            componentsProps={{
+                button: withAspectRatio,
+                link: withAspectRatio,
+                wrapper: withAspectRatio
+            }}
+        />
+    </SSR>
 )
