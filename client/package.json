@@ -5,6 +5,11 @@
     "engines": {
         "node": ">=20.11.0"
     },
+    "sideEffects": [
+        "*.css",
+        "*.sass",
+        "*.scss"
+    ],
     "scripts": {
         "dev": "next dev",
         "build": "next build",

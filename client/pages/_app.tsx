@@ -17,7 +17,6 @@ import i18Config from '../next-i18next.config'
 
 import 'dayjs/locale/ru'
 
-import 'leaflet/dist/leaflet.css'
 import 'simple-react-ui-kit/theme.css'
 import 'simple-react-ui-kit/styles.css'
 import '@/styles/theme.css'
