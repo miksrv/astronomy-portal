@@ -1,0 +1,167 @@
+@use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
+
+.objectHero
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+.breadcrumbs
+    margin: 0
+
+.grid
+    display: grid
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr)
+    gap: var(--space-6)
+    // The photo and the facts end on one line: the photo fills the info column's height
+    align-items: stretch
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: minmax(0, 1fr)
+
+    // Nothing to show on the left: the facts take the whole width
+    &.single
+        grid-template-columns: minmax(0, 1fr)
+
+// ---- The photo (an LCP candidate: a fixed frame, no shift while it loads). On desktop the
+// frame is as tall as the facts beside it (at least 4:3); on phones it is 4:3
+.photo
+    position: relative
+    display: block
+    min-height: 0
+    aspect-ratio: 4 / 3
+    border-radius: var(--radius-xl)
+    overflow: hidden
+    background: var(--surface-1)
+    box-shadow: inset 0 0 0 1px var(--border)
+
+    img
+        object-fit: cover
+        transition: transform var(--duration-slow) var(--ease)
+
+    &:hover img
+        transform: scale(1.02)
+
+    @media only screen and (min-width: calc(#{variables.$mobileMaxWidth} + 1px))
+        // The grid row (the info column) sets the height; the ratio only keeps a floor
+        height: 100%
+        aspect-ratio: auto
+        min-height: 360px
+
+    // A scrim under the pills
+    &::after
+        content: ''
+        position: absolute
+        inset: 55% 0 0
+        background: linear-gradient(to top, color-mix(in srgb, var(--body-background) 85%, transparent), transparent)
+        pointer-events: none
+
+.survey
+    // The survey's photographic plates are grey: dimmed into the night palette
+    img
+        filter: brightness(0.65) contrast(1.4)
+
+    &:hover img
+        transform: none
+
+.pill
+    +type.caption
+    position: absolute
+    z-index: 1
+    bottom: var(--space-3)
+    padding: 4px 8px
+    border-radius: var(--radius-sm)
+    background: var(--overlay-pill-background)
+    color: #fff
+    backdrop-filter: blur(6px)
+    -webkit-backdrop-filter: blur(6px)
+
+.pillLeft
+    left: var(--space-3)
+
+.pillRight
+    right: var(--space-3)
+
+// ---- The facts
+.info
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+    min-width: 0
+
+.overline
+    +type.overline
+    margin: 0
+    color: var(--color-main)
+
+    a
+        color: inherit
+
+        &:hover
+            color: var(--color-main-hover)
+
+.title
+    +type.titlePage
+    margin: 0
+    overflow-wrap: anywhere
+
+.subtitle
+    +type.lead
+    margin: 0
+    color: var(--text-color-secondary)
+
+.badges
+    display: flex
+    flex-wrap: wrap
+    gap: var(--space-2)
+
+.facts
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: 1px
+    margin: var(--space-2) 0 0
+    border-radius: var(--radius-xl)
+    overflow: hidden
+    background: var(--border)
+    box-shadow: inset 0 0 0 1px var(--border)
+
+    > div
+        padding: var(--space-3)
+        background: var(--surface-1)
+
+    // An odd last fact spans the row instead of leaving a hole
+    > div:last-child:nth-child(odd)
+        grid-column: 1 / -1
+
+    dt
+        +type.caption
+
+    dd
+        margin: 2px 0 0
+        font-weight: var(--font-weight-semibold)
+        font-variant-numeric: tabular-nums
+
+        small
+            color: var(--text-color-secondary)
+            font-weight: var(--font-weight-normal)
+
+.factSkeleton
+    width: 96px
+    height: 20px
+
+.actions
+    display: flex
+    flex-wrap: wrap
+    gap: var(--space-2)
+    margin-top: var(--space-2)
+
+    // The main call to action takes the full width and the large (44px) size on phones (DESIGN §6).
+    // The kit puts `className` on the <button> and wraps a linked one in an <a>: size the button,
+    // stretch its wrapper (the kit sizes buttons by `height`, so a min-height wouldn't grow it)
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        .primaryAction
+            width: 100%
+            height: var(--size-control-large, 44px)
+
+        > a:has(> .primaryAction)
+            flex: 1 1 100%

@@ -1,0 +1,1 @@
+export { ObjectHero } from './ObjectHero'
