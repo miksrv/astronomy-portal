@@ -1,0 +1,56 @@
+@use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
+
+.chipGroup
+    display: flex
+    gap: var(--space-2)
+    min-width: 0
+    overflow-x: auto
+    scrollbar-width: none
+    // Room for the focus outline, which the scroll container would clip
+    padding: 2px
+
+    &::-webkit-scrollbar
+        display: none
+
+// Nested: the kit's `.button.unstyled` resets padding and height with two classes
+.chipGroup .chip
+    +type.secondary
+    display: inline-flex
+    flex: none
+    align-items: center
+    gap: 6px
+    height: 34px
+    padding: 0 12px
+    border: 1px solid var(--border)
+    border-radius: var(--radius-md)
+    background: none
+    color: var(--text-color-secondary)
+    font-weight: var(--font-weight-medium)
+    white-space: nowrap
+    cursor: pointer
+    transition: color var(--duration-fast) var(--ease), border-color var(--duration-fast) var(--ease)
+
+    &:hover
+        color: var(--text-color-primary)
+        border-color: var(--border-strong)
+
+    &:focus-visible
+        outline: var(--focus-outline)
+        outline-offset: 1px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        height: 40px
+
+    &[aria-pressed='true']
+        background: var(--color-main-background)
+        border-color: color-mix(in srgb, var(--color-main) 45%, transparent)
+        color: var(--color-main)
+
+        .count
+            color: inherit
+            opacity: .75
+
+.count
+    color: var(--text-color-disabled)
+    font-variant-numeric: tabular-nums

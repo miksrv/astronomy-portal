@@ -1,0 +1,19 @@
+@use '../../../styles/typography' as type
+
+.cardTitle
+    +type.titleBlock
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    margin: 0
+    min-width: 0
+
+    svg
+        flex: none
+        width: 18px
+        height: 18px
+        fill: var(--text-color-secondary)
+
+.cardMeta
+    +type.caption
+    text-align: right

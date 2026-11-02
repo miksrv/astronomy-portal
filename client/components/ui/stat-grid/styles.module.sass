@@ -1,0 +1,50 @@
+@use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
+
+.statGrid
+    display: grid
+    grid-auto-columns: minmax(0, 1fr)
+    grid-auto-flow: column
+    gap: var(--space-3)
+    margin: 0
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-auto-flow: row
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+        gap: var(--space-2)
+
+.stat
+    display: flex
+    // The value reads first, the label under it - the DOM keeps dt before dd
+    flex-direction: column-reverse
+    justify-content: flex-end
+    gap: var(--space-1)
+    min-width: 0
+    padding: var(--space-4)
+    border-radius: var(--radius-xl)
+
+.card .stat
+    background: var(--surface-1)
+    box-shadow: inset 0 0 0 1px var(--border)
+
+.plate .stat
+    padding: var(--space-3)
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
+
+.value
+    +type.stat
+    margin: 0
+    overflow-wrap: anywhere
+
+    small
+        +type.secondary
+        margin-left: var(--space-1)
+        font-weight: var(--font-weight-medium)
+
+.label
+    +type.secondary
+
+.skeleton
+    width: 60%
+    height: 24px

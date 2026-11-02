@@ -1,0 +1,34 @@
+@use '../../../styles/typography' as type
+
+.statusBadge
+    +type.caption
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    height: 22px
+    padding: 0 8px
+    border-radius: var(--radius-sm)
+    font-weight: var(--font-weight-medium)
+    white-space: nowrap
+
+    &.positive
+        background: var(--color-green-background)
+        color: var(--color-green)
+
+    &.accent
+        background: var(--color-main-background)
+        color: var(--color-main)
+
+    &.warning
+        background: var(--color-orange-background)
+        color: var(--color-orange)
+
+    &.neutral
+        background: var(--surface-2)
+        color: var(--text-color-secondary)
+
+.dot
+    width: 8px
+    height: 8px
+    border-radius: 50%
+    background: currentColor

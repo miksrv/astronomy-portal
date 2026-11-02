@@ -1,0 +1,38 @@
+@use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
+
+.sectionNav
+    position: sticky
+    top: var(--header-height)
+    z-index: var(--z-dropdown)
+    display: flex
+    gap: var(--space-1)
+    padding: var(--space-2) 0
+    overflow-x: auto
+    scrollbar-width: none
+    background: color-mix(in srgb, var(--body-background) 88%, transparent)
+    backdrop-filter: blur(14px)
+    -webkit-backdrop-filter: blur(14px)
+    border-bottom: 1px solid var(--border)
+
+    &::-webkit-scrollbar
+        display: none
+
+.link
+    +type.secondary
+    flex: none
+    padding: 6px 12px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        padding: 10px 12px
+    border-radius: var(--radius-md)
+    white-space: nowrap
+    transition: color var(--duration-fast) var(--ease), background var(--duration-fast) var(--ease)
+
+    &:hover
+        color: var(--text-color-primary)
+        background: var(--surface-2)
+
+    &.active
+        color: var(--color-main)
+        background: var(--color-main-background)
