@@ -9,6 +9,8 @@ class ObjectEntity extends Entity
     protected $casts = [
         'ra'         => 'float',
         'dec'        => 'float',
+        'distance'   => '?float',
+        'magnitude'  => '?float',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => '?datetime',

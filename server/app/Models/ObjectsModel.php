@@ -31,6 +31,8 @@ class ObjectsModel extends ApplicationBaseModel
         'image_file',
         'ra',
         'dec',
+        'distance',
+        'magnitude',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -77,8 +79,10 @@ class ObjectsModel extends ApplicationBaseModel
 
     /** @var array<string, string> CI4 model-level casts for RA/Dec coordinate fields. */
     protected array $casts = [
-        'ra'  => 'float',
-        'dec' => 'float',
+        'ra'        => 'float',
+        'dec'       => 'float',
+        'distance'  => '?float',
+        'magnitude' => '?float',
     ];
 
     /**
@@ -92,12 +96,12 @@ class ObjectsModel extends ApplicationBaseModel
      * @param string|null $object Optional catalog_name to retrieve a single object.
      * @return array Array of ObjectEntity objects enriched with localised fields and categories.
      */
-    public function getObjectsWithCategories(string $locale = 'ru', string $object = null): array
+    public function getObjectsWithCategories(string $locale = 'ru', ?string $object = null): array
     {
         helper('locale');
 
         $objectsQuery = $this->select('catalog_name, title_en, title_ru, image_file, ra, dec' . (
-            $object !== null ? ', description_en, description_ru, fits_cloud_link' : '')
+            $object !== null ? ', distance, magnitude, description_en, description_ru, fits_cloud_link' : '')
         );
 
         if ($object !== null) {
