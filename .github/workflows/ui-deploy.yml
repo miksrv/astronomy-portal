@@ -74,7 +74,7 @@ jobs:
         working-directory: client/.next/standalone
         run: |
           ls node_modules/@img
-          node -e "const sharp = require('sharp'); console.log('sharp', sharp.versions.sharp, 'libvips', sharp.versions.vips)"
+          node -e "const sharp = require(require.resolve('sharp', { paths: ['node_modules/next/dist/server'] })); console.log('sharp', sharp.versions.sharp, 'libvips', sharp.versions.vips)"
 
 
       - name: Configure SSH
@@ -115,7 +115,13 @@ jobs:
           # requested for a month go. The previous builds' static files stay for a week: pages rendered
           # before the release (open tabs, the crawler page cache) still load their chunks and icons
           ssh vps "cd /var/www/astro.miksoft.pro && mkdir -p .next && find .next -mindepth 1 -maxdepth 1 ! -name cache ! -name static -exec rm -rf {} + && (find .next/static -type f -mtime +7 -delete; find .next/static -mindepth 1 -type d -empty -delete; find .next/cache/images -type f -atime +30 -delete) 2>/dev/null || true"
-          rsync -avz -e ssh client/.next/standalone/ vps:/var/www/astro.miksoft.pro
+          # --delete for the server bundle: a package left behind by an older build is not
+          # harmless. A stale node_modules/next/node_modules/sharp (0.34, from a build that
+          # nested it) shadowed the real sharp for months: Next resolved it, it failed to load,
+          # and every image was served as the unoptimized original. .next, public and the
+          # ecosystem file are synced separately below and are excluded from the delete, and so
+          # is .deploy-lock: it holds the maintenance locks of this and the API deploy.
+          rsync -avz --delete --exclude .next --exclude public --exclude ecosystem.config.js --exclude .deploy-lock -e ssh client/.next/standalone/ vps:/var/www/astro.miksoft.pro
           rsync -avz -e ssh client/.next/static vps:/var/www/astro.miksoft.pro/.next
           rsync -avz -e ssh client/public vps:/var/www/astro.miksoft.pro
           rsync -avz -e ssh client/ecosystem.config.js vps:/var/www/astro.miksoft.pro
@@ -125,8 +131,10 @@ jobs:
         run: ssh vps "cd /var/www/astro.miksoft.pro && pm2 restart ecosystem.config.js --update-env && pm2 save"
 
       # Same check on the host: the binary must also load with the server's Node and glibc
+      # Resolved from Next's own directory, the way the image optimizer requires it: a copy
+      # nested under node_modules/next would shadow the top-level one
       - name: Check sharp on the host
-        run: ssh vps "cd /var/www/astro.miksoft.pro && node -e \"const sharp = require('sharp'); console.log('sharp', sharp.versions.sharp, 'libvips', sharp.versions.vips)\""
+        run: ssh vps "cd /var/www/astro.miksoft.pro && node -e \"const sharp = require(require.resolve('sharp', { paths: ['node_modules/next/dist/server'] })); console.log('sharp', sharp.versions.sharp, 'libvips', sharp.versions.vips)\""
 
       # Runs even if a previous step failed, so a broken deploy never leaves
       # the site stuck behind the maintenance page.
