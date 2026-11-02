@@ -1,1 +1,0 @@
-export { ObjectsCloud } from './ObjectsCloud'
