@@ -1,0 +1,96 @@
+@use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
+
+.observingSessions
+    display: flex
+    flex-direction: column
+    min-width: 0
+
+    // In the stretched grid row the card is as tall as the equipment card beside it and the
+    // nights scroll inside; stacked on phones it gets its own cap
+    min-height: 0
+
+    .sessions
+        flex: 1
+        min-height: 0
+        overflow-y: auto
+        padding-right: var(--space-1)
+        scrollbar-width: thin
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            max-height: 420px
+
+.sessions
+    display: grid
+    align-content: start
+    margin: 0
+    padding: 0
+    list-style: none
+
+.session
+    display: grid
+    grid-template-columns: 64px minmax(0, 1fr) auto
+    align-items: center
+    gap: var(--space-3)
+    padding: 10px 0
+    border-bottom: 1px solid var(--border)
+
+    &:last-child
+        border-bottom: 0
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: 52px minmax(0, 1fr)
+
+.date
+    line-height: 1.1
+    text-align: center
+
+    b
+        +type.stat
+        display: block
+
+    span
+        +type.caption
+
+.objects
+    display: flex
+    flex-wrap: wrap
+    gap: 6px
+
+.tag
+    +type.caption
+    display: inline-flex
+    align-items: center
+    min-height: 24px
+    padding: 0 8px
+    border-radius: var(--radius-sm)
+    background: var(--surface-2)
+    color: var(--text-color-primary)
+
+    &:hover
+        background: var(--color-main-background)
+        color: var(--color-main)
+
+.stats
+    +type.caption
+    text-align: right
+    white-space: nowrap
+    font-variant-numeric: tabular-nums
+
+    b
+        +type.body
+        display: block
+        color: var(--text-color-primary)
+        font-weight: var(--font-weight-semibold)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-column: 2
+        text-align: left
+
+        b
+            display: inline
+            margin-right: 6px
+
+.empty
+    +type.secondary
+    margin: 0

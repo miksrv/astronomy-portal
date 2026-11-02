@@ -1,0 +1,107 @@
+@use '../../../../styles/typography' as type
+
+.telescopeActivity
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+    min-width: 0
+
+.years
+    align-self: flex-start
+    max-width: 100%
+
+.scroll
+    position: relative
+    overflow-x: auto
+    // Room for the tooltip over the first rows, so the scroll box doesn't clip it
+    padding: var(--space-1) 0
+
+.heatmap
+    // 53 week columns share the card's width; cells stay square through aspect-ratio
+    display: grid
+    grid-template-rows: 14px repeat(7, auto)
+    grid-auto-flow: column
+    grid-auto-columns: minmax(0, 1fr)
+    gap: 3px
+    min-width: 640px
+
+.month
+    +type.micro
+    grid-row: 1
+    color: var(--text-color-secondary)
+    white-space: nowrap
+    overflow: visible
+
+// The activity scale: from the surface to the brand periwinkle, the brightest glowing.
+// Doubled selectors: the night cells are kit buttons, and `.button.unstyled` paints them
+// transparent with two classes
+.cell
+    display: block
+    aspect-ratio: 1
+    min-height: 10px
+    border-radius: 3px
+    background: var(--surface-2)
+
+.cell.level1
+    background: color-mix(in srgb, var(--color-main) 30%, var(--surface-2))
+
+.cell.level2
+    background: var(--button-primary-background)
+
+.cell.level3
+    background: color-mix(in srgb, var(--color-main) 80%, var(--surface-2))
+
+.cell.level4
+    background: color-mix(in srgb, var(--color-main) 70%, white)
+    box-shadow: 0 0 6px color-mix(in srgb, var(--color-main) 55%, transparent)
+
+.heatmap [data-date]:hover, .heatmap [data-date]:focus-visible
+    outline: 1px solid var(--text-color-primary)
+    outline-offset: 1px
+
+// The kit's `.button.unstyled` resets the size: the night cells are buttons
+.heatmap button.cell
+    padding: 0
+    border: 0
+    cursor: pointer
+
+.tooltip
+    +type.caption
+    position: absolute
+    z-index: var(--z-tooltip, 100)
+    display: grid
+    gap: 2px
+    max-width: 280px
+    padding: 6px 10px
+    transform: translate(-50%, calc(-100% - 8px))
+    border-radius: var(--radius-sm)
+    background: var(--body-background)
+    box-shadow: var(--shadow-lg), inset 0 0 0 1px var(--border-strong)
+    color: var(--text-color-primary)
+    pointer-events: none
+    white-space: nowrap
+
+    // Over the top rows the tooltip would be clipped by the scroll box: flip it under the cell
+    &.below
+        transform: translate(-50%, 24px)
+
+.tooltipObjects
+    color: var(--text-color-secondary)
+    white-space: normal
+
+.footer
+    +type.caption
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    justify-content: space-between
+    gap: var(--space-3)
+
+.scale
+    display: inline-flex
+    align-items: center
+    gap: 3px
+
+    .cell
+        width: 12px
+        min-height: 12px
