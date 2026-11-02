@@ -187,6 +187,9 @@ class Photos extends BaseApiController
             $photo->id = $id;
             $photosModel->update($id, $photo);
 
+            // The catalog shows each object's newest photo as its cover
+            \Config\Services::cache()->deleteMatching('objects_list_*');
+
             return $this->respondCreated($photo);
         } catch (\Exception $e) {
             log_message('error', $e->getMessage());
@@ -216,6 +219,8 @@ class Photos extends BaseApiController
 
             if ($photoData) {
                 $photoModel->delete($id);
+                \Config\Services::cache()->deleteMatching('objects_list_*');
+
                 return $this->respondDeleted($photoData);
             }
 
@@ -339,6 +344,8 @@ class Photos extends BaseApiController
                     ]);
                 }
             }
+
+            \Config\Services::cache()->deleteMatching('objects_list_*');
 
             $isUpdate = !empty($id);
             return $isUpdate ? $this->respondUpdated($photo) : $this->respondCreated($photo);

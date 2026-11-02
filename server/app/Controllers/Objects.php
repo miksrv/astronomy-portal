@@ -8,6 +8,8 @@ use App\Libraries\SessionLibrary;
 use App\Models\ObjectsModel;
 use App\Models\ObjectFitsFiltersModel;
 use App\Models\ObjectCategoryModel;
+use App\Models\ObjectFitsFilesModel;
+use App\Models\PhotosObjectModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 use Exception;
@@ -27,7 +29,9 @@ class Objects extends BaseApiController
     }
 
     /**
-     * Retrieves a list of objects and their related filters with statistics (frames, exposure, file size).
+     * Retrieves a list of objects and their related filters with statistics (frames, exposure, file size),
+     * plus what the catalog shows per object: the cover photo (the newest one), the number of photos,
+     * and the number of observing nights with the first and the last of them.
      *
      * @return ResponseInterface Returns a response containing the object list with filter statistics.
      */
@@ -54,6 +58,18 @@ class Objects extends BaseApiController
 
             // Prepare objects with filters and statistics
             $result = prepareObjectDataWithFilters($objectsData, $filtersData);
+            $nights = (new ObjectFitsFilesModel())->getNightsSummary();
+            $covers = (new PhotosObjectModel())->getObjectCovers();
+
+            foreach ($result as $object) {
+                $this->_addNights($object, $nights[$object->name] ?? null);
+
+                $object->photosCount = $covers[$object->name]['photosCount'] ?? 0;
+
+                if (isset($covers[$object->name])) {
+                    $object->cover = $covers[$object->name]['cover'];
+                }
+            }
 
             $response = [
                 'count' => count($result),
@@ -88,12 +104,21 @@ class Objects extends BaseApiController
             $objectsModel = new ObjectsModel();
             $filtersModel = new ObjectFitsFiltersModel();
             $objectsData  = $objectsModel->getObjectsWithCategories($locale, $id);
-            $filtersData  = $filtersModel->findAll();
+
+            if (empty($objectsData)) {
+                return $this->respondNotFound(lang('Objects.notFound'));
+            }
+
+            $filtersData = $filtersModel->where('object_name', $id)->findAll();
 
             // Prepare the object data with filters and statistics
             $result = prepareObjectDataWithFilters($objectsData, $filtersData);
+            $nights = (new ObjectFitsFilesModel())->getNightsSummary($id);
 
             if (!empty($result)) {
+                $this->_addNights($result[0], $nights[$id] ?? null);
+                $result[0]->optics = (new ObjectFitsFilesModel())->getObjectOptics($id);
+
                 return $this->respond($result[0]);
             }
 
@@ -128,6 +153,8 @@ class Objects extends BaseApiController
             'description'   => 'if_exist|permit_empty|string',
             'ra'            => 'if_exist|permit_empty|decimal',
             'dec'           => 'if_exist|permit_empty|decimal',
+            'distance'      => 'if_exist|permit_empty|decimal|greater_than[0]',
+            'magnitude'     => 'if_exist|permit_empty|decimal|greater_than_equal_to[-30]|less_than_equal_to[30]',
             'fitsCloudLink' => 'if_exist|permit_empty|string|max_length[500]',
         ];
 
@@ -153,6 +180,13 @@ class Objects extends BaseApiController
         if (isset($input['fitsCloudLink'])) {
             $input['fits_cloud_link'] = $input['fitsCloudLink'];
             unset($input['fitsCloudLink']);
+        }
+
+        // An emptied optional fact clears the column instead of storing 0
+        foreach (['distance', 'magnitude'] as $field) {
+            if (array_key_exists($field, $input) && ($input[$field] === '' || $input[$field] === null)) {
+                $input[$field] = null;
+            }
         }
 
         // Save the catalog image
@@ -206,6 +240,8 @@ class Objects extends BaseApiController
             'description'   => 'if_exist|permit_empty|string',
             'ra'            => 'if_exist|permit_empty|decimal',
             'dec'           => 'if_exist|permit_empty|decimal',
+            'distance'      => 'if_exist|permit_empty|decimal|greater_than[0]',
+            'magnitude'     => 'if_exist|permit_empty|decimal|greater_than_equal_to[-30]|less_than_equal_to[30]',
             'fitsCloudLink' => 'if_exist|permit_empty|string|max_length[500]',
         ];
 
@@ -234,6 +270,13 @@ class Objects extends BaseApiController
         if (isset($input['fitsCloudLink'])) {
             $input['fits_cloud_link'] = $input['fitsCloudLink'];
             unset($input['fitsCloudLink']);
+        }
+
+        // An emptied optional fact clears the column instead of storing 0
+        foreach (['distance', 'magnitude'] as $field) {
+            if (array_key_exists($field, $input) && ($input[$field] === '' || $input[$field] === null)) {
+                $input[$field] = null;
+            }
         }
 
         // Save the catalog image
@@ -299,10 +342,29 @@ class Objects extends BaseApiController
             }
 
             $objectsModel->delete($id, true);
+
+            \Config\Services::cache()->deleteMatching('objects_list_*');
+
             return $this->respondDeleted($objectsData);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
             return $this->respondServerError();
+        }
+    }
+
+    /**
+     * Adds the observing nights summary (`nights`, `firstNight`, `lastNight`) to an object.
+     *
+     * @param object     $object  The object entity from getObjectsWithCategories().
+     * @param array|null $summary The object's entry from ObjectFitsFilesModel::getNightsSummary().
+     */
+    protected function _addNights(object $object, ?array $summary): void
+    {
+        $object->nights = $summary['nights'] ?? 0;
+
+        if (!empty($summary['firstNight'])) {
+            $object->firstNight = $summary['firstNight'];
+            $object->lastNight  = $summary['lastNight'];
         }
     }
 

@@ -142,6 +142,11 @@ class Files extends BaseApiController
                 $objectsModel->insert($dataCatalog);
             }
 
+            // A new or changed frame moves the per-night aggregates of the catalog and the dashboard
+            $cache = \Config\Services::cache();
+            $cache->deleteMatching('objects_list_*');
+            $cache->deleteMatching('statistic_telescope_*');
+
             if ($modelFiles->find($fileId)) {
                 unset($dataFile['id']);
 
