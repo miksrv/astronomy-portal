@@ -100,7 +100,14 @@ const CelestialPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const { translations } = await initSSRLocale(store, context)
+            // Static shell: everything on the page is drawn on the client
+            context.res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400')
+
+            const { translations } = await initSSRLocale(store, context, ['translation', 'starmap'])
+
+            // The page's own `useObjectsGetListQuery()` picks this up from __NEXT_DATA__
+            // (extractRehydrationInfo) instead of fetching after hydration
+            await store.dispatch(API.endpoints?.objectsGetList.initiate())
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 

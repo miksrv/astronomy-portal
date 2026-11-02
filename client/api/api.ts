@@ -93,13 +93,6 @@ export const API = createApi({
         authLoginService: builder.mutation<ApiType.Auth.ResAuthService, ApiType.Auth.ReqAuthService>({
             query: ({ service, ...params }) => `auth/${service}${params?.code ? encodeQueryData(params) : ''}`
         }),
-        authPostLogin: builder.mutation<ApiType.Auth.ResLogin, ApiType.Auth.ReqLogin>({
-            query: (credentials) => ({
-                body: credentials,
-                method: 'POST',
-                url: 'auth/login'
-            })
-        }),
         authUpdateProfile: builder.mutation<ApiType.Auth.ResUpdateProfile, ApiType.Auth.ReqUpdateProfile>({
             invalidatesTags: ['Auth'],
             query: (body) => ({ body, method: 'PATCH', url: 'auth/profile' })
@@ -126,6 +119,13 @@ export const API = createApi({
             providesTags: (result, error, id) => [{ id, type: 'Events' }],
             query: (id) => `events/${id}`
         }),
+        // See photosPostView
+        eventPostView: builder.mutation<void, string>({
+            query: (id) => ({
+                method: 'POST',
+                url: `events/${id}/view`
+            })
+        }),
         eventGetMediaList: builder.query<ApiType.Events.ResMediaList, ApiType.Events.ReqMediaList>({
             providesTags: (result, error, arg) => [{ id: arg.eventId ?? 'LIST', type: 'EventMedia' }],
             // A plain, one-shot query - the event page fetches either a small
@@ -134,10 +134,6 @@ export const API = createApi({
             // each distinct set of args (including `limit`) is just its own
             // cache entry.
             query: (params) => `events/media${encodeQueryData(params)}`
-        }),
-        eventGetUsersList: builder.query<ApiType.Events.ResUsersList, string>({
-            providesTags: (result, error, arg) => [{ id: arg, type: 'EventUsers' }],
-            query: (id) => `events/members/${id}`
         }),
         eventGetStatistic: builder.query<ApiType.Events.ResEventStatistic, string>({
             query: (id) => `events/${id}/statistic`
@@ -338,13 +334,6 @@ export const API = createApi({
                 url: 'objects'
             })
         }),
-        objectsDelete: builder.mutation<void, string>({
-            invalidatesTags: () => [{ type: 'Objects' }],
-            query: (name) => ({
-                method: 'DELETE',
-                url: `objects/${name}`
-            })
-        }),
 
         /* Files controller */
         filesGetList: builder.query<ApiType.Files.Response, string>({
@@ -362,6 +351,15 @@ export const API = createApi({
         photosGetItem: builder.query<ApiModel.Photo, string>({
             providesTags: (res, err, id) => [{ id, type: 'Photos' }],
             query: (id) => `photos/${id}`
+        }),
+        // One view, sent by the photo page once it is open (GET no longer counts: SSR and
+        // crawlers were inflating the number). Nothing to invalidate: the figure on the
+        // page is the server-rendered one until the next load
+        photosPostView: builder.mutation<void, string>({
+            query: (id) => ({
+                method: 'POST',
+                url: `photos/${id}/view`
+            })
         }),
         photosGetAstrometry: builder.query<ApiModel.PhotoAstrometry, string>({
             providesTags: (res, err, id) => [{ id: `astrometry-${id}`, type: 'Photos' }],
@@ -407,13 +405,6 @@ export const API = createApi({
             query: ({ id, ...formState }) => ({
                 body: formState,
                 method: 'PATCH',
-                url: `photos/${id}`
-            })
-        }),
-        photosDelete: builder.mutation<void, string>({
-            invalidatesTags: () => [{ type: 'Photos' }],
-            query: (id) => ({
-                method: 'DELETE',
                 url: `photos/${id}`
             })
         }),
@@ -515,8 +506,14 @@ export const API = createApi({
                 url: `mailings/${id}/cancel`
             })
         }),
-        mailingUnsubscribe: builder.query<ApiType.Mailings.ResMailingUnsubscribe, string>({
-            query: (mail) => `mailings/unsubscribe?mail=${encodeURIComponent(mail)}`
+        // POST, not GET: the page asks for a click, so a mail client prefetching
+        // the link does not unsubscribe the reader
+        mailingUnsubscribe: builder.mutation<ApiType.Mailings.ResMailingUnsubscribe, string>({
+            query: (mail) => ({
+                body: { mail },
+                method: 'POST',
+                url: 'mailings/unsubscribe'
+            })
         }),
         mailingGetAudiences: builder.query<ApiType.Mailings.ResMailingAudiences, void>({
             query: () => 'mailings/audiences'

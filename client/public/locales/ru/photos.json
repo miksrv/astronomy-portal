@@ -1,0 +1,178 @@
+{
+    "components": {
+        "pages": {
+            "photos": {
+                "astro-photo-form": {
+                    "category": "Категория",
+                    "not-found": "Ничего не найдено",
+                    "categories-placeholder": "Выберите одну или несколько категорий",
+                    "objects": "Объекты на фотографии",
+                    "objects-placeholder": "Выберите объекты, которые есть на фотографии",
+                    "equipment": "Оборудование",
+                    "equipment-placeholder": "Выберите астрономическое оборудование",
+                    "processing-date": "Дата обработки",
+                    "shooting-params": "Параметры съемки",
+                    "add-filter": "Добавить фильтр",
+                    "frames": "Количество кадров",
+                    "frames-aria": "количество кадров",
+                    "exposure": "Выдержка (минут)",
+                    "exposure-aria": "выдержка (минут)",
+                    "remove-filter": "Удалить фильтр",
+                    "replace-photo": "Заменить фотографию:",
+                    "upload-photo": "Загрузить фотографию:",
+                    "frames-required": "Введите количество кадров (целое число больше нуля)",
+                    "exposure-required": "Введите выдержку в минутах (число больше нуля)",
+                    "categories-required": "Выберите хотя бы одну категорию",
+                    "objects-required": "Выберите хотя бы один объект",
+                    "equipments-required": "Выберите хотя бы одно оборудование",
+                    "date-required": "Укажите дату обработки",
+                    "filters-required": "Добавьте хотя бы один фильтр"
+                },
+                "photo-annotations": {
+                    "compass": "Север и восток на снимке"
+                },
+                "photo-catalog": {
+                    "all-categories": "Все категории",
+                    "sort-date": "Новые",
+                    "sort-exposure": "По выдержке",
+                    "sort-views": "Популярные",
+                    "search-label": "Поиск по объекту",
+                    "search-placeholder": "M31, NGC 7000, туманность…",
+                    "sort-label": "Сортировка",
+                    "categories-label": "Категории",
+                    "grid-label": "Снимки",
+                    "not-found": "По вашему запросу ничего не найдено.",
+                    "reset-filters": "Сбросить фильтры",
+                    "show-more_one": "Показать ещё {{count}}",
+                    "show-more_few": "Показать ещё {{count}}",
+                    "show-more_many": "Показать ещё {{count}}",
+                    "show-more_other": "Показать ещё {{count}}",
+                    "found": "Найдено {{found}} из {{total}}",
+                    "photos-count_one": "{{count}} снимок",
+                    "photos-count_few": "{{count}} снимка",
+                    "photos-count_many": "{{count}} снимков",
+                    "photos-count_other": "{{count}} снимков",
+                    "reset": "Сбросить",
+                    "open": "Снимок {{name}} от {{date}}",
+                    "alt": "Астрофото {{title}} от {{date}}"
+                },
+                "photo-compare": {
+                    "alt": "Снимок {{title}} от {{date}}",
+                    "this": "этот",
+                    "divider": "Граница между снимками от {{other}} и {{current}}"
+                },
+                "photo-history": {
+                    "summary": "С {{year}} года выдержка выросла с {{from}} до {{to}}",
+                    "open": "Снимок {{name}} от {{date}}",
+                    "current": "этот снимок",
+                    "no-exposure": "выдержка не указана",
+                    "compare": "Сравнить",
+                    "compare-label": "Сравнить этот снимок со снимком от {{date}}"
+                },
+                "photo-info": {
+                    "filters": "Фильтры",
+                    "category": "Категория",
+                    "category-link": "Все снимки: {{category}}",
+                    "download": "Полный размер · {{size}}"
+                },
+                "photo-object-card": {
+                    "nights_one": "{{count}} ночь",
+                    "nights_few": "{{count}} ночи",
+                    "nights_many": "{{count}} ночей",
+                    "nights_other": "{{count}} ночей",
+                    "tonight": "Сегодня ночью до {{altitude}}° в {{time}}",
+                    "not-tonight": "Сегодня ночью не поднимается",
+                    "constellation": "Созвездие",
+                    "coordinates": "Координаты",
+                    "archive": "В FITS-архиве",
+                    "photos": "Снимков объекта",
+                    "cta": "Видимость, журнал наблюдений и описание"
+                },
+                "photo-setup": {
+                    "capture": "Съёмка",
+                    "date": "Дата",
+                    "exposure": "Выдержка",
+                    "frames": "Кадров",
+                    "center": "Центр поля",
+                    "field": "Поле зрения",
+                    "scale": "Масштаб",
+                    "scale-value": "{{value}}″ на пиксель",
+                    "rotation": "Поворот",
+                    "rotation-value": "{{value}}° от севера",
+                    "focal-length": "Фокус",
+                    "millimetres": "{{value}} мм",
+                    "views": "Просмотров",
+                    "equipment": "Оборудование"
+                },
+                "photo-solve-status": {
+                    "pending": "Привязка к небу: отправляем снимок…",
+                    "solving": "Привязка к небу: решается…",
+                    "failed": "Привязка к небу не удалась: {{error}}",
+                    "start": "Привязать к небу",
+                    "restart": "Перерешать"
+                },
+                "photo-strip": {
+                    "open": "Снимок от {{date}}",
+                    "alt": "Фото {{name}} от {{date}}",
+                    "current": "вы здесь"
+                },
+                "photo-viewer": {
+                    "zoom": "Открыть снимок на весь экран",
+                    "alt": "Астрофото {{title}} от {{date}}",
+                    "compare-close": "Закрыть сравнение",
+                    "compare": "Сравнить с {{year}}",
+                    "annotations": "Объекты",
+                    "annotations-tooltip": "Подписать объекты на снимке (astrometry.net)",
+                    "grid": "Сетка",
+                    "grid-tooltip": "Координатная сетка RA/Dec",
+                    "scale": "Угловой масштаб",
+                    "fullscreen": "На весь экран, с увеличением",
+                    "previous": "Предыдущий снимок",
+                    "next": "Следующий снимок"
+                }
+            }
+        }
+    },
+    "equipment": {
+        "mount": "Монтировка",
+        "scope": "Телескоп",
+        "camera": "Камера",
+        "guiding_camera": "Гид-камера",
+        "guiding_scope": "Гид-телескоп",
+        "focuser": "Фокусер",
+        "filter_wheel": "Колесо фильтров",
+        "filter": "Фильтр"
+    },
+    "pages": {
+        "photo": {
+            "seo-title": "{{objects}} — астрофото от {{date}}",
+            "description": "{{photoTitle}}: астрофотография, снятая любительской обсерваторией в Оренбурге. Оборудование: {{equipment}}.",
+            "description-no-equipment": "{{photoTitle}}: астрофотография, снятая любительской обсерваторией в Оренбурге.",
+            "title": "Снимок {{objects}} от {{date}}",
+            "setup-title": "Как снято",
+            "history-title": "История съёмки {{objects}}",
+            "history-note": "Каждый снимок — отдельная обработка",
+            "objects-title": "Об объектах",
+            "object-title": "Об объекте",
+            "related-title": "Ещё снимки: {{category}}",
+            "related-all": "Все в галерее →"
+        },
+        "photos-form": {
+            "edit-title": "Редактирование фотографии",
+            "add-title": "Добавление фотографии",
+            "save-error": "Ошибка сохранения"
+        },
+        "photos": {
+            "stat-photos": "снимков в галерее",
+            "stat-objects": "объектов на снимках",
+            "stat-exposure": "суммарной выдержки",
+            "stat-views": "просмотров",
+            "title": "Астрофото",
+            "seo-title": "Астрофото галактик и туманностей — фотографии космоса",
+            "description": "Астрофотографии галактик, туманностей, звёздных скоплений и планет, снятые любительской обсерваторией в Оренбурге. Фильтры, выдержка и оборудование для каждого снимка.",
+            "lead": "Обработанные снимки обсерватории: каждый — часы выдержки через узкополосные и широкополосные фильтры, собранные за несколько ночей. На странице снимка — оборудование, фильтры и другие кадры того же объекта.",
+            "create_button": "Добавить",
+            "stats-label": "Сводка галереи"
+        }
+    }
+}

@@ -49,7 +49,7 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, category, photosList, c
             { value: objects, label: t('pages.photos.stat-objects', 'объектов на снимках') },
             {
                 value: Math.round(totals.exposure / 3600).toLocaleString(i18n.language),
-                unit: t('pages.objects.stat-hours-unit', 'ч'),
+                unit: t('common.hours-unit', 'ч'),
                 label: t('pages.photos.stat-exposure', 'суммарной выдержки')
             },
             {
@@ -98,9 +98,9 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, category, photosList, c
             openGraph={{
                 images: [
                     {
-                        height: 1024,
-                        url: '/images/index-hero.png',
-                        width: 1536
+                        height: 630,
+                        url: '/images/og-index.jpg',
+                        width: 1200
                     }
                 ]
             }}
@@ -153,7 +153,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
             // Public page: nginx caches the HTML for a short while (config/nginx.conf)
             context.res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=1200')
 
-            const { translations } = await initSSRLocale(store, context)
+            const { translations } = await initSSRLocale(store, context, ['translation', 'photos'])
             const search = (context.query.search as string) || ''
             const category = parseInt(context.query.category as string)
 

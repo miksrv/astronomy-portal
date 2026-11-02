@@ -225,7 +225,7 @@ export const getStaticProps = wrapper.getStaticProps(
                 return { notFound: true }
             }
 
-            const { translations } = await initSSRLocale(store, context)
+            const { translations } = await initSSRLocale(store, context, ['translation', 'observatory'])
 
             const HOST_IMG = process.env.NEXT_PUBLIC_IMG_HOST || 'http://localhost:8080/'
             const rawChapter: HistoryChapter = JSON.parse(fs.readFileSync(chapterPath, 'utf-8'))

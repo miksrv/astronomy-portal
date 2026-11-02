@@ -120,7 +120,13 @@ const CheckinPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.EVENTS_CHECKIN, '/stargazing')
+            const guard = await requirePermissionSSR(
+                store,
+                context,
+                ApiModel.Permission.EVENTS_CHECKIN,
+                '/stargazing',
+                ['translation', 'stargazing']
+            )
 
             if (!guard.ok) {
                 return { redirect: guard.redirect }

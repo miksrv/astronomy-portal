@@ -1,4 +1,4 @@
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 
 import { SITE_LINK } from './constants'
 
@@ -21,21 +21,11 @@ export const encodeQueryData = (data: object | void | undefined): string => {
 }
 
 /**
- * Returns the correct word for plural
- * Example: declOfNum(5, ['кадр', 'кадра', 'кадров']) = '5 кадров'
- * @param n
- * @param forms
- */
-export const declOfNum = (n: number, forms: [string, string, string]): string =>
-    forms[n % 10 === 1 && n % 100 !== 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2]
-
-/**
  * Returns the formatted time elapsed since the beginning of the event
  * @param sec {number}
- * @param full {boolean}
  * @returns {string}
  */
-export const formatSecondsToExposure = (sec: number | string, full: boolean = false): string => {
+export const formatSecondsToExposure = (sec: number | string): string => {
     const seconds = Number(sec)
 
     if (seconds <= 0) {
@@ -45,28 +35,11 @@ export const formatSecondsToExposure = (sec: number | string, full: boolean = fa
     const h = (seconds / 3600) ^ 0
     const m = ((seconds - h * 3600) / 60) ^ 0
 
-    if (full) {
-        let text = ''
-
-        text += h ? h + ' ' + declOfNum(h, ['час', 'часа', 'часов']) + ' ' : ''
-        text += m ? m + ' ' + declOfNum(m, ['минута', 'минуты', 'минут']) : ''
-
-        return text
-    }
-
     return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m)
 }
 
-export const getTimeFromSec = (sec: number, full: boolean = false): string => formatSecondsToExposure(sec, full)
-
 export const minutesAgo = (date?: string | Date, withoutSuffix?: boolean): string =>
     date ? dayjs.utc(date).fromNow(withoutSuffix) : ''
-
-export const dateExtractMonth = (date: string | Date | Dayjs, monthCount: number): Date =>
-    dayjs(date).subtract(monthCount, 'month').toDate()
-
-export const dateAddMonth = (date: string | Date | Dayjs, monthCount: number): Date =>
-    dayjs(date).add(monthCount, 'month').toDate()
 
 /**
  * Rounds a number to a specified number of digits.
@@ -103,3 +76,16 @@ export const toJsonLd = (data: object): string => JSON.stringify(data).replace(/
 /** The visitor asked the OS for less motion; false where matchMedia is unavailable (SSR, jsdom). */
 export const prefersReducedMotion = (): boolean =>
     typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+
+/**
+ * True for a path the app may redirect to after login: relative, same-origin.
+ * "//host", "/\host" and "/x://" are read by browsers as absolute URLs (an open
+ * redirect), so they are rejected along with control characters.
+ */
+export const isSafeReturnPath = (path: unknown): path is string =>
+    typeof path === 'string' &&
+    path.startsWith('/') &&
+    !path.startsWith('//') &&
+    !path.includes('\\') &&
+    !path.includes('://') &&
+    !/[\u0000-\u001F\u007F]/.test(path)

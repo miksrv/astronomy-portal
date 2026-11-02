@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A DIY amateur observatory web application with remote monitoring, equipment control, weather data, astrophoto archive, stargazing events, and email mailings. The project is a monorepo with three subsystems: a Next.js frontend (`client/`), a CodeIgniter 4 PHP backend (`server/`), and Arduino firmware (`firmware/`).
 
-**Current version:** 4.15.0 (see `CHANGELOG.md` for history)
+**Current version:** 4.15.1 (see `CHANGELOG.md` for history)
 
 **Feature specs:** `ROADMAP.md` lists planned features; each one with a spec is detailed in `features/`. A shipped feature's spec is deleted and the feature recorded in `CHANGELOG.md`.
 
@@ -70,7 +70,7 @@ Detailed inventories live next to the code — read them instead of guessing:
 
 **Path alias:** `@/*` maps to the `client/` root (e.g., `@/api/models/photo`).
 
-**i18n:** Locales live in `client/public/locales/{en,ru}/` — `translation.json` plus per-page namespaces. `yarn locales:build` (i18next-scanner) adds new keys with the Russian default; the EN value of a new key, and both values of a changed key, are then filled in by hand.
+**i18n:** Locales live in `client/public/locales/{en,ru}/`. The scanner-managed dictionary is split by section — `translation.json` (shared: `common.*`, `menu.*`, `components.common.*`, `components.ui.*`, the small pages) plus `stargazing`, `objects`, `photos`, `observatory`, `starmap`, `admin`, `about`, `privacy` (key prefix → namespace in `NAMESPACE_PREFIXES`, `client/i18next-scanner.config.js`); the hand-written page namespaces (`stargazing-faq`, `observatory-overview`, …) are read via `useTranslation('<ns>')`. Keys keep their names in code (`t('pages.photos.title')`): i18next falls back from `translation` into the loaded section namespaces (`fallbackNS`), so a page only has to load what its section needs — `initSSRLocale(store, context, ['translation', 'photos'])` / `requirePermissionSSR(..., ['translation', 'admin'])`. A key used by several sections belongs in `common.*`. `yarn locales:build` (i18next-scanner) adds new keys with the Russian default to the right file; the EN value of a new key, and both values of a changed key, are then filled in by hand.
 
 **UI library:** `simple-react-ui-kit` 2.x (tokens `theme.css` + component `styles.css`, imported once in `pages/_app.tsx`). The site is dark-only (`data-theme="dark"` on `<html>`). Always prefer kit components over native HTML (`Button`, `Input`, `TextArea`, `Message`, `Table`, …); when to use `Container` and the rest of the layout rules are in `client/DESIGN.md`.
 
@@ -96,7 +96,7 @@ Detailed inventories live next to the code — read them instead of guessing:
 - `CommentsModel::getForEntity()` and `getRandom()` return author as `{ id, name, avatar }` object with name truncated to "FirstName L." for privacy
 - Always run migrations after pulling changes that add them
 
-**Rate limiting:** `server/app/Filters/RateLimitFilter.php` (alias `ratelimit`) throttles abuse-prone public routes per-IP via a token bucket (CI4's `Services::throttler()`), applied per-route in `Routes.php` — currently OAuth login, `relay/light`, `events/booking`, `comments` create, `mailings/:id/test`, `push-notifications/:id/test`, and `push/subscribe`. Disabled under `ENVIRONMENT === 'testing'`.
+**Rate limiting:** `server/app/Filters/RateLimitFilter.php` (alias `ratelimit`) throttles abuse-prone public routes per-IP via a token bucket (CI4's `Services::throttler()`), applied per-route in `Routes.php` — currently OAuth login, `relay/light`, `events/booking`, `comments` create, `mailings/:id/test`, `mailings/unsubscribe`, `push-notifications/:id/test`, `push/subscribe`, and the view counters `photos/:id/view` / `events/:id/view`. Disabled under `ENVIRONMENT === 'testing'`.
 
 **Plate solving:** every photo has a row in `photos_astrometry` solved on nova.astrometry.net (key `astrometry.apiKey`) as a state machine (`AstrometrySolver::step()`): there is **no cron** — after an upload the editor's browser (`PhotoSolveStatus` in the photo page header) polls `POST /photos/:id/astrometry` every few seconds until the row is final, and the archive was backfilled once with `php spark photos:solve --all`. The frontend reads `GET /photos/:id/astrometry` and draws the object labels and the RA/Dec grid itself from the stored WCS (`client/utils/wcs.ts`, TAN + SIP) — the service's annotations are only the second layer under our own objects.
 

@@ -25,7 +25,6 @@ const StargazingStatisticPage: NextPage<StargazingStatisticPageProps> = ({ event
 
     return (
         <AppLayout
-            canonical={`stargazing/${eventId}/statistic`}
             title={title}
             noindex={true}
             nofollow={true}
@@ -68,7 +67,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 store,
                 context,
                 ApiModel.Permission.EVENTS_STATISTIC,
-                `/stargazing/${eventId}`
+                `/stargazing/${eventId}`,
+                ['translation', 'stargazing']
             )
 
             if (!guard.ok) {

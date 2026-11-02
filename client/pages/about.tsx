@@ -159,7 +159,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 href={'https://t.me/look_at_stars'}
                 className={'telegram-message'}
                 title={t('common.telegram', 'Телеграм')}
-                rel={'noindex nofollow'}
+                rel={'nofollow noopener'}
                 target={'_blank'}
             >
                 <Icon name={'Telegram'} />{' '}
@@ -355,7 +355,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
         async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<AboutPageProps>> => {
-            const { translations } = await initSSRLocale(store, context)
+            const { translations } = await initSSRLocale(store, context, ['translation', 'about'])
 
             return {
                 props: {

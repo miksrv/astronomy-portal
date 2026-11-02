@@ -74,7 +74,9 @@ const PhotoFormPage: NextPage<object> = () => {
         router.back()
     }
 
-    const currentPageTitle = photoData?.id ? 'Редактирование фотографии' : 'Добавление фотографии'
+    const currentPageTitle = photoData?.id
+        ? t('pages.photos-form.edit-title', 'Редактирование фотографии')
+        : t('pages.photos-form.add-title', 'Добавление фотографии')
 
     useEffect(() => {
         if ((createdData as ApiModel.Photo)?.id) {
@@ -102,7 +104,9 @@ const PhotoFormPage: NextPage<object> = () => {
     // since there's nothing to scroll to.
     useEffect(() => {
         if (saveError && Object.keys(getFieldErrors(saveError)).length === 0) {
-            snackbar.push(getErrorMessage(saveError) ?? 'Ошибка сохранения', { type: 'error' })
+            snackbar.push(getErrorMessage(saveError) ?? t('pages.photos-form.save-error', 'Ошибка сохранения'), {
+                type: 'error'
+            })
         }
     }, [saveError])
 
@@ -163,7 +167,10 @@ const PhotoFormPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.PHOTOS_MANAGE, '/photos')
+            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.PHOTOS_MANAGE, '/photos', [
+                'translation',
+                'photos'
+            ])
 
             if (!guard.ok) {
                 return { redirect: guard.redirect }

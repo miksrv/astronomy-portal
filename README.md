@@ -297,7 +297,6 @@ yarn build
 | `app.appTimezone` | Server timezone | `Asia/Yekaterinburg` |
 | `app.latitude` | Observatory latitude | `51.7727` |
 | `app.longitude` | Observatory longitude | `55.0988` |
-| `app.fitsApiKey` | API key for FITS data source | — |
 | `astrometry.apiKey` | nova.astrometry.net API key for plate solving photos: new uploads are solved from the editor's browser, the archive once with `php spark photos:solve --all` (see server/CLAUDE.md CLI Commands). Shown on https://nova.astrometry.net/profile after signing in | — |
 | `app.observatory.controller` | URL of Arduino relay controller | `http://astro.myftp.org:8081/` |
 | `app.observatory.controller.user` / `.password` | Relay controller credentials | — |

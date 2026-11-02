@@ -208,7 +208,10 @@ export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
             const id = context.params?.id as string
-            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.PUSH_MANAGE)
+            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.PUSH_MANAGE, '/', [
+                'translation',
+                'admin'
+            ])
 
             if (!guard.ok) {
                 return { redirect: guard.redirect }

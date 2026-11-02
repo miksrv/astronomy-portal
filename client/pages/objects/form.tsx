@@ -70,13 +70,15 @@ const ObjectFormPage: NextPage<object> = () => {
     // since there's nothing to scroll to.
     useEffect(() => {
         if (saveError && Object.keys(getFieldErrors(saveError)).length === 0) {
-            snackbar.push(getErrorMessage(saveError) ?? 'Ошибка сохранения', { type: 'error' })
+            snackbar.push(getErrorMessage(saveError) ?? t('pages.objects-form.save-error', 'Ошибка сохранения'), {
+                type: 'error'
+            })
         }
     }, [saveError])
 
     const currentPageTitle = objectData?.name
-        ? `Редактирование ${formatObjectName(objectData.name)}`
-        : 'Добавление объекта'
+        ? t('pages.objects-form.edit-title', 'Редактирование {{name}}', { name: formatObjectName(objectData.name) })
+        : t('pages.objects-form.add-title', 'Добавление объекта')
 
     return (
         <AppLayout
@@ -111,7 +113,11 @@ const ObjectFormPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.OBJECTS_MANAGE, '/objects')
+            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.OBJECTS_MANAGE, '/objects', [
+                'translation',
+                'objects',
+                'starmap'
+            ])
 
             if (!guard.ok) {
                 return { redirect: guard.redirect }

@@ -16,9 +16,9 @@ const UnsubscribePage: NextPage = () => {
     const router = useRouter()
     const mail = typeof router.query.mail === 'string' ? router.query.mail : ''
 
-    const { isFetching, isSuccess, isError } = API.useMailingUnsubscribeQuery(mail, {
-        skip: !mail
-    })
+    // Nothing happens on page load: a mail client that prefetches the link must not
+    // unsubscribe the reader, so the request is sent only after a click
+    const [unsubscribe, { isLoading, isSuccess, isError }] = API.useMailingUnsubscribeMutation()
 
     const pageTitle = t('pages.unsubscribe.title', 'Отписка от рассылки')
 
@@ -39,19 +39,28 @@ const UnsubscribePage: NextPage = () => {
                             )}
                         </p>
 
-                        {isFetching && (
+                        {isLoading && (
                             <div className={'loaderWrapper'}>
                                 <Spinner />
                             </div>
                         )}
 
-                        {!isFetching && isSuccess && (
+                        {!isLoading && !isSuccess && !isError && (
+                            <Button
+                                mode={'primary'}
+                                disabled={!mail}
+                                label={t('pages.unsubscribe.confirm', 'Отписаться от рассылки')}
+                                onClick={() => void unsubscribe(mail)}
+                            />
+                        )}
+
+                        {!isLoading && isSuccess && (
                             <Message type={'success'}>
                                 {t('pages.unsubscribe.success', 'Вы успешно отписались от рассылки.')}
                             </Message>
                         )}
 
-                        {!isFetching && isError && (
+                        {!isLoading && isError && (
                             <Message type={'error'}>
                                 {t(
                                     'pages.unsubscribe.error',
@@ -60,7 +69,7 @@ const UnsubscribePage: NextPage = () => {
                             </Message>
                         )}
 
-                        {!isFetching && (isSuccess || isError) && (
+                        {!isLoading && (isSuccess || isError) && (
                             <Button
                                 link={'/'}
                                 mode={'secondary'}
@@ -88,8 +97,6 @@ export const getServerSideProps = wrapper.getServerSideProps(
             if (token) {
                 store.dispatch(setSSRToken(token))
             }
-
-            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
             return {
                 props: {

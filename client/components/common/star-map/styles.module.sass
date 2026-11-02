@@ -504,14 +504,14 @@
     // Mobile: the rail stays exactly where it is on desktop (only its buttons grow to a
     // thumb target); the panels and the popup become bottom sheets
     @media (max-width: 768px)
-        // Thumb-sized targets: the kit's small control is 26px, well under the 40px a
+        // Thumb-sized targets: the kit's small control is 26px, well under the 44px a
         // touch UI needs. Real boxes rather than an invisible ::before halo, because the
         // 4px gaps between neighbours leave no room for one without overlapping hits.
         // The rail grows with them, which is what $rail-width-mobile accounts for.
         .railButton, .toolbarButton
-            height: 40px !important
-            width: 40px
-            min-width: 40px
+            height: 44px !important
+            width: 44px
+            min-width: 44px
 
         // Under the status chip, right of the view-controls rail; text and buttons stack
         .geoNudge
@@ -548,17 +548,19 @@
             justify-content: flex-start
             overflow-x: auto
             scrollbar-width: none
+            mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent)
 
             &::-webkit-scrollbar
                 display: none
 
-        // Same 40px thumb target as the rail (see .railButton above); after the mobile
-        // .toolbarButton rule so its width/min-width win. The strip stays a scrollable row.
+        // Same 44px thumb target as the rail (see .railButton above); after the mobile
+        // .toolbarButton rule so its width/min-width win. The strip stays a scrollable row,
+        // and the fade on its right edge says so
         .quickBarButton
             flex: 0 0 auto
-            height: 40px !important
-            width: 40px
-            min-width: 40px
+            height: 44px !important
+            width: 44px
+            min-width: 44px
             padding: 0
 
         .quickBarSheetOpen
@@ -819,7 +821,7 @@
     // Thumb-sized time-flow transport (÷8 ÷2 ⏸ ×2 ×8); the cells are already ~60px wide
     // on a phone, only the kit's 26px height falls short. !important beats `.button.small`.
     .timeFlowRow button
-        height: 40px !important
+        height: 44px !important
 
 // Clamps #celestial-map to its ancestor's height (see pages/starmap.tsx), overriding
 // Celestial's own inline `element.style.height = ...px` (celestial.js sets this on both

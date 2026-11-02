@@ -60,9 +60,21 @@ const nextConfig = {
         // and never get overwritten in place - a new upload always gets a new filename. So the resulting
         // /_next/image URL for a given photo+size never changes either, and it's safe to cache it far longer
         // than the Next.js default of 4h (14400s). This reduces how often crawlers (e.g. Yandex) and CDNs
-        // re-fetch the same optimized image, and survives our on-disk optimizer cache being wiped on every
-        // VPS redeploy without extra origin load.
-        minimumCacheTTL: 31536000 // 1 year
+        // re-fetch the same optimized image.
+        //
+        // Not a year, though: when sharp fails (see imgOptTimeoutInSeconds below) Next silently serves
+        // the ORIGINAL file and caches that for this same TTL, retrying only after it expires. A year of
+        // that turned every photo into a multi-megabyte pass-through on the VPS (found in 4.15.1).
+        // 30 days keeps crawler re-fetches rare and lets a bad entry heal; nginx keeps its own copy
+        // for 7 days on top (config/nginx.conf).
+        minimumCacheTTL: 2592000 // 30 days
+    },
+    experimental: {
+        // sharp's time limit per image. The default 7 s is for a server with spare cores: on the
+        // 1-CPU VPS a crawler fetching a dozen sizes of multi-megapixel astrophotos at once queues
+        // them behind each other, the limit trips, and Next serves (and caches) the unoptimized
+        // original. Verified on the host: the same pipeline takes ~0.2 s when the CPU is free.
+        imgOptTimeoutInSeconds: 30
     },
     output: 'standalone',
     reactStrictMode: true,

@@ -1,4 +1,4 @@
-import React, { useDeferredValue, useMemo } from 'react'
+import React, { useDeferredValue, useMemo, useState } from 'react'
 import { Button, Input } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
@@ -6,7 +6,7 @@ import { useTranslation } from 'next-i18next/pages'
 import { ApiModel } from '@/api'
 import { ChipGroup, SegmentedControl } from '@/components/ui'
 
-import { EAGER_PHOTOS_COUNT } from './constants'
+import { EAGER_PHOTOS_COUNT, PHOTOS_PAGE_SIZE } from './constants'
 import { PhotoTile } from './PhotoTile'
 import { GalleryFilters, GalleryPhotoItem, GallerySort } from './types'
 import { filterGallery } from './utils'
@@ -28,6 +28,19 @@ export const PhotoCatalog: React.FC<PhotoCatalogProps> = ({ photos, categories, 
     // Typing stays responsive: the grid follows the filters a beat later, as a low-priority update
     const deferredFilters = useDeferredValue(filters)
     const list = useMemo(() => filterGallery(photos, deferredFilters), [photos, deferredFilters])
+
+    // Only a page of tiles is rendered (and server-rendered) at a time; a change of filters
+    // starts over from the first page - adjusted during render, not in an effect
+    const [visibleCount, setVisibleCount] = useState(PHOTOS_PAGE_SIZE)
+    const [pagedFilters, setPagedFilters] = useState(deferredFilters)
+
+    if (pagedFilters !== deferredFilters) {
+        setPagedFilters(deferredFilters)
+        setVisibleCount(PHOTOS_PAGE_SIZE)
+    }
+
+    const visible = list.slice(0, visibleCount)
+    const hiddenCount = list.length - visible.length
 
     // Only the categories with photos, the biggest first
     const categoryOptions = useMemo(() => {
@@ -91,7 +104,7 @@ export const PhotoCatalog: React.FC<PhotoCatalogProps> = ({ photos, categories, 
                     className={styles.grid}
                     aria-label={t('components.pages.photos.photo-catalog.grid-label', 'Снимки')}
                 >
-                    {list.map((photo, index) => (
+                    {visible.map((photo, index) => (
                         <li key={photo.id}>
                             <PhotoTile
                                 photo={photo}
@@ -109,6 +122,18 @@ export const PhotoCatalog: React.FC<PhotoCatalogProps> = ({ photos, categories, 
                         mode={'secondary'}
                         label={t('components.pages.photos.photo-catalog.reset-filters', 'Сбросить фильтры')}
                         onClick={onReset}
+                    />
+                </div>
+            )}
+
+            {hiddenCount > 0 && (
+                <div className={styles.showMore}>
+                    <Button
+                        mode={'secondary'}
+                        label={t('components.pages.photos.photo-catalog.show-more', 'Показать ещё {{count}}', {
+                            count: Math.min(hiddenCount, PHOTOS_PAGE_SIZE)
+                        })}
+                        onClick={() => setVisibleCount(visibleCount + PHOTOS_PAGE_SIZE)}
                     />
                 </div>
             )}

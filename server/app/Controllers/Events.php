@@ -96,8 +96,12 @@ class Events extends BaseApiController
 
             // Free seats held by expired, unpaid reservations before counting
             // tickets or resolving the current user's booking state, so a stale
-            // pending booking does not linger or occupy capacity.
-            $this->releaseExpiredBookings($eventUsersModel, new PaymentLibrary());
+            // pending booking does not linger or occupy capacity. Only an event
+            // that takes bookings can have any: for the rest this is skipped, so
+            // a guest GET never touches the payment gateway without a reason.
+            if ($eventData->requiresRegistration) {
+                $this->releaseExpiredBookings($eventUsersModel, new PaymentLibrary());
+            }
 
             $bookedEvents    = $this->session->isAuth && $this->session->user->id
                 ? $eventUsersModel->where(['event_id' => $eventData->id, 'user_id' => $this->session->user->id])->first()
@@ -152,7 +156,9 @@ class Events extends BaseApiController
                         ];
                     }
                 }
-            } else {
+            } elseif ($eventData->requiresRegistration) {
+                // The address is a perk of a booking; an event without
+                // registration has nothing to gate (same rule as show())
                 unset($eventData->address, $eventData->latitude, $eventData->longitude);
             }
 
@@ -802,6 +808,23 @@ class Events extends BaseApiController
     }
 
     /**
+     * Counts one view of an event. Called by the event page from the browser once it
+     * is open, so server renders and crawlers no longer inflate the counter, and a GET
+     * stays free of writes.
+     *
+     * @param string|null $id The event ID.
+     * @return ResponseInterface 204 whether or not the event exists.
+     */
+    public function view($id = null): ResponseInterface
+    {
+        if (is_string($id) && $id !== '') {
+            $this->model->incrementViews($id);
+        }
+
+        return $this->response->setStatusCode(204);
+    }
+
+    /**
      * Retrieves detailed information for a specific past event by its ID with localized content.
      *
      * This method fetches event details based on the provided event ID, utilizing the specified locale
@@ -860,9 +883,6 @@ class Events extends BaseApiController
                     'children' => $usersCount->total_children ?? 0
                 ];
             }
-
-            // Incrementing view counter
-            $this->model->incrementViews($id);
 
             return $this->respond($event);
         } catch (Exception $e) {

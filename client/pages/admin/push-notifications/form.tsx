@@ -270,7 +270,10 @@ const PushNotificationFormPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.PUSH_MANAGE)
+            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.PUSH_MANAGE, '/', [
+                'translation',
+                'admin'
+            ])
 
             if (!guard.ok) {
                 return { redirect: guard.redirect }

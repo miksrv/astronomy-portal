@@ -66,6 +66,17 @@ jobs:
         run: yarn build
         working-directory: client
 
+      # Next's image optimizer needs sharp with the Linux binary inside the standalone
+      # bundle. When sharp fails to load, Next does not error: it serves every image as
+      # the unoptimized original (no resize, no WebP), which is invisible until someone
+      # looks at the response sizes. Fail the deploy instead.
+      - name: Check sharp in the standalone bundle
+        working-directory: client/.next/standalone
+        run: |
+          ls node_modules/@img
+          node -e "const sharp = require('sharp'); console.log('sharp', sharp.versions.sharp, 'libvips', sharp.versions.vips)"
+
+
       - name: Configure SSH
         env:
           SSH_HOST: ${{secrets.SSH_HOST}}
@@ -112,6 +123,10 @@ jobs:
       # Restarting by the ecosystem file applies its env changes; pm2 save keeps the list for a reboot
       - name: Restart PM2
         run: ssh vps "cd /var/www/astro.miksoft.pro && pm2 restart ecosystem.config.js --update-env && pm2 save"
+
+      # Same check on the host: the binary must also load with the server's Node and glibc
+      - name: Check sharp on the host
+        run: ssh vps "cd /var/www/astro.miksoft.pro && node -e \"const sharp = require('sharp'); console.log('sharp', sharp.versions.sharp, 'libvips', sharp.versions.vips)\""
 
       # Runs even if a previous step failed, so a broken deploy never leaves
       # the site stuck behind the maintenance page.

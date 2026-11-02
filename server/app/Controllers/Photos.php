@@ -44,6 +44,17 @@ class Photos extends BaseApiController
         $object = $this->request->getGet('object', FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
 
         try {
+            // Same 5-minute cache as the objects list (the gallery page is rendered for
+            // every guest); a random sample is a different answer each time, so it is
+            // not cached. Dropped together with `objects_list_*` on every photo write.
+            $cache     = \Config\Services::cache();
+            $cacheable = $order !== 'rand';
+            $cacheKey  = 'photos_list_' . hash('sha256', implode('|', [$locale, (string) $object, (string) $limit, (string) $order]));
+
+            if ($cacheable && ($cached = $cache->get($cacheKey)) !== null) {
+                return $this->respond($cached);
+            }
+
             // Fetch data from models
             $photosModel  = new PhotosModel();
             $filtersModel = new PhotosFiltersModel();
@@ -56,18 +67,39 @@ class Photos extends BaseApiController
             $filtersData = empty($photoIds) ? [] : $filtersModel->whereIn('photo_id', $photoIds)->findAll();
 
             // Prepare photos with filters and statistics
-            $result = preparePhotoDataWithFilters($photosData, $filtersData);
-
-            // Return the response with count and items
-            return $this->respond([
+            $result  = preparePhotoDataWithFilters($photosData, $filtersData);
+            $payload = [
                 'count' => count($result),
                 'items' => $result,
-            ]);
+            ];
+
+            if ($cacheable) {
+                $cache->save($cacheKey, $payload, 300);
+            }
+
+            return $this->respond($payload);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
             return $this->respondServerError(lang('General.serverError'));
         }
+    }
+
+    /**
+     * Counts one view of a photo. Called by the photo page from the browser once it
+     * is open, so server renders and crawlers (which fetch the item many times a day)
+     * no longer inflate the counter, and a GET stays free of writes.
+     *
+     * @param string|null $id The photo ID.
+     * @return ResponseInterface 204 whether or not the photo exists (nothing to learn from it).
+     */
+    public function view($id = null): ResponseInterface
+    {
+        if (is_string($id) && $id !== '') {
+            (new PhotosModel())->incrementViews($id);
+        }
+
+        return $this->response->setStatusCode(204);
     }
 
     /**
@@ -95,8 +127,6 @@ class Photos extends BaseApiController
             $result = preparePhotoDataWithFilters($photosData, $filtersData);
 
             if ($photosData) {
-                $photosModel->incrementViews($id);
-
                 return $this->respond($result[0]);
             }
 
@@ -199,6 +229,7 @@ class Photos extends BaseApiController
 
             // The catalog shows each object's newest photo as its cover
             \Config\Services::cache()->deleteMatching('objects_list_*');
+            \Config\Services::cache()->deleteMatching('photos_list_*');
 
             return $this->respondCreated($photo);
         } catch (\Exception $e) {
@@ -291,6 +322,7 @@ class Photos extends BaseApiController
             if ($photoData) {
                 $photoModel->delete($id);
                 \Config\Services::cache()->deleteMatching('objects_list_*');
+                \Config\Services::cache()->deleteMatching('photos_list_*');
 
                 return $this->respondDeleted($photoData);
             }
@@ -417,6 +449,7 @@ class Photos extends BaseApiController
             }
 
             \Config\Services::cache()->deleteMatching('objects_list_*');
+            \Config\Services::cache()->deleteMatching('photos_list_*');
 
             $isUpdate = !empty($id);
             return $isUpdate ? $this->respondUpdated($photo) : $this->respondCreated($photo);

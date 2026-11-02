@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 4.15.1
+
+- Faster pages: the home, stargazing and star map pages are cached for guests, every page carries only its own dictionary, the gallery shows 48 photos at a time and loads the rest on demand, the star map scripts are a third of their size
+- Pictures: the first-screen image is announced to the browser early, social previews are light JPEGs, the image optimizer gets enough time on the small server and no longer keeps a failed attempt for a year, the deploy checks that it works
+- Dates on Russian pages are Russian in the server-rendered HTML, not English until the page hydrates
+- Mobile: pinch zoom is allowed again, controls are at least 44 px tall, the star map's bottom strip shows it scrolls
+- Search engines: honest sitemap dates, no canonical on pages that are not indexed, valid link attributes
+- Views are counted once the page is open, not on every server render or crawler fetch
+- Unsubscribing from the mailing asks for a click; the links use random ids
+- Fixes: the address of an event without registration is visible on the home page; the lights widget no longer fails when the relay is missing; login return links cannot point off-site
+- Housekeeping: editor forms and the date picker are translated, unused code and packages removed
+
 ## 4.15.0
 
 - Redesigned objects catalog and object pages: what is visible tonight, exposure by filter, observing log

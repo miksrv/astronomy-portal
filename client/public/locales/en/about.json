@@ -1,0 +1,54 @@
+{
+    "components": {
+        "pages": {
+            "about": {
+                "project-team": {
+                    "mikhail": "Mikhail Topchilo",
+                    "tatiana": "Tatiana Gavrish",
+                    "igor": "Igor Komissarchik",
+                    "sergey": "Sergey Medvedev",
+                    "eugene": "Eugene Zimin",
+                    "vladimir": "Vladimir Ivanovich",
+                    "nikolay": "Nikolay Cherepanov"
+                }
+            }
+        }
+    },
+    "pages": {
+        "about": {
+            "title": "About the project",
+            "seo-title": "About Look at the Stars: the team and the observatory",
+            "description": "Learn more about the “Look at the Stars” project, our team and our homemade astronomical observatory. Join us and discover the beauty of space!",
+            "my-name": "My name is",
+            "misha": "Misha",
+            "intro": ", and this site is my attempt to tell you about my hobby, bring together all the information, and capture the milestones reached along the way of exploring space. Astronomy for me isn't just a pastime, but a whole world that changed my life. Thanks to it I've found incredible friends, learned a lot of new things, and realized just how vast and mysterious the universe is. This project is our joint contribution to popularizing and developing astronomy. We sincerely believe that through our efforts, space will become closer and more accessible to everyone.",
+            "telegram-channel": "Subscribe to this project's author Telegram channel",
+            "team-title": "Our team",
+            "team-description": "We work in many different fields, but we're all united by one thing - a love of the stars and the night sky. Since 2016 we've been popularizing astronomy, organizing stargazing trips in the Orenburg region, and sidewalk astronomy evenings in Orenburg. Together we look at the stars, share knowledge and inspire others.",
+            "project-title": "The “Look at the Stars” astronomy project",
+            "project-description": "In 2016, in the Orenburg region, we launched the “Look at the Stars” project to make astronomy accessible to everyone. Since then, every season we host free lectures under the open sky, organize trips out of town with telescopes, and hold informal sidewalk astronomy evenings.",
+            "project-goal": "The project's main goal is to show the grandeur and beauty of the universe and inspire people to explore space. We cover not only the Orenburg region but also neighboring regions, traveling to places with especially bright night skies. You can learn more about our current and past events on the",
+            "project-sidewalk": "page, and for those who want to see the stars within the city, we've prepared a section",
+            "project-sidewalk-link": "Where to look through a telescope in Orenburg",
+            "project-locations": "Our events take place not only in the towns and villages of the Orenburg region, but also in neighboring regions. We organize field trips to remote locations where minimal light pollution allows you to fully enjoy the starry sky. Our team of amateur astronomers and volunteers shares their knowledge and experience so everyone can discover the beauty and mysteries of the universe.",
+            "project-lectures": "One of the most important parts of the project is the lectures given by experienced amateur astronomers. We talk about scientific discoveries, the history of astronomy and its modern achievements. The lectures are delivered in a light format, where complex things are explained in simple, understandable language. This helps listeners broaden their horizons and inspires them to explore astronomy on their own.",
+            "project-sidewalk-astronomy": "We pay special attention to sidewalk astronomy evenings. These open-air meetups take place in the most accessible spots in the city. At these events anyone can come up, look through a telescope, and learn more about what the night sky is hiding.",
+            "observatory-title": "Homemade astronomical observatory",
+            "observatory-intro": "This project is one of the most significant chapters of my life. Our homemade astronomical observatory is a unique phenomenon for the Orenburg region. It operates autonomously and captures images of deep-sky objects, making astronomy accessible to everyone. You can learn more about the observatory's operation and equipment in the section - ",
+            "observatory-intro-link": "astronomical observatory in Orenburg",
+            "observatory-work-1": {
+                "text": "The observatory is open to everyone. Anyone can use its capabilities to obtain images of celestial objects. Moreover, the site features a section",
+                "objects": "Objects"
+            },
+            "observatory-work-2": ", where you'll find an archive of FITS files. This data can be used for education, asteroid searches, creating astrophotos, and other scientific or creative purposes.",
+            "observatory-photos-1": "Soon we'll launch a free telescope control service so even more people can experience the beauty of the night sky. Be sure to check out the",
+            "astrophoto": "Astrophotos",
+            "observatory-photos-2": "section, which brings together images obtained with the observatory and during our stargazing trips. These photos were processed by me and my friends and reflect our passion for space.",
+            "observatory-conclusion": "This project is our contribution to popularizing astronomy. We sincerely hope it inspires you too to discover the universe!",
+            "your-help-title": "Your help",
+            "your-help-intro": "The development of the “Look at the Stars” project was made possible in large part thanks to the support of Gazprom Neft's “Home Towns” social investment program and the assistance of the “Orenburg Media” news agency team.",
+            "your-help-description": "Our homemade observatory project has also found support among many caring participants. We have ambitious plans to develop this direction further, and your support plays a key role. We're grateful to everyone who helps with advice, consultations and recommendations. If we accidentally left someone out of our list of thanks, please let us know - it matters a lot to us.",
+            "your-help-conclusion": "Thanks to your help, space really is becoming closer!"
+        }
+    }
+}

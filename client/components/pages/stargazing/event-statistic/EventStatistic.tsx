@@ -31,7 +31,7 @@ interface EventStatisticProps {
 }
 
 export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     const { data, isLoading } = API.useEventGetStatisticQuery(eventId)
 
@@ -184,7 +184,7 @@ export const EventStatistic: React.FC<EventStatisticProps> = ({ eventId }) => {
                     .map((p) => `${String(p.marker)} ${p.seriesName}: ${(p.value as [number, number])[1]}`)
                     .join('<br/>')
 
-                return `${formatDate(new Date(timestamp), 'D MMM, HH:00')}<br/>${rows}<br/>${t(
+                return `${formatDate(new Date(timestamp), 'D MMM, HH:00', i18n.language)}<br/>${rows}<br/>${t(
                     'pages.stargazing.statistic-hourly-total',
                     'Всего: {{count}}',
                     { count: total }

@@ -1,0 +1,172 @@
+{
+    "components": {
+        "pages": {
+            "photos": {
+                "astro-photo-form": {
+                    "category": "Category",
+                    "not-found": "Nothing found",
+                    "categories-placeholder": "Select one or more categories",
+                    "objects": "Objects in the photo",
+                    "objects-placeholder": "Select the objects that are in the photo",
+                    "equipment": "Equipment",
+                    "equipment-placeholder": "Select the astronomical equipment",
+                    "processing-date": "Processing date",
+                    "shooting-params": "Shooting parameters",
+                    "add-filter": "Add a filter",
+                    "frames": "Number of frames",
+                    "frames-aria": "number of frames",
+                    "exposure": "Exposure (minutes)",
+                    "exposure-aria": "exposure (minutes)",
+                    "remove-filter": "Remove the filter",
+                    "replace-photo": "Replace the photo:",
+                    "upload-photo": "Upload a photo:",
+                    "frames-required": "Enter the number of frames (a whole number greater than zero)",
+                    "exposure-required": "Enter the exposure in minutes (a number greater than zero)",
+                    "categories-required": "Select at least one category",
+                    "objects-required": "Select at least one object",
+                    "equipments-required": "Select at least one piece of equipment",
+                    "date-required": "Enter the processing date",
+                    "filters-required": "Add at least one filter"
+                },
+                "photo-annotations": {
+                    "compass": "North and east on the picture"
+                },
+                "photo-catalog": {
+                    "all-categories": "All categories",
+                    "sort-date": "Newest",
+                    "sort-exposure": "By exposure",
+                    "sort-views": "Popular",
+                    "search-label": "Search by object",
+                    "search-placeholder": "M31, NGC 7000, nebula…",
+                    "sort-label": "Sorting",
+                    "categories-label": "Categories",
+                    "grid-label": "Photos",
+                    "not-found": "Nothing matches your search.",
+                    "reset-filters": "Reset filters",
+                    "show-more_one": "Show {{count}} more",
+                    "show-more_other": "Show {{count}} more",
+                    "found": "Found {{found}} of {{total}}",
+                    "photos-count_one": "{{count}} photo",
+                    "photos-count_other": "{{count}} photos",
+                    "reset": "Reset",
+                    "open": "Photo of {{name}}, {{date}}",
+                    "alt": "Astrophoto of {{title}}, {{date}}"
+                },
+                "photo-compare": {
+                    "alt": "Photo of {{title}}, {{date}}",
+                    "this": "this one",
+                    "divider": "Divider between the photos of {{other}} and {{current}}"
+                },
+                "photo-history": {
+                    "summary": "Since {{year}}, the exposure has grown from {{from}} to {{to}}",
+                    "open": "Photo of {{name}}, {{date}}",
+                    "current": "this photo",
+                    "no-exposure": "exposure not specified",
+                    "compare": "Compare",
+                    "compare-label": "Compare this photo with the one of {{date}}"
+                },
+                "photo-info": {
+                    "filters": "Filters",
+                    "category": "Category",
+                    "category-link": "All photos: {{category}}",
+                    "download": "Full size · {{size}}"
+                },
+                "photo-object-card": {
+                    "nights_one": "{{count}} night",
+                    "nights_other": "{{count}} nights",
+                    "tonight": "Tonight up to {{altitude}}° at {{time}}",
+                    "not-tonight": "Does not rise tonight",
+                    "constellation": "Constellation",
+                    "coordinates": "Coordinates",
+                    "archive": "In the FITS archive",
+                    "photos": "Photos of the object",
+                    "cta": "Visibility, observing log and description"
+                },
+                "photo-setup": {
+                    "capture": "Capture",
+                    "date": "Date",
+                    "exposure": "Exposure",
+                    "frames": "Frames",
+                    "center": "Field center",
+                    "field": "Field of view",
+                    "scale": "Scale",
+                    "scale-value": "{{value}}″ per pixel",
+                    "rotation": "Rotation",
+                    "rotation-value": "{{value}}° from north",
+                    "focal-length": "Focal length",
+                    "millimetres": "{{value}} mm",
+                    "views": "Views",
+                    "equipment": "Equipment"
+                },
+                "photo-solve-status": {
+                    "pending": "Plate solving: uploading the picture…",
+                    "solving": "Plate solving: in progress…",
+                    "failed": "Plate solving failed: {{error}}",
+                    "start": "Plate-solve",
+                    "restart": "Solve again"
+                },
+                "photo-strip": {
+                    "open": "Photo of {{date}}",
+                    "alt": "Photo of {{name}}, {{date}}",
+                    "current": "you are here"
+                },
+                "photo-viewer": {
+                    "zoom": "Open the photo full screen",
+                    "alt": "Astrophoto of {{title}}, {{date}}",
+                    "compare-close": "Close comparison",
+                    "compare": "Compare with {{year}}",
+                    "annotations": "Objects",
+                    "annotations-tooltip": "Label the objects on the picture (astrometry.net)",
+                    "grid": "Grid",
+                    "grid-tooltip": "RA/Dec coordinate grid",
+                    "scale": "Angular scale",
+                    "fullscreen": "Full screen, with zoom",
+                    "previous": "Previous photo",
+                    "next": "Next photo"
+                }
+            }
+        }
+    },
+    "equipment": {
+        "mount": "Mount",
+        "scope": "Telescope",
+        "camera": "Camera",
+        "guiding_camera": "Guide camera",
+        "guiding_scope": "Guide scope",
+        "focuser": "Focuser",
+        "filter_wheel": "Filter wheel",
+        "filter": "Filter"
+    },
+    "pages": {
+        "photo": {
+            "seo-title": "{{objects}} — astrophoto from {{date}}",
+            "description": "{{photoTitle}}: an astrophoto taken by an amateur observatory in Orenburg. Equipment: {{equipment}}.",
+            "description-no-equipment": "{{photoTitle}}: an astrophoto taken by an amateur observatory in Orenburg.",
+            "title": "Photo of {{objects}}, {{date}}",
+            "setup-title": "How it was taken",
+            "history-title": "Shooting history of {{objects}}",
+            "history-note": "Each photo is a separate processing",
+            "objects-title": "About the objects",
+            "object-title": "About the object",
+            "related-title": "More photos: {{category}}",
+            "related-all": "All in the gallery →"
+        },
+        "photos-form": {
+            "edit-title": "Editing the photo",
+            "add-title": "Adding a photo",
+            "save-error": "Could not save"
+        },
+        "photos": {
+            "stat-photos": "photos in the gallery",
+            "stat-objects": "objects photographed",
+            "stat-exposure": "of total exposure",
+            "stat-views": "views",
+            "title": "Astrophotos",
+            "seo-title": "Astrophotos of galaxies and nebulae — deep-sky photography",
+            "description": "Astrophotos of galaxies, nebulae, star clusters and planets taken by an amateur observatory in Orenburg, with filters, exposure and equipment for every image.",
+            "lead": "Processed photos of the observatory: each is hours of exposure through narrowband and broadband filters, gathered over several nights. A photo page lists the equipment, the filters and the other shots of the same object.",
+            "create_button": "Add",
+            "stats-label": "Gallery summary"
+        }
+    }
+}

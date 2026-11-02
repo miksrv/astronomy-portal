@@ -15,7 +15,7 @@ interface UserEventsDialogProps {
 }
 
 const UserEventsDialog: React.FC<UserEventsDialogProps> = ({ userId, userName, onClose }) => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     const { data, isFetching, error } = API.useUsersGetEventsQuery(userId!, { skip: !userId })
 
@@ -23,7 +23,7 @@ const UserEventsDialog: React.FC<UserEventsDialogProps> = ({ userId, userName, o
         {
             accessor: 'date',
             header: t('users.eventsColumnDate', 'Дата'),
-            formatter: (data) => formatDate(data as string, 'DD MMMM YYYY')
+            formatter: (data) => formatDate(data as string, 'DD MMMM YYYY', i18n.language)
         },
         {
             accessor: 'title',

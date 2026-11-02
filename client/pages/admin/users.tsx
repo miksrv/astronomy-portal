@@ -47,7 +47,7 @@ const parseRoleIdsParam = (value: string): number[] =>
         .filter((id) => !Number.isNaN(id))
 
 const UsersPage: NextPage<object> = () => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const router = useRouter()
 
     const pageTitle = t('users.pageTitle', 'Пользователи')
@@ -380,7 +380,7 @@ const UsersPage: NextPage<object> = () => {
             header: t('users.columnRegistered', 'Регистрация'),
             isSortable: true,
             onChangeSort: handleSort,
-            formatter: (data) => formatDate(data as string, 'DD MMMM YYYY')
+            formatter: (data) => formatDate(data as string, 'DD MMMM YYYY', i18n.language)
         }
     ]
 
@@ -514,7 +514,10 @@ const UsersPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.USERS_MANAGE)
+            const guard = await requirePermissionSSR(store, context, ApiModel.Permission.USERS_MANAGE, '/', [
+                'translation',
+                'admin'
+            ])
 
             if (!guard.ok) {
                 return { redirect: guard.redirect }

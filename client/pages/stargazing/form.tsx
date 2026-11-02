@@ -139,7 +139,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 store,
                 context,
                 [ApiModel.Permission.EVENTS_CREATE, ApiModel.Permission.EVENTS_UPDATE],
-                '/stargazing'
+                '/stargazing',
+                ['translation', 'stargazing']
             )
 
             if (!guard.ok) {

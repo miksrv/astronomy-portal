@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Button, cn } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -93,6 +93,13 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
     const { t, i18n } = useTranslation()
 
     const user = useAppSelector((state) => state.auth?.user)
+
+    // Counted here, once the page is open in a browser, not by the server render
+    const [postView] = API.usePhotosPostViewMutation()
+
+    useEffect(() => {
+        void postView(photoId)
+    }, [photoId, postView])
 
     const objectNames = objects.map(({ name }) => formatObjectName(name)).join(', ')
     const objectTitles = objects.map(({ title }) => title).join(', ')
@@ -334,7 +341,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<PhotoItemPageProps>> => {
-            const { translations, locale } = await initSSRLocale(store, context)
+            const { translations, locale } = await initSSRLocale(store, context, ['translation', 'photos'])
             const photoId = context.params?.name
 
             if (typeof photoId !== 'string') {

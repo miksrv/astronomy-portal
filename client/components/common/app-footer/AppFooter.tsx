@@ -63,9 +63,9 @@ export const AppFooter = forwardRef<HTMLDivElement>((props, ref) => {
                     <Link
                         href={'/privacy'}
                         className={styles.link}
-                        title={t('pages.privacy.title', 'Политика конфиденциальности')}
+                        title={t('common.privacy-policy', 'Политика конфиденциальности')}
                     >
-                        {t('pages.privacy.title', 'Политика конфиденциальности')}
+                        {t('common.privacy-policy', 'Политика конфиденциальности')}
                     </Link>
                 </div>
 

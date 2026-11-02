@@ -33,7 +33,7 @@ interface InfoRow {
 }
 
 export const EventItemData: React.FC<EventItemDataProps> = ({ title, event, ...props }) => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     const eventDate = event?.date?.date
     const isEventPast = !!eventDate && dayjs.utc(eventDate).isBefore(dayjs.utc())
@@ -122,7 +122,7 @@ export const EventItemData: React.FC<EventItemDataProps> = ({ title, event, ...p
 
     const membersCount = event?.members?.total || event?.availableTickets
 
-    const formattedDate = formatUTCDate(eventDate, 'dddd, D MMMM YYYY')
+    const formattedDate = formatUTCDate(eventDate, 'dddd, D MMMM YYYY', i18n.language)
     const capitalizedDate = formattedDate
         ? `${formattedDate.charAt(0).toUpperCase()}${formattedDate.slice(1)}`
         : formattedDate

@@ -181,6 +181,8 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
                                 name: object.title || name
                             })}
                             fill={true}
+                            preload={true}
+                            loading={'eager'}
                             sizes={'(max-width: 768px) 100vw, 620px'}
                             onError={() => setSurveyFailed(true)}
                         />
@@ -275,7 +277,7 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
                                 mode={'secondary'}
                                 icon={'Map'}
                                 link={`/starmap?view=sky&c=${object.ra},${object.dec},0&z=4`}
-                                label={t('components.pages.objects.object-hero.on-star-map', 'На звёздной карте')}
+                                label={t('common.star-map', 'Звёздная карта')}
                             />
                         )}
                         {adminActions}

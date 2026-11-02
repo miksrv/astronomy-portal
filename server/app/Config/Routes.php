@@ -23,8 +23,8 @@ $routes->group('statistic', static function ($routes) {
     // $routes->get('/', 'Statistic::list');
     // $routes->get('statistic/catalog', 'Statistic::catalog');
     // $routes->get('statistic/photos', 'Statistic::photos');
-    $routes->get('telescope', 'Statistic::telescope');
-    $routes->get('stargazing', 'Statistic::stargazing');
+    $routes->get('telescope', 'Statistic::telescope', ['filter' => 'publiccache:300']);
+    $routes->get('stargazing', 'Statistic::stargazing', ['filter' => 'publiccache:300']);
     $routes->options('(:any)', static function () {});
 });
 
@@ -54,22 +54,22 @@ $routes->group('relay', static function ($routes) {
 
 /** Files Controller **/
 $routes->group('files', static function ($routes) {
-    $routes->get('(:any)', 'Files::show/$1');
+    $routes->get('(:any)', 'Files::show/$1', ['filter' => 'publiccache:300']);
     $routes->options('(:any)', static function () {});
 });
 
 /** Equipment Controller **/
-$routes->get('equipments', 'Equipment::list');
+$routes->get('equipments', 'Equipment::list', ['filter' => 'publiccache:3600']);
 $routes->options('equipments', static function () {});
 
 /** Categories Controller **/
-$routes->get('categories', 'Categories::list');
+$routes->get('categories', 'Categories::list', ['filter' => 'publiccache:3600']);
 $routes->options('categories', static function () {});
 
 /** Objects Controller **/
 $routes->group('objects', static function ($routes) {
-    $routes->get('/', 'Objects::list');
-    $routes->get('(:any)', 'Objects::show/$1');
+    $routes->get('/', 'Objects::list', ['filter' => 'publiccache:300']);
+    $routes->get('(:any)', 'Objects::show/$1', ['filter' => 'publiccache:300']);
     $routes->post('/', 'Objects::create');
     $routes->patch('(:any)', 'Objects::update/$1');
     $routes->delete('(:any)', 'Objects::delete/$1');
@@ -79,12 +79,14 @@ $routes->group('objects', static function ($routes) {
 
 /** Photos Controller **/
 $routes->group('photos', static function ($routes) {
-    $routes->get('/', 'Photos::list');
+    $routes->get('/', 'Photos::list', ['filter' => 'publiccache:300']);
     // $routes->get('download/(:any)/(:any)', 'Photos::download/$1/$2');
     // Declared before (:any), which also matches "id/astrometry"
-    $routes->get('(:segment)/astrometry', 'Photos::astrometry/$1');
+    $routes->get('(:segment)/astrometry', 'Photos::astrometry/$1', ['filter' => 'publiccache:300']);
     $routes->post('(:segment)/astrometry', 'Photos::solve/$1');
-    $routes->get('(:any)', 'Photos::show/$1');
+    $routes->get('(:any)', 'Photos::show/$1', ['filter' => 'publiccache:300']);
+    // A view is counted by the page once it is open, not by every GET (SSR, crawlers)
+    $routes->post('(:segment)/view', 'Photos::view/$1', ['filter' => 'ratelimit:views,60,60']);
     // $routes->get('photos/(:any)/(:any)', 'Photos::show/$1/$2');
     $routes->post('/', 'Photos::create');
     $routes->post('(:any)/upload', 'Photos::upload/$1');
@@ -104,6 +106,7 @@ $routes->group('events', static function ($routes) {
     $routes->get('(:alphanum)/statistic', 'Events::statistic/$1');
     $routes->get('(:alphanum)/registrations', 'Events::registrations/$1');
     $routes->get('(:alphanum)', 'Events::show/$1');
+    $routes->post('(:alphanum)/view', 'Events::view/$1', ['filter' => 'ratelimit:views,60,60']);
     $routes->get('members/(:alphanum)', 'Events::members/$1');
     $routes->get('checkin/(:alphanum)', 'Events::checkin/$1');
     $routes->get('ticket/(:alphanum)', 'Events::ticket/$1');
@@ -139,7 +142,8 @@ $routes->group('events', static function ($routes) {
 $routes->group('mailings', static function ($routes) {
     $routes->get('/', 'Mailings::list');
     $routes->post('/', 'Mailings::create');
-    $routes->get('unsubscribe', 'Mailings::unsubscribe');  // public — before (:alphanum)
+    // Public, POST (a prefetched GET must not unsubscribe), rate-limited per IP
+    $routes->post('unsubscribe', 'Mailings::unsubscribe', ['filter' => 'ratelimit:mailings_unsubscribe,20,60']);
     $routes->get('audiences', 'Mailings::audiences');      // admin — before (:alphanum)
     $routes->get('(:alphanum)', 'Mailings::show/$1');
     $routes->patch('(:alphanum)', 'Mailings::update/$1');
@@ -201,7 +205,7 @@ $routes->group('roles', static function ($routes) {
 /** Comments Controller **/
 $routes->group('comments', static function ($routes) {
     $routes->get('/', 'Comments::index');
-    $routes->get('random', 'Comments::random');
+    $routes->get('random', 'Comments::random', ['filter' => 'publiccache:60']);
     $routes->post('/', 'Comments::create', ['filter' => 'ratelimit:comments_create,10,60']);
     $routes->delete('(:alphanum)', 'Comments::delete/$1');
     $routes->options('/', static function () {});
@@ -210,6 +214,6 @@ $routes->group('comments', static function ($routes) {
 
 /** Sitemap Controller **/
 $routes->group('sitemap', static function ($routes) {
-    $routes->get('/', 'Sitemap::index');
+    $routes->get('/', 'Sitemap::index', ['filter' => 'publiccache:3600']);
     $routes->options('/', static function () {});
 });

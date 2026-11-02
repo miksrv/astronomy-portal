@@ -70,7 +70,7 @@ const ProfilePage: NextPage<ProfilePageProps> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<ProfilePageProps>> => {
-            const { translations } = await initSSRLocale(store, context)
+            const { translations } = await initSSRLocale(store, context, ['translation', 'stargazing'])
 
             const token = await getCookie('token', { req: context.req, res: context.res })
 

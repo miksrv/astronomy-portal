@@ -27,7 +27,6 @@ app.baseURL = 'http://localhost:8080/'
 
 # Key for parser of FITS files, which downloads data about FITS files
 # and their image preview (see project https://github.com/miksrv/astronomy-fits-parser)
-app.fitsApiKey = ''
 
 # nova.astrometry.net API key for plate solving (photos:solve): https://nova.astrometry.net/profile
 astrometry.apiKey = ''

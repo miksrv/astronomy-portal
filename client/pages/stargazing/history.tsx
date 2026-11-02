@@ -74,7 +74,10 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<StargazingHistoryPageProps>> => {
-            const { translations } = await initSSRLocale(store, context)
+            // Public page: nginx caches the guest HTML for a short while (config/nginx.conf)
+            context.res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=1200')
+
+            const { translations } = await initSSRLocale(store, context, ['translation', 'stargazing'])
             const token = await getCookie('token', { req: context.req, res: context.res })
 
             if (token) {

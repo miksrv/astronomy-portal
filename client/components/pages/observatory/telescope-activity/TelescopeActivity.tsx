@@ -136,7 +136,7 @@ export const TelescopeActivity: React.FC<TelescopeActivityProps> = ({ nights }) 
                     },
                     {
                         value: Math.round(totals.exposure / 3600).toLocaleString(i18n.language),
-                        unit: t('pages.objects.stat-hours-unit', 'ч'),
+                        unit: t('common.hours-unit', 'ч'),
                         label: t('components.pages.observatory.telescope-activity.exposure', 'суммарная выдержка')
                     },
                     {

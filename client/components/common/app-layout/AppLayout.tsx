@@ -42,7 +42,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, noTopMargin, no
     // render of every page
     const documentTitle = props.title && !noBrandSuffix ? `${props.title} — ${siteName}` : props.title
 
-    const showOverlay = useAppSelector((store) => store.application.showOverlay)
     const showAuthDialog = useAppSelector((store) => store.application.showAuthDialog)
 
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
@@ -66,7 +65,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, noTopMargin, no
     }
 
     useEffect(() => {
-        if (showOverlay || sidebarOpen) {
+        if (showAuthDialog || sidebarOpen) {
             document.body.style.overflow = 'hidden'
         } else {
             document.body.style.overflow = 'auto'
@@ -75,7 +74,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, noTopMargin, no
         return () => {
             document.body.style.overflow = 'auto'
         }
-    }, [showOverlay, sidebarOpen])
+    }, [showAuthDialog, sidebarOpen])
 
     // Sidebar as a modal menu: focus moves into it, Escape closes it, and focus
     // goes back to the button that opened it
@@ -153,7 +152,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, noTopMargin, no
 
             <div
                 aria-hidden={'true'}
-                className={cn(styles.overlay, showOverlay || sidebarOpen ? styles.displayed : styles.hidden)}
+                className={cn(styles.overlay, showAuthDialog || sidebarOpen ? styles.displayed : styles.hidden)}
                 onClick={handleCloseOverlay}
             />
 

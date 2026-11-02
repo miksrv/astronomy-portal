@@ -54,6 +54,9 @@ class MagicLinkTokensModel extends ApplicationBaseModel
 
         $this->where('email', $email)->where('used_at', null)->delete();
 
+        // Nothing reads an expired token again; without this the table only ever grows
+        $this->where('expires_at <', Time::now()->subDays(1)->toDateTimeString())->delete();
+
         $existingUser = (new UsersModel())->findUserByEmailAddress($email);
 
         $rawToken = bin2hex(random_bytes(32));

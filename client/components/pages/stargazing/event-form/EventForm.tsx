@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Controller, FieldErrors, useForm, useWatch } from 'react-hook-form'
 import { Button, Checkbox, Container, Input, TextArea } from 'simple-react-ui-kit'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import Image from 'next/image'
+import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel, ApiType } from '@/api'
 import { hosts } from '@/api/constants'
@@ -17,7 +18,7 @@ import { flattenFieldErrorPaths, scrollToFirstFieldError } from '@/utils/formErr
 import { reverseGeocode } from '@/utils/geocoding'
 
 import { DATE_FIELD_ALIASES } from './constants'
-import { eventFormSchema } from './schema'
+import { createEventFormSchema } from './schema'
 import { toCoordinate, toDatePart } from './utils'
 
 import styles from './styles.module.sass'
@@ -34,7 +35,9 @@ interface EventFormProps {
 }
 
 export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, error, onSubmit, onCancel }) => {
+    const { t } = useTranslation()
     const [isGeocoding, setIsGeocoding] = useState(false)
+    const eventFormSchema = useMemo(() => createEventFormSchema(t), [t])
 
     const {
         control,
@@ -138,7 +141,7 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                             disabled={disabled}
                             className={styles.formElement}
                             type={'input'}
-                            label={'Заголовок'}
+                            label={t('components.pages.stargazing.event-form.title', 'Заголовок')}
                             error={errors.title?.message}
                         />
                     )}
@@ -152,7 +155,7 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                             {...field}
                             disabled={disabled}
                             className={styles.formElement}
-                            label={'Описание'}
+                            label={t('components.pages.stargazing.event-form.description', 'Описание')}
                             autoResize={true}
                             error={errors.content?.message}
                             style={{ width: '100%' }}
@@ -171,10 +174,13 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                                 disabled={disabled}
                                 testId={'date'}
                                 className={styles.formElement}
-                                label={'Начало'}
+                                label={t('components.pages.stargazing.event-form.start', 'Начало')}
                                 value={field.value}
                                 error={errors.date?.message}
-                                hint={'по Оренбургскому времени'}
+                                hint={t(
+                                    'components.pages.stargazing.event-form.orenburg-time-hint',
+                                    'по Оренбургскому времени'
+                                )}
                                 onChange={field.onChange}
                             />
                         )}
@@ -188,11 +194,14 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                                 disabled={disabled}
                                 testId={'end-date'}
                                 className={styles.formElement}
-                                label={'Окончание'}
+                                label={t('components.pages.stargazing.event-form.end', 'Окончание')}
                                 value={field.value}
                                 minDate={toDatePart(formValues.date)}
                                 error={errors.endDate?.message}
-                                hint={'необязательно, по Оренбургскому времени'}
+                                hint={t(
+                                    'components.pages.stargazing.event-form.end-hint',
+                                    'необязательно, по Оренбургскому времени'
+                                )}
                                 onChange={field.onChange}
                             />
                         )}
@@ -212,12 +221,22 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                                     disabled={disabled}
                                     className={styles.formElement}
                                     type={'number'}
-                                    label={'Количество доступных мест'}
+                                    label={t(
+                                        'components.pages.stargazing.event-form.tickets',
+                                        'Количество доступных мест'
+                                    )}
                                     error={errors.tickets?.message}
                                 />
                             )}
                         />
-                        {!errors.tickets && <small className={styles.hint}>Считается только по взрослым</small>}
+                        {!errors.tickets && (
+                            <small className={styles.hint}>
+                                {t(
+                                    'components.pages.stargazing.event-form.tickets-hint',
+                                    'Считается только по взрослым'
+                                )}
+                            </small>
+                        )}
                     </div>
 
                     <div className={styles.fieldWithHint}>
@@ -230,13 +249,21 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                                     disabled={disabled}
                                     className={styles.formElement}
                                     type={'number'}
-                                    label={'Цена билета за взрослого, ₽'}
+                                    label={t(
+                                        'components.pages.stargazing.event-form.price',
+                                        'Цена билета за взрослого, ₽'
+                                    )}
                                     error={errors.ticketPrice?.message}
                                 />
                             )}
                         />
                         {!errors.ticketPrice && (
-                            <small className={styles.hint}>0 — бесплатно, дети до 18 лет бесплатно</small>
+                            <small className={styles.hint}>
+                                {t(
+                                    'components.pages.stargazing.event-form.price-hint',
+                                    '0 — бесплатно, дети до 18 лет бесплатно'
+                                )}
+                            </small>
                         )}
                     </div>
 
@@ -250,12 +277,19 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                                     disabled={disabled}
                                     className={styles.formElement}
                                     type={'number'}
-                                    label={'Возрастное ограничение, лет'}
+                                    label={t(
+                                        'components.pages.stargazing.event-form.min-age',
+                                        'Возрастное ограничение, лет'
+                                    )}
                                     error={errors.minAge?.message}
                                 />
                             )}
                         />
-                        {!errors.minAge && <small className={styles.hint}>необязательно, например 6</small>}
+                        {!errors.minAge && (
+                            <small className={styles.hint}>
+                                {t('components.pages.stargazing.event-form.min-age-hint', 'необязательно, например 6')}
+                            </small>
+                        )}
                     </div>
                 </div>
 
@@ -265,7 +299,10 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                     render={({ field }) => (
                         <Checkbox
                             className={styles.formElement}
-                            label={'Требуется регистрация'}
+                            label={t(
+                                'components.pages.stargazing.event-form.requires-registration',
+                                'Требуется регистрация'
+                            )}
                             checked={field.value ?? true}
                             disabled={disabled}
                             onChange={(e) => field.onChange(e.target.checked)}
@@ -283,7 +320,10 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                                 disabled={disabled || !requiresRegistration}
                                 testId={'registration-start'}
                                 className={styles.formElement}
-                                label={'Дата начала регистрации'}
+                                label={t(
+                                    'components.pages.stargazing.event-form.registration-start',
+                                    'Дата начала регистрации'
+                                )}
                                 value={field.value}
                                 error={errors.registrationStart?.message}
                                 onChange={field.onChange}
@@ -300,7 +340,10 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                                 disabled={disabled || !requiresRegistration}
                                 testId={'registration-end'}
                                 className={styles.formElement}
-                                label={'Дата завершения регистрации'}
+                                label={t(
+                                    'components.pages.stargazing.event-form.registration-end',
+                                    'Дата завершения регистрации'
+                                )}
                                 value={field.value}
                                 minDate={toDatePart(formValues.registrationStart)}
                                 error={errors.registrationEnd?.message}
@@ -322,7 +365,7 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                                     disabled={disabled}
                                     className={styles.formElement}
                                     type={'number'}
-                                    label={'Широта'}
+                                    label={t('components.pages.stargazing.event-form.latitude', 'Широта')}
                                     error={errors.latitude?.message}
                                 />
                             )}
@@ -337,7 +380,7 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                                     disabled={disabled}
                                     className={styles.formElement}
                                     type={'number'}
-                                    label={'Долгота'}
+                                    label={t('components.pages.stargazing.event-form.longitude', 'Долгота')}
                                     error={errors.longitude?.message}
                                 />
                             )}
@@ -354,7 +397,7 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                                     disabled={disabled}
                                     className={styles.formElement}
                                     type={'input'}
-                                    label={'Название площадки'}
+                                    label={t('components.pages.stargazing.event-form.location', 'Название площадки')}
                                     error={errors.location?.message}
                                 />
                             )}
@@ -370,14 +413,17 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                                         disabled={disabled}
                                         className={styles.formElement}
                                         type={'input'}
-                                        label={'Адрес'}
+                                        label={t('components.pages.stargazing.event-form.address', 'Адрес')}
                                         error={errors.address?.message}
                                     />
                                 )}
                             />
                             <Button
                                 mode={'secondary'}
-                                label={'Найти по координатам'}
+                                label={t(
+                                    'components.pages.stargazing.event-form.find-by-coordinates',
+                                    'Найти по координатам'
+                                )}
                                 disabled={disabled}
                                 loading={isGeocoding}
                                 onClick={handleFindAddress}
@@ -409,7 +455,9 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                 </div>
                 <div style={{ marginTop: 15 }}>
                     <label htmlFor={'event-cover-upload'}>
-                        {initialData?.coverFileName ? 'Заменить обложку:' : 'Загрузить обложку:'}
+                        {initialData?.coverFileName
+                            ? t('components.pages.stargazing.event-form.replace-cover', 'Заменить обложку:')
+                            : t('components.pages.stargazing.event-form.upload-cover', 'Загрузить обложку:')}
                     </label>
                     <Controller
                         name={'upload'}
@@ -430,7 +478,7 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                 <div className={styles.footer}>
                     <Button
                         mode={'outline'}
-                        label={'Отмена'}
+                        label={t('common.cancel', 'Отмена')}
                         disabled={disabled}
                         onClick={onCancel}
                     />
@@ -439,7 +487,7 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                         type={'submit'}
                         mode={'primary'}
                         variant={'positive'}
-                        label={'Сохранить'}
+                        label={t('common.save', 'Сохранить')}
                         disabled={disabled}
                     />
                 </div>

@@ -22,5 +22,3 @@ export const useDebouncedValue = <T>(value: T, delay: number): [T, Dispatch<SetS
 
     return [debouncedValue, setDebouncedValue]
 }
-
-export default useDebouncedValue

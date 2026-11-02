@@ -152,9 +152,9 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
             openGraph={{
                 images: [
                     {
-                        height: 1024,
-                        url: '/images/index-observatory.png',
-                        width: 1536
+                        height: 630,
+                        url: '/images/og-observatory.jpg',
+                        width: 1200
                     }
                 ]
             }}
@@ -306,6 +306,9 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<ObservatoryOverviewPageProps>> => {
+            // Public page: nginx caches the guest HTML for a short while (config/nginx.conf)
+            context.res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=3600')
+
             const { translations } = await initSSRLocale(store, context, ['translation', 'observatory-overview'])
 
             const { data: photos } = await store.dispatch(

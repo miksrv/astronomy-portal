@@ -19,6 +19,10 @@ Components live in `components/common/` (shared), `components/pages/<page>/` (pa
 
 Props as `interface`, Russian `t()` fallbacks, both locale files, kit components over native HTML — see the root `CLAUDE.md`. In addition:
 
+### Translation namespaces per page
+
+The dictionary is split by section (root `CLAUDE.md`, "i18n"). Every `getServerSideProps` names the namespaces its page needs on top of `translation` — `initSSRLocale(store, context, ['translation', 'objects'])`, and for guarded pages `requirePermissionSSR(store, context, permission, '/', ['translation', 'admin'])`. A component from another section (say, an `EventRow` on the profile page) means that section's namespace must be loaded too; otherwise EN visitors see the Russian default text. A key that several sections share goes to `common.*`, not to a section.
+
 ### Split non-JSX logic out of the component file
 
 Each component lives in `component-name/ComponentName.tsx`. When that file accumulates non-JSX logic above/outside the component, pull it into sibling files in the same directory — the goal is a `.tsx` file that reads mostly as markup and wiring, not helper code:

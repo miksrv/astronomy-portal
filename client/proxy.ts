@@ -17,6 +17,7 @@ export function proxy(request: NextRequest) {
     if (
         pathname.startsWith('/_next') ||
         pathname === '/robots.txt' ||
+        pathname === '/sitemap' ||
         pathname === '/sitemap.xml' ||
         PUBLIC_FILE.test(pathname)
     ) {

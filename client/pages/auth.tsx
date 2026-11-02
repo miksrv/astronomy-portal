@@ -8,19 +8,20 @@ import { useSearchParams } from 'next/navigation'
 import { useTranslation } from 'next-i18next/pages'
 import { generateNextSeo } from 'next-seo/pages'
 
-import { API, ApiType, SITE_LINK } from '@/api'
+import { API, ApiType } from '@/api'
 import { login } from '@/api/authSlice'
 import { useAppDispatch, useAppSelector, wrapper } from '@/api/store'
 import useLocalStorage from '@/hooks/useLocalStorage'
 import { LOCAL_STORAGE } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/errors'
+import { isSafeReturnPath } from '@/utils/helpers'
 import * as LocalStorage from '@/utils/localstorage'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
 type AuthPageProps = object
 
 const AuthPage: NextPage<AuthPageProps> = () => {
-    const { t, i18n } = useTranslation()
+    const { t } = useTranslation()
 
     const dispatch = useAppDispatch()
     const router = useRouter()
@@ -64,11 +65,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
             dispatch(login(data))
 
             if (returnPath) {
-                // Validate returnPath: must be relative (starts with '/' and no '://')
-                const isValidPath =
-                    typeof returnPath === 'string' && returnPath.startsWith('/') && !returnPath.includes('://')
-
-                const returnLink = isValidPath ? returnPath : '/'
+                const returnLink = isSafeReturnPath(returnPath) ? returnPath : '/'
 
                 LocalStorage.removeItem(LOCAL_STORAGE.RETURN_PATH as 'RETURN_PATH')
 
@@ -90,12 +87,7 @@ const AuthPage: NextPage<AuthPageProps> = () => {
             // The return path travels in the emailed link itself (query param),
             // not localStorage — the link may be opened on a different device
             // or browser than the one that requested it.
-            const isValidReturn =
-                typeof returnQueryParam === 'string' &&
-                returnQueryParam.startsWith('/') &&
-                !returnQueryParam.includes('://')
-
-            const returnLink = isValidReturn ? returnQueryParam : '/'
+            const returnLink = isSafeReturnPath(returnQueryParam) ? returnQueryParam : '/'
 
             if (magicData.isNewUser) {
                 // Stash it under the same key the OAuth flow uses, so the
@@ -160,7 +152,6 @@ const AuthPage: NextPage<AuthPageProps> = () => {
                 {generateNextSeo({
                     nofollow: true,
                     noindex: true,
-                    canonical: `${SITE_LINK}${i18n.language === 'en' ? 'en/' : ''}auth`,
                     title: t('pages.auth.title', 'Авторизация на сайте')
                 })}
             </Head>

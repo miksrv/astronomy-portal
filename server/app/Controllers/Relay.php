@@ -223,6 +223,11 @@ class Relay extends BaseApiController
         $searchIndex = array_search($this->relayLibrary->getLightRelayIndex(), array_column($relayStates, 'id'));
         $turnedUser  = (bool) $this->settingsModel->find('light_turned_by_user')->value;
 
+        // If the relay is not in the list, there is nothing to check
+        if ($searchIndex === false || !isset($relayStates[$searchIndex])) {
+            return ;
+        }
+
         // If we received the value that the relay was turned on by the user, but the relay is now turned on,
         // we change the value in the database
         if ($turnedUser && $relayStates[$searchIndex]['state'] === 0) {
@@ -230,8 +235,8 @@ class Relay extends BaseApiController
             return ;
         }
 
-        // If the relay is not in the list or is turned off, skip it
-        if (!isset($relayStates[$searchIndex]) || $relayStates[$searchIndex]['state'] === 0) {
+        // If the relay is turned off, skip it
+        if ($relayStates[$searchIndex]['state'] === 0) {
             return ;
         }
 
