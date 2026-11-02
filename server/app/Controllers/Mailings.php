@@ -718,8 +718,15 @@ class Mailings extends BaseApiController
     {
         // POST on purpose: a link-scanning mail client prefetching a GET must not
         // unsubscribe anyone; the frontend page asks for a click first
-        $input  = $this->request->getJSON(true) ?? [];
-        $mailId = $input['mail'] ?? $this->request->getPost('mail');
+        // getJSON() throws on a body that is not JSON (an empty or form-encoded POST):
+        // that is a bad request, not a server error
+        try {
+            $input = $this->request->getJSON(true);
+        } catch (\CodeIgniter\HTTP\Exceptions\HTTPException) {
+            $input = null;
+        }
+
+        $mailId = (is_array($input) ? ($input['mail'] ?? null) : null) ?? $this->request->getPost('mail');
         $mailId = is_string($mailId) ? trim($mailId) : '';
 
         if ($mailId === '' || !preg_match('/^[a-zA-Z0-9]{1,32}$/', $mailId)) {

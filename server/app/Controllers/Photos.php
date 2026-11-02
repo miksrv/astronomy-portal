@@ -49,7 +49,7 @@ class Photos extends BaseApiController
             // not cached. Dropped together with `objects_list_*` on every photo write.
             $cache     = \Config\Services::cache();
             $cacheable = $order !== 'rand';
-            $cacheKey  = 'photos_list_' . md5(implode('|', [$locale, (string) $object, (string) $limit, (string) $order]));
+            $cacheKey  = 'photos_list_' . hash('sha256', implode('|', [$locale, (string) $object, (string) $limit, (string) $order]));
 
             if ($cacheable && ($cached = $cache->get($cacheKey)) !== null) {
                 return $this->respond($cached);
@@ -322,7 +322,7 @@ class Photos extends BaseApiController
             if ($photoData) {
                 $photoModel->delete($id);
                 \Config\Services::cache()->deleteMatching('objects_list_*');
-            \Config\Services::cache()->deleteMatching('photos_list_*');
+                \Config\Services::cache()->deleteMatching('photos_list_*');
 
                 return $this->respondDeleted($photoData);
             }

@@ -36,7 +36,19 @@ class PublicCacheFilter implements FilterInterface
             return null;
         }
 
+        // The response starts with CI4's default `no-store, max-age=0, no-cache` as a
+        // multi-value header, and setHeader() appends to such a header instead of
+        // replacing it: without removing it first `no-store` would win and nothing
+        // would ever be cached
+        $response->removeHeader('Cache-Control');
         $response->setHeader('Cache-Control', sprintf('public, max-age=%d, stale-while-revalidate=%d', $maxAge, $maxAge * 4));
+
+        // The body depends on the `Locale` header (LocaleLibrary), and a stored guest
+        // answer must not be reused for a request that carries a token: without Vary a
+        // browser would serve the Russian copy after a switch to English, or the guest
+        // copy after a login
+        $response->appendHeader('Vary', 'Locale');
+        $response->appendHeader('Vary', 'Authorization');
 
         return $response;
     }

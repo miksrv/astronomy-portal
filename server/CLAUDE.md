@@ -274,7 +274,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 ### Filters (`app/Filters/`)
 | Filter | Purpose |
 |---|---|
-| `PublicCacheFilter` | `Cache-Control: public, max-age=N, stale-while-revalidate=4N` on viewer-independent public GETs (catalogue, photos, categories, equipment, FITS lists, statistics, random comments, sitemap). Alias `publiccache`, applied per route as `['filter' => 'publiccache:<seconds>']`; only a 200 to a request without an `Authorization` header gets the header. |
+| `PublicCacheFilter` | `Cache-Control: public, max-age=N, stale-while-revalidate=4N` on viewer-independent public GETs (catalogue, photos, categories, equipment, FITS lists, statistics, random comments, sitemap). Alias `publiccache`, applied per route as `['filter' => 'publiccache:<seconds>']`; only a 200 to a request without an `Authorization` header gets the header, with `Vary: Locale, Authorization` (the body depends on the `Locale` header). The default `no-store` is removed first — CI4's `setHeader()` appends to a multi-value header. |
 | `RateLimitFilter` | Per-IP token-bucket throttling for abuse-prone public routes. Registered as alias `ratelimit` in `Config/Filters.php`; applied per-route via `['filter' => 'ratelimit:<bucket>,<capacity>,<seconds>']` (see route table above for current buckets). Disabled when `ENVIRONMENT === 'testing'` since the `file` cache backend is shared across test cases. Uses CI4's built-in `Services::throttler()`. |
 | `CorsFilter` | Legacy/unused — superseded by CI4's built-in `Cors` filter (`Config\Cors`); left in place as a removal marker only. |
 

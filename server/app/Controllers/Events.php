@@ -808,19 +808,6 @@ class Events extends BaseApiController
     }
 
     /**
-     * Retrieves detailed information for a specific past event by its ID with localized content.
-     *
-     * This method fetches event details based on the provided event ID, utilizing the specified locale
-     * from the request to return translated content if available. If the event is not found, a 404
-     * response is returned. Additionally, any exceptions encountered are logged, and a server error
-     * response is returned.
-     *
-     * @param int|null $id The ID of the event to retrieve. Defaults to null.
-     *
-     * @return ResponseInterface Returns a JSON response with the event details if found, or a 404
-     * error response if the event does not exist. In case of an error, a server error message is returned.
-     */
-    /**
      * Counts one view of an event. Called by the event page from the browser once it
      * is open, so server renders and crawlers no longer inflate the counter, and a GET
      * stays free of writes.
@@ -837,6 +824,19 @@ class Events extends BaseApiController
         return $this->response->setStatusCode(204);
     }
 
+    /**
+     * Retrieves detailed information for a specific past event by its ID with localized content.
+     *
+     * This method fetches event details based on the provided event ID, utilizing the specified locale
+     * from the request to return translated content if available. If the event is not found, a 404
+     * response is returned. Additionally, any exceptions encountered are logged, and a server error
+     * response is returned.
+     *
+     * @param int|null $id The ID of the event to retrieve. Defaults to null.
+     *
+     * @return ResponseInterface Returns a JSON response with the event details if found, or a 404
+     * error response if the event does not exist. In case of an error, a server error message is returned.
+     */
     public function show($id = null): ResponseInterface
     {
         $locale = $this->request->getLocale();
