@@ -32,9 +32,9 @@ Turbopack (pages router) merges the CSS modules of all pages into one render-blo
 - Look into whether Turbopack has a CSS chunking option for the pages router in Next 16, or whether moving admin-only and heavy page styles behind dynamic imports splits them out.
 - Re-measure the critical CSS size per route afterwards.
 
-## 4. Trim the `/objects` photo payload
+## 4. Trim the `/objects` photo payload — done in 4.15.0
 
-`pages/objects/index.tsx` passes the full `photosList` (~99 KB) as props only to show object cover thumbnails. Pass a minimal map instead (object name → cover file fields), either shaped in `getServerSideProps` or through a dedicated lightweight endpoint.
+`GET /objects` now carries each object's cover photo and `getServerSideProps` ships a trimmed `CatalogObject` per row; `__NEXT_DATA__` on `/objects` went from ~190 KB to ~97 KB, more than half of it the shared `translation.json` (item 1).
 
 ## 5. "Read more" shift on the event page
 
@@ -45,6 +45,6 @@ Turbopack (pages router) merges the CSS modules of all pages into one render-blo
 - [ ] No "large page data" warnings in `yarn build` for the static info pages
 - [ ] Initial JS on `/404` drops below the 4.14.0 baseline (~208 KB gzip); the kit is no longer included whole
 - [ ] Critical CSS on a typical public page contains no admin or unrelated page styles
-- [ ] `/objects` `__NEXT_DATA__` is well under the 4.14.0 size (~190 KB)
+- [x] `/objects` `__NEXT_DATA__` is well under the 4.14.0 size (~190 KB) — ~97 KB in 4.15.0
 - [ ] CLS is 0 on `/stargazing/[id]` on desktop
 - [ ] Lighthouse mobile scores do not regress on `/`, `/stargazing`, `/photos`, `/about`, `/observatory/weather`, `/starmap`

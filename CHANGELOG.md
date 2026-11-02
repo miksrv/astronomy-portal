@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 4.15.0
+
+The objects catalog, the object pages and the observatory dashboard are redesigned around what an observer wants to know tonight.
+
+### Minor Changes
+
+- Objects catalog: a sortable list with each object's photo, status, exposure by filter, nights and frames; search, category and status filters; "Visible tonight" with the best altitude of every object over Orenburg
+- Object page: the newest photo, coordinates, constellation, tonight's altitude and the FITS archive at the top; exposure by filter, a visibility chart for the night, an observing log by nights with every frame, all photos and related objects
+- Observatory: a verdict on whether the telescope can shoot now, the weather against its safety limits, Sun and Moon with the night's twilight timeline, the coming night's clouds by the hour and the week ahead, cameras, equipment power, the latest nights and a year-at-a-glance activity map
+- Photo gallery: tiles with the object's name, date, exposure, frames, views and the filter spectrum; search, sort (newest, exposure, popular) and category chips; a summary of the gallery
+- Photo page: the title over a viewer as large as the first screen allows, on a black band across the whole window with the picture itself kept to the page's column; the exposure by filter and the category under it with the original file to download; when and how it was taken (date, exposure, frames, the field of view and plate scale) and the equipment in a section of their own; full screen with zoom, an angular scale bar, and a before/after slider against earlier processings of the same object; the history of every processing of the object with its exposure by filter; beside them a card linking to the object's page instead of repeating its data, with a link to the star map, that stays in view while the history scrolls
+- Object page without a photo of our own: the same piece of the sky from the DSS2 survey (NASA SkyView), framed to the observatory camera's field
+- Editors can add an object's distance and magnitude
+- Structured data: the catalog as a CollectionPage with its objects, the observatory as a Place
+- Lighter pages: the catalog no longer loads the whole photo archive, the object page loads its frames only when needed, and public pages can be cached by the web server
+
 ## 4.14.0
 
 Pages open noticeably faster, especially on phones and slow connections.
