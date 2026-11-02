@@ -84,6 +84,7 @@ class PhotoUploadLibrary {
         // Define the preview file names
         $previewFiles = [
             $directoryPath . '/' . $fileName . '_small.' . $fileExtension,
+            $directoryPath . '/' . $fileName . '_thumb.' . $fileExtension,
             $directoryPath . '/' . $fileName . '_medium.' . $fileExtension,
             $directoryPath . '/' . $fileName . '_large.' . $fileExtension,
         ];
@@ -127,6 +128,14 @@ class PhotoUploadLibrary {
               ->fit(160, 36, 'center')
               ->save($smallImagePath);
         $previewFiles['small'] = $smallFileName;
+
+        // Square thumbnail 160x160 for the objects catalog and the "tonight" cards (48–56 px, retina)
+        $thumbFileName = $fileName . '_thumb.' . $fileExtension;
+        $thumbImagePath = $uploadPath . '/' . $thumbFileName;
+        $image->withFile($filePath)
+              ->fit(160, 160, 'center')
+              ->save($thumbImagePath);
+        $previewFiles['thumb'] = $thumbFileName;
 
         // Среднее изображение 500x400 (сначала уменьшаем, потом обрезаем)
         $mediumFileName = $fileName . '_medium.' . $fileExtension;
