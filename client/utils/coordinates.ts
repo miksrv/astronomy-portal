@@ -42,3 +42,36 @@ export const formatDEC = (dec?: number): string => {
     const seconds = ((absDec - degrees) * 60 - minutes) * 60
     return `${sign}${degrees}° ${minutes}′ ${seconds.toFixed(2)}″`
 }
+
+/**
+ * Right ascension for people: "21ʰ 35ᵐ 55ˢ".
+ *
+ * @param {number} [ra] - The right ascension value in degrees.
+ */
+export const formatRAShort = (ra?: number): string => {
+    if (typeof ra !== 'number' || Number.isNaN(ra)) {
+        return ''
+    }
+
+    const totalSeconds = Math.round(((((ra % 360) + 360) % 360) / 15) * 3600) % 86_400
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const seconds = totalSeconds % 60
+
+    return `${hours}ʰ ${String(minutes).padStart(2, '0')}ᵐ ${String(seconds).padStart(2, '0')}ˢ`
+}
+
+/**
+ * Declination for people: "+57° 33′", with a true minus sign.
+ *
+ * @param {number} [dec] - The declination value in degrees.
+ */
+export const formatDECShort = (dec?: number): string => {
+    if (typeof dec !== 'number' || Number.isNaN(dec)) {
+        return ''
+    }
+
+    const totalMinutes = Math.round(Math.abs(dec) * 60)
+
+    return `${dec < 0 ? '−' : '+'}${Math.floor(totalMinutes / 60)}° ${String(totalMinutes % 60).padStart(2, '0')}′`
+}

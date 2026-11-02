@@ -96,6 +96,13 @@ export const getSensorColorType = (sensor?: keyof ApiModel.Weather): keyof typeo
             return 'olive'
         case undefined:
         case 'date':
+        case 'lastUpdated':
+        case 'isStale':
+        case 'weatherId':
+        case 'temperatureMin':
+        case 'temperatureMax':
+        case 'windSpeedMax':
+        case 'precipitationHours':
         default:
             return 'grey'
     }

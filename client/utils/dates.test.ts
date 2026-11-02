@@ -1,7 +1,10 @@
 import { TFunction } from 'i18next'
 
 import {
+    formatCalendarDate,
     formatDateFromUnixUTC,
+    formatDateRange,
+    formatExposure,
     formatYearMonth,
     getHumanTimeFromSec,
     getLocalizedTimeFromSec,
@@ -11,7 +14,46 @@ import {
 const mockT: TFunction = ((key: string, defaultValue: string, options?: { count?: number }) =>
     defaultValue?.replace('{{count}}', String(options?.count ?? ''))) as unknown as TFunction
 
+// Fills every {{name}} placeholder, for keys with named values instead of a count
+const interpolateT: TFunction = ((key: string, defaultValue: string, options?: Record<string, unknown>) =>
+    defaultValue.replace(/{{(\w+)}}/g, (_, name: string) => String(options?.[name] ?? ''))) as unknown as TFunction
+
 describe('dates', () => {
+    describe('formatCalendarDate', () => {
+        it('formats a night in the given language, without the trailing "г."', () => {
+            expect(formatCalendarDate('2023-10-19', 'ru')).toBe('19 окт. 2023')
+            expect(formatCalendarDate('2023-10-19', 'en')).toBe('19 Oct 2023')
+            expect(formatCalendarDate(undefined, 'ru')).toBe('')
+        })
+    })
+
+    describe('formatDateRange', () => {
+        it('keeps the range short and without the year', () => {
+            expect(formatDateRange('2024-05-24', '2024-05-31', 'ru')).toBe('24–31 мая')
+            expect(formatDateRange('2024-05-24', '2024-06-03', 'ru')).toBe('24 мая — 3 июн.')
+            expect(formatDateRange('2023-12-30', '2024-01-02', 'en')).toBe('30 Dec — 2 Jan')
+            expect(formatDateRange('2024-05-24', '2024-05-24', 'ru')).toBe('24 мая')
+        })
+    })
+
+    describe('formatExposure', () => {
+        it('is empty for no exposure', () => {
+            expect(formatExposure(0, interpolateT)).toBe('')
+            expect(formatExposure(undefined, interpolateT)).toBe('')
+        })
+
+        it('shows minutes under an hour, at least one', () => {
+            expect(formatExposure(20, interpolateT)).toBe('1 мин')
+            expect(formatExposure(1500, interpolateT)).toBe('25 мин')
+        })
+
+        it('shows hours and minutes', () => {
+            expect(formatExposure(69300, interpolateT)).toBe('19 ч 15 мин')
+            expect(formatExposure(7200, interpolateT)).toBe('2 ч')
+            expect(formatExposure(7199, interpolateT)).toBe('2 ч')
+        })
+    })
+
     describe('getLocalizedTimeFromSec', () => {
         it('returns "0" for 0 seconds', () => {
             expect(getLocalizedTimeFromSec(0, false, mockT)).toBe('0')
