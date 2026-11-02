@@ -1,13 +1,126 @@
-@use '../../../styles/mixins'
 @use '../../../styles/typography' as type
 
-.container
-    .title
-        +type.titleBlock
-        margin: 0 0 var(--space-1)
+// The SVG's own palette: the sky tones of the night palette, and the brand colour for the object
+.visibilityChart
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+    min-width: 0
 
-    .description
-        +type.secondary
-        margin: 0 0 var(--space-3)
+.title
+    +type.titleBlock
+    margin: 0
 
-+mixins.chart-tooltip(100px)
+.meta
+    +type.caption
+
+// Holds the chart's shape before it's drawn on the client
+.frame
+    aspect-ratio: 560 / 220
+
+    svg
+        display: block
+        width: 100%
+        height: auto
+
+.dark
+    fill: var(--body-background)
+
+.grid
+    stroke: var(--border)
+
+.axis
+    // In viewBox units: the chart scales to ~60% on phones, so 16 reads as ~10px there
+    font-size: 16px
+    fill: var(--text-color-secondary)
+
+.fillTop
+    stop-color: var(--color-main)
+    stop-opacity: .35
+
+.fillBottom
+    stop-color: var(--color-main)
+    stop-opacity: 0
+
+.object
+    fill: none
+    stroke: var(--color-main)
+    stroke-width: 2.5
+    stroke-linejoin: round
+
+.moon
+    fill: none
+    stroke: var(--text-color-secondary)
+    stroke-width: 1.5
+    stroke-dasharray: 4 3
+    opacity: .7
+
+.best
+    fill: var(--color-green)
+    stroke: var(--surface-1)
+    stroke-width: 2
+
+.now
+    stroke: var(--text-color-primary)
+    stroke-width: 1.5
+    opacity: .8
+
+.nowLabel
+    font-size: 16px
+    fill: var(--text-color-primary)
+
+.legend
+    +type.caption
+    display: flex
+    flex-wrap: wrap
+    gap: var(--space-2) var(--space-4)
+
+    span
+        display: inline-flex
+        align-items: center
+        gap: 6px
+
+    i
+        display: inline-block
+        width: 14px
+        height: 3px
+        border-radius: 2px
+
+.legendObject
+    background: var(--color-main)
+
+.legendMoon
+    background: repeating-linear-gradient(90deg, var(--text-color-secondary) 0 4px, transparent 4px 7px)
+
+.legend .legendDark
+    width: 10px
+    height: 10px
+    background: var(--body-background)
+    box-shadow: inset 0 0 0 1px var(--border-strong)
+
+.note
+    +type.secondary
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    margin: 0
+    padding: var(--space-3)
+    border-radius: var(--radius-lg)
+
+    svg
+        flex: none
+        width: 16px
+        height: 16px
+        fill: currentColor
+
+    &.good
+        background: var(--color-green-background)
+        color: var(--color-green)
+
+    &.warning
+        background: var(--color-orange-background)
+        color: var(--color-orange)
+
+.noteSkeleton
+    height: 44px
+    border-radius: var(--radius-lg)
