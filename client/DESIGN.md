@@ -56,8 +56,8 @@ overrides), `styles/globals.sass`. Do not import the kit CSS anywhere else.
    pill over photos (credits, durations, counters).
 
 Kit tokens worth knowing: spacing `--space-1…6` (4…24px, 4px grid), radii `--radius-xs|sm|md|lg|xl`
-(2/4/6/8/12) — controls `md`, menus and messages `lg`, cards and dialogs `xl`, chips and tooltips
-`sm`; shadows `--shadow-sm|md|lg`; motion `--duration-fast|base|slow` + `--ease`; layers
+(2/4/6/8/12) — controls `md`, menus and messages `lg`, cards and dialogs `xl`, chips, badges and
+tooltips `sm` (no fully round pills except the `Switch` thumb and the altitude ring); shadows `--shadow-sm|md|lg`; motion `--duration-fast|base|slow` + `--ease`; layers
 `--z-dropdown|overlay|dialog|tooltip`; focus `--focus-ring` (fields) and `--focus-outline`
 (everything else).
 
@@ -94,7 +94,15 @@ readers may spell out all-caps words letter by letter. No ad-hoc sizes, no `em` 
 ## 4. Layout
 
 - **Width.** Content is capped by `--width-max` (1127px), centred, 16px side gutters on phones.
-  `AppLayout fullWidth` is for the star map and the hero pages only.
+  `AppLayout fullWidth` is for the star map and the hero pages only (it widens the app bar too). A
+  block that wants more room inside a normal page grows in height, not out of the column: the
+  photo page's viewer stays in the column and is capped by the first screen's height. What may
+  break out to the window's width is a backdrop: a `100vw` box centred under the block
+  (`left: 50%; transform: translateX(-50%)`), the way the home page draws its hero backgrounds and
+  the photo viewer its black mount. `100vw` counts the scrollbar in, so `body` has
+  `overflow-x: clip` (`clip`, not `hidden`: `hidden` would make `body` a scroll container and
+  break `position: sticky`; never `overflow-x` on `html` either). Content itself never leaves the
+  column.
 - **App chrome.** `AppHeader` (50px, sticky) is the only global navigation; on phones the menu
   opens as a sidebar (`--width-menu`) over a scrim. `AppFooter` closes every page.
 - **Page header.** `AppToolbar` is the one header of every inner page: the breadcrumbs (12px,
@@ -122,13 +130,13 @@ readers may spell out all-caps words letter by letter. No ad-hoc sizes, no `em` 
 
 ## 5. Components
 
-| Where                     | What                                                                                                                                                                       |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `simple-react-ui-kit`     | primitives: `Button`, `Input`, `TextArea`, `Select`, `Checkbox`, `Dialog`, `Container`, `Message`, `Table`, `Popout`, `Tooltip`, `Badge`, `Skeleton`, `Spinner`, `Icon`, … |
-| `components/ui`           | project primitives that are kit candidates: `Breadcrumbs`, `Carousel`, `Counter`, `Pagination`, `ShowMore`, `UserAvatar`, `DateTimeInput`                                  |
-| `components/common`       | domain components shared by several sections: layout chrome, `LoginForm`, `PhotoGallery`, `PhotoLightbox`, `ReviewCard`, `ReviewForm`, `EventMap`, `StarMap`, charts       |
-| `components/pages/<area>` | section-specific composition (`stargazing`, `observatory`, `photos`, `objects`, …)                                                                                         |
-| `pages`                   | routes; they compose sections and set the SEO props of `AppLayout`                                                                                                         |
+| Where                     | What                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `simple-react-ui-kit`     | primitives: `Button`, `Input`, `TextArea`, `Select`, `Checkbox`, `Dialog`, `Container`, `Message`, `Table`, `Popout`, `Tooltip`, `Badge`, `Skeleton`, `Spinner`, `Icon`, …                                                                                                                                                                                                                                                                                                                 |
+| `components/ui`           | project primitives that are kit candidates: `Breadcrumbs`, `Carousel`, `Counter`, `Pagination`, `ShowMore`, `UserAvatar`, `DateTimeInput`, `SegmentedControl` (one of a few views), `ChipGroup` (a scrolling filter row), `Switch` (an on/off that acts at once), `StatGrid` (a row of big numbers), `StatusBadge` (a tinted status label), `SectionNav` (sticky anchors of a long page), `CardTitle`/`CardMeta` (the header of a `Container`: icon + title, and the small text beside it) |
+| `components/common`       | domain components shared by several sections: layout chrome, `LoginForm`, `PhotoGallery`, `PhotoLightbox`, `ReviewCard`, `ReviewForm`, `EventMap`, `StarMap`, `FilterSpectrum`/`FilterTag` (exposure by filter in the filters' colours), `VisibilityChart` (SVG, client-only), charts                                                                                                                                                                                                      |
+| `components/pages/<area>` | section-specific composition (`stargazing`, `observatory`, `photos`, `objects`, …); the catalog-like pages (`objects`, `photos`) share `hooks/useSearchCategoryFilters` for their URL-synced search/category filters and the `StatGrid` → toolbar → list rhythm                                                                                                                                                                                                                            |
+| `pages`                   | routes; they compose sections and set the SEO props of `AppLayout`                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 ## 6. Patterns
 
