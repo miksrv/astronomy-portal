@@ -49,43 +49,54 @@ export const PhotoObjectCard: React.FC<PhotoObjectCardProps> = ({ object }) => {
             : ''
     ].filter(Boolean)
 
+    const subtitleParts = [subtitle, ...(object.aliases ?? [])].filter(Boolean)
+
     return (
         <Container className={styles.photoObjectCard}>
-            <div className={styles.identity}>
-                <h3 className={styles.title}>
-                    <Link href={`/objects/${object.name}`}>{name}</Link>
-                </h3>
-                {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-
-                {hasCoordinates && !isMoving && (
-                    <div className={styles.tonight}>
-                        {!visibility ? (
-                            <Skeleton className={styles.skeleton} />
-                        ) : risesTonight(visibility) ? (
-                            <StatusBadge
-                                tone={'positive'}
-                                dot={true}
-                            >
-                                {t(
-                                    'components.pages.photos.photo-object-card.tonight',
-                                    'Сегодня ночью до {{altitude}}° в {{time}}',
-                                    {
-                                        altitude: Math.round(visibility.altitude),
-                                        time: formatObservatoryTime(visibility.time, i18n.language)
-                                    }
-                                )}
-                            </StatusBadge>
-                        ) : (
-                            <StatusBadge tone={'neutral'}>
-                                {t(
-                                    'components.pages.photos.photo-object-card.not-tonight',
-                                    'Сегодня ночью не поднимается'
-                                )}
-                            </StatusBadge>
-                        )}
-                    </div>
+            <div className={styles.header}>
+                <div className={styles.identity}>
+                    <h3 className={styles.title}>
+                        <Link href={`/objects/${object.name}`}>{name}</Link>
+                    </h3>
+                    {!!subtitleParts.length && <p className={styles.subtitle}>{subtitleParts.join(' · ')}</p>}
+                </div>
+                {hasCoordinates && (
+                    <Button
+                        mode={'secondary'}
+                        size={'small'}
+                        icon={'Map'}
+                        className={styles.starMap}
+                        link={`/starmap?view=sky&c=${object.ra},${object.dec},0&z=4`}
+                        label={t('components.pages.photos.photo-object-card.star-map', 'Звёздная карта')}
+                    />
                 )}
             </div>
+
+            {hasCoordinates && !isMoving && (
+                <div className={styles.tonight}>
+                    {!visibility ? (
+                        <Skeleton className={styles.skeleton} />
+                    ) : risesTonight(visibility) ? (
+                        <StatusBadge
+                            tone={'positive'}
+                            dot={true}
+                        >
+                            {t(
+                                'components.pages.photos.photo-object-card.tonight',
+                                'Сегодня ночью до {{altitude}}° в {{time}}',
+                                {
+                                    altitude: Math.round(visibility.altitude),
+                                    time: formatObservatoryTime(visibility.time, i18n.language)
+                                }
+                            )}
+                        </StatusBadge>
+                    ) : (
+                        <StatusBadge tone={'neutral'}>
+                            {t('components.pages.photos.photo-object-card.not-tonight', 'Сегодня ночью не поднимается')}
+                        </StatusBadge>
+                    )}
+                </div>
+            )}
 
             <dl className={styles.facts}>
                 {object.constellation && (
@@ -114,24 +125,13 @@ export const PhotoObjectCard: React.FC<PhotoObjectCardProps> = ({ object }) => {
                 )}
             </dl>
 
-            <div className={styles.footer}>
-                <Link
-                    href={`/objects/${object.name}`}
-                    className={styles.cta}
-                >
-                    {t('components.pages.photos.photo-object-card.cta', 'Видимость, журнал наблюдений и описание')}
-                    <Icon name={'KeyboardRight'} />
-                </Link>
-                {hasCoordinates && (
-                    <Button
-                        mode={'secondary'}
-                        size={'small'}
-                        icon={'Map'}
-                        link={`/starmap?view=sky&c=${object.ra},${object.dec},0&z=4`}
-                        label={t('components.pages.photos.photo-object-card.star-map', 'На звёздной карте')}
-                    />
-                )}
-            </div>
+            <Link
+                href={`/objects/${object.name}`}
+                className={styles.cta}
+            >
+                {t('components.pages.photos.photo-object-card.cta', 'Видимость, журнал наблюдений и описание')}
+                <Icon name={'KeyboardRight'} />
+            </Link>
         </Container>
     )
 }
