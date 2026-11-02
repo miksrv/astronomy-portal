@@ -36,9 +36,11 @@ PATCH  /objects/:name               → Objects::update
 DELETE /objects/:name               → Objects::delete
 
 GET    /photos                      → Photos::list
+GET    /photos/:id/astrometry       → Photos::astrometry (public; the plate solve — centre, scale, rotation, WCS, annotations; 404 until solved; declared before GET /photos/:id)
+POST   /photos/:id/astrometry       → Photos::solve      (photos.manage; one step of the solve — starts it when there is none or it is final, otherwise moves it along — and returns the row; the editor's browser polls it every few seconds after an upload, so there is no cron; 503 without `astrometry.apiKey`)
 GET    /photos/:id                  → Photos::show
 POST   /photos                      → Photos::create
-POST   /photos/:id/upload           → Photos::upload
+POST   /photos/:id/upload           → Photos::upload     (also resets the photo's plate solve to `pending`)
 PATCH  /photos/:id                  → Photos::update
 DELETE /photos/:id                  → Photos::delete
 
@@ -137,7 +139,7 @@ All controllers extend `BaseApiController` (see API Responses below).
 | `PushSubscriptions.php` | User-facing Web Push opt-in/opt-out (`GET /push/vapid-key`, `POST`/`DELETE /push/subscribe`) — no privilege check; `subscribe()` is fully public (rate-limited) so guests can opt in from the site-wide stargazing banner, `unsubscribe()` still requires `isAuth` |
 | `PushNotifications.php` | Admin push notification campaign CRUD; mirrors `Mailings.php` (audience targeting, test send via `WebPushLibrary`, bulk send via `PushNotificationDeliveriesModel`) — `push.manage` privilege |
 | `Objects.php` | CRUD for astronomical objects catalog (locale-aware titles/descriptions) |
-| `Photos.php` | CRUD for astrophoto archive; image upload via `PhotoUploadLibrary` |
+| `Photos.php` | CRUD for astrophoto archive; image upload via `PhotoUploadLibrary`; the plate solve of a photo (`astrometry()`, `solve()`) |
 | `Relay.php` | Observatory power relay control (list state, toggle light with cooldown guard) |
 | `Roles.php` | CRUD for roles (name + a set of `Permission` privileges); `permissions()` returns the fixed privilege catalog for the admin UI's checkbox list |
 | `Sitemap.php` | Returns URL slugs for photos, objects, and events for sitemap generation |
@@ -170,6 +172,7 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 | `PhotosEquipmentsModel.php` | `photos_equipments` | no | Pivot: photo ↔ equipment used |
 | `PhotosFiltersModel.php` | `photos_filters` | no | Filter metadata per photo |
 | `PhotosObjectModel.php` | `photos_objects` | no | Pivot: photo ↔ astronomical object; `getObjectCovers()` — the newest photo and the photo count per object, for the catalog |
+| `PhotosAstrometryModel.php` | `photos_astrometry` | no | `PhotoAstrometryEntity`; one row per photo (PK `photo_id`): the plate solve from nova.astrometry.net — `status` (`pending`/`solving`/`success`/`failed`) is the state `AstrometrySolver::step()` advances, `ra`/`dec`/`radius`/`pixscale`/`orientation`/`parity` the calibration, `wcs` the parsed TAN+SIP header (JSON, what `client/utils/wcs.ts` reads), `annotations` the service's catalogue objects (JSON), `solved_width`/`solved_height` the size of the `_large` file they are in pixels of; `enqueue()` is called by `Photos::upload()`/`Photos::solve()` |
 | `CategoryModel.php` | `categories` | no | Shared photo/object categories |
 | `ObservatoryEquipmentModel.php` | `observatory_equipment` | no | Equipment inventory (type, brand, model, specs) |
 | `ObservatorySettingsModel.php` | `observatory_settings` | no | Key-value store for observatory config |
@@ -190,6 +193,7 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 
 Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 
+- `2026-11-02-100000_AddPhotosAstrometry` — `photos_astrometry`, the plate solve per photo (see `PhotosAstrometryModel`); `status` is a VARCHAR, not an ENUM, so the migration also runs on SQLite.
 - `2026-10-30-100000_ObjectsRedesign` — `objects.distance` (light years) / `objects.magnitude` (optional, editor-filled facts for the object page) and the (`object`, `date_obs`) index on `objects_fits_files` behind the per-night aggregations.
 
 - `2026-08-13-100001_AddRolesTable` — seeds 3 starter roles (Разработчик/Команда/Охрана); role id 1 ("Разработчик") is reserved, see `RolesModel::DEVELOPER_ROLE_ID`.
@@ -261,6 +265,8 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 | `CalendarLibrary` | Builds ICS calendar attachments for event emails |
 | `ApiExceptionHandler` | Renders uncaught exceptions in the `{message, errors?}` envelope (`Config\Exceptions::handler()`) |
 | `WebPushLibrary` | Thin wrapper around `Minishlink\WebPush\WebPush` (VAPID keys from `Config\Push`); throws `WebPushExpiredSubscriptionException` on HTTP 404/410 |
+| `AstrometryClient` | nova.astrometry.net API (key from `Config\Astrometry` / `astrometry.apiKey`): login, image upload, submission → job → calibration/annotations, and `parseWcsHeader()` for the WCS FITS header; every failure is a `RuntimeException` |
+| `AstrometrySolver` | The plate solve as a state machine advanced one non-blocking step at a time (`step()`): `pending` → upload the `_large` file → `solving`; `solving` → ask for the job and its status → `success` (calibration + WCS + annotations stored) or `failed` (reason in `error`; a job older than 30 min times out). Driven by `Photos::solve()` from the editor's browser, or by `photos:solve` in a loop |
 
 ### Filters (`app/Filters/`)
 | Filter | Purpose |
@@ -275,6 +281,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 | `system:send-push` | system | Drains the Web Push delivery queue (`push_notification_deliveries`), batch size 50, no rate-limit cap (push has no SMTP-style provider reputation limit) — deletes the `push_subscriptions` row on a 404/410 (`WebPushExpiredSubscriptionException`) |
 | `fits:recalculate` | Observatory | Recalculates FITS filter aggregates (no HTTP endpoint) |
 | `photos:thumbnails` | Observatory | Generates the square `_thumb` (160×160) preview for photos uploaded before 4.15.0 (`--force` regenerates all); new uploads get it from `PhotoUploadLibrary` |
+| `photos:solve` | Observatory | Plate-solves photos from the command line by looping `AstrometrySolver::step()` (about a minute each): `--limit N` (default 3) rows in progress, `--all` first queues every never-solved photo (the one-time backfill of the archive), `--photo ID` (re)solves one photo. Spark passes options as `--name value`; the command also accepts `--name=value`. Not a cron job — new uploads are solved from the editor's browser via `POST /photos/:id/astrometry` |
 
 `send-email` and `send-push` are registered for the same `* * * * *` cron cadence on the hosting cron (outside this repo).
 

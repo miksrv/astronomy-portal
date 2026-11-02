@@ -2,434 +2,80 @@
 
 ## 4.15.0
 
-The objects catalog, the object pages and the observatory dashboard are redesigned around what an observer wants to know tonight.
-
-### Minor Changes
-
-- Objects catalog: a sortable list with each object's photo, status, exposure by filter, nights and frames; search, category and status filters; "Visible tonight" with the best altitude of every object over Orenburg
-- Object page: the newest photo, coordinates, constellation, tonight's altitude and the FITS archive at the top; exposure by filter, a visibility chart for the night, an observing log by nights with every frame, all photos and related objects
-- Observatory: a verdict on whether the telescope can shoot now, the weather against its safety limits, Sun and Moon with the night's twilight timeline, the coming night's clouds by the hour and the week ahead, cameras, equipment power, the latest nights and a year-at-a-glance activity map
-- Photo gallery: tiles with the object's name, date, exposure, frames, views and the filter spectrum; search, sort (newest, exposure, popular) and category chips; a summary of the gallery
-- Photo page: the title over a viewer as large as the first screen allows, on a black band across the whole window with the picture itself kept to the page's column; the exposure by filter and the category under it with the original file to download; when and how it was taken (date, exposure, frames, the field of view and plate scale) and the equipment in a section of their own; full screen with zoom, an angular scale bar, and a before/after slider against earlier processings of the same object; the history of every processing of the object with its exposure by filter; beside them a card linking to the object's page instead of repeating its data, with a link to the star map, that stays in view while the history scrolls
-- Object page without a photo of our own: the same piece of the sky from the DSS2 survey (NASA SkyView), framed to the observatory camera's field
-- Editors can add an object's distance and magnitude
-- Structured data: the catalog as a CollectionPage with its objects, the observatory as a Place
-- Lighter pages: the catalog no longer loads the whole photo archive, the object page loads its frames only when needed, and public pages can be cached by the web server
+- Redesigned objects catalog and object pages: what is visible tonight, exposure by filter, observing log
+- Redesigned observatory dashboard: can the telescope shoot now, weather, Sun and Moon, the night ahead
+- Redesigned photo gallery and photo page: large viewer, zoom, scale bar, before/after slider, shooting history
+- Photos are plate-solved: objects labelled on the picture, RA/Dec grid and compass, measured field and rotation
+- Object pages without a photo show the DSS2 sky survey
+- Faster and cacheable public pages
 
 ## 4.14.0
 
-Pages open noticeably faster, especially on phones and slow connections.
-
-### Minor Changes
-
-- Faster first load on every page: about a third less code to download before the page works
-- The home page shows its first screen right away, without waiting for the entrance animation
-- Lighter background images on the home, stargazing and observatory pages
-- Astrophoto pages load a photo sized for the screen instead of the multi-megabyte original
-- Content no longer jumps while loading on the weather, objects, event and gallery pages
-- Bug fixes and optimizations
+- Faster first load on every page, lighter images, no content jumps while loading
 
 ## 4.13.0
 
-A refreshed night design across the whole site, with better phone and keyboard support.
-
-### Minor Changes
-
-- New night design: one consistent look for titles, buttons, forms and cards on every page
-- Stargazing, FAQ, rules and info pages are easier to read, with clearer booking and status messages
-- Observatory: the calendar fits on phones, Sun rise and set times, Sun and Moon azimuth measured from north
-- Photo archive, objects and profile pages work better on phones
-- Menu, gallery and notifications work with the keyboard and screen readers
-- Star map: a description of what the map can do, and a preview image when the link is shared
-- Clearer titles and descriptions in search results; object pages show their astrophotos in link previews
-- The 404 page links back to the home page
-- Bug fixes and optimizations
+- New night design across the whole site, better on phones and with the keyboard
+- Star map and object pages get link previews
 
 ## 4.12.1
-
-### Patch Changes
 
 - Faster loading of pages and photos
 
 ## 4.12.0
 
-The star map is now a full online planetarium: see the sky from any place at any moment.
-
-### Minor Changes
-
-- Star map: horizon view with ground, compass directions and atmosphere, alongside the classic chart
-- Star map: any location and any date and time
-- Star map: speed up or pause the motion of the sky
-- Star map: search for stars, planets and deep-sky objects
-- Star map: tap an object to see its altitude, azimuth, rise and set times; Moon phase
-- Star map: meteor shower radiants, a "Tonight" preset and an optional full deep-sky catalog
-- Star map: "Copy link" shares the exact view, place and time
-- Star map: full-screen layout on phones
-- Bug fixes and optimizations
+- Star map becomes an online planetarium: horizon view, any place and time, search, object details, shareable links
 
 ## 4.11.0
 
-### Minor Changes
-
-- Stargazing galleries now support videos alongside photos
+- Videos in stargazing galleries
 
 ## 4.10.0
 
-### Minor Changes
+- Reworked event page; notifications and clearer form errors
 
-- Notifications for completed actions and clearer form errors
-- Reworked event page layout and navigation between events
-- Fixed registration closing too early
-- Bug fixes and optimizations
+## 4.9.1 – 4.9.2
 
-## 4.9.2
-
-### Patch Changes
-
-- Updated the recommended arrival time for stargazing events
-- Event photos on the home page open their own event
-
-## 4.9.1
-
-### Patch Changes
-
-- Redesigned ticket and newsletter emails
-- New single-row layout of the stargazing events list, with location and a short description
-- Stargazing history is grouped by year
-- Profile: event history shows whether you attended and left a review
-- Push notifications also reach visitors who are not logged in
-- Bug fixes and optimizations
+- Redesigned emails and events list; push notifications for guests
 
 ## 4.9.0
 
-### Minor Changes
-
-- Push notifications about stargazing events: enable them in the profile or from the banner on stargazing pages
+- Push notifications about stargazing events
 
 ## 4.8.0
 
-### Minor Changes
+- Event galleries filtered by photographer; roles and permissions; batch photo upload
 
-- Event galleries can be filtered by photographer and are sorted by capture time
-- Faster photo galleries and smoother full-size photo loading
-- Admin: flexible roles and permissions
-- Admin: batch photo upload with progress and retry
+## 4.7.0 – 4.7.5
 
-## 4.7.5
+- Events: venue map, calendar file and QR ticket, reviews prompt, refunds, statistics
+- Logging out signs you out on all devices; redesigned profile
 
-### Patch Changes
+## 4.6.0 – 4.6.3
 
-- Event reviews load page by page as you scroll
-- Redesigned profile page
-- Admin: newsletter preview and cancellation
+- Paid tickets with online payment; sign in by email link
+- Privacy policy, FAQ, rules and location pages; redesigned home page
 
-## 4.7.4
+## 4.5.0 – 4.5.5
 
-### Patch Changes
-
-- Admin: refunds for paid registrations
-- Bug fixes and optimizations
-
-## 4.7.3
-
-### Patch Changes
-
-- A prompt to leave a review after attending an event
-- Bug fixes and optimizations
-
-## 4.7.2
-
-### Patch Changes
-
-- Short "back" link on phones
-- Updated stargazing FAQ
-- Admin: registration filters and extended event statistics
-- Bug fixes and optimizations
-
-## 4.7.1
-
-### Patch Changes
-
-- A "please wait" page while the site is being updated
-- Updated FAQ for paid tickets
-- Bug fixes and optimizations
-
-## 4.7.0
-
-### Minor Changes
-
-- Event pages show the venue on a map, age limit, end time and weather
-- Tickets come with a calendar file and a QR code for check-in
-- Logging out signs you out on all devices
-- Reworked booking and payment screens
-- Bug fixes and optimizations
-
-## 4.6.3
-
-### Patch Changes
-
-- Events without online registration
-- Profile: event history as cards, reviews show their event
-- Bug fixes and optimizations
-
-## 4.6.2
-
-### Patch Changes
-
-- Language switcher moved to the footer
-- Photo and object filters are kept in the link, so filtered views can be shared
-- Review form validation
-- Bug fixes and optimizations
-
-## 4.6.1
-
-### Patch Changes
-
-- Payment status page redirects to the profile after a successful payment
-- Admin: event registrations list with payment check
-- Bug fixes and optimizations
-
-## 4.6.0
-
-### Minor Changes
-
-- Paid tickets for stargazing events with online payment
-- Sign in with a link sent by email
-- Privacy policy and cookie notice
-- New stargazing FAQ, how-to, rules and location pages; redesigned home page
-- Bug fixes and optimizations
-
-## 4.5.5
-
-### Patch Changes
-
-- Better search engine results
-- Bug fixes and optimizations
-
-## 4.5.4
-
-### Patch Changes
-
-- Admin: event attendance statistics
-- Bug fixes and optimizations
-
-## 4.5.3
-
-### Patch Changes
-
-- Admin: newsletters can be sent to the participants of a specific event
-- Bug fixes and optimizations
-
-## 4.5.2
-
-### Patch Changes
-
-- Admin: newsletter preview and sending limits
-- Bug fixes and optimizations
-
-## 4.5.1
-
-### Patch Changes
-
-- Bug fixes and optimizations
-
-## 4.5.0
-
-### Minor Changes
-
-- Reviews for stargazing events
-- Profile page with your upcoming event, history and reviews
-- Redesigned stargazing pages
+- Reviews for stargazing events; profile page; newsletters to event participants
 
 ## 4.4.0
 
-### Minor Changes
-
-- Star map settings: choose what to show on the map
-- Photo view counter
-- Admin: users list
-
-## 4.3.1
-
-### Patch Changes
-
-- Bug fixes and optimizations
+- Star map settings; photo view counter; users list
 
 ## 4.3.0
 
-### Minor Changes
+- Email newsletter about stargazing events
 
-- Email newsletter about stargazing events, with unsubscribe
-- Admin: editing and archiving events
+## 4.1.0 – 4.2.0
 
-## 4.2.0
+- Registration for stargazing events with QR check-in; interactive star map; telescope workdays
 
-### Minor Changes
+## 4.0.1 – 4.0.18
 
-- Bug fixes and optimizations
-
-## 4.1.6
-
-### Patch Changes
-
-- Telescope workdays table
-
-## 4.1.5
-
-### Patch Changes
-
-- Interactive star map mode
-- Bug fixes and optimizations
-
-## 4.1.4
-
-### Patch Changes
-
-- Bug fixes and optimizations
-
-## 4.1.3
-
-### Patch Changes
-
-- Bug fixes and optimizations
-
-## 4.1.2
-
-### Patch Changes
-
-- Bug fixes and optimizations
-
-## 4.1.1
-
-### Patch Changes
-
-- Bug fixes and optimizations
-
-## 4.1.0
-
-### Minor Changes
-
-- Registration for stargazing events with QR code check-in
-- Number of participants for each event
-- User menu
-
-## 4.0.18
-
-### Patch Changes
-
-- Bug fixes and optimizations
-
-## 4.0.17
-
-### Patch Changes
-
-- New sign-in dialog
-- Bug fixes and optimizations
-
-## 4.0.16
-
-### Patch Changes
-
-- Sitemap for search engines
-
-## 4.0.15
-
-### Patch Changes
-
-- Bug fixes and optimizations
-
-## 4.0.14
-
-### Patch Changes
-
-- Bug fixes and optimizations
-
-## 4.0.13
-
-### Patch Changes
-
-- New photo gallery
-
-## 4.0.12
-
-### Patch Changes
-
-- Object categories
-- Bug fixes and optimizations
-
-## 4.0.11
-
-### Patch Changes
-
-- Observatory weather charts
-- Bug fixes and optimizations
-
-## 4.0.10
-
-### Patch Changes
-
-- Observatory overview page
-- New logo
-- Bug fixes and optimizations
-
-## 4.0.9
-
-### Patch Changes
-
-- Object visibility chart
-- Bug fixes and optimizations
-
-## 4.0.8
-
-### Patch Changes
-
-- Photos from past events on the stargazing page
-
-## 4.0.7
-
-### Patch Changes
-
-- Bug fixes and optimizations
-
-## 4.0.6
-
-### Patch Changes
-
-- Admin: stargazing event form
-
-## 4.0.5
-
-### Patch Changes
-
-- Bug fixes and optimizations
-
-## 4.0.4
-
-### Patch Changes
-
-- Bug fixes and optimizations
-
-## 4.0.3
-
-### Patch Changes
-
-- Photo carousel on the about page
-
-## 4.0.2
-
-### Patch Changes
-
-- Bug fixes and optimizations
-
-## 4.0.1
-
-### Patch Changes
-
-- New stargazing photo gallery
+- Photo gallery, object categories, observatory overview and weather charts, sitemap, new logo
 
 ## 4.0.0
 
-### Major Changes
-
-- Fully redesigned site
-- English version
+- Fully redesigned site, English version
