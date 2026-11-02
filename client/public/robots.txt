@@ -6,7 +6,6 @@ Disallow: /photos/form
 Disallow: /objects/form
 Disallow: /stargazing/form
 Disallow: /stargazing/checkin
-Disallow: /stargazing/entry
 Disallow: /stargazing/payment
 Disallow: /auth
 Disallow: /en/auth
@@ -17,7 +16,6 @@ Disallow: /en/photos/form
 Disallow: /en/objects/form
 Disallow: /en/stargazing/form
 Disallow: /en/stargazing/checkin
-Disallow: /en/stargazing/entry
 Disallow: /en/stargazing/payment
 Disallow: /profile
 Disallow: /en/profile

@@ -76,7 +76,7 @@ const App = ({ Component, pageProps }: AppProps) => {
                 />
                 <meta
                     name={'viewport'}
-                    content={'width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no'}
+                    content={'width=device-width, initial-scale=1'}
                 />
                 <meta
                     name={'apple-mobile-web-app-status-bar-style'}
@@ -143,11 +143,11 @@ const App = ({ Component, pageProps }: AppProps) => {
                     {/* Google tag (gtag.js) */}
                     <Script
                         src={'https://www.googletagmanager.com/gtag/js?id=G-BGBKSHELMF'}
-                        strategy={'afterInteractive'}
+                        strategy={'lazyOnload'}
                     />
                     <Script
                         id={'google-analytics'}
-                        strategy={'afterInteractive'}
+                        strategy={'lazyOnload'}
                     >
                         {`
                             window.dataLayer = window.dataLayer || [];
@@ -161,7 +161,7 @@ const App = ({ Component, pageProps }: AppProps) => {
                     {/* Yandex.Metrika counter */}
                     <Script
                         id={'yandex-metrika'}
-                        strategy={'afterInteractive'}
+                        strategy={'lazyOnload'}
                     >
                         {`
                             (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
