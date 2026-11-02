@@ -1,0 +1,111 @@
+@use '../../../../styles/typography' as type
+
+.skyCard
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+    min-width: 0
+
+.bodies
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: var(--space-2)
+
+.body
+    display: grid
+    gap: var(--space-2)
+    margin: 0
+    padding: var(--space-3)
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
+
+.bodyName
+    +type.body
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    margin: 0
+    font-weight: var(--font-weight-semibold)
+
+.rows
+    display: grid
+    gap: var(--space-2)
+    margin: 0
+
+// The Sun's colour, the one warm accent of the sky card
+.sun
+    width: 12px
+    height: 12px
+    border-radius: 50%
+    background: #f5c451
+    box-shadow: 0 0 10px rgb(245 196 81 / 55%)
+
+.row
+    +type.secondary
+    display: flex
+    justify-content: space-between
+    gap: var(--space-2)
+    font-variant-numeric: tabular-nums
+
+    dd
+        margin: 0
+        color: var(--text-color-primary)
+        font-weight: var(--font-weight-medium)
+
+.rowsSkeleton
+    height: 96px
+
+// Sky tones: day, twilight and the astronomical night (the darkest)
+.day
+    background: #3b4a7a
+
+.twilight
+    background: #2b3157
+
+.night
+    background: #141628
+
+.timeline
+    position: relative
+    display: flex
+    height: 28px
+    border-radius: var(--radius-md)
+    overflow: hidden
+    background: var(--surface-2)
+
+    i
+        height: 100%
+        flex-basis: 0
+
+.now
+    position: absolute
+    top: 0
+    bottom: 0
+    width: 2px
+    margin-left: -1px
+    background: #fff
+    box-shadow: 0 0 8px #fff
+
+.axis
+    display: flex
+    justify-content: space-between
+    margin-top: var(--space-1)
+    font-size: var(--font-size-micro)
+    color: var(--text-color-disabled)
+    font-variant-numeric: tabular-nums
+
+.legend
+    +type.caption
+    display: flex
+    flex-wrap: wrap
+    gap: var(--space-3)
+
+    span
+        display: inline-flex
+        align-items: center
+        gap: 5px
+
+    i
+        width: 10px
+        height: 10px
+        border-radius: 3px
