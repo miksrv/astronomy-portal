@@ -15,6 +15,12 @@ class Camera extends BaseApiController
 {
     const CACHE_TIME = 2;
 
+    /** How long the camera host may take before the offline placeholder is served instead */
+    const FETCH_TIMEOUT = 3;
+
+    /** An unreachable camera is re-tried this often, not on every page view */
+    const OFFLINE_CACHE_TIME = 30;
+
     /**
      * Camera image by id
      * @param null $id
@@ -30,13 +36,16 @@ class Camera extends BaseApiController
         }
 
         if ( ! $photo = cache($cache)) {
-            try {
-                $photo = file_get_contents($param);
-            } catch (\Exception $e) {
-                $photo = file_get_contents(FCPATH . '/images/camera_offline.png');
-            }
+            // A camera that doesn't answer must not hold the page's other requests: give up fast
+            $context = stream_context_create(['http' => ['timeout' => self::FETCH_TIMEOUT]]);
+            $photo   = @file_get_contents($param, false, $context);
 
-            cache()->save($cache, $photo, self::CACHE_TIME);
+            if ($photo === false || $photo === '') {
+                $photo = file_get_contents(FCPATH . '/images/camera_offline.png');
+                cache()->save($cache, $photo, self::OFFLINE_CACHE_TIME);
+            } else {
+                cache()->save($cache, $photo, self::CACHE_TIME);
+            }
         }
 
         return $this->response->setHeader('Content-Type', 'image/jpeg')->setBody($photo)->send();
