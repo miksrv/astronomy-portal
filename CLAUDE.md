@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A DIY amateur observatory web application with remote monitoring, equipment control, weather data, astrophoto archive, stargazing events, and email mailings. The project is a monorepo with three subsystems: a Next.js frontend (`client/`), a CodeIgniter 4 PHP backend (`server/`), and Arduino firmware (`firmware/`).
 
-**Current version:** 4.14.0 (see `CHANGELOG.md` for history)
+**Current version:** 4.15.0 (see `CHANGELOG.md` for history)
 
 **Feature specs:** `ROADMAP.md` lists planned features; each one with a spec is detailed in `features/`. A shipped feature's spec is deleted and the feature recorded in `CHANGELOG.md`.
 
@@ -97,6 +97,8 @@ Detailed inventories live next to the code — read them instead of guessing:
 - Always run migrations after pulling changes that add them
 
 **Rate limiting:** `server/app/Filters/RateLimitFilter.php` (alias `ratelimit`) throttles abuse-prone public routes per-IP via a token bucket (CI4's `Services::throttler()`), applied per-route in `Routes.php` — currently OAuth login, `relay/light`, `events/booking`, `comments` create, `mailings/:id/test`, `push-notifications/:id/test`, and `push/subscribe`. Disabled under `ENVIRONMENT === 'testing'`.
+
+**Plate solving:** every photo has a row in `photos_astrometry` solved on nova.astrometry.net (key `astrometry.apiKey`) as a state machine (`AstrometrySolver::step()`): there is **no cron** — after an upload the editor's browser (`PhotoSolveStatus` in the photo page header) polls `POST /photos/:id/astrometry` every few seconds until the row is final, and the archive was backfilled once with `php spark photos:solve --all`. The frontend reads `GET /photos/:id/astrometry` and draws the object labels and the RA/Dec grid itself from the stored WCS (`client/utils/wcs.ts`, TAN + SIP) — the service's annotations are only the second layer under our own objects.
 
 **Session revocation:** The JWT lifetime is intentionally long (180 days) and unchanged by logout. Instead, `users.session_token` is embedded in every token as a `sid` claim and checked on every request; `POST /auth/logout` clears it, instantly invalidating every token issued to that user on any device — see "Authentication" in `server/CLAUDE.md` for the full mechanism.
 

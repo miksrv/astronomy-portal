@@ -29,25 +29,40 @@ class Statistic extends BaseApiController
     }
 
     /**
+     * Imaging statistics per observing night: total exposure, frame count and the objects
+     * shot. A night runs from local noon to the next local noon and is named after its
+     * evening (see ObjectFitsFilesModel::NIGHT_EXPRESSION), so frames taken after midnight
+     * count towards the night they belong to. Optional `?period=MM-YYYY` narrows it to a month.
+     *
      * @return ResponseInterface
      */
     public function telescope(): ResponseInterface
     {
         $period = $this->request->getGet('period', FILTER_SANITIZE_SPECIAL_CHARS);
         $date   = strtotime("01-{$period}");
+        $night  = ObjectFitsFilesModel::NIGHT_EXPRESSION;
         $where  = [];
 
-        if ($period && checkdate(date('m', $date), 1, date('Y', $date))) {
-            $month = date('m', $date);
-            $year  = date('Y', $date);
-            $where = ['MONTH(date_obs)' => $month, 'YEAR(date_obs)' => $year];
+        if ($period && $date && checkdate(date('m', $date), 1, date('Y', $date))) {
+            $where = ["MONTH({$night})" => date('m', $date), "YEAR({$night})" => date('Y', $date)];
+        }
+
+        // New frames arrive at most once per night, so a short cache spares the full-table scan
+        $cache    = \Config\Services::cache();
+        $cacheKey = 'statistic_telescope_' . ($where ? date('Y_m', $date) : 'all');
+        $cached   = $cache->get($cacheKey);
+
+        if ($cached !== null) {
+            return $this->respond($cached);
         }
 
         $filesModel = new ObjectFitsFilesModel();
         $filesData  = $filesModel
-            ->select("DATE(DATE_ADD(date_obs, INTERVAL 5 HOUR)) as obs_date, object, SUM(exptime) as total_exptime, COUNT(*) as frames_count")
+            ->select("{$night} as obs_date, object, SUM(exptime) as total_exptime, COUNT(*) as frames_count", false)
+            ->where('date_obs IS NOT NULL')
             ->where($where)
-            ->groupBy('DATE(DATE_ADD(date_obs, INTERVAL 5 HOUR)), object')
+            // No escaping: the builder would otherwise split the expression on its own comma
+            ->groupBy("{$night}, object", false)
             ->findAll();
 
         $daysStatistic = [];
@@ -72,19 +87,19 @@ class Statistic extends BaseApiController
             }
         }
 
-        $result = [];
-
-        foreach ($daysStatistic as $day) {
-            $result[] = $day;
-        }
+        $result = array_values($daysStatistic);
 
         unset($daysStatistic);
 
         usort($result, fn($a, $b) => $b->telescope_date <=> $a->telescope_date);
 
-        return $this->respond([
+        $response = [
             'count' => count($result),
             'items' => $result
-        ]);
+        ];
+
+        $cache->save($cacheKey, $response, 600);
+
+        return $this->respond($response);
     }
 }

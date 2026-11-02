@@ -81,6 +81,9 @@ $routes->group('objects', static function ($routes) {
 $routes->group('photos', static function ($routes) {
     $routes->get('/', 'Photos::list');
     // $routes->get('download/(:any)/(:any)', 'Photos::download/$1/$2');
+    // Declared before (:any), which also matches "id/astrometry"
+    $routes->get('(:segment)/astrometry', 'Photos::astrometry/$1');
+    $routes->post('(:segment)/astrometry', 'Photos::solve/$1');
     $routes->get('(:any)', 'Photos::show/$1');
     // $routes->get('photos/(:any)/(:any)', 'Photos::show/$1/$2');
     $routes->post('/', 'Photos::create');

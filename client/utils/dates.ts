@@ -91,6 +91,65 @@ export const getLocalizedTimeFromSec = (sec: number, full: boolean = false, t: T
 }
 
 /**
+ * Formats a calendar date ("YYYY-MM-DD", e.g. an observing night) with Intl in the given
+ * language. Unlike dayjs, whose locale is switched on the client only, the server renders the
+ * same text, so it's safe in server-rendered markup.
+ */
+export const formatCalendarDate = (
+    date: string | undefined,
+    locale: string,
+    options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' }
+): string =>
+    date
+        ? new Date(`${date.slice(0, 10)}T12:00:00Z`)
+              .toLocaleDateString(locale === 'en' ? 'en-GB' : 'ru-RU', { ...options, timeZone: 'UTC' })
+              .replace(/\s?г\.$/, '')
+        : ''
+
+/**
+ * A short range of days without the year, for where the year is shown beside it:
+ * "24–31 мая" within one month, "24 мая — 3 июн." across months, "24 мая" for one day
+ */
+export const formatDateRange = (from: string, to: string, locale: string): string => {
+    const dayMonth: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }
+
+    if (from.slice(0, 10) === to.slice(0, 10)) {
+        return formatCalendarDate(from, locale, dayMonth)
+    }
+
+    if (from.slice(0, 7) === to.slice(0, 7)) {
+        return `${Number(from.slice(8, 10))}–${formatCalendarDate(to, locale, dayMonth)}`
+    }
+
+    return `${formatCalendarDate(from, locale, dayMonth)} — ${formatCalendarDate(to, locale, dayMonth)}`
+}
+
+/**
+ * Formats an exposure as a compact, localized "19 ч 15 мин" (hours and minutes only; under a
+ * minute rounds up to "1 мин"). Used wherever exposure is a number to compare at a glance.
+ */
+export const formatExposure = (sec: number | undefined, t: TFunction): string => {
+    const total = Math.max(0, Math.round(sec ?? 0))
+
+    if (!total) {
+        return ''
+    }
+
+    // Round to whole minutes first, so 7199 s is "2 ч", not "1 ч 60 мин"
+    const totalMinutes = Math.max(1, Math.round(total / 60))
+    const hours = Math.floor(totalMinutes / 60)
+    const minutes = totalMinutes % 60
+
+    if (!hours) {
+        return t('common.exposure-minutes', '{{minutes}} мин', { minutes })
+    }
+
+    return minutes
+        ? t('common.exposure-hours-minutes', '{{hours}} ч {{minutes}} мин', { hours, minutes })
+        : t('common.exposure-hours', '{{hours}} ч', { hours })
+}
+
+/**
  * Formats a duration in seconds as a human-readable, localized string,
  * e.g. "17 минут 49 секунд" / "1 час 5 минут" / "8 минут". Uses i18next
  * pluralization (common.* keys). Seconds are shown when below an hour so a

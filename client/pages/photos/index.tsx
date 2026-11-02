@@ -1,15 +1,15 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import uniq from 'lodash-es/uniq'
-import { Button, Input, Select } from 'simple-react-ui-kit'
+import React, { useMemo } from 'react'
+import { Button } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
-import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
+import { JsonLdScript } from 'next-seo'
 
 import { API, ApiModel, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
-import { PhotoGrid } from '@/components/pages/photos'
-import { useDebouncedValue } from '@/hooks/useDebouncedValue'
+import { GalleryPhotoItem, PhotoCatalog, toGalleryPhoto, usePhotoFilters } from '@/components/pages/photos'
+import { StatGrid } from '@/components/ui'
+import { createPageUrl } from '@/utils/helpers'
 import { hasPermission } from '@/utils/permissions'
 import { removeSSRQueryCache } from '@/utils/ssrCache'
 import { initSSRLocale } from '@/utils/ssrLocale'
@@ -17,92 +17,75 @@ import { formatObjectName } from '@/utils/strings'
 
 interface PhotosPageProps {
     search: string
-    photosList: ApiModel.Photo[]
+    category: number | null
+    photosList: GalleryPhotoItem[]
     categoriesList: ApiModel.Category[]
 }
 
-const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesList }) => {
-    const { t } = useTranslation()
-    const router = useRouter()
+const PhotosPage: NextPage<PhotosPageProps> = ({ search, category, photosList, categoriesList }) => {
+    const { t, i18n } = useTranslation()
 
     const user = useAppSelector((state) => state.auth?.user)
 
-    const [searchFilter, setSearchFilter] = useState<string | undefined>(search || undefined)
-    const [debouncedSearchFilter, setDebouncedSearchFilter] = useDebouncedValue(searchFilter, 400)
-    const [categoryFilter, setCategoryFilter] = useState<number | undefined>()
-
-    const filteredCategoriesList = useMemo(
-        () =>
-            categoriesList?.filter(({ id }) => uniq(photosList?.flatMap(({ categories }) => categories))?.includes(id)),
-        [categoriesList, photosList]
-    )
-
-    const filteredPhotosList = useMemo(
-        () =>
-            photosList
-                ?.filter(({ categories }) => (categoryFilter ? categories?.includes(categoryFilter) : true))
-                ?.filter(({ objects }) =>
-                    searchFilter
-                        ? objects
-                              ?.flatMap((name) => formatObjectName(name))
-                              ?.join('')
-                              ?.toLowerCase()
-                              .includes(searchFilter.toLowerCase())
-                        : true
-                )
-                ?.sort((a, b) => new Date(b?.date || '').getTime() - new Date(a?.date || '').getTime()),
-        [photosList, categoryFilter, searchFilter]
-    )
+    const { filters, updateFilters, resetFilters } = usePhotoFilters(search, category ?? undefined)
 
     const currentCategory = useMemo(
-        () => filteredCategoriesList?.find(({ id }) => id === categoryFilter),
-        [filteredCategoriesList, categoryFilter]
+        () => categoriesList.find(({ id }) => id === filters.category),
+        [categoriesList, filters.category]
     )
+
+    const stats = useMemo(() => {
+        const totals = photosList.reduce(
+            (sum, photo) => ({
+                exposure: sum.exposure + photo.exposure,
+                views: sum.views + photo.views
+            }),
+            { exposure: 0, views: 0 }
+        )
+        const objects = new Set(photosList.flatMap(({ objects }) => objects)).size
+
+        return [
+            { value: photosList.length, label: t('pages.photos.stat-photos', 'снимков в галерее') },
+            { value: objects, label: t('pages.photos.stat-objects', 'объектов на снимках') },
+            {
+                value: Math.round(totals.exposure / 3600).toLocaleString(i18n.language),
+                unit: t('pages.objects.stat-hours-unit', 'ч'),
+                label: t('pages.photos.stat-exposure', 'суммарной выдержки')
+            },
+            {
+                value: totals.views.toLocaleString(i18n.language),
+                label: t('pages.photos.stat-views', 'просмотров')
+            }
+        ]
+    }, [photosList, t, i18n.language])
 
     const title = t('pages.photos.title', 'Астрофото')
     const seoTitle = t('pages.photos.seo-title', 'Астрофото галактик и туманностей — фотографии космоса')
+    const pageUrl = createPageUrl(i18n.language, 'photos')
 
-    // Derive filters from router.query (not just the initial SSR props) so
-    // shallow-routed URL updates and Back/Forward navigation stay in sync.
-    useEffect(() => {
-        const queryCategory = router.query.category as string | undefined
-
-        setCategoryFilter(queryCategory ? parseInt(queryCategory) : undefined)
-    }, [router.query.category])
-
-    useEffect(() => {
-        const querySearch = (router.query.search as string) || undefined
-
-        setSearchFilter(querySearch)
-        setDebouncedSearchFilter(querySearch)
-    }, [router.query.search])
-
-    // Sync filters to the URL (shallow - filtering is client-side, no need to
-    // re-run getServerSideProps).
-    useEffect(() => {
-        const currentSearch = (router.query.search as string) || undefined
-        const currentCategory = router.query.category ? parseInt(router.query.category as string) : undefined
-
-        if (currentSearch === debouncedSearchFilter && currentCategory === categoryFilter) {
-            return
-        }
-
-        const query: Record<string, string | number> = {}
-
-        if (debouncedSearchFilter) {
-            query.search = debouncedSearchFilter
-        }
-        if (categoryFilter !== undefined) {
-            query.category = categoryFilter
-        }
-
-        void router.push({ pathname: router.pathname, query }, undefined, { shallow: true })
-    }, [debouncedSearchFilter, categoryFilter, router.query.search, router.query.category])
+    // The gallery as an ImageGallery: every photo with its page and image
+    const gallerySchema = useMemo(
+        () => ({
+            '@context': 'https://schema.org',
+            '@type': 'ImageGallery',
+            '@id': pageUrl,
+            url: pageUrl,
+            name: seoTitle,
+            inLanguage: i18n.language === 'en' ? 'en' : 'ru',
+            image: photosList.map((photo) => ({
+                '@type': 'ImageObject',
+                contentUrl: photo.src,
+                name: photo.titles.join(', ') || photo.objects.map(formatObjectName).join(', '),
+                url: createPageUrl(i18n.language, `photos/${photo.id}`)
+            }))
+        }),
+        [photosList, pageUrl, seoTitle, i18n.language]
+    )
 
     return (
         <AppLayout
             canonical={'photos'}
-            title={categoryFilter ? `${title}: ${currentCategory?.title}` : seoTitle}
+            title={currentCategory ? `${title}: ${currentCategory.title}` : seoTitle}
             description={[
                 t(
                     'pages.photos.description',
@@ -122,50 +105,42 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
                 ]
             }}
         >
+            <JsonLdScript
+                scriptKey={'photos-gallery'}
+                data={gallerySchema}
+            />
+
             <AppToolbar
-                title={`${title}${categoryFilter ? `: ${currentCategory?.title}` : ''}`}
-                currentPage={categoryFilter ? currentCategory?.title : title}
-                links={
-                    categoryFilter
-                        ? [
-                              {
-                                  link: '/photos',
-                                  text: title
-                              }
-                          ]
-                        : undefined
-                }
+                title={currentCategory ? `${title}: ${currentCategory.title}` : title}
+                lead={t(
+                    'pages.photos.lead',
+                    'Обработанные снимки обсерватории: каждый — часы выдержки через узкополосные и широкополосные фильтры, собранные за несколько ночей. На странице снимка — оборудование, фильтры и другие кадры того же объекта.'
+                )}
+                currentPage={currentCategory ? currentCategory.title : title}
+                links={currentCategory ? [{ link: '/photos', text: title }] : undefined}
             >
-                <Input
-                    clearable={true}
-                    value={searchFilter}
-                    aria-label={t('pages.photos.search-by-object', 'Поиск по объекту')}
-                    placeholder={t('pages.photos.search-by-object', 'Поиск по объекту')}
-                    onChange={(e) => setSearchFilter(e.target.value)}
-                />
-
-                <Select<number>
-                    clearable={true}
-                    value={categoryFilter}
-                    placeholder={t('pages.photos.filter-by-category', 'Фильтр по категории')}
-                    onSelect={(category) => setCategoryFilter(category?.[0]?.key)}
-                    options={filteredCategoriesList?.map((category) => ({
-                        key: category.id,
-                        value: category.title
-                    }))}
-                />
-
                 {hasPermission(user, ApiModel.Permission.PHOTOS_MANAGE) && (
                     <Button
                         icon={'PlusCircle'}
-                        mode={'primary'}
+                        mode={'secondary'}
                         label={t('pages.photos.create_button', 'Добавить')}
                         link={'/photos/form'}
                     />
                 )}
             </AppToolbar>
 
-            <PhotoGrid photosList={filteredPhotosList} />
+            <StatGrid
+                items={stats}
+                aria-label={t('pages.photos.stats-label', 'Сводка галереи')}
+            />
+
+            <PhotoCatalog
+                photos={photosList}
+                categories={categoriesList}
+                filters={filters}
+                onChange={updateFilters}
+                onReset={resetFilters}
+            />
 
             <AppFooter />
         </AppLayout>
@@ -175,24 +150,43 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, photosList, categoriesL
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<PhotosPageProps>> => {
+            // Public page: nginx caches the HTML for a short while (config/nginx.conf)
+            context.res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=1200')
+
             const { translations } = await initSSRLocale(store, context)
             const search = (context.query.search as string) || ''
+            const category = parseInt(context.query.category as string)
 
-            const { data: photos } = await store.dispatch(API.endpoints?.photosGetList.initiate())
-
-            const { data: categories } = await store.dispatch(API.endpoints?.categoriesGetList.initiate())
+            const [{ data: photos }, { data: objects }, { data: categories }] = await Promise.all([
+                store.dispatch(API.endpoints?.photosGetList.initiate()),
+                store.dispatch(API.endpoints?.objectsGetList.initiate()),
+                store.dispatch(API.endpoints?.categoriesGetList.initiate())
+            ])
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
             // Handed to the page as props - no need to also ship RTK Query's copy
-            removeSSRQueryCache(store, ['photosGetList', 'categoriesGetList'])
+            removeSSRQueryCache(store, ['photosGetList', 'objectsGetList', 'categoriesGetList'])
+
+            // An API outage renders an empty gallery: that must not be cached for everyone
+            if (!photos) {
+                context.res.setHeader('Cache-Control', 'no-store')
+            }
+
+            // The objects' titles name the tiles and feed the search; only that map is kept
+            const objectTitles = Object.fromEntries((objects?.items ?? []).map(({ name, title }) => [name, title]))
 
             return {
                 props: {
                     ...translations,
                     search,
-                    photosList: photos?.items || [],
-                    categoriesList: categories?.items || []
+                    category: Number.isNaN(category) ? null : category,
+                    photosList: (photos?.items ?? []).map((photo) => toGalleryPhoto(photo, objectTitles)),
+                    categoriesList: (categories?.items ?? []).map(({ id, title, description }) => ({
+                        id,
+                        title,
+                        ...(description ? { description } : {})
+                    }))
                 }
             }
         }

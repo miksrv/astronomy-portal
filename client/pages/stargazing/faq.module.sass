@@ -3,7 +3,8 @@
 // Intro under the page title
 .intro
     +type.lead
-    margin: var(--space-4) 0 var(--space-6)
+    // No top margin: the gap of <main> already puts the lead 16px under the title (as on every page)
+    margin: 0 0 var(--space-6)
 
 .faqList
     display: flex

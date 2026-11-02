@@ -1,0 +1,334 @@
+@use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
+
+// <main> lays its children out with a --space-4 gap: the sentinel takes no room of its own
+.sentinel
+    height: 0
+    margin-bottom: calc(-1 * var(--space-4))
+
+// ---- Toolbar: sticks under the app header while the list scrolls
+.toolbar
+    position: sticky
+    top: var(--header-height)
+    z-index: var(--z-dropdown)
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+    padding: var(--space-3) 0
+    background: color-mix(in srgb, var(--body-background) 88%, transparent)
+    backdrop-filter: blur(14px)
+    -webkit-backdrop-filter: blur(14px)
+    transition: box-shadow var(--duration-fast) var(--ease)
+
+    &.stuck
+        box-shadow: 0 1px 0 var(--border)
+
+    // Phones: the four rows would cover a quarter of the screen; the filters scroll away with
+    // the page and only the search stays in reach
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        position: static
+        background: none
+        backdrop-filter: none
+        -webkit-backdrop-filter: none
+
+        &.stuck
+            box-shadow: none
+
+        .toolbarRow:first-child
+            position: sticky
+            top: var(--header-height)
+            z-index: var(--z-dropdown)
+            margin: 0 calc(-1 * var(--space-4))
+            padding: var(--space-3) var(--space-4)
+            background: var(--body-background)
+            box-shadow: 0 1px 0 var(--border)
+
+.toolbarRow
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: var(--space-2)
+    min-width: 0
+
+.search
+    flex: 1
+    min-width: 240px
+
+    // Kit 2.1.1 paints the field (position: relative) over its own left icon wrapper: lift the
+    // wrapper (the fix belongs in the kit)
+    [class*='iconLeft']
+        z-index: 1
+
+.visibleToggle.pressed
+    background: var(--color-green-background)
+    border-color: color-mix(in srgb, var(--color-green) 45%, transparent)
+    color: var(--color-green)
+
+.sort
+    width: 200px
+
+.chips
+    flex: 1
+
+// ---- The list
+.list
+    border-radius: var(--radius-xl)
+    background: var(--surface-1)
+    box-shadow: inset 0 0 0 1px var(--border)
+    overflow: hidden
+
+.row
+    position: relative
+    display: grid
+    grid-template-columns: minmax(240px, 2.2fr) 130px minmax(150px, 1.3fr) 64px 60px 96px 124px
+    align-items: center
+    gap: var(--space-4)
+    padding: 10px var(--space-4)
+    border-bottom: 1px solid var(--border)
+
+    &:last-child
+        border-bottom: 0
+
+.head
+    +type.caption
+    padding-top: 0
+    padding-bottom: 0
+    background: var(--surface-2)
+    font-weight: var(--font-weight-semibold)
+
+    [role='columnheader']
+        display: flex
+        align-items: center
+        min-height: 40px
+
+        &.right
+            justify-content: flex-end
+
+.head .sortButton
+    display: inline-flex
+    align-items: center
+    gap: var(--space-1)
+    padding: 10px 0
+    border: 0
+    background: none
+    color: inherit
+    font: inherit
+    white-space: nowrap
+    cursor: pointer
+
+    &:hover
+        color: var(--text-color-primary)
+
+    &:focus-visible
+        outline: var(--focus-outline)
+        outline-offset: 2px
+
+    &.active
+        color: var(--text-color-primary)
+
+        .arrow
+            opacity: 1
+            color: var(--color-main)
+
+.arrow
+    +type.micro
+    opacity: 0
+
+[role='rowgroup'] .row:last-child
+    border-bottom: 0
+
+.item
+    transition: background var(--duration-fast) var(--ease)
+
+    &:hover
+        background: var(--surface-2)
+
+    &.dim
+        .name a, .thumb
+            opacity: .55
+
+.object
+    display: flex
+    align-items: center
+    gap: var(--space-3)
+    min-width: 0
+
+.thumb
+    flex: none
+    width: 48px
+    height: 48px
+    border-radius: var(--radius-lg)
+    object-fit: cover
+    background: var(--surface-3)
+
+.thumbEmpty
+    display: grid
+    place-items: center
+    color: var(--text-color-disabled)
+    background: var(--surface-2)
+
+    svg
+        width: 16px
+        height: 16px
+        fill: currentColor
+
+.name
+    min-width: 0
+
+    a
+        font-weight: var(--font-weight-semibold)
+        color: var(--text-color-primary)
+
+        // The whole row is the object's link
+        &::after
+            content: ''
+            position: absolute
+            inset: 0
+
+        &:hover
+            color: var(--color-main)
+
+        &:focus-visible
+            outline: none
+
+            &::after
+                outline: var(--focus-outline)
+                outline-offset: -2px
+                border-radius: var(--radius-md)
+
+    small
+        +type.caption
+        display: block
+        overflow: hidden
+        white-space: nowrap
+        text-overflow: ellipsis
+
+// ---- Cells
+.exposure
+    +type.secondary
+    display: grid
+    gap: 6px
+    color: var(--text-color-primary)
+    font-variant-numeric: tabular-nums
+
+.right
+    text-align: right
+    font-variant-numeric: tabular-nums
+
+.muted
+    color: var(--text-color-secondary)
+
+.visibility
+    +type.secondary
+    display: inline-flex
+    align-items: center
+    justify-content: flex-end
+    gap: 6px
+    color: var(--text-color-primary)
+    font-variant-numeric: tabular-nums
+    white-space: nowrap
+
+    .dot
+        flex: none
+        width: 8px
+        height: 8px
+        border-radius: 50%
+        background: var(--text-color-disabled)
+
+    &.high .dot
+        background: var(--color-green)
+
+    &.low .dot
+        background: var(--color-orange)
+
+    &.none
+        color: var(--text-color-secondary)
+
+.visibilitySkeleton
+    width: 88px
+    height: 16px
+    margin-left: auto
+
+.mobileMeta
+    display: none
+
+// ---- Under the list
+.empty
+    padding: var(--space-10) var(--space-4)
+    text-align: center
+    color: var(--text-color-secondary)
+
+    p
+        margin: 0 0 var(--space-3)
+
+.resultLine
+    +type.caption
+    display: flex
+    flex-wrap: wrap
+    justify-content: space-between
+    gap: var(--space-3)
+    margin-top: calc(var(--space-3) - var(--space-4))
+
+.resetLink
+    height: auto
+    padding: 0
+    vertical-align: baseline
+
+// ---- Narrower screens drop the least important columns, phones fold the row
+@media only screen and (max-width: 960px)
+    .row
+        grid-template-columns: minmax(220px, 2fr) 120px minmax(120px, 1fr) 60px 124px
+
+    .cellNights, .cellLast, .head .cellNights, .head .cellLast
+        display: none
+
+@media only screen and (max-width: variables.$mobileMaxWidth)
+    .search
+        flex-basis: 100%
+
+    .sort
+        flex: 1
+        width: auto
+
+    .head
+        display: none
+
+    .row
+        grid-template-columns: 1fr auto
+        gap: var(--space-2) var(--space-3)
+
+    // The frames and visibility cells are summed up in .mobileMeta below; they stay in the
+    // accessibility tree (a phone's screen reader still gets every column)
+    .cellFrames, .cellVisibility
+        position: absolute
+        width: 1px
+        height: 1px
+        overflow: hidden
+        clip: rect(0 0 0 0)
+        white-space: nowrap
+
+    .mobileMeta
+        +type.caption
+        display: flex
+        flex-wrap: wrap
+        grid-column: 1 / -1
+        grid-row: 2
+        gap: var(--space-2) var(--space-4)
+        padding-left: 60px
+        font-variant-numeric: tabular-nums
+
+        .visibility
+            +type.caption
+
+    // The exposure cell keeps only its spectrum, as the last line of the folded row
+    .cellExposure
+        grid-column: 1 / -1
+        grid-row: 3
+        padding-left: 60px
+
+        .exposureText
+            display: none
+
+        // No spectrum (no frames): nothing left to show in the row's last line
+        &:not(:has(> div))
+            display: none

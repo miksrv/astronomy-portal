@@ -1,0 +1,95 @@
+@use '../../../../styles/typography' as type
+
+.title
+    display: flex
+    align-items: baseline
+    justify-content: space-between
+    gap: var(--space-3)
+    margin: var(--space-4) 0 var(--space-3)
+
+    small
+        +type.secondary
+        font-weight: var(--font-weight-normal)
+        letter-spacing: 0
+
+// One row of cards that scrolls sideways; a fixed height, so nothing moves when it fills in
+.strip
+    display: grid
+    grid-auto-flow: column
+    grid-auto-columns: minmax(210px, 1fr)
+    gap: var(--space-3)
+    min-height: 72px
+    overflow-x: auto
+    scrollbar-width: none
+    padding: 2px
+
+    &::-webkit-scrollbar
+        display: none
+
+.skeleton
+    height: 72px
+    border-radius: var(--radius-xl)
+
+.empty
+    +type.secondary
+    grid-column: 1 / -1
+    align-self: center
+    margin: 0
+
+.card
+    position: relative
+    display: flex
+    align-items: center
+    gap: var(--space-3)
+    height: 72px
+    padding: var(--space-2)
+    border-radius: var(--radius-xl)
+    background: var(--surface-1)
+    box-shadow: inset 0 0 0 1px var(--border)
+    color: inherit
+    transition: background var(--duration-fast) var(--ease), box-shadow var(--duration-fast) var(--ease)
+
+    &:hover
+        color: inherit
+        background: var(--surface-2)
+        box-shadow: inset 0 0 0 1px var(--border-strong)
+
+        .ring
+            --ring-hole: var(--surface-2)
+
+.photo
+    flex: none
+    width: 56px
+    height: 56px
+    border-radius: var(--radius-lg)
+    object-fit: cover
+    background: var(--surface-3)
+
+.text
+    min-width: 0
+
+    b
+        display: block
+        font-weight: var(--font-weight-semibold)
+        white-space: nowrap
+
+    span
+        +type.caption
+        display: block
+        white-space: nowrap
+        font-variant-numeric: tabular-nums
+
+// The best altitude as a ring filled to its share of 90°
+.ring
+    --ring-hole: var(--surface-1)
+    flex: none
+    display: grid
+    place-items: center
+    width: 36px
+    height: 36px
+    margin-left: auto
+    border-radius: 50%
+    font-size: var(--font-size-micro)
+    font-weight: var(--font-weight-semibold)
+    font-variant-numeric: tabular-nums
+    background: radial-gradient(closest-side, var(--ring-hole) 76%, transparent 78% 100%), conic-gradient(var(--color-green) calc(var(--percent) * 1%), var(--surface-3) 0)

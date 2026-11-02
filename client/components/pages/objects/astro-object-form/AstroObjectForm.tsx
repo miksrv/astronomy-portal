@@ -40,6 +40,10 @@ interface AstroObjectFormValues {
     // an invalid type just like a missing value would be.
     ra: number
     dec: number
+    /** Light years; NaN when not known */
+    distance: number
+    /** Apparent visual magnitude; NaN when not known */
+    magnitude: number
     description: string
 }
 
@@ -80,6 +84,8 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
             fitsCloudLink: '',
             ra: NaN,
             dec: NaN,
+            distance: NaN,
+            magnitude: NaN,
             description: ''
         }
     })
@@ -104,6 +110,8 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                 fitsCloudLink: initialData.fitsCloudLink ?? '',
                 ra: initialData.ra ?? NaN,
                 dec: initialData.dec ?? NaN,
+                distance: initialData.distance ?? NaN,
+                magnitude: initialData.magnitude ?? NaN,
                 description: initialData.description ?? ''
             })
         }
@@ -117,7 +125,12 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
         // must stay inside the submit handler rather than run eagerly.
         const canvasImage = document?.getElementById('celestial-map')?.getElementsByTagName('canvas')?.[0]?.toDataURL()
 
-        onSubmit?.({ ...values, image: canvasImage })
+        onSubmit?.({
+            ...values,
+            distance: Number.isNaN(values.distance) ? null : values.distance,
+            magnitude: Number.isNaN(values.magnitude) ? null : values.magnitude,
+            image: canvasImage
+        })
     }
 
     // Fires when a submit attempt fails client-side (zod) validation - with
@@ -239,6 +252,48 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                                     disabled={isFormDisabled}
                                     className={styles.formElement}
                                     label={'DEC'}
+                                    type={'number'}
+                                    value={Number.isNaN(field.value) ? '' : field.value}
+                                    error={fieldState.error?.message}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                />
+                            )}
+                        />
+
+                        <Controller
+                            name={'distance'}
+                            control={control}
+                            render={({ field, fieldState }) => (
+                                <Input
+                                    {...field}
+                                    size={'medium'}
+                                    disabled={isFormDisabled}
+                                    className={styles.formElement}
+                                    label={t(
+                                        'components.pages.objects.astro-object-form.distance',
+                                        'Расстояние, св. лет'
+                                    )}
+                                    type={'number'}
+                                    value={Number.isNaN(field.value) ? '' : field.value}
+                                    error={fieldState.error?.message}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                />
+                            )}
+                        />
+
+                        <Controller
+                            name={'magnitude'}
+                            control={control}
+                            render={({ field, fieldState }) => (
+                                <Input
+                                    {...field}
+                                    size={'medium'}
+                                    disabled={isFormDisabled}
+                                    className={styles.formElement}
+                                    label={t(
+                                        'components.pages.objects.astro-object-form.magnitude',
+                                        'Звёздная величина'
+                                    )}
                                     type={'number'}
                                     value={Number.isNaN(field.value) ? '' : field.value}
                                     error={fieldState.error?.message}

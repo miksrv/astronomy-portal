@@ -5,8 +5,10 @@ namespace App\Controllers;
 use App\Enums\Permission;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
+use App\Libraries\AstrometrySolver;
 use App\Libraries\PhotoUploadLibrary;
 use App\Models\CatalogModel;
+use App\Models\PhotosAstrometryModel;
 use App\Models\PhotosModel;
 use App\Models\PhotosCategoryModel;
 use App\Models\PhotosObjectModel;
@@ -187,11 +189,83 @@ class Photos extends BaseApiController
             $photo->id = $id;
             $photosModel->update($id, $photo);
 
+            // A new picture: its plate solve starts over (the old solution describes the old pixels);
+            // the photo page's editor view drives it. A queue hiccup must not fail the upload itself
+            try {
+                (new PhotosAstrometryModel())->enqueue($id, true);
+            } catch (\Throwable $e) {
+                log_message('error', 'Astrometry enqueue failed for photo ' . $id . ': ' . $e->getMessage());
+            }
+
+            // The catalog shows each object's newest photo as its cover
+            \Config\Services::cache()->deleteMatching('objects_list_*');
+
             return $this->respondCreated($photo);
         } catch (\Exception $e) {
             log_message('error', $e->getMessage());
             return $this->respondServerError(lang('General.couldNotSaveData'));
         }
+    }
+
+    /**
+     * The plate solve of a photo: where it looks on the sky, its scale and rotation, the WCS
+     * and the catalogue objects found (see PhotosAstrometryModel). Public, like the photo.
+     *
+     * @param null $id The ID of the photo.
+     */
+    public function astrometry($id = null): ResponseInterface
+    {
+        // A deleted photo's solve is gone with it
+        $solution = (new PhotosModel())->find($id) ? (new PhotosAstrometryModel())->find($id) : null;
+
+        if (!$solution) {
+            return $this->respondNotFound(lang('Photos.astrometryNotFound'));
+        }
+
+        return $this->respond($solution);
+    }
+
+    /**
+     * Advances the plate solve of a photo by one step and returns its state: starts one when
+     * the photo has none, otherwise moves the running one along. A finished solve is returned
+     * as is unless `restart` is sent: a late poll from another tab or a retried request must
+     * not re-upload the picture and throw a good solution back to `pending`. The editor's
+     * browser calls this every few seconds after an upload until the status is final, so no
+     * background worker is needed. See AstrometrySolver.
+     *
+     * @param null $id The ID of the photo.
+     */
+    public function solve($id = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->respondUnauthorized(lang('App.accessDenied'));
+        }
+
+        if (!$this->session->can(Permission::PHOTOS_MANAGE)) {
+            return $this->respondForbidden(lang('App.accessDenied'));
+        }
+
+        if (!(new PhotosModel())->find($id)) {
+            return $this->respondNotFound(lang('Photos.invalidPhotoId'));
+        }
+
+        if (!\App\Libraries\AstrometryClient::isConfigured()) {
+            return $this->respondError(lang('Photos.astrometryNotConfigured'), 503);
+        }
+
+        $astrometryModel = new PhotosAstrometryModel();
+        $row             = $astrometryModel->find($id);
+
+        $restart = filter_var($this->request->getVar('restart'), FILTER_VALIDATE_BOOLEAN);
+
+        if (!$row || (!AstrometrySolver::isInProgress($row) && $restart)) {
+            $astrometryModel->enqueue($id);
+            $row = $astrometryModel->find($id);
+        } elseif (!AstrometrySolver::isInProgress($row)) {
+            return $this->respond($row);
+        }
+
+        return $this->respond(AstrometrySolver::fromConfig()->step($row));
     }
 
     /**
@@ -216,6 +290,8 @@ class Photos extends BaseApiController
 
             if ($photoData) {
                 $photoModel->delete($id);
+                \Config\Services::cache()->deleteMatching('objects_list_*');
+
                 return $this->respondDeleted($photoData);
             }
 
@@ -339,6 +415,8 @@ class Photos extends BaseApiController
                     ]);
                 }
             }
+
+            \Config\Services::cache()->deleteMatching('objects_list_*');
 
             $isUpdate = !empty($id);
             return $isUpdate ? $this->respondUpdated($photo) : $this->respondCreated($photo);

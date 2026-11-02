@@ -1,241 +1,266 @@
-import React, { useMemo } from 'react'
-import * as Astronomy from 'astronomy-engine'
-import dayjs from 'dayjs'
-import timezone from 'dayjs/plugin/timezone'
-import utc from 'dayjs/plugin/utc'
-import type { EChartsOption, EChartsReactProps } from 'echarts-for-react'
-import { Container } from 'simple-react-ui-kit'
+import React, { useId, useMemo } from 'react'
+import { cn, Container, Icon, Skeleton } from 'simple-react-ui-kit'
+import * as SunCalc from 'suncalc'
 
-import dynamic from 'next/dynamic'
 import { useTranslation } from 'next-i18next/pages'
 
-import { ApiModel } from '@/api'
-import { CHART_COLORS, getBaseChartConfig } from '@/utils/charts'
-import { formatDate } from '@/utils/dates'
-import { formatObjectName } from '@/utils/strings'
+import { useNow } from '@/hooks/useNow'
+import {
+    formatObservatoryTime,
+    getNight,
+    getNightPosition,
+    getVisibility,
+    OBSERVATORY_LAT,
+    OBSERVATORY_LON
+} from '@/utils/visibility'
 
-import { LAT, LON } from './constants'
-import { makeSunEvents } from './utils'
+import {
+    BASELINE,
+    CHART_HEIGHT,
+    CHART_WIDTH,
+    getDarkSpans,
+    getMoonPoints,
+    getObjectPoints,
+    PADDING,
+    toX,
+    toY
+} from './utils'
 
 import styles from './styles.module.sass'
 
-const CHART_HEIGHT = '200px'
+const ALTITUDE_GRID = [0, 30, 60, 90]
+const HOUR_TICKS = ['12:00', '18:00', '00:00', '06:00', '12:00']
 
-const ReactECharts = dynamic<EChartsReactProps>(() => import('echarts-for-react'), {
-    ssr: false,
-    // Holds the chart's height while ECharts loads, so the content below doesn't jump (CLS)
-    loading: () => <div style={{ height: CHART_HEIGHT }} />
-})
-
-dayjs.extend(utc)
-dayjs.extend(timezone)
+/** A bright Moon above the horizon washes out broadband filters, not the narrowband ones */
+const BRIGHT_MOON = 0.5
 
 interface VisibilityChartProps {
-    object?: ApiModel.Object
-    lat?: number
-    lon?: number
+    /** Right ascension, degrees */
+    ra: number
+    /** Declination, degrees */
+    dec: number
+    /** The object's name for the legend and the chart's text alternative */
+    name: string
+    className?: string
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ChartDataType = any
+/**
+ * How high the object climbs over the observatory tonight, from noon to noon: its altitude,
+ * the Moon's, the dark hours shaded and the best moment marked. Drawn on the client only, as
+ * it depends on the current time; the frame keeps its size until then.
+ */
+export const VisibilityChart: React.FC<VisibilityChartProps> = ({ ra, dec, name, className }) => {
+    const { t, i18n } = useTranslation()
+    const now = useNow(5 * 60_000)
+    // Two charts on one page must not share a gradient id
+    const gradientId = `${useId()}-fill`
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type MarkAreaType = any
-
-export const VisibilityChart: React.FC<VisibilityChartProps> = ({ object, lat = LAT, lon = LON }) => {
-    const { t } = useTranslation()
-
-    const date = dayjs()
-
-    const objectName = object?.title || formatObjectName(object?.name)
-
-    // Memoize the 288-sample computation so it only runs when coordinates or date change
-    const { chartData, markAreas, loading } = useMemo<{
-        chartData: ChartDataType[]
-        markAreas: MarkAreaType[]
-        loading: boolean
-    }>(() => {
-        if (!object?.ra || !object?.dec) {
-            return { chartData: [], loading: true, markAreas: [] }
+    const chart = useMemo(() => {
+        if (!now) {
+            return undefined
         }
 
-        const now = dayjs()
-        const observer = new Astronomy.Observer(lat, lon, 0)
-
-        const startOfDay = now.add(-12, 'hour').toDate()
-        const endOfDay = now.add(12, 'hour').toDate()
-
-        const startTime = Astronomy.MakeTime(startOfDay)
-        const endTime = Astronomy.MakeTime(endOfDay)
-
-        const interval = 5 * 60
-        const intervalInDays = interval / 86400
-
-        const sunEvents = makeSunEvents(observer, startTime)
-        const twilightPhases = [
-            {
-                // День
-                start: startOfDay,
-                end: endOfDay,
-                color: 'rgba(255, 255, 255, .08)'
-            },
-            {
-                // Гражданские сумерки
-                start: sunEvents.civilDusk?.date,
-                end: sunEvents.civilDawn?.date,
-                color: 'rgba(98, 98, 145, .4)'
-            },
-            {
-                // Навигационные сумерки
-                start: sunEvents.nauticalDusk?.date,
-                end: sunEvents.nauticalDawn?.date,
-                color: 'rgba(20, 20, 60, .3)'
-            },
-            {
-                // Астрономическая ночь
-                start: sunEvents.astroDusk?.date,
-                end: sunEvents.astroDawn?.date,
-                color: 'rgba(0, 0, 0, .3)'
-            },
-            {
-                // Текущая область времени
-                start: dayjs().subtract(interval, 'second').toDate(),
-                end: dayjs().toDate(),
-                color: 'rgba(141, 140, 240, .6)' // --color-main
-            }
-        ].map((phase) => [
-            {
-                xAxis: dayjs(phase?.start).toISOString(),
-                itemStyle: { color: phase.color }
-            },
-            {
-                xAxis: dayjs(phase?.end).toISOString(),
-                itemStyle: { color: phase.color }
-            }
-        ])
-
-        const raHours = (object?.ra || 0) / 15
-        const decDeg = object?.dec || 0
-
-        const data: ChartDataType[] = Array.from(
-            { length: Math.ceil((endTime.ut - startTime.ut) / intervalInDays) },
-            (_, i) => {
-                const chartTime = Astronomy.MakeTime(startTime.ut + i * intervalInDays)
-                const hor = Astronomy.Horizon(chartTime, observer, raHours, decDeg, 'normal')
-
-                return [chartTime.date.toISOString(), hor.altitude.toFixed(2)]
-            }
-        )
-
-        return { chartData: data, loading: false, markAreas: twilightPhases }
-    }, [object?.ra, object?.dec, lat, lon])
-
-    const options: EChartsOption = useMemo(() => {
-        const base = getBaseChartConfig()
+        const night = getNight(now)
+        const visibility = getVisibility(ra, dec, night)
+        const moonAtBest = visibility.time
+            ? SunCalc.getMoonPosition(visibility.time, OBSERVATORY_LAT, OBSERVATORY_LON).altitude
+            : -90
 
         return {
-            ...base,
-            legend: { show: false },
-            loading,
-            grid: {
-                left: 10,
-                right: 10,
-                top: 10,
-                bottom: 10,
-                containLabel: true,
-                borderColor: CHART_COLORS.border
-            },
-            tooltip: {
-                ...(base.tooltip as object),
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                formatter: (params: any) => {
-                    const tooltipContent: string[] = []
-
-                    if (params.length > 0) {
-                        const header =
-                            `<div class="${styles.chartTooltipTitle}">Local: ${formatDate(
-                                params[0].axisValueLabel
-                            )}</div>` +
-                            `<div class="${styles.chartTooltipTitle}">UTC: ${formatDate(
-                                dayjs(params[0].axisValueLabel).utc()
-                            )}</div>` +
-                            `<div class="${styles.chartTooltipTitle}">Observatory: ${formatDate(
-                                dayjs(params[0].axisValueLabel).utc().tz('Asia/Yekaterinburg')
-                            )}</div>`
-
-                        tooltipContent.push(header)
-                    }
-
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    params.forEach((item: any) => {
-                        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                        const colorSquare = `<span class="${styles.icon}" style="background-color: ${item.color};"></span>`
-                        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                        const seriesValue = `<span class="${styles.value}">${item.value?.[1] ?? '---'}</span>`
-                        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                        const seriesName = `<span class="${styles.label}">${item.seriesName}<span>${seriesValue}°</span></span>`
-
-                        const row = `<div class="${styles.chartTooltipItem}">${colorSquare} ${seriesName}</div>`
-                        tooltipContent.push(row)
-                    })
-
-                    return tooltipContent.join('')
-                }
-            },
-            xAxis: {
-                ...(base.xAxis as object),
-                axisTick: { show: true }
-            },
-            yAxis: {
-                ...(base.yAxis as object),
-                name: `${t('components.common.visibility-chart.height', 'Высота')} (°)`,
-                min: 0,
-                max: 90,
-                interval: 10,
-                axisLabel: {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    ...(base.yAxis as any).axisLabel,
-                    formatter: '{value}°'
-                }
-            },
-            series: [
-                {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    ...(base.series as any)[0],
-                    name: t('components.common.visibility-chart.height', 'Высота'),
-                    data: chartData,
-                    markArea: {
-                        silent: true,
-                        data: markAreas
-                    }
-                }
-            ]
+            night,
+            visibility,
+            objectPoints: getObjectPoints(night, ra, dec),
+            moonPoints: getMoonPoints(night),
+            darkSpans: getDarkSpans(night),
+            nowX: toX(getNightPosition(night, now)),
+            bestX: visibility.time ? toX(getNightPosition(night, visibility.time)) : undefined,
+            moonFraction: SunCalc.getMoonIllumination(visibility.time ?? now).fraction,
+            moonUp: moonAtBest > 0
         }
-    }, [chartData, markAreas, loading, t])
+    }, [now, ra, dec])
+
+    const isVisible = !!chart && chart.visibility.level !== 'none'
+    const bestTime = formatObservatoryTime(chart?.visibility.time, i18n.language)
+    const bestAltitude = Math.round(chart?.visibility.altitude ?? 0)
 
     return (
-        <Container className={styles.container}>
-            <h3 className={styles.title}>
-                {t('components.common.visibility-chart.title', 'График видимости {{name}} в течение суток', {
-                    name: objectName
-                })}
-            </h3>
-            <div className={styles.description}>
-                {t(
-                    'components.common.visibility-chart.description',
-                    'Диаграмма высоты {{name}} над горизонтом в течение текущих суток для точки наблюдения обсерватории в Оренбурге ({{lat}}, {{lon}}). График показывает, когда объект находится выше горизонта и на какой максимальной высоте в градусах он поднимается. Данные актуальны на дату наблюдения: {{date}}.',
-                    {
-                        name: objectName,
-                        date: formatDate(date, 'dddd, D MMMM YYYY'),
-                        lat,
-                        lon
-                    }
+        <Container
+            className={cn(styles.visibilityChart, className)}
+            header={
+                <h3 className={styles.title}>
+                    {t('components.common.visibility-chart.title', 'Высота над горизонтом этой ночью')}
+                </h3>
+            }
+            action={<span className={styles.meta}>{t('components.common.visibility-chart.place', 'Оренбург')}</span>}
+        >
+            <div className={styles.frame}>
+                {chart && (
+                    <svg
+                        viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+                        role={'img'}
+                        aria-label={
+                            isVisible
+                                ? t(
+                                      'components.common.visibility-chart.aria-visible',
+                                      'Высота {{name}} над горизонтом этой ночью: максимум {{altitude}}° в {{time}}',
+                                      { name, altitude: bestAltitude, time: bestTime }
+                                  )
+                                : t(
+                                      'components.common.visibility-chart.aria-hidden',
+                                      '{{name}} этой ночью не поднимается достаточно высоко',
+                                      { name }
+                                  )
+                        }
+                    >
+                        <defs>
+                            <linearGradient
+                                id={gradientId}
+                                x1={'0'}
+                                y1={'0'}
+                                x2={'0'}
+                                y2={'1'}
+                            >
+                                <stop
+                                    offset={'0'}
+                                    className={styles.fillTop}
+                                />
+                                <stop
+                                    offset={'1'}
+                                    className={styles.fillBottom}
+                                />
+                            </linearGradient>
+                        </defs>
+
+                        {chart.darkSpans.map(([from, to]) => (
+                            <rect
+                                key={from}
+                                className={styles.dark}
+                                x={toX(from)}
+                                y={PADDING.top}
+                                width={toX(to) - toX(from)}
+                                height={BASELINE - PADDING.top}
+                            />
+                        ))}
+
+                        {ALTITUDE_GRID.map((altitude) => (
+                            <g key={altitude}>
+                                <line
+                                    className={styles.grid}
+                                    x1={PADDING.left}
+                                    x2={CHART_WIDTH - PADDING.right}
+                                    y1={toY(altitude)}
+                                    y2={toY(altitude)}
+                                />
+                                <text
+                                    className={styles.axis}
+                                    x={PADDING.left - 6}
+                                    y={toY(altitude) + 4}
+                                    textAnchor={'end'}
+                                >
+                                    {`${altitude}°`}
+                                </text>
+                            </g>
+                        ))}
+
+                        <polygon
+                            className={styles.area}
+                            fill={`url(#${gradientId})`}
+                            points={`${PADDING.left},${BASELINE} ${chart.objectPoints} ${CHART_WIDTH - PADDING.right},${BASELINE}`}
+                        />
+                        <polyline
+                            className={styles.object}
+                            points={chart.objectPoints}
+                        />
+                        <polyline
+                            className={styles.moon}
+                            points={chart.moonPoints}
+                        />
+
+                        {chart.bestX !== undefined && isVisible && (
+                            <circle
+                                className={styles.best}
+                                cx={chart.bestX}
+                                cy={toY(chart.visibility.altitude)}
+                                r={5}
+                            />
+                        )}
+
+                        <line
+                            className={styles.now}
+                            x1={chart.nowX}
+                            x2={chart.nowX}
+                            y1={PADDING.top}
+                            y2={BASELINE}
+                        />
+                        <text
+                            className={styles.nowLabel}
+                            x={chart.nowX + (chart.nowX > CHART_WIDTH - 60 ? -4 : 4)}
+                            y={PADDING.top + 10}
+                            textAnchor={chart.nowX > CHART_WIDTH - 60 ? 'end' : 'start'}
+                        >
+                            {t('components.common.visibility-chart.now', 'сейчас')}
+                        </text>
+
+                        {HOUR_TICKS.map((tick, i) => (
+                            <text
+                                key={i}
+                                className={styles.axis}
+                                x={toX(i / (HOUR_TICKS.length - 1))}
+                                y={CHART_HEIGHT - 6}
+                                textAnchor={i === 0 ? 'start' : i === HOUR_TICKS.length - 1 ? 'end' : 'middle'}
+                            >
+                                {tick}
+                            </text>
+                        ))}
+                    </svg>
                 )}
             </div>
-            <ReactECharts
-                option={options}
-                style={{ width: '100%', height: CHART_HEIGHT }}
-            />
+
+            <div
+                className={styles.legend}
+                aria-hidden={'true'}
+            >
+                <span>
+                    <i className={styles.legendObject} />
+                    {name}
+                </span>
+                <span>
+                    <i className={styles.legendMoon} />
+                    {t('components.common.visibility-chart.moon', 'Луна')}
+                </span>
+                <span>
+                    <i className={styles.legendDark} />
+                    {t('components.common.visibility-chart.dark', 'Темно (Солнце ниже −12°)')}
+                </span>
+            </div>
+
+            {chart ? (
+                <p className={cn(styles.note, isVisible ? styles.good : styles.warning)}>
+                    <Icon name={isVisible ? 'CheckCircle' : 'ReportError'} />
+                    <span>
+                        {isVisible
+                            ? t(
+                                  'components.common.visibility-chart.best-time',
+                                  'Лучшее время — {{time}}, высота {{altitude}}°',
+                                  { time: bestTime, altitude: bestAltitude }
+                              )
+                            : t(
+                                  'components.common.visibility-chart.too-low',
+                                  'Этой ночью объект слишком низко для съёмки'
+                              )}
+                        {isVisible &&
+                            chart.moonUp &&
+                            chart.moonFraction > BRIGHT_MOON &&
+                            t(
+                                'components.common.visibility-chart.bright-moon',
+                                '. Луна {{percent}}% — подойдут узкополосные фильтры Hα, OIII, SII',
+                                { percent: Math.round(chart.moonFraction * 100) }
+                            )}
+                    </span>
+                </p>
+            ) : (
+                <Skeleton className={styles.noteSkeleton} />
+            )}
         </Container>
     )
 }

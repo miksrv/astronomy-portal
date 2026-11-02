@@ -149,7 +149,7 @@ Roles are managed entirely through data, not code — `/admin/roles` lets an adm
 |---|---|
 | `RELAY_CONTROL` | `PUT /relay/set` — observatory power relay control |
 | `OBJECTS_MANAGE` | Create/update/delete on the astronomical objects catalog |
-| `PHOTOS_MANAGE` | Create/update/delete/upload on the astrophoto archive |
+| `PHOTOS_MANAGE` | Create/update/delete/upload on the astrophoto archive; run a photo's plate solve (`POST /photos/:id/astrometry`) |
 | `MAILINGS_MANAGE` | All `/mailings*` endpoints except `unsubscribe` |
 | `USERS_MANAGE` | Admin member list (`/admin/users`), viewing another user's event history, and all of `/roles*` (creating/editing roles and assigning them to users). **Reserved** — see "The reserved developer role" below; not a privilege any admin-created role can be granted. |
 | `COMMENTS_MODERATE` | Deleting any comment/review (not just your own) |
@@ -298,6 +298,7 @@ yarn build
 | `app.latitude` | Observatory latitude | `51.7727` |
 | `app.longitude` | Observatory longitude | `55.0988` |
 | `app.fitsApiKey` | API key for FITS data source | — |
+| `astrometry.apiKey` | nova.astrometry.net API key for plate solving photos: new uploads are solved from the editor's browser, the archive once with `php spark photos:solve --all` (see server/CLAUDE.md CLI Commands). Shown on https://nova.astrometry.net/profile after signing in | — |
 | `app.observatory.controller` | URL of Arduino relay controller | `http://astro.myftp.org:8081/` |
 | `app.observatory.controller.user` / `.password` | Relay controller credentials | — |
 | `app.observatory.webcam_1` | Webcam 1 snapshot URL | — |

@@ -1,0 +1,37 @@
+@use '../../../../styles/typography' as type
+
+.objectPhotos
+    display: grid
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr))
+    gap: var(--space-4)
+    margin: 0
+    padding: 0
+    list-style: none
+
+.tile
+    position: relative
+    display: block
+    aspect-ratio: 4 / 3
+    border-radius: var(--radius-lg)
+    overflow: hidden
+    background: var(--surface-1)
+
+    img
+        object-fit: cover
+        transition: transform var(--duration-slow) var(--ease)
+
+    &:hover img
+        transform: scale(1.04)
+
+    &.latest
+        box-shadow: 0 0 0 2px var(--color-main)
+
+.pill
+    +type.caption
+    position: absolute
+    left: var(--space-2)
+    bottom: var(--space-2)
+    padding: 4px 8px
+    border-radius: var(--radius-sm)
+    background: var(--overlay-pill-background)
+    color: var(--overlay-pill-color)

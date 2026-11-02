@@ -1,0 +1,93 @@
+@use '../../../../styles/typography' as type
+
+.objectFilters
+    display: flex
+    flex-direction: column
+    min-width: 0
+
+.title
+    +type.titleBlock
+    margin: 0
+
+.meta
+    +type.caption
+    white-space: nowrap
+
+.rows
+    display: grid
+    gap: var(--space-3)
+    margin: 0 0 var(--space-4)
+    padding: 0
+    list-style: none
+
+.row
+    +type.secondary
+    display: grid
+    grid-template-columns: 48px minmax(0, 1fr) 148px
+    align-items: center
+    gap: var(--space-3)
+    font-variant-numeric: tabular-nums
+
+    b
+        display: inline-flex
+        align-items: center
+        gap: 6px
+        color: var(--text-color-primary)
+        font-weight: var(--font-weight-semibold)
+
+        &::before
+            content: ''
+            width: 8px
+            height: 8px
+            border-radius: 50%
+            background: var(--filter-color)
+
+.bar
+    height: 8px
+    border-radius: var(--radius-full)
+    background: var(--surface-3)
+    overflow: hidden
+
+    i
+        display: block
+        height: 100%
+        border-radius: inherit
+        background: var(--filter-color)
+
+.value
+    text-align: right
+    white-space: nowrap
+
+    em
+        font-style: normal
+        color: var(--text-color-primary)
+
+.caption
+    +type.caption
+    margin: 0 0 6px
+
+// The figures under the bars, pushed to the bottom of a card stretched to its neighbour
+.summary
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr))
+    gap: var(--space-2)
+    margin: auto 0 0
+    padding-top: var(--space-4)
+
+    > div
+        padding: var(--space-3)
+        border-radius: var(--radius-lg)
+        background: var(--surface-2)
+
+    dt
+        +type.caption
+
+    dd
+        +type.titleBlock
+        margin: 2px 0 0
+        font-variant-numeric: tabular-nums
+
+        small
+            +type.caption
+            display: block
+            font-weight: var(--font-weight-normal)

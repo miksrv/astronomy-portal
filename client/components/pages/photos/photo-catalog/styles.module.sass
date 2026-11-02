@@ -1,0 +1,137 @@
+@use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
+
+// ---- Toolbar
+.toolbar
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+
+.toolbarRow
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: var(--space-2)
+
+.search
+    flex: 1
+    min-width: 240px
+
+    // Kit 2.1.1 paints the field over its own left icon wrapper: lift the wrapper
+    [class*='iconLeft']
+        z-index: 1
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-basis: 100%
+
+// ---- Tiles on the page background (DESIGN.md → Lists of media)
+.grid
+    display: grid
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr))
+    gap: var(--space-3)
+    margin: 0
+    padding: 0
+    list-style: none
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: 1fr
+
+.tile
+    position: relative
+    display: block
+    aspect-ratio: 4 / 3
+    border-radius: var(--radius-lg)
+    overflow: hidden
+    background: var(--surface-2)
+    color: #fff
+
+    &:hover .image
+        transform: scale(1.03)
+
+    &:focus-visible
+        outline: var(--focus-outline)
+        outline-offset: 2px
+
+    @media (prefers-reduced-motion: reduce)
+        .image
+            transition: none
+
+        &:hover .image
+            transform: none
+
+.image
+    object-fit: cover
+    transition: transform var(--duration-slow) var(--ease)
+
+// Text over a photo: on a gradient scrim, always white (DESIGN §6 Photos)
+.caption
+    position: absolute
+    inset: auto 0 0
+    display: grid
+    gap: var(--space-2)
+    padding: var(--space-8) var(--space-3) var(--space-3)
+    background: linear-gradient(to top, rgb(0 0 0 / 78%), rgb(0 0 0 / 35%) 60%, transparent)
+    color: #fff
+
+.name
+    display: flex
+    align-items: baseline
+    justify-content: space-between
+    gap: var(--space-2)
+    min-width: 0
+
+    b
+        +type.body
+        overflow: hidden
+        font-weight: var(--font-weight-semibold)
+        text-overflow: ellipsis
+        white-space: nowrap
+
+    small
+        +type.caption
+        flex: none
+        color: rgb(255 255 255 / 75%)
+
+.figures
+    +type.micro
+    display: flex
+    flex-wrap: wrap
+    gap: 0 var(--space-3)
+    color: rgb(255 255 255 / 85%)
+    font-variant-numeric: tabular-nums
+
+.views
+    display: inline-flex
+    align-items: center
+    gap: 4px
+    margin-left: auto
+
+    svg
+        width: 12px
+        height: 12px
+        fill: currentColor
+
+.spectrum
+    height: 4px
+    background: rgb(255 255 255 / 15%)
+
+// ---- Under the grid
+.empty
+    padding: var(--space-10) var(--space-4)
+    text-align: center
+    color: var(--text-color-secondary)
+
+    p
+        margin: 0 0 var(--space-3)
+
+.resultLine
+    +type.caption
+    display: flex
+    align-items: baseline
+    gap: var(--space-2)
+    margin-top: calc(var(--space-3) - var(--space-4))
+
+.resetLink
+    height: auto
+    padding: 0
+    vertical-align: baseline

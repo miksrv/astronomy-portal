@@ -1,1 +1,0 @@
-export { PhotoCloud } from './PhotoCloud'

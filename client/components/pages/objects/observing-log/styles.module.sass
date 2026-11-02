@@ -1,0 +1,189 @@
+@use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
+
+.observingLog
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+
+.cardTitle
+    +type.titleBlock
+    margin: 0
+
+.meta
+    +type.caption
+
+// ---- Accumulated exposure
+.accumulated
+    position: relative
+
+    svg
+        display: block
+        width: 100%
+        height: 110px
+
+.gridLine
+    stroke: var(--border-strong)
+    vector-effect: non-scaling-stroke
+
+.area
+    fill: var(--color-main)
+    opacity: .15
+
+.line
+    fill: none
+    stroke: var(--color-main)
+    stroke-width: 2
+    vector-effect: non-scaling-stroke
+
+// Sits exactly over the SVG: the card's padding on every side but the header
+.overlay
+    position: absolute
+    left: var(--container-padding, var(--space-4))
+    right: var(--container-padding, var(--space-4))
+    bottom: var(--container-padding, var(--space-4))
+    height: 110px
+    pointer-events: none
+
+.dot
+    position: absolute
+    width: 6px
+    height: 6px
+    margin: -3px 0 0 -3px
+    border-radius: 50%
+    background: var(--color-main)
+    pointer-events: auto
+
+.year
+    +type.caption
+    position: absolute
+    bottom: 0
+    padding-left: 4px
+    font-variant-numeric: tabular-nums
+
+// ---- Nights
+.nights
+    scroll-margin-top: calc(var(--header-height) + 64px)
+    border-radius: var(--radius-xl)
+    background: var(--surface-1)
+    box-shadow: inset 0 0 0 1px var(--border)
+    overflow: hidden
+
+.night
+    border-bottom: 1px solid var(--border)
+
+    &:last-child
+        border-bottom: 0
+
+    summary
+        display: grid
+        grid-template-columns: 92px minmax(0, 1fr) 130px 110px 20px
+        align-items: center
+        gap: var(--space-4)
+        padding: 12px var(--space-4)
+        list-style: none
+        cursor: pointer
+        transition: background var(--duration-fast) var(--ease)
+
+        &::-webkit-details-marker
+            display: none
+
+        &:hover
+            background: var(--surface-2)
+
+        &:focus-visible
+            outline: var(--focus-outline)
+            outline-offset: -2px
+
+    &[open]
+        summary
+            background: var(--surface-2)
+
+        .chevron
+            transform: rotate(180deg)
+
+.date
+    b
+        display: block
+        font-weight: var(--font-weight-semibold)
+        font-variant-numeric: tabular-nums
+
+    span
+        +type.caption
+
+.filters
+    display: flex
+    flex-wrap: wrap
+    gap: 6px
+
+.conditions
+    +type.caption
+    display: grid
+    gap: 2px
+    font-variant-numeric: tabular-nums
+
+    span
+        display: inline-flex
+        align-items: center
+        gap: 6px
+
+.total
+    text-align: right
+    font-variant-numeric: tabular-nums
+
+    b
+        display: block
+        font-weight: var(--font-weight-semibold)
+
+    span
+        +type.caption
+
+.chevron
+    width: 16px
+    height: 16px
+    fill: var(--text-color-disabled)
+    transition: transform var(--duration-base) var(--ease)
+
+.frames
+    padding: 0 var(--space-4) var(--space-3)
+    background: var(--surface-2)
+    overflow-x: auto
+
+.file
+    font-family: var(--font-mono, monospace)
+    font-size: var(--font-size-micro)
+    color: var(--text-color-secondary)
+    white-space: nowrap
+
+.footer
+    +type.caption
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    justify-content: space-between
+    gap: var(--space-3)
+
+.empty
+    +type.secondary
+    margin: 0
+
+.chartSkeleton
+    height: 170px
+    border-radius: var(--radius-xl)
+
+.nightSkeleton
+    height: 61px
+    border-radius: 0
+    border-bottom: 1px solid var(--border)
+
+@media only screen and (max-width: 860px)
+    .night summary
+        grid-template-columns: minmax(0, 1fr) auto 20px
+        gap: var(--space-2) var(--space-3)
+
+    .filters
+        grid-column: 1 / -1
+        grid-row: 2
+
+    .conditions
+        display: none

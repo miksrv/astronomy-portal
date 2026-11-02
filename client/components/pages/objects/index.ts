@@ -1,6 +1,17 @@
 export { AstroObjectForm, type AstroObjectFormType } from './astro-object-form'
 export { ObjectDescription } from './object-description'
-export { ObjectFilesTable } from './object-files-table'
-export { ObjectHeader } from './object-header'
-export { ObjectsCloud } from './objects-cloud'
-export { ObjectsTable } from './objects-table'
+export { ObjectFilters } from './object-filters'
+export { ObjectHero } from './object-hero'
+export { ObjectPhotos } from './object-photos'
+export {
+    type CatalogObject,
+    type CatalogVisibility,
+    ObjectsCatalog,
+    toCatalogObject,
+    useCatalogFilters,
+    useCatalogVisibility
+} from './objects-catalog'
+export { ObservingLog } from './observing-log'
+export { RelatedObjects } from './related-objects'
+export { TonightStrip } from './tonight-strip'
+export { type ObjectPagePhoto, type RelatedObject } from './types'

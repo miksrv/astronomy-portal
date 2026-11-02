@@ -15,7 +15,8 @@
 // First paragraph of a text page
 .lead
     +type.lead
-    margin: var(--space-4) 0 0
+    // No top margin: the gap of <main> already puts the lead 16px under the title (as on every page)
+    margin: 0
 
 // Long text pages (howto, rules, where): the prose role on the full content width
 .prose

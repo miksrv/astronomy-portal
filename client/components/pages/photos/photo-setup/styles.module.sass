@@ -1,0 +1,47 @@
+@use '../../../../styles/typography' as type
+
+// The setup and the optics side by side when there is room, one under the other on phones
+.photoSetup
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))
+    align-items: start
+    gap: var(--space-4) var(--space-8)
+    min-width: 0
+
+.group
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+    min-width: 0
+
+// A group label inside the section, not a heading of the page: the overline role
+.groupTitle.groupTitle
+    +type.overline
+    margin: 0
+    color: var(--text-color-secondary)
+
+// Label-value rows: the label on the left, the value on the right
+.rows
+    display: grid
+    margin: 0
+
+    > div
+        display: grid
+        grid-template-columns: 130px minmax(0, 1fr)
+        align-items: baseline
+        gap: var(--space-2)
+        padding: var(--space-2) 0
+        border-bottom: 1px solid var(--border)
+
+        &:last-child
+            border-bottom: 0
+
+    dt
+        +type.caption
+
+    dd
+        +type.secondary
+        margin: 0
+        color: var(--text-color-primary)
+        overflow-wrap: anywhere
+

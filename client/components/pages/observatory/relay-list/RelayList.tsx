@@ -1,53 +1,56 @@
 import React, { startTransition, useEffect, useOptimistic, useRef, useState } from 'react'
-import { Button, cn, Container, Message, Spinner } from 'simple-react-ui-kit'
+import { Button, cn, Container, Icon, Message } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, ApiType, useAppDispatch, useAppSelector } from '@/api'
+import { CardMeta, CardTitle, Switch } from '@/components/ui'
+import { useInView } from '@/hooks/useInView'
 import { hasPermission } from '@/utils/permissions'
+
+import { LIGHT_RELAY_ID, RELAY_POLLING_MS, RELAYS } from './constants'
 
 import styles from './styles.module.sass'
 
 /**
- * TODO useState
- *
- * Нужно создать массив состояний реле через useState и каждый раз при изменении состояния реле
- * изменять это состояние в массиве, чтобы каждый раз не перезапрашивать список реле с состояниями
+ * The observatory's power relays: every device with its switch (privileged users only) and
+ * the light anyone can turn on for a moment to see the observatory on the camera. The list of
+ * devices is fixed hardware and renders at once; only the states come from the API.
  */
 export const RelayList: React.FC = () => {
     const { t } = useTranslation()
 
-    const [relayLoading, setRelayLoading] = React.useState<number>()
+    const [relayLoading, setRelayLoading] = useState<number>()
     const [countdownTimer, setCountdownTimer] = useState<number>(0)
+    const [lightError, setLightError] = useState(false)
     const countdownTimerRef = useRef<number>(0)
-    // Pause polling when the tab is not visible to avoid wasted network requests
-    const [pollingInterval, setPollingInterval] = useState<number>(
-        typeof document !== 'undefined' && document.visibilityState === 'hidden' ? 0 : 15 * 1000
-    )
 
-    const { data: relayList, isLoading, isError } = API.useRelayGetStateQuery(undefined, { pollingInterval })
+    // The relay board answers slowly: ask it only once the card is near the viewport, so the
+    // weather above isn't queued behind it. Polling pauses while the tab is hidden
+    const cardRef = useRef<HTMLElement>(null)
+    const inView = useInView(cardRef)
 
-    useEffect(() => {
-        const handleVisibilityChange = () => {
-            setPollingInterval(document.visibilityState === 'hidden' ? 0 : 15 * 1000)
-        }
-
-        document.addEventListener('visibilitychange', handleVisibilityChange)
-
-        return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange)
-        }
-    }, [])
+    const {
+        data: relayList,
+        isLoading,
+        isError
+    } = API.useRelayGetStateQuery(undefined, {
+        skip: !inView,
+        pollingInterval: RELAY_POLLING_MS,
+        skipPollingIfUnfocused: true
+    })
 
     const dispatch = useAppDispatch()
 
-    const [setRelayStatus, { isLoading: loaderSet, data: relaySet }] = API.useRelayPutStatusMutation()
+    const [setRelayStatus, { isLoading: loaderSet }] = API.useRelayPutStatusMutation()
 
     const [setLightOn, { isLoading: lightLoading }] = API.useRelayToggleLightMutation()
 
+    const states = new Map(relayList?.items.map(({ id, state }) => [id, state === 1]))
+
     // Instant feedback on click instead of waiting out the round-trip - reverts
     // on its own once the transition below settles (see handleLightClick).
-    const [optimisticLightOn, setOptimisticLightOn] = useOptimistic(relayList?.items?.[1]?.state === 1)
+    const [optimisticLightOn, setOptimisticLightOn] = useOptimistic(states.get(LIGHT_RELAY_ID) ?? false)
 
     const user = useAppSelector((state) => state.auth.user)
 
@@ -57,21 +60,22 @@ export const RelayList: React.FC = () => {
         // Optimistically update the relay state before the server confirms
         const patchResult = dispatch(
             API.util.updateQueryData('relayGetState', undefined, (draft) => {
-                if (draft?.items) {
-                    const item = draft.items.find((r) => r.id === relay.id)
+                const item = draft?.items?.find((r) => r.id === relay.id)
 
-                    if (item) {
-                        item.state = relay.state
-                    }
+                if (item) {
+                    item.state = relay.state
                 }
             })
         )
 
         try {
-            await setRelayStatus(relay)
+            // `.unwrap()` throws on a failed request; the bare trigger resolves with `{ error }`
+            await setRelayStatus(relay).unwrap()
         } catch {
             // Revert optimistic update if the request fails
             patchResult.undo()
+        } finally {
+            setRelayLoading(undefined)
         }
     }
 
@@ -82,24 +86,24 @@ export const RelayList: React.FC = () => {
 
         startTransition(async () => {
             setOptimisticLightOn(true)
+            setLightError(false)
 
-            await setLightOn()
+            try {
+                // `.unwrap()` throws on a failed request (the route is rate-limited, the board
+                // may be down); the bare trigger would resolve with `{ error }` and show nothing
+                await setLightOn().unwrap()
 
-            // `relayToggleLight` invalidates the Relay tag, but that background
-            // refetch isn't awaited by the mutation trigger itself - force and
-            // await it explicitly so this transition (and the optimistic value
-            // with it) doesn't end before `relayGetState` actually reflects the
-            // new state, which would otherwise flash the button back to "off"
-            // for a moment.
-            await dispatch(API.endpoints.relayGetState.initiate(undefined, { forceRefetch: true })).unwrap()
+                // `relayToggleLight` invalidates the Relay tag, but that background
+                // refetch isn't awaited by the mutation trigger itself - force and
+                // await it explicitly so this transition (and the optimistic value
+                // with it) doesn't end before `relayGetState` actually reflects the
+                // new state, which would otherwise flash the button back to "off"
+                // for a moment.
+                await dispatch(API.endpoints.relayGetState.initiate(undefined, { forceRefetch: true })).unwrap()
+            } catch {
+                setLightError(true)
+            }
         })
-    }
-
-    const tick = () => {
-        if (countdownTimerRef.current > 0) {
-            countdownTimerRef.current -= 1
-            setCountdownTimer(countdownTimerRef.current)
-        }
     }
 
     useEffect(() => {
@@ -110,121 +114,154 @@ export const RelayList: React.FC = () => {
     }, [relayList])
 
     useEffect(() => {
-        const timer = setInterval(() => tick(), 1000)
+        const timer = setInterval(() => {
+            if (countdownTimerRef.current > 0) {
+                countdownTimerRef.current -= 1
+                setCountdownTimer(countdownTimerRef.current)
+            }
+        }, 1000)
 
         return () => clearInterval(timer)
     }, [])
 
-    return (
-        <Container className={styles.relayListContainer}>
-            {isLoading && (
-                <div className={styles.loader}>
-                    <Spinner />
-                </div>
-            )}
+    const canControl = hasPermission(user, ApiModel.Permission.RELAY_CONTROL)
+    const switchedOn = [...states.values()].filter(Boolean).length
 
+    const relayTitles: Record<number, string> = {
+        0: t('components.pages.observatory.relay-list.mount', 'Монтировка'),
+        1: t('components.pages.observatory.relay-list.camera', 'Камера'),
+        2: t('components.pages.observatory.relay-list.focuser', 'Фокусер'),
+        3: t('components.pages.observatory.relay-list.heaters', 'Контроллер грелок'),
+        6: t('components.pages.observatory.relay-list.power-supply', 'Блок питания 12 В'),
+        7: t('components.pages.observatory.relay-list.flat-panel', 'LED Flat-панель')
+    }
+
+    return (
+        <Container
+            ref={cardRef}
+            className={styles.relayList}
+            header={
+                <CardTitle icon={'Lightning'}>
+                    {t('components.pages.observatory.relay-list.title', 'Питание оборудования')}
+                </CardTitle>
+            }
+            action={
+                relayList && (
+                    <CardMeta>
+                        {t('components.pages.observatory.relay-list.summary', 'включено {{on}} из {{total}}', {
+                            on: switchedOn,
+                            total: RELAYS.length
+                        })}
+                    </CardMeta>
+                )
+            }
+        >
             {isError && (
                 <Message type={'error'}>
                     {t('components.pages.observatory.relay-list.error', 'Ошибка при получении списка реле')}
                 </Message>
             )}
 
-            <>
-                {relayList?.items.map((item) => (
-                    <RelayListItem
-                        key={item.id}
-                        id={item.id}
-                        name={item.name}
-                        state={item.state === 1 || (relaySet?.state === 1 && relaySet?.id === item.id)}
-                        loading={loaderSet && relayLoading === item.id}
-                        isAdmin={hasPermission(user, ApiModel.Permission.RELAY_CONTROL)}
-                        handleClick={async (relay) => await handleSetRelay(relay)}
-                    />
-                ))}
+            {lightError && (
+                <Message type={'error'}>
+                    {t(
+                        'components.pages.observatory.relay-list.light-error',
+                        'Не удалось включить освещение, попробуйте через минуту'
+                    )}
+                </Message>
+            )}
 
-                {!!relayList?.items?.length && (
-                    <div className={styles.item}>
-                        <div className={styles.name}>
-                            <span
-                                className={cn(styles.ledIndicator, optimisticLightOn ? styles.on : styles.off)}
-                                aria-hidden={'true'}
-                            />
-                            {t('components.pages.observatory.relay-list.lightning', 'Освещение')}
-                        </div>
-                        <div className={styles.description}>
-                            {countdownTimer > 0 ? (
-                                <>
-                                    {t('components.pages.observatory.relay-list.available-in', 'Доступно через')}{' '}
-                                    <b>{countdownTimer}</b> {t('components.pages.observatory.relay-list.sec', 'секунд')}
-                                </>
-                            ) : (
-                                <>
-                                    {t('components.pages.observatory.relay-list.turned-on', 'Включили')}{' '}
-                                    {t('components.pages.observatory.relay-list.times', '{{count}} раз', {
-                                        count: relayList?.light.counter
-                                    })}
-                                </>
-                            )}
-                        </div>
-                        <Button
-                            // Not a switch: the light can only be turned on, it goes off by timer
-                            aria-pressed={optimisticLightOn}
-                            aria-label={t('components.pages.observatory.relay-list.lightning', 'Освещение')}
-                            mode={'outline'}
-                            loading={(isLoading && relayLoading === 1) || lightLoading}
-                            className={cn(styles.switchButton, optimisticLightOn ? styles.on : styles.off)}
-                            disabled={
-                                loaderSet ||
-                                lightLoading ||
-                                relayLoading === 1 ||
-                                !relayList?.light.enable ||
-                                countdownTimer > 0 ||
-                                optimisticLightOn
-                            }
-                            onClick={handleLightClick}
+            <ul className={styles.relays}>
+                {RELAYS.map(({ id, model, icon }) => {
+                    const name = `${relayTitles[id] ?? ''}${model ? ` (${model})` : ''}`
+                    const on = states.get(id) ?? false
+
+                    return (
+                        <li
+                            key={id}
+                            className={cn(styles.relay, on && styles.on)}
                         >
-                            {!(isLoading && relayLoading === 1) && !lightLoading
-                                ? optimisticLightOn
-                                    ? 'on'
-                                    : 'off'
-                                : ''}
-                        </Button>
-                    </div>
-                )}
-            </>
+                            <span
+                                className={styles.relayIcon}
+                                aria-hidden={'true'}
+                            >
+                                <Icon name={icon} />
+                            </span>
+                            <span className={styles.relayName}>
+                                {relayTitles[id]}
+                                {model && <small>{model}</small>}
+                            </span>
+                            <Switch
+                                checked={on}
+                                aria-label={name}
+                                // The states are unknown until the first poll: the switches wait, greyed
+                                loading={!inView || isLoading || (loaderSet && relayLoading === id)}
+                                // One request at a time: a second toggle would lose the first one's spinner
+                                disabled={!canControl || isError || loaderSet}
+                                onChange={(checked) => handleSetRelay({ id, state: checked ? 1 : 0 })}
+                            />
+                        </li>
+                    )
+                })}
+            </ul>
+
+            {!canControl && (
+                <p className={styles.lockNote}>
+                    <Icon name={'Lock'} />
+                    {t(
+                        'components.pages.observatory.relay-list.admins-only',
+                        'Управление питанием доступно только администраторам'
+                    )}
+                </p>
+            )}
+
+            <div className={cn(styles.light, optimisticLightOn && styles.on)}>
+                <span
+                    className={styles.bulb}
+                    aria-hidden={'true'}
+                >
+                    <Icon name={'Sun'} />
+                </span>
+                <div className={styles.lightText}>
+                    <b>{t('components.pages.observatory.relay-list.lightning', 'Освещение')}</b>
+                    <span>
+                        {countdownTimer > 0
+                            ? t(
+                                  'components.pages.observatory.relay-list.available-in-seconds',
+                                  'Снова доступно через {{count}} с',
+                                  { count: countdownTimer }
+                              )
+                            : t(
+                                  'components.pages.observatory.relay-list.turned-on-times',
+                                  'Включали {{count}} раз — посмотрите на камере',
+                                  { count: relayList?.light.counter ?? 0 }
+                              )}
+                    </span>
+                </div>
+                <Button
+                    // Not a switch: the light can only be turned on, it goes off by timer
+                    mode={'primary'}
+                    size={'small'}
+                    aria-pressed={optimisticLightOn}
+                    loading={lightLoading}
+                    disabled={
+                        !inView ||
+                        isLoading ||
+                        isError ||
+                        loaderSet ||
+                        lightLoading ||
+                        !relayList?.light.enable ||
+                        countdownTimer > 0 ||
+                        optimisticLightOn
+                    }
+                    label={
+                        optimisticLightOn
+                            ? t('components.pages.observatory.relay-list.light-on', 'Горит')
+                            : t('components.pages.observatory.relay-list.light-turn-on', 'Включить')
+                    }
+                    onClick={handleLightClick}
+                />
+            </div>
         </Container>
     )
 }
-
-interface RelayListItemProps {
-    id: number
-    name: string
-    state: boolean
-    loading: boolean
-    isAdmin?: boolean
-    handleClick?: (relay: ApiType.Relay.ReqRelaySet) => void
-}
-
-export const RelayListItem: React.FC<RelayListItemProps> = ({ id, name, state, loading, isAdmin, handleClick }) => (
-    <div className={styles.item}>
-        <div className={styles.name}>
-            <span
-                className={cn(styles.ledIndicator, state ? styles.on : styles.off)}
-                aria-hidden={'true'}
-            />
-            {name}
-        </div>
-        <Button
-            role={'switch'}
-            aria-checked={state}
-            aria-label={name}
-            mode={'outline'}
-            loading={loading}
-            className={cn(styles.switchButton, state ? styles.on : styles.off)}
-            disabled={loading || !isAdmin}
-            onClick={() => handleClick?.({ id, state: state ? 0 : 1 })}
-        >
-            {!loading ? (state ? 'on' : 'off') : ''}
-        </Button>
-    </div>
-)

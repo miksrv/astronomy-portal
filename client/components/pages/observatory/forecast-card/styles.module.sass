@@ -1,0 +1,180 @@
+@use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
+
+.forecastCard
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+    min-width: 0
+    // Scrolling rows inside (hours, days on phones) must not widen the card
+    overflow: hidden
+
+.block
+    display: grid
+    gap: var(--space-2)
+    min-width: 0
+    // A scrolling child (the week on phones) must not widen the card
+    overflow: hidden
+
+.subtitle
+    +type.caption
+    margin: 0
+    font-weight: var(--font-weight-semibold)
+
+.empty
+    +type.secondary
+    margin: 0
+
+// ---- Tonight, hour by hour
+.hours
+    display: grid
+    grid-auto-flow: column
+    grid-auto-columns: minmax(0, 1fr)
+    gap: var(--space-1)
+    width: 100%
+    min-width: 0
+    margin: 0
+    padding: 0
+    list-style: none
+
+    // Phones: 14 hours don't fit; the row scrolls with a readable column each
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-auto-columns: 44px
+        overflow-x: auto
+        scrollbar-width: none
+
+        &::-webkit-scrollbar
+            display: none
+
+.hour
+    display: grid
+    justify-items: center
+    gap: 4px
+    font-variant-numeric: tabular-nums
+
+.hourBar
+    position: relative
+    width: 100%
+    height: 48px
+    border-radius: var(--radius-sm)
+    background: var(--surface-2)
+    overflow: hidden
+
+    i
+        position: absolute
+        inset: auto 0 0
+        background: var(--text-color-disabled)
+
+.clear .hourBar
+    background: var(--color-green-background)
+
+    i
+        background: var(--color-green)
+
+.hourValue
+    font-size: var(--font-size-micro)
+    color: var(--text-color-secondary)
+
+.hourTime
+    font-size: var(--font-size-micro)
+    color: var(--text-color-secondary)
+
+.hoursSkeleton
+    height: 84px
+
+// ---- The week
+.days
+    display: grid
+    grid-auto-flow: column
+    grid-auto-columns: minmax(0, 1fr)
+    gap: var(--space-2)
+    width: 100%
+    min-width: 0
+    margin: 0
+    padding: 0
+    list-style: none
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-auto-columns: 132px
+        overflow-x: auto
+
+.day
+    display: grid
+    justify-items: center
+    gap: var(--space-2)
+    padding: var(--space-3)
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
+    text-align: center
+
+    &.good
+        background: linear-gradient(to bottom, color-mix(in srgb, var(--color-green) 14%, var(--surface-2)), var(--surface-2))
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-green) 30%, transparent)
+
+.dayName
+    +type.caption
+    white-space: nowrap
+
+    &.today
+        color: var(--color-main)
+        font-weight: var(--font-weight-semibold)
+
+// The weather at a glance: one glyph, tinted by kind
+.kindIcon
+    display: grid
+    place-items: center
+    width: 40px
+    height: 40px
+    border-radius: 50%
+    background: var(--surface-3)
+    color: var(--text-color-secondary)
+
+    svg
+        width: 22px
+        height: 22px
+        fill: currentColor
+
+    &.clear
+        background: color-mix(in srgb, var(--color-orange) 22%, var(--surface-3))
+        color: var(--color-orange)
+
+    &.rain, &.snow, &.storm
+        color: var(--text-color-primary)
+
+// A number with its meaning right under it: "49 %" + "облачность", "14°" + "днём"
+.clouds, .temperature > span
+    display: grid
+    justify-items: center
+    gap: 1px
+    font-variant-numeric: tabular-nums
+
+    b
+        +type.body
+        font-weight: var(--font-weight-semibold)
+
+    small
+        +type.micro
+        color: var(--text-color-secondary)
+
+.temperature
+    display: flex
+    gap: var(--space-3)
+
+    > span:last-child b
+        color: var(--text-color-secondary)
+        font-weight: var(--font-weight-medium)
+
+.verdict
+    +type.micro
+    padding: 2px 6px
+    border-radius: var(--radius-sm)
+    background: var(--surface-3)
+    color: var(--text-color-secondary)
+    white-space: nowrap
+
+    &.goodVerdict
+        background: var(--color-green-background)
+        color: var(--color-green)
+
+.daysSkeleton
+    height: 140px

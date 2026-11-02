@@ -1,0 +1,84 @@
+@use '../../../../styles/typography' as type
+
+// Stacked and tight: the name with the star map beside it, tonight, the facts, the link
+.photoObjectCard
+    display: grid
+    grid-template-columns: minmax(0, 1fr)
+    align-content: start
+    gap: var(--space-2)
+
+// The name on the left, the star map in the corner
+.header
+    display: flex
+    align-items: flex-start
+    justify-content: space-between
+    gap: var(--space-3)
+
+.identity
+    display: flex
+    flex-direction: column
+    gap: 2px
+    min-width: 0
+
+.title.title
+    +type.titleSection
+    margin: 0
+
+    a
+        color: var(--text-color-primary)
+
+        &:hover
+            color: var(--color-main)
+
+// The common name and the other designations
+.subtitle
+    +type.secondary
+    margin: 0
+
+.starMap
+    flex-shrink: 0
+
+// Reserved before tonight's visibility is computed on the client: no shift when it appears
+.tonight
+    min-height: 22px
+
+.skeleton
+    width: 220px
+    height: 22px
+
+.facts
+    display: grid
+    margin: 0
+
+    > div
+        display: flex
+        align-items: baseline
+        justify-content: space-between
+        gap: var(--space-3)
+        padding: 6px 0
+        border-bottom: 1px solid var(--border)
+
+        &:last-child
+            border-bottom: 0
+
+    dt
+        +type.caption
+
+    dd
+        +type.secondary
+        margin: 0
+        color: var(--text-color-primary)
+        font-variant-numeric: tabular-nums
+        text-align: right
+
+.cta
+    +type.secondary
+    display: inline-flex
+    align-items: center
+    gap: var(--space-1)
+    color: var(--color-main)
+
+    svg
+        width: 16px
+        height: 16px
+        fill: currentColor

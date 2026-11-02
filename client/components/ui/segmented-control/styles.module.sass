@@ -1,0 +1,53 @@
+@use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
+
+.segmentedControl
+    display: inline-flex
+    gap: 2px
+    padding: 3px
+    border-radius: var(--radius-lg)
+    background: var(--surface-1)
+    box-shadow: inset 0 0 0 1px var(--border)
+    max-width: 100%
+    overflow-x: auto
+    scrollbar-width: none
+
+    &::-webkit-scrollbar
+        display: none
+
+// Nested: the kit's `.button.unstyled` resets padding and height with two classes
+.segmentedControl .option
+    +type.secondary
+    display: inline-flex
+    align-items: center
+    gap: var(--space-1)
+    height: 28px
+    padding: 0 10px
+    border: 0
+    border-radius: var(--radius-md)
+    background: none
+    color: var(--text-color-secondary)
+    font-weight: var(--font-weight-medium)
+    white-space: nowrap
+    cursor: pointer
+    transition: color var(--duration-fast) var(--ease), background var(--duration-fast) var(--ease)
+
+    &:hover
+        color: var(--text-color-primary)
+
+    &:focus-visible
+        outline: var(--focus-outline)
+        outline-offset: 1px
+
+    &[aria-pressed='true']
+        background: var(--surface-3)
+        color: var(--text-color-primary)
+        box-shadow: var(--shadow-sm)
+
+    // Touch targets of at least 44px on phones
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        height: 38px
+
+.count
+    color: var(--text-color-disabled)
+    font-variant-numeric: tabular-nums

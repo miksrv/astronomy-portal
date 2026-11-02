@@ -363,6 +363,26 @@ export const API = createApi({
             providesTags: (res, err, id) => [{ id, type: 'Photos' }],
             query: (id) => `photos/${id}`
         }),
+        photosGetAstrometry: builder.query<ApiModel.PhotoAstrometry, string>({
+            providesTags: (res, err, id) => [{ id: `astrometry-${id}`, type: 'Photos' }],
+            query: (id) => `photos/${id}/astrometry`
+        }),
+        /**
+         * One step of the plate solve: starts it, or moves the running one along (editors). A
+         * finished solve is started over only with `restart`. The GET's cache is refreshed only
+         * when the solve ends - every step's answer is already the freshest state
+         */
+        photosSolve: builder.mutation<ApiModel.PhotoAstrometry, { id: string; restart?: boolean }>({
+            invalidatesTags: (result, error, { id }) =>
+                result && (result.status === 'success' || result.status === 'failed')
+                    ? [{ id: `astrometry-${id}`, type: 'Photos' }]
+                    : [],
+            query: ({ id, restart }) => ({
+                body: restart ? { restart: true } : undefined,
+                method: 'POST',
+                url: `photos/${id}/astrometry`
+            })
+        }),
         photosGetList: builder.query<ApiType.Photos.Response, Maybe<ApiType.Photos.Request>>({
             providesTags: () => [{ id: 'LIST', type: 'Photos' }],
             query: (params) => `photos${encodeQueryData(params)}`

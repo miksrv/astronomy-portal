@@ -30,7 +30,24 @@ final class ObjectEntityTest extends CIUnitTestCase
         $this->assertNull($entity->deleted_at);
     }
 
+    public function testNewInstanceDistanceAndMagnitudeDefaultToNull(): void
+    {
+        // Optional catalog facts: '?float' keeps a missing value null instead of 0.0
+        $entity = new ObjectEntity();
+        $this->assertNull($entity->distance);
+        $this->assertNull($entity->magnitude);
+    }
+
     // --- Cast behavior ---
+
+    public function testDistanceAndMagnitudeCastToFloat(): void
+    {
+        $entity            = new ObjectEntity();
+        $entity->distance  = '2400';
+        $entity->magnitude = '3.5';
+        $this->assertSame(2400.0, $entity->distance);
+        $this->assertSame(3.5, $entity->magnitude);
+    }
 
     public function testRaCastToFloat(): void
     {

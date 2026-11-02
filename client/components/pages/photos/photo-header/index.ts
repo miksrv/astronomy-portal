@@ -1,1 +1,0 @@
-export { PhotoHeader } from './PhotoHeader'

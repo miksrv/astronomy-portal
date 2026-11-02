@@ -1,80 +1,113 @@
-@use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
 
-.relayListContainer
+.relayList
     display: flex
     flex-direction: column
-    gap: var(--space-1)
-    height: 100%
-    min-height: 230px
+    gap: var(--space-3)
+    min-width: 0
 
-    .loader
-        display: flex
-        justify-content: center
-        align-items: center
-        height: 100%
-
-        svg
-            width: 32px
-            height: 32px
-
-    .item
-        display: flex
-        align-items: center
-        justify-content: space-between
-        gap: var(--space-3)
-        min-height: 44px
-        margin: 0 calc(-1 * var(--space-2))
-        padding: 0 var(--space-2)
-        border-radius: var(--radius-md)
-
-        &:hover
-            background-color: var(--surface-2)
-
-    .name
-        display: flex
-        align-items: center
-        gap: var(--space-2)
-        min-width: 0
-
-    .description
+    // The list grows to fill the card: the card sits in a grid row beside the nights list
+    .relays
         flex: 1
-        text-align: right
-        color: var(--text-color-secondary)
-        font-size: var(--font-size-secondary)
+        align-content: start
 
-    .ledIndicator
+
+.relays
+    display: grid
+    gap: 0
+    margin: 0
+    padding: 0
+    list-style: none
+
+.relay
+    display: flex
+    align-items: center
+    gap: var(--space-3)
+    padding: 6px var(--space-2)
+    border-radius: var(--radius-md)
+
+    &:hover
+        background: var(--surface-2)
+
+.relayIcon
+    flex: none
+    display: grid
+    place-items: center
+    width: 28px
+    height: 28px
+    border-radius: var(--radius-md)
+    background: var(--surface-2)
+    color: var(--text-color-secondary)
+
+    svg
+        width: 16px
+        height: 16px
+        fill: currentColor
+
+.on .relayIcon
+    background: var(--color-green-background)
+    color: var(--color-green)
+
+.relayName
+    flex: 1
+    min-width: 0
+
+    small
+        +type.caption
+        display: block
+
+.lockNote
+    +type.caption
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    margin: 0
+    padding: var(--space-2) var(--space-3)
+    border-radius: var(--radius-md)
+    background: var(--surface-2)
+
+    svg
         flex: none
-        display: inline-block
-        width: 8px
-        height: 8px
-        border-radius: 50%
-        background-color: var(--text-color-disabled)
+        width: 14px
+        height: 14px
+        fill: currentColor
 
-        &.on
-            background-color: var(--color-green)
+.light
+    display: flex
+    align-items: center
+    gap: var(--space-3)
+    padding: var(--space-3)
+    border-radius: var(--radius-lg)
+    background: linear-gradient(110deg, color-mix(in srgb, var(--color-orange) 12%, var(--surface-2)), var(--surface-2))
 
-        &.off
-            background-color: var(--color-red)
+.bulb
+    flex: none
+    display: grid
+    place-items: center
+    width: 40px
+    height: 40px
+    border-radius: 50%
+    background: var(--surface-3)
+    color: var(--text-color-secondary)
+    transition: background var(--duration-slow) var(--ease), box-shadow var(--duration-slow) var(--ease)
 
-    // Switch: outline button tinted with the state it shows
-    .switchButton
-        min-width: 56px
-        text-transform: uppercase
+    svg
+        width: 20px
+        height: 20px
+        fill: currentColor
 
-        @media only screen and (max-width: variables.$mobileMaxWidth)
-            min-width: 64px
-            min-height: 44px
+.light.on .bulb
+    background: var(--color-orange)
+    color: var(--body-background)
+    box-shadow: 0 0 24px color-mix(in srgb, var(--color-orange) 70%, transparent)
 
-        &.off
-            color: var(--color-main)
-            border-color: var(--color-main)
+.lightText
+    +type.secondary
+    flex: 1
+    min-width: 0
 
-            &:hover:not(:disabled)
-                background: var(--color-main-background)
-
-        &.on
-            color: var(--color-green)
-            border-color: var(--color-green)
-
-            &:hover:not(:disabled)
-                background: var(--color-green-background)
+    b
+        +type.body
+        display: block
+        color: var(--text-color-primary)
+        font-weight: var(--font-weight-semibold)

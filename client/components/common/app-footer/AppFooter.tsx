@@ -6,7 +6,6 @@ import { useTranslation } from 'next-i18next/pages'
 
 import { LanguageSwitcher } from '@/components/common/app-layout/language-switcher'
 import packageInfo from '@/package.json'
-import { update } from '@/update'
 import { formatDate } from '@/utils/dates'
 
 import styles from './styles.module.sass'
@@ -45,7 +44,6 @@ export const AppFooter = forwardRef<HTMLDivElement>((props, ref) => {
                 >
                     {'GitHub'}
                 </a>
-                {`(${formatDate(update, 'DD.MM.YYYY, HH:mm')})`}
             </div>
 
             <div className={styles.rightGroup}>
@@ -62,7 +60,6 @@ export const AppFooter = forwardRef<HTMLDivElement>((props, ref) => {
                 </div>
 
                 <div className={styles.privacyLink}>
-                    <span aria-hidden={'true'}>{'·'}</span>
                     <Link
                         href={'/privacy'}
                         className={styles.link}

@@ -1,3 +1,4 @@
+import type React from 'react'
 import { TFunction } from 'i18next'
 
 import { ApiModel } from '@/api'
@@ -41,7 +42,7 @@ export const normalizeAndFilterObjects = (data?: ApiModel.Photo[]): ApiModel.Pho
     return Object.values(uniqueMap ?? {})
 }
 
-const createPhotoUrl = (photo?: ApiModel.Photo, size?: 'small' | 'medium' | 'large'): string => {
+const createPhotoUrl = (photo?: ApiModel.Photo, size?: 'small' | 'thumb' | 'medium' | 'large'): string => {
     if (!photo?.fileName || !photo?.fileExt || !photo?.dirName) {
         return ''
     }
@@ -50,6 +51,21 @@ const createPhotoUrl = (photo?: ApiModel.Photo, size?: 'small' | 'medium' | 'lar
 }
 
 export const createSmallPhotoUrl = (photo?: ApiModel.Photo): string => createPhotoUrl(photo, 'small')
+
+/**
+ * Falls back from the square `_thumb` to the `_medium` file: photos uploaded before 4.15.0 have
+ * no thumb until `php spark photos:thumbnails` has run on the host. For `onError` of an <img>.
+ */
+export const fallbackToMediumPhoto = (event: React.SyntheticEvent<HTMLImageElement>): void => {
+    const image = event.currentTarget
+
+    if (image.src.includes('_thumb.')) {
+        image.src = image.src.replace('_thumb.', '_medium.')
+    }
+}
+
+/** The square 160 px thumbnail (`_thumb`), for the objects catalog and small cards */
+export const createThumbPhotoUrl = (photo?: ApiModel.Photo): string => createPhotoUrl(photo, 'thumb')
 
 export const createMediumPhotoUrl = (photo?: ApiModel.Photo): string => createPhotoUrl(photo, 'medium')
 

@@ -1,0 +1,90 @@
+@use '../../../../styles/typography' as type
+
+// Fills the picture's box of the viewer; dragging anywhere on it moves the divider
+.photoCompare
+    position: absolute
+    inset: 0
+    cursor: ew-resize
+    touch-action: pan-y
+    user-select: none
+
+.image
+    object-fit: contain
+    background-position: center
+    background-size: contain
+    background-repeat: no-repeat
+    pointer-events: none
+
+// The other version over this photo, cut at the divider
+.other
+    position: absolute
+    inset: 0
+    // The camera's black, so the other picture's own margins hide this one
+    background: #08090c
+    clip-path: inset(0 calc(100% - var(--divider)) 0 0)
+
+.labelLeft, .labelRight
+    +type.caption
+    position: absolute
+    top: var(--space-3)
+    display: inline-flex
+    align-items: baseline
+    gap: 6px
+    padding: 4px 8px
+    border-radius: var(--radius-sm)
+    background: var(--overlay-pill-background)
+    color: #fff
+    pointer-events: none
+
+    small
+        +type.micro
+        color: var(--color-main)
+
+.labelLeft
+    left: var(--space-3)
+
+.labelRight
+    right: var(--space-3)
+
+.divider
+    position: absolute
+    top: 0
+    bottom: 0
+    left: var(--divider)
+    width: 2px
+    transform: translateX(-50%)
+    background: #fff
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.6)
+
+    &:focus-visible
+        outline: var(--focus-outline)
+        outline-offset: 2px
+
+.handle
+    position: absolute
+    top: 50%
+    left: 50%
+    width: 36px
+    height: 36px
+    transform: translate(-50%, -50%)
+    border: 2px solid #fff
+    border-radius: 50%
+    background: var(--overlay-pill-background)
+
+    // Two arrows: ‹ ›
+    &::before, &::after
+        content: ''
+        position: absolute
+        top: 50%
+        width: 7px
+        height: 7px
+        border: solid #fff
+        border-width: 0 0 2px 2px
+
+    &::before
+        left: 8px
+        transform: translateY(-50%) rotate(45deg)
+
+    &::after
+        right: 8px
+        transform: translateY(-50%) rotate(-135deg)

@@ -40,7 +40,9 @@ class RelayLibrary {
     public function getList(string $locale = 'ru'): array {
         $client   = Services::curlrequest();
         $response = $client->get(getenv('app.observatory.controller') . 'pstat.xml', [
-            'auth' => [getenv('app.observatory.controller.user'), getenv('app.observatory.controller.password')],
+            'auth'    => [getenv('app.observatory.controller.user'), getenv('app.observatory.controller.password')],
+            // The relay board is on a home link: a hung request must not block the dashboard
+            'timeout' => 3,
         ]);
 
         $xmlDocument = simplexml_load_string($response->getBody(), "SimpleXMLElement", LIBXML_NOCDATA);
@@ -55,7 +57,7 @@ class RelayLibrary {
             $result[] = [
                 'id'    => $item,
                 'name'  => $key,
-                'state' => (integer) $arrayStates[$arrayKeys[$item]],
+                'state' => (int) $arrayStates[$arrayKeys[$item]],
             ];
         }
 
@@ -75,7 +77,8 @@ class RelayLibrary {
         $format = "rb{$relayId}{$action}.cgi";
 
         return $client->get(getenv('app.observatory.controller') . $format, [
-            'auth' => [getenv('app.observatory.controller.user'), getenv('app.observatory.controller.password')],
+            'auth'    => [getenv('app.observatory.controller.user'), getenv('app.observatory.controller.password')],
+            'timeout' => 5,
         ]);
     }
 

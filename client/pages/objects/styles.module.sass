@@ -1,0 +1,69 @@
+@use '../../styles/variables' as variables
+@use '../../styles/typography' as type
+
+// A way out of the catalog to the gallery, after the list
+.galleryLink
+    display: flex
+    align-items: center
+    gap: var(--space-4)
+    margin-top: var(--space-2)
+    padding: var(--space-4) var(--space-5)
+    border-radius: var(--radius-xl)
+    background: linear-gradient(110deg, var(--color-main-background), var(--surface-1) 70%)
+    box-shadow: inset 0 0 0 1px var(--border)
+
+    > svg
+        flex: none
+        width: 28px
+        height: 28px
+        fill: var(--color-main)
+
+    p
+        flex: 1
+        margin: 0
+        color: var(--text-color-secondary)
+
+    b
+        +type.titleBlock
+        display: block
+        color: var(--text-color-primary)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column
+        align-items: flex-start
+
+// ---- The object page
+// A section of the object page: jumps from the section nav stop below the sticky bars
+.section
+    scroll-margin-top: calc(var(--header-height) + 64px)
+
+    > h2:first-child
+        margin-top: var(--space-4)
+
+.titleWithMeta
+    display: flex
+    flex-wrap: wrap
+    align-items: baseline
+    justify-content: space-between
+    gap: var(--space-1) var(--space-3)
+
+    small
+        +type.secondary
+        font-weight: var(--font-weight-normal)
+        letter-spacing: 0
+
+.split
+    display: grid
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr)
+    gap: var(--space-4)
+    align-items: stretch
+
+    &.single
+        grid-template-columns: minmax(0, 1fr)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: minmax(0, 1fr)
+
+.relatedTitle
+    +type.titleSection
+    margin: var(--space-8) 0 var(--space-3)

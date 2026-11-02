@@ -6,7 +6,8 @@ This file supplements the root `CLAUDE.md` and `client/DESIGN.md` with frontend-
 
 ## API layer (`client/api/`)
 
-- Endpoints are defined in `api/api.ts` (main API) and `api/apiMeteo.ts` (weather); hooks are `API.use<EndpointName>Query/Mutation()`. Request/response types are in `api/types/`, models in `api/models/` (import via `import { ApiModel } from '@/api'`).
+- Endpoints are defined in `api/api.ts` (main API) and `api/apiMeteo.ts` (weather); hooks are `API.use<EndpointName>Query/Mutation()`. Request/response types are in `api/types/`, models in `api/models/` (import via `import { ApiModel } from '@/api'`). Both slices implement `extractRehydrationInfo`, so a query dispatched in `getServerSideProps` (e.g. the weather on `/observatory`) is picked up by the client hook from `__NEXT_DATA__` instead of being refetched; `removeSSRQueryCache` is for the opposite case, data handed over as props.
+- Below-the-fold widgets that talk to slow hardware (cameras, the relay board) start their requests only once near the viewport (`hooks/useInView.ts`), so they never queue in front of the data the first screen needs.
 - `ApiModel.Event`'s `registered`/`bookedId`/`bookingStatus`/`hasReviewed` are viewer-scoped: present on `eventGetList`/`eventGetItem`/`eventGetUpcoming` only for an authenticated request, omitted for a guest.
 - `ApiModel.Permission` mirrors the backend enum; read it only through `hasPermission()`/`hasAnyPermission()` (`client/utils/permissions.ts`).
 

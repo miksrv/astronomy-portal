@@ -1,0 +1,148 @@
+@use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
+
+// The viewer sits in the content column like the rest of the page; only its black mount is drawn
+// out to the window's edges. Its height follows the picture: a tall one is capped so it fits the
+// first screen under the page header, with the start of its label under it (`--viewer-height`);
+// a wide one leaves no black bands
+.photoViewer
+    // What is over the viewer on the first screen: the app bar, the header (the breadcrumbs and
+    // the h1: about 56px) and the gaps of <main>
+    --viewer-above: calc(var(--header-height) + var(--container-margin-top) + 56px + var(--space-4))
+    --viewer-height: clamp(420px, calc(100dvh - var(--viewer-above) - 2 * var(--space-6)), 900px)
+    --stage-padding: var(--space-4)
+    position: relative
+
+    // The camera's own black, darker than any surface: the mount of the work, from one edge of
+    // the window to the other. A 100vw box centred under the viewer, the way the home page draws
+    // its hero backgrounds; the scrollbar's width it counts in is clipped by <body> (globals.sass)
+    &::before
+        content: ''
+        position: absolute
+        top: 0
+        bottom: 0
+        left: 50%
+        width: 100vw
+        transform: translateX(-50%)
+        background: #08090c
+        border-block: 1px solid var(--border)
+
+// The picture and its tools, over the black
+.stage
+    position: relative
+    display: grid
+    place-items: center
+    min-width: 0
+    padding: var(--stage-padding) calc(var(--stage-padding) + 56px)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        --stage-padding: 0px
+        padding: 0
+
+// The picture's own box: as large as the stage allows at the picture's ratio, so the tools
+// over it (the slider, the scale bar) line up with the picture and not with the black around
+.picture
+    position: relative
+    width: min(100%, calc((var(--viewer-height) - 2 * var(--stage-padding)) * var(--photo-ratio)))
+    aspect-ratio: var(--photo-ratio)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        width: min(100%, calc(75svh * var(--photo-ratio)))
+
+// Doubled: the kit's `.button.unstyled` resets the size with two classes; the fill image
+// needs this box to be positioned and as tall as the picture
+.frame.frame
+    position: absolute
+    inset: 0
+    display: block
+    width: 100%
+    height: 100%
+    cursor: zoom-in
+
+    &:focus-visible
+        outline: var(--focus-outline)
+        outline-offset: -3px
+
+.image
+    object-fit: contain
+    background-position: center
+    background-size: contain
+    background-repeat: no-repeat
+
+// The picture's tools, over the stage's top right corner
+.tools
+    position: absolute
+    top: var(--space-3)
+    right: var(--space-3)
+    display: flex
+    flex-wrap: wrap
+    justify-content: flex-end
+    gap: var(--space-2)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        top: auto
+        bottom: var(--space-2)
+        right: var(--space-2)
+
+// A white bar of a round angle, bottom left of the picture
+.scaleBar
+    +type.caption
+    position: absolute
+    left: var(--space-3)
+    bottom: var(--space-3)
+    display: grid
+    gap: 4px
+    justify-items: start
+    padding: 6px 8px
+    border-radius: var(--radius-sm)
+    background: var(--overlay-pill-background)
+    color: #fff
+    font-variant-numeric: tabular-nums
+    pointer-events: none
+
+    i
+        width: var(--bar-width)
+        height: 6px
+        border: 2px solid #fff
+        border-top: 0
+
+// Gallery arrows over the stage's edges
+.arrow
+    position: absolute
+    top: 50%
+    display: grid
+    place-items: center
+    width: 44px
+    height: 44px
+    transform: translateY(-50%)
+    border-radius: 50%
+    background: var(--overlay-pill-background)
+    color: #fff
+    transition: background var(--duration-fast) var(--ease)
+
+    svg
+        width: 22px
+        height: 22px
+        fill: currentColor
+
+    &:hover
+        background: var(--surface-3)
+        color: #fff
+
+    &:focus-visible
+        outline: var(--focus-outline)
+        outline-offset: 2px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        width: 36px
+        height: 36px
+
+.arrowPrevious
+    left: var(--space-3)
+
+.arrowNext
+    right: var(--space-3)
+
+@media (prefers-reduced-motion: reduce)
+    .arrow
+        transition: none

@@ -45,7 +45,8 @@ jobs:
         id: cache-build
         with:
           path: client/.next
-          key: ${{ runner.os }}-build-${{ hashFiles('client/**/*.ts', 'client/**/*.tsx') }}
+          # Everything the build output depends on: styles, locales and config change it too
+          key: ${{ runner.os }}-build-${{ hashFiles('client/**/*.ts', 'client/**/*.tsx', 'client/**/*.sass', 'client/**/*.css', 'client/public/locales/**', 'client/package.json', 'client/yarn.lock', 'client/next.config.js') }}
           restore-keys: |
             ${{ runner.os }}-build-
             ${{ runner.os }}-
@@ -62,10 +63,7 @@ jobs:
 
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
         name: Build UI
-        run: |
-          export dateNow=$(date +"%Y-%m-%dT%H:%M")
-          echo "export const update = '$dateNow'" > update.ts
-          yarn build
+        run: yarn build
         working-directory: client
 
       - name: Configure SSH

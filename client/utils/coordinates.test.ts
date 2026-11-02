@@ -1,4 +1,4 @@
-import { formatDEC, formatRA } from './coordinates'
+import { formatDEC, formatDECShort, formatRA, formatRAShort } from './coordinates'
 
 describe('coordinates', () => {
     describe('formatRA', () => {
@@ -51,5 +51,19 @@ describe('coordinates', () => {
                 expect(formatDEC(NaN)).toBe('')
             })
         })
+    })
+})
+
+describe('formatRAShort / formatDECShort', () => {
+    it('formats RA in hours, minutes and seconds', () => {
+        expect(formatRAShort(323.977)).toBe('21ʰ 35ᵐ 54ˢ')
+        expect(formatRAShort(0)).toBe('0ʰ 00ᵐ 00ˢ')
+        expect(formatRAShort(undefined)).toBe('')
+    })
+
+    it('formats declination in degrees and minutes with a true minus', () => {
+        expect(formatDECShort(57.5555)).toBe('+57° 33′')
+        expect(formatDECShort(-5.39)).toBe('−5° 23′')
+        expect(formatDECShort(undefined)).toBe('')
     })
 })

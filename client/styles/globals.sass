@@ -7,6 +7,12 @@
 html, body
     margin: 0
 
+body
+    // Backdrops drawn out to the window's width are 100vw boxes (DESIGN.md → Layout), and 100vw
+    // counts the scrollbar in: clip that sliver instead of letting it add a sideways scroll.
+    // `clip`, not `hidden`: `hidden` would make <body> a scroll container and break sticky
+    overflow-x: clip
+
 html
     color-scheme: dark
     -webkit-font-smoothing: antialiased
