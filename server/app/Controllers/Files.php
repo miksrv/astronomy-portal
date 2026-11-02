@@ -9,12 +9,12 @@ use Exception;
 /**
  * Class Files
  *
- * This controller handles file operations such as showing and updating FITS file metadata.
+ * Lists the FITS frames of an object. The archive is read-only now: nothing feeds
+ * `objects_fits_files` any more, the table stays for the statistics built on it.
  *
  * @package App\Controllers
  *
  * @method ResponseInterface show($id = null) Retrieves and returns files associated with a specific object.
- * @method ResponseInterface updates() Updates file information based on provided JSON input.
  */
 class Files extends BaseApiController
 {
@@ -47,122 +47,4 @@ class Files extends BaseApiController
             return $this->respondServerError();
         }
     }
-
-    /**
-     * @return ResponseInterface
-     */
-    public function updates(): ResponseInterface
-    {
-        $apiKey = $this->request->getGet('key', FILTER_SANITIZE_SPECIAL_CHARS) ?? '';
-        $input  = json_decode($this->request->getJSON(true));
-
-        if (!$apiKey || $apiKey !== getenv('app.fitsApiKey')) {
-            return $this->respondUnauthorized(lang('FilesController.invalidApiKey'));
-        }
-
-        if (!isset($input->DEC) || !isset($input->RA)) {
-            return $this->respondError(lang('FilesController.missingCoordinates'), 400);
-        }
-
-        $maxLength = ['COMMENT' => 500, 'OBSERVER' => 100, 'INSTRUME' => 100, 'TELESCOP' => 100];
-        foreach ($maxLength as $field => $max) {
-            if (isset($input->$field) && strlen((string) $input->$field) > $max) {
-                $input->$field = substr((string) $input->$field, 0, $max);
-            }
-        }
-
-        try {
-            $objectsModel = new \App\Models\ObjectsModel();
-            $modelFiles   = new \App\Models\ObjectFitsFilesModel();
-            $fileId       = md5($input->FILE_NAME);
-            $fileObject   = str_replace(' ', '_', $input->OBJECT);
-
-            $dataFile = [
-                'id'        => $fileId,
-                'file_name' => $input->FILE_NAME,
-                'ypixsz'    => isset($input->YPIXSZ) ? floatval($input->YPIXSZ) : null,
-                'xpixsz'    => isset($input->XPIXSZ) ? floatval($input->XPIXSZ) : null,
-                'naxis1'    => isset($input->NAXIS1) ? intval($input->NAXIS1) : null,
-                'naxis2'    => isset($input->NAXIS2) ? intval($input->NAXIS2) : null,
-                'naxis'     => isset($input->NAXIS) ? intval($input->NAXIS) : null,
-                'bscale'    => isset($input->BSCALE) ? intval($input->BSCALE) : 0,
-                'simple'    => isset($input->SIMPLE) ? intval($input->SIMPLE) : null,
-                'bitpix'    => isset($input->BITPIX) ? intval($input->BITPIX) : null,
-                'xbinning'  => isset($input->XBINNING) ? intval($input->XBINNING) : null,
-                'ybinning'  => isset($input->YBINNING) ? intval($input->YBINNING) : null,
-                'exptime'   => isset($input->EXPTIME) ? intval($input->EXPTIME) : null,
-                'frame'     => $input->FRAME ?? null,
-                'aptdia'    => isset($input->APTDIA) ? intval($input->APTDIA) : null,
-                'focallen'  => isset($input->FOCALLEN) ? intval($input->FOCALLEN) : null,
-                'comment'   => $input->COMMENT ?? null,
-                'telescop'  => $input->TELESCOP ?? null,
-                'observer'  => $input->OBSERVER ?? null,
-                'instrume'  => $input->INSTRUME ?? null,
-                'pixsize1'  => isset($input->PIXSIZE1) ? floatval($input->PIXSIZE1) : null,
-                'pixsize2'  => isset($input->PIXSIZE2) ? floatval($input->PIXSIZE2) : null,
-                'ccd_temp'  => isset($input->CCD_TEMP) ? floatval($input->CCD_TEMP) : null,
-                'offset'    => isset($input->OFFSET) ? intval($input->OFFSET) : null,
-                'gain'      => isset($input->GAIN) ? intval($input->GAIN) : null,
-                'scale'     => isset($input->SCALE) ? floatval($input->SCALE) : null,
-                'date_obs'  => $input->DATE_OBS ?? null,
-                'equinox'   => $input->EQUINOX ?? null,
-                'filter'    => $input->FILTER ?? 'Luminance',
-                'dec'       => floatval($input->DEC),
-                'ra'        => floatval($input->RA),
-                'object'    => $fileObject,
-                'objctdec'  => $input->OBJCTDEC ?? null,
-                'objctra'   => $input->OBJCTRA ?? null,
-                'sitelong'  => floatval($input->SITELONG),
-                'sitelat'   => floatval($input->SITELAT),
-                'bzero'     => isset($input->BZERO) ? intval($input->BZERO) : 0,
-                'extend'    => $input->EXTEND ?? null,
-                'airmass'   => floatval($input->AIRMASS),
-
-                'star_count'     => isset($input->STARS_COUNT) ? intval($input->STARS_COUNT) : null,
-                'sky_background' => isset($input->SKY_BACKGROUND) ? floatval($input->SKY_BACKGROUND) : null,
-                'devitation'     => isset($input->DEVIATION) ? floatval($input->DEVIATION) : null,
-
-                'sigma' => isset($input->SIGMA) ? floatval($input->SIGMA) : null,
-                'hfr'   => isset($input->MEAN_FWHM) ? floatval($input->MEAN_FWHM) : null,
-                'fwhm'  => isset($input->MEAN_SNR) ? floatval($input->MEAN_SNR) : null,
-            ];
-
-            if (!$objectsModel->find($fileObject)) {
-                $dataCatalog = [
-                    'name'        => $fileObject,
-                    'title'       => str_replace('_', ' ', $fileObject),
-                    'category'    => 1,
-                    'text'        => '',
-                    'source_link' => '',
-                    'image'       => '',
-                    'coord_ra'    => $dataFile['ra'],
-                    'coord_dec'   => $dataFile['dec'],
-                ];
-
-                $objectsModel->insert($dataCatalog);
-            }
-
-            // A new or changed frame moves the per-night aggregates of the catalog and the dashboard
-            $cache = \Config\Services::cache();
-            $cache->deleteMatching('objects_list_*');
-            $cache->deleteMatching('statistic_telescope_*');
-
-            if ($modelFiles->find($fileId)) {
-                unset($dataFile['id']);
-
-                $modelFiles->update($fileId, $dataFile);
-
-                return $this->respondUpdated(['file' => $dataFile['file_name']]);
-            }
-
-            $modelFiles->insert($dataFile);
-
-            return $this->respondCreated($dataFile);
-        } catch (Exception $e) {
-            log_message('error', '{exception}', ['exception' => $e]);
-
-            return $this->respondServerError();
-        }
-    }
-
 }

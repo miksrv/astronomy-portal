@@ -9,7 +9,7 @@ GET  /                              → API health info (inline closure)
 
 GET  /camera/:id                    → Camera::show
 
-GET  /statistic/telescope           → Statistic::telescope     (per observing night: local noon → noon, UTC+5; `?period=MM-YYYY`; cached 10 min, invalidated by Files::updates)
+GET  /statistic/telescope           → Statistic::telescope     (per observing night: local noon → noon, UTC+5; `?period=MM-YYYY`; cached 10 min; the FITS archive is read-only now, so the cache simply expires)
 
 GET  /auth/me                       → Auth::me
 GET  /auth/google                   → Auth::google              [rate-limited: auth_oauth, 15/300s]
@@ -38,7 +38,8 @@ DELETE /objects/:name               → Objects::delete
 GET    /photos                      → Photos::list
 GET    /photos/:id/astrometry       → Photos::astrometry (public; the plate solve — centre, scale, rotation, WCS, annotations; 404 until solved; declared before GET /photos/:id)
 POST   /photos/:id/astrometry       → Photos::solve      (photos.manage; one step of the solve — starts it when there is none, otherwise moves it along — and returns the row; a finished solve is returned as is unless the body carries `restart: true` (the editor's "Перерешать" button), so a late poll never re-uploads the picture; the editor's browser polls it every few seconds after an upload, so there is no cron; 503 without `astrometry.apiKey`)
-GET    /photos/:id                  → Photos::show
+GET    /photos/:id                  → Photos::show       (no side effects: the view counter moved to POST /photos/:id/view)
+POST   /photos/:id/view             → Photos::view       (public; +1 view, 204; sent by the photo page once open [rate-limited: views, 60/60s])
 POST   /photos                      → Photos::create
 POST   /photos/:id/upload           → Photos::upload     (also resets the photo's plate solve to `pending`)
 PATCH  /photos/:id                  → Photos::update
@@ -50,7 +51,8 @@ GET    /events/upcoming/registered  → Events::upcomingRegistered
 GET    /events/media                → Events::media   (one chronological feed of both photos and videos; `mediaType`/`duration` per item)
 GET    /events/:id/statistic        → Events::statistic
 GET    /events/:id/registrations    → Events::registrations
-GET    /events/:id                  → Events::show
+GET    /events/:id                  → Events::show       (no side effects: the view counter moved to POST /events/:id/view)
+POST   /events/:id/view             → Events::view       (public; +1 view, 204; sent by the event page once open [rate-limited: views, 60/60s])
 GET    /events/members/:id          → Events::members (events.users privilege)
 GET    /events/checkin/:id          → Events::checkin
 GET    /events/ticket/:id           → Events::ticket
@@ -71,7 +73,7 @@ DELETE /events/media/:sessionId     → Events::mediaCancel    (declared before 
 
 GET    /mailings                    → Mailings::list
 POST   /mailings                    → Mailings::create
-GET    /mailings/unsubscribe        → Mailings::unsubscribe  (public; declared before (:alphanum))
+POST   /mailings/unsubscribe        → Mailings::unsubscribe  (public, rate-limited, idempotent; declared before (:alphanum))
 GET    /mailings/audiences          → Mailings::audiences    (mailings.manage privilege; declared before (:alphanum))
 GET    /mailings/:id                → Mailings::show
 PATCH  /mailings/:id                → Mailings::update
@@ -200,6 +202,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 - `2026-08-13-100002_AddUsersRolesColumn` — adds `users.roles JSON`, backfilled from the legacy `users.role` ENUM, which is left in place as a rollback safety net.
 - `2026-08-17-110000_FixPushNotificationDeliveriesSubscriptionCascade` — `push_notification_deliveries.subscription_id` FK is `SET NULL`, not `CASCADE`, so a delivery row survives when `system:send-push` deletes an expired subscription.
 - `2026-08-21-100000_RenameEventsPhotosToEventsMedia` — `events_photos` → `events_media`; the index is renamed with a raw `ALTER TABLE ... RENAME INDEX`, since `RENAME TABLE` keeps index names verbatim and Forge has no `renameIndex`.
+- `2026-11-03-100000_AddEventsDateIndex` — index `events_date` on `events.date`, the column every public events query filters and sorts by.
 
 ---
 
@@ -243,7 +246,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 
 ### Language Files
 - Located in `app/Language/en/` and `app/Language/ru/`.
-- Files: `App.php`, `Auth.php`, `Categories.php`, `Comments.php`, `Events.php`, `General.php`, `Mailings.php`, `FilesController.php`, `Members.php`, `Objects.php`, `Photos.php`, `PushNotifications.php`, `Relay.php`, `Roles.php`, `Validation.php` (plus `ru/Files.php`, which overrides the framework's own `Files` keys).
+- Files: `App.php`, `Auth.php`, `Categories.php`, `Comments.php`, `Events.php`, `General.php`, `Mailings.php`, `Members.php`, `Objects.php`, `Photos.php`, `PushNotifications.php`, `Relay.php`, `Roles.php`, `Validation.php` (plus `ru/Files.php`, which overrides the framework's own `Files` keys).
 - Never name a lang file after a framework one (`Files`, `Validation`, …) for a new namespace — it collides with CI4's system language files.
 - Load with: `lang('Events.someKey')` after `LocaleLibrary` sets the locale.
 
@@ -271,6 +274,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 ### Filters (`app/Filters/`)
 | Filter | Purpose |
 |---|---|
+| `PublicCacheFilter` | `Cache-Control: public, max-age=N, stale-while-revalidate=4N` on viewer-independent public GETs (catalogue, photos, categories, equipment, FITS lists, statistics, random comments, sitemap). Alias `publiccache`, applied per route as `['filter' => 'publiccache:<seconds>']`; only a 200 to a request without an `Authorization` header gets the header. |
 | `RateLimitFilter` | Per-IP token-bucket throttling for abuse-prone public routes. Registered as alias `ratelimit` in `Config/Filters.php`; applied per-route via `['filter' => 'ratelimit:<bucket>,<capacity>,<seconds>']` (see route table above for current buckets). Disabled when `ENVIRONMENT === 'testing'` since the `file` cache backend is shared across test cases. Uses CI4's built-in `Services::throttler()`. |
 | `CorsFilter` | Legacy/unused — superseded by CI4's built-in `Cors` filter (`Config\Cors`); left in place as a removal marker only. |
 

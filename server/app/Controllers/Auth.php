@@ -286,6 +286,17 @@ class Auth extends BaseApiController
             return null;
         }
 
+        // Browsers read "//host" and "/\host" as absolute URLs, which would turn
+        // the emailed link into an open redirect; control characters never
+        // belong in a path either.
+        if (
+            str_starts_with($returnPath, '//')
+            || str_contains($returnPath, '\\')
+            || preg_match('/[\x00-\x1F\x7F]/', $returnPath)
+        ) {
+            return null;
+        }
+
         return $returnPath;
     }
 

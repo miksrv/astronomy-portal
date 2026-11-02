@@ -38,6 +38,21 @@ class MailingEmailsModel extends ApplicationBaseModel
     protected $beforeInsert   = ['generateId'];
 
     /**
+     * beforeInsert callback: a random id instead of the base class's uniqid().
+     *
+     * The id is the only secret in the unsubscribe link mailed to the
+     * recipient (`/unsubscribe?mail=<id>`); uniqid() is time-based and
+     * guessable, so one recipient's link could be turned into another's.
+     * 15 hex characters (60 bits) fit the VARCHAR(15) column.
+     */
+    protected function generateId(array $data): array
+    {
+        $data['data']['id'] = substr(bin2hex(random_bytes(8)), 0, 15);
+
+        return $data;
+    }
+
+    /**
      * Counts email entries for a given mailing filtered by delivery status.
      *
      * @param string $mailingId The mailing campaign ID.

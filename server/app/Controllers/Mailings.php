@@ -716,10 +716,14 @@ class Mailings extends BaseApiController
      */
     public function unsubscribe(): ResponseInterface
     {
-        $mailId = $this->request->getGet('mail', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        // POST on purpose: a link-scanning mail client prefetching a GET must not
+        // unsubscribe anyone; the frontend page asks for a click first
+        $input  = $this->request->getJSON(true) ?? [];
+        $mailId = $input['mail'] ?? $this->request->getPost('mail');
+        $mailId = is_string($mailId) ? trim($mailId) : '';
 
-        if (empty($mailId)) {
-            return $this->respondInvalidRequest('unsubscribe() called without the mail query parameter');
+        if ($mailId === '' || !preg_match('/^[a-zA-Z0-9]{1,32}$/', $mailId)) {
+            return $this->respondInvalidRequest('unsubscribe() called without a valid mail id');
         }
 
         try {
@@ -728,6 +732,16 @@ class Mailings extends BaseApiController
 
             if (!$mailingEmail) {
                 return $this->respondNotFound(lang('Mailings.unsubscribeLinkNotFound'));
+            }
+
+            // Idempotent: the same link opened twice is one unsubscribe, not two audit rows
+            $unsubscribesModel = new MailingUnsubscribesModel();
+
+            if ($unsubscribesModel->where('mailing_email_id', $mailId)->first()) {
+                return $this->respond([
+                    'success' => true,
+                    'message' => lang('Mailings.unsubscribeSuccess'),
+                ]);
             }
 
             $usersModel = new UsersModel();
@@ -745,7 +759,6 @@ class Mailings extends BaseApiController
             }
 
             // Insert audit record
-            $unsubscribesModel = new MailingUnsubscribesModel();
             $unsubscribesModel->insert([
                 'mailing_email_id' => $mailId,
                 'user_id'          => $mailingEmail->user_id,

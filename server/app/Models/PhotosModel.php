@@ -96,7 +96,7 @@ class PhotosModel extends ApplicationBaseModel
      * @param string|null $photo_id Optional photo ID to retrieve a single photo.
      * @param string|null $object   Optional object name to filter photos by linked astronomical object.
      * @param int|null    $limit    Optional row limit. No limit is applied when null.
-     * @param string|null $order    Sort order: 'rand' for random, 'date' for created_at ascending.
+     * @param string|null $order    Sort order: 'rand' for random, 'date' for created_at ascending; newest first otherwise.
      * @return array Array of PhotoEntity objects enriched with categories, objects, and equipment arrays.
      */
     protected function fetchPhotos(
@@ -144,8 +144,14 @@ class PhotosModel extends ApplicationBaseModel
             $photosQuery->limit($limit);
         }
 
-        if ($order !== null && in_array($order, ['rand', 'date'])) {
-            $photosQuery->orderBy($order === 'rand' ? 'RAND()' : 'created_at');
+        if ($order === 'rand') {
+            $photosQuery->orderBy('RAND()');
+        } elseif ($order === 'date') {
+            $photosQuery->orderBy('created_at', 'ASC')->orderBy('id', 'ASC');
+        } else {
+            // Always ordered: without it a `limit` would cut an arbitrary subset,
+            // different from one query to the next
+            $photosQuery->orderBy('created_at', 'DESC')->orderBy('id', 'DESC');
         }
 
         $photosList = $photosQuery->findAll();
@@ -154,22 +160,29 @@ class PhotosModel extends ApplicationBaseModel
             return [];
         }
 
-        foreach ($photosList as $photoItem) {
-            $photoItem->categories = array_values(array_map(
-                fn($category) => $category->category_id,
-                array_filter($photosCategories, fn($category) => $category->photo_id === $photoItem->id)
-            ));
+        // Pivot rows grouped by photo once, instead of a scan of every row per photo
+        $categoriesByPhoto = [];
+        $objectsByPhoto    = [];
+        $equipmentsByPhoto = [];
 
-            $photoItem->objects = array_values(array_map(
-                fn($objects) => $objects->object_id,
-                array_filter($photosObjects, fn($objects) => $objects->photo_id === $photoItem->id)
-            ));
+        foreach ($photosCategories as $category) {
+            $categoriesByPhoto[$category->photo_id][] = $category->category_id;
+        }
+
+        foreach ($photosObjects as $objects) {
+            $objectsByPhoto[$objects->photo_id][] = $objects->object_id;
+        }
+
+        foreach ($photosEquipments as $equipments) {
+            $equipmentsByPhoto[$equipments->photo_id][] = $equipments->equipment_id;
+        }
+
+        foreach ($photosList as $photoItem) {
+            $photoItem->categories = $categoriesByPhoto[$photoItem->id] ?? [];
+            $photoItem->objects    = $objectsByPhoto[$photoItem->id] ?? [];
 
             if ($photo_id !== null && count($photosEquipments)) {
-                $photoItem->equipments = array_values(array_map(
-                    fn($equipments) => $equipments->equipment_id,
-                    array_filter($photosEquipments, fn($equipments) => $equipments->photo_id === $photoItem->id)
-                ));
+                $photoItem->equipments = $equipmentsByPhoto[$photoItem->id] ?? [];
             }
 
             unset(
