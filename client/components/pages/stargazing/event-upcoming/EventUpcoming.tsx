@@ -16,7 +16,7 @@ import { hasAnyPermission, hasPermission } from '@/utils/permissions'
 import { removeMarkdownPreserveParagraphs } from '@/utils/strings'
 
 import { EventBookingForm } from './event-booking-form'
-import noEventsImage from './no-events.png'
+import noEventsImage from './no-events.webp'
 import { StatusAwaitingPayment } from './StatusAwaitingPayment'
 import { StatusLoginRequired } from './StatusLoginRequired'
 import { StatusNoRegistrationRequired } from './StatusNoRegistrationRequired'
@@ -60,7 +60,7 @@ interface EventUpcomingProps {
 }
 
 export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, layout = 'hero' }) => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const router = useRouter()
 
     const isHero = layout === 'hero'
@@ -160,6 +160,7 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
                     className={styles.noEventImage}
                     src={noEventsImage}
                     alt={''}
+                    sizes={'(max-width: 768px) 100vw, 400px'}
                 />
                 <h2 className={cn(styles.noEventTitle, 'centeredHeading')}>
                     {t('components.pages.stargazing.event-upcoming.no-upcoming', 'Пока нет предстоящих астровыездов')}
@@ -187,8 +188,8 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
     // Summary shown in the "Детали заявки" card of the payment-failed panel —
     // the amount matches EventBookingForm's calculation (children are free).
     const failedBookingDateTime = event?.endDate?.date
-        ? `${formatUTCDate(event?.date?.date, 'D MMMM YYYY')}, ${formatUTCDate(event?.date?.date, 'HH:mm')} — ${formatUTCDate(event.endDate.date, 'HH:mm')}`
-        : formatUTCDate(event?.date?.date, 'D MMMM YYYY, HH:mm')
+        ? `${formatUTCDate(event?.date?.date, 'D MMMM YYYY', i18n.language)}, ${formatUTCDate(event?.date?.date, 'HH:mm')} — ${formatUTCDate(event.endDate.date, 'HH:mm')}`
+        : formatUTCDate(event?.date?.date, 'D MMMM YYYY, HH:mm', i18n.language)
 
     const failedBookingAmount = (event?.members?.adults || 0) * (event?.ticketPrice || 0)
 
@@ -196,7 +197,7 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
         {
             icon: 'Calendar',
             label: t('pages.stargazing.event-date-label', 'Дата (GMT+5)'),
-            value: formatUTCDate(event?.date?.date, 'D MMMM, YYYY')
+            value: formatUTCDate(event?.date?.date, 'D MMMM, YYYY', i18n.language)
         },
         {
             icon: 'Time',

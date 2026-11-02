@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 
 import type { GetServerSidePropsResult, NextPage } from 'next'
+import Head from 'next/head'
 import { useTranslation } from 'next-i18next/pages'
 import { JsonLdScript } from 'next-seo'
 
@@ -70,9 +71,19 @@ const HomePage: NextPage<HomePageProps> = ({ photosList, eventPhotos }) => {
                 'Астровыезды за город с телескопами, тротуарная астрономия, любительская обсерватория и астрофото галактик и туманностей — проект «Смотри на звёзды» в Оренбурге.'
             )}
             openGraph={{
-                images: [{ url: '/images/index-hero.png', width: 1536, height: 1024 }]
+                images: [{ url: '/images/og-index.jpg', width: 1200, height: 630 }]
             }}
         >
+            <Head>
+                {/* The hero background is a CSS image (MainSectionHero): the browser only finds
+                    it after the stylesheet, so it is announced here as the first-screen image */}
+                <link
+                    rel={'preload'}
+                    as={'image'}
+                    href={'/images/index-hero.webp'}
+                    fetchPriority={'high'}
+                />
+            </Head>
             <JsonLdScript
                 scriptKey={'website'}
                 data={websiteSchema}
@@ -87,6 +98,9 @@ const HomePage: NextPage<HomePageProps> = ({ photosList, eventPhotos }) => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<HomePageProps>> => {
+            // Public page: nginx caches the guest HTML for a short while (config/nginx.conf)
+            context.res.setHeader('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=600')
+
             const { translations } = await initSSRLocale(store, context)
 
             const { data: photos } = await store.dispatch(
