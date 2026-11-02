@@ -41,6 +41,9 @@ const baseRelayList = {
 let resolveToggle: () => void
 const mockSetLightOn = jest.fn()
 
+// jsdom's IntersectionObserver never reports an intersection: the card is treated as in view
+jest.mock('@/hooks/useInView', () => ({ useInView: () => true }))
+
 beforeEach(() => {
     jest.clearAllMocks()
 
@@ -67,25 +70,32 @@ beforeEach(() => {
 })
 
 describe('RelayList', () => {
-    it('flips the light button to "on" immediately, before the mutation resolves', async () => {
+    it('shows the light as on immediately, before the mutation resolves', async () => {
         render(<RelayList />)
 
-        // Two "off" buttons render for the light relay: the generic per-relay
-        // item (disabled - the mock user has no `relay.control` permission)
-        // and the dedicated light-toggle control below it, which this targets.
-        const lightToggle = screen
-            .getAllByText('off')
-            .find((button) => !(button as HTMLButtonElement).disabled) as HTMLButtonElement
-
-        fireEvent.click(lightToggle)
+        // The relay switches are disabled (the mock user has no `relay.control`
+        // permission); the light button is the one anyone can press
+        fireEvent.click(screen.getByText('Включить'))
 
         await waitFor(() => {
-            expect(screen.getByText('on')).toBeDefined()
+            expect(screen.getByText('Горит')).toBeDefined()
         })
 
         // The mutation hasn't resolved yet - only the optimistic value moved.
         expect(mockSetLightOn).toHaveBeenCalledTimes(1)
 
         resolveToggle()
+    })
+})
+
+describe('RelayList switches', () => {
+    it('renders a disabled switch per relay for a user without relay.control', () => {
+        render(<RelayList />)
+
+        const switches = screen.getAllByRole('switch')
+
+        expect(switches.length).toBeGreaterThan(0)
+        expect(switches.every((element) => (element as HTMLButtonElement).disabled)).toBe(true)
+        expect(screen.getByText('Управление питанием доступно только администраторам')).toBeDefined()
     })
 })

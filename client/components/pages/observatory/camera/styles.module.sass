@@ -1,38 +1,113 @@
-.cameraSection
-    padding: 0
+@use '../../../../styles/typography' as type
+
+.camera
+    display: flex
+    flex-direction: column
+    min-width: 0
+
+.frame
+    position: relative
+    aspect-ratio: 4 / 3
+    border-radius: var(--radius-lg)
     overflow: hidden
+    // The camera's own black, darker than any surface
+    background: #08090c
 
-    // Frame keeps its 4:3 shape while the first picture loads, so the page does not jump
-    .lightboxTrigger
-        display: block
-        position: relative
-        width: 100%
-        aspect-ratio: 4 / 3
-        margin: 0
-        padding: 0
-        border: 0
-        background: var(--surface-2)
-        cursor: zoom-in
-
-        &:focus-visible
-            outline-offset: -2px
-
-    .spinner
-        position: absolute
-        top: 50%
-        left: 50%
-        width: 32px
-        height: 32px
-        margin: -16px 0 0 -16px
-
-    .photoImage
+    img
         display: block
         width: 100%
         height: 100%
         object-fit: cover
 
-    .error
-        position: absolute
-        left: var(--space-3)
-        right: var(--space-3)
-        bottom: var(--space-3)
+.spinner
+    position: absolute
+    top: 50%
+    left: 50%
+    width: 32px
+    height: 32px
+    transform: translate(-50%, -50%)
+
+.off
+    +type.secondary
+    position: absolute
+    inset: 0
+    display: grid
+    place-content: center
+    justify-items: center
+    gap: var(--space-2)
+    color: var(--text-color-disabled)
+
+    svg
+        width: 28px
+        height: 28px
+        fill: currentColor
+
+.pill
+    position: absolute
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    padding: 4px 8px
+    border-radius: var(--radius-sm)
+    background: var(--overlay-pill-background)
+    color: #fff
+    font-size: var(--font-size-micro)
+    font-variant-numeric: tabular-nums
+    backdrop-filter: blur(6px)
+    -webkit-backdrop-filter: blur(6px)
+
+.pillLeft
+    top: 10px
+    left: 10px
+    font-weight: var(--font-weight-semibold)
+    letter-spacing: .04em
+
+.pillRight
+    right: 10px
+    bottom: 10px
+
+.dot
+    width: 6px
+    height: 6px
+    border-radius: 50%
+    background: var(--text-color-disabled)
+
+    &.live
+        background: var(--color-red)
+        animation: pulse 2s infinite
+
+.progress
+    position: absolute
+    left: 0
+    bottom: 0
+    width: 100%
+    height: 2px
+    background: var(--color-main)
+    transform-origin: left
+    animation-name: progress
+    animation-timing-function: linear
+    animation-fill-mode: forwards
+
+.footer
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: var(--space-3)
+
+@keyframes progress
+    from
+        transform: scaleX(0)
+
+    to
+        transform: scaleX(1)
+
+@keyframes pulse
+    0%
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-red) 60%, transparent)
+
+    70%, 100%
+        box-shadow: 0 0 0 6px transparent
+
+@media (prefers-reduced-motion: reduce)
+    .progress, .dot.live
+        animation: none
