@@ -1,0 +1,1 @@
+export { PhotoCompare } from './PhotoCompare'

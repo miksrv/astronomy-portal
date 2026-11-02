@@ -54,6 +54,9 @@ const PhotoLightboxRender: React.FC<PhotoLightboxRenderProps> = ({
 }) => {
     const { t } = useTranslation()
 
+    // A single photo has nowhere to page to: no arrows, no wrap-around swipe
+    const single = (photos?.length ?? 0) <= 1
+
     // const makeImageLink = (link?: string) =>
     //     link?.includes('http://') || link?.includes('https://')
     //         ? link
@@ -65,6 +68,7 @@ const PhotoLightboxRender: React.FC<PhotoLightboxRenderProps> = ({
             index={photoIndex}
             plugins={[Captions, Zoom]}
             close={onCloseLightBox}
+            carousel={{ finite: single }}
             labels={{
                 Close: t('components.common.photo-lightbox.close', 'Закрыть'),
                 Next: t('components.common.photo-lightbox.next', 'Следующее фото'),
@@ -79,7 +83,8 @@ const PhotoLightboxRender: React.FC<PhotoLightboxRenderProps> = ({
                 // file already used before video slides existed.
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 slide: (props: any) =>
-                    props?.slide?.type === 'video' ? <VideoSlide {...props} /> : <ImageSlide {...props} />
+                    props?.slide?.type === 'video' ? <VideoSlide {...props} /> : <ImageSlide {...props} />,
+                ...(single ? { buttonPrev: () => null, buttonNext: () => null } : {})
             }}
             slides={photos?.map(
                 (photo) =>

@@ -1,0 +1,1 @@
+export { PhotoObjectCard } from './PhotoObjectCard'

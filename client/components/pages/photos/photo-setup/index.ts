@@ -1,0 +1,1 @@
+export { PhotoSetup } from './PhotoSetup'
