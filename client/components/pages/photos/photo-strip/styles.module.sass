@@ -1,0 +1,61 @@
+@use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
+
+// Five tiles across the column on a desktop, the way a row of the gallery reads whole; on phones
+// tiles of a fixed width to flick through. Doubled: the carousel sets the same variables with one
+// class of its own
+.photoStrip.photoStrip
+    --slide-spacing: var(--space-3)
+    // The carousel's slides include their left spacing, and its container is one spacing wider
+    // than the viewport, so a fifth of it is exactly five tiles with four gaps between them
+    --slide-size: calc(100% / 5)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        --slide-size: 220px
+
+.slide
+    position: relative
+    display: block
+    aspect-ratio: 4 / 3
+    border-radius: var(--radius-lg)
+    overflow: hidden
+    background: var(--surface-1)
+    color: #fff
+
+    img
+        object-fit: cover
+        transition: transform var(--duration-slow) var(--ease)
+
+    &:hover img
+        transform: scale(1.04)
+
+    &.current
+        box-shadow: 0 0 0 2px var(--color-main)
+
+    &:focus-visible
+        outline: var(--focus-outline)
+        outline-offset: 2px
+
+    @media (prefers-reduced-motion: reduce)
+        img
+            transition: none
+
+        &:hover img
+            transform: none
+
+.caption
+    +type.caption
+    position: absolute
+    left: var(--space-2)
+    bottom: var(--space-2)
+    display: inline-flex
+    align-items: baseline
+    gap: 6px
+    padding: 4px 8px
+    border-radius: var(--radius-sm)
+    background: var(--overlay-pill-background)
+    color: #fff
+
+    small
+        +type.micro
+        color: var(--color-main)

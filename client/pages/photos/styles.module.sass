@@ -1,0 +1,53 @@
+@use '../../styles/variables' as variables
+@use '../../styles/typography' as type
+
+// ---- The photo page: the header, the viewer, its label and everything under it sit in the usual
+// content column with the gap of <main>; only the viewer's black mount is drawn out to the
+// window's edges (photo-viewer/styles.module.sass)
+
+// ---- Sections
+.section
+    min-width: 0
+
+    > h2:first-child
+        margin-top: var(--space-4)
+
+.titleWithMeta
+    display: flex
+    flex-wrap: wrap
+    align-items: baseline
+    justify-content: space-between
+    gap: var(--space-1) var(--space-3)
+
+    small, a
+        +type.secondary
+        font-weight: var(--font-weight-normal)
+        letter-spacing: 0
+
+// The setup and the history in the wide column, the object's card in the narrow one; stacked
+// on phones
+.layout
+    display: grid
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr)
+    align-items: start
+    gap: 0 var(--space-8)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: minmax(0, 1fr)
+        gap: 0
+
+    // Without an object's card, one column across the page
+    &.single
+        grid-template-columns: minmax(0, 1fr)
+
+.column
+    min-width: 0
+
+// The object's card follows the reader down the column: it is short next to the history, and
+// the way to the object stays at hand. Not on phones, where it is one of the stacked sections
+.aside
+    position: sticky
+    top: calc(var(--header-height) + var(--space-2))
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        position: static
