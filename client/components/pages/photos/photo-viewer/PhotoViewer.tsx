@@ -6,11 +6,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
+import { ApiModel } from '@/api'
 import { formatCalendarDate } from '@/utils/dates'
 import { FieldOfView, formatAngle, pickScaleBar } from '@/utils/optics'
 
+import { PhotoAnnotations } from '../photo-annotations'
 import { PhotoCompare } from '../photo-compare'
-import { PhotoVersion } from '../types'
+import { PhotoSkyObject, PhotoVersion } from '../types'
 
 import styles from './styles.module.sass'
 
@@ -34,6 +36,10 @@ interface PhotoViewerProps {
     onCompareChange: (id?: string) => void
     /** The sky the picture covers, for the scale bar */
     field?: FieldOfView
+    /** The plate solve, for the object labels and the coordinate grid */
+    astrometry?: ApiModel.SolvedAstrometry
+    /** Our objects around the picture's centre, to label the ones on it */
+    skyObjects?: PhotoSkyObject[]
 }
 
 /**
@@ -50,13 +56,18 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     versions,
     compareId,
     onCompareChange,
-    field
+    field,
+    astrometry,
+    skyObjects
 }) => {
     const { t, i18n } = useTranslation()
     const pictureRef = useRef<HTMLDivElement>(null)
 
     const [lightbox, setLightbox] = useState(false)
     const [showScale, setShowScale] = useState(false)
+    // A solved picture opens with its objects named and the grid on; the buttons turn them off
+    const [showAnnotations, setShowAnnotations] = useState(true)
+    const [showGrid, setShowGrid] = useState(true)
     const [pictureWidth, setPictureWidth] = useState(0)
 
     const compareWith = versions.find(({ id }) => id === compareId)
@@ -120,6 +131,15 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                         </Button>
                     )}
 
+                    {astrometry && (showAnnotations || showGrid) && !compareWith && (
+                        <PhotoAnnotations
+                            astrometry={astrometry}
+                            objects={skyObjects}
+                            showObjects={showAnnotations}
+                            showGrid={showGrid}
+                        />
+                    )}
+
                     {scaleBar && !compareWith && (
                         <span
                             className={styles.scaleBar}
@@ -146,6 +166,34 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                                       })
                             }
                             onClick={() => onCompareChange(compareWith ? undefined : defaultCompare?.id)}
+                        />
+                    )}
+                    {astrometry && !compareWith && (
+                        <Button
+                            mode={showAnnotations ? 'primary' : 'secondary'}
+                            size={'small'}
+                            icon={'Tag'}
+                            aria-pressed={showAnnotations}
+                            label={t('components.pages.photos.photo-viewer.annotations', 'Объекты')}
+                            tooltip={t(
+                                'components.pages.photos.photo-viewer.annotations-tooltip',
+                                'Подписать объекты на снимке (astrometry.net)'
+                            )}
+                            onClick={() => setShowAnnotations((value) => !value)}
+                        />
+                    )}
+                    {astrometry?.wcs && !compareWith && (
+                        <Button
+                            mode={showGrid ? 'primary' : 'secondary'}
+                            size={'small'}
+                            icon={'Position'}
+                            aria-pressed={showGrid}
+                            label={t('components.pages.photos.photo-viewer.grid', 'Сетка')}
+                            tooltip={t(
+                                'components.pages.photos.photo-viewer.grid-tooltip',
+                                'Координатная сетка RA/Dec'
+                            )}
+                            onClick={() => setShowGrid((value) => !value)}
                         />
                     )}
                     {field && !compareWith && (
