@@ -363,6 +363,18 @@ export const API = createApi({
             providesTags: (res, err, id) => [{ id, type: 'Photos' }],
             query: (id) => `photos/${id}`
         }),
+        photosGetAstrometry: builder.query<ApiModel.PhotoAstrometry, string>({
+            providesTags: (res, err, id) => [{ id: `astrometry-${id}`, type: 'Photos' }],
+            query: (id) => `photos/${id}/astrometry`
+        }),
+        /** One step of the plate solve: starts it, or moves the running one along (editors) */
+        photosSolve: builder.mutation<ApiModel.PhotoAstrometry, string>({
+            invalidatesTags: (result, error, id) => [{ id: `astrometry-${id}`, type: 'Photos' }],
+            query: (id) => ({
+                method: 'POST',
+                url: `photos/${id}/astrometry`
+            })
+        }),
         photosGetList: builder.query<ApiType.Photos.Response, Maybe<ApiType.Photos.Request>>({
             providesTags: () => [{ id: 'LIST', type: 'Photos' }],
             query: (params) => `photos${encodeQueryData(params)}`

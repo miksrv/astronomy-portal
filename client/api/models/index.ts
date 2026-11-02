@@ -1,3 +1,4 @@
+export * from './astrometry'
 export * from './category'
 export * from './comment'
 export * from './equipment'
