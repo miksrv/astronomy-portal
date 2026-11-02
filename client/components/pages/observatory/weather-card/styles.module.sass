@@ -1,0 +1,128 @@
+@use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
+
+.weatherCard
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+    min-width: 0
+
+.more
+    +type.caption
+
+.top
+    display: flex
+    align-items: center
+    gap: var(--space-5)
+    min-height: 48px
+
+.topSkeleton
+    width: 100%
+    height: 48px
+
+.temperature
+    // The one number on the dashboard read from across the room: the display size
+    +type.titleDisplay
+    line-height: 1
+    letter-spacing: -.03em
+    font-variant-numeric: tabular-nums
+
+    sup
+        +type.lead
+        margin-left: 2px
+        font-weight: var(--font-weight-medium)
+        color: var(--text-color-secondary)
+        vertical-align: top
+
+.description
+    min-width: 0
+
+    b
+        +type.titleBlock
+        display: block
+
+    span
+        +type.caption
+
+.state
+    +type.caption
+    background: var(--weather-background)
+    color: var(--weather-color)
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    height: 24px
+    margin-left: auto
+    padding: 0 10px
+    border-radius: var(--radius-full)
+    font-weight: var(--font-weight-semibold)
+    white-space: nowrap
+
+.dot
+    flex: none
+    width: 8px
+    height: 8px
+    border-radius: 50%
+    background: currentColor
+
+.good
+    --weather-color: var(--color-green)
+    --weather-background: var(--color-green-background)
+
+.warning
+    --weather-color: var(--color-orange)
+    --weather-background: var(--color-orange-background)
+
+.danger
+    --weather-color: var(--color-red)
+    --weather-background: var(--color-red-background)
+.metrics
+    display: grid
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+    gap: var(--space-2)
+    margin: 0
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+
+.metric
+    --weather-color: var(--text-color-disabled)
+    display: grid
+    gap: 6px
+    padding: var(--space-3)
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
+
+    dt
+        +type.caption
+        display: flex
+        align-items: center
+        gap: 6px
+
+        .dot
+            background: var(--weather-color)
+
+    dd
+        +type.titleBlock
+        margin: 0
+        font-variant-numeric: tabular-nums
+
+        small
+            +type.caption
+            font-weight: var(--font-weight-normal)
+
+.meter
+    height: 4px
+    border-radius: var(--radius-full)
+    background: var(--surface-3)
+    overflow: hidden
+
+    i
+        display: block
+        height: 100%
+        border-radius: inherit
+        background: var(--weather-color)
+
+.valueSkeleton
+    width: 56px
+    height: 20px

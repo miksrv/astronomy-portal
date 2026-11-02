@@ -1,0 +1,1 @@
+export { ConditionsVerdict } from './ConditionsVerdict'
