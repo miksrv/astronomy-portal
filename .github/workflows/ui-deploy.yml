@@ -62,10 +62,7 @@ jobs:
 
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
         name: Build UI
-        run: |
-          export dateNow=$(date +"%Y-%m-%dT%H:%M")
-          echo "export const update = '$dateNow'" > update.ts
-          yarn build
+        run: yarn build
         working-directory: client
 
       - name: Configure SSH
