@@ -11,10 +11,3 @@ export const TYPE_ORDER: ApiModel.EquipmentType[] = [
     ApiModel.EquipmentType.GuidingScope,
     ApiModel.EquipmentType.GuidingCamera
 ]
-
-/** The parts that made the picture; the rest of the setup is folded under "more" */
-export const MAIN_TYPES: ApiModel.EquipmentType[] = [
-    ApiModel.EquipmentType.Scope,
-    ApiModel.EquipmentType.Camera,
-    ApiModel.EquipmentType.Mount
-]
