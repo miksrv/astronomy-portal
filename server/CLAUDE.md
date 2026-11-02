@@ -37,7 +37,7 @@ DELETE /objects/:name               → Objects::delete
 
 GET    /photos                      → Photos::list
 GET    /photos/:id/astrometry       → Photos::astrometry (public; the plate solve — centre, scale, rotation, WCS, annotations; 404 until solved; declared before GET /photos/:id)
-POST   /photos/:id/astrometry       → Photos::solve      (photos.manage; one step of the solve — starts it when there is none or it is final, otherwise moves it along — and returns the row; the editor's browser polls it every few seconds after an upload, so there is no cron; 503 without `astrometry.apiKey`)
+POST   /photos/:id/astrometry       → Photos::solve      (photos.manage; one step of the solve — starts it when there is none, otherwise moves it along — and returns the row; a finished solve is returned as is unless the body carries `restart: true` (the editor's "Перерешать" button), so a late poll never re-uploads the picture; the editor's browser polls it every few seconds after an upload, so there is no cron; 503 without `astrometry.apiKey`)
 GET    /photos/:id                  → Photos::show
 POST   /photos                      → Photos::create
 POST   /photos/:id/upload           → Photos::upload     (also resets the photo's plate solve to `pending`)

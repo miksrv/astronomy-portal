@@ -73,5 +73,5 @@ export const formatDECShort = (dec?: number): string => {
 
     const totalMinutes = Math.round(Math.abs(dec) * 60)
 
-    return `${dec < 0 ? '−' : '+'}${Math.floor(totalMinutes / 60)}° ${String(totalMinutes % 60).padStart(2, '0')}′`
+    return `${dec < 0 && totalMinutes > 0 ? '−' : '+'}${Math.floor(totalMinutes / 60)}° ${String(totalMinutes % 60).padStart(2, '0')}′`
 }

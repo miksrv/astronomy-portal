@@ -18,6 +18,13 @@ describe('weather', () => {
         expect(getWeatherState(undefined)).toBeUndefined()
     })
 
+    it('does not call an empty or cloudless-sensor report good', () => {
+        expect(getWeatherState({})).toBeUndefined()
+        expect(getWeatherState({ temperature: undefined, humidity: undefined })).toBeUndefined()
+        expect(getWeatherState({ temperature: 3, humidity: 50 })).toBe('warning')
+        expect(getWeatherState({ clouds: 0, precipitation: 0, temperature: 3 })).toBe('good')
+    })
+
     it('fills a meter within its scale', () => {
         expect(getWeatherMeter('humidity', 50)).toBe(50)
         expect(getWeatherMeter('clouds', 0)).toBe(4)

@@ -570,6 +570,9 @@
                     "date-required": "Enter the processing date",
                     "filters-required": "Add at least one filter"
                 },
+                "photo-annotations": {
+                    "compass": "North and east on the picture"
+                },
                 "photo-catalog": {
                     "all-categories": "All categories",
                     "sort-date": "Newest",
@@ -611,30 +614,37 @@
                 "photo-object-card": {
                     "nights_one": "{{count}} night",
                     "nights_other": "{{count}} nights",
+                    "star-map": "Star map",
                     "tonight": "Tonight up to {{altitude}}° at {{time}}",
                     "not-tonight": "Does not rise tonight",
                     "constellation": "Constellation",
                     "coordinates": "Coordinates",
                     "archive": "In the FITS archive",
                     "photos": "Photos of the object",
-                    "cta": "Visibility, observing log and description",
-                    "star-map": "Star map"
+                    "cta": "Visibility, observing log and description"
                 },
                 "photo-setup": {
                     "capture": "Capture",
                     "date": "Date",
                     "exposure": "Exposure",
                     "frames": "Frames",
+                    "center": "Field center",
                     "field": "Field of view",
                     "scale": "Scale",
                     "scale-value": "{{value}}″ per pixel",
+                    "rotation": "Rotation",
+                    "rotation-value": "{{value}}° from north",
                     "focal-length": "Focal length",
                     "millimetres": "{{value}} mm",
                     "views": "Views",
-                    "equipment": "Equipment",
-                    "center": "Field center",
-                    "rotation": "Rotation",
-                    "rotation-value": "{{value}}° from north"
+                    "equipment": "Equipment"
+                },
+                "photo-solve-status": {
+                    "pending": "Plate solving: uploading the picture…",
+                    "solving": "Plate solving: in progress…",
+                    "failed": "Plate solving failed: {{error}}",
+                    "start": "Plate-solve",
+                    "restart": "Solve again"
                 },
                 "photo-strip": {
                     "open": "Photo of {{date}}",
@@ -646,24 +656,14 @@
                     "alt": "Astrophoto of {{title}}, {{date}}",
                     "compare-close": "Close comparison",
                     "compare": "Compare with {{year}}",
-                    "scale": "Angular scale",
-                    "fullscreen": "Full screen, with zoom",
-                    "previous": "Previous photo",
-                    "next": "Next photo",
                     "annotations": "Objects",
                     "annotations-tooltip": "Label the objects on the picture (astrometry.net)",
                     "grid": "Grid",
-                    "grid-tooltip": "RA/Dec coordinate grid"
-                },
-                "photo-annotations": {
-                    "compass": "North and east on the picture"
-                },
-                "photo-solve-status": {
-                    "pending": "Plate solving: uploading the picture…",
-                    "solving": "Plate solving: in progress…",
-                    "failed": "Plate solving failed: {{error}}",
-                    "start": "Plate-solve",
-                    "restart": "Solve again"
+                    "grid-tooltip": "RA/Dec coordinate grid",
+                    "scale": "Angular scale",
+                    "fullscreen": "Full screen, with zoom",
+                    "previous": "Previous photo",
+                    "next": "Next photo"
                 }
             },
             "stargazing": {
@@ -1309,10 +1309,10 @@
             "setup-title": "How it was taken",
             "history-title": "Shooting history of {{objects}}",
             "history-note": "Each photo is a separate processing",
+            "objects-title": "About the objects",
             "object-title": "About the object",
             "related-title": "More photos: {{category}}",
-            "related-all": "All in the gallery →",
-            "objects-title": "About the objects"
+            "related-all": "All in the gallery →"
         },
         "photos": {
             "stat-photos": "photos in the gallery",

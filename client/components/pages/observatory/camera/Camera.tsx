@@ -146,7 +146,7 @@ export const Camera: React.FC<CameraProps> = ({ cameraURL, interval = DEFAULT_IN
                         className={cn(styles.dot, frame && status !== 'error' && styles.live)}
                         aria-hidden={'true'}
                     />
-                    {`${t('components.pages.observatory.camera.live', 'LIVE')} · ${label}`}
+                    {`${t('components.pages.observatory.camera.live', 'В ЭФИРЕ')} · ${label}`}
                 </span>
 
                 {frame && (

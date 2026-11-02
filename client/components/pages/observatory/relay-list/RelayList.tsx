@@ -196,7 +196,8 @@ export const RelayList: React.FC = () => {
                                 aria-label={name}
                                 // The states are unknown until the first poll: the switches wait, greyed
                                 loading={!inView || isLoading || (loaderSet && relayLoading === id)}
-                                disabled={!canControl || isError}
+                                // One request at a time: a second toggle would lose the first one's spinner
+                                disabled={!canControl || isError || loaderSet}
                                 onChange={(checked) => handleSetRelay({ id, state: checked ? 1 : 0 })}
                             />
                         </li>

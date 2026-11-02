@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
-import { locateObject, normalizeDesignation } from '@/utils/astrometry'
+import { FAINT_STARS_LIMIT, locateObject, normalizeDesignation } from '@/utils/astrometry'
 import { formatObjectName } from '@/utils/strings'
 import { buildSkyGrid, formatGridValue } from '@/utils/wcs'
 
@@ -46,29 +46,30 @@ interface PhotoAnnotationsProps {
     showObjects?: boolean
     /** The RA/Dec grid with the compass */
     showGrid?: boolean
-    /** Draw the HD/HIP/Tycho stars too (there can be hundreds) */
-    showFaintStars?: boolean
 }
+
+const NO_OBJECTS: PhotoSkyObject[] = []
+const NO_ANNOTATIONS: ApiModel.AstrometryAnnotation[] = []
 
 /**
  * The plate solve drawn over the picture, the way AstroBin does: a ring with a name on each
  * object - ours first, linking to their pages, then the service's catalogue objects and bright
- * stars - an RA/Dec grid with a compass, and the frame's sky coordinates in a caption. Placed
- * in percent of the picture's box, so it follows the picture at any size.
+ * stars - and an RA/Dec grid with a compass. Placed in percent of the picture's box, so it
+ * follows the picture at any size.
  */
 export const PhotoAnnotations: React.FC<PhotoAnnotationsProps> = ({
     astrometry,
-    objects = [],
+    objects = NO_OBJECTS,
     showObjects,
-    showGrid,
-    showFaintStars
+    showGrid
 }) => {
     const { t } = useTranslation()
     const { solvedWidth: width, solvedHeight: height, wcs } = astrometry
-    const annotations = astrometry.annotations ?? []
+    const annotations = astrometry.annotations ?? NO_ANNOTATIONS
 
-    // The grid's lines are drawn on request; its compass is always there
-    const skyGrid = useMemo(() => (wcs ? buildSkyGrid(wcs) : undefined), [wcs])
+    // The grid's lines are drawn on request; its compass is always there. The solved size is
+    // the one the markers are placed in: the WCS header's own may be missing (0)
+    const skyGrid = useMemo(() => (wcs ? buildSkyGrid({ ...wcs, width, height }) : undefined), [wcs, width, height])
 
     const markers = useMemo((): Marker[] => {
         const own: Marker[] = []
@@ -98,7 +99,7 @@ export const PhotoAnnotations: React.FC<PhotoAnnotationsProps> = ({
 
         // A narrow field has a handful of HD stars and little else: then they are worth drawing
         const faintStars = annotations.filter(({ type }) => kindOf(type) === 'faintStar').length
-        const withFaint = showFaintStars ?? faintStars <= 12
+        const withFaint = faintStars <= FAINT_STARS_LIMIT
         const ownKeys = new Set(objects.map(({ name }) => normalizeDesignation(name)))
 
         // The service's ring on one of our objects (NGC 3031 on M 81) would double its name
@@ -106,7 +107,8 @@ export const PhotoAnnotations: React.FC<PhotoAnnotationsProps> = ({
             .filter((item) => !twins.has(item) && !item.names.some((alias) => ownKeys.has(normalizeDesignation(alias))))
             .filter(({ type }) => withFaint || kindOf(type) !== 'faintStar')
             .map((item) => ({
-                key: `${item.type}-${item.names.join('-')}`,
+                // Two entries can share a name (a double star): the spot tells them apart
+                key: `${item.type}-${item.names.join('-')}-${Math.round(item.pixelx)}-${Math.round(item.pixely)}`,
                 kind: kindOf(item.type),
                 x: item.pixelx,
                 y: item.pixely,
@@ -115,14 +117,14 @@ export const PhotoAnnotations: React.FC<PhotoAnnotationsProps> = ({
             }))
 
         return [...own, ...others]
-    }, [astrometry, annotations, objects, showFaintStars])
+    }, [astrometry, annotations, objects])
 
     return (
         <div className={styles.annotations}>
             {showGrid && skyGrid && wcs && (
                 <svg
                     className={styles.grid}
-                    viewBox={`0 0 ${wcs.width} ${wcs.height}`}
+                    viewBox={`0 0 ${width} ${height}`}
                     preserveAspectRatio={'none'}
                     aria-hidden={'true'}
                 >
@@ -145,8 +147,8 @@ export const PhotoAnnotations: React.FC<PhotoAnnotationsProps> = ({
                                 className={cn(styles.gridLabel, styles[line.label.edge])}
                                 style={
                                     {
-                                        '--x': `${(line.label.x / wcs.width) * 100}%`,
-                                        '--y': `${(line.label.y / wcs.height) * 100}%`
+                                        '--x': `${(line.label.x / width) * 100}%`,
+                                        '--y': `${(line.label.y / height) * 100}%`
                                     } as React.CSSProperties
                                 }
                             >

@@ -50,13 +50,34 @@ class PhotosAstrometryModel extends ApplicationBaseModel
     protected $updatedField  = 'updated_at';
 
     /**
-     * Starts a solve: a new row, or an existing one back to `pending` (a re-solve after the
-     * picture was replaced). The previous result stays until the new one arrives.
+     * Starts a solve: a new row, or an existing one back to `pending`. On a plain re-solve the
+     * previous result stays until the new one arrives; with `$reset` (the picture was replaced)
+     * it is cleared, since it describes pixels that no longer exist.
      */
-    public function enqueue(string $photoId): void
+    public function enqueue(string $photoId, bool $reset = false): void
     {
         if ($this->find($photoId)) {
-            $this->update($photoId, ['status' => self::STATUS_PENDING, 'error' => null]);
+            $data = ['status' => self::STATUS_PENDING, 'error' => null];
+
+            if ($reset) {
+                $data += [
+                    'submission_id' => null,
+                    'job_id'        => null,
+                    'solved_width'  => null,
+                    'solved_height' => null,
+                    'ra'            => null,
+                    'dec'           => null,
+                    'radius'        => null,
+                    'pixscale'      => null,
+                    'orientation'   => null,
+                    'parity'        => null,
+                    'wcs'           => null,
+                    'annotations'   => null,
+                    'solved_at'     => null,
+                ];
+            }
+
+            $this->update($photoId, $data);
 
             return;
         }

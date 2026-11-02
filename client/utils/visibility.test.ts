@@ -3,6 +3,7 @@ import {
     getAltitude,
     getNight,
     getNightPosition,
+    getObservatoryDate,
     getVisibility,
     isCircumpolar,
     isMovingObject
@@ -88,5 +89,11 @@ describe('visibility', () => {
     it('formats time at the observatory', () => {
         expect(formatObservatoryTime(evening)).toBe('20:00')
         expect(formatObservatoryTime()).toBe('—')
+    })
+
+    it('dates a moment by the observatory calendar', () => {
+        // 20:20 UTC on the 2nd is 01:20 on the 3rd at the observatory
+        expect(getObservatoryDate(new Date('2026-11-02T20:20:00Z'))).toBe('2026-11-03')
+        expect(getObservatoryDate(new Date('2026-11-02T12:00:00Z'))).toBe('2026-11-02')
     })
 })

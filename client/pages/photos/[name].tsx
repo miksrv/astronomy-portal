@@ -22,7 +22,7 @@ import {
     PhotoViewer,
     StripPhoto
 } from '@/components/pages/photos'
-import { objectAliases } from '@/utils/astrometry'
+import { getSolvedField, objectAliases, trimAstrometry } from '@/utils/astrometry'
 import { getConstellationName } from '@/utils/constellations'
 import { formatCalendarDate, toISODateTime } from '@/utils/dates'
 import { createPageUrl } from '@/utils/helpers'
@@ -103,7 +103,10 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
 
     const current = versions.find(({ id }) => id === photoId) ?? toVersion(photo)
     const otherVersions = versions.filter(({ id }) => id !== photoId)
-    const field = getImageField(photo.imageWidth, photo.imageHeight, optics)
+    // The plate solve measured the field; the optics only estimate it (and can't for a crop or a mosaic)
+    const field = astrometry
+        ? getSolvedField(astrometry, photo.imageWidth)
+        : getImageField(photo.imageWidth, photo.imageHeight, optics)
 
     // The slider's version belongs to the photo it was picked on: walking to another photo
     // (the page stays mounted) turns it off
@@ -113,7 +116,8 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
 
     // Picked in the history below the fold: bring the slider into view
     const handleCompare = (id: string) => {
-        setCompareId(id)
+        // The same version again turns the slider off
+        setCompareId(compareId === id ? undefined : id)
         window.scrollTo({
             top: 0,
             behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
@@ -202,7 +206,10 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
             >
                 {hasPermission(user, ApiModel.Permission.PHOTOS_MANAGE) && (
                     <>
-                        <PhotoSolveStatus photoId={photoId} />
+                        <PhotoSolveStatus
+                            key={photoId}
+                            photoId={photoId}
+                        />
                         <Button
                             icon={'Pencil'}
                             mode={'secondary'}
@@ -334,9 +341,14 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 return { notFound: true }
             }
 
-            const { data: photo, isError } = await store.dispatch(API.endpoints?.photosGetItem.initiate(photoId))
+            const { data: photo, isError, error } = await store.dispatch(API.endpoints?.photosGetItem.initiate(photoId))
 
-            if (isError || !photo) {
+            // Only an unknown id is a 404: an API outage must not tell crawlers the page is gone
+            if (isError && (error as { status?: number } | undefined)?.status !== 404) {
+                throw new Error(`Photos API unavailable: ${photoId}`)
+            }
+
+            if (!photo) {
                 return { notFound: true }
             }
 
@@ -376,7 +388,9 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 'equipmentsGetList'
             ])
 
-            const astrometry = ApiModel.isSolved(astrometryData) ? astrometryData : null
+            // Only what the page draws: the viewer skips the faint stars when there are many, and
+            // the solve's bookkeeping fields have no reader here
+            const astrometry = ApiModel.isSolved(astrometryData) ? trimAstrometry(astrometryData) : null
 
             const allObjects = objectsData?.items ?? []
             const objectTitle = (name: string) =>

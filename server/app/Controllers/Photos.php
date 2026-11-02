@@ -189,8 +189,13 @@ class Photos extends BaseApiController
             $photo->id = $id;
             $photosModel->update($id, $photo);
 
-            // A new picture: its plate solve starts over; the photo page's editor view drives it
-            (new PhotosAstrometryModel())->enqueue($id);
+            // A new picture: its plate solve starts over (the old solution describes the old pixels);
+            // the photo page's editor view drives it. A queue hiccup must not fail the upload itself
+            try {
+                (new PhotosAstrometryModel())->enqueue($id, true);
+            } catch (\Throwable $e) {
+                log_message('error', 'Astrometry enqueue failed for photo ' . $id . ': ' . $e->getMessage());
+            }
 
             // The catalog shows each object's newest photo as its cover
             \Config\Services::cache()->deleteMatching('objects_list_*');
@@ -210,7 +215,8 @@ class Photos extends BaseApiController
      */
     public function astrometry($id = null): ResponseInterface
     {
-        $solution = (new PhotosAstrometryModel())->find($id);
+        // A deleted photo's solve is gone with it
+        $solution = (new PhotosModel())->find($id) ? (new PhotosAstrometryModel())->find($id) : null;
 
         if (!$solution) {
             return $this->respondNotFound(lang('Photos.astrometryNotFound'));
@@ -221,9 +227,11 @@ class Photos extends BaseApiController
 
     /**
      * Advances the plate solve of a photo by one step and returns its state: starts one when
-     * the photo has none (or to redo a finished one), otherwise moves the running one along.
-     * The editor's browser calls this every few seconds after an upload until the status is
-     * final, so no background worker is needed. See AstrometrySolver.
+     * the photo has none, otherwise moves the running one along. A finished solve is returned
+     * as is unless `restart` is sent: a late poll from another tab or a retried request must
+     * not re-upload the picture and throw a good solution back to `pending`. The editor's
+     * browser calls this every few seconds after an upload until the status is final, so no
+     * background worker is needed. See AstrometrySolver.
      *
      * @param null $id The ID of the photo.
      */
@@ -248,9 +256,13 @@ class Photos extends BaseApiController
         $astrometryModel = new PhotosAstrometryModel();
         $row             = $astrometryModel->find($id);
 
-        if (!$row || !AstrometrySolver::isInProgress($row)) {
+        $restart = filter_var($this->request->getVar('restart'), FILTER_VALIDATE_BOOLEAN);
+
+        if (!$row || (!AstrometrySolver::isInProgress($row) && $restart)) {
             $astrometryModel->enqueue($id);
             $row = $astrometryModel->find($id);
+        } elseif (!AstrometrySolver::isInProgress($row)) {
+            return $this->respond($row);
         }
 
         return $this->respond(AstrometrySolver::fromConfig()->step($row));

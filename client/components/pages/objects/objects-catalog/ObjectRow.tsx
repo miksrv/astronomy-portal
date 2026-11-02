@@ -9,7 +9,7 @@ import { formatCalendarDate, formatExposure } from '@/utils/dates'
 import { getObjectStatus } from '@/utils/objects'
 import { fallbackToMediumPhoto } from '@/utils/photos'
 import { formatObjectName } from '@/utils/strings'
-import { formatObservatoryTime, risesTonight, Visibility } from '@/utils/visibility'
+import { formatObservatoryTime, isMovingObject, risesTonight, Visibility } from '@/utils/visibility'
 
 import { ObjectStatusBadge } from '../object-status-badge'
 
@@ -33,10 +33,13 @@ export const ObjectRow: React.FC<ObjectRowProps> = ({ object, categoryTitles, vi
     const name = formatObjectName(object.name)
     const exposure = formatExposure(object.exposure, t)
 
-    // Shown only once computed, when every object has an entry: no visibility then means a moving object
+    // Shown only once computed, when every object has an entry: no visibility then means a moving
+    // object - or one whose coordinates nobody has entered yet
     const visibilityLabel =
         visibility == null
-            ? t('components.pages.objects.objects-catalog.moving', 'Движется по небу')
+            ? isMovingObject(object.categories)
+                ? t('components.pages.objects.objects-catalog.moving', 'Движется по небу')
+                : '—'
             : !risesTonight(visibility)
               ? t('components.pages.objects.objects-catalog.does-not-rise', 'Не поднимается')
               : t('components.pages.objects.objects-catalog.altitude-at', '{{altitude}}° в {{time}}', {
@@ -165,13 +168,9 @@ export const ObjectRow: React.FC<ObjectRowProps> = ({ object, categoryTitles, vi
                 )}
                 <span className={cn(styles.visibility, styles[visibility?.level ?? 'none'])}>
                     <span className={styles.dot} />
-                    {computed
-                        ? t('components.pages.objects.objects-catalog.tonight-label', 'Сегодня: {{value}}', {
-                              value: visibilityLabel
-                          })
-                        : t('components.pages.objects.objects-catalog.tonight-label', 'Сегодня: {{value}}', {
-                              value: '…'
-                          })}
+                    {t('components.pages.objects.objects-catalog.tonight-label', 'Сегодня: {{value}}', {
+                        value: computed ? visibilityLabel : '…'
+                    })}
                 </span>
             </div>
         </div>

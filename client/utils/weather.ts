@@ -43,7 +43,13 @@ export const getWeatherRange = (key: WeatherKey, value?: number | null): Weather
     return margin > max || margin < min ? 'warning' : 'good'
 }
 
-/** The worst of all sensors: one critical reading makes the whole weather critical */
+/** Without these the sky can't be called clear: a missing reading is a warning, not "good" */
+const DECISIVE_KEYS: WeatherKey[] = ['clouds']
+
+/**
+ * The worst of all sensors: one critical reading makes the whole weather critical. No readings
+ * at all is no state, not a good one
+ */
 export const getWeatherState = (weather?: ApiModel.Weather): WeatherRange | undefined => {
     if (!weather) {
         return undefined
@@ -51,11 +57,19 @@ export const getWeatherState = (weather?: ApiModel.Weather): WeatherRange | unde
 
     const ranges = WEATHER_KEYS.map((key) => getWeatherRange(key, weather[key]))
 
+    if (ranges.every((range) => range === undefined)) {
+        return undefined
+    }
+
     if (ranges.includes('danger')) {
         return 'danger'
     }
 
-    return ranges.every((range) => range === 'good' || range === undefined) ? 'good' : 'warning'
+    if (ranges.includes('warning') || DECISIVE_KEYS.some((key) => weather[key] == null)) {
+        return 'warning'
+    }
+
+    return 'good'
 }
 
 /** A meter's fill for a sensor, 4…100 % of its scale */

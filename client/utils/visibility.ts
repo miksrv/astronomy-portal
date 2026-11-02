@@ -137,6 +137,10 @@ export const getVisibility = (
     }
 }
 
+/** The observatory's calendar date (`YYYY-MM-DD`) of a moment: UTC's is a day behind until 05:00 */
+export const getObservatoryDate = (date: Date): string =>
+    new Date(date.getTime() + (12 - LOCAL_NOON_UTC_HOUR) * 3_600_000).toISOString().slice(0, 10)
+
 /** Rises high enough tonight to be worth a look (not necessarily to shoot) */
 export const risesTonight = (visibility?: Visibility | null): visibility is Visibility =>
     !!visibility && visibility.altitude >= RISES_ALTITUDE

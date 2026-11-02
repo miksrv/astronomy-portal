@@ -8,8 +8,9 @@ use CodeIgniter\Database\Migration;
  * The plate solve of a photo (nova.astrometry.net), one row per photo: where on the sky the
  * picture looks (`ra`/`dec`, `radius`), its plate scale and rotation, the full WCS solution
  * (TAN + SIP, as JSON) the frontend draws the coordinate grid with, and the catalogue objects
- * the service found (JSON, as returned). `status` is the queue: `pending` rows are solved by
- * `php spark photos:solve`; a photo's upload enqueues it.
+ * the service found (JSON, as returned). `status` is the queue: a photo's upload enqueues it
+ * (`pending`), and the editor's browser steps it through `POST /photos/:id/astrometry` until
+ * it is final; `php spark photos:solve` does the same for a backfill of the archive.
  */
 class AddPhotosAstrometry extends Migration
 {

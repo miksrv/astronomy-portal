@@ -90,7 +90,14 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
         return () => observer.disconnect()
     }, [showScale])
 
-    const ratio = current.width && current.height ? current.width / current.height : 4 / 3
+    // The overlay is placed in percent of this box: it must have the picture's proportions, or
+    // the labels drift off their objects on a letterboxed picture
+    const ratio =
+        current.width && current.height
+            ? current.width / current.height
+            : astrometry
+              ? astrometry.solvedWidth / astrometry.solvedHeight
+              : 4 / 3
 
     return (
         <div className={styles.photoViewer}>

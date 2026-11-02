@@ -5,7 +5,6 @@ export {
     type GalleryPhotoItem,
     type GallerySort,
     PhotoCatalog,
-    PhotoTile,
     toGalleryPhoto,
     usePhotoFilters
 } from './photo-catalog'

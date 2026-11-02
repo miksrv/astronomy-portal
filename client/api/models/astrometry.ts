@@ -11,7 +11,7 @@ export interface AstrometryAnnotation {
     vmag?: number
 }
 
-export type AstrometryStatus = 'pending' | 'solving' | 'success' | 'failed'
+type AstrometryStatus = 'pending' | 'solving' | 'success' | 'failed'
 
 /** The plate solve of a photo (`GET /photos/:id/astrometry`) */
 export interface PhotoAstrometry {
@@ -51,7 +51,9 @@ export interface SolvedAstrometry extends PhotoAstrometry {
 export const isSolved = (astrometry?: PhotoAstrometry | null): astrometry is SolvedAstrometry =>
     astrometry?.status === 'success' &&
     typeof astrometry.solvedWidth === 'number' &&
+    astrometry.solvedWidth > 0 &&
     typeof astrometry.solvedHeight === 'number' &&
+    astrometry.solvedHeight > 0 &&
     typeof astrometry.ra === 'number' &&
     typeof astrometry.dec === 'number' &&
     typeof astrometry.pixscale === 'number' &&

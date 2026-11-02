@@ -28,13 +28,16 @@ export const PhotoSolveStatus: React.FC<PhotoSolveStatusProps> = ({ photoId }) =
     const { t } = useTranslation()
     const router = useRouter()
 
-    const { data, error, isLoading } = API.usePhotosGetAstrometryQuery(photoId)
+    // `currentData` (not `data`): the page stays mounted between photos, and the previous photo's
+    // state must not drive a step on this one
+    const { currentData: data, error, isLoading } = API.usePhotosGetAstrometryQuery(photoId)
     const [solve, { data: stepped, error: stepError, isLoading: stepping }] = API.usePhotosSolveMutation()
 
     // The step's answer is newer than the query's cache until the latter refetches
     const current: ApiModel.PhotoAstrometry | undefined = stepped?.photoId === photoId ? stepped : data
     const status = current?.status
-    const inProgress = status === 'pending' || status === 'solving'
+    // A step that failed to reach the server ends the chain: the button comes back for a retry
+    const inProgress = (status === 'pending' || status === 'solving') && !stepError
     const notSolvedYet = !isLoading && !current && !!error
 
     // A running solve is stepped every few seconds; done - the page gets its new props
@@ -52,7 +55,7 @@ export const PhotoSolveStatus: React.FC<PhotoSolveStatusProps> = ({ photoId }) =
         }
 
         wasInProgress.current = true
-        const timer = window.setTimeout(() => void solve(photoId), STEP_INTERVAL)
+        const timer = window.setTimeout(() => void solve({ id: photoId }), STEP_INTERVAL)
 
         return () => window.clearTimeout(timer)
         // `current` changes with every step's answer, which is what restarts the timer
@@ -89,11 +92,11 @@ export const PhotoSolveStatus: React.FC<PhotoSolveStatusProps> = ({ photoId }) =
                     loading={stepping}
                     disabled={stepping}
                     label={
-                        notSolvedYet || status === 'failed'
+                        notSolvedYet || status === 'failed' || stepError
                             ? t('components.pages.photos.photo-solve-status.start', 'Привязать к небу')
                             : t('components.pages.photos.photo-solve-status.restart', 'Перерешать')
                     }
-                    onClick={() => void solve(photoId)}
+                    onClick={() => void solve({ id: photoId, restart: true })}
                 />
             )}
         </span>

@@ -19,6 +19,9 @@ import styles from './styles.module.sass'
 
 const LEVELS = [0, 1, 2, 3, 4] as const
 
+/** Half the tooltip's `max-width` (styles): how far its centre must stay from the box's edges */
+const TOOLTIP_HALF_WIDTH = 140
+
 interface TelescopeActivityProps {
     nights: TelescopeNight[]
 }
@@ -83,12 +86,24 @@ export const TelescopeActivity: React.FC<TelescopeActivityProps> = ({ nights }) 
             return
         }
 
+        // A tap on the night already shown puts the tooltip away (there is no mouseleave on touch)
+        if (event.type === 'click' && hovered?.day.date === day.date) {
+            setHovered(undefined)
+
+            return
+        }
+
         const cellBox = cell.getBoundingClientRect()
         const box = scroll.getBoundingClientRect()
 
+        // Centred on the cell, but kept inside the scroll box: it clips what sticks out
+        const left = cellBox.left - box.left + cellBox.width / 2 + scroll.scrollLeft
+        const min = scroll.scrollLeft + TOOLTIP_HALF_WIDTH
+        const max = scroll.scrollLeft + scroll.clientWidth - TOOLTIP_HALF_WIDTH
+
         setHovered({
             day,
-            left: cellBox.left - box.left + cellBox.width / 2 + scroll.scrollLeft,
+            left: max > min ? Math.min(Math.max(left, min), max) : left,
             top: cellBox.top - box.top
         })
     }
@@ -145,7 +160,7 @@ export const TelescopeActivity: React.FC<TelescopeActivityProps> = ({ nights }) 
             >
                 <div
                     className={styles.heatmap}
-                    role={'img'}
+                    role={'group'}
                     aria-label={t(
                         'components.pages.observatory.telescope-activity.heatmap-label',
                         'Ночи съёмки за {{year}} год: {{count}}',

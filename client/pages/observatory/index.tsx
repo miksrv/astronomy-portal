@@ -33,8 +33,6 @@ const WEATHER_POLLING_MS = 60_000
 /** Older weather than this means the link to the observatory is down */
 const STALE_WEATHER_MINUTES = 30
 
-/** The weather is "known" only while the station reported recently: a stale feed decides nothing */
-
 interface ObservatoryPageProps {
     nights: TelescopeNight[]
 }
@@ -220,10 +218,6 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = ({ nights }) => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<ObservatoryPageProps>> => {
-            // Public page: nginx caches the HTML for a short while (config/nginx.conf), so a burst
-            // of visitors costs the API one request
-            context.res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=240')
-
             const { translations } = await initSSRLocale(store, context)
 
             // The nights are rendered on the server: the objects shot are links worth indexing.
@@ -242,6 +236,12 @@ export const getServerSideProps = wrapper.getServerSideProps(
             ])
 
             removeSSRQueryCache(store, ['statisticGetTelescope'])
+
+            // Public page: nginx caches the HTML for a short while (config/nginx.conf), so a burst
+            // of visitors costs the API one request - unless the API gave nothing to show
+            if (telescope) {
+                context.res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=240')
+            }
 
             return {
                 props: {

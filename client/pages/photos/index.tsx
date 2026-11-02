@@ -168,6 +168,11 @@ export const getServerSideProps = wrapper.getServerSideProps(
             // Handed to the page as props - no need to also ship RTK Query's copy
             removeSSRQueryCache(store, ['photosGetList', 'objectsGetList', 'categoriesGetList'])
 
+            // An API outage renders an empty gallery: that must not be cached for everyone
+            if (!photos) {
+                context.res.setHeader('Cache-Control', 'no-store')
+            }
+
             // The objects' titles name the tiles and feed the search; only that map is kept
             const objectTitles = Object.fromEntries((objects?.items ?? []).map(({ name, title }) => [name, title]))
 

@@ -6,7 +6,7 @@ import { useTranslation } from 'next-i18next/pages'
 import { ApiModel } from '@/api'
 import { CardMeta, CardTitle } from '@/components/ui'
 import { formatCalendarDate } from '@/utils/dates'
-import { formatObservatoryTime, getNight } from '@/utils/visibility'
+import { formatObservatoryTime, getObservatoryDate } from '@/utils/visibility'
 import { isGoodForecastNight } from '@/utils/weather'
 import { getWeatherKind, WEATHER_KIND_ICONS, WeatherKind } from '@/utils/weatherIcons'
 
@@ -42,8 +42,9 @@ export const ForecastCard: React.FC<ForecastCardProps> = ({ daily, hourly, now, 
         storm: t('components.pages.observatory.forecast-card.kind-storm', 'Гроза'),
         fog: t('components.pages.observatory.forecast-card.kind-fog', 'Туман')
     }
-    // The forecast's days are the observatory's calendar days; "today" is the night that starts today
-    const todayDate = now ? getNight(now).start.toISOString().slice(0, 10) : undefined
+    // The forecast's days are the observatory's calendar days: "today" is its date, not UTC's
+    // (after local midnight the night in progress belongs to yesterday's row, which is gone)
+    const todayDate = now ? getObservatoryDate(now) : undefined
     const days = (daily ?? []).slice(0, DAYS)
 
     return (
@@ -78,26 +79,27 @@ export const ForecastCard: React.FC<ForecastCardProps> = ({ daily, hourly, now, 
                 ) : tonight.length ? (
                     <ol className={styles.hours}>
                         {tonight.map((hour) => {
-                            const clouds = Math.round(hour.clouds ?? 0)
+                            // No cloud reading is not a clear sky: the bar stays empty and the value a dash
+                            const clouds = hour.clouds == null ? undefined : Math.round(hour.clouds)
                             const time = formatObservatoryTime(parseMeteoDate(hour.date), i18n.language)
 
                             return (
                                 <li
                                     key={hour.date}
-                                    className={cn(styles.hour, clouds < 30 && styles.clear)}
+                                    className={cn(styles.hour, clouds != null && clouds < 30 && styles.clear)}
                                     title={t(
                                         'components.pages.observatory.forecast-card.hour-title',
                                         '{{time}}: облачность {{clouds}}%, ветер {{wind}} м/с',
-                                        { time, clouds, wind: hour.windSpeed ?? '?' }
+                                        { time, clouds: clouds ?? '—', wind: hour.windSpeed ?? '?' }
                                     )}
                                 >
                                     <span
                                         className={styles.hourBar}
                                         aria-hidden={'true'}
                                     >
-                                        <i style={{ height: `${Math.max(4, clouds)}%` }} />
+                                        <i style={{ height: `${Math.max(4, clouds ?? 0)}%` }} />
                                     </span>
-                                    <span className={styles.hourValue}>{`${clouds}%`}</span>
+                                    <span className={styles.hourValue}>{clouds == null ? '—' : `${clouds}%`}</span>
                                     <span className={styles.hourTime}>{time.slice(0, 2)}</span>
                                 </li>
                             )
@@ -125,7 +127,7 @@ export const ForecastCard: React.FC<ForecastCardProps> = ({ daily, hourly, now, 
                     <ol className={styles.days}>
                         {days.map((day) => {
                             const good = isGoodForecastNight(day)
-                            const clouds = Math.round(day.clouds ?? 0)
+                            const clouds = day.clouds == null ? undefined : Math.round(day.clouds)
                             const isToday = !!now && day.date?.slice(0, 10) === todayDate
                             const kind = getWeatherKind(day.weatherId, day.clouds)
                             const high = Math.round(day.temperatureMax ?? day.temperature ?? 0)
@@ -152,7 +154,7 @@ export const ForecastCard: React.FC<ForecastCardProps> = ({ daily, hourly, now, 
                                         <span className={'visuallyHidden'}>{kindLabels[kind]}</span>
                                     </span>
                                     <span className={styles.clouds}>
-                                        <b>{`${clouds}%`}</b>
+                                        <b>{clouds == null ? '—' : `${clouds}%`}</b>
                                         <small>
                                             {t('components.pages.observatory.forecast-card.clouds-label', 'облачность')}
                                         </small>

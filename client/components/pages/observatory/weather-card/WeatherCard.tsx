@@ -101,7 +101,8 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({ weather, loading, erro
                                     {
                                         pressure:
                                             typeof weather.pressure === 'number' ? Math.round(weather.pressure) : '—',
-                                        dewPoint: weather.dewPoint ?? '—'
+                                        dewPoint:
+                                            typeof weather.dewPoint === 'number' ? Math.round(weather.dewPoint) : '—'
                                     }
                                 )}
                             </span>

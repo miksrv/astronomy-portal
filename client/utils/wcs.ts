@@ -112,11 +112,26 @@ export const skyToPixel = (wcs: Wcs, { ra, dec }: SkyPoint): PixelPoint | undefi
     let u = (a22 * ix - a12 * iy) / det
     let v = (-a21 * ix + a11 * iy) / det
 
-    if (wcs.sip) {
+    if (wcs.sip?.ap || wcs.sip?.bp) {
         const du = evaluateSip(wcs.sip.ap, u, v)
         const dv = evaluateSip(wcs.sip.bp, u, v)
         u += du
         v += dv
+    } else if (wcs.sip?.a || wcs.sip?.b) {
+        // No inverse polynomials in the header: undo the forward ones by fixed-point iteration
+        // (the distortion is a small correction, so a few rounds converge to a fraction of a pixel)
+        let pu = u
+        let pv = v
+
+        for (let round = 0; round < 8; round++) {
+            const nu = u - evaluateSip(wcs.sip.a, pu, pv)
+            const nv = v - evaluateSip(wcs.sip.b, pu, pv)
+            pu = nu
+            pv = nv
+        }
+
+        u = pu
+        v = pv
     }
 
     return { x: u + wcs.crpix[0] - 1, y: v + wcs.crpix[1] - 1 }
@@ -243,7 +258,10 @@ export const buildSkyGrid = (wcs: Wcs, density: number = 5): SkyGrid => {
 
     const lines: GridLine[] = []
 
-    for (let dec = Math.floor(decMin / decStep) * decStep; dec <= decMax + decStep; dec += decStep) {
+    // Steps are counted as integers: accumulating floats would leave a −1e-17 where 0° belongs
+    for (let k = Math.floor(decMin / decStep); k * decStep <= decMax + decStep; k++) {
+        const dec = k * decStep
+
         if (Math.abs(dec) >= 90) {
             continue
         }
@@ -255,7 +273,11 @@ export const buildSkyGrid = (wcs: Wcs, density: number = 5): SkyGrid => {
         }
     }
 
-    for (let ra = Math.floor(raMin / raStep) * raStep; ra <= raMax + raStep; ra += raStep) {
+    // A field around the pole spans every RA: past a full turn the lines would only repeat
+    const raEnd = Math.min(raMax + raStep, raMin + 360 - raStep)
+
+    for (let k = Math.floor(raMin / raStep); k * raStep <= raEnd; k++) {
+        const ra = k * raStep
         const line = traceLine(
             wcs,
             'ra',
@@ -292,7 +314,7 @@ export const formatGridValue = (line: Pick<GridLine, 'kind' | 'value'>, step: nu
         const degrees = Math.floor(totalMinutes / 60)
         const minutes = totalMinutes % 60
 
-        return `${line.value < 0 ? '−' : '+'}${degrees}°${step < 1 ? ` ${String(minutes).padStart(2, '0')}′` : ''}`
+        return `${line.value < 0 && totalMinutes > 0 ? '−' : '+'}${degrees}°${step < 1 ? ` ${String(minutes).padStart(2, '0')}′` : ''}`
     }
 
     const totalSeconds = Math.round((line.value / 15) * 3600) % 86_400

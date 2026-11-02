@@ -195,12 +195,18 @@ class AstrometryClient
         ];
     }
 
-    private function http(): \CodeIgniter\HTTP\CURLRequest
+    /**
+     * @param int $timeout Seconds to wait for the whole exchange. The status calls are tiny
+     *                     and answered by a browser poll, so they give up fast; only the
+     *                     upload of the picture gets a long one
+     */
+    private function http(int $timeout = 15): \CodeIgniter\HTTP\CURLRequest
     {
         return Services::curlrequest([
-            'baseURI'     => Astrometry::API_URL,
-            'timeout'     => 120,
-            'http_errors' => false,
+            'baseURI'         => Astrometry::API_URL,
+            'timeout'         => $timeout,
+            'connect_timeout' => 10,
+            'http_errors'     => false,
         ]);
     }
 
@@ -220,7 +226,7 @@ class AstrometryClient
             $fields['file'] = $file;
         }
 
-        $response = $this->http()->post($path, $file ? ['multipart' => $fields] : ['form_params' => $fields]);
+        $response = $this->http($file ? 120 : 15)->post($path, $file ? ['multipart' => $fields] : ['form_params' => $fields]);
 
         return $this->decode($path, $response->getStatusCode(), $response->getBody());
     }

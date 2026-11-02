@@ -204,6 +204,11 @@ export const getServerSideProps = wrapper.getServerSideProps(
             // The objects list carries each object's cover photo, so the page needs no photos list
             const { data: objects } = await store.dispatch(API.endpoints?.objectsGetList.initiate())
 
+            // An API outage renders an empty catalog: that must not be cached for everyone
+            if (!objects) {
+                context.res.setHeader('Cache-Control', 'no-store')
+            }
+
             const { data: categories } = await store.dispatch(API.endpoints?.categoriesGetList.initiate())
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))

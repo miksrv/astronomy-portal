@@ -194,8 +194,9 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ ra, dec, name,
                         />
                         <text
                             className={styles.nowLabel}
-                            x={chart.nowX + 4}
+                            x={chart.nowX + (chart.nowX > CHART_WIDTH - 60 ? -4 : 4)}
                             y={PADDING.top + 10}
+                            textAnchor={chart.nowX > CHART_WIDTH - 60 ? 'end' : 'start'}
                         >
                             {t('components.common.visibility-chart.now', 'сейчас')}
                         </text>

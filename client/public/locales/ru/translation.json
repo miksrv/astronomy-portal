@@ -438,7 +438,7 @@
                     "fullscreen": "Во весь экран",
                     "image-alt": "Кадр камеры: {{label}}",
                     "camera-not-available": "Камера недоступна",
-                    "live": "LIVE",
+                    "live": "В ЭФИРЕ",
                     "stale": "кадр от {{time}}"
                 },
                 "conditions-verdict": {
@@ -594,6 +594,9 @@
                     "date-required": "Укажите дату обработки",
                     "filters-required": "Добавьте хотя бы один фильтр"
                 },
+                "photo-annotations": {
+                    "compass": "Север и восток на снимке"
+                },
                 "photo-catalog": {
                     "all-categories": "Все категории",
                     "sort-date": "Новые",
@@ -639,30 +642,37 @@
                     "nights_few": "{{count}} ночи",
                     "nights_many": "{{count}} ночей",
                     "nights_other": "{{count}} ночей",
+                    "star-map": "Звёздная карта",
                     "tonight": "Сегодня ночью до {{altitude}}° в {{time}}",
                     "not-tonight": "Сегодня ночью не поднимается",
                     "constellation": "Созвездие",
                     "coordinates": "Координаты",
                     "archive": "В FITS-архиве",
                     "photos": "Снимков объекта",
-                    "cta": "Видимость, журнал наблюдений и описание",
-                    "star-map": "Звёздная карта"
+                    "cta": "Видимость, журнал наблюдений и описание"
                 },
                 "photo-setup": {
                     "capture": "Съёмка",
                     "date": "Дата",
                     "exposure": "Выдержка",
                     "frames": "Кадров",
+                    "center": "Центр поля",
                     "field": "Поле зрения",
                     "scale": "Масштаб",
                     "scale-value": "{{value}}″ на пиксель",
+                    "rotation": "Поворот",
+                    "rotation-value": "{{value}}° от севера",
                     "focal-length": "Фокус",
                     "millimetres": "{{value}} мм",
                     "views": "Просмотров",
-                    "equipment": "Оборудование",
-                    "center": "Центр поля",
-                    "rotation": "Поворот",
-                    "rotation-value": "{{value}}° от севера"
+                    "equipment": "Оборудование"
+                },
+                "photo-solve-status": {
+                    "pending": "Привязка к небу: отправляем снимок…",
+                    "solving": "Привязка к небу: решается…",
+                    "failed": "Привязка к небу не удалась: {{error}}",
+                    "start": "Привязать к небу",
+                    "restart": "Перерешать"
                 },
                 "photo-strip": {
                     "open": "Снимок от {{date}}",
@@ -674,24 +684,14 @@
                     "alt": "Астрофото {{title}} от {{date}}",
                     "compare-close": "Закрыть сравнение",
                     "compare": "Сравнить с {{year}}",
-                    "scale": "Угловой масштаб",
-                    "fullscreen": "На весь экран, с увеличением",
-                    "previous": "Предыдущий снимок",
-                    "next": "Следующий снимок",
                     "annotations": "Объекты",
                     "annotations-tooltip": "Подписать объекты на снимке (astrometry.net)",
                     "grid": "Сетка",
-                    "grid-tooltip": "Координатная сетка RA/Dec"
-                },
-                "photo-annotations": {
-                    "compass": "Север и восток на снимке"
-                },
-                "photo-solve-status": {
-                    "pending": "Привязка к небу: отправляем снимок…",
-                    "solving": "Привязка к небу: решается…",
-                    "failed": "Привязка к небу не удалась: {{error}}",
-                    "start": "Привязать к небу",
-                    "restart": "Перерешать"
+                    "grid-tooltip": "Координатная сетка RA/Dec",
+                    "scale": "Угловой масштаб",
+                    "fullscreen": "На весь экран, с увеличением",
+                    "previous": "Предыдущий снимок",
+                    "next": "Следующий снимок"
                 }
             },
             "stargazing": {
@@ -1353,10 +1353,10 @@
             "setup-title": "Как снято",
             "history-title": "История съёмки {{objects}}",
             "history-note": "Каждый снимок — отдельная обработка",
+            "objects-title": "Об объектах",
             "object-title": "Об объекте",
             "related-title": "Ещё снимки: {{category}}",
-            "related-all": "Все в галерее →",
-            "objects-title": "Об объектах"
+            "related-all": "Все в галерее →"
         },
         "photos": {
             "stat-photos": "снимков в галерее",

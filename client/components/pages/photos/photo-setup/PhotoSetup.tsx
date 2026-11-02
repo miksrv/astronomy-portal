@@ -3,6 +3,7 @@ import React from 'react'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
+import { getSolvedField } from '@/utils/astrometry'
 import { formatDECShort, formatRAShort } from '@/utils/coordinates'
 import { formatCalendarDate, formatExposure } from '@/utils/dates'
 import { FieldOfView, formatAngle, getFocalRatio, Optics } from '@/utils/optics'
@@ -52,11 +53,9 @@ export const PhotoSetup: React.FC<PhotoSetupProps> = ({ photo, equipment, optics
         ? {
               ra: astrometry.ra,
               dec: astrometry.dec,
-              width: (astrometry.solvedWidth * astrometry.pixscale) / 3600,
-              height: (astrometry.solvedHeight * astrometry.pixscale) / 3600,
-              // The published picture's pixels, not the solved (downscaled) file's
-              scale: (astrometry.pixscale * astrometry.solvedWidth) / (photo.imageWidth || astrometry.solvedWidth),
-              rotation: astrometry.orientation
+              ...getSolvedField(astrometry, photo.imageWidth),
+              // East of north, 0…360: the service may answer a negative angle
+              rotation: (((Math.round(astrometry.orientation) % 360) + 360) % 360) as number
           }
         : undefined
     const sky = solved ?? field
@@ -119,7 +118,7 @@ export const PhotoSetup: React.FC<PhotoSetupProps> = ({ photo, equipment, optics
                             <dt>{t('components.pages.photos.photo-setup.rotation', 'Поворот')}</dt>
                             <dd>
                                 {t('components.pages.photos.photo-setup.rotation-value', '{{value}}° от севера', {
-                                    value: Math.round(solved.rotation)
+                                    value: solved.rotation
                                 })}
                             </dd>
                         </div>

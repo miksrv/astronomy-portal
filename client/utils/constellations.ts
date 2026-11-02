@@ -101,8 +101,13 @@ const CONSTELLATIONS: Record<string, { ru: string; en: string }> = {
  * @param dec - Declination, degrees
  */
 export const getConstellationName = (ra: number, dec: number, locale: string): string | undefined => {
-    const { symbol, name } = Astronomy.Constellation(ra / 15, dec)
-    const names = CONSTELLATIONS[symbol]
+    // A stored declination outside ±90° (a typo in the form) must not take the whole page down
+    try {
+        const { symbol, name } = Astronomy.Constellation(ra / 15, dec)
+        const names = CONSTELLATIONS[symbol]
 
-    return names ? (locale === 'en' ? names.en : names.ru) : name
+        return names ? (locale === 'en' ? names.en : names.ru) : name
+    } catch {
+        return undefined
+    }
 }

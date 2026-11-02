@@ -362,11 +362,18 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 return { notFound: true }
             }
 
-            const { data: objectData, isError } = await store.dispatch(
-                API.endpoints?.objectsGetItem.initiate(objectName)
-            )
+            const {
+                data: objectData,
+                isError,
+                error
+            } = await store.dispatch(API.endpoints?.objectsGetItem.initiate(objectName))
 
-            if (isError || !objectData) {
+            // Only an unknown name is a 404: an API outage must not tell crawlers the page is gone
+            if (isError && (error as { status?: number } | undefined)?.status !== 404) {
+                throw new Error(`Objects API unavailable: ${objectName}`)
+            }
+
+            if (!objectData) {
                 return { notFound: true }
             }
 
@@ -384,7 +391,8 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
-            removeSSRQueryCache(store, ['objectsGetList', 'categoriesGetList', 'photosGetList'])
+            // The object itself is handed over as props too; no hook on this page reads the cache
+            removeSSRQueryCache(store, ['objectsGetItem', 'objectsGetList', 'categoriesGetList', 'photosGetList'])
 
             const sortedPhotos = [...(photosData?.items ?? [])].sort((a, b) =>
                 (b.date ?? '').localeCompare(a.date ?? '')

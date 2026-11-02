@@ -47,7 +47,7 @@ export const matchesSearch = (object: CatalogObject, search: string): boolean =>
             .toLowerCase()
             .replace(/[_\s-]/g, '')
             .includes(compactQuery) ||
-        object.title.toLowerCase().includes(query)
+        (object.title ?? '').toLowerCase().includes(query)
     )
 }
 

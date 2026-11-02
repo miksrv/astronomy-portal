@@ -15,12 +15,10 @@ interface ObjectPhotosProps {
     /** The newest first */
     photos: ObjectPagePhoto[]
     name: string
-    /** The photo being viewed, outlined in the grid (the photo page); the newest otherwise */
-    currentId?: string
 }
 
 /** Every processed photo of the object as tiles, the newest marked; each opens its photo page */
-export const ObjectPhotos: React.FC<ObjectPhotosProps> = ({ photos, name, currentId }) => {
+export const ObjectPhotos: React.FC<ObjectPhotosProps> = ({ photos, name }) => {
     const { t, i18n } = useTranslation()
 
     return (
@@ -32,8 +30,7 @@ export const ObjectPhotos: React.FC<ObjectPhotosProps> = ({ photos, name, curren
                     <li key={photo.id}>
                         <Link
                             href={`/photos/${photo.id}`}
-                            className={cn(styles.tile, (currentId ? photo.id === currentId : i === 0) && styles.latest)}
-                            aria-current={currentId === photo.id ? 'page' : undefined}
+                            className={cn(styles.tile, i === 0 && styles.latest)}
                             title={t('components.pages.objects.object-photos.open', 'Открыть снимок от {{date}}', {
                                 date
                             })}

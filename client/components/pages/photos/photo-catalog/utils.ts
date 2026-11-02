@@ -18,9 +18,7 @@ export const toGalleryPhoto = (photo: ApiModel.Photo, objectTitles: Record<strin
         filters: photo.filters
             ? Object.fromEntries(Object.entries(photo.filters).map(([filter, { exposure }]) => [filter, { exposure }]))
             : undefined,
-        src: createMediumPhotoUrl(photo),
-        width: photo.imageWidth,
-        height: photo.imageHeight
+        src: createMediumPhotoUrl(photo)
     }
 
     return Object.fromEntries(Object.entries(item).filter(([, value]) => value != null)) as unknown as GalleryPhotoItem

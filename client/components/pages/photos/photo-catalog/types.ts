@@ -17,8 +17,6 @@ export interface GalleryPhotoItem {
     filters?: ApiModel.Filters
     /** Medium-size image URL */
     src: string
-    width?: number
-    height?: number
 }
 
 export type GallerySort = 'date' | 'exposure' | 'views'
