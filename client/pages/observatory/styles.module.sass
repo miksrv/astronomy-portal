@@ -4,29 +4,103 @@
 // The blocks of a page are spaced by the gap of <main> (--space-4), so none
 // of them carries an outer margin: a margin would double the gap
 
-// Intro text of an observatory page
+// Intro text of an observatory page: the first paragraph of a page is a lead (DESIGN §3)
 .text
-    +type.prose
+    +type.lead
     margin: 0
 
-// Two widgets side by side, stacked on phones
-.observatoryGrid
+// Charts on the weather page: a card each, --space-4 apart (the gap of <main>)
+.chart
+    min-width: 0
+
+// ---- The dashboard (/observatory)
+// "Online · updated N min ago": the link to the observatory, by the weather station's last report
+.livePill
+    +type.secondary
+    display: inline-flex
+    align-items: center
+    gap: var(--space-2)
+    min-height: 32px
+    padding: 0 12px
+    border-radius: var(--radius-md)
+    background: var(--surface-1)
+    box-shadow: inset 0 0 0 1px var(--border)
+    white-space: nowrap
+
+    b
+        color: var(--text-color-primary)
+        font-weight: var(--font-weight-medium)
+
+.liveDot
+    flex: none
+    width: 8px
+    height: 8px
+    border-radius: 50%
+    background: var(--text-color-disabled)
+
+    &.online
+        background: var(--color-green)
+        animation: live-pulse 2s infinite
+
+    &.offline
+        background: var(--color-red)
+
+@keyframes live-pulse
+    0%
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-green) 60%, transparent)
+
+    70%, 100%
+        box-shadow: 0 0 0 7px transparent
+
+@media (prefers-reduced-motion: reduce)
+    .liveDot.online
+        animation: none
+
+// The "online" pill sits under the lead, before the verdict
+.status
+    display: flex
+
+// Weather and the sky side by side (the same height), the forecast under them; one column on phones
+.bento
+    display: grid
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr)
+    gap: var(--space-4)
+    align-items: stretch
+
+    .wide
+        grid-column: 1 / -1
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: minmax(0, 1fr)
+
+.cameras
     display: grid
     grid-template-columns: repeat(2, minmax(0, 1fr))
     gap: var(--space-4)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        grid-template-columns: 1fr
+        grid-template-columns: minmax(0, 1fr)
 
-.stack
-    display: flex
-    flex-direction: column
+.equipment
+    display: grid
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr)
     gap: var(--space-4)
-    min-width: 0
+    align-items: stretch
 
-// Charts and tables on the page: a card each, --space-4 apart (the gap of <main>)
-.chart, .block
-    min-width: 0
+    // The nights card takes the row's height from the equipment card, not the other way round
+    > :last-child
+        height: 0
+        min-height: 100%
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: minmax(0, 1fr)
+
+        > :last-child
+            height: auto
+
+// A heading right in <main>: the global `main > h2` rule takes the gap off its margins
+.sectionTitle
+    margin-bottom: calc(var(--space-3) - var(--space-4))
 
 .allPhotosButtonContainer
     margin-top: var(--space-4)
@@ -41,7 +115,6 @@
 .lead
     +type.lead
     margin: 0 0 var(--space-6)
-    color: var(--text-color-secondary)
 
 .prose
     +type.prose

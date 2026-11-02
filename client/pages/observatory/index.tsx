@@ -1,23 +1,94 @@
-import React from 'react'
+import React, { useMemo } from 'react'
+import { cn } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
+import { JsonLdScript } from 'next-seo'
 
-import { API, wrapper } from '@/api'
+import { API, APIMeteo, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
-import { AstronomyCalc, Calendar, Camera, RelayList, TelescopeWorkdays, Weather } from '@/components/pages/observatory'
+import {
+    Camera,
+    ConditionsVerdict,
+    ForecastCard,
+    ObservingSessions,
+    RelayList,
+    SkyCard,
+    TelescopeActivity,
+    WeatherCard
+} from '@/components/pages/observatory'
+import { useNow } from '@/hooks/useNow'
+import { createPageUrl } from '@/utils/helpers'
+import { removeSSRQueryCache } from '@/utils/ssrCache'
 import { initSSRLocale } from '@/utils/ssrLocale'
+import { TelescopeNight, toTelescopeNights } from '@/utils/telescopeActivity'
+import { OBSERVATORY_LAT, OBSERVATORY_LON } from '@/utils/visibility'
 
 import styles from './styles.module.sass'
 
-const ObservatoryPage: NextPage<object> = () => {
-    const { t } = useTranslation()
+/** The weather station reports every few minutes: poll at its pace, not faster */
+const WEATHER_POLLING_MS = 60_000
 
-    const { data, isLoading } = API.useStatisticGetTelescopeQuery()
+/** Older weather than this means the link to the observatory is down */
+const STALE_WEATHER_MINUTES = 30
+
+/** The weather is "known" only while the station reported recently: a stale feed decides nothing */
+
+interface ObservatoryPageProps {
+    nights: TelescopeNight[]
+}
+
+const ObservatoryPage: NextPage<ObservatoryPageProps> = ({ nights }) => {
+    const { t, i18n } = useTranslation()
+
+    const now = useNow(60_000)
+
+    const {
+        data: weather,
+        isLoading: weatherLoading,
+        isError: weatherError
+    } = APIMeteo.useGetCurrentQuery(undefined, {
+        pollingInterval: WEATHER_POLLING_MS,
+        skipPollingIfUnfocused: true
+    })
+    const { data: forecastDaily, isLoading: dailyLoading, isError: dailyError } = APIMeteo.useGetForecastDailyQuery()
+    const {
+        data: forecastHourly,
+        isLoading: hourlyLoading,
+        isError: hourlyError
+    } = APIMeteo.useGetForecastHourlyQuery()
 
     const title = t('pages.observatory.title', 'Обсерватория')
-    const observatoryLink = t('pages.observatory.observatory-in-orenburg_link', 'Обсерватория в Оренбурге')
+    const overviewLink = t('pages.observatory.how-it-works', 'Как она устроена')
+
+    // Minutes since the weather station last reported: the observatory's "online" signal
+    const minutesAgo = useMemo(() => {
+        const updated = weather?.lastUpdated ?? (weather?.date ? `${weather.date.replace(' ', 'T')}Z` : undefined)
+
+        return now && updated
+            ? Math.max(0, Math.round((now.getTime() - new Date(updated).getTime()) / 60_000))
+            : undefined
+    }, [now, weather?.lastUpdated, weather?.date])
+
+    const online = minutesAgo !== undefined && !weather?.isStale && minutesAgo < STALE_WEATHER_MINUTES
+
+    const placeSchema = useMemo(
+        () => ({
+            '@context': 'https://schema.org',
+            '@type': 'Place',
+            '@id': createPageUrl(i18n.language, 'observatory'),
+            name: t('pages.observatory.schema-name', 'Любительская обсерватория «Смотри на звёзды»'),
+            url: createPageUrl(i18n.language, 'observatory'),
+            geo: { '@type': 'GeoCoordinates', latitude: OBSERVATORY_LAT, longitude: OBSERVATORY_LON },
+            address: {
+                '@type': 'PostalAddress',
+                addressLocality: t('pages.observatory.schema-locality', 'Оренбург'),
+                addressCountry: 'RU'
+            }
+        }),
+        [i18n.language, t]
+    )
 
     return (
         <AppLayout
@@ -37,53 +108,109 @@ const ObservatoryPage: NextPage<object> = () => {
                 ]
             }}
         >
+            <JsonLdScript
+                scriptKey={'observatory-place'}
+                data={placeSchema}
+            />
+
             <AppToolbar
                 title={title}
                 currentPage={title}
+                lead={
+                    <>
+                        {t(
+                            'pages.observatory.lead',
+                            'Погода, камеры, оборудование и расписание съёмки в реальном времени. Обсерватория сама решает, начинать ли съёмку, анализируя условия.'
+                        )}{' '}
+                        <Link
+                            href={'/observatory/overview'}
+                            title={overviewLink}
+                        >
+                            {`${overviewLink} →`}
+                        </Link>
+                    </>
+                }
             />
 
-            <p className={styles.text}>
-                {t(
-                    'pages.observatory.text',
-                    'Наблюдение за Вселенной начинается здесь - в режиме реального времени вы можете увидеть текущие погодные условия, трансляцию с камер, статус оборудования и расписание съёмки. Обсерватория работает в полуавтоматическом режиме, позволяя вести съёмку deep-sky объектов удалённо. Здесь реализована система интеллектуального управления, анализирующая погодные условия и автоматически принимающая решение о начале работы. Подробнее об оборудовании и принципе работы можно узнать на отдельной странице:'
-                )}{' '}
-                <Link
-                    href={'/observatory/overview'}
-                    title={observatoryLink}
-                >
-                    {observatoryLink}
-                </Link>
-                {'.'}
-            </p>
-
-            <div className={styles.observatoryGrid}>
-                <div className={styles.stack}>
-                    <Weather />
-                    <AstronomyCalc />
-                </div>
-                <RelayList />
+            <div className={styles.status}>
+                <span className={styles.livePill}>
+                    <span
+                        className={cn(
+                            styles.liveDot,
+                            online && styles.online,
+                            minutesAgo !== undefined && !online && styles.offline
+                        )}
+                        aria-hidden={'true'}
+                    />
+                    {minutesAgo === undefined ? (
+                        t('pages.observatory.connecting', 'Подключение…')
+                    ) : online ? (
+                        <>
+                            <b>{t('pages.observatory.online', 'Онлайн')}</b>
+                            {' · '}
+                            {minutesAgo < 1
+                                ? t('pages.observatory.updated-now', 'обновлено только что')
+                                : t('pages.observatory.updated-ago', 'обновлено {{count}} мин назад', {
+                                      count: minutesAgo
+                                  })}
+                        </>
+                    ) : (
+                        <>
+                            <b>{t('pages.observatory.offline', 'Нет связи')}</b>
+                            {' · '}
+                            {t('pages.observatory.updated-ago', 'обновлено {{count}} мин назад', { count: minutesAgo })}
+                        </>
+                    )}
+                </span>
             </div>
 
-            <div className={styles.observatoryGrid}>
+            <ConditionsVerdict
+                weather={weather}
+                now={now}
+                online={online}
+                loading={weatherLoading}
+            />
+
+            <div className={styles.bento}>
+                <WeatherCard
+                    weather={weather}
+                    loading={weatherLoading}
+                    error={weatherError}
+                />
+                <SkyCard now={now} />
+                <ForecastCard
+                    className={styles.wide}
+                    daily={forecastDaily}
+                    hourly={forecastHourly}
+                    now={now}
+                    loading={dailyLoading || hourlyLoading}
+                    error={dailyError && hourlyError}
+                />
+            </div>
+
+            <h2 className={styles.sectionTitle}>{t('pages.observatory.cameras', 'Камеры')}</h2>
+            <div className={styles.cameras}>
                 <Camera
-                    cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/2`}
+                    cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}camera/2`}
                     interval={4}
+                    label={t('pages.observatory.camera-observatory', 'Обсерватория')}
                 />
-
                 <Camera
-                    cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}/camera/1`}
+                    cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}camera/1`}
                     interval={30}
+                    label={t('pages.observatory.camera-sky', 'Всё небо')}
                 />
             </div>
 
-            <div className={styles.block}>
-                <TelescopeWorkdays
-                    eventsTelescope={data?.items}
-                    loading={isLoading}
-                />
+            <h2 className={styles.sectionTitle}>
+                {t('pages.observatory.equipment', 'Оборудование и работа телескопа')}
+            </h2>
+            <div className={styles.equipment}>
+                <RelayList />
+                <ObservingSessions nights={nights} />
             </div>
 
-            <Calendar eventsTelescope={data?.items} />
+            <TelescopeActivity nights={nights} />
 
             <AppFooter />
         </AppLayout>
@@ -92,14 +219,34 @@ const ObservatoryPage: NextPage<object> = () => {
 
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
-        async (context): Promise<GetServerSidePropsResult<object>> => {
+        async (context): Promise<GetServerSidePropsResult<ObservatoryPageProps>> => {
+            // Public page: nginx caches the HTML for a short while (config/nginx.conf), so a burst
+            // of visitors costs the API one request
+            context.res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=240')
+
             const { translations } = await initSSRLocale(store, context)
 
-            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+            // The nights are rendered on the server: the objects shot are links worth indexing.
+            // The weather and the forecast are fetched here too (the station answers in ~1 s):
+            // they ship in the store, the client hooks pick them up and only poll for updates
+            const [{ data: telescope }] = await Promise.all([
+                store.dispatch(API.endpoints?.statisticGetTelescope.initiate()),
+                store.dispatch(APIMeteo.endpoints.getCurrent.initiate()),
+                store.dispatch(APIMeteo.endpoints.getForecastDaily.initiate()),
+                store.dispatch(APIMeteo.endpoints.getForecastHourly.initiate())
+            ])
+
+            await Promise.all([
+                ...store.dispatch(API.util.getRunningQueriesThunk()),
+                ...store.dispatch(APIMeteo.util.getRunningQueriesThunk())
+            ])
+
+            removeSSRQueryCache(store, ['statisticGetTelescope'])
 
             return {
                 props: {
-                    ...translations
+                    ...translations,
+                    nights: toTelescopeNights(telescope?.items)
                 }
             }
         }
