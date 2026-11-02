@@ -10,8 +10,63 @@ const typescript = require('typescript')
 // authored plural forms that the scanner cannot derive from a single default
 // string in source).
 // ---------------------------------------------------------------------------
-const EN_TRANSLATION_PATH = path.resolve(__dirname, 'public/locales/en/translation.json')
-const RU_TRANSLATION_PATH = path.resolve(__dirname, 'public/locales/ru/translation.json')
+// ---------------------------------------------------------------------------
+// Namespaces. Every page used to ship the whole dictionary (100+ KB of JSON in
+// __NEXT_DATA__, admin and editor strings included) because every scanned key
+// landed in one `translation` file. The keys keep their names; a key is written
+// to the namespace its prefix belongs to, and a page loads only the namespaces
+// its section needs (`initSSRLocale(store, context, ['translation', 'photos'])`).
+// At runtime i18next looks a key up in `translation` first and then in the
+// loaded section namespaces (`fallbackNS` in next-i18next.config.js), so the
+// code never spells a namespace out. Keys shared by several sections stay in
+// `translation` (`common.*`, `menu.*`, `components.common.*`, `components.ui.*`,
+// `pages.profile.*`); `pages.privacy.title` is `common.privacy-policy` for the
+// footer for that reason.
+//
+// The hand-written page namespaces (`stargazing-faq`, `observatory-overview`, ...)
+// are read through `useTranslation('<ns>')` and never go through the scanner.
+// ---------------------------------------------------------------------------
+const DEFAULT_NS = 'translation'
+
+const NAMESPACE_PREFIXES = {
+    about: ['pages.about', 'components.pages.about'],
+    admin: ['pages.mailing', 'pages.roles', 'pages.push-notifications', 'users'],
+    objects: ['pages.objects', 'pages.object', 'pages.objects-form', 'components.pages.objects'],
+    observatory: [
+        'pages.observatory',
+        'pages.observatory-weather',
+        'pages.observatory-history',
+        'components.pages.observatory'
+    ],
+    photos: ['pages.photos', 'pages.photo', 'pages.photos-form', 'components.pages.photos', 'equipment'],
+    privacy: ['pages.privacy'],
+    stargazing: [
+        'pages.stargazing',
+        'pages.stargazing-history',
+        'pages.stargazing-tickets',
+        'pages.payment',
+        'pages.checkin',
+        'components.pages.stargazing'
+    ],
+    starmap: ['pages.star-map', 'components.common.star-map']
+}
+
+const NAMESPACES = [DEFAULT_NS, ...Object.keys(NAMESPACE_PREFIXES)]
+
+function namespaceForKey(key) {
+    for (const [ns, prefixes] of Object.entries(NAMESPACE_PREFIXES)) {
+        if (prefixes.some((prefix) => key === prefix || key.startsWith(prefix + '.'))) {
+            return ns
+        }
+    }
+
+    return DEFAULT_NS
+}
+
+module.exports.NAMESPACE_PREFIXES = NAMESPACE_PREFIXES
+module.exports.namespaceForKey = namespaceForKey
+
+const localePath = (lng, ns) => path.resolve(__dirname, `public/locales/${lng}/${ns}.json`)
 
 /**
  * Recursively flatten a nested object into dot-separated key → value entries.
@@ -32,18 +87,26 @@ function flattenObject(obj, prefix, map) {
     return map
 }
 
-function loadSnapshot(filePath) {
-    try {
-        const raw = fs.readFileSync(filePath, 'utf-8')
-        return flattenObject(JSON.parse(raw))
-    } catch (_) {
-        // File doesn't exist yet — all keys will be treated as new
-        return new Map()
-    }
+// One flat map per language over every managed namespace file: a key that moves
+// between namespaces (or a dictionary that is being split for the first time)
+// keeps its translation.
+function loadSnapshot(lng) {
+    const map = new Map()
+
+    NAMESPACES.forEach((ns) => {
+        try {
+            const raw = fs.readFileSync(localePath(lng, ns), 'utf-8')
+            flattenObject(JSON.parse(raw), '', map)
+        } catch (_) {
+            // File doesn't exist yet — its keys will be treated as new
+        }
+    })
+
+    return map
 }
 
-const existingEnSnapshot = loadSnapshot(EN_TRANSLATION_PATH)
-const existingRuSnapshot = loadSnapshot(RU_TRANSLATION_PATH)
+const existingEnSnapshot = loadSnapshot('en')
+const existingRuSnapshot = loadSnapshot('ru')
 
 // ---------------------------------------------------------------------------
 // Deep-merge helper used in flush: for every leaf in `scanned`, if the
@@ -78,6 +141,7 @@ function mergeOutput(scanned, snapshot, fallbackToScanned, prefix) {
 }
 
 module.exports = {
+    ...module.exports,
     input: ['**/*.{js,jsx,ts,tsx}', '!**/node_modules/**', '!**/dist/**'],
     output: './public/locales',
 
@@ -94,6 +158,8 @@ module.exports = {
         },
         lngs: ['en', 'ru'],
         defaultLng: 'ru',
+        ns: NAMESPACES,
+        defaultNs: DEFAULT_NS,
         nsSeparator: false,
         keySeparator: '.',
         checkForSourceFile: false,
@@ -248,7 +314,7 @@ module.exports = {
 
             console.log(file.path)
 
-            this.parser.set(key, opts)
+            this.parser.set(key, { ...opts, ns: namespaceForKey(key) })
             keyMap.set(key, file.path)
         }
 

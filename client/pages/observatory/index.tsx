@@ -99,9 +99,9 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = ({ nights }) => {
             openGraph={{
                 images: [
                     {
-                        height: 1024,
-                        url: '/images/index-observatory.png',
-                        width: 1536
+                        height: 630,
+                        url: '/images/og-observatory.jpg',
+                        width: 1200
                     }
                 ]
             }}
@@ -218,7 +218,7 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = ({ nights }) => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<ObservatoryPageProps>> => {
-            const { translations } = await initSSRLocale(store, context)
+            const { translations } = await initSSRLocale(store, context, ['translation', 'observatory'])
 
             // The nights are rendered on the server: the objects shot are links worth indexing.
             // The weather and the forecast are fetched here too (the station answers in ~1 s):

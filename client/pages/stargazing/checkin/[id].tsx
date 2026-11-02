@@ -94,7 +94,7 @@ const CheckinIdPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const { translations } = await initSSRLocale(store, context)
+            const { translations } = await initSSRLocale(store, context, ['translation', 'stargazing'])
             const token = await getCookie('token', { req: context.req, res: context.res })
 
             if (token) {

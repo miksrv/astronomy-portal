@@ -6,6 +6,7 @@ import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslation
 import { API, ApiModel, setLocale } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import type { AppStore } from '@/api/store'
+import { DEFAULT_LOCALE } from '@/utils/constants'
 
 type SSRTranslations = Awaited<ReturnType<typeof serverSideTranslations>>
 
@@ -26,10 +27,12 @@ export const requirePermissionSSR = async (
     context: GetServerSidePropsContext,
     /** A single required privilege, or a list — any one of which is enough. */
     permission: ApiModel.Permission | ApiModel.Permission[],
-    redirectTo = '/'
+    redirectTo = '/',
+    // The section's dictionaries on top of the shared one, as for `initSSRLocale`
+    namespaces: string[] = ['translation']
 ): Promise<PermissionGuardResult> => {
-    const locale = context.locale ?? 'en'
-    const translations = await serverSideTranslations(locale, ['translation'])
+    const locale = context.locale ?? DEFAULT_LOCALE
+    const translations = await serverSideTranslations(locale, namespaces)
     const token = await getCookie('token', { req: context.req, res: context.res })
 
     store.dispatch(setLocale(locale))

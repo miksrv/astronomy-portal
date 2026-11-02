@@ -280,7 +280,7 @@ const PrivacyPolicyPage: NextPage<object> = () => {
                     <Link
                         href={'https://t.me/look_at_stars'}
                         title={t('common.telegram', 'Телеграм')}
-                        rel={'noindex nofollow'}
+                        rel={'nofollow noopener'}
                         target={'_blank'}
                     >
                         {t('pages.privacy.telegram', 'Телеграм проекта')}
@@ -294,7 +294,7 @@ const PrivacyPolicyPage: NextPage<object> = () => {
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
         async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<object>> => {
-            const { translations } = await initSSRLocale(store, context, ['translation'])
+            const { translations } = await initSSRLocale(store, context, ['translation', 'privacy'])
 
             return {
                 props: {

@@ -81,7 +81,7 @@ export const CookieConsent: React.FC = () => {
                 <Link
                     href={'/privacy'}
                     className={styles.link}
-                    title={t('pages.privacy.title', 'Политика конфиденциальности')}
+                    title={t('common.privacy-policy', 'Политика конфиденциальности')}
                 >
                     {t('components.common.cookie-consent.privacy-link', 'политикой конфиденциальности')}
                 </Link>

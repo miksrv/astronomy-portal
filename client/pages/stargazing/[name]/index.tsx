@@ -40,6 +40,15 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 
     const user = useAppSelector((state) => state.auth.user)
 
+    // Counted here, once the page is open in a browser, not by the server render
+    const [postView] = API.useEventPostViewMutation()
+
+    useEffect(() => {
+        if (eventId) {
+            void postView(eventId)
+        }
+    }, [eventId, postView])
+
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState<boolean>(false)
     const [selectedPhotographer, setSelectedPhotographer] = useState<string | undefined>(undefined)
     const [showLightbox, setShowLightbox] = useState<boolean>(false)
@@ -361,7 +370,7 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<StargazingItemPageProps>> => {
-            const { translations } = await initSSRLocale(store, context)
+            const { translations } = await initSSRLocale(store, context, ['translation', 'stargazing'])
             const eventId = context.params?.name
 
             if (typeof eventId !== 'string') {
@@ -374,9 +383,16 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 store.dispatch(setSSRToken(token))
             }
 
-            const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
+            // The event itself and the list for the prev/next links do not depend on
+            // each other: one round trip to the API instead of two
+            const [{ data: eventsData }, { data: eventData, isError }] = await Promise.all([
+                store.dispatch(API.endpoints?.eventGetList.initiate()),
+                store.dispatch(API.endpoints?.eventGetItem.initiate(eventId))
+            ])
 
-            const { data: eventData, isError } = await store.dispatch(API.endpoints?.eventGetItem.initiate(eventId))
+            if (isError) {
+                return { notFound: true }
+            }
 
             // Prefetch only the first page of the gallery (not the whole,
             // potentially hundreds-strong list) so it's part of the initial HTML
@@ -384,31 +400,27 @@ export const getServerSideProps = wrapper.getServerSideProps(
             // the rest loads via the "Смотреть все" button on the client. Args
             // match exactly what the component requests on mount, so the client
             // hook reuses this cached entry with no extra request.
-            await store.dispatch(
-                API.endpoints?.eventGetMediaList.initiate({
-                    eventId,
-                    limit: PHOTOS_PAGE_SIZE
-                })
-            )
-
-            // Prefetch the first page of reviews so it's part of the initial HTML
-            // instead of only appearing after client-side hydration (bad for SEO -
-            // crawlers that don't execute JS never see review text at all, and
-            // Google's JS-render pass is delayed). The query args match exactly
-            // what `EventReviews` requests on mount, so the client hook reuses this
-            // cached entry with no extra request or loading flash.
-            await store.dispatch(
-                API.endpoints?.commentsGetList.initiate({
-                    entityId: eventId,
-                    entityType: 'event',
-                    limit: REVIEWS_PAGE_SIZE,
-                    offset: 0
-                })
-            )
-
-            if (isError) {
-                return { notFound: true }
-            }
+            //
+            // The first page of reviews is prefetched for the same reason: crawlers
+            // that don't execute JS never see review text otherwise. The query args
+            // match exactly what `EventReviews` requests on mount, so the client
+            // hook reuses this cached entry with no extra request or loading flash.
+            await Promise.all([
+                store.dispatch(
+                    API.endpoints?.eventGetMediaList.initiate({
+                        eventId,
+                        limit: PHOTOS_PAGE_SIZE
+                    })
+                ),
+                store.dispatch(
+                    API.endpoints?.commentsGetList.initiate({
+                        entityId: eventId,
+                        entityType: 'event',
+                        limit: REVIEWS_PAGE_SIZE,
+                        offset: 0
+                    })
+                )
+            ])
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 

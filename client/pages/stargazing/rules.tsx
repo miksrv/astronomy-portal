@@ -155,7 +155,7 @@ const StargazingRulesPage: NextPage<object> = () => {
                     style={{ margin: '0 5px' }}
                     href={'https://t.me/look_at_stars'}
                     title={t('common.telegram', 'Телеграм')}
-                    rel={'noindex nofollow'}
+                    rel={'nofollow noopener'}
                     target={'_blank'}
                 >
                     {tPage('subscribe', 'Подписывайтесь')}

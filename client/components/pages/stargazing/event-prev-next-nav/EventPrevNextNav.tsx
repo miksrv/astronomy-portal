@@ -17,7 +17,7 @@ interface EventPrevNextNavProps {
 }
 
 export const EventPrevNextNav: React.FC<EventPrevNextNavProps> = ({ prevEvent, nextEvent }) => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     if (!prevEvent && !nextEvent) {
         return null
@@ -72,7 +72,9 @@ export const EventPrevNextNav: React.FC<EventPrevNextNavProps> = ({ prevEvent, n
                     <div className={styles.body}>
                         <div className={styles.title}>{prevEvent.title}</div>
                         {prevEvent.date?.date && (
-                            <div className={styles.date}>{formatDate(prevEvent.date.date, 'D MMMM YYYY')}</div>
+                            <div className={styles.date}>
+                                {formatDate(prevEvent.date.date, 'D MMMM YYYY', i18n.language)}
+                            </div>
                         )}
                     </div>
                 </Link>
@@ -87,7 +89,9 @@ export const EventPrevNextNav: React.FC<EventPrevNextNavProps> = ({ prevEvent, n
                     <div className={styles.body}>
                         <div className={styles.title}>{nextEvent.title}</div>
                         {nextEvent.date?.date && (
-                            <div className={styles.date}>{formatDate(nextEvent.date.date, 'D MMMM YYYY')}</div>
+                            <div className={styles.date}>
+                                {formatDate(nextEvent.date.date, 'D MMMM YYYY', i18n.language)}
+                            </div>
                         )}
                     </div>
 

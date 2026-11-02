@@ -67,7 +67,7 @@ export const PhotoObjectCard: React.FC<PhotoObjectCardProps> = ({ object }) => {
                         icon={'Map'}
                         className={styles.starMap}
                         link={`/starmap?view=sky&c=${object.ra},${object.dec},0&z=4`}
-                        label={t('components.pages.photos.photo-object-card.star-map', 'Звёздная карта')}
+                        label={t('common.star-map', 'Звёздная карта')}
                     />
                 )}
             </div>

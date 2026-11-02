@@ -179,9 +179,15 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                             closeOnSelect={true}
                             disabled={isFormDisabled}
                             className={styles.formElement}
-                            label={'Категория'}
-                            notFoundCaption={'Ничего не найдено'}
-                            placeholder={'Выберите одну или несколько категорий'}
+                            label={t('components.pages.photos.astro-photo-form.category', 'Категория')}
+                            notFoundCaption={t(
+                                'components.pages.photos.astro-photo-form.not-found',
+                                'Ничего не найдено'
+                            )}
+                            placeholder={t(
+                                'components.pages.photos.astro-photo-form.categories-placeholder',
+                                'Выберите одну или несколько категорий'
+                            )}
                             loading={categoriesListLoading}
                             value={field.value}
                             error={fieldState.error?.message}
@@ -205,9 +211,15 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                             closeOnSelect={true}
                             disabled={isFormDisabled}
                             className={styles.formElement}
-                            label={'Объекты на фотографии'}
-                            notFoundCaption={'Ничего не найдено'}
-                            placeholder={'Выберите объекты, которые есть на фотографии'}
+                            label={t('components.pages.photos.astro-photo-form.objects', 'Объекты на фотографии')}
+                            notFoundCaption={t(
+                                'components.pages.photos.astro-photo-form.not-found',
+                                'Ничего не найдено'
+                            )}
+                            placeholder={t(
+                                'components.pages.photos.astro-photo-form.objects-placeholder',
+                                'Выберите объекты, которые есть на фотографии'
+                            )}
                             loading={objectsListLoading}
                             value={field.value}
                             error={fieldState.error?.message}
@@ -230,9 +242,15 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                             required={true}
                             disabled={isFormDisabled}
                             className={styles.fullRow}
-                            label={'Оборудование'}
-                            notFoundCaption={'Ничего не найдено'}
-                            placeholder={'Выберите астрономическое оборудование'}
+                            label={t('components.pages.photos.astro-photo-form.equipment', 'Оборудование')}
+                            notFoundCaption={t(
+                                'components.pages.photos.astro-photo-form.not-found',
+                                'Ничего не найдено'
+                            )}
+                            placeholder={t(
+                                'components.pages.photos.astro-photo-form.equipment-placeholder',
+                                'Выберите астрономическое оборудование'
+                            )}
                             loading={equipmentListLoading}
                             value={field.value}
                             error={fieldState.error?.message}
@@ -261,7 +279,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                             disabled={isFormDisabled}
                             className={styles.formElement}
                             testId={'date'}
-                            label={'Дата обработки'}
+                            label={t('components.pages.photos.astro-photo-form.processing-date', 'Дата обработки')}
                             value={field.value}
                             error={fieldState.error?.message}
                             onChange={field.onChange}
@@ -272,8 +290,8 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                 <div className={`${styles.addFilter} ${styles.fullRow}`}>
                     <Select<ApiModel.FilterTypes>
                         data-testid={'filters'}
-                        label={'Параметры съемки'}
-                        placeholder={'Добавить фильтр'}
+                        label={t('components.pages.photos.astro-photo-form.shooting-params', 'Параметры съемки')}
+                        placeholder={t('components.pages.photos.astro-photo-form.add-filter', 'Добавить фильтр')}
                         value={selectedFilter}
                         disabled={isFormDisabled}
                         className={styles.filtersDropdown}
@@ -289,7 +307,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                         type={'button'}
                         icon={'PlusCircle'}
                         size={'medium'}
-                        aria-label={'Добавить фильтр'}
+                        aria-label={t('components.pages.photos.astro-photo-form.add-filter', 'Добавить фильтр')}
                         disabled={!selectedFilter || isFormDisabled}
                         onClick={handleAddFilter}
                     />
@@ -316,8 +334,11 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                                         {...framesField}
                                         disabled={isFormDisabled}
                                         type={'number'}
-                                        placeholder={'Количество кадров'}
-                                        aria-label={`${field.filter}: количество кадров`}
+                                        placeholder={t(
+                                            'components.pages.photos.astro-photo-form.frames',
+                                            'Количество кадров'
+                                        )}
+                                        aria-label={`${field.filter}: ${t('components.pages.photos.astro-photo-form.frames-aria', 'количество кадров')}`}
                                         value={Number.isNaN(framesField.value) ? '' : framesField.value}
                                         error={fieldState.error?.message}
                                         onChange={(e) => framesField.onChange(parseFloat(e.target.value))}
@@ -333,8 +354,11 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                                         {...exposureField}
                                         disabled={isFormDisabled}
                                         type={'number'}
-                                        placeholder={'Выдержка (минут)'}
-                                        aria-label={`${field.filter}: выдержка (минут)`}
+                                        placeholder={t(
+                                            'components.pages.photos.astro-photo-form.exposure',
+                                            'Выдержка (минут)'
+                                        )}
+                                        aria-label={`${field.filter}: ${t('components.pages.photos.astro-photo-form.exposure-aria', 'выдержка (минут)')}`}
                                         value={Number.isNaN(exposureField.value) ? '' : exposureField.value}
                                         error={fieldState.error?.message}
                                         onChange={(e) => exposureField.onChange(parseFloat(e.target.value))}
@@ -346,7 +370,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                                 type={'button'}
                                 icon={'Close'}
                                 mode={'outline'}
-                                aria-label={`Удалить фильтр ${field.filter}`}
+                                aria-label={`${t('components.pages.photos.astro-photo-form.remove-filter', 'Удалить фильтр')} ${field.filter}`}
                                 disabled={isFormDisabled}
                                 onClick={() => remove(index)}
                             />
@@ -377,7 +401,15 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                                 htmlFor={'astroPhotoUpload'}
                                 className={styles.formLabel}
                             >
-                                {initialData?.fileName ? 'Заменить фотографию:' : 'Загрузить фотографию:'}
+                                {initialData?.fileName
+                                    ? t(
+                                          'components.pages.photos.astro-photo-form.replace-photo',
+                                          'Заменить фотографию:'
+                                      )
+                                    : t(
+                                          'components.pages.photos.astro-photo-form.upload-photo',
+                                          'Загрузить фотографию:'
+                                      )}
                             </label>
                             <input
                                 {...restField}
@@ -396,7 +428,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                     <Button
                         type={'button'}
                         mode={'outline'}
-                        label={'Отмена'}
+                        label={t('common.cancel', 'Отмена')}
                         disabled={isFormDisabled}
                         onClick={onCancel}
                     />
@@ -404,7 +436,7 @@ export const AstroPhotoForm: React.FC<AstroPhotoFormProps> = ({ disabled, initia
                     <Button
                         type={'submit'}
                         mode={'primary'}
-                        label={'Сохранить'}
+                        label={t('common.save', 'Сохранить')}
                         loading={isSubmitting}
                         disabled={isFormDisabled}
                     />

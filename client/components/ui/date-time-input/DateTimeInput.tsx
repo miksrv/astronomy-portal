@@ -2,6 +2,8 @@ import React, { useCallback, useId, useRef, useState } from 'react'
 import dayjs from 'dayjs'
 import { Button, Calendar, Icon, InputProps, Popout, Select } from 'simple-react-ui-kit'
 
+import { useTranslation } from 'next-i18next/pages'
+
 import styles from './styles.module.sass'
 
 export interface DateTimeInputProps {
@@ -36,15 +38,15 @@ export interface DateTimeInputProps {
     maxDate?: string
     /** Locale for month/day names in the calendar (default: 'ru'). */
     locale?: 'ru' | 'en'
-    /** Caption over the hour select (default: 'Часы'). Set it on a localized page. */
+    /** Caption over the hour select (default: the dictionary's) */
     hourLabel?: string
-    /** Caption over the minute select (default: 'Минуты'). Set it on a localized page. */
+    /** Caption over the minute select (default: the dictionary's) */
     minuteLabel?: string
-    /** Caption of the button that closes the popout (default: 'Готово'). */
+    /** Caption of the button that closes the popout (default: the dictionary's). */
     doneLabel?: string
     /** Adds a "now" button to the popout footer, next to the closing one. */
     showNowButton?: boolean
-    /** Caption of the "now" button (default: 'Сейчас'). */
+    /** Caption of the "now" button (default: the dictionary's). */
     nowLabel?: string
     /**
      * What the "now" button does. By default it commits the current moment through
@@ -112,11 +114,11 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     minDate,
     maxDate,
     locale = 'ru',
-    hourLabel = 'Часы',
-    minuteLabel = 'Минуты',
-    doneLabel = 'Готово',
+    hourLabel,
+    minuteLabel,
+    doneLabel,
     showNowButton,
-    nowLabel = 'Сейчас',
+    nowLabel,
     timePosition = 'below',
     portal,
     className,
@@ -125,6 +127,8 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     onNow,
     onOpenChange
 }) => {
+    const { t } = useTranslation()
+
     // Typed structurally (rather than importing `PopoutHandleProps`) so this
     // file only needs one import statement from 'simple-react-ui-kit' — a
     // mix of a value and a type-only import from the same module trips up
@@ -179,7 +183,15 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
         onChange?.(showTime ? `${nextDate}T${nextHour ?? '00'}:${nextMinute ?? '00'}` : nextDate)
     }
 
-    const resolvedPlaceholder = placeholder ?? (showTime ? 'Выберите дату и время' : 'Выберите дату')
+    const resolvedPlaceholder =
+        placeholder ??
+        (showTime
+            ? t('components.ui.date-time-input.placeholder-datetime', 'Выберите дату и время')
+            : t('components.ui.date-time-input.placeholder-date', 'Выберите дату'))
+    const resolvedHourLabel = hourLabel ?? t('components.ui.date-time-input.hours', 'Часы')
+    const resolvedMinuteLabel = minuteLabel ?? t('components.ui.date-time-input.minutes', 'Минуты')
+    const resolvedDoneLabel = doneLabel ?? t('components.ui.date-time-input.done', 'Готово')
+    const resolvedNowLabel = nowLabel ?? t('components.ui.date-time-input.now', 'Сейчас')
 
     const handleNow = () => {
         if (onNow) {
@@ -204,7 +216,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 data-testid={testId && `${testId}-hour`}
             >
                 <Select<string>
-                    label={hourLabel}
+                    label={resolvedHourLabel}
                     options={HOUR_OPTIONS}
                     value={effectiveHour}
                     onSelect={(selected) => commit(effectiveDate, selected?.[0]?.key, effectiveMinute)}
@@ -215,7 +227,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 data-testid={testId && `${testId}-minute`}
             >
                 <Select<string>
-                    label={minuteLabel}
+                    label={resolvedMinuteLabel}
                     options={MINUTE_OPTIONS}
                     value={effectiveMinute}
                     onSelect={(selected) => commit(effectiveDate, effectiveHour, selected?.[0]?.key)}
@@ -299,7 +311,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                             {showNowButton && (
                                 <Button
                                     mode={'outline'}
-                                    label={nowLabel}
+                                    label={resolvedNowLabel}
                                     className={styles.footerButton}
                                     disabled={disabled}
                                     onClick={handleNow}
@@ -309,7 +321,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                             {showTime && (
                                 <Button
                                     mode={'primary'}
-                                    label={doneLabel}
+                                    label={resolvedDoneLabel}
                                     className={styles.footerButton}
                                     onClick={() => popoutRef.current?.close()}
                                 />

@@ -21,7 +21,7 @@ interface ObjectPhotoTableProps extends ContainerProps {
 }
 
 export const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, currentPhotoId, ...props }) => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     const flattenedPhotos = useMemo(() => flattenPhotos(photosList), [photosList])
 
@@ -57,7 +57,7 @@ export const ObjectPhotoTable: React.FC<ObjectPhotoTableProps> = ({ photosList, 
             {
                 accessor: 'date',
                 className: styles.cellCenter,
-                formatter: (data) => formatDate(data as string, 'DD MMM YYYY'),
+                formatter: (data) => formatDate(data as string, 'DD MMM YYYY', i18n.language),
                 header: t('components.common.object-photos-table.date', 'Дата'),
                 isSortable: true
             },

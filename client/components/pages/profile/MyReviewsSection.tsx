@@ -18,7 +18,7 @@ interface MyReviewsSectionProps {
 }
 
 export const MyReviewsSection: React.FC<MyReviewsSectionProps> = ({ userId }) => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     const { data, isLoading } = API.useCommentsGetListQuery({ userId: userId! }, { skip: !userId })
     const [deleteComment, { isLoading: isDeleting }] = API.useCommentsDeleteMutation()
@@ -84,7 +84,7 @@ export const MyReviewsSection: React.FC<MyReviewsSectionProps> = ({ userId }) =>
                                     className={styles.reviewDate}
                                     dateTime={review.entity.date}
                                 >
-                                    {formatDate(review.entity.date, 'D MMMM YYYY')}
+                                    {formatDate(review.entity.date, 'D MMMM YYYY', i18n.language)}
                                 </time>
                             )}
                             {review.rating !== undefined && <StarRating rating={review.rating} />}

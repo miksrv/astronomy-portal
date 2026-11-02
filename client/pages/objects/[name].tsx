@@ -355,7 +355,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<ObjectItemPageProps>> => {
-            const { translations, locale } = await initSSRLocale(store, context)
+            const { translations, locale } = await initSSRLocale(store, context, ['translation', 'objects'])
             const objectName = context.params?.name
 
             if (typeof objectName !== 'string') {

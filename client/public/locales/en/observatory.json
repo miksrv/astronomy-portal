@@ -1,0 +1,180 @@
+{
+    "components": {
+        "pages": {
+            "observatory": {
+                "camera": {
+                    "interval_one": "Refreshes every {{count}} second",
+                    "interval_other": "Refreshes every {{count}} seconds",
+                    "fullscreen": "Fullscreen",
+                    "image-alt": "Camera frame: {{label}}",
+                    "camera-not-available": "Camera unavailable",
+                    "live": "LIVE",
+                    "stale": "frame of {{time}}"
+                },
+                "conditions-verdict": {
+                    "clear-title": "Great conditions for imaging",
+                    "clear-dark": "Clear and dark — the telescope can work",
+                    "clear-moon": "Clear, but the Moon is bright — narrowband filters are better",
+                    "waiting-title": "Good weather, waiting for darkness",
+                    "waiting-text": "Imaging starts after astronomical twilight",
+                    "borderline-title": "Borderline conditions",
+                    "borderline-text": "One sensor is at its limit — the telescope waits for the weather to settle",
+                    "closed-title": "No imaging possible",
+                    "closed-text": "The observatory stays closed until the weather improves",
+                    "unknown-title": "No weather data",
+                    "unknown-text": "The weather station does not respond — imaging is on hold",
+                    "day": "day",
+                    "twilight": "twilight",
+                    "night": "night",
+                    "label": "Imaging conditions",
+                    "local-time": "Local time",
+                    "sun-altitude": "Sun altitude",
+                    "moon": "Moon",
+                    "moon-up": "above the horizon",
+                    "moon-down": "below the horizon"
+                },
+                "forecast-card": {
+                    "kind-clear": "Clear",
+                    "kind-partly": "Partly cloudy",
+                    "kind-cloudy": "Cloudy",
+                    "kind-rain": "Rain",
+                    "kind-snow": "Snow",
+                    "kind-storm": "Thunderstorm",
+                    "kind-fog": "Fog",
+                    "title": "Cloud forecast",
+                    "legend": "Green — nights without clouds, rain or wind",
+                    "error": "The forecast is unavailable",
+                    "tonight": "The coming night by the hour",
+                    "hour-title": "{{time}}: clouds {{clouds}}%, wind {{wind}} m/s",
+                    "no-hourly": "No hourly forecast for this night",
+                    "week": "This week",
+                    "no-daily": "No weekly forecast yet",
+                    "today": "Today",
+                    "clouds-label": "clouds",
+                    "day-label": "day",
+                    "night-label": "night",
+                    "good-night": "good for imaging",
+                    "bad-night": "not for imaging"
+                },
+                "observing-sessions": {
+                    "title": "Latest imaging nights",
+                    "total_one": "{{count}} night in total",
+                    "total_other": "{{count}} nights in total",
+                    "empty": "The telescope has not shot anything yet"
+                },
+                "relay-list": {
+                    "mount": "Mount",
+                    "camera": "Camera",
+                    "focuser": "Focuser",
+                    "heaters": "Dew heater controller",
+                    "power-supply": "12 V power supply",
+                    "flat-panel": "LED flat panel",
+                    "title": "Equipment power",
+                    "summary": "{{on}} of {{total}} on",
+                    "error": "Failed to retrieve the relay list",
+                    "light-error": "Could not turn the light on, try again in a minute",
+                    "admins-only": "Only administrators can control the power",
+                    "lightning": "Lighting",
+                    "available-in-seconds_one": "Available again in {{count}} s",
+                    "available-in-seconds_other": "Available again in {{count}} s",
+                    "turned-on-times_one": "Turned on {{count}} time — watch it on the camera",
+                    "turned-on-times_other": "Turned on {{count}} times — watch it on the camera",
+                    "light-on": "On",
+                    "light-turn-on": "Turn on"
+                },
+                "sky-card": {
+                    "new-moon": "new moon",
+                    "waxing": "waxing",
+                    "full-moon": "full moon",
+                    "waning": "waning",
+                    "day": "Day",
+                    "twilight": "Twilight",
+                    "night": "Astronomical night",
+                    "title": "Sun and Moon",
+                    "coordinates": "{{lat}}° N, {{lon}}° E",
+                    "sun": "Sun",
+                    "dawn": "Rise",
+                    "sunset": "Set",
+                    "height": "Altitude",
+                    "azimuth": "Azimuth",
+                    "moon": "Moon",
+                    "moonset": "Set",
+                    "illumination": "Illumination",
+                    "timeline": "Twilight and night from noon to noon; the mark is the current time"
+                },
+                "telescope-activity": {
+                    "title": "Telescope activity",
+                    "year": "Year",
+                    "nights": "imaging nights",
+                    "exposure": "total exposure",
+                    "frames": "frames",
+                    "objects": "objects",
+                    "heatmap-label_one": "{{count}} imaging night in {{year}}",
+                    "heatmap-label_other": "{{count}} imaging nights in {{year}}",
+                    "no-shooting": "no imaging",
+                    "legend": "Each cell is a night; the colour is its total exposure",
+                    "less": "less",
+                    "more": "more"
+                },
+                "weather": {
+                    "label-temperature": "Temperature",
+                    "label-humidity": "Humidity",
+                    "label-clouds": "Cloudiness",
+                    "label-wind-speed": "Wind",
+                    "label-wind-gust": "Gusts",
+                    "label-precipitation": "Precipitation",
+                    "unit-wind": "m/s",
+                    "unit-precipitation": "mm",
+                    "safely": "Safe",
+                    "dangerous": "Dangerous",
+                    "critical": "Critical",
+                    "title": "Weather now",
+                    "observatory-in-orenburg-weather": "Weather at the Orenburg Observatory",
+                    "read-more": "Learn more",
+                    "error": "The weather station does not respond",
+                    "feels-like": "Feels like {{value}}°",
+                    "pressure-dew": "Pressure {{pressure}} hPa · dew point {{dewPoint}}°"
+                },
+                "widget-chart": {
+                    "chart-label_date-format": "D MMM YYYY, HH:mm",
+                    "only-hour_date-format": "HH:mm",
+                    "temperature": "Temperature",
+                    "feels-like": "Feels like",
+                    "dew-point": "Dew point",
+                    "meters-per-second": "m/s",
+                    "clouds": "Cloudiness",
+                    "wind-speed": "Wind speed"
+                }
+            }
+        }
+    },
+    "pages": {
+        "observatory-history": {
+            "title": "Observatory history",
+            "description": "The history of building and developing an amateur astronomical observatory: from the very first stake in the ground to remote telescope control."
+        },
+        "observatory": {
+            "title": "Observatory",
+            "how-it-works": "How it works",
+            "schema-name": "Look at the Stars amateur observatory",
+            "schema-locality": "Orenburg",
+            "description": "A homemade amateur astronomical observatory with remote access from anywhere in the world via the internet. Observatory operation statistics, number of frames captured and data accumulated. Telescope operating calendar.",
+            "lead": "Weather, cameras, equipment and the imaging schedule in real time. The observatory decides on its own whether to start imaging by analysing the conditions.",
+            "connecting": "Connecting…",
+            "online": "Online",
+            "updated-now": "updated just now",
+            "updated-ago_one": "updated {{count}} min ago",
+            "updated-ago_other": "updated {{count}} min ago",
+            "offline": "No connection",
+            "cameras": "Cameras",
+            "camera-observatory": "Observatory",
+            "camera-sky": "All sky",
+            "equipment": "Equipment and the telescope at work"
+        },
+        "observatory-weather": {
+            "title": "Weather at the Orenburg Observatory",
+            "description": "Current weather charts from the weather station of an amateur observatory on the outskirts of Orenburg. Temperature, humidity, cloudiness and wind speed in real time.",
+            "text": "Follow the weather in real time from the weather station installed at the homemade astronomical observatory on the outskirts of Orenburg. The charts show temperature, humidity, cloud cover and wind speed. For full data access and observation history, visit the weather station site:"
+        }
+    }
+}

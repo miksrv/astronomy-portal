@@ -29,7 +29,7 @@ const STATUS_BADGE_CLASS: Record<CombinedStatus, string> = {
 }
 
 export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = ({ eventId }) => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const [search, setSearch] = useState('')
     const [statusFilter, setStatusFilter] = useState<CombinedStatus | undefined>()
 
@@ -85,7 +85,7 @@ export const EventRegistrationsTable: React.FC<EventRegistrationsTableProps> = (
         {
             accessor: 'createdAt',
             className: styles.nowrap,
-            formatter: (value) => formatDate(value as string, 'DD MMMM YYYY, HH:mm'),
+            formatter: (value) => formatDate(value as string, 'DD MMMM YYYY, HH:mm', i18n.language),
             header: t('pages.stargazing.registrations-column-date', 'Дата регистрации'),
             isSortable: true
         },

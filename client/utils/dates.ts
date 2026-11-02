@@ -5,6 +5,11 @@ import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { TFunction } from 'i18next'
 
+// The month/weekday names come from the locale passed in by the caller, never from
+// dayjs's global locale: on the server that global is always 'en' (pages/_app.tsx only
+// switches it in an effect), which rendered English dates into Russian pages.
+import 'dayjs/locale/ru'
+
 dayjs.extend(utc)
 dayjs.extend(duration)
 dayjs.extend(relativeTime)
@@ -14,11 +19,26 @@ export const TIME_ZONE = 'Asia/Yekaterinburg'
 export const DEFAULT_SHORT_DATE_FORMAT = 'DD.MM.YYYY, HH:mm'
 export const DEFAULT_FULL_DATE_FORMAT = 'D MMMM YYYY, HH:mm'
 
-export const formatDate = (date?: string | Date | Dayjs, format?: string): string | undefined =>
-    date ? dayjs(date).format(format ?? DEFAULT_SHORT_DATE_FORMAT) : undefined
+/** `locale` ('ru' | 'en') is required whenever `format` has month or weekday names */
+export const formatDate = (date?: string | Date | Dayjs, format?: string, locale?: string): string | undefined =>
+    date
+        ? dayjs(date)
+              .locale(locale ?? 'ru')
+              .format(format ?? DEFAULT_SHORT_DATE_FORMAT)
+        : undefined
 
-export const formatUTCDate = (date?: string | Date, format: string = DEFAULT_FULL_DATE_FORMAT): string | undefined =>
-    date ? dayjs.utc(date).tz(TIME_ZONE).format(format) : undefined
+export const formatUTCDate = (
+    date?: string | Date,
+    format: string = DEFAULT_FULL_DATE_FORMAT,
+    locale?: string
+): string | undefined =>
+    date
+        ? dayjs
+              .utc(date)
+              .tz(TIME_ZONE)
+              .locale(locale ?? 'ru')
+              .format(format)
+        : undefined
 
 /**
  * Converts a UTC date (as stored/returned by the API) into the value format

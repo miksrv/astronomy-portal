@@ -40,7 +40,7 @@ const HistoryPage: NextPage<object> = () => {
                 'Актуальные графики погоды с метеостанции любительской обсерватории в пригороде Оренбурга. Температура, влажность, облачность и скорость ветра в реальном времени.'
             )}
             openGraph={{
-                images: [{ url: '/images/obs-background.png', width: 1717, height: 916 }]
+                images: [{ url: '/images/og-weather.jpg', width: 1200, height: 630 }]
             }}
         >
             <AppToolbar
@@ -103,7 +103,10 @@ const HistoryPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const { translations } = await initSSRLocale(store, context)
+            // Static shell: the charts fetch their own data on the client
+            context.res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400')
+
+            const { translations } = await initSSRLocale(store, context, ['translation', 'observatory'])
 
             return {
                 props: {

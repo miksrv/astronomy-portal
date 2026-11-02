@@ -127,7 +127,7 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
                         href={'https://t.me/look_at_stars'}
                         className={styles.telegramCta}
                         title={t('pages.stargazing.telegram', 'Телеграм')}
-                        rel={'noindex nofollow'}
+                        rel={'nofollow noopener'}
                         target={'_blank'}
                     >
                         <Icon name={'Telegram'} />
@@ -175,7 +175,11 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<StargazingPageProps>> => {
-            const { translations } = await initSSRLocale(store, context)
+            // Guests get the cached HTML (config/nginx.conf bypasses the cache on the auth cookie);
+            // short, so a freshly opened registration shows up within a couple of minutes
+            context.res.setHeader('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=600')
+
+            const { translations } = await initSSRLocale(store, context, ['translation', 'stargazing'])
             const token = await getCookie('token', { req: context.req, res: context.res })
 
             if (token) {

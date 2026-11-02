@@ -48,7 +48,7 @@ export const EventRow: React.FC<EventRowProps> = ({
     attended,
     hasReviewed
 }) => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     const itemTitle = linkTitle || title
 
@@ -59,7 +59,7 @@ export const EventRow: React.FC<EventRowProps> = ({
     const viewsCount = views || 0
     const membersCountValue = membersCount || 0
 
-    const formattedDate = formatDate(date, 'D MMMM YYYY')
+    const formattedDate = formatDate(date, 'D MMMM YYYY', i18n.language)
 
     const statsBadges = (attended || hasReviewed) && (
         <div className={styles.stats}>
@@ -119,7 +119,9 @@ export const EventRow: React.FC<EventRowProps> = ({
                         className={styles.dateBlock}
                         aria-label={`${dateLabel}: ${formattedDate}`}
                     >
-                        <span className={styles.dateMonth}>{formatDate(date, 'MMM')?.replace('.', '')}</span>
+                        <span className={styles.dateMonth}>
+                            {formatDate(date, 'MMM', i18n.language)?.replace('.', '')}
+                        </span>
                         <span className={styles.dateDay}>{formatDate(date, 'D')}</span>
                         <span className={styles.dateYear}>{formatDate(date, 'YYYY')}</span>
                     </div>

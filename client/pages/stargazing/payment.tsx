@@ -8,7 +8,7 @@ import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 import { generateNextSeo } from 'next-seo/pages'
 
-import { API, ApiType, SITE_LINK, wrapper } from '@/api'
+import { API, ApiType, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { useEventBookingSubmit } from '@/components/pages/stargazing/event-upcoming/useEventBookingSubmit'
 import { STARGAZING_RETRY_STORAGE_KEY } from '@/utils/constants'
@@ -22,7 +22,7 @@ const MAX_POLL_ATTEMPTS = 5
 type PaymentViewStatus = 'loading' | 'redirecting' | 'pending' | 'failed' | 'canceled' | 'error'
 
 const StargazingPaymentPage: NextPage<object> = () => {
-    const { t, i18n } = useTranslation()
+    const { t } = useTranslation()
     const router = useRouter()
 
     const orderId = typeof router.query.orderId === 'string' ? router.query.orderId : undefined
@@ -195,7 +195,6 @@ const StargazingPaymentPage: NextPage<object> = () => {
                 {generateNextSeo({
                     nofollow: true,
                     noindex: true,
-                    canonical: `${SITE_LINK}${i18n.language === 'en' ? 'en/' : ''}stargazing/payment`,
                     title: pageTitle
                 })}
             </Head>
@@ -316,7 +315,7 @@ const StargazingPaymentPage: NextPage<object> = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
-            const { translations } = await initSSRLocale(store, context)
+            const { translations } = await initSSRLocale(store, context, ['translation', 'stargazing'])
             const token = await getCookie('token', { req: context.req, res: context.res })
 
             if (token) {

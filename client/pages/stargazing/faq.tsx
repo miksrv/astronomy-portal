@@ -356,7 +356,7 @@ const StargazingFAQPage: NextPage<object> = () => {
                     href={'https://t.me/look_at_stars'}
                     style={{ marginLeft: '5px' }}
                     title={t('common.telegram', 'Телеграм')}
-                    rel={'noindex nofollow'}
+                    rel={'nofollow noopener'}
                     target={'_blank'}
                 >
                     {t('common.look-at-the-stars', 'Смотри на звёзды')}

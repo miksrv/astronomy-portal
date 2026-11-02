@@ -160,9 +160,15 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                                     closeOnSelect={true}
                                     disabled={isFormDisabled}
                                     className={styles.formElement}
-                                    label={'Категория'}
-                                    notFoundCaption={'Ничего не найдено'}
-                                    placeholder={'Выберите одну или несколько категорий'}
+                                    label={t('components.pages.objects.astro-object-form.category', 'Категория')}
+                                    notFoundCaption={t(
+                                        'components.pages.objects.astro-object-form.not-found',
+                                        'Ничего не найдено'
+                                    )}
+                                    placeholder={t(
+                                        'components.pages.objects.astro-object-form.categories-placeholder',
+                                        'Выберите одну или несколько категорий'
+                                    )}
                                     loading={categoriesListLoading}
                                     value={field.value}
                                     error={fieldState.error?.message}
@@ -185,7 +191,10 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                                     required={true}
                                     disabled={isFormDisabled}
                                     className={styles.formElement}
-                                    label={'Имя объекта в каталогах'}
+                                    label={t(
+                                        'components.pages.objects.astro-object-form.catalog-name',
+                                        'Имя объекта в каталогах'
+                                    )}
                                     error={fieldState.error?.message}
                                 />
                             )}
@@ -201,7 +210,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                                     required={true}
                                     disabled={isFormDisabled}
                                     className={styles.formElement}
-                                    label={'Название объекта'}
+                                    label={t('components.pages.objects.astro-object-form.title', 'Название объекта')}
                                     error={fieldState.error?.message}
                                 />
                             )}
@@ -216,7 +225,10 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                                     size={'medium'}
                                     disabled={isFormDisabled}
                                     className={styles.formElement}
-                                    label={'Ссылка на FITS файлы'}
+                                    label={t(
+                                        'components.pages.objects.astro-object-form.fits-link',
+                                        'Ссылка на FITS файлы'
+                                    )}
                                     error={fieldState.error?.message}
                                 />
                             )}
@@ -327,7 +339,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                             {...field}
                             disabled={isFormDisabled}
                             className={styles.formElement}
-                            label={'Описание объекта'}
+                            label={t('components.pages.objects.astro-object-form.description', 'Описание объекта')}
                             error={fieldState.error?.message}
                             autoResize={true}
                         />
@@ -338,7 +350,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                     <Button
                         type={'button'}
                         mode={'outline'}
-                        label={'Отмена'}
+                        label={t('common.cancel', 'Отмена')}
                         disabled={isFormDisabled}
                         onClick={onCancel}
                     />
@@ -346,7 +358,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                     <Button
                         type={'submit'}
                         mode={'primary'}
-                        label={'Сохранить'}
+                        label={t('common.save', 'Сохранить')}
                         loading={isSubmitting}
                         disabled={isFormDisabled}
                     />

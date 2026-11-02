@@ -1,3 +1,4 @@
+import { TFunction } from 'i18next'
 import { z } from 'zod'
 
 // All four fields are `datetime-local`-compatible values ("YYYY-MM-DDTHH:mm")
@@ -12,46 +13,56 @@ import { z } from 'zod'
 // something the booking-status UI can't render — see the 2026-08-19 incident
 // where registrationEnd fell after the event's own date and the
 // "registration closed" panel simply never appeared).
-export const eventFormSchema = z
-    .object({
-        title: z.string().optional(),
-        content: z.string().optional(),
-        date: z.string().optional(),
-        endDate: z.string().optional(),
-        tickets: z.string().optional(),
-        ticketPrice: z.string().optional(),
-        minAge: z.string().optional(),
-        requiresRegistration: z.boolean().optional(),
-        registrationStart: z.string().optional(),
-        registrationEnd: z.string().optional(),
-        latitude: z.string().optional(),
-        longitude: z.string().optional(),
-        location: z.string().optional(),
-        address: z.string().optional(),
-        upload: z.any().optional()
-    })
-    .superRefine((data, ctx) => {
-        if (data.endDate && data.date && data.endDate <= data.date) {
-            ctx.addIssue({
-                code: 'custom',
-                path: ['endDate'],
-                message: 'Время окончания мероприятия должно быть позже времени начала'
-            })
-        }
-
-        if (data.requiresRegistration ?? true) {
-            if (data.registrationStart && data.registrationEnd && data.registrationStart >= data.registrationEnd) {
+export const createEventFormSchema = (t: TFunction) =>
+    z
+        .object({
+            title: z.string().optional(),
+            content: z.string().optional(),
+            date: z.string().optional(),
+            endDate: z.string().optional(),
+            tickets: z.string().optional(),
+            ticketPrice: z.string().optional(),
+            minAge: z.string().optional(),
+            requiresRegistration: z.boolean().optional(),
+            registrationStart: z.string().optional(),
+            registrationEnd: z.string().optional(),
+            latitude: z.string().optional(),
+            longitude: z.string().optional(),
+            location: z.string().optional(),
+            address: z.string().optional(),
+            upload: z.any().optional()
+        })
+        .superRefine((data, ctx) => {
+            if (data.endDate && data.date && data.endDate <= data.date) {
                 ctx.addIssue({
                     code: 'custom',
-                    path: ['registrationEnd'],
-                    message: 'Регистрация должна открываться раньше, чем закрываться'
-                })
-            } else if (data.registrationEnd && data.date && data.registrationEnd > data.date) {
-                ctx.addIssue({
-                    code: 'custom',
-                    path: ['registrationEnd'],
-                    message: 'Регистрация должна закрываться не позднее даты и времени проведения мероприятия'
+                    path: ['endDate'],
+                    message: t(
+                        'components.pages.stargazing.event-form.end-after-start',
+                        'Время окончания мероприятия должно быть позже времени начала'
+                    )
                 })
             }
-        }
-    })
+
+            if (data.requiresRegistration ?? true) {
+                if (data.registrationStart && data.registrationEnd && data.registrationStart >= data.registrationEnd) {
+                    ctx.addIssue({
+                        code: 'custom',
+                        path: ['registrationEnd'],
+                        message: t(
+                            'components.pages.stargazing.event-form.registration-order',
+                            'Регистрация должна открываться раньше, чем закрываться'
+                        )
+                    })
+                } else if (data.registrationEnd && data.date && data.registrationEnd > data.date) {
+                    ctx.addIssue({
+                        code: 'custom',
+                        path: ['registrationEnd'],
+                        message: t(
+                            'components.pages.stargazing.event-form.registration-before-event',
+                            'Регистрация должна закрываться не позднее даты и времени проведения мероприятия'
+                        )
+                    })
+                }
+            }
+        })
