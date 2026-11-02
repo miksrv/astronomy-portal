@@ -51,6 +51,14 @@ final class AuthGuardTest extends CIUnitTestCase
         $this->assertArrayHasKey('message', $json);
     }
 
+    public function testPostPhotoSolveWithoutTokenReturns401(): void
+    {
+        $result = $this->post('photos/abc123/astrometry', []);
+        $result->assertStatus(401);
+        $json = json_decode($result->getJSON(), true);
+        $this->assertArrayHasKey('message', $json);
+    }
+
     // --- Mailings endpoints ---
 
     public function testGetMailingsWithoutTokenReturns401(): void
