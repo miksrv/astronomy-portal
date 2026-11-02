@@ -62,18 +62,21 @@ const nextConfig = {
         // than the Next.js default of 4h (14400s). This reduces how often crawlers (e.g. Yandex) and CDNs
         // re-fetch the same optimized image.
         //
-        // Not a year, though: when sharp fails (see imgOptTimeoutInSeconds below) Next silently serves
-        // the ORIGINAL file and caches that for this same TTL, retrying only after it expires. A year of
-        // that turned every photo into a multi-megabyte pass-through on the VPS (found in 4.15.1).
-        // 30 days keeps crawler re-fetches rare and lets a bad entry heal; nginx keeps its own copy
-        // for 7 days on top (config/nginx.conf).
+        // Not a year, though: when sharp fails for any reason (it cannot be loaded, it times out)
+        // Next silently serves the ORIGINAL file and caches that for this same TTL, retrying only
+        // after it expires. From August to November 2026 a stale sharp copy nested under
+        // node_modules/next on the VPS shadowed the real one and failed to load, so every image
+        // was a multi-megabyte pass-through, cached for a year (found and fixed in 4.15.1; the
+        // deploy now syncs the server bundle with --delete and checks sharp the way Next resolves
+        // it). 30 days keeps crawler re-fetches rare and lets a bad entry heal; nginx keeps its own
+        // copy for 7 days on top (config/nginx.conf).
         minimumCacheTTL: 2592000 // 30 days
     },
     experimental: {
-        // sharp's time limit per image. The default 7 s is for a server with spare cores: on the
-        // 1-CPU VPS a crawler fetching a dozen sizes of multi-megapixel astrophotos at once queues
-        // them behind each other, the limit trips, and Next serves (and caches) the unoptimized
-        // original. Verified on the host: the same pipeline takes ~0.2 s when the CPU is free.
+        // sharp's time limit per image. The default 7 s assumes spare cores: on the 1-CPU VPS a
+        // crawler fetching a dozen sizes of multi-megapixel astrophotos at once queues them behind
+        // each other, and a trip of the limit means an unoptimized original cached for a month
+        // (see minimumCacheTTL above). The pipeline itself takes ~0.2-0.4 s per image there.
         imgOptTimeoutInSeconds: 30
     },
     output: 'standalone',
