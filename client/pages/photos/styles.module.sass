@@ -49,5 +49,10 @@
     position: sticky
     top: calc(var(--header-height) + var(--space-2))
 
+// One card per object on the picture
+.objectCards
+    display: grid
+    gap: var(--space-3)
+
     @media only screen and (max-width: variables.$mobileMaxWidth)
         position: static

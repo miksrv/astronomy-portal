@@ -15,11 +15,14 @@ import {
     PhotoObjectCard,
     PhotoObjectSummary,
     PhotoSetup,
+    PhotoSkyObject,
+    PhotoSolveStatus,
     PhotoStrip,
     PhotoVersion,
     PhotoViewer,
     StripPhoto
 } from '@/components/pages/photos'
+import { objectAliases } from '@/utils/astrometry'
 import { getConstellationName } from '@/utils/constellations'
 import { formatCalendarDate, toISODateTime } from '@/utils/dates'
 import { createPageUrl } from '@/utils/helpers'
@@ -59,8 +62,12 @@ interface PhotoItemPageProps {
     optics: Optics | null
     /** Every processing of the same objects, the newest first (this one included) */
     versions: PhotoVersion[]
-    /** The main object, for the card linking to its page and the sky frame */
-    object: PhotoObjectSummary | null
+    /** The objects on the picture in the photo's order, for the cards linking to their pages */
+    objectCards: PhotoObjectSummary[]
+    /** The plate solve, when the photo has one */
+    astrometry: ApiModel.SolvedAstrometry | null
+    /** Our objects around the solved picture's centre, to label the ones on it */
+    skyObjects: PhotoSkyObject[]
     /** The newest photo of other objects in the same category */
     related: StripPhoto[]
     /** The neighbours in the gallery (the newest first) */
@@ -76,7 +83,9 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
     equipment,
     optics,
     versions,
-    object,
+    objectCards,
+    astrometry,
+    skyObjects,
     related,
     previousId,
     nextId
@@ -192,12 +201,15 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                 currentPage={t('pages.photo.title', 'Снимок {{objects}} от {{date}}', { objects: objectNames, date })}
             >
                 {hasPermission(user, ApiModel.Permission.PHOTOS_MANAGE) && (
-                    <Button
-                        icon={'Pencil'}
-                        mode={'secondary'}
-                        label={t('common.edit', 'Редактировать')}
-                        link={`/photos/form/?id=${photoId}`}
-                    />
+                    <>
+                        <PhotoSolveStatus photoId={photoId} />
+                        <Button
+                            icon={'Pencil'}
+                            mode={'secondary'}
+                            label={t('common.edit', 'Редактировать')}
+                            link={`/photos/form/?id=${photoId}`}
+                        />
+                    </>
                 )}
             </AppToolbar>
 
@@ -211,6 +223,8 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                 compareId={compareId}
                 onCompareChange={setCompareId}
                 field={field}
+                astrometry={astrometry ?? undefined}
+                skyObjects={skyObjects}
             />
 
             <PhotoInfo
@@ -221,7 +235,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
 
             {/* The setup and the history in the wide column, the object's card beside them: it
                 stays in view while the column scrolls, so the way to the object is always at hand */}
-            <div className={cn(styles.layout, !object && styles.single)}>
+            <div className={cn(styles.layout, !objectCards.length && styles.single)}>
                 <div className={styles.column}>
                     <section
                         className={styles.section}
@@ -233,6 +247,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                             equipment={equipment}
                             optics={optics}
                             field={field}
+                            astrometry={astrometry ?? undefined}
                         />
                     </section>
                     {otherVersions.length > 0 && (
@@ -259,13 +274,24 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                         </section>
                     )}
                 </div>
-                {object && (
+                {!!objectCards.length && (
                     <aside
                         className={cn(styles.section, styles.aside)}
                         aria-labelledby={'object-title'}
                     >
-                        <h2 id={'object-title'}>{t('pages.photo.object-title', 'Об объекте')}</h2>
-                        <PhotoObjectCard object={object} />
+                        <h2 id={'object-title'}>
+                            {objectCards.length > 1
+                                ? t('pages.photo.objects-title', 'Об объектах')
+                                : t('pages.photo.object-title', 'Об объекте')}
+                        </h2>
+                        <div className={styles.objectCards}>
+                            {objectCards.map((item) => (
+                                <PhotoObjectCard
+                                    key={item.name}
+                                    object={item}
+                                />
+                            ))}
+                        </div>
                     </aside>
                 )}
             </div>
@@ -318,33 +344,39 @@ export const getServerSideProps = wrapper.getServerSideProps(
             // for an existing photo, so random ids don't fill the cache with 404 pages
             context.res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=1200')
 
-            const mainObject = photo.objects?.[0]
+            const photoObjects = photo.objects ?? []
 
             const [
                 { data: objectsData },
                 { data: photosData },
                 { data: categoriesData },
                 { data: equipmentData },
-                mainObjectResult
+                { data: astrometryData },
+                // Each object's page data; the main one's carries the optics its frames were taken with
+                ...objectResults
             ] = await Promise.all([
                 store.dispatch(API.endpoints?.objectsGetList.initiate()),
                 store.dispatch(API.endpoints?.photosGetList.initiate()),
                 store.dispatch(API.endpoints?.categoriesGetList.initiate()),
                 store.dispatch(API.endpoints?.equipmentsGetList.initiate()),
-                // The main object's page data carries the optics its frames were taken with
-                mainObject ? store.dispatch(API.endpoints?.objectsGetItem.initiate(mainObject)) : undefined
+                // 404 until the photo is plate-solved
+                store.dispatch(API.endpoints?.photosGetAstrometry.initiate(photoId)),
+                ...photoObjects.map((name) => store.dispatch(API.endpoints?.objectsGetItem.initiate(name)))
             ])
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
             removeSSRQueryCache(store, [
                 'photosGetItem',
+                'photosGetAstrometry',
                 'objectsGetItem',
                 'objectsGetList',
                 'photosGetList',
                 'categoriesGetList',
                 'equipmentsGetList'
             ])
+
+            const astrometry = ApiModel.isSolved(astrometryData) ? astrometryData : null
 
             const allObjects = objectsData?.items ?? []
             const objectTitle = (name: string) =>
@@ -381,27 +413,58 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 .filter((item) => item.objects?.some((name) => photo.objects?.includes(name)))
                 .map(toVersion)
 
-            const mainObjectData = mainObjectResult?.data
-            const { ra, dec } = mainObjectData ?? {}
-            const constellation =
-                typeof ra === 'number' && typeof dec === 'number' ? getConstellationName(ra, dec, locale) : undefined
-            const object: PhotoObjectSummary | null =
-                mainObject && mainObjectData
-                    ? {
-                          name: mainObject,
-                          title: mainObjectData.title || formatObjectName(mainObject),
-                          ...(typeof ra === 'number' ? { ra } : {}),
-                          ...(typeof dec === 'number' ? { dec } : {}),
-                          ...(constellation ? { constellation } : {}),
-                          ...(mainObjectData.categories ? { categories: mainObjectData.categories } : {}),
-                          ...(mainObjectData.statistic?.exposure
-                              ? { exposure: mainObjectData.statistic.exposure }
-                              : {}),
-                          ...(mainObjectData.statistic?.frames ? { frames: mainObjectData.statistic.frames } : {}),
-                          ...(mainObjectData.nights ? { nights: mainObjectData.nights } : {}),
-                          photosCount: gallery.filter((item) => item.objects?.includes(mainObject)).length
+            const mainObjectData = objectResults[0]?.data
+            const toSummary = (name: string, data: ApiModel.Object): PhotoObjectSummary => {
+                const { ra, dec } = data
+                const constellation =
+                    typeof ra === 'number' && typeof dec === 'number'
+                        ? getConstellationName(ra, dec, locale)
+                        : undefined
+
+                const aliases =
+                    astrometry && typeof ra === 'number' && typeof dec === 'number'
+                        ? objectAliases(astrometry, { name, ra, dec })
+                        : []
+
+                return {
+                    name,
+                    title: data.title || formatObjectName(name),
+                    ...(aliases.length ? { aliases } : {}),
+                    ...(typeof ra === 'number' ? { ra } : {}),
+                    ...(typeof dec === 'number' ? { dec } : {}),
+                    ...(constellation ? { constellation } : {}),
+                    ...(data.categories ? { categories: data.categories } : {}),
+                    ...(data.statistic?.exposure ? { exposure: data.statistic.exposure } : {}),
+                    ...(data.statistic?.frames ? { frames: data.statistic.frames } : {}),
+                    ...(data.nights ? { nights: data.nights } : {}),
+                    photosCount: gallery.filter((item) => item.objects?.includes(name)).length
+                }
+            }
+            const objectCards = photoObjects.flatMap((name, index) => {
+                const data = objectResults[index]?.data
+
+                return data ? [toSummary(name, data)] : []
+            })
+
+            // Our objects within the solved picture's reach (twice its radius, to be safe about
+            // the centre): the overlay finds the ones on the picture with the WCS
+            const skyObjects: PhotoSkyObject[] = astrometry
+                ? allObjects.flatMap(({ name, title, ra, dec }) => {
+                      if (typeof ra !== 'number' || typeof dec !== 'number') {
+                          return []
                       }
-                    : null
+
+                      const toRadians = Math.PI / 180
+                      const cosDistance =
+                          Math.sin(dec * toRadians) * Math.sin(astrometry.dec * toRadians) +
+                          Math.cos(dec * toRadians) *
+                              Math.cos(astrometry.dec * toRadians) *
+                              Math.cos((ra - astrometry.ra) * toRadians)
+                      const distance = Math.acos(Math.max(-1, Math.min(1, cosDistance))) / toRadians
+
+                      return distance <= (astrometry.radius ?? 1) * 2 ? [{ name, title, ra, dec }] : []
+                  })
+                : []
 
             // The newest photo of every other object in the category, newest first
             const firstCategory = photo.categories?.[0]
@@ -439,7 +502,9 @@ export const getServerSideProps = wrapper.getServerSideProps(
                     equipment,
                     optics: mainObjectData?.optics ?? null,
                     versions,
-                    object,
+                    objectCards,
+                    astrometry,
+                    skyObjects,
                     related,
                     previousId: position > 0 ? (gallery[position - 1]?.id ?? null) : null,
                     nextId: position >= 0 && position < gallery.length - 1 ? (gallery[position + 1]?.id ?? null) : null

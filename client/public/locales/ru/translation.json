@@ -646,7 +646,7 @@
                     "archive": "В FITS-архиве",
                     "photos": "Снимков объекта",
                     "cta": "Видимость, журнал наблюдений и описание",
-                    "star-map": "На звёздной карте"
+                    "star-map": "Звёздная карта"
                 },
                 "photo-setup": {
                     "capture": "Съёмка",
@@ -660,11 +660,9 @@
                     "millimetres": "{{value}} мм",
                     "views": "Просмотров",
                     "equipment": "Оборудование",
-                    "less": "Свернуть",
-                    "more_one": "Ещё {{count}} позиция",
-                    "more_few": "Ещё {{count}} позиции",
-                    "more_many": "Ещё {{count}} позиций",
-                    "more_other": "Ещё {{count}} позиций"
+                    "center": "Центр поля",
+                    "rotation": "Поворот",
+                    "rotation-value": "{{value}}° от севера"
                 },
                 "photo-strip": {
                     "open": "Снимок от {{date}}",
@@ -679,7 +677,21 @@
                     "scale": "Угловой масштаб",
                     "fullscreen": "На весь экран, с увеличением",
                     "previous": "Предыдущий снимок",
-                    "next": "Следующий снимок"
+                    "next": "Следующий снимок",
+                    "annotations": "Объекты",
+                    "annotations-tooltip": "Подписать объекты на снимке (astrometry.net)",
+                    "grid": "Сетка",
+                    "grid-tooltip": "Координатная сетка RA/Dec"
+                },
+                "photo-annotations": {
+                    "compass": "Север и восток на снимке"
+                },
+                "photo-solve-status": {
+                    "pending": "Привязка к небу: отправляем снимок…",
+                    "solving": "Привязка к небу: решается…",
+                    "failed": "Привязка к небу не удалась: {{error}}",
+                    "start": "Привязать к небу",
+                    "restart": "Перерешать"
                 }
             },
             "stargazing": {
@@ -1343,7 +1355,8 @@
             "history-note": "Каждый снимок — отдельная обработка",
             "object-title": "Об объекте",
             "related-title": "Ещё снимки: {{category}}",
-            "related-all": "Все в галерее →"
+            "related-all": "Все в галерее →",
+            "objects-title": "Об объектах"
         },
         "photos": {
             "stat-photos": "снимков в галерее",

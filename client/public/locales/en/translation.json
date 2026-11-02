@@ -618,7 +618,7 @@
                     "archive": "In the FITS archive",
                     "photos": "Photos of the object",
                     "cta": "Visibility, observing log and description",
-                    "star-map": "On the star map"
+                    "star-map": "Star map"
                 },
                 "photo-setup": {
                     "capture": "Capture",
@@ -632,9 +632,9 @@
                     "millimetres": "{{value}} mm",
                     "views": "Views",
                     "equipment": "Equipment",
-                    "less": "Show less",
-                    "more_one": "{{count}} more item",
-                    "more_other": "{{count}} more items"
+                    "center": "Field center",
+                    "rotation": "Rotation",
+                    "rotation-value": "{{value}}° from north"
                 },
                 "photo-strip": {
                     "open": "Photo of {{date}}",
@@ -649,7 +649,21 @@
                     "scale": "Angular scale",
                     "fullscreen": "Full screen, with zoom",
                     "previous": "Previous photo",
-                    "next": "Next photo"
+                    "next": "Next photo",
+                    "annotations": "Objects",
+                    "annotations-tooltip": "Label the objects on the picture (astrometry.net)",
+                    "grid": "Grid",
+                    "grid-tooltip": "RA/Dec coordinate grid"
+                },
+                "photo-annotations": {
+                    "compass": "North and east on the picture"
+                },
+                "photo-solve-status": {
+                    "pending": "Plate solving: uploading the picture…",
+                    "solving": "Plate solving: in progress…",
+                    "failed": "Plate solving failed: {{error}}",
+                    "start": "Plate-solve",
+                    "restart": "Solve again"
                 }
             },
             "stargazing": {
@@ -1297,7 +1311,8 @@
             "history-note": "Each photo is a separate processing",
             "object-title": "About the object",
             "related-title": "More photos: {{category}}",
-            "related-all": "All in the gallery →"
+            "related-all": "All in the gallery →",
+            "objects-title": "About the objects"
         },
         "photos": {
             "stat-photos": "photos in the gallery",
