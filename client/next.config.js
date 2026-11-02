@@ -35,6 +35,13 @@ const nextConfig = {
                 port: '',
                 protocol: 'https'
             },
+            // DSS2 cut-outs of the sky for objects without a photo of our own (utils/skySurvey.ts)
+            {
+                hostname: 'skyview.gsfc.nasa.gov',
+                pathname: '/current/cgi/runquery.pl',
+                port: '',
+                protocol: 'https'
+            },
             // Local backend (composer serve) - dev-only, kept out of production builds.
             ...(process.env.NODE_ENV !== 'production'
                 ? [
