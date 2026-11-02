@@ -43,5 +43,18 @@ export const buildObjectSchema = (t: (key: string, fallback: string) => string) 
                 DEC_MAX,
                 t('components.pages.objects.astro-object-form.dec-range', 'DEC должно быть в диапазоне от -90 до 90')
             ),
+        // Optional catalog facts: an empty field is NaN, sent to the API as null
+        distance: z.union([
+            z.nan(),
+            z
+                .number()
+                .positive(
+                    t(
+                        'components.pages.objects.astro-object-form.distance-positive',
+                        'Расстояние должно быть больше нуля'
+                    )
+                )
+        ]),
+        magnitude: z.union([z.nan(), z.number()]),
         description: z.string().trim()
     })
