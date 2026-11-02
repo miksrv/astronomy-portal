@@ -1,0 +1,108 @@
+import * as Astronomy from 'astronomy-engine'
+
+// Constellation names by IAU abbreviation (Russian, and the Latin name in English),
+// from the star map's data (public/data/constellations.json)
+const CONSTELLATIONS: Record<string, { ru: string; en: string }> = {
+    And: { ru: 'Андромеда', en: 'Andromeda' },
+    Ant: { ru: 'Насос', en: 'Antlia' },
+    Aps: { ru: 'Райская Птица', en: 'Apus' },
+    Aql: { ru: 'Орёл', en: 'Aquila' },
+    Aqr: { ru: 'Водолей', en: 'Aquarius' },
+    Ara: { ru: 'Жертвенник', en: 'Ara' },
+    Ari: { ru: 'Овен', en: 'Aries' },
+    Aur: { ru: 'Возничий', en: 'Auriga' },
+    Boo: { ru: 'Волопас', en: 'Bo\u00f6tes' },
+    CMa: { ru: 'Большой Пёс', en: 'Canis Major' },
+    CMi: { ru: 'Малый Пёс', en: 'Canis Minor' },
+    CVn: { ru: 'Гончие Псы', en: 'Canes Venatici' },
+    Cae: { ru: 'Резец', en: 'Caelum' },
+    Cam: { ru: 'Жираф', en: 'Camelopardalis' },
+    Cap: { ru: 'Козерог', en: 'Capricornus' },
+    Car: { ru: 'Киль', en: 'Carina' },
+    Cas: { ru: 'Кассиопея', en: 'Cassiopeia' },
+    Cen: { ru: 'Центавр', en: 'Centaurus' },
+    Cep: { ru: 'Цефей', en: 'Cepheus' },
+    Cet: { ru: 'Кит', en: 'Cetus' },
+    Cha: { ru: 'Хамелеон', en: 'Chamaeleon' },
+    Cir: { ru: 'Циркуль', en: 'Circinus' },
+    Cnc: { ru: 'Рак', en: 'Cancer' },
+    Col: { ru: 'Голубь', en: 'Columba' },
+    Com: { ru: 'Волосы Вероники', en: 'Coma Berenices' },
+    CrA: { ru: 'Южная Корона', en: 'Corona Austrina' },
+    CrB: { ru: 'Северная Корона', en: 'Corona Borealis' },
+    Crt: { ru: 'Чаша', en: 'Crater' },
+    Cru: { ru: 'Южный Крест', en: 'Crux' },
+    Crv: { ru: 'Ворон', en: 'Corvus' },
+    Cyg: { ru: 'Лебедь', en: 'Cygnus' },
+    Del: { ru: 'Дельфин', en: 'Delphinus' },
+    Dor: { ru: 'Золотая Рыба', en: 'Dorado' },
+    Dra: { ru: 'Дракон', en: 'Draco' },
+    Equ: { ru: 'Малый Конь', en: 'Equuleus' },
+    Eri: { ru: 'Эридан', en: 'Eridanus' },
+    For: { ru: 'Печь', en: 'Fornax' },
+    Gem: { ru: 'Близнецы', en: 'Gemini' },
+    Gru: { ru: 'Журавль', en: 'Grus' },
+    Her: { ru: 'Геркулес', en: 'Hercules' },
+    Hor: { ru: 'Часы', en: 'Horologium' },
+    Hya: { ru: 'Гидра', en: 'Hydra' },
+    Hyi: { ru: 'Южная Гидра', en: 'Hydrus' },
+    Ind: { ru: 'Индеец', en: 'Indus' },
+    LMi: { ru: 'Малый Лев', en: 'Leo Minor' },
+    Lac: { ru: 'Ящерица', en: 'Lacerta' },
+    Leo: { ru: 'Лев', en: 'Leo' },
+    Lep: { ru: 'Заяц', en: 'Lepus' },
+    Lib: { ru: 'Весы', en: 'Libra' },
+    Lup: { ru: 'Волк', en: 'Lupus' },
+    Lyn: { ru: 'Рысь', en: 'Lynx' },
+    Lyr: { ru: 'Лира', en: 'Lyra' },
+    Men: { ru: 'Столовая Гора', en: 'Mensa' },
+    Mic: { ru: 'Микроскоп', en: 'Microscopium' },
+    Mon: { ru: 'Единорог', en: 'Monoceros' },
+    Mus: { ru: 'Муха', en: 'Musca' },
+    Nor: { ru: 'Наугольник', en: 'Norma' },
+    Oct: { ru: 'Октант', en: 'Octans' },
+    Oph: { ru: 'Змееносец', en: 'Ophiuchus' },
+    Ori: { ru: 'Орион', en: 'Orion' },
+    Pav: { ru: 'Павлин', en: 'Pavo' },
+    Peg: { ru: 'Пегас', en: 'Pegasus' },
+    Per: { ru: 'Персей', en: 'Perseus' },
+    Phe: { ru: 'Феникс', en: 'Phoenix' },
+    Pic: { ru: 'Живописец', en: 'Pictor' },
+    PsA: { ru: 'Южная Рыба', en: 'Piscis Austrinus' },
+    Psc: { ru: 'Рыбы', en: 'Pisces' },
+    Pup: { ru: 'Корма', en: 'Puppis' },
+    Pyx: { ru: 'Компас', en: 'Pyxis' },
+    Ret: { ru: 'Сетка', en: 'Reticulum' },
+    Scl: { ru: 'Скульптор', en: 'Sculptor' },
+    Sco: { ru: 'Скорпион', en: 'Scorpius' },
+    Sct: { ru: 'Щит', en: 'Scutum' },
+    Ser: { ru: 'Змея', en: 'Serpens' },
+    Sex: { ru: 'Секстант', en: 'Sextans' },
+    Sge: { ru: 'Стрела', en: 'Sagitta' },
+    Sgr: { ru: 'Стрелец', en: 'Sagittarius' },
+    Tau: { ru: 'Телец', en: 'Taurus' },
+    Tel: { ru: 'Телескоп', en: 'Telescopium' },
+    TrA: { ru: 'Южный Треугольник', en: 'Triangulum Australe' },
+    Tri: { ru: 'Треугольник', en: 'Triangulum' },
+    Tuc: { ru: 'Тукан', en: 'Tucana' },
+    UMa: { ru: 'Большая Медведица', en: 'Ursa Major' },
+    UMi: { ru: 'Малая Медведица', en: 'Ursa Minor' },
+    Vel: { ru: 'Паруса', en: 'Vela' },
+    Vir: { ru: 'Дева', en: 'Virgo' },
+    Vol: { ru: 'Летучая Рыба', en: 'Volans' },
+    Vul: { ru: 'Лисичка', en: 'Vulpecula' }
+}
+
+/**
+ * The constellation a point of the sky lies in, named in the given language. Meant for
+ * getServerSideProps: astronomy-engine then stays out of the page's client bundle.
+ *
+ * @param ra - Right ascension, degrees
+ * @param dec - Declination, degrees
+ */
+export const getConstellationName = (ra: number, dec: number, locale: string): string | undefined => {
+    const { symbol, name } = Astronomy.Constellation(ra / 15, dec)
+    const names = CONSTELLATIONS[symbol]
+
+    return names ? (locale === 'en' ? names.en : names.ru) : name
+}
