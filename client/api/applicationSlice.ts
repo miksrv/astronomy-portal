@@ -17,20 +17,18 @@ export interface SnackbarItem {
 }
 
 interface ApplicationSliceProps {
-    showOverlay?: boolean
     showAuthDialog?: boolean
     locale?: ApiType.Locale | string
     snackbars: SnackbarItem[]
 }
 
-export const getStorageLocale = (): string | undefined =>
+const getStorageLocale = (): string | undefined =>
     typeof window !== 'undefined'
         ? (LocalStorage.getItem(LOCAL_STORAGE.LOCALE as 'LOCALE') ?? i18Config.i18n.defaultLocale)
         : i18Config.i18n.defaultLocale
 
 const initialState: ApplicationSliceProps = {
     locale: getStorageLocale(),
-    showOverlay: false,
     showAuthDialog: false,
     snackbars: []
 }
@@ -43,11 +41,9 @@ const applicationSlice = createSlice({
             state.locale = payload
         },
         closeAuthDialog: (state) => {
-            state.showOverlay = false
             state.showAuthDialog = false
         },
         openAuthDialog: (state) => {
-            state.showOverlay = true
             state.showAuthDialog = true
         },
         pushSnackbar: (state, { payload }: PayloadAction<SnackbarItem>) => {

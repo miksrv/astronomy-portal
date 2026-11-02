@@ -13,11 +13,6 @@ const config: Config.InitialOptions = {
     ],
     // on node 14.x coverage provider v8 offers good speed and more or less good report
     coverageProvider: 'v8',
-    globals: {
-        'ts-jest': {
-            tsconfig: 'tsconfig.json'
-        }
-    },
     moduleNameMapper: {
         '^.+\\.(png|jpg|jpeg|gif|webp|avif|ico|bmp|svg)$': 'identity-obj-proxy',
 

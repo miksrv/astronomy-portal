@@ -12,7 +12,7 @@ type InitialStateProps = {
     user?: ApiModel.User
 }
 
-export const getStorageToken = (): string | undefined => {
+const getStorageToken = (): string | undefined => {
     const token = typeof window !== 'undefined' ? LocalStorage.getItem('AUTH_TOKEN') : undefined
     return token ?? ''
 }
