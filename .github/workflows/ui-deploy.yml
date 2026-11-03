@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - 'client/**/*'
+  # By hand from the Actions tab (or `gh workflow run ui-deploy.yml`): a change to this workflow
+  # alone, or a re-deploy of the same build, has no client push to start it
+  workflow_dispatch:
 
 jobs:
   ui-ssh-deploy:
@@ -64,6 +67,14 @@ jobs:
       - if: ${{ steps.cache-build.outputs.cache-hit != 'true' }}
         name: Build UI
         run: yarn build
+        working-directory: client
+
+      # serverSideTranslations reads ./next-i18next.config.js from the server's working
+      # directory at runtime and throws (every page a 500) when it is missing, but the standalone
+      # trace does not copy it: put it in the bundle, so the --delete sync below keeps it and the
+      # host always has the current one. Not under the cache check: a cached build needs it too
+      - name: Add the i18n config to the standalone bundle
+        run: cp next-i18next.config.js .next/standalone/
         working-directory: client
 
       # Next's image optimizer needs sharp with the Linux binary inside the standalone
@@ -132,9 +143,11 @@ jobs:
 
       # Same check on the host: the binary must also load with the server's Node and glibc
       # Resolved from Next's own directory, the way the image optimizer requires it: a copy
-      # nested under node_modules/next would shadow the top-level one
+      # nested under node_modules/next would shadow the top-level one. A block scalar: the
+      # `paths: [` in the command is a "key: value" to YAML on a plain one-line `run:`
       - name: Check sharp on the host
-        run: ssh vps "cd /var/www/astro.miksoft.pro && node -e \"const sharp = require(require.resolve('sharp', { paths: ['node_modules/next/dist/server'] })); console.log('sharp', sharp.versions.sharp, 'libvips', sharp.versions.vips)\""
+        run: |
+          ssh vps "cd /var/www/astro.miksoft.pro && node -e \"const sharp = require(require.resolve('sharp', { paths: ['node_modules/next/dist/server'] })); console.log('sharp', sharp.versions.sharp, 'libvips', sharp.versions.vips)\""
 
       # Runs even if a previous step failed, so a broken deploy never leaves
       # the site stuck behind the maintenance page.
