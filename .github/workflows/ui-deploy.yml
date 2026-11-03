@@ -132,9 +132,11 @@ jobs:
 
       # Same check on the host: the binary must also load with the server's Node and glibc
       # Resolved from Next's own directory, the way the image optimizer requires it: a copy
-      # nested under node_modules/next would shadow the top-level one
+      # nested under node_modules/next would shadow the top-level one. A block scalar: the
+      # `paths: [` in the command is a "key: value" to YAML on a plain one-line `run:`
       - name: Check sharp on the host
-        run: ssh vps "cd /var/www/astro.miksoft.pro && node -e \"const sharp = require(require.resolve('sharp', { paths: ['node_modules/next/dist/server'] })); console.log('sharp', sharp.versions.sharp, 'libvips', sharp.versions.vips)\""
+        run: |
+          ssh vps "cd /var/www/astro.miksoft.pro && node -e \"const sharp = require(require.resolve('sharp', { paths: ['node_modules/next/dist/server'] })); console.log('sharp', sharp.versions.sharp, 'libvips', sharp.versions.vips)\""
 
       # Runs even if a previous step failed, so a broken deploy never leaves
       # the site stuck behind the maintenance page.
