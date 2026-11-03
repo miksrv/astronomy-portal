@@ -111,12 +111,13 @@ const StarMapQuickBar: React.FC<StarMapQuickBarProps> = ({ settings, onChange, s
             <Button
                 key={key}
                 size={'small'}
-                mode={'secondary'}
+                // On = the filled indigo button, the same toggle language as the photo viewer
+                mode={active ? 'primary' : 'secondary'}
                 icon={key === 'planets' ? 'Sun' : undefined}
                 tooltip={labels[key]}
                 aria-pressed={active}
                 disabled={!enabled}
-                className={cn(styles.toolbarButton, styles.quickBarButton, active && styles.toolbarButtonActive)}
+                className={styles.quickBarButton}
                 onClick={() => onChange(toggleQuickBarSetting(settings, key))}
             >
                 {ICONS[key]}

@@ -1,4 +1,10 @@
 @use '../../../styles/starmap-mixins' as starmap
+@use '../../../styles/typography' as type
+@use '../../../styles/variables'
+
+// The overlays of the map follow the design system (kit controls, tokens, type roles);
+// only the sky itself — Celestial's canvas and the layers drawn on it — has its own
+// palette (client/DESIGN.md, section 7).
 
 .starMap
     position: relative
@@ -8,125 +14,106 @@
     // page's layout once it appears.
     min-height: 220px
 
+    // Celestial's own zoom inputs — only on the small maps of the object and photo pages
+    // (the /starmap page switches them off and uses the rail below)
     :global(#celestial-zoomin), :global(#celestial-zoomout)
+        +type.body
         position: absolute
-        top: 10px
-        left: 10px
-        height: 24px
-        width: 24px
-        line-height: 20px
-        font-family: var(--font-family), sans-serif
+        top: starmap.$inset
+        left: starmap.$inset
+        width: var(--size-control-small)
+        height: var(--size-control-small)
+        padding: 0
         color: var(--text-color-secondary)
         background-color: var(--button-secondary-background)
         border: none
-        border-radius: var(--border-radius)
+        border-radius: var(--radius-md)
         cursor: pointer
 
-        &:hover, &:focus
+        &:hover
             background-color: var(--button-secondary-background-hover)
+
+        &:focus-visible
+            outline: var(--focus-outline)
 
         &:active
             background-color: var(--button-secondary-background-active)
 
     :global(#celestial-zoomout)
-        top: 40px
+        top: calc(#{starmap.$inset} + var(--size-control-small) + var(--space-1))
 
-    // One glass rail in the top-left corner holding every map action (settings page
+    // One rail in the top-left corner holding every map action (settings page
     // only): the view controls (zoom in/out, and "fit view" in sky mode) followed by the
     // panel buttons. Replaces Celestial's own #celestial-zoomin/#celestial-zoomout inputs,
     // which are switched off for this page via `controls: false` (see buildVisualConfig).
+    // No plate behind the groups: the buttons stand on the sky by themselves, the way the
+    // photo viewer's tools stand on the picture, and the groups are told apart by air
+    .viewControls, .mapToolbar
+        display: flex
+        flex-direction: column
+        gap: var(--space-1)
+
     .mapRail
         position: absolute
-        top: 10px
-        left: 10px
+        top: starmap.$inset
+        left: starmap.$inset
         z-index: starmap.$z-controls
         display: flex
         flex-direction: column
-        gap: 4px
-        padding: 4px
-        border-radius: 10px
-        +starmap.glass
+        gap: var(--space-3)
 
-    .viewControls
-        display: flex
-        flex-direction: column
-        gap: 4px
+    // The kit's translucent secondary fill would let constellation lines run through the
+    // icons, so over the sky a secondary button gets the frosted card surface instead.
+    // Set as the kit's own variables: the pressed/open state stays the kit's primary.
+    .mapRail, .quickBar
+        --button-secondary-background: color-mix(in srgb, var(--surface-1) 88%, transparent)
+        --button-secondary-background-hover: var(--surface-2)
+        --button-secondary-background-active: var(--surface-3)
 
-    // Icon-only square. Sized from the kit's own control height: `.button.medium` sets
-    // that height and outranks a single class here, so a smaller value would only squash
-    // the width and leave the button a tall rectangle.
-    .railButton
-        height: var(--size-control-small) !important
+    // Icon-only squares of the kit's small size. A pressed/open control is the filled
+    // primary button (set in StarMapRender), the same toggle language as the photo viewer.
+    // The kit drops its icon sizing once a button has children (the custom zoom glyphs),
+    // so the svg is pinned here.
+    .railButton, .quickBarButton
         width: var(--size-control-small)
         min-width: var(--size-control-small)
         padding: 0
-        justify-content: center
-        color: var(--text-color-secondary)
-
-        &:hover, &:focus-visible
-            color: var(--text-color-primary)
+        box-shadow: 0 0 0 1px var(--border), var(--shadow-sm)
+        backdrop-filter: blur(6px)
 
         svg
-            width: 18px
-            min-width: 18px
-            height: 18px
-            margin-right: 0
-
-    // Panel buttons (settings/search/link): the second group of the rail, same column
-    // on every screen — mobile only enlarges the buttons (see the mobile block below)
-    .mapToolbar
-        display: flex
-        flex-direction: column
-        gap: 4px
-
-    .toolbarButton
-        height: var(--size-control-small) !important
-        width: var(--size-control-small)
-        min-width: var(--size-control-small)
-        padding: 0
-        justify-content: center
-
-        // The kit Button drops its icon sizing once it has children (the quick bar passes
-        // its glyphs as children), letting flex squeeze the svg — pin the size explicitly
-        svg
-            width: 18px
-            min-width: 18px
-            height: 18px
-            margin-right: 0
-
-    .toolbarButtonActive
-        background-color: var(--button-secondary-background-active) !important
-
+            width: 16px
+            min-width: 16px
+            height: 16px
 
     // Geolocation nudge card (StarMapGeoNudge): top-center of the map on desktop, under
-    // the status chip on mobile. Same glass surface as the rail.
+    // the status chip on mobile. Same glass surface as the status chip.
     .geoNudge
+        +type.secondary
         position: absolute
-        top: 10px
+        top: starmap.$inset
         left: 50%
         z-index: starmap.$z-panel
         transform: translateX(-50%)
         display: flex
         align-items: center
         flex-wrap: wrap
-        gap: 12px
+        gap: var(--space-3)
         // Hug the content: as a shrink-to-fit absolute box it would otherwise stretch
         // to max-width and cover the whole top row (incl. the floating intro card)
         width: max-content
         max-width: calc(100% - 120px)
-        padding: 8px 12px
-        border-radius: 12px
-        font-size: 13px
+        padding: var(--space-2) var(--space-3)
+        border-radius: var(--radius-lg)
         +starmap.glass(92%, 8px)
 
     .geoNudgeText
         color: var(--text-color-primary)
-        line-height: 1.3
 
     .geoNudgeActions
         display: flex
         align-items: center
-        gap: 6px
+        gap: var(--space-2)
         flex-shrink: 0
 
     // Screenshot mode (hide-UI): the rail stays mounted but only the toggle itself is
@@ -140,27 +127,28 @@
     // the top-right corner belongs to the floating intro card. Stays visible in uiHidden mode
     // on purpose — it is the caption for a screenshot.
     .statusChip
+        +type.caption
         position: absolute
-        right: 10px
-        bottom: 10px
+        right: starmap.$inset
+        bottom: starmap.$inset
         z-index: starmap.$z-controls
         display: inline-flex
         align-items: center
-        gap: 6px
-        height: 28px
-        max-width: calc(100% - 20px)
-        padding: 0 10px 0 8px
+        gap: var(--space-2)
+        height: var(--size-control-small)
+        max-width: calc(100% - 2 * #{starmap.$inset})
+        padding: 0 var(--space-3) 0 var(--space-2)
         border-radius: var(--radius-lg)
-        font-size: 12px
-        line-height: 1
         white-space: nowrap
-        color: var(--text-color-secondary)
         +starmap.glass
         cursor: pointer
-        transition: background-color 0.15s ease
+        transition: background-color var(--duration-fast) var(--ease)
 
-        &:hover, &:focus-visible
-            background-color: color-mix(in srgb, var(--container-background-color) 100%, transparent)
+        &:hover
+            background-color: var(--surface-2)
+
+        &:focus-visible
+            outline: var(--focus-outline)
 
         // The kit Button drops its icon sizing once it has children — pin it
         svg
@@ -176,12 +164,12 @@
         text-overflow: ellipsis
 
     .statusChipSeparator
-        opacity: 0.6
+        color: var(--text-color-disabled)
 
     .statusChipTime
         display: inline-flex
         align-items: center
-        gap: 4px
+        gap: var(--space-1)
         overflow: hidden
         text-overflow: ellipsis
 
@@ -189,7 +177,7 @@
     .statusChipFrozen
         .statusChipTime
             color: var(--color-main)
-            font-weight: 600
+            font-weight: var(--font-weight-semibold)
 
     .statusChipSpinner
         width: 12px
@@ -202,81 +190,67 @@
     // map is wide enough (container query on .starMap, see .starMapShell) it centers.
     .quickBar
         position: absolute
-        left: 10px
-        bottom: 10px
+        left: starmap.$inset
+        bottom: starmap.$inset
         z-index: starmap.$z-controls
         display: flex
         align-items: center
-        gap: 4px
-        padding: 4px
-        border-radius: 10px
-        +starmap.glass
+        gap: var(--space-1)
 
-    .quickBarButton
-        color: var(--text-color-secondary)
+    // Unavailable in the current mode (atmosphere outside horizon view): kept in place so
+    // the bar never reflows, just visibly inert. Doubled to beat the kit's `.button:disabled`.
+    .quickBarButton.quickBarButton:disabled
+        opacity: .4
+        cursor: default
 
-        &[aria-pressed='true']
-            color: var(--text-color-primary)
-
-        // Unavailable in the current mode (atmosphere outside horizon view): kept in
-        // place so the bar never reflows, just visibly inert
-        &:disabled
-            opacity: 0.4
-            cursor: default
-
+    // Between the layers and the view-mode pair: a wider gap, like the rail's groups
     .quickBarDivider
-        width: 1px
-        height: 18px
-        margin: 0 2px
-        background-color: color-mix(in srgb, var(--input-border-color) 80%, transparent)
+        width: var(--space-1)
 
     @container starmap (min-width: 1000px)
         .quickBar
             left: 50%
             transform: translateX(-50%)
 
+    // The object popup: a kit Container (card surface, ring, xl radius) with a tighter
+    // padding — the photo inside it is the content
     .popup
         position: absolute
         z-index: starmap.$z-popup
-        padding: 5px
+        padding: var(--space-1)
         width: 200px
         height: 180px
-        border-radius: 12px
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 0 0.5px #363738
+        border-radius: var(--radius-xl)
+        box-shadow: 0 0 0 1px var(--border), var(--shadow-lg)
         opacity: 0
         visibility: hidden
         transform: scale(0.95)
-        transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s
+        transition: opacity var(--duration-fast) var(--ease), transform var(--duration-fast) var(--ease), visibility var(--duration-fast)
         pointer-events: none
         overflow: hidden
 
-    .popupClose
+    // Translucent so the cross reads on both the dark photo and the info panel. Doubled
+    // to beat the kit's `.button.secondary` / `.button.small` (two classes each).
+    .popupClose.popupClose
         position: absolute
-        top: 6px
-        right: 6px
+        top: var(--space-2)
+        right: var(--space-2)
         z-index: starmap.$z-popup-close
-        height: 22px
         width: 22px
         min-width: 22px
+        height: 22px
+        min-height: 22px
         padding: 0
-        justify-content: center
-        // Translucent so the cross reads on both the dark photo and the info panel.
-        // !important: the kit's `.button.secondary` (two classes) otherwise outranks
-        // this single-class override, same trick as .toolbarButtonActive above.
-        background-color: color-mix(in srgb, var(--container-background-color) 75%, transparent) !important
-        color: var(--text-color-secondary) !important
+        background-color: var(--overlay-pill-background)
+        color: var(--overlay-pill-color)
 
-        &:hover, &:focus-visible
-            color: var(--text-color-primary) !important
-            background-color: var(--button-secondary-background-hover) !important
+        &:hover
+            background-color: var(--surface-3)
 
-        // The kit Button lets flex squeeze an unsized svg (same as the rail buttons) —
-        // pin the icon size explicitly so the cross doesn't collapse to a dot
         svg
             width: 14px
             min-width: 14px
             height: 14px
-            margin-right: 0
 
     .popupVisible
         opacity: 1
@@ -296,84 +270,88 @@
         opacity: 0
         visibility: hidden
         pointer-events: none
-        transition: opacity 0.15s ease, visibility 0.15s
+        transition: opacity var(--duration-fast) var(--ease), visibility var(--duration-fast)
 
     // Popup below the marker — arrow points up, flush with the popup's top edge.
     // Same colour token as the kit Container behind .popup, so the arrow reads as part
     // of the popup rather than a stray grey triangle.
     .popupArrowUp
         border-width: 0 8px 8px 8px
-        border-color: transparent transparent var(--container-background-color) transparent
+        border-color: transparent transparent var(--surface-1) transparent
 
     // Popup above the marker — arrow points down, flush with the popup's bottom edge
     .popupArrowDown
         border-width: 8px 8px 0 8px
-        border-color: var(--container-background-color) transparent transparent transparent
+        border-color: var(--surface-1) transparent transparent transparent
 
     .popupArrowVisible
         opacity: 1
         visibility: visible
 
+    // The object's name over its photo: white text on a dark scrim (DESIGN.md, "Photos")
     .popout
+        +type.secondary
         position: absolute
         left: 0
         right: 0
         bottom: 0
-        padding: 10px
-        background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgb(44 45 46) 100%)
         z-index: starmap.$z-popup
         display: flex
         align-items: flex-end
         justify-content: center
         height: 70px
+        padding: var(--space-3)
+        background: linear-gradient(to top, var(--overlay-pill-background), transparent)
 
         .popoutLink
-            color: #fff
             position: relative
             z-index: starmap.$z-popup-link
+            color: var(--overlay-pill-color)
+            font-weight: var(--font-weight-medium)
 
-    .searchPanel
+    // Search and permalink panels, right of the rail; the link panel further down, so
+    // both can be open at once
+    .searchPanel, .linkPanel
         position: absolute
-        top: 106px
         left: starmap.$rail-width
         z-index: starmap.$z-panel
-        width: 280px
         max-width: calc(100% - 64px)
-        padding: 10px
+        padding: var(--space-3)
+        border-radius: var(--radius-lg)
+        +starmap.glass(92%, 8px, $shadow: false)
+
+    .searchPanel
+        top: 106px
+        width: 280px
         display: flex
         flex-direction: column
-        gap: 8px
-        border-radius: 12px
-        +starmap.glass(92%, 8px, $shadow: null)
+        gap: var(--space-2)
 
     // Manual-copy fallback for the permalink (shown only when clipboard access failed);
     // sits below the toolbar rail like .searchPanel, further down so both can coexist
     .linkPanel
-        position: absolute
         top: 178px
-        left: starmap.$rail-width
-        z-index: starmap.$z-panel
         width: 320px
-        max-width: calc(100% - 64px)
-        padding: 10px
-        border-radius: 12px
-        +starmap.glass(92%, 8px, $shadow: null)
 
     .linkPanelBody
         display: flex
         flex-direction: column
-        gap: 8px
+        gap: var(--space-2)
 
     .linkPanelHint
-        font-size: 12px
-        color: var(--text-color-secondary)
+        +type.caption
 
     .searchStatus
+        +type.caption
         display: flex
         align-items: center
-        gap: 8px
-        font-size: 12px
-        color: var(--text-color-secondary)
+        gap: var(--space-2)
+
+    // The kit Spinner fills its parent — sized to the caption line
+    .searchSpinner
+        width: 14px
+        min-width: 14px
+        height: 14px
 
     .searchResults
         list-style: none
@@ -388,22 +366,22 @@
     // The <li role="option"> itself (no inner button — an interactive control nested in an
     // option is invalid ARIA); the keyboard lives on the combobox input
     .searchResult
+        +type.secondary
         display: flex
         align-items: center
-        gap: 8px
+        gap: var(--space-2)
         width: 100%
-        padding: 6px 8px
-        border-radius: var(--border-radius)
+        padding: 6px var(--space-2)
+        border-radius: var(--radius-md)
         text-align: left
-        font-size: 13px
-        color: var(--text-color)
+        color: var(--text-color-primary)
         cursor: pointer
 
         &:hover
-            background-color: var(--button-secondary-background-hover)
+            background-color: var(--surface-2)
 
     .searchResultActive
-        background-color: var(--button-secondary-background-active)
+        background-color: var(--surface-3)
 
     .searchResultIcon
         width: 16px
@@ -426,18 +404,17 @@
         text-overflow: ellipsis
         white-space: nowrap
 
-    .searchResultKind
-        font-size: 11px
+    .searchResultKind, .searchResultSecondary
+        +type.micro
         color: var(--text-color-secondary)
+        white-space: nowrap
+
+    .searchResultKind
         overflow: hidden
         text-overflow: ellipsis
-        white-space: nowrap
 
     .searchResultSecondary
         margin-left: auto
-        font-size: 11px
-        color: var(--text-color-secondary)
-        white-space: nowrap
 
     // Info-panel variant of the popup: auto height, slightly wider than the photo popup
     .popupInfo
@@ -446,13 +423,14 @@
         width: 230px
 
     .infoPanel
-        padding: 5px
-        font-size: 12px
+        +type.caption
+        padding: var(--space-1)
+        color: var(--text-color-primary)
 
     .infoPanelHeader
         display: flex
         align-items: center
-        gap: 8px
+        gap: var(--space-2)
         // Keep the title clear of the popup's absolute close button
         padding-right: 22px
 
@@ -465,7 +443,6 @@
         height: 28px
         border-radius: 50%
         background-color: var(--color-main-background)
-        font-size: 14px
 
         svg
             width: 16px
@@ -473,14 +450,13 @@
 
     // An <h3> for heading semantics inside the popup — reset the UA margin
     .infoPanelName
+        +type.body
         margin: 0
-        font-weight: 600
-        font-size: 14px
+        font-weight: var(--font-weight-semibold)
 
     .infoPanelKind
-        font-size: 11px
+        +type.micro
         color: var(--text-color-secondary)
-        margin-top: 1px
 
     // KindIcon wrapper (search results + info popup header); font-size is set inline per size
     .kindIcon
@@ -491,8 +467,8 @@
     .infoPanelRows
         display: grid
         grid-template-columns: auto 1fr
-        gap: 3px 12px
-        margin: 8px 0 0
+        gap: 2px var(--space-3)
+        margin: var(--space-2) 0 0
 
         dt
             color: var(--text-color-secondary)
@@ -503,36 +479,37 @@
 
     // Mobile: the rail stays exactly where it is on desktop (only its buttons grow to a
     // thumb target); the panels and the popup become bottom sheets
-    @media (max-width: 768px)
-        // Thumb-sized targets: the kit's small control is 26px, well under the 44px a
-        // touch UI needs. Real boxes rather than an invisible ::before halo, because the
-        // 4px gaps between neighbours leave no room for one without overlapping hits.
-        // The rail grows with them, which is what $rail-width-mobile accounts for.
-        .railButton, .toolbarButton
-            height: 44px !important
+    @media (max-width: variables.$mobileMaxWidth)
+        // Thumb-sized targets: real boxes rather than an invisible ::before halo, because
+        // the 4px gaps between neighbours leave no room for one without overlapping hits.
+        // The rail grows with them, which is what $rail-width-mobile accounts for. Doubled
+        // to beat the kit's `.button.small` height.
+        .railButton.railButton, .quickBarButton.quickBarButton
+            flex: 0 0 auto
             width: 44px
             min-width: 44px
+            height: 44px
 
         // Under the status chip, right of the view-controls rail; text and buttons stack
         .geoNudge
-            top: 46px
+            top: calc(#{starmap.$inset} + var(--size-control-small) + var(--space-2))
             left: starmap.$rail-width-mobile
-            right: 8px
+            right: starmap.$inset
             transform: none
             flex-direction: column
             align-items: stretch
-            gap: 8px
+            gap: var(--space-2)
             max-width: none
 
         .geoNudgeActions
             flex-wrap: wrap
 
         // Under the header right of the view-controls rail: the bottom edge is taken by
-        // the action bar with its raised FAB and by the bottom-sheet panels, so a bottom
-        // placement would collide with them
+        // the quick-bar strip and by the bottom-sheet panels, so a bottom placement would
+        // collide with them
         .statusChip
-            top: 10px
-            right: 8px
+            top: starmap.$inset
+            right: starmap.$inset
             bottom: auto
             left: starmap.$rail-width-mobile
             max-width: none
@@ -541,27 +518,20 @@
         // Horizontally scrollable strip along the bottom edge; hidden while a bottom
         // sheet (settings/search/link) occupies the same spot
         .quickBar
-            left: 8px
-            right: 8px
+            left: starmap.$inset
+            right: starmap.$inset
             bottom: starmap.$mobile-bottom-inset
             transform: none
             justify-content: flex-start
             overflow-x: auto
+            // Room for the buttons' ring and shadow, which the scroller would clip
+            padding: var(--space-1) 2px
+            margin-bottom: calc(-1 * var(--space-1))
             scrollbar-width: none
             mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent)
 
             &::-webkit-scrollbar
                 display: none
-
-        // Same 44px thumb target as the rail (see .railButton above); after the mobile
-        // .toolbarButton rule so its width/min-width win. The strip stays a scrollable row,
-        // and the fade on its right edge says so
-        .quickBarButton
-            flex: 0 0 auto
-            height: 44px !important
-            width: 44px
-            min-width: 44px
-            padding: 0
 
         .quickBarSheetOpen
             display: none
@@ -570,8 +540,8 @@
         // below them
         .searchPanel, .linkPanel
             top: auto
-            left: 8px
-            right: 8px
+            left: starmap.$inset
+            right: starmap.$inset
             bottom: starmap.$mobile-bottom-inset
             width: auto
             max-width: none
@@ -587,8 +557,8 @@
         // !important beats the JS-computed inline left/top used for the anchored desktop
         // placement
         .popup
-            left: 8px !important
-            right: 8px
+            left: starmap.$inset !important
+            right: starmap.$inset
             top: auto !important
             bottom: starmap.$mobile-bottom-inset
             width: auto
@@ -648,80 +618,46 @@
     position: relative
     z-index: starmap.$z-sidebar
     overflow-y: auto
-    background-color: var(--container-background-color)
-    border-right: 1px solid color-mix(in srgb, var(--input-border-color) 60%, transparent)
+    background-color: var(--surface-1)
+    border-right: 1px solid var(--border)
     // No width transition on purpose: the fitContainer ResizeObserver calls
     // Celestial.resize() on every width change, an animated width would mean a dozen
     // resizes per toggle. The sidebar simply appears/disappears in one step.
 
-.settingsPanel
-    // Inside the docked sidebar the aside is the surface: the kit Container keeps
-    // only its padding/typography — no own radius, shadow or background on desktop
-    padding: 12px !important
+// Doubled: inside the docked sidebar the aside is the surface, the kit Container keeps
+// only its typography — no own radius, ring, background or padding on desktop
+.settingsPanel.settingsPanel
     display: flex
     flex-direction: column
-    gap: 10px
-    border-radius: 0 !important
-    box-shadow: none !important
-    background: transparent !important
+    gap: var(--space-4)
+    padding: var(--space-4)
+    border-radius: 0
+    box-shadow: none
+    background: transparent
 
-    // Kit checkboxes restyled as iOS-like switches (mockup): the aria-hidden span is
-    // the checkbox's visual box — turn it into a track + ::after thumb, label text
-    // stays left, switch goes right. State comes from the sibling input via :has().
-    label:has(> input[type='checkbox'])
-        justify-content: space-between
-        align-items: center
-        gap: 8px
-
-        > span[aria-hidden='true']
-            order: 2
-            margin-right: 0
-            position: relative
-            width: 34px
-            min-width: 34px
-            height: 20px
-            border-radius: 10px
-            background-color: var(--input-background-color)
-            box-shadow: inset 0 0 0 1px var(--input-border-color)
-            transition: background-color 0.15s ease, box-shadow 0.15s ease
-
-            svg
-                display: none
-
-            &::after
-                content: ''
-                position: absolute
-                top: 3px
-                left: 3px
-                width: 14px
-                height: 14px
-                border-radius: 50%
-                background-color: var(--text-color-secondary)
-                transition: transform 0.15s ease, background-color 0.15s ease
-
-    label:has(> input[type='checkbox']:checked)
-        > span[aria-hidden='true']
-            background-color: var(--color-main)
-            box-shadow: none
-
-            &::after
-                transform: translateX(14px)
-                background-color: #fff
-
+// A block of the sidebar (StarMapSettingsGroup): a <fieldset> with an overline legend,
+// separated from the previous one by a hairline
 .settingsGroup
     display: flex
     flex-direction: column
-    gap: 6px
-    // Titled groups are <fieldset>s — strip the UA chrome (groove border, side padding,
-    // 2px inline margin, min-content width) so they lay out exactly like the plain <div>
-    // groups
+    gap: var(--space-3)
     margin: 0
-    padding: 8px 0 0
+    padding: 0
     border: 0
+    // <fieldset> defaults to min-content width
     min-width: 0
 
     &:not(:first-child)
-        border-top: 1px solid color-mix(in srgb, var(--input-border-color) 60%, transparent)
+        padding-top: var(--space-4)
+        border-top: 1px solid var(--border)
+
+.settingsGroupBody
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+
+    &[hidden]
+        display: none
 
 .settingsGroupTitle
     // A <legend>: browsers pull it out of the flex flow and render it into the fieldset
@@ -730,13 +666,58 @@
     float: left
     width: 100%
     padding: 0
+
+.settingsGroupLabel
+    +type.overline
+
+// The legend of a collapsible group: the whole row is the disclosure button. Doubled to
+// beat the kit's `.button.unstyled` reset.
+.settingsGroupToggle.settingsGroupToggle
     display: flex
     align-items: center
-    gap: 6px
-    font-size: 12px
+    gap: var(--space-2)
+    width: 100%
+    margin: calc(-1 * var(--space-1)) 0
+    padding: var(--space-1) 0
+    border-radius: var(--radius-sm)
     color: var(--text-color-secondary)
-    text-transform: uppercase
-    letter-spacing: 0.5px
+    cursor: pointer
+
+    &:hover
+        color: var(--text-color-primary)
+
+    &:focus-visible
+        outline: var(--focus-outline)
+
+.settingsGroupSummary
+    +type.caption
+    margin-left: auto
+    font-variant-numeric: tabular-nums
+
+.settingsGroupChevron
+    width: 16px
+    height: 16px
+    flex-shrink: 0
+    transition: transform var(--duration-base) var(--ease)
+
+.settingsGroupChevronOpen
+    transform: rotate(180deg)
+
+// A layer toggle: the caption left, the project Switch right; the row takes the click
+.settingsSwitch
+    +type.body
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: var(--space-2)
+    color: var(--text-color-primary)
+    cursor: pointer
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        min-height: 44px
+
+.settingsSwitchLabel
+    min-width: 0
 
 // A caption and its control on one line — the sidebar is 280px wide, so a stacked
 // label costs a whole row for two words. The control keeps a floor wide enough for
@@ -745,47 +726,57 @@
     display: flex
     align-items: center
     justify-content: space-between
-    gap: 8px
+    gap: var(--space-2)
 
 .settingsRowLabel
-    font-size: 13px
-    color: var(--input-label-color)
+    +type.body
+    color: var(--text-color-secondary)
 
 .settingsRowControl
     flex: 0 0 auto
     min-width: 84px
 
-.viewModeToggle
+// The sky ↔ horizon SegmentedControl spans the sidebar, two equal halves. Doubled: the
+// control's own `.segmentedControl` is inline-flex.
+.viewModeToggle.viewModeToggle
     display: flex
-    gap: 4px
 
-    button
-        flex: 1
+    > button
+        flex: 1 1 0
+        justify-content: center
 
 .locationRow
     display: flex
-    gap: 6px
+    gap: var(--space-2)
 
 // Time-flow rail under the datetime field — ÷8 ÷2 ⏸ ×2 ×8 as five equal cells in one
-// row; nowrap + zero min-width keep the short labels from wrapping in the 280px sidebar
-.timeFlowRow
+// row; nowrap + zero min-width keep the short labels from wrapping in the 280px sidebar.
+// Doubled for the kit's `.button.small` padding.
+.timeFlowRow.timeFlowRow
     display: flex
-    gap: 4px
+    gap: var(--space-1)
 
     button
         flex: 1 1 0
         min-width: 0
-        padding-left: 4px
-        padding-right: 4px
+        padding-left: var(--space-1)
+        padding-right: var(--space-1)
         white-space: nowrap
         justify-content: center
 
 .timezoneHint
+    +type.caption
     display: flex
     align-items: center
-    gap: 6px
-    font-size: 11px
-    color: var(--text-color-secondary)
+    gap: var(--space-2)
+
+// The running speed of the clock — a state, so it reads in the accent colour
+.rateHint
+    color: var(--color-main)
+
+    strong
+        font-weight: var(--font-weight-semibold)
+        font-variant-numeric: tabular-nums
 
 .timezoneSpinner
     width: 12px
@@ -798,30 +789,30 @@
 
 // Mobile: the sidebar leaves the flex flow and becomes the bottom sheet it was before
 // (the map keeps the full width); the Container inside gets its card chrome back
-@media (max-width: 768px)
+@media (max-width: variables.$mobileMaxWidth)
     .settingsSidebar
         position: absolute
         flex: none
-        left: 8px
-        right: 8px
+        left: starmap.$inset
+        right: starmap.$inset
         bottom: starmap.$mobile-bottom-inset
         // Stops short of the rail, which paints above the sheet — the form scrolls inside
         // anyway, and this keeps every rail button reachable while the sheet is open
-        max-height: calc(100% - #{starmap.$rail-bottom-mobile} - 8px)
+        max-height: calc(100% - #{starmap.$rail-bottom-mobile} - var(--space-2))
         z-index: starmap.$z-sidebar
         border-right: none
-        border-radius: 12px
-        +starmap.glass(92%, 8px, $shadow: null)
+        border-radius: var(--radius-xl)
+        +starmap.glass(92%, 8px)
         overflow-y: auto
 
-    .settingsPanel
-        // Inherit the sheet's rounded corners so the Container's own background never pokes out
-        border-radius: 12px
+    // Inherit the sheet's rounded corners so the Container's own background never pokes out
+    .settingsPanel.settingsPanel
+        border-radius: var(--radius-xl)
 
     // Thumb-sized time-flow transport (÷8 ÷2 ⏸ ×2 ×8); the cells are already ~60px wide
-    // on a phone, only the kit's 26px height falls short. !important beats `.button.small`.
-    .timeFlowRow button
-        height: 44px !important
+    // on a phone, only the kit's 28px height falls short. Doubled for `.button.small`.
+    .timeFlowRow.timeFlowRow button
+        height: 44px
 
 // Clamps #celestial-map to its ancestor's height (see pages/starmap.tsx), overriding
 // Celestial's own inline `element.style.height = ...px` (celestial.js sets this on both

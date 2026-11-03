@@ -77,11 +77,14 @@
                 "settings": {
                     "title": "Настройки карты",
                     "star-magnitude": "Макс. величина",
+                    "group-summary": "{{on}} из {{total}}",
                     "view-mode": "Режим просмотра",
                     "atmosphere": "Атмосфера",
                     "stars": "Звёзды",
                     "show-stars": "Показать звёзды",
+                    "milky-way": "Млечный Путь",
                     "objects": "Объекты",
+                    "planets": "Планеты, Солнце, Луна",
                     "show-dso": "Объекты глубокого космоса",
                     "show-dso-full": "Больше объектов",
                     "show-custom-objects": "Объекты обсерватории",
@@ -94,9 +97,7 @@
                     "graticule": "Координатная сетка",
                     "equator": "Экватор",
                     "ecliptic": "Эклиптика",
-                    "galactic-plane": "Галактическая плоскость",
-                    "milky-way": "Млечный Путь",
-                    "planets": "Планеты, Солнце, Луна"
+                    "galactic-plane": "Галактическая плоскость"
                 },
                 "search": {
                     "title": "Поиск по небу",

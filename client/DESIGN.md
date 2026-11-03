@@ -182,7 +182,11 @@ readers may spell out all-caps words letter by letter. No ad-hoc sizes, no `em` 
 
 - ECharts options (`utils/charts.ts`, weather and statistics charts) and Leaflet paths take colours
   in JS; keep them in one place per library and match the palette above.
-- The star map (`components/common/star-map`, Celestial.js) has its own sky palette.
+- The star map (`components/common/star-map`, Celestial.js) has its own sky palette — for what is
+  drawn on the canvas only. Its overlays (rail, quick bar, settings sidebar, panels, popup,
+  captions) are ordinary UI: kit controls, tokens and type roles. A toggle that is on is a
+  `primary` button, as in the photo viewer; the floating surfaces share the `glass` mixin of
+  `styles/starmap-mixins.sass` (the card surface, slightly see-through, ring + `--shadow-md`).
 - White text over photos and the indigo button is `#fff`.
 
 ## 8. Adding a component — checklist

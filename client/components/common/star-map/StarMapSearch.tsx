@@ -150,14 +150,18 @@ const StarMapSearch: React.FC<StarMapSearchProps> = ({ open, objects, dsoCatalog
                 />
             </div>
 
-            {!items && (
+            {/* The index builds from the catalogs the first time the panel opens — a
+                fraction of a second, since the map has already fetched them. Until a query
+                is typed nothing needs it, so the panel opens on its hint at once; the
+                loading line only shows when the visitor is actually waiting for results. */}
+            {!items && queryLongEnough && (
                 <div className={styles.searchStatus}>
-                    <Spinner />
+                    <Spinner className={styles.searchSpinner} />
                     {t('components.common.star-map.search.loading', 'Загрузка каталогов…')}
                 </div>
             )}
 
-            {items && !queryLongEnough && (
+            {!queryLongEnough && (
                 <div className={styles.searchStatus}>
                     {t(
                         'components.common.star-map.search.hint',
