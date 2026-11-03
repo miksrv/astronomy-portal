@@ -1,15 +1,13 @@
 import React from 'react'
 import { getCookie } from 'cookies-next'
-import { Button } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
 
-import { API, ApiModel, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { EventsList } from '@/components/pages/stargazing'
-import { hasPermission } from '@/utils/permissions'
 import { removeSSRQueryCache } from '@/utils/ssrCache'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
@@ -19,8 +17,6 @@ interface StargazingHistoryPageProps {
 
 const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events }) => {
     const { t } = useTranslation()
-
-    const user = useAppSelector((state) => state.auth?.user)
 
     const title = t('pages.stargazing-history.title', 'Архив астровыездов')
     const description = t(
@@ -47,17 +43,16 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
                 title={title}
                 links={[{ link: '/stargazing', text: t('pages.stargazing.title', 'Астровыезды') }]}
                 currentPage={title}
-            >
-                {hasPermission(user, ApiModel.Permission.EVENTS_CREATE) && (
-                    <Button
-                        icon={'PlusCircle'}
-                        mode={'primary'}
-                        size={'medium'}
-                        label={t('pages.stargazing.create_button', 'Добавить')}
-                        link={'/stargazing/form'}
-                    />
-                )}
-            </AppToolbar>
+                actions={[
+                    {
+                        key: 'create',
+                        icon: 'PlusCircle',
+                        label: t('pages.stargazing.create_button', 'Добавить'),
+                        link: '/stargazing/form',
+                        permission: ApiModel.Permission.EVENTS_CREATE
+                    }
+                ]}
+            />
 
             {description}
 

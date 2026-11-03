@@ -5,7 +5,7 @@ import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
 import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import {
     CatalogObject,
@@ -17,7 +17,6 @@ import {
 } from '@/components/pages/objects'
 import { StatGrid } from '@/components/ui'
 import { createPageUrl } from '@/utils/helpers'
-import { hasPermission } from '@/utils/permissions'
 import { removeSSRQueryCache } from '@/utils/ssrCache'
 import { initSSRLocale } from '@/utils/ssrLocale'
 import { formatObjectName } from '@/utils/strings'
@@ -33,8 +32,6 @@ interface ObjectsPageProps {
 
 const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, category, categoriesList, objectsList }) => {
     const { t, i18n } = useTranslation()
-
-    const user = useAppSelector((state) => state.auth?.user)
 
     const { filters, updateFilters, resetFilters } = useCatalogFilters(search, category ?? undefined)
     const visibility = useCatalogVisibility(objectsList)
@@ -139,16 +136,16 @@ const ObjectsPage: NextPage<ObjectsPageProps> = ({ search, category, categoriesL
                 )}
                 currentPage={currentCategory ? currentCategory.title : t('menu.objects', 'Объекты')}
                 links={currentCategory ? [{ link: '/objects', text: t('menu.objects', 'Объекты') }] : undefined}
-            >
-                {hasPermission(user, ApiModel.Permission.OBJECTS_MANAGE) && (
-                    <Button
-                        icon={'PlusCircle'}
-                        mode={'secondary'}
-                        label={t('pages.objects.create_button', 'Добавить')}
-                        link={'/objects/form'}
-                    />
-                )}
-            </AppToolbar>
+                actions={[
+                    {
+                        key: 'create',
+                        icon: 'PlusCircle',
+                        label: t('pages.objects.create_button', 'Добавить'),
+                        link: '/objects/form',
+                        permission: ApiModel.Permission.OBJECTS_MANAGE
+                    }
+                ]}
+            />
 
             <StatGrid
                 items={stats}

@@ -1,0 +1,100 @@
+// The "⋯" in the top right corner of the page header. It sits on the breadcrumbs line, so its
+// negative block margins (a 28px target over a 12px text line) keep that line as tall as for a
+// guest: the title does not move down for an editor
+.inline
+    flex-shrink: 0
+    margin-block: -8px
+
+.trigger
+    display: flex
+    align-items: center
+    justify-content: center
+    width: var(--size-small)
+    height: var(--size-small)
+    border-radius: var(--radius-md)
+    color: var(--text-color-secondary)
+    transition: background-color var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease)
+
+    svg
+        width: 20px
+        height: 20px
+        fill: currentColor
+
+    &:hover
+        background-color: var(--surface-2)
+        color: var(--text-color-primary)
+
+    [aria-expanded='true'] > &
+        background-color: var(--surface-2)
+        color: var(--text-color-primary)
+
+    // Over a photo: legible on any part of the sky
+    &.overlay
+        width: var(--size-medium)
+        height: var(--size-medium)
+        background-color: rgb(0 0 0 / 55%)
+        color: #fff
+        backdrop-filter: blur(4px)
+
+        &:hover,
+        [aria-expanded='true'] > &
+            background-color: rgb(0 0 0 / 75%)
+            color: #fff
+
+// The same rows as the user menu of the app bar
+.menu
+    list-style: none
+    margin: 0
+    padding: var(--space-1)
+    width: max-content
+    min-width: 100%
+
+    li
+        margin-bottom: 2px
+
+        &:last-child
+            margin-bottom: 0
+
+        &.divider
+            margin-top: var(--space-1)
+            padding-top: var(--space-1)
+            border-top: 1px solid var(--border)
+
+    .item
+        display: flex
+        align-items: center
+        justify-content: flex-start
+        gap: var(--space-2)
+        width: 100%
+        min-height: var(--size-medium)
+        padding: var(--space-1) var(--space-3)
+        border-radius: var(--radius-md)
+        color: var(--text-color-primary)
+        font-size: inherit
+        font-weight: var(--font-weight-normal)
+        white-space: nowrap
+        cursor: pointer
+        transition: background-color var(--duration-fast) var(--ease)
+
+        svg
+            fill: var(--text-color-secondary)
+            width: 20px
+            height: 20px
+            flex-shrink: 0
+
+        &:hover
+            background-color: var(--surface-2)
+            color: var(--text-color-primary)
+
+        &:disabled
+            cursor: default
+            opacity: 0.5
+
+            &:hover
+                background-color: transparent
+
+        &.negative
+            color: var(--color-red)
+
+            svg
+                fill: var(--color-red)

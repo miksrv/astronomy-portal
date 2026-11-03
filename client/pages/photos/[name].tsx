@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Button, cn } from 'simple-react-ui-kit'
+import { cn } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
@@ -20,7 +20,8 @@ import {
     PhotoStrip,
     PhotoVersion,
     PhotoViewer,
-    StripPhoto
+    StripPhoto,
+    usePhotoSolve
 } from '@/components/pages/photos'
 import { getSolvedField, objectAliases, trimAstrometry } from '@/utils/astrometry'
 import { getConstellationName } from '@/utils/constellations'
@@ -93,6 +94,8 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
     const { t, i18n } = useTranslation()
 
     const user = useAppSelector((state) => state.auth?.user)
+    const canManage = hasPermission(user, ApiModel.Permission.PHOTOS_MANAGE)
+    const solve = usePhotoSolve(photoId, canManage)
 
     // Counted here, once the page is open in a browser, not by the server render
     const [postView] = API.usePhotosPostViewMutation()
@@ -210,22 +213,27 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                 // The page's own name in the path: which object and when (the date is also the
                 // first fact of the label, for phones that show only the way back here)
                 currentPage={t('pages.photo.title', 'Снимок {{objects}} от {{date}}', { objects: objectNames, date })}
-            >
-                {hasPermission(user, ApiModel.Permission.PHOTOS_MANAGE) && (
-                    <>
-                        <PhotoSolveStatus
-                            key={photoId}
-                            photoId={photoId}
-                        />
-                        <Button
-                            icon={'Pencil'}
-                            mode={'secondary'}
-                            label={t('common.edit', 'Редактировать')}
-                            link={`/photos/form/?id=${photoId}`}
-                        />
-                    </>
-                )}
-            </AppToolbar>
+                afterBreadcrumbs={canManage && <PhotoSolveStatus solve={solve} />}
+                actions={[
+                    {
+                        key: 'edit',
+                        icon: 'Pencil',
+                        label: t('common.edit', 'Редактировать'),
+                        link: `/photos/form/?id=${photoId}`,
+                        permission: ApiModel.Permission.PHOTOS_MANAGE
+                    },
+                    {
+                        key: 'solve',
+                        icon: 'Position',
+                        label: solve.unsolved
+                            ? t('components.pages.photos.photo-solve-status.start', 'Привязать к небу')
+                            : t('components.pages.photos.photo-solve-status.restart', 'Привязать к небу заново'),
+                        disabled: solve.inProgress || solve.stepping,
+                        onClick: solve.start,
+                        permission: ApiModel.Permission.PHOTOS_MANAGE
+                    }
+                ]}
+            />
 
             {/* The work, as large as the first screen allows, on a black band across the window */}
             <PhotoViewer

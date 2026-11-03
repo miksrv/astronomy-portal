@@ -103,7 +103,7 @@
                     "solving": "Plate solving: in progress…",
                     "failed": "Plate solving failed: {{error}}",
                     "start": "Plate-solve",
-                    "restart": "Solve again"
+                    "restart": "Plate-solve again"
                 },
                 "photo-strip": {
                     "open": "Photo of {{date}}",

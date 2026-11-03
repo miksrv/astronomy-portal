@@ -252,9 +252,10 @@ describe('EventUpcoming', () => {
     it('does not show moderation actions for a regular user', () => {
         render(<EventUpcoming event={baseEvent} />)
 
-        expect(screen.queryByTitle('Редактировать')).toBeNull()
-        expect(screen.queryByTitle('Статистика')).toBeNull()
-        expect(screen.queryByTitle('Удалить')).toBeNull()
+        // The kit's test double renders the "⋯" menu's items right away
+        expect(screen.queryByText('Редактировать')).toBeNull()
+        expect(screen.queryByText('Статистика')).toBeNull()
+        expect(screen.queryByText('Удалить')).toBeNull()
     })
 
     it('shows edit and statistic but not delete for a moderator', () => {
@@ -272,16 +273,12 @@ describe('EventUpcoming', () => {
 
         render(<EventUpcoming event={baseEvent} />)
 
-        fireEvent.click(screen.getByTitle('Редактировать'))
-        expect(mockRouterPush).toHaveBeenCalledWith('/stargazing/form?id=event-1')
-
-        expect(screen.queryByTitle('Удалить')).toBeNull()
-
-        fireEvent.click(screen.getByTitle('Статистика'))
-        expect(mockRouterPush).toHaveBeenCalledWith('/stargazing/event-1/statistic')
+        expect(screen.getByText('Редактировать').closest('a')?.getAttribute('href')).toBe('/stargazing/form?id=event-1')
+        expect(screen.getByText('Статистика').closest('a')?.getAttribute('href')).toBe('/stargazing/event-1/statistic')
+        expect(screen.queryByText('Удалить')).toBeNull()
     })
 
-    it('shows edit, statistic and delete actions for an admin and navigates to the edit form', () => {
+    it('shows edit, statistic and delete actions for an admin', () => {
         ;(useAppSelector as jest.Mock).mockImplementation((selector) =>
             selector({
                 auth: {
@@ -300,11 +297,9 @@ describe('EventUpcoming', () => {
 
         render(<EventUpcoming event={baseEvent} />)
 
-        fireEvent.click(screen.getByTitle('Редактировать'))
-        expect(mockRouterPush).toHaveBeenCalledWith('/stargazing/form?id=event-1')
-
-        fireEvent.click(screen.getByTitle('Статистика'))
-        expect(mockRouterPush).toHaveBeenCalledWith('/stargazing/event-1/statistic')
+        expect(screen.getByText('Редактировать').closest('a')?.getAttribute('href')).toBe('/stargazing/form?id=event-1')
+        expect(screen.getByText('Статистика').closest('a')?.getAttribute('href')).toBe('/stargazing/event-1/statistic')
+        expect(screen.getByRole('button', { name: 'Удалить' })).toBeDefined()
     })
 
     it('opens the delete confirmation dialog and deletes the event on confirm', async () => {
@@ -327,7 +322,7 @@ describe('EventUpcoming', () => {
 
         render(<EventUpcoming event={baseEvent} />)
 
-        fireEvent.click(screen.getByTitle('Удалить'))
+        fireEvent.click(screen.getByRole('button', { name: 'Удалить' }))
         expect(screen.getByText('Удалить астровыезд?')).toBeDefined()
 
         const confirmButtons = screen.getAllByText('Удалить')
@@ -376,7 +371,7 @@ describe('EventUpcoming', () => {
 
         render(<EventUpcoming event={baseEvent} />)
 
-        fireEvent.click(screen.getByTitle('Удалить'))
+        fireEvent.click(screen.getByRole('button', { name: 'Удалить' }))
         const confirmButtons = screen.getAllByText('Удалить')
         const confirmButton = confirmButtons[confirmButtons.length - 1]
 
