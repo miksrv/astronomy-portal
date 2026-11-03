@@ -129,10 +129,13 @@ jobs:
           # --delete for the server bundle: a package left behind by an older build is not
           # harmless. A stale node_modules/next/node_modules/sharp (0.34, from a build that
           # nested it) shadowed the real sharp for months: Next resolved it, it failed to load,
-          # and every image was served as the unoptimized original. .next, public and the
-          # ecosystem file are synced separately below and are excluded from the delete, and so
-          # is .deploy-lock: it holds the maintenance locks of this and the API deploy.
-          rsync -avz --delete --exclude .next --exclude public --exclude ecosystem.config.js --exclude .deploy-lock -e ssh client/.next/standalone/ vps:/var/www/astro.miksoft.pro
+          # and every image was served as the unoptimized original.
+          # Protect (P) filters, not --exclude: an excluded path is not sent either, and the
+          # bundle's .next (server pages, BUILD_ID, the manifests) must be. They only keep from
+          # the delete what is synced or managed outside the bundle: the image cache and the
+          # static files (kept for a week, cleaned above), public and the ecosystem file (synced
+          # below) and .deploy-lock (the maintenance locks of this and the API deploy)
+          rsync -avz --delete --filter='P /.next/cache/' --filter='P /.next/static/' --filter='P /public/' --filter='P /ecosystem.config.js' --filter='P /.deploy-lock/' -e ssh client/.next/standalone/ vps:/var/www/astro.miksoft.pro
           rsync -avz -e ssh client/.next/static vps:/var/www/astro.miksoft.pro/.next
           rsync -avz -e ssh client/public vps:/var/www/astro.miksoft.pro
           rsync -avz -e ssh client/ecosystem.config.js vps:/var/www/astro.miksoft.pro
@@ -140,6 +143,12 @@ jobs:
       # Restarting by the ecosystem file applies its env changes; pm2 save keeps the list for a reboot
       - name: Restart PM2
         run: ssh vps "cd /var/www/astro.miksoft.pro && pm2 restart ecosystem.config.js --update-env && pm2 save"
+
+      # PM2 reports "online" for a process that crashes right after the start (it restarts it in a
+      # loop): ask the server itself. Fails the run with the app's last log lines if it doesn't answer
+      - name: Check the site answers
+        run: |
+          ssh vps 'for i in $(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:3006/ && echo "the site answers" && exit 0; sleep 1; done; pm2 logs astro.miksoft.pro --lines 40 --nostream; exit 1'
 
       # Same check on the host: the binary must also load with the server's Node and glibc
       # Resolved from Next's own directory, the way the image optimizer requires it: a copy
