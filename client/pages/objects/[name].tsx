@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react'
-import { Button, cn } from 'simple-react-ui-kit'
+import { cn } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
 import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, HOST_IMG, SITE_LINK, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, HOST_IMG, SITE_LINK, wrapper } from '@/api'
 import { AppFooter, AppLayout, BreadcrumbJsonLd } from '@/components/common'
 import { VisibilityChart } from '@/components/common/visibility-chart'
 import {
@@ -24,7 +24,6 @@ import { getConstellationName } from '@/utils/constellations'
 import { formatDateRange, formatExposure, toISODateTime } from '@/utils/dates'
 import { createPageUrl } from '@/utils/helpers'
 import { groupFramesIntoNights, toObservingFrames } from '@/utils/observingLog'
-import { hasPermission } from '@/utils/permissions'
 import { createLargePhotoUrl, createMediumPhotoUrl } from '@/utils/photos'
 import { removeSSRQueryCache } from '@/utils/ssrCache'
 import { initSSRLocale } from '@/utils/ssrLocale'
@@ -58,7 +57,6 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 }) => {
     const { t, i18n } = useTranslation()
 
-    const user = useAppSelector((state) => state.auth?.user)
     const now = useNow(5 * 60_000)
 
     const hasFrames = !!objectData.statistic?.frames
@@ -219,16 +217,15 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 constellation={constellation ?? undefined}
                 visibility={visibility}
                 isMoving={isMoving}
-                adminActions={
-                    hasPermission(user, ApiModel.Permission.OBJECTS_MANAGE) && (
-                        <Button
-                            icon={'Pencil'}
-                            mode={'outline'}
-                            label={t('common.edit', 'Редактировать')}
-                            link={`/objects/form/?id=${objectName}`}
-                        />
-                    )
-                }
+                actions={[
+                    {
+                        key: 'edit',
+                        icon: 'Pencil',
+                        label: t('common.edit', 'Редактировать'),
+                        link: `/objects/form/?id=${objectName}`,
+                        permission: ApiModel.Permission.OBJECTS_MANAGE
+                    }
+                ]}
             />
 
             {hasFrames && (

@@ -46,8 +46,6 @@
                     "show-more_one": "Show {{count}} more",
                     "show-more_other": "Show {{count}} more",
                     "found": "Found {{found}} of {{total}}",
-                    "photos-count_one": "{{count}} photo",
-                    "photos-count_other": "{{count}} photos",
                     "reset": "Reset",
                     "open": "Photo of {{name}}, {{date}}",
                     "alt": "Astrophoto of {{title}}, {{date}}"
@@ -103,7 +101,7 @@
                     "solving": "Plate solving: in progress…",
                     "failed": "Plate solving failed: {{error}}",
                     "start": "Plate-solve",
-                    "restart": "Solve again"
+                    "restart": "Plate-solve again"
                 },
                 "photo-strip": {
                     "open": "Photo of {{date}}",

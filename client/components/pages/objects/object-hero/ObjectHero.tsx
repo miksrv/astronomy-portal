@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
+import { PageAction, PageActions } from '@/components/common'
 import { Breadcrumbs, StatusBadge } from '@/components/ui'
 import { formatDECShort, formatRAShort } from '@/utils/coordinates'
 import { formatCalendarDate } from '@/utils/dates'
@@ -32,8 +33,8 @@ interface ObjectHeroProps {
     visibility?: Visibility
     /** A comet, an asteroid or a planet: its coordinates are from the shooting date */
     isMoving?: boolean
-    /** Rendered after the main actions: the editor's buttons */
-    adminActions?: React.ReactNode
+    /** The editor's actions, behind "⋯" on the line of the breadcrumbs */
+    actions?: PageAction[]
 }
 
 /**
@@ -49,7 +50,7 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
     constellation,
     visibility,
     isMoving,
-    adminActions
+    actions
 }) => {
     const { t, i18n } = useTranslation()
 
@@ -126,12 +127,20 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
 
     return (
         <div className={styles.objectHero}>
-            <Breadcrumbs
-                className={styles.breadcrumbs}
-                homePageTitle={t('common.look-at-the-stars', 'Смотри на звёзды')}
-                links={[{ link: '/objects', text: t('menu.objects', 'Объекты') }]}
-                currentPage={name}
-            />
+            <div className={styles.top}>
+                <Breadcrumbs
+                    className={styles.breadcrumbs}
+                    homePageTitle={t('common.look-at-the-stars', 'Смотри на звёзды')}
+                    links={[{ link: '/objects', text: t('menu.objects', 'Объекты') }]}
+                    currentPage={name}
+                />
+                {!!actions?.length && (
+                    <PageActions
+                        className={styles.pageActions}
+                        actions={actions}
+                    />
+                )}
+            </div>
 
             <div className={cn(styles.grid, !photo && !surveyUrl && styles.single)}>
                 {photo ? (
@@ -280,7 +289,6 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
                                 label={t('common.star-map', 'Звёздная карта')}
                             />
                         )}
-                        {adminActions}
                     </div>
                 </div>
             </div>

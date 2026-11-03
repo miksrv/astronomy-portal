@@ -94,7 +94,7 @@
             "video-caption": "{{eventTitle}} (Видео №{{number}})",
             "photo-caption-with-photographer": "{{eventTitle}} — фото от {{photographer}}",
             "photo-caption": "{{eventTitle}} (Фото №{{number}})",
-            "upload-media-button": "Медиа",
+            "upload-media-button": "Загрузить медиа",
             "photos-from-stargazing": "Фотографии с мероприятия",
             "photos-loading-more": "Загрузка ещё фотографий…",
             "photos-show-all": "Смотреть все ({{total}})",

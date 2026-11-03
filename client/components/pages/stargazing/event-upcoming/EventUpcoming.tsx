@@ -4,15 +4,15 @@ import { Button, cn, Container, Icon } from 'simple-react-ui-kit'
 
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
-import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, useAppDispatch, useAppSelector } from '@/api'
 import { openAuthDialog } from '@/api/applicationSlice'
 import { hosts } from '@/api/constants'
+import { PageActions } from '@/components/common/page-actions'
 import { formatUTCDate } from '@/utils/dates'
 import { getErrorMessage } from '@/utils/errors'
-import { hasAnyPermission, hasPermission } from '@/utils/permissions'
+import { hasPermission } from '@/utils/permissions'
 import { removeMarkdownPreserveParagraphs } from '@/utils/strings'
 
 import { EventBookingForm } from './event-booking-form'
@@ -61,7 +61,6 @@ interface EventUpcomingProps {
 
 export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, layout = 'hero' }) => {
     const { t, i18n } = useTranslation()
-    const router = useRouter()
 
     const isHero = layout === 'hero'
 
@@ -81,10 +80,6 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
 
     const user = useAppSelector((state) => state.auth.user)
 
-    const canModerate = hasAnyPermission(user, [
-        ApiModel.Permission.EVENTS_UPDATE,
-        ApiModel.Permission.EVENTS_STATISTIC
-    ])
     const canDelete = hasPermission(user, ApiModel.Permission.EVENTS_DELETE)
 
     const [confirmation, showConfirmation] = useState<boolean>(false)
@@ -421,39 +416,38 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
                                     preload={true}
                                 />
 
-                                {canModerate && (
-                                    <div className={styles.adminActions}>
-                                        <Button
-                                            size={'small'}
-                                            mode={'secondary'}
-                                            icon={'Pencil'}
-                                            title={t('common.edit', 'Редактировать')}
-                                            onClick={() => router.push(`/stargazing/form?id=${event?.id}`)}
-                                        />
-
-                                        <Button
-                                            size={'small'}
-                                            mode={'secondary'}
-                                            icon={'BarChart'}
-                                            title={t(
-                                                'components.pages.stargazing.event-upcoming.statistic',
-                                                'Статистика'
-                                            )}
-                                            onClick={() => router.push(`/stargazing/${event?.id}/statistic`)}
-                                        />
-
-                                        {canDelete && (
-                                            <Button
-                                                size={'small'}
-                                                mode={'primary'}
-                                                variant={'negative'}
-                                                icon={'Close'}
-                                                title={t('common.delete', 'Удалить')}
-                                                onClick={() => setShowDeleteDialog(true)}
-                                            />
-                                        )}
-                                    </div>
-                                )}
+                                <div className={styles.adminActions}>
+                                    <PageActions
+                                        overlay={true}
+                                        actions={[
+                                            {
+                                                key: 'edit',
+                                                icon: 'Pencil',
+                                                label: t('common.edit', 'Редактировать'),
+                                                link: `/stargazing/form?id=${event?.id}`,
+                                                permission: ApiModel.Permission.EVENTS_UPDATE
+                                            },
+                                            {
+                                                key: 'statistic',
+                                                icon: 'BarChart',
+                                                label: t(
+                                                    'components.pages.stargazing.event-upcoming.statistic',
+                                                    'Статистика'
+                                                ),
+                                                link: `/stargazing/${event?.id}/statistic`,
+                                                permission: ApiModel.Permission.EVENTS_STATISTIC
+                                            },
+                                            {
+                                                key: 'delete',
+                                                icon: 'Close',
+                                                label: t('common.delete', 'Удалить'),
+                                                variant: 'negative',
+                                                onClick: () => setShowDeleteDialog(true),
+                                                permission: ApiModel.Permission.EVENTS_DELETE
+                                            }
+                                        ]}
+                                    />
+                                </div>
                             </div>
 
                             {/* Stripped of Markdown since it's shown as plain filler text

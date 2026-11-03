@@ -1,16 +1,14 @@
 import React, { useMemo } from 'react'
-import { Button } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import { useTranslation } from 'next-i18next/pages'
 import { JsonLdScript } from 'next-seo'
 
-import { API, ApiModel, useAppSelector, wrapper } from '@/api'
+import { API, ApiModel, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { GalleryPhotoItem, PhotoCatalog, toGalleryPhoto, usePhotoFilters } from '@/components/pages/photos'
 import { StatGrid } from '@/components/ui'
 import { createPageUrl } from '@/utils/helpers'
-import { hasPermission } from '@/utils/permissions'
 import { removeSSRQueryCache } from '@/utils/ssrCache'
 import { initSSRLocale } from '@/utils/ssrLocale'
 import { formatObjectName } from '@/utils/strings'
@@ -24,8 +22,6 @@ interface PhotosPageProps {
 
 const PhotosPage: NextPage<PhotosPageProps> = ({ search, category, photosList, categoriesList }) => {
     const { t, i18n } = useTranslation()
-
-    const user = useAppSelector((state) => state.auth?.user)
 
     const { filters, updateFilters, resetFilters } = usePhotoFilters(search, category ?? undefined)
 
@@ -118,16 +114,16 @@ const PhotosPage: NextPage<PhotosPageProps> = ({ search, category, photosList, c
                 )}
                 currentPage={currentCategory ? currentCategory.title : title}
                 links={currentCategory ? [{ link: '/photos', text: title }] : undefined}
-            >
-                {hasPermission(user, ApiModel.Permission.PHOTOS_MANAGE) && (
-                    <Button
-                        icon={'PlusCircle'}
-                        mode={'secondary'}
-                        label={t('pages.photos.create_button', 'Добавить')}
-                        link={'/photos/form'}
-                    />
-                )}
-            </AppToolbar>
+                actions={[
+                    {
+                        key: 'create',
+                        icon: 'PlusCircle',
+                        label: t('pages.photos.create_button', 'Добавить'),
+                        link: '/photos/form',
+                        permission: ApiModel.Permission.PHOTOS_MANAGE
+                    }
+                ]}
+            />
 
             <StatGrid
                 items={stats}

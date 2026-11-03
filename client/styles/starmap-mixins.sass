@@ -4,14 +4,18 @@
 // (bottom insets, rail width, stacking order) live in one place instead of being repeated
 // as literals that can drift apart.
 
-// Translucent panel surface of every floating map control (rail, status chip, quick bar,
-// side panels, bottom sheets, intro card). Pass `$shadow: null` to leave the box-shadow
-// alone — a kit Container keeps its own that way.
-=glass($opacity: 88%, $blur: 6px, $shadow: 0 2px 10px rgba(0, 0, 0, 0.35))
-    background-color: color-mix(in srgb, var(--container-background-color) $opacity, transparent)
+// Translucent panel surface of every floating map card (status chip, side panels, bottom
+// sheets, geolocation nudge, intro card): the card surface let through the sky a little,
+// with the same 1px ring and shadow as the site's other floating cards. Pass
+// `$shadow: false` to leave the box-shadow alone — a kit Container keeps its own that way.
+=glass($opacity: 88%, $blur: 6px, $shadow: true)
+    background-color: color-mix(in srgb, var(--surface-1) $opacity, transparent)
     backdrop-filter: blur($blur)
     @if $shadow
-        box-shadow: $shadow
+        box-shadow: 0 0 0 1px var(--border), var(--shadow-md)
+
+// Distance of every floating control from the map's edges, and between stacked ones
+$inset: var(--space-2)
 
 // Mobile: everything docking to the map's bottom edge (the quick-bar strip, the
 // settings/search/link sheets and the object popup, which cover it while they are up)
@@ -19,16 +23,17 @@
 $mobile-bottom-inset: calc(8px + env(safe-area-inset-bottom))
 
 // Distance from the map's top edge to the bottom of the mobile rail, at its tallest (sky
-// mode: 10px offset + 4px padding + 7 × 44px buttons + 6 × 4px gaps + 4px padding). The
+// mode: 8px inset + 7 × 44px buttons + 5 × 4px gaps + the 12px gap between the groups). The
 // bottom sheets are full-width, and the rail paints above them, so their height is capped
 // to stop short of this line.
-$rail-bottom-mobile: 350px
+$rail-bottom-mobile: 348px
 
 // Left edge for overlays sitting right of the top-left rail (search/link panels on
 // desktop; status chip and geolocation nudge on mobile, where the rail buttons are
 // enlarged to thumb size — see the mobile block in star-map/styles.module.sass)
-$rail-width: 54px
-$rail-width-mobile: 70px
+// (8px inset + 28px button + 8px gap; 44px buttons on mobile)
+$rail-width: 44px
+$rail-width-mobile: 60px
 
 // Stacking order of everything floating over #celestial-map
 // Docked settings sidebar / mobile bottom sheet

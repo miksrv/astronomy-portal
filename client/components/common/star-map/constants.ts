@@ -1,5 +1,5 @@
 import { FONT } from './config'
-import { StarMapSettings } from './types'
+import { StarMapSettings, StarMapSettingsSwitchKey } from './types'
 
 export const POINT_RADIUS = 5
 export const POPUP_WIDTH = 200
@@ -13,6 +13,17 @@ export const POPUP_ARROW_SIZE = 8
 export const POPUP_ARROW_MARGIN = 16
 
 export const STARMAP_STORAGE_KEY = 'astro_starmap_settings'
+
+// Which collapsible groups of the settings sidebar are open (see settingsGroups.ts)
+export const STARMAP_GROUPS_STORAGE_KEY = 'astro_starmap_settings_groups'
+
+// The layers of the two folded sidebar groups — counted in the group's "2 of 4" summary
+export const CONSTELLATION_KEYS: StarMapSettingsSwitchKey[] = [
+    'constellationNames',
+    'constellationLines',
+    'constellationBounds'
+]
+export const GRID_KEYS: StarMapSettingsSwitchKey[] = ['graticule', 'equatorial', 'ecliptic', 'galactic']
 
 export const MOBILE_MAX_WIDTH = 768
 

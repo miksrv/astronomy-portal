@@ -8,6 +8,7 @@ import { DateTimeInput } from '@/components/ui/date-time-input'
 
 import { MOBILE_MAX_WIDTH, TIME_FLOW_DISPLAY_INTERVAL_MS } from './constants'
 import { findTonightMoment } from './nightPreset'
+import StarMapSettingsGroup from './StarMapSettingsGroup'
 import { formatTimeRate, TIME_RATE_MAX, TIME_RATE_MIN } from './timeFlow'
 import { dateToWallClock, ResolvedTimeZone, wallClockToDate } from './timezone'
 import { useLiveClock } from './useLiveClock'
@@ -215,11 +216,7 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
     }
 
     return (
-        <fieldset className={styles.settingsGroup}>
-            <legend className={styles.settingsGroupTitle}>
-                {t('components.common.star-map.location.title', 'Место и время')}
-            </legend>
-
+        <StarMapSettingsGroup title={t('components.common.star-map.location.title', 'Место и время')}>
             {/* TODO: bring the city picker back. A combobox over the static catalog
                 `public/data/cities.json` (module cities.ts) used to sit here — both the
                 catalog and the module were removed with it; see BE-1 in
@@ -329,10 +326,12 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
             </div>
 
             {flowing && (
-                <div className={styles.timezoneHint}>
+                // The running speed is a state, not a hint: the transport buttons are actions
+                // (multiply, pause), so this line is what tells the clock is accelerated
+                <div className={cn(styles.timezoneHint, styles.rateHint)}>
                     {t('components.common.star-map.location.rate-current', 'Скорость времени')}
                     {': '}
-                    {rateLabel}
+                    <strong>{rateLabel}</strong>
                 </div>
             )}
 
@@ -383,7 +382,7 @@ const StarMapLocationControl: React.FC<StarMapLocationControlProps> = ({
                     {t('components.common.star-map.location.reset-to-now', 'Вернуться к «сейчас»')}
                 </Button>
             )}
-        </fieldset>
+        </StarMapSettingsGroup>
     )
 }
 

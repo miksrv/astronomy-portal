@@ -102,3 +102,8 @@ export type StarMapSettings = {
     /** Observer position [lat, lon] in degrees — persisted, unlike the selected date */
     geopos: [number, number]
 }
+
+/** The boolean layers of the settings — what a switch row of the sidebar can flip */
+export type StarMapSettingsSwitchKey = {
+    [K in keyof StarMapSettings]: StarMapSettings[K] extends boolean ? K : never
+}[keyof StarMapSettings]

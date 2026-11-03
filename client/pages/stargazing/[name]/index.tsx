@@ -4,7 +4,6 @@ import { Button } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import dynamic from 'next/dynamic'
-import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 import { JsonLdScript } from 'next-seo'
 
@@ -16,7 +15,7 @@ import { EventItemData, EventMediaFilter, EventPrevNextNav, EventReviews } from 
 import { PHOTOS_PAGE_SIZE, REVIEWS_PAGE_SIZE } from '@/utils/constants'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
 import { createFullMediaUrl, createPreviewMediaUrl } from '@/utils/eventMedia'
-import { hasAnyPermission, hasPermission } from '@/utils/permissions'
+import { hasPermission } from '@/utils/permissions'
 import { initSSRLocale } from '@/utils/ssrLocale'
 import { removeMarkdown, sliceText } from '@/utils/strings'
 
@@ -36,7 +35,6 @@ interface StargazingItemPageProps {
 
 const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event, eventsList }) => {
     const { t } = useTranslation()
-    const router = useRouter()
 
     const user = useAppSelector((state) => state.auth.user)
 
@@ -182,16 +180,6 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
         setShowLightbox(true)
     }
 
-    const handleUploadMediaClick = (event: React.MouseEvent | undefined) => {
-        event?.preventDefault()
-
-        if (!hasPermission(user, ApiModel.Permission.EVENTS_GALLERY_UPLOAD)) {
-            return
-        }
-
-        setIsUploadDialogOpen(true)
-    }
-
     const handleShowAllMedia = () => {
         if (isLoadingAllMedia || !totalMedia) {
             return
@@ -222,45 +210,33 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                         text: t('menu.stargazing', 'Астровыезды')
                     }
                 ]}
-            >
-                {hasAnyPermission(user, [
-                    ApiModel.Permission.EVENTS_UPDATE,
-                    ApiModel.Permission.EVENTS_STATISTIC,
-                    ApiModel.Permission.EVENTS_GALLERY_UPLOAD
-                ]) && (
-                    <>
-                        {hasPermission(user, ApiModel.Permission.EVENTS_GALLERY_UPLOAD) && (
-                            <Button
-                                disabled={isUploadDialogOpen}
-                                icon={'Photo'}
-                                mode={'secondary'}
-                                onClick={handleUploadMediaClick}
-                            >
-                                {t('pages.stargazing.upload-media-button', 'Медиа')}
-                            </Button>
-                        )}
-
-                        {hasPermission(user, ApiModel.Permission.EVENTS_UPDATE) && (
-                            <Button
-                                icon={'Pencil'}
-                                mode={'secondary'}
-                                label={t('common.edit', 'Редактировать')}
-                                disabled={!eventId}
-                                onClick={() => router.push(`/stargazing/form?id=${eventId}`)}
-                            />
-                        )}
-
-                        {hasPermission(user, ApiModel.Permission.EVENTS_STATISTIC) && (
-                            <Button
-                                icon={'BarChart'}
-                                mode={'secondary'}
-                                aria-label={t('components.pages.stargazing.event-upcoming.statistic', 'Статистика')}
-                                onClick={() => router.push(`/stargazing/${eventId}/statistic`)}
-                            />
-                        )}
-                    </>
-                )}
-            </AppToolbar>
+                actions={[
+                    {
+                        key: 'upload-media',
+                        icon: 'Photo',
+                        label: t('pages.stargazing.upload-media-button', 'Загрузить медиа'),
+                        disabled: isUploadDialogOpen,
+                        onClick: () => setIsUploadDialogOpen(true),
+                        permission: ApiModel.Permission.EVENTS_GALLERY_UPLOAD
+                    },
+                    {
+                        key: 'edit',
+                        icon: 'Pencil',
+                        label: t('common.edit', 'Редактировать'),
+                        link: `/stargazing/form?id=${eventId}`,
+                        disabled: !eventId,
+                        permission: ApiModel.Permission.EVENTS_UPDATE
+                    },
+                    {
+                        key: 'statistic',
+                        icon: 'BarChart',
+                        label: t('components.pages.stargazing.event-upcoming.statistic', 'Статистика'),
+                        link: `/stargazing/${eventId}/statistic`,
+                        disabled: !eventId,
+                        permission: ApiModel.Permission.EVENTS_STATISTIC
+                    }
+                ]}
+            />
 
             <EventItemData
                 title={title}

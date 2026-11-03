@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 4.15.3
+
+- Star map: layers that are on now stand out as filled buttons, the same as on the photo page
+- Star map settings: switches, a sky/horizon toggle, Milky Way and planets in their groups
+- Star map settings: Constellations and Grid & lines fold away and show how many layers are on
+- Star map: panels, popup and captions match the rest of the site
+- Editors: add, edit, statistics and other page actions live in one "⋯" menu in the top right corner of the page; restarting a photo's plate solve is in it too
+- Photo gallery: the "Show more" button spans the whole grid right under it, without the photo count line
+
 ## 4.15.2
 
 - Before/after slider lines the two photos up by their stars: same rotation, scale and position

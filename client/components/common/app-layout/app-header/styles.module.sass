@@ -1,3 +1,4 @@
+@use '../../../../styles/mixins'
 @use '../../../../styles/variables' as variables
 
 .appHeader
@@ -104,46 +105,15 @@
     transition: opacity var(--duration-fast) var(--ease)
 
 .contextListMenu
-    list-style: none
-    margin: 0
-    padding: var(--space-1)
-    width: max-content
-    min-width: 100%
+    +mixins.menu-list
 
     li
-        margin-bottom: 2px
-
-        &:last-child
-            margin-bottom: 0
-
         a
-            display: flex
-            align-items: center
-            gap: var(--space-2)
-            min-height: var(--size-medium)
-            padding: var(--space-1) var(--space-3)
-            border-radius: var(--radius-md)
-            color: var(--text-color-primary)
-            font-weight: var(--font-weight-normal)
-            white-space: nowrap
-            cursor: pointer
-            transition: background-color var(--duration-fast) var(--ease)
-
-            svg
-                fill: var(--text-color-secondary)
-                width: 20px
-                height: 20px
-                flex-shrink: 0
-
-            &:hover
-                background-color: var(--surface-2)
-                color: var(--text-color-primary)
+            +mixins.menu-item
 
             &.active
                 background-color: var(--color-main-background)
                 color: var(--color-main)
 
         &.dividerItem
-            margin-top: var(--space-1)
-            padding-top: var(--space-1)
-            border-top: 1px solid var(--border)
+            +mixins.menu-divider

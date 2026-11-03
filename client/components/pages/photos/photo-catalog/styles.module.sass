@@ -124,13 +124,9 @@
     p
         margin: 0 0 var(--space-3)
 
+// Right under the grid, at the gap of <main>: the whole width of the grid
 .showMore
     display: flex
-    justify-content: center
-    margin-top: var(--space-4)
-
-    button
-        min-width: 220px
 
 .resultLine
     +type.caption
@@ -138,6 +134,14 @@
     align-items: baseline
     gap: var(--space-2)
     margin-top: calc(var(--space-3) - var(--space-4))
+
+    // Nothing filtered: the line stays as a live region (so the first result of a search is
+    // announced) but out of the flow, so it adds no gap under the grid
+    &:empty
+        position: absolute
+        width: 1px
+        height: 1px
+        overflow: hidden
 
 .resetLink
     height: auto

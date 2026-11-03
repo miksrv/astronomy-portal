@@ -48,10 +48,6 @@
                     "show-more_many": "Показать ещё {{count}}",
                     "show-more_other": "Показать ещё {{count}}",
                     "found": "Найдено {{found}} из {{total}}",
-                    "photos-count_one": "{{count}} снимок",
-                    "photos-count_few": "{{count}} снимка",
-                    "photos-count_many": "{{count}} снимков",
-                    "photos-count_other": "{{count}} снимков",
                     "reset": "Сбросить",
                     "open": "Снимок {{name}} от {{date}}",
                     "alt": "Астрофото {{title}} от {{date}}"
@@ -109,7 +105,7 @@
                     "solving": "Привязка к небу: решается…",
                     "failed": "Привязка к небу не удалась: {{error}}",
                     "start": "Привязать к небу",
-                    "restart": "Перерешать"
+                    "restart": "Привязать к небу заново"
                 },
                 "photo-strip": {
                     "open": "Снимок от {{date}}",
