@@ -324,3 +324,114 @@ export const formatGridValue = (line: Pick<GridLine, 'kind' | 'value'>, step: nu
 
     return `${hours}ʰ ${String(minutes).padStart(2, '0')}ᵐ${step < 1 / 4 ? ` ${String(seconds).padStart(2, '0')}ˢ` : ''}`
 }
+
+/**
+ * A plane affine map in the CSS `matrix(a, b, c, d, e, f)` order:
+ * x' = a·x + c·y + e, y' = b·x + d·y + f
+ */
+export interface AffineMatrix {
+    a: number
+    b: number
+    c: number
+    d: number
+    e: number
+    f: number
+}
+
+/** Least squares of z ≈ p·x + q·y + r over the points, by the 3×3 normal equations (Cramer) */
+const fitPlane = (points: Array<[x: number, y: number, z: number]>): [number, number, number] | undefined => {
+    let sxx = 0
+    let sxy = 0
+    let sx = 0
+    let syy = 0
+    let sy = 0
+    let n = 0
+    let sxz = 0
+    let syz = 0
+    let sz = 0
+
+    for (const [x, y, z] of points) {
+        sxx += x * x
+        sxy += x * y
+        sx += x
+        syy += y * y
+        sy += y
+        n += 1
+        sxz += x * z
+        syz += y * z
+        sz += z
+    }
+
+    type Column = [number, number, number]
+
+    // The determinant of the 3×3 matrix of these three columns
+    const det3 = ([a1, a2, a3]: Column, [b1, b2, b3]: Column, [c1, c2, c3]: Column) =>
+        a1 * (b2 * c3 - b3 * c2) - b1 * (a2 * c3 - a3 * c2) + c1 * (a2 * b3 - a3 * b2)
+
+    const cx: Column = [sxx, sxy, sx]
+    const cy: Column = [sxy, syy, sy]
+    const c1: Column = [sx, sy, n]
+    const rhs: Column = [sxz, syz, sz]
+    const det = det3(cx, cy, c1)
+
+    if (!Number.isFinite(det) || Math.abs(det) < 1e-9) {
+        return undefined
+    }
+
+    return [det3(rhs, cy, c1) / det, det3(cx, rhs, c1) / det, det3(cx, cy, rhs) / det]
+}
+
+/**
+ * The affine map that puts the pixels of one solved picture onto the pixels of another so that
+ * the same stars meet: rotation, scale, shift and a mirror if one of them is flipped. Fitted over
+ * a grid of points of the `from` picture through the sky; the SIP distortions left over are a
+ * fraction of a pixel on our fields. `undefined` when the pictures don't look at the same sky
+ */
+export const fitAffineBetween = (from: Wcs, to: Wcs, density: number = 5): AffineMatrix | undefined => {
+    const xs: Array<[number, number, number]> = []
+    const ys: Array<[number, number, number]> = []
+
+    for (let i = 0; i < density; i++) {
+        for (let j = 0; j < density; j++) {
+            const x = (from.width * i) / (density - 1)
+            const y = (from.height * j) / (density - 1)
+            const target = skyToPixel(to, pixelToSky(from, { x, y }))
+
+            if (target) {
+                xs.push([x, y, target.x])
+                ys.push([x, y, target.y])
+            }
+        }
+    }
+
+    if (xs.length < 3) {
+        return undefined
+    }
+
+    const fx = fitPlane(xs)
+    const fy = fitPlane(ys)
+
+    if (!fx || !fy) {
+        return undefined
+    }
+
+    const matrix: AffineMatrix = { a: fx[0], c: fx[1], e: fx[2], b: fy[0], d: fy[1], f: fy[2] }
+
+    // The fields must overlap: the centre of one picture no farther than a frame from the other
+    const centre = {
+        x: matrix.a * (from.width / 2) + matrix.c * (from.height / 2) + matrix.e,
+        y: matrix.b * (from.width / 2) + matrix.d * (from.height / 2) + matrix.f
+    }
+
+    if (
+        centre.x < -to.width ||
+        centre.x > 2 * to.width ||
+        centre.y < -to.height ||
+        centre.y > 2 * to.height ||
+        Object.values(matrix).some((value) => !Number.isFinite(value))
+    ) {
+        return undefined
+    }
+
+    return matrix
+}

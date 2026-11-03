@@ -22,6 +22,19 @@
     // The camera's black, so the other picture's own margins hide this one
     background: #08090c
     clip-path: inset(0 calc(100% - var(--divider)) 0 0)
+    overflow: hidden
+
+// Not solved: the other picture fitted into the frame as it is
+.fitted
+    position: absolute
+    inset: 0
+
+// Solved: the box gets its size and transform from the two plate solves (inline style); the
+// picture fills it exactly, the box already has its proportions
+.aligned
+    .image
+        object-fit: fill
+        background-size: 100% 100%
 
 .labelLeft, .labelRight
     +type.caption

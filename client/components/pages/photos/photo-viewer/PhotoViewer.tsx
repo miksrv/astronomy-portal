@@ -4,6 +4,7 @@ import { Button, cn, Icon } from 'simple-react-ui-kit'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
@@ -69,6 +70,29 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     const [showAnnotations, setShowAnnotations] = useState(true)
     const [showGrid, setShowGrid] = useState(true)
     const [pictureWidth, setPictureWidth] = useState(0)
+    // Going to another photo: its page data comes from the server first; the old picture is
+    // taken off the screen meanwhile, not left there to be mistaken for the next one
+    const [navigating, setNavigating] = useState(false)
+    const router = useRouter()
+
+    useEffect(() => {
+        const handleStart = (url: string, { shallow }: { shallow: boolean }) => {
+            // With the locale prefix, if any: `/en/photos/:id`
+            const id = /\/photos\/([^/?#]+)/.exec(url)?.[1]
+            setNavigating(!shallow && !!id && id !== current.id)
+        }
+        const handleEnd = () => setNavigating(false)
+
+        router.events.on('routeChangeStart', handleStart)
+        router.events.on('routeChangeComplete', handleEnd)
+        router.events.on('routeChangeError', handleEnd)
+
+        return () => {
+            router.events.off('routeChangeStart', handleStart)
+            router.events.off('routeChangeComplete', handleEnd)
+            router.events.off('routeChangeError', handleEnd)
+        }
+    }, [router.events, current.id])
 
     const compareWith = versions.find(({ id }) => id === compareId)
     // Before/after reads best against the previous processing; the newest one if this is the first
@@ -104,7 +128,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
             <div className={styles.stage}>
                 <div
                     ref={pictureRef}
-                    className={styles.picture}
+                    className={cn(styles.picture, navigating && styles.leaving)}
                     style={{ '--photo-ratio': String(ratio) } as React.CSSProperties}
                 >
                     {compareWith ? (
@@ -112,6 +136,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                             current={current}
                             other={compareWith}
                             title={title}
+                            astrometry={astrometry}
                         />
                     ) : (
                         <Button
@@ -121,8 +146,10 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                             onClick={() => setLightbox(true)}
                         >
                             {/* Fetched through the image optimizer; the original is several MB.
-                                    The medium file shows as the background until it loads */}
+                                    The medium file shows as the background until it loads. Keyed by
+                                    the photo: the previous picture must not linger while the next loads */}
                             <Image
+                                key={current.id}
                                 className={styles.image}
                                 src={current.large}
                                 alt={t('components.pages.photos.photo-viewer.alt', 'Астрофото {{title}} от {{date}}', {

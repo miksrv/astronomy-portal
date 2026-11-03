@@ -1,4 +1,4 @@
-import { buildSkyGrid, formatGridValue, pixelToSky, skyToPixel, Wcs } from './wcs'
+import { buildSkyGrid, fitAffineBetween, formatGridValue, pixelToSky, skyToPixel, Wcs } from './wcs'
 
 /**
  * A TAN + SIP solution with a tilted CD matrix near RA 0h. The expected sky positions come from
@@ -91,5 +91,48 @@ describe('wcs', () => {
         expect(formatGridValue({ kind: 'dec', value: -1e-12 }, 0.5)).toBe('+0° 00′')
         expect(formatGridValue({ kind: 'ra', value: 38 }, 0.5)).toMatch(/^2ʰ 32ᵐ/)
         expect(formatGridValue({ kind: 'ra', value: 359.5 }, 0.5)).toMatch(/^23ʰ 58ᵐ/)
+    })
+    it('fits the map between two solves of the same sky, rotated, rescaled and mirrored', () => {
+        // Another camera on the same field: 1.6× coarser pixels, turned by 35°, mirrored, off centre
+        const angle = 35 * (Math.PI / 180)
+        const scale = 1.6e-3
+        const other: Wcs = {
+            crval: [1.5, 61.3],
+            crpix: [1200.5, 800.5],
+            cd: [
+                [scale * Math.cos(angle), -scale * Math.sin(angle)],
+                // det > 0 where the reference solve has det < 0: one of the two is flipped
+                [scale * Math.sin(angle), scale * Math.cos(angle)]
+            ],
+            width: 2400,
+            height: 1600
+        }
+
+        const matrix = fitAffineBetween(other, wcs)
+
+        expect(matrix).toBeDefined()
+
+        for (const point of [
+            { x: 0, y: 0 },
+            { x: 2400, y: 1600 },
+            { x: 600, y: 1300 },
+            { x: 1200, y: 800 }
+        ]) {
+            const expected = skyToPixel(wcs, pixelToSky(other, point))!
+            const x = matrix!.a * point.x + matrix!.c * point.y + matrix!.e
+            const y = matrix!.b * point.x + matrix!.d * point.y + matrix!.f
+
+            // A couple of pixels of a 4000 px frame: the SIP and the projection's curvature
+            expect(Math.abs(x - expected.x)).toBeLessThan(2)
+            expect(Math.abs(y - expected.y)).toBeLessThan(2)
+        }
+
+        // Mirrored: the determinant changes sign; 1.6× the scale
+        expect(matrix!.a * matrix!.d - matrix!.b * matrix!.c).toBeLessThan(0)
+        expect(Math.sqrt(Math.abs(matrix!.a * matrix!.d - matrix!.b * matrix!.c))).toBeCloseTo(1.6, 1)
+    })
+
+    it('refuses to align pictures of different parts of the sky', () => {
+        expect(fitAffineBetween({ ...wcs, crval: [180, -30] }, wcs)).toBeUndefined()
     })
 })
