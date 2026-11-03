@@ -42,6 +42,7 @@ export const AppToolbar = forwardRef<HTMLDivElement, AppToolbarProps>(
                             <div className={styles.toolbarTop}>
                                 {(links || currentPage) && (
                                     <Breadcrumbs
+                                        className={styles.toolbarBreadcrumbs}
                                         links={links}
                                         currentPage={currentPage}
                                         homePageTitle={t('common.look-at-the-stars', 'Смотри на звёзды')}

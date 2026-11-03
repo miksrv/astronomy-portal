@@ -61,7 +61,6 @@ const mockCheckPaymentStatus = jest.fn(() => ({ unwrap: () => new Promise(() => 
 const defaultCheckPaymentStatusState = { isLoading: false }
 const mockDeleteMutate = jest.fn()
 const defaultDeleteState = { isLoading: false }
-const mockRouterPush = jest.fn()
 const mockRouterReplace = jest.fn()
 
 const baseEvent: ApiModel.Event = {
@@ -101,7 +100,6 @@ beforeEach(() => {
     )
     ;(getSecondsUntilUTCDate as jest.Mock).mockReturnValue(undefined)
     ;(useRouter as jest.Mock).mockReturnValue({
-        push: mockRouterPush,
         replace: mockRouterReplace,
         asPath: '/stargazing'
     })

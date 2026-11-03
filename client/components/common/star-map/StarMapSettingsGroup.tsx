@@ -39,13 +39,12 @@ const StarMapSettingsGroup: React.FC<StarMapSettingsGroupProps> = ({
     }
 
     const toggle = () => {
-        setOpen((previous) => {
-            if (storageKey) {
-                writeGroupOpen(storageKey, !previous)
-            }
+        const next = !open
+        setOpen(next)
 
-            return !previous
-        })
+        if (storageKey) {
+            writeGroupOpen(storageKey, next)
+        }
     }
 
     return (

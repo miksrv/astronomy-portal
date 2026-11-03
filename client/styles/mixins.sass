@@ -134,3 +134,48 @@
 
     span
         display: block
+
+// A dropdown menu: the user menu of the app bar, the "⋯" page actions. The list...
+=menu-list
+    list-style: none
+    margin: 0
+    padding: var(--space-1)
+    width: max-content
+    min-width: 100%
+
+    li
+        margin-bottom: 2px
+
+        &:last-child
+            margin-bottom: 0
+
+// ...a row of it (a link or an unstyled button: icon and label)...
+=menu-item
+    display: flex
+    align-items: center
+    justify-content: flex-start
+    gap: var(--space-2)
+    min-height: var(--size-medium)
+    padding: var(--space-1) var(--space-3)
+    border-radius: var(--radius-md)
+    color: var(--text-color-primary)
+    font-weight: var(--font-weight-normal)
+    white-space: nowrap
+    cursor: pointer
+    transition: background-color var(--duration-fast) var(--ease)
+
+    svg
+        fill: var(--text-color-secondary)
+        width: 20px
+        height: 20px
+        flex-shrink: 0
+
+    &:hover
+        background-color: var(--surface-2)
+        color: var(--text-color-primary)
+
+// ...and the line before a group of rows (the destructive ones, the admin links)
+=menu-divider
+    margin-top: var(--space-1)
+    padding-top: var(--space-1)
+    border-top: 1px solid var(--border)

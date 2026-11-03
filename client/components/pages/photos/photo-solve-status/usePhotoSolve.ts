@@ -16,8 +16,8 @@ export interface PhotoSolveState {
     failure?: string
     /** No solve has completed yet: the action starts the first one rather than another one */
     unsolved: boolean
-    /** A step is on its way to the server */
-    stepping: boolean
+    /** The state is not known yet, or a step is on its way to the server: nothing to start */
+    busy: boolean
     /** Start a solve over */
     start: () => void
 }
@@ -41,10 +41,17 @@ export const usePhotoSolve = (photoId: string, enabled: boolean): PhotoSolveStat
     } = API.usePhotosGetAstrometryQuery(photoId, {
         skip: !enabled
     })
-    const [solve, { data: stepped, error: stepError, isLoading: stepping }] = API.usePhotosSolveMutation()
+    const [solve, mutation] = API.usePhotosSolveMutation()
+
+    // The page stays mounted between photos, and so does the mutation: its answer, error and
+    // pending flag count only for the photo the last step was sent for
+    const ownStep = mutation.originalArgs?.id === photoId
+    const stepped = ownStep ? mutation.data : undefined
+    const stepError = ownStep ? mutation.error : undefined
+    const stepping = ownStep && mutation.isLoading
 
     // The step's answer is newer than the query's cache until the latter refetches
-    const current: ApiModel.PhotoAstrometry | undefined = stepped?.photoId === photoId ? stepped : data
+    const current: ApiModel.PhotoAstrometry | undefined = stepped ?? data
     const status = current?.status
     // A step that failed to reach the server ends the chain: the action comes back for a retry
     const inProgress = enabled && (status === 'pending' || status === 'solving') && !stepError
@@ -77,7 +84,7 @@ export const usePhotoSolve = (photoId: string, enabled: boolean): PhotoSolveStat
         failure:
             status === 'failed' ? (current?.error ?? undefined) : stepError ? getErrorMessage(stepError) : undefined,
         unsolved: (!isLoading && !current && !!error) || status === 'failed' || !!stepError,
-        stepping,
+        busy: isLoading || stepping,
         start: () => void solve({ id: photoId, restart: true })
     }
 }

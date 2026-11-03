@@ -1,3 +1,5 @@
+@use '../../../styles/mixins'
+
 // The "⋯" in the top right corner of the page header. It sits on the breadcrumbs line, so its
 // negative block margins (a 28px target over a 12px text line) keep that line as tall as for a
 // guest: the title does not move down for an editor
@@ -43,48 +45,15 @@
 
 // The same rows as the user menu of the app bar
 .menu
-    list-style: none
-    margin: 0
-    padding: var(--space-1)
-    width: max-content
-    min-width: 100%
+    +mixins.menu-list
 
-    li
-        margin-bottom: 2px
-
-        &:last-child
-            margin-bottom: 0
-
-        &.divider
-            margin-top: var(--space-1)
-            padding-top: var(--space-1)
-            border-top: 1px solid var(--border)
+    li.divider
+        +mixins.menu-divider
 
     .item
-        display: flex
-        align-items: center
-        justify-content: flex-start
-        gap: var(--space-2)
+        +mixins.menu-item
         width: 100%
-        min-height: var(--size-medium)
-        padding: var(--space-1) var(--space-3)
-        border-radius: var(--radius-md)
-        color: var(--text-color-primary)
         font-size: inherit
-        font-weight: var(--font-weight-normal)
-        white-space: nowrap
-        cursor: pointer
-        transition: background-color var(--duration-fast) var(--ease)
-
-        svg
-            fill: var(--text-color-secondary)
-            width: 20px
-            height: 20px
-            flex-shrink: 0
-
-        &:hover
-            background-color: var(--surface-2)
-            color: var(--text-color-primary)
 
         &:disabled
             cursor: default

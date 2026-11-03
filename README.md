@@ -155,7 +155,7 @@ Roles are managed entirely through data, not code — `/admin/roles` lets an adm
 | `COMMENTS_MODERATE` | Deleting any comment/review (not just your own) |
 | `EVENTS_CREATE` | Creating a new stargazing event |
 | `EVENTS_UPDATE` | Editing an event and replacing its cover image. Also exempts the viewer from the address/coordinates gating on `GET /events/:id` (see "Event Location & Map" in `server/CLAUDE.md`) so the edit form always shows the real saved values, not just for a viewer with their own booking |
-| `EVENTS_DELETE` | Deleting an event |
+| `EVENTS_DELETE` | Deleting an event. On its own enough for the "Удалить" item of the upcoming event's "⋯" menu on `/stargazing` (the item no longer also needs `EVENTS_UPDATE`/`EVENTS_STATISTIC`) |
 | `EVENTS_GALLERY_UPLOAD` | Uploading media — photos **and** videos — to an event's gallery after the fact, across the whole chunked upload flow (`POST /events/media/init/:id`, `POST /events/media/chunk/:sessionId`, `POST /events/media/finalize/:sessionId`, `DELETE /events/media/:sessionId`) |
 | `EVENTS_CHECKIN` | QR check-in and viewing any attendee's ticket |
 | `EVENTS_STATISTIC` | Event statistics, the registrations table, and re-verifying a registration's payment |

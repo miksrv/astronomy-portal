@@ -213,7 +213,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                 // The page's own name in the path: which object and when (the date is also the
                 // first fact of the label, for phones that show only the way back here)
                 currentPage={t('pages.photo.title', 'Снимок {{objects}} от {{date}}', { objects: objectNames, date })}
-                afterBreadcrumbs={canManage && <PhotoSolveStatus solve={solve} />}
+                afterBreadcrumbs={(solve.inProgress || solve.failure) && <PhotoSolveStatus solve={solve} />}
                 actions={[
                     {
                         key: 'edit',
@@ -228,7 +228,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                         label: solve.unsolved
                             ? t('components.pages.photos.photo-solve-status.start', 'Привязать к небу')
                             : t('components.pages.photos.photo-solve-status.restart', 'Привязать к небу заново'),
-                        disabled: solve.inProgress || solve.stepping,
+                        disabled: solve.inProgress || solve.busy,
                         onClick: solve.start,
                         permission: ApiModel.Permission.PHOTOS_MANAGE
                     }
