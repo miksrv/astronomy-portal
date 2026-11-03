@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 4.15.2
+
+- Before/after slider lines the two photos up by their stars: same rotation, scale and position
+- Paging to the next photo no longer shows the previous picture while the next one loads
+
 ## 4.15.1
 
 - Faster pages: the home, stargazing and star map pages are cached for guests, every page carries only its own dictionary, the gallery shows 48 photos at a time and loads the rest on demand, the star map scripts are a third of their size
