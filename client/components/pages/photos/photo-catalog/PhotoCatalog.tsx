@@ -130,6 +130,7 @@ export const PhotoCatalog: React.FC<PhotoCatalogProps> = ({ photos, categories, 
                 <div className={styles.showMore}>
                     <Button
                         mode={'secondary'}
+                        stretched={true}
                         label={t('components.pages.photos.photo-catalog.show-more', 'Показать ещё {{count}}', {
                             count: Math.min(hiddenCount, PHOTOS_PAGE_SIZE)
                         })}
@@ -138,25 +139,27 @@ export const PhotoCatalog: React.FC<PhotoCatalogProps> = ({ photos, categories, 
                 </div>
             )}
 
-            <div className={styles.resultLine}>
-                <span aria-live={'polite'}>
-                    {filtered
-                        ? t('components.pages.photos.photo-catalog.found', 'Найдено {{found}} из {{total}}', {
-                              found: list.length,
-                              total: photos.length
-                          })
-                        : t('components.pages.photos.photo-catalog.photos-count', '{{count}} снимков', {
-                              count: photos.length
-                          })}
-                </span>
+            {/* Only for a search or a category: how much of the archive it left, and the way back */}
+            <div
+                className={styles.resultLine}
+                aria-live={'polite'}
+            >
                 {filtered && (
-                    <Button
-                        mode={'link'}
-                        size={'small'}
-                        className={styles.resetLink}
-                        label={t('components.pages.photos.photo-catalog.reset', 'Сбросить')}
-                        onClick={onReset}
-                    />
+                    <>
+                        <span>
+                            {t('components.pages.photos.photo-catalog.found', 'Найдено {{found}} из {{total}}', {
+                                found: list.length,
+                                total: photos.length
+                            })}
+                        </span>
+                        <Button
+                            mode={'link'}
+                            size={'small'}
+                            className={styles.resetLink}
+                            label={t('components.pages.photos.photo-catalog.reset', 'Сбросить')}
+                            onClick={onReset}
+                        />
+                    </>
                 )}
             </div>
         </>
