@@ -1,11 +1,14 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 
 import Image from 'next/image'
 import { useTranslation } from 'next-i18next/pages'
 
+import { API, ApiModel } from '@/api'
 import { formatCalendarDate } from '@/utils/dates'
 
 import { PhotoVersion } from '../types'
+
+import { getAlignedLayer } from './utils'
 
 import styles from './styles.module.sass'
 
@@ -16,6 +19,8 @@ interface PhotoCompareProps {
     other: PhotoVersion
     /** For the alt texts */
     title: string
+    /** This photo's plate solve: with the other version's one, the two are drawn star on star */
+    astrometry?: ApiModel.SolvedAstrometry
 }
 
 /** How far one arrow key press moves the divider, percent */
@@ -24,12 +29,21 @@ const KEY_STEP = 5
 /**
  * Two processings of one object in the same frame, a divider between them to drag: the left
  * side shows the other version, the right one this photo. The versions may be framed
- * differently; both are fitted into the frame of this photo.
+ * differently: when both are plate-solved, the other one is turned, scaled and shifted so that
+ * its stars sit on the stars of this photo; otherwise both are just fitted into the frame.
  */
-export const PhotoCompare: React.FC<PhotoCompareProps> = ({ current, other, title }) => {
+export const PhotoCompare: React.FC<PhotoCompareProps> = ({ current, other, title, astrometry }) => {
     const { t, i18n } = useTranslation()
     const ref = useRef<HTMLDivElement>(null)
     const [position, setPosition] = useState(50)
+
+    const { currentData: otherAstrometry } = API.usePhotosGetAstrometryQuery(other.id, { skip: !astrometry?.wcs })
+    const aligned = useMemo(
+        () => (ApiModel.isSolved(otherAstrometry) ? getAlignedLayer(astrometry, otherAstrometry) : undefined),
+        [astrometry, otherAstrometry]
+    )
+    // Scaled up, the other picture needs a bigger file not to go soft
+    const otherZoom = Math.min(3, Math.max(1, aligned?.zoom ?? 1))
 
     const moveTo = useCallback((clientX: number) => {
         const rect = ref.current?.getBoundingClientRect()
@@ -91,18 +105,23 @@ export const PhotoCompare: React.FC<PhotoCompareProps> = ({ current, other, titl
                 draggable={false}
             />
             <div className={styles.other}>
-                <Image
-                    className={styles.image}
-                    src={other.large}
-                    alt={t('components.pages.photos.photo-compare.alt', 'Снимок {{title}} от {{date}}', {
-                        title,
-                        date: otherDate
-                    })}
-                    fill={true}
-                    sizes={'(max-width: 768px) 100vw, 1200px'}
-                    draggable={false}
-                    style={{ backgroundImage: `url(${other.src})` }}
-                />
+                <div
+                    className={aligned ? styles.aligned : styles.fitted}
+                    style={aligned?.style}
+                >
+                    <Image
+                        className={styles.image}
+                        src={other.large}
+                        alt={t('components.pages.photos.photo-compare.alt', 'Снимок {{title}} от {{date}}', {
+                            title,
+                            date: otherDate
+                        })}
+                        fill={true}
+                        sizes={`(max-width: 768px) ${Math.ceil(100 * otherZoom)}vw, ${Math.ceil(1200 * otherZoom)}px`}
+                        draggable={false}
+                        style={{ backgroundImage: `url(${other.src})` }}
+                    />
+                </div>
             </div>
 
             <span className={styles.labelLeft}>{otherDate}</span>
