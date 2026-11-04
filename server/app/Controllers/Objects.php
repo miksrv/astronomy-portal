@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Enums\Permission;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
+use App\Models\CatalogModel;
 use App\Models\ObjectsModel;
 use App\Models\ObjectFitsFiltersModel;
 use App\Models\ObjectCategoryModel;
@@ -118,6 +119,8 @@ class Objects extends BaseApiController
             if (!empty($result)) {
                 $this->_addNights($result[0], $nights[$id] ?? null);
                 $result[0]->optics = (new ObjectFitsFilesModel())->getObjectOptics($id);
+                // Reference facts (type, size, magnitude, constellation) from the OpenNGC catalog
+                $result[0]->catalog = (new CatalogModel())->getForObject($id);
 
                 return $this->respond($result[0]);
             }
