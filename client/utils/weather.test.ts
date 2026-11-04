@@ -8,6 +8,8 @@ describe('weather', () => {
         expect(getWeatherRange('clouds', 80)).toBe('danger')
         expect(getWeatherRange('temperature', -30)).toBe('danger')
         expect(getWeatherRange('precipitation', 0)).toBe('good')
+        // Even a trace of rain closes the roof
+        expect(getWeatherRange('precipitation', 0.01)).toBe('danger')
         expect(getWeatherRange('humidity', undefined)).toBeUndefined()
     })
 
@@ -23,6 +25,7 @@ describe('weather', () => {
         expect(getWeatherState({ temperature: undefined, humidity: undefined })).toBeUndefined()
         expect(getWeatherState({ temperature: 3, humidity: 50 })).toBe('warning')
         expect(getWeatherState({ clouds: 0, precipitation: 0, temperature: 3 })).toBe('good')
+        expect(getWeatherState({ clouds: 0, precipitation: 0.01, temperature: 3 })).toBe('danger')
     })
 
     it('fills a meter within its scale', () => {
