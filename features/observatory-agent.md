@@ -107,7 +107,7 @@ Two modes of the same form, stored the same way (`plan`):
   observatory settings).
 - **PRO** — own rows filter × exposure × count.
 
-Target search uses the OpenNGC catalog ([FEAT-31](catalog-openngc.md)) → exact coordinates.
+A job stores only the target's name and coordinates: picked on the star map, or found by search — our objects at once, a CDS (Sesame) lookup by name in the background ([FEAT-31](objects-simbad.md)).
 
 Limits, checked by the API (values in `observatory_settings`, editable without a deploy; admins are
 not limited): **≤ 2 h total exposure per job**, **≤ 3 active jobs per user**, exposure **30–600 s**,
@@ -282,7 +282,7 @@ clears).
 | Phase | Scope | Risk |
 |---|---|---|
 | 0 | Frames on the SSD → archive server (`frames-upload`) | done in this release |
-| 1 | Agent status push, status API, status card on `/observatory`; OpenNGC catalog (FEAT-31) | none: read-only |
+| 1 | Agent status push, status API, status card on `/observatory` | none: read-only |
 | 2 | Jobs on the site (create, approve, list), agent pulls them and **loads** the schedule; a human starts the night | low: a person decides to start |
 | 3 | Go/no-go + autonomous start of the Scheduler by the agent | needs the on-site checklist passed |
 

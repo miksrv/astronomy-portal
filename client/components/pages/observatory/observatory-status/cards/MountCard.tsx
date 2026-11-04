@@ -69,16 +69,20 @@ export const MountCard: React.FC<MountCardProps> = ({ mount, name, connected, dr
             state={<StatusBadge tone={MOUNT_TONES[state]}>{stateLabels[state]}</StatusBadge>}
         >
             <Facts columns={3}>
-                <Fact label={t('components.pages.observatory.status.coordinates', 'Координаты (J2000)')}>
-                    {`${formatRAShort(mount.raJ2000)} ${formatDECShort(mount.decJ2000)}`}
-                </Fact>
+                {isNumber(mount.raJ2000) && isNumber(mount.decJ2000) && (
+                    <Fact label={t('components.pages.observatory.status.coordinates', 'Координаты (J2000)')}>
+                        {`${formatRAShort(mount.raJ2000)} ${formatDECShort(mount.decJ2000)}`}
+                    </Fact>
+                )}
 
-                <Fact label={t('components.pages.observatory.status.alt-az-label', 'Высота / азимут')}>
-                    {t('components.pages.observatory.status.alt-az-value', '{{alt}}° / {{az}}°', {
-                        alt: number(mount.alt),
-                        az: number(mount.az)
-                    })}
-                </Fact>
+                {isNumber(mount.alt) && isNumber(mount.az) && (
+                    <Fact label={t('components.pages.observatory.status.alt-az-label', 'Высота / азимут')}>
+                        {t('components.pages.observatory.status.alt-az-value', '{{alt}}° / {{az}}°', {
+                            alt: number(mount.alt),
+                            az: number(mount.az)
+                        })}
+                    </Fact>
+                )}
 
                 {mount.pierSide && (
                     <Fact label={t('components.pages.observatory.status.pier-side', 'Сторона пирса')}>

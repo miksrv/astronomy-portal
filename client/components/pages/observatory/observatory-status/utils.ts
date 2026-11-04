@@ -167,7 +167,7 @@ export const getMapZoom = (fov: { width: number; height: number } | null | undef
 }
 
 /** The map is centered on a whole-degree grid: a tracking mount does not rebuild it */
-export const getMapCenter = (mount: ApiModel.ObservatoryMount): [number, number] => [
-    Math.round(mount.raJ2000 / 2) * 2,
-    Math.round(mount.decJ2000 / 2) * 2
-]
+export const getMapCenter = (mount: ApiModel.ObservatoryMount): [number, number] | undefined =>
+    isNumber(mount.raJ2000) && isNumber(mount.decJ2000)
+        ? [Math.round(mount.raJ2000 / 2) * 2, Math.round(mount.decJ2000 / 2) * 2]
+        : undefined

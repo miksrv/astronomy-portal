@@ -30,6 +30,8 @@ log = logging.getLogger("observatory_agent")
 TICK_SECONDS = 5.0
 STARTUP_GRACE_SECONDS = 4.0
 MAX_PENDING_EVENTS = 200
+# Events per push, oldest first: a long backlog drains over a few pushes and never blocks the snapshot
+MAX_EVENTS_PER_PUSH = 50
 
 
 class Agent:
@@ -83,14 +85,15 @@ class Agent:
         if not (due or extra):
             return
 
+        batch = self.pending[:MAX_EVENTS_PER_PUSH]
         try:
-            await asyncio.to_thread(self.portal.push_status, snapshot, list(self.pending))
+            await asyncio.to_thread(self.portal.push_status, snapshot, batch)
         except PortalError as error:
             log.warning("push failed (%d events kept): %s", len(self.pending), error)
             self.last_push = now  # retry on the next interval, don't hammer the site
             return
-        log.debug("pushed snapshot, %d events", len(self.pending))
-        self.pending.clear()
+        log.debug("pushed snapshot, %d events", len(batch))
+        del self.pending[: len(batch)]
         self.last_push = now
         if extra and not due:
             self.last_extra_push = now

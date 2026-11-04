@@ -158,7 +158,9 @@ class SnapshotBuilder:
         ra_hours = eod.number("RA") if eod else None
         dec = eod.number("DEC") if eod else None
         ra_j2000, dec_j2000 = self._j2000(ra_hours, dec)
-        target_ra, target_dec = self._j2000(target.number("RA"), target.number("DEC")) if target else (None, None)
+        # TARGET_EOD_COORD reads 0/0 until the first GOTO since the driver connected: no target
+        has_target = bool(target) and (target.number("RA") or target.number("DEC"))
+        target_ra, target_dec = self._j2000(target.number("RA"), target.number("DEC")) if has_target else (None, None)
         pier_side = None
         if pier and pier.switch("PIER_EAST"):
             pier_side = "east"
@@ -287,6 +289,9 @@ class SnapshotBuilder:
             state = "open"
         elif roof_text.startswith("CLOSE"):
             state = "closed"
+        elif roof_text.startswith("ABORT"):
+            # Stopped part-way: DOME_PARK may still hold the state from before the move
+            state = "unknown"
         elif park and park.switch("PARK"):
             state = "closed"
         elif park and park.switch("UNPARK"):

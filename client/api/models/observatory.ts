@@ -18,14 +18,14 @@ export interface ObservatoryDevice {
 export type TrackMode = 'sidereal' | 'solar' | 'lunar' | 'custom'
 
 export interface ObservatoryMount {
-    /** JNow, degrees */
-    ra: number
-    dec: number
+    /** JNow, degrees; null until the driver has reported a position */
+    ra: number | null
+    dec: number | null
     /** J2000, degrees: what any map is drawn with */
-    raJ2000: number
-    decJ2000: number
-    alt: number
-    az: number
+    raJ2000: number | null
+    decJ2000: number | null
+    alt: number | null
+    az: number | null
     parked: boolean
     tracking: boolean
     slewing: boolean

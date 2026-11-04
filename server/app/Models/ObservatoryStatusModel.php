@@ -29,6 +29,9 @@ class ObservatoryStatusModel extends ApplicationBaseModel
         'weather_alert', 'weather_ok', 'job_started', 'job_finished', 'agent_started',
     ];
 
+    /** Events stored from one push (the agent queues up to 200 while the link is down) */
+    public const MAX_EVENTS_PER_PUSH = 200;
+
     /**
      * Stores a new snapshot (replacing the previous one) and appends its events.
      *
@@ -38,6 +41,8 @@ class ObservatoryStatusModel extends ApplicationBaseModel
     public function store(array $snapshot, array $events): void
     {
         $now = Time::now('UTC')->toDateTimeString();
+
+        $this->db->transStart();
 
         $this->db->table($this->table)->replace([
             'id'          => 1,
@@ -71,10 +76,17 @@ class ObservatoryStatusModel extends ApplicationBaseModel
         }
 
         if ($rows) {
-            $this->db->table('observatory_events')->insertBatch(array_slice($rows, 0, 50));
+            // After a long outage the agent sends its whole backlog: keep the newest events
+            $this->db->table('observatory_events')->insertBatch(array_slice($rows, -self::MAX_EVENTS_PER_PUSH));
             $this->db->table('observatory_events')
                 ->where('created_at <', Time::now('UTC')->subDays(Observatory::EVENTS_KEEP_DAYS)->toDateTimeString())
                 ->delete();
+        }
+
+        $this->db->transComplete();
+
+        if (!$this->db->transStatus()) {
+            throw new \RuntimeException('Could not store the observatory status');
         }
     }
 
@@ -108,6 +120,7 @@ class ObservatoryStatusModel extends ApplicationBaseModel
         $rows = $this->db->table('observatory_events')
             ->whereIn('type', self::PUBLIC_EVENTS)
             ->orderBy('created_at', 'DESC')
+            ->orderBy('id', 'DESC')
             ->limit(max(1, min($limit, 50)))
             ->get()
             ->getResultArray();

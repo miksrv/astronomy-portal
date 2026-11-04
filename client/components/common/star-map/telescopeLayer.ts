@@ -1,3 +1,4 @@
+import { toCelestialLon } from './angles'
 import { FONT } from './config'
 import { getFovOutline, getVisibleTarget, StarMapTelescope } from './telescope'
 
@@ -11,11 +12,14 @@ type Point = [number, number]
 
 /** The map's pixel for an RA/Dec (J2000 degrees), or null when it is behind the projection */
 const project = (ra: number, dec: number): Point | null => {
-    if (!Celestial.clip([ra, dec])) {
+    // d3-celestial takes longitudes in ±180 (as the meteor shower layer does)
+    const lon = toCelestialLon(ra)
+
+    if (!Celestial.clip([lon, dec])) {
         return null
     }
 
-    const point = Celestial.mapProjection([ra, dec])
+    const point = Celestial.mapProjection([lon, dec])
 
     return point && Number.isFinite(point[0]) && Number.isFinite(point[1]) ? point : null
 }

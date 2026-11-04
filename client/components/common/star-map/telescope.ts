@@ -75,8 +75,13 @@ export const getFovOutline = (
 export const isMountPointing = (
     mount: ApiModel.ObservatoryMount | null | undefined,
     includeParked = false
-): mount is ApiModel.ObservatoryMount =>
-    !!mount && (includeParked || !mount.parked) && Number.isFinite(mount.raJ2000) && Number.isFinite(mount.decJ2000)
+): mount is ApiModel.ObservatoryMount & { raJ2000: number; decJ2000: number } =>
+    !!mount &&
+    (includeParked || !mount.parked) &&
+    typeof mount.raJ2000 === 'number' &&
+    Number.isFinite(mount.raJ2000) &&
+    typeof mount.decJ2000 === 'number' &&
+    Number.isFinite(mount.decJ2000)
 
 /** What to draw for the observatory's mount: nothing while its position is unknown (or it is parked) */
 export const getMountTelescope = (

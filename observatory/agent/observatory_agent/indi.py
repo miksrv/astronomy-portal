@@ -10,12 +10,17 @@ don't travel over this connection.
 from __future__ import annotations
 
 import asyncio
+import codecs
 import logging
+import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from typing import Callable
 
 log = logging.getLogger(__name__)
+
+# Characters XML 1.0 does not allow (tab, LF and CR are fine)
+_INVALID_XML_CHARS = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f]")
 
 VECTOR_TYPES = {"Text", "Number", "Switch", "Light", "BLOB"}
 
@@ -143,23 +148,27 @@ class IndiClient:
         """Connects, reads until the server goes away, reconnects with back-off."""
         delay = 5.0
         while not stop.is_set():
+            was_connected = False
             try:
                 await self._session(stop)
-                delay = 5.0
             except (OSError, asyncio.IncompleteReadError, ET.ParseError) as error:
                 if self.connected:
                     log.warning("INDI connection lost: %s", error)
                 else:
                     log.debug("INDI server not reachable: %s", error)
+            except Exception:  # a bug must not end INDI reading for good
+                log.exception("INDI session failed")
             finally:
+                was_connected = self.connected
                 if self.connected:
                     self.connected = False
                     self.tree.clear()
+            # A session that got connected resets the back-off: only failed attempts grow it
+            delay = 5.0 if was_connected else min(delay * 2, 60.0)
             try:
                 await asyncio.wait_for(stop.wait(), timeout=delay)
             except asyncio.TimeoutError:
                 pass
-            delay = min(delay * 2, 60.0)
 
     async def _session(self, stop: asyncio.Event) -> None:
         reader, writer = await asyncio.wait_for(asyncio.open_connection(self.host, self.port), timeout=10)
@@ -198,11 +207,16 @@ class StreamParser:
         self._handler = handler
         self._parser = ET.XMLPullParser(events=("start", "end"))
         self._parser.feed("<indi>")
+        self._decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
         self._depth = 0
         self._root: ET.Element | None = None
 
     def feed(self, data: bytes | str) -> None:
-        self._parser.feed(data)
+        # A driver text in another encoding or with a control character must not break the
+        # whole stream (a ParseError reconnects, and the same text would come back every time)
+        if isinstance(data, bytes):
+            data = self._decoder.decode(data)
+        self._parser.feed(_INVALID_XML_CHARS.sub("", data))
         for event, element in self._parser.read_events():
             if event == "start":
                 if self._root is None:
