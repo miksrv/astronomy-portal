@@ -232,4 +232,19 @@ final class AuthGuardTest extends CIUnitTestCase
         $json = json_decode($result->getJSON(), true);
         $this->assertArrayHasKey('message', $json);
     }
+
+    // --- Observatory agent ---
+
+    public function testAgentStatusWithoutTokenReturns401(): void
+    {
+        $result = $this->post('observatory/agent/status', []);
+        $result->assertStatus(401);
+    }
+
+    public function testAgentStatusWithWrongTokenReturns401(): void
+    {
+        $result = $this->withHeaders(['Authorization' => 'Bearer not-the-agent-token-not-the-agent-token'])
+            ->post('observatory/agent/status', []);
+        $result->assertStatus(401);
+    }
 }

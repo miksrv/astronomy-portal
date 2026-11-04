@@ -31,6 +31,10 @@ app.baseURL = 'http://localhost:8080/'
 # nova.astrometry.net API key for plate solving (photos:solve): https://nova.astrometry.net/profile
 astrometry.apiKey = ''
 
+# Observatory agent (FEAT-30): Bearer token the Python agent on the observatory PC pushes the
+# status with — at least 32 random bytes (`openssl rand -hex 32`), the same value in its config
+observatory.agentToken = ''
+
 app.appTimezone = UTC
 app.timezone  = 5
 app.latitude  = 51.7727
