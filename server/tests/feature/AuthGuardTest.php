@@ -43,6 +43,13 @@ final class AuthGuardTest extends CIUnitTestCase
 
     // --- Photos endpoints ---
 
+    public function testSimbadLookupWithoutTokenReturns401(): void
+    {
+        $result = $this->get('objects/simbad/M_51');
+
+        $result->assertStatus(401);
+    }
+
     public function testPostPhotosWithoutTokenReturns401(): void
     {
         $result = $this->post('photos', []);

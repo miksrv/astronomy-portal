@@ -11,6 +11,8 @@ class ObjectEntity extends Entity
         'dec'        => 'float',
         'distance'   => '?float',
         'magnitude'  => '?float',
+        'maj_axis'   => '?float',
+        'min_axis'   => '?float',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => '?datetime',

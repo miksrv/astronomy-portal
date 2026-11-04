@@ -60,13 +60,6 @@ $routes->group('observatory', static function ($routes) {
     $routes->options('(:any)', static function () {});
 });
 
-/** Catalog Controller (OpenNGC reference catalog, FEAT-31) **/
-$routes->group('catalog', static function ($routes) {
-    $routes->get('search', 'Catalog::search', ['filter' => ['ratelimit:catalog_search,120,60', 'publiccache:3600']]);
-    $routes->get('(:segment)', 'Catalog::show/$1', ['filter' => 'publiccache:3600']);
-    $routes->options('(:any)', static function () {});
-});
-
 /** Files Controller **/
 $routes->group('files', static function ($routes) {
     $routes->get('(:any)', 'Files::show/$1', ['filter' => 'publiccache:300']);
@@ -84,6 +77,8 @@ $routes->options('categories', static function () {});
 /** Objects Controller **/
 $routes->group('objects', static function ($routes) {
     $routes->get('/', 'Objects::list', ['filter' => 'publiccache:300']);
+    // Declared before (:any); a lookup for the object form, objects.manage only
+    $routes->get('simbad/(:any)', 'Objects::simbad/$1');
     $routes->get('(:any)', 'Objects::show/$1', ['filter' => 'publiccache:300']);
     $routes->post('/', 'Objects::create');
     $routes->patch('(:any)', 'Objects::update/$1');

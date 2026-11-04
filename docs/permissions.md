@@ -13,7 +13,7 @@ Roles are managed entirely through data, not code — `/admin/roles` lets an adm
 | `Permission::` | Grants |
 |---|---|
 | `RELAY_CONTROL` | `PUT /relay/set` — observatory power relay control |
-| `OBJECTS_MANAGE` | Create/update/delete on the astronomical objects catalog |
+| `OBJECTS_MANAGE` | Create/update/delete on the astronomical objects catalog; the SIMBAD lookup of the object form (`GET /objects/simbad/:name`) |
 | `PHOTOS_MANAGE` | Create/update/delete/upload on the astrophoto archive; run a photo's plate solve (`POST /photos/:id/astrometry`) |
 | `MAILINGS_MANAGE` | All `/mailings*` endpoints except `unsubscribe` |
 | `USERS_MANAGE` | Admin member list (`/admin/users`), viewing another user's event history, and all of `/roles*` (creating/editing roles and assigning them to users). **Reserved** — see "The reserved developer role" below; not a privilege any admin-created role can be granted. |
