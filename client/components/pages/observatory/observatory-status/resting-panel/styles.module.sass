@@ -1,0 +1,54 @@
+@use '../../../../../styles/typography' as type
+
+// The observatory at rest: a calm plate where the device cards would be
+.restingPanel
+    // Fills the column next to the map: a whole empty state, not a stray note
+    display: flex
+    flex: 1 1 auto
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    gap: var(--space-4)
+    min-height: 240px
+    padding: var(--space-6) var(--space-5)
+    text-align: center
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
+
+.icon
+    display: inline-flex
+    flex: none
+    align-items: center
+    justify-content: center
+    width: 56px
+    height: 56px
+    border-radius: var(--radius-md)
+    background: var(--color-main-background)
+    color: var(--color-main)
+
+    svg
+        width: 28px
+        height: 28px
+        fill: currentColor
+
+.body
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: var(--space-2)
+    max-width: 420px
+    min-width: 0
+
+.title
+    +type.titleBlock
+
+.text
+    +type.secondary
+    margin: 0
+
+.meta
+    +type.caption
+    margin: 0
+
+.action
+    margin-top: var(--space-2)

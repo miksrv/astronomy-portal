@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Enums\Permission;
 use App\Libraries\LocaleLibrary;
+use App\Libraries\ObjectSimbadLibrary;
+use App\Libraries\SimbadClient;
 use App\Libraries\SessionLibrary;
 use App\Models\ObjectsModel;
 use App\Models\ObjectFitsFiltersModel;
@@ -11,6 +13,7 @@ use App\Models\ObjectCategoryModel;
 use App\Models\ObjectFitsFilesModel;
 use App\Models\PhotosObjectModel;
 use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\I18n\Time;
 use Config\Services;
 use Exception;
 
@@ -131,6 +134,44 @@ class Objects extends BaseApiController
     }
 
     /**
+     * Looks a name up in SIMBAD for the object form ("Найти в SIMBAD"), without storing anything:
+     * the editor sees what was found and saves it with the form.
+     */
+    public function simbad($name = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->respondUnauthorized(lang('App.accessDenied'));
+        }
+
+        if (!$this->session->can(Permission::OBJECTS_MANAGE)) {
+            return $this->respondForbidden(lang('App.accessDenied'));
+        }
+
+        // The router has already decoded the segment
+        $name = trim((string) $name);
+
+        if ($name === '' || mb_strlen($name) > 80) {
+            return $this->respondInvalidRequest('SIMBAD lookup without a name');
+        }
+
+        try {
+            $simbad = (new SimbadClient(8))->lookup($name);
+        } catch (\Throwable $e) {
+            log_message('warning', 'SIMBAD lookup of {name} failed: {message}', ['name' => $name, 'message' => $e->getMessage()]);
+
+            return $this->respondError(lang('Objects.simbadUnavailable'), 503);
+        }
+
+        if ($simbad === null) {
+            return $this->respondNotFound(lang('Objects.simbadNotFound'));
+        }
+
+        $simbad['magnitude'] = ObjectSimbadLibrary::ownMagnitude($simbad['type'], $simbad['magnitude']);
+
+        return $this->respond($simbad);
+    }
+
+    /**
      * Create a new object item.
      *
      * @return ResponseInterface Returns a response indicating the result of the creation operation.
@@ -195,14 +236,47 @@ class Objects extends BaseApiController
         }
         unset($input['image']);
 
+        // What the editor looked up in SIMBAD from the form; without it the object is looked up below
+        $simbad = ObjectSimbadLibrary::columnsFromForm($input['simbad'] ?? null, Time::now('UTC')->toDateTimeString());
+        unset($input['simbad']);
+
+        if ($simbad) {
+            $input += $simbad;
+        }
+
         // Check uniqueness after mapping
         $objectsModel = new ObjectsModel();
         if ($objectsModel->where('catalog_name', $input['catalog_name'])->withDeleted()->first()) {
             return $this->respondValidationErrors(['name' => lang('Objects.nameAlreadyExists')], null, 409);
         }
 
+        // Each category once, and only real ids: a duplicate would fail the insert below
+        $categories = is_array($input['categories'] ?? null)
+            ? array_values(array_unique(array_filter(array_map('intval', $input['categories']), static fn ($id) => $id > 0)))
+            : [];
+
         try {
+            // The object and its categories together: a failed category must not leave an object
+            // behind that a retry then calls a duplicate
+            $db = \Config\Database::connect();
+            $db->transException(true)->transStart();
+
             $objectsModel->insert($input);
+
+            $objectCategoryModel = new ObjectCategoryModel();
+
+            foreach ($categories as $categoryId) {
+                $objectCategoryModel->insert([
+                    'object_name' => $input['catalog_name'],
+                    'category_id' => $categoryId,
+                ]);
+            }
+
+            $db->transComplete();
+
+            if (!$simbad) {
+                $this->_fillFromSimbad($input, $categories);
+            }
 
             \Config\Services::cache()->deleteMatching('objects_list_*');
 
@@ -213,6 +287,38 @@ class Objects extends BaseApiController
             log_message('error', $e->getMessage(), ['exception' => $e]);
 
             return $this->respondServerError(lang('General.serverError'));
+        }
+    }
+
+    /**
+     * Fills a new object from SIMBAD (type, size, aliases; the magnitude when empty). A failed or
+     * slow lookup never fails the create: `objects:simbad` picks the object up later.
+     */
+    private function _fillFromSimbad(array $object, array $categories): void
+    {
+        // Tests never reach out to CDS
+        if (ENVIRONMENT === 'testing') {
+            return;
+        }
+
+        try {
+            $result = (new ObjectSimbadLibrary(new SimbadClient(8)))->check($object, $categories);
+
+            if ($result['update']) {
+                (new ObjectsModel())->update($object['catalog_name'], $result['update']);
+            }
+
+            if ($result['status'] === 'far') {
+                log_message('warning', 'SIMBAD: {name} resolves {offset}° away from its coordinates, not filled', [
+                    'name'   => $object['catalog_name'],
+                    'offset' => round($result['offset'], 1),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            log_message('warning', 'SIMBAD lookup of {name} failed: {message}', [
+                'name'    => $object['catalog_name'],
+                'message' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -283,6 +389,14 @@ class Objects extends BaseApiController
         if (!empty($input['image'])) {
             $input['image_file'] = $this->_saveCatalogImage($id, $input['image']);
             unset($input['image']);
+        }
+
+        // The editor refreshed the object from SIMBAD in the form
+        $simbad = ObjectSimbadLibrary::columnsFromForm($input['simbad'] ?? null, Time::now('UTC')->toDateTimeString());
+        unset($input['simbad']);
+
+        if ($simbad) {
+            $input += $simbad;
         }
 
         try {

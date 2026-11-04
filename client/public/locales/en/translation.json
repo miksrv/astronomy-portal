@@ -46,6 +46,22 @@
                 "email-required": "Enter your email",
                 "email-invalid": "Enter a valid email"
             },
+            "markdown-editor": {
+                "placeholder": "text",
+                "link-text": "link text",
+                "bold": "Bold (⌘B)",
+                "italic": "Italic (⌘I)",
+                "heading": "Subheading",
+                "list": "List",
+                "numbered": "Numbered list",
+                "quote": "Quote",
+                "link": "Link (⌘K)",
+                "view": "View",
+                "write": "Text",
+                "preview": "Preview",
+                "toolbar": "Formatting",
+                "empty": "Nothing yet: write the text in the \"Text\" tab"
+            },
             "object-photos-table": {
                 "photo": "Photo",
                 "date": "Date",
@@ -92,6 +108,12 @@
             "snackbar-stack": {
                 "close": "Close notification",
                 "label": "Notifications"
+            },
+            "unsaved-changes": {
+                "title": "Leave without saving?",
+                "text": "The form has unsaved changes. If you leave the page, they will be lost.",
+                "stay": "Stay",
+                "leave": "Leave without saving"
             },
             "visibility-chart": {
                 "title": "Altitude above the horizon tonight",
@@ -164,16 +186,36 @@
         "page-actions": "Actions",
         "loading": "Loading...",
         "cancel": "Cancel",
-        "save": "Save",
         "frames_one": "{{count}} frame",
         "frames_other": "{{count}} frames",
         "star-map": "Star map",
         "hours-unit": "h",
+        "save": "Save",
         "delete": "Delete",
         "done": "Done",
         "edit": "Edit",
         "go-to-home-page": "Home",
         "telegram": "Telegram",
+        "object-type": {
+            "galaxy": "Galaxy",
+            "nebula": "Nebula",
+            "interacting-galaxies": "Interacting galaxies",
+            "galaxy-group": "Galaxy group",
+            "galaxy-cluster": "Galaxy cluster",
+            "globular-cluster": "Globular cluster",
+            "open-cluster": "Open cluster",
+            "star-cluster": "Star cluster",
+            "association": "Stellar association",
+            "planetary-nebula": "Planetary nebula",
+            "hii-region": "HII region",
+            "supernova-remnant": "Supernova remnant",
+            "reflection-nebula": "Reflection nebula",
+            "dark-nebula": "Dark nebula",
+            "supernova": "Supernova",
+            "nova": "Nova",
+            "double-star": "Double star",
+            "star": "Star"
+        },
         "day_one": "{{count}} day",
         "day_other": "{{count}} days",
         "hour_one": "{{count}} hour",

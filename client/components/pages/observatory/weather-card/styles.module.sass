@@ -7,6 +7,13 @@
     gap: var(--space-4)
     min-width: 0
 
+.actions
+    display: inline-flex
+    flex-wrap: wrap
+    align-items: center
+    justify-content: flex-end
+    gap: var(--space-3)
+
 .more
     +type.caption
 
@@ -45,18 +52,7 @@
         +type.caption
 
 .state
-    +type.caption
-    background: var(--weather-background)
-    color: var(--weather-color)
-    display: inline-flex
-    align-items: center
-    gap: 6px
-    height: 24px
     margin-left: auto
-    padding: 0 10px
-    border-radius: var(--radius-full)
-    font-weight: var(--font-weight-semibold)
-    white-space: nowrap
 
 .dot
     flex: none
@@ -80,7 +76,8 @@
     display: grid
     grid-template-columns: repeat(3, minmax(0, 1fr))
     gap: var(--space-2)
-    margin: 0
+    // Pinned to the bottom of the card, level with the neighbour card's content
+    margin: auto 0 0
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         grid-template-columns: repeat(2, minmax(0, 1fr))
@@ -101,6 +98,21 @@
 
         .dot
             background: var(--weather-color)
+
+    // The range colours have to outrank the neutral default above (same specificity, later wins)
+    &.good
+        --weather-color: var(--color-green)
+
+    &.warning
+        --weather-color: var(--color-orange)
+        box-shadow: inset 0 0 0 1px var(--color-orange-background)
+
+    &.danger
+        --weather-color: var(--color-red)
+        box-shadow: inset 0 0 0 1px var(--color-red)
+
+        dd
+            color: var(--color-red)
 
     dd
         +type.titleBlock

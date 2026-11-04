@@ -34,452 +34,72 @@ A web application for a DIY amateur observatory with support for remote monitori
 
 ---
 
-<!-- TABLE OF CONTENTS -->
-### Table of Contents
+## About
 
-- [About the Project](#about-the-project)
-    - [Key Features](#key-features)
-    - [Built With](#built-with)
-- [Project Structure](#project-structure)
-- [User Roles & Permissions](#user-roles--permissions)
-- [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Database](#database)
-    - [Backend Setup](#backend-setup)
-    - [Frontend Setup](#frontend-setup)
-- [Configuration](#configuration)
-    - [Frontend Environment Variables](#frontend-environment-variables)
-    - [Backend Environment Variables](#backend-environment-variables)
-- [API Overview](#api-overview)
-- [Deployment](#deployment)
-    - [Database Migrations](#database-migrations)
-    - [Payment Acquiring (Alfa-Bank)](#payment-acquiring-alfa-bank)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+A DIY platform for a remote amateur observatory: live observatory and weather dashboard, deep-sky photo archive with plate solving, interactive star map, and stargazing events with ticketing. Demo: [astro.miksoft.pro](https://astro.miksoft.pro).
 
----
+### Features
 
-<!-- ABOUT THE PROJECT -->
-## About the Project
-
-Amateur Astronomy Observatory Portal is a DIY platform for managing and monitoring a remote observatory. The web app consists of several user screens, including displaying telemetry from the observatory, a weather station, storing processed astronomy photos, and storing information about captured frames. The app also features an interactive sky map, a deep sky image archive, and a live dashboard with weather and equipment statistics. The portal combines automation with practical astrophotography. Whether you are tracking celestial events or analyzing FITS footage, this project demonstrates the convergence of technology and astronomy.
-
-<!-- KEY FEATURES -->
-### Key Features
-
-- **Built with React and Next.js** — a fast and scalable web application for managing astronomical data.
-- **Interactive Celestial Map** — explore observed objects, constellations, stars, and their imaging history powered by Celestial.js and D3.js.
-- **Real-Time Observatory Dashboard** — monitor telescope status, weather conditions, and sensor data live.
-- **Astrophotography Archive** — FITS file management and astrophotography archive with detailed metadata, equipment info, and filters.
-- **Stargazing Events** — event management with registration, optional paid ticketing via Alfa-Bank online acquiring (adults pay, children under 18 are free), check-in via QR code, reviews, and a photo/video gallery per event.
-- **Astronomy Calculations** — visibility charts, celestial coordinate utilities, moon phase display using `astronomy-engine` and `suncalc`.
-- **Remote Observatory Control** — manage equipment power and receive telemetry via an Arduino-based controller.
-- **Authentication** — sign in with Google, Yandex or VK, or passwordless via an emailed magic link.
-- **Mailings & Web Push** — admin email campaigns and browser push notifications about upcoming events.
-- **Role-based Admin** — admin-editable roles built from a fixed privilege catalog (see below).
-- **Multilingual UI** — i18n support via `i18next`.
-
-<p align="right">(<a href="#top">Back to top</a>)</p>
-
----
+- **Observatory dashboard** — weather, imaging statistics, equipment, webcam, power control.
+- **Astrophoto archive** — photos with FITS metadata, filters, equipment and plate-solved coordinate grids.
+- **Interactive star map** — observed objects, constellations and imaging history (d3-celestial).
+- **Stargazing events** — registration, paid tickets (Alfa-Bank), QR check-in, reviews, photo/video gallery.
+- **Accounts** — Google / Yandex / VK or e-mail magic link; mailings and Web Push about upcoming events.
+- **Role-based admin** — admin-editable roles built from a fixed privilege catalog.
+- **Russian and English UI.**
 
 ### Built With
 
-The Homemade Observatory Web Application project leverages a wide range of technologies across various layers of the system:
+[![PHP][php-badge]][php-url] [![MySQL][mysql-badge]][mysql-url] [![TypeScript][ts-badge]][ts-url] [![NextJS][nextjs-badge]][nextjs-url] [![Redux][redux-badge]][redux-url] [![NodeJS][nodejs-badge]][nodejs-url] [![Sass][sass-badge]][sass-url] [![GitHub Actions][githubactions-badge]][githubactions-url] [![SonarCloud][sonarcloud-badge]][sonarcloud-url]
 
-- [![PHP][php-badge]][php-url] Server-side scripting language (PHP 8.2) powering the CodeIgniter 4 backend API.
-- [![MySQL][mysql-badge]][mysql-url] MariaDB/MySQL database system for storing all application data.
-- [![JavaScript][js-badge]][js-url] Core language used in frontend development.
-- [![TypeScript][ts-badge]][ts-url] TypeScript extends JavaScript by adding types to the language (v6.0.3).
-- [![NextJS][nextjs-badge]][nextjs-url] React-based frontend framework for building the user interface (v16.4.3).
-- [![Redux][redux-badge]][redux-url] State management for the frontend via Redux Toolkit with RTK Query.
-- [![NodeJS][nodejs-badge]][nodejs-url] JavaScript runtime used for frontend development and package management (≥20.11.0).
-- [![Sass][sass-badge]][sass-url] Styling the user interface.
-- [![GitHub Actions][githubactions-badge]][githubactions-url] Continuous integration and deployment pipeline for automating tests and deployment processes.
-- [![SonarCloud][sonarcloud-badge]][sonarcloud-url] Code quality and security analysis.
-
-<p align="right">(<a href="#top">Back to top</a>)</p>
+Next.js 16 (pages router) + React 19 + Redux Toolkit / RTK Query on the frontend, CodeIgniter 4 (PHP 8.2) + MariaDB on the backend.
 
 ---
 
-<!-- PROJECT STRUCTURE -->
 ## Project Structure
-
-This is a monorepo with three independent subsystems:
 
 ```
 astronomy-portal/
-├── client/              # Next.js 16 frontend application
-│   ├── api/             # RTK Query API layer and data models
-│   ├── components/      # React UI components
-│   ├── pages/           # Next.js pages-router (routes)
-│   ├── public/          # Static assets, star map data, images
-│   └── utils/           # Utility functions (coordinates, dates, moon, etc.)
-├── server/              # CodeIgniter 4 PHP backend API
-│   └── app/
-│       ├── Controllers/ # Request handlers (Auth, Photos, Events, Objects…)
-│       ├── Models/      # Database models extending ApplicationBaseModel
-│       ├── Entities/    # DB row entity classes
-│       ├── Database/
-│       │   └── Migrations/ # Database migrations
-│       ├── Config/      # Routes, CORS, Filters, Services
-│       └── Libraries/   # Auth, payments, email, push, relay, tickets…
-├── firmware/            # Arduino firmware for observatory hardware control
-│   └── main/
-└── config/              # Docker Compose and Nginx configuration
+├── client/        # Next.js frontend
+├── server/        # CodeIgniter 4 backend API
+├── observatory/   # The observatory PC: docs, INDI/Ekos configs, scripts
+├── docs/          # Project documentation
+└── config/        # Docker Compose (local MariaDB) and nginx config
 ```
 
-<p align="right">(<a href="#top">Back to top</a>)</p>
+## Quick Start
 
----
+```bash
+(cd config && docker-compose up -d)                       # MariaDB on localhost:3308
+(cd server && composer install && cp env .env && composer migration:run && composer serve)   # API on :8080
+(cd client && yarn install && cp env .env && yarn dev)    # site on :3000
+```
 
-<!-- USER ROLES & PERMISSIONS -->
-## User Roles & Permissions
+Details and every environment variable: [docs/setup.md](docs/setup.md).
 
-Access control is privilege-based, not role-based: every backend check tests for one of a fixed set of **privileges** (`App\Enums\Permission`, a PHP backed enum — the single place a new privilege is introduced when new functionality needs one), and a **role** (`user_roles` table) is just a named, admin-editable bundle of privileges. A user can hold several roles at once (`users.roles`, a JSON array of `user_roles.id` values); their effective privileges are the union of every role they're assigned. There is no general admin bypass — the one hardcoded exception is `USERS_MANAGE` itself, see below.
+## Documentation
 
-Roles are managed entirely through data, not code — `/admin/roles` lets an admin create a role, name it, and grant it any subset of the fixed privilege list; `/admin/users` assigns roles to a specific user. Adding a new privilege still requires a code change (a new `Permission` case plus the checks that use it); deciding who gets it does not. The one exception is `USERS_MANAGE` (see "The reserved developer role" below), which is deliberately kept out of the "just data" model because it's the privilege that controls every other privilege.
-
-`isAuth` (is there a session at all) is a separate, orthogonal check from privileges — it gates the baseline actions any authenticated account gets (posting a comment, booking an event, editing your own profile), which every account has regardless of which roles, if any, it holds. A user with zero assigned roles is simply a plain authenticated account.
-
-### The privilege catalog
-
-| `Permission::` | Grants |
+| Document | Contents |
 |---|---|
-| `RELAY_CONTROL` | `PUT /relay/set` — observatory power relay control |
-| `OBJECTS_MANAGE` | Create/update/delete on the astronomical objects catalog |
-| `PHOTOS_MANAGE` | Create/update/delete/upload on the astrophoto archive; run a photo's plate solve (`POST /photos/:id/astrometry`) |
-| `MAILINGS_MANAGE` | All `/mailings*` endpoints except `unsubscribe` |
-| `USERS_MANAGE` | Admin member list (`/admin/users`), viewing another user's event history, and all of `/roles*` (creating/editing roles and assigning them to users). **Reserved** — see "The reserved developer role" below; not a privilege any admin-created role can be granted. |
-| `COMMENTS_MODERATE` | Deleting any comment/review (not just your own) |
-| `EVENTS_CREATE` | Creating a new stargazing event |
-| `EVENTS_UPDATE` | Editing an event and replacing its cover image. Also exempts the viewer from the address/coordinates gating on `GET /events/:id` (see "Event Location & Map" in `server/CLAUDE.md`) so the edit form always shows the real saved values, not just for a viewer with their own booking |
-| `EVENTS_DELETE` | Deleting an event. On its own enough for the "Удалить" item of the upcoming event's "⋯" menu on `/stargazing` (the item no longer also needs `EVENTS_UPDATE`/`EVENTS_STATISTIC`) |
-| `EVENTS_GALLERY_UPLOAD` | Uploading media — photos **and** videos — to an event's gallery after the fact, across the whole chunked upload flow (`POST /events/media/init/:id`, `POST /events/media/chunk/:sessionId`, `POST /events/media/finalize/:sessionId`, `DELETE /events/media/:sessionId`) |
-| `EVENTS_CHECKIN` | QR check-in and viewing any attendee's ticket |
-| `EVENTS_STATISTIC` | Event statistics, the registrations table, and re-verifying a registration's payment |
-| `EVENTS_REFUND` | Forced refund of a paid registration (stricter than `EVENTS_STATISTIC` — moves real money) |
-| `EVENTS_USERS` | `GET /events/members/:id` — viewing the registered-members list for a single event. Distinct from `EVENTS_STATISTIC` (the aggregated registrations/statistics table for an event) and from `USERS_MANAGE` (the site-wide member directory) — a role can be given visibility into one event's attendees without also getting the admin member list or role management. |
-| `PIPELINE_MANAGE` | Reserved for the observatory pipeline-management section (in development — no endpoint checks it yet) |
-| `PUSH_MANAGE` | All `/push-notifications*` endpoints (admin CRUD push-кампаний, тест-отправка, запуск) — не путать с user-facing `POST /push/subscribe` (public, no `isAuth` needed — a guest may opt in before logging in) / `DELETE /push/subscribe` (requires `isAuth`) |
+| [docs/setup.md](docs/setup.md) | Prerequisites, local setup, environment variables |
+| [docs/deployment.md](docs/deployment.md) | CI/CD, maintenance mode, migrations, payment acquiring |
+| [docs/permissions.md](docs/permissions.md) | Privileges, roles and the access matrix |
+| [observatory/README.md](observatory/README.md) | The observatory itself: hardware, INDI/Ekos, safety, rebuilding the observatory PC |
+| [server/CLAUDE.md](server/CLAUDE.md) | API routes, controllers, models, backend conventions |
+| [client/CLAUDE.md](client/CLAUDE.md), [client/DESIGN.md](client/DESIGN.md) | Frontend conventions and design system |
+| [ROADMAP.md](ROADMAP.md), [CHANGELOG.md](CHANGELOG.md) | Planned features and release history |
 
-Owner overrides still apply on top of a privilege check where they always did: `DELETE /comments/:id` (own comment, or `COMMENTS_MODERATE`), `GET /members/:id/events` and `GET /events/ticket/:id` (own data, or `USERS_MANAGE`/`EVENTS_CHECKIN` respectively).
-
-### The reserved developer role
-
-`USERS_MANAGE` is the one privilege that isn't "just data": it grants the ability to create/edit roles and assign them to users (`/roles*`, `Members::updateRoles()`), so a role holding it could otherwise grant itself — or anyone — every other privilege, including itself. To close that escalation path, it's hardcoded rather than left to admin discretion:
-
-- **Only role id 1** (`RolesModel::DEVELOPER_ROLE_ID`, seeded as **"Разработчик"** by `AddRolesTable`) may ever hold `USERS_MANAGE`. `Roles::create()`/`Roles::update()` reject granting it to any other role, and reject removing it from role 1 — the privilege can't be handed out and can't be orphaned.
-- Role id 1 can never be **deleted** (`Roles::delete()` rejects it) — there must always be exactly one role capable of managing roles/users.
-- Role id 1 can be **assigned to only one user at a time** — `Members::updateRoles()` rejects assigning it to a second user while another already holds it (`UsersModel::isRoleAssignedToOtherUser()`). To hand it off, remove it from the current holder first, then assign it to the new one.
-- The admin UI mirrors all three rules (`/admin/roles` hides the `USERS_MANAGE` checkbox for every role except the developer role and won't let it be unchecked there; `/admin/users` disables the developer-role checkbox once someone else already holds it), but the API enforces them independently — the UI restrictions are a convenience, not the security boundary.
-
-### Seeded roles
-
-The migration that introduced this system (`server/app/Database/Migrations/2026-08-13-100001_AddRolesTable.php`) seeded three starter roles, preserving exactly what the old `users.role` ENUM values (`admin`/`moderator`/`security`) could do — any further roles (e.g. a role for event curators with `EVENTS_GALLERY_UPLOAD` + `MAILINGS_MANAGE`, or one for the pipeline team) are created afterwards through `/admin/roles`, not hardcoded:
-
-| Seeded role | Privileges |
-|---|---|
-| Разработчик (id 1, reserved — see above) | All of the above |
-| Команда | `COMMENTS_MODERATE`, `EVENTS_CREATE`, `EVENTS_UPDATE`, `EVENTS_STATISTIC`, `EVENTS_CHECKIN` |
-| Охрана | `EVENTS_CHECKIN` |
-
-### Frontend
-
-`GET /auth/me` returns `roles` (role names, display-only — e.g. for the badge list in `/admin/users`) and `permissions` (the flat privilege list, the only thing ever checked). `client/utils/permissions.ts` exports `hasPermission(user, permission)` / `hasAnyPermission(user, permissions)`; every page/component gate and the `requirePermissionSSR()` SSR guard (`client/utils/adminAuth.ts`) go through these instead of comparing a role. `client/api/models/permission.ts` mirrors the backend `Permission` enum — the one remaining place the two ends duplicate each other, down from every call site duplicating a role comparison.
-
-<p align="right">(<a href="#top">Back to top</a>)</p>
-
----
-
-<!-- GETTING STARTED -->
-## Getting Started
-
-### Prerequisites
-
-| Tool | Version |
-|------|---------|
-| Node.js | ≥ 20.11.0 |
-| Yarn | 4.9.2 |
-| PHP | ≥ 8.2 |
-| Composer | ≥ 2.x |
-| Docker & Docker Compose | any recent version |
-
----
-
-### Database
-
-The project uses MariaDB. Start a local instance via Docker Compose:
-
-```bash
-cd config
-docker-compose up -d
-```
-
-This starts a MariaDB 10.5.8 container accessible at `localhost:3308` with:
-- **Database:** `db`
-- **User:** `user`
-- **Password:** `password`
-
----
-
-### Backend Setup
-
-```bash
-cd server
-
-# Install PHP dependencies
-composer install
-
-# Copy environment file and configure it
-cp env .env
-
-# Run database migrations
-composer migration:run
-
-# (Optional) seed initial data
-php spark db:seed CategoriesSeeder
-php spark db:seed ObservatoryEquipmentSeeder
-php spark db:seed ObservatorySettingsSeeder
-
-# Start development server at http://localhost:8080
-composer serve
-```
-
----
-
-### Frontend Setup
-
-```bash
-cd client
-
-# Install Node.js dependencies
-yarn install
-
-# Copy environment file and configure it
-cp env .env
-
-# Start development server at http://localhost:3000
-yarn dev
-```
-
-To build for production:
-
-```bash
-yarn build
-```
-
-<p align="right">(<a href="#top">Back to top</a>)</p>
-
----
-
-<!-- CONFIGURATION -->
-## Configuration
-
-### Frontend Environment Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `NEXT_PUBLIC_SITE_LINK` | Public URL of the frontend | `http://localhost:3000/` |
-| `NEXT_PUBLIC_API_HOST` | Backend API base URL | `http://localhost:8080/` |
-| `NEXT_PUBLIC_IMG_HOST` | Base URL for serving uploaded images (optional, defaults to `NEXT_PUBLIC_API_HOST`) | `http://localhost:8080/` |
-| `NEXT_PUBLIC_LAT` | Observatory latitude (for sky map) | `51.7` |
-| `NEXT_PUBLIC_LON` | Observatory longitude (for sky map) | `55.2` |
-| `NEXT_PUBLIC_THUNDERFOREST_API_KEY` | Tile API key for the event location map | — |
-
-### Backend Environment Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `CI_ENVIRONMENT` | App environment (`development` / `production`) | `development` |
-| `app.baseURL` | Backend base URL | `http://localhost:8080/` |
-| `app.appTimezone` | Server timezone | `Asia/Yekaterinburg` |
-| `app.latitude` | Observatory latitude | `51.7727` |
-| `app.longitude` | Observatory longitude | `55.0988` |
-| `astrometry.apiKey` | nova.astrometry.net API key for plate solving photos: new uploads are solved from the editor's browser, the archive once with `php spark photos:solve --all` (see server/CLAUDE.md CLI Commands). Shown on https://nova.astrometry.net/profile after signing in | — |
-| `app.observatory.controller` | URL of Arduino relay controller | `http://astro.myftp.org:8081/` |
-| `app.observatory.controller.user` / `.password` | Relay controller credentials | — |
-| `app.observatory.webcam_1` | Webcam 1 snapshot URL | — |
-| `app.observatory.webcam_2` | Webcam 2 snapshot URL | — |
-| `app.siteUrl` | Public frontend URL; used to build the payment return URL | `https://astro.miksoft.pro` |
-| `auth.token.secret` | JWT HS256 secret, **at least 32 bytes** | — |
-| `auth.token.live` | JWT lifetime in seconds | `15552000` |
-| `auth.google.*` | Google OAuth credentials | — |
-| `auth.yandex.*` | Yandex OAuth credentials | — |
-| `auth.vk.*` | VK OAuth credentials | — |
-| `payment.gateway` | Active acquiring gateway implementation | `alfabank` |
-| `payment.currency` | ISO 4217 numeric currency code (`810` = RUB) | `810` |
-| `payment.sessionTimeoutSecs` | Order lifetime / unpaid seat-hold TTL, in seconds | `1200` |
-| `payment.alfabank.environment` | `'test'` to use the `payment.alfabank.test.*` block below, anything else uses production | `production` |
-| `payment.alfabank.userName` | Alfa-Bank API login (usually ends with `-api`) | — |
-| `payment.alfabank.password` | Alfa-Bank API password | — |
-| `payment.alfabank.token` | Payment token; preferred over `userName`/`password` when set (required for an "r-login" contract). Not used by `refund.do`, which always needs `userName`/`password` | — |
-| `payment.alfabank.gatewayUrl` | Alfa-Bank REST base URL (production) | `https://payment.alfabank.ru/payment/rest/` |
-| `payment.alfabank.callbackToken` | Symmetric token for HMAC callback verification | — |
-| `payment.alfabank.test.*` | Same keys as above (`userName`/`password`/`token`/`gatewayUrl`/`callbackToken`), used when `payment.alfabank.environment = 'test'` | `gatewayUrl`: `https://alfa.rbsuat.com/payment/rest/` |
-| `smtp.*` | SMTP server for mailings, tickets and magic links (`host`/`port`/`user`/`pass`/`crypto`/`mail`/`senderName`) | — |
-| `push.vapidPublicKey` / `vapidPrivateKey` / `vapidSubject` | VAPID keys for Web Push | — |
-| `database.*.hostname` | DB host | `127.0.0.1` |
-| `database.*.port` | DB port | `3308` |
-| `database.*.database` | DB name | `db` |
-| `database.*.username` | DB user | `user` |
-| `database.*.password` | DB password | `password` |
-
-<p align="right">(<a href="#top">Back to top</a>)</p>
-
----
-
-<!-- API OVERVIEW -->
-## API Overview
-
-All backend endpoints are defined in `server/app/Config/Routes.php` (`composer routes` lists them); the annotated route table with privileges and rate limits is in [`server/CLAUDE.md`](server/CLAUDE.md#api-routes-appconfigroutesphp).
-
-<p align="right">(<a href="#top">Back to top</a>)</p>
-
----
-
-<!-- DEPLOYMENT -->
-## Deployment
-
-CI/CD is handled by GitHub Actions (`.github/workflows/`). Pushing to `main` deploys automatically:
-
-| Workflow | Trigger | Action |
-|----------|---------|--------|
-| `ui-checks.yml` | Pull Request | Lint + test + build frontend |
-| `api-checks.yml` | Pull Request | PHPUnit backend tests |
-| `ui-deploy.yml` | Push to `main` | Deploy frontend via SSH/rsync to a VPS, served with PM2 |
-| `api-deploy.yml` | Push to `main` | Deploy backend via FTP to shared PHP hosting |
-| `sonarcloud.yml` | PRs + push to `main` | SonarCloud quality gate |
-
-- **Frontend** is built as a Next.js standalone app (`output: 'standalone'` in `next.config.js`) and managed by PM2 (`ecosystem.config.js`).
-- **Backend** is uploaded as plain PHP to shared hosting.
-- Production secrets live in the `server/.env` and `client/.env` files **on the target hosts** — they are not committed. Configure them using the tables in the [Configuration](#configuration) section before (or right after) the first deploy. Neither workflow injects them.
-
-### Maintenance Mode
-
-Both deploy workflows show a static "please wait" page (`client/public/maintenance.html`) to visitors for the duration of the file swap, so nobody hits a half-deployed app. The gate lives in nginx (`config/nginx.conf`), which is only manually synced to the VPS — re-copy it there after editing.
-
-Each workflow touches its own lock file on the frontend VPS right before the disruptive step (rsync + PM2 restart for `ui-deploy.yml`; the FTP mirror for `api-deploy.yml`, which reaches the VPS over SSH purely for this) and removes it (`if: always()`) once that step finishes, success or failure. nginx serves the maintenance page whenever **either** lock file exists, so a client-only, API-only, or simultaneous deploy all show the same screen until every job that started has finished. If a run is killed before its cleanup step, clear the stuck lock manually:
-
-```bash
-ssh vps "rm -f /var/www/astro.miksoft.pro/.deploy-lock/*.lock"
-```
-
-### Database Migrations
-
-Migrations are **not** run automatically by the deploy workflows. After deploying changes that add migrations, run them on the server:
-
-```bash
-cd server
-composer migration:run     # apply pending migrations
-composer migration:status  # verify what has been applied
-```
-
-### Payment Acquiring (Alfa-Bank)
-
-Stargazing events can charge a per-event ticket price (set in the event admin form; `0` = free, children under 18 are always free). Payments use Alfa-Bank **single-stage** REST internet acquiring: the API registers an order, the user is redirected to the bank's payment page, and the result is reconciled both by polling and by an asynchronous HMAC-signed callback.
-
-The integration is gateway-agnostic (`PaymentGatewayInterface` → `AlfaBankClient` → `PaymentLibrary` in `server/app/Libraries/`); adding another provider is a single new class.
-
-**1. Set the environment variables** in `server/.env` (see the [Backend Environment Variables](#backend-environment-variables) table for the full list). `payment.alfabank.environment` switches between two independent credential/URL sets — `test.*` (sandbox/UAT) and the bare `payment.alfabank.*` keys (production):
-
-```dotenv
-payment.gateway                = 'alfabank'
-payment.currency               = '810'        # RUB
-payment.sessionTimeoutSecs     = 1200          # how long an unpaid seat is held
-
-payment.alfabank.environment   = 'production'  # or 'test' to use the block below
-
-payment.alfabank.userName      = ''            # API login from the cabinet (ends with -api)
-payment.alfabank.password      = ''            # API password
-payment.alfabank.token         = ''            # preferred over userName/password when set (required for an "r-login" contract); NOT used by refund.do, which always needs userName/password
-payment.alfabank.gatewayUrl    = 'https://payment.alfabank.ru/payment/rest/'
-payment.alfabank.callbackToken = ''            # symmetric token (see step 3)
-
-# Sandbox/UAT — same keys, used only when payment.alfabank.environment = 'test'.
-# gatewayUrl is Alfa-Bank's public rbsuat sandbox host (test cards, no real
-# money); userName/password/token still come from the bank/integrator.
-payment.alfabank.test.userName      = ''
-payment.alfabank.test.password      = ''
-payment.alfabank.test.token         = ''
-payment.alfabank.test.gatewayUrl    = 'https://alfa.rbsuat.com/payment/rest/'
-payment.alfabank.test.callbackToken = ''
-
-# Must point to the public frontend URL — used to build the payment return URL:
-app.siteUrl                    = 'https://astro.miksoft.pro'
-```
-
-**2. Get the API credentials.** In the Alfa-Bank merchant cabinet (or from your acquiring integrator, if you're onboarded through one), create/obtain the API user (login usually ends with `-api`) and its password, and put them in `payment.alfabank.userName` / `payment.alfabank.password` (production) or the matching `payment.alfabank.test.*` keys (sandbox — same request, just ask for sandbox/UAT credentials).
-
-**3. Enable signed callbacks.** In the cabinet, set the callback signature type to **Symmetric**, generate the **callback token**, and copy it into `payment.alfabank.callbackToken` (or `payment.alfabank.test.callbackToken` for sandbox). The backend verifies every callback with HMAC-SHA256 and rejects unsigned/forged ones. Without a real, publicly reachable callback URL (e.g. testing from `localhost`), leave this blank — the app still reconciles payments by polling (`/events/payment/status`), just without the async webhook.
-
-**4. Register the callback URL** in the cabinet, pointing to the **backend (API)** host:
-
-```
-https://<your-api-host>/events/payment/callback
-```
-
-**5. Confirm the return URL.** After payment the bank redirects the user to the **frontend** page below (built automatically from `app.siteUrl`, with the order id appended by the bank). No cabinet setting is required, but the frontend host must be reachable:
-
-```
-https://<your-frontend-host>/stargazing/payment
-```
-
-**6. Apply migrations** (see [Database Migrations](#database-migrations)) and restart the API.
-
-> Reference: Alfa-Bank REST API — <https://ecom.alfabank.ru/assets/instructions/merchantManual/pages/index/rest.html>
-
-<p align="right">(<a href="#top">Back to top</a>)</p>
-
----
-
-<!-- CONTRIBUTING -->
 ## Contributing
 
-Contributions are what make the open-source community an incredible environment for learning, inspiration, and innovation. Your contributions are highly valued and greatly appreciated, whether it's reporting bugs, suggesting improvements, or creating new features.
-
-**To contribute:**
-
-1. Fork the project by clicking the "Fork" button at the top of this page.
-2. Clone your fork locally:
-   ```bash
-   git clone https://github.com/miksrv/astronomy-portal.git
-   ```
-3. Create a new feature branch:
-   ```bash
-   git checkout -b feature/AmazingFeature
-   ```
-4. Make your changes, then commit them:
-   ```bash
-   git commit -m "Add AmazingFeature"
-   ```
-5. Push your changes to your forked repository:
-   ```bash
-   git push origin feature/AmazingFeature
-   ```
-6. Open a pull request from your feature branch to the main repository.
-
-We encourage contributions of all kinds, whether big or small. Your efforts help improve the project for everyone!
-
-<p align="right">(<a href="#top">Back to top</a>)</p>
-
----
+Fork the repo, create a branch (`git checkout -b feature/my-feature`), commit, and open a pull request. Bug reports and ideas are welcome in [issues][issues-url].
 
 ## License
 
-<!-- LICENSE -->
-Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
-
-<p align="right">(<a href="#top">Back to top</a>)</p>
-
----
+Distributed under the MIT License. See [LICENSE](LICENSE).
 
 ## Contact
 
-Misha - [miksoft.pro](https://miksoft.pro)
-
-<p align="right">(<a href="#top">Back to top</a>)</p>
+Misha — [miksoft.pro](https://miksoft.pro)
 
 ---
 

@@ -1,0 +1,102 @@
+@use '../../../../styles/typography' as type
+
+.observatoryEvents
+    display: flex
+    flex-direction: column
+    min-width: 0
+    min-height: 0
+
+// The days, then "show more" at the end of the list. Next to the device cards the log only
+// takes the height the cards leave under the map, and scrolls inside it
+.list
+    flex: 1 1 auto
+    min-width: 0
+    min-height: 0
+    overflow-y: auto
+
+.head
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    justify-content: space-between
+    gap: var(--space-1) var(--space-3)
+    margin-bottom: var(--space-2)
+
+.skeleton
+    height: 200px
+
+.empty
+    +type.secondary
+    margin: 0
+
+// A day: its name, then the events of that day under a hairline
+.day
+    & + &
+        margin-top: var(--space-4)
+
+.dayTitle
+    +type.overline
+    margin: 0 0 var(--space-1)
+
+.events
+    display: grid
+    margin: 0
+    padding: 0
+    list-style: none
+
+.event
+    display: grid
+    grid-template-columns: 28px minmax(0, 1fr) auto
+    align-items: center
+    gap: var(--space-3)
+    min-height: 44px
+    padding: var(--space-2)
+    border-radius: var(--radius-md)
+
+    &:hover
+        background: var(--surface-2)
+
+    // The icon plate carries the tone: red alerts, green "all clear", periwinkle for what is on the move
+    &.alert .icon
+        background: var(--color-red-background)
+        color: var(--color-red)
+
+    &.ok .icon
+        background: var(--color-green-background)
+        color: var(--color-green)
+
+    &.info .icon
+        background: var(--color-main-background)
+        color: var(--color-main)
+
+.icon
+    display: grid
+    place-items: center
+    width: 28px
+    height: 28px
+    border-radius: var(--radius-md)
+    background: var(--surface-2)
+    color: var(--text-color-secondary)
+
+    svg
+        width: 16px
+        height: 16px
+        fill: currentColor
+
+.alert .text
+    color: var(--color-red)
+
+.text
+    +type.body
+    min-width: 0
+
+    small
+        +type.caption
+        display: block
+
+.time
+    +type.caption
+    font-variant-numeric: tabular-nums
+
+.more
+    margin-top: var(--space-3)

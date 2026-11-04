@@ -315,6 +315,11 @@ export const API = createApi({
             providesTags: (res, err, id) => [{ id, type: 'Objects' }],
             query: (id) => `objects/${id}`
         }),
+        /** The object form's "Найти в SIMBAD": a lookup only (objects.manage) */
+        objectsSimbadLookup: builder.query<ApiType.Objects.SimbadFacts, string>({
+            keepUnusedDataFor: 600,
+            query: (name) => `objects/simbad/${encodeURIComponent(name)}`
+        }),
         objectsPatch: builder.mutation<ApiType.Objects.Response | ApiType.ResError, Partial<ApiType.Objects.Request>>({
             invalidatesTags: (result, error, { name }) => [
                 { id: name, type: 'Objects' },
@@ -333,6 +338,14 @@ export const API = createApi({
                 method: 'POST',
                 url: 'objects'
             })
+        }),
+
+        /* Observatory controller (what the agent on the observatory host reports) */
+        observatoryGetStatus: builder.query<ApiType.Observatory.ResStatus, void>({
+            query: () => 'observatory/status'
+        }),
+        observatoryGetEvents: builder.query<ApiType.Observatory.ResEvents, number>({
+            query: (limit) => `observatory/events?limit=${limit}`
         }),
 
         /* Files controller */

@@ -7,7 +7,6 @@ use App\Libraries\LocaleLibrary;
 use App\Libraries\SessionLibrary;
 use App\Libraries\AstrometrySolver;
 use App\Libraries\PhotoUploadLibrary;
-use App\Models\CatalogModel;
 use App\Models\PhotosAstrometryModel;
 use App\Models\PhotosModel;
 use App\Models\PhotosCategoryModel;

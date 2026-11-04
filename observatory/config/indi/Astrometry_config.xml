@@ -1,0 +1,15 @@
+<INDIDriver>
+<newTextVector device='Astrometry' name='ACTIVE_DEVICES'>
+  <oneText name='ACTIVE_CCD'>
+      ZWO CCD ASI6200MM Pro
+  </oneText>
+</newTextVector>
+<newTextVector device='Astrometry' name='ASTROMETRY_SETTINGS'>
+  <oneText name='ASTROMETRY_SETTINGS_BINARY'>
+      /usr/bin/solve-field
+  </oneText>
+  <oneText name='ASTROMETRY_SETTINGS_OPTIONS'>
+      --no-verify --no-plots --resort --downsample 2 -O
+  </oneText>
+</newTextVector>
+</INDIDriver>

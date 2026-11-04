@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Head from 'next/head'
@@ -6,16 +6,54 @@ import { useTranslation } from 'next-i18next/pages'
 
 import { API, SITE_LINK, wrapper } from '@/api'
 import { AppLayout, BreadcrumbJsonLd, StarMap } from '@/components/common'
+import { getMountTelescope, StarMapTelescope } from '@/components/common/star-map/telescope'
 import { StarMapIntro } from '@/components/pages/starmap'
+import { formatDECShort, formatRAShort } from '@/utils/coordinates'
 import { createPageUrl, toJsonLd } from '@/utils/helpers'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
 import styles from './starmap.module.sass'
 
+/** The agent posts a snapshot every minute or so: ask at that pace */
+const OBSERVATORY_POLLING_MS = 60_000
+
 const CelestialPage: NextPage<object> = () => {
     const { t, i18n } = useTranslation()
 
     const { data } = API.useObjectsGetListQuery()
+
+    // Where the observatory's telescope points: a marker on the map while it is online and unparked
+    const { data: observatory } = API.useObservatoryGetStatusQuery(undefined, {
+        pollingInterval: OBSERVATORY_POLLING_MS,
+        skipPollingIfUnfocused: true
+    })
+    const online = !!observatory?.online
+    const mount = observatory?.snapshot?.mount
+    const fov = observatory?.snapshot?.camera?.fov
+    const telescopeLabel = t('pages.star-map.telescope', 'Телескоп обсерватории')
+
+    const telescope = useMemo((): StarMapTelescope | null => {
+        const pointing = online ? getMountTelescope(mount, fov) : null
+
+        return pointing
+            ? {
+                  ...pointing,
+                  label: telescopeLabel,
+                  detail: `${formatRAShort(pointing.ra)} ${formatDECShort(pointing.dec)}`
+              }
+            : null
+        // The marker follows the numbers, not the object each poll hands over
+    }, [
+        online,
+        mount?.parked,
+        mount?.raJ2000,
+        mount?.decJ2000,
+        mount?.target?.ra,
+        mount?.target?.dec,
+        fov?.width,
+        fov?.height,
+        telescopeLabel
+    ])
 
     // Mirrors the map's hide-UI (screenshot) mode so the floating intro card, which lives
     // outside the map element, hides together with the map's own overlays
@@ -86,6 +124,7 @@ const CelestialPage: NextPage<object> = () => {
                     {/* data.items is referentially stable between refetches (RTK Query), so no memo is needed */}
                     <StarMap
                         objects={data?.items}
+                        telescope={telescope}
                         interactive={true}
                         showSettings={true}
                         fitContainer={true}

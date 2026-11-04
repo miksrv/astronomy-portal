@@ -1,0 +1,21 @@
+@use '../../../styles/variables' as variables
+
+.content
+    margin: var(--space-3) var(--space-5)
+
+    p
+        margin: 0
+        color: var(--text-color-secondary)
+
+// Stay first, leave (the destructive one) last; full width on phones
+.footer
+    display: flex
+    justify-content: flex-end
+    gap: var(--space-2)
+    margin: var(--space-5) var(--space-5) var(--space-5)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column-reverse
+
+        & > *
+            width: 100%

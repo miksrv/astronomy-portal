@@ -26,10 +26,16 @@ PUT  /relay/set                     → Relay::set
 
 GET  /files/:path                   → Files::show
 
+
+POST /observatory/agent/status      → Observatory::agentStatus (observatory agent only: `Authorization: Bearer <observatory.agentToken>` via `observatoryagent`; body = status snapshot + optional `events[]`, up to 200 per push, the newest kept; ≤ 128 KB) [rate-limited: observatory_agent, 10/60s]
+GET  /observatory/status            → Observatory::status      (public; `{online, updatedAt, snapshot}` — online = last snapshot younger than 180 s; only the public sections, see `ObservatoryStatusModel::PUBLIC_SECTIONS`; cached 30 s)
+GET  /observatory/events            → Observatory::events      (public; recent public events, `?limit=` ≤ 50; cached 60 s)
+
 GET  /equipments                    → Equipment::list
 GET  /categories                    → Categories::list
 
 GET    /objects                     → Objects::list   (+ per object: `nights`/`firstNight`/`lastNight`, `photosCount`, `cover` = newest photo's file fields; cached 5 min, invalidated by object, photo and FITS writes)
+GET    /objects/simbad/:name        → Objects::simbad (objects.manage; the object form's "Найти в SIMBAD": a lookup only, nothing stored — the form saves the facts with the object as `simbad: {...}`; 404 not found, 503 SIMBAD unreachable; declared before GET /objects/:name)
 GET    /objects/:name               → Objects::show   (+ `distance`, `magnitude`, `nights`/`firstNight`/`lastNight`, `optics` = the FITS optical train most frames share: focal length, aperture, pixel size, sensor size, binning, plate scale)
 POST   /objects                     → Objects::create
 PATCH  /objects/:name               → Objects::update
@@ -140,7 +146,8 @@ All controllers extend `BaseApiController` (see API Responses below).
 | `Members.php` | Admin-only list of registered users and their event history |
 | `PushSubscriptions.php` | User-facing Web Push opt-in/opt-out (`GET /push/vapid-key`, `POST`/`DELETE /push/subscribe`) — no privilege check; `subscribe()` is fully public (rate-limited) so guests can opt in from the site-wide stargazing banner, `unsubscribe()` still requires `isAuth` |
 | `PushNotifications.php` | Admin push notification campaign CRUD; mirrors `Mailings.php` (audience targeting, test send via `WebPushLibrary`, bulk send via `PushNotificationDeliveriesModel`) — `push.manage` privilege |
-| `Objects.php` | CRUD for astronomical objects catalog (locale-aware titles/descriptions) |
+| `Objects.php` | CRUD for astronomical objects catalog (locale-aware titles/descriptions); `show()` adds the SIMBAD facts (`simbadId`, `type`, `majAxis`/`minAxis`, `aliases`); `create()`/`update()` store the SIMBAD facts the form looked up (`simbad` in the body); a new object without them is looked up on create (8 s, a failure never fails the create); `simbad()` is the form's lookup |
+| `Observatory.php` | Live observatory status (FEAT-30 phase 1): the agent's snapshot push, the public status and events |
 | `Photos.php` | CRUD for astrophoto archive; image upload via `PhotoUploadLibrary`; the plate solve of a photo (`astrometry()`, `solve()`) |
 | `Relay.php` | Observatory power relay control (list state, toggle light with cooldown guard) |
 | `Roles.php` | CRUD for roles (name + a set of `Permission` privileges); `permissions()` returns the fixed privilege catalog for the admin UI's checkbox list |
@@ -159,12 +166,12 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 |---|---|---|---|
 | `ApplicationBaseModel.php` | — | — | Base class; adds `prepareOutput()` for stripping `hiddenFields` |
 | `UsersModel.php` | `users` | yes | `UserEntity`; `roles` is a JSON array of `user_roles.id` values (see `RolesModel`) — a user can hold several roles; `session_token` powers logout revocation — see Authentication below |
-| `RolesModel.php` | `user_roles` | no | `RoleEntity`; `permissions` is a JSON array of `App\Enums\Permission` values; `getPermissionsForIds()` resolves a user's effective privileges (union across all their roles); `countUsersPerRole()` powers the "assigned to N users" delete warning (single query for all roles, not one per role); `idsExist()` validates role ids before they're persisted onto a user; `DEVELOPER_ROLE_ID` (= 1, "Разработчик") is the one hardcoded role — see "The reserved developer role" in the root README |
+| `RolesModel.php` | `user_roles` | no | `RoleEntity`; `permissions` is a JSON array of `App\Enums\Permission` values; `getPermissionsForIds()` resolves a user's effective privileges (union across all their roles); `countUsersPerRole()` powers the "assigned to N users" delete warning (single query for all roles, not one per role); `idsExist()` validates role ids before they're persisted onto a user; `DEVELOPER_ROLE_ID` (= 1, "Разработчик") is the one hardcoded role — see "The reserved developer role" in `docs/permissions.md` |
 | `EventsModel.php` | `events` | yes | `EventEntity`; bilingual fields (`title_en/ru`, `content_en/ru`) |
 | `EventsMediaModel.php` | `events_media` | yes | `EventMediaEntity`; photos **and** videos uploaded to a specific event, one chronological feed (`media_type` discriminator, `duration` for video); a video's poster frame reuses the `{file_name}_preview.jpg` convention |
 | `EventsMediaUploadsModel.php` | `events_media_uploads` | no | `EventMediaUploadEntity`; ephemeral bookkeeping for an in-progress chunked upload (never displayed) — `mediaFinalize()` marks it `completed` and removes the temp chunks, `mediaCancel()` deletes both; an abandoned session (no cancel) stays behind — see CLI Commands below |
 | `EventsUsersModel.php` | `events_users` | yes | Pivot: user bookings/check-ins for events |
-| `ObjectsModel.php` | `objects` | yes | `ObjectEntity`; PK is `catalog_name` (string, e.g. `M31`) |
+| `ObjectsModel.php` | `objects` | yes | `ObjectEntity`; PK is `catalog_name` (string, e.g. `M_31`); the SIMBAD columns (`simbad_id`, `object_type`, `maj_axis`, `min_axis`, `aliases`) are returned by `getObjectsWithCategories()` for one object only |
 | `ObjectCategoryModel.php` | `objects_categories` | no | Pivot: object ↔ category |
 | `ObjectFitsFilesModel.php` | `objects_fits_files` | yes | FITS file metadata per object; `NIGHT_EXPRESSION` names the observing night a frame belongs to (local noon → noon), `getNightsSummary()` counts nights per object, `getObjectOptics()` picks the optical train (focal length / pixel / sensor / scale) most of an object's frames share; indexed on (`object`, `date_obs`) |
 | `ObjectFitsFiltersModel.php` | `objects_fits_filters` | yes | Filter data extracted from FITS files |
@@ -176,6 +183,7 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 | `PhotosObjectModel.php` | `photos_objects` | no | Pivot: photo ↔ astronomical object; `getObjectCovers()` — the newest photo and the photo count per object, for the catalog |
 | `PhotosAstrometryModel.php` | `photos_astrometry` | no | `PhotoAstrometryEntity`; one row per photo (PK `photo_id`): the plate solve from nova.astrometry.net — `status` (`pending`/`solving`/`success`/`failed`) is the state `AstrometrySolver::step()` advances, `ra`/`dec`/`radius`/`pixscale`/`orientation`/`parity` the calibration, `wcs` the parsed TAN+SIP header (JSON, what `client/utils/wcs.ts` reads), `annotations` the service's catalogue objects (JSON), `solved_width`/`solved_height` the size of the `_large` file they are in pixels of; `enqueue()` is called by `Photos::upload()`/`Photos::solve()` |
 | `CategoryModel.php` | `categories` | no | Shared photo/object categories |
+| `ObservatoryStatusModel.php` | `observatory_status` (+ `observatory_events`) | no | Latest agent snapshot (one row, id 1) and the event log (pruned after 90 days); `publicView()` / `recentEvents()` decide what visitors see |
 | `ObservatoryEquipmentModel.php` | `observatory_equipment` | no | Equipment inventory (type, brand, model, specs) |
 | `ObservatorySettingsModel.php` | `observatory_settings` | no | Key-value store for observatory config |
 | `CommentsModel.php` | `comments` | yes | Comments/reviews on events and photos; `entity_type` ENUM: `event`, `photo` |
@@ -195,6 +203,8 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 
 Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 
+- `2026-11-04-100000_AddObjectsSimbad` — `objects.simbad_id`, `object_type` (SIMBAD's short code), `maj_axis`/`min_axis` (arcmin), `aliases` (JSON list), `simbad_checked_at`; filled by `php spark objects:simbad` and on `POST /objects` (FEAT-31, see `ObjectSimbadLibrary`).
+- `2026-11-04-110000_AddObservatoryStatus` — `observatory_status` (latest agent snapshot) and `observatory_events`.
 - `2026-11-02-100000_AddPhotosAstrometry` — `photos_astrometry`, the plate solve per photo (see `PhotosAstrometryModel`); `status` is a VARCHAR, not an ENUM, so the migration also runs on SQLite.
 - `2026-10-30-100000_ObjectsRedesign` — `objects.distance` (light years) / `objects.magnitude` (optional, editor-filled facts for the object page) and the (`object`, `date_obs`) index on `objects_fits_files` behind the per-night aggregations.
 
@@ -227,7 +237,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 - Instantiate in controller: `$this->session = new SessionLibrary();`
 - Check auth: `$this->session->isAuth` (bool)
 - Get current user: `$this->session->user` (returns `UserEntity | null`)
-- Check a privilege: `$this->session->can(Permission::X)` (bool) — resolved from the union of every role in `$this->session->user->roles`; no admin bypass, see "User Roles & Permissions" in the root `README.md`
+- Check a privilege: `$this->session->can(Permission::X)` (bool) — resolved from the union of every role in `$this->session->user->roles`; no admin bypass, see `docs/permissions.md`
 - **Token lifetime is intentionally long** (`auth.token.live`, currently 180 days) — logout does not shorten it. Instead, revocation is layered on top via `users.session_token`:
   - The JWT carries a `sid` claim = `users.session_token` at issuance time (`generateAuthToken($email, $sessionToken)`).
   - `validateAuthToken()` rejects the token if `sid` doesn't match the user's current `session_token` (or if it's `NULL`) — checked on every request, piggybacking on the user row `SessionLibrary` already loads (no extra query).
@@ -269,6 +279,8 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 | `ApiExceptionHandler` | Renders uncaught exceptions in the `{message, errors?}` envelope (`Config\Exceptions::handler()`) |
 | `WebPushLibrary` | Thin wrapper around `Minishlink\WebPush\WebPush` (VAPID keys from `Config\Push`); throws `WebPushExpiredSubscriptionException` on HTTP 404/410 |
 | `AstrometryClient` | nova.astrometry.net API (key from `Config\Astrometry` / `astrometry.apiKey`): login, image upload, submission → job → calibration/annotations, and `parseWcsHeader()` for the WCS FITS header; every failure is a `RuntimeException` |
+| `SimbadClient` | SIMBAD lookup (FEAT-31, mirrors in `Config\Simbad`, overridable in `.env`): the Sesame resolver (any name → SIMBAD main id, J2000 position, type, aliases) + SIMBAD TAP (size, V magnitude); `queryName()` turns our names into Sesame's (`Sh2_103` → `Sh 2-103`, `2023ixf` → `SN 2023ixf`), `alias()` keeps only the names people use; null when not found, `RuntimeException` when unreachable |
+| `ObjectSimbadLibrary` | Decides what of a SIMBAD answer an object gets: within `Simbad::MATCH_DEGREES` (2°) of our position → type, size, aliases, the magnitude when empty (not for nebulae: their V is a central star's), our coordinates kept; farther → nothing unless a person accepts it (then SIMBAD's coordinates too); moving bodies (categories 8/9/10/12) are never looked up |
 | `AstrometrySolver` | The plate solve as a state machine advanced one non-blocking step at a time (`step()`): `pending` → upload the `_large` file → `solving`; `solving` → ask for the job and its status → `success` (calibration + WCS + annotations stored) or `failed` (reason in `error`; a job older than 30 min times out). Driven by `Photos::solve()` from the editor's browser, or by `photos:solve` in a loop |
 
 ### Filters (`app/Filters/`)
@@ -276,6 +288,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 |---|---|
 | `PublicCacheFilter` | `Cache-Control: public, max-age=N, stale-while-revalidate=4N` on viewer-independent public GETs (catalogue, photos, categories, equipment, FITS lists, statistics, random comments, sitemap). Alias `publiccache`, applied per route as `['filter' => 'publiccache:<seconds>']`; only a 200 to a request without an `Authorization` header gets the header, with `Vary: Locale, Authorization` (the body depends on the `Locale` header). The default `no-store` is removed first — CI4's `setHeader()` appends to a multi-value header. |
 | `RateLimitFilter` | Per-IP token-bucket throttling for abuse-prone public routes. Registered as alias `ratelimit` in `Config/Filters.php`; applied per-route via `['filter' => 'ratelimit:<bucket>,<capacity>,<seconds>']` (see route table above for current buckets). Disabled when `ENVIRONMENT === 'testing'` since the `file` cache backend is shared across test cases. Uses CI4's built-in `Services::throttler()`. |
+| `ObservatoryAgentFilter` | Alias `observatoryagent`: only lets through `Authorization: Bearer <observatory.agentToken>` (constant-time compare; a token shorter than 32 characters or none refuses everything) — the observatory agent's endpoints |
 | `CorsFilter` | Legacy/unused — superseded by CI4's built-in `Cors` filter (`Config\Cors`); left in place as a removal marker only. |
 
 ### CLI Commands (`app/Commands/`)
@@ -283,6 +296,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 |---|---|---|
 | `system:send-email` | system | Drains the mailing queue (`mailing_emails`) and the transactional email outbox (`email_queue`), subject to `Config\MailingLimits` day/hour caps |
 | `system:send-push` | system | Drains the Web Push delivery queue (`push_notification_deliveries`), batch size 50, no rate-limit cap (push has no SMTP-style provider reputation limit) — deletes the `push_subscriptions` row on a 404/410 (`WebPushExpiredSubscriptionException`) |
+| `objects:simbad` | Observatory | Fills the objects from SIMBAD (`ObjectSimbadLibrary`): a report only, unless `--apply`; `--accept M_94,IC_405` takes the far ones (coordinates included) after a person checked them, `--skip NGC_6888` leaves out a name SIMBAD resolves to a neighbour, `--object NAME` one object, `--all` also the ones looked up before. Run once after the migration; new objects are filled on `POST /objects` |
 | `fits:recalculate` | Observatory | Recalculates FITS filter aggregates (no HTTP endpoint) |
 | `photos:thumbnails` | Observatory | Generates the square `_thumb` (160×160) preview for photos uploaded before 4.15.0 (`--force` regenerates all); new uploads get it from `PhotoUploadLibrary` |
 | `photos:solve` | Observatory | Plate-solves photos from the command line by looping `AstrometrySolver::step()` (about a minute each): `--limit N` (default 3) rows in progress, `--all` first queues every never-solved photo (the one-time backfill of the archive), `--photo ID` (re)solves one photo. Spark passes options as `--name value`; the command also accepts `--name=value`. Not a cron job — new uploads are solved from the editor's browser via `POST /photos/:id/astrometry` |

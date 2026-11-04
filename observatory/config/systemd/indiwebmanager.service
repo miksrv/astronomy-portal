@@ -1,0 +1,14 @@
+[Unit]
+Description=INDI Web Manager
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=idle
+User=mik
+ExecStart=/home/mik/.local/bin/indi-web -v
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

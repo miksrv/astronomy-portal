@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A DIY amateur observatory web application with remote monitoring, equipment control, weather data, astrophoto archive, stargazing events, and email mailings. The project is a monorepo with three subsystems: a Next.js frontend (`client/`), a CodeIgniter 4 PHP backend (`server/`), and Arduino firmware (`firmware/`).
+A DIY amateur observatory web application with remote monitoring, equipment control, weather data, astrophoto archive, stargazing events, and email mailings. The project is a monorepo with three subsystems: a Next.js frontend (`client/`), a CodeIgniter 4 PHP backend (`server/`), and the observatory PC setup (`observatory/`).
 
-**Current version:** 4.15.3 (see `CHANGELOG.md` for history)
+**Current version:** 4.16.0 (see `CHANGELOG.md` for history)
 
 **Feature specs:** `ROADMAP.md` lists planned features; each one with a spec is detailed in `features/`. A shipped feature's spec is deleted and the feature recorded in `CHANGELOG.md`.
 
@@ -18,7 +18,7 @@ Stargazing events are rare (~3 per year), so the product's primary "dead-time" c
 
 ### Maintenance rule: roles & permissions table
 
-There is no central permission/filter middleware — every backend controller checks `session->can(Permission::X)` inline (`App\Enums\Permission`, a fixed backed enum), and the frontend mirrors those checks via `hasPermission()`/`hasAnyPermission()` (`client/utils/permissions.ts`) to show/hide pages and UI (see "User Roles & Permissions" in `README.md`). Roles (`user_roles` table, admin-editable via `/admin/roles`) are just named bundles of privileges a user can be assigned any number of; there is no admin bypass. Whenever a change touches who can do what — a new privilege is introduced, a privilege check is added/removed/loosened/tightened on either the backend or the frontend, a seeded role's default privileges change — **update the "User Roles & Permissions" tables in `README.md` in the same change**. That section is the single source of truth for the access matrix; letting it drift from the code makes it actively misleading.
+There is no central permission/filter middleware — every backend controller checks `session->can(Permission::X)` inline (`App\Enums\Permission`, a fixed backed enum), and the frontend mirrors those checks via `hasPermission()`/`hasAnyPermission()` (`client/utils/permissions.ts`) to show/hide pages and UI (see `docs/permissions.md`). Roles (`user_roles` table, admin-editable via `/admin/roles`) are just named bundles of privileges a user can be assigned any number of; there is no admin bypass. Whenever a change touches who can do what — a new privilege is introduced, a privilege check is added/removed/loosened/tightened on either the backend or the frontend, a seeded role's default privileges change — **update the tables in `docs/permissions.md` in the same change**. That document is the single source of truth for the access matrix; letting it drift from the code makes it actively misleading.
 
 ## Development Commands
 
@@ -59,7 +59,7 @@ docker-compose up     # Start MariaDB at localhost:3308 (db: db, user: user, pas
 
 ## Architecture
 
-Detailed inventories live next to the code — read them instead of guessing:
+Detailed inventories live next to the code — read them instead of guessing (setup, env variables and deployment are in `docs/`):
 - **`client/CLAUDE.md`** — frontend conventions, API error handling, verification checklist.
 - **`client/DESIGN.md`** — design system (tokens, type roles, layout, patterns); read it before any UI change.
 - **`server/CLAUDE.md`** — full API route table, controllers, models, libraries, notable migrations, CLI commands, backend conventions.
@@ -102,9 +102,9 @@ Detailed inventories live next to the code — read them instead of guessing:
 
 **Session revocation:** The JWT lifetime is intentionally long (180 days) and unchanged by logout. Instead, `users.session_token` is embedded in every token as a `sid` claim and checked on every request; `POST /auth/logout` clears it, instantly invalidating every token issued to that user on any device — see "Authentication" in `server/CLAUDE.md` for the full mechanism.
 
-### Firmware (`firmware/`)
+### Observatory (`observatory/`)
 
-Arduino/embedded firmware for observatory hardware control (relay boards, sensors). Source in `firmware/main/`.
+Docs (English), anonymised INDI driver configs, indiweb/Ekos profiles, the KStars desktop container and the power scripts of the observatory PC `astrolab` — enough to rebuild it from scratch (`observatory/README.md`). Never commit credentials, public addresses or site coordinates there: use placeholders (`change-me`, `example.com`, `0.0`). Safety rules for anything that can move the roof or mount are in `observatory/docs/safety.md`. Planned: the Python agent `observatory/agent/` (FEAT-30).
 
 ### Deployment
 

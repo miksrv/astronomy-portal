@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
-import { CardTitle } from '@/components/ui'
+import { CardTitle, StatusBadge, StatusTone } from '@/components/ui'
 import {
     getWeatherMeter,
     getWeatherRange,
@@ -15,17 +15,30 @@ import {
     WeatherRange
 } from '@/utils/weather'
 
+import { LiveMeta } from '../live-meta'
+
 import styles from './styles.module.sass'
+
+/** The overall weather on the shared status badge: the same look as the equipment states */
+const RANGE_TONES: Record<WeatherRange, StatusTone> = {
+    good: 'positive',
+    warning: 'warning',
+    danger: 'danger'
+}
 
 interface WeatherCardProps {
     weather?: ApiModel.Weather
     loading?: boolean
     /** The weather request failed and there is nothing to show */
     error?: boolean
+    /** The station reported recently enough to be trusted */
+    online?: boolean
+    /** Whole minutes since the station's last report; `undefined` while unknown */
+    minutesAgo?: number
 }
 
 /** The weather at the observatory now: the temperature, the overall safety and every sensor against its limit */
-export const WeatherCard: React.FC<WeatherCardProps> = ({ weather, loading, error }) => {
+export const WeatherCard: React.FC<WeatherCardProps> = ({ weather, loading, error, online = false, minutesAgo }) => {
     const { t } = useTranslation()
 
     const state = getWeatherState(weather)
@@ -61,16 +74,22 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({ weather, loading, erro
                 <CardTitle icon={'Cloud'}>{t('components.pages.observatory.weather.title', 'Погода сейчас')}</CardTitle>
             }
             action={
-                <Link
-                    href={'/observatory/weather'}
-                    className={styles.more}
-                    title={t(
-                        'components.pages.observatory.weather.observatory-in-orenburg-weather',
-                        'Погода в Обсерватории Оренбурга'
-                    )}
-                >
-                    {t('components.pages.observatory.weather.read-more', 'Подробнее')}
-                </Link>
+                <span className={styles.actions}>
+                    <LiveMeta
+                        online={online}
+                        minutesAgo={minutesAgo}
+                    />
+                    <Link
+                        href={'/observatory/weather'}
+                        className={styles.more}
+                        title={t(
+                            'components.pages.observatory.weather.observatory-in-orenburg-weather',
+                            'Погода в Обсерватории Оренбурга'
+                        )}
+                    >
+                        {t('components.pages.observatory.weather.read-more', 'Подробнее')}
+                    </Link>
+                </span>
             }
         >
             {error && !weather && (
@@ -108,13 +127,13 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({ weather, loading, erro
                             </span>
                         </div>
                         {state && (
-                            <span className={cn(styles.state, styles[state])}>
-                                <span
-                                    className={styles.dot}
-                                    aria-hidden={'true'}
-                                />
+                            <StatusBadge
+                                tone={RANGE_TONES[state]}
+                                dot={true}
+                                className={styles.state}
+                            >
                                 {rangeLabels[state]}
-                            </span>
+                            </StatusBadge>
                         )}
                     </>
                 )}

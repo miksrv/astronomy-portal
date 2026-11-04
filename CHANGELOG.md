@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 4.16.0
+
+The observatory page shows the telescope live, and objects are filled from the SIMBAD catalog.
+
+### Minor Changes
+
+- Observatory: live status of the mount, cameras, focuser, filters and roof, with a sky map of where the telescope points
+- Observatory: a log of the night's events, grouped by day
+- Star map: the telescope and its camera field of view, updated live
+- Objects: type, angular size and other designations from SIMBAD, with a link to SIMBAD
+- Object editor: grouped fields, "Find in SIMBAD", coordinates in degrees or hours, a Markdown editor with preview
+- Editors: leaving a form with unsaved changes asks first
+
+### Patch Changes
+
+- Objects: corrected coordinates of M 94, NGC 1961, IC 405 and NGC 7640
+- Paging to the next object no longer shows the previous photo while the next one loads
+- New objects keep their categories
+
 ## 4.15.3
 
 - Star map: layers that are on now stand out as filled buttons, the same as on the photo page

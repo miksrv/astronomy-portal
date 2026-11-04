@@ -1,0 +1,202 @@
+<INDIDriver>
+<newSwitchVector device='Roll Roof' name='DEBUG'>
+  <oneSwitch name='ENABLE'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='DISABLE'>
+      On
+  </oneSwitch>
+</newSwitchVector>
+<newNumberVector device='Roll Roof' name='POLLING_PERIOD'>
+  <oneNumber name='PERIOD_MS'>
+      5000
+  </oneNumber>
+</newNumberVector>
+<newSwitchVector device='Roll Roof' name='CONNECTION_MODE'>
+  <oneSwitch name='CONNECTION_SERIAL'>
+      On
+  </oneSwitch>
+  <oneSwitch name='CONNECTION_TCP'>
+      Off
+  </oneSwitch>
+</newSwitchVector>
+<newTextVector device='Roll Roof' name='DEVICE_PORT'>
+  <oneText name='PORT'>
+      /dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_SERIAL-if00
+  </oneText>
+</newTextVector>
+<newSwitchVector device='Roll Roof' name='DEVICE_BAUD_RATE'>
+  <oneSwitch name='9600'>
+      On
+  </oneSwitch>
+  <oneSwitch name='19200'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='38400'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='57600'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='115200'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='230400'>
+      Off
+  </oneSwitch>
+</newSwitchVector>
+<newSwitchVector device='Roll Roof' name='DEVICE_AUTO_SEARCH'>
+  <oneSwitch name='INDI_ENABLED'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='INDI_DISABLED'>
+      On
+  </oneSwitch>
+</newSwitchVector>
+<newSwitchVector device='Roll Roof' name='DEBUG_LEVEL'>
+  <oneSwitch name='DBG_ERROR'>
+      On
+  </oneSwitch>
+  <oneSwitch name='DBG_WARNING'>
+      On
+  </oneSwitch>
+  <oneSwitch name='DBG_SESSION'>
+      On
+  </oneSwitch>
+  <oneSwitch name='DBG_DEBUG'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='DBG_EXTRA_1'>
+      Off
+  </oneSwitch>
+</newSwitchVector>
+<newSwitchVector device='Roll Roof' name='LOGGING_LEVEL'>
+  <oneSwitch name='LOG_ERROR'>
+      On
+  </oneSwitch>
+  <oneSwitch name='LOG_WARNING'>
+      On
+  </oneSwitch>
+  <oneSwitch name='LOG_SESSION'>
+      On
+  </oneSwitch>
+  <oneSwitch name='LOG_DEBUG'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='LOG_EXTRA_1'>
+      Off
+  </oneSwitch>
+</newSwitchVector>
+<newSwitchVector device='Roll Roof' name='LOG_OUTPUT'>
+  <oneSwitch name='CLIENT_DEBUG'>
+      On
+  </oneSwitch>
+  <oneSwitch name='FILE_DEBUG'>
+      Off
+  </oneSwitch>
+</newSwitchVector>
+<newTextVector device='Roll Roof' name='ACTIVE_DEVICES'>
+  <oneText name='ACTIVE_TELESCOPE'>
+      EQMod Mount
+  </oneText>
+  <oneText name='ACTIVE_INPUT'>
+      
+  </oneText>
+  <oneText name='ACTIVE_OUTPUT'>
+      
+  </oneText>
+</newTextVector>
+<newSwitchVector device='Roll Roof' name='MOUNT_POLICY'>
+  <oneSwitch name='MOUNT_IGNORED'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='MOUNT_LOCKS'>
+      On
+  </oneSwitch>
+</newSwitchVector>
+<newNumberVector device='Roll Roof' name='Presets'>
+  <oneNumber name='Preset 1'>
+      0
+  </oneNumber>
+  <oneNumber name='Preset 2'>
+      0
+  </oneNumber>
+  <oneNumber name='Preset 3'>
+      0
+  </oneNumber>
+</newNumberVector>
+<newNumberVector device='Roll Roof' name='DOME_PARAMS'>
+  <oneNumber name='AUTOSYNC_THRESHOLD'>
+      0.5
+  </oneNumber>
+</newNumberVector>
+<newNumberVector device='Roll Roof' name='DOME_MEASUREMENTS'>
+  <oneNumber name='DM_DOME_RADIUS'>
+      0
+  </oneNumber>
+  <oneNumber name='DM_SHUTTER_WIDTH'>
+      0
+  </oneNumber>
+  <oneNumber name='DM_NORTH_DISPLACEMENT'>
+      0
+  </oneNumber>
+  <oneNumber name='DM_EAST_DISPLACEMENT'>
+      0
+  </oneNumber>
+  <oneNumber name='DM_UP_DISPLACEMENT'>
+      0
+  </oneNumber>
+  <oneNumber name='DM_OTA_OFFSET'>
+      0
+  </oneNumber>
+</newNumberVector>
+<newSwitchVector device='Roll Roof' name='DOME_AUTOSYNC'>
+  <oneSwitch name='DOME_AUTOSYNC_ENABLE'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='DOME_AUTOSYNC_DISABLE'>
+      On
+  </oneSwitch>
+</newSwitchVector>
+<newSwitchVector device='Roll Roof' name='DM_OTA_SIDE'>
+  <oneSwitch name='DM_OTA_SIDE_EAST'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='DM_OTA_SIDE_WEST'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='DM_OTA_SIDE_MOUNT'>
+      On
+  </oneSwitch>
+  <oneSwitch name='DM_OTA_SIDE_HA'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='DM_OTA_SIDE_IGNORE'>
+      Off
+  </oneSwitch>
+</newSwitchVector>
+<newSwitchVector device='Roll Roof' name='USEJOYSTICK'>
+  <oneSwitch name='ENABLE'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='DISABLE'>
+      On
+  </oneSwitch>
+</newSwitchVector>
+<newTextVector device='Roll Roof' name='JOYSTICKSETTINGS'>
+  <oneText name='Dome Abort'>
+      BUTTON_3
+  </oneText>
+  <oneText name='Dome CW'>
+      BUTTON_1
+  </oneText>
+  <oneText name='Dome CCW'>
+      BUTTON_2
+  </oneText>
+</newTextVector>
+<newTextVector device='Roll Roof' name='SNOOP_JOYSTICK'>
+  <oneText name='SNOOP_JOYSTICK_DEVICE'>
+      Joystick
+  </oneText>
+</newTextVector>
+</INDIDriver>

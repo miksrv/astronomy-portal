@@ -1,0 +1,108 @@
+# KStars/Ekos settings that matter for the observatory (excerpt of kstarsrc).
+# File in the container: /config/.config/kstarsrc
+# (host: ~/kstars-desktop/config/.config/kstarsrc).
+#
+# A running KStars overwrites this file on exit, so do not edit it by hand:
+# stop the container, merge the sections below, start it again — or set the
+# same values in the KStars GUI. Window geometry, colours and view state are
+# left out on purpose.
+
+[Location]
+# Set the real site here or in Settings → Geographic. Kept generic in the repo.
+CityName=City
+CountryName=Country
+ProvinceName=Region
+Latitude=0.0
+Longitude=0.0
+Elevation=0
+TimeZone=0
+DST=--
+
+[Ekos]
+profile=AstroLab
+
+[Align]
+AlignBinning=4x4
+AlignFilter=Red
+AlignGain=150
+PAHDirection=West
+PAHMountSpeedIndex=9
+PAHRefreshAlgorithm=Plate Solve
+SolverCameraGain=120
+
+[StellarSolver]
+AstrometryIndexFolderList=/usr/share/astrometry,/config/.local/share/kstars/astrometry
+FocusOptionsProfile=3
+SolveOptionsProfile=0
+SolverMode=1
+
+[Capture]
+# Host SSD, bind-mounted into the container under the same path (compose.yaml).
+CaptureDirectory=/home/mik/fits
+CaptureTrainID=1
+EnforceGuideDeviation=true
+EnforceStartGuiderDrift=true
+GuideDeviation=3
+HFRDeviation=1.66
+# Folder/file name template: /<target>/<frame type>/<filter>/<target>_<type>_<filter>_<exposure>_<datetime>
+PlaceholderFormat=/%t/%T/%F/%t_%T_%F_%e_%D
+SaveHFRToFile=true
+fileSettingsUseDuration=true
+fileSettingsUseFilter=true
+fileSettingsUseTimestamp=true
+
+[DarkLibrary]
+shutterfulCCDs=ZWO CCD ASI6200MM Pro
+
+[Focus]
+DefaultFocusTemperatureSource=Weather Watcher
+FocusBinning=2x2
+FocusDonut=true
+FocusExposure=1
+FocusFilter=G
+FocusGain=100
+FocusMaxSingleStep=100
+FocusMaxTravel=15000
+FocusRefineCurveFit=true
+FocusSEPProfile=1-Focus-Default-Donut
+FocusTolerance=10
+FocusWalk=Fixed Steps
+focusAdvSteps=250
+focusCFZAperture=200
+focusCFZFNumber=5
+focusCFZWavelength=500
+focusOutlierRejection=0.2
+
+[Guide]
+DECProportionalGain=0.75
+GuideAutoStar=true
+GuideAutoStarEnabled=true
+GuideBinning=1x1
+GuideExposure=2.5
+GuideScopeType=1
+RAProportionalGain=0.75
+
+[Mount]
+ConfirmBelowHorizon=false
+
+[Observatory]
+# Must stay false: Ekos would close the roof without parking the mount first,
+# and the roof driver refuses that (see docs/safety.md).
+weatherAlertCloseShutter=false
+
+[Scheduler]
+CameraHeight=6388
+CameraWidth=9576
+CameraPixelHeight=3.76
+CameraPixelWidth=3.76
+TelescopeFocalLength=1000
+SchedulerCompleteSequences=false
+SchedulerUnparkMount=true
+SchedulerParkMount=true
+SchedulerUntilTerminated=true
+SchedulerPostStartupScript=/usr/share/kstars/taskqueue/collections/observatory_startup.json
+SchedulerPreShutdownScript=/usr/share/kstars/taskqueue/collections/observatory_shutdown.json
+# Still to be set in the GUI (Scheduler → Observatory startup / shutdown):
+#   startup script  /config/scripts/obs-power-on.sh
+#   shutdown script /config/scripts/ekos-shutdown.sh
+#   unpark/park dome, warm up the camera before shutdown

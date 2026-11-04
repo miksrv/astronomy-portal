@@ -8,6 +8,8 @@ import { useTranslation } from 'next-i18next/pages'
 import { ApiModel } from '@/api'
 import { PageAction, PageActions } from '@/components/common'
 import { Breadcrumbs, StatusBadge } from '@/components/ui'
+import { useLeavingPage } from '@/hooks/useLeavingPage'
+import { formatCatalogSize, getObjectTypeLabel } from '@/utils/catalog'
 import { formatDECShort, formatRAShort } from '@/utils/coordinates'
 import { formatCalendarDate } from '@/utils/dates'
 import { getObjectStatus } from '@/utils/objects'
@@ -53,6 +55,8 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
     actions
 }) => {
     const { t, i18n } = useTranslation()
+    // Going to another object: its photo is taken off the screen until the next page comes
+    const leaving = useLeavingPage('objects', object.name)
 
     const status = getObjectStatus({ ...object, photosCount })
     const hasFrames = status !== 'none'
@@ -86,6 +90,10 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
         t('components.pages.objects.object-hero.does-not-rise', 'не поднимается')
     )
 
+    // The type and the size are SIMBAD's; the magnitude the editor's or, when empty, SIMBAD's
+    const magnitude = object.magnitude
+    const catalogSize = formatCatalogSize(object.majAxis, object.minAxis, i18n.language)
+
     const facts: Array<{ label: string; value?: React.ReactNode }> = [
         {
             label: t('components.pages.objects.object-hero.right-ascension', 'Прямое восхождение'),
@@ -97,6 +105,14 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
         },
         { label: t('components.pages.objects.object-hero.constellation', 'Созвездие'), value: constellation },
         {
+            label: t('components.pages.objects.object-hero.type', 'Тип'),
+            value: getObjectTypeLabel(object.type, t)
+        },
+        {
+            label: t('components.pages.objects.object-hero.size', 'Угловой размер'),
+            value: catalogSize
+        },
+        {
             label: t('components.pages.objects.object-hero.distance', 'Расстояние'),
             value: object.distance ? (
                 <>
@@ -107,8 +123,7 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
         },
         {
             label: t('components.pages.objects.object-hero.magnitude', 'Звёздная величина'),
-            value:
-                typeof object.magnitude === 'number' ? `${object.magnitude.toLocaleString(i18n.language)}ᵐ` : undefined
+            value: typeof magnitude === 'number' ? `${magnitude.toLocaleString(i18n.language)}ᵐ` : undefined
         },
         {
             label: t('components.pages.objects.object-hero.tonight', 'Сегодня ночью'),
@@ -146,12 +161,14 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
                 {photo ? (
                     <Link
                         href={`/photos/${photo.id}`}
-                        className={styles.photo}
+                        className={cn(styles.photo, leaving && styles.leaving)}
                         title={t('components.pages.objects.object-hero.open-photo', 'Открыть снимок {{name}}', {
                             name
                         })}
                     >
+                        {/* Keyed by the photo: the previous object's picture must not linger while this one loads */}
                         <Image
+                            key={photo.id}
                             src={photo.large}
                             alt={t('components.pages.objects.object-hero.photo-alt', 'Фото {{name}}', {
                                 name: object.title || name
@@ -178,13 +195,14 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
                     </Link>
                 ) : surveyUrl ? (
                     <div
-                        className={cn(styles.photo, styles.survey)}
+                        className={cn(styles.photo, styles.survey, leaving && styles.leaving)}
                         title={t(
                             'components.pages.objects.object-hero.survey-credit',
                             'Digitized Sky Survey (STScI), через NASA SkyView'
                         )}
                     >
                         <Image
+                            key={surveyUrl}
                             src={surveyUrl}
                             alt={t('components.pages.objects.object-hero.survey-alt', '{{name}} в обзоре неба DSS2', {
                                 name: object.title || name

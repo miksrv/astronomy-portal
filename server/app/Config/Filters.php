@@ -12,6 +12,7 @@ use CodeIgniter\Filters\InvalidChars;
 use CodeIgniter\Filters\PageCache;
 use CodeIgniter\Filters\PerformanceMetrics;
 use CodeIgniter\Filters\SecureHeaders;
+use App\Filters\ObservatoryAgentFilter;
 use App\Filters\PublicCacheFilter;
 use App\Filters\RateLimitFilter;
 
@@ -38,6 +39,7 @@ class Filters extends BaseFilters
         'performance'   => PerformanceMetrics::class,
         'ratelimit'     => RateLimitFilter::class,
         'publiccache'   => PublicCacheFilter::class,
+        'observatoryagent' => ObservatoryAgentFilter::class,
     ];
 
     /**

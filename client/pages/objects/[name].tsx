@@ -9,6 +9,7 @@ import { API, ApiModel, HOST_IMG, SITE_LINK, wrapper } from '@/api'
 import { AppFooter, AppLayout, BreadcrumbJsonLd } from '@/components/common'
 import { VisibilityChart } from '@/components/common/visibility-chart'
 import {
+    ObjectCatalogFacts,
     ObjectDescription,
     ObjectFilters,
     ObjectHero,
@@ -82,6 +83,13 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
     )
 
     const name = formatObjectName(objectName)
+
+    // SIMBAD's other names, without the one the page is titled with ("M 33" on M 33)
+    const aliases = useMemo(() => {
+        const key = (value: string) => value.replace(/[\s_]+/g, '').toLowerCase()
+
+        return (objectData.aliases ?? []).filter((alias) => key(alias) !== key(objectName))
+    }, [objectData.aliases, objectName])
     const title = objectData.title || name
     const description = createSeoDescription(objectData.description)
     const pageUrl = createPageUrl(i18n.language, `objects/${objectName}`)
@@ -185,11 +193,11 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 : []),
             ...(hasFrames ? [{ id: 'log', label: t('pages.object.nav-log', 'Журнал наблюдений') }] : []),
             ...(photos.length ? [{ id: 'photos', label: t('pages.object.nav-photos', 'Снимки') }] : []),
-            ...(objectData.description || related.length
+            ...(objectData.description || related.length || aliases.length
                 ? [{ id: 'about', label: t('pages.object.nav-about', 'Об объекте') }]
                 : [])
         ],
-        [showChart, showFilters, hasFrames, photos.length, objectData.description, related.length, t]
+        [showChart, showFilters, hasFrames, photos.length, objectData.description, aliases.length, related.length, t]
     )
 
     return (
@@ -319,7 +327,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 </section>
             )}
 
-            {(!!objectData.description || !!related.length) && (
+            {(!!objectData.description || !!related.length || !!aliases.length) && (
                 <section
                     id={'about'}
                     className={styles.section}
@@ -327,6 +335,13 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 >
                     <h2 id={'about-title'}>{t('pages.object.about-title', 'Об объекте')}</h2>
                     {objectData.description && <ObjectDescription text={objectData.description} />}
+
+                    {!!aliases.length && (
+                        <ObjectCatalogFacts
+                            aliases={aliases}
+                            simbadId={objectData.simbadId}
+                        />
+                    )}
 
                     {!!related.length && firstCategory && (
                         <>
@@ -352,7 +367,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<ObjectItemPageProps>> => {
-            const { translations, locale } = await initSSRLocale(store, context, ['translation', 'objects'])
+            const { translations, locale } = await initSSRLocale(store, context, ['translation', 'objects', 'starmap'])
             const objectName = context.params?.name
 
             if (typeof objectName !== 'string') {

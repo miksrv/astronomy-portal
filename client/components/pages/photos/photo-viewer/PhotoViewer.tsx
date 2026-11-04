@@ -4,10 +4,10 @@ import { Button, cn, Icon } from 'simple-react-ui-kit'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
+import { useLeavingPage } from '@/hooks/useLeavingPage'
 import { formatCalendarDate } from '@/utils/dates'
 import { FieldOfView, formatAngle, pickScaleBar } from '@/utils/optics'
 
@@ -70,29 +70,8 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     const [showAnnotations, setShowAnnotations] = useState(true)
     const [showGrid, setShowGrid] = useState(true)
     const [pictureWidth, setPictureWidth] = useState(0)
-    // Going to another photo: its page data comes from the server first; the old picture is
-    // taken off the screen meanwhile, not left there to be mistaken for the next one
-    const [navigating, setNavigating] = useState(false)
-    const router = useRouter()
-
-    useEffect(() => {
-        const handleStart = (url: string, { shallow }: { shallow: boolean }) => {
-            // With the locale prefix, if any: `/en/photos/:id`
-            const id = /\/photos\/([^/?#]+)/.exec(url)?.[1]
-            setNavigating(!shallow && !!id && id !== current.id)
-        }
-        const handleEnd = () => setNavigating(false)
-
-        router.events.on('routeChangeStart', handleStart)
-        router.events.on('routeChangeComplete', handleEnd)
-        router.events.on('routeChangeError', handleEnd)
-
-        return () => {
-            router.events.off('routeChangeStart', handleStart)
-            router.events.off('routeChangeComplete', handleEnd)
-            router.events.off('routeChangeError', handleEnd)
-        }
-    }, [router.events, current.id])
+    // Going to another photo: the old picture is taken off the screen until the next one comes
+    const navigating = useLeavingPage('photos', current.id)
 
     const compareWith = versions.find(({ id }) => id === compareId)
     // Before/after reads best against the previous processing; the newest one if this is the first

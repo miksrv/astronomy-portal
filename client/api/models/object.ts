@@ -22,7 +22,7 @@ export interface Object {
     dec?: number
     /** Distance in light years, filled in by an editor */
     distance?: number | null
-    /** Apparent visual magnitude, filled in by an editor */
+    /** Apparent visual magnitude: the editor's, or SIMBAD's when the editor left it empty */
     magnitude?: number | null
     /** Observing nights with at least one FITS frame (a night runs from local noon to noon) */
     nights?: number
@@ -38,4 +38,14 @@ export interface Object {
     updated?: ApiType.DateTime
     statistic?: ApiModel.Statistic
     filters?: ApiModel.Filters
+    /**
+     * What SIMBAD knows (`GET /objects/:name` only; null until the object was looked up): its main
+     * identifier, the type as SIMBAD's short code (`G`, `GlC`, `HII`…), the size in arcminutes and
+     * the other names ("NGC 598", "Triangulum Galaxy")
+     */
+    simbadId?: string | null
+    type?: string | null
+    majAxis?: number | null
+    minAxis?: number | null
+    aliases?: string[]
 }

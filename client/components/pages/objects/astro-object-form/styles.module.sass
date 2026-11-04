@@ -1,36 +1,188 @@
 @use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
 
-// Fields on the left, the position on the sky on the right (stacked on phones)
-.sections
+// Four groups one under the other, separated by hairlines (DESIGN.md → Forms)
+.form
+    display: flex
+    flex-direction: column
+    gap: var(--space-6)
+
+.group
+    min-width: 0
+    margin: 0
+    padding: 0
+    border: 0
+
+    & + .group
+        padding-top: var(--space-6)
+        border-top: 1px solid var(--border)
+
+.legend
+    +type.titleBlock
+    // A floated legend leaves the fieldset's border alone and takes part in the layout
+    float: left
+    display: flex
+    align-items: baseline
+    gap: var(--space-2)
+    width: 100%
+    margin: 0 0 var(--space-4)
+    padding: 0
+
+    & + *
+        clear: both
+
+.optional
+    +type.caption
+    font-weight: var(--font-weight-normal)
+
+// Two columns of fields on wide screens, one on phones
+.grid
     display: grid
     grid-template-columns: repeat(2, minmax(0, 1fr))
     gap: var(--space-4)
-    align-items: stretch
-    margin-bottom: var(--space-4)
+    align-items: start
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        grid-template-columns: 1fr
+        grid-template-columns: minmax(0, 1fr)
 
-    .inputSection
-        display: flex
-        flex-direction: column
-        gap: var(--space-4)
+// The name and "Найти в SIMBAD" beside it, at the height of the field
+.nameRow
+    display: flex
+    align-items: flex-end
+    gap: var(--space-2)
+
+    > :first-child
+        flex: 1
         min-width: 0
 
-    .mapSection
-        min-height: 280px
-        border-radius: var(--radius-lg)
-        overflow: hidden
+.simbadButton
+    flex-shrink: 0
+
+.stack
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+.fullRow
+    grid-column: 1 / -1
+
+.field
+    display: flex
+    flex-direction: column
+    min-width: 0
 
 .formElement
     margin: 0
+
+.hint
+    +type.caption
+    margin: var(--space-1) 0 0
+    font-variant-numeric: tabular-nums
+
+// What SIMBAD knows of the object, under its names (a failed lookup's warning above it)
+.simbadPanel
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+
+.simbadCard
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+    padding: var(--space-3)
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
+    transition: opacity var(--duration-fast, 0.15s)
+
+    p
+        margin: 0
+
+.simbadLoading
+    opacity: 0.6
+
+.simbadTitle
+    display: flex
+    flex-wrap: wrap
+    align-items: baseline
+    gap: var(--space-1) var(--space-3)
+    font-weight: var(--font-weight-semibold)
+
+    a
+        color: var(--color-main)
+
+        &:hover
+            color: var(--color-main-hover)
+
+    span
+        +type.secondary
+
+.simbadAliases
+    +type.secondary
+
+.simbadFilled
+    +type.secondary
+    color: var(--color-green)
+
+.simbadOffset
+    +type.secondary
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: var(--space-2) var(--space-3)
+    color: var(--text-color-primary)
+
+.simbadNote
+    +type.caption
+    margin: 0
+
+// The coordinates in a row, the map that checks them under it, the whole width
+.position
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+// A fixed window into the map. Celestial sizes its canvas by the width (taller than the window
+// here); the map's own box is the window — it crops the canvas around the centre, where the
+// object is, and keeps the zoom buttons, placed in its corner, inside
+.map
+    position: relative
+    border-radius: var(--radius-lg)
+    overflow: hidden
+    background: var(--surface-2)
+
+.mapCanvas
+    display: flex
+    align-items: center
+    height: 320px !important
+    min-height: 0
+    overflow: hidden
+
+    > :global(#celestial-map)
+        flex: none
+        width: 100%
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        height: 260px !important
+
+.mapEmpty
+    +type.caption
+    position: absolute
+    left: 50%
+    bottom: var(--space-3)
+    transform: translateX(-50%)
+    margin: 0
+    padding: 4px 8px
+    border-radius: var(--radius-sm)
+    background: var(--overlay-pill-background)
+    color: var(--overlay-pill-color)
+    white-space: nowrap
+    pointer-events: none
 
 // Actions: cancel first, primary last, right-aligned
 .footer
     display: flex
     justify-content: flex-end
     gap: var(--space-2)
-    margin-top: var(--space-4)
     padding-top: var(--space-4)
     border-top: 1px solid var(--border)
 
@@ -39,3 +191,9 @@
 
         & > *
             width: 100%
+
+// The edited object is loading: the form's place is kept
+.formSkeleton
+    width: 100%
+    height: 960px
+    border-radius: var(--radius-xl)

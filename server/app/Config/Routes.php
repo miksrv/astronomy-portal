@@ -52,6 +52,14 @@ $routes->group('relay', static function ($routes) {
     $routes->options('(:any)', static function () {});
 });
 
+/** Observatory Controller (live status pushed by the observatory agent, FEAT-30) **/
+$routes->group('observatory', static function ($routes) {
+    $routes->post('agent/status', 'Observatory::agentStatus', ['filter' => ['ratelimit:observatory_agent,10,60', 'observatoryagent']]);
+    $routes->get('status', 'Observatory::status', ['filter' => 'publiccache:30']);
+    $routes->get('events', 'Observatory::events', ['filter' => 'publiccache:60']);
+    $routes->options('(:any)', static function () {});
+});
+
 /** Files Controller **/
 $routes->group('files', static function ($routes) {
     $routes->get('(:any)', 'Files::show/$1', ['filter' => 'publiccache:300']);
@@ -69,6 +77,8 @@ $routes->options('categories', static function () {});
 /** Objects Controller **/
 $routes->group('objects', static function ($routes) {
     $routes->get('/', 'Objects::list', ['filter' => 'publiccache:300']);
+    // Declared before (:any); a lookup for the object form, objects.manage only
+    $routes->get('simbad/(:any)', 'Objects::simbad/$1');
     $routes->get('(:any)', 'Objects::show/$1', ['filter' => 'publiccache:300']);
     $routes->post('/', 'Objects::create');
     $routes->patch('(:any)', 'Objects::update/$1');

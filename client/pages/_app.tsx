@@ -7,6 +7,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Script from 'next/script'
 import { appWithTranslation, useTranslation } from 'next-i18next/pages'
+import { setupListeners } from '@reduxjs/toolkit/query'
 
 import { SITE_LINK, wrapper } from '@/api'
 import { useAuthSession } from '@/api/useAuthSession'
@@ -66,6 +67,11 @@ const App = ({ Component, pageProps }: AppProps) => {
     useEffect(() => {
         dayjs.locale(i18n.language ?? i18Config.i18n.defaultLocale)
     }, [i18n.language])
+
+    // Tells RTK Query when the tab is hidden or the network drops: without it the `focused` flag
+    // keeps the value it had when the store was created, so `skipPollingIfUnfocused` polls a
+    // hidden tab and never polls one that was opened in the background
+    useEffect(() => setupListeners(store.dispatch), [store])
 
     return (
         <>

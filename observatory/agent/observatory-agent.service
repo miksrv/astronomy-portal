@@ -1,0 +1,22 @@
+[Unit]
+Description=Observatory agent: reports the observatory status to the portal
+Wants=network-online.target
+After=network-online.target indiwebmanager.service docker.service
+
+[Service]
+Type=simple
+User=mik
+# docker exec for the Ekos DBus query needs the docker group
+SupplementaryGroups=docker
+WorkingDirectory=/opt/observatory-agent
+ExecStart=/usr/bin/python3 -m observatory_agent --config /etc/observatory-agent/config.toml
+Restart=always
+RestartSec=10
+# Read-only service: no writes outside its own state
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

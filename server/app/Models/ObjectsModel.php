@@ -33,6 +33,12 @@ class ObjectsModel extends ApplicationBaseModel
         'dec',
         'distance',
         'magnitude',
+        'simbad_id',
+        'object_type',
+        'maj_axis',
+        'min_axis',
+        'aliases',
+        'simbad_checked_at',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -101,7 +107,7 @@ class ObjectsModel extends ApplicationBaseModel
         helper('locale');
 
         $objectsQuery = $this->select('catalog_name, title_en, title_ru, image_file, ra, dec' . (
-            $object !== null ? ', distance, magnitude, description_en, description_ru, fits_cloud_link' : '')
+            $object !== null ? ', distance, magnitude, description_en, description_ru, fits_cloud_link, simbad_id, object_type, maj_axis, min_axis, aliases' : '')
         );
 
         if ($object !== null) {
@@ -130,6 +136,13 @@ class ObjectsModel extends ApplicationBaseModel
             if ($object !== null) {
                 $objectItem->description   = getLocalizedString($locale, $objectItem->description_en, $objectItem->description_ru);
                 $objectItem->fitsCloudLink = $objectItem->fits_cloud_link;
+
+                // What SIMBAD knows (FEAT-31), null until `objects:simbad` or the create looked it up
+                $objectItem->simbadId = $objectItem->simbad_id;
+                $objectItem->type     = $objectItem->object_type;
+                $objectItem->majAxis  = $objectItem->maj_axis;
+                $objectItem->minAxis  = $objectItem->min_axis;
+                $objectItem->aliases  = $objectItem->aliases ? (json_decode($objectItem->aliases, true) ?: []) : [];
             }
 
             if (!empty($objectItem->image_file) && file_exists(UPLOAD_STAR_MAPS . $objectItem->image_file)) {
@@ -145,7 +158,8 @@ class ObjectsModel extends ApplicationBaseModel
             unset(
                 $objectItem->catalog_name, $objectItem->title_en, $objectItem->title_ru,
                 $objectItem->description_en, $objectItem->description_ru,
-                $objectItem->image_file, $objectItem->fits_cloud_link
+                $objectItem->image_file, $objectItem->fits_cloud_link,
+                $objectItem->simbad_id, $objectItem->object_type, $objectItem->maj_axis, $objectItem->min_axis
             );
         }
 

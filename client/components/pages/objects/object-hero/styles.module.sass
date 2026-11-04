@@ -75,6 +75,12 @@
     &:hover img
         transform: none
 
+// The page is on its way to another object: this photo and its pills are gone until the next
+// one comes, the empty frame stays
+.leaving > *,
+.leaving::after
+    visibility: hidden
+
 .pill
     +type.caption
     position: absolute

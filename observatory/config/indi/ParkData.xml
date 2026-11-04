@@ -1,0 +1,20 @@
+<parkdata>
+    <device name="EQMod Mount">
+        <parkstatus>
+true
+        </parkstatus>
+        <parkposition>
+            <axis1position>
+6895429.000000
+            </axis1position>
+            <axis2position>
+13761607.000000
+            </axis2position>
+        </parkposition>
+    </device>
+    <device name="Roll Roof">
+        <parkstatus>
+true
+        </parkstatus>
+    </device>
+</parkdata>

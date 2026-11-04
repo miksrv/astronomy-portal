@@ -43,6 +43,13 @@ final class AuthGuardTest extends CIUnitTestCase
 
     // --- Photos endpoints ---
 
+    public function testSimbadLookupWithoutTokenReturns401(): void
+    {
+        $result = $this->get('objects/simbad/M_51');
+
+        $result->assertStatus(401);
+    }
+
     public function testPostPhotosWithoutTokenReturns401(): void
     {
         $result = $this->post('photos', []);
@@ -231,5 +238,20 @@ final class AuthGuardTest extends CIUnitTestCase
         $result->assertStatus(401);
         $json = json_decode($result->getJSON(), true);
         $this->assertArrayHasKey('message', $json);
+    }
+
+    // --- Observatory agent ---
+
+    public function testAgentStatusWithoutTokenReturns401(): void
+    {
+        $result = $this->post('observatory/agent/status', []);
+        $result->assertStatus(401);
+    }
+
+    public function testAgentStatusWithWrongTokenReturns401(): void
+    {
+        $result = $this->withHeaders(['Authorization' => 'Bearer not-the-agent-token-not-the-agent-token'])
+            ->post('observatory/agent/status', []);
+        $result->assertStatus(401);
     }
 }

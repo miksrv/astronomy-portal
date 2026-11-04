@@ -1,0 +1,79 @@
+@use '../../../../../styles/typography' as type
+
+.skyMap
+    min-width: 0
+    margin: 0
+
+.map
+    position: relative
+    aspect-ratio: 1
+    overflow: hidden
+    border-radius: var(--radius-lg)
+    background: var(--body-background)
+    box-shadow: inset 0 0 0 1px var(--border)
+
+    // The same sky, seen through a veil: there is nothing to point at
+    &.muted canvas
+        opacity: 0.45
+
+    // Drag to turn the sky, wheel to zoom (mouse only, see SkyMap)
+    &.draggable canvas
+        cursor: grab
+
+        &:active
+            cursor: grabbing
+
+// Celestial sets the size of its canvas itself; the box only reserves the room and crops it
+.canvas
+    width: 100%
+    height: 100%
+
+.note
+    +type.secondary
+    position: absolute
+    left: 50%
+    bottom: var(--space-3)
+    max-width: calc(100% - var(--space-6))
+    margin: 0
+    padding: var(--space-1) var(--space-3)
+    border-radius: var(--radius-sm)
+    background: var(--overlay-pill-background)
+    color: var(--overlay-pill-color)
+    text-align: center
+    transform: translateX(-50%)
+
+.legend
+    +type.caption
+    display: flex
+    flex-wrap: wrap
+    // Spread across the map's width, one line
+    justify-content: space-between
+    gap: var(--space-1) var(--space-4)
+    margin-top: var(--space-2)
+
+    span
+        display: inline-flex
+        align-items: center
+        gap: var(--space-2)
+
+    i
+        display: inline-block
+        flex: none
+
+.keyPoint
+    width: 10px
+    height: 10px
+    border: 1.5px solid #ffc15a
+    border-radius: 50%
+
+.keyFov
+    width: 14px
+    height: 10px
+    border: 1.5px solid #5ec8f2
+    background: rgba(94, 200, 242, 0.1)
+
+.keyTarget
+    width: 10px
+    height: 10px
+    border: 1.5px dashed rgba(255, 233, 190, 0.7)
+    border-radius: 50%

@@ -14,8 +14,8 @@ export const WEATHER_LIMITS: Record<WeatherKey, { min: number; max: number; scal
     clouds: { min: 0, max: 50, scale: [0, 100] },
     windSpeed: { min: 0, max: 10, scale: [0, 15] },
     windGust: { min: 0, max: 8, scale: [0, 15] },
-    // Any rain is too much: 0 is good (the `=== 0` shortcut), anything above the limit is critical
-    precipitation: { min: 0, max: 0.1, scale: [0, 5] }
+    // Any rain is too much: 0 is good (the `=== 0` shortcut), any amount above it is critical
+    precipitation: { min: 0, max: 0, scale: [0, 5] }
 }
 
 export const WEATHER_KEYS = Object.keys(WEATHER_LIMITS) as WeatherKey[]
