@@ -4,6 +4,8 @@ import { POINT_RADIUS, stylePoint, styleText } from './constants'
 import { drawHorizonOverlay } from './horizonOverlay'
 import { HorizonView } from './horizonView'
 import { drawMeteorRadiants, MeteorShower } from './meteorShowers'
+import { StarMapTelescope } from './telescope'
+import { drawTelescope } from './telescopeLayer'
 import { HitResult, StarMapSettings } from './types'
 import { useCompassLabels } from './useCompassLabels'
 
@@ -15,6 +17,8 @@ export interface UseCustomLayersOptions {
     /** Horizon mode: the direction the visitor is looking (see useHorizonNavigation) */
     viewRef: RefObject<HorizonView>
     showersRef: RefObject<MeteorShower[] | null>
+    /** Where the observatory's telescope points, if it is shown on the map */
+    telescopeRef: RefObject<StarMapTelescope | null | undefined>
     /** The moment the map is currently computed for (useCelestialDisplay) */
     resolveDate: () => Date
     language?: string
@@ -32,6 +36,7 @@ export const useCustomLayers = ({
     settingsRef,
     viewRef,
     showersRef,
+    telescopeRef,
     resolveDate,
     language
 }: UseCustomLayersOptions): void => {
@@ -68,6 +73,10 @@ export const useCustomLayers = ({
                 })
             }
 
+            if (telescopeRef.current) {
+                drawTelescope(telescopeRef.current)
+            }
+
             if (showSettings && currentSettings.viewMode === 'horizon') {
                 drawHorizonOverlay({
                     geopos: currentSettings.geopos,
@@ -77,7 +86,7 @@ export const useCustomLayers = ({
                 })
             }
         },
-        [showSettings, showersRef, viewRef, resolveDate, language, compassLabels]
+        [showSettings, showersRef, telescopeRef, viewRef, resolveDate, language, compassLabels]
     )
 
     // Drawn from Celestial's end-of-redraw callback (addCallback), NOT from the layer's

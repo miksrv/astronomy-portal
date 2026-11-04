@@ -9,6 +9,7 @@ import { API } from '@/api'
 import { FitViewIcon, ZoomInIcon, ZoomOutIcon } from '@/components/icons'
 import { createMediumPhotoUrl } from '@/utils/photos'
 
+import { readZoomFactor, withoutAnimations } from './celestialApi'
 import { POPUP_ARROW_SIZE, POPUP_HEIGHT, POPUP_WIDTH } from './constants'
 import { StarMapProps } from './StarMap'
 import StarMapGeoNudge from './StarMapGeoNudge'
@@ -42,12 +43,18 @@ const StarMapRender: React.FC<StarMapProps> = ({
     config,
     showSettings,
     fitContainer,
+    telescope,
+    center,
+    viewControls,
     onUiHiddenChange
 }) => {
     const { t, i18n } = useTranslation()
     const bodyLabels = useBodyLabels()
 
     const ref = useRef<HTMLDivElement>(null)
+
+    // Read by the end-of-redraw callback, so a new pointing needs a redraw, not a rebuild
+    const telescopeRef = useRef(telescope)
 
     const {
         settings,
@@ -108,6 +115,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
         containerRef: ref,
         objects,
         zoom,
+        center,
         config,
         language: i18n?.language,
         showSettings,
@@ -151,9 +159,22 @@ const StarMapRender: React.FC<StarMapProps> = ({
         settingsRef,
         viewRef,
         showersRef,
+        telescopeRef,
         resolveDate,
         language: i18n?.language
     })
+
+    useEffect(() => {
+        telescopeRef.current = telescope
+
+        if (initializedRef.current) {
+            try {
+                Celestial.redraw()
+            } catch (error) {
+                console.warn(error)
+            }
+        }
+    }, [telescope, initializedRef])
 
     const { linkCopied, manualLinkUrl, closeManualLink, handleCopyLink } = usePermalinkSync({
         showSettings,
@@ -176,6 +197,28 @@ const StarMapRender: React.FC<StarMapProps> = ({
     })
 
     const isHorizon = settings.viewMode === 'horizon'
+
+    // Back to where the telescope points, at the map's own zoom (the observatory's map, after
+    // the visitor has dragged or zoomed it)
+    const centerOnTelescope = () => {
+        const current = telescopeRef.current
+
+        if (!current || !initializedRef.current) {
+            return
+        }
+
+        // One step without transitions: an animated rotate would finish after the zoom reset
+        // and bring the old zoom back
+        withoutAnimations(() => {
+            Celestial.rotate({ center: [current.ra, current.dec, 0] })
+
+            const zoomFactor = readZoomFactor()
+
+            if (zoomFactor != null && Math.abs(zoomFactor - 1) > 0.001) {
+                Celestial.zoomBy(1 / zoomFactor)
+            }
+        })
+    }
 
     const { selectSearchItem } = useCanvasInteraction({
         containerRef: ref,
@@ -255,6 +298,48 @@ const StarMapRender: React.FC<StarMapProps> = ({
                 !showSettings && className
             )}
         >
+            {!showSettings && viewControls && (
+                // The observatory's map: zoom and "back to the telescope", nothing else
+                <div className={styles.mapRail}>
+                    <div
+                        className={styles.viewControls}
+                        role={'group'}
+                    >
+                        <Button
+                            size={'small'}
+                            mode={'secondary'}
+                            title={viewControls.zoomIn}
+                            aria-label={viewControls.zoomIn}
+                            className={styles.railButton}
+                            onClick={zoomIn}
+                        >
+                            <ZoomInIcon />
+                        </Button>
+                        <Button
+                            size={'small'}
+                            mode={'secondary'}
+                            title={viewControls.zoomOut}
+                            aria-label={viewControls.zoomOut}
+                            className={styles.railButton}
+                            onClick={zoomOut}
+                        >
+                            <ZoomOutIcon />
+                        </Button>
+                        {viewControls.toTelescope && telescope && (
+                            <Button
+                                icon={'Position'}
+                                size={'small'}
+                                mode={'secondary'}
+                                title={viewControls.toTelescope}
+                                aria-label={viewControls.toTelescope}
+                                className={styles.railButton}
+                                onClick={centerOnTelescope}
+                            />
+                        )}
+                    </div>
+                </div>
+            )}
+
             {showSettings && (
                 // One rail for every map action, on every screen: a single vertical
                 // column in the top-left corner (view controls, then the panel buttons).

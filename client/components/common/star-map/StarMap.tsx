@@ -5,6 +5,7 @@ import { PartialDeep } from 'type-fest'
 import { ApiModel } from '@/api'
 import { customConfig } from '@/components/common/star-map/config'
 
+import { StarMapTelescope } from './telescope'
 import { useCelestialScripts } from './useCelestialScripts'
 
 import styles from './styles.module.sass'
@@ -13,13 +14,33 @@ export type StarMapObject = Pick<ApiModel.Object, 'name' | 'ra' | 'dec'>
 
 type CustomConfigType = typeof customConfig
 
+export interface StarMapViewControls {
+    zoomIn: string
+    zoomOut: string
+    /** Center on the telescope again and reset the zoom */
+    toTelescope?: string
+}
+
 export interface StarMapProps {
     className?: string
     interactive?: boolean
     config?: PartialDeep<CustomConfigType>
     objects?: StarMapObject[]
     goto?: [number, number]
+    /**
+     * Where the observatory's telescope points (and its field of view): drawn over the sky as
+     * a crosshair with a caption. Memoize it: a new object redraws the map.
+     */
+    telescope?: StarMapTelescope | null
+    /** Center a map without the settings UI on this RA/Dec (J2000 degrees) */
+    center?: [number, number]
     zoom?: number
+    /**
+     * A small rail of view buttons for a map without the settings UI (the observatory's map):
+     * zoom in / out, and back to the telescope when `telescope` is set. The labels come from
+     * the caller, whose page has its own translations loaded.
+     */
+    viewControls?: StarMapViewControls
     /** Show the settings toggle button and panel (only used on the starmap page) */
     showSettings?: boolean
     /**

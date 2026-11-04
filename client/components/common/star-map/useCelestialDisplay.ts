@@ -30,6 +30,7 @@ export interface UseCelestialDisplayOptions {
     containerRef: RefObject<HTMLDivElement | null>
     objects?: StarMapObject[]
     zoom?: number
+    center?: [number, number]
     config?: StarMapProps['config']
     language?: string
     showSettings?: boolean
@@ -101,6 +102,7 @@ export const useCelestialDisplay = ({
     containerRef,
     objects,
     zoom,
+    center,
     config,
     language,
     showSettings,
@@ -119,6 +121,9 @@ export const useCelestialDisplay = ({
     clearPopupTimers,
     extendAutoHideGrace
 }: UseCelestialDisplayOptions): CelestialDisplayController => {
+    const centerRa = center?.[0]
+    const centerDec = center?.[1]
+
     const objectsJSON = useMemo(() => createObjectsJSON(objects), [objects])
 
     // Slot for the custom-layer drawer (filled by useCustomLayers), read by the
@@ -296,6 +301,12 @@ export const useCelestialDisplay = ({
                 localConfig.center = [singleObject.ra || 0, singleObject.dec || 0, 1]
             }
 
+            // A map pointed at a place (the observatory's telescope)
+            if (!showSettings && !singleObject && centerRa !== undefined && centerDec !== undefined) {
+                localConfig.follow = [centerRa, centerDec]
+                localConfig.center = [centerRa, centerDec, 0]
+            }
+
             Celestial.clear()
 
             // The layer registration only matters for its load callback (see
@@ -415,7 +426,7 @@ export const useCelestialDisplay = ({
         }
 
         return teardown
-    }, [objects, zoom, language, settings.viewMode, settings.dsosFull])
+    }, [objects, zoom, centerRa, centerDec, language, settings.viewMode, settings.dsosFull])
 
     // Keep the map fitted to its container on resize. Celestial has its own window-resize
     // listener, but it's a no-op once an explicit numeric width has been set (its getWidth()
