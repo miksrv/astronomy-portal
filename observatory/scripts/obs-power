@@ -1,0 +1,188 @@
+#!/usr/bin/env bash
+# Observatory power control via the RODOS-18 Ethernet relay.
+#
+#   obs-power status            show every channel we manage
+#   obs-power on                12 V supply, then each device, 3 s apart
+#   obs-power off [--force]     each device, then the 12 V supply, 3 s apart;
+#                               refuses unless INDI reports mount AND roof parked
+#                               (--force skips that check: manual use only)
+#   obs-power light on|off      LED panel inside the observatory
+#
+# Works both on the astrolab host and inside the kstars-desktop container
+# (/config/scripts/obs-power), so the Ekos Scheduler can call it.
+# Credentials: rodos.env next to this script (RODOS_HOST, RODOS_USER, RODOS_PASS).
+#
+# Relay channels #15/#16 pulse the roof gate motor buttons and bypass every
+# interlock (the roof could close onto an unparked mount). This script can
+# never switch them: only the channels listed below are allowed.
+
+set -uo pipefail
+
+STEP_DELAY=3
+INDI_HOST=localhost
+INDI_PORT=7624
+MOUNT_PARK="EQMod Mount.TELESCOPE_PARK.PARK"
+ROOF_PARK="Roll Roof.DOME_PARK.PARK"
+
+# Channel numbers as labelled on the relay case (API index = number - 1).
+PSU=7
+LIGHT=8
+DEVICES=(1 2 3 4) # power-on order; power-off goes in reverse
+declare -A NAMES=(
+    [1]="Монтировка EQ6 Pro"
+    [2]="Камера ASI6200"
+    [3]="Фокусер EAF"
+    [4]="Контроллер грелок"
+    [7]="Блок питания 12 В"
+    [8]="LED Panel"
+)
+
+# Credentials, log and lock live next to the script: that directory is the
+# same on the host and in the container, so both share one lock and one log.
+DIR="$(dirname "$(readlink -f "$0")")"
+ENV_FILE="$DIR/rodos.env"
+LOG_FILE="$DIR/obs-power.log"
+LOCK_FILE="$DIR/.obs-power.lock"
+
+log() {
+    local line
+    line="$(date '+%F %T') $*"
+    echo "$line"
+    echo "$line" >>"$LOG_FILE"
+}
+
+die() {
+    log "ОШИБКА: $*"
+    exit 1
+}
+
+load_env() {
+    [[ -r "$ENV_FILE" ]] || die "нет файла $ENV_FILE"
+    # shellcheck disable=SC1090
+    . "$ENV_FILE"
+    [[ -n "${RODOS_HOST:-}" && -n "${RODOS_USER:-}" && -n "${RODOS_PASS:-}" ]] ||
+        die "в $ENV_FILE нужны RODOS_HOST, RODOS_USER, RODOS_PASS"
+}
+
+# The password goes to curl via stdin config, so it never shows up in `ps`.
+rodos_get() {
+    printf 'user = "%s:%s"\n' "$RODOS_USER" "$RODOS_PASS" |
+        curl -sS -m 5 -K - "http://$RODOS_HOST/$1"
+}
+
+allowed() {
+    [[ -n "${NAMES[$1]:-}" ]]
+}
+
+# Prints 1/0 for the channel, as the relay reports it.
+state() {
+    local idx=$(($1 - 1)) xml
+    xml="$(rodos_get pstat.xml)" || return 1
+    sed -n "s:.*<rl${idx}string>\([01]\)</rl${idx}string>.*:\1:p" <<<"$xml"
+}
+
+# switch <channel> on|off — sends the command and confirms it via pstat.xml.
+switch() {
+    local ch=$1 want=$2 cmd reply now
+    allowed "$ch" || die "канал #$ch запрещён"
+    [[ $want == on ]] && cmd=n || cmd=f
+    reply="$(rodos_get "rb$((ch - 1))${cmd}.cgi")" || die "#$ch ${NAMES[$ch]}: реле не отвечает"
+    [[ $reply == Success* ]] || die "#$ch ${NAMES[$ch]}: ответ реле «$reply»"
+    now="$(state "$ch")"
+    [[ ($want == on && $now == 1) || ($want == off && $now == 0) ]] ||
+        die "#$ch ${NAMES[$ch]}: после команды состояние «$now»"
+    log "#$ch ${NAMES[$ch]}: $want"
+}
+
+# ensure <channel> on|off — switches only if needed; returns 0 if it switched.
+ensure() {
+    local ch=$1 want=$2 now
+    now="$(state "$ch")" || die "реле не отвечает"
+    if [[ ($want == on && $now == 1) || ($want == off && $now == 0) ]]; then
+        log "#$ch ${NAMES[$ch]}: уже $want"
+        return 1
+    fi
+    switch "$ch" "$want"
+    return 0
+}
+
+indi_prop() {
+    indi_getprop -h "$INDI_HOST" -p "$INDI_PORT" -1 -t 3 "$1" 2>/dev/null
+}
+
+check_parked() {
+    local mount roof
+    mount="$(indi_prop "$MOUNT_PARK")" || die "INDI: не удалось прочитать парковку монтировки — питание не выключаю"
+    roof="$(indi_prop "$ROOF_PARK")" || die "INDI: не удалось прочитать парковку крыши — питание не выключаю"
+    [[ $mount == On ]] || die "монтировка не запаркована — питание не выключаю"
+    [[ $roof == On ]] || die "крыша не закрыта (не запаркована) — питание не выключаю"
+    log "INDI: монтировка запаркована, крыша закрыта"
+}
+
+cmd_status() {
+    local xml ch idx v
+    xml="$(rodos_get pstat.xml)" || die "реле не отвечает"
+    for ch in "$PSU" "${DEVICES[@]}" "$LIGHT"; do
+        idx=$((ch - 1))
+        v="$(sed -n "s:.*<rl${idx}string>\([01]\)</rl${idx}string>.*:\1:p" <<<"$xml")"
+        case $v in 1) v=ВКЛ ;; 0) v=выкл ;; *) v="?" ;; esac
+        printf '#%-2s %-4s  %s\n' "$ch" "$v" "${NAMES[$ch]}"
+    done
+}
+
+cmd_on() {
+    local ch first=1
+    log "=== включение"
+    ensure "$PSU" on && first=0
+    for ch in "${DEVICES[@]}"; do
+        # Pause before every switch except when nothing has been switched yet.
+        [[ $first == 0 ]] && sleep "$STEP_DELAY"
+        ensure "$ch" on && first=0
+    done
+    log "=== включено"
+}
+
+cmd_off() {
+    local force=$1 ch i first=1
+    log "=== выключение${force:+ (--force, без проверки INDI)}"
+    [[ -n $force ]] || check_parked
+    for ((i = ${#DEVICES[@]} - 1; i >= 0; i--)); do
+        ch=${DEVICES[i]}
+        [[ $first == 0 ]] && sleep "$STEP_DELAY"
+        ensure "$ch" off && first=0
+    done
+    [[ $first == 0 ]] && sleep "$STEP_DELAY"
+    ensure "$PSU" off
+    log "=== выключено"
+}
+
+usage() {
+    sed -n '4,10p' "$0" | sed 's/^# \{0,1\}//'
+    exit 2
+}
+
+main() {
+    load_env
+    exec 9>"$LOCK_FILE"
+    flock -n 9 || die "obs-power уже выполняется"
+    case "${1:-}" in
+    status) cmd_status ;;
+    on) cmd_on ;;
+    off)
+        case "${2:-}" in
+        "") cmd_off "" ;;
+        --force) cmd_off force ;;
+        *) usage ;;
+        esac
+        ;;
+    light)
+        case "${2:-}" in
+        on | off) ensure "$LIGHT" "$2" || true ;;
+        *) usage ;;
+        esac
+        ;;
+    *) usage ;;
+    esac
+}
+
+main "$@"

@@ -1,0 +1,273 @@
+<INDIDriver>
+<newSwitchVector device='Weather Watcher' name='DEBUG'>
+  <oneSwitch name='ENABLE'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='DISABLE'>
+      On
+  </oneSwitch>
+</newSwitchVector>
+<newNumberVector device='Weather Watcher' name='POLLING_PERIOD'>
+  <oneNumber name='PERIOD_MS'>
+      1000
+  </oneNumber>
+</newNumberVector>
+<newSwitchVector device='Weather Watcher' name='DEBUG_LEVEL'>
+  <oneSwitch name='DBG_ERROR'>
+      On
+  </oneSwitch>
+  <oneSwitch name='DBG_WARNING'>
+      On
+  </oneSwitch>
+  <oneSwitch name='DBG_SESSION'>
+      On
+  </oneSwitch>
+  <oneSwitch name='DBG_DEBUG'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='DBG_EXTRA_1'>
+      Off
+  </oneSwitch>
+</newSwitchVector>
+<newSwitchVector device='Weather Watcher' name='LOGGING_LEVEL'>
+  <oneSwitch name='LOG_ERROR'>
+      On
+  </oneSwitch>
+  <oneSwitch name='LOG_WARNING'>
+      On
+  </oneSwitch>
+  <oneSwitch name='LOG_SESSION'>
+      On
+  </oneSwitch>
+  <oneSwitch name='LOG_DEBUG'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='LOG_EXTRA_1'>
+      Off
+  </oneSwitch>
+</newSwitchVector>
+<newSwitchVector device='Weather Watcher' name='LOG_OUTPUT'>
+  <oneSwitch name='CLIENT_DEBUG'>
+      On
+  </oneSwitch>
+  <oneSwitch name='FILE_DEBUG'>
+      Off
+  </oneSwitch>
+</newSwitchVector>
+<newNumberVector device='Weather Watcher' name='WEATHER_UPDATE'>
+  <oneNumber name='PERIOD'>
+      60
+  </oneNumber>
+</newNumberVector>
+<newNumberVector device='Weather Watcher' name='WEATHER_CLOUDS'>
+  <oneNumber name='MIN_OK'>
+      0
+  </oneNumber>
+  <oneNumber name='MAX_OK'>
+      50
+  </oneNumber>
+  <oneNumber name='PERC_WARN'>
+      15
+  </oneNumber>
+  <oneNumber name='ALERT_TYPE'>
+      0
+  </oneNumber>
+</newNumberVector>
+<newNumberVector device='Weather Watcher' name='WEATHER_FORECAST'>
+  <oneNumber name='MIN_OK'>
+      0
+  </oneNumber>
+  <oneNumber name='MAX_OK'>
+      1
+  </oneNumber>
+  <oneNumber name='PERC_WARN'>
+      0
+  </oneNumber>
+  <oneNumber name='ALERT_TYPE'>
+      0
+  </oneNumber>
+</newNumberVector>
+<newNumberVector device='Weather Watcher' name='WEATHER_HUMIDITY'>
+  <oneNumber name='MIN_OK'>
+      0
+  </oneNumber>
+  <oneNumber name='MAX_OK'>
+      100
+  </oneNumber>
+  <oneNumber name='PERC_WARN'>
+      15
+  </oneNumber>
+  <oneNumber name='ALERT_TYPE'>
+      0
+  </oneNumber>
+</newNumberVector>
+<newNumberVector device='Weather Watcher' name='WEATHER_RAIN_HOUR'>
+  <oneNumber name='MIN_OK'>
+      -1
+  </oneNumber>
+  <oneNumber name='MAX_OK'>
+      0
+  </oneNumber>
+  <oneNumber name='PERC_WARN'>
+      15
+  </oneNumber>
+  <oneNumber name='ALERT_TYPE'>
+      0
+  </oneNumber>
+</newNumberVector>
+<newNumberVector device='Weather Watcher' name='WEATHER_PRESSURE'>
+  <oneNumber name='MIN_OK'>
+      960
+  </oneNumber>
+  <oneNumber name='MAX_OK'>
+      1050
+  </oneNumber>
+  <oneNumber name='PERC_WARN'>
+      0
+  </oneNumber>
+  <oneNumber name='ALERT_TYPE'>
+      0
+  </oneNumber>
+</newNumberVector>
+<newNumberVector device='Weather Watcher' name='WEATHER_TEMPERATURE'>
+  <oneNumber name='MIN_OK'>
+      -24
+  </oneNumber>
+  <oneNumber name='MAX_OK'>
+      30
+  </oneNumber>
+  <oneNumber name='PERC_WARN'>
+      15
+  </oneNumber>
+  <oneNumber name='ALERT_TYPE'>
+      0
+  </oneNumber>
+</newNumberVector>
+<newNumberVector device='Weather Watcher' name='WEATHER_WIND_GUST'>
+  <oneNumber name='MIN_OK'>
+      0
+  </oneNumber>
+  <oneNumber name='MAX_OK'>
+      15
+  </oneNumber>
+  <oneNumber name='PERC_WARN'>
+      15
+  </oneNumber>
+  <oneNumber name='ALERT_TYPE'>
+      0
+  </oneNumber>
+</newNumberVector>
+<newNumberVector device='Weather Watcher' name='WEATHER_WIND_SPEED'>
+  <oneNumber name='MIN_OK'>
+      0
+  </oneNumber>
+  <oneNumber name='MAX_OK'>
+      9
+  </oneNumber>
+  <oneNumber name='PERC_WARN'>
+      15
+  </oneNumber>
+  <oneNumber name='ALERT_TYPE'>
+      0
+  </oneNumber>
+</newNumberVector>
+<newTextVector device='Weather Watcher' name='ACTIVE_DEVICES'>
+  <oneText name='ACTIVE_GPS'>
+      
+  </oneText>
+</newTextVector>
+<newNumberVector device='Weather Watcher' name='GEOGRAPHIC_COORD'>
+  <oneNumber name='LAT'>
+      0.0
+  </oneNumber>
+  <oneNumber name='LONG'>
+      0.0
+  </oneNumber>
+  <oneNumber name='ELEV'>
+      0.0
+  </oneNumber>
+</newNumberVector>
+<newTextVector device='Weather Watcher' name='LABELS'>
+  <oneText name='LABEL_1'>
+      Rain
+  </oneText>
+  <oneText name='LABEL_2'>
+      Temperature
+  </oneText>
+  <oneText name='LABEL_3'>
+      Wind
+  </oneText>
+  <oneText name='LABEL_4'>
+      Gust
+  </oneText>
+  <oneText name='LABEL_5'>
+      Clouds
+  </oneText>
+  <oneText name='LABEL_6'>
+      Humidity
+  </oneText>
+  <oneText name='lABEL_7'>
+      Pressure
+  </oneText>
+  <oneText name='LABEL_8'>
+      Forecast
+  </oneText>
+</newTextVector>
+<newSwitchVector device='Weather Watcher' name='CRITICALS'>
+  <oneSwitch name='CRITICAL_1'>
+      On
+  </oneSwitch>
+  <oneSwitch name='CRITICAL_2'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='CRITICAL_3'>
+      On
+  </oneSwitch>
+  <oneSwitch name='CRITICAL_4'>
+      On
+  </oneSwitch>
+  <oneSwitch name='CRITICAL_5'>
+      On
+  </oneSwitch>
+  <oneSwitch name='CRITICAL_6'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='CRITICAL_7'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='CRITICAL_8'>
+      On
+  </oneSwitch>
+</newSwitchVector>
+<newTextVector device='Weather Watcher' name='WATCH_SOURCE'>
+  <oneText name='URL'>
+      https://weather.example.com/current/text
+  </oneText>
+</newTextVector>
+<newTextVector device='Weather Watcher' name='KEYWORDS'>
+  <oneText name='KEY_1'>
+      precipitation
+  </oneText>
+  <oneText name='KEY_2'>
+      temperature
+  </oneText>
+  <oneText name='KEY_3'>
+      wind_speed
+  </oneText>
+  <oneText name='KEY_4'>
+      wind_gust
+  </oneText>
+  <oneText name='KEY_5'>
+      clouds
+  </oneText>
+  <oneText name='KEY_6'>
+      humidity
+  </oneText>
+  <oneText name='KEY_7'>
+      pressure
+  </oneText>
+  <oneText name='KEY_8'>
+      forecast
+  </oneText>
+</newTextVector>
+</INDIDriver>

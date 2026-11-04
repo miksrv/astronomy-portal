@@ -1,0 +1,355 @@
+<INDIDriver>
+    <newSwitchVector device="EQMod Mount" name="DEBUG">
+        <oneSwitch name="ENABLE">
+Off
+        </oneSwitch>
+        <oneSwitch name="DISABLE">
+On
+        </oneSwitch>
+    </newSwitchVector>
+    <newNumberVector device="EQMod Mount" name="POLLING_PERIOD">
+        <oneNumber name="PERIOD_MS">
+1000
+        </oneNumber>
+    </newNumberVector>
+    <newSwitchVector device="EQMod Mount" name="CONNECTION_MODE">
+        <oneSwitch name="CONNECTION_SERIAL">
+On
+        </oneSwitch>
+        <oneSwitch name="CONNECTION_TCP">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newTextVector device="EQMod Mount" name="DEVICE_PORT">
+        <oneText name="PORT">
+      /dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0
+    </oneText>
+    </newTextVector>
+    <newSwitchVector device="EQMod Mount" name="DEVICE_BAUD_RATE">
+        <oneSwitch name="9600">
+On
+        </oneSwitch>
+        <oneSwitch name="19200">
+Off
+        </oneSwitch>
+        <oneSwitch name="38400">
+Off
+        </oneSwitch>
+        <oneSwitch name="57600">
+Off
+        </oneSwitch>
+        <oneSwitch name="115200">
+Off
+        </oneSwitch>
+        <oneSwitch name="230400">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newSwitchVector device="EQMod Mount" name="DEVICE_AUTO_SEARCH">
+        <oneSwitch name="INDI_ENABLED">
+      Off
+    </oneSwitch>
+        <oneSwitch name="INDI_DISABLED">
+      On
+    </oneSwitch>
+    </newSwitchVector>
+    <newSwitchVector device="EQMod Mount" name="DEBUG_LEVEL">
+        <oneSwitch name="DBG_ERROR">
+On
+        </oneSwitch>
+        <oneSwitch name="DBG_WARNING">
+On
+        </oneSwitch>
+        <oneSwitch name="DBG_SESSION">
+On
+        </oneSwitch>
+        <oneSwitch name="DBG_DEBUG">
+Off
+        </oneSwitch>
+        <oneSwitch name="DBG_EXTRA_1">
+Off
+        </oneSwitch>
+        <oneSwitch name="DBG_EXTRA_2">
+Off
+        </oneSwitch>
+        <oneSwitch name="DBG_EXTRA_3">
+Off
+        </oneSwitch>
+        <oneSwitch name="DBG_EXTRA_4">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newSwitchVector device="EQMod Mount" name="LOGGING_LEVEL">
+        <oneSwitch name="LOG_ERROR">
+On
+        </oneSwitch>
+        <oneSwitch name="LOG_WARNING">
+On
+        </oneSwitch>
+        <oneSwitch name="LOG_SESSION">
+On
+        </oneSwitch>
+        <oneSwitch name="LOG_DEBUG">
+Off
+        </oneSwitch>
+        <oneSwitch name="LOG_EXTRA_1">
+Off
+        </oneSwitch>
+        <oneSwitch name="LOG_EXTRA_2">
+Off
+        </oneSwitch>
+        <oneSwitch name="LOG_EXTRA_3">
+Off
+        </oneSwitch>
+        <oneSwitch name="LOG_EXTRA_4">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newSwitchVector device="EQMod Mount" name="LOG_OUTPUT">
+        <oneSwitch name="CLIENT_DEBUG">
+On
+        </oneSwitch>
+        <oneSwitch name="FILE_DEBUG">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newTextVector device="EQMod Mount" name="ACTIVE_DEVICES">
+        <oneText name="ACTIVE_GPS" />
+        <oneText name="ACTIVE_DOME">
+      Roll Roof
+    </oneText>
+    </newTextVector>
+    <newSwitchVector device="EQMod Mount" name="DOME_POLICY">
+        <oneSwitch name="DOME_IGNORED">
+      Off
+    </oneSwitch>
+        <oneSwitch name="DOME_LOCKS">
+      On
+    </oneSwitch>
+    </newSwitchVector>
+    <newNumberVector device="EQMod Mount" name="GEOGRAPHIC_COORD">
+        <oneNumber name="LAT">
+      0.0
+        </oneNumber>
+        <oneNumber name="LONG">
+      0.0
+        </oneNumber>
+        <oneNumber name="ELEV">
+      0.0
+        </oneNumber>
+    </newNumberVector>
+    <newSwitchVector device="EQMod Mount" name="TELESCOPE_REVERSE_MOTION">
+        <oneSwitch name="REVERSE_NS">
+Off
+        </oneSwitch>
+        <oneSwitch name="REVERSE_WE">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newSwitchVector device="EQMod Mount" name="TELESCOPE_SLEW_RATE">
+        <oneSwitch name="1x">
+Off
+        </oneSwitch>
+        <oneSwitch name="2x">
+Off
+        </oneSwitch>
+        <oneSwitch name="3x">
+Off
+        </oneSwitch>
+        <oneSwitch name="4x">
+Off
+        </oneSwitch>
+        <oneSwitch name="5x">
+Off
+        </oneSwitch>
+        <oneSwitch name="6x">
+Off
+        </oneSwitch>
+        <oneSwitch name="7x">
+Off
+        </oneSwitch>
+        <oneSwitch name="8x">
+Off
+        </oneSwitch>
+        <oneSwitch name="9x">
+Off
+        </oneSwitch>
+        <oneSwitch name="SLEW_MAX">
+On
+        </oneSwitch>
+        <oneSwitch name="SLEWCUSTOM">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newSwitchVector device="EQMod Mount" name="TELESCOPE_TRACK_MODE">
+        <oneSwitch name="TRACK_SIDEREAL">
+On
+        </oneSwitch>
+        <oneSwitch name="TRACK_SOLAR">
+Off
+        </oneSwitch>
+        <oneSwitch name="TRACK_LUNAR">
+Off
+        </oneSwitch>
+        <oneSwitch name="TRACK_CUSTOM">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newNumberVector device="EQMod Mount" name="TELESCOPE_TRACK_RATE">
+        <oneNumber name="TRACK_RATE_RA">
+15.04106717867020393
+        </oneNumber>
+        <oneNumber name="TRACK_RATE_DE">
+0
+        </oneNumber>
+    </newNumberVector>
+    <newSwitchVector device="EQMod Mount" name="USEJOYSTICK">
+        <oneSwitch name="ENABLE">
+Off
+        </oneSwitch>
+        <oneSwitch name="DISABLE">
+On
+        </oneSwitch>
+    </newSwitchVector>
+    <newTextVector device="EQMod Mount" name="JOYSTICKSETTINGS">
+        <oneText name="MOTIONDIR">
+JOYSTICK_1
+        </oneText>
+        <oneText name="MOTIONDIRNS">
+AXIS_8
+        </oneText>
+        <oneText name="MOTIONDIRWE">
+AXIS_7
+        </oneText>
+        <oneText name="SLEWPRESET">
+JOYSTICK_2
+        </oneText>
+        <oneText name="SLEWPRESETUP">
+BUTTON_5
+        </oneText>
+        <oneText name="SLEWPRESETDOWN">
+BUTTON_6
+        </oneText>
+        <oneText name="ABORTBUTTON">
+BUTTON_1
+        </oneText>
+        <oneText name="PARKBUTTON">
+BUTTON_2
+        </oneText>
+        <oneText name="UNPARKBUTTON">
+BUTTON_3
+        </oneText>
+    </newTextVector>
+    <newTextVector device="EQMod Mount" name="SNOOP_JOYSTICK">
+        <oneText name="SNOOP_JOYSTICK_DEVICE">
+Joystick
+        </oneText>
+    </newTextVector>
+    <newSwitchVector device="EQMod Mount" name="MOTION_CONTROL_MODE">
+        <oneSwitch name="MOTION_CONTROL_MODE_JOYSTICK">
+On
+        </oneSwitch>
+        <oneSwitch name="MOTION_CONTROL_MODE_AXES">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newSwitchVector device="EQMod Mount" name="JOYSTICK_LOCK_AXIS">
+        <oneSwitch name="LOCK_AXIS_1">
+Off
+        </oneSwitch>
+        <oneSwitch name="LOCK_AXIS_2">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newSwitchVector device="EQMod Mount" name="SIMULATE_PIER_SIDE">
+        <oneSwitch name="SIMULATE_YES">
+Off
+        </oneSwitch>
+        <oneSwitch name="SIMULATE_NO">
+On
+        </oneSwitch>
+    </newSwitchVector>
+    <newNumberVector device="EQMod Mount" name="BACKLASH">
+        <oneNumber name="BACKLASHRA">
+10
+        </oneNumber>
+        <oneNumber name="BACKLASHDE">
+10
+        </oneNumber>
+    </newNumberVector>
+    <newSwitchVector device="EQMod Mount" name="USEBACKLASH">
+        <oneSwitch name="USEBACKLASHRA">
+Off
+        </oneSwitch>
+        <oneSwitch name="USEBACKLASHDE">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newNumberVector device="EQMod Mount" name="GUIDE_RATE">
+        <oneNumber name="GUIDE_RATE_WE">
+0.5
+        </oneNumber>
+        <oneNumber name="GUIDE_RATE_NS">
+0.5
+        </oneNumber>
+    </newNumberVector>
+    <newNumberVector device="EQMod Mount" name="PULSE_LIMITS">
+        <oneNumber name="MIN_PULSE">
+10
+        </oneNumber>
+        <oneNumber name="MIN_PULSE_TIMER">
+100
+        </oneNumber>
+    </newNumberVector>
+    <newNumberVector device="EQMod Mount" name="SLEWSPEEDS">
+        <oneNumber name="RASLEW">
+800
+        </oneNumber>
+        <oneNumber name="DESLEW">
+800
+        </oneNumber>
+    </newNumberVector>
+    <newSwitchVector device="EQMod Mount" name="REVERSEDEC">
+        <oneSwitch name="ENABLE">
+Off
+        </oneSwitch>
+        <oneSwitch name="DISABLE">
+On
+        </oneSwitch>
+    </newSwitchVector>
+    <newNumberVector device="EQMod Mount" name="LED_BRIGHTNESS">
+        <oneNumber name="LED_BRIGHTNESS_VALUE">
+255
+        </oneNumber>
+    </newNumberVector>
+    <newSwitchVector device="EQMod Mount" name="ALIGNMODE">
+        <oneSwitch name="NOALIGN">
+Off
+        </oneSwitch>
+        <oneSwitch name="ALIGNNEAREST">
+On
+        </oneSwitch>
+        <oneSwitch name="ALIGNNSTAR">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newSwitchVector device="EQMod Mount" name="HORIZONLIMITSONLIMIT">
+        <oneSwitch name="HORIZONLIMITSONLIMITTRACK">
+On
+        </oneSwitch>
+        <oneSwitch name="HORIZONLIMITSONLIMITSLEW">
+Off
+        </oneSwitch>
+        <oneSwitch name="HORIZONLIMITSONLIMITGOTO">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newSwitchVector device="EQMod Mount" name="HORIZONLIMITSLIMITGOTO">
+        <oneSwitch name="HORIZONLIMITSLIMITGOTODISABLE">
+Off
+        </oneSwitch>
+        <oneSwitch name="HORIZONLIMITSLIMITGOTOENABLE">
+On
+        </oneSwitch>
+    </newSwitchVector>
+</INDIDriver>

@@ -1,0 +1,16 @@
+[Unit]
+Description=Move captured FITS frames to the archive server
+Wants=network-online.target
+After=network-online.target
+# Give up after 4 failed attempts in a row; the daily timer tries again.
+StartLimitIntervalSec=2h
+StartLimitBurst=4
+
+[Service]
+Type=oneshot
+User=mik
+ExecStart=/usr/local/bin/frames-upload
+Restart=on-failure
+RestartSec=15min
+Nice=10
+IOSchedulingClass=idle

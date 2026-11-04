@@ -1,0 +1,108 @@
+<INDIDriver>
+<newSwitchVector device='ZWO EFW' name='DEBUG'>
+  <oneSwitch name='ENABLE'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='DISABLE'>
+      On
+  </oneSwitch>
+</newSwitchVector>
+<newNumberVector device='ZWO EFW' name='POLLING_PERIOD'>
+  <oneNumber name='PERIOD_MS'>
+      250
+  </oneNumber>
+</newNumberVector>
+<newSwitchVector device='ZWO EFW' name='DEBUG_LEVEL'>
+  <oneSwitch name='DBG_ERROR'>
+      On
+  </oneSwitch>
+  <oneSwitch name='DBG_WARNING'>
+      On
+  </oneSwitch>
+  <oneSwitch name='DBG_SESSION'>
+      On
+  </oneSwitch>
+  <oneSwitch name='DBG_DEBUG'>
+      Off
+  </oneSwitch>
+</newSwitchVector>
+<newSwitchVector device='ZWO EFW' name='LOGGING_LEVEL'>
+  <oneSwitch name='LOG_ERROR'>
+      On
+  </oneSwitch>
+  <oneSwitch name='LOG_WARNING'>
+      On
+  </oneSwitch>
+  <oneSwitch name='LOG_SESSION'>
+      On
+  </oneSwitch>
+  <oneSwitch name='LOG_DEBUG'>
+      Off
+  </oneSwitch>
+</newSwitchVector>
+<newSwitchVector device='ZWO EFW' name='LOG_OUTPUT'>
+  <oneSwitch name='CLIENT_DEBUG'>
+      On
+  </oneSwitch>
+  <oneSwitch name='FILE_DEBUG'>
+      Off
+  </oneSwitch>
+</newSwitchVector>
+<newNumberVector device='ZWO EFW' name='FILTER_SLOT'>
+  <oneNumber name='FILTER_SLOT_VALUE'>
+      1
+  </oneNumber>
+</newNumberVector>
+<newTextVector device='ZWO EFW' name='FILTER_NAME'>
+  <oneText name='FILTER_SLOT_NAME_1'>
+      L
+  </oneText>
+  <oneText name='FILTER_SLOT_NAME_2'>
+      R
+  </oneText>
+  <oneText name='FILTER_SLOT_NAME_3'>
+      G
+  </oneText>
+  <oneText name='FILTER_SLOT_NAME_4'>
+      B
+  </oneText>
+  <oneText name='FILTER_SLOT_NAME_5'>
+      H
+  </oneText>
+  <oneText name='FILTER_SLOT_NAME_6'>
+      O
+  </oneText>
+  <oneText name='FILTER_SLOT_NAME_7'>
+      S
+  </oneText>
+</newTextVector>
+<newSwitchVector device='ZWO EFW' name='USEJOYSTICK'>
+  <oneSwitch name='ENABLE'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='DISABLE'>
+      On
+  </oneSwitch>
+</newSwitchVector>
+<newTextVector device='ZWO EFW' name='JOYSTICKSETTINGS'>
+  <oneText name='Change Filter'>
+      JOYSTICK_1
+  </oneText>
+  <oneText name='Reset'>
+      BUTTON_1
+  </oneText>
+</newTextVector>
+<newTextVector device='ZWO EFW' name='SNOOP_JOYSTICK'>
+  <oneText name='SNOOP_JOYSTICK_DEVICE'>
+      Joystick
+  </oneText>
+</newTextVector>
+<newSwitchVector device='ZWO EFW' name='FILTER_UNIDIRECTIONAL_MOTION'>
+  <oneSwitch name='INDI_ENABLED'>
+      Off
+  </oneSwitch>
+  <oneSwitch name='INDI_DISABLED'>
+      On
+  </oneSwitch>
+</newSwitchVector>
+</INDIDriver>

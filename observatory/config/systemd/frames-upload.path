@@ -1,0 +1,11 @@
+[Unit]
+Description=Upload frames when the Ekos Scheduler shutdown script asks for it
+
+[Path]
+# Created by ekos-shutdown.sh, removed by frames-upload as soon as it starts.
+# Written by ekos-shutdown.sh (scripts dir is shared with the kstars-desktop container).
+PathExists=/home/mik/kstars-desktop/config/scripts/.frames-upload.request
+Unit=frames-upload.service
+
+[Install]
+WantedBy=multi-user.target

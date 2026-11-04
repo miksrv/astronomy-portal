@@ -1,0 +1,108 @@
+<INDIDriver>
+    <newSwitchVector device="WatchDog" name="DEBUG">
+        <oneSwitch name="ENABLE">
+Off
+        </oneSwitch>
+        <oneSwitch name="DISABLE">
+On
+        </oneSwitch>
+    </newSwitchVector>
+    <newNumberVector device="WatchDog" name="POLLING_PERIOD">
+        <oneNumber name="PERIOD_MS">
+1000
+        </oneNumber>
+    </newNumberVector>
+    <newSwitchVector device="WatchDog" name="DEBUG_LEVEL">
+        <oneSwitch name="DBG_ERROR">
+On
+        </oneSwitch>
+        <oneSwitch name="DBG_WARNING">
+On
+        </oneSwitch>
+        <oneSwitch name="DBG_SESSION">
+On
+        </oneSwitch>
+        <oneSwitch name="DBG_DEBUG">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newSwitchVector device="WatchDog" name="LOGGING_LEVEL">
+        <oneSwitch name="LOG_ERROR">
+On
+        </oneSwitch>
+        <oneSwitch name="LOG_WARNING">
+On
+        </oneSwitch>
+        <oneSwitch name="LOG_SESSION">
+On
+        </oneSwitch>
+        <oneSwitch name="LOG_DEBUG">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newSwitchVector device="WatchDog" name="LOG_OUTPUT">
+        <oneSwitch name="CLIENT_DEBUG">
+On
+        </oneSwitch>
+        <oneSwitch name="FILE_DEBUG">
+Off
+        </oneSwitch>
+    </newSwitchVector>
+    <newNumberVector device="WatchDog" name="WATCHDOG_HEARTBEAT">
+        <oneNumber name="WATCHDOG_HEARTBEAT_VALUE">
+      600
+    </oneNumber>
+    </newNumberVector>
+    <newNumberVector device="WatchDog" name="WATCHDOG_WEATHER">
+        <oneNumber name="WATCHDOG_WEATHER_VALUE">
+      120
+    </oneNumber>
+    </newNumberVector>
+    <newTextVector device="WatchDog" name="WATCHDOG_SETTINGS">
+        <oneText name="INDISERVER_HOST">
+localhost
+        </oneText>
+        <oneText name="INDISERVER_PORT">
+7624
+        </oneText>
+        <oneText name="SHUTDOWN_SCRIPT" />
+    </newTextVector>
+    <newTextVector device="WatchDog" name="ACTIVE_DEVICES">
+        <oneText name="ACTIVE_TELESCOPE">
+      EQMod Mount
+    </oneText>
+        <oneText name="ACTIVE_DOME">
+      Roll Roof
+    </oneText>
+        <oneText name="ACTIVE_WEATHER">
+      Weather Watcher
+    </oneText>
+    </newTextVector>
+    <newSwitchVector device="WatchDog" name="WATCHDOG_MOUNT_POLICY">
+        <oneSwitch name="MOUNT_IGNORED">
+      Off
+    </oneSwitch>
+        <oneSwitch name="MOUNT_LOCKS">
+      On
+    </oneSwitch>
+    </newSwitchVector>
+    <newSwitchVector device="WatchDog" name="WATCHDOG_Trigger">
+        <oneSwitch name="TRIGGER_CLIENT">
+      On
+    </oneSwitch>
+        <oneSwitch name="TRIGGER_WEATHER">
+      On
+    </oneSwitch>
+    </newSwitchVector>
+    <newSwitchVector device="WatchDog" name="WATCHDOG_SHUTDOWN">
+        <oneSwitch name="PARK_MOUNT">
+      On
+    </oneSwitch>
+        <oneSwitch name="PARK_DOME">
+      On
+    </oneSwitch>
+        <oneSwitch name="EXECUTE_SCRIPT">
+      Off
+    </oneSwitch>
+    </newSwitchVector>
+</INDIDriver>

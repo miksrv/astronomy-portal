@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily fallback upload of captured frames
+
+[Timer]
+# Host clock is UTC; pick an hour that is late morning at the site (no imaging).
+OnCalendar=*-*-* 05:00:00 UTC
+Persistent=true
+RandomizedDelaySec=10min
+
+[Install]
+WantedBy=timers.target

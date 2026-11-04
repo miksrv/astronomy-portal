@@ -1,0 +1,30 @@
+services:
+  kstars:
+    build: .
+    image: astrolab/kstars-desktop
+    container_name: kstars-desktop
+    # Host network: Ekos reaches indiserver/indiweb on localhost, and the HTTPS
+    # listener of the web desktop binds host port 80.
+    network_mode: host
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: ${TZ}
+      TITLE: AstroLab KStars
+      CUSTOM_USER: ${CUSTOM_USER}
+      PASSWORD: ${PASSWORD}
+      CUSTOM_HTTPS_PORT: "80"
+      # Plain HTTP only on loopback: no TLS, so never on the LAN or internet.
+      CUSTOM_PORT: "127.0.0.1:3000"
+      DISABLE_IPV6: "1"
+    volumes:
+      - ./config:/config
+      # Night frames go to the host SSD under the same path as inside the container
+      # (Ekos CaptureDirectory); frames-upload moves them to the archive server.
+      - /home/mik/fits:/home/mik/fits
+      - /usr/share/astrometry:/usr/share/astrometry:ro
+    shm_size: 1gb
+    # Cap RAM so a runaway KStars/solver can never starve the host (sshd, INDI drivers).
+    mem_limit: 5g
+    memswap_limit: 6g
+    restart: unless-stopped

@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# Moves the night's FITS frames from the observatory SSD to the archive server.
+#
+#   frames-upload              move every finished frame
+#   frames-upload --dry-run    only list what would be moved
+#
+# 1. Frames older than MIN_AGE_MIN minutes are copied with rsync into a staging
+#    directory on the archive server (same filesystem as the pipeline's incoming
+#    directory). rsync deletes each local file only after it has been fully and
+#    verifiably transferred.
+# 2. On the server every staged frame is renamed into INCOMING (flat). A rename is
+#    atomic, so the pipeline watcher never sees a half-written file, and a file moved
+#    in from outside the watched tree is reported as "created".
+#    A frame whose name already exists in INCOMING stays in staging (logged).
+#
+# Runs on the host (needs the ssh key/alias of the archive server), from:
+#   - frames-upload.path   when the Ekos Scheduler shutdown script requests it
+#   - frames-upload.timer  once a day as a fallback
+#   - by hand
+# Settings can be overridden in /etc/default/frames-upload.
+
+set -euo pipefail
+
+# shellcheck disable=SC1091
+[[ -r /etc/default/frames-upload ]] && . /etc/default/frames-upload
+
+FRAMES_DIR=${FRAMES_DIR:-/home/mik/fits}            # Ekos CaptureDirectory (same path in the container)
+DEST_HOST=${DEST_HOST:-archive}                     # ssh alias of the archive server
+DEST_STAGING=${DEST_STAGING:-/data/fits/upload}
+DEST_INCOMING=${DEST_INCOMING:-/data/fits/incoming}
+MIN_AGE_MIN=${MIN_AGE_MIN:-2}                       # skip files that may still be being written
+SCRIPTS_DIR="$(dirname "$(readlink -f "$0")")"
+LOG_FILE="$SCRIPTS_DIR/frames-upload.log"
+LOCK_FILE="$SCRIPTS_DIR/.frames-upload.lock"
+REQUEST_FILE="$SCRIPTS_DIR/.frames-upload.request"
+
+DRY_RUN=
+case "${1:-}" in
+"") ;;
+--dry-run) DRY_RUN=1 ;;
+*) sed -n '4,5p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+esac
+
+log() {
+    local line
+    line="$(date '+%F %T') $*"
+    echo "$line"
+    [[ -n $DRY_RUN ]] || echo "$line" >>"$LOG_FILE"
+}
+
+# The request has been seen: clear it first (even if another run holds the lock), so
+# frames-upload.path (PathExists) is re-armed and doesn't fire again in a loop.
+[[ -n $DRY_RUN ]] || rm -f "$REQUEST_FILE"
+
+exec 9>"$LOCK_FILE"
+flock -n 9 || { log "already running"; exit 0; }
+
+[[ -d $FRAMES_DIR ]] || { log "ERROR: $FRAMES_DIR does not exist"; exit 1; }
+
+LIST="$(mktemp)"
+trap 'rm -f "$LIST"' EXIT
+
+# Relative paths, NUL-separated, so any file name survives.
+(cd "$FRAMES_DIR" && find . -type f \( -iname '*.fits' -o -iname '*.fit' \) \
+    -mmin +"$MIN_AGE_MIN" -printf '%P\0') >"$LIST"
+
+count=$(tr -cd '\0' <"$LIST" | wc -c)
+size=$(cd "$FRAMES_DIR" && xargs -0 -r du -cb <"$LIST" | tail -1 | cut -f1)
+size=${size:-0}
+
+if [[ -n $DRY_RUN ]]; then
+    log "dry run: $count frame(s), $((size / 1048576)) MiB in $FRAMES_DIR"
+    tr '\0' '\n' <"$LIST"
+    exit 0
+fi
+
+if ((count > 0)); then
+    log "uploading $count frame(s), $((size / 1048576)) MiB → $DEST_HOST:$DEST_STAGING"
+    rsync -rt --from0 --files-from="$LIST" --remove-source-files \
+        --partial-dir=.rsync-partial --chmod=D2775,F664 --timeout=300 \
+        "$FRAMES_DIR"/ "$DEST_HOST:$DEST_STAGING"/
+    log "uploaded, local copies removed"
+    # Drop the empty target/type/filter folders left behind (not the root itself).
+    find "$FRAMES_DIR" -mindepth 1 -type d -empty -mmin +"$MIN_AGE_MIN" -delete 2>/dev/null || true
+fi
+
+# Publish everything that is in staging, including leftovers of an earlier run.
+# shellcheck disable=SC2087
+result="$(ssh -o BatchMode=yes "$DEST_HOST" bash -s -- "$DEST_STAGING" "$DEST_INCOMING" <<'REMOTE'
+set -euo pipefail
+staging=$1 incoming=$2
+moved=0 kept=0
+while IFS= read -r -d '' f; do
+    name=${f##*/}
+    if [[ -e "$incoming/$name" ]]; then
+        echo "KEPT $f (already in incoming)"
+        kept=$((kept + 1))
+    else
+        mv -n "$f" "$incoming/$name"
+        moved=$((moved + 1))
+    fi
+done < <(find "$staging" -type f \( -iname '*.fits' -o -iname '*.fit' \) \
+    -not -path '*/.rsync-partial/*' -print0)
+find "$staging" -mindepth 1 -type d -empty -not -name .rsync-partial -delete 2>/dev/null || true
+echo "MOVED $moved KEPT $kept"
+REMOTE
+)"
+while IFS= read -r line; do log "server: $line"; done <<<"$result"
