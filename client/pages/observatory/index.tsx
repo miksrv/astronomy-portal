@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react'
-import { cn } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
 import Link from 'next/link'
@@ -12,6 +11,7 @@ import {
     Camera,
     ConditionsVerdict,
     ForecastCard,
+    ObservatoryStatus,
     ObservingSessions,
     RelayList,
     SkyCard,
@@ -33,6 +33,12 @@ const WEATHER_POLLING_MS = 60_000
 /** Older weather than this means the link to the observatory is down */
 const STALE_WEATHER_MINUTES = 30
 
+/** The agent posts a snapshot every minute or so: ask at that pace */
+const OBSERVATORY_POLLING_MS = 60_000
+
+/** The recent events fetched at once: "Show more" reveals them without another request */
+const EVENTS_LIMIT = 40
+
 interface ObservatoryPageProps {
     nights: TelescopeNight[]
 }
@@ -48,6 +54,22 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = ({ nights }) => {
         isError: weatherError
     } = APIMeteo.useGetCurrentQuery(undefined, {
         pollingInterval: WEATHER_POLLING_MS,
+        skipPollingIfUnfocused: true
+    })
+    const {
+        data: observatory,
+        isLoading: observatoryLoading,
+        isError: observatoryError
+    } = API.useObservatoryGetStatusQuery(undefined, {
+        pollingInterval: OBSERVATORY_POLLING_MS,
+        skipPollingIfUnfocused: true
+    })
+    const {
+        data: observatoryEvents,
+        isLoading: eventsLoading,
+        isError: eventsError
+    } = API.useObservatoryGetEventsQuery(EVENTS_LIMIT, {
+        pollingInterval: OBSERVATORY_POLLING_MS,
         skipPollingIfUnfocused: true
     })
     const { data: forecastDaily, isLoading: dailyLoading, isError: dailyError } = APIMeteo.useGetForecastDailyQuery()
@@ -130,38 +152,6 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = ({ nights }) => {
                 }
             />
 
-            <div className={styles.status}>
-                <span className={styles.livePill}>
-                    <span
-                        className={cn(
-                            styles.liveDot,
-                            online && styles.online,
-                            minutesAgo !== undefined && !online && styles.offline
-                        )}
-                        aria-hidden={'true'}
-                    />
-                    {minutesAgo === undefined ? (
-                        t('pages.observatory.connecting', 'Подключение…')
-                    ) : online ? (
-                        <>
-                            <b>{t('pages.observatory.online', 'Онлайн')}</b>
-                            {' · '}
-                            {minutesAgo < 1
-                                ? t('pages.observatory.updated-now', 'обновлено только что')
-                                : t('pages.observatory.updated-ago', 'обновлено {{count}} мин назад', {
-                                      count: minutesAgo
-                                  })}
-                        </>
-                    ) : (
-                        <>
-                            <b>{t('pages.observatory.offline', 'Нет связи')}</b>
-                            {' · '}
-                            {t('pages.observatory.updated-ago', 'обновлено {{count}} мин назад', { count: minutesAgo })}
-                        </>
-                    )}
-                </span>
-            </div>
-
             <ConditionsVerdict
                 weather={weather}
                 now={now}
@@ -174,6 +164,8 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = ({ nights }) => {
                     weather={weather}
                     loading={weatherLoading}
                     error={weatherError}
+                    online={online}
+                    minutesAgo={minutesAgo}
                 />
                 <SkyCard now={now} />
                 <ForecastCard
@@ -186,11 +178,21 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = ({ nights }) => {
                 />
             </div>
 
-            <h2 className={styles.sectionTitle}>{t('pages.observatory.cameras', 'Камеры')}</h2>
+            <h2 className={styles.sectionTitle}>{t('pages.observatory.state', 'Состояние оборудования')}</h2>
+            <ObservatoryStatus
+                status={observatory}
+                loading={observatoryLoading}
+                error={observatoryError}
+                now={now}
+                events={observatoryEvents?.items}
+                eventsLoading={eventsLoading}
+                eventsError={eventsError}
+            />
+
             <div className={styles.cameras}>
                 <Camera
                     cameraURL={`${process.env.NEXT_PUBLIC_API_HOST}camera/2`}
-                    interval={4}
+                    interval={6}
                     label={t('pages.observatory.camera-observatory', 'Обсерватория')}
                 />
                 <Camera
@@ -200,9 +202,7 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = ({ nights }) => {
                 />
             </div>
 
-            <h2 className={styles.sectionTitle}>
-                {t('pages.observatory.equipment', 'Оборудование и работа телескопа')}
-            </h2>
+            <h2 className={styles.sectionTitle}>{t('pages.observatory.power-history', 'Питание и история съёмки')}</h2>
             <div className={styles.equipment}>
                 <RelayList />
                 <ObservingSessions nights={nights} />

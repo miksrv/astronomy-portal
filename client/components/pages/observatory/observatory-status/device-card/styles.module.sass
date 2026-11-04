@@ -1,0 +1,194 @@
+@use '../../../../../styles/typography' as type
+
+.deviceCard
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+    min-width: 0
+    padding: var(--space-3) var(--space-4)
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
+    container-type: inline-size
+
+    // A device that is off: the card stays, its readings go
+    &.disconnected
+        gap: 0
+
+        .name, .role
+            color: var(--text-color-secondary)
+
+        .title svg
+            opacity: 0.6
+
+    // The last known data of a lost link: dimmed, not hidden
+    &.stale > :not(.head)
+        opacity: 0.55
+
+    // Something is wrong with the device: a tinted edge, so it stands out in the column
+    &.error
+        box-shadow: inset 3px 0 0 var(--color-red)
+
+    &.warning
+        box-shadow: inset 3px 0 0 var(--color-orange)
+
+// What INDI reports in Alert, under the header of a warning card
+.alerts
+    +type.secondary
+    margin: 0
+    color: var(--color-orange)
+
+.head
+    display: grid
+    grid-template-columns: minmax(0, 1fr) auto
+    align-items: center
+    gap: var(--space-1) var(--space-3)
+
+    // A narrow card: the badges go under the name
+    @container (max-width: 520px)
+        grid-template-columns: minmax(0, 1fr)
+
+.title
+    +type.titleBlock
+    display: flex
+    flex-wrap: wrap
+    align-items: baseline
+    gap: 0 var(--space-2)
+    min-width: 0
+    margin: 0
+
+    svg
+        flex: none
+        align-self: center
+        width: 18px
+        height: 18px
+        fill: var(--text-color-secondary)
+
+.name
+    min-width: 0
+    overflow-wrap: anywhere
+
+.role
+    +type.caption
+
+.badges
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    justify-content: flex-end
+    gap: var(--space-2)
+
+    @container (max-width: 520px)
+        justify-content: flex-start
+
+.driver
+    +type.caption
+    grid-column: 1 / -1
+    margin: 0
+    overflow-wrap: anywhere
+
+// Readings: label over value, in as many columns as fit
+.facts
+    display: grid
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr))
+    gap: var(--space-2) var(--space-4)
+    margin: 0
+
+.fact
+    min-width: 0
+
+    dt
+        +type.caption
+
+    dd
+        +type.body
+        margin: 2px 0 0
+        font-variant-numeric: tabular-nums
+        font-weight: var(--font-weight-medium)
+        overflow-wrap: anywhere
+
+    small
+        +type.caption
+        display: block
+        font-weight: var(--font-weight-normal)
+
+.meter
+    height: 6px
+    margin-top: var(--space-1)
+    border-radius: var(--radius-sm)
+    background: var(--surface-3)
+    overflow: hidden
+
+    span
+        display: block
+        height: 100%
+        border-radius: inherit
+        background: var(--color-main)
+        transition: width var(--duration-slow) var(--ease)
+
+        @media (prefers-reduced-motion: reduce)
+            transition: none
+
+    &.positive span
+        background: var(--color-green)
+
+    &.warning span
+        background: var(--color-orange)
+
+.note
+    +type.secondary
+    margin: 0
+
+// The filter wheel's slots
+.chips
+    // Every slot gets an equal share of the card's width; very narrow cards wrap
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(44px, 1fr))
+    gap: var(--space-2)
+    margin: 0
+    padding: 0
+    list-style: none
+
+.chip
+    +type.body
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    gap: var(--space-2)
+    min-height: 32px
+    padding: 0 var(--space-3) 0 var(--space-2)
+    border-radius: var(--radius-sm)
+    background: var(--surface-3)
+    color: var(--text-color-secondary)
+
+    &.active
+        background: var(--color-main-background)
+        box-shadow: inset 0 0 0 1px var(--color-main)
+        color: var(--text-color-primary)
+        font-weight: var(--font-weight-semibold)
+
+    &.moving
+        animation: pulse 1.2s var(--ease) infinite
+
+        @media (prefers-reduced-motion: reduce)
+            animation: none
+
+.slot
+    +type.caption
+    min-width: 16px
+    font-variant-numeric: tabular-nums
+    text-align: center
+
+@keyframes pulse
+    50%
+        opacity: 0.5
+
+// Three equal columns across the card; two on a narrow card
+.three
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+
+    @container (max-width: 420px)
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+
+// One reading that is a sentence: the full width
+.single
+    grid-template-columns: minmax(0, 1fr)

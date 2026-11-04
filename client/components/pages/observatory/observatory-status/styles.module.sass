@@ -1,0 +1,118 @@
+@use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
+
+// One block: the summary on top, the devices on the left, the sky map and the event log on the right
+.observatoryStatus
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+    min-width: 0
+
+.skeletonSummary
+    height: 56px
+
+.skeletonBlock
+    height: 420px
+
+.empty
+    +type.secondary
+    margin: 0
+
+.summary
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    justify-content: space-between
+    gap: var(--space-2) var(--space-6)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column
+        align-items: flex-start
+
+.summaryFacts
+    display: flex
+    flex-wrap: wrap
+    gap: var(--space-2) var(--space-6)
+    margin: 0
+
+    dt
+        +type.caption
+
+    dd
+        +type.body
+        display: flex
+        flex-wrap: wrap
+        align-items: center
+        gap: var(--space-2)
+        margin: 0
+        font-weight: var(--font-weight-medium)
+
+.job
+    font-weight: var(--font-weight-normal)
+
+.layout
+    display: grid
+    grid-template-columns: minmax(0, 7fr) minmax(300px, 5fr)
+    // Both columns as tall as the taller one: the log fills what the map leaves
+    align-items: stretch
+    gap: var(--space-4)
+
+    // Phones: the summary, the map, the devices, the log
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: minmax(0, 1fr)
+
+        .side
+            display: contents
+
+            > :first-child
+                order: 1
+
+            > :last-child
+                order: 3
+
+        .cards
+            order: 2
+
+.cards
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+    min-width: 0
+
+// In place of the device cards while INDI is off
+.cardsEmpty
+    +type.secondary
+    display: flex
+    flex-direction: column
+    gap: var(--space-1)
+    padding: var(--space-5)
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
+
+    b
+        +type.body
+        color: var(--text-color-primary)
+        font-weight: var(--font-weight-semibold)
+
+.side
+    display: flex
+    flex-direction: column
+    gap: var(--space-5)
+    min-width: 0
+    min-height: 0
+
+    // The log under the map takes the rest of the column — the device cards set the block's
+    // height, a longer log scrolls inside. Phones stack everything, so there the log is as long
+    // as its content
+    @media only screen and (min-width: variables.$mobileMaxWidth + 1)
+        > :last-child
+            flex: 1 1 0
+            min-height: 240px
+
+// "Last received data — 3 November, 04:47 · Hide" over the stale cards
+.lastNote
+    display: inline-flex
+    flex-wrap: wrap
+    align-items: center
+    gap: var(--space-2)
+
