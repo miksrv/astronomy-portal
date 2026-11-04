@@ -335,6 +335,22 @@ export const API = createApi({
             })
         }),
 
+        /* Catalog controller (OpenNGC) */
+        catalogSearch: builder.query<ApiType.Catalog.ResSearch, ApiType.Catalog.ReqSearch>({
+            query: ({ q, limit = 10 }) => `catalog/search${encodeQueryData({ limit, q })}`
+        }),
+        catalogGetItem: builder.query<ApiModel.CatalogDetails, string>({
+            query: (name) => `catalog/${encodeURIComponent(name)}`
+        }),
+
+        /* Observatory controller (what the agent on the observatory host reports) */
+        observatoryGetStatus: builder.query<ApiType.Observatory.ResStatus, void>({
+            query: () => 'observatory/status'
+        }),
+        observatoryGetEvents: builder.query<ApiType.Observatory.ResEvents, number>({
+            query: (limit) => `observatory/events?limit=${limit}`
+        }),
+
         /* Files controller */
         filesGetList: builder.query<ApiType.Files.Response, string>({
             providesTags: (res, err, id) => [{ id, type: 'Files' }],

@@ -38,4 +38,6 @@ export interface Object {
     updated?: ApiType.DateTime
     statistic?: ApiModel.Statistic
     filters?: ApiModel.Filters
+    /** The OpenNGC facts for the object (`GET /objects/:name` only); `null` when it is not in the catalog */
+    catalog?: ApiModel.CatalogItem | null
 }
