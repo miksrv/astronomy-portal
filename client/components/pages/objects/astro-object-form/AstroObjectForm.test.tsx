@@ -12,7 +12,16 @@ jest.mock('@/api', () => ({
     }
 }))
 
+// The stub "finds" M 31 (magnitude 3.4) on a click
 jest.mock('@/components/common', () => ({
+    CatalogSearch: ({ onSelect }: { onSelect: (item: unknown) => void }) => (
+        <button
+            type={'button'}
+            onClick={() => onSelect({ ra: 10.68, dec: 41.27, magnitude: 3.4 })}
+        >
+            {'catalog-pick'}
+        </button>
+    ),
     StarMap: () => <div data-testid={'star-map'} />
 }))
 
@@ -113,5 +122,29 @@ describe('AstroObjectForm', () => {
         render(<AstroObjectForm error={{ message: 'Ошибка сохранения', errors: { name: 'Это имя уже занято' } }} />)
 
         expect(await screen.findByText('Это имя уже занято')).toBeDefined()
+    })
+
+    it('fills the position and an empty magnitude from a catalog pick', async () => {
+        render(<AstroObjectForm />)
+
+        fireEvent.click(screen.getByText('catalog-pick'))
+
+        await waitFor(() => {
+            expect(screen.getByDisplayValue('10.68')).toBeDefined()
+        })
+        expect(screen.getByDisplayValue('41.27')).toBeDefined()
+        expect(screen.getByDisplayValue('3.4')).toBeDefined()
+    })
+
+    it('keeps the magnitude an editor already entered', async () => {
+        render(<AstroObjectForm initialData={{ magnitude: 5 }} />)
+
+        fireEvent.click(screen.getByText('catalog-pick'))
+
+        await waitFor(() => {
+            expect(screen.getByDisplayValue('10.68')).toBeDefined()
+        })
+        expect(screen.getByDisplayValue('5')).toBeDefined()
+        expect(screen.queryByDisplayValue('3.4')).toBeNull()
     })
 })

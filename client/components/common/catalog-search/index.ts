@@ -1,0 +1,1 @@
+export { CatalogSearch } from './CatalogSearch'

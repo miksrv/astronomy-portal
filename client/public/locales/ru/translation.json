@@ -18,6 +18,13 @@
                     "logout": "Выйти"
                 }
             },
+            "catalog-search": {
+                "placeholder": "M 31, NGC 7000, Андромеда…",
+                "results": "Результаты поиска по каталогу",
+                "searching": "Ищем…",
+                "error": "Каталог не отвечает",
+                "empty": "Ничего не найдено"
+            },
             "cookie-consent": {
                 "title": "Уведомление об использовании cookies",
                 "text": "Сайт использует cookies и собирает метрические данные для улучшения работы. Продолжая пользоваться сайтом, вы соглашаетесь с",
@@ -176,6 +183,27 @@
         "edit": "Редактировать",
         "go-to-home-page": "На главную",
         "telegram": "Телеграм",
+        "catalog-type": {
+            "galaxy": "Галактика",
+            "globular-cluster": "Шаровое скопление",
+            "open-cluster": "Рассеянное скопление",
+            "planetary-nebula": "Планетарная туманность",
+            "hii-region": "Область HII",
+            "nebula": "Туманность",
+            "supernova-remnant": "Остаток сверхновой",
+            "cluster-nebula": "Скопление с туманностью",
+            "association": "Звёздная ассоциация",
+            "reflection-nebula": "Отражательная туманность",
+            "emission-nebula": "Эмиссионная туманность",
+            "dark-nebula": "Тёмная туманность",
+            "galaxy-pair": "Пара галактик",
+            "galaxy-triplet": "Тройка галактик",
+            "galaxy-group": "Группа галактик",
+            "star": "Звезда",
+            "double-star": "Двойная звезда",
+            "nova": "Новая звезда",
+            "other": "Другое"
+        },
         "day_one": "{{count}} день",
         "day_few": "{{count}} дня",
         "day_many": "{{count}} дней",

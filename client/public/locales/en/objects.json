@@ -3,6 +3,7 @@
         "pages": {
             "objects": {
                 "astro-object-form": {
+                    "catalog-search": "Find in the catalog",
                     "category": "Category",
                     "not-found": "Nothing found",
                     "categories-placeholder": "Select one or more categories",
@@ -20,6 +21,15 @@
                     "dec-required": "Enter the DEC value",
                     "dec-range": "DEC must be between -90 and 90",
                     "distance-positive": "Distance must be greater than zero"
+                },
+                "object-catalog-facts": {
+                    "designations": "Designations",
+                    "names": "Other names",
+                    "surface-brightness": "Surface brightness",
+                    "surface-brightness-unit": "mag / arcsec²",
+                    "hubble": "Morphological type",
+                    "title": "Catalog data",
+                    "attribution": "Catalog data:"
                 },
                 "object-filters": {
                     "title": "Exposure by filter",
@@ -63,6 +73,8 @@
                     "right-ascension": "Right ascension",
                     "declination": "Declination",
                     "constellation": "Constellation",
+                    "type": "Type",
+                    "size": "Angular size",
                     "distance": "Distance",
                     "light-years": "light years",
                     "magnitude": "Magnitude",

@@ -1,0 +1,26 @@
+@use '../../../../styles/typography' as type
+
+.catalogFacts
+    margin-top: var(--space-6)
+
+.title
+    +type.titleSection
+    margin: 0 0 var(--space-3)
+
+.facts
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))
+    gap: var(--space-3) var(--space-4)
+    margin: 0
+
+    dt
+        +type.caption
+
+    dd
+        +type.body
+        margin: 2px 0 0
+        overflow-wrap: anywhere
+
+.attribution
+    +type.caption
+    margin: var(--space-3) 0 0

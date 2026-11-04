@@ -9,6 +9,7 @@ import { API, ApiModel, HOST_IMG, SITE_LINK, wrapper } from '@/api'
 import { AppFooter, AppLayout, BreadcrumbJsonLd } from '@/components/common'
 import { VisibilityChart } from '@/components/common/visibility-chart'
 import {
+    ObjectCatalogFacts,
     ObjectDescription,
     ObjectFilters,
     ObjectHero,
@@ -185,11 +186,20 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 : []),
             ...(hasFrames ? [{ id: 'log', label: t('pages.object.nav-log', 'Журнал наблюдений') }] : []),
             ...(photos.length ? [{ id: 'photos', label: t('pages.object.nav-photos', 'Снимки') }] : []),
-            ...(objectData.description || related.length
+            ...(objectData.description || related.length || objectData.catalog
                 ? [{ id: 'about', label: t('pages.object.nav-about', 'Об объекте') }]
                 : [])
         ],
-        [showChart, showFilters, hasFrames, photos.length, objectData.description, related.length, t]
+        [
+            showChart,
+            showFilters,
+            hasFrames,
+            photos.length,
+            objectData.description,
+            objectData.catalog,
+            related.length,
+            t
+        ]
     )
 
     return (
@@ -215,6 +225,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 photo={photos[0]}
                 photosCount={photos.length}
                 constellation={constellation ?? undefined}
+                catalog={objectData.catalog}
                 visibility={visibility}
                 isMoving={isMoving}
                 actions={[
@@ -319,7 +330,7 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 </section>
             )}
 
-            {(!!objectData.description || !!related.length) && (
+            {(!!objectData.description || !!related.length || !!objectData.catalog) && (
                 <section
                     id={'about'}
                     className={styles.section}
@@ -327,6 +338,8 @@ const ObjectItemPage: NextPage<ObjectItemPageProps> = ({
                 >
                     <h2 id={'about-title'}>{t('pages.object.about-title', 'Об объекте')}</h2>
                     {objectData.description && <ObjectDescription text={objectData.description} />}
+
+                    {objectData.catalog && <ObjectCatalogFacts catalog={objectData.catalog} />}
 
                     {!!related.length && firstCategory && (
                         <>

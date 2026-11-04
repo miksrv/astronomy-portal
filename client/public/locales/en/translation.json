@@ -18,6 +18,13 @@
                     "logout": "Log out"
                 }
             },
+            "catalog-search": {
+                "placeholder": "M 31, NGC 7000, Andromeda…",
+                "results": "Catalog search results",
+                "searching": "Searching…",
+                "error": "The catalog is not responding",
+                "empty": "Nothing found"
+            },
             "cookie-consent": {
                 "title": "Cookie notice",
                 "text": "This site uses cookies and collects analytics data to improve the service. By continuing to use the site, you agree to the",
@@ -174,6 +181,27 @@
         "edit": "Edit",
         "go-to-home-page": "Home",
         "telegram": "Telegram",
+        "catalog-type": {
+            "galaxy": "Galaxy",
+            "globular-cluster": "Globular cluster",
+            "open-cluster": "Open cluster",
+            "planetary-nebula": "Planetary nebula",
+            "hii-region": "HII region",
+            "nebula": "Nebula",
+            "supernova-remnant": "Supernova remnant",
+            "cluster-nebula": "Cluster with nebulosity",
+            "association": "Stellar association",
+            "reflection-nebula": "Reflection nebula",
+            "emission-nebula": "Emission nebula",
+            "dark-nebula": "Dark nebula",
+            "galaxy-pair": "Pair of galaxies",
+            "galaxy-triplet": "Galaxy triplet",
+            "galaxy-group": "Group of galaxies",
+            "star": "Star",
+            "double-star": "Double star",
+            "nova": "Nova",
+            "other": "Other"
+        },
         "day_one": "{{count}} day",
         "day_other": "{{count}} days",
         "hour_one": "{{count}} hour",

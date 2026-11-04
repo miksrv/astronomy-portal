@@ -3,6 +3,7 @@
         "pages": {
             "objects": {
                 "astro-object-form": {
+                    "catalog-search": "Найти в каталоге",
                     "category": "Категория",
                     "not-found": "Ничего не найдено",
                     "categories-placeholder": "Выберите одну или несколько категорий",
@@ -20,6 +21,15 @@
                     "dec-required": "Введите значение DEC",
                     "dec-range": "DEC должно быть в диапазоне от -90 до 90",
                     "distance-positive": "Расстояние должно быть больше нуля"
+                },
+                "object-catalog-facts": {
+                    "designations": "Обозначения",
+                    "names": "Другие названия",
+                    "surface-brightness": "Поверхностная яркость",
+                    "surface-brightness-unit": "зв. вел. / кв. угл. сек.",
+                    "hubble": "Морфологический тип",
+                    "title": "Данные каталога",
+                    "attribution": "Данные каталога:"
                 },
                 "object-filters": {
                     "title": "Выдержка по фильтрам",
@@ -71,6 +81,8 @@
                     "right-ascension": "Прямое восхождение",
                     "declination": "Склонение",
                     "constellation": "Созвездие",
+                    "type": "Тип",
+                    "size": "Угловой размер",
                     "distance": "Расстояние",
                     "light-years": "св. лет",
                     "magnitude": "Звёздная величина",

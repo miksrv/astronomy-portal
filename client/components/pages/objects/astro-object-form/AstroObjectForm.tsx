@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel } from '@/api'
-import { StarMap } from '@/components/common'
+import { CatalogSearch, StarMap } from '@/components/common'
 import useApiFormError from '@/hooks/useApiFormError'
 import useScrollToApiFieldErrors from '@/hooks/useScrollToApiFieldErrors'
 import useSyncApiFieldErrors from '@/hooks/useSyncApiFieldErrors'
@@ -63,8 +63,10 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
 
     const {
         control,
+        getValues,
         handleSubmit,
         reset,
+        setValue,
         setError,
         formState: { isSubmitting }
     } = useForm<AstroObjectFormValues>({
@@ -119,6 +121,16 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
 
     const isFormDisabled = !!disabled || isSubmitting
 
+    // A pick from the OpenNGC catalog fills the position; the magnitude only when nobody entered it
+    const handleCatalogSelect = (item: ApiModel.CatalogItem) => {
+        setValue('ra', item.ra, { shouldDirty: true, shouldValidate: true })
+        setValue('dec', item.dec, { shouldDirty: true, shouldValidate: true })
+
+        if (Number.isNaN(getValues('magnitude')) && typeof item.magnitude === 'number') {
+            setValue('magnitude', item.magnitude, { shouldDirty: true })
+        }
+    }
+
     const onValidSubmit = (values: AstroObjectFormValues) => {
         // Snapshot the star map canvas as it looks right now, at save time, so
         // the object gets a thumbnail matching the coordinates just entered -
@@ -147,6 +159,13 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                 onSubmit={handleSubmit(onValidSubmit, onInvalidSubmit)}
                 noValidate={true}
             >
+                <CatalogSearch
+                    className={styles.catalogSearch}
+                    disabled={isFormDisabled}
+                    label={t('components.pages.objects.astro-object-form.catalog-search', 'Найти в каталоге')}
+                    onSelect={handleCatalogSelect}
+                />
+
                 <div className={styles.sections}>
                     <div className={styles.inputSection}>
                         <Controller

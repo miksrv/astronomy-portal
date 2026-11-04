@@ -8,6 +8,7 @@ import { useTranslation } from 'next-i18next/pages'
 import { ApiModel } from '@/api'
 import { PageAction, PageActions } from '@/components/common'
 import { Breadcrumbs, StatusBadge } from '@/components/ui'
+import { formatCatalogSize, getCatalogTypeLabel } from '@/utils/catalog'
 import { formatDECShort, formatRAShort } from '@/utils/coordinates'
 import { formatCalendarDate } from '@/utils/dates'
 import { getObjectStatus } from '@/utils/objects'
@@ -29,6 +30,8 @@ interface ObjectHeroProps {
     photo?: ObjectPagePhoto
     photosCount: number
     constellation?: string
+    /** OpenNGC facts: they fill what the editor left empty (the magnitude) and add the type and the size */
+    catalog?: ApiModel.CatalogItem | null
     /** Tonight's visibility: `undefined` until computed on the client */
     visibility?: Visibility
     /** A comet, an asteroid or a planet: its coordinates are from the shooting date */
@@ -48,6 +51,7 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
     photo,
     photosCount,
     constellation,
+    catalog,
     visibility,
     isMoving,
     actions
@@ -86,6 +90,10 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
         t('components.pages.objects.object-hero.does-not-rise', 'не поднимается')
     )
 
+    // The editor's value wins, the catalog fills the gap
+    const magnitude = typeof object.magnitude === 'number' ? object.magnitude : catalog?.magnitude
+    const catalogSize = formatCatalogSize(catalog?.majAxis, catalog?.minAxis, i18n.language)
+
     const facts: Array<{ label: string; value?: React.ReactNode }> = [
         {
             label: t('components.pages.objects.object-hero.right-ascension', 'Прямое восхождение'),
@@ -97,6 +105,14 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
         },
         { label: t('components.pages.objects.object-hero.constellation', 'Созвездие'), value: constellation },
         {
+            label: t('components.pages.objects.object-hero.type', 'Тип'),
+            value: catalog ? getCatalogTypeLabel(catalog.type, t) : undefined
+        },
+        {
+            label: t('components.pages.objects.object-hero.size', 'Угловой размер'),
+            value: catalogSize
+        },
+        {
             label: t('components.pages.objects.object-hero.distance', 'Расстояние'),
             value: object.distance ? (
                 <>
@@ -107,8 +123,7 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
         },
         {
             label: t('components.pages.objects.object-hero.magnitude', 'Звёздная величина'),
-            value:
-                typeof object.magnitude === 'number' ? `${object.magnitude.toLocaleString(i18n.language)}ᵐ` : undefined
+            value: typeof magnitude === 'number' ? `${magnitude.toLocaleString(i18n.language)}ᵐ` : undefined
         },
         {
             label: t('components.pages.objects.object-hero.tonight', 'Сегодня ночью'),
