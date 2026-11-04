@@ -315,6 +315,11 @@ export const API = createApi({
             providesTags: (res, err, id) => [{ id, type: 'Objects' }],
             query: (id) => `objects/${id}`
         }),
+        /** The object form's "Найти в SIMBAD": a lookup only (objects.manage) */
+        objectsSimbadLookup: builder.query<ApiType.Objects.SimbadFacts, string>({
+            keepUnusedDataFor: 600,
+            query: (name) => `objects/simbad/${encodeURIComponent(name)}`
+        }),
         objectsPatch: builder.mutation<ApiType.Objects.Response | ApiType.ResError, Partial<ApiType.Objects.Request>>({
             invalidatesTags: (result, error, { name }) => [
                 { id: name, type: 'Objects' },
@@ -333,14 +338,6 @@ export const API = createApi({
                 method: 'POST',
                 url: 'objects'
             })
-        }),
-
-        /* Catalog controller (OpenNGC) */
-        catalogSearch: builder.query<ApiType.Catalog.ResSearch, ApiType.Catalog.ReqSearch>({
-            query: ({ q, limit = 10 }) => `catalog/search${encodeQueryData({ limit, q })}`
-        }),
-        catalogGetItem: builder.query<ApiModel.CatalogDetails, string>({
-            query: (name) => `catalog/${encodeURIComponent(name)}`
         }),
 
         /* Observatory controller (what the agent on the observatory host reports) */

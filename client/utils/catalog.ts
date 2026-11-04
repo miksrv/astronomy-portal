@@ -1,71 +1,78 @@
 import { TFunction } from 'i18next'
 
-import { ApiModel } from '@/api'
-
-/** "NGC598" -> "NGC 598", "IC1396" -> "IC 1396"; anything else is returned as is */
-export const formatDesignation = (designation?: string | null): string => {
-    const match = /^([A-Za-z]+)\s*(\d.*)$/.exec(designation ?? '')
-
-    return match ? `${match[1]} ${match[2]}` : (designation ?? '')
-}
-
-/** The names people know an object by: "M 33", "NGC 598" (Messier first) */
-export const getCatalogDesignations = (item: Pick<ApiModel.CatalogItem, 'messier' | 'designation'>): string[] => [
-    ...(item.messier ? [`M ${item.messier}`] : []),
-    ...(item.designation ? [formatDesignation(item.designation)] : [])
+/** SIMBAD object types (`otype`, https://simbad.cds.unistra.fr/guide/otypes.htx) by the label shown for them */
+const GALAXY_TYPES = [
+    'G',
+    'GiG',
+    'GiC',
+    'GiP',
+    'BiC',
+    'AGN',
+    'SyG',
+    'Sy1',
+    'Sy2',
+    'LIN',
+    'SBG',
+    'H2G',
+    'EmG',
+    'rG',
+    'LSB',
+    'bCG'
 ]
+const NEBULA_TYPES = ['GNe', 'ISM', 'EmO', 'sh', 'bub']
 
-/** "M 31 · NGC 224" */
-export const formatCatalogTitle = (item: Pick<ApiModel.CatalogItem, 'messier' | 'designation'>): string =>
-    getCatalogDesignations(item).join(' · ')
-
-/** The human name of an OpenNGC type code; an unknown code is shown as it is */
-export const getCatalogTypeLabel = (code: string | null | undefined, t: TFunction): string => {
+/** The human name of a SIMBAD object type; nothing for a type we don't name (better no label than a code) */
+export const getObjectTypeLabel = (code: string | null | undefined, t: TFunction): string | undefined => {
     if (!code) {
-        return ''
+        return undefined
+    }
+
+    if (GALAXY_TYPES.includes(code)) {
+        return t('common.object-type.galaxy', 'Галактика')
+    }
+
+    if (NEBULA_TYPES.includes(code)) {
+        return t('common.object-type.nebula', 'Туманность')
     }
 
     switch (code) {
-        case 'G':
-            return t('common.catalog-type.galaxy', 'Галактика')
-        case 'GCl':
-            return t('common.catalog-type.globular-cluster', 'Шаровое скопление')
-        case 'OCl':
-            return t('common.catalog-type.open-cluster', 'Рассеянное скопление')
+        case 'PaG':
+        case 'IG':
+            return t('common.object-type.interacting-galaxies', 'Взаимодействующие галактики')
+        case 'GrG':
+        case 'CGG':
+            return t('common.object-type.galaxy-group', 'Группа галактик')
+        case 'ClG':
+            return t('common.object-type.galaxy-cluster', 'Скопление галактик')
+        case 'GlC':
+            return t('common.object-type.globular-cluster', 'Шаровое скопление')
+        case 'OpC':
+            return t('common.object-type.open-cluster', 'Рассеянное скопление')
+        case 'Cl*':
+            return t('common.object-type.star-cluster', 'Звёздное скопление')
+        case 'As*':
+            return t('common.object-type.association', 'Звёздная ассоциация')
         case 'PN':
-            return t('common.catalog-type.planetary-nebula', 'Планетарная туманность')
+            return t('common.object-type.planetary-nebula', 'Планетарная туманность')
         case 'HII':
-            return t('common.catalog-type.hii-region', 'Область HII')
-        case 'Neb':
-            return t('common.catalog-type.nebula', 'Туманность')
+            return t('common.object-type.hii-region', 'Область HII')
         case 'SNR':
-            return t('common.catalog-type.supernova-remnant', 'Остаток сверхновой')
-        case 'Cl+N':
-            return t('common.catalog-type.cluster-nebula', 'Скопление с туманностью')
-        case '*Ass':
-            return t('common.catalog-type.association', 'Звёздная ассоциация')
-        case 'RfN':
-            return t('common.catalog-type.reflection-nebula', 'Отражательная туманность')
-        case 'EmN':
-            return t('common.catalog-type.emission-nebula', 'Эмиссионная туманность')
-        case 'DrkN':
-            return t('common.catalog-type.dark-nebula', 'Тёмная туманность')
-        case 'GPair':
-            return t('common.catalog-type.galaxy-pair', 'Пара галактик')
-        case 'GTrpl':
-            return t('common.catalog-type.galaxy-triplet', 'Тройка галактик')
-        case 'GGroup':
-            return t('common.catalog-type.galaxy-group', 'Группа галактик')
-        case '*':
-            return t('common.catalog-type.star', 'Звезда')
+            return t('common.object-type.supernova-remnant', 'Остаток сверхновой')
+        case 'RNe':
+            return t('common.object-type.reflection-nebula', 'Отражательная туманность')
+        case 'DNe':
+        case 'Cld':
+        case 'MoC':
+            return t('common.object-type.dark-nebula', 'Тёмная туманность')
+        case 'SN*':
+            return t('common.object-type.supernova', 'Сверхновая')
+        case 'No*':
+            return t('common.object-type.nova', 'Новая звезда')
         case '**':
-            return t('common.catalog-type.double-star', 'Двойная звезда')
-        case 'Nova':
-            return t('common.catalog-type.nova', 'Новая звезда')
-        case 'Other':
-            return t('common.catalog-type.other', 'Другое')
+            return t('common.object-type.double-star', 'Двойная звезда')
         default:
-            return code
+            // The many kinds of single stars: `*`, `PM*`, `V*`, `WR*`…
+            return code.endsWith('*') ? t('common.object-type.star', 'Звезда') : undefined
     }
 }
 
@@ -87,3 +94,7 @@ export const formatCatalogSize = (
 
     return minor && minor !== major ? `${major} × ${minor}′` : `${major}′`
 }
+
+/** The object's page in SIMBAD */
+export const getSimbadUrl = (simbadId: string): string =>
+    `https://simbad.cds.unistra.fr/simbad/sim-id?Ident=${encodeURIComponent(simbadId)}`

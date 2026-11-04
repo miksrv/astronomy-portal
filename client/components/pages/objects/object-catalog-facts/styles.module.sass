@@ -7,19 +7,10 @@
     +type.titleSection
     margin: 0 0 var(--space-3)
 
-.facts
-    display: grid
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))
-    gap: var(--space-3) var(--space-4)
+.aliases
+    +type.body
     margin: 0
-
-    dt
-        +type.caption
-
-    dd
-        +type.body
-        margin: 2px 0 0
-        overflow-wrap: anywhere
+    overflow-wrap: anywhere
 
 .attribution
     +type.caption

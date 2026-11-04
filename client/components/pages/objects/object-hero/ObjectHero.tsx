@@ -8,7 +8,8 @@ import { useTranslation } from 'next-i18next/pages'
 import { ApiModel } from '@/api'
 import { PageAction, PageActions } from '@/components/common'
 import { Breadcrumbs, StatusBadge } from '@/components/ui'
-import { formatCatalogSize, getCatalogTypeLabel } from '@/utils/catalog'
+import { useLeavingPage } from '@/hooks/useLeavingPage'
+import { formatCatalogSize, getObjectTypeLabel } from '@/utils/catalog'
 import { formatDECShort, formatRAShort } from '@/utils/coordinates'
 import { formatCalendarDate } from '@/utils/dates'
 import { getObjectStatus } from '@/utils/objects'
@@ -30,8 +31,6 @@ interface ObjectHeroProps {
     photo?: ObjectPagePhoto
     photosCount: number
     constellation?: string
-    /** OpenNGC facts: they fill what the editor left empty (the magnitude) and add the type and the size */
-    catalog?: ApiModel.CatalogItem | null
     /** Tonight's visibility: `undefined` until computed on the client */
     visibility?: Visibility
     /** A comet, an asteroid or a planet: its coordinates are from the shooting date */
@@ -51,12 +50,13 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
     photo,
     photosCount,
     constellation,
-    catalog,
     visibility,
     isMoving,
     actions
 }) => {
     const { t, i18n } = useTranslation()
+    // Going to another object: its photo is taken off the screen until the next page comes
+    const leaving = useLeavingPage('objects', object.name)
 
     const status = getObjectStatus({ ...object, photosCount })
     const hasFrames = status !== 'none'
@@ -90,9 +90,9 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
         t('components.pages.objects.object-hero.does-not-rise', 'не поднимается')
     )
 
-    // The editor's value wins, the catalog fills the gap
-    const magnitude = typeof object.magnitude === 'number' ? object.magnitude : catalog?.magnitude
-    const catalogSize = formatCatalogSize(catalog?.majAxis, catalog?.minAxis, i18n.language)
+    // The type and the size are SIMBAD's; the magnitude the editor's or, when empty, SIMBAD's
+    const magnitude = object.magnitude
+    const catalogSize = formatCatalogSize(object.majAxis, object.minAxis, i18n.language)
 
     const facts: Array<{ label: string; value?: React.ReactNode }> = [
         {
@@ -106,7 +106,7 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
         { label: t('components.pages.objects.object-hero.constellation', 'Созвездие'), value: constellation },
         {
             label: t('components.pages.objects.object-hero.type', 'Тип'),
-            value: catalog ? getCatalogTypeLabel(catalog.type, t) : undefined
+            value: getObjectTypeLabel(object.type, t)
         },
         {
             label: t('components.pages.objects.object-hero.size', 'Угловой размер'),
@@ -161,12 +161,14 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
                 {photo ? (
                     <Link
                         href={`/photos/${photo.id}`}
-                        className={styles.photo}
+                        className={cn(styles.photo, leaving && styles.leaving)}
                         title={t('components.pages.objects.object-hero.open-photo', 'Открыть снимок {{name}}', {
                             name
                         })}
                     >
+                        {/* Keyed by the photo: the previous object's picture must not linger while this one loads */}
                         <Image
+                            key={photo.id}
                             src={photo.large}
                             alt={t('components.pages.objects.object-hero.photo-alt', 'Фото {{name}}', {
                                 name: object.title || name
@@ -193,13 +195,14 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
                     </Link>
                 ) : surveyUrl ? (
                     <div
-                        className={cn(styles.photo, styles.survey)}
+                        className={cn(styles.photo, styles.survey, leaving && styles.leaving)}
                         title={t(
                             'components.pages.objects.object-hero.survey-credit',
                             'Digitized Sky Survey (STScI), через NASA SkyView'
                         )}
                     >
                         <Image
+                            key={surveyUrl}
                             src={surveyUrl}
                             alt={t('components.pages.objects.object-hero.survey-alt', '{{name}} в обзоре неба DSS2', {
                                 name: object.title || name
