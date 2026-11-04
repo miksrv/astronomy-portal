@@ -1,0 +1,112 @@
+@use '../../../styles/typography' as type
+
+.markdownEditor
+    display: flex
+    flex-direction: column
+    min-width: 0
+
+// The label on the left, "Текст / Просмотр" on the right
+.header
+    display: flex
+    align-items: flex-end
+    justify-content: space-between
+    gap: var(--space-2)
+    margin-bottom: var(--space-2)
+
+// Looks like the kit's field labels
+.label
+    color: var(--input-label-color)
+    font-size: var(--input-label-font-size)
+    font-weight: var(--input-label-font-weight)
+    line-height: var(--line-height)
+
+    &.required::after
+        content: '*'
+        margin-left: 3px
+        color: var(--color-red)
+
+.views
+    flex-shrink: 0
+
+// The field: a toolbar on top of the text, one frame around both, as a kit input has
+.box
+    border: var(--input-border)
+    border-radius: var(--input-radius)
+    background: var(--input-background-color)
+    transition: border-color var(--duration-fast, 0.15s), box-shadow var(--duration-fast, 0.15s)
+
+    &:focus-within
+        border-color: var(--input-border-focus-color)
+        box-shadow: var(--focus-ring)
+
+    &.error
+        border-color: var(--color-red)
+
+    &.hidden
+        display: none
+
+.toolbar
+    display: flex
+    flex-wrap: wrap
+    gap: 2px
+    padding: var(--space-1)
+    border-bottom: 1px solid var(--border)
+
+// Nested: the kit's `.button.unstyled` resets padding and height with two classes
+.toolbar .tool
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    min-width: 32px
+    height: 32px
+    padding: 0 var(--space-2)
+    border-radius: var(--radius-md)
+    color: var(--text-color-secondary)
+    font-size: var(--font-size)
+
+    &:hover:not(:disabled)
+        background: var(--surface-2)
+        color: var(--text-color-primary)
+
+    &:focus-visible
+        outline: var(--focus-outline)
+        outline-offset: -2px
+
+    &:disabled
+        opacity: 0.5
+
+.textArea
+    margin: 0
+
+    // The kit's ghost field has no padding (`!important`, three classes deep) and its own focus
+    // ring: the frame here is the box's
+    .markdownEditor .box &.textArea textarea
+        padding: var(--space-3) !important
+        border: none !important
+        box-shadow: none !important
+        font-variant-ligatures: none
+        resize: none
+
+.preview
+    +type.prose
+    min-height: 160px
+    padding: var(--space-3)
+    overflow-wrap: anywhere
+
+    > :first-child
+        margin-top: 0
+
+    > :last-child
+        margin-bottom: 0
+
+.empty
+    color: var(--text-color-secondary)
+
+.hint
+    +type.caption
+    margin: var(--space-1) 0 0
+
+.errorText
+    +type.caption
+    margin: var(--space-1) 0 0
+    color: var(--color-red)

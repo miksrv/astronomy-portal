@@ -8,22 +8,34 @@ import { AstroObjectForm } from './AstroObjectForm'
 
 jest.mock('@/api', () => ({
     API: {
-        useCategoriesGetListQuery: jest.fn()
+        useCategoriesGetListQuery: jest.fn(),
+        useLazyObjectsSimbadLookupQuery: jest.fn()
     }
 }))
 
-// The stub "finds" M 31 (magnitude 3.4) on a click
 jest.mock('@/components/common', () => ({
-    CatalogSearch: ({ onSelect }: { onSelect: (item: unknown) => void }) => (
-        <button
-            type={'button'}
-            onClick={() => onSelect({ ra: 10.68, dec: 41.27, magnitude: 3.4 })}
-        >
-            {'catalog-pick'}
-        </button>
-    ),
-    StarMap: () => <div data-testid={'star-map'} />
+    StarMap: () => <div data-testid={'star-map'} />,
+    MarkdownEditor: ({ name, value, onChange }: { name: string; value: string; onChange: (v: string) => void }) => (
+        <textarea
+            name={name}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+        />
+    )
 }))
+
+const M51 = {
+    simbadId: 'M 51',
+    ra: 202.4696,
+    dec: 47.1952,
+    type: 'Sy2',
+    majAxis: 9,
+    minAxis: 7.8,
+    magnitude: 8.36,
+    aliases: ['M 51', 'NGC 5194']
+}
+
+const lookup = jest.fn()
 
 // `simple-react-ui-kit` itself uses the project's shared Jest manual mock
 // (`client/__mocks__/simple-react-ui-kit.tsx`) - its `Select` is a
@@ -39,6 +51,8 @@ const defaultCategoriesState = {
 beforeEach(() => {
     jest.clearAllMocks()
     ;(API.useCategoriesGetListQuery as jest.Mock).mockReturnValue(defaultCategoriesState)
+    lookup.mockResolvedValue({ data: M51 })
+    ;(API.useLazyObjectsSimbadLookupQuery as jest.Mock).mockReturnValue([lookup, { isFetching: false }])
 })
 
 describe('AstroObjectForm', () => {
@@ -46,7 +60,7 @@ describe('AstroObjectForm', () => {
         const handleSubmit = jest.fn()
         render(<AstroObjectForm onSubmit={handleSubmit} />)
 
-        fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Добавить объект' }))
 
         await waitFor(() => {
             expect(screen.getByText('Выберите хотя бы одну категорию')).toBeDefined()
@@ -80,7 +94,7 @@ describe('AstroObjectForm', () => {
             target: { value: '41.2' }
         })
 
-        fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Добавить объект' }))
 
         await waitFor(() => {
             expect(handleSubmit).toHaveBeenCalledWith(
@@ -102,7 +116,7 @@ describe('AstroObjectForm', () => {
             target: { value: '999' }
         })
 
-        fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Добавить объект' }))
 
         await waitFor(() => {
             expect(screen.getByText('RA должно быть в диапазоне от 0 до 360')).toBeDefined()
@@ -118,33 +132,124 @@ describe('AstroObjectForm', () => {
         expect(screen.getByDisplayValue('Андромеда')).toBeDefined()
     })
 
+    it('reads the coordinates of an atlas: RA in hours, Dec in degrees and minutes', async () => {
+        const handleSubmit = jest.fn()
+        const { container } = render(
+            <AstroObjectForm
+                initialData={{ categories: [1] }}
+                onSubmit={handleSubmit}
+            />
+        )
+
+        fireEvent.change(container.querySelector('input[name="name"]') as HTMLInputElement, {
+            target: { value: 'M_51' }
+        })
+        fireEvent.change(container.querySelector('input[name="title"]') as HTMLInputElement, {
+            target: { value: 'Водоворот' }
+        })
+        fireEvent.change(container.querySelector('input[name="ra"]') as HTMLInputElement, {
+            target: { value: '13:29:52.7' }
+        })
+        fireEvent.change(container.querySelector('input[name="dec"]') as HTMLInputElement, {
+            target: { value: '+47° 11′ 43″' }
+        })
+
+        fireEvent.click(screen.getByRole('button', { name: 'Добавить объект' }))
+
+        await waitFor(() => expect(handleSubmit).toHaveBeenCalled())
+
+        const submitted = handleSubmit.mock.calls[0][0]
+        expect(submitted.ra).toBeCloseTo(202.4696, 3)
+        expect(submitted.dec).toBeCloseTo(47.1953, 3)
+    })
+
+    it('rejects a name with spaces: it is the name of the FITS frames', async () => {
+        const { container } = render(<AstroObjectForm />)
+
+        fireEvent.change(container.querySelector('input[name="name"]') as HTMLInputElement, {
+            target: { value: 'M 51' }
+        })
+        fireEvent.click(screen.getByRole('button', { name: 'Добавить объект' }))
+
+        expect(await screen.findByText('Вместо пробелов используйте подчёркивание: M_51')).toBeDefined()
+    })
+
+    it('keeps the name of an edited object read-only and shows a form-level server error', () => {
+        const { container } = render(
+            <AstroObjectForm
+                initialData={{ name: 'M_51', title: 'Водоворот', ra: 202.47, dec: 47.19, categories: [1] }}
+                error={{ message: 'Сервер недоступен' }}
+            />
+        )
+
+        expect((container.querySelector('input[name="name"]') as HTMLInputElement).disabled).toBe(true)
+        expect(screen.getByRole('button', { name: 'Сохранить изменения' })).toBeDefined()
+        expect(screen.getByText('Сервер недоступен')).toBeDefined()
+    })
+
+    it('fills the empty coordinates and magnitude from SIMBAD and saves its facts with the form', async () => {
+        const handleSubmit = jest.fn()
+        const { container } = render(
+            <AstroObjectForm
+                initialData={{ categories: [1] }}
+                onSubmit={handleSubmit}
+            />
+        )
+
+        fireEvent.change(container.querySelector('input[name="name"]') as HTMLInputElement, {
+            target: { value: 'M_51' }
+        })
+        fireEvent.change(container.querySelector('input[name="title"]') as HTMLInputElement, {
+            target: { value: 'Водоворот' }
+        })
+        fireEvent.click(screen.getByRole('button', { name: 'Найти в SIMBAD' }))
+
+        expect(await screen.findByText(/Подставлено/)).toBeDefined()
+        expect(lookup).toHaveBeenCalledWith('M_51', true)
+        expect((container.querySelector('input[name="ra"]') as HTMLInputElement).value).toBe('202.4696')
+
+        fireEvent.click(screen.getByRole('button', { name: 'Добавить объект' }))
+
+        await waitFor(() => expect(handleSubmit).toHaveBeenCalled())
+        expect(handleSubmit.mock.calls[0][0]).toEqual(
+            expect.objectContaining({ ra: 202.4696, dec: 47.1952, magnitude: 8.36, simbad: M51 })
+        )
+    })
+
+    it('offers SIMBAD coordinates when they differ from the typed ones instead of overwriting them', async () => {
+        const { container } = render(
+            <AstroObjectForm initialData={{ name: 'M_94', title: 'M 94', ra: 12.83, dec: 41.12, categories: [1] }} />
+        )
+
+        fireEvent.click(screen.getByRole('button', { name: 'Найти в SIMBAD' }))
+
+        expect(await screen.findByRole('button', { name: 'Взять координаты SIMBAD' })).toBeDefined()
+        expect((container.querySelector('input[name="ra"]') as HTMLInputElement).value).toBe('12.83')
+
+        fireEvent.click(screen.getByRole('button', { name: 'Взять координаты SIMBAD' }))
+
+        await waitFor(() =>
+            expect((container.querySelector('input[name="ra"]') as HTMLInputElement).value).toBe('202.4696')
+        )
+    })
+
+    it('still sends the name of an edited object although its field is disabled', async () => {
+        const handleSubmit = jest.fn()
+        render(
+            <AstroObjectForm
+                initialData={{ name: 'M_51', title: 'Водоворот', ra: 202.47, dec: 47.19, categories: [1] }}
+                onSubmit={handleSubmit}
+            />
+        )
+
+        fireEvent.click(screen.getByRole('button', { name: 'Сохранить изменения' }))
+
+        await waitFor(() => expect(handleSubmit).toHaveBeenCalledWith(expect.objectContaining({ name: 'M_51' })))
+    })
+
     it('surfaces a server-side field error returned for the name field', async () => {
         render(<AstroObjectForm error={{ message: 'Ошибка сохранения', errors: { name: 'Это имя уже занято' } }} />)
 
         expect(await screen.findByText('Это имя уже занято')).toBeDefined()
-    })
-
-    it('fills the position and an empty magnitude from a catalog pick', async () => {
-        render(<AstroObjectForm />)
-
-        fireEvent.click(screen.getByText('catalog-pick'))
-
-        await waitFor(() => {
-            expect(screen.getByDisplayValue('10.68')).toBeDefined()
-        })
-        expect(screen.getByDisplayValue('41.27')).toBeDefined()
-        expect(screen.getByDisplayValue('3.4')).toBeDefined()
-    })
-
-    it('keeps the magnitude an editor already entered', async () => {
-        render(<AstroObjectForm initialData={{ magnitude: 5 }} />)
-
-        fireEvent.click(screen.getByText('catalog-pick'))
-
-        await waitFor(() => {
-            expect(screen.getByDisplayValue('10.68')).toBeDefined()
-        })
-        expect(screen.getByDisplayValue('5')).toBeDefined()
-        expect(screen.queryByDisplayValue('3.4')).toBeNull()
     })
 })

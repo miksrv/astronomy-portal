@@ -1,1 +1,1 @@
-export { AstroObjectForm, type AstroObjectFormType } from './AstroObjectForm'
+export { AstroObjectForm, AstroObjectFormSkeleton, type AstroObjectFormType } from './AstroObjectForm'

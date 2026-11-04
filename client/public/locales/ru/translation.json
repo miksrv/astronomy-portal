@@ -18,13 +18,6 @@
                     "logout": "Выйти"
                 }
             },
-            "catalog-search": {
-                "placeholder": "M 31, NGC 7000, Андромеда…",
-                "results": "Результаты поиска по каталогу",
-                "searching": "Ищем…",
-                "error": "Каталог не отвечает",
-                "empty": "Ничего не найдено"
-            },
             "cookie-consent": {
                 "title": "Уведомление об использовании cookies",
                 "text": "Сайт использует cookies и собирает метрические данные для улучшения работы. Продолжая пользоваться сайтом, вы соглашаетесь с",
@@ -52,6 +45,22 @@
                 "privacy-link": "Политике конфиденциальности",
                 "email-required": "Введите email",
                 "email-invalid": "Введите корректный email"
+            },
+            "markdown-editor": {
+                "placeholder": "текст",
+                "link-text": "текст ссылки",
+                "bold": "Жирный (⌘B)",
+                "italic": "Курсив (⌘I)",
+                "heading": "Подзаголовок",
+                "list": "Список",
+                "numbered": "Нумерованный список",
+                "quote": "Цитата",
+                "link": "Ссылка (⌘K)",
+                "view": "Вид",
+                "write": "Текст",
+                "preview": "Просмотр",
+                "toolbar": "Форматирование",
+                "empty": "Пока пусто — напишите текст во вкладке «Текст»"
             },
             "object-photos-table": {
                 "photo": "Фотография",
@@ -99,6 +108,12 @@
             "snackbar-stack": {
                 "close": "Закрыть уведомление",
                 "label": "Уведомления"
+            },
+            "unsaved-changes": {
+                "title": "Уйти без сохранения?",
+                "text": "В форме есть несохранённые изменения. Если уйти со страницы, они пропадут.",
+                "stay": "Остаться",
+                "leave": "Уйти без сохранения"
             },
             "visibility-chart": {
                 "title": "Высота над горизонтом этой ночью",
@@ -171,38 +186,37 @@
         "page-actions": "Действия",
         "loading": "Загрузка...",
         "cancel": "Отмена",
-        "save": "Сохранить",
         "frames_one": "{{count}} кадр",
         "frames_few": "{{count}} кадра",
         "frames_many": "{{count}} кадров",
         "frames_other": "{{count}} кадров",
         "star-map": "Звёздная карта",
         "hours-unit": "ч",
+        "save": "Сохранить",
         "delete": "Удалить",
         "done": "Готово",
         "edit": "Редактировать",
         "go-to-home-page": "На главную",
         "telegram": "Телеграм",
-        "catalog-type": {
+        "object-type": {
             "galaxy": "Галактика",
+            "nebula": "Туманность",
+            "interacting-galaxies": "Взаимодействующие галактики",
+            "galaxy-group": "Группа галактик",
+            "galaxy-cluster": "Скопление галактик",
             "globular-cluster": "Шаровое скопление",
             "open-cluster": "Рассеянное скопление",
+            "star-cluster": "Звёздное скопление",
+            "association": "Звёздная ассоциация",
             "planetary-nebula": "Планетарная туманность",
             "hii-region": "Область HII",
-            "nebula": "Туманность",
             "supernova-remnant": "Остаток сверхновой",
-            "cluster-nebula": "Скопление с туманностью",
-            "association": "Звёздная ассоциация",
             "reflection-nebula": "Отражательная туманность",
-            "emission-nebula": "Эмиссионная туманность",
             "dark-nebula": "Тёмная туманность",
-            "galaxy-pair": "Пара галактик",
-            "galaxy-triplet": "Тройка галактик",
-            "galaxy-group": "Группа галактик",
-            "star": "Звезда",
-            "double-star": "Двойная звезда",
+            "supernova": "Сверхновая",
             "nova": "Новая звезда",
-            "other": "Другое"
+            "double-star": "Двойная звезда",
+            "star": "Звезда"
         },
         "day_one": "{{count}} день",
         "day_few": "{{count}} дня",

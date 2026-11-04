@@ -1,4 +1,4 @@
-export { AstroObjectForm, type AstroObjectFormType } from './astro-object-form'
+export { AstroObjectForm, AstroObjectFormSkeleton, type AstroObjectFormType } from './astro-object-form'
 export { ObjectCatalogFacts } from './object-catalog-facts'
 export { ObjectDescription } from './object-description'
 export { ObjectFilters } from './object-filters'
