@@ -90,7 +90,8 @@ export const useUnsavedChangesGuard = (when: boolean): UnsavedChangesGuard => {
     // the visitor decides
     useEffect(() => {
         const currentState: unknown = window.history.state
-        const currentUrl = router.asPath
+        // The real address, with the locale prefix (`/en/...`) that `router.asPath` leaves out
+        const currentUrl = window.location.pathname + window.location.search + window.location.hash
 
         router.beforePopState(() => {
             if (!isBlocking()) {
@@ -104,6 +105,18 @@ export const useUnsavedChangesGuard = (when: boolean): UnsavedChangesGuard => {
         })
 
         return () => router.beforePopState(() => true)
+    }, [router])
+
+    // The navigation the visitor chose didn't happen (an error, the same address): the form is
+    // guarded again
+    useEffect(() => {
+        const handleError = () => {
+            leavingRef.current = false
+        }
+
+        router.events.on('routeChangeError', handleError)
+
+        return () => router.events.off('routeChangeError', handleError)
     }, [router])
 
     // Closing or reloading the tab

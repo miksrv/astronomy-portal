@@ -63,3 +63,10 @@ def test_precession_matches_reference():
     back = date_to_j2000(ra, dec, when)
     assert abs(back[0] - 10.684708) < 1e-6 and abs(back[1] - 41.26875) < 1e-6
     assert field_of_view(9576, 6388, 3.76, 0) is None
+
+
+def test_parse_number_rejects_non_finite():
+    # A confused driver's nan/inf would break int() in the snapshot and the portal's JSON
+    assert parse_number("nan") is None
+    assert parse_number("inf") is None
+    assert parse_number("-inf") is None

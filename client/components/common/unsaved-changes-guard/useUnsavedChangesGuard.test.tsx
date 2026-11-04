@@ -7,7 +7,8 @@ import { useUnsavedChangesGuard } from './useUnsavedChangesGuard'
 const mockRouter = {
     push: jest.fn(() => Promise.resolve(true)),
     beforePopState: jest.fn(),
-    asPath: '/objects/form?id=M_51'
+    asPath: '/objects/form?id=M_51',
+    events: { on: jest.fn(), off: jest.fn() }
 }
 
 jest.mock('next/router', () => ({

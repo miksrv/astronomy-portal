@@ -147,7 +147,8 @@ class Objects extends BaseApiController
             return $this->respondForbidden(lang('App.accessDenied'));
         }
 
-        $name = trim(urldecode((string) $name));
+        // The router has already decoded the segment
+        $name = trim((string) $name);
 
         if ($name === '' || mb_strlen($name) > 80) {
             return $this->respondInvalidRequest('SIMBAD lookup without a name');
@@ -249,9 +250,17 @@ class Objects extends BaseApiController
             return $this->respondValidationErrors(['name' => lang('Objects.nameAlreadyExists')], null, 409);
         }
 
-        $categories = is_array($input['categories'] ?? null) ? array_map('intval', $input['categories']) : [];
+        // Each category once, and only real ids: a duplicate would fail the insert below
+        $categories = is_array($input['categories'] ?? null)
+            ? array_values(array_unique(array_filter(array_map('intval', $input['categories']), static fn ($id) => $id > 0)))
+            : [];
 
         try {
+            // The object and its categories together: a failed category must not leave an object
+            // behind that a retry then calls a duplicate
+            $db = \Config\Database::connect();
+            $db->transException(true)->transStart();
+
             $objectsModel->insert($input);
 
             $objectCategoryModel = new ObjectCategoryModel();
@@ -262,6 +271,8 @@ class Objects extends BaseApiController
                     'category_id' => $categoryId,
                 ]);
             }
+
+            $db->transComplete();
 
             if (!$simbad) {
                 $this->_fillFromSimbad($input, $categories);

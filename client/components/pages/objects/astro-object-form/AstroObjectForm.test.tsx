@@ -216,6 +216,32 @@ describe('AstroObjectForm', () => {
         )
     })
 
+    it('drops the SIMBAD facts when the name changes after the lookup', async () => {
+        const handleSubmit = jest.fn()
+        const { container } = render(
+            <AstroObjectForm
+                initialData={{ categories: [1] }}
+                onSubmit={handleSubmit}
+            />
+        )
+        const name = container.querySelector('input[name="name"]') as HTMLInputElement
+
+        fireEvent.change(name, { target: { value: 'M_51' } })
+        fireEvent.change(container.querySelector('input[name="title"]') as HTMLInputElement, {
+            target: { value: 'Водоворот' }
+        })
+        fireEvent.click(screen.getByRole('button', { name: 'Найти в SIMBAD' }))
+        expect(await screen.findByText(/Подставлено/)).toBeDefined()
+
+        fireEvent.change(name, { target: { value: 'M_33' } })
+        await waitFor(() => expect(screen.queryByText(/Подставлено/)).toBeNull())
+
+        fireEvent.click(screen.getByRole('button', { name: 'Добавить объект' }))
+
+        await waitFor(() => expect(handleSubmit).toHaveBeenCalled())
+        expect(handleSubmit.mock.calls[0][0]).toEqual(expect.objectContaining({ name: 'M_33', simbad: null }))
+    })
+
     it('offers SIMBAD coordinates when they differ from the typed ones instead of overwriting them', async () => {
         const { container } = render(
             <AstroObjectForm initialData={{ name: 'M_94', title: 'M 94', ra: 12.83, dec: 41.12, categories: [1] }} />

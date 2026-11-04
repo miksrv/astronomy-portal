@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 import codecs
 import logging
+import math
 import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
@@ -53,14 +54,19 @@ class Property:
 
 
 def parse_number(value: str | None) -> float | None:
-    """INDI numbers are decimal, or sexagesimal (`12:30:00`, `-5 23 22`)."""
+    """INDI numbers are decimal, or sexagesimal (`12:30:00`, `-5 23 22`).
+
+    A non-finite value (`nan`, `inf` from a confused driver) is no number: it would break
+    `int()` in the snapshot and the JSON the portal accepts.
+    """
     if value is None:
         return None
     text = value.strip()
     if not text:
         return None
     try:
-        return float(text)
+        number = float(text)
+        return number if math.isfinite(number) else None
     except ValueError:
         pass
     parts = text.replace(" ", ":").split(":")

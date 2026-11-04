@@ -51,28 +51,30 @@ export const SimbadPanel: React.FC<SimbadPanelProps> = ({
 }) => {
     const { t, i18n } = useTranslation()
 
-    if (error && !loading) {
-        return (
+    // A failed lookup is said above what is already known, it doesn't hide it
+    const warning =
+        error && !loading ? (
             <Message type={'warning'}>
                 {getErrorMessage(error) ||
                     t('components.pages.objects.astro-object-form.simbad-error', 'SIMBAD не отвечает')}
             </Message>
-        )
-    }
+        ) : null
 
     if (!facts) {
         return (
-            <p className={styles.simbadNote}>
-                {isEdit
-                    ? t(
-                          'components.pages.objects.astro-object-form.simbad-none',
-                          'Объект ещё не сверялся с SIMBAD. Нажмите «Найти в SIMBAD» — подставим тип, угловой размер и другие обозначения.'
-                      )
-                    : t(
-                          'components.pages.objects.astro-object-form.simbad-create',
-                          'Нажмите «Найти в SIMBAD» — подставим координаты, тип, угловой размер и звёздную величину. Если не нажимать, данные подтянутся из SIMBAD при сохранении.'
-                      )}
-            </p>
+            warning ?? (
+                <p className={styles.simbadNote}>
+                    {isEdit
+                        ? t(
+                              'components.pages.objects.astro-object-form.simbad-none',
+                              'Объект ещё не сверялся с SIMBAD. Нажмите «Найти в SIMBAD» — подставим тип, угловой размер и другие обозначения.'
+                          )
+                        : t(
+                              'components.pages.objects.astro-object-form.simbad-create',
+                              'Нажмите «Найти в SIMBAD» — подставим координаты, тип, угловой размер и звёздную величину. Если не нажимать, данные подтянутся из SIMBAD при сохранении.'
+                          )}
+                </p>
+            )
         )
     }
 
@@ -85,72 +87,75 @@ export const SimbadPanel: React.FC<SimbadPanelProps> = ({
     const coordinatesDiffer = offset !== undefined && offset > SAME_POSITION_DEGREES
 
     return (
-        <div className={cn(styles.simbadCard, loading && styles.simbadLoading)}>
-            <p className={styles.simbadTitle}>
-                <a
-                    href={getSimbadUrl(facts.simbadId)}
-                    target={'_blank'}
-                    rel={'noopener noreferrer'}
-                >
-                    {facts.simbadId}
-                </a>
-                {[type, size, magnitude].filter(Boolean).map((fact) => (
-                    <span key={fact}>{fact}</span>
-                ))}
-            </p>
-
-            {!!facts.aliases.length && (
-                <p className={styles.simbadAliases}>
-                    {t('components.pages.objects.astro-object-form.simbad-aliases', 'Другие обозначения:')}{' '}
-                    {facts.aliases.join(', ')}
+        <div className={styles.simbadPanel}>
+            {warning}
+            <div className={cn(styles.simbadCard, loading && styles.simbadLoading)}>
+                <p className={styles.simbadTitle}>
+                    <a
+                        href={getSimbadUrl(facts.simbadId)}
+                        target={'_blank'}
+                        rel={'noopener noreferrer'}
+                    >
+                        {facts.simbadId}
+                    </a>
+                    {[type, size, magnitude].filter(Boolean).map((fact) => (
+                        <span key={fact}>{fact}</span>
+                    ))}
                 </p>
-            )}
 
-            {fresh && !!filled?.length && (
-                <p className={styles.simbadFilled}>
-                    {t('components.pages.objects.astro-object-form.simbad-filled', 'Подставлено: {{fields}}', {
-                        fields: filled.join(', ')
-                    })}
+                {!!facts.aliases.length && (
+                    <p className={styles.simbadAliases}>
+                        {t('components.pages.objects.astro-object-form.simbad-aliases', 'Другие обозначения:')}{' '}
+                        {facts.aliases.join(', ')}
+                    </p>
+                )}
+
+                {fresh && !!filled?.length && (
+                    <p className={styles.simbadFilled}>
+                        {t('components.pages.objects.astro-object-form.simbad-filled', 'Подставлено: {{fields}}', {
+                            fields: filled.join(', ')
+                        })}
+                    </p>
+                )}
+
+                {coordinatesDiffer && (
+                    <div className={styles.simbadOffset}>
+                        <span>
+                            {t(
+                                'components.pages.objects.astro-object-form.simbad-offset',
+                                'В SIMBAD координаты {{ra}} {{dec}} — в {{offset}}° от введённых',
+                                {
+                                    ra: formatRAShort(facts.ra),
+                                    dec: formatDECShort(facts.dec),
+                                    offset: Number(offset.toFixed(offset < 1 ? 2 : 1)).toLocaleString(i18n.language)
+                                }
+                            )}
+                        </span>
+                        <Button
+                            type={'button'}
+                            size={'small'}
+                            mode={'secondary'}
+                            label={t(
+                                'components.pages.objects.astro-object-form.simbad-use-coordinates',
+                                'Взять координаты SIMBAD'
+                            )}
+                            onClick={onUseCoordinates}
+                        />
+                    </div>
+                )}
+
+                <p className={styles.simbadNote}>
+                    {fresh
+                        ? t(
+                              'components.pages.objects.astro-object-form.simbad-fresh',
+                              'Тип, размер и обозначения сохранятся вместе с формой.'
+                          )
+                        : t(
+                              'components.pages.objects.astro-object-form.simbad-stored',
+                              'Данные SIMBAD, сохранённые у объекта.'
+                          )}
                 </p>
-            )}
-
-            {coordinatesDiffer && (
-                <div className={styles.simbadOffset}>
-                    <span>
-                        {t(
-                            'components.pages.objects.astro-object-form.simbad-offset',
-                            'В SIMBAD координаты {{ra}} {{dec}} — в {{offset}}° от введённых',
-                            {
-                                ra: formatRAShort(facts.ra),
-                                dec: formatDECShort(facts.dec),
-                                offset: Number(offset.toFixed(offset < 1 ? 2 : 1)).toLocaleString(i18n.language)
-                            }
-                        )}
-                    </span>
-                    <Button
-                        type={'button'}
-                        size={'small'}
-                        mode={'secondary'}
-                        label={t(
-                            'components.pages.objects.astro-object-form.simbad-use-coordinates',
-                            'Взять координаты SIMBAD'
-                        )}
-                        onClick={onUseCoordinates}
-                    />
-                </div>
-            )}
-
-            <p className={styles.simbadNote}>
-                {fresh
-                    ? t(
-                          'components.pages.objects.astro-object-form.simbad-fresh',
-                          'Тип, размер и обозначения сохранятся вместе с формой.'
-                      )
-                    : t(
-                          'components.pages.objects.astro-object-form.simbad-stored',
-                          'Данные SIMBAD, сохранённые у объекта.'
-                      )}
-            </p>
+            </div>
         </div>
     )
 }

@@ -32,6 +32,8 @@ STARTUP_GRACE_SECONDS = 4.0
 MAX_PENDING_EVENTS = 200
 # Events per push, oldest first: a long backlog drains over a few pushes and never blocks the snapshot
 MAX_EVENTS_PER_PUSH = 50
+# Ekos polls in a row without an answer before the scheduler is taken as gone
+SCHEDULER_MISSES_TO_FORGET = 3
 
 
 class Agent:
@@ -46,6 +48,7 @@ class Agent:
         self.last_extra_push = 0.0
         self.profile: str | None = None
         self.scheduler: dict | None = None
+        self._scheduler_misses = 0
         self._last_host_poll = 0.0
 
     async def _poll_host(self) -> None:
@@ -56,7 +59,12 @@ class Agent:
         self._last_host_poll = now
         self.profile = await asyncio.to_thread(host.indiweb_profile, self.config.indiweb_url)
         if self.config.ekos_enabled:
-            self.scheduler = await asyncio.to_thread(host.ekos_scheduler, self.config.ekos_container, self.config.ekos_user)
+            scheduler = await asyncio.to_thread(host.ekos_scheduler, self.config.ekos_container, self.config.ekos_user)
+            # One failed DBus poll (a timeout, a slow `docker exec`) is not the end of the job:
+            # keep the last known state, or the log gets a false "finished" and "started" pair
+            self._scheduler_misses = 0 if scheduler is not None else self._scheduler_misses + 1
+            if scheduler is not None or self._scheduler_misses >= SCHEDULER_MISSES_TO_FORGET:
+                self.scheduler = scheduler
 
     def build(self) -> dict:
         return self.builder.build(

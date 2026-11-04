@@ -79,7 +79,12 @@
     margin: var(--space-1) 0 0
     font-variant-numeric: tabular-nums
 
-// What SIMBAD knows of the object, under its names
+// What SIMBAD knows of the object, under its names (a failed lookup's warning above it)
+.simbadPanel
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+
 .simbadCard
     display: flex
     flex-direction: column

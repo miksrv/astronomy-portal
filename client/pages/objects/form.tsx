@@ -21,9 +21,11 @@ const ObjectFormPage: NextPage<object> = () => {
     const [savedName, setSavedName] = useState<string>()
     const [dirty, setDirty] = useState(false)
 
+    // `currentData`, not `data`: going from one object's form to another's must not show the
+    // previous object meanwhile
     const {
-        data: objectData,
-        isLoading: objectLoading,
+        currentData: objectData,
+        isFetching: objectLoading,
         isError: objectError
     } = API.useObjectsGetItemQuery(id as string, {
         skip: !id

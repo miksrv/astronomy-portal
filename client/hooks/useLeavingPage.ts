@@ -21,7 +21,8 @@ export const useLeavingPage = (section: string, currentId: string): boolean => {
 
         const handleStart = (url: string, { shallow }: { shallow: boolean }) => {
             const id = pattern.exec(url)?.[1]
-            setLeaving(!shallow && !!id && decodeURIComponent(id) !== currentId)
+            // `/objects/form?id=…` is the editor of this item, not another one
+            setLeaving(!shallow && !!id && id !== 'form' && decodeURIComponent(id) !== currentId)
         }
         const handleEnd = () => setLeaving(false)
 

@@ -184,7 +184,18 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
     // "Найти в SIMBAD": the answer fills the empty fields; the rest is the editor's to decide
     const [lookupSimbad, { isFetching: simbadLoading, error: simbadError }] = API.useLazyObjectsSimbadLookupQuery()
     const [filled, setFilled] = useState<string[]>([])
+    const [lookedUpName, setLookedUpName] = useState<string>()
     const simbadValue = useWatch({ control, name: 'simbad' })
+
+    // The facts belong to the name they were found for: another name drops them, so they are
+    // never saved against a different object
+    useEffect(() => {
+        if (simbadValue && lookedUpName !== undefined && nameValue.trim() !== lookedUpName) {
+            setValue('simbad', null)
+            setFilled([])
+            setLookedUpName(undefined)
+        }
+    }, [nameValue, simbadValue, lookedUpName, setValue])
 
     const handleSimbadLookup = async () => {
         const name = getValues('name').trim()
@@ -211,6 +222,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
         const dirty = { shouldDirty: true, shouldValidate: false }
 
         setValue('simbad', facts, dirty)
+        setLookedUpName(name)
 
         if (parseRA(getValues('ra')) === undefined && parseDec(getValues('dec')) === undefined) {
             setValue('ra', coordinateToText(facts.ra), dirty)
@@ -430,7 +442,6 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                                             size={'medium'}
                                             required={true}
                                             disabled={isFormDisabled}
-                                            inputMode={'decimal'}
                                             autoComplete={'off'}
                                             className={styles.formElement}
                                             label={t(
