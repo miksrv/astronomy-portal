@@ -163,4 +163,4 @@ yarn eslint:fix && yarn prettier:fix && yarn test
 - [ ] Each stats widget is requested and rendered only when the user holds its specific privilege; no 403s occur for widgets a user can't see (because they're never requested)
 - [ ] `GET /members` gains `total` without changing its existing paginated `items` shape or breaking `/admin/users`
 - [ ] `AppHeader`'s admin dropdown and `/admin`'s tile grid share one source of truth for the link list — no second copy of the permission-to-route mapping
-- [ ] README's "User Roles & Permissions" tables are updated if any privilege's usage surface changed (it shouldn't — this feature reuses existing privileges only)
+- [ ] `docs/permissions.md` tables are updated if any privilege's usage surface changed (it shouldn't — this feature reuses existing privileges only)
