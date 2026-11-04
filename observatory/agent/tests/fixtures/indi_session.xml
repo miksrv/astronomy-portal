@@ -1,0 +1,169 @@
+<defSwitchVector device="EQMod Mount" name="CONNECTION" label="Connection" group="Main Control" state="Ok" perm="rw" rule="OneOfMany" timeout="60">
+    <defSwitch name="CONNECT" label="Connect">On</defSwitch>
+    <defSwitch name="DISCONNECT" label="Disconnect">Off</defSwitch>
+</defSwitchVector>
+<defNumberVector device="EQMod Mount" name="EQUATORIAL_EOD_COORD" label="Eq. Coordinates" group="Main Control" state="Ok" perm="rw" timeout="60">
+    <defNumber name="RA" label="RA (hh:mm:ss)" format="%010.6m" min="0" max="24" step="0">0.73689</defNumber>
+    <defNumber name="DEC" label="DEC (dd:mm:ss)" format="%010.6m" min="-90" max="90" step="0">41.4155</defNumber>
+</defNumberVector>
+<defNumberVector device="EQMod Mount" name="HORIZONTAL_COORD" label="Horizontal Coordinates" group="Main Control" state="Ok" perm="ro" timeout="60">
+    <defNumber name="AZ" label="Az" format="%010.6m" min="0" max="360" step="0">75.12</defNumber>
+    <defNumber name="ALT" label="Alt" format="%010.6m" min="-90" max="90" step="0">62.41</defNumber>
+</defNumberVector>
+<defSwitchVector device="EQMod Mount" name="TELESCOPE_PARK" label="Parking" group="Site Management" state="Ok" perm="rw" rule="OneOfMany" timeout="60">
+    <defSwitch name="PARK" label="Park(ed)">Off</defSwitch>
+    <defSwitch name="UNPARK" label="UnPark(ed)">On</defSwitch>
+</defSwitchVector>
+<defSwitchVector device="EQMod Mount" name="TELESCOPE_TRACK_STATE" label="Tracking" group="Main Control" state="Ok" perm="rw" rule="OneOfMany" timeout="60">
+    <defSwitch name="TRACK_ON" label="On">On</defSwitch>
+    <defSwitch name="TRACK_OFF" label="Off">Off</defSwitch>
+</defSwitchVector>
+<defSwitchVector device="EQMod Mount" name="TELESCOPE_PIER_SIDE" label="Pier Side" group="Main Control" state="Idle" perm="ro" rule="AtMostOne" timeout="60">
+    <defSwitch name="PIER_WEST" label="West (pointing east)">On</defSwitch>
+    <defSwitch name="PIER_EAST" label="East (pointing west)">Off</defSwitch>
+</defSwitchVector>
+<defSwitchVector device="ZWO CCD ASI6200MM Pro" name="CONNECTION" label="Connection" group="Main Control" state="Ok" perm="rw" rule="OneOfMany" timeout="60">
+    <defSwitch name="CONNECT" label="Connect">On</defSwitch>
+    <defSwitch name="DISCONNECT" label="Disconnect">Off</defSwitch>
+</defSwitchVector>
+<defNumberVector device="ZWO CCD ASI6200MM Pro" name="CCD_TEMPERATURE" label="Temperature" group="Main Control" state="Ok" perm="rw" timeout="60">
+    <defNumber name="CCD_TEMPERATURE_VALUE" label="Temperature (C)" format="%5.2f" min="-50" max="50" step="0">-10.07</defNumber>
+</defNumberVector>
+<defSwitchVector device="ZWO CCD ASI6200MM Pro" name="CCD_COOLER" label="Cooler" group="Main Control" state="Ok" perm="wo" rule="OneOfMany" timeout="0">
+    <defSwitch name="COOLER_ON" label="ON">On</defSwitch>
+    <defSwitch name="COOLER_OFF" label="OFF">Off</defSwitch>
+</defSwitchVector>
+<defNumberVector device="ZWO CCD ASI6200MM Pro" name="CCD_COOLER_POWER" label="Cooler power" group="Main Control" state="Ok" perm="ro" timeout="60">
+    <defNumber name="CCD_COOLER_VALUE" label="Percentage" format="%.f" min="0" max="100" step="1">34</defNumber>
+</defNumberVector>
+<defNumberVector device="ZWO CCD ASI6200MM Pro" name="CCD_EXPOSURE" label="Expose" group="Main Control" state="Busy" perm="rw" timeout="60">
+    <defNumber name="CCD_EXPOSURE_VALUE" label="Duration (s)" format="%.6f" min="0" max="3600" step="1">182.5</defNumber>
+</defNumberVector>
+<defSwitchVector device="ZWO EFW" name="CONNECTION" label="Connection" group="Main Control" state="Ok" perm="rw" rule="OneOfMany" timeout="60">
+    <defSwitch name="CONNECT" label="Connect">On</defSwitch>
+    <defSwitch name="DISCONNECT" label="Disconnect">Off</defSwitch>
+</defSwitchVector>
+<defNumberVector device="ZWO EFW" name="FILTER_SLOT" label="Filter Slot" group="Main Control" state="Ok" perm="rw" timeout="60">
+    <defNumber name="FILTER_SLOT_VALUE" label="Filter" format="%3.0f" min="1" max="7" step="1">1</defNumber>
+</defNumberVector>
+<defTextVector device="ZWO EFW" name="FILTER_NAME" label="Filter" group="Filter Wheel" state="Idle" perm="rw" timeout="0">
+    <defText name="FILTER_SLOT_NAME_1" label="Filter#1">L</defText>
+    <defText name="FILTER_SLOT_NAME_2" label="Filter#2">R</defText>
+    <defText name="FILTER_SLOT_NAME_3" label="Filter#3">G</defText>
+    <defText name="FILTER_SLOT_NAME_4" label="Filter#4">B</defText>
+    <defText name="FILTER_SLOT_NAME_5" label="Filter#5">H</defText>
+    <defText name="FILTER_SLOT_NAME_6" label="Filter#6">O</defText>
+    <defText name="FILTER_SLOT_NAME_7" label="Filter#7">S</defText>
+</defTextVector>
+<defSwitchVector device="Roll Roof" name="CONNECTION" label="Connection" group="Main Control" state="Ok" perm="rw" rule="OneOfMany" timeout="60">
+    <defSwitch name="CONNECT" label="Connect">On</defSwitch>
+    <defSwitch name="DISCONNECT" label="Disconnect">Off</defSwitch>
+</defSwitchVector>
+<defTextVector device="Roll Roof" name="ROOF" label="Roll-off-roof" group="Main Control" state="Ok" perm="ro" timeout="60">
+    <defText name="ROOF" label="Position status">OPEN</defText>
+</defTextVector>
+<defTextVector device="Roll Roof" name="TELESCOPE" label="Telescope" group="Main Control" state="Ok" perm="ro" timeout="60">
+    <defText name="TELESCOPE" label="Park status">NOT PARKED</defText>
+</defTextVector>
+<defSwitchVector device="Roll Roof" name="DOME_PARK" label="Parking" group="Site Management" state="Ok" perm="rw" rule="OneOfMany" timeout="60">
+    <defSwitch name="PARK" label="Park(ed)">Off</defSwitch>
+    <defSwitch name="UNPARK" label="UnPark(ed)">On</defSwitch>
+</defSwitchVector>
+<defSwitchVector device="Weather Watcher" name="CONNECTION" label="Connection" group="Main Control" state="Ok" perm="rw" rule="OneOfMany" timeout="60">
+    <defSwitch name="CONNECT" label="Connect">On</defSwitch>
+    <defSwitch name="DISCONNECT" label="Disconnect">Off</defSwitch>
+</defSwitchVector>
+<defLightVector device="Weather Watcher" name="WEATHER_STATUS" label="Status" group="Main Control" state="Ok">
+    <defLight name="WEATHER_RAIN_HOUR" label="Rain">Ok</defLight>
+    <defLight name="WEATHER_WIND_SPEED" label="Wind">Ok</defLight>
+    <defLight name="WEATHER_CLOUDS" label="Clouds">Ok</defLight>
+</defLightVector>
+<defNumberVector device="Weather Watcher" name="WEATHER_PARAMETERS" label="Parameters" group="Parameters" state="Ok" perm="ro" timeout="60">
+    <defNumber name="WEATHER_RAIN_HOUR" label="Rain" format="%4.2f" min="0" max="100" step="0">0</defNumber>
+    <defNumber name="WEATHER_TEMPERATURE" label="Temperature" format="%4.2f" min="-50" max="50" step="0">-3.2</defNumber>
+    <defNumber name="WEATHER_WIND_SPEED" label="Wind" format="%4.2f" min="0" max="100" step="0">2.1</defNumber>
+    <defNumber name="WEATHER_WIND_GUST" label="Gust" format="%4.2f" min="0" max="100" step="0">4.5</defNumber>
+    <defNumber name="WEATHER_CLOUDS" label="Clouds" format="%4.2f" min="0" max="100" step="0">8</defNumber>
+    <defNumber name="WEATHER_HUMIDITY" label="Humidity" format="%4.2f" min="0" max="100" step="0">71</defNumber>
+    <defNumber name="WEATHER_PRESSURE" label="Pressure" format="%4.2f" min="0" max="2000" step="0">1018</defNumber>
+    <defNumber name="WEATHER_FORECAST" label="Forecast" format="%4.2f" min="0" max="1" step="0">0</defNumber>
+</defNumberVector>
+<defSwitchVector device="WatchDog" name="CONNECTION" label="Connection" group="Main Control" state="Ok" perm="rw" rule="OneOfMany" timeout="60">
+    <defSwitch name="CONNECT" label="Connect">On</defSwitch>
+    <defSwitch name="DISCONNECT" label="Disconnect">Off</defSwitch>
+</defSwitchVector>
+<defSwitchVector device="ZWO EAF" name="CONNECTION" label="Connection" group="Main Control" state="Idle" perm="rw" rule="OneOfMany" timeout="60">
+    <defSwitch name="CONNECT" label="Connect">Off</defSwitch>
+    <defSwitch name="DISCONNECT" label="Disconnect">On</defSwitch>
+</defSwitchVector>
+<defTextVector device="EQMod Mount" name="DRIVER_INFO" label="Driver Info" group="General Info" state="Idle" perm="ro" timeout="60">
+    <defText name="DRIVER_NAME" label="Name">EQMod Mount</defText>
+    <defText name="DRIVER_EXEC" label="Exec">indi_eqmod_telescope</defText>
+    <defText name="DRIVER_VERSION" label="Version">1.4</defText>
+</defTextVector>
+<defNumberVector device="EQMod Mount" name="TARGET_EOD_COORD" label="Target" group="Main Control" state="Idle" perm="ro" timeout="60">
+    <defNumber name="RA" label="RA" format="%010.6m" min="0" max="24" step="0">0.7369</defNumber>
+    <defNumber name="DEC" label="DEC" format="%010.6m" min="-90" max="90" step="0">41.4155</defNumber>
+</defNumberVector>
+<defNumberVector device="EQMod Mount" name="TIME_LST" label="Local sidereal time" group="Site Management" state="Ok" perm="ro" timeout="60">
+    <defNumber name="LST" label="Local sidereal time" format="%010.6m" min="0" max="24" step="0">23.5512</defNumber>
+</defNumberVector>
+<defSwitchVector device="EQMod Mount" name="TELESCOPE_TRACK_MODE" label="Track Mode" group="Main Control" state="Ok" perm="rw" rule="OneOfMany" timeout="60">
+    <defSwitch name="TRACK_SIDEREAL" label="Sidereal">On</defSwitch>
+    <defSwitch name="TRACK_SOLAR" label="Solar">Off</defSwitch>
+    <defSwitch name="TRACK_LUNAR" label="Lunar">Off</defSwitch>
+    <defSwitch name="TRACK_CUSTOM" label="Custom">Off</defSwitch>
+</defSwitchVector>
+<defTextVector device="ZWO CCD ASI6200MM Pro" name="DRIVER_INFO" label="Driver Info" group="General Info" state="Idle" perm="ro" timeout="60">
+    <defText name="DRIVER_NAME" label="Name">ZWO CCD</defText>
+    <defText name="DRIVER_EXEC" label="Exec">indi_asi_ccd</defText>
+    <defText name="DRIVER_VERSION" label="Version">2.5</defText>
+</defTextVector>
+<defNumberVector device="ZWO CCD ASI6200MM Pro" name="CCD_INFO" label="CCD Information" group="Image Info" state="Idle" perm="ro" timeout="60">
+    <defNumber name="CCD_MAX_X" label="Max. Width" format="%.f" min="1" max="16000" step="0">9576</defNumber>
+    <defNumber name="CCD_MAX_Y" label="Max. Height" format="%.f" min="1" max="16000" step="0">6388</defNumber>
+    <defNumber name="CCD_PIXEL_SIZE" label="Pixel size (um)" format="%.2f" min="1" max="40" step="0">3.76</defNumber>
+    <defNumber name="CCD_BITSPERPIXEL" label="Bits per pixel" format="%.f" min="8" max="64" step="0">16</defNumber>
+</defNumberVector>
+<defNumberVector device="ZWO CCD ASI6200MM Pro" name="SCOPE_INFO" label="Scope" group="Options" state="Idle" perm="rw" timeout="60">
+    <defNumber name="FOCAL_LENGTH" label="Focal Length (mm)" format="%g" min="10" max="10000" step="1">1000</defNumber>
+    <defNumber name="APERTURE" label="Aperture (mm)" format="%g" min="10" max="3000" step="1">200</defNumber>
+</defNumberVector>
+<defNumberVector device="ZWO CCD ASI6200MM Pro" name="CCD_CONTROLS" label="Controls" group="Controls" state="Idle" perm="rw" timeout="60">
+    <defNumber name="Gain" label="Gain" format="%g" min="0" max="470" step="1">150</defNumber>
+    <defNumber name="Offset" label="Offset" format="%g" min="0" max="80" step="1">50</defNumber>
+</defNumberVector>
+<defSwitchVector device="ZWO CCD ASI6200MM Pro" name="CCD_FRAME_TYPE" label="Type" group="Image Settings" state="Idle" perm="rw" rule="OneOfMany" timeout="60">
+    <defSwitch name="FRAME_LIGHT" label="Light">On</defSwitch>
+    <defSwitch name="FRAME_BIAS" label="Bias">Off</defSwitch>
+    <defSwitch name="FRAME_DARK" label="Dark">Off</defSwitch>
+    <defSwitch name="FRAME_FLAT" label="Flat">Off</defSwitch>
+</defSwitchVector>
+<defNumberVector device="ZWO CCD ASI6200MM Pro" name="CCD_BINNING" label="Binning" group="Image Settings" state="Ok" perm="rw" timeout="60">
+    <defNumber name="HOR_BIN" label="X" format="%2.0f" min="1" max="4" step="1">1</defNumber>
+    <defNumber name="VER_BIN" label="Y" format="%2.0f" min="1" max="4" step="1">1</defNumber>
+</defNumberVector>
+<defSwitchVector device="QHY CCD QHY5II-M" name="CONNECTION" label="Connection" group="Main Control" state="Ok" perm="rw" rule="OneOfMany" timeout="60">
+    <defSwitch name="CONNECT" label="Connect">On</defSwitch>
+    <defSwitch name="DISCONNECT" label="Disconnect">Off</defSwitch>
+</defSwitchVector>
+<defNumberVector device="QHY CCD QHY5II-M" name="CCD_EXPOSURE" label="Expose" group="Main Control" state="Busy" perm="rw" timeout="60">
+    <defNumber name="CCD_EXPOSURE_VALUE" label="Duration (s)" format="%.6f" min="0" max="3600" step="1">1.5</defNumber>
+</defNumberVector>
+<defNumberVector device="QHY CCD QHY5II-M" name="CCD_BINNING" label="Binning" group="Image Settings" state="Ok" perm="rw" timeout="60">
+    <defNumber name="HOR_BIN" label="X" format="%2.0f" min="1" max="4" step="1">1</defNumber>
+    <defNumber name="VER_BIN" label="Y" format="%2.0f" min="1" max="4" step="1">1</defNumber>
+</defNumberVector>
+<defNumberVector device="WatchDog" name="WATCHDOG_HEARTBEAT" label="Heart beat" group="Main Control" state="Idle" perm="rw" timeout="60">
+    <defNumber name="WATCHDOG_HEARTBEAT_VALUE" label="Threshold" format="%.f" min="0" max="3600" step="10">600</defNumber>
+</defNumberVector>
+<defSwitchVector device="WatchDog" name="WATCHDOG_Trigger" label="Trigger" group="Main Control" state="Idle" perm="rw" rule="AnyOfMany" timeout="60">
+    <defSwitch name="TRIGGER_CLIENT" label="Client">On</defSwitch>
+    <defSwitch name="TRIGGER_WEATHER" label="Weather">On</defSwitch>
+</defSwitchVector>
+<defSwitchVector device="WatchDog" name="WATCHDOG_SHUTDOWN" label="Shutdown" group="Main Control" state="Idle" perm="rw" rule="AnyOfMany" timeout="60">
+    <defSwitch name="PARK_MOUNT" label="Park Mount">On</defSwitch>
+    <defSwitch name="PARK_DOME" label="Park Dome">On</defSwitch>
+    <defSwitch name="EXECUTE_SCRIPT" label="Execute Script">Off</defSwitch>
+</defSwitchVector>
+<message device="EQMod Mount" timestamp="2026-11-03T22:00:00" message="Tracking started"/>

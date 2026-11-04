@@ -1,0 +1,40 @@
+# Observatory agent configuration → /etc/observatory-agent/config.toml
+
+[portal]
+# Portal API base URL
+url = "https://api.example.com"
+# File with the agent token (= observatory.agentToken in the portal's server/.env), mode 600.
+# The OBSERVATORY_AGENT_TOKEN environment variable overrides it.
+token_file = "/etc/observatory-agent/token"
+# Regular status push, seconds
+push_interval = 60
+# Important transitions (roof, weather alert, INDI up/down, job) are pushed at once,
+# but not more often than this, seconds
+extra_push_min_gap = 60
+
+[indi]
+host = "localhost"
+port = 7624
+indiweb_url = "http://localhost:8624"
+
+[ekos]
+# Read the Ekos Scheduler state over DBus inside the KStars container (docker exec)
+enabled = true
+container = "kstars-desktop"
+user = "abc"
+interval = 30
+
+[frames]
+# Where Ekos saves frames (free space is reported to admins)
+dir = "/home/mik/fits"
+
+# INDI device name per role (defaults shown)
+[devices]
+mount = "EQMod Mount"
+camera = "ZWO CCD ASI6200MM Pro"
+guider = "QHY CCD QHY5II-M"
+filter = "ZWO EFW"
+focuser = "ZWO EAF"
+roof = "Roll Roof"
+weather = "Weather Watcher"
+watchdog = "WatchDog"
