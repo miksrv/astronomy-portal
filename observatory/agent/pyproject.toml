@@ -1,6 +1,6 @@
 [project]
 name = "observatory-agent"
-version = "0.1.0"
+version = "0.2.0"
 description = "Reports the observatory status (INDI, Ekos) to the astronomy portal"
 requires-python = ">=3.11"
 dependencies = []  # standard library only
