@@ -55,8 +55,28 @@ $routes->group('relay', static function ($routes) {
 /** Observatory Controller (live status pushed by the observatory agent, FEAT-30) **/
 $routes->group('observatory', static function ($routes) {
     $routes->post('agent/status', 'Observatory::agentStatus', ['filter' => ['ratelimit:observatory_agent,10,60', 'observatoryagent']]);
+    $routes->get('agent/jobs', 'ObservatoryAgent::jobs', ['filter' => ['ratelimit:observatory_agent_sync,30,60', 'observatoryagent']]);
+    $routes->post('agent/updates', 'ObservatoryAgent::updates', ['filter' => ['ratelimit:observatory_agent_sync,30,60', 'observatoryagent']]);
+    $routes->get('agent/patrol', 'ObservatoryAgent::patrol', ['filter' => ['ratelimit:observatory_agent_sync,30,60', 'observatoryagent']]);
+    $routes->post('agent/patrol/visits', 'ObservatoryAgent::visits', ['filter' => ['ratelimit:observatory_agent_sync,30,60', 'observatoryagent']]);
+    $routes->post('agent/plan', 'ObservatoryAgent::plan', ['filter' => ['ratelimit:observatory_agent_sync,30,60', 'observatoryagent']]);
     $routes->get('status', 'Observatory::status', ['filter' => 'publiccache:30']);
     $routes->get('events', 'Observatory::events', ['filter' => 'publiccache:60']);
+    $routes->options('(:any)', static function () {});
+});
+
+/** Telescope Controller (telescope jobs from the site, FEAT-30 phase 2) **/
+$routes->group('telescope', static function ($routes) {
+    $routes->get('config', 'Telescope::config');
+    $routes->get('tonight', 'Telescope::tonight', ['filter' => 'publiccache:60']);
+    $routes->get('jobs', 'Telescope::list');
+    $routes->post('jobs', 'Telescope::create', ['filter' => 'ratelimit:telescope_jobs_create,10,300']);
+    $routes->get('jobs/(:alphanum)', 'Telescope::show/$1');
+    $routes->patch('jobs/(:alphanum)', 'Telescope::update/$1');
+    $routes->delete('jobs/(:alphanum)', 'Telescope::cancel/$1');
+    $routes->post('jobs/(:alphanum)/approve', 'Telescope::approve/$1');
+    $routes->post('jobs/(:alphanum)/reject', 'Telescope::reject/$1');
+    $routes->post('jobs/(:alphanum)/remove', 'Telescope::remove/$1');
     $routes->options('(:any)', static function () {});
 });
 
@@ -77,8 +97,8 @@ $routes->options('categories', static function () {});
 /** Objects Controller **/
 $routes->group('objects', static function ($routes) {
     $routes->get('/', 'Objects::list', ['filter' => 'publiccache:300']);
-    // Declared before (:any); a lookup for the object form, objects.manage only
-    $routes->get('simbad/(:any)', 'Objects::simbad/$1');
+    // Declared before (:any); a name lookup for the object form and the telescope job form (signed in)
+    $routes->get('simbad/(:any)', 'Objects::simbad/$1', ['filter' => 'ratelimit:simbad_lookup,20,300']);
     $routes->get('(:any)', 'Objects::show/$1', ['filter' => 'publiccache:300']);
     $routes->post('/', 'Objects::create');
     $routes->patch('(:any)', 'Objects::update/$1');

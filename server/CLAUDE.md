@@ -15,7 +15,7 @@ GET  /auth/me                       → Auth::me
 GET  /auth/google                   → Auth::google              [rate-limited: auth_oauth, 15/300s]
 GET  /auth/yandex                   → Auth::yandex              [rate-limited: auth_oauth, 15/300s]
 GET  /auth/vk                       → Auth::vk                  [rate-limited: auth_oauth, 15/300s]
-POST /auth/magic-link               → Auth::requestMagicLink    (passwordless email login; per-email/IP cooldown in MagicLinkTokensModel)
+POST /auth/magic-link               → Auth::requestMagicLink    (passwordless email login; per-email/IP cooldown in MagicLinkTokensModel; with `CI_ENVIRONMENT = development` the link is also appended to `writable/logs/magic-links.log`, so a dev stand signs in without SMTP)
 POST /auth/magic-link/verify        → Auth::verifyMagicLink
 POST /auth/logout                   → Auth::logout              (clears users.session_token — revokes every token issued to this user, on any device)
 PATCH /auth/profile                 → Auth::updateProfile
@@ -28,14 +28,30 @@ GET  /files/:path                   → Files::show
 
 
 POST /observatory/agent/status      → Observatory::agentStatus (observatory agent only: `Authorization: Bearer <observatory.agentToken>` via `observatoryagent`; body = status snapshot + optional `events[]`, up to 200 per push, the newest kept; ≤ 128 KB) [rate-limited: observatory_agent, 10/60s]
+GET  /observatory/agent/jobs        → ObservatoryAgent::jobs    (agent token; expires overdue jobs — "valid until X" covers the night of X — and closes finished patrol nights, then the full desired state (visitors' jobs only, never a patrol night): approved/queued/running with `version`, `lastSeq`, `progress`, `lastFrameAt`, `cancelRequested` + the settings the agent needs) [rate-limited: observatory_agent_sync, 30/60s — every agent route below too]
+POST /observatory/agent/updates     → ObservatoryAgent::updates (agent token; `{updates: [{jobId, seq, type, time, payload?}]}` ≤ 500 in outbox order — see `TelescopeAgentSync`; e-mails first frames / completed)
+GET  /observatory/agent/patrol      → ObservatoryAgent::patrol  (agent token; the enabled patrol targets)
+POST /observatory/agent/patrol/visits → ObservatoryAgent::visits (agent token; `{visits: [{target, time, frames, lastFrame?}]}` — sent while a visit is shot and once it is over; unique per target + time, the larger count wins; the night's visits make its patrol job, see `PatrolNights`)
+POST /observatory/agent/plan        → ObservatoryAgent::plan    (agent token; `{night: Y-m-d, plan: {...}}` — tonight's plan, replaced per night; only yesterday…tomorrow; refreshes the night's patrol job: planned galaxies, dawn)
 GET  /observatory/status            → Observatory::status      (public; `{online, updatedAt, snapshot}` — online = last snapshot younger than 180 s; only the public sections, see `ObservatoryStatusModel::PUBLIC_SECTIONS`; cached 30 s)
 GET  /observatory/events            → Observatory::events      (public; recent public events, `?limit=` ≤ 50; cached 60 s)
+
+GET    /telescope/config            → Telescope::config  (public; the job form's filters, presets, limits, altitude floor; signed in: + `activeJobs`, `unlimited`)
+GET    /telescope/tonight           → Telescope::tonight (public; tonight's plan from the agent: planned jobs with their authors (full name + avatar), patrol targets, darkness, Moon — telescope.manage also gets the agent's full `report`; `plan` null until the agent planned the night) [publiccache:60]
+GET    /telescope/jobs              → Telescope::list    (runs the site's upkeep first — expiry + closing patrol nights, at most once a minute, see `Telescope::upkeep()`; also `show`, `create`, `config`; public: every job except rejected/cancelled; `?mine=1` isAuth: own jobs in any status; `?all=1` telescope.manage: all; `&status=a,b`, `&sort=queue` — what the observatory shoots next first: running, the queue by pinned/priority/age, held, pending, finished —, `&limit=` ≤ 100, `&offset=`; `{items, count}`, `own` per item)
+POST   /telescope/jobs              → Telescope::create  (isAuth; checked by `TelescopeJobValidator` + ≤ `job_max_active` active jobs, counted again after the insert so parallel requests can't cross it; a telescope.manage holder's job is approved at once and not limited) [rate-limited: telescope_jobs_create, 10/300s]
+GET    /telescope/jobs/:id          → Telescope::show    (public for a job in a public status; rejected/cancelled only for the author or telescope.manage, anyone else gets 404; a patrol night also gets `visits` — the galaxies in the order they were shot)
+PATCH  /telescope/jobs/:id          → Telescope::update  (telescope.manage; body `version` = the one the admin saw → 409 when stale; priority/pinned any time before final, `held` (the site's "Приостановлено") on only for an approved/queued job — else 409 — off any time, plan fields not while running or cancelling)
+DELETE /telescope/jobs/:id          → Telescope::cancel  (the author or telescope.manage; pending → cancelled at once, approved/queued/running → `cancelRequested`, the agent confirms — it may have an approved job in its schedule already; a patrol night → 409)
+POST   /telescope/jobs/:id/approve  → Telescope::approve (telescope.manage; only from pending, else 409; e-mail to the author)
+POST   /telescope/jobs/:id/reject   → Telescope::reject  (telescope.manage; body `reason` required; only from pending; e-mail to the author)
+POST   /telescope/jobs/:id/remove   → Telescope::remove  (telescope.manage; deletes the job + its update log — only pending or final; an approved/queued/running job is cancelled first, a patrol night never, else 409)
 
 GET  /equipments                    → Equipment::list
 GET  /categories                    → Categories::list
 
 GET    /objects                     → Objects::list   (+ per object: `nights`/`firstNight`/`lastNight`, `photosCount`, `cover` = newest photo's file fields; cached 5 min, invalidated by object, photo and FITS writes)
-GET    /objects/simbad/:name        → Objects::simbad (objects.manage; the object form's "Найти в SIMBAD": a lookup only, nothing stored — the form saves the facts with the object as `simbad: {...}`; 404 not found, 503 SIMBAD unreachable; declared before GET /objects/:name)
+GET    /objects/simbad/:name        → Objects::simbad (isAuth; the "Найти в SIMBAD" field of the object form and the telescope job form: a lookup only, nothing stored; 404 not found, 503 SIMBAD unreachable; declared before GET /objects/:name) [rate-limited: simbad_lookup, 20/300s]
 GET    /objects/:name               → Objects::show   (+ `distance`, `magnitude`, `nights`/`firstNight`/`lastNight`, `optics` = the FITS optical train most frames share: focal length, aperture, pixel size, sensor size, binning, plate scale)
 POST   /objects                     → Objects::create
 PATCH  /objects/:name               → Objects::update
@@ -148,6 +164,8 @@ All controllers extend `BaseApiController` (see API Responses below).
 | `PushNotifications.php` | Admin push notification campaign CRUD; mirrors `Mailings.php` (audience targeting, test send via `WebPushLibrary`, bulk send via `PushNotificationDeliveriesModel`) — `push.manage` privilege |
 | `Objects.php` | CRUD for astronomical objects catalog (locale-aware titles/descriptions); `show()` adds the SIMBAD facts (`simbadId`, `type`, `majAxis`/`minAxis`, `aliases`); `create()`/`update()` store the SIMBAD facts the form looked up (`simbad` in the body); a new object without them is looked up on create (8 s, a failure never fails the create); `simbad()` is the form's lookup |
 | `Observatory.php` | Live observatory status (FEAT-30 phase 1): the agent's snapshot push, the public status and events |
+| `Telescope.php` | Telescope jobs from the site (FEAT-30 phase 2): the form config, own jobs (any authenticated user), the admin queue — approve/reject/edit with optimistic `version` checks |
+| `ObservatoryAgent.php` | The job sync with the observatory agent (FEAT-30 §4.3): the desired state, the agent's update batches, patrol targets and visits, tonight's plan — all behind `observatoryagent` |
 | `Photos.php` | CRUD for astrophoto archive; image upload via `PhotoUploadLibrary`; the plate solve of a photo (`astrometry()`, `solve()`) |
 | `Relay.php` | Observatory power relay control (list state, toggle light with cooldown guard) |
 | `Roles.php` | CRUD for roles (name + a set of `Permission` privileges); `permissions()` returns the fixed privilege catalog for the admin UI's checkbox list |
@@ -184,6 +202,9 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 | `PhotosAstrometryModel.php` | `photos_astrometry` | no | `PhotoAstrometryEntity`; one row per photo (PK `photo_id`): the plate solve from nova.astrometry.net — `status` (`pending`/`solving`/`success`/`failed`) is the state `AstrometrySolver::step()` advances, `ra`/`dec`/`radius`/`pixscale`/`orientation`/`parity` the calibration, `wcs` the parsed TAN+SIP header (JSON, what `client/utils/wcs.ts` reads), `annotations` the service's catalogue objects (JSON), `solved_width`/`solved_height` the size of the `_large` file they are in pixels of; `enqueue()` is called by `Photos::upload()`/`Photos::solve()` |
 | `CategoryModel.php` | `categories` | no | Shared photo/object categories |
 | `ObservatoryStatusModel.php` | `observatory_status` (+ `observatory_events`) | no | Latest agent snapshot (one row, id 1) and the event log (pruned after 90 days); `publicView()` / `recentEvents()` decide what visitors see |
+| `TelescopeJobsModel.php` | `telescope_jobs` | no | Every status change is a conditional UPDATE (`cancel()`, `review()`, `edit()`), so an author, an admin and the agent never overwrite each other; `edit()` only for the version the admin saw, plan fields not while running; `format()` gives the author's name in full + avatar (a job is a public credit — decision of 2026-11-06), `own` for the viewer's jobs, managers also get `version`. Statuses and presets in `Config\Telescope` |
+| `PatrolTargetsModel.php` | `patrol_targets` | no | The supernova patrol galaxies: `forAgent()` the enabled targets; their visits and `visits`/`last_visit_at` are kept by `PatrolNights` |
+| `ObservatoryNightPlansModel.php` | `observatory_night_plans` | no | Tonight's plan as the agent built it, one row per night (PK `night`), kept 90 days |
 | `ObservatoryEquipmentModel.php` | `observatory_equipment` | no | Equipment inventory (type, brand, model, specs) |
 | `ObservatorySettingsModel.php` | `observatory_settings` | no | Key-value store for observatory config |
 | `CommentsModel.php` | `comments` | yes | Comments/reviews on events and photos; `entity_type` ENUM: `event`, `photo` |
@@ -203,6 +224,7 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 
 Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 
+- `2026-11-05-100000_AddTelescopeJobs` — FEAT-30 phase 2: `telescope_jobs` (`source` = `site` | `patrol` — a visitor's job or the agent's own, then `user_id` is null; portal-owned target/plan/constraints/priority/approval with a `version`; agent-owned `progress`/`last_seq`; `status` VARCHAR), `telescope_job_updates` (unique `job_id`+`seq` — the agent's idempotency log and the job timeline), no frames table (frames live in observatory-api; a job keeps counts per filter + `first_frame_at`/`last_frame_at`), `patrol_targets`/`patrol_visits` (a visit links its night's patrol job, `job_id`; `telescope_jobs.night` is unique — one patrol job per night; `ra`/`dec` are null only for a patrol night), `observatory_night_plans`, and the job/patrol `observatory_settings` keys (`AddTelescopeJobs::SETTINGS`; `autonomous_mode` = 0). Plain types on purpose: `tests/_support/Database/TelescopeTables` runs it on SQLite, so the job logic is tested against a real database.
 - `2026-11-04-100000_AddObjectsSimbad` — `objects.simbad_id`, `object_type` (SIMBAD's short code), `maj_axis`/`min_axis` (arcmin), `aliases` (JSON list), `simbad_checked_at`; filled by `php spark objects:simbad` and on `POST /objects` (FEAT-31, see `ObjectSimbadLibrary`).
 - `2026-11-04-110000_AddObservatoryStatus` — `observatory_status` (latest agent snapshot) and `observatory_events`.
 - `2026-11-02-100000_AddPhotosAstrometry` — `photos_astrometry`, the plate solve per photo (see `PhotosAstrometryModel`); `status` is a VARCHAR, not an ENUM, so the migration also runs on SQLite.
@@ -256,7 +278,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 
 ### Language Files
 - Located in `app/Language/en/` and `app/Language/ru/`.
-- Files: `App.php`, `Auth.php`, `Categories.php`, `Comments.php`, `Events.php`, `General.php`, `Mailings.php`, `Members.php`, `Objects.php`, `Photos.php`, `PushNotifications.php`, `Relay.php`, `Roles.php`, `Validation.php` (plus `ru/Files.php`, which overrides the framework's own `Files` keys).
+- Files: `App.php`, `Auth.php`, `Categories.php`, `Comments.php`, `Events.php`, `General.php`, `Mailings.php`, `Members.php`, `Objects.php`, `Photos.php`, `PushNotifications.php`, `Relay.php`, `Roles.php`, `Telescope.php`, `Validation.php` (plus `ru/Files.php`, which overrides the framework's own `Files` keys).
 - Never name a lang file after a framework one (`Files`, `Validation`, …) for a new namespace — it collides with CI4's system language files.
 - Load with: `lang('Events.someKey')` after `LocaleLibrary` sets the locale.
 
@@ -281,6 +303,11 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 | `AstrometryClient` | nova.astrometry.net API (key from `Config\Astrometry` / `astrometry.apiKey`): login, image upload, submission → job → calibration/annotations, and `parseWcsHeader()` for the WCS FITS header; every failure is a `RuntimeException` |
 | `SimbadClient` | SIMBAD lookup (FEAT-31, mirrors in `Config\Simbad`, overridable in `.env`): the Sesame resolver (any name → SIMBAD main id, J2000 position, type, aliases) + SIMBAD TAP (size, V magnitude); `queryName()` turns our names into Sesame's (`Sh2_103` → `Sh 2-103`, `2023ixf` → `SN 2023ixf`), `alias()` keeps only the names people use; null when not found, `RuntimeException` when unreachable |
 | `ObjectSimbadLibrary` | Decides what of a SIMBAD answer an object gets: within `Simbad::MATCH_DEGREES` (2°) of our position → type, size, aliases, the magnitude when empty (not for nebulae: their V is a central star's), our coordinates kept; farther → nothing unless a person accepts it (then SIMBAD's coordinates too); moving bodies (categories 8/9/10/12) are never looked up |
+| `TelescopeSettings` | The job/patrol settings from `observatory_settings`, typed; a missing or broken value falls back to the default (never opens a limit), the altitude floor never below 15° |
+| `TelescopeJobValidator` | Pure check of a job's target, plan and constraints → table values; users within the limits from the settings, `telescope.manage` within the physical bounds of `Config\Telescope`; wheel filters and the altitude floor bind everybody |
+| `TelescopeAgentSync` | The portal side of the agent sync: `expireOverdue()`, `desiredState()`, `applyUpdates()` — per job `seq` (seen → duplicate, next → applied, gap → the batch stops with `lastSeq`); a transition that doesn't fit the status still consumes its seq (`telescope_job_updates.applied = 0`) so the outbox never sticks; `progress` is absolute counts per filter + the frames' time window — no frames are stored (they live in observatory-api); every change is a conditional UPDATE on `last_seq` + status, retried when the site changed the job meanwhile |
+| `PatrolNights` | The patrol as jobs (FEAT-30 §4.10, decision #23): `record()` stores the agent's visits (reported while shot and when over; target + time is the key, the larger count wins) and makes/updates **one job per night** (`source` = patrol, `night`, `visits_done`/`visits_planned`, `progress.L`) — made by the night's first visit, `running` until the night's dawn (from the agent's plan) or the next night, then `completed` (`closeFinished()`, called by the agent pull and the site's job list/page); `visitsOf()` for the job page. A patrol night is never in the agent's desired state, and the site refuses to cancel/edit/review/delete it (409 `patrolNotEditable`) |
+| `TelescopeMailer` | Queues the author's e-mails (approved / rejected / first frames / completed / expired, in the author's language); a failure is logged, never thrown |
 | `AstrometrySolver` | The plate solve as a state machine advanced one non-blocking step at a time (`step()`): `pending` → upload the `_large` file → `solving`; `solving` → ask for the job and its status → `success` (calibration + WCS + annotations stored) or `failed` (reason in `error`; a job older than 30 min times out). Driven by `Photos::solve()` from the editor's browser, or by `photos:solve` in a loop |
 
 ### Filters (`app/Filters/`)
@@ -312,4 +339,4 @@ There is no automatic cleanup of abandoned chunked uploads (tab closed or networ
 ### Testing
 - Always run `composer test` after any change.
 - Tests live in `server/tests/` and use PHPUnit 11.5 against in-memory SQLite (`phpunit.xml.dist`) — no live DB needed.
-- Layout: `tests/unit/{Entities,Helpers,Libraries,Models}`, `tests/feature` (controller guards), fixtures in `tests/_support/`.
+- Layout: `tests/unit/{Entities,Helpers,Libraries,Models}`, `tests/feature` (controller guards), `tests/database` (against real tables on SQLite — `TelescopeTables` creates the telescope ones from their migrations), fixtures in `tests/_support/`.

@@ -254,4 +254,33 @@ final class AuthGuardTest extends CIUnitTestCase
             ->post('observatory/agent/status', []);
         $result->assertStatus(401);
     }
+
+    public function testAgentSyncEndpointsWithoutTheAgentTokenReturn401(): void
+    {
+        foreach ([['get', 'observatory/agent/jobs'], ['post', 'observatory/agent/updates'], ['get', 'observatory/agent/patrol'], ['post', 'observatory/agent/patrol/visits'], ['post', 'observatory/agent/plan']] as [$method, $path]) {
+            $this->{$method}($path, [])->assertStatus(401);
+            $this->withHeaders(['Authorization' => 'Bearer not-the-agent-token-not-the-agent-token'])->{$method}($path, [])->assertStatus(401);
+        }
+    }
+
+    // --- Telescope jobs: every endpoint but the form config needs a session ---
+
+    public function testTelescopeJobEndpointsWithoutTokenReturn401(): void
+    {
+        // The public list, a job page and tonight's plan are open; one's own list and every write are not
+        foreach ([
+            ['get', 'telescope/jobs?mine=1'],
+            ['get', 'telescope/jobs?all=1'],
+            ['post', 'telescope/jobs'],
+            ['patch', 'telescope/jobs/abc123'],
+            ['delete', 'telescope/jobs/abc123'],
+            ['post', 'telescope/jobs/abc123/approve'],
+            ['post', 'telescope/jobs/abc123/reject'],
+            ['post', 'telescope/jobs/abc123/remove'],
+        ] as [$method, $path]) {
+            $result = $this->{$method}($path, []);
+            $result->assertStatus(401);
+            $this->assertArrayHasKey('message', json_decode($result->getJSON(), true), "{$method} {$path}");
+        }
+    }
 }

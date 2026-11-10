@@ -134,17 +134,14 @@ class Objects extends BaseApiController
     }
 
     /**
-     * Looks a name up in SIMBAD for the object form ("Найти в SIMBAD"), without storing anything:
-     * the editor sees what was found and saves it with the form.
+     * Looks a name up in SIMBAD without storing anything — for the object form ("Найти в
+     * SIMBAD": the editor saves what was found with the form) and the telescope job form (the
+     * target's coordinates). Any signed-in user; rate-limited per IP.
      */
     public function simbad($name = null): ResponseInterface
     {
         if (!$this->session->isAuth) {
             return $this->respondUnauthorized(lang('App.accessDenied'));
-        }
-
-        if (!$this->session->can(Permission::OBJECTS_MANAGE)) {
-            return $this->respondForbidden(lang('App.accessDenied'));
         }
 
         // The router has already decoded the segment
