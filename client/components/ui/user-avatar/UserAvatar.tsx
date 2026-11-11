@@ -11,15 +11,16 @@ import styles from './styles.module.sass'
 interface UserAvatarProps {
     src?: string
     name?: string
-    size?: 'small' | 'medium' | 'large'
+    /** `tiny` (18px) — inline in a meta line of icons; `small` (24px) — beside a name */
+    size?: 'tiny' | 'small' | 'medium' | 'large'
     className?: string
 }
 
 export const UserAvatar: React.FC<UserAvatarProps> = ({ src, name, size = 'medium', className }) => {
     const [imgError, setImgError] = useState(false)
 
-    const px = size === 'small' ? 24 : size === 'large' ? 128 : 32
-    const sizeClass = size === 'small' ? styles.small : size === 'large' ? styles.large : styles.medium
+    const px = { large: 128, medium: 32, small: 24, tiny: 18 }[size]
+    const sizeClass = styles[size]
     const rootClass = [styles.root, sizeClass, className].filter(Boolean).join(' ')
 
     if (src && !imgError) {

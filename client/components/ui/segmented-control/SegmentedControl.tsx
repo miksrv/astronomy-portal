@@ -13,6 +13,8 @@ export interface SegmentedOption<T extends string | number> {
 interface SegmentedControlProps<T extends string | number> {
     options: Array<SegmentedOption<T>>
     value: T
+    /** The kit's control heights, as `Button`'s `size`: small 28px, medium 36px (default), large 44px */
+    size?: 'small' | 'medium' | 'large'
     'aria-label': string
     className?: string
     onChange?: (value: T) => void
@@ -25,6 +27,7 @@ interface SegmentedControlProps<T extends string | number> {
 export const SegmentedControl = <T extends string | number>({
     options,
     value,
+    size = 'medium',
     className,
     onChange,
     ...props
@@ -32,7 +35,7 @@ export const SegmentedControl = <T extends string | number>({
     <div
         role={'group'}
         aria-label={props['aria-label']}
-        className={cn(styles.segmentedControl, className)}
+        className={cn(styles.segmentedControl, styles[size], className)}
     >
         {options.map((option) => (
             <Button
