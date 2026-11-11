@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 4.17.0
+
+Anyone signed in can now send the observatory telescope a target to photograph.
+
+### Minor Changes
+
+- Observatory: telescope jobs — pick a target, a filter set and conditions, and the observatory shoots it on clear nights
+- Telescope jobs: a public queue with progress, your own jobs, and e-mails when shooting starts and finishes
+- Telescope jobs: find any target in SIMBAD right in the form, with its visibility tonight and a sky map
+- Observatory: a "Telescope queue" card with the next jobs on the observatory page
+- Observatory: the supernova patrol of nearby galaxies runs between site jobs and is shown in the queue
+
+### Patch Changes
+
+- Star map: small maps are sharp on high-resolution screens
+- Star map: the stray "undefined3" label near Eridanus is now υ³ Eri
+- Page actions open from a compact "Actions" button next to the page title
+- Photo page: equipment and object facts are laid out more cleanly
+
 ## 4.16.0
 
 The observatory page shows the telescope live, and objects are filled from the SIMBAD catalog.
