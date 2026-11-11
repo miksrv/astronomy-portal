@@ -70,6 +70,10 @@ export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) =
                     text: t('menu.observatory-orenburg', 'Об обсерватории')
                 },
                 {
+                    link: '/observatory/jobs',
+                    text: t('menu.observatory-jobs', 'Задания телескопа')
+                },
+                {
                     link: '/observatory/weather',
                     text: t('menu.observatory-orenburg-weather', 'Погода')
                 }

@@ -16,6 +16,7 @@ import {
     RelayList,
     SkyCard,
     TelescopeActivity,
+    TelescopeWidget,
     WeatherCard
 } from '@/components/pages/observatory'
 import { useNow } from '@/hooks/useNow'
@@ -177,6 +178,8 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = ({ nights }) => {
                     error={dailyError && hourlyError}
                 />
             </div>
+
+            <TelescopeWidget />
 
             <h2 className={styles.sectionTitle}>{t('pages.observatory.state', 'Состояние оборудования')}</h2>
             <ObservatoryStatus
