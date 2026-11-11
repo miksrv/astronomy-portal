@@ -116,6 +116,7 @@
             "permission-events-users": "Просмотр участников астровыезда",
             "permission-pipeline-manage": "Управление pipeline обсерватории",
             "permission-push-manage": "Управление push-уведомлениями",
+            "permission-telescope-manage": "Управление заданиями телескопа и автопилотом обсерватории",
             "column-name": "Название",
             "column-permissions": "Привилегии",
             "column-users-count": "Пользователей",
