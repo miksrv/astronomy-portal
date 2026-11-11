@@ -158,6 +158,7 @@ const PushNotificationListPage: NextPage<object> = () => {
                 currentPage={pageTitle}
             >
                 <Button
+                    size={'small'}
                     mode={'primary'}
                     icon={'PlusCircle'}
                     link={'/admin/push-notifications/form'}

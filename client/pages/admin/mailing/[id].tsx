@@ -121,6 +121,7 @@ const MailingStatsPage: NextPage<object> = () => {
             >
                 {isCancelable && (
                     <Button
+                        size={'small'}
                         icon={'Close'}
                         mode={'primary'}
                         variant={'negative'}

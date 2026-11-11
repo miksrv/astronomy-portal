@@ -13,18 +13,20 @@ import styles from './styles.module.sass'
 
 interface AppToolbarProps extends Pick<BreadcrumbsProps, 'currentPage' | 'links'> {
     title?: string
+    /** Right after a short title, on its line: the status of what the page is about (a job) */
+    titleAside?: React.ReactNode
     /** The page's first paragraph, under the title */
     lead?: React.ReactNode
-    /** Rendered on the right, on the line of the breadcrumbs: the editor's actions behind "⋯" */
+    /** The editor's actions behind "Действия ▾": the last thing on the title's line, on the right */
     actions?: PageAction[]
-    /** Rendered on the right of the title (under it on phones): controls a visitor uses */
+    /** On the title's line, on the right (under the title on phones): controls a visitor uses — never beside the lead */
     children?: React.ReactNode
     /** Rendered below the breadcrumbs line, e.g. a live "last updated" indicator. */
     afterBreadcrumbs?: React.ReactNode
 }
 
 export const AppToolbar = forwardRef<HTMLDivElement, AppToolbarProps>(
-    ({ title, lead, links, currentPage, actions, children, afterBreadcrumbs }, ref) => {
+    ({ title, titleAside, lead, links, currentPage, actions, children, afterBreadcrumbs }, ref) => {
         const { t } = useTranslation()
 
         return (
@@ -38,29 +40,33 @@ export const AppToolbar = forwardRef<HTMLDivElement, AppToolbarProps>(
                     ref={ref}
                 >
                     <div className={styles.toolbarTitle}>
-                        {(links || currentPage || !!actions?.length) && (
+                        {(links || currentPage) && (
                             <div className={styles.toolbarTop}>
-                                {(links || currentPage) && (
-                                    <Breadcrumbs
-                                        className={styles.toolbarBreadcrumbs}
-                                        links={links}
-                                        currentPage={currentPage}
-                                        homePageTitle={t('common.look-at-the-stars', 'Смотри на звёзды')}
-                                    />
-                                )}
-                                {!!actions?.length && (
-                                    <PageActions
-                                        className={styles.toolbarPageActions}
-                                        actions={actions}
-                                    />
-                                )}
+                                <Breadcrumbs
+                                    className={styles.toolbarBreadcrumbs}
+                                    links={links}
+                                    currentPage={currentPage}
+                                    homePageTitle={t('common.look-at-the-stars', 'Смотри на звёзды')}
+                                />
                             </div>
                         )}
-                        <h1>{title}</h1>
+                        <div className={styles.toolbarTitleRow}>
+                            <div className={styles.toolbarHeading}>
+                                <h1>{title}</h1>
+                                {titleAside && <div className={styles.toolbarAside}>{titleAside}</div>}
+                            </div>
+                            {children && <div className={styles.toolbarActions}>{children}</div>}
+                            {!!actions?.length && (
+                                <PageActions
+                                    className={styles.toolbarPageActions}
+                                    actions={actions}
+                                />
+                            )}
+                        </div>
                         {afterBreadcrumbs && <div className={styles.toolbarMeta}>{afterBreadcrumbs}</div>}
+                        {/* The lead runs the full width, under the title and its controls (DESIGN §4) */}
                         {lead && <p className={styles.toolbarLead}>{lead}</p>}
                     </div>
-                    {children && <div className={styles.toolbarActions}>{children}</div>}
                 </div>
             </>
         )

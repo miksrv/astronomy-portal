@@ -396,6 +396,7 @@ const UsersPage: NextPage<object> = () => {
                 currentPage={pageTitle}
             >
                 <Input
+                    size={'small'}
                     clearable={true}
                     value={search}
                     aria-label={t('users.search', 'Поиск по имени')}
@@ -404,6 +405,7 @@ const UsersPage: NextPage<object> = () => {
                 />
 
                 <Select<number>
+                    size={'small'}
                     multiple={true}
                     closeOnSelect={true}
                     placeholder={t('users.filterByRole', 'Роль')}

@@ -1,20 +1,55 @@
 @use '../../../styles/variables' as variables
 @use '../../../styles/typography' as type
 
-// The page header: breadcrumbs (the way back) over the h1, an optional meta line under it, the
-// editor's "⋯" menu on the breadcrumbs line and visitor controls on the right (under the title
-// on phones)
+// The page header: breadcrumbs (the way back) over the h1, the visitor's controls and the editor's
+// "Действия ▾" menu on the h1's line (under it on phones), an optional meta line, then the lead
+// over the full width
 .toolbarHeader
     display: flex
-    justify-content: space-between
-    align-items: flex-end
-    gap: var(--space-4)
+    flex-direction: column
 
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        flex-direction: column
-        align-items: stretch
+    .toolbarTitleRow
+        display: flex
+        justify-content: space-between
+        align-items: center
+        gap: var(--space-2) var(--space-4)
+        min-width: 0
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            flex-direction: column
+            align-items: stretch
+
+    // The h1 and what stands right after it (wraps under a long title)
+    .toolbarHeading
+        display: flex
+        flex-wrap: wrap
+        align-items: center
+        gap: var(--space-2) var(--space-3)
+        min-width: 0
+
+    .toolbarAside
+        display: flex
+        flex-wrap: wrap
+        align-items: center
+        gap: var(--space-2)
+
+    // Beside the title the controls are small (28px, under the h1's ~31px line): the gap from the
+    // title to the lead is the same with them and without. Pages pass `size="small"`; this keeps a
+    // forgotten medium control (36px) from growing the line all the same
+    // "Действия ▾" at its normal size (36px) on the title's line: its bottom on the line's bottom,
+    // the 5px it is taller than the h1's line (~31px) given back on top, so the line — and the gap
+    // to the lead — stay as they are for a guest
+    .toolbarPageActions
+        align-self: flex-end
+        // The h1's line: titlePage is 26px × 1.2 (typography.sass)
+        margin-top: calc(var(--font-size-title-page) * 1.2 - var(--size-medium))
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            align-self: flex-start
+            margin-top: 0
 
     .toolbarActions
+        --size-control-medium: var(--size-control-small, var(--size-small))
         display: flex
         align-items: center
         gap: var(--space-2)
@@ -39,13 +74,9 @@
             gap: var(--space-4)
             min-width: 0
 
-        // Beside the "⋯": shrinks, so a long current page is cut with an ellipsis, not pushed out
+        // Shrinks, so a long current page is cut with an ellipsis, not pushed out
         .toolbarBreadcrumbs
             min-width: 0
-
-        // Always in the top right corner, also with no breadcrumbs before it
-        .toolbarPageActions
-            margin-left: auto
 
         h1
             +type.titlePage
