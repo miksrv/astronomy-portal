@@ -29,14 +29,18 @@ interface SimbadPanelProps {
     dec?: number
     loading?: boolean
     error?: unknown
-    isEdit?: boolean
+    /** Shown while there is nothing found yet: what the lookup will do in this form */
+    emptyText?: React.ReactNode
+    /** The form's word under the facts (what happens to them) */
+    note?: React.ReactNode
     onUseCoordinates?: () => void
 }
 
 /**
- * What SIMBAD knows of the object, under its name: the main identifier (a link to SIMBAD), the
- * type, the size, the magnitude and the other names. A lookup fills the empty fields at once;
- * coordinates that differ from SIMBAD's are only offered, the editor decides.
+ * What SIMBAD knows of an object, under its name (`GET /objects/simbad/:name`): the main
+ * identifier (a link to SIMBAD), the type, the size, the magnitude and the other names. Used by
+ * the object editor and the telescope job form. A lookup fills the empty fields at once;
+ * coordinates that differ from SIMBAD's are only offered, the person decides.
  */
 export const SimbadPanel: React.FC<SimbadPanelProps> = ({
     facts,
@@ -46,7 +50,8 @@ export const SimbadPanel: React.FC<SimbadPanelProps> = ({
     dec,
     loading,
     error,
-    isEdit,
+    emptyText,
+    note,
     onUseCoordinates
 }) => {
     const { t, i18n } = useTranslation()
@@ -55,27 +60,12 @@ export const SimbadPanel: React.FC<SimbadPanelProps> = ({
     const warning =
         error && !loading ? (
             <Message type={'warning'}>
-                {getErrorMessage(error) ||
-                    t('components.pages.objects.astro-object-form.simbad-error', 'SIMBAD не отвечает')}
+                {getErrorMessage(error) || t('components.common.simbad-panel.error', 'SIMBAD не отвечает')}
             </Message>
         ) : null
 
     if (!facts) {
-        return (
-            warning ?? (
-                <p className={styles.simbadNote}>
-                    {isEdit
-                        ? t(
-                              'components.pages.objects.astro-object-form.simbad-none',
-                              'Объект ещё не сверялся с SIMBAD. Нажмите «Найти в SIMBAD» — подставим тип, угловой размер и другие обозначения.'
-                          )
-                        : t(
-                              'components.pages.objects.astro-object-form.simbad-create',
-                              'Нажмите «Найти в SIMBAD» — подставим координаты, тип, угловой размер и звёздную величину. Если не нажимать, данные подтянутся из SIMBAD при сохранении.'
-                          )}
-                </p>
-            )
-        )
+        return warning ?? (emptyText ? <p className={styles.simbadNote}>{emptyText}</p> : null)
     }
 
     const type = getObjectTypeLabel(facts.type, t)
@@ -105,14 +95,13 @@ export const SimbadPanel: React.FC<SimbadPanelProps> = ({
 
                 {!!facts.aliases.length && (
                     <p className={styles.simbadAliases}>
-                        {t('components.pages.objects.astro-object-form.simbad-aliases', 'Другие обозначения:')}{' '}
-                        {facts.aliases.join(', ')}
+                        {t('components.common.simbad-panel.aliases', 'Другие обозначения:')} {facts.aliases.join(', ')}
                     </p>
                 )}
 
                 {fresh && !!filled?.length && (
                     <p className={styles.simbadFilled}>
-                        {t('components.pages.objects.astro-object-form.simbad-filled', 'Подставлено: {{fields}}', {
+                        {t('components.common.simbad-panel.filled', 'Подставлено: {{fields}}', {
                             fields: filled.join(', ')
                         })}
                     </p>
@@ -122,7 +111,7 @@ export const SimbadPanel: React.FC<SimbadPanelProps> = ({
                     <div className={styles.simbadOffset}>
                         <span>
                             {t(
-                                'components.pages.objects.astro-object-form.simbad-offset',
+                                'components.common.simbad-panel.offset',
                                 'В SIMBAD координаты {{ra}} {{dec}} — в {{offset}}° от введённых',
                                 {
                                     ra: formatRAShort(facts.ra),
@@ -135,26 +124,13 @@ export const SimbadPanel: React.FC<SimbadPanelProps> = ({
                             type={'button'}
                             size={'small'}
                             mode={'secondary'}
-                            label={t(
-                                'components.pages.objects.astro-object-form.simbad-use-coordinates',
-                                'Взять координаты SIMBAD'
-                            )}
+                            label={t('components.common.simbad-panel.use-coordinates', 'Взять координаты SIMBAD')}
                             onClick={onUseCoordinates}
                         />
                     </div>
                 )}
 
-                <p className={styles.simbadNote}>
-                    {fresh
-                        ? t(
-                              'components.pages.objects.astro-object-form.simbad-fresh',
-                              'Тип, размер и обозначения сохранятся вместе с формой.'
-                          )
-                        : t(
-                              'components.pages.objects.astro-object-form.simbad-stored',
-                              'Данные SIMBAD, сохранённые у объекта.'
-                          )}
-                </p>
+                {note && <p className={styles.simbadNote}>{note}</p>}
             </div>
         </div>
     )

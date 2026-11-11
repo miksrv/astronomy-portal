@@ -79,62 +79,6 @@
     margin: var(--space-1) 0 0
     font-variant-numeric: tabular-nums
 
-// What SIMBAD knows of the object, under its names (a failed lookup's warning above it)
-.simbadPanel
-    display: flex
-    flex-direction: column
-    gap: var(--space-2)
-
-.simbadCard
-    display: flex
-    flex-direction: column
-    gap: var(--space-2)
-    padding: var(--space-3)
-    border-radius: var(--radius-lg)
-    background: var(--surface-2)
-    transition: opacity var(--duration-fast, 0.15s)
-
-    p
-        margin: 0
-
-.simbadLoading
-    opacity: 0.6
-
-.simbadTitle
-    display: flex
-    flex-wrap: wrap
-    align-items: baseline
-    gap: var(--space-1) var(--space-3)
-    font-weight: var(--font-weight-semibold)
-
-    a
-        color: var(--color-main)
-
-        &:hover
-            color: var(--color-main-hover)
-
-    span
-        +type.secondary
-
-.simbadAliases
-    +type.secondary
-
-.simbadFilled
-    +type.secondary
-    color: var(--color-green)
-
-.simbadOffset
-    +type.secondary
-    display: flex
-    flex-wrap: wrap
-    align-items: center
-    gap: var(--space-2) var(--space-3)
-    color: var(--text-color-primary)
-
-.simbadNote
-    +type.caption
-    margin: 0
-
 // The coordinates in a row, the map that checks them under it, the whole width
 .position
     display: flex

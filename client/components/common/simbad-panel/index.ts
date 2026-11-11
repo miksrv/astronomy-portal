@@ -1,0 +1,1 @@
+export { SimbadPanel } from './SimbadPanel'
