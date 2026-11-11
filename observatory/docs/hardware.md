@@ -4,9 +4,9 @@
 
 | Device | Model | Notes |
 |---|---|---|
-| Main telescope | Sky-Watcher BK2001P | Newtonian, D = 200 mm, f = 1000 mm, f/5. Ekos telescope id 3 |
+| Main telescope | Sky-Watcher Explorer 250P | Newtonian, D = 254 mm, f = 1200 mm, f/4.7. Ekos telescope id 3 — its entry in Ekos must be updated to these values |
 | Guide scope | SVBony 60 mm | f = 240 mm, f/4. Ekos telescope id 4 |
-| Main camera | ZWO ASI6200MM Pro | Full frame mono, 9576 × 6388 px, 3.76 µm → ≈ 0.78″/px at 1000 mm. Gain 150 / offset 50, RAW16, FITS. A full frame is ≈ 122 MB |
+| Main camera | ZWO ASI6200MM Pro | Full frame mono, 9576 × 6388 px, 3.76 µm → ≈ 0.65″/px at 1200 mm (field ≈ 1.72° × 1.15°). Gain 150 / offset 50, RAW16, FITS. A full frame is ≈ 122 MB |
 | Filter wheel | ZWO EFW, 7 positions | Slots 1–7: **L R G B H O S**. A full-frame sensor needs 36 mm / 2″ filters — test frames showed strong corner vignetting, spacing/filter size still to be checked |
 | Focuser | ZWO EAF | Connected to the camera's USB hub. Max travel 15000 steps in Ekos |
 | Guide camera | QHY5-II mono (`QHY CCD QHY5II-M`) | Ekos ST4 driver is set to this camera (guide pulses through its ST4 port); EQMod guide rate 0.5× |
@@ -15,7 +15,7 @@ Optical trains in Ekos:
 
 | Train | Scope | Camera | Filter wheel | Focuser | Guider |
 |---|---|---|---|---|---|
-| Primary | BK2001P 1000@f/5 | ASI6200MM Pro | ZWO EFW | ZWO EAF | QHY5II-M |
+| Primary | Explorer 250P 1200@f/4.7 | ASI6200MM Pro | ZWO EFW | ZWO EAF | QHY5II-M |
 | Guide | SVBony 240@f/4 | QHY5II-M | — | — | QHY5II-M |
 
 ## Mount

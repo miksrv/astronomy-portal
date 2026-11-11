@@ -24,7 +24,7 @@ so the same files work from a shell and from Ekos. See [host-setup.md](host-setu
 
 ```bash
 obs-power status            # state of every managed channel (read-only)
-obs-power on                # 12 V supply first, then each device, 3 s apart
+obs-power on                # 12 V supply first, then each device, 3 s apart, then 15 s for USB
 obs-power off               # each device, then the 12 V supply — only if INDI says mount + roof parked
 obs-power off --force       # same, without the INDI check (manual use, when you know it's safe)
 obs-power light on|off      # LED panel inside the observatory
