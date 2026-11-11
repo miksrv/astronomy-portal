@@ -315,7 +315,7 @@ export const API = createApi({
             providesTags: (res, err, id) => [{ id, type: 'Objects' }],
             query: (id) => `objects/${id}`
         }),
-        /** The object form's "Найти в SIMBAD": a lookup only (objects.manage) */
+        /** "Найти в SIMBAD" of the object and telescope job forms: a lookup only (signed in) */
         objectsSimbadLookup: builder.query<ApiType.Objects.SimbadFacts, string>({
             keepUnusedDataFor: 600,
             query: (name) => `objects/simbad/${encodeURIComponent(name)}`
@@ -338,6 +338,56 @@ export const API = createApi({
                 method: 'POST',
                 url: 'objects'
             })
+        }),
+
+        /* Telescope controller (telescope jobs from the site, FEAT-30 phase 2) */
+        telescopeGetConfig: builder.query<ApiType.Telescope.ResConfig, void>({
+            providesTags: () => [{ id: 'CONFIG', type: 'TelescopeJobs' }],
+            query: () => 'telescope/config'
+        }),
+        telescopeGetJobs: builder.query<ApiType.Telescope.ResList, Maybe<ApiType.Telescope.ReqList>>({
+            providesTags: () => [{ id: 'LIST', type: 'TelescopeJobs' }],
+            query: (params) =>
+                `telescope/jobs${encodeQueryData({
+                    all: params?.all ? 1 : undefined,
+                    limit: params?.limit,
+                    mine: params?.mine ? 1 : undefined,
+                    offset: params?.offset,
+                    sort: params?.sort,
+                    status: params?.status?.join(',')
+                })}`
+        }),
+        telescopeGetJob: builder.query<ApiModel.TelescopeJob, string>({
+            providesTags: (result, error, id) => [{ id, type: 'TelescopeJobs' }],
+            query: (id) => `telescope/jobs/${id}`
+        }),
+        telescopeGetTonight: builder.query<ApiType.Telescope.ResTonight, void>({
+            providesTags: () => [{ id: 'TONIGHT', type: 'TelescopeJobs' }],
+            query: () => 'telescope/tonight'
+        }),
+        telescopeCreateJob: builder.mutation<ApiType.Telescope.ResCreate, ApiType.Telescope.ReqCreate>({
+            invalidatesTags: () => [{ type: 'TelescopeJobs' }],
+            query: (body) => ({ body, method: 'POST', url: 'telescope/jobs' })
+        }),
+        telescopeCancelJob: builder.mutation<ApiType.Telescope.ResCancel, string>({
+            invalidatesTags: () => [{ type: 'TelescopeJobs' }],
+            query: (id) => ({ method: 'DELETE', url: `telescope/jobs/${id}` })
+        }),
+        telescopeApproveJob: builder.mutation<ApiModel.TelescopeJob, string>({
+            invalidatesTags: () => [{ type: 'TelescopeJobs' }],
+            query: (id) => ({ method: 'POST', url: `telescope/jobs/${id}/approve` })
+        }),
+        telescopeRejectJob: builder.mutation<ApiModel.TelescopeJob, { id: string; reason: string }>({
+            invalidatesTags: () => [{ type: 'TelescopeJobs' }],
+            query: ({ id, reason }) => ({ body: { reason }, method: 'POST', url: `telescope/jobs/${id}/reject` })
+        }),
+        telescopePatchJob: builder.mutation<ApiModel.TelescopeJob, ApiType.Telescope.ReqPatch>({
+            invalidatesTags: () => [{ type: 'TelescopeJobs' }],
+            query: ({ id, ...body }) => ({ body, method: 'PATCH', url: `telescope/jobs/${id}` })
+        }),
+        telescopeRemoveJob: builder.mutation<{ message: string }, string>({
+            invalidatesTags: () => [{ type: 'TelescopeJobs' }],
+            query: (id) => ({ method: 'POST', url: `telescope/jobs/${id}/remove` })
         }),
 
         /* Observatory controller (what the agent on the observatory host reports) */
@@ -690,6 +740,7 @@ export const API = createApi({
         'Mailings',
         'Users',
         'Roles',
-        'PushNotifications'
+        'PushNotifications',
+        'TelescopeJobs'
     ]
 })
