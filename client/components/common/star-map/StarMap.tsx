@@ -19,6 +19,8 @@ export interface StarMapViewControls {
     zoomOut: string
     /** Center on the telescope again and reset the zoom */
     toTelescope?: string
+    /** The way to the full atlas (/starmap) at this place: the last button of the rail */
+    openFull?: { href: string; label: string }
 }
 
 export interface StarMapProps {

@@ -64,3 +64,34 @@ export const withoutAnimations = (run: () => void, alreadyDisabled = false): voi
         }
     }
 }
+
+/**
+ * Gives the canvas its CSS size back. Celestial sizes the canvas for the screen's pixel ratio —
+ * `width`/`height` attributes × devicePixelRatio, the CSS size × 1 — but a map with
+ * `interactive: false` then sets the whole `style` attribute to `cursor: default!important`,
+ * which drops that CSS size: on a 2× screen the canvas shows at twice its size, blurred, and its
+ * box crops all but the middle quarter. Cheap and idempotent: called after every redraw.
+ */
+export const keepCanvasCssSize = (): void => {
+    try {
+        const canvas: HTMLCanvasElement | undefined = Celestial.context?.canvas
+
+        if (!canvas || typeof window === 'undefined') {
+            return
+        }
+
+        const ratio = window.devicePixelRatio || 1
+        const width = `${canvas.width / ratio}px`
+        const height = `${canvas.height / ratio}px`
+
+        if (canvas.style.width !== width) {
+            canvas.style.width = width
+        }
+
+        if (canvas.style.height !== height) {
+            canvas.style.height = height
+        }
+    } catch {
+        // Celestial not ready: nothing to fix yet
+    }
+}
