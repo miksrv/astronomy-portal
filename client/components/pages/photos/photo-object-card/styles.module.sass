@@ -46,31 +46,6 @@
     width: 220px
     height: 22px
 
-.facts
-    display: grid
-    margin: 0
-
-    > div
-        display: flex
-        align-items: baseline
-        justify-content: space-between
-        gap: var(--space-3)
-        padding: 6px 0
-        border-bottom: 1px solid var(--border)
-
-        &:last-child
-            border-bottom: 0
-
-    dt
-        +type.caption
-
-    dd
-        +type.secondary
-        margin: 0
-        color: var(--text-color-primary)
-        font-variant-numeric: tabular-nums
-        text-align: right
-
 .cta
     +type.secondary
     display: inline-flex
