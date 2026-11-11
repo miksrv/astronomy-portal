@@ -99,7 +99,7 @@ localhost
       On
     </oneSwitch>
         <oneSwitch name="PARK_DOME">
-      On
+      Off
     </oneSwitch>
         <oneSwitch name="EXECUTE_SCRIPT">
       Off
