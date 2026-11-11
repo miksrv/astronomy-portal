@@ -1,0 +1,679 @@
+@use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
+
+// ============================================================================================
+// Shared
+// ============================================================================================
+
+// A card of this section: its parts are --space-4 apart (the kit puts children right in the
+// section after the header, whose own bottom margin is dropped so the gap alone spaces them)
+.card
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+    min-width: 0
+
+    > div:first-child
+        margin-bottom: 0
+
+.muted
+    +type.secondary
+
+.meta
+    +type.secondary
+    margin: 0
+
+.caption
+    +type.caption
+    margin: 0
+
+.hint
+    +type.caption
+    margin: var(--space-1) 0 0
+
+.error
+    +type.caption
+    margin: 0
+    color: var(--color-red)
+
+.empty
+    margin: 0
+    color: var(--text-color-secondary)
+
+
+
+.progressRow
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: var(--space-2) var(--space-3)
+
+.progress
+    flex: 1
+    min-width: 120px
+    max-width: 360px
+
+.dialogText
+    margin: 0 0 var(--space-4)
+
+.dialogActions
+    display: flex
+    justify-content: flex-end
+    gap: var(--space-2)
+    margin-top: var(--space-4)
+
+// The picture of a job: our photo, or a plate tinted with its filters' colours
+.cover
+    flex-shrink: 0
+    width: 96px
+    height: 96px
+    overflow: hidden
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
+
+    img
+        display: block
+        width: 100%
+        height: 100%
+        object-fit: cover
+
+.coverSmall
+    width: 56px
+    height: 56px
+    border-radius: var(--radius-md)
+
+.coverTint
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 100%
+    height: 100%
+    color: #fff
+
+    svg
+        width: 40%
+        height: 40%
+        fill: currentColor
+        opacity: 0.85
+
+// ============================================================================================
+// The form's numbered steps
+// ============================================================================================
+
+.stepNumber
+    display: inline-flex
+    flex-shrink: 0
+    align-items: center
+    justify-content: center
+    width: 22px
+    height: 22px
+    border-radius: var(--radius-sm)
+    background: var(--color-main-background)
+    color: var(--color-main)
+    font-size: var(--font-size-small)
+    font-weight: var(--font-weight-semibold)
+    font-variant-numeric: tabular-nums
+
+// ============================================================================================
+// The star map (the job's page)
+// ============================================================================================
+// Celestial draws a square canvas: a box of another shape would stretch it
+.map
+    position: relative
+    aspect-ratio: 1
+    overflow: hidden
+    border-radius: var(--radius-lg)
+    background: var(--body-background)
+    box-shadow: inset 0 0 0 1px var(--border)
+
+// Celestial sets the size of its canvas itself; the box only reserves the room and crops it
+.mapCanvas
+    position: absolute
+    inset: 0
+    width: 100%
+    height: 100%
+
+// ============================================================================================
+// The lists: /observatory/jobs sections and the dashboard widget
+// ============================================================================================
+// A section of the page: 32px from the previous block (with <main>'s gap), its heading 12px
+// over the list
+.jobsSection
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+    margin-top: var(--space-4)
+
+    h2
+        margin: 0
+
+.count
+    +type.secondary
+    font-variant-numeric: tabular-nums
+
+.listFetching
+    opacity: 0.6
+    transition: opacity var(--duration-fast) var(--ease)
+
+.emptyState
+    margin: 0
+    padding: var(--space-8) var(--space-4)
+    border: 1px dashed var(--border-strong)
+    border-radius: var(--radius-xl)
+    color: var(--text-color-secondary)
+    text-align: center
+
+.held
+    opacity: 0.7
+
+// The section's heading: the title, the count, "Все задания" on the right (DESIGN §6)
+.sectionTitle
+    display: flex
+    align-items: baseline
+    gap: var(--space-2)
+
+.sectionHeader
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: var(--space-2) var(--space-4)
+    flex-wrap: wrap
+
+.sectionAction
+    +type.body
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    white-space: nowrap
+
+.cards
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+    margin: 0
+    padding: 0
+    list-style: none
+
+.cardSkeleton
+    height: 106px
+    border-radius: var(--radius-xl)
+
+// One job: a card with its own link — content (queue place + name, meta, filters), progress, chevron
+// (the shape of the stargazing EventRow)
+.jobCard
+    display: flex
+    align-items: center
+    gap: var(--space-4)
+    padding: var(--space-3) var(--space-4) var(--space-3) var(--space-3)
+    transition: box-shadow var(--duration-base) var(--ease)
+
+    &:hover
+        box-shadow: 0 0 0 1px var(--color-main)
+
+        .jobTitle
+            color: var(--color-main)
+
+    &:has(.jobLink:focus-visible)
+        outline: var(--focus-outline)
+
+    @media (prefers-reduced-motion: reduce)
+        transition: none
+
+// The card's edge says the state at a glance: done — green; waiting for approval — the warning
+// badge's orange, faint and dashed (not settled yet); paused — grey and dashed. The kit's own
+// ring gives way to it
+.jobCompleted,
+.jobPending,
+.jobPaused
+    --container-shadow: none
+    outline-offset: -1px
+
+.jobCompleted
+    outline: 1px solid color-mix(in srgb, var(--color-green) 70%, transparent)
+
+.jobPending
+    outline: 1px dashed color-mix(in srgb, var(--color-orange) 55%, transparent)
+
+// Paused by a manager: the same dashed edge, grey — set aside, nothing to act on
+.jobPaused
+    outline: 1px dashed var(--text-color-disabled)
+
+.jobLink
+    display: flex
+    align-items: center
+    gap: var(--space-4)
+    flex: 1
+    min-width: 0
+    color: inherit
+    text-decoration: none
+
+    &:hover
+        color: inherit
+
+    &:focus-visible
+        outline: none
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-wrap: wrap
+        gap: var(--space-3)
+
+.jobPosition
+    +type.secondary
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    min-width: 22px
+    height: 22px
+    padding: 0 var(--space-1)
+    border-radius: var(--radius-sm)
+    background: var(--color-main-background)
+    color: var(--color-main)
+    font-weight: var(--font-weight-semibold)
+    font-variant-numeric: tabular-nums
+
+.jobContent
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+    flex: 1
+    min-width: 0
+
+.jobTitleRow
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: var(--space-2)
+    min-width: 0
+
+.jobTitle
+    +type.titleBlock
+    overflow: hidden
+    color: var(--text-color-primary)
+    text-overflow: ellipsis
+    white-space: nowrap
+    transition: color var(--duration-base) var(--ease)
+
+    @media (prefers-reduced-motion: reduce)
+        transition: none
+
+.jobBadges
+    display: flex
+    flex-wrap: wrap
+    gap: var(--space-1)
+
+.jobMeta
+    +type.secondary
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: var(--space-1) var(--space-2)
+    min-width: 0
+
+.jobMetaItem
+    display: inline-flex
+    align-items: center
+    gap: var(--space-1)
+    font-variant-numeric: tabular-nums
+
+    svg
+        flex-shrink: 0
+        width: 14px
+        height: 14px
+        fill: var(--text-color-secondary)
+
+// A job's author (avatar + name) or the patrol (icon + name)
+.jobAuthor
+    display: inline-flex
+    align-items: center
+    gap: var(--space-2)
+    min-width: 0
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+    > svg
+        flex-shrink: 0
+        width: 16px
+        height: 16px
+        fill: var(--text-color-secondary)
+
+.metaDivider
+    color: var(--text-color-disabled)
+
+    // The meta wraps on a phone: a dot would hang at the end of a line
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        display: none
+
+.jobProgress
+    display: flex
+    flex-direction: column
+    gap: var(--space-1)
+    flex-shrink: 0
+    width: 150px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        width: 100%
+
+.jobPercent
+    +type.titleBlock
+    font-variant-numeric: tabular-nums
+
+.chevron
+    flex-shrink: 0
+    width: 18px
+    height: 18px
+    fill: var(--text-color-secondary)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        display: none
+
+// ============================================================================================
+// The job's page
+// ============================================================================================
+.details
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+// The target card: facts | map, tonight's altitude under both
+.detailsTarget
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+.detailsTargetGrid
+    display: grid
+    // Three blocks of one height side by side: the facts, tonight's altitude (the chart keeps
+    // the scale it is drawn for and sets the row's height), the map cut to that height; two
+    // rows on a tablet, one column on a phone
+    grid-template-columns: max-content minmax(0, 1fr) 340px
+    align-items: stretch
+    gap: var(--space-4) var(--space-6)
+
+    // The map: as tall as the row (the square canvas is cropped top and bottom, never stretched)
+    .map
+        aspect-ratio: auto
+        min-height: 240px
+
+    @media only screen and (max-width: 1080px)
+        grid-template-columns: minmax(0, 1fr) 340px
+
+        .detailsChart
+            grid-column: 1 / -1
+            grid-row: 2
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: minmax(0, 1fr)
+
+        .detailsChart
+            grid-row: auto
+
+        .map
+            aspect-ratio: 1
+
+// The facts spread over the row's height, the first at the top, the last at the bottom
+.detailsFacts
+    align-content: space-between
+
+.detailsChart
+    min-width: 0
+
+// A patrol night: what the patrol is and the night's facts | the map of its galaxies
+.patrolGrid
+    display: grid
+    grid-template-columns: minmax(0, 1fr) 340px
+    align-items: stretch
+    gap: var(--space-4) var(--space-6)
+
+    .map
+        aspect-ratio: auto
+        min-height: 300px
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: minmax(0, 1fr)
+
+        .map
+            aspect-ratio: 1
+
+.patrolInfo
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+.patrolText
+    margin: 0
+    max-width: 640px
+    color: var(--text-secondary)
+
+// The plan card: the table over its whole width, no padding of the card's own
+.detailsPlan
+    padding: 0
+    overflow: hidden
+
+// ============================================================================================
+// The form
+// ============================================================================================
+.form
+    form
+        display: flex
+        flex-direction: column
+        gap: var(--space-8)
+
+.step
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+    min-width: 0
+    margin: 0
+    padding: 0
+    border: 0
+
+.stepLegend
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    margin-bottom: var(--space-4)
+    padding: 0
+    +type.titleBlock
+
+    .stepNumber
+        width: 26px
+        height: 26px
+        font-size: var(--font-size)
+
+.stepHint
+    +type.secondary
+    margin: calc(var(--space-2) * -1) 0 0
+
+.field
+    display: flex
+    flex-direction: column
+    min-width: 0
+
+.grid
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
+    gap: var(--space-4)
+
+.manual
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+// The chosen target: its picture, the name to send (editable) and its facts
+.targetCard
+    display: flex
+    align-items: flex-start
+    gap: var(--space-3)
+    padding: var(--space-3)
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-wrap: wrap
+
+.targetInfo
+    display: flex
+    flex: 1
+    flex-direction: column
+    gap: var(--space-2)
+    min-width: 200px
+
+// Tonight's visibility and the place on the sky, side by side
+.preview
+    display: grid
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr)
+    gap: var(--space-4)
+    align-items: stretch
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: minmax(0, 1fr)
+
+.previewMap
+    position: relative
+    aspect-ratio: 1
+    overflow: hidden
+    border-radius: var(--radius-lg)
+    background: var(--body-background)
+    box-shadow: inset 0 0 0 1px var(--border)
+
+// The presets as radio tiles
+.presets
+    display: grid
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr))
+    gap: var(--space-3)
+
+.preset
+    display: flex
+    flex-direction: column
+    align-items: flex-start
+    gap: var(--space-2)
+    padding: var(--space-3)
+    border: 1px solid var(--border-strong)
+    border-radius: var(--radius-lg)
+    background: var(--surface-1)
+    color: var(--text-color-primary)
+    font: inherit
+    text-align: left
+    cursor: pointer
+    transition: border-color var(--duration-fast) var(--ease), background-color var(--duration-fast) var(--ease)
+
+    &:hover
+        border-color: var(--color-main)
+
+    &:focus-visible
+        outline: var(--focus-outline)
+        outline-offset: 2px
+
+.presetSelected
+    border-color: var(--color-main)
+    background: var(--color-main-background)
+    box-shadow: inset 0 0 0 1px var(--color-main)
+
+.presetHead
+    display: flex
+    align-items: baseline
+    justify-content: space-between
+    gap: var(--space-2)
+    width: 100%
+
+.presetName
+    font-weight: var(--font-weight-semibold)
+
+.presetText
+    +type.caption
+
+.planEditor
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+    padding: var(--space-3)
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
+
+.planEditorRow
+    display: grid
+    grid-template-columns: minmax(110px, 1fr) minmax(110px, 1fr) minmax(90px, 1fr) 90px auto
+    align-items: end
+    gap: var(--space-2)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: 1fr 1fr
+
+.rowTotal
+    +type.secondary
+    align-self: center
+    padding-top: var(--space-5, 20px)
+    font-variant-numeric: tabular-nums
+
+.planEditorFooter
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    justify-content: space-between
+    gap: var(--space-2)
+
+.exposureMeter
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+    max-width: 480px
+
+.exposureText
+    display: flex
+    justify-content: space-between
+    gap: var(--space-3)
+    +type.secondary
+
+    strong
+        color: var(--text-color-primary)
+        font-variant-numeric: tabular-nums
+
+    .over
+        color: var(--color-red)
+
+.conditionsSummary
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: var(--space-1) var(--space-3)
+    padding: var(--space-3)
+    border-radius: var(--radius-lg)
+    background: var(--surface-2)
+
+// What will be sent, kept in sight while the form scrolls
+.summaryBar
+    position: sticky
+    bottom: var(--space-3)
+    z-index: 1
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    justify-content: space-between
+    gap: var(--space-3)
+    padding: var(--space-3) var(--space-4)
+    border: 1px solid var(--border-strong)
+    border-radius: var(--radius-lg)
+    background: var(--surface-1)
+    box-shadow: var(--shadow-lg)
+
+.summaryText
+    display: flex
+    flex-direction: column
+    gap: 2px
+    min-width: 0
+
+.summaryBlocker
+    +type.secondary
+    color: var(--color-orange)
+
+.formActions
+    display: flex
+    gap: var(--space-2)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column-reverse
+        width: 100%
+
+        button
+            width: 100%
