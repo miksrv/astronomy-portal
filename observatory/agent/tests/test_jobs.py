@@ -431,6 +431,23 @@ def test_a_cancel_waits_while_ekos_is_unreadable(env, monkeypatch):
     assert env.portal.types("a1")[-1][1] == "cancelled"
 
 
+def test_a_job_with_nothing_left_to_shoot_is_completed_without_a_new_frame(env):
+    # The plan was cut on the site below what is already shot: no frame will come to complete it
+    plan = [{"filter": "L", "exposure": 300, "count": 3}]
+    env.portal.jobs = [portal_job(status="queued", plan=plan, progress={"L": 2}, lastSeq=3)]
+    env.portal.last_seq["a1"] = 3
+    env.step()
+    assert env.portal.types("a1") == []
+    env.portal.jobs[0].update(version=2, plan=[{"filter": "L", "exposure": 300, "count": 2}])
+    env.step()
+    assert env.portal.types("a1") == [(4, "completed")]
+    assert env.runner.state.job("a1")["local_status"] == "completed"
+    env.portal.jobs = []  # final on the site now
+    env.step()
+    assert env.portal.types("a1") == [(4, "completed")]
+    assert env.runner.state.job("a1") is None
+
+
 def test_a_job_gone_from_the_site_is_forgotten(env):
     env.portal.jobs = [portal_job(status="queued")]
     env.step()

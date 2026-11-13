@@ -170,7 +170,15 @@ class JobsRunner:
                 if job["status"] == "approved" and local_status == "approved":
                     self.state.enqueue(job["id"], "accepted", now)
                     self.state.set_local_status(job["id"], "queued")
+                    local_status = "queued"
                     log.info("job %s accepted", job["id"])
+                # Every frame is there and no new one will come to say so (completion is otherwise
+                # noticed with a new frame): the plan was cut on the site below what is shot, or
+                # this database is new and the site's counts are already the whole plan
+                if local_status in ("queued", "running") and is_complete(job["plan"], self.progress_of(self.state.job(job["id"]))):
+                    self.state.enqueue(job["id"], "completed", now)
+                    self.state.set_local_status(job["id"], "completed")
+                    log.info("job %s completed (nothing left to shoot)", job["id"])
             for local in self.state.jobs():
                 if local["id"] not in seen and self.state.outbox_count(local["id"]) == 0:
                     # Final on the site (completed, cancelled, expired, …): forget it, keep its frames
@@ -393,6 +401,10 @@ class JobsRunner:
         if not (opens <= now < night.nautical_end):
             return
 
+        # Called with every tick of the agent: the inputs are only read once a replan may be due
+        if now_m - self._last_plan < MIN_REPLAN_SECONDS:
+            return
+
         wheel = self._wheel(snapshot)
         jobs = self.state.jobs()
         progress = {job["id"]: self.progress_of(job) for job in jobs}
@@ -410,7 +422,7 @@ class JobsRunner:
                 default=str,
             ).encode()
         ).hexdigest()
-        if inputs == self._plan_inputs or now_m - self._last_plan < MIN_REPLAN_SECONDS:
+        if inputs == self._plan_inputs:
             return
         self._last_plan = now_m
         self._plan_inputs = inputs
