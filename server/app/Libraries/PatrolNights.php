@@ -340,7 +340,7 @@ class PatrolNights
      */
     public static function nightBounds(string $night): array
     {
-        $noon = Time::parse($night . ' 12:00:00', 'Asia/Yekaterinburg')->setTimezone('UTC');
+        $noon = Time::parse($night . ' 12:00:00', Telescope::TIME_ZONE)->setTimezone('UTC');
 
         return [$noon->toDateTimeString(), $noon->addDays(1)->toDateTimeString()];
     }

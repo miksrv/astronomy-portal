@@ -10,6 +10,7 @@ use App\Models\ObservatoryNightPlansModel;
 use App\Models\PatrolTargetsModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
+use Config\Telescope as TelescopeConfig;
 use Throwable;
 
 /**
@@ -176,7 +177,7 @@ class ObservatoryAgent extends BaseApiController
         }
 
         // Only around today: a wrong clock on the observatory PC must not fill the table with junk
-        $today = Time::now('Asia/Yekaterinburg');
+        $today = Time::now(TelescopeConfig::TIME_ZONE);
 
         if ($night < $today->subDays(1)->format('Y-m-d') || $night > $today->addDays(1)->format('Y-m-d')) {
             return $this->respondInvalidRequest('observatory agent: plan night is not around today');

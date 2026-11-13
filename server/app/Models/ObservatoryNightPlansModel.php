@@ -25,7 +25,7 @@ class ObservatoryNightPlansModel extends ApplicationBaseModel
     /** The observing night a moment belongs to: local noon → next noon, named by the evening */
     public static function currentNight(?Time $now = null): string
     {
-        return ($now ?? Time::now())->setTimezone('Asia/Yekaterinburg')->subHours(12)->format('Y-m-d');
+        return ($now ?? Time::now())->setTimezone(Telescope::TIME_ZONE)->subHours(12)->format('Y-m-d');
     }
 
     /**

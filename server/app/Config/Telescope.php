@@ -9,6 +9,12 @@ namespace Config;
  */
 class Telescope
 {
+    /**
+     * The observatory's time zone: an observing night runs from its local noon to the next one
+     * and is named by the date of its evening (the agent's `site.timezone` must be the same)
+     */
+    public const TIME_ZONE = 'Asia/Yekaterinburg';
+
     /** A visitor's job from the site (it has an author) */
     public const SOURCE_SITE = 'site';
     /** The observatory agent's own job: the supernova patrol (no author) */
