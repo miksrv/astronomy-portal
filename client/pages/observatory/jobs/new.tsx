@@ -24,7 +24,7 @@ const NewTelescopeJobPage: NextPage = () => {
     const router = useRouter()
 
     const signedIn = !!useAppSelector((state) => state.auth.user?.id)
-    const { data: config } = API.useTelescopeGetConfigQuery(undefined, { skip: !signedIn })
+    const { data: config, isError: configFailed } = API.useTelescopeGetConfigQuery(undefined, { skip: !signedIn })
 
     const jobsTitle = t('pages.observatory.jobs.title', 'Задания телескопа')
     const title = t('pages.observatory.job-new.title', 'Новое задание')
@@ -74,6 +74,13 @@ const NewTelescopeJobPage: NextPage = () => {
                     cancelHref={'/observatory/jobs'}
                     onCreated={(job) => router.push(jobLink(job.id))}
                 />
+            ) : configFailed ? (
+                <Message type={'error'}>
+                    {t(
+                        'components.pages.observatory.telescope-jobs.config-failed',
+                        'Не удалось загрузить настройки телескопа. Обновите страницу или попробуйте позже.'
+                    )}
+                </Message>
             ) : (
                 <Skeleton
                     className={styles.jobSkeleton}
