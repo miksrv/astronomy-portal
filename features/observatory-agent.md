@@ -110,7 +110,7 @@ Two modes of the same form, stored the same way (`plan`):
   observatory settings).
 - **PRO** — own rows filter × exposure × count.
 
-A job stores only the target's name and coordinates: picked on the star map, or found by search — our objects at once, a CDS (Sesame) lookup by name in the background ([FEAT-31](objects-simbad.md)).
+A job stores only the target's name and coordinates: picked on the star map, or found by search — our objects at once, a CDS (Sesame) lookup by name in the background (FEAT-31, shipped).
 
 Limits, checked by the API (values in `observatory_settings`, editable without a deploy; admins are
 not limited): **≤ 2 h total exposure per job**, **≤ 3 active jobs per user**, exposure **30–600 s**,
