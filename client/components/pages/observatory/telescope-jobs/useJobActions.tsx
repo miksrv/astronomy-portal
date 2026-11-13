@@ -190,7 +190,9 @@ export const useJobActions = (job: ApiModel.TelescopeJob | undefined, manager: b
                               'components.pages.observatory.telescope-jobs.remove-text',
                               'Задание и его история удаляются насовсем, автор его больше не увидит.'
                           )
-                        : job.status === 'queued' || job.status === 'running'
+                        : // Only a job still waiting for approval is cancelled at once: an approved one
+                          // may be in the observatory's schedule already, the agent confirms its cancel
+                          job.status !== 'pending'
                           ? t(
                                 'components.pages.observatory.telescope-jobs.cancel-text-observatory',
                                 'Задание уже на обсерватории: его снимут с расписания в безопасный момент. Отснятые кадры сохранятся.'
