@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Message, Skeleton } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
@@ -9,8 +9,7 @@ import { useTranslation } from 'next-i18next/pages'
 import { API, ApiModel, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { JobDetails, JobStatusBadge, PatrolDetails, useJobActions } from '@/components/pages/observatory'
-import { OBSERVATORY_TIME_ZONE } from '@/components/pages/observatory/telescope-jobs/constants'
-import { formatDate, jobTitle } from '@/components/pages/observatory/telescope-jobs/utils'
+import { formatDate, isFinal, jobTitle } from '@/components/pages/observatory/telescope-jobs/utils'
 import { hasPermission } from '@/utils/permissions'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
@@ -35,15 +34,23 @@ const TelescopeJobPage: NextPage = () => {
     const user = useAppSelector((state) => state.auth.user)
     const manager = hasPermission(user, ApiModel.Permission.TELESCOPE_MANAGE)
 
+    // A final job changes no more: only one still on its way is asked for again
+    const [settled, setSettled] = useState(false)
     const {
         data: job,
         error,
         isLoading
     } = API.useTelescopeGetJobQuery(id ?? '', {
-        pollingInterval: POLLING_MS,
+        pollingInterval: settled ? 0 : POLLING_MS,
         skip: !id,
         skipPollingIfUnfocused: true
     })
+    const final = !!job && isFinal(job.status)
+
+    useEffect(() => {
+        setSettled(final)
+    }, [final])
+
     const { actions, dialogs } = useJobActions(job, manager)
 
     const jobsTitle = t('pages.observatory.jobs.title', 'Задания телескопа')
@@ -88,7 +95,7 @@ const TelescopeJobPage: NextPage = () => {
                                           '{{author}} · отправлено {{date}}',
                                           {
                                               author: job.author?.name ?? '',
-                                              date: formatDate(job.createdAt, i18n.language, OBSERVATORY_TIME_ZONE)
+                                              date: formatDate(job.createdAt, i18n.language)
                                           }
                                       )}
                                 {manager &&

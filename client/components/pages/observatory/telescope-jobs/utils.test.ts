@@ -7,11 +7,13 @@ import {
     canPause,
     canRemove,
     displayStatus,
+    formatDate,
     formatDuration,
+    formatTime,
+    framesDone,
     jobTitle,
     noticeText,
     patrolDone,
-    progressShare,
     totalSeconds
 } from './utils'
 
@@ -62,10 +64,22 @@ describe('canCancel / canRemove', () => {
     })
 })
 
-describe('progressShare', () => {
+describe('framesDone', () => {
     it('counts frames up to the plan per filter', () => {
-        expect(progressShare(job({ progress: { H: 9, L: 5 } }))).toBeCloseTo(9 / 14)
-        expect(progressShare(job({ progress: {} }))).toBe(0)
+        expect(framesDone(job({ progress: { H: 9, L: 5 } }))).toStrictEqual({ done: 9, total: 14 })
+        expect(framesDone(job({ progress: {} }))).toStrictEqual({ done: 0, total: 14 })
+    })
+})
+
+describe('formatDate / formatTime', () => {
+    it("formats a night as it is and a moment as the observatory's day and time, in the site's formats", () => {
+        expect(formatDate('2026-11-10', 'ru')).toBe('10 нояб. 2026')
+        expect(formatDate('2026-11-10', 'en')).toBe('10 Nov 2026')
+        // 20:30 UTC is already the 11th at the observatory (UTC+5)
+        expect(formatDate('2026-11-10T20:30:00Z', 'ru')).toBe('11 нояб. 2026')
+        expect(formatTime('2026-11-10T20:30:00Z', 'en')).toBe('01:30')
+        expect(formatDate(null, 'ru')).toBe('—')
+        expect(formatTime(undefined, 'ru')).toBe('—')
     })
 })
 

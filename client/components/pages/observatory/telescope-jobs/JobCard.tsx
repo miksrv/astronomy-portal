@@ -8,7 +8,6 @@ import { ApiModel } from '@/api'
 import { FilterTag, FilterTagList } from '@/components/common/filter-tag'
 import { formatDECShort, formatRAShort } from '@/utils/coordinates'
 
-import { OBSERVATORY_TIME_ZONE } from './constants'
 import { JobAuthor } from './JobAuthor'
 import { JobStatusBadge } from './JobStatusBadge'
 import {
@@ -152,7 +151,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job, position, className }) =>
                                             name={'Calendar'}
                                             aria-hidden
                                         />
-                                        {formatDate(job.finishedAt, i18n.language, OBSERVATORY_TIME_ZONE)}
+                                        {formatDate(job.finishedAt, i18n.language)}
                                     </span>
                                     <span
                                         className={styles.metaDivider}

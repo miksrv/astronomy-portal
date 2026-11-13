@@ -9,8 +9,8 @@ import { StarMap } from '@/components/common'
 import { Fact, FactList } from '@/components/ui'
 import { formatDECShort, formatRAShort } from '@/utils/coordinates'
 
-import { MAP_CONFIG, OBSERVATORY_TIME_ZONE } from './constants'
-import { formatDuration, formatObservatoryTime, patrolDone, starMapLink } from './utils'
+import { MAP_CONFIG } from './constants'
+import { formatDuration, formatTime, patrolDone, starMapLink } from './utils'
 
 import styles from './styles.module.sass'
 
@@ -70,7 +70,7 @@ export const PatrolDetails: React.FC<PatrolDetailsProps> = ({ job }) => {
         name: visit.target.name,
         object: visit.target.object,
         position: `${formatRAShort(visit.target.ra)} ${formatDECShort(visit.target.dec)}`,
-        time: formatObservatoryTime(visit.time, i18n.language, OBSERVATORY_TIME_ZONE)
+        time: formatTime(visit.time, i18n.language)
     }))
 
     return (
@@ -112,9 +112,9 @@ export const PatrolDetails: React.FC<PatrolDetailsProps> = ({ job }) => {
                                     'Первый и последний кадр'
                                 )}
                             >
-                                {formatObservatoryTime(job.firstFrameAt, i18n.language, OBSERVATORY_TIME_ZONE)}
+                                {formatTime(job.firstFrameAt, i18n.language)}
                                 {' – '}
-                                {formatObservatoryTime(job.lastFrameAt, i18n.language, OBSERVATORY_TIME_ZONE)}
+                                {formatTime(job.lastFrameAt, i18n.language)}
                             </Fact>
                         </FactList>
                     </div>

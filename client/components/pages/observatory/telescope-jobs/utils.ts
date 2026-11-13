@@ -1,8 +1,10 @@
 import { TFunction } from 'i18next'
 
 import { ApiModel } from '@/api'
+import { formatCalendarDate, formatUTCDate, TIME_ZONE } from '@/utils/dates'
+import { formatObservatoryTime } from '@/utils/visibility'
 
-import { FINAL_STATUSES } from './constants'
+import { FINAL_STATUSES, SHOWN_FIELDS } from './constants'
 
 /** Total exposure of a plan, seconds */
 export const totalSeconds = (plan: ApiModel.TelescopePlanRow[]): number =>
@@ -26,6 +28,21 @@ export const formatDuration = (seconds: number, t: TFunction): string => {
         : t('components.pages.observatory.telescope-jobs.hours', '{{count}} ч', { count: hours })
 }
 
+/** A number typed into a form field ("12,5" too), or null when it is empty or not one */
+export const toNumber = (text: string): number | null => {
+    const value = Number(text.replace(',', '.'))
+
+    return text.trim() !== '' && Number.isFinite(value) ? value : null
+}
+
+/** Today's date at the observatory, `YYYY-MM-DD`: the server compares `validUntil` with it, not with UTC */
+export const observatoryToday = (): string =>
+    new Intl.DateTimeFormat('en-CA', { timeZone: TIME_ZONE }).format(new Date())
+
+/** A field error the job form shows next to its input; any other one falls back to the generic message */
+export const isShownField = (key: string): boolean =>
+    SHOWN_FIELDS.includes(key) || /^plan\.\d+\.(filter|exposure|count)$/.test(key)
+
 export const isFinal = (status: ApiModel.TelescopeJobStatus): boolean => FINAL_STATUSES.includes(status)
 
 /** The author (or a manager) may still cancel it: not final and no cancel already asked for */
@@ -37,25 +54,16 @@ export const canCancel = (job: ApiModel.TelescopeJob): boolean => !isFinal(job.s
  */
 export const canRemove = (job: ApiModel.TelescopeJob): boolean => job.status === 'pending' || isFinal(job.status)
 
-/** Frames captured / planned over the whole job, 0…1 */
-export const progressShare = (job: ApiModel.TelescopeJob): number => {
-    const planned = job.plan.reduce((sum, row) => sum + row.count, 0)
-    const done = job.plan.reduce((sum, row) => sum + Math.min(job.progress[row.filter] ?? 0, row.count), 0)
+/**
+ * A date in the site's format, "5 нояб. 2026": a calendar date (`YYYY-MM-DD`, a night) as it is,
+ * a moment — as the day it fell on at the observatory
+ */
+export const formatDate = (iso: string | null | undefined, locale: string): string =>
+    iso ? formatCalendarDate(iso.length === 10 ? iso : formatUTCDate(iso, 'YYYY-MM-DD'), locale) : '—'
 
-    return planned ? done / planned : 0
-}
-
-/** Time of day at the observatory, "21:40" */
-export const formatObservatoryTime = (iso: string | null | undefined, locale: string, timeZone: string): string =>
-    iso ? new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', timeZone }).format(new Date(iso)) : '—'
-
-/** A date, "5 нояб. 2026" */
-export const formatDate = (iso: string | null | undefined, locale: string, timeZone?: string): string =>
-    iso
-        ? new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', timeZone, year: 'numeric' }).format(
-              new Date(iso.length === 10 ? `${iso}T12:00:00Z` : iso)
-          )
-        : '—'
+/** A moment as the time of day at the observatory, "21:40" */
+export const formatTime = (iso: string | null | undefined, locale: string): string =>
+    formatObservatoryTime(iso ? new Date(iso) : undefined, locale)
 
 export const statusLabel = (status: JobDisplayStatus, t: TFunction): string =>
     ({
@@ -229,9 +237,6 @@ export const displayStatus = (job: ApiModel.TelescopeJob): JobDisplayStatus => {
 /** A manager may pause it: approved or queued, not being cancelled */
 export const canPause = (job: ApiModel.TelescopeJob): boolean =>
     (job.status === 'approved' || job.status === 'queued') && !job.cancelRequested
-
-/** A night of the supernova patrol (`source` = patrol), not a visitor's job */
-export const isPatrol = (job: ApiModel.TelescopeJob): boolean => job.source === 'patrol' && !!job.patrol
 
 /** The job's name: the target, or "Патруль сверхновых · 10 нояб. 2026" for a patrol night */
 export const jobTitle = (job: ApiModel.TelescopeJob, t: TFunction, locale: string): string =>

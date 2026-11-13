@@ -29,8 +29,25 @@ export const STATUS_TONE: Record<JobDisplayStatus, StatusTone> = {
     failed: 'danger'
 }
 
-/** The observatory's time zone: darkness and frame times are shown in it */
-export const OBSERVATORY_TIME_ZONE = 'Asia/Yekaterinburg'
+/** The job form: its own plan instead of a preset, and the "look it up in SIMBAD" option of the search */
+export const CUSTOM = 'custom'
+export const SIMBAD_OPTION = '__simbad__'
+
+/** The first row of one's own plan, and of every added one */
+export const DEFAULT_ROW: ApiModel.TelescopePlanRow = { count: 10, exposure: 300, filter: 'L' }
+
+/** Field errors the job form shows next to their inputs (the plan's rows too, see `isShownField`) */
+export const SHOWN_FIELDS = [
+    'targetName',
+    'ra',
+    'dec',
+    'plan',
+    'preset',
+    'mode',
+    'minAltitude',
+    'minMoonSeparation',
+    'validUntil'
+]
 
 /** The jobs list asks for this many at once */
 export const PAGE_SIZE = 10

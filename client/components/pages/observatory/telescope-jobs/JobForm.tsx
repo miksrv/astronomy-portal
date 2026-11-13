@@ -12,10 +12,10 @@ import { getObjectTypeLabel } from '@/utils/catalog'
 import { formatDECShort, formatRAShort, parseDec, parseRA } from '@/utils/coordinates'
 import { FILTER_LABELS } from '@/utils/filters'
 
-import { MAP_CONFIG, OBSERVATORY_TIME_ZONE } from './constants'
+import { CUSTOM, DEFAULT_ROW, MAP_CONFIG, SIMBAD_OPTION } from './constants'
 import { JobCover } from './JobCover'
 import { useObjectCovers } from './useObjectCovers'
-import { formatDuration, totalSeconds } from './utils'
+import { formatDate, formatDuration, isShownField, observatoryToday, toNumber, totalSeconds } from './utils'
 
 import styles from './styles.module.sass'
 
@@ -40,34 +40,6 @@ interface Target {
 }
 
 type PlanChoice = string
-
-const CUSTOM = 'custom'
-const SIMBAD_OPTION = '__simbad__'
-const DEFAULT_ROW: ApiModel.TelescopePlanRow = { count: 10, exposure: 300, filter: 'L' }
-
-const toNumber = (text: string): number | null => {
-    const value = Number(text.replace(',', '.'))
-
-    return text.trim() !== '' && Number.isFinite(value) ? value : null
-}
-
-// The observatory's date: the server compares `validUntil` with it, not with UTC
-const today = (): string => new Intl.DateTimeFormat('en-CA', { timeZone: OBSERVATORY_TIME_ZONE }).format(new Date())
-
-// Field errors the form shows next to their inputs; any other one falls back to the generic message
-const SHOWN_FIELDS = [
-    'targetName',
-    'ra',
-    'dec',
-    'plan',
-    'preset',
-    'mode',
-    'minAltitude',
-    'minMoonSeparation',
-    'validUntil'
-]
-const isShownField = (key: string): boolean =>
-    SHOWN_FIELDS.includes(key) || /^plan\.\d+\.(filter|exposure|count)$/.test(key)
 
 interface StepProps {
     number: number
@@ -112,7 +84,7 @@ const Step: React.FC<StepProps> = ({ number, title, hint, id, children }) => (
  * land on their fields.
  */
 export const JobForm: React.FC<JobFormProps> = ({ config, onCreated, cancelHref }) => {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const snackbar = useSnackbar()
     const covers = useObjectCovers()
 
@@ -156,6 +128,7 @@ export const JobForm: React.FC<JobFormProps> = ({ config, onCreated, cancelHref 
     const limited = !config.unlimited
     const overLimit = limited && total > config.maxExposureSeconds
     const quotaLeft = limited ? config.maxActiveJobs - (config.activeJobs ?? 0) : undefined
+    const quotaFull = quotaLeft !== undefined && quotaLeft <= 0
     const dirty = !!(target || manualName || raText || decText || choice === CUSTOM)
 
     const guard = useUnsavedChangesGuard(dirty && !saving && !created)
@@ -245,14 +218,16 @@ export const JobForm: React.FC<JobFormProps> = ({ config, onCreated, cancelHref 
 
     // Why it can't be sent yet, said in the summary bar
     const blocker = !current
-        ? t('components.pages.observatory.telescope-jobs.form-need-target', 'Выберите объект')
+        ? manual
+            ? t('components.pages.observatory.telescope-jobs.form-need-manual', 'Укажите название и координаты цели')
+            : t('components.pages.observatory.telescope-jobs.form-need-target', 'Выберите объект')
         : !plan.length
           ? t('components.pages.observatory.telescope-jobs.form-need-plan', 'Добавьте хотя бы один фильтр')
           : badRow
             ? t('components.pages.observatory.telescope-jobs.form-bad-row', 'Проверьте выдержку и число кадров')
             : overLimit
               ? t('components.pages.observatory.telescope-jobs.form-over-limit', 'Выдержка больше лимита')
-              : quotaLeft !== undefined && quotaLeft <= 0
+              : quotaFull
                 ? t('components.pages.observatory.telescope-jobs.form-quota-full', 'Лимит активных заданий исчерпан')
                 : undefined
 
@@ -266,7 +241,9 @@ export const JobForm: React.FC<JobFormProps> = ({ config, onCreated, cancelHref 
               })
             : t('components.pages.observatory.telescope-jobs.form-cond-moon-any', 'Луна не мешает'),
         validUntil
-            ? t('components.pages.observatory.telescope-jobs.form-cond-until', 'до {{date}}', { date: validUntil })
+            ? t('components.pages.observatory.telescope-jobs.form-cond-until', 'до {{date}}', {
+                  date: formatDate(validUntil, i18n.language)
+              })
             : t('components.pages.observatory.telescope-jobs.form-cond-no-date', 'без срока')
     ].join(' · ')
 
@@ -331,6 +308,15 @@ export const JobForm: React.FC<JobFormProps> = ({ config, onCreated, cancelHref 
 
     const needTarget = t('components.pages.observatory.telescope-jobs.form-need-target', 'Выберите объект')
     const unreadable = t('components.pages.observatory.telescope-jobs.form-unreadable', 'Не получилось прочитать')
+    // A coordinate typed by hand: unreadable as soon as it is, missing once "Send" was pressed
+    const coordinateError = (text: string, value: number | undefined): string | undefined =>
+        value !== undefined
+            ? undefined
+            : text.trim()
+              ? unreadable
+              : triedSubmit
+                ? t('components.pages.observatory.telescope-jobs.form-need-coordinate', 'Укажите координату')
+                : undefined
 
     return (
         // The page's h1 names it: the card has no title of its own
@@ -339,6 +325,16 @@ export const JobForm: React.FC<JobFormProps> = ({ config, onCreated, cancelHref 
                 onSubmit={handleSubmit}
                 noValidate={true}
             >
+                {/* Said before the form is filled in, not only beside "Send" at its end */}
+                {quotaFull && (
+                    <Message type={'warning'}>
+                        {t(
+                            'components.pages.observatory.telescope-jobs.form-quota-full',
+                            'Лимит активных заданий исчерпан'
+                        )}
+                    </Message>
+                )}
+
                 <div ref={stepOneRef}>
                     <Step
                         id={'job-target'}
@@ -427,10 +423,7 @@ export const JobForm: React.FC<JobFormProps> = ({ config, onCreated, cancelHref 
                                             value={raText}
                                             autoComplete={'off'}
                                             inputMode={'decimal'}
-                                            error={
-                                                fieldErrors.ra ??
-                                                (raText && manualRa === undefined ? unreadable : undefined)
-                                            }
+                                            error={fieldErrors.ra ?? coordinateError(raText, manualRa)}
                                             onChange={(event) => setRaText(event.target.value)}
                                         />
                                         <p className={styles.hint}>
@@ -450,10 +443,7 @@ export const JobForm: React.FC<JobFormProps> = ({ config, onCreated, cancelHref 
                                             value={decText}
                                             autoComplete={'off'}
                                             inputMode={'decimal'}
-                                            error={
-                                                fieldErrors.dec ??
-                                                (decText && manualDec === undefined ? unreadable : undefined)
-                                            }
+                                            error={fieldErrors.dec ?? coordinateError(decText, manualDec)}
                                             onChange={(event) => setDecText(event.target.value)}
                                         />
                                         <p className={styles.hint}>
@@ -808,7 +798,7 @@ export const JobForm: React.FC<JobFormProps> = ({ config, onCreated, cancelHref 
                                         'Снять до'
                                     )}
                                     value={validUntil}
-                                    min={today()}
+                                    min={observatoryToday()}
                                     error={fieldErrors.validUntil}
                                     onChange={(event) => setValidUntil(event.target.value)}
                                 />
