@@ -40,6 +40,7 @@ const TelescopeJobPage: NextPage = () => {
     const {
         data: job,
         error,
+        isFetching,
         isLoading
     } = API.useTelescopeGetJobQuery(id ?? '', {
         pollingInterval: settled ? 0 : POLLING_MS,
@@ -52,7 +53,7 @@ const TelescopeJobPage: NextPage = () => {
         setSettled(final)
     }, [final])
 
-    const { actions, dialogs } = useJobActions(job, manager)
+    const { actions, dialogs } = useJobActions(job, manager, isFetching)
 
     const jobsTitle = t('pages.observatory.jobs.title', 'Задания телескопа')
     const title = job ? jobTitle(job, t, i18n.language) : t('pages.observatory.job.title', 'Задание телескопа')

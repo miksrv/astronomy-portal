@@ -115,13 +115,22 @@ export const JobForm: React.FC<JobFormProps> = ({ config, onCreated, cancelHref 
     const { message: formError, fieldErrors } = useApiFormError(saveError)
 
     // The target: chosen, or typed by hand
-    const manualRa = parseRA(raText)
-    const manualDec = parseDec(decText)
+    // Out of the sky's range is as unreadable as a typo (the API refuses it too)
+    const parsedRa = parseRA(raText)
+    const parsedDec = parseDec(decText)
+    const manualRa = parsedRa !== undefined && parsedRa >= 0 && parsedRa < 360 ? parsedRa : undefined
+    const manualDec = parsedDec !== undefined && parsedDec >= -90 && parsedDec <= 90 ? parsedDec : undefined
     const current: Target | undefined = manual
         ? manualName.trim() && manualRa !== undefined && manualDec !== undefined
             ? { dec: manualDec, name: manualName.trim(), object: null, ra: manualRa }
             : undefined
         : target
+
+    // The same array while the target is the same: a new one redraws the whole star map
+    const mapObjects = useMemo(
+        () => (current ? [{ dec: current.dec, name: current.name, ra: current.ra }] : []),
+        [current?.dec, current?.name, current?.ra]
+    )
 
     const plan = choice === CUSTOM ? rows : (config.presets[choice] ?? [])
     const total = totalSeconds(plan)
@@ -159,7 +168,9 @@ export const JobForm: React.FC<JobFormProps> = ({ config, onCreated, cancelHref 
                           'components.pages.observatory.telescope-jobs.form-search-simbad',
                           'Найти «{{name}}» в SIMBAD',
                           {
-                              name: typed
+                              // As typed, spaces at the ends too: the select keeps an option only
+                              // while its text contains the search
+                              name: search
                           }
                       )
                   }
@@ -525,7 +536,7 @@ export const JobForm: React.FC<JobFormProps> = ({ config, onCreated, cancelHref 
                                         interactive={false}
                                         zoom={5}
                                         config={MAP_CONFIG}
-                                        objects={[{ dec: current.dec, name: current.name, ra: current.ra }]}
+                                        objects={mapObjects}
                                     />
                                 </div>
                             </div>

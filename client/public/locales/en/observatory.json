@@ -297,6 +297,8 @@
                     "details-time": "Time",
                     "form-search-simbad": "Look up “{{name}}” in SIMBAD",
                     "form-need-target": "Choose an object",
+                    "list-failed": "Couldn’t load the jobs",
+                    "retry": "Retry",
                     "config-failed": "Couldn’t load the telescope settings. Reload the page or try again later.",
                     "form-need-manual": "Enter the target’s name and coordinates",
                     "form-need-coordinate": "Enter the coordinate",

@@ -1,5 +1,5 @@
 import React from 'react'
-import { cn, Skeleton } from 'simple-react-ui-kit'
+import { Button, cn, Message, Skeleton } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
@@ -56,7 +56,11 @@ export const JobsList: React.FC<JobsListProps> = ({
     const { t } = useTranslation()
 
     const offset = ((page ?? 1) - 1) * perPage
-    const { data, isFetching, isLoading } = API.useTelescopeGetJobsQuery({ ...query, limit: perPage, offset })
+    const { data, isError, isFetching, isLoading, refetch } = API.useTelescopeGetJobsQuery({
+        ...query,
+        limit: perPage,
+        offset
+    })
     const List = numbered ? 'ol' : 'ul'
 
     return (
@@ -86,6 +90,21 @@ export const JobsList: React.FC<JobsListProps> = ({
                         </li>
                     ))}
                 </ul>
+            ) : isError && !data ? (
+                // Not "the queue is empty": that would be untrue
+                <Message
+                    type={'error'}
+                    title={t('components.pages.observatory.telescope-jobs.list-failed', 'Не удалось загрузить задания')}
+                >
+                    <Button
+                        mode={'secondary'}
+                        size={'small'}
+                        disabled={isFetching}
+                        onClick={() => void refetch()}
+                    >
+                        {t('components.pages.observatory.telescope-jobs.retry', 'Повторить')}
+                    </Button>
+                </Message>
             ) : data?.items.length ? (
                 <List
                     className={cn(styles.cards, isFetching && styles.listFetching)}

@@ -28,7 +28,12 @@ interface JobActions {
  * What the viewer may do with a job, on its page: the author cancels it; a manager approves or
  * rejects it, pins, pauses / resumes, moves it up or down the queue, cancels and deletes it.
  */
-export const useJobActions = (job: ApiModel.TelescopeJob | undefined, manager: boolean): JobActions => {
+export const useJobActions = (
+    job: ApiModel.TelescopeJob | undefined,
+    manager: boolean,
+    /** The job is being reloaded: its `version` may be stale, a change now would get a 409 */
+    fetching = false
+): JobActions => {
     const { t } = useTranslation()
     const router = useRouter()
     const snackbar = useSnackbar()
@@ -74,6 +79,7 @@ export const useJobActions = (job: ApiModel.TelescopeJob | undefined, manager: b
         }
     }
 
+    const locked = busy || fetching
     const final = isFinal(job.status)
     const version = job.version ?? 0
     const patch = (change: Pick<ApiType.Telescope.ReqPatch, 'held' | 'pinned' | 'priority'>) => () =>
@@ -84,7 +90,7 @@ export const useJobActions = (job: ApiModel.TelescopeJob | undefined, manager: b
     if (manager && job.status === 'pending') {
         actions.push(
             {
-                disabled: busy,
+                disabled: locked,
                 icon: 'CheckCircle',
                 key: 'approve',
                 label: t('components.pages.observatory.telescope-jobs.approve', 'Одобрить'),
@@ -95,7 +101,7 @@ export const useJobActions = (job: ApiModel.TelescopeJob | undefined, manager: b
                     )
             },
             {
-                disabled: busy,
+                disabled: locked,
                 key: 'reject',
                 label: t('components.pages.observatory.telescope-jobs.reject', 'Отклонить'),
                 onClick: () => {
@@ -109,7 +115,7 @@ export const useJobActions = (job: ApiModel.TelescopeJob | undefined, manager: b
     if (manager && !final) {
         actions.push(
             {
-                disabled: busy,
+                disabled: locked,
                 key: 'pin',
                 label: job.pinned
                     ? t('components.pages.observatory.telescope-jobs.unpin', 'Открепить')
@@ -119,7 +125,7 @@ export const useJobActions = (job: ApiModel.TelescopeJob | undefined, manager: b
             ...(job.held || canPause(job)
                 ? [
                       {
-                          disabled: busy,
+                          disabled: locked,
                           key: 'pause',
                           label: job.held
                               ? t('components.pages.observatory.telescope-jobs.resume', 'Возобновить')
@@ -129,14 +135,14 @@ export const useJobActions = (job: ApiModel.TelescopeJob | undefined, manager: b
                   ]
                 : []),
             {
-                disabled: busy || job.priority >= PRIORITY_LIMIT,
+                disabled: locked || job.priority >= PRIORITY_LIMIT,
                 icon: 'ArrowUp',
                 key: 'priority-up',
                 label: t('components.pages.observatory.telescope-jobs.priority-up', 'Повысить приоритет'),
                 onClick: patch({ priority: job.priority + 1 })
             },
             {
-                disabled: busy || job.priority <= -PRIORITY_LIMIT,
+                disabled: locked || job.priority <= -PRIORITY_LIMIT,
                 icon: 'ArrowDown',
                 key: 'priority-down',
                 label: t('components.pages.observatory.telescope-jobs.priority-down', 'Понизить приоритет'),
@@ -147,7 +153,7 @@ export const useJobActions = (job: ApiModel.TelescopeJob | undefined, manager: b
 
     if ((job.own || manager) && canCancel(job)) {
         actions.push({
-            disabled: busy,
+            disabled: locked,
             key: 'cancel',
             label: t('components.pages.observatory.telescope-jobs.cancel', 'Отменить задание'),
             onClick: () => setConfirm('cancel'),
@@ -157,7 +163,7 @@ export const useJobActions = (job: ApiModel.TelescopeJob | undefined, manager: b
 
     if (manager && canRemove(job)) {
         actions.push({
-            disabled: busy,
+            disabled: locked,
             key: 'remove',
             label: t('components.pages.observatory.telescope-jobs.remove', 'Удалить'),
             onClick: () => setConfirm('remove'),
