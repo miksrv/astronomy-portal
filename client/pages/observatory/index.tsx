@@ -20,6 +20,7 @@ import {
     WeatherCard
 } from '@/components/pages/observatory'
 import { useNow } from '@/hooks/useNow'
+import { TELESCOPE_JOBS_ENABLED } from '@/utils/constants'
 import { createPageUrl } from '@/utils/helpers'
 import { removeSSRQueryCache } from '@/utils/ssrCache'
 import { initSSRLocale } from '@/utils/ssrLocale'
@@ -179,7 +180,7 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = ({ nights }) => {
                 />
             </div>
 
-            <TelescopeWidget />
+            {TELESCOPE_JOBS_ENABLED && <TelescopeWidget />}
 
             <h2 className={styles.sectionTitle}>{t('pages.observatory.state', 'Состояние оборудования')}</h2>
             <ObservatoryStatus

@@ -10,6 +10,7 @@ import { API, ApiModel, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { JobDetails, JobStatusBadge, PatrolDetails, useJobActions } from '@/components/pages/observatory'
 import { formatDate, isFinal, jobTitle } from '@/components/pages/observatory/telescope-jobs/utils'
+import { TELESCOPE_JOBS_ENABLED } from '@/utils/constants'
 import { hasPermission } from '@/utils/permissions'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
@@ -149,6 +150,10 @@ const TelescopeJobPage: NextPage = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
+            if (!TELESCOPE_JOBS_ENABLED) {
+                return { notFound: true }
+            }
+
             const { translations } = await initSSRLocale(store, context, ['translation', 'observatory', 'starmap'])
 
             return {

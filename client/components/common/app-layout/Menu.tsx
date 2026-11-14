@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 
+import { TELESCOPE_JOBS_ENABLED } from '@/utils/constants'
+
 import styles from './styles.module.sass'
 
 export type MenuItemType = {
@@ -69,10 +71,14 @@ export const Menu: React.FC<MenuProps> = ({ className, sidebarMenu, onClick }) =
                     link: '/observatory/overview',
                     text: t('menu.observatory-orenburg', 'Об обсерватории')
                 },
-                {
-                    link: '/observatory/jobs',
-                    text: t('menu.observatory-jobs', 'Задания телескопа')
-                },
+                ...(TELESCOPE_JOBS_ENABLED
+                    ? [
+                          {
+                              link: '/observatory/jobs',
+                              text: t('menu.observatory-jobs', 'Задания телескопа')
+                          }
+                      ]
+                    : []),
                 {
                     link: '/observatory/weather',
                     text: t('menu.observatory-orenburg-weather', 'Погода')

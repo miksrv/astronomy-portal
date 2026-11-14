@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 
 import { API, SITE_LINK } from '@/api'
 import { makeStore } from '@/api/store'
+import { TELESCOPE_JOBS_ENABLED } from '@/utils/constants'
 
 // Plain API route (not a `pages/` page) on purpose: Next.js treats any page whose route
 // resolves to "/sitemap" as a reserved App Router metadata route and rejects
@@ -59,7 +60,7 @@ const staticPages: StaticPage[] = [
     { url: 'observatory/overview', priority: '0.7', changefreq: 'monthly', lastmod: CONTENT_PAGES_EDITED },
     // Section not yet ready for public access
     // { url: 'observatory/history', priority: '0.6', changefreq: 'monthly', lastmod: CONTENT_PAGES_EDITED },
-    { url: 'observatory/jobs', priority: '0.6', changefreq: 'daily' },
+    ...(TELESCOPE_JOBS_ENABLED ? [{ url: 'observatory/jobs', priority: '0.6', changefreq: 'daily' }] : []),
     { url: 'observatory/weather', priority: '0.5', changefreq: 'always' },
     { url: 'starmap', priority: '0.9', changefreq: 'monthly', lastmod: '2026-10-29T00:00:00.000Z' }
 ]

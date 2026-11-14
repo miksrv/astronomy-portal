@@ -10,6 +10,7 @@ import { openAuthDialog } from '@/api/applicationSlice'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
 import { JobForm } from '@/components/pages/observatory'
 import { jobLink } from '@/components/pages/observatory/telescope-jobs/utils'
+import { TELESCOPE_JOBS_ENABLED } from '@/utils/constants'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
 import styles from '../styles.module.sass'
@@ -96,6 +97,10 @@ const NewTelescopeJobPage: NextPage = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
+            if (!TELESCOPE_JOBS_ENABLED) {
+                return { notFound: true }
+            }
+
             const { translations } = await initSSRLocale(store, context, ['translation', 'observatory', 'starmap'])
 
             return {

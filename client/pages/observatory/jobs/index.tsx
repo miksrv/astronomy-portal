@@ -15,6 +15,7 @@ import {
 } from '@/components/pages/observatory/telescope-jobs/constants'
 import { SegmentedControl } from '@/components/ui/segmented-control/SegmentedControl'
 import { Switch } from '@/components/ui/switch/Switch'
+import { TELESCOPE_JOBS_ENABLED } from '@/utils/constants'
 import { hasPermission } from '@/utils/permissions'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
@@ -164,6 +165,10 @@ const TelescopeJobsPage: NextPage = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
     (store) =>
         async (context): Promise<GetServerSidePropsResult<object>> => {
+            if (!TELESCOPE_JOBS_ENABLED) {
+                return { notFound: true }
+            }
+
             const { translations } = await initSSRLocale(store, context, ['translation', 'observatory'])
 
             return {
