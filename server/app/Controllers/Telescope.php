@@ -516,14 +516,19 @@ class Telescope extends BaseApiController
                     'plan'              => json_decode($row['plan'], true),
                     'minAltitude'       => $row['min_altitude'],
                     'minMoonSeparation' => $row['min_moon_separation'],
-                    'validUntil'        => $row['valid_until'],
                 ];
+                // The stored date is not checked again: a job whose date has passed (one being shot
+                // is not expired) can still have its plan changed; a date sent with the patch is
                 $validator = new TelescopeJobValidator(TelescopeSettings::load(), true);
                 $data      = $validator->validate(array_merge($current, array_intersect_key($input, array_flip($planKeys))));
 
                 if ($data === null) {
                     $errors += $validator->errors();
                 } else {
+                    if (!array_key_exists('validUntil', $input)) {
+                        unset($data['valid_until']);
+                    }
+
                     $data['object'] = $this->existingObject($data['object']);
                     $fields += $data;
                 }

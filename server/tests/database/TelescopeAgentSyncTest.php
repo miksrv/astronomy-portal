@@ -223,6 +223,27 @@ final class TelescopeAgentSyncTest extends CIUnitTestCase
         $this->assertSame(Telescope::STATUS_CANCELLED, $this->jobs->find($id)['status']);
     }
 
+    public function testACancelOfAnApprovedJobIsConfirmedWithoutAccepted(): void
+    {
+        // The job never became "queued" on the site: the cancel must still end it
+        $id = $this->job();
+        $this->jobs->cancel($id);
+
+        $this->assertSame(['applied'], $this->results([$this->update($id, 1, 'cancelled')]));
+        $this->assertSame(Telescope::STATUS_CANCELLED, $this->jobs->find($id)['status']);
+    }
+
+    public function testAFinalJobIsNotCancelRequested(): void
+    {
+        // A cancel asked for while the agent was finishing the job
+        $id = $this->job(Telescope::STATUS_RUNNING);
+        $this->jobs->cancel($id);
+        $this->results([$this->update($id, 1, 'completed')]);
+
+        $this->assertSame(Telescope::STATUS_COMPLETED, $this->jobs->find($id)['status']);
+        $this->assertFalse($this->jobs->format($this->jobs->find($id))['cancelRequested']);
+    }
+
     public function testFailedKeepsTheReason(): void
     {
         $id = $this->job(Telescope::STATUS_QUEUED);

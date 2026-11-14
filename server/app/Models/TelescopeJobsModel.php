@@ -356,7 +356,8 @@ class TelescopeJobsModel extends ApplicationBaseModel
             'held'              => (bool) $row['held'],
             'status'            => $row['status'],
             'statusReason'      => $own || $manager ? $row['status_reason'] : null,
-            'cancelRequested'   => $row['cancel_requested_at'] !== null,
+            // A cancel asked for while the agent finished the job is moot once the job is final
+            'cancelRequested'   => $row['cancel_requested_at'] !== null && !in_array($row['status'], Telescope::FINAL_STATUSES, true),
             'own'               => $own,
             'progress'          => is_array($progress) ? $progress : (object) [],
             // A patrol night (`source` = patrol): its date, the visits so far and the targets planned

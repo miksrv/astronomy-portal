@@ -284,7 +284,9 @@ class TelescopeAgentSync
                 break;
 
             case 'cancelled':
-                if ($row['cancel_requested_at'] !== null && in_array($status, [Telescope::STATUS_QUEUED, Telescope::STATUS_RUNNING], true)) {
+                // From `approved` too: the agent may confirm a cancel of a job whose "accepted" never
+                // reached the site, and the job must not stay active with its cancel asked for good
+                if ($row['cancel_requested_at'] !== null && in_array($status, Telescope::AGENT_STATUSES, true)) {
                     return [['status' => Telescope::STATUS_CANCELLED, 'finished_at' => $time], true];
                 }
                 break;
