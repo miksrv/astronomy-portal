@@ -219,8 +219,10 @@ class Planner:
             if not groups:
                 continue
 
-            done = sum(min(int(progress.get(job["id"], {}).get(r["filter"], 0)), int(r["count"])) for r in data.get("plan") or [] if "filter" in r)
-            total = sum(int(r["count"]) for r in data.get("plan") or [] if "count" in r) or 1
+            # From the same rows `remaining()` accepts: a malformed one must not stop the night's plan
+            planned = remaining(data.get("plan") or [], {})
+            total = sum(count for _, _, count in planned) or 1
+            done = max(0, total - sum(count for _, _, count in left)) if planned else 0
             # Leaving the evening sky: the target is less than 90° east of the Sun
             leaving = 0 < (ra - sun_ra) % 360 < 90
             valid_until = _parse((data.get("validUntil") or "") + "T00:00:00Z") if data.get("validUntil") else None

@@ -332,6 +332,31 @@ def test_ekos_running_our_job_starts_it_and_idle_ends_the_night(env):
     assert env.runner.state.job("a1")["local_status"] == "queued"
 
 
+def test_a_late_counted_last_frame_does_not_start_an_ended_night_again(env):
+    # Ekos idles right after the last frame, which is counted only on the next scan (it settles)
+    env.portal.jobs = [portal_job(status="queued")]
+    env.step()
+    env.ekos.status = 2
+    env.ekos.current = {"name": "M 31", "sequence": "file:///config/agent/2026-12-10/job-a1-nb.esq"}
+    env.step(minutes=1)
+    env.ekos.status = 0
+    env.ekos.current = None
+    env.step(minutes=1)
+    assert env.runner.state.job("a1")["local_status"] == "queued"
+    env.frame("a1", "L", age_minutes=2)  # shot before the night was ended
+    env.step(minutes=1)
+    assert [t for _, t in env.portal.types("a1")][-2:] == ["night_ended", "progress"]
+    assert env.runner.state.job("a1")["local_status"] == "queued"
+
+
+def test_a_job_with_a_bad_last_seq_is_skipped_not_the_whole_pull(env):
+    env.portal.jobs = [portal_job(status="queued", lastSeq="x"), portal_job(id="b2", status="queued")]
+    env.step()
+    assert env.runner.synced
+    assert env.runner.state.job("a1") is None
+    assert env.runner.state.job("b2") is not None
+
+
 def test_daylight_ends_the_night(env):
     env.portal.jobs = [portal_job(status="running")]
     env.clock["now"] = datetime(2026, 12, 11, 7, 30, tzinfo=UTC)  # sunrise ≈ 07:10 at 50°N 10°E

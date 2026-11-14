@@ -74,6 +74,7 @@ def _valid_job(job) -> bool:
         and isinstance(job.get("plan"), list)
         and isinstance(job.get("ra"), (int, float))
         and isinstance(job.get("dec"), (int, float))
+        and (job.get("lastSeq") is None or (isinstance(job["lastSeq"], int) and not isinstance(job["lastSeq"], bool)))
     )
 
 
@@ -95,6 +96,9 @@ class JobsRunner:
         self._load_failed_inputs: str | None = None
         self._ekos_info: ekos_mod.SchedulerInfo | None = None
         self._ekos_was_busy = False
+        # When a job's night was ended (job id → ISO UTC): a frame shot before it, counted late (a
+        # frame settles for a few seconds), must not start the job again
+        self._night_ended: dict[str, str] = {}
         self._patrol_frames = False
         self._ekos_unreadable_since: datetime | None = None
         self._nights: dict[date, ephem.Night] = {}
@@ -271,7 +275,7 @@ class JobsRunner:
                     log.warning("frames of job %s, which the agent doesn't know (any more)", job_id)
                     continue
                 counts = self.progress_of(job)
-                if job["local_status"] == "queued":
+                if job["local_status"] == "queued" and frame_time > self._night_ended.get(job_id, ""):
                     self.state.enqueue(job_id, "started", frame_time)
                     self.state.set_local_status(job_id, "running")
                 self.state.enqueue(job_id, "progress", frame_time, {"progress": counts, "frameTime": frame_time})
@@ -325,6 +329,7 @@ class JobsRunner:
                     if job["local_status"] == "running":
                         self.state.enqueue(job["id"], "night_ended", iso(now), {"reason": reason})
                         self.state.set_local_status(job["id"], "queued")
+                        self._night_ended[job["id"]] = iso(now)
                         log.info("job %s: night ended (%s)", job["id"], reason)
                         changed = True
 
