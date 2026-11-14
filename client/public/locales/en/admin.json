@@ -116,6 +116,7 @@
             "permission-events-users": "View an event's registered members",
             "permission-pipeline-manage": "Manage the observatory pipeline",
             "permission-push-manage": "Manage push notifications",
+            "permission-telescope-manage": "Manage telescope jobs and the observatory autopilot",
             "column-name": "Name",
             "column-permissions": "Privileges",
             "column-users-count": "Users",

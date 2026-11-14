@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
-import { FilterTag } from '@/components/common/filter-tag'
+import { FilterTag, FilterTagList } from '@/components/common/filter-tag'
 import { formatExposure } from '@/utils/dates'
 import { getFilterExposures } from '@/utils/filters'
 import { humanizeFileSize } from '@/utils/strings'
@@ -37,14 +37,16 @@ export const PhotoInfo: React.FC<PhotoInfoProps> = ({ photo, categories, origina
                     <div className={styles.filters}>
                         <dt>{t('components.pages.photos.photo-info.filters', 'Фильтры')}</dt>
                         <dd>
-                            {filters.map(({ filter, exposure: filterExposure }) => (
-                                <FilterTag
-                                    key={filter}
-                                    filter={filter}
-                                >
-                                    <span className={styles.filterExposure}>{formatExposure(filterExposure, t)}</span>
-                                </FilterTag>
-                            ))}
+                            <FilterTagList>
+                                {filters.map(({ filter, exposure: filterExposure }) => (
+                                    <FilterTag
+                                        key={filter}
+                                        filter={filter}
+                                    >
+                                        {formatExposure(filterExposure, t)}
+                                    </FilterTag>
+                                ))}
+                            </FilterTagList>
                         </dd>
                     </div>
                 )}

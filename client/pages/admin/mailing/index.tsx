@@ -160,6 +160,7 @@ const MailingListPage: NextPage<object> = () => {
                 currentPage={pageTitle}
             >
                 <Button
+                    size={'small'}
                     mode={'primary'}
                     icon={'PlusCircle'}
                     link={'/admin/mailing/form'}

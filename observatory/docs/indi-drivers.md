@@ -123,8 +123,9 @@ WatchDog only parks. It never cuts power.
 ## ZWO CCD ASI6200MM Pro
 
 Gain 150, offset 50, USB bandwidth 80, RAW16, FITS, full frame 9576 × 6388, bin 1×1, cooler off
-by default (Ekos turns it on per sequence; it needs the camera's 12 V). `SCOPE_INFO` 1000 mm /
-200 mm. Upload mode `UPLOAD_CLIENT` — frames go to Ekos, which saves them under
+by default (Ekos turns it on per sequence; it needs the camera's 12 V). `SCOPE_INFO` 1200 mm /
+254 mm (INDI 2 does not restore it from the config on start: Ekos sets it from the optical
+train when it connects; the observatory agent falls back to its own `[optics]`). Upload mode `UPLOAD_CLIENT` — frames go to Ekos, which saves them under
 `/home/mik/fits/<target>/<type>/<filter>/…`. Snooped devices: EQMod Mount, ZWO EAF, ZWO EFW.
 
 ## ZWO EFW

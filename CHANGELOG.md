@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 4.17.0
+
+Sharper star maps and tidier page actions; the observatory gets ready for telescope jobs from the site.
+
+### Patch Changes
+
+- Observatory: groundwork for telescope jobs from the site and the supernova patrol (not shown on the site yet)
+- Star map: small maps are sharp on high-resolution screens
+- Star map: the stray "undefined3" label near Eridanus is now υ³ Eri
+- Page actions open from a compact "Actions" button next to the page title
+- Photo page: equipment and object facts are laid out more cleanly
+
 ## 4.16.0
 
 The observatory page shows the telescope live, and objects are filled from the SIMBAD catalog.

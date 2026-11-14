@@ -117,6 +117,10 @@ const RolesPage: NextPage<object> = () => {
                 [ApiModel.Permission.PUSH_MANAGE]: t(
                     'pages.roles.permission-push-manage',
                     'Управление push-уведомлениями'
+                ),
+                [ApiModel.Permission.TELESCOPE_MANAGE]: t(
+                    'pages.roles.permission-telescope-manage',
+                    'Управление заданиями телескопа и автопилотом обсерватории'
                 )
             }
 
@@ -275,6 +279,7 @@ const RolesPage: NextPage<object> = () => {
                 currentPage={pageTitle}
             >
                 <Button
+                    size={'small'}
                     icon={'PlusCircle'}
                     mode={'primary'}
                     label={t('pages.roles.create-button', 'Добавить роль')}

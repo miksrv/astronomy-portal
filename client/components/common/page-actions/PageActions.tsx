@@ -32,7 +32,8 @@ interface PageActionsProps {
 }
 
 /**
- * The editor's actions on a page - add, edit, delete, … - behind one "⋯" button in the top right
+ * The editor's actions on a page - add, edit, delete, … - behind one "Действия ▾" button in the top right
+ * (a single allowed action is shown as that one button instead)
  * corner of the page header. Each item names the privileges it needs and the menu shows only those
  * the viewer has; with none left there is no button at all, so a guest sees the page as it is.
  */
@@ -46,6 +47,42 @@ export const PageActions: React.FC<PageActionsProps> = ({ actions, overlay, clas
 
     if (!visible.length) {
         return null
+    }
+
+    // One action needs no menu: it is the button itself ("Добавить" on a catalog), the same
+    // primary button at the same place. "Действия ▾" only from two actions on
+    const [single] = visible
+
+    if (visible.length === 1 && single) {
+        const item = single
+
+        // A page to go to is a link (next/link, a new tab works), drawn as the primary button;
+        // something to do here is the kit's own primary button
+        return item.link && !item.disabled ? (
+            <Link
+                href={item.link}
+                className={cn(
+                    styles.trigger,
+                    styles.single,
+                    !overlay && styles.inline,
+                    overlay && styles.overlay,
+                    className
+                )}
+            >
+                {item.icon && <Icon name={item.icon} />}
+                {item.label}
+            </Link>
+        ) : (
+            <Button
+                className={cn(!overlay && styles.inline, overlay && styles.overlayButton, className)}
+                mode={'primary'}
+                variant={item.variant}
+                icon={item.icon}
+                label={item.label}
+                disabled={item.disabled}
+                onClick={item.onClick}
+            />
+        )
     }
 
     // The destructive ones go last, so that a miss on the menu never deletes anything
@@ -63,8 +100,14 @@ export const PageActions: React.FC<PageActionsProps> = ({ actions, overlay, clas
             aria-label={t('common.page-actions', 'Действия')}
             title={t('common.page-actions', 'Действия')}
             trigger={
+                // The look of the kit's small primary button: a Popout trigger is a button
+                // already, so a kit Button can't go inside it
                 <span className={cn(styles.trigger, overlay && styles.overlay)}>
-                    <Icon name={'VerticalDots'} />
+                    {t('common.page-actions', 'Действия')}
+                    <Icon
+                        name={'KeyboardDown'}
+                        className={styles.arrow}
+                    />
                 </span>
             }
         >

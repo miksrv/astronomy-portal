@@ -64,4 +64,19 @@ describe('PageActions', () => {
         fireEvent.click(screen.getByText('Удалить'))
         expect(onDelete).toHaveBeenCalled()
     })
+
+    it('shows a single allowed action as that button, without the "Действия" menu', () => {
+        asUser(['events.users'])
+        render(<PageActions actions={actions} />)
+
+        expect(screen.queryByText('Действия')).toBeNull()
+        expect(screen.getByText('Статистика').closest('a')?.getAttribute('href')).toBe('/stats')
+    })
+
+    it('opens a "Действия" menu from two actions on', () => {
+        asUser(['events.update', 'events.statistic'])
+        render(<PageActions actions={actions} />)
+
+        expect(screen.getByText('Действия')).toBeTruthy()
+    })
 })

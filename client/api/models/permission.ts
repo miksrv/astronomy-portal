@@ -21,5 +21,6 @@ export enum Permission {
     EVENTS_REFUND = 'events.refund',
     EVENTS_USERS = 'events.users',
     PIPELINE_MANAGE = 'pipeline.manage',
-    PUSH_MANAGE = 'push.manage'
+    PUSH_MANAGE = 'push.manage',
+    TELESCOPE_MANAGE = 'telescope.manage'
 }

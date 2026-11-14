@@ -14,6 +14,8 @@ jest.mock('@/api', () => ({
 }))
 
 jest.mock('@/components/common', () => ({
+    // The real panel: the form's SIMBAD behaviour is what these tests check
+    SimbadPanel: jest.requireActual('@/components/common/simbad-panel').SimbadPanel,
     StarMap: () => <div data-testid={'star-map'} />,
     MarkdownEditor: ({ name, value, onChange }: { name: string; value: string; onChange: (v: string) => void }) => (
         <textarea
