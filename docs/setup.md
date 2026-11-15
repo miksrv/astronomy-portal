@@ -91,6 +91,7 @@ yarn build
 | `app.latitude` | Observatory latitude | `0.0` |
 | `app.longitude` | Observatory longitude | `0.0` |
 | `astrometry.apiKey` | nova.astrometry.net API key for plate solving photos: new uploads are solved from the editor's browser, the archive once with `php spark photos:solve --all` (see server/CLAUDE.md CLI Commands). Shown on https://nova.astrometry.net/profile after signing in | — |
+| `simbad.sesameUrl` / `simbad.tapUrl` | SIMBAD mirrors for the object lookups (optional; the CDS mirrors at Harvard by default, `Config\Simbad`) | — |
 | `app.observatory.controller` | Base URL of the observatory power relay API | — |
 | `app.observatory.controller.user` / `.password` | Power relay API credentials | — |
 | `observatory.agentToken` | Bearer token of the observatory agent (FEAT-30), ≥ 32 random bytes (`openssl rand -hex 32`); the same value goes into the agent's token file | — |
@@ -112,7 +113,7 @@ yarn build
 | `payment.alfabank.gatewayUrl` | Alfa-Bank REST base URL (production) | `https://payment.alfabank.ru/payment/rest/` |
 | `payment.alfabank.callbackToken` | Symmetric token for HMAC callback verification | — |
 | `payment.alfabank.test.*` | Same keys as above (`userName`/`password`/`token`/`gatewayUrl`/`callbackToken`), used when `payment.alfabank.environment = 'test'` | `gatewayUrl`: `https://alfa.rbsuat.com/payment/rest/` |
-| `smtp.*` | SMTP server for mailings, tickets and magic links (`host`/`port`/`user`/`pass`/`crypto`/`mail`/`senderName`) | — |
+| `smtp.*` | SMTP server for mailings, tickets and magic links (`host`/`port`/`user`/`pass`/`crypto`/`mail`/`senderName`; optional `timeout`, seconds, default 5) | — |
 | `push.vapidPublicKey` / `vapidPrivateKey` / `vapidSubject` | VAPID keys for Web Push | — |
 | `database.*.hostname` | DB host | `127.0.0.1` |
 | `database.*.port` | DB port | `3308` |

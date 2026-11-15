@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A DIY amateur observatory web application with remote monitoring, equipment control, weather data, astrophoto archive, stargazing events, and email mailings. The project is a monorepo with three subsystems: a Next.js frontend (`client/`), a CodeIgniter 4 PHP backend (`server/`), and the observatory PC setup (`observatory/`).
 
-**Current version:** 4.17.0 (see `CHANGELOG.md` for history)
+**Version:** `client/package.json`; history in `CHANGELOG.md`.
 
 **Feature specs:** `ROADMAP.md` lists planned features; each one with a spec is detailed in `features/`. A shipped feature's spec is deleted and the feature recorded in `CHANGELOG.md`.
 
@@ -19,6 +19,10 @@ Stargazing events are rare (~3 per year), so the product's primary "dead-time" c
 ### Maintenance rule: roles & permissions table
 
 There is no central permission/filter middleware — every backend controller checks `session->can(Permission::X)` inline (`App\Enums\Permission`, a fixed backed enum), and the frontend mirrors those checks via `hasPermission()`/`hasAnyPermission()` (`client/utils/permissions.ts`) to show/hide pages and UI (see `docs/permissions.md`). Roles (`user_roles` table, admin-editable via `/admin/roles`) are just named bundles of privileges a user can be assigned any number of; there is no admin bypass. Whenever a change touches who can do what — a new privilege is introduced, a privilege check is added/removed/loosened/tightened on either the backend or the frontend, a seeded role's default privileges change — **update the tables in `docs/permissions.md` in the same change**. That document is the single source of truth for the access matrix; letting it drift from the code makes it actively misleading.
+
+### Feature flag: telescope jobs (FEAT-30 phase 2)
+
+Built, but switched off until it is presented: `TELESCOPE_JOBS_ENABLED = false` in `client/utils/constants.ts` hides the UI, and the `/telescope/*` route group is commented out in `server/app/Config/Routes.php`. Switch both on together.
 
 ## Development Commands
 
@@ -59,10 +63,11 @@ docker-compose up     # Start MariaDB at localhost:3308 (db: db, user: user, pas
 
 ## Architecture
 
-Detailed inventories live next to the code — read them instead of guessing (setup, env variables and deployment are in `docs/`):
+Detailed inventories live next to the code — read them instead of guessing:
 - **`client/CLAUDE.md`** — frontend conventions, API error handling, verification checklist.
 - **`client/DESIGN.md`** — design system (tokens, type roles, layout, patterns); read it before any UI change.
-- **`server/CLAUDE.md`** — full API route table, controllers, models, libraries, notable migrations, CLI commands, backend conventions.
+- **`server/CLAUDE.md`** — stack, full API route table, controllers, models, libraries (payments, plate solving, the agent sync), auth and session revocation, rate limiting, notable migrations, CLI commands, backend conventions.
+- **`docs/`** — local setup and every env variable (`setup.md`), CI/CD and deployment (`deployment.md`), the access matrix (`permissions.md`).
 
 ### Frontend (`client/`)
 
@@ -79,40 +84,20 @@ Detailed inventories live next to the code — read them instead of guessing (se
 **Coding conventions (frontend):**
 - Component props must use `interface`, not `type` alias
 - Default text in `t('key', 'fallback')` must always be **Russian**
-- Every new i18n key must be added to **both** `client/public/locales/en/translation.json` and `client/public/locales/ru/translation.json` with proper translations — never copy English text into the RU file
+- Every new i18n key must be added to **both** the `en` and `ru` locale files (the section's namespace file) with proper translations — never copy English text into the RU file
 
 ### Backend (`server/`)
 
-**Stack:** CodeIgniter 4.7, PHP 8.2 (pinned as `config.platform.php` in `composer.json`, so `composer update` never resolves packages the hosting cannot run). JWT auth via `firebase/php-jwt ^7` (requires an HS256 secret of at least 32 bytes — `auth.token.secret`). Web Push via `minishlink/web-push ^11` (+ `guzzlehttp/guzzle`), ticket QR codes via `endroid/qr-code ^6`. Tests via PHPUnit 11.5 on in-memory SQLite.
-
-**Routing:** all routes in `server/app/Config/Routes.php` (autoRoute disabled); every group also registers `OPTIONS (:any)` for CORS preflight. `composer routes` lists them.
-
-**Payments:** `PaymentLibrary` + `PaymentGatewayInterface` are gateway-agnostic — adding a provider means one class implementing the interface; `AlfaBankClient` is the current one.
-
-**Backend conventions:**
-- API responses use **camelCase** field names (e.g. `createdAt`, not `created_at`) — format in model, not controller
-- Errors use the `{message, errors?}` envelope via `BaseApiController` helpers — see "API Responses" in `server/CLAUDE.md`
-- CodeIgniter 4 Query Builder does **not** have `selectRaw()` — use `select()` which accepts raw SQL expressions and aliases natively
-- `CommentsModel::getForEntity()` and `getRandom()` return author as `{ id, name, avatar }` object with name truncated to "FirstName L." for privacy
-- Always run migrations after pulling changes that add them
-
-**Rate limiting:** `server/app/Filters/RateLimitFilter.php` (alias `ratelimit`) throttles abuse-prone public routes per-IP via a token bucket (CI4's `Services::throttler()`), applied per-route in `Routes.php` — currently OAuth login, the SIMBAD lookup `objects/simbad/:name`, `relay/light`, `events/booking`, `comments` create, `mailings/:id/test`, `mailings/unsubscribe`, `push-notifications/:id/test`, `push/subscribe`, and the view counters `photos/:id/view` / `events/:id/view`. Disabled under `ENVIRONMENT === 'testing'`.
-
-**Plate solving:** every photo has a row in `photos_astrometry` solved on nova.astrometry.net (key `astrometry.apiKey`) as a state machine (`AstrometrySolver::step()`): there is **no cron** — after an upload the editor's browser (`PhotoSolveStatus` in the photo page header) polls `POST /photos/:id/astrometry` every few seconds until the row is final, and the archive was backfilled once with `php spark photos:solve --all`. The frontend reads `GET /photos/:id/astrometry` and draws the object labels and the RA/Dec grid itself from the stored WCS (`client/utils/wcs.ts`, TAN + SIP) — the service's annotations are only the second layer under our own objects.
-
-**Session revocation:** The JWT lifetime is intentionally long (180 days) and unchanged by logout. Instead, `users.session_token` is embedded in every token as a `sid` claim and checked on every request; `POST /auth/logout` clears it, instantly invalidating every token issued to that user on any device — see "Authentication" in `server/CLAUDE.md` for the full mechanism.
+CodeIgniter 4.7 on PHP 8.2, tests on in-memory SQLite. Conventions that bite most often (the rest in `server/CLAUDE.md`):
+- API responses use **camelCase** field names, formatted in the model, not the controller
+- Errors use the `{message, errors?}` envelope via the `BaseApiController` helpers
+- CI4's Query Builder has **no** `selectRaw()` — `select()` takes raw expressions and aliases
+- Every route is declared in `server/app/Config/Routes.php` (autoRoute disabled)
 
 ### Observatory (`observatory/`)
 
-Docs (English), anonymised INDI driver configs, indiweb/Ekos profiles, the KStars desktop container and the power scripts of the observatory PC `astrolab` — enough to rebuild it from scratch (`observatory/README.md`). Never commit credentials, public addresses or site coordinates there: use placeholders (`change-me`, `example.com`, `0.0`). Safety rules for anything that can move the roof or mount are in `observatory/docs/safety.md`. Planned: the Python agent `observatory/agent/` (FEAT-30).
+Docs (English), anonymised INDI driver configs, indiweb/Ekos profiles, the KStars desktop container, the power scripts of the observatory PC `astrolab` and the Python agent `observatory/agent/` — enough to rebuild it from scratch (`observatory/README.md`). Never commit credentials, public addresses or site coordinates there: use placeholders (`change-me`, `example.com`, `0.0`). Safety rules for anything that can move the roof or mount are in `observatory/docs/safety.md`.
 
 ### Deployment
 
-- **Frontend:** SSH/rsync to VPS, served via PM2 (`ecosystem.config.js`). Built as Next.js standalone (`output: 'standalone'` in `next.config.js`).
-- **Backend:** FTP upload to shared PHP hosting via GitHub Actions.
-- CI/CD workflows in `.github/workflows/`:
-  - `ui-checks.yml` — runs on PRs: lint + test + build
-  - `api-checks.yml` — runs on PRs: PHPUnit tests
-  - `ui-deploy.yml` — deploys frontend on push to `main`
-  - `api-deploy.yml` — deploys backend on push to `main`
-  - `sonarcloud.yml` — SonarCloud quality gate on PRs and pushes to `main`
+Pushing to `main` deploys both sides (frontend: rsync to a VPS + PM2; backend: FTP to shared PHP hosting); PRs run lint, tests, build and SonarCloud. Migrations are **not** run by the deploy. Details: `docs/deployment.md`.

@@ -52,12 +52,13 @@ observatory/
 │   ├── kstars-desktop/       # Dockerfile + compose.yaml + .env.example for the KStars web desktop
 │   └── systemd/              # indiwebmanager, frames-upload units, DNS fallback
 ├── scripts/                  # obs-power (relay), Ekos startup/shutdown scripts, frames-upload
-└── agent/                    # observatory agent (Python): status → portal
+└── agent/                    # observatory agent (Python): status, telescope jobs → portal
 ```
 
 `agent/` — the observatory agent, a Python service on the observatory PC that reports the
-device status to the portal ([agent/README.md](agent/README.md); prototype, phase 1 of
-[FEAT-30](../features/observatory-agent.md)). Telescope jobs from the site come in phase 2.
+device status to the portal and, when enabled, runs the telescope jobs from the site through the
+Ekos Scheduler ([agent/README.md](agent/README.md); [FEAT-30](../features/observatory-agent.md):
+phase 1 — status, phase 2 — jobs, built in 4.17.0, not deployed yet).
 
 ## Quick restore
 
