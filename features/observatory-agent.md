@@ -1,6 +1,6 @@
 # FEAT-30 — Observatory Agent: live status + telescope jobs from the site
 
-**Status:** Plan and decisions agreed (2026-11-03); autopilot / supernova patrol added (2026-11-04, §4.10); phase 1 (status) prototype in `observatory/agent/` + `/observatory/status` API
+**Status:** Plan and decisions agreed (2026-11-03); autopilot / supernova patrol added (2026-11-04), **dropped on 2026-11-13** in favour of repeated jobs (§4.10); phase 1 (status) prototype in `observatory/agent/` + `/observatory/status` API
 **Priority:** High
 **Affects:** New Python service (`observatory/agent/`) + Backend (CodeIgniter 4) + Frontend (Next.js)
 **Supersedes:** the ROADMAP ideas "Live observatory status on the site" and "User imaging requests → KStars/Ekos Scheduler".
@@ -13,9 +13,9 @@
    where the telescope points, what the camera is shooting, is the weather safe.
 2. Registered users **create imaging jobs on the site**; the observatory shoots them
    autonomously on clear nights and the site shows the progress and, at the end, the frames.
-3. **Every clear night has a plan, even with an empty queue.** There are only ~80–95 clear nights
-   a year at the site, so the telescope must never stand idle because nobody added a job: whatever
-   time the jobs leave free goes to the **supernova patrol** (§4.10).
+3. **Recurring targets are repeated jobs.** Instead of an automatic patrol the managers keep a set
+   of long-lived jobs (e.g. 20–30 galaxies in L) and repeat a finished one, which puts it back into
+   the queue with its counters reset (§4.10).
 
 ---
 
@@ -134,7 +134,7 @@ visibility preview (altitude tonight and over the next weeks, `astronomy-engine`
   it is `completed` when every filter has its count.
 - **A job has no date.** It waits in `queued` for as long as it takes: cloudy nights cost nothing,
   because the agent rebuilds the schedule every afternoon from *all* queued jobs (§4.4). On the
-  first clear night when the target is observable it is shot, ahead of the patrol (§4.5). The only
+  first clear night when the target is observable it is shot (§4.5). The only
   date is the optional "valid until". If the target is not observable at all in the coming weeks
   (wrong season, never above its min altitude) the form says so when the job is created.
 - Cancelling a `running` job takes effect at the next safe point: the agent stops the Scheduler
@@ -145,9 +145,11 @@ visibility preview (altitude tonight and over the next weeks, `astronomy-engine`
   the site — so a cancel is a request the agent confirms, and a manager deletes such a job only
   after it is final. While Ekos can't be read the agent waits with the confirmation, unless Ekos
   stays unreadable for 15 min (KStars down) or the agent has no Ekos access at all.
-- Expiry and the end of a patrol night follow the date, not the agent: the agent's pull and the
+- Expiry follows the date, not the agent: the agent's pull and the
   site's job reads (at most once a minute) both run them, so a PC that is off for weeks never
   leaves stale active jobs counting against their authors' limits.
+- A final job (completed, failed, expired, cancelled — not rejected) can be **repeated** (§4.10):
+  the same job goes back to `approved` (a manager) or `pending` (its author), its counters reset.
 - E-mail to the author: approved / rejected / first frames / completed / expired; it links to the
   job's own page.
 
@@ -156,8 +158,8 @@ visibility preview (altitude tonight and over the next weeks, `astronomy-engine`
 - **Pull, full desired state.** Every 5 minutes (and right after start) the agent calls
   `GET /observatory/agent/jobs`, which returns *all* jobs the observatory should know about
   (`approved`, `queued`, `running`; `cancelRequested` flag) with `version`, `lastSeq`, `progress`
-  and `lastFrameAt` per job, plus the settings the agent needs (altitude floor, filters, autonomous
-  mode, patrol). Before answering, the portal expires `approved`/`queued` jobs past "valid until" —
+  `lastFrameAt` and `repeatedAt` per job, plus the settings the agent needs (altitude floor, filters, autonomous
+  mode). Before answering, the portal expires `approved`/`queued` jobs past "valid until" —
   "valid until X" includes the night that starts on the evening of X (compared with the current
   night, local noon → noon); a `running` one finishes its night first. The agent reconciles against its local SQLite state: new → accept,
   changed version → update, missing → remove. No deltas to lose; a lost local database is rebuilt
@@ -183,8 +185,8 @@ visibility preview (altitude tonight and over the next weeks, `astronomy-engine`
 
 ### 4.4 Night cycle (who starts what)
 
-1. **Afternoon (≈ 2 h before dusk):** the agent builds tonight's schedule from all `queued` jobs
-   **plus the patrol targets due tonight** (§4.10): one Ekos sequence (`.esq`) per job with the
+1. **Afternoon (≈ 2 h before dusk):** the agent builds tonight's schedule from all `queued` jobs:
+   one Ekos sequence (`.esq`) per job with the
    **remaining** counts per filter, one schedule (`.esl`) with the targets, constraints and
    priorities. It loads it into the Ekos Scheduler only when the Scheduler is idle and nobody is
    using Ekos manually, and pushes the plan to the portal ("tonight" on `/observatory`).
@@ -192,13 +194,13 @@ visibility preview (altitude tonight and over the next weeks, `astronomy-engine`
    reason is shown on the site):
    - autonomous mode **on** — both on the site (admin switch) and locally (`jobs.enabled`);
    - INDI profile running, WatchDog armed, Weather Watcher connected and Ok, roof driver connected;
-   - at least one job or patrol target observable tonight above its min altitude.
+   - at least one job observable tonight above its min altitude.
 3. **Ekos runs the night:** startup script (power on) → unpark roof + mount → for each job: slew,
    plate solve, autofocus, guiding, capture → when nothing is observable, dawn or weather alert:
    park mount → close roof → `ekos-shutdown.sh` (frames upload request + power off).
 4. **During the night** the agent only watches: Ekos job states over DBus, new FITS files →
    `progress` updates. Every sequence the agent writes saves into its own folder —
-   `~/fits/jobs/<job id>/<target>/Light/<filter>/…`, `~/fits/patrol/<target id>/…` — so a frame is
+   `~/fits/jobs/<job id>/<target>/Light/<filter>/…` — so a frame is
    attributed by its path, never by the target name.
 5. **Morning:** the agent marks unfinished jobs `queued` with their progress; `frames-upload` moves
    the files to the archive server; the pipeline ingests them; the site shows the job's frames from
@@ -206,12 +208,9 @@ visibility preview (altitude tonight and over the next weeks, `astronomy-engine`
 
 ### 4.5 Priorities: what to shoot now
 
-**Two strict tiers:** jobs always rank above the patrol. The patrol never takes time from a job
-that is observable; it fills the gaps — before a job's target rises, after it sets, while the Moon
-blocks its broadband part, or the whole night when the queue is empty. A patrol visit is short
-(~10 min, §4.10), so when a job becomes observable it waits at most one visit. (To verify: how the
-Ekos greedy scheduler switches between jobs — between Ekos jobs is enough for us, no mid-sequence
-preemption needed.)
+Only jobs are shot; with an empty queue the telescope stays idle (no automatic backlog). (To verify:
+how the Ekos greedy scheduler switches between jobs — between Ekos jobs is enough for us, no
+mid-sequence preemption needed.)
 
 Within the jobs tier every job gets a score for tonight, recomputed by the agent when it builds
 the schedule (and shown to admins on the site with the reasons):
@@ -280,7 +279,7 @@ No Telegram (blocked where the servers are). Two channels already in the portal:
 |---|---|---|
 | Job approved / rejected / first frames / completed / expired | author | e-mail (+ Web Push if subscribed) |
 | Weather abort, roof not closed, mount not parked, device lost, SSD low on space | admins (`telescope.manage`) | Web Push + e-mail |
-| **Night ready** (phase 2 only): at dusk, forecast clear, plan loaded, Scheduler not started — "tonight: M101 (job, 6/15 h) + 74 patrol galaxies", one tap to the admin page with the start button | admins | Web Push |
+| **Night ready** (phase 2 only): at dusk, forecast clear, plan loaded, Scheduler not started — "tonight: M101 (6/15 h), NGC 891, M 74", one tap to the admin page with the start button | admins | Web Push |
 | "No link" for > 15 min while a night is planned or running | admins | Web Push + e-mail |
 
 Agent-detected problems arrive as events with the status push and are sent at once. "No link" can't
@@ -289,90 +288,26 @@ come from the agent — a spark command `observatory:watch` on the existing host
 `user_id`, so pushes can target admins only. Repeated alerts are throttled (one per problem until it
 clears).
 
-### 4.10 Autopilot: supernova patrol when the queue is empty
+### 4.10 Repeating a job (the supernova patrol dropped)
 
-**Why.** Deciding *what to shoot tonight* is the bottleneck: a night with no job added is a lost
-night, and there are only ~80–95 clear nights a year. So the observatory always has a default
-plan. Roughly half of the observing goals are artistic imaging and half are hunting new objects
-(supernovae, novae); artistic imaging stays **manual** — it comes only from jobs (there is no
-automatic "art backlog"), the patrol is **automatic**. The 50/50 split is a loose guideline, not
-an enforced rule: the site may show the share of time jobs vs patrol over the last 30 days, the
-planner does not balance it.
+The automatic supernova patrol (a galaxy list re-imaged every few nights, one patrol job per night
+made by the agent — decisions #9, #11, #13, #14, #23) was **dropped on 2026-11-13** before the
+release: too much machinery for now. Recurring targets are ordinary jobs instead — a manager creates
+20–30 jobs (one target each, e.g. L frames of a galaxy) and pins / prioritises them.
 
-**What the patrol is.** A list of galaxies (`patrol_targets`), each re-imaged every few nights. A
-visit is a short series; finding the supernova (compare with a reference frame, check against TNS)
-is the job of observatory-pipeline, not of the planner — the planner only guarantees regular frames.
-
-**A patrol night is a job** (decision #23). The agent plans the patrol by itself and reports every
-visit to the portal (`POST /observatory/agent/patrol/visits`) — while it is shot too, then once
-more when it is over (target + first-frame time is the visit's key, the larger count wins). The
-portal turns the visits into **one job per night** (`telescope_jobs.source = patrol`, `night`,
-`App\Libraries\PatrolNights`):
-- it appears with the night's **first reported visit** — a cloudy night, or one whose plan never
-  started, leaves nothing; the plan files of such nights are pruned by the agent (7 nights kept);
-- it is `running` while its night lasts and `completed` after the night's dawn (nautical, from the
-  agent's plan; or once the next night began);
-- it counts galaxies shot of the planned ones (`visits_done` / `visits_planned`, the planned count
-  never shrinks — a target already shot drops out of later plans) and the frames (`progress.L`);
-  its page lists the galaxies in the order they were shot;
-- it is never in the agent's desired state, and nobody changes, pauses, cancels or deletes it on
-  the site. In the queue it ranks after the visitors' jobs of its rank.
-
-**Every visit is focused and guided.** A frame the pipeline rejects (soft focus, trailed stars) is
-telescope time thrown away, so quality comes before the number of galaxies per hour. The overhead
-is paid per visit, so each visit takes enough exposure to be worth it:
-
-| Step | Time | How it is kept short |
-|---|---|---|
-| Slew | 20–60 s | the agent orders targets along a path — neighbours on the sky, setting (west) first |
-| Plate solve + correction | 15–30 s | one solve after the slew, binned, offline index |
-| Autofocus | ≈ 2–4 min | **every target** (Ekos job step "Focus"); binned focus frames, short exposures, tuned step count — the EAF is being repaired |
-| Guiding | ≈ 30–60 s | **every target** (job step "Guide"); calibrate once per night and reuse the calibration after slews (Ekos guide option), so a visit only pays for star selection + settle |
-| Exposure | 5 × 60 s L, bin 2 | ≥ 3 frames so a satellite trail or a cosmic ray never looks like a new star; 5 to make the overhead worth paying |
-
-≈ **9–10 min per visit → ~6 galaxies per hour**, about half the time on the sky. Storage at bin 2 is
-≈ 30 MB per frame, ≈ 9 GB for 60 visits — fine for the SSD and frames-upload.
-
-The pipeline's FWHM/QC statistics of the patrol frames show later whether per-target focus is really
-needed or whether the Ekos options "refocus on HFR growth / temperature change / after a meridian
-flip" keep the frames just as sharp — then the visit gets shorter. Start with full focus + guide.
-
-**Reach.** 250 mm f/4.7, 5 × 60 s stacked: roughly mag 19 on a dark night, less with the Moon.
-Supernovae in galaxies within ~40 Mpc peak at mag 12–16, so the margin is comfortable; the patrol
-runs on moonlit nights too, just shallower.
-
-**Recommended size (start):**
-- **~100–120 galaxies**: major axis ≥ 2′ (smaller ones gain nothing from our 0.65″/px), B ≤ 12.5 or
-  distance ≤ ~30 Mpc (the brightest, nearest — the best chance of a supernova we can see),
-  culminating ≥ 30° at the site; plus **M31 and M33** for novae (M31 needs ~2–3 fields with our
-  1.7° × 1.15° frame). Seeded once from SIMBAD by a spark command (`patrol:seed`, reusing the
-  FEAT-31 SIMBAD client), then edited by admins (enable/disable, add).
-- In any season about half are observable → **~50–60 candidates a night**.
-- **Cadence: every 5–7 calendar days.** A supernova stays bright for weeks, so a run of cloudy
-  nights loses nothing: the target's priority just keeps growing with the days since its last
-  visit. A long winter night (10–12 h dark, ~60–70 visits) covers every observable galaxy; a
-  night shared with jobs covers the most overdue ones. The list grows once the real visit time is
-  known.
-
-**Planning the patrol part of the night** (agent, every afternoon):
-1. Candidates = enabled targets observable tonight above `max(15° floor, 25°)` — the patrol accepts
-   lower altitude than art, a visit is about *seeing* a new star, not about a pretty frame.
-2. Score = days since last visit (main factor) + altitude/airmass + Moon separation.
-3. Fill the dark time the jobs leave free, then order the chosen visits along a path (west to east,
-   neighbours together) and write them into the `.esl` below every job (lower Ekos priority).
-   If Ekos ignores our order between equal priorities, use strictly decreasing priorities.
-4. Darkness: jobs with broadband filters need astronomical night; narrowband jobs and the patrol
-   also run in nautical darkness (sun < −12°) — at the site's latitude there is no astronomical
-   night around midsummer, so in summer the patrol is (with narrowband jobs) the only work.
-
-**Reporting.** Frames go to `~/fits/patrol/<target id>/…`; the agent sends a `patrol_visit` event
-(target, frames, time) → `patrol_targets.last_visit_at`, visit count. Frames reach observatory-api
-like any other, so the object pages show them too.
-
-**Public.** Everyone sees "Tonight" on `/observatory`: planned jobs (target + "job") and the
-patrol (number of galaxies, then the current one) — and during the night what the telescope is
-shooting right now. A job shows its author with avatar and full name (decision of 2026-11-06: a job is a public
-credit, unlike a comment).
+**Repeat** (`POST /telescope/jobs/:id/repeat`, "Повторить" in the job's menu) — no clone, the same
+job comes back:
+- allowed for the author and `telescope.manage`, only from `completed`, `failed`, `expired`,
+  `cancelled` (not `rejected`);
+- a manager's repeat → `approved` at once; an author's → `pending` (moderation again), within the
+  active-jobs limit;
+- reset: progress, the frame window, accepted/started/finished times, the status reason, a pending
+  cancel, `held`; a passed "valid until" is cleared; `version` + 1; the update log (history) stays;
+- `repeated_at` = now: in the queue a repeated job goes first among the jobs of its pinned/priority
+  rank (latest repeat first); the agent counts only frames shot after `repeatedAt`, so the frames of
+  the earlier run (still in its local database and in `~/fits/jobs/<job id>/`) don't complete it at
+  once; the site ignores an update whose time is before `repeated_at` (the earlier run's progress,
+  `failed` or `completed` left in the agent's outbox) — its seq is consumed, the new run untouched.
 
 ### 4.11 Altitude floor: 15°, enforced in Ekos too
 
@@ -410,15 +345,11 @@ For artistic jobs 15° is only the floor — the default min altitude stays 30°
 
 - `observatory_status` (latest snapshot), `observatory_events` (log).
 - `telescope_jobs` (target, plan JSON, constraints, priority, status, version, progress JSON,
-  author, approval, timestamps, the frames' time window — no frames table, decision #18),
+  author, approval, timestamps, the frames' time window, `repeated_at` — no frames table, decision #18),
   `telescope_job_updates` (every applied `seq` per job: idempotency + the job's timeline).
-- `patrol_targets` (name, RA/Dec, size, magnitude, enabled, cadence days, last visit, visit
-  count), `observatory_night_plans` (the plan the agent pushes for tonight, shown publicly).
-- `observatory_settings` gets `autonomous_mode` (admin switch), `altitude_floor` (15),
-  `patrol_enabled`, patrol defaults (exposure, count, binning, cadence).
-- Agent API also: `GET /observatory/agent/patrol` (targets, synced like jobs),
-  `POST /observatory/agent/patrol/visits` (batch, unique per target + time),
-  `POST /observatory/agent/plan` (tonight's plan, upsert per night).
+- `observatory_night_plans` (the plan the agent pushes for tonight, shown publicly).
+- `observatory_settings` gets `autonomous_mode` (admin switch), `altitude_floor` (15).
+- Agent API also: `POST /observatory/agent/plan` (tonight's plan, upsert per night).
 - Agent API (token, `Authorization: Bearer`, rate-limited): `POST /observatory/agent/status`,
   `GET /observatory/agent/jobs`, `POST /observatory/agent/updates` (batch, §4.3).
 - Public / user API: `GET /observatory/status`, `GET /observatory/events`, `GET /telescope/config`
@@ -443,10 +374,10 @@ For artistic jobs 15° is only the floor — the default min altitude stays 30°
   limits, visibility preview); after sending, the new job's page.
 - `/observatory/jobs/:id`: one job — target facts, the target on `<StarMap>`, tonight's visibility,
   the plan per filter with the frames captured, the history; the author's cancel and every
-  manager action (approve / reject / pin / pause–resume / priority / cancel / delete) in the header's "⋯"
+  manager action (approve / reject / pin / pause–resume / priority / cancel / repeat / delete; the author's cancel and repeat too) in the header's "⋯"
   menu. Frames from observatory-api later.
 - Still open (not built): autonomous mode switch with the go/no-go checklist, full status, the
-  agent's plan with the reasons, patrol list (enable / disable / add, last visit per galaxy) — the
+  agent's plan with the reasons — the
   agent's report is served (`GET /telescope/tonight`, `report` for managers) but not shown.
 
 ---
@@ -457,7 +388,7 @@ For artistic jobs 15° is only the floor — the default min altitude stays 30°
 |---|---|---|
 | 0 | Frames on the SSD → archive server (`frames-upload`) | done in this release |
 | 1 | Agent status push, status API, status card on `/observatory` | none: read-only |
-| 2 | Jobs on the site (create, approve, list), patrol list + tonight's plan, agent pulls them and **loads** the schedule; "night ready" push, a human starts the night | low: a person decides to start |
+| 2 | Jobs on the site (create, approve, list, repeat) + tonight's plan, agent pulls them and **loads** the schedule; "night ready" push, a human starts the night | low: a person decides to start |
 | 3 | Go/no-go + autonomous start of the Scheduler by the agent — from here a clear night runs with nobody involved | needs the on-site checklist passed (incl. the horizon mask and the altitude limits, §4.11) |
 
 **Open task — Ekos after a reboot (needed before phase 3, nice to have in phase 2).** After the PC
@@ -495,12 +426,12 @@ Status push every 60 s, job sync every 5 min (§3, §4.3).
 
 | # | Question | Decision |
 |---|---|---|
-| 9 | Empty queue | Automatic supernova/nova patrol fills every free dark hour (§4.10); no automatic art backlog — art only from jobs |
+| 9 | Empty queue | ~~Automatic supernova/nova patrol~~ — dropped 2026-11-13: the telescope shoots only jobs; recurring targets are repeated jobs (§4.10) |
 | 10 | 50/50 art vs hunting | A loose guideline, not enforced by the planner |
-| 11 | Jobs vs patrol | Strict tiers: an observable job always goes before the patrol; a dateless job waits through cloudy nights and runs on the first clear night it is observable |
+| 11 | Dateless jobs | (The jobs-before-patrol tiers went with the patrol.) A dateless job waits through cloudy nights and runs on the first clear night it is observable |
 | 12 | Altitude | 15° floor in Ekos (mount limits + artificial horizon from a by-eye mask) and in the agent/form (§4.11) |
-| 13 | Patrol visit | Autofocus + guiding on every target (rejected frames waste more than the overhead); 5 × 60 s L bin 2, ≈ 9–10 min per visit |
-| 14 | Patrol size | Start with ~100–120 galaxies + M31/M33, revisit every 5–7 days; grow when the real visit time is known |
+| 13 | ~~Patrol visit~~ (dropped) | Autofocus + guiding on every target (rejected frames waste more than the overhead); 5 × 60 s L bin 2, ≈ 9–10 min per visit |
+| 14 | ~~Patrol size~~ (dropped) | Start with ~100–120 galaxies + M31/M33, revisit every 5–7 days; grow when the real visit time is known |
 | 15 | Visibility | Tonight's plan and the current target are public on `/observatory`, with the job author (avatar + full name) |
 
 **Added 2026-11-05 (start of 4.17.0):**
@@ -511,10 +442,10 @@ Status push every 60 s, job sync every 5 min (§3, §4.3).
 | 17 | Who may create jobs | Any authenticated user (`isAuth`), no separate privilege — spam is bounded by the 3-active-jobs limit and the approval; only `telescope.manage` is new |
 | 18 | Frames | Not stored in the portal: they live in observatory-api, the site asks it for a job's frames by target + the job's frame window; a job keeps counts per filter (absolute, reported by the agent) |
 | 19 | Agent | One daemon: the jobs are part of the existing `observatory-agent` service (same token, config, DBus access), off unless `[jobs] enabled`; loading into Ekos is a second switch (`load_into_ekos`), off until the generated files were checked by eye |
-| 20 | Focus step | Every job and patrol visit has Focus (with Track, Align, Guide); the missing EAF is a mechanical fault being repaired, so the agent warns in the plan instead of dropping the step |
+| 20 | Focus step | Every job has Focus (with Track, Align, Guide); the missing EAF is a mechanical fault being repaired, so the agent warns in the plan instead of dropping the step |
 | 21 | Job pages | `/observatory/jobs` is public (the queue in shooting order + the finished jobs, one row per job); `/observatory/jobs/:id` has the map, visibility, plan, history and — in the "⋯" menu — the author's and managers' actions; `/observatory/jobs/new` the form; writes need a session; no admin page; `/observatory` shows the next two jobs (redesign of 2026-11-10). A job's author is shown with the **full name** + avatar (a job is a public credit; comments keep "FirstName L.") |
 | 22 | Agent texts | The agent sends no human text to the site: the plan's reasons and warnings, the Ekos load state and the `night_ended` reason are codes with their numbers/names (`{"code": "not-observable", "group": "bb", "minutes": 20}`), translated on the site (`noticeText()` in `client/components/pages/observatory/telescope-jobs/utils.ts`); an unknown code is shown as is |
-| 23 | Patrol as jobs | Whatever the telescope shoots is a job on the site, made on the site or by the agent (user, 2026-11-10): one patrol job per night, made by the night's first reported visit — never a job per galaxy (≈ 30–55 a winter night) or one endless job; nights without frames make nothing (§4.10) |
+| 23 | ~~Patrol as jobs~~ (dropped 2026-11-13) | Whatever the telescope shoots is a job on the site, made on the site or by the agent (user, 2026-11-10): one patrol job per night, made by the night's first reported visit — never a job per galaxy (≈ 30–55 a winter night) or one endless job; nights without frames make nothing (§4.10) |
 
 ---
 
@@ -527,8 +458,8 @@ Status push every 60 s, job sync every 5 min (§3, §4.3).
 - An approved job appears in the Ekos Scheduler with the remaining counts, its progress on the site
   follows the real captures across nights, and it reaches `completed` (or `failed`/`expired` with a
   reason).
-- With an empty queue the loaded schedule contains patrol visits for every free dark hour; with a
-  queued job observable tonight, the job is before the patrol in the schedule. A job created
+- A repeated job comes back with zero progress, is shot again from scratch, and the frames of its
+  earlier run never count toward it. A job created
   before several cloudy nights is in the schedule of the first clear night it is observable.
 - No generated Ekos job can run below 15°, and Ekos itself refuses a slew below 15°.
 - `/observatory` shows tonight's plan to guests.

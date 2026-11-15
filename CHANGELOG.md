@@ -6,7 +6,7 @@ Sharper star maps and tidier page actions; the observatory gets ready for telesc
 
 ### Patch Changes
 
-- Observatory: groundwork for telescope jobs from the site and the supernova patrol (not shown on the site yet)
+- Observatory: groundwork for telescope jobs from the site (not shown on the site yet)
 - Star map: small maps are sharp on high-resolution screens
 - Star map: the stray "undefined3" label near Eridanus is now υ³ Eri
 - Page actions open from a compact "Actions" button next to the page title
