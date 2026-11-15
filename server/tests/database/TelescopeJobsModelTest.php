@@ -240,19 +240,6 @@ final class TelescopeJobsModelTest extends CIUnitTestCase
         $this->assertCount(1, $this->model->listJobs(['status' => [Telescope::STATUS_APPROVED]]));
     }
 
-    public function testPatrolJobHasNoAuthor(): void
-    {
-        $id = $this->job();
-        Database::connect()->table('telescope_jobs')->where('id', $id)->update(['source' => Telescope::SOURCE_PATROL, 'user_id' => null]);
-
-        $job = TelescopeJobsModel::format($this->model->findWithAuthor($id), false, 'u1');
-        $this->assertSame(Telescope::SOURCE_PATROL, $job['source']);
-        $this->assertNull($job['author']);
-        $this->assertFalse($job['own']);
-
-        $this->assertSame(Telescope::SOURCE_SITE, TelescopeJobsModel::format($this->model->findWithAuthor($this->job()))['source']);
-    }
-
     public function testQueueOrder(): void
     {
         $db  = Database::connect()->table('telescope_jobs');
@@ -266,7 +253,9 @@ final class TelescopeJobsModelTest extends CIUnitTestCase
             'pinned'   => ['status' => 'approved', 'created_at' => '2026-11-05 10:00:00', 'pinned' => 1],
             'held'     => ['status' => 'queued', 'created_at' => '2026-10-01 10:00:00', 'held' => 1, 'pinned' => 1],
             'running'  => ['status' => 'running', 'created_at' => '2026-11-06 10:00:00'],
-            'patrol'   => ['status' => 'queued', 'created_at' => '2026-10-01 09:00:00', 'source' => 'patrol', 'user_id' => null],
+            // Repeated: first in its pinned/priority group, the latest repeat first
+            'repeated'  => ['status' => 'approved', 'created_at' => '2026-10-01 09:00:00', 'repeated_at' => '2026-11-10 10:00:00'],
+            'repeated2' => ['status' => 'queued', 'created_at' => '2026-11-07 09:00:00', 'repeated_at' => '2026-11-11 10:00:00'],
             'done'     => ['status' => 'completed', 'created_at' => '2026-10-02 10:00:00', 'finished_at' => '2026-10-20 10:00:00'],
             'done2'    => ['status' => 'expired', 'created_at' => '2026-09-01 10:00:00', 'finished_at' => '2026-10-25 10:00:00'],
         ] as $key => $fields) {
@@ -276,7 +265,7 @@ final class TelescopeJobsModelTest extends CIUnitTestCase
 
         $order = array_column($this->model->listJobs(['sort' => 'queue']), 'id');
         $this->assertSame(
-            [$ids['running'], $ids['pinned'], $ids['priority'], $ids['old'], $ids['new'], $ids['patrol'], $ids['held'], $ids['pending'], $ids['done2'], $ids['done']],
+            [$ids['running'], $ids['pinned'], $ids['priority'], $ids['repeated2'], $ids['repeated'], $ids['old'], $ids['new'], $ids['held'], $ids['pending'], $ids['done2'], $ids['done']],
             $order,
         );
     }

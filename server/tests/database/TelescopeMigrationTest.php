@@ -32,13 +32,13 @@ final class TelescopeMigrationTest extends CIUnitTestCase
     {
         $db = Database::connect();
         $db->table('observatory_settings')->where('key', 'job_max_active')->update(['value' => '5']);
-        $db->table('observatory_settings')->where('key', 'patrol_count')->delete();
+        $db->table('observatory_settings')->where('key', 'job_exposure_max')->delete();
 
         (new AddTelescopeJobs(Database::forge()))->up();
 
         $values = array_column($db->table('observatory_settings')->get()->getResultArray(), 'value', 'key');
         $this->assertSame('5', $values['job_max_active']);
-        $this->assertSame('5', $values['patrol_count']);
+        $this->assertSame('600', $values['job_exposure_max']);
         $this->assertCount(count(AddTelescopeJobs::SETTINGS), $values);
     }
 

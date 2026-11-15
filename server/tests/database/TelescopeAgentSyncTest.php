@@ -1,9 +1,7 @@
 <?php
 
-use App\Libraries\PatrolNights;
 use App\Libraries\TelescopeAgentSync;
 use App\Models\ObservatoryNightPlansModel;
-use App\Models\PatrolTargetsModel;
 use App\Models\TelescopeJobsModel;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Test\CIUnitTestCase;
@@ -13,7 +11,7 @@ use Tests\Support\Database\TelescopeTables;
 
 /**
  * The agent sync (FEAT-30 §4.3) against real tables: seq idempotency, gaps, transitions that
- * don't fit, absolute progress, expiry, the patrol visits and the night plan.
+ * don't fit, absolute progress, expiry and the night plan.
  *
  * @internal
  */
@@ -360,29 +358,33 @@ final class TelescopeAgentSyncTest extends CIUnitTestCase
         Time::setTestNow('2026-11-11 08:00:00', 'UTC');
         $this->assertSame([$tonight], array_column($this->sync->expireOverdue(), 'id'));
     }
-    public function testPatrolVisitsAreCountedOnce(): void
+
+    public function testDesiredStateCarriesTheRepeatTime(): void
     {
-        $model  = new PatrolTargetsModel();
-        $nights = new PatrolNights();
-        $m51    = $model->insert(['name' => 'M 51', 'ra' => 202.47, 'dec' => 47.195]);
-        $off    = $model->insert(['name' => 'NGC 1', 'ra' => 1.8, 'dec' => 27.7, 'enabled' => 0]);
+        $id = $this->job();
+        $this->assertNull($this->sync->desiredState()[0]['repeatedAt']);
 
-        $this->assertSame(['M 51'], array_column($model->forAgent(), 'name'));
+        Database::connect()->table('telescope_jobs')->where('id', $id)->update(['repeated_at' => '2026-11-12 10:00:00']);
+        $this->assertSame('2026-11-12T10:00:00Z', $this->sync->desiredState()[0]['repeatedAt']);
+    }
 
-        $visits = [
-            ['target' => (int) $m51, 'time' => '2026-11-05T20:00:00Z', 'frames' => 5],
-            ['target' => (int) $m51, 'time' => '2026-11-06T20:10:00Z', 'frames' => 5],
-            ['target' => 999, 'time' => '2026-11-05T20:00:00Z', 'frames' => 5],
-            ['target' => (int) $m51, 'time' => 'tonight', 'frames' => 5],
-        ];
+    public function testUpdatesOfThePreviousRunDoNotTouchARepeatedJob(): void
+    {
+        // Repeated and accepted again; the agent's outbox still holds the old run's updates
+        $id = $this->job(Telescope::STATUS_QUEUED);
+        Database::connect()->table('telescope_jobs')->where('id', $id)->update(['repeated_at' => '2026-11-12 10:00:00']);
 
-        $this->assertSame(['recorded' => 2, 'updated' => 0, 'duplicates' => 0, 'invalid' => 2], $nights->record($visits));
-        $this->assertSame(['recorded' => 0, 'updated' => 0, 'duplicates' => 2, 'invalid' => 2], $nights->record($visits));
+        $this->assertSame(['ignored', 'ignored', 'applied'], $this->results([
+            $this->update($id, 1, 'progress', ['progress' => ['L' => 3], 'frameTime' => '2026-11-10T21:00:00Z'], '2026-11-10T21:00:00Z'),
+            $this->update($id, 2, 'failed', ['reason' => 'old'], '2026-11-11T01:00:00Z'),
+            $this->update($id, 3, 'progress', ['progress' => ['L' => 1], 'frameTime' => '2026-11-12T19:00:00Z'], '2026-11-12T19:00:00Z'),
+        ]));
 
-        $row = $model->find($m51);
-        $this->assertSame(2, (int) $row['visits']);
-        $this->assertSame('2026-11-06 20:10:00', $row['last_visit_at']);
-        $this->assertSame(0, (int) $model->find($off)['visits']);
+        $row = $this->jobs->find($id);
+        $this->assertSame(Telescope::STATUS_QUEUED, $row['status']);
+        $this->assertSame(['L' => 1], json_decode($row['progress'], true));
+        $this->assertSame('2026-11-12 19:00:00', $row['first_frame_at']);
+        $this->assertSame(3, (int) $row['last_seq']);
     }
 
     public function testNightPlanIsReplaced(): void

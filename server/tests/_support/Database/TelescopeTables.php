@@ -17,7 +17,7 @@ trait TelescopeTables
     {
         $db = Database::connect();
 
-        foreach (['users', 'objects', 'observatory_night_plans', 'patrol_visits', 'patrol_targets', 'telescope_job_updates', 'telescope_jobs', 'observatory_settings'] as $table) {
+        foreach (['users', 'objects', 'observatory_night_plans', 'telescope_job_updates', 'telescope_jobs', 'observatory_settings'] as $table) {
             $db->query('DROP TABLE IF EXISTS "' . $table . '"');
         }
 
@@ -33,7 +33,7 @@ trait TelescopeTables
 
         // The columns of `users` the job queries join (the real table has MySQL ENUMs)
         $db->query('CREATE TABLE users (id VARCHAR(15) PRIMARY KEY, name VARCHAR(100), email VARCHAR(100), avatar VARCHAR(40), locale VARCHAR(2) DEFAULT \'ru\', deleted_at DATETIME NULL)');
-        // The columns of `objects` the patrol night's page looks up (the catalog link of a galaxy)
+        // The catalog names a job's `object` is checked against
         $db->query('CREATE TABLE objects (catalog_name VARCHAR(40) PRIMARY KEY, deleted_at DATETIME NULL)');
     }
 }

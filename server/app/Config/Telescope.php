@@ -15,12 +15,6 @@ class Telescope
      */
     public const TIME_ZONE = 'Asia/Yekaterinburg';
 
-    /** A visitor's job from the site (it has an author) */
-    public const SOURCE_SITE = 'site';
-    /** The observatory agent's own job: the supernova patrol (no author) */
-    public const SOURCE_PATROL = 'patrol';
-    public const SOURCES       = [self::SOURCE_SITE, self::SOURCE_PATROL];
-
     public const STATUS_PENDING   = 'pending';
     public const STATUS_APPROVED  = 'approved';
     public const STATUS_REJECTED  = 'rejected';
@@ -39,6 +33,9 @@ class Telescope
 
     /** Seen by everyone on /observatory/jobs; rejected and cancelled jobs only by the author and managers */
     public const PUBLIC_STATUSES = [self::STATUS_PENDING, self::STATUS_APPROVED, self::STATUS_QUEUED, self::STATUS_RUNNING, self::STATUS_COMPLETED, self::STATUS_EXPIRED, self::STATUS_FAILED];
+
+    /** May be repeated (shot again from scratch): finished, but not turned down by a manager */
+    public const REPEATABLE_STATUSES = [self::STATUS_COMPLETED, self::STATUS_FAILED, self::STATUS_EXPIRED, self::STATUS_CANCELLED];
 
     /** The observatory has (or may have) the job: approved and not final */
     public const AGENT_STATUSES = [self::STATUS_APPROVED, self::STATUS_QUEUED, self::STATUS_RUNNING];

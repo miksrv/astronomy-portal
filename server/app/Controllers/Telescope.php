@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Enums\Permission;
 use App\Libraries\LocaleLibrary;
-use App\Libraries\PatrolNights;
 use App\Libraries\SessionLibrary;
 use App\Libraries\TelescopeAgentSync;
 use App\Libraries\TelescopeJobValidator;
@@ -44,8 +43,7 @@ class Telescope extends BaseApiController
 
     /**
      * Statuses that change with the date, kept right without the observatory: overdue jobs
-     * expire (their authors are e-mailed) and patrol nights whose dawn passed are completed. The
-     * agent's pull does the same, but the agent may be off for weeks — and a stale active job
+     * expire (their authors are e-mailed). The agent's pull does the same, but the agent may be off for weeks — and a stale active job
      * would still count against its author's limit. At most once a minute: the reads stay cheap.
      */
     private function upkeep(): void
@@ -64,8 +62,6 @@ class Telescope extends BaseApiController
             foreach ((new TelescopeAgentSync())->expireOverdue() as $job) {
                 $mailer->expired($job);
             }
-
-            (new PatrolNights())->closeFinished();
         } catch (Throwable $e) {
             // Never fails a read: the agent's next pull does the same
             log_message('error', '{exception}', ['exception' => $e]);
@@ -196,14 +192,7 @@ class Telescope extends BaseApiController
                 return $this->respondNotFound(lang('Telescope.jobNotFound'));
             }
 
-            $job = $this->formatJob($row);
-
-            // A patrol night: the galaxies it visited, in the order they were shot
-            if ($row['source'] === TelescopeConfig::SOURCE_PATROL) {
-                $job['visits'] = (new PatrolNights())->visitsOf($row['id']);
-            }
-
-            return $this->respond($job);
+            return $this->respond($this->formatJob($row));
         } catch (Throwable $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 
@@ -213,7 +202,7 @@ class Telescope extends BaseApiController
 
     /**
      * `GET /telescope/tonight` — public: tonight's plan as the observatory agent built it (the
-     * planned jobs with their authors, the patrol targets, darkness, the Moon). A
+     * planned jobs with their authors, darkness, the Moon). A
      * `telescope.manage` holder also gets the agent's full report (`report`: scores, reasons,
      * warnings, the Ekos state). `plan` is null while the agent hasn't planned the night.
      */
@@ -321,10 +310,6 @@ class Telescope extends BaseApiController
                 return $this->respondNotFound(lang('Telescope.jobNotFound'));
             }
 
-            if ($row['source'] !== TelescopeConfig::SOURCE_SITE) {
-                return $this->respondConflict(lang('Telescope.patrolNotEditable'));
-            }
-
             $result = $model->cancel($id);
 
             if ($result === null) {
@@ -333,6 +318,65 @@ class Telescope extends BaseApiController
 
             return $this->respond([
                 'message' => lang($result === TelescopeConfig::STATUS_CANCELLED ? 'Telescope.jobCancelled' : 'Telescope.jobCancelRequested'),
+                'job'     => $this->formatJob($model->findWithAuthor($id)),
+            ]);
+        } catch (Throwable $e) {
+            log_message('error', '{exception}', ['exception' => $e]);
+
+            return $this->respondServerError();
+        }
+    }
+
+    /**
+     * `POST /telescope/jobs/:id/repeat` — the author (or a manager) puts a finished job back into
+     * the queue to be shot again from scratch: the same job, its counts and frame window reset
+     * (the agent counts only the frames taken after `repeated_at`), the update log kept. Only a
+     * completed, failed, expired or cancelled job. An author's repeat waits for approval again and
+     * counts against the active-jobs limit; a manager's is approved at once.
+     */
+    public function repeat(?string $id = null): ResponseInterface
+    {
+        if (!$this->session->isAuth) {
+            return $this->respondUnauthorized(lang('App.accessDenied'));
+        }
+
+        try {
+            $model   = new TelescopeJobsModel();
+            $row     = $id ? $model->find($id) : null;
+            $manager = $this->isManager();
+            $userId  = $this->session->user->id;
+
+            if (!$row || ($row['user_id'] !== $userId && !$manager)) {
+                return $this->respondNotFound(lang('Telescope.jobNotFound'));
+            }
+
+            $settings = TelescopeSettings::load();
+
+            if (!$manager) {
+                // An overdue job of the author's must not count against the limit
+                $this->upkeep();
+
+                if ($model->countActive($userId) >= $settings->maxActiveJobs) {
+                    return $this->respondConflict(lang('Telescope.tooManyActive', [$settings->maxActiveJobs]));
+                }
+            }
+
+            $previous = $model->repeat($id, $manager ? $userId : null);
+
+            if ($previous === null) {
+                return $this->respondConflict(lang('Telescope.jobNotRepeatable'));
+            }
+
+            // Parallel requests all pass the check above: count again and put the job back as it
+            // was if the limit got crossed (as create() takes its new job back)
+            if (!$manager && $model->countActive($userId) > $settings->maxActiveJobs) {
+                $model->restore($id, $previous);
+
+                return $this->respondConflict(lang('Telescope.tooManyActive', [$settings->maxActiveJobs]));
+            }
+
+            return $this->respond([
+                'message' => lang($manager ? 'Telescope.jobRepeatedApproved' : 'Telescope.jobRepeated'),
                 'job'     => $this->formatJob($model->findWithAuthor($id)),
             ]);
         } catch (Throwable $e) {
@@ -364,11 +408,6 @@ class Telescope extends BaseApiController
 
             if (!$row) {
                 return $this->respondNotFound(lang('Telescope.jobNotFound'));
-            }
-
-            // A patrol night is the record of its visits (they would make it again)
-            if ($row['source'] !== TelescopeConfig::SOURCE_SITE) {
-                return $this->respondConflict(lang('Telescope.patrolNotEditable'));
             }
 
             if (!$model->remove($id)) {
@@ -429,10 +468,6 @@ class Telescope extends BaseApiController
                 return $this->respondNotFound(lang('Telescope.jobNotFound'));
             }
 
-            if ($row['source'] !== TelescopeConfig::SOURCE_SITE) {
-                return $this->respondConflict(lang('Telescope.patrolNotEditable'));
-            }
-
             if (!$model->review($id, $approve, $this->session->user->id, $reason)) {
                 return $this->respondConflict(lang('Telescope.jobNotPending'));
             }
@@ -476,10 +511,6 @@ class Telescope extends BaseApiController
 
             if (!$row) {
                 return $this->respondNotFound(lang('Telescope.jobNotFound'));
-            }
-
-            if ($row['source'] !== TelescopeConfig::SOURCE_SITE) {
-                return $this->respondConflict(lang('Telescope.patrolNotEditable'));
             }
 
             $fields = [];

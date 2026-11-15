@@ -57,8 +57,6 @@ $routes->group('observatory', static function ($routes) {
     $routes->post('agent/status', 'Observatory::agentStatus', ['filter' => ['ratelimit:observatory_agent,10,60', 'observatoryagent']]);
     $routes->get('agent/jobs', 'ObservatoryAgent::jobs', ['filter' => ['ratelimit:observatory_agent_sync,30,60', 'observatoryagent']]);
     $routes->post('agent/updates', 'ObservatoryAgent::updates', ['filter' => ['ratelimit:observatory_agent_sync,30,60', 'observatoryagent']]);
-    $routes->get('agent/patrol', 'ObservatoryAgent::patrol', ['filter' => ['ratelimit:observatory_agent_sync,30,60', 'observatoryagent']]);
-    $routes->post('agent/patrol/visits', 'ObservatoryAgent::visits', ['filter' => ['ratelimit:observatory_agent_sync,30,60', 'observatoryagent']]);
     $routes->post('agent/plan', 'ObservatoryAgent::plan', ['filter' => ['ratelimit:observatory_agent_sync,30,60', 'observatoryagent']]);
     $routes->get('status', 'Observatory::status', ['filter' => 'publiccache:30']);
     $routes->get('events', 'Observatory::events', ['filter' => 'publiccache:60']);
@@ -77,6 +75,7 @@ $routes->group('telescope', static function ($routes) {
     $routes->post('jobs/(:alphanum)/approve', 'Telescope::approve/$1');
     $routes->post('jobs/(:alphanum)/reject', 'Telescope::reject/$1');
     $routes->post('jobs/(:alphanum)/remove', 'Telescope::remove/$1');
+    $routes->post('jobs/(:alphanum)/repeat', 'Telescope::repeat/$1', ['filter' => 'ratelimit:telescope_jobs_create,10,300']);
     $routes->options('(:any)', static function () {});
 });
 

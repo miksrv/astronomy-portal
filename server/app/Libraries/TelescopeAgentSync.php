@@ -55,7 +55,6 @@ class TelescopeAgentSync
         $today = ObservatoryNightPlansModel::currentNight();
         $now   = Time::now('UTC')->toDateTimeString();
         $rows  = $this->db->table('telescope_jobs')
-            ->where('source', Telescope::SOURCE_SITE)
             ->whereIn('status', [Telescope::STATUS_PENDING, Telescope::STATUS_APPROVED, Telescope::STATUS_QUEUED])
             ->where('valid_until <', $today)
             ->get()
@@ -86,10 +85,8 @@ class TelescopeAgentSync
      */
     public function desiredState(): array
     {
-        // The patrol nights are the agent's own work, made from its visits: never handed back to it
         $rows = $this->db->table('telescope_jobs')
             ->whereIn('status', Telescope::AGENT_STATUSES)
-            ->where('source', Telescope::SOURCE_SITE)
             ->orderBy('created_at', 'ASC')
             ->orderBy('id', 'ASC')
             ->get()
@@ -117,6 +114,8 @@ class TelescopeAgentSync
                 // The frames up to it are in `progress`: an agent that lost its database doesn't count them twice
                 'lastFrameAt'       => $row['last_frame_at'] === null ? null : Time::parse($row['last_frame_at'], 'UTC')->format('Y-m-d\TH:i:s\Z'),
                 'lastSeq'           => (int) $row['last_seq'],
+                // Repeated (shot again from scratch): only the frames taken after it count
+                'repeatedAt'        => empty($row['repeated_at']) ? null : Time::parse($row['repeated_at'], 'UTC')->format('Y-m-d\TH:i:s\Z'),
                 'createdAt'         => Time::parse($row['created_at'], 'UTC')->format('Y-m-d\TH:i:s\Z'),
             ];
         }, $rows);
@@ -176,8 +175,7 @@ class TelescopeAgentSync
         for ($attempt = 0; $attempt < 3; $attempt++) {
             $row = $this->db->table('telescope_jobs')->where('id', $jobId)->get()->getRowArray();
 
-            // A patrol night is never in the desired state: the agent can't have updates for it
-            if (!$row || $row['source'] !== Telescope::SOURCE_SITE) {
+            if (!$row) {
                 return ['jobId' => $jobId, 'seq' => $seq, 'result' => 'unknown_job'];
             }
 
@@ -249,6 +247,12 @@ class TelescopeAgentSync
     {
         $status = $row['status'];
         $final  = in_array($status, Telescope::FINAL_STATUSES, true);
+
+        // The job was repeated after this happened: an update of the previous run that waited in
+        // the agent's outbox (old counts, a late "failed" or "completed") must not touch the new one
+        if ($row['repeated_at'] !== null && $time < $row['repeated_at']) {
+            return [[], false];
+        }
 
         switch ($type) {
             case 'accepted':

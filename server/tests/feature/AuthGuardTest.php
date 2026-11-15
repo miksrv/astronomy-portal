@@ -257,7 +257,7 @@ final class AuthGuardTest extends CIUnitTestCase
 
     public function testAgentSyncEndpointsWithoutTheAgentTokenReturn401(): void
     {
-        foreach ([['get', 'observatory/agent/jobs'], ['post', 'observatory/agent/updates'], ['get', 'observatory/agent/patrol'], ['post', 'observatory/agent/patrol/visits'], ['post', 'observatory/agent/plan']] as [$method, $path]) {
+        foreach ([['get', 'observatory/agent/jobs'], ['post', 'observatory/agent/updates'], ['post', 'observatory/agent/plan']] as [$method, $path]) {
             $this->{$method}($path, [])->assertStatus(401);
             $this->withHeaders(['Authorization' => 'Bearer not-the-agent-token-not-the-agent-token'])->{$method}($path, [])->assertStatus(401);
         }
@@ -277,6 +277,7 @@ final class AuthGuardTest extends CIUnitTestCase
             ['post', 'telescope/jobs/abc123/approve'],
             ['post', 'telescope/jobs/abc123/reject'],
             ['post', 'telescope/jobs/abc123/remove'],
+            ['post', 'telescope/jobs/abc123/repeat'],
         ] as [$method, $path]) {
             $result = $this->{$method}($path, []);
             $result->assertStatus(401);

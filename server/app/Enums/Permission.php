@@ -44,8 +44,8 @@ enum Permission: string
     case PUSH_MANAGE           = 'push.manage';
     // The telescope job queue and the observatory's autonomous operation
     // (FEAT-30): approving/rejecting/prioritising/editing anyone's jobs and the
-    // agent's full night report (planned: the patrol list, the autonomous-mode
-    // switch, the full observatory status). Creating a job of one's own needs
+    // agent's full night report (planned: the autonomous-mode switch, the full
+    // observatory status). Creating a job of one's own needs
     // only isAuth; a holder's own jobs are approved at once.
     case TELESCOPE_MANAGE      = 'telescope.manage';
 }

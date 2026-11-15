@@ -57,11 +57,10 @@ final class TelescopeSettingsTest extends CIUnitTestCase
 
     public function testAltitudeFloorNeverBelowFifteen(): void
     {
-        $settings = new TelescopeSettings(['altitude_floor' => '5', 'job_default_min_altitude' => '10', 'patrol_min_altitude' => '0']);
+        $settings = new TelescopeSettings(['altitude_floor' => '5', 'job_default_min_altitude' => '10']);
 
         $this->assertSame(15.0, $settings->altitudeFloor);
         $this->assertSame(15.0, $settings->defaultMinAltitude);
-        $this->assertSame(15.0, $settings->patrolMinAltitude);
     }
 
     public function testDefaultMinAltitudeFollowsARaisedFloor(): void

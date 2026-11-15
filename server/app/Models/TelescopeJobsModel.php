@@ -24,11 +24,16 @@ class TelescopeJobsModel extends ApplicationBaseModel
     protected $protectFields    = true;
 
     protected $allowedFields = [
-        'id', 'source', 'user_id', 'target_name', 'object', 'ra', 'dec', 'mode', 'preset', 'plan', 'min_altitude',
+        'id', 'user_id', 'target_name', 'object', 'ra', 'dec', 'mode', 'preset', 'plan', 'min_altitude',
         'min_moon_separation', 'valid_until', 'priority', 'pinned', 'held', 'status', 'status_reason',
         'cancel_requested_at', 'version', 'progress', 'last_seq', 'reviewed_by', 'reviewed_at',
-        'accepted_at', 'started_at', 'first_frame_at', 'last_frame_at', 'finished_at',
-        'night', 'visits_done', 'visits_planned',
+        'accepted_at', 'started_at', 'first_frame_at', 'last_frame_at', 'finished_at', 'repeated_at',
+    ];
+
+    /** What a repeat resets (and what restore() puts back) besides the status and the review */
+    private const REPEAT_FIELDS = [
+        'progress', 'first_frame_at', 'last_frame_at', 'accepted_at', 'started_at', 'finished_at',
+        'status_reason', 'cancel_requested_at', 'held', 'repeated_at', 'valid_until', 'reviewed_by', 'reviewed_at',
     ];
 
     protected $useTimestamps = true;
@@ -223,6 +228,70 @@ class TelescopeJobsModel extends ApplicationBaseModel
     }
 
     /**
+     * Puts a finished job back into the queue to be shot again from scratch — the same job, so
+     * its id, plan, priority, pin, `last_seq` and the update log stay. One conditional UPDATE on
+     * the repeatable statuses: a second repeat (or a race) finds nothing to change.
+     *
+     * @param string|null $approvedBy a manager's id: approved at once; null — an author's repeat,
+     *                                waiting for approval again (`pending`)
+     *
+     * @return array|null the row as it was (for restore()), or null when it isn't repeatable (any more)
+     */
+    public function repeat(string $id, ?string $approvedBy): ?array
+    {
+        $previous = $this->find($id);
+
+        if (!$previous || !in_array($previous['status'], Telescope::REPEATABLE_STATUSES, true)) {
+            return null;
+        }
+
+        $now = self::now();
+
+        $this->builder()
+            ->where('id', $id)
+            ->where('status', $previous['status'])
+            ->where('version', $previous['version'])
+            ->set([
+                'status'              => $approvedBy !== null ? Telescope::STATUS_APPROVED : Telescope::STATUS_PENDING,
+                'progress'            => '{}',
+                'first_frame_at'      => null,
+                'last_frame_at'       => null,
+                'accepted_at'         => null,
+                'started_at'          => null,
+                'finished_at'         => null,
+                'status_reason'       => null,
+                'cancel_requested_at' => null,
+                'held'                => 0,
+                'repeated_at'         => $now,
+                'reviewed_by'         => $approvedBy,
+                'reviewed_at'         => $approvedBy !== null ? $now : null,
+                'updated_at'          => $now,
+            ])
+            // A date already passed would expire the job at once
+            ->set('valid_until', $previous['valid_until'] !== null && $previous['valid_until'] < ObservatoryNightPlansModel::currentNight() ? null : $previous['valid_until'])
+            ->set('version', 'version + 1', false)
+            ->update();
+
+        return $this->db->affectedRows() === 1 ? $previous : null;
+    }
+
+    /**
+     * Takes a repeat back (the author's active-jobs limit got crossed by a parallel request): the
+     * job as it was before repeat(), with a new `version` — the agent may have seen the repeat.
+     */
+    public function restore(string $id, array $previous): void
+    {
+        $fields = array_intersect_key($previous, array_flip([...self::REPEAT_FIELDS, 'status']));
+
+        $this->builder()
+            ->where('id', $id)
+            ->where('status', Telescope::STATUS_PENDING)
+            ->set($fields + ['updated_at' => self::now()])
+            ->set('version', 'version + 1', false)
+            ->update();
+    }
+
+    /**
      * Deletes a job outright (`telescope.manage`): only one the observatory doesn't have
      * (pending) or a final one. An approved, queued or running job must be cancelled first, or
      * the observatory could keep shooting a job the site no longer knows (an approved one may
@@ -260,16 +329,18 @@ class TelescopeJobsModel extends ApplicationBaseModel
 
         if (($filter['sort'] ?? null) === 'queue') {
             // What the observatory shoots next: the running job, then the queue the way the agent
-            // ranks jobs (pinned, the admin priority, the oldest first), held ones after it, the
+            // ranks jobs (pinned, the admin priority, a repeated job before the others — the
+            // latest repeat first —, the oldest first), held ones after it, the
             // ones waiting for approval after those, the finished last (the latest first). The night's own score
             // (altitude, Moon) is the agent's: the real order of a night may differ within a rank
             $builder->orderBy(self::QUEUE_RANK, 'ASC', false)
                 // The finished ones (the last rank): the latest first
                 ->orderBy("CASE WHEN j.status IN ('" . implode("', '", Telescope::FINAL_STATUSES) . "') THEN COALESCE(j.finished_at, j.updated_at) END", 'DESC', false)
-                // The patrol only takes the time the visitors' jobs leave (spec §4.10)
-                ->orderBy("CASE WHEN j.source = '" . Telescope::SOURCE_PATROL . "' THEN 1 ELSE 0 END", 'ASC', false)
                 ->orderBy('j.pinned', 'DESC')
                 ->orderBy('j.priority', 'DESC')
+                // Repeated: back at the top of its pinned/priority group
+                ->orderBy('CASE WHEN j.repeated_at IS NULL THEN 1 ELSE 0 END', 'ASC', false)
+                ->orderBy('j.repeated_at', 'DESC')
                 ->orderBy('j.created_at', 'ASC');
         } else {
             $builder->orderBy('j.created_at', 'DESC');
@@ -340,11 +411,10 @@ class TelescopeJobsModel extends ApplicationBaseModel
         $progress = json_decode((string) ($row['progress'] ?? ''), true);
         $job      = [
             'id'                => $row['id'],
-            'source'            => $row['source'] ?? Telescope::SOURCE_SITE,
             'targetName'        => $row['target_name'],
             'object'            => $row['object'],
-            'ra'                => $row['ra'] === null ? null : (float) $row['ra'],
-            'dec'               => $row['dec'] === null ? null : (float) $row['dec'],
+            'ra'                => (float) $row['ra'],
+            'dec'               => (float) $row['dec'],
             'mode'              => $row['mode'],
             'preset'            => $row['preset'],
             'plan'              => json_decode($row['plan'], true) ?: [],
@@ -360,12 +430,6 @@ class TelescopeJobsModel extends ApplicationBaseModel
             'cancelRequested'   => $row['cancel_requested_at'] !== null && !in_array($row['status'], Telescope::FINAL_STATUSES, true),
             'own'               => $own,
             'progress'          => is_array($progress) ? $progress : (object) [],
-            // A patrol night (`source` = patrol): its date, the visits so far and the targets planned
-            'patrol'            => ($row['source'] ?? null) === Telescope::SOURCE_PATROL ? [
-                'night'         => $row['night'],
-                'visitsDone'    => (int) $row['visits_done'],
-                'visitsPlanned' => (int) $row['visits_planned'],
-            ] : null,
             // The author's name in full (a job is a public credit, unlike a comment — decision of
             // 2026-11-06); the id builds the avatar's URL (users/<id>/<avatar>), as comments do
             'author'            => $row['user_id'] === null ? null : [
@@ -380,6 +444,7 @@ class TelescopeJobsModel extends ApplicationBaseModel
             'firstFrameAt'      => $date($row['first_frame_at']),
             'lastFrameAt'       => $date($row['last_frame_at']),
             'finishedAt'        => $date($row['finished_at']),
+            'repeatedAt'        => $date($row['repeated_at'] ?? null),
         ];
 
         if ($manager) {

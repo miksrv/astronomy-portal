@@ -8,7 +8,7 @@ use Config\Telescope;
 /**
  * ObservatoryNightPlansModel
  *
- * Tonight's plan as the observatory agent built it (FEAT-30 §4.4, §4.10): one row per night (the
+ * Tonight's plan as the observatory agent built it (FEAT-30 §4.4): one row per night (the
  * local date of the evening), replaced whenever the agent rebuilds the plan. Kept for 90 days.
  */
 class ObservatoryNightPlansModel extends ApplicationBaseModel
@@ -46,7 +46,7 @@ class ObservatoryNightPlansModel extends ApplicationBaseModel
 
     /**
      * What everyone may see of a night's plan: darkness, the Moon, the planned jobs (target and
-     * author's name + avatar, only jobs visible to everyone) and the patrol targets.
+     * author's name + avatar, only jobs visible to everyone).
      * No scores, reasons, warnings or Ekos state — those are the admins'.
      */
     public function publicView(string $night, array $plan): array
@@ -89,11 +89,6 @@ class ObservatoryNightPlansModel extends ApplicationBaseModel
             }
         }
 
-        $patrol  = is_array($plan['patrol'] ?? null) ? $plan['patrol'] : [];
-        $targets = array_values(array_filter(array_map(
-            static fn ($t) => is_array($t) && is_string($t['name'] ?? null) ? $t['name'] : null,
-            is_array($patrol['planned'] ?? null) ? $patrol['planned'] : []
-        )));
         $string = static fn ($v) => is_string($v) ? $v : null;
         $dark   = is_array($plan['darkness'] ?? null) ? $plan['darkness'] : [];
 
@@ -108,7 +103,6 @@ class ObservatoryNightPlansModel extends ApplicationBaseModel
             ],
             'moon'     => ['illumination' => is_numeric($plan['moon']['illumination'] ?? null) ? (float) $plan['moon']['illumination'] : null],
             'jobs'     => $jobs,
-            'patrol'   => ['enabled' => (bool) ($patrol['enabled'] ?? false), 'targets' => $targets],
         ];
     }
 

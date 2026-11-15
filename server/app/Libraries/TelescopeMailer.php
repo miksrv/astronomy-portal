@@ -42,7 +42,7 @@ class TelescopeMailer
      */
     private function send(array $job, string $kind, ?string $reason): void
     {
-        // The agent's own jobs (the patrol) have no author to write to
+        // An author whose account is gone: nobody to write to
         if (empty($job['user_id'])) {
             return;
         }

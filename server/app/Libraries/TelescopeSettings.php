@@ -5,7 +5,7 @@ namespace App\Libraries;
 use Config\Database;
 
 /**
- * The telescope job / patrol settings from `observatory_settings`, typed. A missing or broken
+ * The telescope job settings from `observatory_settings`, typed. A missing or broken
  * value falls back to the default, so a half-filled table never opens a limit — but never below
  * the 15° altitude floor either.
  */
@@ -22,12 +22,6 @@ class TelescopeSettings
         'job_exposure_max'          => '600',
         'job_max_frames_per_filter' => '100',
         'filters'                   => 'L,R,G,B,H,O,S',
-        'patrol_enabled'            => '1',
-        'patrol_min_altitude'       => '25',
-        'patrol_cadence_days'       => '6',
-        'patrol_exposure'           => '60',
-        'patrol_count'              => '5',
-        'patrol_binning'            => '2',
     ];
 
     /** The physical floor of the mount/site: no setting can plan lower (§4.11) */
@@ -43,12 +37,6 @@ class TelescopeSettings
     public readonly int $maxFramesPerFilter;
     /** @var list<string> */
     public readonly array $filters;
-    public readonly bool $patrolEnabled;
-    public readonly float $patrolMinAltitude;
-    public readonly int $patrolCadenceDays;
-    public readonly int $patrolExposure;
-    public readonly int $patrolCount;
-    public readonly int $patrolBinning;
 
     /**
      * @param array<string, string|null> $values raw `observatory_settings` key => value
@@ -83,13 +71,6 @@ class TelescopeSettings
 
         $this->filters = $filters ?: explode(',', self::DEFAULTS['filters']);
 
-        $this->patrolEnabled     = ($values['patrol_enabled'] ?? self::DEFAULTS['patrol_enabled']) === '1';
-        $patrolAltitude          = is_numeric($values['patrol_min_altitude'] ?? null) ? (float) $values['patrol_min_altitude'] : (float) self::DEFAULTS['patrol_min_altitude'];
-        $this->patrolMinAltitude = max($this->altitudeFloor, min($patrolAltitude, 80.0));
-        $this->patrolCadenceDays = $int('patrol_cadence_days', 1, 60);
-        $this->patrolExposure    = $int('patrol_exposure', 1, 600);
-        $this->patrolCount       = $int('patrol_count', 1, 50);
-        $this->patrolBinning     = $int('patrol_binning', 1, 4);
     }
 
     public static function load(): self

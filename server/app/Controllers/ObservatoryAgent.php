@@ -2,12 +2,10 @@
 
 namespace App\Controllers;
 
-use App\Libraries\PatrolNights;
 use App\Libraries\TelescopeAgentSync;
 use App\Libraries\TelescopeMailer;
 use App\Libraries\TelescopeSettings;
 use App\Models\ObservatoryNightPlansModel;
-use App\Models\PatrolTargetsModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\I18n\Time;
 use Config\Telescope as TelescopeConfig;
@@ -20,7 +18,7 @@ use Throwable;
  */
 class ObservatoryAgent extends BaseApiController
 {
-    /** Largest body of an updates / visits batch, bytes */
+    /** Largest body of an updates batch, bytes */
     private const MAX_BATCH_BYTES = 1048576;
 
     /** Largest plan of a night, bytes */
@@ -36,7 +34,6 @@ class ObservatoryAgent extends BaseApiController
             $sync     = new TelescopeAgentSync();
             $settings = TelescopeSettings::load();
             $expired  = $sync->expireOverdue();
-            (new PatrolNights())->closeFinished();
 
             $mailer = new TelescopeMailer();
             foreach ($expired as $job) {
@@ -49,14 +46,6 @@ class ObservatoryAgent extends BaseApiController
                     'autonomousMode' => $settings->autonomousMode,
                     'altitudeFloor'  => $settings->altitudeFloor,
                     'filters'        => $settings->filters,
-                    'patrol'         => [
-                        'enabled'     => $settings->patrolEnabled,
-                        'minAltitude' => $settings->patrolMinAltitude,
-                        'cadenceDays' => $settings->patrolCadenceDays,
-                        'exposure'    => $settings->patrolExposure,
-                        'count'       => $settings->patrolCount,
-                        'binning'     => $settings->patrolBinning,
-                    ],
                 ],
                 'jobs'       => $sync->desiredState(),
             ]);
@@ -112,52 +101,6 @@ class ObservatoryAgent extends BaseApiController
     }
 
     /**
-     * `GET /observatory/agent/patrol` — the enabled patrol targets.
-     */
-    public function patrol(): ResponseInterface
-    {
-        try {
-            return $this->respond(['targets' => (new PatrolTargetsModel())->forAgent()]);
-        } catch (Throwable $e) {
-            log_message('error', '{exception}', ['exception' => $e]);
-
-            return $this->respondServerError();
-        }
-    }
-
-    /**
-     * `POST /observatory/agent/patrol/visits` — body `{visits: [{target, time, frames, lastFrame?}]}`;
-     * a visit is reported while it is being shot and once more when it is over (target + time is
-     * its key, the larger count wins). The night's visits make its patrol job (`PatrolNights`).
-     */
-    public function visits(): ResponseInterface
-    {
-        $body = $this->request->getBody() ?? '';
-
-        if (strlen($body) > self::MAX_BATCH_BYTES) {
-            return $this->respondError('Batch too large', 413);
-        }
-
-        $data = json_decode($body, true);
-
-        if (!is_array($data) || !is_array($data['visits'] ?? null) || !array_is_list($data['visits'])) {
-            return $this->respondInvalidRequest('observatory agent: visits is not a list');
-        }
-
-        if (count($data['visits']) > PatrolNights::MAX_VISITS) {
-            return $this->respondError('Batch too large', 413);
-        }
-
-        try {
-            return $this->respond((new PatrolNights())->record($data['visits']));
-        } catch (Throwable $e) {
-            log_message('error', '{exception}', ['exception' => $e]);
-
-            return $this->respondServerError();
-        }
-    }
-
-    /**
      * `POST /observatory/agent/plan` — body `{night: 'Y-m-d' (local date of the evening), plan: {...}}`,
      * tonight's plan as the agent built it; replaces the stored one for that night.
      */
@@ -185,8 +128,6 @@ class ObservatoryAgent extends BaseApiController
 
         try {
             (new ObservatoryNightPlansModel())->store($night, $data['plan']);
-            // The night's patrol job (if the patrol shot anything yet) follows the plan: planned targets, the dawn
-            (new PatrolNights())->refreshNight($night);
 
             return $this->respond(['stored' => true]);
         } catch (Throwable $e) {
