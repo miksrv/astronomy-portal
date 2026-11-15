@@ -11,12 +11,11 @@ ROOT = "/home/mik/fits"
 @pytest.mark.parametrize(
     "path, expected",
     [
-        (f"{ROOT}/jobs/a1b2/M_51/Light/L/M_51_Light_L_300_secs_2026-12-10T20-00-00.fits", ("job", "a1b2", "L")),
-        (f"{ROOT}/jobs/a1b2/M_51/Light/H/x.fit", ("job", "a1b2", "H")),
-        (f"{ROOT}/patrol/17/NGC_2903/Light/L/x.fits", ("patrol", "17", "L")),
+        (f"{ROOT}/jobs/a1b2/M_51/Light/L/M_51_Light_L_300_secs_2026-12-10T20-00-00.fits", ("a1b2", "L")),
+        (f"{ROOT}/jobs/a1b2/M_51/Light/H/x.fit", ("a1b2", "H")),
+        (f"{ROOT}/patrol/17/NGC_2903/Light/L/x.fits", None),  # the patrol is gone: not ours
         (f"{ROOT}/jobs/a1b2/M_51/Dark/L/x.fits", None),  # only Light frames
         (f"{ROOT}/jobs/a1b2/M_51/Light/L/x.jpg", None),
-        (f"{ROOT}/patrol/abc/X/Light/L/x.fits", None),  # patrol ids are numbers
         (f"{ROOT}/M_51/Light/L/x.fits", None),  # a frame of a manual session
         ("/elsewhere/jobs/a1/M/Light/L/x.fits", None),
     ],

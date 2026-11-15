@@ -11,7 +11,6 @@ EVENING = date(2026, 12, 10)  # new moon on 9 December
 NIGHT = ephem.night_of(evening_noon_utc(EVENING, UTC), LAT, LON)
 NOW = datetime(2026, 12, 10, 14, 0, tzinfo=UTC)
 WHEEL = ["L", "R", "G", "B", "H", "O", "S"]
-SETTINGS = {"altitudeFloor": 15, "patrol": {"enabled": True, "minAltitude": 25, "cadenceDays": 6, "exposure": 60, "count": 5, "binning": 2}}
 
 M31 = (10.6847, 41.2690)
 M42 = (83.8221, -5.3911)
@@ -36,9 +35,9 @@ def job(id_, radec, plan, status="queued", **data):
     return {"id": id_, "local_status": status, "cancel_requested": False, "data": values}
 
 
-def build(jobs, progress=None, targets=(), settings=SETTINGS, wheel=WHEEL, night=NIGHT):
+def build(jobs, progress=None, wheel=WHEEL, night=NIGHT):
     planner = Planner(LAT, LON, 15, ["Track", "Focus", "Align", "Guide"])
-    return planner.build(EVENING, night, jobs, progress or {}, settings, list(targets), NOW, wheel)
+    return planner.build(EVENING, night, jobs, progress or {}, NOW, wheel)
 
 
 def entry(plan, id_):
@@ -115,30 +114,6 @@ def test_without_a_known_wheel_filters_are_not_judged():
     assert [g.ref for g in plan.groups] == ["a1"]
 
 
-def test_patrol_fills_after_the_jobs():
-    last_week = (NOW - timedelta(days=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    yesterday = (NOW - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    targets = [
-        {"id": 1, "name": "M 31", "ra": M31[0], "dec": M31[1], "lastVisitAt": last_week},
-        {"id": 2, "name": "M 33", "ra": 23.4621, "dec": 30.6602, "lastVisitAt": yesterday},  # not due
-        {"id": 3, "name": "south", "ra": NEVER_RISES[0], "dec": NEVER_RISES[1], "lastVisitAt": None},
-        {"id": 4, "name": "M 74", "ra": 24.1742, "dec": 15.7836, "lastVisitAt": None},
-    ]
-    plan = build([job("a1", M42, [{"filter": "H", "exposure": 600, "count": 4}])], targets=targets)
-    kinds = [g.kind for g in plan.groups]
-    assert kinds[0] == "job" and set(kinds[1:]) == {"patrol"}
-    patrol = [g for g in plan.groups if g.kind == "patrol"]
-    assert sorted(g.ref for g in patrol) == [1, 4]
-    assert all(g.rows == [("L", 60.0, 5)] and g.binning == 2 and g.min_altitude == 25 for g in patrol)
-    assert plan.report["patrol"]["candidates"] == 2
-
-
-def test_patrol_off():
-    targets = [{"id": 1, "name": "M 31", "ra": M31[0], "dec": M31[1], "lastVisitAt": None}]
-    plan = build([], targets=targets, settings={"altitudeFloor": 15, "patrol": {"enabled": False}})
-    assert plan.groups == [] and plan.report["patrol"]["planned"] == []
-
-
 def test_no_darkness_no_plan():
     summer = ephem.night_of(evening_noon_utc(date(2026, 6, 21), UTC), 56.0, LON)
     plan = build([job("a1", M31, [{"filter": "H", "exposure": 600, "count": 4}])], night=summer)
@@ -155,7 +130,7 @@ def test_a_plan_built_mid_night_counts_only_the_hours_ahead():
     rows = [{"filter": "H", "exposure": 600, "count": 4}]
     full = build([job("a1", M31, rows)])
     planner = Planner(LAT, LON, 15, ["Track"])
-    late = planner.build(EVENING, NIGHT, [job("a1", M31, rows)], {}, SETTINGS, [], NIGHT.nautical_end - timedelta(minutes=20), WHEEL)
+    late = planner.build(EVENING, NIGHT, [job("a1", M31, rows)], {}, NIGHT.nautical_end - timedelta(minutes=20), WHEEL)
     assert entry(full, "a1")["observableMinutes"] > 300
     assert entry(late, "a1")["planned"] is False
     assert entry(late, "a1")["reasons"][0]["code"] == "not-observable"

@@ -39,12 +39,12 @@ Ekos Scheduler (DBus) ─────►┘          POST /observatory/agent/sta
 | `observatory_agent/portal.py` | HTTPS client (Bearer token) |
 | `observatory_agent/main.py` | Main loop, `--once` mode |
 | `observatory_agent/jobs.py` | Telescope jobs: sync, frames → progress, Ekos observation, tonight's plan + load |
-| `observatory_agent/jobstate.py` | Local SQLite: jobs, outbox (per-job `seq`), frames, patrol visits |
-| `observatory_agent/planner.py` | What to shoot tonight: visibility, darkness, Moon, score, patrol |
+| `observatory_agent/jobstate.py` | Local SQLite: jobs, outbox (per-job `seq`), frames |
+| `observatory_agent/planner.py` | What to shoot tonight: visibility, darkness, Moon, score |
 | `observatory_agent/ephem.py` | Low-precision Sun/Moon, altitude, the night's darkness |
 | `observatory_agent/ekosfiles.py` | `.esq`/`.esl` writer + checks (KStars 3.8.5 format) |
 | `observatory_agent/ekos.py` | Ekos Scheduler over DBus (`busctl`): read state, `loadScheduler` only |
-| `observatory_agent/frames.py` | Finds the jobs' and patrol frames under `~/fits/jobs`, `~/fits/patrol` |
+| `observatory_agent/frames.py` | Finds the jobs' frames under `~/fits/jobs` |
 | `config.example.toml` | Every setting with defaults |
 | `observatory-agent.service` | systemd unit |
 | `tools/fake_indi.py` | Fake INDI server for trying it without hardware |
@@ -72,14 +72,13 @@ The portal side needs `observatory.agentToken` (≥ 32 random bytes, `openssl ra
 Off unless `[jobs] enabled = true` (and `[site]` filled in — on the host only). Then the agent:
 
 1. every 5 min pulls the jobs the observatory should know (`GET /observatory/agent/jobs`), accepts
-   new approved ones, and pushes its outbox (`POST /observatory/agent/updates`) — each update with
+   new approved ones (a job repeated on the site comes back with the same id and counts only the
+   frames shot since its `repeatedAt`), and pushes its outbox (`POST /observatory/agent/updates`) — each update with
    a per-job `seq`, kept in the local database until the site has it, so nothing is lost or counted
    twice across restarts and outages;
-2. every 30 s looks for new frames under `~/fits/jobs/<job id>/…` and `~/fits/patrol/<target id>/…`
-   (each sequence it writes saves there) and reports absolute counts per filter (`progress`),
-   `started` with the first frame, `completed` when every filter has its count; patrol frames
-   become visits (`POST /observatory/agent/patrol/visits`), reported while they are shot and once
-   more when over — the night's first visit makes that night's patrol job on the site;
+2. every 30 s looks for new frames under `~/fits/jobs/<job id>/…` (each sequence it writes saves
+   there) and reports absolute counts per filter (`progress`), `started` with the first frame,
+   `completed` when every filter has its count;
 3. watches the Ekos Scheduler: the job it runs is `started`; when it goes idle, or in daylight
    while Ekos shoots nothing (also after the PC was off for days), the running jobs go back to
    `queued` (`night_ended`); a cancel from the site is confirmed only once

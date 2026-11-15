@@ -123,7 +123,7 @@ def may_load(info: SchedulerInfo, agent_dir: str) -> tuple[bool, dict | None]:
 
 
 def job_key_of(job: dict | None, agent_dir: str) -> str | None:
-    """`job-<id>-bb` / `patrol-<id>` of an Ekos job loaded by the agent, else None."""
+    """`job-<id>-bb` / `job-<id>-nb` of an Ekos job loaded by the agent, else None."""
     if not job:
         return None
     path = sequence_path(job)

@@ -8,9 +8,9 @@
               `base_progress` already and are not counted again (a job re-inserted, a rescan of
               the SSD after a lost database).
 - `outbox`  — updates for the portal in the order they happened, each with its per-job `seq`.
-- `frames`  — every frame the agent has seen (path, job or patrol target, filter, time). Frames are
-              moved away to the archive in the morning; their rows stay, they are the counts.
-- `visits`  — patrol visits built from the patrol frames, until the portal has them.
+- `frames`  — every frame the agent has seen (path, job, filter, time). Frames are moved away to
+              the archive in the morning; their rows stay, they are the counts. A job repeated on
+              the site counts only the frames taken since its `repeatedAt`.
 - `meta`    — small key/value facts (the last loaded plan, …).
 
 One connection, used from one thread at a time (the agent's job loop).
@@ -51,17 +51,6 @@ CREATE TABLE IF NOT EXISTS frames (
     time      TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS frames_job ON frames (job_id);
-CREATE INDEX IF NOT EXISTS frames_target ON frames (target_id, time);
-CREATE TABLE IF NOT EXISTS visits (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    target_id  INTEGER NOT NULL,
-    time       TEXT NOT NULL,
-    last_frame TEXT NOT NULL,
-    frames     INTEGER NOT NULL,
-    reported   INTEGER NOT NULL DEFAULT 0,
-    sent       INTEGER NOT NULL DEFAULT 0,
-    UNIQUE (target_id, time)
-);
 CREATE TABLE IF NOT EXISTS meta (
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL
@@ -147,6 +136,17 @@ class JobState:
             ),
         )
 
+    def reset_base(self, job: dict) -> None:
+        """The job was repeated on the site: its counts start again from the portal's (none)."""
+        self.db.execute(
+            "UPDATE jobs SET base_progress = ?, base_frame_time = ? WHERE id = ?",
+            (
+                json.dumps(_counts(job.get("progress"))),
+                job["lastFrameAt"] if isinstance(job.get("lastFrameAt"), str) else None,
+                job["id"],
+            ),
+        )
+
     def set_local_status(self, job_id: str, status: str) -> None:
         self.db.execute("UPDATE jobs SET local_status = ? WHERE id = ?", (status, job_id))
 
@@ -209,57 +209,22 @@ class JobState:
     def has_frame(self, path: str) -> bool:
         return self.db.execute("SELECT 1 FROM frames WHERE path = ?", (path,)).fetchone() is not None
 
-    def add_frame(self, path: str, filter_: str, time: str, job_id: str | None = None, target_id: int | None = None) -> bool:
+    def add_frame(self, path: str, filter_: str, time: str, job_id: str) -> bool:
         cursor = self.db.execute(
-            "INSERT OR IGNORE INTO frames (path, job_id, target_id, filter, time) VALUES (?, ?, ?, ?, ?)",
-            (path, job_id, target_id, filter_, time),
+            "INSERT OR IGNORE INTO frames (path, job_id, filter, time) VALUES (?, ?, ?, ?)",
+            (path, job_id, filter_, time),
         )
         return cursor.rowcount == 1
 
-    def frame_counts(self, job_id: str, after: str | None = None) -> dict[str, int]:
-        """Frames of the job per filter; with `after` (ISO UTC) only the ones taken later."""
+    def frame_counts(self, job_id: str, after: str | None = None, since: str | None = None) -> dict[str, int]:
+        """Frames of the job per filter; with `after` (ISO UTC) only the ones taken later, with
+        `since` only the ones taken then or later (a job repeated on the site)."""
         rows = self.db.execute(
-            "SELECT filter, COUNT(*) AS n FROM frames WHERE job_id = ? AND (? IS NULL OR time > ?) GROUP BY filter",
-            (job_id, after, after),
+            "SELECT filter, COUNT(*) AS n FROM frames WHERE job_id = ? AND (? IS NULL OR time > ?)"
+            " AND (? IS NULL OR time >= ?) GROUP BY filter",
+            (job_id, after, after, since, since),
         )
         return {row["filter"]: row["n"] for row in rows}
-
-    # --- patrol visits ---------------------------------------------------------------------
-
-    def add_patrol_frame_to_visit(self, target_id: int, time: str, gap_seconds: int) -> None:
-        """A patrol frame joins the target's latest visit if it came within `gap_seconds` of its last
-        frame and the visit is not over yet; otherwise it starts a new visit. Once reported, a
-        visit keeps its start time: with the target it is the visit's key on the site."""
-        row = self.db.execute(
-            "SELECT id, last_frame, reported, sent FROM visits WHERE target_id = ? ORDER BY last_frame DESC LIMIT 1", (target_id,)
-        ).fetchone()
-        if row and not row["sent"] and _seconds_between(row["last_frame"], time) <= gap_seconds:
-            self.db.execute(
-                "UPDATE visits SET frames = frames + 1, last_frame = MAX(last_frame, ?),"
-                " time = CASE WHEN reported > 0 THEN time ELSE MIN(time, ?) END WHERE id = ?",
-                (time, time, row["id"]),
-            )
-            return
-        self.db.execute(
-            "INSERT OR IGNORE INTO visits (target_id, time, last_frame, frames) VALUES (?, ?, ?, 1)", (target_id, time, time)
-        )
-
-    def visits_to_report(self, before: str) -> list[dict]:
-        """Visits the site doesn't know as they are: new frames since the last report, or over
-        (last frame older than `before`, ISO UTC) and not yet reported as over."""
-        rows = self.db.execute(
-            "SELECT id, target_id, time, last_frame, frames FROM visits"
-            " WHERE sent = 0 AND (frames != reported OR last_frame < ?) ORDER BY id",
-            (before,),
-        )
-        return [dict(row) for row in rows]
-
-    def mark_visits_reported(self, visits: list[dict], before: str) -> None:
-        """The site has these visits with these counts; the ones that are over are done."""
-        self.db.executemany(
-            "UPDATE visits SET reported = ?, sent = CASE WHEN last_frame < ? AND frames = ? THEN 1 ELSE 0 END WHERE id = ?",
-            [(v["frames"], before, v["frames"], v["id"]) for v in visits],
-        )
 
     # --- meta ------------------------------------------------------------------------------
 
@@ -286,12 +251,3 @@ def _counts(value) -> dict[str, int]:
     if not isinstance(value, dict):
         return {}
     return {str(k): int(v) for k, v in value.items() if isinstance(v, int) and v >= 0}
-
-
-def _seconds_between(a: str, b: str) -> float:
-    from datetime import datetime
-
-    def parse(text: str) -> datetime:
-        return datetime.fromisoformat(text.replace("Z", "+00:00"))
-
-    return abs((parse(b) - parse(a)).total_seconds())

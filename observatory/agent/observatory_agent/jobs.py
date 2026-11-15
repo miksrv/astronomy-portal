@@ -3,9 +3,8 @@
 `JobsRunner.step()` is called from the agent's loop (in a worker thread, one call at a time):
 
 1. **Sync** (every `sync_interval`, 5 min): pull the full desired state, reconcile the local
-   database (new approved job → `accepted`), push the outbox in order, fetch the patrol targets,
-   report the patrol visits (also while they are shot: the night's first one makes the patrol
-   job on the site).
+   database (new approved job → `accepted`; a job repeated on the site counts only the frames
+   taken since its `repeatedAt`), push the outbox in order.
 2. **Frames** (every `frames_interval`, 30 s): new FITS files in the jobs' folders → absolute
    counts → `started` (first frame) + `progress`, and `completed` once every filter has its count.
 3. **Ekos** (same cadence): the job Ekos is running → `started`; the Scheduler back to idle, or
@@ -41,9 +40,6 @@ log = logging.getLogger(__name__)
 
 AGENT_STATUSES = ("approved", "queued", "running")
 MAX_UPDATES_PER_REQUEST = 500
-# A patrol visit ends when no frame of the target came for this long
-VISIT_GAP_SECONDS = 2 * 3600
-VISIT_DONE_MINUTES = 20
 # Replan at most this often while the inputs keep changing (frames during the night)
 MIN_REPLAN_SECONDS = 600
 # A load refused for a passing reason is tried again with the next plan (every MIN_REPLAN_SECONDS)
@@ -87,7 +83,6 @@ class JobsRunner:
         self.state = state or JobState(config.jobs.state_db)
         self.tz = ZoneInfo(config.site.timezone)
         self.settings: dict = {}
-        self.patrol_targets: list[dict] = []
         self.synced = False
         self._last_sync = -1e9
         self._last_frames = -1e9
@@ -99,7 +94,6 @@ class JobsRunner:
         # When a job's night was ended (job id → ISO UTC): a frame shot before it, counted late (a
         # frame settles for a few seconds), must not start the job again
         self._night_ended: dict[str, str] = {}
-        self._patrol_frames = False
         self._ekos_unreadable_since: datetime | None = None
         self._nights: dict[date, ephem.Night] = {}
 
@@ -118,9 +112,6 @@ class JobsRunner:
             changed |= self.observe_ekos()
             if changed:
                 self.push_outbox()
-            if self._patrol_frames:
-                self._patrol_frames = False
-                self.push_visits()
         self.maybe_plan(snapshot, now_m)
 
     # --- sync with the portal ----------------------------------------------------------------
@@ -139,13 +130,7 @@ class JobsRunner:
         self.settings = settings
         self.reconcile(jobs)
         self.synced = True
-        if (settings.get("patrol") or {}).get("enabled"):
-            try:
-                self.patrol_targets = self.portal.get_patrol()
-            except PortalError as error:
-                log.warning("patrol targets pull failed: %s", error)
         self.push_outbox()
-        self.push_visits()
 
     def reconcile(self, desired: list) -> None:
         """Takes the portal's desired state; a new approved job is accepted."""
@@ -168,7 +153,13 @@ class JobsRunner:
                     # While our updates wait in the outbox, our status is ahead of the portal's
                     pending = self.state.outbox_count(job["id"]) > 0
                     local_status = local["local_status"] if pending else job["status"]
+                    repeated = job.get("repeatedAt") and job.get("repeatedAt") != local["data"].get("repeatedAt")
                     self.state.update_job(job, local_status)
+                    if repeated:
+                        # Repeated on the site: the counts start again (the old frames stay history)
+                        self.state.reset_base(job)
+                        self._night_ended.pop(job["id"], None)
+                        log.info("job %s repeated on the site (%s)", job["id"], job["repeatedAt"])
                     if local["version"] != job["version"]:
                         log.info("job %s changed on the site (version %s → %s)", job["id"], local["version"], job["version"])
                 if job["status"] == "approved" and local_status == "approved":
@@ -228,30 +219,13 @@ class JobsRunner:
             if not gap and len(done) < len(items) and not answer.get("stopped"):
                 return  # something unexpected: try again on the next cycle
 
-    def push_visits(self) -> None:
-        """Patrol visits go to the site while they are shot too: the night's first one makes the
-        patrol job there (the site counts a visit once per target + start time, the larger
-        count wins). A visit is done once it is over and reported as such."""
-        before = iso(utc_now() - timedelta(minutes=VISIT_DONE_MINUTES))
-        visits = self.state.visits_to_report(before)[:500]
-        if not visits:
-            return
-        try:
-            answer = self.portal.post_visits(
-                [{"target": v["target_id"], "time": v["time"], "lastFrame": v["last_frame"], "frames": v["frames"]} for v in visits]
-            )
-        except PortalError as error:
-            log.warning("patrol visits push failed: %s", error)
-            return
-        with self.state.transaction():
-            self.state.mark_visits_reported(visits, before)
-        log.info("patrol visits reported: %s", answer)
-
     # --- frames ------------------------------------------------------------------------------
 
     def progress_of(self, job: dict) -> dict[str, int]:
         counts = dict(job["base_progress"])
-        for filter_, n in self.state.frame_counts(job["id"], job["base_frame_time"]).items():
+        repeated_at = job["data"].get("repeatedAt")
+        since = repeated_at if isinstance(repeated_at, str) else None
+        for filter_, n in self.state.frame_counts(job["id"], job["base_frame_time"], since).items():
             counts[filter_] = counts.get(filter_, 0) + n
         return counts
 
@@ -262,13 +236,8 @@ class JobsRunner:
         touched: dict[str, str] = {}
         with self.state.transaction():
             for frame in found:
-                if frame.kind == "job":
-                    self.state.add_frame(frame.path, frame.filter, frame.time, job_id=frame.ref)
-                    touched[frame.ref] = max(touched.get(frame.ref, ""), frame.time)
-                else:
-                    if self.state.add_frame(frame.path, frame.filter, frame.time, target_id=int(frame.ref)):
-                        self.state.add_patrol_frame_to_visit(int(frame.ref), frame.time, VISIT_GAP_SECONDS)
-                        self._patrol_frames = True
+                self.state.add_frame(frame.path, frame.filter, frame.time, job_id=frame.job_id)
+                touched[frame.job_id] = max(touched.get(frame.job_id, ""), frame.time)
             for job_id, frame_time in touched.items():
                 job = self.state.job(job_id)
                 if job is None:
@@ -419,7 +388,6 @@ class JobsRunner:
                     evening.isoformat(),
                     [(j["id"], j["version"], j["local_status"], j["cancel_requested"]) for j in jobs],
                     progress,
-                    [(t.get("id"), t.get("lastVisitAt"), t.get("enabled", True)) for t in self.patrol_targets],
                     self.settings,
                     wheel,
                 ],
@@ -433,7 +401,7 @@ class JobsRunner:
         self._plan_inputs = inputs
 
         planner = Planner(self.config.site.latitude, self.config.site.longitude, float(self.settings.get("altitudeFloor") or 15), self.jobs_config.steps)
-        plan = planner.build(evening, night, jobs, progress, self.settings, self.patrol_targets, now, wheel)
+        plan = planner.build(evening, night, jobs, progress, now, wheel)
         report = plan.report
         report["warnings"] = self._warnings(snapshot, wheel)
         report["autonomousMode"] = bool(self.settings.get("autonomousMode"))
@@ -470,7 +438,7 @@ class JobsRunner:
         container_dir = f"{cfg.ekos_dir_container.rstrip('/')}/{plan.night.isoformat()}/{version}"
         ekos_jobs = []
         for group in plan.groups:
-            fits_dir = frames.job_dir(self.config.frames_dir, str(group.ref)) if group.kind == "job" else frames.patrol_dir(self.config.frames_dir, int(group.ref))
+            fits_dir = frames.job_dir(self.config.frames_dir, str(group.ref))
             rows = [ekosfiles.SequenceRow(f, exp, n) for f, exp, n in group.rows]
             text = ekosfiles.sequence_xml(rows, self.config.camera, fits_dir, group.binning)
             ekosfiles.check_sequence(text, wheel, fits_dir)

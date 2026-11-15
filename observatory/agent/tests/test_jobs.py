@@ -27,12 +27,10 @@ class FakePortal:
 
     def __init__(self):
         self.jobs: list[dict] = []
-        self.settings = {"autonomousMode": False, "altitudeFloor": 15, "filters": ["L", "R", "G", "B", "H", "O", "S"], "patrol": {"enabled": False}}
+        self.settings = {"autonomousMode": False, "altitudeFloor": 15, "filters": ["L", "R", "G", "B", "H", "O", "S"]}
         self.last_seq: dict[str, int] = {}
         self.received: list[dict] = []
         self.plans: list[tuple[str, dict]] = []
-        self.visits: list[dict] = []
-        self.patrol: list[dict] = []
         self.down = False
 
     def get_jobs(self):
@@ -58,13 +56,6 @@ class FakePortal:
                 self.received.append(update)
                 results.append({"jobId": update["jobId"], "seq": update["seq"], "result": "applied"})
         return {"results": results, "stopped": False}
-
-    def get_patrol(self):
-        return self.patrol
-
-    def post_visits(self, visits):
-        self.visits.extend(visits)
-        return {"recorded": len(visits), "duplicates": 0, "invalid": 0}
 
     def post_plan(self, night, plan):
         self.plans.append((night, plan))
@@ -473,6 +464,63 @@ def test_a_job_with_nothing_left_to_shoot_is_completed_without_a_new_frame(env):
     assert env.runner.state.job("a1") is None
 
 
+def _shoot_whole_plan(env):
+    """The default plan (2 × L, 1 × H) shot and reported as completed."""
+    env.portal.jobs = [portal_job(status="queued")]
+    env.step()
+    for filter_ in ("L", "L", "H"):
+        env.frame("a1", filter_)
+    env.step(minutes=1)
+    assert env.portal.types("a1")[-1][1] == "completed"
+    assert env.runner.state.job("a1")["local_status"] == "completed"
+
+
+def _repeated(env, **kw):
+    """The job as the site serves it after a repeat: same id, a newer version, no progress."""
+    return portal_job(status="approved", version=2, progress={}, repeatedAt=jobs_mod.iso(env.clock["now"]), **kw)
+
+
+def test_a_repeated_job_the_agent_forgot_starts_from_zero(env):
+    _shoot_whole_plan(env)
+    env.portal.jobs = []  # final on the site: forgotten, its frames stay
+    env.step()
+    assert env.runner.state.job("a1") is None
+
+    env.portal.jobs = [_repeated(env)]
+    env.step()
+    # Accepted again, not completed by the frames of the first run
+    assert env.portal.types("a1")[-1][1] == "accepted"
+    assert env.runner.state.job("a1")["local_status"] == "queued"
+    assert env.runner.progress_of(env.runner.state.job("a1")) == {}
+
+    accepted = len(env.portal.types("a1"))
+    env.frame("a1", "L")
+    env.step(minutes=2)
+    # (then put back to queued: it is daytime in the test)
+    assert [t for _, t in env.portal.types("a1")][accepted : accepted + 2] == ["started", "progress"]
+    progress = [u for u in env.portal.received if u["jobId"] == "a1" and u["type"] == "progress"]
+    assert progress[-1]["payload"]["progress"] == {"L": 1}
+
+
+def test_a_repeated_job_the_agent_still_has_as_completed_starts_from_zero(env):
+    _shoot_whole_plan(env)
+    # Repeated on the site before the agent's next pull dropped the finished job
+    env.portal.jobs = [_repeated(env)]
+    env.step()
+    assert env.portal.types("a1")[-1][1] == "accepted"
+    job = env.runner.state.job("a1")
+    assert job["local_status"] == "queued"
+    assert env.runner.progress_of(job) == {}
+
+    for filter_ in ("L", "L", "H"):
+        env.frame("a1", filter_)
+    env.step(minutes=2)
+    assert "completed" in [t for _, t in env.portal.types("a1")][-3:]
+    progress = [u for u in env.portal.received if u["jobId"] == "a1" and u["type"] == "progress"]
+    assert progress[-1]["payload"]["progress"] == {"L": 2, "H": 1}
+    assert env.runner.state.job("a1")["local_status"] == "completed"
+
+
 def test_a_job_gone_from_the_site_is_forgotten(env):
     env.portal.jobs = [portal_job(status="queued")]
     env.step()
@@ -559,47 +607,3 @@ def test_warnings_for_missing_focuser(env):
     # The Focus step stays in the jobs (the focuser is being repaired, not dropped)
     esl = (Path(env.config.jobs.ekos_dir) / "2026-12-10" / "tonight.esl").read_text()
     assert "<Step>Focus</Step>" in esl
-
-
-def test_patrol_frames_become_visits(env):
-    env.portal.settings["patrol"] = {"enabled": True}
-    env.portal.jobs = []
-    env.step()
-    for _ in range(3):
-        env.frame("7", "L", kind="patrol")
-    env.step(minutes=1)
-    # Reported while it goes on: the night's first visit makes the patrol job on the site
-    assert len(env.portal.visits) == 1
-    first = env.portal.visits[0]
-    assert first["target"] == 7 and first["frames"] == 3 and first["lastFrame"] >= first["time"]
-
-    env.step(minutes=1)
-    assert len(env.portal.visits) == 1  # nothing new: not sent again
-
-    env.frame("7", "L", kind="patrol")
-    env.step(minutes=1)
-    assert len(env.portal.visits) == 2
-    assert env.portal.visits[1]["time"] == first["time"] and env.portal.visits[1]["frames"] == 4
-
-    env.step(minutes=25)  # over: reported once more as such, then never again
-    assert len(env.portal.visits) == 3 and env.portal.visits[2]["frames"] == 4
-    env.step(minutes=10)
-    assert len(env.portal.visits) == 3
-
-
-def test_patrol_visits_wait_while_the_portal_is_down(env):
-    env.portal.settings["patrol"] = {"enabled": True}
-    env.portal.jobs = []
-    env.step()
-    sent = []
-
-    def down(visits):
-        raise PortalError("down")
-
-    env.portal.post_visits = down
-    env.frame("7", "L", kind="patrol")
-    env.step(minutes=1)
-
-    env.portal.post_visits = lambda visits: sent.extend(visits) or {}
-    env.step(minutes=6)
-    assert [(v["target"], v["frames"]) for v in sent] == [(7, 1)]

@@ -77,7 +77,6 @@ def test_may_load_never_replaces_a_schedule_a_person_built():
 
 def test_job_key_of():
     assert job_key_of({"sequence": "file:///config/agent/2026-12-10/job-a1b2-nb.esq"}, AGENT_DIR) == "job-a1b2-nb"
-    assert job_key_of({"sequence": "/config/agent/2026-12-10/patrol-7.esq"}, AGENT_DIR) == "patrol-7"
     assert job_key_of({"sequence": "/config/Desktop/x.esq"}, AGENT_DIR) is None
     assert job_key_of(None, AGENT_DIR) is None
 

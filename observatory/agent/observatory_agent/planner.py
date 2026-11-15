@@ -1,18 +1,16 @@
-"""Tonight's plan: which jobs and patrol targets go into the Ekos schedule, in which order.
+"""Tonight's plan: which jobs go into the Ekos schedule, in which order.
 
-Pure computation (no I/O): the inputs are the local jobs, the patrol targets and settings from the
-portal, the site and the night's darkness. The output is the list of Ekos jobs to write and a
+Pure computation (no I/O): the inputs are the local jobs from the portal, the site and the
+night's darkness. The output is the list of Ekos jobs to write and a
 report for the portal (`POST /observatory/agent/plan`) with the score and the reasons per job.
 
-Rules (features/observatory-agent.md §4.5, §4.10, §4.11):
-- Jobs always rank above the patrol; within jobs: pinned first, then the admin priority, then the
-  score of the night. A held job is not planned.
+Rules (features/observatory-agent.md §4.5, §4.11):
+- Pinned first, then the admin priority, then the score of the night. A held job is not planned.
 - A job is split into a broadband (L/R/G/B) and a narrowband (H/O/S) Ekos job: broadband needs
   astronomical night and suffers from the Moon, narrowband runs from nautical darkness.
 - Every Ekos job has min altitude = max(floor, the job's), never below the floor.
 - Only the remaining frames are planned (progress = the portal's counts when first seen + the
-  frames this agent has seen since).
-- Patrol targets fill the time the jobs leave, most overdue first, then ordered by setting time.
+  frames this agent has seen since; a job repeated on the site — only those since its repeat).
 """
 
 from __future__ import annotations
@@ -33,18 +31,15 @@ NARROWBAND = ("H", "O", "S")
 SAMPLE_MINUTES = 10
 # A job group needs this much observable time tonight to be worth loading
 MIN_OBSERVABLE_MINUTES = 30
-# Slew + solve + focus + guide per Ekos job, minutes (§4.10)
-OVERHEAD_MINUTES = 8
-MAX_PATROL_VISITS = 80
 
 
 @dataclass
 class PlannedGroup:
     """One Ekos job of the plan, with what its sequence file must contain."""
 
-    key: str  # file name stem: "job-<id>-bb", "patrol-<id>"
-    kind: str  # "job" | "patrol"
-    ref: str | int  # job id or patrol target id
+    key: str  # file name stem: "job-<id>-bb" / "job-<id>-nb"
+    kind: str  # "job" (the only kind; kept in the plan report)
+    ref: str  # job id
     name: str
     ra: float
     dec: float
@@ -142,8 +137,6 @@ class Planner:
         night: ephem.Night,
         jobs: list[dict],
         progress: dict[str, dict[str, int]],
-        settings: dict,
-        patrol_targets: list[dict],
         now: datetime,
         wheel: list[str] | None,
     ) -> Plan:
@@ -249,15 +242,8 @@ class Planner:
             candidates.append((order, groups, entry))
 
         candidates.sort(key=lambda c: c[0])
-        job_minutes = 0
         for _, groups, _ in candidates:
-            for group in groups:
-                need = sum(exp * n for _, exp, n in group.rows) / 60 * 1.15 + OVERHEAD_MINUTES
-                job_minutes += min(need, group.observable_minutes)
-                plan.groups.append(group)
-
-        night_minutes = len(s.times) * SAMPLE_MINUTES
-        patrol_report = self._patrol(plan, s, settings, patrol_targets, now, max(0, night_minutes - job_minutes), wheel)
+            plan.groups.extend(groups)
 
         plan.report = {
             "night": evening.isoformat(),
@@ -270,66 +256,9 @@ class Planner:
             },
             "moon": {"illumination": round(moon_illum, 2)},
             "jobs": report_jobs,
-            "patrol": patrol_report,
             "ekosJobs": [{"key": g.key, "kind": g.kind, "name": g.name} for g in plan.groups],
         }
         return plan
-
-    def _patrol(self, plan: Plan, s: _Samples, settings: dict, targets: list[dict], now: datetime, free_minutes: float, wheel: list[str] | None) -> dict:
-        patrol = settings.get("patrol") or {}
-        report = {"enabled": bool(patrol.get("enabled")), "targets": len(targets), "candidates": 0, "planned": []}
-        if not patrol.get("enabled") or not targets or not s.times:
-            return report
-        if wheel is not None and "L" not in wheel:
-            report["reason"] = notice("patrol-no-l")
-            return report
-
-        exposure = float(patrol.get("exposure") or 60)
-        count = int(patrol.get("count") or 5)
-        visit_minutes = exposure * count / 60 + OVERHEAD_MINUTES
-        min_alt = max(self.floor, float(patrol.get("minAltitude") or 25))
-        cadence = int(patrol.get("cadenceDays") or 6)
-
-        candidates = []
-        for target in targets:
-            try:
-                ra, dec, target_id = float(target["ra"]), float(target["dec"]), int(target["id"])
-            except (KeyError, TypeError, ValueError):
-                continue
-            last = _parse(target.get("lastVisitAt"))
-            days = (now - last).total_seconds() / 86400 if last else 60.0
-            if days < int(target.get("cadenceDays") or cadence):
-                continue
-            ok, alts = self._visible(s, ra, dec, min_alt, -12.0, None)
-            if sum(ok) * SAMPLE_MINUTES < visit_minutes:
-                continue
-            # The last sample at which it is still observable — setting targets go first
-            set_index = max(i for i, o in enumerate(ok) if o)
-            score = min(days, 60) + max(a for a, o in zip(alts, ok) if o) / 10
-            candidates.append((score, set_index, target_id, str(target.get("name") or target_id), ra, dec))
-        report["candidates"] = len(candidates)
-
-        visits = min(MAX_PATROL_VISITS, int(free_minutes // visit_minutes))
-        chosen = sorted(candidates, key=lambda c: -c[0])[:visits]
-        chosen.sort(key=lambda c: (c[1], c[4]))
-        binning = int(patrol.get("binning") or 2)
-        for score, _, target_id, name, ra, dec in chosen:
-            plan.groups.append(
-                PlannedGroup(
-                    key=f"patrol-{target_id}",
-                    kind="patrol",
-                    ref=target_id,
-                    name=name,
-                    ra=ra,
-                    dec=dec,
-                    rows=[("L", exposure, count)],
-                    min_altitude=min_alt,
-                    min_moon_separation=None,
-                    binning=binning,
-                )
-            )
-            report["planned"].append({"id": target_id, "name": name, "score": round(score, 1)})
-        return report
 
 
 def evening_date(now: datetime, tz) -> date:

@@ -39,13 +39,6 @@ class PortalClient:
         """`{results: [{jobId, seq, result, lastSeq?}], stopped}`."""
         return self._post("/observatory/agent/updates", {"updates": updates})
 
-    def get_patrol(self) -> list[dict]:
-        targets = self._request("GET", "/observatory/agent/patrol").get("targets")
-        return targets if isinstance(targets, list) else []
-
-    def post_visits(self, visits: list[dict]) -> dict:
-        return self._post("/observatory/agent/patrol/visits", {"visits": visits})
-
     def post_plan(self, night: str, plan: dict) -> None:
         self._post("/observatory/agent/plan", {"night": night, "plan": plan})
 
