@@ -24,7 +24,7 @@ export const STARGAZING_RETRY_STORAGE_KEY = 'astro:lastBookingAttempt'
 
 // Telescope jobs from the site (FEAT-30 phase 2): the UI is hidden until the feature is presented —
 // no menu item, no queue card on /observatory, no sitemap entry, and /observatory/jobs/* answer 404.
-// The API and the observatory agent stay as they are.
+// The server's /telescope/* routes are commented out too (server/app/Config/Routes.php): switch both on together.
 export const TELESCOPE_JOBS_ENABLED = false
 
 export const SITE_LINK = process.env.NEXT_PUBLIC_SITE_LINK

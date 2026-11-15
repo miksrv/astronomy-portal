@@ -1,7 +1,9 @@
 <?php
 
+use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
+use Tests\Support\TelescopeRoutes;
 
 /**
  * Tests that admin-only endpoints return 401 when called without an Authorization header.
@@ -14,6 +16,7 @@ use CodeIgniter\Test\FeatureTestTrait;
 final class AuthGuardTest extends CIUnitTestCase
 {
     use FeatureTestTrait;
+    use TelescopeRoutes;
 
     // --- Objects endpoints ---
 
@@ -265,8 +268,27 @@ final class AuthGuardTest extends CIUnitTestCase
 
     // --- Telescope jobs: every endpoint but the form config needs a session ---
 
+    public function testTelescopeJobRoutesAreOffUntilTheFeatureIsPresented(): void
+    {
+        // The real routes file (another test may have left its own routes in the shared collection)
+        service('routes')->resetRoutes();
+        service('routes')->loadRoutes();
+
+        foreach ([['get', 'telescope/jobs'], ['get', 'telescope/config'], ['post', 'telescope/jobs'], ['post', 'telescope/jobs/abc123/repeat']] as [$method, $path]) {
+            try {
+                $this->{$method}($path, []);
+                $this->fail("{$method} {$path} is routed");
+            } catch (PageNotFoundException) {
+                // No route: the production server answers 404
+                $this->addToAssertionCount(1);
+            }
+        }
+    }
+
     public function testTelescopeJobEndpointsWithoutTokenReturn401(): void
     {
+        $this->withTelescopeRoutes();
+
         // The public list, a job page and tonight's plan are open; one's own list and every write are not
         foreach ([
             ['get', 'telescope/jobs?mine=1'],

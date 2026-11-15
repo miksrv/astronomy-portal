@@ -8,6 +8,7 @@ use CodeIgniter\Test\FeatureTestTrait;
 use Config\Database;
 use Config\Telescope;
 use Tests\Support\Database\TelescopeTables;
+use Tests\Support\TelescopeRoutes;
 
 /**
  * `POST /telescope/jobs/:id/repeat` end to end: the same job back into the queue, shot again from
@@ -19,6 +20,7 @@ final class TelescopeRepeatTest extends CIUnitTestCase
 {
     use FeatureTestTrait;
     use TelescopeTables;
+    use TelescopeRoutes;
 
     private TelescopeJobsModel $jobs;
 
@@ -28,6 +30,7 @@ final class TelescopeRepeatTest extends CIUnitTestCase
     {
         parent::setUp();
         $this->createTelescopeTables();
+        $this->withTelescopeRoutes();
 
         helper('auth');
         $this->secret = getenv('auth.token.secret') ?: null;

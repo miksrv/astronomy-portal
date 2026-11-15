@@ -64,20 +64,22 @@ $routes->group('observatory', static function ($routes) {
 });
 
 /** Telescope Controller (telescope jobs from the site, FEAT-30 phase 2) **/
-$routes->group('telescope', static function ($routes) {
-    $routes->get('config', 'Telescope::config');
-    $routes->get('tonight', 'Telescope::tonight', ['filter' => 'publiccache:60']);
-    $routes->get('jobs', 'Telescope::list');
-    $routes->post('jobs', 'Telescope::create', ['filter' => 'ratelimit:telescope_jobs_create,10,300']);
-    $routes->get('jobs/(:alphanum)', 'Telescope::show/$1');
-    $routes->patch('jobs/(:alphanum)', 'Telescope::update/$1');
-    $routes->delete('jobs/(:alphanum)', 'Telescope::cancel/$1');
-    $routes->post('jobs/(:alphanum)/approve', 'Telescope::approve/$1');
-    $routes->post('jobs/(:alphanum)/reject', 'Telescope::reject/$1');
-    $routes->post('jobs/(:alphanum)/remove', 'Telescope::remove/$1');
-    $routes->post('jobs/(:alphanum)/repeat', 'Telescope::repeat/$1', ['filter' => 'ratelimit:telescope_jobs_create,10,300']);
-    $routes->options('(:any)', static function () {});
-});
+// Off until the feature is presented, as the site's UI (TELESCOPE_JOBS_ENABLED in
+// client/utils/constants.ts): uncomment together with it. The tests register these routes themselves.
+// $routes->group('telescope', static function ($routes) {
+//     $routes->get('config', 'Telescope::config');
+//     $routes->get('tonight', 'Telescope::tonight', ['filter' => 'publiccache:60']);
+//     $routes->get('jobs', 'Telescope::list');
+//     $routes->post('jobs', 'Telescope::create', ['filter' => 'ratelimit:telescope_jobs_create,10,300']);
+//     $routes->get('jobs/(:alphanum)', 'Telescope::show/$1');
+//     $routes->patch('jobs/(:alphanum)', 'Telescope::update/$1');
+//     $routes->delete('jobs/(:alphanum)', 'Telescope::cancel/$1');
+//     $routes->post('jobs/(:alphanum)/approve', 'Telescope::approve/$1');
+//     $routes->post('jobs/(:alphanum)/reject', 'Telescope::reject/$1');
+//     $routes->post('jobs/(:alphanum)/remove', 'Telescope::remove/$1');
+//     $routes->post('jobs/(:alphanum)/repeat', 'Telescope::repeat/$1', ['filter' => 'ratelimit:telescope_jobs_create,10,300']);
+//     $routes->options('(:any)', static function () {});
+// });
 
 /** Files Controller **/
 $routes->group('files', static function ($routes) {
