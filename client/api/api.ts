@@ -385,6 +385,10 @@ export const API = createApi({
             invalidatesTags: () => [{ type: 'TelescopeJobs' }],
             query: ({ id, ...body }) => ({ body, method: 'PATCH', url: `telescope/jobs/${id}` })
         }),
+        telescopeRepeatJob: builder.mutation<ApiType.Telescope.ResRepeat, string>({
+            invalidatesTags: () => [{ type: 'TelescopeJobs' }],
+            query: (id) => ({ method: 'POST', url: `telescope/jobs/${id}/repeat` })
+        }),
         telescopeRemoveJob: builder.mutation<{ message: string }, string>({
             invalidatesTags: () => [{ type: 'TelescopeJobs' }],
             query: (id) => ({ method: 'POST', url: `telescope/jobs/${id}/remove` })

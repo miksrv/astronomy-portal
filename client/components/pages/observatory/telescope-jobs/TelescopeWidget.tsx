@@ -35,7 +35,7 @@ export const TelescopeWidget: React.FC<TelescopeWidgetProps> = ({ className }) =
             }
             empty={t(
                 'components.pages.observatory.telescope-jobs.widget-empty',
-                'Очередь пуста — в ясную ночь телескоп ищет сверхновые.'
+                'Очередь пуста: заданий для телескопа пока нет.'
             )}
         />
     )

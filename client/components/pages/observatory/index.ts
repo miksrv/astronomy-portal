@@ -14,7 +14,6 @@ export {
     JobForm,
     JobsList,
     JobStatusBadge,
-    PatrolDetails,
     TelescopeWidget,
     useJobActions
 } from './telescope-jobs'

@@ -6,14 +6,13 @@ import {
     canCancel,
     canPause,
     canRemove,
+    canRepeat,
     displayStatus,
     formatDate,
     formatDuration,
     formatTime,
     framesDone,
-    jobTitle,
     noticeText,
-    patrolDone,
     totalSeconds
 } from './utils'
 
@@ -122,28 +121,14 @@ describe('displayStatus', () => {
     })
 })
 
-describe('patrol nights', () => {
-    const night = job({
-        patrol: { night: '2026-11-10', visitsDone: 3, visitsPlanned: 5 },
-        plan: [{ count: 5, exposure: 60, filter: 'L' }],
-        progress: { L: 14 },
-        source: 'patrol',
-        targetName: 'Supernova patrol'
-    })
+describe('canRepeat', () => {
+    it('lets a job that is over be shot again, except a rejected one', () => {
+        for (const status of ['completed', 'failed', 'expired', 'cancelled'] as const) {
+            expect(canRepeat(job({ status }))).toBe(true)
+        }
 
-    it("is named by its night, a visitor's job by its target", () => {
-        expect(jobTitle(night, t, 'ru')).toMatch(/^Патруль сверхновых · 10 нояб/)
-        expect(jobTitle(job({ patrol: null, targetName: 'M 101' }), t, 'ru')).toBe('M 101')
-    })
-
-    it('counts galaxies, never fewer planned than shot', () => {
-        expect(patrolDone(night)).toStrictEqual({ done: 3, frames: 14, total: 5 })
-        expect(
-            patrolDone({ ...night, patrol: { night: '2026-11-10', visitsDone: 4, visitsPlanned: 2 } })
-        ).toStrictEqual({
-            done: 4,
-            frames: 14,
-            total: 4
-        })
+        for (const status of ['pending', 'approved', 'queued', 'running', 'rejected'] as const) {
+            expect(canRepeat(job({ status }))).toBe(false)
+        }
     })
 })

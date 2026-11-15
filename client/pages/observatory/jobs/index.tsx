@@ -151,7 +151,7 @@ const TelescopeJobsPage: NextPage = () => {
                               )
                             : t(
                                   'components.pages.observatory.telescope-jobs.empty-active',
-                                  'Очередь пуста — в ясную ночь телескоп ищет сверхновые.'
+                                  'Очередь пуста: заданий для телескопа пока нет.'
                               )
                         : t('components.pages.observatory.telescope-jobs.empty-all', 'Заданий пока нет.')
                 }

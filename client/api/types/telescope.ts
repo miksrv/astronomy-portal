@@ -56,6 +56,9 @@ export interface ResCreate {
 
 export type ResCancel = ResCreate
 
+/** The repeated job, back in the queue */
+export type ResRepeat = ResCreate
+
 export interface ReqPatch {
     id: string
     version: number

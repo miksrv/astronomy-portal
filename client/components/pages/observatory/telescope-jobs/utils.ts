@@ -4,7 +4,7 @@ import { ApiModel } from '@/api'
 import { formatCalendarDate, formatUTCDate, TIME_ZONE } from '@/utils/dates'
 import { formatObservatoryTime } from '@/utils/visibility'
 
-import { FINAL_STATUSES, SHOWN_FIELDS } from './constants'
+import { FINAL_STATUSES, REPEATABLE_STATUSES, SHOWN_FIELDS } from './constants'
 
 /** Total exposure of a plan, seconds */
 export const totalSeconds = (plan: ApiModel.TelescopePlanRow[]): number =>
@@ -133,11 +133,6 @@ export const noticeText = (notice: ApiModel.TelescopeNotice, t: TFunction): stri
                     minutes: p.minutes
                 }
             )
-        case 'patrol-no-l':
-            return t(
-                'components.pages.observatory.telescope-jobs.notice-patrol-no-l',
-                'для патруля нет фильтра L в колесе'
-            )
         case 'indi-offline':
             return t('components.pages.observatory.telescope-jobs.notice-indi-offline', 'INDI не запущен')
         case 'no-filter-wheel':
@@ -234,25 +229,12 @@ export const displayStatus = (job: ApiModel.TelescopeJob): JobDisplayStatus => {
     return job.status
 }
 
+/**
+ * The author or a manager may send it to be shot again ("Повторить"): a job that is over, except a
+ * rejected one — the same job, its counters from zero (the server says where it goes in the queue)
+ */
+export const canRepeat = (job: ApiModel.TelescopeJob): boolean => REPEATABLE_STATUSES.includes(job.status)
+
 /** A manager may pause it: approved or queued, not being cancelled */
 export const canPause = (job: ApiModel.TelescopeJob): boolean =>
     (job.status === 'approved' || job.status === 'queued') && !job.cancelRequested
-
-/** The job's name: the target, or "Патруль сверхновых · 10 нояб. 2026" for a patrol night */
-export const jobTitle = (job: ApiModel.TelescopeJob, t: TFunction, locale: string): string =>
-    job.patrol
-        ? t('components.pages.observatory.telescope-jobs.patrol-title', 'Патруль сверхновых · {{date}}', {
-              date: formatDate(job.patrol.night, locale)
-          })
-        : job.targetName
-
-/** A patrol night: galaxies shot / planned, and its frames (every patrol frame is L) */
-export const patrolDone = (job: ApiModel.TelescopeJob): { done: number; total: number; frames: number } => {
-    const done = job.patrol?.visitsDone ?? 0
-
-    return {
-        done,
-        frames: Object.values(job.progress).reduce((sum, n) => sum + (n ?? 0), 0),
-        total: Math.max(job.patrol?.visitsPlanned ?? 0, done)
-    }
-}

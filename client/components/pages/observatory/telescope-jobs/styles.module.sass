@@ -321,7 +321,7 @@
         height: 14px
         fill: var(--text-color-secondary)
 
-// A job's author (avatar + name) or the patrol (icon + name)
+// A job's author (avatar + name)
 .jobAuthor
     display: inline-flex
     align-items: center
@@ -417,33 +417,6 @@
 
 .detailsChart
     min-width: 0
-
-// A patrol night: what the patrol is and the night's facts | the map of its galaxies
-.patrolGrid
-    display: grid
-    grid-template-columns: minmax(0, 1fr) 340px
-    align-items: stretch
-    gap: var(--space-4) var(--space-6)
-
-    .map
-        aspect-ratio: auto
-        min-height: 300px
-
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        grid-template-columns: minmax(0, 1fr)
-
-        .map
-            aspect-ratio: 1
-
-.patrolInfo
-    display: flex
-    flex-direction: column
-    gap: var(--space-4)
-
-.patrolText
-    margin: 0
-    max-width: 640px
-    color: var(--text-secondary)
 
 // The plan card: the table over its whole width, no padding of the card's own
 .detailsPlan

@@ -1,7 +1,5 @@
 import React from 'react'
-import { cn, Icon } from 'simple-react-ui-kit'
-
-import { useTranslation } from 'next-i18next/pages'
+import { cn } from 'simple-react-ui-kit'
 
 import { ApiModel } from '@/api'
 import { UserAvatar } from '@/components/ui/user-avatar/UserAvatar'
@@ -16,20 +14,11 @@ interface JobAuthorProps {
     className?: string
 }
 
-/** Who a job is from: the visitor's avatar and name, or the observatory's own supernova patrol */
+/** Who a job is from: the visitor's avatar and name */
 export const JobAuthor: React.FC<JobAuthorProps> = ({ job, avatarSize = 'small', className }) => {
-    const { t } = useTranslation()
-
+    // Every job has an author; a deleted account leaves none to show
     if (!job.author) {
-        return (
-            <span className={cn(styles.jobAuthor, className)}>
-                <Icon
-                    name={'Search'}
-                    aria-hidden
-                />
-                {t('components.pages.observatory.telescope-jobs.patrol-author', 'Патруль сверхновых')}
-            </span>
-        )
+        return null
     }
 
     return (

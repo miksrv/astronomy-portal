@@ -10,16 +10,7 @@ import { formatDECShort, formatRAShort } from '@/utils/coordinates'
 
 import { JobAuthor } from './JobAuthor'
 import { JobStatusBadge } from './JobStatusBadge'
-import {
-    displayStatus,
-    formatDate,
-    formatDuration,
-    framesDone,
-    jobLink,
-    jobTitle,
-    patrolDone,
-    totalSeconds
-} from './utils'
+import { displayStatus, formatDate, formatDuration, framesDone, jobLink, totalSeconds } from './utils'
 
 import styles from './styles.module.sass'
 
@@ -35,20 +26,15 @@ interface JobCardProps {
  * /observatory/jobs alike: its place in the queue before the target's name, the status, the
  * coordinates, the author, the date it finished and the total time, the plan per filter and the
  * frames captured. The whole card is the link to the job's page.
- *
- * A patrol night (the observatory's own job) has no coordinates or author: its card counts the
- * galaxies shot of the planned ones, and the frames with their time.
  */
 export const JobCard: React.FC<JobCardProps> = ({ job, position, className }) => {
     const { t, i18n } = useTranslation()
 
-    const patrol = job.patrol ? patrolDone(job) : null
-    const { done, total } = patrol ?? framesDone(job)
+    const { done, total } = framesDone(job)
     const paused = displayStatus(job) === 'paused'
     const percent = total ? Math.round((done / total) * 100) : 0
     const showProgress = job.status !== 'pending' && job.status !== 'rejected'
-    const title = jobTitle(job, t, i18n.language)
-    const exposure = job.plan[0]?.exposure ?? 0
+    const title = job.targetName
 
     return (
         <Container
@@ -88,95 +74,63 @@ export const JobCard: React.FC<JobCardProps> = ({ job, position, className }) =>
                         </span>
                     </div>
 
-                    {patrol ? (
-                        <div className={styles.jobMeta}>
-                            <span className={styles.jobMetaItem}>
-                                <Icon
-                                    name={'Search'}
-                                    aria-hidden
-                                />
-                                {t('components.pages.observatory.telescope-jobs.patrol-source', 'Агент обсерватории')}
-                            </span>
-                            <span
-                                className={styles.metaDivider}
+                    <div className={styles.jobMeta}>
+                        <span className={styles.jobMetaItem}>
+                            <Icon
+                                name={'Position'}
                                 aria-hidden
-                            >
-                                •
-                            </span>
-                            <span className={styles.jobMetaItem}>
-                                <Icon
-                                    name={'Time'}
-                                    aria-hidden
-                                />
-                                {t(
-                                    'components.pages.observatory.telescope-jobs.row-total',
-                                    '{{frames}} кадров · {{duration}}',
-                                    {
-                                        duration: formatDuration(patrol.frames * exposure, t),
-                                        frames: patrol.frames
-                                    }
-                                )}
-                            </span>
-                        </div>
-                    ) : (
-                        <div className={styles.jobMeta}>
-                            <span className={styles.jobMetaItem}>
-                                <Icon
-                                    name={'Position'}
-                                    aria-hidden
-                                />
-                                {formatRAShort(job.ra ?? undefined)} {formatDECShort(job.dec ?? undefined)}
-                            </span>
-                            <span
-                                className={styles.metaDivider}
-                                aria-hidden
-                            >
-                                •
-                            </span>
-                            <JobAuthor
-                                job={job}
-                                avatarSize={'tiny'}
-                                className={styles.jobMetaItem}
                             />
-                            <span
-                                className={styles.metaDivider}
-                                aria-hidden
-                            >
-                                •
-                            </span>
-                            {job.finishedAt && (
-                                <>
-                                    <span className={styles.jobMetaItem}>
-                                        <Icon
-                                            name={'Calendar'}
-                                            aria-hidden
-                                        />
-                                        {formatDate(job.finishedAt, i18n.language)}
-                                    </span>
-                                    <span
-                                        className={styles.metaDivider}
+                            {formatRAShort(job.ra)} {formatDECShort(job.dec)}
+                        </span>
+                        <span
+                            className={styles.metaDivider}
+                            aria-hidden
+                        >
+                            •
+                        </span>
+                        <JobAuthor
+                            job={job}
+                            avatarSize={'tiny'}
+                            className={styles.jobMetaItem}
+                        />
+                        <span
+                            className={styles.metaDivider}
+                            aria-hidden
+                        >
+                            •
+                        </span>
+                        {job.finishedAt && (
+                            <>
+                                <span className={styles.jobMetaItem}>
+                                    <Icon
+                                        name={'Calendar'}
                                         aria-hidden
-                                    >
-                                        •
-                                    </span>
-                                </>
-                            )}
-                            <span className={styles.jobMetaItem}>
-                                <Icon
-                                    name={'Time'}
+                                    />
+                                    {formatDate(job.finishedAt, i18n.language)}
+                                </span>
+                                <span
+                                    className={styles.metaDivider}
                                     aria-hidden
-                                />
-                                {t(
-                                    'components.pages.observatory.telescope-jobs.row-total',
-                                    '{{frames}} кадров · {{duration}}',
-                                    {
-                                        duration: formatDuration(totalSeconds(job.plan), t),
-                                        frames: total
-                                    }
-                                )}
-                            </span>
-                        </div>
-                    )}
+                                >
+                                    •
+                                </span>
+                            </>
+                        )}
+                        <span className={styles.jobMetaItem}>
+                            <Icon
+                                name={'Time'}
+                                aria-hidden
+                            />
+                            {t(
+                                'components.pages.observatory.telescope-jobs.row-total',
+                                '{{frames}} кадров · {{duration}}',
+                                {
+                                    duration: formatDuration(totalSeconds(job.plan), t),
+                                    frames: total
+                                }
+                            )}
+                        </span>
+                    </div>
 
                     <FilterTagList aria-label={t('components.pages.observatory.telescope-jobs.plan', 'План съёмки')}>
                         {job.plan.map((row) => (
@@ -184,23 +138,14 @@ export const JobCard: React.FC<JobCardProps> = ({ job, position, className }) =>
                                 key={row.filter}
                                 filter={row.filter}
                             >
-                                {patrol
-                                    ? t(
-                                          'components.pages.observatory.telescope-jobs.patrol-frames',
-                                          '{{count}} × {{exposure}} с на галактику',
-                                          {
-                                              count: row.count,
-                                              exposure: row.exposure
-                                          }
-                                      )
-                                    : t(
-                                          'components.pages.observatory.telescope-jobs.row-frames',
-                                          '{{count}} × {{exposure}} с',
-                                          {
-                                              count: row.count,
-                                              exposure: row.exposure
-                                          }
-                                      )}
+                                {t(
+                                    'components.pages.observatory.telescope-jobs.row-frames',
+                                    '{{count}} × {{exposure}} с',
+                                    {
+                                        count: row.count,
+                                        exposure: row.exposure
+                                    }
+                                )}
                             </FilterTag>
                         ))}
                     </FilterTagList>
@@ -222,23 +167,14 @@ export const JobCard: React.FC<JobCardProps> = ({ job, position, className }) =>
                             )}
                         />
                         <span className={styles.caption}>
-                            {patrol
-                                ? t(
-                                      'components.pages.observatory.telescope-jobs.patrol-done-short',
-                                      '{{done}} из {{total}} галактик',
-                                      {
-                                          done,
-                                          total
-                                      }
-                                  )
-                                : t(
-                                      'components.pages.observatory.telescope-jobs.frames-done-short',
-                                      '{{done}} из {{total}} кадров',
-                                      {
-                                          done,
-                                          total
-                                      }
-                                  )}
+                            {t(
+                                'components.pages.observatory.telescope-jobs.frames-done-short',
+                                '{{done}} из {{total}} кадров',
+                                {
+                                    done,
+                                    total
+                                }
+                            )}
                         </span>
                     </div>
                 )}

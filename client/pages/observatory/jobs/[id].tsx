@@ -8,8 +8,8 @@ import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, useAppSelector, wrapper } from '@/api'
 import { AppFooter, AppLayout, AppToolbar } from '@/components/common'
-import { JobDetails, JobStatusBadge, PatrolDetails, useJobActions } from '@/components/pages/observatory'
-import { formatDate, isFinal, jobTitle } from '@/components/pages/observatory/telescope-jobs/utils'
+import { JobDetails, JobStatusBadge, useJobActions } from '@/components/pages/observatory'
+import { formatDate, isFinal } from '@/components/pages/observatory/telescope-jobs/utils'
 import { TELESCOPE_JOBS_ENABLED } from '@/utils/constants'
 import { hasPermission } from '@/utils/permissions'
 import { initSSRLocale } from '@/utils/ssrLocale'
@@ -56,12 +56,10 @@ const TelescopeJobPage: NextPage = () => {
     const { actions, dialogs } = useJobActions(job, manager, isFetching)
 
     const jobsTitle = t('pages.observatory.jobs.title', 'Задания телескопа')
-    const title = job ? jobTitle(job, t, i18n.language) : t('pages.observatory.job.title', 'Задание телескопа')
+    const title = job ? job.targetName : t('pages.observatory.job.title', 'Задание телескопа')
     // The browser's tab and search results: what the page is, not only the target's name
     const pageTitle = job
-        ? job.patrol
-            ? title
-            : t('pages.observatory.job.title-named', 'Задание телескопа: {{name}}', { name: job.targetName })
+        ? t('pages.observatory.job.title-named', 'Задание телескопа: {{name}}', { name: job.targetName })
         : t('pages.observatory.job.title', 'Задание телескопа')
     const notFound = (error as { status?: number } | undefined)?.status === 404
 
@@ -87,21 +85,23 @@ const TelescopeJobPage: NextPage = () => {
                         <span className={styles.jobLead}>
                             <JobStatusBadge job={job} />
                             <span className={styles.jobLeadMeta}>
-                                {job.patrol
-                                    ? t(
-                                          'components.pages.observatory.telescope-jobs.patrol-lead',
-                                          'ведёт сама обсерватория'
-                                      )
-                                    : t(
-                                          'components.pages.observatory.telescope-jobs.lead-sent',
-                                          '{{author}} · отправлено {{date}}',
-                                          {
-                                              author: job.author?.name ?? '',
-                                              date: formatDate(job.createdAt, i18n.language)
-                                          }
-                                      )}
+                                {t(
+                                    'components.pages.observatory.telescope-jobs.lead-sent',
+                                    '{{author}} · отправлено {{date}}',
+                                    {
+                                        author: job.author?.name ?? '',
+                                        date: formatDate(job.createdAt, i18n.language)
+                                    }
+                                )}
+                                {job.repeatedAt &&
+                                    ` · ${t(
+                                        'components.pages.observatory.telescope-jobs.lead-repeated',
+                                        'повторено {{date}}',
+                                        {
+                                            date: formatDate(job.repeatedAt, i18n.language)
+                                        }
+                                    )}`}
                                 {manager &&
-                                    !job.patrol &&
                                     ` · ${t(
                                         'components.pages.observatory.telescope-jobs.priority-value',
                                         'приоритет {{value}}',
@@ -115,9 +115,7 @@ const TelescopeJobPage: NextPage = () => {
                 }
             />
 
-            {job?.patrol ? (
-                <PatrolDetails job={job} />
-            ) : job ? (
+            {job ? (
                 <JobDetails job={job} />
             ) : isLoading || !id ? (
                 <Skeleton

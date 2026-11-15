@@ -40,9 +40,7 @@ export const JobDetails: React.FC<JobDetailsProps> = ({ job }) => {
     const { t, i18n } = useTranslation()
 
     const final = isFinal(job.status)
-    // Always set for a visitor's job (only a patrol night has none, and it has a page of its own)
-    const ra = job.ra ?? 0
-    const dec = job.dec ?? 0
+    const { ra, dec } = job
 
     const objects = useMemo(() => [{ dec, name: job.targetName, ra }], [dec, ra, job.targetName])
     const center = useMemo<[number, number]>(() => [ra, dec], [ra, dec])
@@ -121,15 +119,11 @@ export const JobDetails: React.FC<JobDetailsProps> = ({ job }) => {
                                 ? formatDate(job.validUntil, i18n.language)
                                 : t('components.pages.observatory.telescope-jobs.details-no-date', 'без срока')}
                         </Fact>
-                        <Fact
-                            label={
-                                job.author
-                                    ? t('components.pages.observatory.telescope-jobs.details-author', 'Автор')
-                                    : t('components.pages.observatory.telescope-jobs.details-source', 'Источник')
-                            }
-                        >
-                            <JobAuthor job={job} />
-                        </Fact>
+                        {job.author && (
+                            <Fact label={t('components.pages.observatory.telescope-jobs.details-author', 'Автор')}>
+                                <JobAuthor job={job} />
+                            </Fact>
+                        )}
                     </FactList>
                     <VisibilityChart
                         className={styles.detailsChart}

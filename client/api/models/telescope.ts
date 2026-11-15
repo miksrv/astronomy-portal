@@ -18,52 +18,14 @@ export interface TelescopeJobAuthor {
     avatar?: string | null
 }
 
-/** `site` — a visitor's job; `patrol` — the observatory agent's own (the supernova patrol, no author) */
-export type TelescopeJobSource = 'site' | 'patrol'
-
-/**
- * One night of the supernova patrol as a job: made by the night's first visit the observatory
- * reported, running while the night lasts, completed after the dawn
- */
-export interface TelescopePatrolNight {
-    /** `YYYY-MM-DD`, the local date of the evening */
-    night: string
-    /** Galaxies shot so far */
-    visitsDone: number
-    /** Galaxies the observatory planned for the night (never less than shot) */
-    visitsPlanned: number
-}
-
-/** One galaxy of a patrol night */
-export interface TelescopePatrolVisit {
-    target: {
-        id: number
-        name: string
-        /** Our catalog object (`catalog_name`, the link to its page), when the galaxy is in the catalog */
-        object: string | null
-        /** J2000, degrees */
-        ra: number
-        dec: number
-        /** SIMBAD's short type code */
-        type: string | null
-        magnitude: number | null
-    }
-    /** The first frame, UTC */
-    time: string
-    /** The latest frame so far, UTC */
-    lastFrame: string | null
-    frames: number
-}
-
 export interface TelescopeJob {
     id: string
-    source: TelescopeJobSource
     targetName: string
     /** Our catalog object (`catalog_name`), when the target is one */
     object: string | null
-    /** J2000, degrees; null for a patrol night (its targets are its `visits`) */
-    ra: number | null
-    dec: number | null
+    /** J2000, degrees */
+    ra: number
+    dec: number
     mode: 'simple' | 'pro'
     preset: string | null
     plan: TelescopePlanRow[]
@@ -82,13 +44,10 @@ export interface TelescopeJob {
     own: boolean
     /** Frames captured per filter (absolute counts from the observatory) */
     progress: Partial<Record<ApiModel.FilterTypes, number>>
-    /** null for the agent's own jobs (`source` = patrol) */
     author: TelescopeJobAuthor | null
-    /** A patrol night (`source` = patrol), otherwise null */
-    patrol: TelescopePatrolNight | null
-    /** A patrol night's visits, in the order they were shot (`GET /telescope/jobs/:id` only) */
-    visits?: TelescopePatrolVisit[]
     createdAt: string
+    /** When it was last sent to be shot again ("Повторить"): the counters start from zero then */
+    repeatedAt: string | null
     reviewedAt: string | null
     acceptedAt: string | null
     startedAt: string | null
@@ -119,7 +78,6 @@ export interface TelescopeTonightPlan {
         groups: string[]
         author: TelescopeJobAuthor
     }>
-    patrol: { enabled: boolean; targets: string[] }
 }
 
 /**
@@ -146,11 +104,5 @@ export interface TelescopeReport {
     jobs?: TelescopeReportJob[]
     warnings?: TelescopeNotice[]
     ekos?: { loaded: boolean; reason?: TelescopeNotice; jobs?: number; started?: boolean }
-    patrol?: {
-        enabled: boolean
-        targets: number
-        candidates: number
-        planned: Array<{ id: number; name: string; score: number }>
-    }
     autonomousMode?: boolean
 }

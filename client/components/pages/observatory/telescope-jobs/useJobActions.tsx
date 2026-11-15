@@ -10,7 +10,7 @@ import { useSnackbar } from '@/hooks/useSnackbar'
 import { getErrorMessage } from '@/utils/errors'
 
 import { PRIORITY_LIMIT } from './constants'
-import { canCancel, canPause, canRemove, isFinal } from './utils'
+import { canCancel, canPause, canRemove, canRepeat, isFinal } from './utils'
 
 import styles from './styles.module.sass'
 
@@ -41,6 +41,7 @@ export const useJobActions = (
     const [busy, setBusy] = useState(false)
     const [confirm, setConfirm] = useState<'cancel' | 'remove'>()
     const [rejecting, setRejecting] = useState(false)
+    const [repeating, setRepeating] = useState(false)
     const [reason, setReason] = useState('')
 
     const [approveJob] = API.useTelescopeApproveJobMutation()
@@ -48,9 +49,9 @@ export const useJobActions = (
     const [cancelJob] = API.useTelescopeCancelJobMutation()
     const [removeJob] = API.useTelescopeRemoveJobMutation()
     const [patchJob] = API.useTelescopePatchJobMutation()
+    const [repeatJob] = API.useTelescopeRepeatJobMutation()
 
-    // A patrol night is the observatory's own: nobody changes, cancels or deletes it
-    if (!job || job.source !== 'site') {
+    if (!job) {
         return { actions: [], dialogs: null }
     }
 
@@ -151,6 +152,16 @@ export const useJobActions = (
         )
     }
 
+    if ((job.own || manager) && canRepeat(job)) {
+        actions.push({
+            disabled: locked,
+            icon: 'Rotate',
+            key: 'repeat',
+            label: t('components.pages.observatory.telescope-jobs.repeat', 'Повторить'),
+            onClick: () => setRepeating(true)
+        })
+    }
+
     if ((job.own || manager) && canCancel(job)) {
         actions.push({
             disabled: locked,
@@ -231,6 +242,44 @@ export const useJobActions = (
                             } else if (action === 'cancel') {
                                 await run(() => cancelJob(job.id).unwrap())
                             }
+                        }}
+                    />
+                </div>
+            </Dialog>
+
+            <Dialog
+                open={repeating}
+                title={t('components.pages.observatory.telescope-jobs.repeat-title', 'Повторить задание «{{name}}»?', {
+                    name: job.targetName
+                })}
+                onCloseDialog={() => setRepeating(false)}
+            >
+                <p className={styles.dialogText}>
+                    {manager
+                        ? t(
+                              'components.pages.observatory.telescope-jobs.repeat-text',
+                              'Задание вернётся в очередь первым среди заданий своего приоритета, счётчики кадров начнутся с нуля. Отснятые раньше кадры сохранятся.'
+                          )
+                        : t(
+                              'components.pages.observatory.telescope-jobs.repeat-text-moderation',
+                              'Задание снова уйдёт на одобрение, счётчики кадров начнутся с нуля. Отснятые раньше кадры сохранятся.'
+                          )}
+                </p>
+                <div className={styles.dialogActions}>
+                    <Button
+                        mode={'outline'}
+                        label={t('common.cancel', 'Отмена')}
+                        onClick={() => setRepeating(false)}
+                    />
+                    <Button
+                        mode={'primary'}
+                        label={t('components.pages.observatory.telescope-jobs.repeat', 'Повторить')}
+                        onClick={async () => {
+                            setRepeating(false)
+                            await run(
+                                () => repeatJob(job.id).unwrap(),
+                                t('components.pages.observatory.telescope-jobs.repeated', 'Задание снова в очереди')
+                            )
                         }}
                     />
                 </div>

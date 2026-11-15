@@ -15,6 +15,9 @@ export const PRIVATE_STATUSES: ApiModel.TelescopeJobStatus[] = ['rejected', 'can
 /** Never change again */
 export const FINAL_STATUSES: ApiModel.TelescopeJobStatus[] = [...FINISHED_STATUSES, ...PRIVATE_STATUSES]
 
+/** A job that is over and may be shot again ("Повторить"): not a rejected one */
+export const REPEATABLE_STATUSES: ApiModel.TelescopeJobStatus[] = ['completed', 'failed', 'expired', 'cancelled']
+
 export const STATUS_TONE: Record<JobDisplayStatus, StatusTone> = {
     cancelling: 'neutral',
     paused: 'neutral',
