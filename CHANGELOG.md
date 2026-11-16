@@ -12,6 +12,7 @@ Better visibility in search engines, a faster first screen and more reliable mai
 - The main picture of a page loads first, so the first screen appears sooner
 - Star map: zoom and layer buttons are named for screen readers
 - Seats held by abandoned unpaid bookings are freed again
+- A payment made after the booking time ran out now gets its ticket, or a refund when the seat is gone
 - Emails are no longer sent twice when the mail server is slow
 - Housekeeping: unused code and star map data removed, the server moved to PHP 8.4
 

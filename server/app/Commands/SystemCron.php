@@ -3,9 +3,8 @@
 namespace App\Commands;
 
 use App\Libraries\EmailQueueProcessor;
-use App\Libraries\PaymentLibrary;
+use App\Libraries\EventBookingLibrary;
 use App\Libraries\PushQueueProcessor;
-use App\Models\EventsUsersModel;
 use App\Models\PaymentsModel;
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
@@ -52,7 +51,8 @@ class SystemCron extends BaseCommand
     /**
      * Seats held by unpaid bookings whose 20-minute payment hold ran out are freed, so an
      * abandoned booking doesn't block the event even when nobody books it. Every expired
-     * payment is checked with the bank first: a failed or cancelled one frees its seat.
+     * payment is checked with the bank first, and one paid after its hold expired is
+     * confirmed (with the ticket email) or refunded — the same path as on the site.
      */
     private function releaseExpiredHolds(): void
     {
@@ -61,27 +61,7 @@ class SystemCron extends BaseCommand
             return;
         }
 
-        $failedPaymentIds = [];
-
-        foreach ((new PaymentLibrary())->releaseExpired() as ['payment' => $payment, 'status' => $status]) {
-            if ($status === 'paid') {
-                // The bank took the money after our hold ran out. Confirming or refunding it is
-                // Events::reconcileBooking(), which lives in the controller; until it moves to
-                // a library, a person handles it
-                log_message('error', 'Payment {id} was paid after its hold expired: confirm the booking {booking} or refund it by hand', [
-                    'id'      => $payment->id,
-                    'booking' => $payment->entity_id,
-                ]);
-
-                continue;
-            }
-
-            if (in_array($status, ['failed', 'canceled'], true)) {
-                $failedPaymentIds[] = $payment->id;
-            }
-        }
-
-        (new EventsUsersModel())->releaseExpiredPendingByPaymentIds($failedPaymentIds);
+        (new EventBookingLibrary())->releaseExpiredBookings();
     }
 
     /**
@@ -130,7 +110,8 @@ class SystemCron extends BaseCommand
      */
     private function acquireLock()
     {
-        $lock = fopen(WRITEPATH . 'cron.lock', 'c');
+        // @: CI4 turns the warning of a failed fopen into an exception, the fallback below must run
+        $lock = @fopen(WRITEPATH . 'cron.lock', 'c');
 
         if ($lock === false) {
             // No lock file (a read-only writable/?): run anyway rather than never

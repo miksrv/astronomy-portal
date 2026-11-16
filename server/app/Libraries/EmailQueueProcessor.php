@@ -60,6 +60,9 @@ class EmailQueueProcessor
             return null;
         }
 
+        // Built outside the per-row catch: a mailer that can't be set up fails the run and
+        // leaves the rows queued instead of spending their retries
+        $mailer = $this->mailer();
         $sent   = 0;
         $errors = 0;
 
@@ -67,7 +70,7 @@ class EmailQueueProcessor
             /** @var EmailQueueEntity $item */
             try {
                 // sendWithAttachment handles null paths (plain email, no CID swap, no ics)
-                $this->mailer()->sendWithAttachment(
+                $mailer->sendWithAttachment(
                     $item->email,
                     $item->subject,
                     $item->body,
@@ -144,6 +147,7 @@ class EmailQueueProcessor
             ];
         }
 
+        $mailer   = $this->mailer();
         $siteUrl  = rtrim((string) getenv('app.siteUrl'), '/');
         $apiUrl   = rtrim((string) getenv('app.baseURL'), '/');
         $sent     = 0;
@@ -179,7 +183,7 @@ class EmailQueueProcessor
             ]);
 
             try {
-                $this->mailer()->send($item->email, $mailing->subject, $body);
+                $mailer->send($item->email, $mailing->subject, $body);
 
                 $this->mailingEmailsModel->update($item->id, [
                     'status'  => MailingEmailEntity::STATUS_SENT,

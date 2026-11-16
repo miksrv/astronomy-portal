@@ -104,17 +104,9 @@ class MailingEmailsModel extends ApplicationBaseModel
                     ->countAllResults();
     }
 
-    /**
-     * Whether anything waits in the queue: one indexed row, no entity built.
-     * The cron asks this every minute before it sets up a mailer.
-     */
+    /** Whether anything waits in the queue (one indexed row): the cron asks every minute */
     public function hasQueued(): bool
     {
-        return $this->builder()
-            ->select($this->primaryKey)
-            ->where('status', 'queued')
-            ->limit(1)
-            ->get()
-            ->getFirstRow() !== null;
+        return $this->hasRowWithStatus(MailingEmailEntity::STATUS_QUEUED);
     }
 }

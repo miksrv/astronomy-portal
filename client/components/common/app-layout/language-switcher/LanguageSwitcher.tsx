@@ -63,8 +63,22 @@ export const LanguageSwitcher: React.FC = () => {
                             as={asPath}
                             locale={locale}
                             hrefLang={locale}
+                            // Always on screen: prefetching the other locale on every page view
+                            // would cost requests for a link that is rarely clicked
+                            prefetch={false}
                             className={styles.langButton}
                             onClick={(event) => {
+                                // Cmd/Ctrl/Shift/middle click: the browser opens the link itself
+                                if (
+                                    event.metaKey ||
+                                    event.ctrlKey ||
+                                    event.shiftKey ||
+                                    event.altKey ||
+                                    event.button !== 0
+                                ) {
+                                    return
+                                }
+
                                 event.preventDefault()
                                 void changeLanguage(locale)
                             }}

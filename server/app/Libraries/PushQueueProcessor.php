@@ -15,7 +15,7 @@ use Exception;
  *
  * No day/hour cap, unlike email: push services don't throttle by sender reputation the way
  * SMTP providers do; still batched to bound one run. The VAPID client is only built when
- * something is queued. A subscription the push service reports gone (404/410) is deleted.
+ * something is queued, and before the first delivery, so a broken config fails the whole run. A subscription the push service reports gone (404/410) is deleted.
  */
 class PushQueueProcessor
 {
@@ -46,6 +46,9 @@ class PushQueueProcessor
             return null;
         }
 
+        // Built before the loop, outside the per-delivery catch: a broken VAPID config fails the
+        // run (logged by the cron) and leaves the deliveries queued, not marked failed one by one
+        $webPush  = $this->webPush();
         $sent     = 0;
         $errors   = 0;
         $affected = [];
@@ -65,7 +68,7 @@ class PushQueueProcessor
             $affected[$notificationId] = true;
 
             try {
-                $this->webPush()->send($subscription, [
+                $webPush->send($subscription, [
                     'title' => $notification->title,
                     'body'  => $notification->body,
                     'icon'  => $notification->getIconUrl(),

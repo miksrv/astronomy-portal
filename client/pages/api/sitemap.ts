@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
-import { API, SITE_LINK } from '@/api'
+import { API } from '@/api'
 import { makeStore } from '@/api/store'
 import { TELESCOPE_JOBS_ENABLED } from '@/utils/constants'
+import { createPageUrl } from '@/utils/helpers'
 
 // Plain API route (not a `pages/` page) on purpose: Next.js treats any page whose route
 // resolves to "/sitemap" as a reserved App Router metadata route and rejects
@@ -25,8 +26,6 @@ type StaticPage = {
     lastmod?: string
 }
 
-const base = (SITE_LINK ?? '').replace(/\/$/, '')
-
 // The API sends ISO 8601 with the offset. Until both sides are deployed it may still send the
 // old shapes: a CI4 Time object ({ date }) for photos and events, a bare string for objects
 const toIsoDate = (date?: string | { date?: string } | null): string | undefined => {
@@ -45,9 +44,9 @@ const xmlEscape = (value: string): string =>
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&apos;')
 
-/** Absolute URL of a page; the home page is "/en" in English, without a trailing slash */
+/** Absolute URL of a page, by the site's one locale-prefix rule (createPageUrl), escaped for XML */
 const pageUrl = (path: string, english: boolean): string =>
-    xmlEscape(`${base}/${english ? (path ? `en/${encodeURI(path)}` : 'en') : encodeURI(path)}`)
+    xmlEscape(createPageUrl(english ? 'en' : 'ru', encodeURI(path)))
 
 /**
  * Both language versions of a page, each as its own <url> with the full set of

@@ -192,6 +192,25 @@ final class CronQueuesTest extends CIUnitTestCase
         $this->assertSame('queued', $db->table('mailing_emails')->where('id', 'e1')->get()->getRow()->status);
     }
 
+    public function testBrokenPushConfigLeavesTheQueueUntouched(): void
+    {
+        $db = Database::connect();
+        $db->table('push_notifications')->insert(['id' => 'n1', 'title' => 'Астровыезд', 'body' => 'Текст', 'status' => 'sending']);
+        $db->table('push_subscriptions')->insert(['id' => 's1', 'endpoint' => 'https://push.example.com/alive', 'p256dh' => 'k', 'auth_key' => 'a']);
+        $db->table('push_notification_deliveries')->insert(['id' => 'd1', 'notification_id' => 'n1', 'subscription_id' => 's1', 'status' => 'queued']);
+
+        $processor = new PushQueueProcessor(static function (): WebPushLibrary {
+            throw new ErrorException('Invalid VAPID private key');
+        });
+
+        try {
+            $processor->process();
+            $this->fail('A broken push config must fail the run');
+        } catch (ErrorException) {
+            $this->assertSame('queued', $db->table('push_notification_deliveries')->where('id', 'd1')->get()->getRow()->status);
+        }
+    }
+
     public function testPushSentGoneSubscriptionDeletedAndCampaignCompleted(): void
     {
         $db = Database::connect();

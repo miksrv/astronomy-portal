@@ -21,7 +21,7 @@ export interface GalleryPhoto extends Photo {
     duration?: number
 }
 
-type PhotoGalleryProps = RowsPhotoAlbumProps<GalleryPhoto> & {
+interface PhotoGalleryProps extends RowsPhotoAlbumProps<GalleryPhoto> {
     /**
      * Alt text for the photos that have none of their own, numbered: "<alt> 1", "<alt> 2"…
      * Static galleries are plain image imports; without it every tile is alt="" - invisible
