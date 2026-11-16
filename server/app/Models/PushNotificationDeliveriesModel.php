@@ -16,7 +16,7 @@ use App\Entities\PushNotificationDeliveryEntity;
  * `subscription_id` is nullable with an ON DELETE SET NULL FK to
  * push_subscriptions (see FixPushNotificationDeliveriesSubscriptionCascade)
  * — a row must survive as a permanent send-audit record (status intact)
- * even after SendPushNotifications hard-deletes the subscription it
+ * even after PushQueueProcessor hard-deletes the subscription it
  * targeted, the same way a mailing_emails row survives an unsubscribe.
  */
 class PushNotificationDeliveriesModel extends ApplicationBaseModel
@@ -65,5 +65,19 @@ class PushNotificationDeliveriesModel extends ApplicationBaseModel
         return $this->where('status', 'queued')
                     ->orderBy('created_at', 'ASC')
                     ->findAll($limit);
+    }
+
+    /**
+     * Whether anything waits in the queue: one indexed row, no entity built.
+     * The cron asks this every minute before it sets up a mailer.
+     */
+    public function hasQueued(): bool
+    {
+        return $this->builder()
+            ->select($this->primaryKey)
+            ->where('status', 'queued')
+            ->limit(1)
+            ->get()
+            ->getFirstRow() !== null;
     }
 }

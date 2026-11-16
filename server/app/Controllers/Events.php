@@ -494,7 +494,7 @@ class Events extends BaseApiController
     /**
      * Renders the PNG ticket and queues a confirmation email (with the ticket
      * embedded) to the booking owner for asynchronous delivery by the
-     * `system:send-email` cron. The PNG is written to a durable file the cron
+     * `system:cron` cron. The PNG is written to a durable file the cron
      * deletes once sent. Enqueue failures are logged but never bubble up —
      * a failed email must not break the booking/payment flow.
      *

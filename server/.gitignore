@@ -145,3 +145,6 @@ nb-configuration.xml
 !/public/stargazing/.htaccess
 /public/attachments/*
 !/public/attachments/.htaccess
+
+# The lock of `spark system:cron`
+writable/cron.lock

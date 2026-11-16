@@ -31,7 +31,7 @@ class PushNotificationDeliveryEntity extends Entity
         'id'              => 'string',
         'notification_id' => 'string',
         // Nullable cast — subscription_id is SET NULL (not CASCADE-deleted)
-        // when SendPushNotifications hard-deletes an expired subscription,
+        // when PushQueueProcessor hard-deletes an expired subscription,
         // so the delivery row can outlive it as a permanent send-audit
         // record. A plain 'string' cast would silently turn that null
         // into '', same pitfall as PushSubscriptionEntity::user_id.

@@ -283,8 +283,7 @@ No Telegram (blocked where the servers are). Two channels already in the portal:
 | "No link" for > 15 min while a night is planned or running | admins | Web Push + e-mail |
 
 Agent-detected problems arrive as events with the status push and are sent at once. "No link" can't
-come from the agent — a spark command `observatory:watch` on the existing hosting cron (next to
-`send-email`/`send-push`) checks the age of the last snapshot. Push subscriptions already carry
+come from the agent — a step of `system:cron` (the existing hosting cron) checks the age of the last snapshot. Push subscriptions already carry
 `user_id`, so pushes can target admins only. Repeated alerts are throttled (one per problem until it
 clears).
 

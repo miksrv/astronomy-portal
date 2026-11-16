@@ -233,7 +233,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 
 - `2026-08-13-100001_AddRolesTable` — seeds 3 starter roles (Разработчик/Команда/Охрана); role id 1 ("Разработчик") is reserved, see `RolesModel::DEVELOPER_ROLE_ID`.
 - `2026-08-13-100002_AddUsersRolesColumn` — adds `users.roles JSON`, backfilled from the legacy `users.role` ENUM, which is left in place as a rollback safety net.
-- `2026-08-17-110000_FixPushNotificationDeliveriesSubscriptionCascade` — `push_notification_deliveries.subscription_id` FK is `SET NULL`, not `CASCADE`, so a delivery row survives when `system:send-push` deletes an expired subscription.
+- `2026-08-17-110000_FixPushNotificationDeliveriesSubscriptionCascade` — `push_notification_deliveries.subscription_id` FK is `SET NULL`, not `CASCADE`, so a delivery row survives when `system:cron` deletes an expired subscription.
 - `2026-08-21-100000_RenameEventsPhotosToEventsMedia` — `events_photos` → `events_media`; the index is renamed with a raw `ALTER TABLE ... RENAME INDEX`, since `RENAME TABLE` keeps index names verbatim and Forge has no `renameIndex`.
 - `2026-11-03-100000_AddEventsDateIndex` — index `events_date` on `events.date`, the column every public events query filters and sorts by.
 
@@ -292,6 +292,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 | `SessionLibrary` | JWT validation, populates `$this->session->user` and `->isAuth` |
 | `LocaleLibrary` | Sets CI4 locale from request header or user preference |
 | `EmailLibrary` | Wraps CodeIgniter email service for mailing campaigns |
+| `EmailQueueProcessor` / `PushQueueProcessor` | The send steps of `system:cron`: one batch of the transactional outbox, the mailing campaigns (day/hour caps) or the push deliveries; the mailer / push client is built only when something is queued |
 | `RelayLibrary` | HTTP communication with the RODOS relay board (3 s read / 5 s write timeouts, so a hung link never blocks the dashboard) |
 | `PhotoUploadLibrary` | Handles photo file validation, resizing (`_small` 160×36 strip, `_thumb` 160×160 square, `_medium` 500×400, `_large` 4096 wide), and storage |
 | `GoogleClient` / `YandexClient` / `VkClient` | OAuth provider integrations |
@@ -322,14 +323,11 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 ### CLI Commands (`app/Commands/`)
 | Command | Group | Purpose |
 |---|---|---|
-| `system:send-email` | system | Drains the mailing queue (`mailing_emails`) and the transactional email outbox (`email_queue`), subject to `Config\MailingLimits` day/hour caps |
-| `system:send-push` | system | Drains the Web Push delivery queue (`push_notification_deliveries`), batch size 50, no rate-limit cap (push has no SMTP-style provider reputation limit) — deletes the `push_subscriptions` row on a 404/410 (`WebPushExpiredSubscriptionException`) |
+| `system:cron` | system | The API's one cron job, every minute, in one process: frees the seats of expired unpaid bookings (each payment checked with the bank first; one paid after its hold expired is logged for a person to confirm or refund), then sends the transactional emails and the mailing campaigns (`EmailQueueProcessor`, campaigns under the `Config\MailingLimits` day/hour caps) and the Web Push deliveries (`PushQueueProcessor`, batch 50, no cap; a 404/410 subscription is deleted). An idle minute is one indexed query per queue (`hasQueued()`) and no output; a run that outlives its minute holds `writable/cron.lock` and the next one exits, so nothing is sent twice; a failing step is logged and the next one runs |
 | `objects:simbad` | Observatory | Fills the objects from SIMBAD (`ObjectSimbadLibrary`): a report only, unless `--apply`; `--accept M_94,IC_405` takes the far ones (coordinates included) after a person checked them, `--skip NGC_6888` leaves out a name SIMBAD resolves to a neighbour, `--object NAME` one object, `--all` also the ones looked up before. Run once after the migration; new objects are filled on `POST /objects` |
-| `fits:recalculate` | Observatory | Recalculates FITS filter aggregates (no HTTP endpoint) |
-| `photos:thumbnails` | Observatory | Generates the square `_thumb` (160×160) preview for photos uploaded before 4.15.0 (`--force` regenerates all); new uploads get it from `PhotoUploadLibrary` |
 | `photos:solve` | Observatory | Plate-solves photos from the command line by looping `AstrometrySolver::step()` (about a minute each): `--limit N` (default 3) rows in progress, `--all` first queues every never-solved photo (the one-time backfill of the archive), `--photo ID` (re)solves one photo. Spark passes options as `--name value`; the command also accepts `--name=value`. Not a cron job — new uploads are solved from the editor's browser via `POST /photos/:id/astrometry` |
 
-`send-email` and `send-push` are registered for the same `* * * * *` cron cadence on the hosting cron (outside this repo).
+The hosting cron (outside this repo) runs `php8.4 <path>/spark system:cron` every minute (`* * * * *`).
 
 There is no automatic cleanup of abandoned chunked uploads (tab closed or network dropped without a cancel): their parts stay in `UPLOAD_EVENTS/{eventId}/tmp/{sessionId}/` and the `events_media_uploads` row stays `uploading`/`finalizing`. Uploads are rare, so these are removed by hand on the server.
 

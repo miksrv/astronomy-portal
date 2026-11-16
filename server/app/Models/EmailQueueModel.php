@@ -9,7 +9,7 @@ use App\Entities\EmailQueueEntity;
  *
  * Outbox for one-off transactional emails. Producers call {@see enqueue()} with
  * an already-rendered subject/body (and optional attachment); the
- * `system:send-email` cron drains the queue and performs the actual SMTP send,
+ * `system:cron` cron drains the queue and performs the actual SMTP send,
  * so request handlers never block on email delivery.
  *
  * Uses UUID primary keys generated via the beforeInsert callback.
@@ -80,5 +80,19 @@ class EmailQueueModel extends ApplicationBaseModel
         return $this->where('status', EmailQueueEntity::STATUS_QUEUED)
                     ->orderBy('created_at', 'ASC')
                     ->findAll($limit);
+    }
+
+    /**
+     * Whether anything waits in the queue: one indexed row, no entity built.
+     * The cron asks this every minute before it sets up a mailer.
+     */
+    public function hasQueued(): bool
+    {
+        return $this->builder()
+            ->select($this->primaryKey)
+            ->where('status', 'queued')
+            ->limit(1)
+            ->get()
+            ->getFirstRow() !== null;
     }
 }

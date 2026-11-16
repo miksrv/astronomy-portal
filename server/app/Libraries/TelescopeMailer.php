@@ -7,7 +7,7 @@ use App\Models\UsersModel;
 
 /**
  * E-mails to a job's author (FEAT-30 §4.9), queued in `email_queue` and sent by
- * `system:send-email`. In the author's language. Failures are logged, never thrown: a lost
+ * `system:cron`. In the author's language. Failures are logged, never thrown: a lost
  * notification must never undo an approval or a status change.
  */
 class TelescopeMailer
