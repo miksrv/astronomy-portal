@@ -1,10 +1,11 @@
 """Agent main loop.
 
 Every 5 s a snapshot is built locally (cheap); it is pushed to the portal every
-`push_interval` seconds (60 by default), and additionally at once when an important transition
-happens (roof opened/closed, weather alert, INDI up/down, job change) — at most one such extra
-push per `extra_push_min_gap` seconds. Events that couldn't be delivered are kept (bounded) and
-sent with the next successful push.
+`push_interval` seconds (60 by default). An important transition (roof opened/closed, weather
+alert, INDI up/down, job change) is pushed earlier, as soon as `min_push_gap` seconds (60) have
+passed since the last push. No two pushes are ever closer than `min_push_gap`, so the site gets
+at most one request a minute whatever happens. Events that couldn't be delivered are kept
+(bounded) and sent with the next successful push.
 
     python -m observatory_agent --config /etc/observatory-agent/config.toml
     python -m observatory_agent --config config.toml --once     # print one snapshot, send nothing
@@ -21,7 +22,9 @@ import time
 
 from . import __version__, host
 from .config import Config, load
+from .ekos import EkosClient
 from .indi import IndiClient
+from .jobs import JobsRunner
 from .portal import PortalClient, PortalError
 from .snapshot import IMPORTANT_EVENTS, SnapshotBuilder, diff_events, utc_now
 
@@ -40,16 +43,26 @@ class Agent:
     def __init__(self, config: Config) -> None:
         self.config = config
         self.indi = IndiClient(config.indi_host, config.indi_port)
-        self.builder = SnapshotBuilder(config.roles)
+        self.builder = SnapshotBuilder(config.roles, (config.focal_length, config.aperture))
         self.portal = PortalClient(config.portal_url, config.token)
         self.pending: list[dict] = [{"type": "agent_started", "time": utc_now(), "payload": {"version": __version__}}]
         self.previous: dict | None = None
         self.last_push = 0.0
-        self.last_extra_push = 0.0
+        # An important event is waiting to be pushed early (as soon as the gap allows)
+        self.urgent = False
         self.profile: str | None = None
         self.scheduler: dict | None = None
         self._scheduler_misses = 0
         self._last_host_poll = 0.0
+        # Telescope jobs (FEAT-30 phase 2): off unless [jobs] enabled = true
+        self.jobs: JobsRunner | None = None
+        self._jobs_task: asyncio.Task | None = None
+        if config.jobs.enabled:
+            ekos = EkosClient(config.ekos_container, config.ekos_user) if config.ekos_enabled else None
+            try:
+                self.jobs = JobsRunner(config, self.portal, ekos)
+            except Exception:  # noqa: BLE001 — e.g. state.db can't be opened: the status push goes on
+                log.exception("telescope jobs disabled: the jobs runner could not start")
 
     async def _poll_host(self) -> None:
         """indiweb profile + Ekos Scheduler, at most every `ekos_interval` seconds."""
@@ -76,9 +89,22 @@ class Agent:
             agent_version=__version__,
         )
 
+    def _start_jobs_step(self, snapshot: dict) -> None:
+        """One job step in a worker thread at a time; it never delays the status push."""
+        if self.jobs is None or (self._jobs_task is not None and not self._jobs_task.done()):
+            return
+
+        def finished(task: asyncio.Task) -> None:
+            if not task.cancelled() and task.exception() is not None:
+                log.error("jobs step failed", exc_info=task.exception())
+
+        self._jobs_task = asyncio.create_task(asyncio.to_thread(self.jobs.step, snapshot))
+        self._jobs_task.add_done_callback(finished)
+
     async def tick(self) -> None:
         await self._poll_host()
         snapshot = self.build()
+        self._start_jobs_step(snapshot)
         events = diff_events(self.previous, snapshot)
         self.previous = snapshot
         for event in events:
@@ -86,11 +112,14 @@ class Agent:
         self.pending.extend(events)
         del self.pending[:-MAX_PENDING_EVENTS]
 
+        if any(e["type"] in IMPORTANT_EVENTS for e in events):
+            self.urgent = True
+
         now = time.monotonic()
-        due = now - self.last_push >= self.config.push_interval
-        important = any(e["type"] in IMPORTANT_EVENTS for e in events)
-        extra = important and now - self.last_extra_push >= self.config.extra_push_min_gap
-        if not (due or extra):
+        since = now - self.last_push
+        if since < self.config.min_push_gap:
+            return
+        if not (since >= self.config.push_interval or self.urgent):
             return
 
         batch = self.pending[:MAX_EVENTS_PER_PUSH]
@@ -103,8 +132,7 @@ class Agent:
         log.debug("pushed snapshot, %d events", len(batch))
         del self.pending[: len(batch)]
         self.last_push = now
-        if extra and not due:
-            self.last_extra_push = now
+        self.urgent = False
 
     async def run(self, stop: asyncio.Event) -> None:
         indi_task = asyncio.create_task(self.indi.run_forever(stop))
@@ -126,6 +154,8 @@ class Agent:
                 except asyncio.TimeoutError:
                     pass
         finally:
+            if self._jobs_task is not None:
+                await asyncio.gather(self._jobs_task, return_exceptions=True)
             await indi_task
 
 

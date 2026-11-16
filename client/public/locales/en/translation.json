@@ -105,6 +105,14 @@
                 "floating-title": "Leave a review about the event",
                 "floating-close": "Dismiss the review reminder"
             },
+            "simbad-panel": {
+                "error": "SIMBAD is not responding",
+                "aliases": "Other designations:",
+                "filled": "Filled in: {{fields}}",
+                "offset": "SIMBAD has {{ra}} {{dec}}, {{offset}}° from the entered coordinates",
+                "use-coordinates": "Use SIMBAD coordinates",
+                "lookup": "Look up in SIMBAD"
+            },
             "snackbar-stack": {
                 "close": "Close notification",
                 "label": "Notifications"
@@ -252,6 +260,7 @@
         "stargazing-history": "Event archive",
         "observatory": "Observatory",
         "observatory-orenburg": "About the observatory",
+        "observatory-jobs": "Telescope jobs",
         "observatory-orenburg-weather": "Weather",
         "observatory-history": "History",
         "star-map": "Star map",

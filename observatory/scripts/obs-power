@@ -2,7 +2,8 @@
 # Observatory power control via the RODOS-18 Ethernet relay.
 #
 #   obs-power status            show every channel we manage
-#   obs-power on                12 V supply, then each device, 3 s apart
+#   obs-power on                12 V supply, then each device, 3 s apart, then 15 s
+#                               for the devices to appear on USB before Ekos connects them
 #   obs-power off [--force]     each device, then the 12 V supply, 3 s apart;
 #                               refuses unless INDI reports mount AND roof parked
 #                               (--force skips that check: manual use only)
@@ -19,6 +20,9 @@
 set -uo pipefail
 
 STEP_DELAY=3
+# After switching anything on: USB devices (camera, filter wheel, focuser) need a few seconds to
+# enumerate, and Ekos connects them right after the Scheduler's startup script returns
+SETTLE_DELAY=15
 INDI_HOST=localhost
 INDI_PORT=7624
 MOUNT_PARK="EQMod Mount.TELESCOPE_PARK.PARK"
@@ -139,6 +143,10 @@ cmd_on() {
         [[ $first == 0 ]] && sleep "$STEP_DELAY"
         ensure "$ch" on && first=0
     done
+    if [[ $first == 0 ]]; then
+        log "ждём ${SETTLE_DELAY} с, пока устройства появятся на USB"
+        sleep "$SETTLE_DELAY"
+    fi
     log "=== включено"
 }
 

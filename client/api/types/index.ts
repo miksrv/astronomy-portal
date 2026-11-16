@@ -13,6 +13,7 @@ export * as Relay from './relay'
 export * as Roles from './roles'
 export * as SiteMap from './sitemap'
 export * as Statistic from './statistic'
+export * as Telescope from './telescope'
 export * as Users from './users'
 export * as Weather from './weather'
 

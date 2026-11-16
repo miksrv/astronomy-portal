@@ -16,7 +16,8 @@ equipment. Everything below exists to prevent that.
 3. **Never send a motion or park command to read a state.** To read the roof or mount state,
    read INDI properties (`indi_getprop`) or reconnect the driver.
 4. **Stop the INDI server while people work on site** (`curl -X POST localhost:8624/api/server/stop`):
-   WatchDog could otherwise fire a park/close sequence.
+   WatchDog could otherwise fire a park/close sequence. The indiweb profile starts INDI at boot
+   (autostart), so after a reboot of the PC stop it again.
 5. **Cut mount power only when the mount is parked.** A mount that loses power while unparked
    loses its position, can't be parked, and then the roof can't close.
 6. Every roof or mount motion during tests is announced first, someone watches the webcam,

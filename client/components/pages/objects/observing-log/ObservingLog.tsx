@@ -3,7 +3,7 @@ import { Button, Container, Icon, Message, Skeleton, Table, TableColumnProps } f
 
 import { useTranslation } from 'next-i18next/pages'
 
-import { FilterTag } from '@/components/common/filter-tag'
+import { FilterTag, FilterTagList } from '@/components/common/filter-tag'
 import { MoonPhaseIcon } from '@/components/common/moon-phase-icon'
 import { formatCalendarDate, formatExposure } from '@/utils/dates'
 import { FILTERS_ORDER } from '@/utils/filters'
@@ -224,16 +224,16 @@ export const ObservingLog: React.FC<ObservingLogProps> = ({ nights, loading, err
                                     {formatCalendarDate(night.date, i18n.language, { weekday: 'short' })}
                                 </span>
                             </span>
-                            <span className={styles.filters}>
+                            <FilterTagList className={styles.filters}>
                                 {FILTERS_ORDER.filter((filter) => night.filters[filter]).map((filter) => (
                                     <FilterTag
                                         key={filter}
                                         filter={filter}
                                     >
-                                        {` × ${night.filters[filter]}`}
+                                        {`× ${night.filters[filter]}`}
                                     </FilterTag>
                                 ))}
-                            </span>
+                            </FilterTagList>
                             <span className={styles.conditions}>
                                 <span>
                                     <MoonPhaseIcon date={`${night.date}T19:00:00Z`} />

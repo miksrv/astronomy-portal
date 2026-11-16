@@ -8,5 +8,14 @@ export { ObservingSessions } from './observing-sessions'
 export { RelayList } from './relay-list'
 export { SkyCard } from './sky-card'
 export { TelescopeActivity } from './telescope-activity'
+export {
+    JobCard,
+    JobDetails,
+    JobForm,
+    JobsList,
+    JobStatusBadge,
+    TelescopeWidget,
+    useJobActions
+} from './telescope-jobs'
 export { WeatherCard } from './weather-card'
 export { WidgetChart } from './widget-chart'

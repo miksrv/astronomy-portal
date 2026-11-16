@@ -6,11 +6,13 @@ url = "https://api.example.com"
 # File with the agent token (= observatory.agentToken in the portal's server/.env), mode 600.
 # The OBSERVATORY_AGENT_TOKEN environment variable overrides it.
 token_file = "/etc/observatory-agent/token"
-# Regular status push, seconds
+# Regular status push, seconds. Raising it (say to 300) needs Observatory::ONLINE_SECONDS on the
+# portal raised above it too (now 180), or the site shows "no link" between pushes
 push_interval = 60
-# Important transitions (roof, weather alert, INDI up/down, job) are pushed at once,
-# but not more often than this, seconds
-extra_push_min_gap = 60
+# No two pushes closer than this, seconds: the site never gets more than one request per gap.
+# Important transitions (roof, weather alert, INDI up/down, job) go out as soon as it allows,
+# even when push_interval is longer
+min_push_gap = 60
 
 [indi]
 host = "localhost"
@@ -28,6 +30,12 @@ interval = 30
 # Where Ekos saves frames (free space is reported to admins)
 dir = "/home/mik/fits"
 
+[optics]
+# The main telescope, mm. The camera driver learns it from the Ekos optical train only while Ekos
+# is connected; until then the site shows these (and the field of view from them)
+focal_length = 1200
+aperture = 254
+
 # INDI device name per role (defaults shown)
 [devices]
 mount = "EQMod Mount"
@@ -38,3 +46,39 @@ focuser = "ZWO EAF"
 roof = "Roll Roof"
 weather = "Weather Watcher"
 watchdog = "WatchDog"
+
+# --- Telescope jobs from the site (FEAT-30 phase 2) -----------------------------------------
+# Off by default. With `enabled` the agent syncs jobs, counts their frames, builds tonight's plan,
+# writes the Ekos files and shows the plan on the site. It never starts the Ekos Scheduler.
+[jobs]
+enabled = false
+# Load tonight's schedule into the idle Ekos Scheduler (only when every job in it is the agent's).
+# Leave off until the generated files have been checked by eye
+load_into_ekos = false
+state_db = "/var/lib/observatory-agent/state.db"
+# The agent's folder for .esq/.esl on the host, and the same folder inside the KStars container
+ekos_dir = "/home/mik/kstars-desktop/config/agent"
+ekos_dir_container = "/config/agent"
+ekos_profile = "AstroLab"
+# Must exist in Ekos: an unknown train makes KStars open a modal dialog
+optical_train = "Primary"
+steps = ["Track", "Focus", "Align", "Guide"]
+sync_interval = 300
+frames_interval = 30
+plan_hours_before_dusk = 2
+
+# The observatory's position: fill in on the host only, never commit real values
+[site]
+latitude = 0.0
+longitude = 0.0    # east-positive
+timezone = "UTC"   # the site's IANA zone (the observing night runs local noon → noon)
+
+# What every generated sequence uses (the observatory's choice, not the job's)
+[camera]
+width = 9576       # the full sensor: Ekos keeps the camera's current subframe when this is 0
+height = 6388
+gain = 150
+offset = 50
+temperature = -10  # cooling target, °C
+format = ""        # CCD_CAPTURE_FORMAT label; empty = keep the camera's
+binning = 1

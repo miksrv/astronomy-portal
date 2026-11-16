@@ -3,6 +3,7 @@ import React from 'react'
 import { useTranslation } from 'next-i18next/pages'
 
 import { ApiModel } from '@/api'
+import { Fact, FactList } from '@/components/ui'
 import { getSolvedField } from '@/utils/astrometry'
 import { formatDECShort, formatRAShort } from '@/utils/coordinates'
 import { formatCalendarDate, formatExposure } from '@/utils/dates'
@@ -64,82 +65,61 @@ export const PhotoSetup: React.FC<PhotoSetupProps> = ({ photo, equipment, optics
         <div className={styles.photoSetup}>
             <div className={styles.group}>
                 <h3 className={styles.groupTitle}>{t('components.pages.photos.photo-setup.capture', 'Съёмка')}</h3>
-                <dl className={styles.rows}>
+                <FactList>
                     {photo.date && (
-                        <div>
-                            <dt>{t('components.pages.photos.photo-setup.date', 'Дата')}</dt>
-                            <dd>
-                                <time dateTime={photo.date.slice(0, 10)}>
-                                    {formatCalendarDate(photo.date, i18n.language)}
-                                </time>
-                            </dd>
-                        </div>
+                        <Fact label={t('components.pages.photos.photo-setup.date', 'Дата')}>
+                            <time dateTime={photo.date.slice(0, 10)}>
+                                {formatCalendarDate(photo.date, i18n.language)}
+                            </time>
+                        </Fact>
                     )}
                     {exposure && (
-                        <div>
-                            <dt>{t('components.pages.photos.photo-setup.exposure', 'Выдержка')}</dt>
-                            <dd>{exposure}</dd>
-                        </div>
+                        <Fact label={t('components.pages.photos.photo-setup.exposure', 'Выдержка')}>{exposure}</Fact>
                     )}
                     {!!photo.statistic?.frames && (
-                        <div>
-                            <dt>{t('components.pages.photos.photo-setup.frames', 'Кадров')}</dt>
-                            <dd>{photo.statistic.frames.toLocaleString(i18n.language)}</dd>
-                        </div>
+                        <Fact label={t('components.pages.photos.photo-setup.frames', 'Кадров')}>
+                            {photo.statistic.frames.toLocaleString(i18n.language)}
+                        </Fact>
                     )}
                     {solved && (
-                        <div>
-                            <dt>{t('components.pages.photos.photo-setup.center', 'Центр поля')}</dt>
-                            <dd>
-                                {formatRAShort(solved.ra)} {formatDECShort(solved.dec)}
-                            </dd>
-                        </div>
+                        <Fact label={t('components.pages.photos.photo-setup.center', 'Центр поля')}>
+                            {formatRAShort(solved.ra)} {formatDECShort(solved.dec)}
+                        </Fact>
                     )}
                     {sky && (
-                        <div>
-                            <dt>{t('components.pages.photos.photo-setup.field', 'Поле зрения')}</dt>
-                            <dd>{`${formatAngle(sky.width, i18n.language)} × ${formatAngle(sky.height, i18n.language)}`}</dd>
-                        </div>
+                        <Fact
+                            label={t('components.pages.photos.photo-setup.field', 'Поле зрения')}
+                        >{`${formatAngle(sky.width, i18n.language)} × ${formatAngle(sky.height, i18n.language)}`}</Fact>
                     )}
                     {sky && (
-                        <div>
-                            <dt>{t('components.pages.photos.photo-setup.scale', 'Масштаб')}</dt>
-                            <dd>
-                                {t('components.pages.photos.photo-setup.scale-value', '{{value}}″ на пиксель', {
-                                    value: sky.scale.toLocaleString(i18n.language, {
-                                        maximumFractionDigits: 2
-                                    })
-                                })}
-                            </dd>
-                        </div>
+                        <Fact label={t('components.pages.photos.photo-setup.scale', 'Масштаб')}>
+                            {t('components.pages.photos.photo-setup.scale-value', '{{value}}″ на пиксель', {
+                                value: sky.scale.toLocaleString(i18n.language, {
+                                    maximumFractionDigits: 2
+                                })
+                            })}
+                        </Fact>
                     )}
                     {solved && (
-                        <div>
-                            <dt>{t('components.pages.photos.photo-setup.rotation', 'Поворот')}</dt>
-                            <dd>
-                                {t('components.pages.photos.photo-setup.rotation-value', '{{value}}° от севера', {
-                                    value: solved.rotation
-                                })}
-                            </dd>
-                        </div>
+                        <Fact label={t('components.pages.photos.photo-setup.rotation', 'Поворот')}>
+                            {t('components.pages.photos.photo-setup.rotation-value', '{{value}}° от севера', {
+                                value: solved.rotation
+                            })}
+                        </Fact>
                     )}
                     {!!optics?.focalLength && (
-                        <div>
-                            <dt>{t('components.pages.photos.photo-setup.focal-length', 'Фокус')}</dt>
-                            <dd>
-                                {t('components.pages.photos.photo-setup.millimetres', '{{value}} мм', {
-                                    value: optics.focalLength
-                                })}
-                                {!!focalRatio &&
-                                    `, f/${focalRatio.toLocaleString(i18n.language, { maximumFractionDigits: 1 })}`}
-                            </dd>
-                        </div>
+                        <Fact label={t('components.pages.photos.photo-setup.focal-length', 'Фокус')}>
+                            {t('components.pages.photos.photo-setup.millimetres', '{{value}} мм', {
+                                value: optics.focalLength
+                            })}
+                            {!!focalRatio &&
+                                `, f/${focalRatio.toLocaleString(i18n.language, { maximumFractionDigits: 1 })}`}
+                        </Fact>
                     )}
-                    <div>
-                        <dt>{t('components.pages.photos.photo-setup.views', 'Просмотров')}</dt>
-                        <dd>{(Number(photo.views) || 0).toLocaleString(i18n.language)}</dd>
-                    </div>
-                </dl>
+                    <Fact label={t('components.pages.photos.photo-setup.views', 'Просмотров')}>
+                        {(Number(photo.views) || 0).toLocaleString(i18n.language)}
+                    </Fact>
+                </FactList>
             </div>
 
             {!!sorted.length && (
@@ -147,17 +127,17 @@ export const PhotoSetup: React.FC<PhotoSetupProps> = ({ photo, equipment, optics
                     <h3 className={styles.groupTitle}>
                         {t('components.pages.photos.photo-setup.equipment', 'Оборудование')}
                     </h3>
-                    <dl className={styles.rows}>
+                    <FactList>
                         {sorted.map((item) => (
-                            <div
+                            <Fact
                                 key={item.id}
                                 title={item.specifications || undefined}
+                                label={typeLabels[typeOf(item)]}
                             >
-                                <dt>{typeLabels[typeOf(item)]}</dt>
-                                <dd>{[item.brand, item.model].filter(Boolean).join(' ')}</dd>
-                            </div>
+                                {[item.brand, item.model].filter(Boolean).join(' ')}
+                            </Fact>
                         ))}
-                    </dl>
+                    </FactList>
                 </div>
             )}
         </div>

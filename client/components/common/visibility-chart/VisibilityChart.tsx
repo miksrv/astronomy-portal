@@ -41,6 +41,11 @@ interface VisibilityChartProps {
     dec: number
     /** The object's name for the legend and the chart's text alternative */
     name: string
+    /**
+     * Inside another card (the job page's target card): no card of its own — the title and the
+     * place as a plain header row over the chart, so a card is never nested in a card
+     */
+    bare?: boolean
     className?: string
 }
 
@@ -49,7 +54,7 @@ interface VisibilityChartProps {
  * the Moon's, the dark hours shaded and the best moment marked. Drawn on the client only, as
  * it depends on the current time; the frame keeps its size until then.
  */
-export const VisibilityChart: React.FC<VisibilityChartProps> = ({ ra, dec, name, className }) => {
+export const VisibilityChart: React.FC<VisibilityChartProps> = ({ ra, dec, name, bare, className }) => {
     const { t, i18n } = useTranslation()
     const now = useNow(5 * 60_000)
     // Two charts on one page must not share a gradient id
@@ -83,16 +88,15 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ ra, dec, name,
     const bestTime = formatObservatoryTime(chart?.visibility.time, i18n.language)
     const bestAltitude = Math.round(chart?.visibility.altitude ?? 0)
 
-    return (
-        <Container
-            className={cn(styles.visibilityChart, className)}
-            header={
-                <h3 className={styles.title}>
-                    {t('components.common.visibility-chart.title', 'Высота над горизонтом этой ночью')}
-                </h3>
-            }
-            action={<span className={styles.meta}>{t('components.common.visibility-chart.place', 'Оренбург')}</span>}
-        >
+    const title = (
+        <h3 className={styles.title}>
+            {t('components.common.visibility-chart.title', 'Высота над горизонтом этой ночью')}
+        </h3>
+    )
+    const place = <span className={styles.meta}>{t('components.common.visibility-chart.place', 'Оренбург')}</span>
+
+    const content = (
+        <>
             <div className={styles.frame}>
                 {chart && (
                     <svg
@@ -261,6 +265,24 @@ export const VisibilityChart: React.FC<VisibilityChartProps> = ({ ra, dec, name,
             ) : (
                 <Skeleton className={styles.noteSkeleton} />
             )}
+        </>
+    )
+
+    return bare ? (
+        <div className={cn(styles.visibilityChart, className)}>
+            <div className={styles.bareHeader}>
+                {title}
+                {place}
+            </div>
+            {content}
+        </div>
+    ) : (
+        <Container
+            className={cn(styles.visibilityChart, className)}
+            header={title}
+            action={place}
+        >
+            {content}
         </Container>
     )
 }

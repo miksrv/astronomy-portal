@@ -91,3 +91,25 @@
 
 .equipmentDescription
     +type.secondary
+
+// ---- Telescope jobs (/observatory/jobs/…)
+// "Все / Мои" before "Только активные" on the list's heading line: two filters, a gap between
+.jobsScope
+    margin-right: var(--space-3)
+
+// The job page's lead: status badges, then the author and the date
+.jobLead
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: var(--space-2)
+
+.jobLeadMeta
+    +type.secondary
+
+.jobSkeleton
+    height: 420px
+    border-radius: var(--radius-xl)
+
+.signInText
+    margin: 0 0 var(--space-3)

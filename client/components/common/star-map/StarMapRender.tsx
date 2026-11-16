@@ -299,7 +299,7 @@ const StarMapRender: React.FC<StarMapProps> = ({
             )}
         >
             {!showSettings && viewControls && (
-                // The observatory's map: zoom and "back to the telescope", nothing else
+                // A small map (the observatory's, a telescope job's): zoom, "back to the telescope", the full atlas
                 <div className={styles.mapRail}>
                     <div
                         className={styles.viewControls}
@@ -334,6 +334,17 @@ const StarMapRender: React.FC<StarMapProps> = ({
                                 aria-label={viewControls.toTelescope}
                                 className={styles.railButton}
                                 onClick={centerOnTelescope}
+                            />
+                        )}
+                        {viewControls.openFull && (
+                            <Button
+                                icon={'External'}
+                                size={'small'}
+                                mode={'secondary'}
+                                link={viewControls.openFull.href}
+                                title={viewControls.openFull.label}
+                                aria-label={viewControls.openFull.label}
+                                className={styles.railButton}
                             />
                         )}
                     </div>

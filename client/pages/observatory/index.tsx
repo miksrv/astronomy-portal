@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { JsonLdScript } from 'next-seo'
@@ -19,6 +20,7 @@ import {
     WeatherCard
 } from '@/components/pages/observatory'
 import { useNow } from '@/hooks/useNow'
+import { TELESCOPE_JOBS_ENABLED } from '@/utils/constants'
 import { createPageUrl } from '@/utils/helpers'
 import { removeSSRQueryCache } from '@/utils/ssrCache'
 import { initSSRLocale } from '@/utils/ssrLocale'
@@ -26,6 +28,11 @@ import { TelescopeNight, toTelescopeNights } from '@/utils/telescopeActivity'
 import { OBSERVATORY_LAT, OBSERVATORY_LON } from '@/utils/visibility'
 
 import styles from './styles.module.sass'
+
+// Its own chunk: the jobs' cards and styles stay off this page while the feature is switched off
+const TelescopeWidget = dynamic(() =>
+    import('@/components/pages/observatory/telescope-jobs/TelescopeWidget').then((m) => m.TelescopeWidget)
+)
 
 /** The weather station reports every few minutes: poll at its pace, not faster */
 const WEATHER_POLLING_MS = 60_000
@@ -177,6 +184,8 @@ const ObservatoryPage: NextPage<ObservatoryPageProps> = ({ nights }) => {
                     error={dailyError && hourlyError}
                 />
             </div>
+
+            {TELESCOPE_JOBS_ENABLED && <TelescopeWidget />}
 
             <h2 className={styles.sectionTitle}>{t('pages.observatory.state', 'Состояние оборудования')}</h2>
             <ObservatoryStatus

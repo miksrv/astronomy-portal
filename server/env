@@ -136,6 +136,8 @@ smtp.user = ''
 smtp.pass = ''
 smtp.crypto = 'ssl'
 smtp.senderName = ''
+# Seconds for the SMTP connection and each reply (default 5; raise it where the TLS handshake is slow)
+# smtp.timeout = 5
 
 #--------------------------------------------------------------------
 # WEB PUSH (VAPID)

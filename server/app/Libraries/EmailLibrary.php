@@ -18,8 +18,9 @@ class EmailLibrary
             'SMTPPass'    => getenv('smtp.pass'),
             'SMTPPort'    => (int) getenv('smtp.port'),
             // A synchronous send blocking the login-request endpoint must not
-            // let a hung mail server stall that request indefinitely.
-            'SMTPTimeout' => 5,
+            // let a hung mail server stall that request indefinitely. `smtp.timeout`
+            // raises it where the TLS handshake is slow (a home connection: ~5 s at times)
+            'SMTPTimeout' => (int) getenv('smtp.timeout') ?: 5,
             'mailType'    => 'html',
             'SMTPCrypto'  => 'ssl',
             'charset'     => 'UTF-8',

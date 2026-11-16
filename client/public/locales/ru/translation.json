@@ -105,6 +105,14 @@
                 "floating-title": "Оставьте отзыв о мероприятии",
                 "floating-close": "Закрыть напоминание об отзыве"
             },
+            "simbad-panel": {
+                "error": "SIMBAD не отвечает",
+                "aliases": "Другие обозначения:",
+                "filled": "Подставлено: {{fields}}",
+                "offset": "В SIMBAD координаты {{ra}} {{dec}} — в {{offset}}° от введённых",
+                "use-coordinates": "Взять координаты SIMBAD",
+                "lookup": "Найти в SIMBAD"
+            },
             "snackbar-stack": {
                 "close": "Закрыть уведомление",
                 "label": "Уведомления"
@@ -270,6 +278,7 @@
         "stargazing-history": "Архив мероприятий",
         "observatory": "Обсерватория",
         "observatory-orenburg": "Об обсерватории",
+        "observatory-jobs": "Задания телескопа",
         "observatory-orenburg-weather": "Погода",
         "observatory-history": "История",
         "star-map": "Звёздная карта",

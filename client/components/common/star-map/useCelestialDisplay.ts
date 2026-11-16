@@ -1,6 +1,6 @@
 import { RefObject, useCallback, useEffect, useMemo, useRef } from 'react'
 
-import { readZoomFactor, withoutAnimations } from './celestialApi'
+import { keepCanvasCssSize, readZoomFactor, withoutAnimations } from './celestialApi'
 import { customConfig, defaultConfig } from './config'
 import {
     LIVE_TICK_HIDE_GRACE_MS,
@@ -320,6 +320,7 @@ export const useCelestialDisplay = ({
 
             nowRef.current = new Date()
             Celestial.display(localConfig)
+            keepCanvasCssSize()
 
             // Fill portrait screens with sky instead of a letterboxed band (no-op on
             // landscape/desktop, where the canvas already overflows the container)
@@ -379,6 +380,8 @@ export const useCelestialDisplay = ({
             if (!initializedRef.current) {
                 initializedRef.current = true
                 Celestial.addCallback(() => {
+                    keepCanvasCssSize()
+
                     // Runs at the very end of every Celestial redraw — the only spot
                     // where custom drawing lands on top of the daylight/horizon fills
                     drawCustomLayersRef.current()

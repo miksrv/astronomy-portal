@@ -186,10 +186,10 @@ On
     </newNumberVector>
     <newNumberVector device="ZWO CCD ASI6200MM Pro" name="SCOPE_INFO">
         <oneNumber name="FOCAL_LENGTH">
-      1000
+      1200
         </oneNumber>
         <oneNumber name="APERTURE">
-      200
+      254
         </oneNumber>
     </newNumberVector>
     <newSwitchVector device="ZWO CCD ASI6200MM Pro" name="CCD_COOLER">

@@ -4,7 +4,7 @@ import { Button, Container, Icon, Skeleton } from 'simple-react-ui-kit'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
-import { StatusBadge } from '@/components/ui'
+import { Fact, FactList, StatusBadge } from '@/components/ui'
 import { useNow } from '@/hooks/useNow'
 import { formatDECShort, formatRAShort } from '@/utils/coordinates'
 import { formatExposure } from '@/utils/dates'
@@ -98,32 +98,28 @@ export const PhotoObjectCard: React.FC<PhotoObjectCardProps> = ({ object }) => {
                 </div>
             )}
 
-            <dl className={styles.facts}>
+            <FactList layout={'split'}>
                 {object.constellation && (
-                    <div>
-                        <dt>{t('components.pages.photos.photo-object-card.constellation', 'Созвездие')}</dt>
-                        <dd>{object.constellation}</dd>
-                    </div>
+                    <Fact label={t('components.pages.photos.photo-object-card.constellation', 'Созвездие')}>
+                        {object.constellation}
+                    </Fact>
                 )}
                 {hasCoordinates && (
-                    <div>
-                        <dt>{t('components.pages.photos.photo-object-card.coordinates', 'Координаты')}</dt>
-                        <dd>{`${formatRAShort(object.ra)}, ${formatDECShort(object.dec)}`}</dd>
-                    </div>
+                    <Fact
+                        label={t('components.pages.photos.photo-object-card.coordinates', 'Координаты')}
+                    >{`${formatRAShort(object.ra)}, ${formatDECShort(object.dec)}`}</Fact>
                 )}
                 {!!archive.length && (
-                    <div>
-                        <dt>{t('components.pages.photos.photo-object-card.archive', 'В FITS-архиве')}</dt>
-                        <dd>{archive.join(' · ')}</dd>
-                    </div>
+                    <Fact label={t('components.pages.photos.photo-object-card.archive', 'В FITS-архиве')}>
+                        {archive.join(' · ')}
+                    </Fact>
                 )}
                 {(object.photosCount ?? 0) > 1 && (
-                    <div>
-                        <dt>{t('components.pages.photos.photo-object-card.photos', 'Снимков объекта')}</dt>
-                        <dd>{object.photosCount?.toLocaleString(i18n.language)}</dd>
-                    </div>
+                    <Fact label={t('components.pages.photos.photo-object-card.photos', 'Снимков объекта')}>
+                        {object.photosCount?.toLocaleString(i18n.language)}
+                    </Fact>
                 )}
-            </dl>
+            </FactList>
 
             <Link
                 href={`/objects/${object.name}`}

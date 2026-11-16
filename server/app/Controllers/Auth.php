@@ -216,6 +216,16 @@ class Auth extends BaseApiController
             $siteUrl = rtrim(getenv('app.siteUrl'), '/');
             $link    = $siteUrl . '/auth?token=' . $rawToken . ($returnPath !== null ? '&return=' . rawurlencode($returnPath) : '');
 
+            // A developer's machine: the link in the log too, so signing in never waits for
+            // the mail (SMTP from home can fail). Never in production — the link is a password
+            if (ENVIRONMENT === 'development') {
+                @file_put_contents(
+                    WRITEPATH . 'logs/magic-links.log',
+                    date('Y-m-d H:i:s') . " {$email} {$link}\n",
+                    FILE_APPEND
+                );
+            }
+
             try {
                 $locale  = $this->request->getLocale();
                 $subject = lang('Auth.magicLinkEmailSubject', [], $locale);

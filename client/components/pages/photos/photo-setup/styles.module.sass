@@ -19,29 +19,3 @@
     +type.overline
     margin: 0
     color: var(--text-color-secondary)
-
-// Label-value rows: the label on the left, the value on the right
-.rows
-    display: grid
-    margin: 0
-
-    > div
-        display: grid
-        grid-template-columns: 130px minmax(0, 1fr)
-        align-items: baseline
-        gap: var(--space-2)
-        padding: var(--space-2) 0
-        border-bottom: 1px solid var(--border)
-
-        &:last-child
-            border-bottom: 0
-
-    dt
-        +type.caption
-
-    dd
-        +type.secondary
-        margin: 0
-        color: var(--text-color-primary)
-        overflow-wrap: anywhere
-

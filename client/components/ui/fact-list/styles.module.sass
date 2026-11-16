@@ -1,0 +1,39 @@
+@use '../../../styles/typography' as type
+
+.factList
+    margin: 0
+
+    dt
+        +type.secondary
+
+    dd
+        +type.secondary
+        margin: 0
+        min-width: 0
+        color: var(--text-color-primary)
+        font-variant-numeric: tabular-nums
+        overflow-wrap: anywhere
+
+// The labels in one column: the rows' cells join the list's grid, so every value lines up
+.columns
+    display: grid
+    grid-template-columns: max-content minmax(0, 1fr)
+    gap: var(--space-2) var(--space-6)
+
+    .fact
+        display: contents
+
+// The label on the left, the value on the right
+.split
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+
+    .fact
+        display: flex
+        align-items: baseline
+        justify-content: space-between
+        gap: var(--space-3)
+
+    dd
+        text-align: right

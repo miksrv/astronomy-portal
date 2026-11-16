@@ -43,6 +43,7 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
                 title={title}
                 links={[{ link: '/stargazing', text: t('pages.stargazing.title', 'Астровыезды') }]}
                 currentPage={title}
+                lead={description}
                 actions={[
                     {
                         key: 'create',
@@ -53,8 +54,6 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
                     }
                 ]}
             />
-
-            {description}
 
             <EventsList
                 events={events}

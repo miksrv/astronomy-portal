@@ -1,47 +1,72 @@
 @use '../../../styles/mixins'
 
-// The "⋯" in the top right corner of the page header. It sits on the breadcrumbs line, so its
-// negative block margins (a 28px target over a 12px text line) keep that line as tall as for a
-// guest: the title does not move down for an editor
+// "Действия ▾": the kit's primary button at the normal (medium, 36px) size — a filled indigo
+// plate, white text, the chevron of the app bar's user menu. Where it goes is the page's business
+// (the toolbar puts it on the title's line, a hero in its corner)
 .inline
     flex-shrink: 0
-    margin-block: -8px
+
+// A single action over a photo: the button itself, kept apart from a bright sky
+.overlayButton
+    box-shadow: var(--shadow-md)
 
 .trigger
-    display: flex
+    display: inline-flex
     align-items: center
-    justify-content: center
-    width: var(--size-small)
-    height: var(--size-small)
+    gap: var(--space-1)
+    height: var(--size-medium)
+    padding: 0 var(--space-3) 0 var(--space-4)
     border-radius: var(--radius-md)
-    color: var(--text-color-secondary)
-    transition: background-color var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease)
-
-    svg
-        width: 20px
-        height: 20px
-        fill: currentColor
+    background-color: var(--button-primary-background)
+    color: var(--button-primary-color)
+    font-size: var(--font-size)
+    font-weight: var(--font-weight-medium)
+    white-space: nowrap
+    transition: background-color var(--duration-fast) var(--ease)
 
     &:hover
-        background-color: var(--surface-2)
-        color: var(--text-color-primary)
+        background-color: var(--button-primary-background-hover)
 
     [aria-expanded='true'] > &
-        background-color: var(--surface-2)
-        color: var(--text-color-primary)
+        background-color: var(--button-primary-background-active)
 
-    // Over a photo: legible on any part of the sky
+    @media (prefers-reduced-motion: reduce)
+        transition: none
+
+    // Over a photo: the same button, a shadow keeps it apart from a bright sky
     &.overlay
-        width: var(--size-medium)
-        height: var(--size-medium)
-        background-color: rgb(0 0 0 / 55%)
-        color: #fff
-        backdrop-filter: blur(4px)
+        box-shadow: var(--shadow-md)
 
-        &:hover,
-        [aria-expanded='true'] > &
-            background-color: rgb(0 0 0 / 75%)
-            color: #fff
+// A single action shown as the button itself: the plate of the trigger, a link inside
+.single
+    padding: 0 var(--space-4) 0 var(--space-3)
+    text-decoration: none
+
+    &:hover
+        color: var(--button-primary-color)
+
+    &:focus-visible
+        outline: var(--focus-outline)
+        outline-offset: 2px
+
+    svg
+        flex-shrink: 0
+        width: 18px
+        height: 18px
+        fill: currentColor
+
+.arrow
+    flex-shrink: 0
+    width: 18px
+    height: 18px
+    fill: currentColor
+    transition: transform var(--duration-fast) var(--ease)
+
+    [aria-expanded='true'] > .trigger &
+        transform: rotate(180deg)
+
+    @media (prefers-reduced-motion: reduce)
+        transition: none
 
 // The same rows as the user menu of the app bar
 .menu

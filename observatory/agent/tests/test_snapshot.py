@@ -1,4 +1,5 @@
 import copy
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from observatory_agent.config import DEFAULT_ROLES
@@ -130,3 +131,21 @@ def test_parse_scheduler_reply():
     assert parse_scheduler_reply(reply) == {"state": "running", "job": "M31"}
     assert parse_scheduler_reply(reply.replace('"M31"', '""').replace("int32 2", "int32 0")) == {"state": "idle", "job": None}
     assert parse_scheduler_reply("Error org.freedesktop.DBus.Error.ServiceUnknown") is None
+
+
+def test_optics_from_the_config_when_indi_has_none():
+    tree = PropertyTree()
+    builder = SnapshotBuilder(DEFAULT_ROLES, (1200.0, 254.0))
+    tree.apply(ET.fromstring(
+        '<defSwitchVector device="ZWO CCD ASI6200MM Pro" name="CONNECTION">'
+        '<defSwitch name="CONNECT">On</defSwitch><defSwitch name="DISCONNECT">Off</defSwitch></defSwitchVector>'
+    ))
+    tree.apply(ET.fromstring(
+        '<defNumberVector device="ZWO CCD ASI6200MM Pro" name="CCD_INFO">'
+        '<defNumber name="CCD_MAX_X">9576</defNumber><defNumber name="CCD_MAX_Y">6388</defNumber>'
+        '<defNumber name="CCD_PIXEL_SIZE">3.76</defNumber></defNumberVector>'
+    ))
+    camera = builder.build(tree, indi_online=True)["camera"]
+    assert camera["focalLength"] == 1200
+    assert camera["aperture"] == 254
+    assert round(camera["fov"]["width"], 2) == 1.72

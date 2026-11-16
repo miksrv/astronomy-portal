@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
 import { ApiType } from '@/api'
+import { parseDec, parseRA } from '@/utils/coordinates'
 
 import { DEC_MAX, DEC_MIN, NAME_MAX, NAME_MIN, RA_MAX, RA_MIN } from './constants'
-import { parseDec, parseRA } from './utils'
 
 export const buildObjectSchema = (t: (key: string, fallback: string) => string) =>
     z.object({

@@ -46,9 +46,12 @@ def _round(value: float | None, digits: int) -> float | None:
 class SnapshotBuilder:
     """Turns the INDI property tree (+ Ekos and host facts) into the portal snapshot."""
 
-    def __init__(self, roles: dict[str, str]) -> None:
+    def __init__(self, roles: dict[str, str], optics: tuple[float | None, float | None] = (None, None)) -> None:
         # role → INDI device name, e.g. {"mount": "EQMod Mount", "roof": "Roll Roof"}
         self.roles = roles
+        # (focal length, aperture) of the main telescope from the agent's config, for when INDI
+        # reports none
+        self.optics = optics
         self._role_of = {device: role for role, device in roles.items()}
 
     def build(
@@ -208,6 +211,9 @@ class SnapshotBuilder:
         focal = scope.number("FOCAL_LENGTH") if scope else None
         if not focal:
             focal = self._number(tree, "mount", "TELESCOPE_INFO", "TELESCOPE_FOCAL_LENGTH", 1)
+        if not focal:
+            focal = self.optics[0]
+        aperture = self._number(tree, "camera", "SCOPE_INFO", "APERTURE", 0) or self.optics[1]
         fov = field_of_view(width or 0, height or 0, pixel or 0, focal or 0)
         frame = next((FRAME_TYPES.get(name) for name in frame_type.on_switches() if name in FRAME_TYPES), None) if frame_type else None
         return {
@@ -222,7 +228,7 @@ class SnapshotBuilder:
             "offset": _round(offset, 0),
             "sensor": {"width": int(width), "height": int(height), "pixelSize": round(pixel, 2)} if width and height and pixel else None,
             "focalLength": _round(focal, 0),
-            "aperture": self._number(tree, "camera", "SCOPE_INFO", "APERTURE", 0),
+            "aperture": _round(aperture, 0),
             # Field of view, degrees
             "fov": {"width": round(fov[0], 3), "height": round(fov[1], 3)} if fov else None,
         }

@@ -1,8 +1,13 @@
 @use '../../../styles/variables' as variables
 @use '../../../styles/typography' as type
 
+// The plate is as tall as the kit's control of the same size (`--size-control-*`, what `Button`
+// uses), so it lines up with a button beside it; the options fill it inside the 3px inset
 .segmentedControl
+    --segmented-height: var(--size-control-medium, var(--size-medium))
     display: inline-flex
+    box-sizing: border-box
+    height: var(--segmented-height)
     gap: 2px
     padding: 3px
     border-radius: var(--radius-lg)
@@ -15,13 +20,23 @@
     &::-webkit-scrollbar
         display: none
 
+    &.small
+        --segmented-height: var(--size-control-small, var(--size-small))
+
+    &.large
+        --segmented-height: var(--size-control-large, var(--size-large))
+
+    // Touch targets of at least 44px on phones
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        --segmented-height: calc(44px + 6px)
+
 // Nested: the kit's `.button.unstyled` resets padding and height with two classes
 .segmentedControl .option
     +type.secondary
     display: inline-flex
     align-items: center
     gap: var(--space-1)
-    height: 28px
+    height: 100%
     padding: 0 10px
     border: 0
     border-radius: var(--radius-md)
@@ -44,9 +59,6 @@
         color: var(--text-color-primary)
         box-shadow: var(--shadow-sm)
 
-    // Touch targets of at least 44px on phones
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        height: 44px
 
 .count
     color: var(--text-color-disabled)

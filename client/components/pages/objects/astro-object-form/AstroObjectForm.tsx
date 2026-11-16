@@ -6,16 +6,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'next-i18next/pages'
 
 import { API, ApiModel, ApiType } from '@/api'
-import { MarkdownEditor, StarMap } from '@/components/common'
+import { MarkdownEditor, SimbadPanel, StarMap } from '@/components/common'
 import useApiFormError from '@/hooks/useApiFormError'
 import useScrollToApiFieldErrors from '@/hooks/useScrollToApiFieldErrors'
 import useSyncApiFieldErrors from '@/hooks/useSyncApiFieldErrors'
-import { formatDECShort, formatRAShort } from '@/utils/coordinates'
+import { coordinateToText, formatDECShort, formatRAShort, parseDec, parseRA } from '@/utils/coordinates'
 import { flattenFieldErrorPaths, scrollToFirstFieldError } from '@/utils/formErrorScroll'
 
 import { buildObjectSchema } from './schema'
-import { SimbadPanel } from './SimbadPanel'
-import { coordinateToText, parseDec, parseRA } from './utils'
 
 import styles from './styles.module.sass'
 
@@ -320,10 +318,7 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                                                           'components.pages.objects.astro-object-form.simbad-refresh',
                                                           'Обновить из SIMBAD'
                                                       )
-                                                    : t(
-                                                          'components.pages.objects.astro-object-form.simbad-lookup',
-                                                          'Найти в SIMBAD'
-                                                      )
+                                                    : t('components.common.simbad-panel.lookup', 'Найти в SIMBAD')
                                             }
                                             onClick={handleSimbadLookup}
                                         />
@@ -415,7 +410,28 @@ export const AstroObjectForm: React.FC<AstroObjectFormProps> = ({
                                 dec={dec}
                                 loading={simbadLoading}
                                 error={simbadError}
-                                isEdit={isEdit}
+                                emptyText={
+                                    isEdit
+                                        ? t(
+                                              'components.pages.objects.astro-object-form.simbad-none',
+                                              'Объект ещё не сверялся с SIMBAD. Нажмите «Найти в SIMBAD» — подставим тип, угловой размер и другие обозначения.'
+                                          )
+                                        : t(
+                                              'components.pages.objects.astro-object-form.simbad-create',
+                                              'Нажмите «Найти в SIMBAD» — подставим координаты, тип, угловой размер и звёздную величину. Если не нажимать, данные подтянутся из SIMBAD при сохранении.'
+                                          )
+                                }
+                                note={
+                                    simbadValue
+                                        ? t(
+                                              'components.pages.objects.astro-object-form.simbad-fresh',
+                                              'Тип, размер и обозначения сохранятся вместе с формой.'
+                                          )
+                                        : t(
+                                              'components.pages.objects.astro-object-form.simbad-stored',
+                                              'Данные SIMBAD, сохранённые у объекта.'
+                                          )
+                                }
                                 onUseCoordinates={handleUseSimbadCoordinates}
                             />
                         </div>

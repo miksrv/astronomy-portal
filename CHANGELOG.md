@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 4.17.0
+
+Sharper star maps and tidier page actions; the observatory gets ready for telescope jobs from the site.
+
+### Patch Changes
+
+- Observatory: groundwork for telescope jobs from the site (not shown on the site yet); roles can already be given the new "telescope jobs management" privilege
+- Star map: small maps are sharp on high-resolution screens
+- Star map: the stray "undefined3" label near Eridanus is now υ³ Eri
+- Page actions open from a compact "Actions" button next to the page title
+- Page headers: filters and switches sit on the title line, the page description below it
+- Photo page: equipment and object facts are laid out more cleanly
+- Object page: the observing log shows each night's filters as tidy tags
+
 ## 4.16.0
 
 The observatory page shows the telescope live, and objects are filled from the SIMBAD catalog.

@@ -1,1 +1,1 @@
-export { FilterTag } from './FilterTag'
+export { FilterTag, FilterTagList } from './FilterTag'

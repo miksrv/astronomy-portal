@@ -1,5 +1,5 @@
 [Unit]
-Description=Observatory agent: reports the observatory status to the portal
+Description=Observatory agent: observatory status and telescope jobs for the portal
 Wants=network-online.target
 After=network-online.target indiwebmanager.service docker.service
 
@@ -12,11 +12,15 @@ WorkingDirectory=/opt/observatory-agent
 ExecStart=/usr/bin/python3 -m observatory_agent --config /etc/observatory-agent/config.toml
 Restart=always
 RestartSec=10
-# Read-only service: no writes outside its own state
+# Read-only service except for its own state: the jobs database (/var/lib/observatory-agent)
+# and the folder it writes Ekos .esq/.esl files to (created at install, see README)
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=read-only
 PrivateTmp=true
+StateDirectory=observatory-agent
+StateDirectoryMode=0700
+ReadWritePaths=-/home/mik/kstars-desktop/config/agent
 
 [Install]
 WantedBy=multi-user.target

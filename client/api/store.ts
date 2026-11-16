@@ -1,13 +1,13 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
 import { createWrapper, HYDRATE } from 'next-redux-wrapper'
-import { combineReducers, configureStore, UnknownAction } from '@reduxjs/toolkit'
+import { combineReducers, configureStore, createListenerMiddleware, isAnyOf, UnknownAction } from '@reduxjs/toolkit'
 
 import { APIMeteo } from '@/api/apiMeteo'
 
 import { API } from './api'
 import applicationSlice from './applicationSlice'
-import authSlice from './authSlice'
+import authSlice, { login, logout } from './authSlice'
 
 // 1. Combine all reducers
 const combinedReducer = combineReducers({
@@ -72,12 +72,30 @@ const rootReducer = (state: RootReducerState | undefined, action: UnknownAction)
     return combinedReducer(state, action)
 }
 
-// 3. Configure the store
+// 3. Viewer-scoped data cached without a viewer-dependent key (the telescope jobs carry `own`,
+// the manager's `version`, the viewer's quota) is refetched when the signed-in user changes -
+// a login on /auth returns to the page by client navigation, not by a reload
+const authChangeListener = createListenerMiddleware()
+
+authChangeListener.startListening({
+    matcher: isAnyOf(login, logout),
+    effect: (_action, listenerApi) => {
+        const before = (listenerApi.getOriginalState() as RootReducerState).auth.user?.id
+        const after = (listenerApi.getState() as RootReducerState).auth.user?.id
+
+        if (before !== after) {
+            listenerApi.dispatch(API.util.invalidateTags(['TelescopeJobs']))
+        }
+    }
+})
+
+// 4. Configure the store
 export const makeStore = () =>
     configureStore({
         reducer: rootReducer,
         devTools: process.env.NODE_ENV !== 'production',
-        middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(API.middleware, APIMeteo.middleware)
+        middleware: (getDefaultMiddleware) =>
+            getDefaultMiddleware().prepend(authChangeListener.middleware).concat(API.middleware, APIMeteo.middleware)
     })
 
 export type AppStore = ReturnType<typeof makeStore>

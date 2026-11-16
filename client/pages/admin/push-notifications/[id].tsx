@@ -73,6 +73,7 @@ const PushNotificationStatsPage: NextPage<object> = () => {
                 ]}
             >
                 <Button
+                    size={'small'}
                     mode={'primary'}
                     label={t('pages.push-notifications.test-send', 'Отправить тест')}
                     onClick={handleTestSend}

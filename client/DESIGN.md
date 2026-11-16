@@ -106,11 +106,23 @@ readers may spell out all-caps words letter by letter. No ad-hoc sizes, no `em` 
 - **App chrome.** `AppHeader` (50px, sticky) is the only global navigation; on phones the menu
   opens as a sidebar (`--width-menu`) over a scrim. `AppFooter` closes every page.
 - **Page header.** `AppToolbar` is the one header of every inner page: the breadcrumbs (12px,
-  secondary; on phones only "← parent"), the `h1` (`titlePage`), an optional meta line
-  (`secondary`) under it and the visitor's controls (`children`) on the right — under the title
-  on phones. The editor's actions (add, edit, delete, statistics, re-run a plate solve, …) are
-  never buttons on a public page: they go to `actions`, the `PageActions` "⋯" menu at the right
-  end of the breadcrumbs line. Each item names its privileges (`permission`), the menu shows only
+  secondary; on phones only "← parent"), the `h1` (`titlePage`) with the visitor's controls
+  (`children`) on its line, on the right — under the title on phones —, the status of what a
+  page with a short title is about (`titleAside`: badges, author · date) right after the `h1`
+  instead of a line of its own, an optional meta line
+  (`secondary`), then the lead. **The lead (the page's description) always runs the full width of
+  the column**: no button, switch or other control ever sits beside it; controls go on the
+  title's line, and they are **small** (`size="small"`, 28px — under the h1's ~31px line): the gap
+  from the title to the lead is the same on a page with controls and without (the toolbar also
+  maps the medium control size to small there). The editor's actions (add, edit, delete, statistics, re-run a plate solve, …) are
+  never buttons on a public page: they go to `actions`, the `PageActions` menu — one primary button "Действия ▾" at
+  the normal size (the chevron of the app bar's user menu, turned up while open), the last thing
+  on the title's line: its bottom on the line's bottom, the few pixels it is taller given back on
+  top, so the gap to the lead is the same for an editor and a guest. **A single allowed action
+  needs no menu:** `PageActions` shows it as that one primary button in the same place ("Добавить"
+  with `PlusCircle` on every catalog — objects, photos, the stargazing archive, telescope jobs); the
+  "Действия ▾" menu appears only from two actions on. A filter of the list below (all / mine, active
+  only) is not a page action: it goes on the list's own heading line. Each item names its privileges (`permission`), the menu shows only
   the allowed ones and disappears without any, so a guest sees the page untouched; destructive
   items are red and last. A page with its own hero (`ObjectHero`, the upcoming-event cover)
   places the same `PageActions` in its top right corner (`overlay` over a picture). `/admin/*`
@@ -128,21 +140,37 @@ readers may spell out all-caps words letter by letter. No ad-hoc sizes, no `em` 
   `Container` (the kit card: `--surface-1`, 1px ring, `--radius-xl`, 16px padding) is reserved
   for things of another nature than the page: a form, a tool or widget with its own purpose
   (weather, relay control, the upcoming event card), a table. Never a `Container` inside a
-  `Container`.
+  `Container`. A card whose content speaks for itself — a star map, a chart, a table under the
+  section it belongs to — has **no title**: "На карте неба" over a sky map says nothing. A table
+  that is a card's whole content runs edge to edge: the card has no padding of its own
+  (`padding: 0; overflow: hidden`), the table's header row is the card's top.
 - **Lists of media** (photos, events) are grids of tiles on the page background, never inside a
   `Container`.
+- **Lists of records** (events, telescope jobs) are a column of cards, **one card per record** —
+  never rows inside one shared card. The card is the stargazing `EventRow` shape: a side block
+  (the date, or a place in a queue: overline + big number, a hairline on its right), the title
+  with its status badges, a meta line of icon + value pairs, one more line of content (excerpt,
+  filter tags), an optional figure on the right (progress), a chevron; the whole card is one link
+  (hover: the `--color-main` ring and title). The same record is the same component wherever it
+  is listed (a dashboard widget and its full list alike): `EventRow`, `JobCard`. A card may say
+  its record's state with its edge, in the status colours only: done — a green ring; waiting for
+  someone's decision — a faint orange dashed ring (the warning badge's colour); set aside (paused)
+  — a grey dashed ring (`--text-color-disabled`); the kit's own ring gives way to it.
+- **"See all".** A section that shows a few items of a longer list has the link to the whole list
+  on its heading's line, on the right ("Смотреть все", "Все задания" — body text, no arrow), as
+  the past events on `/stargazing`; never in a footer under the items.
 - **Breakpoint.** One: `$mobileMaxWidth` (768px) from `styles/variables.sass`. Below it columns
   stack, side actions wrap under the content, touch targets are at least 44px.
 
 ## 5. Components
 
-| Where                     | What                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `simple-react-ui-kit`     | primitives: `Button`, `Input`, `TextArea`, `Select`, `Checkbox`, `Dialog`, `Container`, `Message`, `Table`, `Popout`, `Tooltip`, `Badge`, `Skeleton`, `Spinner`, `Icon`, …                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `components/ui`           | project primitives that are kit candidates: `Breadcrumbs`, `Carousel`, `Counter`, `Pagination`, `ShowMore`, `UserAvatar`, `DateTimeInput`, `SegmentedControl` (one of a few views), `ChipGroup` (a scrolling filter row), `Switch` (an on/off that acts at once; green `status` for hardware, `tone="accent"` for view settings such as map layers), `StatGrid` (a row of big numbers), `StatusBadge` (a tinted status label), `SectionNav` (sticky anchors of a long page), `CardTitle`/`CardMeta` (the header of a `Container`: icon + title, and the small text beside it) |
-| `components/common`       | domain components shared by several sections: layout chrome, `PageActions` (the editor's "⋯" menu), `MarkdownEditor` (Markdown text with a toolbar and a preview in the site's renderer — use it for any field shown as Markdown), `useUnsavedChangesGuard`, `LoginForm`, `PhotoGallery`, `PhotoLightbox`, `ReviewCard`, `ReviewForm`, `EventMap`, `StarMap`, `FilterSpectrum`/`FilterTag` (exposure by filter in the filters' colours), `VisibilityChart` (SVG, client-only), charts                                                                                         |
-| `components/pages/<area>` | section-specific composition (`stargazing`, `observatory`, `photos`, `objects`, …); the catalog-like pages (`objects`, `photos`) share `hooks/useSearchCategoryFilters` for their URL-synced search/category filters and the `StatGrid` → toolbar → list rhythm                                                                                                                                                                                                                                                                                                               |
-| `pages`                   | routes; they compose sections and set the SEO props of `AppLayout`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Where                     | What                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `simple-react-ui-kit`     | primitives: `Button`, `Input`, `TextArea`, `Select`, `Checkbox`, `Dialog`, `Container`, `Message`, `Table`, `Popout`, `Tooltip`, `Badge`, `Skeleton`, `Spinner`, `Icon`, …                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `components/ui`           | project primitives that are kit candidates: `Breadcrumbs`, `Carousel`, `Counter`, `Pagination`, `ShowMore`, `UserAvatar`, `DateTimeInput`, `SegmentedControl` (one of a few views; `size` small/medium/large = the kit's control heights, as `Button`, so the two line up side by side), `ChipGroup` (a scrolling filter row), `Switch` (an on/off that acts at once; green `status` for hardware, `tone="accent"` for view settings such as map layers), `StatGrid` (a row of big numbers), `StatusBadge` (a tinted status label), `FactList`/`Fact` (label → value pairs of one thing: `columns` — the labels in a column, the values lined up; `split` — value on the right, for a narrow card; no rules between the rows; used by the photo page, the photo's object card and the telescope job), `SectionNav` (sticky anchors of a long page), `CardTitle`/`CardMeta` (the header of a `Container`: icon + title, and the small text beside it) |
+| `components/common`       | domain components shared by several sections: layout chrome, `PageActions` (the editor's "Действия ▾" menu), `MarkdownEditor` (Markdown text with a toolbar and a preview in the site's renderer — use it for any field shown as Markdown), `useUnsavedChangesGuard`, `LoginForm`, `PhotoGallery`, `PhotoLightbox`, `ReviewCard`, `ReviewForm`, `EventMap`, `StarMap`, `FilterSpectrum`/`FilterTag` (exposure by filter in the filters' colours; several tags always go in a `FilterTagList` — 4px apart, the value inside the tag in normal weight, the same on photos, objects and jobs), `VisibilityChart` (SVG, client-only; `bare` inside another card), `SimbadPanel` (what SIMBAD knows of a name: the object and telescope job forms), charts                                                                                                                                                                                                |
+| `components/pages/<area>` | section-specific composition (`stargazing`, `observatory`, `photos`, `objects`, …); the catalog-like pages (`objects`, `photos`) share `hooks/useSearchCategoryFilters` for their URL-synced search/category filters and the `StatGrid` → toolbar → list rhythm                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `pages`                   | routes; they compose sections and set the SEO props of `AppLayout`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 ## 6. Patterns
 
@@ -184,6 +212,11 @@ readers may spell out all-caps words letter by letter. No ad-hoc sizes, no `em` 
   `:focus` never share a rule.
 - **Motion.** Kit durations and `--ease`; everything that moves is turned off under
   `prefers-reduced-motion: reduce`.
+- **Star maps.** `StarMap` draws a square canvas: its box is square (`aspect-ratio: 1`), never
+  stretched to another shape by CSS. A small map around one target uses a local projection
+  (`projection: 'stereographic'` in its config) — the site's mercator stretches the sky by
+  1/cos(dec). Its way to the full atlas is the last button of the map's rail
+  (`viewControls.openFull`), not a link under the map.
 - **Photos.** Rounded `--radius-lg` (tiles) or `--radius-xl` (covers), `object-fit: cover`, text over
   a photo only on `--overlay-pill-background` or a gradient scrim, always white.
 - **Prose.** Long text (FAQ, rules, descriptions, privacy) uses the `prose` mixin: 16px, 1.7 line

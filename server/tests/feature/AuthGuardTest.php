@@ -1,7 +1,9 @@
 <?php
 
+use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\Test\CIUnitTestCase;
 use CodeIgniter\Test\FeatureTestTrait;
+use Tests\Support\TelescopeRoutes;
 
 /**
  * Tests that admin-only endpoints return 401 when called without an Authorization header.
@@ -14,6 +16,7 @@ use CodeIgniter\Test\FeatureTestTrait;
 final class AuthGuardTest extends CIUnitTestCase
 {
     use FeatureTestTrait;
+    use TelescopeRoutes;
 
     // --- Objects endpoints ---
 
@@ -253,5 +256,54 @@ final class AuthGuardTest extends CIUnitTestCase
         $result = $this->withHeaders(['Authorization' => 'Bearer not-the-agent-token-not-the-agent-token'])
             ->post('observatory/agent/status', []);
         $result->assertStatus(401);
+    }
+
+    public function testAgentSyncEndpointsWithoutTheAgentTokenReturn401(): void
+    {
+        foreach ([['get', 'observatory/agent/jobs'], ['post', 'observatory/agent/updates'], ['post', 'observatory/agent/plan']] as [$method, $path]) {
+            $this->{$method}($path, [])->assertStatus(401);
+            $this->withHeaders(['Authorization' => 'Bearer not-the-agent-token-not-the-agent-token'])->{$method}($path, [])->assertStatus(401);
+        }
+    }
+
+    // --- Telescope jobs: every endpoint but the form config needs a session ---
+
+    public function testTelescopeJobRoutesAreOffUntilTheFeatureIsPresented(): void
+    {
+        // The real routes file (another test may have left its own routes in the shared collection)
+        service('routes')->resetRoutes();
+        service('routes')->loadRoutes();
+
+        foreach ([['get', 'telescope/jobs'], ['get', 'telescope/config'], ['post', 'telescope/jobs'], ['post', 'telescope/jobs/abc123/repeat']] as [$method, $path]) {
+            try {
+                $this->{$method}($path, []);
+                $this->fail("{$method} {$path} is routed");
+            } catch (PageNotFoundException) {
+                // No route: the production server answers 404
+                $this->addToAssertionCount(1);
+            }
+        }
+    }
+
+    public function testTelescopeJobEndpointsWithoutTokenReturn401(): void
+    {
+        $this->withTelescopeRoutes();
+
+        // The public list, a job page and tonight's plan are open; one's own list and every write are not
+        foreach ([
+            ['get', 'telescope/jobs?mine=1'],
+            ['get', 'telescope/jobs?all=1'],
+            ['post', 'telescope/jobs'],
+            ['patch', 'telescope/jobs/abc123'],
+            ['delete', 'telescope/jobs/abc123'],
+            ['post', 'telescope/jobs/abc123/approve'],
+            ['post', 'telescope/jobs/abc123/reject'],
+            ['post', 'telescope/jobs/abc123/remove'],
+            ['post', 'telescope/jobs/abc123/repeat'],
+        ] as [$method, $path]) {
+            $result = $this->{$method}($path, []);
+            $result->assertStatus(401);
+            $this->assertArrayHasKey('message', json_decode($result->getJSON(), true), "{$method} {$path}");
+        }
     }
 }
