@@ -9,11 +9,6 @@ export interface ResLogin {
     auth?: boolean
 }
 
-export interface ReqLogin {
-    email: string
-    password: string
-}
-
 export interface ReqAuthService {
     service: AuthServiceType
     code?: string

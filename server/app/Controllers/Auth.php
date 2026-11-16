@@ -13,7 +13,6 @@ use App\Models\RolesModel;
 use App\Models\UsersModel;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Files\File;
-use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 use Exception;
@@ -36,7 +35,6 @@ define('AUTH_TYPE_EMAIL', 'email');
  * @method ResponseInterface yandex() Authenticates the user via Yandex.
  * @method ResponseInterface vk() Authenticates the user via VK.
  * @method bool validateRequest($input, array $rules, array $messages = []) Validates the request input.
- * @method mixed getRequestInput(IncomingRequest $request) Retrieves the input from the request.
  * @method ResponseInterface _serviceAuth(string $authType, object | null $serviceProfile) Handles the service authentication.
  * @method ResponseInterface responseAuth() Returns the authentication response.
  */
@@ -321,22 +319,6 @@ class Auth extends BaseApiController
         $this->validator = Services::Validation()->setRules($rules);
 
         return $this->validator->setRules($rules, $messages)->run($input);
-    }
-
-    /**
-     * @param IncomingRequest $request
-     * @return array|bool|float|int|mixed|object|string|null
-     */
-    public function getRequestInput(IncomingRequest $request): mixed
-    {
-        $input = $request->getPost();
-
-        if (empty($input)) {
-            //convert request body to associative array
-            $input = json_decode($request->getBody(), true);
-        }
-
-        return $input;
     }
 
     /**
