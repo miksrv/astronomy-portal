@@ -142,7 +142,7 @@
     "pages": {
         "photo": {
             "seo-title": "{{objects}} — астрофото от {{date}}",
-            "description": "{{photoTitle}}: астрофотография, снятая любительской обсерваторией в Оренбурге. Оборудование: {{equipment}}.",
+            "description": "{{photoTitle}}: астрофотография, снятая любительской обсерваторией в Оренбурге. Снято на {{equipment}}.",
             "description-no-equipment": "{{photoTitle}}: астрофотография, снятая любительской обсерваторией в Оренбурге.",
             "title": "Снимок {{objects}} от {{date}}",
             "setup-title": "Как снято",

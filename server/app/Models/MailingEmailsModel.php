@@ -103,4 +103,10 @@ class MailingEmailsModel extends ApplicationBaseModel
                     ->where('sent_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)')
                     ->countAllResults();
     }
+
+    /** Whether anything waits in the queue (one indexed row): the cron asks every minute */
+    public function hasQueued(): bool
+    {
+        return $this->hasRowWithStatus(MailingEmailEntity::STATUS_QUEUED);
+    }
 }

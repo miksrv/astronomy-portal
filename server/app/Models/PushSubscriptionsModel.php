@@ -92,7 +92,7 @@ class PushSubscriptionsModel extends ApplicationBaseModel
         // "Unregister" on the service worker, clearing site data, or a
         // browser profile reset. None of those call unsubscribe(), so the
         // stale row would otherwise linger forever: the self-cleaning
-        // 404/410 path in SendPushNotifications only prunes a row the next
+        // 404/410 path in PushQueueProcessor only prunes a row the next
         // time a real campaign happens to target it, which for a low-volume
         // mailing list can be months away. Replace it instead of
         // accumulating a duplicate. Scoped to $userId - never applied to an

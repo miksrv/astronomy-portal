@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 4.17.1
+
+Better visibility in search engines, a faster first screen and more reliable mailings.
+
+### Patch Changes
+
+- Search engines: English pages are in the sitemap, and the language switch is a link they can follow
+- Search engines: shorter page descriptions, the object's common name in its heading, FAQ answers in full
+- Photos in the galleries have descriptions for image search and screen readers
+- The main picture of a page loads first, so the first screen appears sooner
+- Star map: zoom and layer buttons are named for screen readers
+- Seats held by abandoned unpaid bookings are freed again
+- A payment made after the booking time ran out now gets its ticket, or a refund when the seat is gone
+- Emails are no longer sent twice when the mail server is slow
+- Housekeeping: unused code and star map data removed, the server moved to PHP 8.4
+
 ## 4.17.0
 
 Sharper star maps and tidier page actions; the observatory gets ready for telescope jobs from the site.

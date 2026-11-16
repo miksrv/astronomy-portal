@@ -138,6 +138,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                                 fill={true}
                                 sizes={'(max-width: 768px) 100vw, 1200px'}
                                 preload={true}
+                                fetchPriority={'high'}
                                 loading={'eager'}
                                 style={{ backgroundImage: `url(${current.src})` }}
                             />

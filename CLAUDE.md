@@ -88,7 +88,7 @@ Detailed inventories live next to the code — read them instead of guessing:
 
 ### Backend (`server/`)
 
-CodeIgniter 4.7 on PHP 8.2, tests on in-memory SQLite. Conventions that bite most often (the rest in `server/CLAUDE.md`):
+CodeIgniter 4.7 on PHP 8.4, tests on in-memory SQLite. Conventions that bite most often (the rest in `server/CLAUDE.md`):
 - API responses use **camelCase** field names, formatted in the model, not the controller
 - Errors use the `{message, errors?}` envelope via the `BaseApiController` helpers
 - CI4's Query Builder has **no** `selectRaw()` — `select()` takes raw expressions and aliases

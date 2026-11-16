@@ -5,17 +5,6 @@
 // Shared
 // ============================================================================================
 
-// A card of this section: its parts are --space-4 apart (the kit puts children right in the
-// section after the header, whose own bottom margin is dropped so the gap alone spaces them)
-.card
-    display: flex
-    flex-direction: column
-    gap: var(--space-4)
-    min-width: 0
-
-    > div:first-child
-        margin-bottom: 0
-
 .muted
     +type.secondary
 
@@ -35,23 +24,6 @@
     +type.caption
     margin: 0
     color: var(--color-red)
-
-.empty
-    margin: 0
-    color: var(--text-color-secondary)
-
-
-
-.progressRow
-    display: flex
-    flex-wrap: wrap
-    align-items: center
-    gap: var(--space-2) var(--space-3)
-
-.progress
-    flex: 1
-    min-width: 120px
-    max-width: 360px
 
 .dialogText
     margin: 0 0 var(--space-4)

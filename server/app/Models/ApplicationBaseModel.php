@@ -100,4 +100,18 @@ class ApplicationBaseModel extends Model
         return Time::parse($nowLocal->format('Y-m-d') . ' 00:00:00', 'Asia/Yekaterinburg')
             ->setTimezone('UTC');
     }
+
+    /**
+     * Whether at least one row has this `status`: one indexed row, no entity built (the
+     * queue checks of `system:cron`, every minute)
+     */
+    protected function hasRowWithStatus(string $status): bool
+    {
+        return $this->builder()
+            ->select($this->primaryKey)
+            ->where('status', $status)
+            ->limit(1)
+            ->get()
+            ->getFirstRow() !== null;
+    }
 }

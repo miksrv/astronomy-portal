@@ -17,12 +17,6 @@ export interface GalleryBlock {
     photos: GalleryPhoto[]
 }
 
-export interface HeadingBlock {
-    type: 'heading'
-    text: string
-    text_en?: string
-}
-
 export type ContentBlock = TextBlock | GalleryBlock
 
 export interface ContentSection {

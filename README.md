@@ -52,7 +52,7 @@ A DIY platform for a remote amateur observatory: live observatory and weather da
 
 [![PHP][php-badge]][php-url] [![MySQL][mysql-badge]][mysql-url] [![TypeScript][ts-badge]][ts-url] [![NextJS][nextjs-badge]][nextjs-url] [![Redux][redux-badge]][redux-url] [![NodeJS][nodejs-badge]][nodejs-url] [![Sass][sass-badge]][sass-url] [![GitHub Actions][githubactions-badge]][githubactions-url] [![SonarCloud][sonarcloud-badge]][sonarcloud-url]
 
-Next.js 16 (pages router) + React 19 + Redux Toolkit / RTK Query on the frontend, CodeIgniter 4 (PHP 8.2) + MariaDB on the backend.
+Next.js 16 (pages router) + React 19 + Redux Toolkit / RTK Query on the frontend, CodeIgniter 4 (PHP 8.4) + MariaDB on the backend.
 
 ---
 

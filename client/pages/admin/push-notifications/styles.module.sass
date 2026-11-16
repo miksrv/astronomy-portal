@@ -26,7 +26,7 @@
 
 // Status pills: the list cells (kit Badge) and the detail page (plain span).
 // Status colours only for status (DESIGN.md → Tokens)
-.statusDraft, .statusSending, .statusCompleted, .statusPaused, .statusCanceled, .limitOk, .limitHit
+.statusDraft, .statusSending, .statusCompleted, .statusPaused
     display: inline-block
     padding: 2px var(--space-2)
     border-radius: var(--radius-sm)
@@ -42,13 +42,9 @@
     background: var(--color-main-background)
     color: var(--color-main)
 
-.statusCompleted, .limitOk
+.statusCompleted
     background: var(--color-green-background)
     color: var(--color-green)
-
-.statusCanceled, .limitHit
-    background: var(--color-red-background)
-    color: var(--color-red)
 
 // Form page (DESIGN.md → Forms): one column, at most 680px
 .formContainer
@@ -211,8 +207,3 @@
 
         & > *
             width: 100%
-
-.countdown
-    font-variant-numeric: tabular-nums
-    font-weight: var(--font-weight-semibold)
-    color: var(--color-main)

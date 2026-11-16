@@ -46,40 +46,6 @@
     justify-content: flex-end
     gap: var(--space-2)
 
-// Inline badge/pill with configurable colors; pass $important: true to add !important on background
-=status-badge($bg, $color, $important: false)
-    @if $important
-        background: #{$bg} !important
-    @else
-        background: $bg
-    color: $color
-
-// Tag cloud list: centered wrapping list of links with dividers
-=tag-cloud-list
-    margin: 0
-    padding: 0
-    display: flex
-    flex-wrap: wrap
-    list-style: none
-    justify-content: center
-
-    li:last-of-type .divider
-        display: none
-
-    .divider
-        color: var(--text-color-primary)
-        margin: 0 var(--space-1)
-
-    a
-        color: var(--text-color-secondary)
-
-        &.active
-            font-weight: var(--font-weight-semibold)
-            color: var(--text-color-primary)
-
-        &:hover
-            color: var(--text-color-primary)
-
 // Full-bleed page background with gradient overlay; $height controls the element height
 =hero-background($height: 100%)
     position: absolute
@@ -98,42 +64,6 @@
         width: 100%
         height: 100%
         background: linear-gradient(#11131824 0%, #11131800 20%, #111318 100%)
-
-// Uppercase section heading — suppresses the global h2 separator line
-=section-title
-    text-transform: uppercase
-    letter-spacing: 0.06em
-    font-weight: var(--font-weight-semibold)
-    font-size: var(--font-size-title-section)
-    line-height: 1.3
-
-    &::after
-        display: none
-
-// Small eyecatcher label above a hero/section title.
-// Uppercase is applied here in CSS - keep the translated source text in
-// normal case. Screen readers (notably VoiceOver) can spell out literal
-// all-caps DOM text letter by letter instead of reading it as a word.
-=hero-label($letter-spacing: 0.12em, $margin-bottom: 14px)
-    font-size: var(--font-size-small)
-    letter-spacing: $letter-spacing
-    text-transform: uppercase
-    color: var(--color-main)
-    font-weight: var(--font-weight-semibold)
-    margin: 0 0 $margin-bottom
-
-// Big hero/section title. Same accessibility note as hero-label above -
-// keep the source text in normal case, uppercase is a purely visual effect.
-=hero-title($font-size: 2.6rem, $font-weight: 600, $line-height: 1.05, $margin-bottom: 18px)
-    font-size: $font-size
-    font-weight: $font-weight
-    text-transform: uppercase
-    line-height: $line-height
-    margin: 0 0 $margin-bottom
-    color: #fff
-
-    span
-        display: block
 
 // A dropdown menu: the user menu of the app bar, the "⋯" page actions. The list...
 =menu-list

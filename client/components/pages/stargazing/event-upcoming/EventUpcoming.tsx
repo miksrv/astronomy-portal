@@ -414,6 +414,7 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
                                     // Cover of the hero widget — the likely LCP element on
                                     // the /stargazing and /profile pages it's rendered on.
                                     preload={true}
+                                    fetchPriority={'high'}
                                 />
 
                                 <div className={styles.adminActions}>

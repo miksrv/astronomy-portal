@@ -17,8 +17,6 @@ export interface ResList {
 
 export type ResItem = ApiModel.Event
 
-export type ResMedia = ApiModel.EventMedia
-
 export type ResCheckin = Pick<ApiModel.Event, 'members'> & {
     checkin?: ApiType.DateTime
     /** Guest display name, resolved server-side — present only for the staff check-in flow. */

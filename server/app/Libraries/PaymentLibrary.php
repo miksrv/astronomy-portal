@@ -29,6 +29,9 @@ use InvalidArgumentException;
  */
 class PaymentLibrary
 {
+    /** Hours after an expired hold when a payment the bank gave no outcome for is failed */
+    public const STALE_HOLD_HOURS = 24;
+
     private PaymentGatewayInterface $gateway;
     private PaymentsModel $model;
     private string $gatewayName;
@@ -291,7 +294,7 @@ class PaymentLibrary
      * {@see getVerifiedStatus()}) but does NOT touch the associated booking —
      * that decision (confirm, refund, or mark the booking failed) belongs to
      * the caller, since it already knows how to reconcile a booking (see
-     * {@see \App\Controllers\Events::reconcileBooking()}).
+     * {@see EventBookingLibrary::reconcileBooking()}).
      *
      * @return array<int, array{payment: PaymentEntity, status: string}> One
      *         entry per expired payment, pairing it with its freshly verified
@@ -304,10 +307,30 @@ class PaymentLibrary
         $expired = $this->model->getExpiredPending();
         $results = [];
 
+        $staleBefore = (new Time('now'))->subHours(self::STALE_HOLD_HOURS);
+
         foreach ($expired as $payment) {
+            $status = $this->getVerifiedStatus($payment);
+
+            // The bank still has no outcome a day after the hold ran out (no answer, or the
+            // order never left "registered"): give it up as failed. Otherwise the same oldest
+            // rows would fill the batch every run and newer expired holds never be released.
+            // Should the bank still report it paid later, the callback/poll refunds it, as for
+            // any payment that no longer has a seat behind it
+            if (in_array($status, ['new', 'pending'], true)
+                && $payment->expires_at !== null
+                && Time::parse((string) $payment->expires_at)->isBefore($staleBefore)
+            ) {
+                $this->applyStatus($payment, 'failed', [
+                    'code'    => null,
+                    'message' => 'No outcome from the bank ' . self::STALE_HOLD_HOURS . ' hours after the hold expired',
+                ]);
+                $status = 'failed';
+            }
+
             $results[] = [
                 'payment' => $payment,
-                'status'  => $this->getVerifiedStatus($payment),
+                'status'  => $status,
             ];
         }
 

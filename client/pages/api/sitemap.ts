@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
-import { API, SITE_LINK } from '@/api'
+import { API } from '@/api'
 import { makeStore } from '@/api/store'
 import { TELESCOPE_JOBS_ENABLED } from '@/utils/constants'
+import { createPageUrl } from '@/utils/helpers'
 
 // Plain API route (not a `pages/` page) on purpose: Next.js treats any page whose route
 // resolves to "/sitemap" as a reserved App Router metadata route and rejects
@@ -25,23 +26,46 @@ type StaticPage = {
     lastmod?: string
 }
 
-const base = (SITE_LINK ?? '').replace(/\/$/, '')
-
-const toIsoDate = (date?: string): string | undefined => {
-    const parsed = date ? new Date(date) : undefined
+// The API sends ISO 8601 with the offset. Until both sides are deployed it may still send the
+// old shapes: a CI4 Time object ({ date }) for photos and events, a bare string for objects
+const toIsoDate = (date?: string | { date?: string } | null): string | undefined => {
+    const value = typeof date === 'string' ? date : date?.date
+    const parsed = value ? new Date(value) : undefined
 
     return parsed && !Number.isNaN(parsed.getTime()) ? parsed.toISOString() : undefined
 }
 
-const makeUrl = (ruPath: string, enPath: string, changefreq: string, priority: string, lastmod?: string) => `
+/** Escapes what XML reserves; catalog names are admin-typed and may hold any of these */
+const xmlEscape = (value: string): string =>
+    value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;')
+
+/** Absolute URL of a page, by the site's one locale-prefix rule (createPageUrl), escaped for XML */
+const pageUrl = (path: string, english: boolean): string =>
+    xmlEscape(createPageUrl(english ? 'en' : 'ru', encodeURI(path)))
+
+/**
+ * Both language versions of a page, each as its own <url> with the full set of
+ * alternates: Google expects every version listed, and Yandex reads no hreflang here
+ */
+const makeUrl = (path: string, changefreq: string, priority: string, lastmod?: string) =>
+    [false, true]
+        .map(
+            (english) => `
 <url>
-  <loc>${base}/${ruPath}</loc>${lastmod ? `\n  <lastmod>${lastmod}</lastmod>` : ''}
+  <loc>${pageUrl(path, english)}</loc>${lastmod ? `\n  <lastmod>${lastmod}</lastmod>` : ''}
   <changefreq>${changefreq}</changefreq>
   <priority>${priority}</priority>
-  <xhtml:link rel="alternate" hreflang="ru" href="${base}/${ruPath}"/>
-  <xhtml:link rel="alternate" hreflang="en" href="${base}/${enPath}"/>
-  <xhtml:link rel="alternate" hreflang="x-default" href="${base}/${ruPath}"/>
+  <xhtml:link rel="alternate" hreflang="ru" href="${pageUrl(path, false)}"/>
+  <xhtml:link rel="alternate" hreflang="en" href="${pageUrl(path, true)}"/>
+  <xhtml:link rel="alternate" hreflang="x-default" href="${pageUrl(path, false)}"/>
 </url>`
+        )
+        .join('')
 
 const CONTENT_PAGES_EDITED = '2025-01-01T00:00:00.000Z'
 
@@ -80,28 +104,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const photosPages: DynamicPage[] = (data.photos ?? []).map((item) => ({
         link: `photos/${item.id}`,
-        lastmod: toIsoDate(item.updated?.date)
+        lastmod: toIsoDate(item.updated)
     }))
 
     const objectsPages: DynamicPage[] = (data.objects ?? []).map((item) => ({
         link: `objects/${item.id}`,
-        lastmod: toIsoDate(item.updated?.date)
+        lastmod: toIsoDate(item.updated)
     }))
 
     const eventsPages: DynamicPage[] = (data.events ?? []).map((item) => ({
         link: `stargazing/${item.id}`,
-        lastmod: toIsoDate(item.updated?.date)
+        lastmod: toIsoDate(item.updated)
     }))
 
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">`
 
     for (const page of staticPages) {
-        sitemap += makeUrl(page.url, `en/${page.url}`, page.changefreq, page.priority, page.lastmod)
+        sitemap += makeUrl(page.url, page.changefreq, page.priority, page.lastmod)
     }
 
     for (const page of [...photosPages, ...objectsPages, ...eventsPages]) {
-        sitemap += makeUrl(page.link, `en/${page.link}`, 'weekly', '0.7', page.lastmod)
+        sitemap += makeUrl(page.link, 'weekly', '0.7', page.lastmod)
     }
 
     sitemap += '\n</urlset>'

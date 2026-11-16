@@ -53,8 +53,8 @@ const createPhotoUrl = (photo?: ApiModel.Photo, size?: 'small' | 'thumb' | 'medi
 export const createSmallPhotoUrl = (photo?: ApiModel.Photo): string => createPhotoUrl(photo, 'small')
 
 /**
- * Falls back from the square `_thumb` to the `_medium` file: photos uploaded before 4.15.0 have
- * no thumb until `php spark photos:thumbnails` has run on the host. For `onError` of an <img>.
+ * Falls back from the square `_thumb` to the `_medium` file when a photo has no thumb (a missing
+ * or broken file). For `onError` of an <img>.
  */
 export const fallbackToMediumPhoto = (event: React.SyntheticEvent<HTMLImageElement>): void => {
     const image = event.currentTarget

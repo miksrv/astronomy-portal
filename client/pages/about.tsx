@@ -149,6 +149,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
 
                 <PhotoGallery
                     photos={galleryAboutMe}
+                    alt={t('pages.about.gallery-about-me-alt', 'Проект «Смотри на звёзды» — фото')}
                     onClick={({ index }) => {
                         handlePhotoClick(index)
                     }}
@@ -218,6 +219,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 </p>
                 <PhotoGallery
                     photos={galleryStargazing}
+                    alt={t('pages.about.gallery-stargazing-alt', 'Астровыезд «Смотри на звёзды» — фото')}
                     onClick={({ index }) => {
                         handlePhotoClick(index)
                     }}
@@ -254,6 +256,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 </p>
                 <PhotoGallery
                     photos={galleryObservatory}
+                    alt={t('pages.about.gallery-observatory-alt', 'Самодельная обсерватория в Оренбурге — фото')}
                     onClick={({ index }) => {
                         handlePhotoClick(index)
                     }}

@@ -2,7 +2,7 @@
 
 Backend-specific reference for the CodeIgniter 4 PHP API. For project-wide context and dev commands see the root `CLAUDE.md`; deployment is in `docs/deployment.md`.
 
-**Stack:** CodeIgniter 4.7, PHP 8.2 (pinned as `config.platform.php` in `composer.json`, so `composer update` never resolves packages the hosting cannot run). JWT via `firebase/php-jwt ^7` (an HS256 secret of at least 32 bytes — `auth.token.secret`), Web Push via `minishlink/web-push ^11` (+ `guzzlehttp/guzzle`), ticket QR codes via `endroid/qr-code ^6`. Always run migrations after pulling changes that add them.
+**Stack:** CodeIgniter 4.7, PHP 8.4 (pinned as `config.platform.php` in `composer.json`, so `composer update` never resolves packages the hosting cannot run). JWT via `firebase/php-jwt ^7` (an HS256 secret of at least 32 bytes — `auth.token.secret`), Web Push via `minishlink/web-push ^11` (+ `guzzlehttp/guzzle`), ticket QR codes via `endroid/qr-code ^6`. Always run migrations after pulling changes that add them.
 
 ## API Routes (`app/Config/Routes.php`)
 
@@ -12,6 +12,7 @@ GET  /                              → API health info (inline closure)
 GET  /camera/:id                    → Camera::show
 
 GET  /statistic/telescope           → Statistic::telescope     (per observing night: local noon → noon, UTC+5; `?period=MM-YYYY`; cached 10 min; the FITS archive is read-only now, so the cache simply expires)
+GET  /statistic/stargazing          → Statistic::stargazing    (number of conducted events and total participants, for the landing page and /stargazing)
 
 GET  /auth/me                       → Auth::me
 GET  /auth/google                   → Auth::google              [rate-limited: auth_oauth, 15/300s]
@@ -171,7 +172,7 @@ All controllers extend `BaseApiController` (see API Responses below).
 | `Photos.php` | CRUD for astrophoto archive; image upload via `PhotoUploadLibrary`; the plate solve of a photo (`astrometry()`, `solve()`) |
 | `Relay.php` | Observatory power relay control (list state, toggle light with cooldown guard) |
 | `Roles.php` | CRUD for roles (name + a set of `Permission` privileges); `permissions()` returns the fixed privilege catalog for the admin UI's checkbox list |
-| `Sitemap.php` | Returns URL slugs for photos, objects, and events for sitemap generation |
+| `Sitemap.php` | Returns the ids of photos, objects and events with their last-modified time (ISO 8601 with the offset, the same for all three) for the frontend's `/sitemap` |
 | `Statistic.php` | Aggregates telescope imaging statistics per observing night (`ObjectFitsFilesModel::NIGHT_EXPRESSION`), optionally for one month |
 
 ---
@@ -196,7 +197,6 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 | `ObjectFitsFilesModel.php` | `objects_fits_files` | yes | FITS file metadata per object; `NIGHT_EXPRESSION` names the observing night a frame belongs to (local noon → noon), `getNightsSummary()` counts nights per object, `getObjectOptics()` picks the optical train (focal length / pixel / sensor / scale) most of an object's frames share; indexed on (`object`, `date_obs`) |
 | `ObjectFitsFiltersModel.php` | `objects_fits_filters` | yes | Filter data extracted from FITS files |
 | `PhotosModel.php` | `photos` | yes | `PhotoEntity`; tracks `views` count |
-| `PhotosAuthorModel.php` | `photos_authors` | yes | Author attribution for photos |
 | `PhotosCategoryModel.php` | `photos_categories` | no | Pivot: photo ↔ category |
 | `PhotosEquipmentsModel.php` | `photos_equipments` | no | Pivot: photo ↔ equipment used |
 | `PhotosFiltersModel.php` | `photos_filters` | no | Filter metadata per photo |
@@ -233,7 +233,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 
 - `2026-08-13-100001_AddRolesTable` — seeds 3 starter roles (Разработчик/Команда/Охрана); role id 1 ("Разработчик") is reserved, see `RolesModel::DEVELOPER_ROLE_ID`.
 - `2026-08-13-100002_AddUsersRolesColumn` — adds `users.roles JSON`, backfilled from the legacy `users.role` ENUM, which is left in place as a rollback safety net.
-- `2026-08-17-110000_FixPushNotificationDeliveriesSubscriptionCascade` — `push_notification_deliveries.subscription_id` FK is `SET NULL`, not `CASCADE`, so a delivery row survives when `system:send-push` deletes an expired subscription.
+- `2026-08-17-110000_FixPushNotificationDeliveriesSubscriptionCascade` — `push_notification_deliveries.subscription_id` FK is `SET NULL`, not `CASCADE`, so a delivery row survives when `system:cron` deletes an expired subscription.
 - `2026-08-21-100000_RenameEventsPhotosToEventsMedia` — `events_photos` → `events_media`; the index is renamed with a raw `ALTER TABLE ... RENAME INDEX`, since `RENAME TABLE` keeps index names verbatim and Forge has no `renameIndex`.
 - `2026-11-03-100000_AddEventsDateIndex` — index `events_date` on `events.date`, the column every public events query filters and sorts by.
 
@@ -292,12 +292,12 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 | `SessionLibrary` | JWT validation, populates `$this->session->user` and `->isAuth` |
 | `LocaleLibrary` | Sets CI4 locale from request header or user preference |
 | `EmailLibrary` | Wraps CodeIgniter email service for mailing campaigns |
+| `EmailQueueProcessor` / `PushQueueProcessor` | The send steps of `system:cron`: one batch of the transactional outbox, the mailing campaigns (day/hour caps) or the push deliveries; the mailer / push client is built only when something is queued |
 | `RelayLibrary` | HTTP communication with the RODOS relay board (3 s read / 5 s write timeouts, so a hung link never blocks the dashboard) |
 | `PhotoUploadLibrary` | Handles photo file validation, resizing (`_small` 160×36 strip, `_thumb` 160×160 square, `_medium` 500×400, `_large` 4096 wide), and storage |
-| `PhotosLibrary` | Helper utilities for photo data aggregation |
-| `StatisticLibrary` | Aggregation helpers for telescope statistics |
 | `GoogleClient` / `YandexClient` / `VkClient` | OAuth provider integrations |
-| `PaymentLibrary` | Gateway-agnostic payment orchestration (uses `PaymentGatewayInterface`) |
+| `PaymentLibrary` | Gateway-agnostic payment orchestration (uses `PaymentGatewayInterface`); `releaseExpired()` checks the expired holds with the bank and fails one still without an outcome `STALE_HOLD_HOURS` (24) after it expired |
+| `EventBookingLibrary` | A booking against its payment, shared by `Events` and `system:cron`: `releaseExpiredBookings()`, `reconcileBooking()` (paid → confirm + ticket email, or refund when the seat is gone; failed/canceled → the booking failed), `buildTicketData()`, `queueTicketEmail()` |
 | `PaymentGatewayInterface` | Contract a new payment provider must implement |
 | `AlfaBankClient` | Current `PaymentGatewayInterface` implementation; test/production environment switch |
 | `TicketLibrary` | Renders event ticket PNGs (static background asset + QR code) for check-in |
@@ -318,20 +318,17 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 |---|---|
 | `PublicCacheFilter` | `Cache-Control: public, max-age=N, stale-while-revalidate=4N` on viewer-independent public GETs (catalogue, photos, categories, equipment, FITS lists, statistics, random comments, sitemap). Alias `publiccache`, applied per route as `['filter' => 'publiccache:<seconds>']`; only a 200 to a request without an `Authorization` header gets the header, with `Vary: Locale, Authorization` (the body depends on the `Locale` header). The default `no-store` is removed first — CI4's `setHeader()` appends to a multi-value header. |
 | `RateLimitFilter` | Per-IP token-bucket throttling for abuse-prone public routes. Registered as alias `ratelimit` in `Config/Filters.php`; applied per-route via `['filter' => 'ratelimit:<bucket>,<capacity>,<seconds>']` (see route table above for current buckets). Disabled when `ENVIRONMENT === 'testing'` since the `file` cache backend is shared across test cases. Uses CI4's built-in `Services::throttler()`. |
+| `NoIndexFilter` | Global `after` filter (alias `noindex`): `X-Robots-Tag: noindex` on every response that goes through the app, so search engines don't index the API's JSON. The photos and covers in `public/` are static files the web server sends itself and stay indexable for image search |
 | `ObservatoryAgentFilter` | Alias `observatoryagent`: only lets through `Authorization: Bearer <observatory.agentToken>` (constant-time compare; a token shorter than 32 characters or none refuses everything) — the observatory agent's endpoints |
-| `CorsFilter` | Legacy/unused — superseded by CI4's built-in `Cors` filter (`Config\Cors`); left in place as a removal marker only. |
 
 ### CLI Commands (`app/Commands/`)
 | Command | Group | Purpose |
 |---|---|---|
-| `system:send-email` | system | Drains the mailing queue (`mailing_emails`) and the transactional email outbox (`email_queue`), subject to `Config\MailingLimits` day/hour caps |
-| `system:send-push` | system | Drains the Web Push delivery queue (`push_notification_deliveries`), batch size 50, no rate-limit cap (push has no SMTP-style provider reputation limit) — deletes the `push_subscriptions` row on a 404/410 (`WebPushExpiredSubscriptionException`) |
+| `system:cron` | system | The API's one cron job, every minute, in one process: frees the seats of expired unpaid bookings (`EventBookingLibrary::releaseExpiredBookings()`, the same as the site: each payment checked with the bank first, one paid after its hold expired is confirmed with the ticket or refunded, one the bank gave no outcome for is failed after `PaymentLibrary::STALE_HOLD_HOURS`), then sends the transactional emails and the mailing campaigns (`EmailQueueProcessor`, campaigns under the `Config\MailingLimits` day/hour caps) and the Web Push deliveries (`PushQueueProcessor`, batch 50, no cap; a 404/410 subscription is deleted). An idle minute is one indexed query per queue (`hasQueued()`) and no output; the mailer and the push client are built before the first row, so a broken config fails the run and leaves the queue as is; a run that outlives its minute holds `writable/cron.lock` and the next one exits, so nothing is sent twice; a failing step is logged and the next one runs |
 | `objects:simbad` | Observatory | Fills the objects from SIMBAD (`ObjectSimbadLibrary`): a report only, unless `--apply`; `--accept M_94,IC_405` takes the far ones (coordinates included) after a person checked them, `--skip NGC_6888` leaves out a name SIMBAD resolves to a neighbour, `--object NAME` one object, `--all` also the ones looked up before. Run once after the migration; new objects are filled on `POST /objects` |
-| `fits:recalculate` | Observatory | Recalculates FITS filter aggregates (no HTTP endpoint) |
-| `photos:thumbnails` | Observatory | Generates the square `_thumb` (160×160) preview for photos uploaded before 4.15.0 (`--force` regenerates all); new uploads get it from `PhotoUploadLibrary` |
 | `photos:solve` | Observatory | Plate-solves photos from the command line by looping `AstrometrySolver::step()` (about a minute each): `--limit N` (default 3) rows in progress, `--all` first queues every never-solved photo (the one-time backfill of the archive), `--photo ID` (re)solves one photo. Spark passes options as `--name value`; the command also accepts `--name=value`. Not a cron job — new uploads are solved from the editor's browser via `POST /photos/:id/astrometry` |
 
-`send-email` and `send-push` are registered for the same `* * * * *` cron cadence on the hosting cron (outside this repo).
+The hosting cron (outside this repo) runs `php8.4 <path>/spark system:cron` every minute (`* * * * *`).
 
 There is no automatic cleanup of abandoned chunked uploads (tab closed or network dropped without a cancel): their parts stay in `UPLOAD_EVENTS/{eventId}/tmp/{sessionId}/` and the `events_media_uploads` row stays `uploading`/`finalizing`. Uploads are rare, so these are removed by hand on the server.
 

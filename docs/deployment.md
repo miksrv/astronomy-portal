@@ -24,6 +24,13 @@ Each workflow touches its own lock file on the frontend VPS right before the dis
 ssh vps "rm -f /var/www/astro.miksoft.pro/.deploy-lock/*.lock"
 ```
 
+## Hosting PHP and cron
+
+Neither lives in this repo, and the deploy changes neither:
+
+- **PHP version.** `server/composer.json` pins the platform (`config.platform.php`, currently 8.4). Switch the hosting's PHP (web and CLI) to that version **before** merging a bump: after the deploy, composer's `platform_check.php` refuses to run on an older PHP and the whole API is down.
+- **Cron.** One line, every minute: `* * * * * php8.4 ~/domains/api.astro.miksoft.pro/spark system:cron`. It frees expired booking holds and sends the queued emails and push notifications (see `server/CLAUDE.md` → CLI Commands). When a command is renamed or the PHP version changes, edit the crontab right after the deploy; a missed minute only delays the queues.
+
 ## Database Migrations
 
 Migrations are **not** run automatically by the deploy workflows. After deploying changes that add migrations, run them on the server:

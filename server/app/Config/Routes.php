@@ -20,9 +20,6 @@ $routes->get('camera/(:num)', 'Camera::show/$1');
 
 /** Statistic Controller **/
 $routes->group('statistic', static function ($routes) {
-    // $routes->get('/', 'Statistic::list');
-    // $routes->get('statistic/catalog', 'Statistic::catalog');
-    // $routes->get('statistic/photos', 'Statistic::photos');
     $routes->get('telescope', 'Statistic::telescope', ['filter' => 'publiccache:300']);
     $routes->get('stargazing', 'Statistic::stargazing', ['filter' => 'publiccache:300']);
     $routes->options('(:any)', static function () {});
@@ -34,8 +31,6 @@ $routes->group('auth', static function ($routes) {
     $routes->get('google', 'Auth::google', ['filter' => 'ratelimit:auth_oauth,15,300']);
     $routes->get('yandex', 'Auth::yandex', ['filter' => 'ratelimit:auth_oauth,15,300']);
     $routes->get('vk', 'Auth::vk', ['filter' => 'ratelimit:auth_oauth,15,300']);
-    //$routes->post('register', 'Auth::register');
-    //$routes->post('login', 'Auth::login');
     $routes->post('magic-link', 'Auth::requestMagicLink');
     $routes->post('magic-link/verify', 'Auth::verifyMagicLink');
     $routes->post('logout', 'Auth::logout');
@@ -111,21 +106,18 @@ $routes->group('objects', static function ($routes) {
 /** Photos Controller **/
 $routes->group('photos', static function ($routes) {
     $routes->get('/', 'Photos::list', ['filter' => 'publiccache:300']);
-    // $routes->get('download/(:any)/(:any)', 'Photos::download/$1/$2');
     // Declared before (:any), which also matches "id/astrometry"
     $routes->get('(:segment)/astrometry', 'Photos::astrometry/$1', ['filter' => 'publiccache:300']);
     $routes->post('(:segment)/astrometry', 'Photos::solve/$1');
     $routes->get('(:any)', 'Photos::show/$1', ['filter' => 'publiccache:300']);
     // A view is counted by the page once it is open, not by every GET (SSR, crawlers)
     $routes->post('(:segment)/view', 'Photos::view/$1', ['filter' => 'ratelimit:views,60,60']);
-    // $routes->get('photos/(:any)/(:any)', 'Photos::show/$1/$2');
     $routes->post('/', 'Photos::create');
     $routes->post('(:any)/upload', 'Photos::upload/$1');
     $routes->patch('(:any)', 'Photos::update/$1');
     $routes->delete('(:any)', 'Photos::delete/$1');
     $routes->options('/', static function () {});
     $routes->options('(:any)', static function () {});
-    // $routes->options('photos/(:any)/(:any)', static function () {});
 });
 
 /** Events Controller **/

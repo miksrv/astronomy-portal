@@ -198,6 +198,7 @@ export const EventItemData: React.FC<EventItemDataProps> = ({ title, event, ...p
                         // The left 3fr of a 3fr/2fr grid on desktop, full width on mobile
                         sizes={'(max-width: 768px) 100vw, 720px'}
                         preload={true}
+                        fetchPriority={'high'}
                     />
                 </div>
 

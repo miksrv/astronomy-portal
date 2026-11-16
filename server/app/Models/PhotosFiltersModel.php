@@ -46,19 +46,4 @@ class PhotosFiltersModel extends ApplicationBaseModel
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
-
-    /**
-     * Retrieves the filter statistics record for a specific photo and filter combination.
-     *
-     * @param string $photo_id The photo ID to look up.
-     * @param string $filter   The filter identifier (e.g. 'L', 'R', 'H').
-     * @return PhotosFiltersEntity|null The matching entity, or null if not found.
-     */
-    public function getDataByPhotoFilter(string $photo_id, string $filter): ?PhotosFiltersEntity
-    {
-        return $this
-            ->where('photo_id', $photo_id)
-            ->where('filter', $filter)
-            ->first();
-    }
 }

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { setCookie } from 'cookies-next'
 import { cn } from 'simple-react-ui-kit'
 
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next/pages'
 
@@ -47,14 +48,44 @@ export const LanguageSwitcher: React.FC = () => {
             {LANGUAGES.map(({ locale, label }, index) => (
                 <React.Fragment key={locale}>
                     {index > 0 && <span className={styles.separator}>{'/'}</span>}
-                    <button
-                        type={'button'}
-                        className={cn(styles.langButton, currentLanguage === locale && styles.active)}
-                        onClick={() => changeLanguage(locale)}
-                        disabled={currentLanguage === locale}
-                    >
-                        {label}
-                    </button>
+                    {currentLanguage === locale ? (
+                        <span
+                            className={cn(styles.langButton, styles.active)}
+                            aria-current={'true'}
+                        >
+                            {label}
+                        </span>
+                    ) : (
+                        // A real link, so crawlers find the other language version of the page;
+                        // the click still goes through changeLanguage (cookie, store, i18n)
+                        <Link
+                            href={{ pathname, query }}
+                            as={asPath}
+                            locale={locale}
+                            hrefLang={locale}
+                            // Always on screen: prefetching the other locale on every page view
+                            // would cost requests for a link that is rarely clicked
+                            prefetch={false}
+                            className={styles.langButton}
+                            onClick={(event) => {
+                                // Cmd/Ctrl/Shift/middle click: the browser opens the link itself
+                                if (
+                                    event.metaKey ||
+                                    event.ctrlKey ||
+                                    event.shiftKey ||
+                                    event.altKey ||
+                                    event.button !== 0
+                                ) {
+                                    return
+                                }
+
+                                event.preventDefault()
+                                void changeLanguage(locale)
+                            }}
+                        >
+                            {label}
+                        </Link>
+                    )}
                 </React.Fragment>
             ))}
         </div>

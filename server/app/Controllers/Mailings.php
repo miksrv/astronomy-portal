@@ -500,7 +500,7 @@ class Mailings extends BaseApiController
     /**
      * Renders the `email_newsletter` view for a campaign — the single source of
      * truth for "what does this email look like", shared by preview() and test()
-     * (the real bulk send in `App\Commands\SendEmail` renders it independently
+     * (the real bulk send in `App\Libraries\EmailQueueProcessor` renders it independently
      * since it runs per-recipient with a per-recipient unsubscribe link).
      */
     private function renderNewsletterBody(MailingEntity $mailing, string $locale, string $unsubscribeMailParam): string
@@ -606,7 +606,7 @@ class Mailings extends BaseApiController
      *
      * A draft is simply marked canceled — nothing has been queued yet. A
      * campaign mid-send additionally has its still-queued `mailing_emails`
-     * rows flipped to 'canceled', so `system:send-email` (which only ever
+     * rows flipped to 'canceled', so `system:cron` (which only ever
      * pulls rows with status = 'queued') stops delivering it. Completed or
      * already-canceled campaigns can't be canceled again; a second request
      * for an already-canceled campaign is treated as an idempotent no-op

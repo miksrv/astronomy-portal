@@ -45,7 +45,8 @@ describe('helpers', () => {
         })
 
         it('returns the locale root when no path is given', () => {
-            expect(createPageUrl('en')).toBe(`${base}en/`)
+            // "/en/" redirects to "/en", so canonical and hreflang must not carry the slash
+            expect(createPageUrl('en')).toBe(`${base}en`)
             expect(createPageUrl('ru')).toBe(base)
         })
 
