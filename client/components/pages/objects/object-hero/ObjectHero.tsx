@@ -175,6 +175,7 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
                             })}
                             fill={true}
                             preload={true}
+                            fetchPriority={'high'}
                             loading={'eager'}
                             sizes={'(max-width: 768px) 100vw, 620px'}
                         />
@@ -209,6 +210,7 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
                             })}
                             fill={true}
                             preload={true}
+                            fetchPriority={'high'}
                             loading={'eager'}
                             sizes={'(max-width: 768px) 100vw, 620px'}
                             onError={() => setSurveyFailed(true)}
@@ -247,8 +249,12 @@ export const ObjectHero: React.FC<ObjectHeroProps> = ({
                         </p>
                     )}
 
-                    <h1 className={styles.title}>{name}</h1>
-                    {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+                    {/* The common name is what people search for, so it belongs to the heading too;
+                        the h1 itself takes no box and the two lines keep their own layout */}
+                    <h1 className={styles.heading}>
+                        <span className={styles.title}>{name}</span>
+                        {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
+                    </h1>
 
                     <div className={styles.badges}>
                         <ObjectStatusBadge

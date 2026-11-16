@@ -123,8 +123,8 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
         '@id': `${SITE_LINK}observatory/overview`,
         headline: tPage('title', 'Обсерватория в Оренбурге'),
         description: tPage(
-            'description',
-            'Самодельная астрономическая обсерватория расположена в пригороде Оренбурга, всего в 15 км от города. Телескоп Sky-Watcher BK2001P, камера ASI ZWO 6200MM Pro, удалённое управление.'
+            'meta-description',
+            'Самодельная астрономическая обсерватория в 15 км от Оренбурга: съёмка туманностей и галактик, удалённое управление и небо 5 класса по Бортлю.'
         ),
         url: `${SITE_LINK}observatory/overview`,
         image: `${SITE_LINK}photos/observatory-3.jpeg`,
@@ -146,8 +146,8 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
             canonical={'observatory/overview'}
             title={tPage('title', 'Обсерватория в Оренбурге')}
             description={tPage(
-                'description',
-                'Самодельная астрономическая обсерватория расположена в пригороде Оренбурга, всего в 15 км от города. Благодаря своему удалению от городской застройки, обсерватория находится в зоне с уровнем светового загрязнения 5 класса по шкале Бортля, что делает её неплохим местом в пригороде для наблюдений за ночным небом.'
+                'meta-description',
+                'Самодельная астрономическая обсерватория в 15 км от Оренбурга: съёмка туманностей и галактик, удалённое управление и небо 5 класса по Бортлю.'
             )}
             openGraph={{
                 images: [
@@ -197,6 +197,7 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
 
                 <PhotoGallery
                     photos={galleryObservatory}
+                    alt={tPage('gallery-observatory-alt', 'Обсерватория в Оренбурге — фото')}
                     onClick={({ index }) => {
                         handlePhotoClick(index)
                     }}
@@ -235,6 +236,7 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                 </ul>
                 <PhotoGallery
                     photos={galleryEquipment}
+                    alt={tPage('gallery-equipment-alt', 'Оборудование обсерватории — фото')}
                     onClick={({ index }) => {
                         handlePhotoClick(index)
                     }}

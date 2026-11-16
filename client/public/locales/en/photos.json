@@ -138,7 +138,7 @@
     "pages": {
         "photo": {
             "seo-title": "{{objects}} — astrophoto from {{date}}",
-            "description": "{{photoTitle}}: an astrophoto taken by an amateur observatory in Orenburg. Equipment: {{equipment}}.",
+            "description": "{{photoTitle}}: an astrophoto taken by an amateur observatory in Orenburg. Shot with {{equipment}}.",
             "description-no-equipment": "{{photoTitle}}: an astrophoto taken by an amateur observatory in Orenburg.",
             "title": "Photo of {{objects}}, {{date}}",
             "setup-title": "How it was taken",

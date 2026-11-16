@@ -33,6 +33,8 @@ const NewTelescopeJobPage: NextPage = () => {
     return (
         <AppLayout
             canonical={'observatory/jobs/new'}
+            // A form for signed-in users: nothing for a search engine
+            noindex={true}
             title={title}
             description={t(
                 'pages.observatory.job-new.description',

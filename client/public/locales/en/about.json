@@ -22,6 +22,7 @@
             "my-name": "My name is",
             "misha": "Misha",
             "intro": ", and this site is my attempt to tell you about my hobby, bring together all the information, and capture the milestones reached along the way of exploring space. Astronomy for me isn't just a pastime, but a whole world that changed my life. Thanks to it I've found incredible friends, learned a lot of new things, and realized just how vast and mysterious the universe is. This project is our joint contribution to popularizing and developing astronomy. We sincerely believe that through our efforts, space will become closer and more accessible to everyone.",
+            "gallery-about-me-alt": "The “Look at the Stars” project — photo",
             "telegram-channel": "Subscribe to this project's author Telegram channel",
             "team-title": "Our team",
             "team-description": "We work in many different fields, but we're all united by one thing - a love of the stars and the night sky. Since 2016 we've been popularizing astronomy, organizing stargazing trips in the Orenburg region, and sidewalk astronomy evenings in Orenburg. Together we look at the stars, share knowledge and inspire others.",
@@ -31,11 +32,13 @@
             "project-sidewalk": "page, and for those who want to see the stars within the city, we've prepared a section",
             "project-sidewalk-link": "Where to look through a telescope in Orenburg",
             "project-locations": "Our events take place not only in the towns and villages of the Orenburg region, but also in neighboring regions. We organize field trips to remote locations where minimal light pollution allows you to fully enjoy the starry sky. Our team of amateur astronomers and volunteers shares their knowledge and experience so everyone can discover the beauty and mysteries of the universe.",
+            "gallery-stargazing-alt": "A “Look at the Stars” stargazing trip — photo",
             "project-lectures": "One of the most important parts of the project is the lectures given by experienced amateur astronomers. We talk about scientific discoveries, the history of astronomy and its modern achievements. The lectures are delivered in a light format, where complex things are explained in simple, understandable language. This helps listeners broaden their horizons and inspires them to explore astronomy on their own.",
             "project-sidewalk-astronomy": "We pay special attention to sidewalk astronomy evenings. These open-air meetups take place in the most accessible spots in the city. At these events anyone can come up, look through a telescope, and learn more about what the night sky is hiding.",
             "observatory-title": "Homemade astronomical observatory",
             "observatory-intro": "This project is one of the most significant chapters of my life. Our homemade astronomical observatory is a unique phenomenon for the Orenburg region. It operates autonomously and captures images of deep-sky objects, making astronomy accessible to everyone. You can learn more about the observatory's operation and equipment in the section - ",
             "observatory-intro-link": "astronomical observatory in Orenburg",
+            "gallery-observatory-alt": "The homemade observatory in Orenburg — photo",
             "observatory-work-1": {
                 "text": "The observatory is open to everyone. Anyone can use its capabilities to obtain images of celestial objects. Moreover, the site features a section",
                 "objects": "Objects"

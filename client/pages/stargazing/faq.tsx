@@ -8,6 +8,7 @@ import { useTranslation } from 'next-i18next/pages'
 import { wrapper } from '@/api'
 import { StaticInfoPageLayout } from '@/components/common'
 import { initSSRLocale } from '@/utils/ssrLocale'
+import { nodeToText } from '@/utils/strings'
 
 import styles from './faq.module.sass'
 
@@ -329,7 +330,8 @@ const StargazingFAQPage: NextPage<object> = () => {
             name: question,
             acceptedAnswer: {
                 '@type': 'Answer',
-                text: typeof answer === 'string' ? answer : question
+                // The visible answer as plain text: the ones with links are JSX
+                text: nodeToText(answer)
             }
         }))
     }

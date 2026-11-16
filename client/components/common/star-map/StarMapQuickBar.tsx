@@ -115,6 +115,8 @@ const StarMapQuickBar: React.FC<StarMapQuickBarProps> = ({ settings, onChange, s
                 mode={active ? 'primary' : 'secondary'}
                 icon={key === 'planets' ? 'Sun' : undefined}
                 tooltip={labels[key]}
+                // The icon is a child, so the kit takes no name from the tooltip
+                aria-label={labels[key]}
                 aria-pressed={active}
                 disabled={!enabled}
                 className={styles.quickBarButton}

@@ -368,6 +368,8 @@ const StarMapRender: React.FC<StarMapProps> = ({
                                 content: t('components.common.star-map.toolbar.zoom-in', 'Приблизить'),
                                 placement: 'right'
                             }}
+                            // The icon is a child, so the kit takes no name from the tooltip
+                            aria-label={t('components.common.star-map.toolbar.zoom-in', 'Приблизить')}
                             className={styles.railButton}
                             onClick={zoomIn}
                         >
@@ -380,6 +382,8 @@ const StarMapRender: React.FC<StarMapProps> = ({
                                 content: t('components.common.star-map.toolbar.zoom-out', 'Отдалить'),
                                 placement: 'right'
                             }}
+                            // The icon is a child, so the kit takes no name from the tooltip
+                            aria-label={t('components.common.star-map.toolbar.zoom-out', 'Отдалить')}
                             className={styles.railButton}
                             onClick={zoomOut}
                         >
@@ -397,6 +401,8 @@ const StarMapRender: React.FC<StarMapProps> = ({
                                     content: t('components.common.star-map.toolbar.fit-view', 'Вписать вид'),
                                     placement: 'right'
                                 }}
+                                // The icon is a child, so the kit takes no name from the tooltip
+                                aria-label={t('components.common.star-map.toolbar.fit-view', 'Вписать вид')}
                                 className={styles.railButton}
                                 onClick={fitView}
                             >

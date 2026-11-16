@@ -107,6 +107,7 @@ const StargazingWherePage: NextPage<object> = () => {
                 </p>
                 <PhotoGallery
                     photos={gallerySidewalk}
+                    alt={tPage('gallery-sidewalk-alt', 'Тротуарная астрономия в Оренбурге — фото')}
                     onClick={({ index }) => {
                         handlePhotoClick(index)
                     }}

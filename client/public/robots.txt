@@ -1,26 +1,19 @@
 User-agent: *
 Allow: /
 
-# Admin and utility pages — not for public indexing
+# Admin pages and forms — not for public indexing. Pages that people reach from emails
+# and messengers (/auth, /profile, /unsubscribe, /stargazing/checkin, /stargazing/payment)
+# are NOT blocked here on purpose: they carry <meta name="robots" content="noindex">, and a
+# crawler blocked by robots.txt never sees it - it may index the bare URL from the links.
 Disallow: /photos/form
 Disallow: /objects/form
 Disallow: /stargazing/form
-Disallow: /stargazing/checkin
-Disallow: /stargazing/payment
-Disallow: /auth
-Disallow: /en/auth
 Disallow: /admin/
 Disallow: /en/admin/
 Disallow: /api/
 Disallow: /en/photos/form
 Disallow: /en/objects/form
 Disallow: /en/stargazing/form
-Disallow: /en/stargazing/checkin
-Disallow: /en/stargazing/payment
-Disallow: /profile
-Disallow: /en/profile
-Disallow: /unsubscribe
-Disallow: /en/unsubscribe
 Disallow: /stargazing/*/statistic
 Disallow: /en/stargazing/*/statistic
 
@@ -32,9 +25,6 @@ Clean-param: _ym_status-check&_ym_lang /
 Clean-param: trk /
 Clean-param: ref /
 Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content /
-
-# Specify the main mirror of the site
-Host: https://astro.miksoft.pro
 
 # Sitemap for faster indexing
 Sitemap: https://astro.miksoft.pro/sitemap

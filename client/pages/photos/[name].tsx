@@ -141,10 +141,13 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
         date: formatCalendarDate(photo.date, i18n.language, { day: '2-digit', month: '2-digit', year: 'numeric' })
     })
 
+    // Only the telescope and the camera: the whole kit made the description ~270 characters,
+    // and search engines cut it at ~160
     const equipmentDescription = equipment
+        .filter(({ type }) => type === ApiModel.EquipmentType.Scope || type === ApiModel.EquipmentType.Camera)
         .map(({ brand, model }) => [brand, model].filter(Boolean).join(' '))
         .filter(Boolean)
-        .join('; ')
+        .join(', ')
 
     const imageObjectSchema = useMemo(
         () => ({
@@ -182,7 +185,7 @@ const PhotoItemPage: NextPage<PhotoItemPageProps> = ({
                 equipmentDescription
                     ? t(
                           'pages.photo.description',
-                          '{{photoTitle}}: астрофотография, снятая любительской обсерваторией в Оренбурге. Оборудование: {{equipment}}.',
+                          '{{photoTitle}}: астрофотография, снятая любительской обсерваторией в Оренбурге. Снято на {{equipment}}.',
                           { photoTitle: objectTitles, equipment: equipmentDescription }
                       )
                     : t(

@@ -21,7 +21,14 @@ export interface GalleryPhoto extends Photo {
     duration?: number
 }
 
-type PhotoGalleryProps = RowsPhotoAlbumProps<GalleryPhoto>
+type PhotoGalleryProps = RowsPhotoAlbumProps<GalleryPhoto> & {
+    /**
+     * Alt text for the photos that have none of their own, numbered: "<alt> 1", "<alt> 2"…
+     * Static galleries are plain image imports; without it every tile is alt="" - invisible
+     * to image search and a nameless button to a screen reader.
+     */
+    alt?: string
+}
 
 // react-photo-album normally sizes each cell's wrapper implicitly - the <img>
 // itself gets `aspect-ratio: var(--photo-width) / var(--photo-height)` (see
@@ -91,10 +98,13 @@ const renderImage = (props: RenderImageProps, context: RenderPhotoContext<Galler
 // get re-flowed - and the content below doesn't jump (CLS) - once JS runs.
 const GALLERY_BREAKPOINTS = [320, 600, 900, 1200] as const
 
-export const PhotoGallery: React.FC<PhotoGalleryProps> = (props) => (
+export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ alt, photos, ...props }) => (
     <SSR breakpoints={GALLERY_BREAKPOINTS}>
         <RowsPhotoAlbum
             {...props}
+            photos={
+                alt ? photos.map((photo, index) => ({ ...photo, alt: photo.alt || `${alt} ${index + 1}` })) : photos
+            }
             spacing={8}
             targetRowHeight={160}
             render={{ image: renderImage }}

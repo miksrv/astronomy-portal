@@ -145,6 +145,7 @@ const StargazingHowToPage: NextPage<object> = () => {
                 </p>
                 <PhotoGallery
                     photos={photosGallery}
+                    alt={tPage('gallery-alt', 'Астровыезд с телескопами за городом — фото')}
                     onClick={({ index }) => {
                         handlePhotoClick(index)
                     }}

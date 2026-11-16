@@ -12,6 +12,7 @@ use CodeIgniter\Filters\InvalidChars;
 use CodeIgniter\Filters\PageCache;
 use CodeIgniter\Filters\PerformanceMetrics;
 use CodeIgniter\Filters\SecureHeaders;
+use App\Filters\NoIndexFilter;
 use App\Filters\ObservatoryAgentFilter;
 use App\Filters\PublicCacheFilter;
 use App\Filters\RateLimitFilter;
@@ -40,6 +41,7 @@ class Filters extends BaseFilters
         'ratelimit'     => RateLimitFilter::class,
         'publiccache'   => PublicCacheFilter::class,
         'observatoryagent' => ObservatoryAgentFilter::class,
+        'noindex'       => NoIndexFilter::class,
     ];
 
     /**
@@ -86,6 +88,7 @@ class Filters extends BaseFilters
             // 'honeypot',
             // 'secureheaders',
             'cors',
+            'noindex',
         ],
     ];
 

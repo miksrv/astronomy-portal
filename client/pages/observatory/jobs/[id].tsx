@@ -66,6 +66,9 @@ const TelescopeJobPage: NextPage = () => {
     return (
         <AppLayout
             canonical={id ? `observatory/jobs/${id}` : undefined}
+            // Loaded in the browser: the server HTML is the same empty shell for every id, and a
+            // missing job is a 200 "not found" - so the page stays out of the index
+            noindex={true}
             title={pageTitle}
             description={t(
                 'pages.observatory.job.description',

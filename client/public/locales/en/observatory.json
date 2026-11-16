@@ -481,7 +481,7 @@
             "how-it-works": "How it works",
             "schema-name": "Look at the Stars amateur observatory",
             "schema-locality": "Orenburg",
-            "description": "A homemade amateur astronomical observatory with remote access from anywhere in the world via the internet. Observatory operation statistics, number of frames captured and data accumulated. Telescope operating calendar.",
+            "description": "A remotely controlled amateur observatory in Orenburg: weather, cameras, statistics of captured frames and the telescope calendar.",
             "lead": "Weather, cameras, equipment and the imaging schedule in real time. The observatory decides on its own whether to start imaging by analysing the conditions.",
             "state": "Equipment status",
             "camera-observatory": "Observatory",

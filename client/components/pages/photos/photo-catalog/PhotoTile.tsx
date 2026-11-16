@@ -46,7 +46,7 @@ const PhotoTileComponent: React.FC<PhotoTileProps> = ({ photo, priority = 'lazy'
                 })}
                 fill={true}
                 sizes={'(max-width: 768px) 100vw, 280px'}
-                {...(priority === 'preload' ? { preload: true } : { loading: priority })}
+                {...(priority === 'preload' ? { preload: true, fetchPriority: 'high' } : { loading: priority })}
             />
             <div className={styles.caption}>
                 <span className={styles.name}>

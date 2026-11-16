@@ -12,6 +12,7 @@ GET  /                              → API health info (inline closure)
 GET  /camera/:id                    → Camera::show
 
 GET  /statistic/telescope           → Statistic::telescope     (per observing night: local noon → noon, UTC+5; `?period=MM-YYYY`; cached 10 min; the FITS archive is read-only now, so the cache simply expires)
+GET  /statistic/stargazing          → Statistic::stargazing    (number of conducted events and total participants, for the landing page and /stargazing)
 
 GET  /auth/me                       → Auth::me
 GET  /auth/google                   → Auth::google              [rate-limited: auth_oauth, 15/300s]
@@ -171,7 +172,7 @@ All controllers extend `BaseApiController` (see API Responses below).
 | `Photos.php` | CRUD for astrophoto archive; image upload via `PhotoUploadLibrary`; the plate solve of a photo (`astrometry()`, `solve()`) |
 | `Relay.php` | Observatory power relay control (list state, toggle light with cooldown guard) |
 | `Roles.php` | CRUD for roles (name + a set of `Permission` privileges); `permissions()` returns the fixed privilege catalog for the admin UI's checkbox list |
-| `Sitemap.php` | Returns URL slugs for photos, objects, and events for sitemap generation |
+| `Sitemap.php` | Returns the ids of photos, objects and events with their last-modified time (ISO 8601 with the offset, the same for all three) for the frontend's `/sitemap` |
 | `Statistic.php` | Aggregates telescope imaging statistics per observing night (`ObjectFitsFilesModel::NIGHT_EXPRESSION`), optionally for one month |
 
 ---
@@ -196,7 +197,6 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 | `ObjectFitsFilesModel.php` | `objects_fits_files` | yes | FITS file metadata per object; `NIGHT_EXPRESSION` names the observing night a frame belongs to (local noon → noon), `getNightsSummary()` counts nights per object, `getObjectOptics()` picks the optical train (focal length / pixel / sensor / scale) most of an object's frames share; indexed on (`object`, `date_obs`) |
 | `ObjectFitsFiltersModel.php` | `objects_fits_filters` | yes | Filter data extracted from FITS files |
 | `PhotosModel.php` | `photos` | yes | `PhotoEntity`; tracks `views` count |
-| `PhotosAuthorModel.php` | `photos_authors` | yes | Author attribution for photos |
 | `PhotosCategoryModel.php` | `photos_categories` | no | Pivot: photo ↔ category |
 | `PhotosEquipmentsModel.php` | `photos_equipments` | no | Pivot: photo ↔ equipment used |
 | `PhotosFiltersModel.php` | `photos_filters` | no | Filter metadata per photo |
@@ -294,8 +294,6 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 | `EmailLibrary` | Wraps CodeIgniter email service for mailing campaigns |
 | `RelayLibrary` | HTTP communication with the RODOS relay board (3 s read / 5 s write timeouts, so a hung link never blocks the dashboard) |
 | `PhotoUploadLibrary` | Handles photo file validation, resizing (`_small` 160×36 strip, `_thumb` 160×160 square, `_medium` 500×400, `_large` 4096 wide), and storage |
-| `PhotosLibrary` | Helper utilities for photo data aggregation |
-| `StatisticLibrary` | Aggregation helpers for telescope statistics |
 | `GoogleClient` / `YandexClient` / `VkClient` | OAuth provider integrations |
 | `PaymentLibrary` | Gateway-agnostic payment orchestration (uses `PaymentGatewayInterface`) |
 | `PaymentGatewayInterface` | Contract a new payment provider must implement |
@@ -318,8 +316,8 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 |---|---|
 | `PublicCacheFilter` | `Cache-Control: public, max-age=N, stale-while-revalidate=4N` on viewer-independent public GETs (catalogue, photos, categories, equipment, FITS lists, statistics, random comments, sitemap). Alias `publiccache`, applied per route as `['filter' => 'publiccache:<seconds>']`; only a 200 to a request without an `Authorization` header gets the header, with `Vary: Locale, Authorization` (the body depends on the `Locale` header). The default `no-store` is removed first — CI4's `setHeader()` appends to a multi-value header. |
 | `RateLimitFilter` | Per-IP token-bucket throttling for abuse-prone public routes. Registered as alias `ratelimit` in `Config/Filters.php`; applied per-route via `['filter' => 'ratelimit:<bucket>,<capacity>,<seconds>']` (see route table above for current buckets). Disabled when `ENVIRONMENT === 'testing'` since the `file` cache backend is shared across test cases. Uses CI4's built-in `Services::throttler()`. |
+| `NoIndexFilter` | Global `after` filter (alias `noindex`): `X-Robots-Tag: noindex` on every response that goes through the app, so search engines don't index the API's JSON. The photos and covers in `public/` are static files the web server sends itself and stay indexable for image search |
 | `ObservatoryAgentFilter` | Alias `observatoryagent`: only lets through `Authorization: Bearer <observatory.agentToken>` (constant-time compare; a token shorter than 32 characters or none refuses everything) — the observatory agent's endpoints |
-| `CorsFilter` | Legacy/unused — superseded by CI4's built-in `Cors` filter (`Config\Cors`); left in place as a removal marker only. |
 
 ### CLI Commands (`app/Commands/`)
 | Command | Group | Purpose |

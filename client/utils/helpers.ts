@@ -63,8 +63,12 @@ const siteBase = (): string => {
  * The single source of the locale-prefix rule — used by AppLayout (canonical/og:url),
  * BreadcrumbJsonLd and page-level JSON-LD blocks; must stay consistent between them.
  */
-export const createPageUrl = (language?: string, path: string = ''): string =>
-    `${siteBase()}${language === 'en' ? 'en/' : ''}${path.replace(/^\//, '')}`
+export const createPageUrl = (language?: string, path: string = ''): string => {
+    const page = path.replace(/^\//, '')
+
+    // The English home page is "/en": "/en/" answers with a redirect to it
+    return language === 'en' ? `${siteBase()}en${page ? `/${page}` : ''}` : `${siteBase()}${page}`
+}
 
 /**
  * Serialize a JSON-LD object for a `<script type="application/ld+json">` body: '<' is

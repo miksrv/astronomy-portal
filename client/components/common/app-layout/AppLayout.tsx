@@ -112,9 +112,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ fullWidth, noTopMargin, no
                     languageAlternates:
                         props?.canonical !== undefined
                             ? [
-                                  { hrefLang: 'ru', href: `${SITE_LINK}${props.canonical ?? ''}` },
-                                  { hrefLang: 'en', href: `${SITE_LINK}en/${props.canonical ?? ''}` },
-                                  { hrefLang: 'x-default', href: `${SITE_LINK}${props.canonical ?? ''}` }
+                                  { hrefLang: 'ru', href: createPageUrl('ru', props.canonical) },
+                                  { hrefLang: 'en', href: createPageUrl('en', props.canonical) },
+                                  { hrefLang: 'x-default', href: createPageUrl('ru', props.canonical) }
                               ]
                             : undefined,
                     openGraph: {
