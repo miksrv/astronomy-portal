@@ -6,7 +6,7 @@
 |------|---------|
 | Node.js | ≥ 20.11.0 |
 | Yarn | 4.9.2 |
-| PHP | ≥ 8.2 |
+| PHP | ≥ 8.4 |
 | Composer | ≥ 2.x |
 | Docker & Docker Compose | any recent version |
 

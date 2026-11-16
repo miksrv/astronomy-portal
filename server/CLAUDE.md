@@ -2,7 +2,7 @@
 
 Backend-specific reference for the CodeIgniter 4 PHP API. For project-wide context and dev commands see the root `CLAUDE.md`; deployment is in `docs/deployment.md`.
 
-**Stack:** CodeIgniter 4.7, PHP 8.2 (pinned as `config.platform.php` in `composer.json`, so `composer update` never resolves packages the hosting cannot run). JWT via `firebase/php-jwt ^7` (an HS256 secret of at least 32 bytes — `auth.token.secret`), Web Push via `minishlink/web-push ^11` (+ `guzzlehttp/guzzle`), ticket QR codes via `endroid/qr-code ^6`. Always run migrations after pulling changes that add them.
+**Stack:** CodeIgniter 4.7, PHP 8.4 (pinned as `config.platform.php` in `composer.json`, so `composer update` never resolves packages the hosting cannot run). JWT via `firebase/php-jwt ^7` (an HS256 secret of at least 32 bytes — `auth.token.secret`), Web Push via `minishlink/web-push ^11` (+ `guzzlehttp/guzzle`), ticket QR codes via `endroid/qr-code ^6`. Always run migrations after pulling changes that add them.
 
 ## API Routes (`app/Config/Routes.php`)
 
