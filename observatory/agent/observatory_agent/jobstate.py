@@ -158,9 +158,15 @@ class JobState:
 
     def enqueue(self, job_id: str, type_: str, time: str, payload: dict | None = None) -> int:
         """Adds an update with the job's next seq; returns the seq."""
-        row = self.db.execute("SELECT last_seq FROM jobs WHERE id = ?", (job_id,)).fetchone()
+        row = self.db.execute("SELECT last_seq, data FROM jobs WHERE id = ?", (job_id,)).fetchone()
         if row is None:
             raise KeyError(job_id)
+        # The site ignores an update older than the job's `repeatedAt` (its server clock): it is
+        # taken for one of the previous run. An update made now belongs to the new run, so a clock
+        # here that is behind the server's must not date it before the repeat
+        repeated_at = json.loads(row["data"]).get("repeatedAt")
+        if isinstance(repeated_at, str) and time < repeated_at:
+            time = repeated_at
         seq = row["last_seq"] + 1
         self.db.execute("UPDATE jobs SET last_seq = ? WHERE id = ?", (seq, job_id))
         self.db.execute(

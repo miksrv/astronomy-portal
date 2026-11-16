@@ -388,8 +388,8 @@ class Telescope extends BaseApiController
 
     /**
      * `POST /telescope/jobs/:id/remove` (`telescope.manage`) — deletes the job outright: only a
-     * job the observatory doesn't have yet (pending, approved) or a final one; a queued or
-     * running job is cancelled first (409 otherwise).
+     * pending job (the observatory never saw it) or a final one; an approved, queued or running
+     * job may already be in the observatory's schedule and is cancelled first (409 otherwise).
      */
     public function remove(?string $id = null): ResponseInterface
     {

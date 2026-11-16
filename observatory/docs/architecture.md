@@ -103,5 +103,5 @@ Observatory PC: agent ──reads──► INDI (:7624), Ekos Scheduler (DBus), 
 
 Both phases are implemented in [`../agent/`](../agent/README.md): the status (phase 1) and the
 jobs (phase 2, built in 4.17.0, not deployed yet). The agent never moves hardware itself: it loads
-and starts Ekos Scheduler runs built from the jobs on the site and reports what was captured. Full plan:
+(never starts) Ekos Scheduler runs built from the jobs on the site and reports what was captured. Full plan:
 [FEAT-30](../../features/observatory-agent.md).

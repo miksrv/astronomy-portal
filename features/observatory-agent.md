@@ -308,6 +308,9 @@ job comes back:
   the earlier run (still in its local database and in `~/fits/jobs/<job id>/`) don't complete it at
   once; the site ignores an update whose time is before `repeated_at` (the earlier run's progress,
   `failed` or `completed` left in the agent's outbox) — its seq is consumed, the new run untouched.
+  `repeated_at` is the server's clock and an update's time the agent's: an update the agent makes
+  once it knows of the repeat is never dated before `repeatedAt`, so a clock behind the server's
+  can't get the new run's `accepted` ignored (the job would stay `approved` for good).
 
 ### 4.11 Altitude floor: 15°, enforced in Ekos too
 

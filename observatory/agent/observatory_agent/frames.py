@@ -5,8 +5,8 @@ Every sequence the agent writes saves its frames under its own folder with the p
 
     <frames_dir>/jobs/<job id>/<target>/Light/<filter>/<file>.fits
 
-so the folder names the job, and the folder two levels up from the file names
-the filter. Only Light frames count. A file is taken once it hasn't changed for `settle_seconds`
+so the folder names the job (the one right under jobs/, whatever Ekos made of the target name),
+and the folder the file is in names the filter. Only Light frames count. A file is taken once it hasn't changed for `settle_seconds`
 (Ekos may still be writing it). `frames-upload` moves the files away in the morning; the agent's
 database keeps the record, which is what the counts are made of.
 """
@@ -41,8 +41,9 @@ def parse(frames_dir: str, path: str) -> tuple[str, str] | None:
     except ValueError:
         return None
     parts = relative.parts
-    # jobs / <job id> / <target> / Light / <filter> / file
-    if len(parts) < 6 or parts[0] != JOBS_DIR:
+    # jobs / <job id> / <target> / Light / <filter> / file — the <target> folder may be missing:
+    # Ekos sanitizes %t and may leave nothing of a name it can't put in a path (Cyrillic)
+    if len(parts) < 5 or parts[0] != JOBS_DIR:
         return None
     if not parts[-1].lower().endswith(EXTENSIONS) or parts[-3] != "Light":
         return None

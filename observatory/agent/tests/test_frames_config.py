@@ -13,6 +13,8 @@ ROOT = "/home/mik/fits"
     [
         (f"{ROOT}/jobs/a1b2/M_51/Light/L/M_51_Light_L_300_secs_2026-12-10T20-00-00.fits", ("a1b2", "L")),
         (f"{ROOT}/jobs/a1b2/M_51/Light/H/x.fit", ("a1b2", "H")),
+        (f"{ROOT}/jobs/a1b2/Light/L/_Light_L_300_secs.fits", ("a1b2", "L")),  # %t left empty by Ekos
+        (f"{ROOT}/jobs/Light/L/x.fits", None),
         (f"{ROOT}/patrol/17/NGC_2903/Light/L/x.fits", None),  # the patrol is gone: not ours
         (f"{ROOT}/jobs/a1b2/M_51/Dark/L/x.fits", None),  # only Light frames
         (f"{ROOT}/jobs/a1b2/M_51/Light/L/x.jpg", None),

@@ -521,6 +521,16 @@ def test_a_repeated_job_the_agent_still_has_as_completed_starts_from_zero(env):
     assert env.runner.state.job("a1")["local_status"] == "completed"
 
 
+def test_updates_of_a_repeated_job_are_not_dated_before_the_repeat(env):
+    """A clock here behind the server's: the site would take the new run's updates for old ones."""
+    _shoot_whole_plan(env)
+    ahead = jobs_mod.iso(env.clock["now"] + timedelta(hours=1))
+    env.portal.jobs = [portal_job(status="approved", version=2, progress={}, repeatedAt=ahead)]
+    env.step()
+    accepted = [u for u in env.portal.received if u["jobId"] == "a1" and u["type"] == "accepted"]
+    assert accepted[-1]["time"] == ahead
+
+
 def test_a_job_gone_from_the_site_is_forgotten(env):
     env.portal.jobs = [portal_job(status="queued")]
     env.step()

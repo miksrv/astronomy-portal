@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { JsonLdScript } from 'next-seo'
@@ -16,7 +17,6 @@ import {
     RelayList,
     SkyCard,
     TelescopeActivity,
-    TelescopeWidget,
     WeatherCard
 } from '@/components/pages/observatory'
 import { useNow } from '@/hooks/useNow'
@@ -28,6 +28,11 @@ import { TelescopeNight, toTelescopeNights } from '@/utils/telescopeActivity'
 import { OBSERVATORY_LAT, OBSERVATORY_LON } from '@/utils/visibility'
 
 import styles from './styles.module.sass'
+
+// Its own chunk: the jobs' cards and styles stay off this page while the feature is switched off
+const TelescopeWidget = dynamic(() =>
+    import('@/components/pages/observatory/telescope-jobs/TelescopeWidget').then((m) => m.TelescopeWidget)
+)
 
 /** The weather station reports every few minutes: poll at its pace, not faster */
 const WEATHER_POLLING_MS = 60_000
