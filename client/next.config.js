@@ -1,9 +1,15 @@
 const { i18n } = require('./next-i18next.config.js')
+const { version } = require('./package.json')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     compiler: {
         removeConsole: process.env.NODE_ENV === 'production'
+    },
+    // Inlined as a plain string at build time: importing package.json from a component
+    // would ship the whole file (every dependency and script) in the client chunks
+    env: {
+        NEXT_PUBLIC_APP_VERSION: version
     },
     // The public sitemap URL is "/sitemap" (see public/robots.txt), served by the
     // pages/api/sitemap.ts route handler. It can't live at pages/sitemap.tsx as a normal
