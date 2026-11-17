@@ -6,6 +6,7 @@ const config: Config.InitialOptions = {
         '**/*.{js,jsx,ts,tsx}',
         '!**/*.d.ts',
         '!**/node_modules/**',
+        '!**/__mocks__/**',
         '!<rootDir>/out/**',
         '!<rootDir>/.next/**',
         '!<rootDir>/*.config.js',

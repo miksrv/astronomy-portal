@@ -27,6 +27,9 @@ export const STARGAZING_RETRY_STORAGE_KEY = 'astro:lastBookingAttempt'
 // The server's /telescope/* routes are commented out too (server/app/Config/Routes.php): switch both on together.
 export const TELESCOPE_JOBS_ENABLED = false
 
+// Set from package.json by next.config.js (env)
+export const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION
+
 export const SITE_LINK = process.env.NEXT_PUBLIC_SITE_LINK
 
 export const HOST_API = process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:8080/'

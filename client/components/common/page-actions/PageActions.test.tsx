@@ -6,14 +6,7 @@ import { useAppSelector } from '@/api'
 
 import { PageAction, PageActions } from './PageActions'
 
-jest.mock('@/api', () => ({
-    ApiModel: {},
-    useAppSelector: jest.fn()
-}))
-
-jest.mock('next-i18next/pages', () => ({
-    useTranslation: () => ({ t: (_key: string, defaultValue: string) => defaultValue })
-}))
+jest.mock('@/api')
 
 const asUser = (permissions?: string[]) =>
     (useAppSelector as jest.Mock).mockImplementation((selector) =>

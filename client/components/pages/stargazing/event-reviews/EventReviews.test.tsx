@@ -7,20 +7,7 @@ import { REVIEW_INLINE_FORM_ID } from '@/utils/constants'
 
 import { EventReviews } from './EventReviews'
 
-jest.mock('@/api', () => ({
-    API: {
-        useCommentsGetListQuery: jest.fn(),
-        useCommentsCreateMutation: jest.fn(),
-        useCommentsDeleteMutation: jest.fn(),
-        endpoints: {
-            commentsGetList: {
-                initiate: jest.fn()
-            }
-        }
-    },
-    useAppDispatch: jest.fn(),
-    useAppSelector: jest.fn()
-}))
+jest.mock('@/api')
 
 const mockUser = { id: 'user-1', name: 'Тестовый Пользователь' }
 

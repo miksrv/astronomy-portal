@@ -3,25 +3,17 @@ import React from 'react'
 import { useRouter } from 'next/router'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 
-import { API } from '@/api'
+import { API, useAppDispatch } from '@/api'
 import { pushSnackbar } from '@/api/applicationSlice'
 
 import { ProfileCard } from './ProfileCard'
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }))
+jest.mock('@/api')
 
 // A save success/generic-error message is no longer rendered inline by
 // ProfileCard itself - it's pushed as a snackbar (see useSnackbar), so tests
 // below assert against dispatched actions rather than DOM text for those.
 const mockDispatch = jest.fn()
-
-jest.mock('@/api', () => ({
-    API: {
-        useAuthUpdateProfileMutation: jest.fn()
-    },
-    HOST_IMG: 'https://example.test/img',
-    useAppDispatch: () => mockDispatch
-}))
 
 const mockUpdateProfile = jest.fn()
 
@@ -39,6 +31,7 @@ const defaultMutationState = { isLoading: false }
 beforeEach(() => {
     jest.clearAllMocks()
     localStorage.clear()
+    jest.mocked(useAppDispatch).mockReturnValue(mockDispatch)
     ;(useRouter as jest.Mock).mockReturnValue({ asPath: '/profile', push: jest.fn() })
     ;(API.useAuthUpdateProfileMutation as jest.Mock).mockReturnValue([mockUpdateProfile, defaultMutationState])
 })

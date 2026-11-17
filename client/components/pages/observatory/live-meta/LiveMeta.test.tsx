@@ -4,14 +4,6 @@ import { render, screen } from '@testing-library/react'
 
 import { LiveMeta } from './LiveMeta'
 
-// Without an i18n instance `t` returns the default text as is: interpolate it like the real one
-jest.mock('next-i18next/pages', () => ({
-    useTranslation: () => ({
-        t: (_key: string, fallback: string, options?: Record<string, unknown>) =>
-            fallback.replace(/{{(\w+)}}/g, (_match, name: string) => String(options?.[name] ?? ''))
-    })
-}))
-
 describe('LiveMeta', () => {
     it('shows nothing while the age is unknown', () => {
         const { container } = render(<LiveMeta online={false} />)

@@ -6,12 +6,7 @@ import { API } from '@/api'
 
 import { AstroObjectForm } from './AstroObjectForm'
 
-jest.mock('@/api', () => ({
-    API: {
-        useCategoriesGetListQuery: jest.fn(),
-        useLazyObjectsSimbadLookupQuery: jest.fn()
-    }
-}))
+jest.mock('@/api')
 
 jest.mock('@/components/common', () => ({
     // The real panel: the form's SIMBAD behaviour is what these tests check
@@ -39,12 +34,6 @@ const M51 = {
 
 const lookup = jest.fn()
 
-// `simple-react-ui-kit` itself uses the project's shared Jest manual mock
-// (`client/__mocks__/simple-react-ui-kit.tsx`) - its `Select` is a
-// non-interactive stub (renders only the label, ignores `onSelect`/`value`),
-// so `categories` can't be driven through a click here; it's seeded via
-// `initialData` instead. See `ProfileCard.test.tsx`/`EventBookingForm.test.tsx`
-// for the same `querySelector`/`getByDisplayValue` convention.
 const defaultCategoriesState = {
     data: { items: [{ id: 1, title: 'Галактики' }] },
     isLoading: false

@@ -6,27 +6,7 @@ import { API, useAppDispatch, useAppSelector } from '@/api'
 
 import { RelayList } from './RelayList'
 
-jest.mock('@/api', () => ({
-    API: {
-        useRelayGetStateQuery: jest.fn(),
-        useRelayPutStatusMutation: jest.fn(),
-        useRelayToggleLightMutation: jest.fn(),
-        util: { updateQueryData: jest.fn() },
-        endpoints: {
-            relayGetState: {
-                initiate: jest.fn()
-            }
-        }
-    },
-    ApiModel: {
-        Permission: {
-            RELAY_CONTROL: 'relay.control'
-        }
-    },
-    ApiType: {},
-    useAppDispatch: jest.fn(),
-    useAppSelector: jest.fn()
-}))
+jest.mock('@/api')
 
 const baseRelayList = {
     items: [

@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { NextRouter, useRouter } from 'next/router'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 
 import { useUnsavedChangesGuard } from './useUnsavedChangesGuard'
@@ -10,10 +11,6 @@ const mockRouter = {
     asPath: '/objects/form?id=M_51',
     events: { on: jest.fn(), off: jest.fn() }
 }
-
-jest.mock('next/router', () => ({
-    useRouter: () => mockRouter
-}))
 
 const { push, beforePopState } = mockRouter
 
@@ -34,7 +31,10 @@ const Page: React.FC<{ dirty: boolean }> = ({ dirty }) => {
     )
 }
 
-beforeEach(() => jest.clearAllMocks())
+beforeEach(() => {
+    jest.clearAllMocks()
+    jest.mocked(useRouter).mockReturnValue(mockRouter as unknown as NextRouter)
+})
 
 describe('useUnsavedChangesGuard', () => {
     it('lets a link through when nothing changed', () => {

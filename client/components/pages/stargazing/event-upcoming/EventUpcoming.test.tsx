@@ -5,38 +5,14 @@ import utc from 'dayjs/plugin/utc'
 import { useRouter } from 'next/router'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 
-import { API, ApiModel, useAppSelector } from '@/api'
+import { API, ApiModel, useAppDispatch, useAppSelector } from '@/api'
 import { getSecondsUntilUTCDate } from '@/utils/dates'
 
 import { EventUpcoming } from './EventUpcoming'
 
 dayjs.extend(utc)
 
-jest.mock('@/api', () => ({
-    API: {
-        useEventPaymentStatusMutation: jest.fn(),
-        useEventsCancelRegistrationPostMutation: jest.fn(),
-        useEventsRegistrationPostMutation: jest.fn(),
-        useEventDeleteMutation: jest.fn(),
-        useEventGetUpcomingQuery: jest.fn(),
-        util: { invalidateTags: jest.fn() }
-    },
-    ApiModel: {
-        Permission: {
-            EVENTS_UPDATE: 'events.update',
-            EVENTS_DELETE: 'events.delete',
-            EVENTS_STATISTIC: 'events.statistic'
-        }
-    },
-    useAppSelector: jest.fn(),
-    useAppDispatch: () => jest.fn()
-}))
-
-jest.mock('next/router', () => ({ useRouter: jest.fn() }))
-
-jest.mock('next-i18next', () => ({
-    useTranslation: () => ({ t: (_key: string, defaultValue: string) => defaultValue })
-}))
+jest.mock('@/api')
 
 jest.mock('@/utils/dates', () => ({
     formatUTCDate: () => '1 January, 2025',
@@ -87,6 +63,7 @@ const baseEvent: ApiModel.Event = {
 
 beforeEach(() => {
     jest.clearAllMocks()
+    jest.mocked(useAppDispatch).mockReturnValue(jest.fn())
     ;(API.useEventsCancelRegistrationPostMutation as jest.Mock).mockReturnValue([mockCancelMutate, defaultCancelState])
     ;(API.useEventsRegistrationPostMutation as jest.Mock).mockReturnValue([mockRetryMutate, defaultRetryState])
     ;(API.useEventPaymentStatusMutation as jest.Mock).mockReturnValue([

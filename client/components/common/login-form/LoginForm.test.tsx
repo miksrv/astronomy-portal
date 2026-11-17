@@ -7,14 +7,7 @@ import { API } from '@/api'
 
 import { LoginForm } from './LoginForm'
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }))
-
-jest.mock('@/api', () => ({
-    API: {
-        useAuthLoginServiceMutation: jest.fn(),
-        useAuthRequestMagicLinkMutation: jest.fn()
-    }
-}))
+jest.mock('@/api')
 
 const mockLoginService = jest.fn()
 const mockRequestMagicLink = jest.fn()
