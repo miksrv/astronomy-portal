@@ -6,12 +6,7 @@ import { API, useAppSelector } from '@/api'
 
 import { EventBookingForm } from './EventBookingForm'
 
-jest.mock('@/api', () => ({
-    API: {
-        useEventsRegistrationPostMutation: jest.fn()
-    },
-    useAppSelector: jest.fn()
-}))
+jest.mock('@/api')
 
 const mockMutate = jest.fn()
 const defaultMutationState = {

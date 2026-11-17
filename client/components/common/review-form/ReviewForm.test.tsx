@@ -6,11 +6,7 @@ import { API } from '@/api'
 
 import { ReviewForm } from './ReviewForm'
 
-jest.mock('@/api', () => ({
-    API: {
-        useCommentsCreateMutation: jest.fn()
-    }
-}))
+jest.mock('@/api')
 
 const mockCreateComment = jest.fn()
 const defaultMutationState = { isLoading: false }
@@ -18,9 +14,7 @@ const defaultMutationState = { isLoading: false }
 const fillContent = (value: string) =>
     fireEvent.change(screen.getByPlaceholderText('Поделитесь впечатлениями...'), { target: { value } })
 
-const clickStar = (value: number) =>
-    // The test i18n instance does not interpolate, so every star shares one label: pick by position
-    fireEvent.click(screen.getAllByRole('button', { name: /Оценка .* из 5/ })[value - 1]!)
+const clickStar = (value: number) => fireEvent.click(screen.getByRole('button', { name: `Оценка ${value} из 5` }))
 
 const clickSubmit = () => fireEvent.click(screen.getByRole('button', { name: 'Отправить отзыв' }))
 

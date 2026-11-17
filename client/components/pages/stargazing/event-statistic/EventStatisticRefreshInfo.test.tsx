@@ -6,16 +6,7 @@ import { API } from '@/api'
 
 import { EventStatisticRefreshInfo } from './EventStatisticRefreshInfo'
 
-jest.mock('@/api', () => ({
-    API: {
-        useEventGetItemQuery: jest.fn(),
-        useEventGetStatisticQuery: jest.fn()
-    }
-}))
-
-jest.mock('next-i18next/pages', () => ({
-    useTranslation: () => ({ t: (_key: string, fallback: string) => fallback })
-}))
+jest.mock('@/api')
 
 const mockUseEventGetItemQuery = API.useEventGetItemQuery as jest.Mock
 const mockUseEventGetStatisticQuery = API.useEventGetStatisticQuery as jest.Mock

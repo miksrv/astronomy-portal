@@ -8,49 +8,12 @@ import { API } from '@/api'
 // under components/ — Next must not treat test files as routes.
 import StargazingPaymentPage from '@/pages/stargazing/payment'
 
-jest.mock('@/api', () => ({
-    API: {
-        useEventPaymentStatusMutation: jest.fn(),
-        useEventsRegistrationPostMutation: jest.fn(),
-        util: { getRunningQueriesThunk: jest.fn() }
-    },
-    setLocale: jest.fn(),
-    SITE_LINK: 'https://example.test/',
-    wrapper: { getServerSideProps: () => () => ({}) }
-}))
-
-// The Jest CJS build of the kit does not expose Spinner; provide light stand-ins.
-jest.mock('simple-react-ui-kit', () => {
-    return {
-        Button: ({
-            children,
-            label,
-            onClick
-        }: {
-            children?: React.ReactNode
-            label?: string
-            onClick?: () => void
-        }) => <button onClick={onClick}>{label ?? children}</button>,
-        Container: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-        Message: ({ title, children }: { title?: string; children?: React.ReactNode }) => (
-            <div>
-                {title}
-                {children}
-            </div>
-        ),
-        Spinner: () => null
-    }
-})
+jest.mock('@/api')
 
 jest.mock('@/api/authSlice', () => ({ setSSRToken: jest.fn() }))
 jest.mock('cookies-next', () => ({ getCookie: jest.fn() }))
-jest.mock('next-i18next/pages', () => ({
-    useTranslation: () => ({ t: (_key: string, fallback: string) => fallback, i18n: { language: 'ru' } })
-}))
 jest.mock('next-i18next/pages/serverSideTranslations', () => ({ serverSideTranslations: jest.fn() }))
 jest.mock('next-seo/pages', () => ({ generateNextSeo: () => null }))
-jest.mock('next/router', () => ({ useRouter: jest.fn() }))
-
 const mockTrigger = jest.fn()
 const mockRetryBooking = jest.fn()
 const mockPush = jest.fn()

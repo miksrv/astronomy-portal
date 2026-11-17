@@ -4,28 +4,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 
 import { ObservatoryEvents } from './ObservatoryEvents'
 
-jest.mock('@/api', () => ({ ApiModel: {} }))
-
-jest.mock('next-i18next/pages', () => ({
-    useTranslation: () => ({
-        i18n: { language: 'ru' },
-        t: (_key: string, fallback: string) => fallback
-    })
-}))
-
-jest.mock('simple-react-ui-kit', () => {
-    const actual = jest.requireActual('../../../../__mocks__/simple-react-ui-kit')
-
-    return {
-        ...actual,
-        Container: ({ header, children }: { header?: React.ReactNode; children?: React.ReactNode }) => (
-            <div>
-                {header}
-                {children}
-            </div>
-        )
-    }
-})
+jest.mock('@/api')
 
 const events = Array.from({ length: 16 }, (_, index) => ({
     id: 100 - index,

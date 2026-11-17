@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 
 import { ObservatoryStatus } from './ObservatoryStatus'
 
-jest.mock('@/api', () => ({ ApiModel: {}, ApiType: {} }))
+jest.mock('@/api')
 
 // The map loads d3-celestial: the test only needs to know it was asked for
 jest.mock('@/components/common', () => ({
@@ -12,40 +12,6 @@ jest.mock('@/components/common', () => ({
         <div data-testid={'star-map'}>{telescope ? 'marker' : 'no marker'}</div>
     )
 }))
-
-// Without an i18n instance `t` returns the default text as is: interpolate it like the real one
-jest.mock('next-i18next/pages', () => ({
-    useTranslation: () => ({
-        i18n: { language: 'ru' },
-        t: (_key: string, fallback: string, options?: Record<string, unknown>) =>
-            fallback.replace(/{{(\w+)}}/g, (_match, name: string) => String(options?.[name] ?? ''))
-    })
-}))
-
-// The kit mock renders neither the header nor the action of a Container: the badge and the
-// title live there, so the test renders them as plain children
-jest.mock('simple-react-ui-kit', () => {
-    const actual = jest.requireActual('../../../../__mocks__/simple-react-ui-kit')
-
-    return {
-        ...actual,
-        Container: ({
-            header,
-            action,
-            children
-        }: {
-            header?: React.ReactNode
-            action?: React.ReactNode
-            children?: React.ReactNode
-        }) => (
-            <div>
-                {header}
-                {action}
-                {children}
-            </div>
-        )
-    }
-})
 
 const now = new Date('2026-11-03T22:02:00Z')
 

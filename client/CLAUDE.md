@@ -63,6 +63,21 @@ Prefer the shared `useApiFormError(error)` hook (`client/hooks/useApiFormError.t
 
 ---
 
+## Unit tests (Jest + Testing Library)
+
+Shared mocks live in one place — reuse them instead of re-declaring a `jest.mock` factory in each test:
+
+| Module                | Mock                                | How it applies                                                                                                                                                                                       |
+| --------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `simple-react-ui-kit` | `__mocks__/simple-react-ui-kit.tsx` | automatically; accessible stand-ins (labels wired via `getByLabelText`, errors `role="alert"`, single `Select` → native `<select>`, `multiple` → checkboxes)                                         |
+| `next-i18next/pages`  | `__mocks__/next-i18next/pages.ts`   | automatically; `t()` returns the Russian fallback with `{{name}}` interpolated, `i18n.language` is `ru`                                                                                              |
+| `next/router`         | `__mocks__/next/router.ts`          | automatically; `useRouter` is a `jest.fn` returning a stub router — override with `jest.mocked(useRouter).mockReturnValue(...)`                                                                      |
+| `@/api`               | `api/__mocks__/index.ts`            | opt-in with `jest.mock('@/api')`; every `API` hook / `util` / `endpoints.*.initiate`, `useAppSelector`, `useAppDispatch` is a `jest.fn` generated from the real slice, models and constants are real |
+
+A node module mock (next to `node_modules`) is picked up without a `jest.mock()` call. When one test needs a different stand-in, override just that export: `jest.mock('simple-react-ui-kit', () => ({ ...jest.requireActual('@/__mocks__/simple-react-ui-kit'), Container: ... }))`. If several tests need the same different behaviour, change the shared mock instead.
+
+---
+
 ## Verification Checklist
 
 Run all four after any change — CI will catch failures, but run locally first:
