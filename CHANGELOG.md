@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 4.17.2
+
+### Patch Changes
+
+- Libraries updated to their latest versions; pages load a little less code
+
 ## 4.17.1
 
 Better visibility in search engines, a faster first screen and more reliable mailings.
