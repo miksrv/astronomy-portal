@@ -4,7 +4,7 @@
 
 | Tool | Version |
 |------|---------|
-| Node.js | ≥ 20.11.0 |
+| Node.js | ≥ 22 |
 | Yarn | 4.9.2 |
 | PHP | ≥ 8.4 |
 | Composer | ≥ 2.x |

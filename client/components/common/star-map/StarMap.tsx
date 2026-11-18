@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { cn, Skeleton } from 'simple-react-ui-kit'
-import { PartialDeep } from 'type-fest'
 
 import { ApiModel } from '@/api'
 import { customConfig } from '@/components/common/star-map/config'
@@ -13,6 +12,13 @@ import styles from './styles.module.sass'
 export type StarMapObject = Pick<ApiModel.Object, 'name' | 'ra' | 'dec'>
 
 type CustomConfigType = typeof customConfig
+
+/** Every property optional, at any depth: a caller overrides only the settings it needs */
+type PartialDeep<T> = T extends readonly unknown[] | ((...args: never[]) => unknown)
+    ? T
+    : T extends object
+      ? { [K in keyof T]?: PartialDeep<T[K]> }
+      : T
 
 export interface StarMapViewControls {
     zoomIn: string

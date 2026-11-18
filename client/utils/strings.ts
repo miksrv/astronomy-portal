@@ -1,5 +1,3 @@
-import React from 'react'
-
 /**
  * Replaces underscores with spaces in the given string.
  * @param {string} objectName - The name of the astronomical object.
@@ -153,32 +151,4 @@ export const removeMarkdownPreserveParagraphs = (text?: string): string => {
         .map((paragraph) => removeMarkdown(paragraph))
         .filter(Boolean)
         .join('\n\n')
-}
-
-/**
- * The text a React node renders, without its markup: e.g. an answer made of text and
- * links becomes one plain string for JSON-LD. Whitespace runs collapse to one space.
- */
-export const nodeToText = (node: React.ReactNode): string => {
-    const collect = (value: React.ReactNode): string => {
-        if (value == null || typeof value === 'boolean') {
-            return ''
-        }
-
-        if (typeof value === 'string' || typeof value === 'number') {
-            return String(value)
-        }
-
-        if (Array.isArray(value)) {
-            return value.map(collect).join('')
-        }
-
-        if (React.isValidElement<{ children?: React.ReactNode }>(value)) {
-            return collect(value.props.children)
-        }
-
-        return ''
-    }
-
-    return collect(node).replace(/\s+/g, ' ').trim()
 }

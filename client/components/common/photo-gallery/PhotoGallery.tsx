@@ -12,8 +12,7 @@ import styles from './styles.module.sass'
 // poster image's (a video is never rendered inline in the grid, only its
 // poster - see Business Rule 5 in features/stargazing-event-video-uploads.md).
 // Both new fields are optional so every existing photo-only caller
-// (pages/about.tsx, observatory/overview.tsx, observatory/history/[slug].tsx,
-// stargazing/where.tsx, stargazing/howto.tsx) keeps compiling/rendering
+// (pages/about.tsx, observatory/history/[slug].tsx) keeps compiling/rendering
 // unchanged.
 export interface GalleryPhoto extends Photo {
     mediaType?: 'photo' | 'video'

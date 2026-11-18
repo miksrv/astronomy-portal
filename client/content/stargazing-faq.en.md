@@ -1,0 +1,92 @@
+---
+title: Frequently Asked Questions
+description: Find answers to frequently asked questions about stargazing trips: registration, what to bring, cost, duration and how to get there. Get ready for a comfortable night under the stars!
+---
+
+Find answers to frequently asked questions about stargazing trips: registration, what to bring, cost, duration and how to get there. Announcements and news are in our ["Look at the Stars"](https://t.me/look_at_stars) Telegram channel.
+
+## When is the next stargazing trip?
+
+We run stargazing trips from May to October every year, but the specific dates depend heavily on the weather. A fairly reliable forecast is only available 2-4 days before a trip, so we can't publish a schedule for the whole season in advance. To make sure you don't miss the next registration opening, subscribe to our [Telegram channel](https://t.me/look_at_stars), and log in on the site - once you sign in by email or via Yandex or VK you're automatically subscribed to our event mailing. It's also worth checking the [stargazing trips page](/stargazing) from time to time, where we post announcements.
+
+## How do I find out where it takes place?
+
+Our stargazing trips always take place out of town, usually within 40-70 km. We head away from light pollution and city lights to see the stars. The exact location becomes available after you register. If you happen to lose the location, just go back to the registration page using the same link. It includes geolocation links for Yandex.Maps and Google Maps.
+
+## Can I come without registering?
+
+No, you can't. Registration is required, as it lets us plan the event, notify participants about any changes, and ensure comfort for everyone.
+
+## Why do I need a QR code?
+
+The QR code is your entry ticket to our event. It will be checked at the entrance. Please have it ready in advance to avoid creating a queue on site. If you don't have a QR code, we'll have to turn you away. The QR code is how we manage the number of participants at the site. Our natural surroundings, as well as the team's physical capacity, have their limits. Please respect that and understand.
+
+## What should I bring?
+
+For a comfortable stay at the observing site, be sure to bring warm clothing (we're out in the steppe, and it's windy and cold at night), a camping mat, folding chairs, and blankets. We also recommend a thermos with tea or coffee and some sandwiches. Consider bringing insect repellent. Hookahs, barbecues, alcohol and cigarettes are prohibited! And by the way, we run the cleanest site around - after a trip we don't find a single wrapper or scrap of paper, and we're very grateful to you for that!
+
+## I don't have a car, what should I do?
+
+We don't organize transport or arrange rides. Our job is to put on a great event, and yours is to get there. But for your convenience, we created a chat called [Astro.Rideshare](https://t.me/stargazing_oren). Join in, meet people and find company. Everyone there is friendly, easy to reach and reliable. Want to chat about space topics? Join our themed [Astro.Chat](https://t.me/all_astronomers)!
+
+## Can I get to the stargazing site by public transport?
+
+Unfortunately, no. The site is far from any public transport routes. You can get there by your own car or join other participants if they're willing to give you a ride. We recommend arranging this in advance through our Telegram channel.
+
+## What time does it start?
+
+The exact start time is listed in the event poster and on the registration page - it's different for every trip. As a rule, we start right around sunset, once the sun dips below the horizon. So we recommend arriving at the site early - an hour to an hour and a half before the start time. That way you'll have time to calmly find a spot in the field, get settled, take some photos, and watch the sunset. And of course, it's important to park without rushing, so as not to create traffic jams at the entrance. We really appreciate that!
+
+## How much does it cost?
+
+It depends on the specific trip - check the price on the event's registration card. For paid trips, the adult ticket is paid online; kids under 18 always go free. After payment you'll get a QR ticket - that's your entry pass. Changed your plans? Cancel your booking and the payment is automatically refunded to your card within 1-10 business days. Some trips remain completely free. The project is growing and developing, and we're always glad to receive support from our listeners and subscribers. That's what [DONATIONS](https://pay.cloudtips.ru/p/6818d70d) are for. Want to support us - we'd be grateful!
+
+## How long does a stargazing trip last?
+
+On average, the official program - from the start of the talk to the telescope observations - lasts 2 hours. But we guarantee it will fly by for you. After that, it's up to you - stay and watch the sky through the telescopes, or head home. Approximate end time: 12:30 AM.
+
+## What happens if it's cloudy or rainy?
+
+If the weather forecast is unfavorable (clouds or precipitation), the event may be canceled or rescheduled. We always notify participants of such changes through our Telegram channel, so be sure to watch for updates.
+
+## Do I need to bring my own telescope?
+
+No, bringing a telescope is not required. We always have several telescopes available for everyone to use. If you have your own equipment, feel free to bring it, and our experts will help you set it up and use it.
+
+## Can children come?
+
+Yes, and we're happy to have them! We're always glad to see young people take an interest in science! That said, the recommended age is 6 and up. Trust our experience on this.
+
+## Can I take photos?
+
+Of course! You can take photos, but please follow good etiquette so as not to disturb other participants. Don't use bright flashes or lights, as they can spoil the night observation for others.
+
+## How and where can I buy your merch?
+
+We bring hoodies, T-shirts, car stickers, postcards and sticker packs to the observing site. Want to support the project - buy our merch!
+
+## I registered but can't make it. What should I do?
+
+Just cancel your booking using the same link you registered with. Open slots will then appear on the site so others can register.
+
+## I registered 1/2/3/4/5 people, can I bring more?
+
+No, you can't. Our rules are the same for everyone. The QR code lets through only as many people as you registered - no exceptions.
+
+## Registration is closed and I missed it. Can I still come? Please!
+
+Unfortunately, no. Our rules are the same for everyone. The observing site has limited capacity, which is why we introduced the registration system and monitor entry to the site.
+
+## I didn't manage to register in time, can you add more tickets?
+
+Unfortunately, no. We limit the number of participants for a reason: the observing site and its parking area have limited capacity, and security checks QR codes at the entrance. We can't let anyone in without registration, and we can't add extra spots either.
+
+The best thing to do is check the registration page from time to time - participants sometimes cancel their booking, and free spots open up again. We'd also recommend subscribing to our [Telegram channel](https://t.me/look_at_stars) - we always announce new stargazing trips in advance, and registration usually opens a few days before the event.
+
+## I like what you do! How can I support you?
+
+We have [donations](https://pay.cloudtips.ru/p/6818d70d) available. We're constantly buying new equipment, upgrading our technical capabilities, creating merch and other activities. Your support means the world to us ❤︎❤︎❤︎
+
+## Where can I leave a review about you?
+
+You can leave a review right on the page of the event you attended - just open it and fill out the rating form. You can see which events you've attended in your [personal account](/profile), in the "Event history" section. You can also leave a review in the comments on our [Telegram channel](https://t.me/look_at_stars). We value feedback and always read your reviews. Thank you for them!

@@ -1,9 +1,9 @@
 {
     "name": "astronomy-portal",
     "description": "This project is intended for remote control of an amateur astronomical observatory. With the help of the WEB interface, you can control the power supply of the observatory devices, monitor the voltage, power current, as well as temperature and humidity in several places.",
-    "version": "4.17.2",
+    "version": "4.17.3",
     "engines": {
-        "node": ">=20.11.0"
+        "node": ">=22"
     },
     "sideEffects": [
         "*.css",
@@ -23,7 +23,7 @@
         "locales:build": "i18next-scanner --config i18next-scanner.config.js"
     },
     "dependencies": {
-        "@hookform/resolvers": "^6.0.2",
+        "@hookform/resolvers": "^7.0.7",
         "@reduxjs/toolkit": "^2.14.0",
         "astronomy-engine": "^2.1.19",
         "cookies-next": "^6.1.1",
@@ -35,7 +35,7 @@
         "embla-carousel-react": "^8.6.0",
         "exifr": "^7.1.3",
         "html5-qrcode": "^2.3.8",
-        "i18next": "^26.5.11",
+        "i18next": "^27.1.5",
         "leaflet": "^1.9.4",
         "next": "16.4.6",
         "next-i18next": "^16.4.11",
@@ -45,7 +45,7 @@
         "react": "19.3.1",
         "react-dom": "19.3.1",
         "react-hook-form": "^7.92.0",
-        "react-i18next": "^17.1.9",
+        "react-i18next": "^18.0.2",
         "react-leaflet": "^5.0.0",
         "react-markdown": "^10.1.0",
         "react-photo-album": "^3.6.2",
@@ -85,7 +85,6 @@
         "prettier": "^3.10.1",
         "sass": "^1.108.2",
         "ts-node": "^10.9.2",
-        "type-fest": "^5.10.0",
         "typescript": "^6.0.3",
         "typescript-eslint": "^8.73.0",
         "whatwg-fetch": "^3.6.20"
