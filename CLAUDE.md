@@ -71,7 +71,7 @@ Detailed inventories live next to the code — read them instead of guessing:
 
 ### Frontend (`client/`)
 
-**Stack:** Next.js 16.4.3 (pages router), React 19.3.1, TypeScript 6.0.3, Redux RTK 2.13.x (RTK Query in `client/api/`), SASS, i18next 26.x. Yarn 4.9.2, Node.js ≥ 20.11.0. Built as Next.js standalone.
+**Stack:** Next.js 16.4.6 (pages router), React 19.3.1, TypeScript 6.0.3, Redux RTK 2.14.x (RTK Query in `client/api/`), SASS, i18next 27.x. Yarn 4.9.2, Node.js ≥ 22. Built as Next.js standalone.
 
 **Path alias:** `@/*` maps to the `client/` root (e.g., `@/api/models/photo`).
 
