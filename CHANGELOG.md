@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 4.17.3
+
+### Patch Changes
+
+- Text pages (rules, how trips work, where to look, FAQ, privacy, the observatory story) load less code; every section has its own link
+- The observatory story links to the photos and objects instead of a random photo table
+- Libraries updated to their new major versions
+
 ## 4.17.2
 
 ### Patch Changes
