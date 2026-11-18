@@ -29,8 +29,8 @@ export const initSSRLocale = async (
     store: AppStore,
     context: { locale?: string },
     // Only the shared namespace by default: without an explicit list,
-    // serverSideTranslations inlines every namespace (FAQ, how-to, ...) into the
-    // page's __NEXT_DATA__. Pages with their own namespace pass it explicitly.
+    // serverSideTranslations inlines every namespace (admin, objects, ...) into the
+    // page's __NEXT_DATA__. Pages of a section pass its namespace explicitly.
     namespaces: string[] = ['translation']
 ): Promise<SSRLocaleResult> => {
     const locale = context.locale ?? DEFAULT_LOCALE

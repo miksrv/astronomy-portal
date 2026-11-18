@@ -1,10 +1,19 @@
 @use '../../styles/typography' as type
 
-// Intro under the page title
+// Intro under the page title (the text before the first question, a paragraph of HTML)
 .intro
     +type.lead
     // No top margin: the gap of <main> already puts the lead 16px under the title (as on every page)
     margin: 0 0 var(--space-6)
+
+    p
+        margin: 0
+
+    a
+        color: var(--link-color)
+
+        &:hover
+            color: var(--link-color-hover)
 
 .faqList
     display: flex
@@ -14,6 +23,8 @@
 .faqItem
     border-radius: var(--radius-lg)
     background: var(--surface-1)
+    // A link to a question (`#что-брать-с-собой`) stops it under the app bar
+    scroll-margin-top: 64px
     box-shadow: 0 0 0 1px var(--border)
     overflow: hidden
     transition: box-shadow var(--duration-base) var(--ease)
@@ -78,6 +89,9 @@
         padding: var(--space-3) var(--space-4) var(--space-4)
         border-top: 1px solid var(--border)
         color: var(--text-color-secondary)
+
+        > :last-child
+            margin-bottom: 0
 
         a
             color: var(--link-color)

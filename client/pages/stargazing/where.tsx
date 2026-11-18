@@ -1,47 +1,25 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
-import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import { SITE_LINK, wrapper } from '@/api'
-import { PhotoGallery, PhotoLightbox, StaticInfoPageLayout } from '@/components/common'
-import photoSidewalk1 from '@/public/photos/sidewalk-asrtronomy-1.jpeg'
-import photoSidewalk2 from '@/public/photos/sidewalk-asrtronomy-2.jpeg'
-import photoSidewalk3 from '@/public/photos/sidewalk-asrtronomy-3.jpeg'
-import photoSidewalk4 from '@/public/photos/sidewalk-asrtronomy-4.jpeg'
+import { ContentText, StaticInfoPageLayout } from '@/components/common'
+import type { ContentPageData } from '@/utils/content'
+import { loadContentPage } from '@/utils/content.server'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
-import styles from './styles.module.sass'
+type StargazingWherePageProps = Pick<ContentPageData, 'title' | 'description' | 'html'>
 
-const gallerySidewalk = [photoSidewalk1, photoSidewalk2, photoSidewalk3, photoSidewalk4]
-
-const StargazingWherePage: NextPage<object> = () => {
+/** The text of the page is `client/content/stargazing-where.<locale>.md` */
+const StargazingWherePage: NextPage<StargazingWherePageProps> = ({ title, description, html }) => {
     const { t } = useTranslation()
-    const { t: tPage } = useTranslation('stargazing-where')
-
-    const title = tPage('title', 'Где посмотреть в телескоп в Оренбурге')
-
-    const [showLightbox, setShowLightbox] = useState<boolean>(false)
-    const [photoIndex, setPhotoIndex] = useState<number>(0)
-
-    const handlePhotoClick = (index: number) => {
-        setPhotoIndex(index)
-        setShowLightbox(true)
-    }
-
-    const handleHideLightbox = () => {
-        setShowLightbox(false)
-    }
 
     const touristAttractionSchema = {
         '@context': 'https://schema.org',
         '@type': 'TouristAttraction',
-        name: tPage('title', 'Где посмотреть в телескоп в Оренбурге'),
-        description: tPage(
-            'description',
-            'Узнайте, где в Оренбурге можно посмотреть в телескоп. Тротуарная астрономия: бесплатные наблюдения Луны, планет и звёзд на улицах города.'
-        ),
+        name: title,
+        description,
         url: `${SITE_LINK}stargazing/where`,
         address: {
             '@type': 'PostalAddress',
@@ -60,10 +38,7 @@ const StargazingWherePage: NextPage<object> = () => {
         <StaticInfoPageLayout
             canonical={'stargazing/where'}
             title={title}
-            description={tPage(
-                'description',
-                'Узнайте, где в Оренбурге можно посмотреть в телескоп. Тротуарная астрономия: бесплатные наблюдения Луны, планет и звёзд на улицах города. Хотите увидеть больше - отправляйтесь на выезд за город для наблюдения туманностей и галактик!'
-            )}
+            description={description}
             openGraph={{
                 images: [
                     {
@@ -81,113 +56,24 @@ const StargazingWherePage: NextPage<object> = () => {
                 }
             ]}
         >
-            <p className={styles.lead}>
-                {tPage(
-                    'intro',
-                    'Тротуарная астрономия - это уникальный формат, благодаря которому космос становится ближе. Весной, летом и осенью мы выставляем телескопы прямо на тротуарах и площадях Оренбурга, чтобы любой желающий мог подойти и бесплатно взглянуть на звёзды, планеты и Луну. Это отличная возможность для жителей города познакомиться с астрономией в непринужденной и дружественной атмосфере.'
-                )}
-            </p>
-
-            <div className={styles.prose}>
-                <p>
-                    {tPage('announcement-1', 'Анонсы вечеров тротуарной астрономии мы почти всегда публикуем в нашем')}
-                    <Link
-                        style={{ margin: '0 5px' }}
-                        href={'https://t.me/look_at_stars'}
-                        title={t('common.telegram', 'Телеграм')}
-                        rel={'nofollow noopener'}
-                        target={'_blank'}
-                    >
-                        {tPage('telegram-channel', 'телеграм-канале')}
-                    </Link>
-                    {tPage(
-                        'announcement-2',
-                        ', но иногда наши телескопы можно встретить на улицах города и без предупреждения. Один из вдохновителей проекта, астролектор Владимир Иванович, нередко делится своими знаниями, показывая всем желающим интересные астрономические объекты. Просто ищите телескоп - и вы точно попадете на незабываемую экскурсию по звёздному небу!'
-                    )}
-                </p>
-                <PhotoGallery
-                    photos={gallerySidewalk}
-                    alt={tPage('gallery-sidewalk-alt', 'Тротуарная астрономия в Оренбурге — фото')}
-                    onClick={({ index }) => {
-                        handlePhotoClick(index)
-                    }}
-                />
-            </div>
-
-            <h2>{tPage('what-you-can-see-title', 'Что можно увидеть в телескоп из города?')}</h2>
-
-            <div className={styles.prose}>
-                <p>
-                    {tPage(
-                        'what-you-can-see-description',
-                        'В условиях городского светового загрязнения наиболее яркие объекты остаются видимыми. Например, вы сможете рассмотреть:'
-                    )}
-                </p>
-                <ul>
-                    <li>
-                        {tPage(
-                            'what-you-can-see-1',
-                            'Кратеры и горы на Луне, особенно впечатляющие в фазах первой и последней четверти;'
-                        )}
-                    </li>
-                    <li>{tPage('what-you-can-see-2', 'Кольца Сатурна, которые неизменно вызывают восторг;')}</li>
-                    <li>{tPage('what-you-can-see-3', 'Яркие звёзды и двойные звёзды, такие как Альбирео;')}</li>
-                    <li>
-                        {tPage('what-you-can-see-4', 'Парады планет, если они происходят в подходящее время года.')}
-                    </li>
-                </ul>
-                <p>
-                    {tPage(
-                        'what-you-can-see-conclusion',
-                        'Однако городское освещение ограничивает наши возможности. Туманности, галактики, метеорные потоки и даже крупные звёздные скопления часто остаются скрытыми от взгляда.'
-                    )}
-                </p>
-            </div>
-
-            <h2>{tPage('want-to-see-more', 'Хотите увидеть больше? Выезжайте за город!')}</h2>
-
-            <div className={styles.prose}>
-                <p>
-                    {tPage(
-                        'want-to-see-description-1',
-                        'Для наблюдения слабосветящихся объектов, таких как туманности Ориона, Андромеды, метеорные потоки и звёздные скопления, необходимо отправиться подальше от городских огней. В таких местах, как Оренбургская степь или другие удаленные районы, ночное небо поражает своей красотой.'
-                    )}
-                </p>
-                <p>
-                    {tPage(
-                        'want-to-see-description-2',
-                        'Мы регулярно организуем выездные астрономические мероприятия, где можно насладиться полной палитрой космических объектов. Следите за анонсами на нашей странице «Астровыезды» или в Telegram-канале, чтобы присоединиться к одному из таких наблюдений.'
-                    )}
-                </p>
-                <p>{tPage('want-to-see-description-3', 'Пусть звёзды станут ближе!')}</p>
-            </div>
-
-            <PhotoLightbox
-                photos={gallerySidewalk.map((image) => ({
-                    src: image.src,
-                    width: image.width,
-                    height: image.height,
-                    title: ''
-                }))}
-                photoIndex={photoIndex}
-                showLightbox={showLightbox}
-                onCloseLightBox={handleHideLightbox}
-                onChangeIndex={setPhotoIndex}
-            />
+            <ContentText html={html} />
         </StaticInfoPageLayout>
     )
 }
 
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
-        async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<object>> => {
-            const { translations } = await initSSRLocale(store, context, ['translation', 'stargazing-where'])
+        async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<StargazingWherePageProps>> => {
+            const { locale, translations } = await initSSRLocale(store, context)
+            const { title, description, html } = loadContentPage('stargazing-where', locale)
 
             return {
                 props: {
-                    ...translations
-                },
-                revalidate: 86400
+                    ...translations,
+                    title,
+                    description,
+                    html
+                }
             }
         }
 )

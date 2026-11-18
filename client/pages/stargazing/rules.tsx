@@ -1,36 +1,37 @@
 import React from 'react'
 
 import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
-import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 
 import { SITE_LINK, wrapper } from '@/api'
-import { StaticInfoPageLayout } from '@/components/common'
+import { ContentText, StaticInfoPageLayout } from '@/components/common'
+import type { ContentPageData } from '@/utils/content'
+import { loadContentPage } from '@/utils/content.server'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
-import styles from './styles.module.sass'
+type StargazingRulesPageProps = Pick<ContentPageData, 'title' | 'description' | 'html'>
 
-const StargazingRulesPage: NextPage<object> = () => {
+/** The text of the page is `client/content/stargazing-rules.<locale>.md` */
+const StargazingRulesPage: NextPage<StargazingRulesPageProps> = ({ title, description, html }) => {
     const { t } = useTranslation()
-    const { t: tPage } = useTranslation('stargazing-rules')
-
-    const title = tPage('title', 'Правила поведения на астровыездах')
 
     const webPageSchema = {
         '@context': 'https://schema.org',
         '@type': 'WebPage',
         '@id': `${SITE_LINK}stargazing/rules`,
-        name: tPage('title', 'Правила поведения на астровыездах'),
+        name: title,
         url: `${SITE_LINK}stargazing/rules`,
-        description: tPage(
-            'description',
-            'Узнайте правила поведения на астровыездах в Оренбурге: что нельзя делать при наблюдении звёзд и планет в телескоп. Соблюдайте рекомендации, чтобы сделать астровыезд безопасным и комфортным для всех участников.'
-        ),
+        description,
         breadcrumb: {
             '@type': 'BreadcrumbList',
             itemListElement: [
-                { '@type': 'ListItem', position: 1, name: 'Астровыезды', item: `${SITE_LINK}stargazing` },
-                { '@type': 'ListItem', position: 2, name: tPage('title', 'Правила поведения на астровыездах') }
+                {
+                    '@type': 'ListItem',
+                    position: 1,
+                    name: t('menu.stargazing', 'Астровыезды'),
+                    item: `${SITE_LINK}stargazing`
+                },
+                { '@type': 'ListItem', position: 2, name: title }
             ]
         }
     }
@@ -39,10 +40,7 @@ const StargazingRulesPage: NextPage<object> = () => {
         <StaticInfoPageLayout
             canonical={'stargazing/rules'}
             title={title}
-            description={tPage(
-                'description',
-                'Узнайте правила поведения на астровыездах в Оренбурге: что нельзя делать при наблюдении звёзд и планет в телескоп. Соблюдайте рекомендации, чтобы сделать астровыезд безопасным и комфортным для всех участников.'
-            )}
+            description={description}
             openGraph={{
                 images: [{ url: '/photos/stargazing-1.jpeg', width: 1280, height: 853 }]
             }}
@@ -54,127 +52,24 @@ const StargazingRulesPage: NextPage<object> = () => {
                 }
             ]}
         >
-            <p className={styles.lead}>
-                {tPage(
-                    'welcome',
-                    'Добро пожаловать на астровыезды в Оренбурге, организованные проектом «Смотри на звёзды»! Чтобы совместное наблюдение звёздного неба и планет прошло комфортно и безопасно для всех участников, важно соблюдать несколько простых правил. Эти рекомендации помогают сохранить атмосферу ночного наблюдения и гарантируют, что каждый сможет насладиться видом звёзд и планет в телескоп.'
-                )}
-            </p>
-
-            <h2>{tPage('prohibited-title', 'Что нельзя делать на астровыездах')}</h2>
-
-            <div className={styles.prose}>
-                <ol>
-                    <li>
-                        <h3>{tPage('prohibited-items-1.title', 'Использовать яркие источники света')}</h3>
-                        <p>
-                            {tPage(
-                                'prohibited-items-1.description',
-                                'Фонарики, экраны телефонов и любые яркие световые приборы нарушают адаптацию глаз к темноте, что снижает видимость звёздного неба. Используйте только красные фонари или специальные светофильтры для устройств.'
-                            )}
-                        </p>
-                    </li>
-                    <li>
-                        <h3>{tPage('prohibited-items-2.title', 'Разжигать костры и использовать открытый огонь')}</h3>
-                        <p>
-                            {tPage(
-                                'prohibited-items-2.description',
-                                'Астровыезды проводятся в полях и открытых местах, где высокая вероятность пожаров. Разведение костров строго запрещено.'
-                            )}
-                        </p>
-                    </li>
-                    <li>
-                        <h3>{tPage('prohibited-items-3.title', 'Употреблять алкоголь и курить')}</h3>
-                        <p>
-                            {tPage(
-                                'prohibited-items-3.description',
-                                'Алкогольные напитки, сигареты, электронные сигареты, вейпы и кальяны запрещены. Это не только вопрос пожарной безопасности, но и уважение к другим участникам, для которых важно чистое ночное небо и свежий воздух.'
-                            )}
-                        </p>
-                    </li>
-                    <li>
-                        <h3>{tPage('prohibited-items-4.title', 'Шуметь и мешать другим участникам')}</h3>
-                        <p>
-                            {tPage(
-                                'prohibited-items-4.description',
-                                'Громкая музыка, крики или другие резкие звуки могут отвлекать и мешать концентрации при наблюдении в телескоп. Уважайте тишину и настрой окружающих.'
-                            )}
-                        </p>
-                    </li>
-                </ol>
-            </div>
-
-            <h2>{tPage('recommendations-title', 'Рекомендации для участников астровыездов')}</h2>
-
-            <div className={styles.prose}>
-                <ol>
-                    <li>
-                        <h3>{tPage('recommendations-items-1.title', 'Берегите природу')}</h3>
-                        <p>
-                            {tPage(
-                                'recommendations-items-1.description',
-                                'Заберите с собой весь мусор после окончания наблюдений. Мы стараемся оставить места астровыездов такими же чистыми, какими они были до нашего приезда.'
-                            )}
-                        </p>
-                    </li>
-                    <li>
-                        <h3>{tPage('recommendations-items-2.title', 'Соблюдайте правила техники безопасности')}</h3>
-                        <p>
-                            {tPage(
-                                'recommendations-items-2.description',
-                                'Передвигайтесь аккуратно, чтобы избежать повреждений оборудования и не навредить себе.'
-                            )}
-                        </p>
-                    </li>
-                    <li>
-                        <h3>{tPage('recommendations-items-3.title', 'Уважайте других участников')}</h3>
-                        <p>
-                            {tPage(
-                                'recommendations-items-3.description',
-                                'Каждый пришел на астровыезд, чтобы насладиться красотой космоса. Уважительное отношение друг к другу делает атмосферу дружелюбной и комфортной.'
-                            )}
-                        </p>
-                    </li>
-                </ol>
-            </div>
-
-            <h2>{tPage('importance-title', 'Почему важно соблюдать правила?')}</h2>
-
-            <div className={styles.prose}>
-                {tPage(
-                    'importance-description',
-                    'Соблюдение этих рекомендаций помогает сделать наблюдение звёздного неба в Оренбурге максимально комфортным для всех. Мы создаем атмосферу, где каждый участник может увидеть удивительные небесные явления, изучить планеты через телескоп и получить незабываемый опыт.'
-                )}
-            </div>
-
-            <h2>{tPage('join-title', 'Присоединяйтесь к нашим астровыездам!')}</h2>
-
-            <div className={styles.prose}>
-                {tPage('join-description', 'Хотите узнать больше о наших мероприятиях, организованных в Оренбурге?')}
-                <Link
-                    style={{ margin: '0 5px' }}
-                    href={'https://t.me/look_at_stars'}
-                    title={t('common.telegram', 'Телеграм')}
-                    rel={'nofollow noopener'}
-                    target={'_blank'}
-                >
-                    {tPage('subscribe', 'Подписывайтесь')}
-                </Link>
-            </div>
+            <ContentText html={html} />
         </StaticInfoPageLayout>
     )
 }
 
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
-        async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<object>> => {
-            const { translations } = await initSSRLocale(store, context, ['translation', 'stargazing-rules'])
+        async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<StargazingRulesPageProps>> => {
+            const { locale, translations } = await initSSRLocale(store, context)
+            const { title, description, html } = loadContentPage('stargazing-rules', locale)
 
             return {
                 props: {
-                    ...translations
-                },
-                revalidate: 86400
+                    ...translations,
+                    title,
+                    description,
+                    html
+                }
             }
         }
 )

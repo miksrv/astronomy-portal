@@ -12,34 +12,6 @@
     justify-content: space-between
     gap: var(--space-4)
 
-// First paragraph of a text page
-.lead
-    +type.lead
-    // No top margin: the gap of <main> already puts the lead 16px under the title (as on every page)
-    margin: 0
-
-// Long text pages (howto, rules, where): the prose role on the full content width
-.prose
-    +type.prose
-    margin-top: var(--space-4)
-
-    // The h2 of the first block follows the lead directly
-    > h2:first-child
-        margin-top: var(--space-4)
-
-    // Numbered steps: the step title is a heading inside the list item
-    li > h3
-        margin: 0 0 var(--space-1)
-
-    li > p
-        margin-bottom: var(--space-3)
-
-    li:last-child > p
-        margin-bottom: 0
-
-    ol li + li
-        margin-top: var(--space-4)
-
 // Payment result: actions in a row, stacked and full width on phones
 .paymentActions
     display: flex
@@ -60,7 +32,3 @@
     display: flex
     justify-content: center
     padding: var(--space-10) 0
-
-// The heading above already carries the space
-h2 + .prose
-    margin-top: 0

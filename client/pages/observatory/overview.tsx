@@ -1,131 +1,29 @@
-import React, { useState } from 'react'
-import { Button, Container } from 'simple-react-ui-kit'
+import React from 'react'
 
-import { GetServerSidePropsResult, NextPage } from 'next'
-import Link from 'next/link'
-import { Trans, useTranslation } from 'next-i18next/pages'
-import { JsonLdScript } from 'next-seo'
+import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
+import { useTranslation } from 'next-i18next/pages'
 
-import { API, ApiModel, SITE_LINK, wrapper } from '@/api'
-import { AppFooter, AppLayout, AppToolbar, ObjectPhotoTable, PhotoGallery, PhotoLightbox } from '@/components/common'
-import photoObservatory1 from '@/public/photos/observatory-1.jpeg'
-import photoObservatory2 from '@/public/photos/observatory-2.jpeg'
-import photoObservatory3 from '@/public/photos/observatory-3.jpeg'
-import photoObservatory4 from '@/public/photos/observatory-4.jpeg'
-import photoObservatory5 from '@/public/photos/observatory-5.jpeg'
-import photoObservatory6 from '@/public/photos/observatory-6.jpeg'
-import photoObservatory7 from '@/public/photos/observatory-7.jpeg'
-import photoObservatory9 from '@/public/photos/observatory-9.jpeg'
-import photoObservatory10 from '@/public/photos/observatory-10.jpeg'
-import photoObservatory11 from '@/public/photos/observatory-11.jpeg'
-import photoObservatory12 from '@/public/photos/observatory-12.jpeg'
+import { SITE_LINK, wrapper } from '@/api'
+import { ContentText, StaticInfoPageLayout } from '@/components/common'
+import type { ContentPageData } from '@/utils/content'
+import { loadContentPage } from '@/utils/content.server'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
-import styles from './styles.module.sass'
+type ObservatoryOverviewPageProps = Pick<ContentPageData, 'title' | 'description' | 'html'>
 
-const galleryObservatory = [photoObservatory3, photoObservatory7, photoObservatory5, photoObservatory6]
-
-const galleryEquipment = [photoObservatory9, photoObservatory10, photoObservatory11, photoObservatory12]
-
-const galleryControl = [photoObservatory1, photoObservatory2, photoObservatory4]
-
-const allPhotos = [...galleryObservatory, ...galleryEquipment, ...galleryControl]
-
-interface ObservatoryOverviewPageProps {
-    photosList: ApiModel.Photo[]
-}
-
-const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photosList }) => {
+/**
+ * The story of the observatory and its equipment: `client/content/observatory-overview.<locale>.md`.
+ * Fully static, built once per deploy: the photos and objects are linked from the text.
+ */
+const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ title, description, html }) => {
     const { t } = useTranslation()
-    const { t: tPage } = useTranslation('observatory-overview')
-
-    const [showLightbox, setShowLightbox] = useState<boolean>(false)
-    const [photoIndex, setPhotoIndex] = useState<number>(0)
-
-    const equipmentList = [
-        {
-            title: tPage('equipment-list.mount.title', 'Монтировка: Sky-Watcher EQ6'),
-            description: tPage(
-                'equipment-list.mount.description',
-                'Надёжная и точная монтировка, обеспечивающая стабильность телескопа даже при длительных экспозициях.'
-            )
-        },
-        {
-            title: tPage('equipment-list.telescope.title', 'Телескоп: Sky-Watcher BK2001P'),
-            description: tPage(
-                'equipment-list.telescope.description',
-                'Рефлекторный телескоп с апертурой 200 мм, идеально подходящий для наблюдений за объектами глубокого космоса.'
-            )
-        },
-        {
-            title: tPage('equipment-list.main-camera.title', 'Основная камера: ASI ZWO 6200MM Pro'),
-            description: tPage(
-                'equipment-list.main-camera.description',
-                'Высокочувствительная астрономическая камера с разрешением 24 МП, способная захватывать мельчайшие детали далёких объектов.'
-            )
-        },
-        {
-            title: tPage('equipment-list.guide-camera.title', 'Гид-камера: QHY QHY5'),
-            description: tPage(
-                'equipment-list.guide-camera.description',
-                'Камера для точного наведения и слежения за объектами.'
-            )
-        },
-        {
-            title: tPage('equipment-list.guide-scope.title', 'Гид-телескоп: SV106 Guide Scope 50mm (Helical Focuser)'),
-            description: tPage(
-                'equipment-list.guide-scope.description',
-                'Компактный телескоп для гидирования при съемках с длинными выдержками.'
-            )
-        },
-        {
-            title: tPage('equipment-list.focuser.title', 'Фокусер: ZWO EAF'),
-            description: tPage(
-                'equipment-list.focuser.description',
-                'Электронный фокусер, обеспечивающий точную настройку фокусировки.'
-            )
-        },
-        {
-            title: tPage('equipment-list.filter-wheel.title', 'Колесо фильтров: ZWO EFW 8x31mm'),
-            description: tPage(
-                'equipment-list.filter-wheel.description',
-                'Универсальное колесо фильтров для работы с различными спектральными диапазонами.'
-            )
-        },
-        {
-            title: tPage('equipment-list.filters.title', 'Фильтры: ZWO L, R, G, B, Ha, OIII, SII (1.25")'),
-            description: tPage(
-                'equipment-list.filters.description',
-                'Набор фильтров для получения цветных изображений и съёмки в узких спектрах.'
-            )
-        },
-        {
-            title: tPage('equipment-list.coma-corrector.title', 'Корректор комы: Baader 2" Mark III MPCC'),
-            description: tPage(
-                'equipment-list.coma-corrector.description',
-                'Устраняет оптические искажения, обеспечивая чёткость изображения.'
-            )
-        }
-    ]
-
-    const handlePhotoClick = (index: number) => {
-        setPhotoIndex(index)
-        setShowLightbox(true)
-    }
-
-    const handleHideLightbox = () => {
-        setShowLightbox(false)
-    }
 
     const techArticleSchema = {
         '@context': 'https://schema.org',
         '@type': 'TechArticle',
         '@id': `${SITE_LINK}observatory/overview`,
-        headline: tPage('title', 'Обсерватория в Оренбурге'),
-        description: tPage(
-            'meta-description',
-            'Самодельная астрономическая обсерватория в 15 км от Оренбурга: съёмка туманностей и галактик, удалённое управление и небо 5 класса по Бортлю.'
-        ),
+        headline: title,
+        description,
         url: `${SITE_LINK}observatory/overview`,
         image: `${SITE_LINK}photos/observatory-3.jpeg`,
         author: {
@@ -142,13 +40,10 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
     }
 
     return (
-        <AppLayout
+        <StaticInfoPageLayout
             canonical={'observatory/overview'}
-            title={tPage('title', 'Обсерватория в Оренбурге')}
-            description={tPage(
-                'meta-description',
-                'Самодельная астрономическая обсерватория в 15 км от Оренбурга: съёмка туманностей и галактик, удалённое управление и небо 5 класса по Бортлю.'
-            )}
+            title={title}
+            description={description}
             openGraph={{
                 images: [
                     {
@@ -158,174 +53,31 @@ const ObservatoryOverviewPage: NextPage<ObservatoryOverviewPageProps> = ({ photo
                     }
                 ]
             }}
+            jsonLd={{ scriptKey: 'observatory-overview-tech-article', data: techArticleSchema }}
+            breadcrumbLinks={[
+                {
+                    link: '/observatory',
+                    text: t('menu.observatory', 'Обсерватория')
+                }
+            ]}
         >
-            <JsonLdScript
-                scriptKey={'observatory-overview-tech-article'}
-                data={techArticleSchema}
-            />
-            <AppToolbar
-                title={tPage('title', 'Обсерватория в Оренбурге')}
-                currentPage={tPage('title', 'Обсерватория в Оренбурге')}
-                links={[
-                    {
-                        link: '/observatory',
-                        text: t('menu.observatory', 'Обсерватория')
-                    }
-                ]}
-            />
-
-            <p className={styles.lead}>
-                {tPage(
-                    'description',
-                    'Самодельная астрономическая обсерватория расположена в пригороде Оренбурга, всего в 15 км от города. Благодаря своему удалению от городской застройки, обсерватория находится в зоне с уровнем светового загрязнения 5 класса по шкале Бортля, что делает её неплохим местом в пригороде для наблюдений за ночным небом.'
-                )}
-            </p>
-
-            <div className={styles.prose}>
-                <p>
-                    {tPage(
-                        'description-1',
-                        'Основное направление деятельности обсерватории - фотографирование объектов глубокого космоса (deep-sky), таких как туманности, галактики и звёздные скопления. Оборудование и технологии, используемые в обсерватории, позволяют получать высококачественные изображения, которые могут использоваться как для научных исследований, так и для образовательных целей.'
-                    )}
-                </p>
-                <p>
-                    {tPage(
-                        'description-2',
-                        'Обсерватория функционирует в полуавтоматическом режиме, что позволяет управлять ею удалённо из любой точки мира через Интернет. Это делает её доступной для астрономов-любителей, исследователей и энтузиастов со всего мира.'
-                    )}
-                </p>
-
-                <PhotoGallery
-                    photos={galleryObservatory}
-                    alt={tPage('gallery-observatory-alt', 'Обсерватория в Оренбурге — фото')}
-                    onClick={({ index }) => {
-                        handlePhotoClick(index)
-                    }}
-                />
-
-                <p>
-                    {tPage(
-                        'description-3',
-                        'Обсерватория открыта для сотрудничества с астрономами-любителями, исследователями и образовательными учреждениями. Мы рады предоставить доступ к нашим данным для научных и образовательных целей. Если вы хотите стать частью нашего сообщества или использовать наши ресурсы для своих проектов, свяжитесь с нами через форму обратной связи.'
-                    )}
-                </p>
-                <p>
-                    {tPage(
-                        'description-4',
-                        'Оренбургская обсерватория - это уникальное сочетание современных технологий и энтузиазма астрономов-любителей. Мы стремимся сделать астрономию доступной для всех, кто интересуется загадками Вселенной. Присоединяйтесь к нам, чтобы вместе исследовать бескрайние просторы космоса!'
-                    )}
-                </p>
-            </div>
-
-            <h2>{tPage('equipment-title', 'Оборудование обсерватории')}</h2>
-
-            <div className={styles.prose}>
-                <p>
-                    {tPage(
-                        'equipment-description',
-                        'Используемые инструменты и технологии обеспечивают высокую точность наблюдений и профессиональное качество снимков. Вот основное оборудование, которое используется в работе:'
-                    )}
-                </p>
-                <ul className={styles.equipmentList}>
-                    {equipmentList.map((item, index: number) => (
-                        <li key={index}>
-                            <h3 className={styles.equipmentTitle}>{item.title}</h3>
-                            <div className={styles.equipmentDescription}>{item.description}</div>
-                        </li>
-                    ))}
-                </ul>
-                <PhotoGallery
-                    photos={galleryEquipment}
-                    alt={tPage('gallery-equipment-alt', 'Оборудование обсерватории — фото')}
-                    onClick={({ index }) => {
-                        handlePhotoClick(index)
-                    }}
-                />
-            </div>
-
-            <h2>{tPage('photos-and-data-title', 'Фотографии и данные')}</h2>
-
-            <div className={styles.prose}>
-                <p>
-                    <Trans
-                        ns={'observatory-overview'}
-                        i18nKey={'photos-and-data'}
-                        defaults={
-                            'На специальном разделе сайта представлены <photosLink>фотографии</photosLink> снятых <objectsLink>объектов</objectsLink> глубокого космоса. Для каждого объекта доступны подробные параметры и характеристики, такие как расстояние до объекта, его размер, спектральные данные и многое другое. Эти материалы могут быть полезны как для начинающих астрономов, так и для профессионалов.'
-                        }
-                        components={{
-                            photosLink: (
-                                <Link
-                                    href='/photos'
-                                    title={t('menu.astrophoto', 'Астрофото')}
-                                />
-                            ),
-                            objectsLink: (
-                                <Link
-                                    href='/objects'
-                                    title={tPage('photos-and-data-part-objects', 'объектов')}
-                                />
-                            )
-                        }}
-                    />
-                </p>
-            </div>
-
-            <Container>
-                <ObjectPhotoTable photosList={photosList} />
-
-                <div className={styles.allPhotosButtonContainer}>
-                    <Button
-                        size={'medium'}
-                        mode={'secondary'}
-                        link={'/photos'}
-                        stretched={true}
-                        title={tPage('astrophoto', 'Астрофото')}
-                    >
-                        {tPage('photos-and-data-all-photos', 'Все астрономические фотографии')}
-                    </Button>
-                </div>
-            </Container>
-
-            <PhotoLightbox
-                photos={allPhotos.map((image) => ({
-                    src: image.src,
-                    width: image.width,
-                    height: image.height,
-                    title: ''
-                }))}
-                photoIndex={photoIndex}
-                showLightbox={showLightbox}
-                onCloseLightBox={handleHideLightbox}
-                onChangeIndex={setPhotoIndex}
-            />
-
-            <AppFooter />
-        </AppLayout>
+            <ContentText html={html} />
+        </StaticInfoPageLayout>
     )
 }
 
-export const getServerSideProps = wrapper.getServerSideProps(
+export const getStaticProps = wrapper.getStaticProps(
     (store) =>
-        async (context): Promise<GetServerSidePropsResult<ObservatoryOverviewPageProps>> => {
-            // Public page: nginx caches the guest HTML for a short while (config/nginx.conf)
-            context.res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=3600')
-
-            const { translations } = await initSSRLocale(store, context, ['translation', 'observatory-overview'])
-
-            const { data: photos } = await store.dispatch(
-                API.endpoints?.photosGetList.initiate({
-                    limit: 5,
-                    order: 'rand'
-                })
-            )
-
-            await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
+        async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<ObservatoryOverviewPageProps>> => {
+            const { locale, translations } = await initSSRLocale(store, context)
+            const { title, description, html } = loadContentPage('observatory-overview', locale)
 
             return {
                 props: {
                     ...translations,
-                    photosList: photos?.items || []
+                    title,
+                    description,
+                    html
                 }
             }
         }

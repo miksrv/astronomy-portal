@@ -20,11 +20,10 @@ const typescript = require('typescript')
 // loaded section namespaces (`fallbackNS` in next-i18next.config.js), so the
 // code never spells a namespace out. Keys shared by several sections stay in
 // `translation` (`common.*`, `menu.*`, `components.common.*`, `components.ui.*`,
-// `pages.profile.*`); `pages.privacy.title` is `common.privacy-policy` for the
-// footer for that reason.
+// `pages.profile.*`).
 //
-// The hand-written page namespaces (`stargazing-faq`, `observatory-overview`, ...)
-// are read through `useTranslation('<ns>')` and never go through the scanner.
+// The long static texts (rules, FAQ, privacy, ...) are not keys at all: they are
+// Markdown files in `client/content` (`utils/content.server.tsx`).
 // ---------------------------------------------------------------------------
 const DEFAULT_NS = 'translation'
 
@@ -39,7 +38,6 @@ const NAMESPACE_PREFIXES = {
         'components.pages.observatory'
     ],
     photos: ['pages.photos', 'pages.photo', 'pages.photos-form', 'components.pages.photos', 'equipment'],
-    privacy: ['pages.privacy'],
     stargazing: [
         'pages.stargazing',
         'pages.stargazing-history',

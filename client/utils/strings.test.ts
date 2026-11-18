@@ -1,10 +1,7 @@
-import React from 'react'
-
 import {
     createSeoDescription,
     extractBookingIdFromScan,
     humanizeFileSize,
-    nodeToText,
     removeMarkdown,
     removeMarkdownPreserveParagraphs,
     sliceText
@@ -219,24 +216,6 @@ describe('strings', () => {
 
         it('formats fractional kilobytes with 2 decimal places', () => {
             expect(humanizeFileSize(1536)).toBe('1.5 KB')
-        })
-    })
-
-    describe('nodeToText', () => {
-        it('flattens text and nested elements into one string', () => {
-            const node = React.createElement(
-                React.Fragment,
-                null,
-                'Следите за ',
-                React.createElement('a', { href: '/x' }, 'Telegram-каналом'),
-                ', где   мы публикуем анонсы.'
-            )
-            expect(nodeToText(node)).toBe('Следите за Telegram-каналом, где мы публикуем анонсы.')
-        })
-
-        it('returns plain strings as they are and skips empty nodes', () => {
-            expect(nodeToText('Ответ')).toBe('Ответ')
-            expect(nodeToText([null, false, 'a', 1])).toBe('a1')
         })
     })
 })
