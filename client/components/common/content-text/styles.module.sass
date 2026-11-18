@@ -1,0 +1,88 @@
+@use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
+
+// The text of a static page: the prose role on the full content width (DESIGN §6)
+.contentText
+    +type.prose
+
+    // The first paragraph is the page's lead (`lead`); the gap of <main> puts it under the title
+    &.lead > p:first-child
+        +type.lead
+
+    h2
+        scroll-margin-top: 64px
+
+    // Numbered steps and lists of items: the item's title is a heading inside it
+    li > h3
+        margin: 0 0 var(--space-1)
+
+    li > p
+        margin-bottom: var(--space-3)
+
+    li > p:last-child
+        margin-bottom: 0
+
+    li:has(> h3) + li
+        margin-top: var(--space-4)
+
+    // A bulleted list of items with titles (the equipment): no bullets, the titles lead
+    ul:has(> li > h3)
+        list-style: none
+        padding-left: 0
+
+    a
+        text-decoration: underline
+        text-underline-offset: 2px
+
+    // A row of photos (`content-gallery`, made on the server from a paragraph of images): as many
+    // columns as photos, at most four, two on phones; one shape for all (3:2, cropped)
+    :global(.content-gallery)
+        display: grid
+        grid-template-columns: repeat(var(--columns, 1), minmax(0, 1fr))
+        gap: var(--space-2)
+        margin: var(--space-4) 0
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            grid-template-columns: repeat(min(var(--columns, 1), 2), minmax(0, 1fr))
+
+    :global(.content-gallery[data-columns='2'])
+        --columns: 2
+
+    :global(.content-gallery[data-columns='3'])
+        --columns: 3
+
+    :global(.content-gallery[data-columns='4'])
+        --columns: 4
+
+    :global(.content-photo)
+        display: block
+        padding: 0
+        border: 0
+        border-radius: var(--radius-lg)
+        overflow: hidden
+        background: var(--surface-2)
+        cursor: zoom-in
+
+        &:focus-visible
+            outline: var(--focus-outline)
+            outline-offset: 2px
+
+        img
+            display: block
+            width: 100%
+            height: auto
+            aspect-ratio: 3 / 2
+            margin: 0
+            border-radius: 0
+            object-fit: cover
+            transition: transform var(--duration-base) var(--ease)
+
+        &:hover img
+            transform: scale(1.03)
+
+    > :global(.content-gallery):last-child
+        margin-bottom: 0
+
+@media (prefers-reduced-motion: reduce)
+    .contentText :global(.content-photo) img
+        transition: none
