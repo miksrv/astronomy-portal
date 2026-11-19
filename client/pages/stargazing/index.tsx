@@ -1,8 +1,8 @@
 import React from 'react'
 import { getCookie } from 'cookies-next'
-import { Button, Icon } from 'simple-react-ui-kit'
 
 import { GetServerSidePropsResult, NextPage } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { JsonLdScript } from 'next-seo'
@@ -15,17 +15,20 @@ import {
     EventProgram,
     EventsList,
     EventUpcoming,
-    InfoCards,
-    ReviewsWidget
+    ReviewsWidget,
+    STARGAZING_REVIEWS_QUERY,
+    StargazingGuide,
+    StargazingHero
 } from '@/components/pages/stargazing'
-import type { InfoCardItem } from '@/components/pages/stargazing/info-cards'
+import { LandingSection } from '@/components/ui'
+import teamPhoto from '@/public/photos/stargazing-8.jpeg'
+import { STARGAZING_FOUNDING_YEAR } from '@/utils/constants'
 import { getSecondsUntilUTCDate } from '@/utils/dates'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
 import { removeSSRQueryCache } from '@/utils/ssrCache'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
 import styles from './index.module.sass'
-import pageStyles from './styles.module.sass'
 
 interface StargazingPageProps {
     upcomingData: ApiModel.Event | null
@@ -37,39 +40,13 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
 
     const title = t('pages.stargazing.title', 'Астровыезды')
 
-    const infoCards: InfoCardItem[] = [
-        {
-            href: '/stargazing/howto',
-            icon: 'StarFilled',
-            title: t('pages.stargazing.howto_link', 'Как проходят астровыезды'),
-            description: t('pages.stargazing.howto_card_desc', 'Программа вечера, телескопы и лекции')
-        },
-        {
-            href: '/stargazing/rules',
-            icon: 'ReportError',
-            title: t('pages.stargazing.rules_link', 'Правила поведения на астровыездах'),
-            description: t('pages.stargazing.rules_card_desc', 'Что нельзя делать и как уважать других')
-        },
-        {
-            href: '/stargazing/faq',
-            icon: 'QuestionCircle',
-            title: t('pages.stargazing.faq_link', 'Часто задаваемые вопросы'),
-            description: t('pages.stargazing.faq_card_desc', 'Ответы на популярные вопросы участников')
-        },
-        {
-            href: '/stargazing/where',
-            icon: 'Map',
-            title: t('pages.stargazing.where_link', 'Где посмотреть в телескоп'),
-            description: t('pages.stargazing.where_card_desc', 'Место проведения в Оренбургском районе')
-        }
-    ]
-
     // Only the active upcoming event gets Event markup — /stargazing is a listing page,
     // and /stargazing/history / past entries here are covered by their own event page.
     const upcomingEventJsonLd = upcomingData ? buildEventJsonLd(upcomingData) : null
 
     return (
         <AppLayout
+            noTopMargin={true}
             canonical={'stargazing'}
             title={t('pages.stargazing.seo-title', 'Астровыезды в Оренбурге — наблюдение звёзд в телескоп')}
             description={t(
@@ -95,76 +72,89 @@ const StargazingPage: NextPage<StargazingPageProps> = ({ upcomingData, pastEvent
                 />
             )}
 
-            <div
-                className={styles.pageBackground}
-                aria-hidden={'true'}
-            />
+            <StargazingHero event={upcomingData || undefined} />
 
-            <div className={styles.hero}>
-                <p className={styles.heroLabel}>
-                    {t('pages.stargazing.hero-label', 'Оренбург · Наблюдение за звёздами')}
-                </p>
-
-                <h1 className={styles.heroTitle}>
-                    <span>{t('pages.stargazing.hero-title-line1', 'Астровыезды')}</span>
-                </h1>
-
-                <p className={styles.heroSubtitle}>
-                    {t(
-                        'pages.stargazing.text',
-                        'Представьте: ночное небо без городских огней, тысячи звёзд над головой и кольца Сатурна в окуляре телескопа. Наши астровыезды за город - это не просто наблюдения, это вечера, которые меняют взгляд на мир. Присоединяйтесь, чтобы увидеть Вселенную своими глазами!'
-                    )}
-                </p>
-
-                <div className={styles.heroActions}>
-                    <Button
-                        mode={'primary'}
-                        label={t('pages.stargazing.hero-cta-events', 'Ближайший выезд')}
-                        link={'#upcoming'}
-                    />
-
-                    <Link
-                        href={'https://t.me/look_at_stars'}
-                        className={styles.telegramCta}
-                        title={t('pages.stargazing.telegram', 'Телеграм')}
-                        rel={'nofollow noopener'}
-                        target={'_blank'}
-                    >
-                        <Icon name={'Telegram'} />
-                        {t('pages.stargazing.hero-cta-telegram', 'Подписаться на Telegram')}
-                    </Link>
-                </div>
-            </div>
-
-            <InfoCards items={infoCards} />
-
-            <div id={'upcoming'}>
+            <LandingSection
+                id={'upcoming'}
+                kicker={t('pages.stargazing.upcoming-kicker', 'Регистрация')}
+                title={t('pages.stargazing.upcoming-title', 'Ближайший')}
+                accent={t('pages.stargazing.upcoming-accent', 'астровыезд')}
+            >
                 <EventUpcoming event={upcomingData || undefined} />
-            </div>
+            </LandingSection>
 
-            <h2>{t('pages.stargazing.program-title', 'Как проходит вечер')}</h2>
-
-            <EventProgram />
-
-            <EventImportant />
+            <LandingSection
+                id={'program'}
+                kicker={t('pages.stargazing.program-kicker', 'Программа')}
+                title={t('pages.stargazing.program-title-start', 'Как проходит')}
+                accent={t('pages.stargazing.program-accent', 'вечер')}
+                lead={t(
+                    'pages.stargazing.program-lead',
+                    'От заката до глубокой ночи: четыре части одного вечера под звёздами, 2–4 часа.'
+                )}
+            >
+                <EventProgram />
+            </LandingSection>
 
             <ReviewsWidget />
 
-            {pastEvents.length > 0 && (
-                <>
-                    <h2 className={pageStyles.sectionTitle}>
-                        {t('pages.stargazing.past-events', 'Прошедшие астровыезды')}
+            <LandingSection
+                kicker={t('pages.stargazing.guide-kicker', 'Перед поездкой')}
+                title={t('pages.stargazing.guide-title', 'Всё, что стоит')}
+                accent={t('pages.stargazing.guide-accent', 'знать заранее')}
+            >
+                <div className={styles.guide}>
+                    <StargazingGuide />
+                    <EventImportant />
+                </div>
+            </LandingSection>
 
+            <LandingSection
+                kicker={t('pages.stargazing.team-kicker', 'Команда')}
+                title={t('pages.stargazing.team-title', 'Кто проводит')}
+                accent={t('pages.stargazing.team-accent', 'астровыезды')}
+            >
+                <div className={styles.team}>
+                    <div className={styles.teamPhoto}>
+                        <Image
+                            src={teamPhoto}
+                            alt={t('pages.stargazing.team-photo-alt', 'Команда проекта «Смотри на звёзды»')}
+                            placeholder={'blur'}
+                            sizes={'(max-width: 768px) 100vw, 560px'}
+                            fill
+                        />
+                    </div>
+                    <div className={styles.teamText}>
+                        <p>
+                            {t(
+                                'pages.stargazing.team-text',
+                                'Мы астрономы-любители из Оренбурга. С {{year}} года привозим телескопы за город, читаем лекции о космосе и показываем небо всем, кто хочет увидеть его своими глазами.',
+                                { year: STARGAZING_FOUNDING_YEAR }
+                            )}
+                        </p>
                         <Link
-                            href={'/stargazing/history'}
-                            className={styles.showAllEvents}
+                            href={'/about'}
+                            className={styles.teamLink}
                         >
+                            {t('pages.stargazing.team-link', 'О проекте и команде')}
+                        </Link>
+                    </div>
+                </div>
+            </LandingSection>
+
+            {pastEvents.length > 0 && (
+                <LandingSection
+                    kicker={t('pages.stargazing.past-kicker', 'Архив')}
+                    title={t('pages.stargazing.past-title', 'Прошедшие')}
+                    accent={t('pages.stargazing.past-events-accent', 'астровыезды')}
+                    aside={
+                        <Link href={'/stargazing/history'}>
                             {t('pages.stargazing.past-events-show-all', 'Смотреть все')}
                         </Link>
-                    </h2>
-
+                    }
+                >
                     <EventsList events={pastEvents} />
-                </>
+                </LandingSection>
             )}
 
             <AppFooter />
@@ -189,6 +179,12 @@ export const getServerSideProps = wrapper.getServerSideProps(
             const { data: upcomingData } = await store.dispatch(API.endpoints?.eventGetUpcoming.initiate())
 
             const { data: eventsData } = await store.dispatch(API.endpoints?.eventGetList.initiate())
+
+            // The reviews are in the HTML (and for search engines), not loaded after the page
+            void store.dispatch(API.endpoints?.commentsGetRandom.initiate(STARGAZING_REVIEWS_QUERY))
+
+            // The numbers of the hero are in the HTML, not 0 until the page loads them
+            void store.dispatch(API.endpoints?.statisticGetStargazing.initiate())
 
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 

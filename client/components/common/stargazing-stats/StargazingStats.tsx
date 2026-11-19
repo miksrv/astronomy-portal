@@ -10,11 +10,12 @@ import { STARGAZING_FOUNDING_YEAR, STARGAZING_LEGACY_MEMBERS } from '@/utils/con
 import styles from './styles.module.sass'
 
 interface StargazingStatsProps {
-    horizontal?: boolean
+    /** A row of numbers on a hairline, left-aligned: the landing hero's band */
+    strip?: boolean
     className?: string
 }
 
-export const StargazingStats: React.FC<StargazingStatsProps> = ({ horizontal, className }) => {
+export const StargazingStats: React.FC<StargazingStatsProps> = ({ strip, className }) => {
     const { t } = useTranslation()
 
     const { data } = API.useStatisticGetStargazingQuery()
@@ -42,7 +43,7 @@ export const StargazingStats: React.FC<StargazingStatsProps> = ({ horizontal, cl
     ]
 
     return (
-        <div className={cn(horizontal ? styles.statsRowHorizontal : styles.statsRow, className)}>
+        <div className={cn(strip ? styles.statsStrip : styles.statsRow, className)}>
             {items.map((item) => (
                 <div
                     key={item.id}

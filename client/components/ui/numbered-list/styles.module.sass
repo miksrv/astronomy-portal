@@ -1,0 +1,102 @@
+@use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
+
+.list
+    display: grid
+    grid-template-columns: repeat(var(--columns, 4), minmax(0, 1fr))
+    gap: var(--space-8) var(--space-6)
+    margin: 0
+    padding: 0
+    list-style: none
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: repeat(min(var(--columns, 4), 2), minmax(0, 1fr))
+        gap: var(--space-6) var(--space-4)
+
+    @media only screen and (max-width: 480px)
+        grid-template-columns: 1fr
+
+.item
+    min-width: 0
+
+.link
+    display: block
+    height: 100%
+    color: inherit
+
+    &:hover
+        color: inherit
+
+        .title
+            color: var(--color-main)
+
+        .arrow
+            fill: var(--color-main)
+            transform: translateX(3px)
+
+        .indexRow
+            border-color: var(--color-main)
+
+.imageWrapper
+    position: relative
+    aspect-ratio: 4 / 3
+    margin-bottom: var(--space-4)
+    border-radius: var(--radius-lg)
+    overflow: hidden
+    background: var(--surface-2)
+
+.image
+    object-fit: cover
+
+// The ordinal on a hairline that runs the width of the item
+.indexRow
+    display: flex
+    align-items: center
+    justify-content: space-between
+    padding-bottom: var(--space-3)
+    margin-bottom: var(--space-3)
+    border-bottom: 1px solid var(--border-strong)
+    transition: border-color var(--duration-fast) var(--ease)
+
+.index
+    +type.index
+
+.arrow
+    width: 16px
+    height: 16px
+    fill: var(--text-color-secondary)
+    transition: fill var(--duration-fast) var(--ease), transform var(--duration-fast) var(--ease)
+
+.title
+    +type.titleBlock
+    margin: 0 0 var(--space-2)
+    transition: color var(--duration-fast) var(--ease)
+
+.text
+    +type.secondary
+    margin: 0
+
+// The title on the ordinal's line: 01 · Title ……… →, a larger text under it
+.inline
+    .indexRow
+        justify-content: flex-start
+        gap: var(--space-3)
+        padding-bottom: var(--space-4)
+        margin-bottom: var(--space-4)
+
+    .index
+        +type.indexInline
+
+    .title
+        flex: 1
+        margin: 0
+
+    .text
+        +type.body
+        font-size: var(--font-size-prose)
+        line-height: 1.6
+        color: var(--text-color-secondary)
+
+@media (prefers-reduced-motion: reduce)
+    .indexRow, .arrow, .title
+        transition: none

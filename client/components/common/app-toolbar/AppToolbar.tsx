@@ -1,4 +1,5 @@
 import React, { forwardRef } from 'react'
+import { cn } from 'simple-react-ui-kit'
 
 import { useTranslation } from 'next-i18next/pages'
 
@@ -13,6 +14,10 @@ import styles from './styles.module.sass'
 
 interface AppToolbarProps extends Pick<BreadcrumbsProps, 'currentPage' | 'links'> {
     title?: string
+    /** The label over the title of a landing family page (the stargazing guide pages) */
+    kicker?: string
+    /** The landing title size (DESIGN.md → Landing pages): the pages of a landing's family */
+    landing?: boolean
     /** Right after a short title, on its line: the status of what the page is about (a job) */
     titleAside?: React.ReactNode
     /** The page's first paragraph, under the title */
@@ -26,7 +31,7 @@ interface AppToolbarProps extends Pick<BreadcrumbsProps, 'currentPage' | 'links'
 }
 
 export const AppToolbar = forwardRef<HTMLDivElement, AppToolbarProps>(
-    ({ title, titleAside, lead, links, currentPage, actions, children, afterBreadcrumbs }, ref) => {
+    ({ title, kicker, landing, titleAside, lead, links, currentPage, actions, children, afterBreadcrumbs }, ref) => {
         const { t } = useTranslation()
 
         return (
@@ -36,7 +41,7 @@ export const AppToolbar = forwardRef<HTMLDivElement, AppToolbarProps>(
                     currentPage={currentPage}
                 />
                 <div
-                    className={styles.toolbarHeader}
+                    className={cn(styles.toolbarHeader, landing && styles.landing)}
                     ref={ref}
                 >
                     <div className={styles.toolbarTitle}>
@@ -50,6 +55,7 @@ export const AppToolbar = forwardRef<HTMLDivElement, AppToolbarProps>(
                                 />
                             </div>
                         )}
+                        {kicker && <p className={styles.toolbarKicker}>{kicker}</p>}
                         <div className={styles.toolbarTitleRow}>
                             <div className={styles.toolbarHeading}>
                                 <h1>{title}</h1>

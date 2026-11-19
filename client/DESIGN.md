@@ -31,7 +31,7 @@ overrides), `styles/globals.sass`. Do not import the kit CSS anywhere else.
 `styles/theme.css` holds only:
 
 1. **Project primitives** — layout (`--width-max` 1127px, `--header-height` 50px, `--width-menu`),
-   the extra spacing steps `--space-8` (32) / `--space-10` (40), the type scale (section 3).
+   the extra spacing steps `--space-8` (32) / `--space-10` (40) / `--space-12` (48), the type scale (section 3).
 2. **The night palette** — the colour overrides of the kit's dark theme:
 
     | Token                               | Value                 | Use                                             |
@@ -74,10 +74,12 @@ and tracking together.
 
 | Role (mixin)   | px (phones) | Token                       | Weight · line height · tracking | Use                                                     |
 | -------------- | ----------- | --------------------------- | ------------------------------- | ------------------------------------------------------- |
-| `titleDisplay` | 40 (30)     | `--font-size-display`       | 700 · 1.1 · −0.02em             | the home and stargazing heroes only                     |
+| `titleHero`    | 64 (40)     | `--font-size-hero`          | 700 · 1.02 · −0.035em, balanced | the h1 of a landing hero (home, `/stargazing`)          |
+| `titleLanding` | 36 (28)     | `--font-size-title-landing` | 700 · 1.1 · −0.025em, balanced  | the h2 of a landing section (`LandingSection`)          |
+| `titleDisplay` | 40 (30)     | `--font-size-display`       | 700 · 1.1 · −0.02em             | big hero numbers                                        |
 | `titlePage`    | 26 (22)     | `--font-size-title-page`    | 600 · 1.2 · −0.01em, balanced   | **every page `h1`** (`AppToolbar`, auth, payment, …)    |
 | `stat`         | 22          | `--font-size-stat`          | 600 · 1.1, tabular figures      | a number that is the point of its block: stats, weather |
-| `lead`         | 18 (16)     | `--font-size-lead`          | 400 · 1.55                      | the first paragraph of a page or hero                   |
+| `lead`         | 18 (16)     | `--font-size-lead`          | 400 · 1.55                      | landing heroes and sections only (never an inner page)  |
 | `titleSection` | 18          | `--font-size-title-section` | 600 · 1.3 · −0.01em             | section `h2` (global default), prose `h2`               |
 | `prose`        | 16          | `--font-size-prose`         | 400 · 1.7                       | long-form text: FAQ, rules, descriptions, privacy       |
 | `titleBlock`   | 16          | `--font-size-large`         | 600 · 1.3                       | card and block titles, `h3` (global default)            |
@@ -85,6 +87,9 @@ and tracking together.
 | `secondary`    | 13          | `--font-size-secondary`     | 400 · 1.45, secondary colour    | bylines, meta lines, values of a card                   |
 | `caption`      | 12          | `--font-size-small`         | 400 · 1.4, secondary colour     | breadcrumbs, captions, counters, chart axes             |
 | `overline`     | 12          | `--font-size-small`         | 600 · 1.4 · +0.08em, uppercase  | eyebrows over hero titles, group labels                 |
+| `kicker`       | 12          | `--font-size-small`         | overline + a 28px brand rule    | the label over a landing title                          |
+| `index`        | 12          | `--font-size-small`         | 600 · +0.08em, tabular, brand   | the ordinal over a numbered card (`NumberedList`)       |
+| `indexInline`  | 18          | `--font-size-title-section` | 600 · 1.15, tabular, brand      | the ordinal on a title's line: text steps, FAQ          |
 | `micro`        | 11          | `--font-size-micro`         | 400 · 1.35                      | credits and badges over photos                          |
 
 Weights are the kit tokens (`--font-weight-normal|medium|semibold`, 400/500/600); 700 only for the
@@ -110,7 +115,8 @@ readers may spell out all-caps words letter by letter. No ad-hoc sizes, no `em` 
   (`children`) on its line, on the right — under the title on phones —, the status of what a
   page with a short title is about (`titleAside`: badges, author · date) right after the `h1`
   instead of a line of its own, an optional meta line
-  (`secondary`), then the lead. **The lead (the page's description) always runs the full width of
+  (`secondary`), then the lead: the page's description, set as ordinary text (`prose`, the size of the
+  page's text — not singled out). **The lead always runs the full width of
   the column**: no button, switch or other control ever sits beside it; controls go on the
   title's line, and they are **small** (`size="small"`, 28px — under the h1's ~31px line): the gap
   from the title to the lead is the same on a page with controls and without (the toolbar also
@@ -147,20 +153,43 @@ readers may spell out all-caps words letter by letter. No ad-hoc sizes, no `em` 
 - **Lists of media** (photos, events) are grids of tiles on the page background, never inside a
   `Container`.
 - **Lists of records** (events, telescope jobs) are a column of cards, **one card per record** —
-  never rows inside one shared card. The card is the stargazing `EventRow` shape: a side block
-  (the date, or a place in a queue: overline + big number, a hairline on its right), the title
-  with its status badges, a meta line of icon + value pairs, one more line of content (excerpt,
-  filter tags), an optional figure on the right (progress), a chevron; the whole card is one link
-  (hover: the `--color-main` ring and title). The same record is the same component wherever it
-  is listed (a dashboard widget and its full list alike): `EventRow`, `JobCard`. A card may say
-  its record's state with its edge, in the status colours only: done — a green ring; waiting for
-  someone's decision — a faint orange dashed ring (the warning badge's colour); set aside (paused)
-  — a grey dashed ring (`--text-color-disabled`); the kit's own ring gives way to it.
+  never rows inside one shared card. A card: a side block, the title with its status badges, a
+  meta line of icon + value pairs (counts in words: «1 611 участников»), one more line of content
+  (excerpt, filter tags), an optional figure on the right (progress), a chevron; the whole card is
+  one link (hover: the `--color-main` ring and title), a second link (the editor's statistics)
+  beside it, never inside. The side block is what the record has to show: an event its cover
+  (`EventRow`: the full image in 16:9, the server's preview crops the posters) with the date as a
+  kicker over the title, up to two lines of title; a job its place in a queue (`JobCard`: overline
+    - big number, a hairline on its right). The same record is the same component wherever it
+      is listed (a dashboard widget and its full list alike): `EventRow`, `JobCard`. A card may say
+      its record's state with its edge, in the status colours only: done — a green ring; waiting for
+      someone's decision — a faint orange dashed ring (the warning badge's colour); set aside (paused)
+      — a grey dashed ring (`--text-color-disabled`); the kit's own ring gives way to it.
 - **"See all".** A section that shows a few items of a longer list has the link to the whole list
   on its heading's line, on the right ("Смотреть все", "Все задания" — body text, no arrow), as
   the past events on `/stargazing`; never in a footer under the items.
 - **Breakpoint.** One: `$mobileMaxWidth` (768px) from `styles/variables.sass`. Below it columns
   stack, side actions wrap under the content, touch targets are at least 44px.
+
+### Landing pages
+
+The home, `/stargazing` and the stargazing guide pages (how-to, where, rules, FAQ) share one
+editorial rhythm, so they read as one family:
+
+- **Hero.** A real photo under the app bar on the full window width (scrim to the page colour); no
+  decorative line of overlines under the app bar (it reads as a second menu), then at the bottom: `kicker` → `titleHero` with one
+  accented phrase (`<em>`, `titleAccent`: `--color-main`, not italic) → a one-line lead → one
+  primary action that fits the moment (book / get the e-mail / read on) and one outline link →
+  the numbers of the project on a hairline (`StargazingStats strip`).
+- **Sections.** `LandingSection` (`components/ui`): `kicker` → `titleLanding` with its accent →
+  optional lead, "see all" on the title's line; `--space-section` (96px, 64px on phones) between
+  sections. Sections are set apart by air, never by a rule.
+- **Numbered items.** `NumberedList` (`components/ui`): 01, 02… on a hairline, a title and one line,
+  optionally a photo above or a link over the whole item. Steps, the guide pages, focuses.
+- **Guide pages.** `StaticInfoPageLayout kicker` gives the title the landing size and the kicker;
+  `ContentText editorial` gives the sections larger titles and more air (no rules between them) and
+  numbers a list of titled items, a hairline between two items only; the
+  page ends with the other guide pages (`StargazingGuide`).
 
 ## 5. Components
 

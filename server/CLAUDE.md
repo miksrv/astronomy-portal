@@ -134,8 +134,8 @@ POST   /roles                       → Roles::create
 PATCH  /roles/:id                   → Roles::update
 DELETE /roles/:id                   → Roles::delete            (strips the role from every user's `roles` array first — see UsersModel::removeRoleFromAllUsers())
 
-GET    /comments                    → Comments::index
-GET    /comments/random             → Comments::random
+GET    /comments                    → Comments::index          (+ `summary` = `{count, average}` of the entity's rated reviews)
+GET    /comments/random             → Comments::random         (`?minRating=1..5`, `?minLength=` characters narrow the pick; each event review carries `entity` = the event's title + date; + `summary` of the whole type) [publiccache:60]
 POST   /comments                    → Comments::create         [rate-limited: comments_create, 10/60s]
 DELETE /comments/:id                → Comments::delete
 
@@ -226,7 +226,7 @@ All models extend `ApplicationBaseModel` (which extends CI4 `Model`) unless note
 Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 
 - `2026-11-05-100000_AddTelescopeJobs` — FEAT-30 phase 2: `telescope_jobs` (portal-owned target/plan/constraints/priority/approval with a `version`; agent-owned `progress`/`last_seq`; `repeated_at` — the job was repeated, frames before it don't count; `status` VARCHAR), `telescope_job_updates` (unique `job_id`+`seq` — the agent's idempotency log and the job timeline), no frames table (frames live in observatory-api; a job keeps counts per filter + `first_frame_at`/`last_frame_at`), `observatory_night_plans`, and the job `observatory_settings` keys (`AddTelescopeJobs::SETTINGS`; `autonomous_mode` = 0). Plain types on purpose: `tests/_support/Database/TelescopeTables` runs it on SQLite, so the job logic is tested against a real database.
-- `2026-11-04-100000_AddObjectsSimbad` — `objects.simbad_id`, `object_type` (SIMBAD's short code), `maj_axis`/`min_axis` (arcmin), `aliases` (JSON list), `simbad_checked_at`; filled by `php spark objects:simbad` and on `POST /objects` (FEAT-31, see `ObjectSimbadLibrary`).
+- `2026-11-04-100000_AddObjectsSimbad` — `objects.simbad_id`, `object_type` (SIMBAD's short code), `maj_axis`/`min_axis` (arcmin), `aliases` (JSON list), `simbad_checked_at`; filled once for the existing objects by a since-removed command, and on `POST /objects` (FEAT-31, see `ObjectSimbadLibrary`).
 - `2026-11-04-110000_AddObservatoryStatus` — `observatory_status` (latest agent snapshot) and `observatory_events`.
 - `2026-11-02-100000_AddPhotosAstrometry` — `photos_astrometry`, the plate solve per photo (see `PhotosAstrometryModel`); `status` is a VARCHAR, not an ENUM, so the migration also runs on SQLite.
 - `2026-10-30-100000_ObjectsRedesign` — `objects.distance` (light years) / `objects.magnitude` (optional, editor-filled facts for the object page) and the (`object`, `date_obs`) index on `objects_fits_files` behind the per-night aggregations.
@@ -246,6 +246,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 - Use `$db->table()` or model query builder methods. Raw SQL goes in `$db->query()`.
 
 ### Comment authors
+- `CommentsModel::getRatingSummary()` is the headline rating (count of rated visible reviews + their average to a tenth), of a type or of one entity.
 - `CommentsModel::getForEntity()` and `getRandom()` return the author as `{ id, name, avatar }` with the name truncated to "FirstName L." for privacy (a telescope job, unlike a comment, shows the author's full name).
 
 ### API Responses
@@ -300,13 +301,14 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 | `EventBookingLibrary` | A booking against its payment, shared by `Events` and `system:cron`: `releaseExpiredBookings()`, `reconcileBooking()` (paid → confirm + ticket email, or refund when the seat is gone; failed/canceled → the booking failed), `buildTicketData()`, `queueTicketEmail()` |
 | `PaymentGatewayInterface` | Contract a new payment provider must implement |
 | `AlfaBankClient` | Current `PaymentGatewayInterface` implementation; test/production environment switch |
+| `EventCoverLibrary` | The cover of an event: whatever is uploaded (on `POST /events` and `POST /events/:id/cover`) is stored as WebP (at most 1920 px wide, quality 85) + its 585×400 `_preview`, under a new name every time (`cover-<random>.webp`, `cover_file_name` in the row): a replaced cover gets a new address, so no cache shows the old one; the files of the earlier cover (any format) are removed once the event points at the new one. `toWebp()` converts a cover stored before (`events:covers-webp`) |
 | `TicketLibrary` | Renders event ticket PNGs (static background asset + QR code) for check-in |
 | `CalendarLibrary` | Builds ICS calendar attachments for event emails |
 | `ApiExceptionHandler` | Renders uncaught exceptions in the `{message, errors?}` envelope (`Config\Exceptions::handler()`) |
 | `WebPushLibrary` | Thin wrapper around `Minishlink\WebPush\WebPush` (VAPID keys from `Config\Push`); throws `WebPushExpiredSubscriptionException` on HTTP 404/410 |
 | `AstrometryClient` | nova.astrometry.net API (key from `Config\Astrometry` / `astrometry.apiKey`): login, image upload, submission → job → calibration/annotations, and `parseWcsHeader()` for the WCS FITS header; every failure is a `RuntimeException` |
 | `SimbadClient` | SIMBAD lookup (FEAT-31, mirrors in `Config\Simbad`, overridable in `.env`): the Sesame resolver (any name → SIMBAD main id, J2000 position, type, aliases) + SIMBAD TAP (size, V magnitude); `queryName()` turns our names into Sesame's (`Sh2_103` → `Sh 2-103`, `2023ixf` → `SN 2023ixf`), `alias()` keeps only the names people use; null when not found, `RuntimeException` when unreachable |
-| `ObjectSimbadLibrary` | Decides what of a SIMBAD answer an object gets: within `Simbad::MATCH_DEGREES` (2°) of our position → type, size, aliases, the magnitude when empty (not for nebulae: their V is a central star's), our coordinates kept; farther → nothing unless a person accepts it (then SIMBAD's coordinates too); moving bodies (categories 8/9/10/12) are never looked up |
+| `ObjectSimbadLibrary` | Decides what of a SIMBAD answer an object gets: within `Simbad::MATCH_DEGREES` (2°) of our position → type, size, aliases, the magnitude when empty (not for nebulae: their V is a central star's), our coordinates kept; farther → nothing (the editor checks it with "Найти в SIMBAD"); moving bodies (categories 8/9/10/12) are never looked up |
 | `TelescopeSettings` | The job settings from `observatory_settings`, typed; a missing or broken value falls back to the default (never opens a limit), the altitude floor never below 15° |
 | `TelescopeJobValidator` | Pure check of a job's target, plan and constraints → table values; users within the limits from the settings, `telescope.manage` within the physical bounds of `Config\Telescope`; wheel filters and the altitude floor bind everybody |
 | `TelescopeAgentSync` | The portal side of the agent sync: `expireOverdue()`, `desiredState()`, `applyUpdates()` — per job `seq` (seen → duplicate, next → applied, gap → the batch stops with `lastSeq`); a transition that doesn't fit the status still consumes its seq (`telescope_job_updates.applied = 0`) so the outbox never sticks; an update that happened before the job's `repeated_at` (the previous run, left in the agent's outbox) is ignored the same way; `progress` is absolute counts per filter + the frames' time window — no frames are stored (they live in observatory-api); every change is a conditional UPDATE on `last_seq` + status, retried when the site changed the job meanwhile |
@@ -325,7 +327,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 | Command | Group | Purpose |
 |---|---|---|
 | `system:cron` | system | The API's one cron job, every minute, in one process: frees the seats of expired unpaid bookings (`EventBookingLibrary::releaseExpiredBookings()`, the same as the site: each payment checked with the bank first, one paid after its hold expired is confirmed with the ticket or refunded, one the bank gave no outcome for is failed after `PaymentLibrary::STALE_HOLD_HOURS`), then sends the transactional emails and the mailing campaigns (`EmailQueueProcessor`, campaigns under the `Config\MailingLimits` day/hour caps) and the Web Push deliveries (`PushQueueProcessor`, batch 50, no cap; a 404/410 subscription is deleted). An idle minute is one indexed query per queue (`hasQueued()`) and no output; the mailer and the push client are built before the first row, so a broken config fails the run and leaves the queue as is; a run that outlives its minute holds `writable/cron.lock` and the next one exits, so nothing is sent twice; a failing step is logged and the next one runs |
-| `objects:simbad` | Observatory | Fills the objects from SIMBAD (`ObjectSimbadLibrary`): a report only, unless `--apply`; `--accept M_94,IC_405` takes the far ones (coordinates included) after a person checked them, `--skip NGC_6888` leaves out a name SIMBAD resolves to a neighbour, `--object NAME` one object, `--all` also the ones looked up before. Run once after the migration; new objects are filled on `POST /objects` |
+| `events:covers-webp` | Events | One-time: converts the covers stored before WebP (JPEG/PNG/GIF, deleted events too) to `cover-<random>.webp` + preview and points the event at them (`EventCoverLibrary::toWebp()`), the old files removed only after the row is updated; a report only, unless `--apply`; `--keep` leaves the old files, `--event ID` one event. A PNG poster shrinks ~8× |
 | `photos:solve` | Observatory | Plate-solves photos from the command line by looping `AstrometrySolver::step()` (about a minute each): `--limit N` (default 3) rows in progress, `--all` first queues every never-solved photo (the one-time backfill of the archive), `--photo ID` (re)solves one photo. Spark passes options as `--name value`; the command also accepts `--name=value`. Not a cron job — new uploads are solved from the editor's browser via `POST /photos/:id/astrometry` |
 
 The hosting cron (outside this repo) runs `php8.4 <path>/spark system:cron` every minute (`* * * * *`).

@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 4.17.4
+
+### Patch Changes
+
+- Stargazing, home and guide pages redesigned: event cards with posters, the evening's plan step by step
+- Reviews show the average rating; the best and fullest reviews are picked for the widget
+- The About page is easier to read
+- Event posters load faster
+
 ## 4.17.3
 
 ### Patch Changes

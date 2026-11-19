@@ -25,12 +25,13 @@ The dictionary is split by section (root `CLAUDE.md`, "i18n"). Every `getServerS
 
 ### Static text pages (Markdown)
 
-The long texts of `/stargazing/{rules,howto,where,faq}`, `/privacy` and `/observatory/overview` live in `client/content/<page>.<locale>.md` (RU and EN, a front matter of `title:` and `description:` on top). `loadContentPage(page, locale)` (`utils/content.server.tsx`) reads the file in `getStaticProps` and renders it to HTML with `react-markdown`, so the browser gets neither the Markdown parser nor the other language; the page shows it with `ContentText` (`components/common/content-text`). Conventions of the files:
+The long texts of `/stargazing/{rules,howto,where,faq}`, `/about`, `/privacy` and `/observatory/overview` live in `client/content/<page>.<locale>.md` (RU and EN, a front matter of `title:` and `description:` on top). `loadContentPage(page, locale)` (`utils/content.server.tsx`) reads the file in `getStaticProps` and renders it to HTML with `react-markdown`, so the browser gets neither the Markdown parser nor the other language; the page shows it with `ContentText` (`components/common/content-text`). Conventions of the files:
 
-- `##` is a section with an anchor (in the FAQ: a question, its text the answer and the FAQPage structured data); the first paragraph is the lead.
+- `##` is a section with an anchor (in the FAQ: a question, its text the answer and the FAQPage structured data); the first paragraph is ordinary text, as the rest (no lead).
 - A list item opening with `### Title` is a titled item (rules, equipment); on the how-to page these are also the HowTo steps.
 - Site links are plain paths (`/stargazing/faq`): the renderer adds `/en` on English pages, `ContentText` navigates them without a reload. Links to other sites open in a new tab.
 - A paragraph of images only (`![alt](/photos/x.jpeg)` on adjacent lines) is a row of photos through the Next.js image optimizer, opening in the lightbox.
+- A component in the middle of a text (the team carousel of `/about`) is placed by the page between parts of the text: `sectionsHtml(sections.slice(...))` renders a range of `##` sections.
 
 A new page: add its name to `ContentPageName` (`utils/content.ts`), both files, and a page with `getStaticProps` like `pages/stargazing/rules.tsx`. The files are read at build time only (no `revalidate`), so a text change ships with the next deploy.
 

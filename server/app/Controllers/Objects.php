@@ -289,7 +289,7 @@ class Objects extends BaseApiController
 
     /**
      * Fills a new object from SIMBAD (type, size, aliases; the magnitude when empty). A failed or
-     * slow lookup never fails the create: `objects:simbad` picks the object up later.
+     * slow lookup never fails the create: the editor can fill it with "Найти в SIMBAD" in the form.
      */
     private function _fillFromSimbad(array $object, array $categories): void
     {

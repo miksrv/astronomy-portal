@@ -86,8 +86,26 @@
         .toolbarMeta
             +type.secondary
 
-        // The same 16px under the title as a first paragraph placed right after the toolbar
-        // gets from the gap of <main> (the title column's own gap is 4px)
+        // The page's description: ordinary text, as the text of the page (no lead role); the
+        // same 16px under the title as a first paragraph placed right after the toolbar gets
+        // from the gap of <main> (the title column's own gap is 4px)
         .toolbarLead
-            +type.lead
+            +type.prose
             margin: var(--space-3) 0 0
+
+    // The kicker over the title of a landing family page: well under the breadcrumbs
+    .toolbarKicker
+        +type.kicker
+        margin: var(--space-8) 0 var(--space-3)
+
+        @media only screen and (max-width: variables.$mobileMaxWidth)
+            margin-top: var(--space-5)
+
+// A page of a landing's family (the stargazing guide): the landing title, the lead under it wider apart
+.landing
+    .toolbarTitle
+        h1
+            +type.titleLanding
+
+        .toolbarLead
+            margin-top: var(--space-4)

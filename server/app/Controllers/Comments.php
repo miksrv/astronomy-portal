@@ -97,8 +97,9 @@ class Comments extends BaseApiController
             $total = $this->model->countForEntity($entityType, $entityId);
 
             $response = [
-                'total' => $total,
-                'items' => $items,
+                'total'   => $total,
+                'items'   => $items,
+                'summary' => $this->model->getRatingSummary($entityType, $entityId),
             ];
 
             if ($this->session->isAuth && $entityType === 'event') {
@@ -117,10 +118,12 @@ class Comments extends BaseApiController
     }
 
     /**
-     * GET /comments/random?entityType=event&limit=5
+     * GET /comments/random?entityType=event&limit=5[&minRating=5][&minLength=80]
      *
-     * Returns N random visible comments for a given entity type (used for widgets).
-     * Public endpoint — no authentication required.
+     * Returns N random visible comments for a given entity type (the reviews widget of the
+     * landing), each with the event it is about, and the rating `summary` of the whole type
+     * (`{count, average}`). `minRating`/`minLength` narrow the pick to the best and fullest
+     * reviews; the summary always counts them all. Public endpoint — no authentication required.
      *
      * @return ResponseInterface
      */
@@ -128,6 +131,8 @@ class Comments extends BaseApiController
     {
         $entityType = $this->request->getGet('entityType', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $limit      = $this->request->getGet('limit', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 50]]);
+        $minRating  = $this->request->getGet('minRating', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 5]]);
+        $minLength  = $this->request->getGet('minLength', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 1000]]);
 
         if (empty($entityType)) {
             return $this->respondInvalidRequest('random() called without the entityType query param');
@@ -140,9 +145,12 @@ class Comments extends BaseApiController
         $limit = $limit ?: 5;
 
         try {
-            $items = $this->model->getRandom($entityType, $limit);
+            $items = $this->model->getRandom($entityType, $limit, $minRating ?: 0, $minLength ?: 0, $this->request->getLocale());
 
-            return $this->respond(['items' => $items]);
+            return $this->respond([
+                'items'   => $items,
+                'summary' => $this->model->getRatingSummary($entityType),
+            ]);
         } catch (Exception $e) {
             log_message('error', '{exception}', ['exception' => $e]);
 

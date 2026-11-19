@@ -6,15 +6,14 @@ use CodeIgniter\I18n\Time;
 use Config\Simbad;
 
 /**
- * Fills an object from SIMBAD (FEAT-31) — shared by `objects:simbad` and `POST /objects`.
+ * Fills a new object from SIMBAD on `POST /objects` (FEAT-31).
  *
  * - **match**: SIMBAD's position is within `Simbad::MATCH_DEGREES` of ours (or we have none):
  *   the type, size, aliases and SIMBAD id are stored; the magnitude only when the editor left it
  *   empty and it is the object's own (not a nebula's central star); our coordinates stay (a
  *   frame center may be off the catalog center on purpose) unless we had none.
  * - **far**: farther than that — our coordinates are wrong or the name means another object.
- *   Nothing is stored unless a person accepts it (`objects:simbad --accept=M_94`); then the
- *   coordinates are SIMBAD's too.
+ *   Nothing is stored: the editor checks it with "Найти в SIMBAD" in the object form.
  * - **not_found**: SIMBAD doesn't know the name; only the time of the check is stored.
  * - **moving**: a comet, asteroid or planet — it has no fixed position, SIMBAD is not asked.
  */
@@ -38,11 +37,10 @@ class ObjectSimbadLibrary
      *
      * @param array $object `catalog_name`, `ra`, `dec`, `magnitude` of the objects row
      * @param int[] $categories
-     * @param bool  $accept store even a far answer (a person checked it)
      *
      * @return array{status: string, offset: ?float, simbad: ?array, update: array}
      */
-    public function check(array $object, array $categories = [], bool $accept = false): array
+    public function check(array $object, array $categories = []): array
     {
         if (array_intersect(array_map('intval', $categories), self::MOVING_CATEGORIES)) {
             return ['status' => 'moving', 'offset' => null, 'simbad' => null, 'update' => []];
@@ -55,7 +53,7 @@ class ObjectSimbadLibrary
             return ['status' => 'not_found', 'offset' => null, 'simbad' => null, 'update' => ['simbad_checked_at' => $now]];
         }
 
-        return self::decide($object, $simbad, $accept, $now);
+        return self::decide($object, $simbad, $now);
     }
 
     /**
@@ -63,7 +61,7 @@ class ObjectSimbadLibrary
      *
      * @return array{status: string, offset: ?float, simbad: array, update: array}
      */
-    public static function decide(array $object, array $simbad, bool $accept, string $now): array
+    public static function decide(array $object, array $simbad, string $now): array
     {
         $ra  = isset($object['ra']) ? (float) $object['ra'] : null;
         $dec = isset($object['dec']) ? (float) $object['dec'] : null;
@@ -73,7 +71,7 @@ class ObjectSimbadLibrary
         $offset      = $hasPosition ? SimbadClient::distance($ra, $dec, $simbad['ra'], $simbad['dec']) : null;
         $status      = $offset === null || $offset <= Simbad::MATCH_DEGREES ? 'match' : 'far';
 
-        if ($status === 'far' && !$accept) {
+        if ($status === 'far') {
             return ['status' => $status, 'offset' => $offset, 'simbad' => $simbad, 'update' => []];
         }
 
@@ -84,7 +82,7 @@ class ObjectSimbadLibrary
             $update['magnitude'] = $magnitude;
         }
 
-        if (!$hasPosition || $status === 'far') {
+        if (!$hasPosition) {
             $update['ra']  = round($simbad['ra'], 6);
             $update['dec'] = round($simbad['dec'], 6);
         }

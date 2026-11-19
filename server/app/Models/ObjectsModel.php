@@ -137,7 +137,7 @@ class ObjectsModel extends ApplicationBaseModel
                 $objectItem->description   = getLocalizedString($locale, $objectItem->description_en, $objectItem->description_ru);
                 $objectItem->fitsCloudLink = $objectItem->fits_cloud_link;
 
-                // What SIMBAD knows (FEAT-31), null until `objects:simbad` or the create looked it up
+                // What SIMBAD knows (FEAT-31), null until it was looked up
                 $objectItem->simbadId = $objectItem->simbad_id;
                 $objectItem->type     = $objectItem->object_type;
                 $objectItem->majAxis  = $objectItem->maj_axis;

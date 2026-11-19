@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import { ApiModel } from '@/api'
+import { ApiModel, ApiType } from '@/api'
 import { hosts } from '@/api/constants'
 import { SITE_LINK } from '@/utils/constants'
 import { toISODateTime } from '@/utils/dates'
@@ -22,6 +22,8 @@ const RATING_SCALE = { bestRating: 5, worstRating: 1 }
 interface EventReviewsData {
     items: ApiModel.Comment[]
     total: number
+    /** The server's rating of all the event's reviews, not only the page passed in */
+    summary?: ApiType.Comments.RatingSummary
 }
 
 const buildReviewJsonLd = (comment: ApiModel.Comment) => ({
@@ -57,21 +59,31 @@ export const buildEventJsonLd = (event: ApiModel.Event, reviews?: EventReviewsDa
             : undefined
 
     const ratedReviews = reviews?.items.filter((item) => typeof item.rating === 'number') ?? []
-    // Only report an aggregate once every review for the event has actually been
-    // fetched - callers only ever pass in the first page, so averaging that alone
-    // would misrepresent the event to search engines whenever there are more.
+    // The server's summary counts every review of the event. Without it (an older API) an
+    // aggregate is only reported once every review has actually been fetched - callers only ever
+    // pass in the first page, so averaging that alone would misrepresent the event to search engines
     const hasCompleteReviewSet = !!reviews && reviews.items.length >= reviews.total
+    const summary = reviews?.summary
     const aggregateRating =
-        hasCompleteReviewSet && ratedReviews.length > 0
+        summary?.count && summary.average != null
             ? {
                   '@type': 'AggregateRating',
-                  ratingValue: Number(
-                      (ratedReviews.reduce((sum, item) => sum + (item.rating ?? 0), 0) / ratedReviews.length).toFixed(2)
-                  ),
-                  reviewCount: ratedReviews.length,
+                  ratingValue: summary.average,
+                  reviewCount: summary.count,
                   ...RATING_SCALE
               }
-            : undefined
+            : hasCompleteReviewSet && ratedReviews.length > 0
+              ? {
+                    '@type': 'AggregateRating',
+                    ratingValue: Number(
+                        (ratedReviews.reduce((sum, item) => sum + (item.rating ?? 0), 0) / ratedReviews.length).toFixed(
+                            2
+                        )
+                    ),
+                    reviewCount: ratedReviews.length,
+                    ...RATING_SCALE
+                }
+              : undefined
 
     return {
         '@context': 'https://schema.org',

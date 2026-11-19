@@ -5,10 +5,6 @@
 .contentText
     +type.prose
 
-    // The first paragraph is the page's lead (`lead`); the gap of <main> puts it under the title
-    &.lead > p:first-child
-        +type.lead
-
     h2
         scroll-margin-top: 64px
 
@@ -82,6 +78,39 @@
 
     > :global(.content-gallery):last-child
         margin-bottom: 0
+
+// The landing rhythm: sections apart by air alone (no rules), a larger title; a numbered list of
+// titled items (the plan of the evening, the rules) is a column of steps 01, 02… with a hairline
+// between two steps only
+.editorial
+    h2
+        +type.titleLanding
+        font-size: var(--font-size-title-page)
+        margin: var(--space-12) 0 var(--space-4)
+
+    ol:has(> li > h3)
+        counter-reset: step
+        list-style: none
+        padding-left: 0
+
+        > li
+            counter-increment: step
+            display: grid
+            grid-template-columns: 56px minmax(0, 1fr)
+            column-gap: var(--space-4)
+
+            &::before
+                +type.indexInline
+                content: counter(step, decimal-leading-zero)
+                grid-row: 1 / span 10
+
+            > *
+                grid-column: 2
+
+        > li + li
+            margin-top: var(--space-4)
+            padding-top: var(--space-4)
+            border-top: 1px solid var(--border)
 
 @media (prefers-reduced-motion: reduce)
     .contentText :global(.content-photo) img

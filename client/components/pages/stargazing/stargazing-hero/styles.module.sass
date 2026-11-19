@@ -1,0 +1,94 @@
+@use '../../../../styles/variables' as variables
+@use '../../../../styles/typography' as type
+
+// Takes the first screen under the app bar; the photo runs the window's width behind the column
+.hero
+    position: relative
+    display: flex
+    flex-direction: column
+    min-height: 100svh
+    // The app bar floats over the photo: the content starts under it
+    padding: calc(var(--header-height) + var(--space-6)) 0 var(--space-8)
+    color: #fff
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        min-height: 92svh
+        padding-bottom: var(--space-6)
+
+.backdrop
+    position: absolute
+    inset: 0 auto 0 50%
+    width: 100vw
+    transform: translateX(-50%)
+    z-index: -1
+    overflow: hidden
+
+    // Readable text over the photo: dark at the top (the app bar), darker at the bottom (the title)
+    &::after
+        content: ''
+        position: absolute
+        inset: 0
+        background: linear-gradient(to bottom, var(--body-background) 0%, color-mix(in srgb, var(--body-background) 45%, transparent) 22%, color-mix(in srgb, var(--body-background) 55%, transparent) 55%, var(--body-background) 100%), linear-gradient(to right, color-mix(in srgb, var(--body-background) 70%, transparent) 0%, transparent 65%)
+
+.backdropImage
+    object-fit: cover
+    object-position: center 40%
+
+.body
+    margin-top: auto
+    padding: var(--space-10) 0
+
+.kicker
+    +type.kicker
+    margin: 0 0 var(--space-5)
+
+.title
+    +type.titleHero
+    max-width: 16ch
+    margin: 0
+    color: #fff
+
+    em
+        +type.titleAccent
+        display: block
+
+.lead
+    +type.lead
+    max-width: 46ch
+    margin: var(--space-5) 0 0
+    color: rgba(255, 255, 255, 0.78)
+
+.actions
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: var(--space-3)
+    margin-top: var(--space-8)
+
+.telegram
+    +type.body
+    display: inline-flex
+    align-items: center
+    gap: var(--space-2)
+    min-height: 44px
+    padding: 0 var(--space-5)
+    border-radius: var(--radius-md)
+    border: 1px solid rgba(255, 255, 255, 0.28)
+    color: #fff
+    transition: border-color var(--duration-fast) var(--ease), background-color var(--duration-fast) var(--ease)
+
+    svg
+        width: 16px
+        height: 16px
+        fill: currentColor
+
+    &:hover
+        color: #fff
+        border-color: var(--color-main)
+        background: rgba(255, 255, 255, 0.06)
+
+    @media (prefers-reduced-motion: reduce)
+        transition: none
+
+.stats
+    max-width: 720px

@@ -35,10 +35,7 @@ const PrivacyPolicyPage: NextPage<PrivacyPolicyPageProps> = ({ title, descriptio
             description={description}
             jsonLd={{ scriptKey: 'privacy-webpage', data: webPageSchema }}
         >
-            <ContentText
-                html={html}
-                lead={false}
-            />
+            <ContentText html={html} />
         </StaticInfoPageLayout>
     )
 }

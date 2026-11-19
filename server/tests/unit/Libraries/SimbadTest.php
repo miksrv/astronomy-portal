@@ -127,7 +127,6 @@ final class SimbadTest extends CIUnitTestCase
         $result = ObjectSimbadLibrary::decide(
             ['catalog_name' => 'M_94', 'ra' => 192.5, 'dec' => 41.5, 'magnitude' => 8.9],
             $this->simbad(),
-            false,
             '2026-11-04 12:00:00'
         );
 
@@ -140,37 +139,30 @@ final class SimbadTest extends CIUnitTestCase
 
     public function testMatchFillsAnEmptyMagnitude(): void
     {
-        $result = ObjectSimbadLibrary::decide(['ra' => 192.7, 'dec' => 41.1, 'magnitude' => null], $this->simbad(), false, 'now');
+        $result = ObjectSimbadLibrary::decide(['ra' => 192.7, 'dec' => 41.1, 'magnitude' => null], $this->simbad(), 'now');
 
         $this->assertSame(8.2, $result['update']['magnitude']);
     }
 
     public function testNoMagnitudeOfAPlanetaryNebulasCentralStar(): void
     {
-        $result = ObjectSimbadLibrary::decide(['ra' => 299.9, 'dec' => 22.72], $this->simbad(['ra' => 299.9, 'dec' => 22.72, 'type' => 'PN', 'magnitude' => 14.09]), false, 'now');
+        $result = ObjectSimbadLibrary::decide(['ra' => 299.9, 'dec' => 22.72], $this->simbad(['ra' => 299.9, 'dec' => 22.72, 'type' => 'PN', 'magnitude' => 14.09]), 'now');
 
         $this->assertArrayNotHasKey('magnitude', $result['update']);
     }
 
-    public function testFarIsNotStoredUnlessAccepted(): void
+    public function testFarIsNotStored(): void
     {
         // M 94 with its RA entered in hours
-        $object = ['ra' => 12.8339, 'dec' => 41.12, 'magnitude' => null];
-
-        $far = ObjectSimbadLibrary::decide($object, $this->simbad(), false, 'now');
+        $far = ObjectSimbadLibrary::decide(['ra' => 12.8339, 'dec' => 41.12, 'magnitude' => null], $this->simbad(), 'now');
 
         $this->assertSame('far', $far['status']);
         $this->assertSame([], $far['update']);
-
-        $accepted = ObjectSimbadLibrary::decide($object, $this->simbad(), true, 'now');
-
-        $this->assertSame(192.7211, $accepted['update']['ra']);
-        $this->assertSame(41.1203, $accepted['update']['dec']);
     }
 
     public function testNoPositionTakesSimbads(): void
     {
-        $result = ObjectSimbadLibrary::decide(['ra' => 0, 'dec' => 0], $this->simbad(), false, 'now');
+        $result = ObjectSimbadLibrary::decide(['ra' => 0, 'dec' => 0], $this->simbad(), 'now');
 
         $this->assertSame('match', $result['status']);
         $this->assertNull($result['offset']);

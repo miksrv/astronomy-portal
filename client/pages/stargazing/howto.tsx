@@ -5,6 +5,7 @@ import { useTranslation } from 'next-i18next/pages'
 
 import { SITE_LINK, wrapper } from '@/api'
 import { ContentText, StaticInfoPageLayout } from '@/components/common'
+import { StargazingGuideMore } from '@/components/pages/stargazing/stargazing-guide'
 import type { ContentPageData } from '@/utils/content'
 import { loadContentPage } from '@/utils/content.server'
 import { initSSRLocale } from '@/utils/ssrLocale'
@@ -36,6 +37,7 @@ const StargazingHowToPage: NextPage<StargazingHowToPageProps> = ({ title, descri
         <StaticInfoPageLayout
             canonical={'stargazing/howto'}
             title={title}
+            kicker={t('pages.stargazing.guide-kicker', 'Перед поездкой')}
             description={description}
             openGraph={{
                 images: [
@@ -54,7 +56,11 @@ const StargazingHowToPage: NextPage<StargazingHowToPageProps> = ({ title, descri
                 }
             ]}
         >
-            <ContentText html={html} />
+            <ContentText
+                html={html}
+                editorial
+            />
+            <StargazingGuideMore current={'/stargazing/howto'} />
         </StaticInfoPageLayout>
     )
 }
@@ -62,7 +68,7 @@ const StargazingHowToPage: NextPage<StargazingHowToPageProps> = ({ title, descri
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
         async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<StargazingHowToPageProps>> => {
-            const { locale, translations } = await initSSRLocale(store, context)
+            const { locale, translations } = await initSSRLocale(store, context, ['translation', 'stargazing'])
             const { title, description, html, steps } = loadContentPage('stargazing-howto', locale)
 
             return {

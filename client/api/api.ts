@@ -69,6 +69,9 @@ export const API = createApi({
 
                 currentCache.items = [...currentCache.items.slice(0, arg.offset), ...newItems.items]
                 currentCache.total = newItems.total
+                // The rating counts every review of the entity: a refetch of a later slice (after a
+                // new review) brings the fresh one
+                currentCache.summary = newItems.summary
             },
             forceRefetch: ({ currentArg, previousArg }) => currentArg?.offset !== previousArg?.offset
         }),

@@ -5,8 +5,8 @@ namespace App\Database\Migrations;
 use CodeIgniter\Database\Migration;
 
 /**
- * What SIMBAD knows about an object (FEAT-31), filled by `php spark objects:simbad` for the
- * existing objects and on `POST /objects` for a new one: the SIMBAD main identifier, the object
+ * What SIMBAD knows about an object (FEAT-31), filled for the existing objects by a one-time
+ * command (since removed) and on `POST /objects` for a new one: the SIMBAD main identifier, the object
  * type (SIMBAD's short code: `G`, `GlC`, `HII`…), the angular size in arcminutes, the other
  * names (JSON list) and when it was looked up. The magnitude goes to the existing column.
  */

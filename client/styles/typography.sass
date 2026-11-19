@@ -114,3 +114,61 @@
 
     > :last-child
         margin-bottom: 0
+
+// ---------------------------------------------------------------------------
+// Landing roles (DESIGN.md → Landing pages): the home and the stargazing
+// landing only. One rhythm: kicker → big title (one accent phrase) → lead.
+
+// The h1 of a landing hero: very large, tight, two or three lines
+=titleHero
+    font-size: var(--font-size-hero)
+    font-weight: 700
+    line-height: 1.02
+    letter-spacing: -0.035em
+    text-wrap: balance
+
+// The h2 of a landing section
+=titleLanding
+    font-size: var(--font-size-title-landing)
+    font-weight: 700
+    line-height: 1.1
+    letter-spacing: -0.025em
+    text-wrap: balance
+
+// The accented phrase of a landing title (<em>): brand colour, not italic
+=titleAccent
+    font-style: normal
+    color: var(--color-main)
+
+// The label over a landing title: overline with a short brand rule before it
+=kicker
+    +overline
+    display: flex
+    align-items: center
+    gap: var(--space-3)
+    color: var(--color-main)
+
+    &::before
+        content: ''
+        flex: none
+        width: 28px
+        height: 1px
+        background: currentColor
+
+// The ordinal of a numbered item: 01, 02, 03
+=index
+    font-size: var(--font-size-small)
+    font-weight: var(--font-weight-semibold)
+    line-height: 1
+    letter-spacing: 0.08em
+    font-variant-numeric: tabular-nums
+    color: var(--color-main)
+
+// The ordinal on the line of an item's title (the steps of a text, the FAQ questions): a little
+// larger than the title, on the title's line box
+=indexInline
+    font-size: var(--font-size-title-section)
+    font-weight: var(--font-weight-semibold)
+    line-height: 1.15
+    font-variant-numeric: tabular-nums
+    color: var(--color-main)

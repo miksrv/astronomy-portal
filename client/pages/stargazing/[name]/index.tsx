@@ -11,6 +11,7 @@ import { API, ApiModel, useAppSelector, wrapper } from '@/api'
 import { setSSRToken } from '@/api/authSlice'
 import { hosts } from '@/api/constants'
 import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
+import { RatingSummary } from '@/components/common/review-card/RatingSummary'
 import { EventItemData, EventMediaFilter, EventPrevNextNav, EventReviews } from '@/components/pages/stargazing'
 import { PHOTOS_PAGE_SIZE, REVIEWS_PAGE_SIZE } from '@/utils/constants'
 import { buildEventJsonLd } from '@/utils/eventJsonLd'
@@ -118,7 +119,12 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
     })
 
     const eventJsonLd = event
-        ? buildEventJsonLd(event, reviewsData ? { items: reviewsData.items, total: reviewsData.total } : undefined)
+        ? buildEventJsonLd(
+              event,
+              reviewsData
+                  ? { items: reviewsData.items, summary: reviewsData.summary, total: reviewsData.total }
+                  : undefined
+          )
         : null
 
     // Rich, unique per-item text - used as the `<img alt>` on both the
@@ -329,7 +335,11 @@ const StargazingItemPage: NextPage<StargazingItemPageProps> = ({ eventId, event,
                 onCloseLightBox={handleCloseLightbox}
             />
 
-            <h2>{t('pages.stargazing.reviews', 'Отзывы участников')}</h2>
+            {/* The rating beside the heading, not in it: the heading is only its words */}
+            <div className={styles.sectionHeading}>
+                <h2>{t('pages.stargazing.reviews', 'Отзывы участников')}</h2>
+                <RatingSummary summary={reviewsData?.summary} />
+            </div>
 
             <EventReviews eventId={eventId} />
 

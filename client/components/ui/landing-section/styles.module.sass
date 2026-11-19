@@ -1,0 +1,47 @@
+@use '../../../styles/variables' as variables
+@use '../../../styles/typography' as type
+
+// <main> already puts --space-4 between its children: the section adds the rest
+.section
+    margin-top: calc(var(--space-section) - var(--space-4))
+    scroll-margin-top: calc(var(--header-height) + var(--space-6))
+
+.header
+    display: flex
+    align-items: flex-end
+    justify-content: space-between
+    gap: var(--space-6)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        flex-direction: column
+        align-items: flex-start
+        gap: var(--space-3)
+
+.headerText
+    min-width: 0
+
+.kicker
+    +type.kicker
+    margin: 0 0 var(--space-4)
+
+.title
+    +type.titleLanding
+    margin: 0
+    color: var(--text-color-primary)
+
+    em
+        +type.titleAccent
+
+.lead
+    +type.lead
+    font-size: var(--font-size-lead-landing)
+    margin: var(--space-4) 0 0
+    color: var(--text-color-secondary)
+
+.aside
+    +type.body
+    flex: none
+    white-space: nowrap
+
+.content
+    margin-top: var(--space-8)

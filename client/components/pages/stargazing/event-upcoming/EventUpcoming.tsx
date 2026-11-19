@@ -10,13 +10,13 @@ import { API, ApiModel, useAppDispatch, useAppSelector } from '@/api'
 import { openAuthDialog } from '@/api/applicationSlice'
 import { hosts } from '@/api/constants'
 import { PageActions } from '@/components/common/page-actions'
+import noEventsPhoto from '@/public/photos/stargazing-10.jpeg'
 import { formatUTCDate } from '@/utils/dates'
 import { getErrorMessage } from '@/utils/errors'
 import { hasPermission } from '@/utils/permissions'
 import { removeMarkdownPreserveParagraphs } from '@/utils/strings'
 
 import { EventBookingForm } from './event-booking-form'
-import noEventsImage from './no-events.webp'
 import { StatusAwaitingPayment } from './StatusAwaitingPayment'
 import { StatusLoginRequired } from './StatusLoginRequired'
 import { StatusNoRegistrationRequired } from './StatusNoRegistrationRequired'
@@ -149,23 +149,61 @@ export const EventUpcoming: React.FC<EventUpcomingProps> = ({ event: eventProp, 
     }
 
     if (!event) {
+        // Subscription = authentication (CLAUDE.md): a guest is asked to log in to get the
+        // e-mail about the next event, a user is told the e-mail will come
         return (
             <Container className={styles.noEvent}>
-                <Image
-                    className={styles.noEventImage}
-                    src={noEventsImage}
-                    alt={''}
-                    sizes={'(max-width: 768px) 100vw, 400px'}
-                />
-                <h2 className={cn(styles.noEventTitle, 'centeredHeading')}>
-                    {t('components.pages.stargazing.event-upcoming.no-upcoming', 'Пока нет предстоящих астровыездов')}
-                </h2>
-                <p>
-                    {t(
-                        'components.pages.stargazing.event-upcoming.no-upcoming-hint',
-                        'Как только мы запланируем следующий астровыезд - здесь появится форма регистрации.'
-                    )}
-                </p>
+                <div className={styles.noEventText}>
+                    <h3 className={styles.noEventTitle}>
+                        {t(
+                            'components.pages.stargazing.event-upcoming.no-upcoming-title',
+                            'Дата следующего выезда пока не объявлена'
+                        )}
+                    </h3>
+                    <p>
+                        {user?.id
+                            ? t(
+                                  'components.pages.stargazing.event-upcoming.no-upcoming-subscribed',
+                                  'Вы в списке рассылки: как только откроем регистрацию, пришлём письмо на {{email}}. Выезды зависят от погоды и объявляются за 2–3 дня.',
+                                  { email: user.email }
+                              )
+                            : t(
+                                  'components.pages.stargazing.event-upcoming.no-upcoming-guest',
+                                  'Выезды зависят от погоды и объявляются за 2–3 дня. Войдите на сайт, и мы пришлём письмо, как только откроем регистрацию.'
+                              )}
+                    </p>
+                    <div className={styles.noEventActions}>
+                        {!user?.id && (
+                            <Button
+                                mode={'primary'}
+                                icon={'Bell'}
+                                label={t(
+                                    'components.pages.stargazing.event-upcoming.no-upcoming-login',
+                                    'Получить письмо о выезде'
+                                )}
+                                onClick={() => dispatch(openAuthDialog())}
+                            />
+                        )}
+                        <a
+                            href={'https://t.me/look_at_stars'}
+                            className={styles.noEventTelegram}
+                            rel={'nofollow noopener'}
+                            target={'_blank'}
+                        >
+                            <Icon name={'Telegram'} />
+                            {t('components.pages.stargazing.event-upcoming.no-upcoming-telegram', 'Анонсы в Telegram')}
+                        </a>
+                    </div>
+                </div>
+                <div className={styles.noEventPhoto}>
+                    <Image
+                        src={noEventsPhoto}
+                        alt={''}
+                        placeholder={'blur'}
+                        sizes={'(max-width: 768px) 100vw, 360px'}
+                        fill
+                    />
+                </div>
             </Container>
         )
     }

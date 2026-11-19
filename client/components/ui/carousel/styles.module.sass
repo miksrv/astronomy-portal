@@ -24,11 +24,13 @@
             & > div, & > article
                 flex: 0 0 var(--slide-size)
                 min-width: 0
-                max-width: 385px
+                // A widget sets its own slide size, spacing and cap with the variables on its
+                // `containerClassName` (the slides inherit them from the nearest one)
+                max-width: var(--slide-max-width, 385px)
                 padding-left: var(--slide-spacing)
 
                 @media only screen and (max-width: variables.$mobileMaxWidth)
-                    max-width: 500px
+                    max-width: var(--slide-max-width-mobile, 500px)
 
     // The strip only positions the arrows; clicks fall through to the slides
     .buttonsContainer

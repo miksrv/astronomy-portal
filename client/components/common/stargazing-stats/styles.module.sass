@@ -14,18 +14,19 @@
         gap: var(--space-6)
         text-align: left
 
-// Horizontal, centered layout used as a standalone band on the /stargazing page
-.statsRowHorizontal
-    display: flex
-    flex-direction: row
-    flex-wrap: wrap
-    justify-content: center
-    gap: var(--space-10)
-    text-align: center
-    margin: var(--space-2) 0
+// The landing hero's band: numbers in a row on a hairline, left-aligned
+.statsStrip
+    display: grid
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+    gap: var(--space-6)
+    padding-top: var(--space-5)
+    border-top: 1px solid rgba(255, 255, 255, 0.18)
+
+    .statValue
+        +type.titleLanding
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        gap: var(--space-8)
+        gap: var(--space-4)
 
 .statItem
     display: flex

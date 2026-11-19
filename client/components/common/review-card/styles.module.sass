@@ -43,10 +43,12 @@
 .starEmpty
     color: var(--text-color-disabled)
 
+// A review's words: the reading size of the site's texts, long reviews run several lines
 .content
     margin: 0
+    font-size: var(--font-size-prose)
+    line-height: 1.6
     color: var(--text-color-primary)
-    line-height: 1.5
     overflow-wrap: anywhere
 
 .date
@@ -63,3 +65,66 @@
 
 .deleteButton
     flex-shrink: 0
+
+// A review on a landing (`variant="quote"`): the stars, the words, then who and about which trip
+.quote
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+    height: 100%
+    padding: var(--space-6)
+    border-radius: var(--radius-xl)
+    background: var(--surface-1)
+    box-shadow: 0 0 0 1px var(--border)
+
+.quoteText
+    flex: 1
+    margin: 0
+    // The words alone: not the framed quote of a text (globals.sass)
+    padding: 0
+    border: 0
+    background: none
+    border-radius: 0
+    font-size: var(--font-size-prose)
+    line-height: 1.6
+    color: var(--text-color-primary)
+    overflow-wrap: anywhere
+    // A long review is cut on a whole line: the card keeps one height in the row
+    display: -webkit-box
+    -webkit-box-orient: vertical
+    -webkit-line-clamp: 5
+    overflow: hidden
+
+.quoteAuthor
+    display: flex
+    align-items: center
+    gap: var(--space-3)
+    padding-top: var(--space-4)
+    border-top: 1px solid var(--border)
+
+.quoteEvent
+    +type.caption
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+
+// «★ 4,9 · 1 234 отзыва»: the headline rating of the reviews
+.summary
+    +type.body
+    margin: 0
+    display: inline-flex
+    align-items: baseline
+    gap: var(--space-2)
+    white-space: nowrap
+    color: var(--text-color-secondary)
+
+.summaryStar
+    color: var(--color-main)
+
+.summaryAverage
+    +type.stat
+    font-size: var(--font-size-title-section)
+    color: var(--text-color-primary)
+
+.summaryDot
+    color: var(--text-color-disabled)

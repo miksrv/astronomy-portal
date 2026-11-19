@@ -19,10 +19,11 @@ export const MainSectionCommunity: React.FC = () => {
             <div className={styles.sectionGrid}>
                 <div className={cn(styles.sectionText, 'animate')}>
                     <span className={styles.sectionLabel}>
-                        {t('components.pages.index.main-sections.label-stargazing', 'Астровыезды')}
+                        {t('components.pages.index.main-sections.kicker-stargazing', '01 · Астровыезды')}
                     </span>
                     <h2 className={styles.sectionTitle}>
-                        {t('components.pages.index.main-sections.stargazing-title', 'Под открытым небом')}
+                        {t('components.pages.index.main-sections.stargazing-title-start', 'Под открытым')}{' '}
+                        <em>{t('components.pages.index.main-sections.stargazing-title-accent', 'небом')}</em>
                     </h2>
                     <p className={styles.sectionDesc}>
                         {t(
@@ -33,8 +34,8 @@ export const MainSectionCommunity: React.FC = () => {
                     <div className={styles.heroCta}>
                         <Button
                             mode={'primary'}
-                            label={t('components.pages.index.main-sections.read-more', 'Подробнее')}
-                            link={'/stargazing/howto'}
+                            label={t('components.pages.index.main-sections.stargazing-cta', 'Об астровыездах')}
+                            link={'/stargazing'}
                         />
                     </div>
                 </div>

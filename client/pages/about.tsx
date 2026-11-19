@@ -1,84 +1,31 @@
-import React, { useMemo, useState } from 'react'
-import { Icon } from 'simple-react-ui-kit'
+import React from 'react'
 
 import { GetStaticPropsContext, GetStaticPropsResult, NextPage } from 'next'
-import Link from 'next/link'
 import { useTranslation } from 'next-i18next/pages'
 import { JsonLdScript } from 'next-seo'
 
 import { SITE_LINK, wrapper } from '@/api'
-import { AppFooter, AppLayout, AppToolbar, PhotoGallery, PhotoLightbox } from '@/components/common'
+import { AppFooter, AppLayout, AppToolbar, ContentText } from '@/components/common'
 import { ProjectTeam } from '@/components/pages/about'
-import donators from '@/public/data/list_donators.json'
-import photoAboutMe1 from '@/public/photos/about-me-1.jpeg'
-import photoAboutMe2 from '@/public/photos/about-me-2.jpeg'
-import photoAboutMe3 from '@/public/photos/about-me-3.jpeg'
-import photoAboutMe4 from '@/public/photos/about-me-4.jpeg'
-import photoObservatory1 from '@/public/photos/observatory-1.jpeg'
-import photoObservatory2 from '@/public/photos/observatory-2.jpeg'
-import photoObservatory3 from '@/public/photos/observatory-3.jpeg'
-import photoObservatory4 from '@/public/photos/observatory-4.jpeg'
-import photoObservatory5 from '@/public/photos/observatory-5.jpeg'
-import photoObservatory6 from '@/public/photos/observatory-6.jpeg'
-import photoObservatory7 from '@/public/photos/observatory-7.jpeg'
-import photoObservatory8 from '@/public/photos/observatory-8.jpeg'
-import photoStargazing1 from '@/public/photos/stargazing-1.jpeg'
-import photoStargazing2 from '@/public/photos/stargazing-2.jpeg'
-import photoStargazing3 from '@/public/photos/stargazing-3.jpeg'
-import photoStargazing4 from '@/public/photos/stargazing-4.jpeg'
-import photoStargazing5 from '@/public/photos/stargazing-5.jpeg'
-import photoStargazing6 from '@/public/photos/stargazing-6.jpeg'
-import photoStargazing7 from '@/public/photos/stargazing-7.jpeg'
-import photoStargazing8 from '@/public/photos/stargazing-8.jpeg'
+import type { ContentPageData } from '@/utils/content'
+import { loadContentPage, sectionsHtml } from '@/utils/content.server'
 import { initSSRLocale } from '@/utils/ssrLocale'
 
 import styles from './about.module.sass'
 
-const galleryAboutMe = [photoAboutMe1, photoAboutMe2, photoAboutMe3, photoAboutMe4]
-
-const galleryObservatory = [
-    photoObservatory3,
-    photoObservatory8,
-    photoObservatory7,
-    photoObservatory5,
-    photoObservatory6,
-    photoObservatory4,
-    photoObservatory1,
-    photoObservatory2
-]
-
-const galleryStargazing = [
-    photoStargazing1,
-    photoStargazing2,
-    photoStargazing3,
-    photoStargazing4,
-    photoStargazing5,
-    photoStargazing6,
-    photoStargazing7,
-    photoStargazing8
-]
-
-const allPhotos = [...galleryAboutMe, ...galleryStargazing, ...galleryObservatory]
-
-type DonaterType = {
-    name: string
-    tooltip?: string
+interface AboutPageProps extends Pick<ContentPageData, 'title' | 'description'> {
+    /** The lead, the story and the first section (the team), as HTML: the team carousel follows */
+    textTop: string
+    /** The other sections, as HTML: the thanks to the first donators close the last one */
+    textBottom: string
 }
 
-type AboutPageProps = object
-
-const AboutPage: NextPage<AboutPageProps> = () => {
+/**
+ * The text of the page is `client/content/about.<locale>.md`, the thanks to the first donators of
+ * the observatory included. The team carousel sits between its first `##` section and the rest
+ */
+const AboutPage: NextPage<AboutPageProps> = ({ title, description, textTop, textBottom }) => {
     const { t } = useTranslation()
-
-    const [showLightbox, setShowLightbox] = useState<boolean>(false)
-    const [photoIndex, setPhotoIndex] = useState<number>(0)
-
-    const title = t('pages.about.title', 'О проекте')
-
-    const sortedDonators = useMemo(
-        () => (donators as DonaterType[]).slice().sort((a, b) => a.name.localeCompare(b.name)),
-        []
-    )
 
     const aboutPageSchema = {
         '@context': 'https://schema.org',
@@ -94,24 +41,12 @@ const AboutPage: NextPage<AboutPageProps> = () => {
         }
     }
 
-    const handlePhotoClick = (index: number) => {
-        setPhotoIndex(index)
-        setShowLightbox(true)
-    }
-
-    const handleHideLightbox = () => {
-        setShowLightbox(false)
-    }
-
     return (
         <AppLayout
             canonical={'about'}
             noBrandSuffix={true}
             title={t('pages.about.seo-title', 'О проекте «Смотри на звёзды»: команда и обсерватория')}
-            description={t(
-                'pages.about.description',
-                'Узнайте больше о проекте «Смотри на звёзды», нашей команде и самодельной астрономической обсерватории. Присоединяйтесь к нам и откройте для себя красоту космоса!'
-            )}
+            description={description}
             openGraph={{
                 images: [
                     {
@@ -126,228 +61,19 @@ const AboutPage: NextPage<AboutPageProps> = () => {
                 scriptKey={'about-page'}
                 data={aboutPageSchema}
             />
+
             <AppToolbar
                 title={title}
                 currentPage={title}
             />
 
-            <div className={styles.prose}>
-                <p className={styles.lead}>
-                    {t('pages.about.my-name', 'Меня зовут')}{' '}
-                    <Link
-                        href={'https://miksoft.pro'}
-                        title={t('pages.about.misha', 'Миша')}
-                        target={'_blank'}
-                    >
-                        {t('pages.about.misha', 'Миша')}
-                    </Link>
-                    {t(
-                        'pages.about.intro',
-                        ', и этот сайт - моя попытка рассказать вам о своём хобби, собрать воедино всю информацию и запечатлеть достижения, сделанные на пути к изучению космоса. Астрономия для меня - это не просто увлечение, а целый мир, который изменил мою жизнь. Благодаря ей я нашел невероятных друзей, узнал много нового и осознал, насколько велики и загадочны просторы Вселенной. Этот проект - наш совместный вклад в популяризацию и развитие астрономии. Мы искренне верим, что благодаря нашим усилиям космос станет ближе и доступнее каждому.'
-                    )}
-                </p>
+            <ContentText html={textTop} />
 
-                <PhotoGallery
-                    photos={galleryAboutMe}
-                    alt={t('pages.about.gallery-about-me-alt', 'Проект «Смотри на звёзды» — фото')}
-                    onClick={({ index }) => {
-                        handlePhotoClick(index)
-                    }}
-                />
-            </div>
+            <ProjectTeam />
 
-            <Link
-                href={'https://t.me/look_at_stars'}
-                className={'telegram-message'}
-                title={t('common.telegram', 'Телеграм')}
-                rel={'nofollow noopener'}
-                target={'_blank'}
-            >
-                <Icon name={'Telegram'} />{' '}
-                {t('pages.about.telegram-channel', 'Подпишитесь на авторский Telegram канал этого проекта')}
-            </Link>
-
-            <h2>{t('pages.about.team-title', 'Наша команда')}</h2>
-
-            <div className={styles.prose}>
-                <p>
-                    {t(
-                        'pages.about.team-description',
-                        'Мы работаем в самых разных сферах, но всех нас объединяет одно - любовь к звёздам и ночному небу. С 2016 года мы популяризируем астрономию, организовываем астровыезды в Оренбургской области и вечера тротуарной астрономии в Оренбурге. Вместе мы смотрим на звёзды, делимся знаниями и вдохновляем других.'
-                    )}
-                </p>
-                <ProjectTeam />
-            </div>
-
-            <h2>{t('pages.about.project-title', 'Астрономический проект «Смотри на звёзды»')}</h2>
-
-            <div className={styles.prose}>
-                <p>
-                    {t(
-                        'pages.about.project-description',
-                        'В 2016 году в Оренбургской области мы запустили проект «Смотри на звёзды», чтобы сделать астрономию доступной для всех. С тех пор каждый сезон мы устраиваем бесплатные лекции под открытым небом, организуем поездки за город с телескопами и проводим неформальные вечера тротуарной астрономии.'
-                    )}
-                </p>
-                <p>
-                    {t(
-                        'pages.about.project-goal',
-                        'Главная цель проекта - показать величие и красоту Вселенной, вдохновить людей на изучение космоса. Мы охватываем не только Оренбургскую область, но и соседние регионы, выезжая в места, где ночное небо особенно яркое. Узнать больше о наших текущих и прошедших мероприятиях можно на странице'
-                    )}{' '}
-                    <Link
-                        href={'/stargazing'}
-                        title={t('menu.stargazing', 'Астровыезды')}
-                    >
-                        {t('menu.stargazing', 'Астровыезды')}
-                    </Link>
-                    {t(
-                        'pages.about.project-sidewalk',
-                        ', а для тех, кто хочет увидеть звёзды в черте города, мы подготовили раздел'
-                    )}{' '}
-                    <Link
-                        href={'/stargazing/where'}
-                        title={t('pages.about.project-sidewalk-link', 'Где в Оренбурге посмотреть в телескоп')}
-                    >
-                        {t('pages.about.project-sidewalk-link', 'Где в Оренбурге посмотреть в телескоп')}
-                    </Link>
-                    {'.'}
-                </p>
-                <p>
-                    {t(
-                        'pages.about.project-locations',
-                        'Наши мероприятия проходят не только в городах и поселках Оренбургской области, но и в соседних регионах. Мы организуем выездные экскурсии в удаленные места, где минимальное световое загрязнение позволяет наслаждаться звёздным небом в полной мере. Наша команда астрономов-любителей и волонтёров делится своими знаниями и опытом, чтобы каждый мог открыть для себя красоту и тайны Вселенной.'
-                    )}
-                </p>
-                <PhotoGallery
-                    photos={galleryStargazing}
-                    alt={t('pages.about.gallery-stargazing-alt', 'Астровыезд «Смотри на звёзды» — фото')}
-                    onClick={({ index }) => {
-                        handlePhotoClick(index)
-                    }}
-                />
-                <p>
-                    {t(
-                        'pages.about.project-lectures',
-                        'Одной из важнейших составляющих проекта являются лекции, которые проводят опытные астрономы-любители. Мы рассказываем о научных открытиях, истории астрономии и её современных достижениях. Лекции проходят в лёгком формате, где сложные вещи объясняются простым и понятным языком. Это помогает слушателям не только расширить кругозор, но и вдохновляет на самостоятельное изучение астрономии.'
-                    )}
-                </p>
-                <p>
-                    {t(
-                        'pages.about.project-sidewalk-astronomy',
-                        'Особое внимание мы уделяем вечерам тротуарной астрономии. Эти встречи под открытым небом проходят в самых доступных местах города. На таких мероприятиях любой желающий может подойти, посмотреть в телескоп и узнать больше о том, что скрывает звёздное небо.'
-                    )}
-                </p>
-            </div>
-
-            <h2>{t('pages.about.observatory-title', 'Самодельная астрономическая обсерватория')}</h2>
-
-            <div className={styles.prose}>
-                <p>
-                    {t(
-                        'pages.about.observatory-intro',
-                        'Этот проект - один из самых значимых этапов моей жизни. Наша самодельная астрономическая обсерватория - уникальное явление для Оренбургской области. Она работает автономно и позволяет получать снимки объектов дальнего космоса, делая астрономию доступной для всех. Более подробно о работе и оборудовании обсерватории можно узнать в разделе - '
-                    )}{' '}
-                    <Link
-                        href={'/objects'}
-                        title={t('pages.about.observatory-intro-link', 'астрономическая обсерватория в Оренбурге')}
-                    >
-                        {t('pages.about.observatory-intro-link', 'астрономическая обсерватория в Оренбурге')}
-                    </Link>
-                    {'.'}
-                </p>
-                <PhotoGallery
-                    photos={galleryObservatory}
-                    alt={t('pages.about.gallery-observatory-alt', 'Самодельная обсерватория в Оренбурге — фото')}
-                    onClick={({ index }) => {
-                        handlePhotoClick(index)
-                    }}
-                />
-                <p>
-                    {t(
-                        'pages.about.observatory-work-1.text',
-                        'Обсерватория открыта для всех желающих. Каждый может воспользоваться её возможностями, чтобы получить изображения космических объектов. Более того, на сайте доступен раздел'
-                    )}{' '}
-                    <Link
-                        href={'/objects'}
-                        title={t('pages.about.observatory-work-1.objects', 'Объекты')}
-                    >
-                        {t('pages.about.observatory-work-1.objects', 'Объекты')}
-                    </Link>
-                    {t(
-                        'pages.about.observatory-work-2',
-                        ', где вы найдёте архив FITS-файлов. Эти данные можно использовать для обучения, поиска астероидов, создания астрофотографий и других научных или творческих целей.'
-                    )}
-                </p>
-                <p>
-                    {t(
-                        'pages.about.observatory-photos-1',
-                        'Скоро мы запустим бесплатный сервис управления телескопом, чтобы ещё больше людей могли приобщиться к красоте ночного неба. Не забудьте заглянуть в раздел'
-                    )}{' '}
-                    <Link
-                        href={'/photos'}
-                        title={t('pages.about.astrophoto', 'Астрофото')}
-                    >
-                        {t('pages.about.astrophoto', 'Астрофото')}
-                    </Link>
-                    {t(
-                        'pages.about.observatory-photos-2',
-                        ', где собраны снимки, полученные с помощью обсерватории и на наших астровыездах. Эти фотографии обработаны мной и моими друзьями и являются отражением нашей страсти к космосу.'
-                    )}
-                </p>
-                <p>
-                    {t(
-                        'pages.about.observatory-conclusion',
-                        'Этот проект - наш вклад в популяризацию астрономии. Мы искренне надеемся, что он вдохновит и вас открыть для себя Вселенную!'
-                    )}
-                </p>
-            </div>
-
-            <h2>{t('pages.about.your-help-title', 'Ваша помощь')}</h2>
-
-            <div
-                id={'your-help'}
-                className={styles.prose}
-            >
-                <p>
-                    {t(
-                        'pages.about.your-help-intro',
-                        'Развитие проекта «Смотри на звёзды» во многом стало возможным благодаря поддержке программы социальных инвестиций «Родные города» компании «Газпром нефть» и содействию команды информационного агентства «Оренбург Медиа».'
-                    )}
-                </p>
-                <p>
-                    {t(
-                        'pages.about.your-help-description',
-                        'Наш проект самодельной обсерватории также нашёл отклик у множества неравнодушных участников. У нас масштабные планы по развитию этого направления, и ваша поддержка играет ключевую роль. Мы благодарны каждому, кто помогает советами, консультациями и рекомендациями. Если мы кого-то случайно не упомянули в списке благодарностей, напишите нам - это очень важно.'
-                    )}
-                </p>
-                <div className={styles.donatorsScroll}>
-                    <ul className={styles.donators}>
-                        {sortedDonators.map((item, i) => (
-                            <li key={`donater-${item?.name}-${i}`}>
-                                {item.name}
-                                {item.tooltip && <span className={styles.donatorNote}>{` (${item.tooltip})`}</span>}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                <p>
-                    {t(
-                        'pages.about.your-help-conclusion',
-                        'Благодаря вашей помощи космос действительно становится ближе!'
-                    )}
-                </p>
-            </div>
-
-            <PhotoLightbox
-                photos={allPhotos.map((image) => ({
-                    src: image.src,
-                    width: image.width,
-                    height: image.height,
-                    title: ''
-                }))}
-                photoIndex={photoIndex}
-                showLightbox={showLightbox}
-                onCloseLightBox={handleHideLightbox}
-                onChangeIndex={setPhotoIndex}
+            <ContentText
+                html={textBottom}
+                className={styles.text}
             />
 
             <AppFooter />
@@ -358,13 +84,17 @@ const AboutPage: NextPage<AboutPageProps> = () => {
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
         async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<AboutPageProps>> => {
-            const { translations } = await initSSRLocale(store, context, ['translation', 'about'])
+            const { locale, translations } = await initSSRLocale(store, context, ['translation', 'about'])
+            const { title, description, intro, sections } = loadContentPage('about', locale)
 
             return {
                 props: {
-                    ...translations
-                },
-                revalidate: 86400
+                    ...translations,
+                    title,
+                    description,
+                    textTop: intro + sectionsHtml(sections.slice(0, 1)),
+                    textBottom: sectionsHtml(sections.slice(1))
+                }
             }
         }
 )
