@@ -7,6 +7,7 @@ use App\Entities\EventMediaEntity;
 use App\Entities\EventMediaUploadEntity;
 use App\Enums\Permission;
 use App\Libraries\EventBookingLibrary;
+use App\Libraries\EventCoverLibrary;
 use App\Libraries\LocaleLibrary;
 use App\Libraries\PaymentLibrary;
 use App\Libraries\SessionLibrary;
@@ -1170,25 +1171,11 @@ class Events extends BaseApiController
             $event->views              = 0;
 
             if ($file) {
-                $image = Services::image('gd');
+                // Stored as WebP with its 585×400 preview, whatever was uploaded
+                $cover = (new EventCoverLibrary())->store($file, $event->id);
 
-                $directoryPath = UPLOAD_EVENTS . $event->id;
-                mkdir($directoryPath, 0755, true);
-
-                $fileName = 'cover';
-                $fileExtension = $file->getExtension();
-                $fileFullName  = $fileName . '.' . $fileExtension;
-
-                $file->move($directoryPath, $fileFullName);
-
-                // Создаем превью 585 (сначала уменьшаем, потом обрезаем)
-                $mediumFileName = $fileName . '_preview.' . $fileExtension;
-                $image->withFile($directoryPath . '/' . $fileFullName)
-                      ->fit(585, 400, 'center') // Уменьшаем до 585x400, сохраняя пропорции
-                      ->save($directoryPath . '/' . $mediumFileName);
-
-                $event->coverFileName  = $fileName;
-                $event->coverFileExt   = $fileExtension;
+                $event->coverFileName = $cover['name'];
+                $event->coverFileExt  = $cover['ext'];
             }
 
             $this->model->save($event);
@@ -2186,8 +2173,9 @@ class Events extends BaseApiController
      * Replaces the cover image for an existing event.
      *
      * Accepts a multipart file upload under the 'upload' key, validates the MIME type,
-     * saves it as cover.<ext> and generates a 585x400 preview as cover_preview.<ext>
-     * inside the event's upload directory. Updates the DB record with the new file info.
+     * stores it as WebP under a new name (cover-<random>.webp + a 585x400 _preview, see
+     * EventCoverLibrary) inside the event's upload directory, so a replaced cover gets a new
+     * address. Updates the DB record with the new file info.
      *
      * @param string|null $id The event ID.
      * @return ResponseInterface
@@ -2220,32 +2208,17 @@ class Events extends BaseApiController
         }
 
         try {
-            $directoryPath = UPLOAD_EVENTS . $event->id;
-
-            if (!is_dir($directoryPath)) {
-                mkdir($directoryPath, 0755, true);
-            }
-
-            $ext          = $file->getExtension();
-            $fileName     = 'cover';
-            $fileFullName = $fileName . '.' . $ext;
-            $previewName  = $fileName . '_preview.' . $ext;
-
-            $file->move($directoryPath, $fileFullName, true);
-
-            Services::image('gd')
-                ->withFile($directoryPath . '/' . $fileFullName)
-                ->fit(585, 400, 'center')
-                ->save($directoryPath . '/' . $previewName);
+            // Stored as WebP with its 585×400 preview; the files of the old cover are removed
+            $cover = (new EventCoverLibrary())->store($file, $event->id);
 
             $this->model->update($id, [
-                'cover_file_name' => $fileName,
-                'cover_file_ext'  => $ext,
+                'cover_file_name' => $cover['name'],
+                'cover_file_ext'  => $cover['ext'],
             ]);
 
             return $this->respondUpdated([
-                'coverFileName' => $fileName,
-                'coverFileExt'  => $ext,
+                'coverFileName' => $cover['name'],
+                'coverFileExt'  => $cover['ext'],
             ]);
         } catch (Exception $e) {
             log_message('error', $e->getMessage());
