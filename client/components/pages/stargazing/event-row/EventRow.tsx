@@ -17,13 +17,11 @@ interface EventRowProps {
     linkTitle?: string
     date?: string
     location?: string
-    /** Short plain-text preview of the event description, shown after the location. */
+    /** Short plain-text preview of the event description, under the title. */
     excerpt?: string
     coverFileName?: string
     coverFileExt?: string
-    /** Rendered as an icon + count next to the location. */
-    views?: number
-    /** Rendered as an icon + count next to the location. */
+    /** How many people came: «1 611 участников» on the meta line. */
     membersCount?: number
     /** When present, membersCount links to the event's statistic page instead of a static block. */
     statisticHref?: string
@@ -33,6 +31,13 @@ interface EventRowProps {
     hasReviewed?: boolean
 }
 
+/**
+ * An event in a list (the past events of /stargazing, the archive, the profile): the cover in its
+ * own 16:9 (the full image through the optimizer: the server's preview crops the posters' text),
+ * the date as a kicker over the title, the title on up to two lines, the place and the number of
+ * participants, the start of the description. The whole card is one link (the title's, stretched
+ * over it); the editor's link to the statistics lies above it, on the meta line.
+ */
 export const EventRow: React.FC<EventRowProps> = ({
     id,
     title,
@@ -42,7 +47,6 @@ export const EventRow: React.FC<EventRowProps> = ({
     excerpt,
     coverFileName,
     coverFileExt,
-    views,
     membersCount,
     statisticHref,
     attended,
@@ -52,14 +56,18 @@ export const EventRow: React.FC<EventRowProps> = ({
 
     const itemTitle = linkTitle || title
 
-    const dateLabel = t('pages.stargazing.event-date-label', 'Дата')
     const attendedLabel = t('pages.profile.history-visited', 'Посещено')
     const reviewedLabel = t('components.pages.stargazing.event-row.reviewed', 'Отзыв')
     const noReviewLabel = t('components.pages.stargazing.event-row.no-review', 'Без отзыва')
-    const viewsCount = views || 0
-    const membersCountValue = membersCount || 0
 
     const formattedDate = formatDate(date, 'D MMMM YYYY', i18n.language)
+
+    const membersLabel = membersCount
+        ? t('components.pages.stargazing.event-row.members', '{{formattedCount}} участников', {
+              count: membersCount,
+              formattedCount: membersCount.toLocaleString(i18n.language)
+          })
+        : undefined
 
     const statsBadges = (attended || hasReviewed) && (
         <div className={styles.stats}>
@@ -92,19 +100,14 @@ export const EventRow: React.FC<EventRowProps> = ({
 
     return (
         <Container className={styles.eventRow}>
-            <Link
-                className={styles.primaryLink}
-                href={`/stargazing/${id}`}
-                title={itemTitle}
-            >
+            <div className={styles.layout}>
                 <div className={cn(styles.thumbnail, !coverFileName && styles.thumbnailEmpty)}>
                     {coverFileName ? (
                         <Image
-                            alt={itemTitle}
-                            quality={70}
-                            width={140}
-                            height={100}
-                            src={`${hosts.stargazing}${id}/${coverFileName}_preview.${coverFileExt}`}
+                            alt={''}
+                            fill
+                            sizes={'(max-width: 768px) 128px, 240px'}
+                            src={`${hosts.stargazing}${id}/${coverFileName}.${coverFileExt}`}
                         />
                     ) : (
                         <Icon
@@ -114,29 +117,32 @@ export const EventRow: React.FC<EventRowProps> = ({
                     )}
                 </div>
 
-                {date && (
-                    <div
-                        className={styles.dateBlock}
-                        aria-label={`${dateLabel}: ${formattedDate}`}
-                    >
-                        <span className={styles.dateMonth}>
-                            {formatDate(date, 'MMM', i18n.language)?.replace('.', '')}
-                        </span>
-                        <span className={styles.dateDay}>{formatDate(date, 'D')}</span>
-                        <span className={styles.dateYear}>{formatDate(date, 'YYYY')}</span>
-                    </div>
-                )}
-
                 <div className={styles.content}>
-                    <div className={styles.titleRow}>
-                        <div className={styles.title}>{title}</div>
+                    {date && (
+                        <time
+                            className={styles.date}
+                            dateTime={date}
+                        >
+                            {formattedDate}
+                        </time>
+                    )}
 
-                        {statsBadges}
-                    </div>
+                    {/* The card's one link: the title, stretched over the whole card (DESIGN §6) */}
+                    <h3 className={styles.title}>
+                        <Link
+                            className={styles.cardLink}
+                            href={`/stargazing/${id}`}
+                            title={itemTitle}
+                        >
+                            {title}
+                        </Link>
+                    </h3>
+
+                    {excerpt && <p className={styles.excerpt}>{excerpt}</p>}
 
                     <div className={styles.metaRow}>
                         {location && (
-                            <span className={styles.location}>
+                            <span className={styles.metaItem}>
                                 <Icon
                                     name={'PinDrop'}
                                     aria-hidden
@@ -145,55 +151,33 @@ export const EventRow: React.FC<EventRowProps> = ({
                             </span>
                         )}
 
-                        {location && (
-                            <span
-                                className={styles.metaDivider}
-                                aria-hidden
-                            >
-                                •
-                            </span>
-                        )}
+                        {membersLabel &&
+                            (statisticHref ? (
+                                // The editor's way to the statistics: above the stretched link
+                                <Link
+                                    className={cn(styles.metaItem, styles.statisticLink)}
+                                    href={statisticHref}
+                                >
+                                    <Icon
+                                        name={'Users'}
+                                        aria-hidden
+                                    />
+                                    {membersLabel}
+                                </Link>
+                            ) : (
+                                <span className={styles.metaItem}>
+                                    <Icon
+                                        name={'Users'}
+                                        aria-hidden
+                                    />
+                                    {membersLabel}
+                                </span>
+                            ))}
 
-                        {statisticHref ? (
-                            <Link
-                                className={styles.metaStat}
-                                href={statisticHref}
-                            >
-                                <Icon
-                                    name={'Users'}
-                                    aria-hidden
-                                />
-                                {membersCountValue}
-                            </Link>
-                        ) : (
-                            <span className={styles.metaStat}>
-                                <Icon
-                                    name={'Users'}
-                                    aria-hidden
-                                />
-                                {membersCountValue}
-                            </span>
-                        )}
-
-                        <span
-                            className={styles.metaDivider}
-                            aria-hidden
-                        >
-                            •
-                        </span>
-
-                        <span className={styles.metaStat}>
-                            <Icon
-                                name={'Eye'}
-                                aria-hidden
-                            />
-                            {viewsCount}
-                        </span>
+                        {statsBadges}
                     </div>
-
-                    {excerpt && <div className={styles.excerpt}>{excerpt}</div>}
                 </div>
-            </Link>
+            </div>
 
             <Icon
                 className={styles.chevron}

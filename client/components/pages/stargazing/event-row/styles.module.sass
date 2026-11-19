@@ -1,8 +1,9 @@
 @use '../../../../styles/variables' as variables
 @use '../../../../styles/typography' as type
 
-// A list row is a card with its own link: photo, date, title, meta
+// A list row is a card with its own link: the cover, then the date, title, text and meta
 .eventRow
+    position: relative
     display: flex
     align-items: center
     gap: var(--space-4)
@@ -13,33 +14,32 @@
         box-shadow: 0 0 0 1px var(--color-main)
 
         .thumbnail img
-            transform: scale(1.05)
+            transform: scale(1.04)
 
         .title
             color: var(--color-main)
 
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        flex-wrap: wrap
-        gap: var(--space-2) var(--space-3)
+        .chevron
+            fill: var(--color-main)
+            transform: translateX(2px)
 
-.primaryLink
+.layout
     display: flex
-    align-items: stretch
-    gap: var(--space-4)
+    align-items: center
+    gap: var(--space-5)
     flex: 1
     min-width: 0
-    color: inherit
-    border-radius: var(--radius-md)
 
-    &:hover
-        color: inherit
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        align-items: flex-start
+        gap: var(--space-3)
 
+// The cover in the posters' own 16:9: the whole width of the image, nothing cut off its sides
 .thumbnail
     position: relative
     flex-shrink: 0
-    align-self: center
-    width: 140px
-    height: 100px
+    width: 240px
+    aspect-ratio: 16 / 9
     border-radius: var(--radius-lg)
     overflow: hidden
     display: flex
@@ -48,15 +48,12 @@
     background: var(--surface-2)
 
     img
-        width: 100%
-        height: 100%
         object-fit: cover
-        font-size: 0
         transition: transform var(--duration-slow) var(--ease)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        width: 96px
-        height: 72px
+        width: 128px
+        border-radius: var(--radius-md)
 
 .thumbnailEmpty
     svg
@@ -64,109 +61,54 @@
         height: 32px
         fill: var(--text-color-secondary)
 
-.dateBlock
-    display: flex
-    flex-direction: column
-    align-items: center
-    justify-content: center
-    align-self: stretch
-    margin: var(--space-1) 0
-    flex-shrink: 0
-    width: 80px
-    text-align: center
-    line-height: 1.15
-    border-right: 1px solid var(--border)
-    padding-right: var(--space-4)
-
-    .dateMonth
-        +type.overline
-        color: var(--color-main)
-
-    .dateDay
-        +type.stat
-        font-size: 24px
-        color: var(--text-color-primary)
-
-    .dateYear
-        +type.caption
-
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        display: none
-
 .content
     display: flex
     flex-direction: column
-    justify-content: center
-    gap: var(--space-1)
-    flex: 1
-    min-width: 0
-
-.titleRow
-    display: flex
-    align-items: center
     gap: var(--space-2)
+    flex: 1
     min-width: 0
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        flex-wrap: wrap
+        gap: var(--space-1)
+
+// The date over the title, as the kickers of the landing (no rule)
+.date
+    +type.overline
+    color: var(--color-main)
 
 .title
-    overflow: hidden
-    text-overflow: ellipsis
-    white-space: nowrap
-    font-weight: var(--font-weight-medium)
+    +type.titleBlock
+    margin: 0
     color: var(--text-color-primary)
     transition: color var(--duration-base) var(--ease)
-    flex: 1
-    min-width: 0
-
-.metaRow
-    +type.secondary
-    display: flex
-    align-items: center
-    gap: var(--space-2)
-    min-width: 0
-
-.location
-    display: flex
-    align-items: center
-    gap: var(--space-1)
-    min-width: 0
+    display: -webkit-box
+    -webkit-box-orient: vertical
+    -webkit-line-clamp: 2
     overflow: hidden
-    text-overflow: ellipsis
-    white-space: nowrap
 
-    svg
-        width: 14px
-        height: 14px
-        fill: var(--text-color-secondary)
-        flex-shrink: 0
-
-.metaDivider
-    flex-shrink: 0
-    color: var(--text-color-disabled)
-
-.metaStat
-    display: flex
-    align-items: center
-    gap: var(--space-1)
-    flex-shrink: 0
+// The title's link covers the whole card: a click anywhere opens the event
+.cardLink
     color: inherit
 
-    svg
-        width: 14px
-        height: 14px
-        fill: var(--text-color-secondary)
-        flex-shrink: 0
-
     &:hover
-        color: var(--text-color-primary)
+        color: inherit
 
-        svg
-            fill: var(--link-color)
+    &::after
+        content: ''
+        position: absolute
+        inset: 0
+        border-radius: var(--radius-xl)
+
+    &:focus-visible
+        outline: none
+
+        &::after
+            outline: var(--focus-outline)
+            outline-offset: 2px
 
 .excerpt
     +type.secondary
+    margin: 0
     display: -webkit-box
     -webkit-box-orient: vertical
     -webkit-line-clamp: 2
@@ -175,20 +117,48 @@
     @media only screen and (max-width: variables.$mobileMaxWidth)
         display: none
 
-// Badges are laid out by the parent now (the kit Badge has no outer margin)
+.metaRow
+    +type.secondary
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: var(--space-1) var(--space-4)
+    min-width: 0
+
+.metaItem
+    display: inline-flex
+    align-items: center
+    gap: var(--space-1)
+    min-width: 0
+    color: var(--text-color-secondary)
+
+    svg
+        width: 14px
+        height: 14px
+        fill: var(--text-color-secondary)
+        flex-shrink: 0
+
+// The editor's link to the event's statistics: above the card's stretched link
+.statisticLink
+    position: relative
+    z-index: 1
+    text-decoration: underline
+    text-decoration-color: var(--border-strong)
+    text-underline-offset: 3px
+
+    &:hover
+        color: var(--text-color-primary)
+        text-decoration-color: currentColor
+
+        svg
+            fill: var(--link-color)
+
+// Badges are laid out by the parent (the kit Badge has no outer margin)
 .stats
     display: flex
     align-items: center
-    justify-content: flex-end
     flex-wrap: wrap
     gap: var(--space-1)
-    flex-shrink: 0
-    margin-left: auto
-
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        flex-basis: 100%
-        justify-content: flex-start
-        margin-left: 0
 
 // Status colours: attended / reviewed (green), attended without a review (red)
 .greenBadge
@@ -206,6 +176,7 @@
     width: 18px
     height: 18px
     fill: var(--text-color-secondary)
+    transition: fill var(--duration-base) var(--ease), transform var(--duration-base) var(--ease)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         display: none
@@ -213,8 +184,10 @@
 @media (prefers-reduced-motion: reduce)
     .eventRow,
     .thumbnail img,
-    .title
+    .title,
+    .chevron
         transition: none
 
-    .eventRow:hover .thumbnail img
+    .eventRow:hover .thumbnail img,
+    .eventRow:hover .chevron
         transform: none

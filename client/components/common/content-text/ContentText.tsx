@@ -11,17 +11,17 @@ import styles from './styles.module.sass'
 interface ContentTextProps {
     /** The text as HTML, rendered on the server from `client/content/<page>.<locale>.md` */
     html: string
-    /** The first paragraph is the page's lead (DESIGN §3); off for a legal text */
-    lead?: boolean
+    /** The landing rhythm (DESIGN.md → Landing pages): sections on hairlines, numbered steps 01, 02… */
+    editorial?: boolean
     className?: string
 }
 
 /**
  * The text of a static page (rules, how-to, privacy...): server-rendered Markdown in the prose
- * role, its first paragraph the lead (unless `lead` is off). Site links navigate without a reload; a row of photos
+ * role, the first paragraph included (no lead). Site links navigate without a reload; a row of photos
  * opens the lightbox on the one clicked.
  */
-export const ContentText: React.FC<ContentTextProps> = ({ html, lead = true, className }) => {
+export const ContentText: React.FC<ContentTextProps> = ({ html, editorial, className }) => {
     const handleLinks = useContentLinks()
 
     const [lightbox, setLightbox] = useState<{ photos: ReturnType<typeof slidesOf>; index: number; open: boolean }>({
@@ -52,7 +52,7 @@ export const ContentText: React.FC<ContentTextProps> = ({ html, lead = true, cla
                 which a keyboard already clicks (Enter, Space) */}
             {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
             <article
-                className={cn(styles.contentText, lead && styles.lead, className)}
+                className={cn(styles.contentText, editorial && styles.editorial, className)}
                 dangerouslySetInnerHTML={{ __html: html }}
                 onClick={handleClick}
             />

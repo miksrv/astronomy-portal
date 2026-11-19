@@ -50,11 +50,12 @@
     max-width: var(--width-max)
     width: 100%
     margin: 0 auto
-    padding: 48px var(--space-4) 23%
+    // No side padding of its own: the content lines up with the app bar's logo, as on every page
+    padding: 48px 0 23%
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
         grid-template-columns: 1fr
-        padding: var(--space-8) var(--space-4)
+        padding: var(--space-8) 0
 
 .sectionHeroGrid
     align-items: center
@@ -65,17 +66,25 @@
         padding-top: 100px
         padding-bottom: var(--space-8)
 
+// The landing rhythm (DESIGN.md → Landing pages): kicker → big title with an accent → lead
 .sectionLabel
-    +type.overline
-    display: block
-    margin: 0 0 var(--space-3)
-    color: var(--color-main)
+    +type.kicker
+    margin: 0 0 var(--space-5)
 
 .sectionTitle
-    +type.titleDisplay
-    margin: 0 0 var(--space-4)
+    +type.titleLanding
+    font-size: calc(var(--font-size-title-landing) * 1.33)
+    margin: 0 0 var(--space-5)
     color: #fff
-    text-wrap: balance
+
+    em
+        +type.titleAccent
+
+.sectionTitleHero
+    +type.titleHero
+
+    em
+        display: block
 
 .sectionDesc
     +type.lead

@@ -12,6 +12,20 @@
     justify-content: space-between
     gap: var(--space-4)
 
+// A section heading with something beside it that is not part of it (the reviews' rating):
+// spaced as an h2 right in <main> (globals.sass), the h2 itself without margins
+.sectionHeading
+    display: flex
+    flex-wrap: wrap
+    align-items: baseline
+    justify-content: space-between
+    gap: var(--space-1) var(--space-4)
+    margin-top: calc(var(--space-8) - var(--space-4))
+    margin-bottom: calc(var(--space-3) - var(--space-4))
+
+    h2
+        margin: 0
+
 // Payment result: actions in a row, stacked and full width on phones
 .paymentActions
     display: flex

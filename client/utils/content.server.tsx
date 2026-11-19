@@ -9,6 +9,7 @@ import { DEFAULT_LOCALE } from '@/utils/constants'
 import {
     ContentPageData,
     ContentPageName,
+    ContentSection,
     ContentStep,
     escapeHtml,
     htmlToText,
@@ -154,6 +155,13 @@ const read = (page: ContentPageName, locale: string): string | undefined => {
 const cache = new Map<string, ContentPageData>()
 
 /**
+ * Sections as the page shows them: each `##` heading with its anchor, then its text. For a page
+ * that puts something of its own between two sections (the team carousel of /about)
+ */
+export const sectionsHtml = (sections: ContentSection[]): string =>
+    sections.map(({ id, title, html }) => `<h2 id="${id}">${escapeHtml(title)}</h2>${html}`).join('')
+
+/**
  * A static text page from its Markdown file of the locale (the Russian one when there is none),
  * rendered on the server: the page shows the HTML as is, the browser loads neither the other
  * language nor a Markdown parser. The front matter gives the page's `title` and `description`;
@@ -188,7 +196,7 @@ export const loadContentPage = (page: ContentPageName, locale: string = DEFAULT_
 
     const data: ContentPageData = {
         description: fields.description ?? '',
-        html: intro + sections.map(({ id, title, html }) => `<h2 id="${id}">${escapeHtml(title)}</h2>${html}`).join(''),
+        html: intro + sectionsHtml(sections),
         intro,
         sections,
         steps,

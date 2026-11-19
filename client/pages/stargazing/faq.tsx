@@ -6,6 +6,7 @@ import { useTranslation } from 'next-i18next/pages'
 
 import { wrapper } from '@/api'
 import { StaticInfoPageLayout, useContentLinks } from '@/components/common'
+import { StargazingGuideMore } from '@/components/pages/stargazing/stargazing-guide'
 import type { ContentPageData } from '@/utils/content'
 import { loadContentPage } from '@/utils/content.server'
 import { initSSRLocale } from '@/utils/ssrLocale'
@@ -22,19 +23,10 @@ type StargazingFAQPageProps = Pick<ContentPageData, 'title' | 'description' | 'i
 const StargazingFAQPage: NextPage<StargazingFAQPageProps> = ({ title, description, intro, sections }) => {
     const { t } = useTranslation()
     const handleLinks = useContentLinks()
-    const [openItems, setOpenItems] = useState<Set<number>>(new Set([0]))
+    // One answer open at a time: opening a question closes the previous one
+    const [openItem, setOpenItem] = useState<number | null>(0)
 
-    const toggleItem = (idx: number) => {
-        setOpenItems((prev) => {
-            const next = new Set(prev)
-            if (next.has(idx)) {
-                next.delete(idx)
-            } else {
-                next.add(idx)
-            }
-            return next
-        })
-    }
+    const toggleItem = (idx: number) => setOpenItem((prev) => (prev === idx ? null : idx))
 
     const faqJsonLd = {
         '@context': 'https://schema.org',
@@ -53,6 +45,7 @@ const StargazingFAQPage: NextPage<StargazingFAQPageProps> = ({ title, descriptio
         <StaticInfoPageLayout
             canonical={'stargazing/faq'}
             title={title}
+            kicker={t('pages.stargazing.guide-kicker', 'Перед поездкой')}
             description={description}
             openGraph={{
                 images: [{ url: '/photos/stargazing-1.jpeg', width: 1280, height: 853 }]
@@ -79,7 +72,7 @@ const StargazingFAQPage: NextPage<StargazingFAQPageProps> = ({ title, descriptio
                 onClick={handleLinks}
             >
                 {sections.map((section, idx) => {
-                    const isOpen = openItems.has(idx)
+                    const isOpen = openItem === idx
 
                     return (
                         <div
@@ -95,7 +88,13 @@ const StargazingFAQPage: NextPage<StargazingFAQPageProps> = ({ title, descriptio
                                 aria-expanded={isOpen}
                                 aria-controls={`faq-answer-${idx}`}
                             >
-                                <span>{section.title}</span>
+                                <span
+                                    className={styles.faqIndex}
+                                    aria-hidden={'true'}
+                                >
+                                    {String(idx + 1).padStart(2, '0')}
+                                </span>
+                                <span className={styles.faqTitle}>{section.title}</span>
                                 <Icon
                                     name={'KeyboardDown'}
                                     className={styles.chevron}
@@ -122,6 +121,7 @@ const StargazingFAQPage: NextPage<StargazingFAQPageProps> = ({ title, descriptio
                     )
                 })}
             </div>
+            <StargazingGuideMore current={'/stargazing/faq'} />
         </StaticInfoPageLayout>
     )
 }

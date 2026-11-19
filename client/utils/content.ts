@@ -5,7 +5,13 @@ import { DEFAULT_LOCALE } from '@/utils/constants'
  * (`<page>.<locale>.md`), rendered to HTML on the server (`utils/content.server.tsx`)
  */
 export type ContentPageName =
-    'observatory-overview' | 'privacy' | 'stargazing-faq' | 'stargazing-howto' | 'stargazing-rules' | 'stargazing-where'
+    | 'about'
+    | 'observatory-overview'
+    | 'privacy'
+    | 'stargazing-faq'
+    | 'stargazing-howto'
+    | 'stargazing-rules'
+    | 'stargazing-where'
 
 /** A `##` section of a page: its anchor, its heading, its body as HTML and as plain text */
 export interface ContentSection {

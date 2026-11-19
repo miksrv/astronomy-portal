@@ -46,10 +46,8 @@ The whole trip takes 2 to 4 hours. You can leave at any time, but many stay unti
 
 ## Essential recommendations
 
-Please review the ["Rules of Conduct on Stargazing Trips"](/stargazing/rules) section so the event is comfortable and safe for everyone.
+Before the trip, be sure to read the ["Rules of Conduct on Stargazing Trips"](/stargazing/rules). On the field nobody turns on bright lights, makes a fire or makes noise: this way everyone's eyes adapt to the dark and everyone can look through a telescope in peace. A few simple rules make the evening comfortable and safe for all.
 
 ## Themed evenings
 
-Sometimes we run sidewalk astronomy sessions right in the city. You can read more about these events in the ["Where to Look Through a Telescope in Orenburg"](/stargazing/where) section.
-
-Didn't find the answer to your question? Check out the ["Frequently Asked Questions"](/stargazing/faq) section or write to us on our ["Look at the Stars"](https://t.me/look_at_stars) Telegram channel.
+Besides the trips out of town, we hold themed evenings: meteor shower nights such as the Perseids, open-air film screenings and sidewalk astronomy right in the centre of Orenburg, when the telescopes stand on Belovka by the Chkalov monument and any passer-by can look at the Moon and the planets. You can read more about the city sessions in the ["Where to Look Through a Telescope in Orenburg"](/stargazing/where) section.

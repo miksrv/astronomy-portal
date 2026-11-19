@@ -5,6 +5,7 @@ import { useTranslation } from 'next-i18next/pages'
 
 import { SITE_LINK, wrapper } from '@/api'
 import { ContentText, StaticInfoPageLayout } from '@/components/common'
+import { StargazingGuideMore } from '@/components/pages/stargazing/stargazing-guide'
 import type { ContentPageData } from '@/utils/content'
 import { loadContentPage } from '@/utils/content.server'
 import { initSSRLocale } from '@/utils/ssrLocale'
@@ -40,6 +41,7 @@ const StargazingRulesPage: NextPage<StargazingRulesPageProps> = ({ title, descri
         <StaticInfoPageLayout
             canonical={'stargazing/rules'}
             title={title}
+            kicker={t('pages.stargazing.guide-kicker', 'Перед поездкой')}
             description={description}
             openGraph={{
                 images: [{ url: '/photos/stargazing-1.jpeg', width: 1280, height: 853 }]
@@ -52,7 +54,11 @@ const StargazingRulesPage: NextPage<StargazingRulesPageProps> = ({ title, descri
                 }
             ]}
         >
-            <ContentText html={html} />
+            <ContentText
+                html={html}
+                editorial
+            />
+            <StargazingGuideMore current={'/stargazing/rules'} />
         </StaticInfoPageLayout>
     )
 }

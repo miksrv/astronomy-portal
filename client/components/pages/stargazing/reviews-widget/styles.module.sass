@@ -3,30 +3,13 @@
 .carousel
     margin: 0
 
+// Exactly three reviews across the column on a wide screen, one and a bit on a phone (the next one
+// peeks out); the slides take the size and spacing from these variables (the Carousel's styles)
 .carouselContainer
-    & > section
-        flex: 0 0 var(--slide-size)
-        min-width: 0
-        max-width: 363px
-        margin-right: var(--space-3)
+    --slide-size: calc(100% / 3)
+    --slide-spacing: var(--space-4)
+    --slide-max-width: none
+    --slide-max-width-mobile: none
 
-        @media only screen and (max-width: variables.$mobileMaxWidth)
-            max-width: 500px
-
-    .review
-        border-bottom: 0
-        margin-bottom: 0
-        padding-bottom: 0
-        height: 155px
-        overflow-y: hidden
-        position: relative
-
-        &::after
-            content: ''
-            position: absolute
-            bottom: 0
-            left: 0
-            right: 0
-            height: 60px
-            background: linear-gradient(to bottom, transparent, var(--surface-1))
-            pointer-events: none
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        --slide-size: 85%

@@ -19,9 +19,10 @@ const StargazingHistoryPage: NextPage<StargazingHistoryPageProps> = ({ events })
     const { t } = useTranslation()
 
     const title = t('pages.stargazing-history.title', 'Архив астровыездов')
+    // One text: the page's opening paragraph and its description for search engines
     const description = t(
         'pages.stargazing-history.description',
-        'Архив астровыездов «Смотри на звёзды» в Оренбурге: фото, даты, число участников и отзывы каждой ночи под звёздами с телескопами.'
+        'Здесь собраны все наши астровыезды и вечера тротуарной астрономии: от первых поездок за город до ночей, на которые приезжает больше тысячи человек. У каждого выезда своя страница с фотографиями и видео, темой лекции, числом участников и отзывами тех, кто был с нами под звёздами. Листайте по годам, вспоминайте свои ночи и выбирайте, на какой выезд поехать в следующий раз.'
     )
 
     return (

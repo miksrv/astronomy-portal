@@ -46,7 +46,6 @@ export const EventsList: React.FC<EventsListProps> = ({ events, groupByYear = fa
                 excerpt={event.excerpt}
                 coverFileName={event.coverFileName}
                 coverFileExt={event.coverFileExt}
-                views={event?.views}
                 membersCount={event?.members?.total || event?.availableTickets}
                 statisticHref={canViewStatistic ? `/stargazing/${event.id}/statistic` : undefined}
                 attended={attended}

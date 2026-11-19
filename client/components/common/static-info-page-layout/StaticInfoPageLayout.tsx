@@ -10,6 +10,8 @@ import { AppToolbar } from '../app-toolbar'
 
 interface StaticInfoPageLayoutProps extends Omit<AppLayoutProps, 'children' | 'title'> {
     title: string
+    /** The label over the title: the page belongs to a landing's family (DESIGN.md → Landing pages) */
+    kicker?: string
     /** Rendered via next-seo's JsonLdScript, keyed by scriptKey. Omit for pages with no structured data. */
     jsonLd?: {
         scriptKey: string
@@ -27,6 +29,7 @@ interface StaticInfoPageLayoutProps extends Omit<AppLayoutProps, 'children' | 't
  */
 export const StaticInfoPageLayout: React.FC<StaticInfoPageLayoutProps> = ({
     title,
+    kicker,
     jsonLd,
     breadcrumbLinks,
     children,
@@ -45,6 +48,8 @@ export const StaticInfoPageLayout: React.FC<StaticInfoPageLayoutProps> = ({
 
         <AppToolbar
             title={title}
+            kicker={kicker}
+            landing={!!kicker}
             currentPage={title}
             links={breadcrumbLinks}
         />

@@ -19,23 +19,53 @@ interface ReviewCardProps {
     /** Set while this review is an optimistic entry still in flight - hides
      * the (not-yet-real) date/delete action and shows a "sending" label. */
     pending?: boolean
+    /** `quote` — a review on a landing: the stars, the words larger, then who wrote it and about
+     * which trip (instead of the date); no actions */
+    variant?: 'default' | 'quote'
 }
 
-export const ReviewCard: React.FC<ReviewCardProps> = ({ review, canDelete, className, onDelete, pending }) => {
+export const ReviewCard: React.FC<ReviewCardProps> = ({
+    review,
+    canDelete,
+    className,
+    onDelete,
+    pending,
+    variant = 'default'
+}) => {
     const { t } = useTranslation()
+
+    const avatar = (
+        <UserAvatar
+            src={review.author?.avatar ? `${HOST_IMG}/users/${review.author.id}/${review.author.avatar}` : undefined}
+            name={review.author.name}
+            size={'medium'}
+        />
+    )
+
+    if (variant === 'quote') {
+        return (
+            <article className={cn(styles.quote, className)}>
+                {review.rating !== undefined && <StarRating rating={review.rating} />}
+
+                <blockquote className={styles.quoteText}>{review.content}</blockquote>
+
+                <footer className={styles.quoteAuthor}>
+                    {avatar}
+                    <div className={styles.meta}>
+                        <span className={styles.authorName}>{review.author.name}</span>
+                        <span className={styles.quoteEvent}>
+                            {review.entity?.title ?? formatDate(review.createdAt)}
+                        </span>
+                    </div>
+                </footer>
+            </article>
+        )
+    }
 
     return (
         <article className={cn(styles.card, pending && styles.cardPending, className)}>
             <header className={styles.header}>
-                <UserAvatar
-                    src={
-                        review.author?.avatar
-                            ? `${HOST_IMG}/users/${review.author.id}/${review.author.avatar}`
-                            : undefined
-                    }
-                    name={review.author.name}
-                    size={'medium'}
-                />
+                {avatar}
                 <div className={styles.meta}>
                     <span className={styles.authorName}>{review.author.name}</span>
                     {review.rating !== undefined && <StarRating rating={review.rating} />}

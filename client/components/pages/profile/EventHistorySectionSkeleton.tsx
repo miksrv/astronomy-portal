@@ -18,14 +18,15 @@ export const EventHistorySectionSkeleton: React.FC<EventHistorySectionSkeletonPr
                 key={index}
                 className={eventRowStyles.eventRow}
             >
-                <div className={eventRowStyles.primaryLink}>
-                    <Skeleton style={{ width: '140px', height: '100px', flexShrink: 0 }} />
+                <div className={eventRowStyles.layout}>
+                    <Skeleton className={eventRowStyles.thumbnail} />
                     <div className={eventRowStyles.content}>
-                        <Skeleton style={{ width: '70%', height: '15px' }} />
-                        <Skeleton style={{ width: '140px', height: '13px' }} />
+                        <Skeleton style={{ width: '120px', height: '12px' }} />
+                        <Skeleton style={{ width: '70%', height: '16px' }} />
+                        <Skeleton style={{ width: '90%', height: '13px' }} />
+                        <Skeleton style={{ width: '220px', height: '13px' }} />
                     </div>
                 </div>
-                <Skeleton style={{ width: '80px', height: '13px' }} />
                 <Skeleton style={{ width: '18px', height: '18px', flexShrink: 0 }} />
             </div>
         ))}

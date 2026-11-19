@@ -27,6 +27,11 @@
     /* Spacing above the kit's 4…24px: the air between page sections */
     --space-8: 32px;
     --space-10: 40px;
+    --space-12: 48px;
+
+    /* Landing rhythm (DESIGN.md → Landing pages): the air between the big
+       sections of a hero page (home, /stargazing) */
+    --space-section: 96px;
 
     /* Type scale (DESIGN.md → Type scale). The kit gives 12 / 14 / 16px
        (--font-size-small / --font-size / --font-size-large); the project
@@ -36,17 +41,24 @@
     --font-size-prose: 16px;
     --font-size-title-section: 18px;
     --font-size-lead: 18px;
+    --font-size-lead-landing: 21px;
     --font-size-stat: 22px;
     --font-size-title-page: 26px;
     --font-size-display: 40px;
+    --font-size-title-landing: 36px;
+    --font-size-hero: 64px;
 }
 
 /* Phones ($mobileMaxWidth, 768px) */
 @media only screen and (max-width: 768px) {
     :root {
         --font-size-lead: 16px;
+        --font-size-lead-landing: 18px;
         --font-size-title-page: 22px;
         --font-size-display: 30px;
+        --font-size-title-landing: 28px;
+        --font-size-hero: 40px;
+        --space-section: 64px;
     }
 }
 

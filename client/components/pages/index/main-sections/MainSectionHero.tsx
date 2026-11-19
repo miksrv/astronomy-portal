@@ -31,8 +31,9 @@ export const MainSectionHero: React.FC<MainSectionHeroProps> = ({ photos }) => {
                     <span className={styles.sectionLabel}>
                         {t('components.pages.index.main-sections.label-astrophoto', 'Лучший астрономический проект')}
                     </span>
-                    <h1 className={styles.sectionTitle}>
-                        {t('components.pages.index.main-sections.hero-title', 'Смотри на звёзды')}
+                    <h1 className={cn(styles.sectionTitle, styles.sectionTitleHero)}>
+                        {t('components.pages.index.main-sections.hero-title-start', 'Смотри на')}{' '}
+                        <em>{t('components.pages.index.main-sections.hero-title-accent', 'звёзды')}</em>
                     </h1>
                     <p className={styles.sectionDesc}>
                         {t(

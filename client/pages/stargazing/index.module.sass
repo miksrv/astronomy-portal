@@ -1,86 +1,37 @@
 @use '../../styles/variables' as variables
-@use '../../styles/mixins'
 @use '../../styles/typography' as type
 
-.pageBackground
-    +mixins.hero-background(100vh)
-
-.hero
-    position: relative
-    min-height: 320px
+// "Перед поездкой": the four pages as numbered links, the notes under them
+.guide
     display: flex
     flex-direction: column
-    justify-content: center
-    padding: var(--space-8) 0 var(--space-4)
+    gap: var(--space-8)
 
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        min-height: 220px
-        padding: var(--space-6) 0 var(--space-4)
-
-// Same hero recipe as the home page: eyebrow, display title, lead, one primary action
-.heroLabel
-    +type.overline
-    margin: 0 0 var(--space-3)
-    color: var(--color-main)
-
-.heroTitle
-    +type.titleDisplay
-    margin: 0 0 var(--space-4)
-    color: #fff
-    text-wrap: balance
-
-    span
-        display: block
-
-.heroSubtitle
-    +type.lead
-    max-width: 52ch
-    margin: 0 0 var(--space-6)
-    color: var(--text-color-secondary)
-
-.heroActions
-    display: flex
+// "Кто проводит": the team photo and a paragraph beside it
+.team
+    display: grid
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr)
     align-items: center
-    gap: var(--space-3)
-    flex-wrap: wrap
-
-    // Touch targets on phones (DESIGN.md: at least 44px)
-    @media only screen and (max-width: variables.$mobileMaxWidth)
-        button
-            min-height: 44px
-
-// Secondary action next to the primary one: a ghost pill over the photo
-.telegramCta
-    +type.body
-    display: inline-flex
-    align-items: center
-    gap: var(--space-2)
-    min-height: 36px
-    padding: 0 var(--space-4)
-    border-radius: var(--radius-md)
-    border: 1px solid var(--border-strong)
-    color: var(--text-color-primary)
-    transition: border-color var(--duration-fast) var(--ease), background-color var(--duration-fast) var(--ease)
+    gap: var(--space-10)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        min-height: 44px
+        grid-template-columns: 1fr
+        gap: var(--space-5)
 
-    svg
-        fill: var(--color-main)
-        width: 16px
-        height: 16px
-        flex-shrink: 0
+.teamPhoto
+    position: relative
+    aspect-ratio: 3 / 2
+    border-radius: var(--radius-xl)
+    overflow: hidden
 
-    &:hover
+    img
+        object-fit: cover
+
+.teamText
+    p
+        +type.lead
+        margin: 0 0 var(--space-5)
         color: var(--text-color-primary)
-        border-color: var(--color-main)
-        background: var(--surface-2)
 
-    @media (prefers-reduced-motion: reduce)
-        transition: none
-
-// "Прошедшие астровыезды" heading + "Смотреть все" on the right
-.showAllEvents
+.teamLink
     +type.body
-    margin-left: auto
-    white-space: nowrap

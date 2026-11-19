@@ -4,24 +4,84 @@
 $touchTarget: 44px
 
 // Empty state: one line of text in place of the card content
+// No upcoming event: the text and its action on the left, a photo on the right as tall as the
+// text (cropped to it), never the other way round
 .noEvent
-    text-align: center
-    padding: var(--space-8) var(--space-5)
+    display: grid
+    grid-template-columns: minmax(0, 1fr) 360px
+    align-items: stretch
+    gap: var(--space-8)
+    padding: var(--space-6) var(--space-6) var(--space-6) var(--space-8)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: 1fr
+        gap: var(--space-4)
+        padding: var(--space-4)
+
+.noEventText
+    align-self: center
 
     p
-        +type.secondary
+        +type.body
+        max-width: 56ch
         margin: 0
+        color: var(--text-color-secondary)
 
 .noEventTitle
-    +type.titleBlock
-    margin: var(--space-3) 0 var(--space-1)
+    +type.titleSection
+    margin: 0 0 var(--space-2)
 
-.noEventImage
-    width: 100%
-    max-width: 400px
-    height: auto
+.noEventActions
+    display: flex
+    flex-wrap: wrap
+    gap: var(--space-2)
+    margin-top: var(--space-5)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        a, button
+            min-height: 44px
+
+// The secondary action: an outline link (a kit Button can't open a new tab)
+.noEventTelegram
+    +type.body
+    display: inline-flex
+    align-items: center
+    gap: var(--space-2)
+    min-height: 36px
+    padding: 0 var(--space-4)
+    border-radius: var(--radius-md)
+    border: 1px solid var(--border-strong)
+    color: var(--text-color-primary)
+    transition: border-color var(--duration-fast) var(--ease)
+
+    svg
+        width: 16px
+        height: 16px
+        fill: var(--color-main)
+
+    &:hover
+        color: var(--text-color-primary)
+        border-color: var(--color-main)
+
+    @media (prefers-reduced-motion: reduce)
+        transition: none
+
+// A real night of a past trip in black and white: the next one is still to come. On a wide
+// screen it takes the text's height (at least a strip), on a phone a strip over the text
+.noEventPhoto
+    position: relative
+    min-height: 180px
     border-radius: var(--radius-lg)
-    margin: 0 auto
+    overflow: hidden
+
+    img
+        object-fit: cover
+        filter: grayscale(1) contrast(1.05)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        order: -1
+        min-height: 0
+        aspect-ratio: 21 / 9
 
 .upcomingEvent
     display: flex

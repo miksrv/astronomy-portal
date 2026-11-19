@@ -1,7 +1,6 @@
 import React from 'react'
-import { Container, Icon } from 'simple-react-ui-kit'
+import { Icon } from 'simple-react-ui-kit'
 
-import Image from 'next/image'
 import { useTranslation } from 'next-i18next/pages'
 
 import styles from './styles.module.sass'
@@ -29,28 +28,16 @@ export const EventImportant: React.FC = () => {
     ]
 
     return (
-        <Container>
-            <div className={styles.importantInner}>
-                <div className={styles.importantContent}>
-                    <div className={styles.importantHeader}>
-                        <Icon name={'ReportError'} />
-                        {t('pages.stargazing-tickets.important-title', 'Важно знать')}
-                    </div>
-                    <ul className={styles.importantList}>
-                        {importantNotes.map((note) => (
-                            <li key={note}>{note}</li>
-                        ))}
-                    </ul>
-                </div>
-                <Image
-                    className={styles.telescopeImage}
-                    src={'/images/telescope-illustration.png'}
-                    width={1235}
-                    height={687}
-                    alt={''}
-                    aria-hidden={'true'}
-                />
-            </div>
-        </Container>
+        <div className={styles.important}>
+            <h3 className={styles.importantHeader}>
+                <Icon name={'ReportError'} />
+                {t('pages.stargazing-tickets.important-title', 'Важно знать')}
+            </h3>
+            <ul className={styles.importantList}>
+                {importantNotes.map((note) => (
+                    <li key={note}>{note}</li>
+                ))}
+            </ul>
+        </div>
     )
 }

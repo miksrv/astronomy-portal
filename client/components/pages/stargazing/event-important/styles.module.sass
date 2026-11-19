@@ -1,52 +1,41 @@
 @use '../../../../styles/variables' as variables
 @use '../../../../styles/typography' as type
 
-.importantInner
-    display: flex
-    align-items: center
-    gap: var(--space-8)
-
-.importantContent
-    flex: 1
-
-.telescopeImage
-    width: 279px
-    height: 155px
-    object-fit: contain
-    flex-shrink: 0
-    opacity: 0.6
+// The notes before a trip: a tinted plate, the notes in two columns
+.important
+    padding: var(--space-6)
+    border-radius: var(--radius-xl)
+    background: var(--color-main-background)
 
     @media only screen and (max-width: variables.$mobileMaxWidth)
-        display: none
+        padding: var(--space-5) var(--space-4)
 
 .importantHeader
-    +type.titleBlock
-    display: flex
-    align-items: center
-    gap: var(--space-3)
-    margin-bottom: var(--space-3)
+    +type.kicker
+    margin: 0 0 var(--space-4)
+
+    // The kicker's rule is replaced by the icon here
+    &::before
+        display: none
 
     svg
-        fill: var(--color-main)
-        width: 24px
-        height: 24px
-        flex-shrink: 0
+        width: 16px
+        height: 16px
+        fill: currentColor
 
 .importantList
-    list-style: none
-    padding: 0
+    +type.body
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: var(--space-3) var(--space-8)
     margin: 0
-    display: flex
-    flex-direction: column
-    gap: var(--space-2)
+    padding: 0
+    list-style: none
+    color: var(--text-color-primary)
+
+    @media only screen and (max-width: variables.$mobileMaxWidth)
+        grid-template-columns: 1fr
 
     li
-        +type.secondary
         padding-left: var(--space-4)
-        position: relative
-
-        &::before
-            content: '—'
-            position: absolute
-            left: 0
-            color: var(--color-main)
+        border-left: 2px solid var(--color-main)
