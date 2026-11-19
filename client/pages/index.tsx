@@ -117,6 +117,9 @@ export const getServerSideProps = wrapper.getServerSideProps(
                 })
             )
 
+            // The numbers of the project are in the HTML, not 0 until the page loads them
+            void store.dispatch(API.endpoints?.statisticGetStargazing.initiate())
+
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
             return {

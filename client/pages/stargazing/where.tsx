@@ -70,7 +70,7 @@ const StargazingWherePage: NextPage<StargazingWherePageProps> = ({ title, descri
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
         async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<StargazingWherePageProps>> => {
-            const { locale, translations } = await initSSRLocale(store, context)
+            const { locale, translations } = await initSSRLocale(store, context, ['translation', 'stargazing'])
             const { title, description, html } = loadContentPage('stargazing-where', locale)
 
             return {

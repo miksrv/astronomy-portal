@@ -72,7 +72,7 @@ export const EventsList: React.FC<EventsListProps> = ({ events, groupByYear = fa
                             className={styles.yearDot}
                             aria-hidden
                         />
-                        <span className={styles.yearLabel}>{group.year}</span>
+                        <h2 className={styles.yearLabel}>{group.year}</h2>
                     </div>
 
                     <div className={styles.yearEvents}>{group.events.map(renderEventRow)}</div>

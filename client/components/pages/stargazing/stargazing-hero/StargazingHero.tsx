@@ -8,7 +8,7 @@ import { ApiModel, useAppDispatch, useAppSelector } from '@/api'
 import { openAuthDialog } from '@/api/applicationSlice'
 import { StargazingStats } from '@/components/common/stargazing-stats/StargazingStats'
 import heroPhoto from '@/public/photos/howto-2.jpeg'
-import { formatUTCDate } from '@/utils/dates'
+import { formatUTCDate, getSecondsUntilUTCDate } from '@/utils/dates'
 
 import styles from './styles.module.sass'
 
@@ -28,6 +28,16 @@ export const StargazingHero: React.FC<StargazingHeroProps> = ({ event }) => {
 
     const eventDate = formatUTCDate(event?.date?.date, 'D MMMM', i18n.language)
 
+    // "Записаться" only while a seat can actually be booked (the rules of useEventBookingStatus);
+    // otherwise (no booking, not open yet, closed, sold out, already booked) the neutral label
+    const canBook =
+        !!event &&
+        event.requiresRegistration !== false &&
+        event.availableTickets !== 0 &&
+        !event.registered &&
+        (getSecondsUntilUTCDate(event.registrationStart?.date) || 0) < 0 &&
+        (getSecondsUntilUTCDate(event.registrationEnd?.date) || 0) > 0
+
     return (
         <section className={styles.hero}>
             <div
@@ -39,6 +49,7 @@ export const StargazingHero: React.FC<StargazingHeroProps> = ({ event }) => {
                     alt={''}
                     fill
                     preload
+                    fetchPriority={'high'}
                     placeholder={'blur'}
                     sizes={'100vw'}
                     className={styles.backdropImage}
@@ -46,7 +57,9 @@ export const StargazingHero: React.FC<StargazingHeroProps> = ({ event }) => {
             </div>
 
             <div className={styles.body}>
-                <p className={styles.kicker}>{t('pages.stargazing.hero-kicker', 'Наблюдение за звёздами')}</p>
+                <p className={styles.kicker}>
+                    {t('pages.stargazing.hero-kicker', 'Оренбург · Наблюдение за звёздами')}
+                </p>
 
                 <h1 className={styles.title}>
                     {t('pages.stargazing.hero-title-line1', 'Астровыезды')}{' '}
@@ -66,12 +79,11 @@ export const StargazingHero: React.FC<StargazingHeroProps> = ({ event }) => {
                             mode={'primary'}
                             size={'large'}
                             label={
-                                // An event without booking (sidewalk astronomy) has nothing to sign up for
-                                event.requiresRegistration === false
-                                    ? t('pages.stargazing.hero-cta-upcoming', 'Ближайший выезд {{date}}', {
+                                canBook
+                                    ? t('pages.stargazing.hero-cta-book', 'Записаться на {{date}}', {
                                           date: eventDate
                                       })
-                                    : t('pages.stargazing.hero-cta-book', 'Записаться на {{date}}', {
+                                    : t('pages.stargazing.hero-cta-upcoming', 'Ближайший выезд {{date}}', {
                                           date: eventDate
                                       })
                             }

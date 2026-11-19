@@ -47,6 +47,13 @@ class EventsCoversWebp extends BaseCommand
         $keep  = array_key_exists('keep', $params);
         $only  = is_string($params['event'] ?? null) ? $params['event'] : null;
 
+        // `--event` without an ID would otherwise convert every event
+        if (array_key_exists('event', $params) && ($only === null || trim($only) === '')) {
+            CLI::error('--event needs an event ID');
+
+            return;
+        }
+
         $db = Database::connect();
 
         // Deleted events too: their folders take the same space

@@ -39,7 +39,8 @@ class EventCoverLibrary
     }
 
     /**
-     * Stores an uploaded file as the event's cover and removes the files of the earlier one.
+     * Stores an uploaded file as the event's cover. The files of the earlier one stay until the
+     * event points at the new one: the caller removes them then (removeOtherCovers()).
      *
      * @return array{name: string, ext: string} The values of `cover_file_name` / `cover_file_ext`.
      */
@@ -55,8 +56,6 @@ class EventCoverLibrary
         } finally {
             @unlink($directory . '/' . $source);
         }
-
-        $this->removeOtherCovers($eventId, $name);
 
         return ['name' => $name, 'ext' => self::EXT];
     }
@@ -118,7 +117,8 @@ class EventCoverLibrary
         $target  = $directory . '/' . $name . '.' . self::EXT;
         $preview = $directory . '/' . $name . '_preview.' . self::EXT;
 
-        $image = Services::image('gd', null, false)->withFile($source);
+        // GD drops the EXIF orientation: a portrait phone photo is turned upright first
+        $image = Services::image('gd', null, false)->withFile($source)->reorient(true);
 
         if ($image->getWidth() > self::MAX_WIDTH) {
             $image->resize(self::MAX_WIDTH, self::MAX_WIDTH, true, 'width');

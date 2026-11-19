@@ -26,13 +26,14 @@ final class CommentsRatingTest extends CIUnitTestCase
 
         // The columns the review queries read (the real tables have MySQL ENUMs)
         $db->query('CREATE TABLE users (id VARCHAR(15) PRIMARY KEY, name VARCHAR(100), avatar VARCHAR(40))');
-        $db->query('CREATE TABLE events (id VARCHAR(15) PRIMARY KEY, title_ru VARCHAR(200), title_en VARCHAR(200), date DATETIME)');
+        $db->query('CREATE TABLE events (id VARCHAR(15) PRIMARY KEY, title_ru VARCHAR(200), title_en VARCHAR(200), date DATETIME, deleted_at DATETIME NULL)');
         $db->query('CREATE TABLE comments (id VARCHAR(15) PRIMARY KEY, user_id VARCHAR(15), entity_type VARCHAR(10), entity_id VARCHAR(15), content TEXT, rating INTEGER NULL, status VARCHAR(10), created_at DATETIME, updated_at DATETIME, deleted_at DATETIME NULL)');
 
         $db->table('users')->insert(['id' => 'u1', 'name' => 'Анна Смирнова', 'avatar' => null]);
         $db->table('events')->insertBatch([
-            ['id' => 'e1', 'title_ru' => 'Персеиды', 'title_en' => 'Perseids', 'date' => '2026-08-12 21:30:00'],
-            ['id' => 'e2', 'title_ru' => 'Тротуарная астрономия', 'title_en' => 'Sidewalk astronomy', 'date' => '2026-09-24 20:00:00'],
+            ['id' => 'e1', 'title_ru' => 'Персеиды', 'title_en' => 'Perseids', 'date' => '2026-08-12 21:30:00', 'deleted_at' => null],
+            ['id' => 'e2', 'title_ru' => 'Тротуарная астрономия', 'title_en' => 'Sidewalk astronomy', 'date' => '2026-09-24 20:00:00', 'deleted_at' => null],
+            ['id' => 'e3', 'title_ru' => 'Удалённый выезд', 'title_en' => 'Deleted trip', 'date' => '2026-10-01 20:00:00', 'deleted_at' => '2026-10-02 00:00:00'],
         ]);
 
         $long = str_repeat('Звёзды над степью. ', 6); // ~114 characters, ~210 bytes
@@ -45,6 +46,8 @@ final class CommentsRatingTest extends CIUnitTestCase
             $this->review('c5', 'e2', $long, null),
             $this->review('c6', 'e2', $long, 1, 'hidden'),
             $this->review('c7', 'e2', $long, 1, 'visible', '2026-09-25 00:00:00'),
+            // A review of a deleted event: neither picked nor counted
+            $this->review('c8', 'e3', $long, 1),
         ]);
 
         $this->model = new CommentsModel();
@@ -100,7 +103,7 @@ final class CommentsRatingTest extends CIUnitTestCase
 
     public function testSummaryOfTheTypeAveragesRatedVisibleReviews(): void
     {
-        // Rated, visible, not deleted: 5, 5, 3, 4 (the unrated, hidden and deleted ones are out)
+        // Rated, visible, not deleted: 5, 5, 3, 4 (the unrated, hidden, deleted ones and those of a deleted event are out)
         $this->assertSame(['count' => 4, 'average' => 4.3], $this->model->getRatingSummary('event'));
     }
 

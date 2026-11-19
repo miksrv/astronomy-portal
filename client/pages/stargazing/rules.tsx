@@ -66,7 +66,7 @@ const StargazingRulesPage: NextPage<StargazingRulesPageProps> = ({ title, descri
 export const getStaticProps = wrapper.getStaticProps(
     (store) =>
         async (context: GetStaticPropsContext): Promise<GetStaticPropsResult<StargazingRulesPageProps>> => {
-            const { locale, translations } = await initSSRLocale(store, context)
+            const { locale, translations } = await initSSRLocale(store, context, ['translation', 'stargazing'])
             const { title, description, html } = loadContentPage('stargazing-rules', locale)
 
             return {

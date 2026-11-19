@@ -2209,12 +2209,16 @@ class Events extends BaseApiController
 
         try {
             // Stored as WebP with its 585×400 preview; the files of the old cover are removed
-            $cover = (new EventCoverLibrary())->store($file, $event->id);
+            // only once the event points at the new one
+            $covers = new EventCoverLibrary();
+            $cover  = $covers->store($file, $event->id);
 
             $this->model->update($id, [
                 'cover_file_name' => $cover['name'],
                 'cover_file_ext'  => $cover['ext'],
             ]);
+
+            $covers->removeOtherCovers($event->id, $cover['name']);
 
             return $this->respondUpdated([
                 'coverFileName' => $cover['name'],

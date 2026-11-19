@@ -447,7 +447,7 @@ export const EventForm: React.FC<EventFormProps> = ({ disabled, initialData, err
                     {!!initialData?.coverFileName && !!initialData?.coverFileExt && (
                         <Image
                             className={styles.image}
-                            src={`${hosts.stargazing}${initialData.id}/cover.${initialData.coverFileExt}`}
+                            src={`${hosts.stargazing}${initialData.id}/${initialData.coverFileName}.${initialData.coverFileExt}`}
                             fill={true}
                             alt={''}
                         />

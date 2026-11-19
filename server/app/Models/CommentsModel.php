@@ -118,7 +118,9 @@ class CommentsModel extends ApplicationBaseModel
             ->join('events e', "e.id = c.entity_id AND c.entity_type = 'event'", 'left')
             ->where('c.entity_type', $type)
             ->where('c.deleted_at IS NULL')
-            ->where('c.status', 'visible');
+            ->where('c.status', 'visible')
+            // Not the reviews of a deleted event
+            ->where('e.deleted_at IS NULL');
 
         if ($minRating > 0) {
             $builder->where('c.rating >=', $minRating);
@@ -151,10 +153,13 @@ class CommentsModel extends ApplicationBaseModel
     {
         $builder = $this->db->table('comments c')
             ->select('COUNT(c.rating) AS rated, AVG(c.rating) AS average')
+            ->join('events e', "e.id = c.entity_id AND c.entity_type = 'event'", 'left')
             ->where('c.entity_type', $type)
             ->where('c.deleted_at IS NULL')
             ->where('c.status', 'visible')
-            ->where('c.rating IS NOT NULL');
+            ->where('c.rating IS NOT NULL')
+            // Not the reviews of a deleted event
+            ->where('e.deleted_at IS NULL');
 
         if ($entityId !== null) {
             $builder->where('c.entity_id', $entityId);

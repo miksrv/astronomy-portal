@@ -9,60 +9,78 @@ interface CounterProps {
     style?: React.CSSProperties
 }
 
+/**
+ * A number that counts up from 0 when it scrolls into view. The server HTML and the first paint
+ * carry the real number (search engines and readers without JS see it); a counter already on
+ * screen when the page opens keeps it, only one below the fold is reset to 0 and counts up.
+ */
 export const Counter: React.FC<CounterProps> = ({ end, duration = 2000, className, style }) => {
-    const [count, setCount] = useState(0)
-    const [hasStarted, setHasStarted] = useState(false)
+    const [count, setCount] = useState(end)
+    const [mode, setMode] = useState<'static' | 'waiting' | 'animate'>('static')
     const elementRef = useRef<HTMLSpanElement>(null)
-    const startTime = useRef<number | null>(null)
+
+    // A static number follows its value (the data may arrive after the first paint)
+    useEffect(() => {
+        if (mode === 'static') {
+            setCount(end)
+        }
+    }, [end, mode])
 
     useEffect(() => {
-        const step = (timestamp: number) => {
-            if (!startTime.current) {
-                startTime.current = timestamp
-            }
-            const elapsed = timestamp - startTime.current
+        const element = elementRef.current
 
-            const progress = Math.min(elapsed / duration, 1)
-            const currentValue = Math.floor(progress * end)
-
-            setCount(currentValue)
-
-            if (progress < 1) {
-                requestAnimationFrame(step)
-            } else {
-                setCount(end)
-            }
+        if (!element || prefersReducedMotion()) {
+            return
         }
 
-        if (hasStarted) {
-            // No count-up animation for visitors who asked for less motion
-            if (prefersReducedMotion()) {
-                setCount(end)
-                return
-            }
+        const rect = element.getBoundingClientRect()
 
-            startTime.current = null
-            requestAnimationFrame(step)
+        if (rect.top < window.innerHeight && rect.bottom >= 0) {
+            return
         }
-    }, [hasStarted, end, duration])
 
-    useEffect(() => {
+        setCount(0)
+        setMode('waiting')
+
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry?.isIntersecting) {
-                    setHasStarted(true)
+                    setMode('animate')
                     observer.disconnect()
                 }
             },
             { threshold: 0.1 }
         )
 
-        if (elementRef.current) {
-            observer.observe(elementRef.current)
-        }
+        observer.observe(element)
 
         return () => observer.disconnect()
     }, [])
+
+    useEffect(() => {
+        if (mode !== 'animate') {
+            return
+        }
+
+        let frame = 0
+        let startTime: number | null = null
+
+        const step = (timestamp: number) => {
+            startTime ??= timestamp
+
+            const progress = Math.min((timestamp - startTime) / duration, 1)
+
+            setCount(progress < 1 ? Math.floor(progress * end) : end)
+
+            if (progress < 1) {
+                frame = requestAnimationFrame(step)
+            }
+        }
+
+        frame = requestAnimationFrame(step)
+
+        return () => cancelAnimationFrame(frame)
+    }, [mode, end, duration])
 
     return (
         <span

@@ -62,12 +62,14 @@ export const EventRow: React.FC<EventRowProps> = ({
 
     const formattedDate = formatDate(date, 'D MMMM YYYY', i18n.language)
 
-    const membersLabel = membersCount
-        ? t('components.pages.stargazing.event-row.members', '{{formattedCount}} участников', {
-              count: membersCount,
-              formattedCount: membersCount.toLocaleString(i18n.language)
-          })
-        : undefined
+    // An editor keeps the way to the statistics even with no participants yet ("0 участников")
+    const membersLabel =
+        membersCount || statisticHref
+            ? t('components.pages.stargazing.event-row.members', '{{formattedCount}} участников', {
+                  count: membersCount ?? 0,
+                  formattedCount: (membersCount ?? 0).toLocaleString(i18n.language)
+              })
+            : undefined
 
     const statsBadges = (attended || hasReviewed) && (
         <div className={styles.stats}>

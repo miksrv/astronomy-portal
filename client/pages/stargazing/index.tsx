@@ -183,6 +183,9 @@ export const getServerSideProps = wrapper.getServerSideProps(
             // The reviews are in the HTML (and for search engines), not loaded after the page
             void store.dispatch(API.endpoints?.commentsGetRandom.initiate(STARGAZING_REVIEWS_QUERY))
 
+            // The numbers of the hero are in the HTML, not 0 until the page loads them
+            void store.dispatch(API.endpoints?.statisticGetStargazing.initiate())
+
             await Promise.all(store.dispatch(API.util.getRunningQueriesThunk()))
 
             // Handed to the page as props - no need to also ship RTK Query's copy
