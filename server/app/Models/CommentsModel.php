@@ -97,26 +97,76 @@ class CommentsModel extends ApplicationBaseModel
     }
 
     /**
-     * Get N random visible comments of a given entity type (used for widgets).
+     * Get N random visible comments of a given entity type (the reviews widget of the landing).
+     * For events each row carries the event's title and date (`entity`), so a review is shown
+     * with the trip it is about instead of its own date.
      *
-     * @param string $type  Entity type ('event' or 'photo').
-     * @param int    $limit Maximum number of results. Default is 5.
+     * @param string $type      Entity type ('event' or 'photo').
+     * @param int    $limit     Maximum number of results. Default is 5.
+     * @param int    $minRating Only reviews rated at least this (1–5); 0 takes all, unrated too.
+     * @param int    $minLength Only reviews at least this many characters long; 0 takes all.
+     * @param string $locale    Locale code for the joined event title. Default is 'ru'.
      * @return array Array of formatted comment rows.
      */
-    public function getRandom(string $type, int $limit = 5): array
+    public function getRandom(string $type, int $limit = 5, int $minRating = 0, int $minLength = 0, string $locale = 'ru'): array
     {
-        $rows = $this->db->table('comments c')
-            ->select('c.id, c.user_id, c.entity_type, c.entity_id, c.content, c.rating, c.status, c.created_at, u.avatar, u.name AS author_name')
+        helper('locale');
+
+        $builder = $this->db->table('comments c')
+            ->select('c.id, c.user_id, c.entity_type, c.entity_id, c.content, c.rating, c.status, c.created_at, u.avatar, u.name AS author_name, e.title_en AS event_title_en, e.title_ru AS event_title_ru, e.date AS event_date')
             ->join('users u', 'u.id = c.user_id', 'left')
+            ->join('events e', "e.id = c.entity_id AND c.entity_type = 'event'", 'left')
             ->where('c.entity_type', $type)
             ->where('c.deleted_at IS NULL')
-            ->where('c.status', 'visible')
-            ->orderBy('RAND()')
+            ->where('c.status', 'visible');
+
+        if ($minRating > 0) {
+            $builder->where('c.rating >=', $minRating);
+        }
+
+        if ($minLength > 0) {
+            // Characters, not bytes: a Cyrillic letter is two bytes (SQLite's LENGTH counts characters)
+            $length = $this->db->DBDriver === 'SQLite3' ? 'LENGTH' : 'CHAR_LENGTH';
+            $builder->where("{$length}(c.content) >=", $minLength);
+        }
+
+        $rows = $builder
+            ->orderBy('c.id', 'RANDOM')
             ->limit($limit)
             ->get()
             ->getResultArray();
 
-        return $this->formatRows($rows);
+        return $this->formatRows($rows, false, $locale, true);
+    }
+
+    /**
+     * The rating of an entity type or of one entity: how many visible reviews carry a rating and
+     * their average, rounded to a tenth (null without any). The headline number of the reviews.
+     *
+     * @param string      $type     Entity type ('event' or 'photo').
+     * @param string|null $entityId One entity, or null for all of the type.
+     * @return array{count: int, average: float|null}
+     */
+    public function getRatingSummary(string $type, ?string $entityId = null): array
+    {
+        $builder = $this->db->table('comments c')
+            ->select('COUNT(c.rating) AS rated, AVG(c.rating) AS average')
+            ->where('c.entity_type', $type)
+            ->where('c.deleted_at IS NULL')
+            ->where('c.status', 'visible')
+            ->where('c.rating IS NOT NULL');
+
+        if ($entityId !== null) {
+            $builder->where('c.entity_id', $entityId);
+        }
+
+        $row   = $builder->get()->getRowArray() ?? [];
+        $count = (int) ($row['rated'] ?? 0);
+
+        return [
+            'count'   => $count,
+            'average' => $count > 0 ? round((float) $row['average'], 1) : null,
+        ];
     }
 
     /**
@@ -245,9 +295,10 @@ class CommentsModel extends ApplicationBaseModel
      * @param array  $rows       Raw result rows from the query builder.
      * @param bool   $keepEntity Whether to include entityType/entityId (and joined event info) in the output.
      * @param string $locale     Locale code for the joined event title, when present. Default is 'ru'.
+     * @param bool   $withEvent  Whether to add the joined event's title and date (`entity`) without the entity ids.
      * @return array Formatted rows.
      */
-    private function formatRows(array $rows, bool $keepEntity = false, string $locale = 'ru'): array
+    private function formatRows(array $rows, bool $keepEntity = false, string $locale = 'ru', bool $withEvent = false): array
     {
         foreach ($rows as &$row) {
             $row['createdAt'] = $row['created_at'] ?? null;
@@ -269,6 +320,11 @@ class CommentsModel extends ApplicationBaseModel
                         'coverFileExt'  => $row['event_cover_file_ext'] ?? null,
                     ];
                 }
+            } elseif ($withEvent && (($row['event_title_en'] ?? null) !== null || ($row['event_title_ru'] ?? null) !== null)) {
+                $row['entity'] = [
+                    'title' => getLocalizedString($locale, $row['event_title_en'] ?? null, $row['event_title_ru'] ?? null),
+                    'date'  => $row['event_date'] ?? null,
+                ];
             }
 
             unset(

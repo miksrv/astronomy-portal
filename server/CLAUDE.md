@@ -134,8 +134,8 @@ POST   /roles                       → Roles::create
 PATCH  /roles/:id                   → Roles::update
 DELETE /roles/:id                   → Roles::delete            (strips the role from every user's `roles` array first — see UsersModel::removeRoleFromAllUsers())
 
-GET    /comments                    → Comments::index
-GET    /comments/random             → Comments::random
+GET    /comments                    → Comments::index          (+ `summary` = `{count, average}` of the entity's rated reviews)
+GET    /comments/random             → Comments::random         (`?minRating=1..5`, `?minLength=` characters narrow the pick; each event review carries `entity` = the event's title + date; + `summary` of the whole type) [publiccache:60]
 POST   /comments                    → Comments::create         [rate-limited: comments_create, 10/60s]
 DELETE /comments/:id                → Comments::delete
 
@@ -246,6 +246,7 @@ Run `ls app/Database/Migrations` for the full list. Non-obvious ones:
 - Use `$db->table()` or model query builder methods. Raw SQL goes in `$db->query()`.
 
 ### Comment authors
+- `CommentsModel::getRatingSummary()` is the headline rating (count of rated visible reviews + their average to a tenth), of a type or of one entity.
 - `CommentsModel::getForEntity()` and `getRandom()` return the author as `{ id, name, avatar }` with the name truncated to "FirstName L." for privacy (a telescope job, unlike a comment, shows the author's full name).
 
 ### API Responses
