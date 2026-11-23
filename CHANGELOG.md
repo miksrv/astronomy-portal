@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 4.17.5
+
+### Patch Changes
+
+- Libraries updated to their latest versions
+
 ## 4.17.4
 
 ### Patch Changes
